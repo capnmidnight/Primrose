@@ -13,6 +13,7 @@
   and (max-device-width: 750px) {
   #fullScreenButtonContainer{
     top: 0;
+    bottom: initial;
   }
 }
 

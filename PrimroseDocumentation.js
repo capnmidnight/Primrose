@@ -2893,13 +2893,6 @@ pliny.class({
 
 pliny.class({
   parent: "Primrose.Input",
-  name: "Motion",
-  baseClass: "Primrose.InputProcessor",
-  description: "| [under construction]"
-});
-
-pliny.class({
-  parent: "Primrose.Input",
   name: "Mouse",
   baseClass: "Primrose.InputProcessor",
   description: "| [under construction]"

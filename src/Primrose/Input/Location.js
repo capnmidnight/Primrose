@@ -6,7 +6,7 @@ pliny.class({
 });
 class Location extends Primrose.InputProcessor {
   constructor(commands, options) {
-    super("Location", commands);
+    super("Location", commands, ["LONGITUDE", "LATITUDE", "ALTITUDE", "HEADING", "SPEED"]);
 
     this.options = patch(options, Location.DEFAULTS);
 
@@ -22,15 +22,13 @@ class Location extends Primrose.InputProcessor {
   setState(location) {
     for (var p in location.coords) {
       var k = p.toUpperCase();
-      if (Location.AXES.indexOf(k) > -1) {
+      if (this.axisNames.indexOf(k) > -1) {
         this.setAxis(k, location.coords[p]);
       }
     }
     this.update();
   }
 }
-
-Primrose.InputProcessor.defineAxisProperties(Location, ["LONGITUDE", "LATITUDE", "ALTITUDE", "HEADING", "SPEED"]);
 
 Location.DEFAULTS = {
   enableHighAccuracy: true,

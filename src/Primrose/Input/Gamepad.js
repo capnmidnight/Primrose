@@ -108,7 +108,7 @@ class Gamepad extends Primrose.PoseInputProcessor {
 
   constructor(pad, axisOffset, commands) {
     var padID = Gamepad.ID(pad);
-    super(padID, commands, Gamepad.AXES);
+    super(padID, commands, ["LSX", "LSY", "RSX", "RSY", "IDK1", "IDK2", "Z", "BUTTONS"]);
     currentManagers[padID] = this;
 
     this.currentDevice = pad;
@@ -140,7 +140,6 @@ class Gamepad extends Primrose.PoseInputProcessor {
     }
   }
 }
-Primrose.InputProcessor.defineAxisProperties(Gamepad, ["LSX", "LSY", "RSX", "RSY", "IDK1", "IDK2", "Z", "BUTTONS"]);
 
 pliny.enumeration({
   parent: "Primrose.Input.Gamepad",

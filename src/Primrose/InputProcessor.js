@@ -16,21 +16,6 @@ pliny.class({
 });
 class InputProcessor {
 
-  static defineAxisProperties(classFunc, values) {
-    classFunc.AXES = values;
-    values.forEach(function (name, i) {
-      classFunc[name] = i + 1;
-      Object.defineProperty(classFunc.prototype, name, {
-        get: function () {
-          return this.getAxis(name);
-        },
-        set: function (v) {
-          this.setAxis(name, v);
-        }
-      });
-    });
-  }
-
   constructor(name, commands, axisNames) {
     this.name = name;
     this.commands = {};
@@ -62,6 +47,12 @@ class InputProcessor {
     window.addEventListener("keydown", readMetaKeys, false);
     window.addEventListener("keyup", readMetaKeys, false);
 
+    this.axisNames = axisNames || [];
+
+    for (i = 0; i < this.axisNames.length; ++i) {
+      this.inputState.axes[i] = 0;
+    }
+
     for (var cmdName in commands) {
       this.addCommand(cmdName, commands[cmdName]);
     }
@@ -69,12 +60,6 @@ class InputProcessor {
     var i;
     for (i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
       this.inputState[Primrose.Keys.MODIFIER_KEYS[i]] = false;
-    }
-
-    this.axisNames = axisNames || Primrose.Input[name] && Primrose.Input[name].AXES || [];
-
-    for (i = 0; i < this.axisNames.length; ++i) {
-      this.inputState.axes[i] = 0;
     }
   }
 
@@ -137,10 +122,27 @@ class InputProcessor {
     var output = [];
     if (arr) {
       for (var i = 0; i < arr.length; ++i) {
+        var index = 0,
+          toggle = false,
+          sign = 1,
+          t = typeof arr[i];
+
+        if(t === "number"){
+          index = Math.abs(arr[i]) - 1;
+          toggle = arr[i] < 0;
+          sign = (arr[i] < 0) ? -1 : 1;
+        }
+        else if(t === "string") {
+          index = this.axisNames.indexOf(arr[i]);
+        }
+        else {
+          throw new Error("Cannot clone command spec. Element was type: " + t, arr[i]);
+        }
+
         output[i] = {
-          index: Math.abs(arr[i]) - 1,
-          toggle: arr[i] < 0,
-          sign: (arr[i] < 0) ? -1 : 1
+          index: index,
+          toggle: toggle,
+          sign: sign
         };
       }
     }

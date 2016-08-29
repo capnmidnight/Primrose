@@ -6,23 +6,31 @@ pliny.class({
 });
 class Mouse extends Primrose.InputProcessor {
   constructor(DOMElement, commands) {
-    super("Mouse", commands);
+    super("Mouse", commands, ["BUTTONS", "X", "Y", "Z", "W"]);
     this.timer = null;
 
     DOMElement = DOMElement || window;
 
-    DOMElement.addEventListener("mousedown", (event) => {
-      this.setButton(event.button, true);
-      this.BUTTONS = event.buttons << 10;
-    }, false);
+    var setState = (stateChange, event) => {
+      var state = event.buttons,
+        button = 0;
+      while(state > 0){
+        var isDown = state & 0x1 !== 0;
+        if(isDown && stateChange || !isDown && !stateChange){
+          this.setButton(button, stateChange);
+        }
+        state >>= 1;
+        ++button;
+      }
+      this.setAxis("BUTTONS", event.buttons << 10);
+      event.preventDefault();
+    };
 
-    DOMElement.addEventListener("mouseup", (event) => {
-      this.setButton(event.button, false);
-      this.BUTTONS = event.buttons << 10;
-    }, false);
-
+    DOMElement.addEventListener("mousedown", setState.bind(this, true), false);
+    DOMElement.addEventListener("mouseup", setState.bind(this, false), false);
     DOMElement.addEventListener("mousemove", (event) => {
-      this.BUTTONS = event.buttons << 10;
+      setState(true, event);
+
       if (PointerLock.isActive) {
         var mx = event.movementX,
           my = event.movementY;
@@ -54,14 +62,12 @@ class Mouse extends Primrose.InputProcessor {
   }
 
   setLocation(x, y) {
-    this.X = x;
-    this.Y = y;
+    this.setAxis("X", x);
+    this.setAxis("Y", y);
   }
 
   setMovement(dx, dy) {
-    this.X += dx;
-    this.Y += dy;
+    this.setAxis("X", this.getAxis("X") + dx);
+    this.setAxis("Y", this.getAxis("Y") + dy);
   }
 }
-
-Primrose.InputProcessor.defineAxisProperties(Mouse, ["X", "Y", "Z", "W", "BUTTONS"]);

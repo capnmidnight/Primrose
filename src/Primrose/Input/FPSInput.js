@@ -76,16 +76,16 @@ class FPSInput {
 
     this.add(new Primrose.Input.Touch(DOMElement, {
       buttons: {
-        axes: [Primrose.Input.Touch.FINGERS]
+        axes: ["FINGERS"]
       },
       dButtons: {
-        axes: [Primrose.Input.Touch.FINGERS],
+        axes: ["FINGERS"],
         delta: true
       },
       dx: {
-        axes: [-Primrose.Input.Touch.X0],
+        axes: ["X0"],
         delta: true,
-        scale: 0.005,
+        scale: -0.005,
         min: -5,
         max: 5
       },
@@ -94,9 +94,9 @@ class FPSInput {
         integrate: true
       },
       dy: {
-        axes: [-Primrose.Input.Touch.Y0],
+        axes: ["Y0"],
         delta: true,
-        scale: 0.005,
+        scale: -0.005,
         min: -5,
         max: 5
       },
@@ -110,16 +110,16 @@ class FPSInput {
 
     this.add(new Primrose.Input.Mouse(DOMElement, {
       buttons: {
-        axes: [Primrose.Input.Mouse.BUTTONS]
+        axes: ["BUTTONS"]
       },
       dButtons: {
-        axes: [Primrose.Input.Mouse.BUTTONS],
+        axes: ["BUTTONS"],
         delta: true
       },
       dx: {
-        axes: [-Primrose.Input.Mouse.X],
+        axes: ["X"],
         delta: true,
-        scale: 0.005,
+        scale: -0.005,
         min: -5,
         max: 5
       },
@@ -128,9 +128,9 @@ class FPSInput {
         integrate: true
       },
       dy: {
-        axes: [-Primrose.Input.Mouse.Y],
+        axes: ["Y"],
         delta: true,
-        scale: 0.005,
+        scale: -0.005,
         min: -5,
         max: 5
       },
@@ -163,10 +163,10 @@ class FPSInput {
 
           mgr = new Primrose.Input.Gamepad(pad, controllerNumber, {
             buttons: {
-              axes: [Primrose.Input.Gamepad.BUTTONS]
+              axes: ["BUTTONS"]
             },
             dButtons: {
-              axes: [Primrose.Input.Gamepad.BUTTONS],
+              axes: ["BUTTONS"],
               delta: true
             },
             zero: {
@@ -194,22 +194,23 @@ class FPSInput {
         else {
           mgr = new Primrose.Input.Gamepad(pad, 0, {
             buttons: {
-              axes: [Primrose.Input.Gamepad.BUTTONS]
+              axes: ["BUTTONS"]
             },
             dButtons: {
-              axes: [Primrose.Input.Gamepad.BUTTONS],
+              axes: ["BUTTONS"],
               delta: true
             },
             strafe: {
-              axes: [Primrose.Input.Gamepad.LSX],
+              axes: ["LSX"],
               deadzone: 0.2
             },
             drive: {
-              axes: [Primrose.Input.Gamepad.LSY],
+              axes: ["LSY"],
               deadzone: 0.2
             },
             heading: {
-              axes: [-Primrose.Input.Gamepad.RSX],
+              axes: ["RSX"],
+              scale: -1,
               deadzone: 0.2,
               integrate: true
             },
@@ -218,7 +219,8 @@ class FPSInput {
               delta: true
             },
             pitch: {
-              axes: [-Primrose.Input.Gamepad.RSY],
+              axes: ["RSY"],
+              scale: -1,
               deadzone: 0.2,
               integrate: true
             },
@@ -239,11 +241,9 @@ class FPSInput {
     this.stage = new THREE.Object3D();
 
     this.mousePointer = new Primrose.Pointer("MousePointer", 0xff0000, 0x7f0000, [
-      this.Mouse,
-      this.Touch
+      this.Mouse
     ], [
       this.VR,
-      this.Touch,
       this.Keyboard
     ]);
     this.pointers.push(this.mousePointer);

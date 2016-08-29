@@ -6,7 +6,14 @@ pliny.class({
 });
 class Touch extends Primrose.InputProcessor {
   constructor(DOMElement, commands) {
-    super("Touch", commands);
+    var axes = ["FINGERS"];
+    for (var i = 0; i < 10; ++i) {
+      axes.push("X" + i);
+      axes.push("Y" + i);
+      axes.push("LX" + i);
+      axes.push("LY" + i);
+    }
+    super("Touch", commands, axes);
     DOMElement = DOMElement || window;
 
     var setState = (stateChange, setAxis, event) => {
@@ -28,12 +35,13 @@ class Touch extends Primrose.InputProcessor {
         this.setButton("FINGER" + t.identifier, stateChange);
       }
       touches = event.touches;
-
-      var fingerState = 0;
+      var fingerState = 0,
+        before = this.getAxis("FINGERS");
       for (i = 0; i < touches.length; ++i) {
+        t = touches[i];
         fingerState |= 1 << t.identifier;
       }
-      this.FINGERS = fingerState;
+      this.setAxis("FINGERS", fingerState);
       event.preventDefault();
     };
 
@@ -41,14 +49,4 @@ class Touch extends Primrose.InputProcessor {
     DOMElement.addEventListener("touchend", setState.bind(this, false, true), false);
     DOMElement.addEventListener("touchmove", setState.bind(this, true, true), false);
   }
-}
-
-if (navigator.maxTouchPoints) {
-  var axes = ["FINGERS"];
-  for (var i = 0; i < navigator.maxTouchPoints; ++i) {
-    axes.push("X" + i);
-    axes.push("Y" + i);
-  }
-
-  Primrose.InputProcessor.defineAxisProperties(Touch, axes);
 }

@@ -3800,6 +3800,8 @@ if(typeof window !== "undefined") window.Primrose.Input = Input;
 // start D:\Documents\VR\Primrose\src\Primrose\InputProcessor.js
 (function(){"use strict";
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -3822,24 +3824,6 @@ pliny.class({
 });
 
 var InputProcessor = function () {
-  _createClass(InputProcessor, null, [{
-    key: "defineAxisProperties",
-    value: function defineAxisProperties(classFunc, values) {
-      classFunc.AXES = values;
-      values.forEach(function (name, i) {
-        classFunc[name] = i + 1;
-        Object.defineProperty(classFunc.prototype, name, {
-          get: function get() {
-            return this.getAxis(name);
-          },
-          set: function set(v) {
-            this.setAxis(name, v);
-          }
-        });
-      });
-    }
-  }]);
-
   function InputProcessor(name, commands, axisNames) {
     var _this = this;
 
@@ -3875,6 +3859,12 @@ var InputProcessor = function () {
     window.addEventListener("keydown", readMetaKeys, false);
     window.addEventListener("keyup", readMetaKeys, false);
 
+    this.axisNames = axisNames || [];
+
+    for (i = 0; i < this.axisNames.length; ++i) {
+      this.inputState.axes[i] = 0;
+    }
+
     for (var cmdName in commands) {
       this.addCommand(cmdName, commands[cmdName]);
     }
@@ -3882,12 +3872,6 @@ var InputProcessor = function () {
     var i;
     for (i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
       this.inputState[Primrose.Keys.MODIFIER_KEYS[i]] = false;
-    }
-
-    this.axisNames = axisNames || Primrose.Input[name] && Primrose.Input[name].AXES || [];
-
-    for (i = 0; i < this.axisNames.length; ++i) {
-      this.inputState.axes[i] = 0;
     }
   }
 
@@ -3955,10 +3939,25 @@ var InputProcessor = function () {
       var output = [];
       if (arr) {
         for (var i = 0; i < arr.length; ++i) {
+          var index = 0,
+              toggle = false,
+              sign = 1,
+              t = _typeof(arr[i]);
+
+          if (t === "number") {
+            index = Math.abs(arr[i]) - 1;
+            toggle = arr[i] < 0;
+            sign = arr[i] < 0 ? -1 : 1;
+          } else if (t === "string") {
+            index = this.axisNames.indexOf(arr[i]);
+          } else {
+            throw new Error("Cannot clone command spec. Element was type: " + t, arr[i]);
+          }
+
           output[i] = {
-            index: Math.abs(arr[i]) - 1,
-            toggle: arr[i] < 0,
-            sign: arr[i] < 0 ? -1 : 1
+            index: index,
+            toggle: toggle,
+            sign: sign
           };
         }
       }
@@ -5099,13 +5098,19 @@ var Pointer = function (_Primrose$AbstractEve) {
             isGround = false,
             object,
             control,
-            point;
+            point,
+            output = "";
 
         for (var i = 0; i < this.triggerDevices.length; ++i) {
           var obj = this.triggerDevices[i];
           if (obj.enabled) {
-            buttons += obj.getValue("buttons");
-            dButtons += obj.getValue("dButtons");
+            var v1 = obj.getValue("buttons"),
+                v2 = obj.getValue("dButtons");
+            buttons += v1;
+            dButtons += v2;
+            if (obj.name === "Touch") {
+              output += v1 + " " + v2;
+            }
           }
         }
 
@@ -10755,16 +10760,16 @@ var FPSInput = function () {
 
     this.add(new Primrose.Input.Touch(DOMElement, {
       buttons: {
-        axes: [Primrose.Input.Touch.FINGERS]
+        axes: ["FINGERS"]
       },
       dButtons: {
-        axes: [Primrose.Input.Touch.FINGERS],
+        axes: ["FINGERS"],
         delta: true
       },
       dx: {
-        axes: [-Primrose.Input.Touch.X0],
+        axes: ["X0"],
         delta: true,
-        scale: 0.005,
+        scale: -0.005,
         min: -5,
         max: 5
       },
@@ -10773,9 +10778,9 @@ var FPSInput = function () {
         integrate: true
       },
       dy: {
-        axes: [-Primrose.Input.Touch.Y0],
+        axes: ["Y0"],
         delta: true,
-        scale: 0.005,
+        scale: -0.005,
         min: -5,
         max: 5
       },
@@ -10789,16 +10794,16 @@ var FPSInput = function () {
 
     this.add(new Primrose.Input.Mouse(DOMElement, {
       buttons: {
-        axes: [Primrose.Input.Mouse.BUTTONS]
+        axes: ["BUTTONS"]
       },
       dButtons: {
-        axes: [Primrose.Input.Mouse.BUTTONS],
+        axes: ["BUTTONS"],
         delta: true
       },
       dx: {
-        axes: [-Primrose.Input.Mouse.X],
+        axes: ["X"],
         delta: true,
-        scale: 0.005,
+        scale: -0.005,
         min: -5,
         max: 5
       },
@@ -10807,9 +10812,9 @@ var FPSInput = function () {
         integrate: true
       },
       dy: {
-        axes: [-Primrose.Input.Mouse.Y],
+        axes: ["Y"],
         delta: true,
-        scale: 0.005,
+        scale: -0.005,
         min: -5,
         max: 5
       },
@@ -10842,10 +10847,10 @@ var FPSInput = function () {
 
           mgr = new Primrose.Input.Gamepad(pad, controllerNumber, {
             buttons: {
-              axes: [Primrose.Input.Gamepad.BUTTONS]
+              axes: ["BUTTONS"]
             },
             dButtons: {
-              axes: [Primrose.Input.Gamepad.BUTTONS],
+              axes: ["BUTTONS"],
               delta: true
             },
             zero: {
@@ -10872,22 +10877,23 @@ var FPSInput = function () {
         } else {
           mgr = new Primrose.Input.Gamepad(pad, 0, {
             buttons: {
-              axes: [Primrose.Input.Gamepad.BUTTONS]
+              axes: ["BUTTONS"]
             },
             dButtons: {
-              axes: [Primrose.Input.Gamepad.BUTTONS],
+              axes: ["BUTTONS"],
               delta: true
             },
             strafe: {
-              axes: [Primrose.Input.Gamepad.LSX],
+              axes: ["LSX"],
               deadzone: 0.2
             },
             drive: {
-              axes: [Primrose.Input.Gamepad.LSY],
+              axes: ["LSY"],
               deadzone: 0.2
             },
             heading: {
-              axes: [-Primrose.Input.Gamepad.RSX],
+              axes: ["RSX"],
+              scale: -1,
               deadzone: 0.2,
               integrate: true
             },
@@ -10896,7 +10902,8 @@ var FPSInput = function () {
               delta: true
             },
             pitch: {
-              axes: [-Primrose.Input.Gamepad.RSY],
+              axes: ["RSY"],
+              scale: -1,
               deadzone: 0.2,
               integrate: true
             },
@@ -10916,7 +10923,7 @@ var FPSInput = function () {
 
     this.stage = new THREE.Object3D();
 
-    this.mousePointer = new Primrose.Pointer("MousePointer", 0xff0000, 0x7f0000, [this.Mouse, this.Touch], [this.VR, this.Touch, this.Keyboard]);
+    this.mousePointer = new Primrose.Pointer("MousePointer", 0xff0000, 0x7f0000, [this.Mouse], [this.VR, this.Keyboard]);
     this.pointers.push(this.mousePointer);
     this.mousePointer.addToBrowserEnvironment(null, this.options.scene);
 
@@ -11281,7 +11288,7 @@ var Gamepad = function (_Primrose$PoseInputPr) {
 
     var padID = Gamepad.ID(pad);
 
-    var _this = _possibleConstructorReturn(this, (Gamepad.__proto__ || Object.getPrototypeOf(Gamepad)).call(this, padID, commands, Gamepad.AXES));
+    var _this = _possibleConstructorReturn(this, (Gamepad.__proto__ || Object.getPrototypeOf(Gamepad)).call(this, padID, commands, ["LSX", "LSY", "RSX", "RSY", "IDK1", "IDK2", "Z", "BUTTONS"]));
 
     currentManagers[padID] = _this;
 
@@ -11322,8 +11329,6 @@ var Gamepad = function (_Primrose$PoseInputPr) {
 
   return Gamepad;
 }(Primrose.PoseInputProcessor);
-
-Primrose.InputProcessor.defineAxisProperties(Gamepad, ["LSX", "LSY", "RSX", "RSY", "IDK1", "IDK2", "Z", "BUTTONS"]);
 
 pliny.enumeration({
   parent: "Primrose.Input.Gamepad",
@@ -11604,7 +11609,7 @@ var LeapMotion = function (_Primrose$InputProces) {
   function LeapMotion(commands) {
     _classCallCheck(this, LeapMotion);
 
-    var _this = _possibleConstructorReturn(this, (LeapMotion.__proto__ || Object.getPrototypeOf(LeapMotion)).call(this, "LeapMotion", commands));
+    var _this = _possibleConstructorReturn(this, (LeapMotion.__proto__ || Object.getPrototypeOf(LeapMotion)).call(this, "LeapMotion", commands, ["X0", "Y0", "Z0", "X1", "Y1", "Z1", "FINGER0TIPX", "FINGER0TIPY", "FINGER0DIPX", "FINGER0DIPY", "FINGER0PIPX", "FINGER0PIPY", "FINGER0MCPX", "FINGER0MCPY", "FINGER0CARPX", "FINGER0CARPY", "FINGER1TIPX", "FINGER1TIPY", "FINGER1DIPX", "FINGER1DIPY", "FINGER1PIPX", "FINGER1PIPY", "FINGER1MCPX", "FINGER1MCPY", "FINGER1CARPX", "FINGER1CARPY", "FINGER2TIPX", "FINGER2TIPY", "FINGER2DIPX", "FINGER2DIPY", "FINGER2PIPX", "FINGER2PIPY", "FINGER2MCPX", "FINGER2MCPY", "FINGER2CARPX", "FINGER2CARPY", "FINGER3TIPX", "FINGER3TIPY", "FINGER3DIPX", "FINGER3DIPY", "FINGER3PIPX", "FINGER3PIPY", "FINGER3MCPX", "FINGER3MCPY", "FINGER3CARPX", "FINGER3CARPY", "FINGER4TIPX", "FINGER4TIPY", "FINGER4DIPX", "FINGER4DIPY", "FINGER4PIPX", "FINGER4PIPY", "FINGER4MCPX", "FINGER4MCPY", "FINGER4CARPX", "FINGER4CARPY", "FINGER5TIPX", "FINGER5TIPY", "FINGER5DIPX", "FINGER5DIPY", "FINGER5PIPX", "FINGER5PIPY", "FINGER5MCPX", "FINGER5MCPY", "FINGER5CARPX", "FINGER5CARPY", "FINGER6TIPX", "FINGER6TIPY", "FINGER6DIPX", "FINGER6DIPY", "FINGER6PIPX", "FINGER6PIPY", "FINGER6MCPX", "FINGER6MCPY", "FINGER6CARPX", "FINGER6CARPY", "FINGER7TIPX", "FINGER7TIPY", "FINGER7DIPX", "FINGER7DIPY", "FINGER7PIPX", "FINGER7PIPY", "FINGER7MCPX", "FINGER7MCPY", "FINGER7CARPX", "FINGER7CARPY", "FINGER8TIPX", "FINGER8TIPY", "FINGER8DIPX", "FINGER8DIPY", "FINGER8PIPX", "FINGER8PIPY", "FINGER8MCPX", "FINGER8MCPY", "FINGER8CARPX", "FINGER8CARPY", "FINGER9TIPX", "FINGER9TIPY", "FINGER9DIPX", "FINGER9DIPY", "FINGER9PIPX", "FINGER9PIPY", "FINGER9MCPX", "FINGER9MCPY", "FINGER9CARPX", "FINGER9CARPY"]));
 
     _this.isStreaming = false;
     _this.controller = new Leap.Controller({
@@ -11704,8 +11709,6 @@ LeapMotion.NUM_FINGERS = 10;
 
 LeapMotion.FINGER_PARTS = ["tip", "dip", "pip", "mcp", "carp"];
 
-Primrose.InputProcessor.defineAxisProperties(LeapMotion, ["X0", "Y0", "Z0", "X1", "Y1", "Z1", "FINGER0TIPX", "FINGER0TIPY", "FINGER0DIPX", "FINGER0DIPY", "FINGER0PIPX", "FINGER0PIPY", "FINGER0MCPX", "FINGER0MCPY", "FINGER0CARPX", "FINGER0CARPY", "FINGER1TIPX", "FINGER1TIPY", "FINGER1DIPX", "FINGER1DIPY", "FINGER1PIPX", "FINGER1PIPY", "FINGER1MCPX", "FINGER1MCPY", "FINGER1CARPX", "FINGER1CARPY", "FINGER2TIPX", "FINGER2TIPY", "FINGER2DIPX", "FINGER2DIPY", "FINGER2PIPX", "FINGER2PIPY", "FINGER2MCPX", "FINGER2MCPY", "FINGER2CARPX", "FINGER2CARPY", "FINGER3TIPX", "FINGER3TIPY", "FINGER3DIPX", "FINGER3DIPY", "FINGER3PIPX", "FINGER3PIPY", "FINGER3MCPX", "FINGER3MCPY", "FINGER3CARPX", "FINGER3CARPY", "FINGER4TIPX", "FINGER4TIPY", "FINGER4DIPX", "FINGER4DIPY", "FINGER4PIPX", "FINGER4PIPY", "FINGER4MCPX", "FINGER4MCPY", "FINGER4CARPX", "FINGER4CARPY", "FINGER5TIPX", "FINGER5TIPY", "FINGER5DIPX", "FINGER5DIPY", "FINGER5PIPX", "FINGER5PIPY", "FINGER5MCPX", "FINGER5MCPY", "FINGER5CARPX", "FINGER5CARPY", "FINGER6TIPX", "FINGER6TIPY", "FINGER6DIPX", "FINGER6DIPY", "FINGER6PIPX", "FINGER6PIPY", "FINGER6MCPX", "FINGER6MCPY", "FINGER6CARPX", "FINGER6CARPY", "FINGER7TIPX", "FINGER7TIPY", "FINGER7DIPX", "FINGER7DIPY", "FINGER7PIPX", "FINGER7PIPY", "FINGER7MCPX", "FINGER7MCPY", "FINGER7CARPX", "FINGER7CARPY", "FINGER8TIPX", "FINGER8TIPY", "FINGER8DIPX", "FINGER8DIPY", "FINGER8PIPX", "FINGER8PIPY", "FINGER8MCPX", "FINGER8MCPY", "FINGER8CARPX", "FINGER8CARPY", "FINGER9TIPX", "FINGER9TIPY", "FINGER9DIPX", "FINGER9DIPY", "FINGER9PIPX", "FINGER9PIPY", "FINGER9MCPX", "FINGER9MCPY", "FINGER9CARPX", "FINGER9CARPY"]);
-
 LeapMotion.CONNECTION_TIMEOUT = 5000;
 if(typeof window !== "undefined") window.Primrose.Input.LeapMotion = LeapMotion;
 })();
@@ -11736,7 +11739,7 @@ var Location = function (_Primrose$InputProces) {
   function Location(commands, options) {
     _classCallCheck(this, Location);
 
-    var _this = _possibleConstructorReturn(this, (Location.__proto__ || Object.getPrototypeOf(Location)).call(this, "Location", commands));
+    var _this = _possibleConstructorReturn(this, (Location.__proto__ || Object.getPrototypeOf(Location)).call(this, "Location", commands, ["LONGITUDE", "LATITUDE", "ALTITUDE", "HEADING", "SPEED"]));
 
     _this.options = patch(options, Location.DEFAULTS);
 
@@ -11754,7 +11757,7 @@ var Location = function (_Primrose$InputProces) {
     value: function setState(location) {
       for (var p in location.coords) {
         var k = p.toUpperCase();
-        if (Location.AXES.indexOf(k) > -1) {
+        if (this.axisNames.indexOf(k) > -1) {
           this.setAxis(k, location.coords[p]);
         }
       }
@@ -11765,8 +11768,6 @@ var Location = function (_Primrose$InputProces) {
   return Location;
 }(Primrose.InputProcessor);
 
-Primrose.InputProcessor.defineAxisProperties(Location, ["LONGITUDE", "LATITUDE", "ALTITUDE", "HEADING", "SPEED"]);
-
 Location.DEFAULTS = {
   enableHighAccuracy: true,
   maximumAge: 30000,
@@ -11775,99 +11776,6 @@ Location.DEFAULTS = {
 if(typeof window !== "undefined") window.Primrose.Input.Location = Location;
 })();
 // end D:\Documents\VR\Primrose\src\Primrose\Input\Location.js
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Input\Motion.js
-(function(){"use strict";
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-pliny.class({
-  parent: "Primrose.Input",
-  name: "Motion",
-  baseClass: "Primrose.InputProcessor",
-  description: "| [under construction]"
-});
-
-var Motion = function (_Primrose$InputProces) {
-  _inherits(Motion, _Primrose$InputProces);
-
-  function Motion(commands) {
-    _classCallCheck(this, Motion);
-
-    var _this = _possibleConstructorReturn(this, (Motion.__proto__ || Object.getPrototypeOf(Motion)).call(this, "Motion", commands));
-
-    var corrector = new MotionCorrector(),
-        a = new THREE.Quaternion(),
-        b = new THREE.Quaternion(),
-        RIGHT = new THREE.Vector3(1, 0, 0),
-        UP = new THREE.Vector3(0, 1, 0),
-        FORWARD = new THREE.Vector3(0, 0, -1);
-    corrector.addEventListener("deviceorientation", function (evt) {
-      for (var i = 0; i < Motion.AXES.length; ++i) {
-        var k = Motion.AXES[i];
-        _this.setAxis(k, evt[k]);
-      }
-      a.set(0, 0, 0, 1).multiply(b.setFromAxisAngle(UP, evt.HEADING)).multiply(b.setFromAxisAngle(RIGHT, evt.PITCH)).multiply(b.setFromAxisAngle(FORWARD, evt.ROLL));
-      _this.headRX = a.x;
-      _this.headRY = a.y;
-      _this.headRZ = a.z;
-      _this.headRW = a.w;
-      _this.update();
-    });
-    _this.zeroAxes = corrector.zeroAxes.bind(corrector);
-    return _this;
-  }
-
-  _createClass(Motion, [{
-    key: "getOrientation",
-    value: function getOrientation(value) {
-      value = value || new THREE.Quaternion();
-      value.set(this.getValue("headRX"), this.getValue("headRY"), this.getValue("headRZ"), this.getValue("headRW"));
-      return value;
-    }
-  }]);
-
-  return Motion;
-}(Primrose.InputProcessor);
-
-Primrose.InputProcessor.defineAxisProperties(Motion, ["HEADING", "PITCH", "ROLL", "D_HEADING", "D_PITCH", "D_ROLL", "headAX", "headAY", "headAZ", "headRX", "headRY", "headRZ", "headRW"]);
-
-function makeTransform(s, eye) {
-  var sw = Math.max(screen.width, screen.height),
-      sh = Math.min(screen.width, screen.height),
-      w = Math.floor(sw * devicePixelRatio / 2),
-      h = Math.floor(sh * devicePixelRatio),
-      i = (eye + 1) / 2;
-
-  if (window.THREE) {
-    s.transform = new THREE.Matrix4().makeTranslation(eye * 0.034, 0, 0);
-  }
-  s.viewport = {
-    x: i * w,
-    y: 0,
-    width: w,
-    height: h,
-    top: 0,
-    right: (i + 1) * w,
-    bottom: h,
-    left: i * w
-  };
-  s.fov = 75;
-}
-
-Motion.DEFAULT_TRANSFORMS = [{}, {}];
-makeTransform(Motion.DEFAULT_TRANSFORMS[0], -1);
-makeTransform(Motion.DEFAULT_TRANSFORMS[1], 1);
-if(typeof window !== "undefined") window.Primrose.Input.Motion = Motion;
-})();
-// end D:\Documents\VR\Primrose\src\Primrose\Input\Motion.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 // start D:\Documents\VR\Primrose\src\Primrose\Input\Mouse.js
@@ -11894,24 +11802,32 @@ var Mouse = function (_Primrose$InputProces) {
   function Mouse(DOMElement, commands) {
     _classCallCheck(this, Mouse);
 
-    var _this = _possibleConstructorReturn(this, (Mouse.__proto__ || Object.getPrototypeOf(Mouse)).call(this, "Mouse", commands));
+    var _this = _possibleConstructorReturn(this, (Mouse.__proto__ || Object.getPrototypeOf(Mouse)).call(this, "Mouse", commands, ["BUTTONS", "X", "Y", "Z", "W"]));
 
     _this.timer = null;
 
     DOMElement = DOMElement || window;
 
-    DOMElement.addEventListener("mousedown", function (event) {
-      _this.setButton(event.button, true);
-      _this.BUTTONS = event.buttons << 10;
-    }, false);
+    var setState = function setState(stateChange, event) {
+      var state = event.buttons,
+          button = 0;
+      while (state > 0) {
+        var isDown = state & 0x1 !== 0;
+        if (isDown && stateChange || !isDown && !stateChange) {
+          _this.setButton(button, stateChange);
+        }
+        state >>= 1;
+        ++button;
+      }
+      _this.setAxis("BUTTONS", event.buttons << 10);
+      event.preventDefault();
+    };
 
-    DOMElement.addEventListener("mouseup", function (event) {
-      _this.setButton(event.button, false);
-      _this.BUTTONS = event.buttons << 10;
-    }, false);
-
+    DOMElement.addEventListener("mousedown", setState.bind(_this, true), false);
+    DOMElement.addEventListener("mouseup", setState.bind(_this, false), false);
     DOMElement.addEventListener("mousemove", function (event) {
-      _this.BUTTONS = event.buttons << 10;
+      setState(true, event);
+
       if (PointerLock.isActive) {
         var mx = event.movementX,
             my = event.movementY;
@@ -11943,21 +11859,19 @@ var Mouse = function (_Primrose$InputProces) {
   _createClass(Mouse, [{
     key: "setLocation",
     value: function setLocation(x, y) {
-      this.X = x;
-      this.Y = y;
+      this.setAxis("X", x);
+      this.setAxis("Y", y);
     }
   }, {
     key: "setMovement",
     value: function setMovement(dx, dy) {
-      this.X += dx;
-      this.Y += dy;
+      this.setAxis("X", this.getAxis("X") + dx);
+      this.setAxis("Y", this.getAxis("Y") + dy);
     }
   }]);
 
   return Mouse;
 }(Primrose.InputProcessor);
-
-Primrose.InputProcessor.defineAxisProperties(Mouse, ["X", "Y", "Z", "W", "BUTTONS"]);
 if(typeof window !== "undefined") window.Primrose.Input.Mouse = Mouse;
 })();
 // end D:\Documents\VR\Primrose\src\Primrose\Input\Mouse.js
@@ -12225,7 +12139,15 @@ var Touch = function (_Primrose$InputProces) {
   function Touch(DOMElement, commands) {
     _classCallCheck(this, Touch);
 
-    var _this = _possibleConstructorReturn(this, (Touch.__proto__ || Object.getPrototypeOf(Touch)).call(this, "Touch", commands));
+    var axes = ["FINGERS"];
+    for (var i = 0; i < 10; ++i) {
+      axes.push("X" + i);
+      axes.push("Y" + i);
+      axes.push("LX" + i);
+      axes.push("LY" + i);
+    }
+
+    var _this = _possibleConstructorReturn(this, (Touch.__proto__ || Object.getPrototypeOf(Touch)).call(this, "Touch", commands, axes));
 
     DOMElement = DOMElement || window;
 
@@ -12247,12 +12169,13 @@ var Touch = function (_Primrose$InputProces) {
         _this.setButton("FINGER" + t.identifier, stateChange);
       }
       touches = event.touches;
-
-      var fingerState = 0;
+      var fingerState = 0,
+          before = _this.getAxis("FINGERS");
       for (i = 0; i < touches.length; ++i) {
+        t = touches[i];
         fingerState |= 1 << t.identifier;
       }
-      _this.FINGERS = fingerState;
+      _this.setAxis("FINGERS", fingerState);
       event.preventDefault();
     };
 
@@ -12264,16 +12187,6 @@ var Touch = function (_Primrose$InputProces) {
 
   return Touch;
 }(Primrose.InputProcessor);
-
-if (navigator.maxTouchPoints) {
-  var axes = ["FINGERS"];
-  for (var i = 0; i < navigator.maxTouchPoints; ++i) {
-    axes.push("X" + i);
-    axes.push("Y" + i);
-  }
-
-  Primrose.InputProcessor.defineAxisProperties(Touch, axes);
-}
 if(typeof window !== "undefined") window.Primrose.Input.Touch = Touch;
 })();
 // end D:\Documents\VR\Primrose\src\Primrose\Input\Touch.js
