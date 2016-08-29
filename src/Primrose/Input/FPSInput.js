@@ -138,12 +138,6 @@ class FPSInput {
         integrate: true,
         min: -Math.PI * 0.5,
         max: Math.PI * 0.5
-      },
-      pointerPitch: {
-        commands: ["dy"],
-        integrate: true,
-        min: -Math.PI * 0.25,
-        max: Math.PI * 0.25
       }
     }));
 
