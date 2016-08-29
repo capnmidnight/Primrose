@@ -348,7 +348,7 @@ class FPSInput {
 
     if (this.VR.hasOrientation) {
       this.mousePointer.showPointer = (this.hasMouse || this.hasGamepad) && !(this.hasTouch || this.hasMotionControllers);
-      this.head.showPointer = !(this.mousePointer.showPointer || this.hasMotionControllers);
+      this.head.showPointer = true;
     }
     else {
       // if we're not using an HMD, then update the view according to the mouse
