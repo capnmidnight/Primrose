@@ -1690,35 +1690,10 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
       _this.scene.remove(user.head);
     };
 
-    var showHideButtons = function showHideButtons() {
-      var hide = _this.input.VR.isPresenting,
-          elem = _this.renderer.domElement.nextElementSibling;
-      while (elem) {
-        if (hide) {
-          elem.dataset.originaldisplay = elem.style.display;
-          elem.style.display = "none";
-        } else {
-          elem.style.display = elem.dataset.originaldisplay;
-        }
-        elem = elem.nextElementSibling;
-      }
-    };
-
-    var fixPointerLock = function fixPointerLock() {
-      if (_this.input.VR.isPresenting && !PointerLock.isActive && !isMobile) {
-        var canv = _this.input.VR.currentCanvas;
-        if (canv) {
-          PointerLock.request(canv);
-        }
-      }
-    };
-
     window.addEventListener("keydown", function (evt) {
       if (_this.input.VR.isPresenting) {
         if (evt.keyCode === Primrose.Keys.ESCAPE && !_this.input.VR.isPolyfilled) {
           _this.input.VR.cancel();
-        } else {
-          fixPointerLock();
         }
       }
     });
@@ -1729,13 +1704,10 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
       }
     });
 
-    window.addEventListener("mousedown", fixPointerLock);
-
     window.addEventListener("vrdisplaypresentchange", function (evt) {
       if (!_this.input.VR.isPresenting) {
         _this.input.VR.cancel();
       }
-      showHideButtons();
       modifyScreen();
     });
     window.addEventListener("resize", modifyScreen, false);

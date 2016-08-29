@@ -1,6 +1,126 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="web-app-capable" content="yes"><meta name="theme-color" content="black"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="description" content="A WebVR application framework."><meta name="keywords" content="WebGL, WebVR, HTML5, JavaScript, text editor, source code editor, virtual reality, Primrose"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@Primrose_VR"><meta property="og:site_name" content="Primrose VR"><meta property="og:description" content="Primrose: Framework for WebVR Applications"><meta name="twitter:description" content="Primrose: Framework for WebVR Applications"><meta property="og:url" content="http://www.primrosevr.com/undefined"><!-- start main.pug meta block --><meta name="twitter:image" content="http://www.primrosevr.com/images/screenshot.jpg"><meta property="og:image" content="http://www.primrosevr.com/images/screenshot.jpg"><!-- end main.pug meta block -->
-<!-- start main.pug title block --><meta property="og:title" content="Primrose VR: WebVR Application Framework"><meta name="twitter:title" content="Primrose VR: WebVR Application Framework"><title>Primrose VR: WebVR Application Framework</title><!-- end main.pug title block --><link type="text/css" rel="stylesheet" href="../doc/style.min.css"><!-- start documentation.pug head append --><script type="text/javascript" src="../node_modules/pliny/pliny.min.js"></script><script type="text/javascript" src="../Primrose.min.js"></script><script type="text/javascript" src="../PrimroseDocumentation.min.js"></script><!-- end documentation.pug head append --><script type="text/javascript" src="../ga.js"></script></head><body><header role="banner"><a id="logo" href="../"><img src="../doc/images/primrose40.png" alt="logo" title="Primrose logo"></a><nav role="navigation"><ul><li><a href="../doc/">Docs</a></li><li><a href="../doc/faq.html">FAQ</a></li><li><a href="../doc/community.html">Community</a></li><li><a href="https://github.com/NotionTheory/Primrose/" target="_blank">Github</a></li></ul></nav><h1>Documentation</h1></header><!-- start main.pug banner block --><!-- end main.pug banner block -->
-<!-- start main.pug main block --><main><!-- start documentation.pug main block --><div id="top"></div><div id="contents"><nav><ul><li><a href="../doc/setup.html">Installation &amp; Setup</a></li></ul></nav></div><div id="documentation"><section><article><!-- start documentation.pug documentation block --><h1>Using the VR Development Environment</h1><p>Primrose is not just a web development framework. It also provides a virtual reality, live-programming environment for rapid prototyping and exploratory programming. You can try out the <a href="../doc/editorVR.html">VR Editor</a> now.</p><blockquote>NOTE: there are two separate interaction modes in the VR Editor. You switch between these modes by clicking on different objects in the environment:<ul><li>Navigation Mode - mouse clicks and keyboard events move your body around the environment.</li><li>Editing Mode - mouse clicks and keyboard events edit text within the Code Editor, but do not cause changes in your body's location.</li></ul></blockquote><h2>Dev Zone Layout</h2><p>Off the bat, there are three text areas visible at approximately arm's distance. We call this the "Dev Zone". It contains the interfaces you will use to read documentation, write code, and see debugging output as you work.</p><blockquote>You may reset your view to return to the center of the Dev Zone and zero your headset's position and orientation sensors by hitting the <kbd>Z</kbd> key on your keyboard.</blockquote><h3>Writing in the Code Editor</h3><p>The VR Editor starts in a blank space with a small demo script already loaded in the editor. The center text area is the code editor. It is rendered on the inside of a portion of a sphere, what we call a "shell". Rendering the code to the inside of a sphere means that all points of the editor will be equidistant from your viewing point when you are standing in front of the editor, helping to reduce distortion and make for a more comfortable reading experience.</p><blockquote>You may reset the editor and reload the original demo code at any time by hitting <kbd>CTRL+SHIFT+X</kbd> on Windows/Linux or <kbd>CMD+SHIFT+X</kbd> on OS X.</blockquote><p>Editing text in the Code Editor supports most of the common keyboard shortcuts that you have grown accustomed to in other text editors:</p><ul><li><kbd>Arrow keys</kbd> to move around.</li><li><kbd>CTRL+Left/Right Arrow keys</kbd> on Windows/Linux, or <kbd>ALT+Left/Right Arrow keys</kbd> on OS X to skip backwards/forwards by tokens.</li><li><kbd>CTRL+Up/Down Arrow keys</kbd> on Windows/Linux to scroll the document window without moving the text cursor (not supported on OS X).</li><li><kbd>Page Up/Page Down</kbd> to move by whole screens of text.</li><li><kbd>Home/End</kbd> on Windows/Linux, or <kbd>CMD+Left Arrow/Right Arrow key</kbd> to jump to the beginning or end of a line of text.</li><li><kbd>CTRL+Home/End</kbd> on Windows/Linux, or <kbd>CMD+Up Arrow/Down Arrow key</kbd> to jump to the beginning or end of the document.</li><li><kbd>SHIFT</kbd> plus one of the movement commands above to select text.</li><li><kbd>CTRL+A</kbd> on Windows/Linux or <kbd>CMD+A</kbd> on OS X to select all text.</li><li><kbd>CTRL+C</kbd> on Windows/Linux or <kbd>CMD+C</kbd> on OS X to copy text.</li><li><kbd>CTRL+X</kbd> on Windows/Linux or <kbd>CMD+X</kbd> on OS X to cut text.</li><li><kbd>CTRL+V</kbd> on Windows/Linux or <kbd>CMD+V</kbd> on OS X to paste text.</li><li><kbd>CTRL+Z</kbd> on Windows/Linux or <kbd>CMD+Z</kbd> on OS X to undo changes.</li><li><kbd>CTRL+Y</kbd> on Windows/Linux or <kbd>CMD+SHIFT+Z</kbd> on OS X to redo changes that were undone.</li><li><kbd>SHIFT+Delete</kbd> to delete an entire line.</li></ul><blockquote>The displaying of the Dev Zone may be toggled at any time by hitting <kbd>CTRL+SHIFT+E</kbd> on Windows/Linux or <kbd>CMD+OPT+E</kbd> on OS X</blockquote><img alt="screenshot" title="VR Editor Layout" src="images/editorVR/layout.jpg"><h3>Documentation Window</h3><p>To the left of the Code Editor is the Documentation Window. For now, it's a static, read-only listing of the scripting functions that are available for using in the Code Editor. Eventually, it will become a live-query-able terminal for all of the documentation within Primrose.</p><img alt="screenshot" title="Documentation Window" src="images/editorVR/docWindow.jpg"><h3>Console Window</h3><p>To the right of the Code Editor is the Console Window. For now, it's a static, read-only printing from whenever you call the <code>log()</code> function with a String parameter in the Code Editor, as well as a description of any errors that occurred during script execution. Eventually, it will become a live-executable terminal for both logging and REPL code execution, exactly the same as the JavaScript Console in your browser's Developer Tools view.</p><img alt="screenshot" title="Documentation Window" src="images/editorVR/consoleWindow.jpg"><h2>Selection Sphere</h2><p>At the center of your view is a small sphere. This is your cursor--we call it the "Selection Sphere". It will follow your mouse, or--if you are not using a mouse--it will follow your head movements as you look around. The Selection Sphere performs different actions when activated in different contexts.</p><p>There are several ways to activate the Selection Sphere:</p><ul><li>clicking the <kbd>left mouse button</kbd>,</li><li>tapping anywhere on the screen,</li><li>depressing the bumper on your Google Cardboard,</li><li>tapping the <kbd>A</kbd> button on your Xbox 360 controller, or</li><li>hitting the <kbd>Enter</kbd> key on your keyboard.</li></ul><h3>Navigating with the Selection Sphere</h3><p>When you point the Selection Sphere to the ground, it turns white and grows in size. Activating the Selection Sphere will make you jump to that position. Additionally, if you are currently in Editing Mode, activating the Selection Sphere while pointing at the ground will switch you to Navigation Mode.</p><blockquote>Experience has shown that "blink" style movement between locations is the most reliable for avoiding nausea for people prone to simulator sickness while using a VR headset.</blockquote><p>There are a few additional ways to navigate the environment:</p><ul><li><kbd>WASD</kbd> keys on the keyboard, a common system from First Person Shooter video games,</li><li><kbd>Arrow-keys</kbd> on the keyboard, a simple fallback for <kbd>WASD</kbd> both for people who prefer arrow keys and supporting the <a href="http://store.steampowered.com/app/353370/">Steam Controller</a>,</li><li><kbd>left analog stick</kbd> on your Xbox 360 gamepad.</li></ul><img alt="screenshot" title="Cursor Sphere" src="images/editorVR/cursor1.jpg"><h3>Making Text Selections with the Selection Sphere</h3><p>When you point the Selection Sphere at a text area, it turns white and shrinks in size. If you are currently in Navigation Mode, activating the Selection Sphere will switch you to Editing Mode.</p><p>Once in Editing Mode, depressing a button to begin activating the Selection Sphere will move the text cursor to that location and begin a text selection.</p><img alt="screenshot" title="Cursor Sphere" src="images/editorVR/cursor2.jpg"><p>You may then move the Selection Sphere, dragging out a text selection. Releasing the button to activate the Selection Sphere will set the end of the text selection.</p><img alt="screenshot" title="Cursor Sphere" src="images/editorVR/cursor3.jpg"><h3>Canceling Edit Mode without Navigating</h3><p>If there is no object under the Selection Sphere, it will turn red and shrink in size. If you are currently in Editing Mode, activating the Selection Sphere at this point will put you in Navigation Mode. If you are already in Navigation Mode, activating the Selection Sphere will have no effect.</p><img alt="screenshot" title="Cursor Sphere" src="images/editorVR/cursor4.jpg"><h2>Scripting</h2><p>The Code Editor window will have a demo script loaded in it at first. When you edit code, Primrose will wait for you to stop typing for a second and then run your script automatically. In the background, Primrose is inserting the code you write inside of a function. That function provides a clean workspace for you to write your code, so that any variables you create won't clobber the values defined outside of your script.</p><h3>Setup and Animation</h3><p>The layout of your script is very simple. At the top level, you can create any variables you want. Use this section as your one-time setup for your script. Create whatever Three.js objects you want, and add them to your scene.</p><p>At the end, you return a function that Primrose can use to update and animate your scene. That function will receive a single parameter <code>dt</code>, which is the amount of time in milliseconds that has elapsed since the last time the update function ran.</p><p>In other words:</p><pre><code>grammar("JavaScript");
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="web-app-capable" content="yes">
+    <meta name="theme-color" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="description" content="A WebVR application framework.">
+    <meta name="keywords" content="WebGL, WebVR, HTML5, JavaScript, text editor, source code editor, virtual reality, Primrose">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@Primrose_VR">
+    <meta property="og:site_name" content="Primrose VR">
+    <meta property="og:description" content="Primrose: Framework for WebVR Applications">
+    <meta name="twitter:description" content="Primrose: Framework for WebVR Applications">
+    <meta property="og:url" content="http://www.primrosevr.com/undefined"><!-- start main.pug meta block -->
+    <meta name="twitter:image" content="http://www.primrosevr.com/images/screenshot.jpg">
+    <meta property="og:image" content="http://www.primrosevr.com/images/screenshot.jpg"><!-- end main.pug meta block -->
+<!-- start main.pug title block -->
+    <meta property="og:title" content="Primrose VR: WebVR Application Framework">
+    <meta name="twitter:title" content="Primrose VR: WebVR Application Framework">
+    <title>Primrose VR: WebVR Application Framework</title><!-- end main.pug title block -->
+    <link type="text/css" rel="stylesheet" href="../doc/style.css"><!-- start documentation.pug head append -->
+    <script type="text/javascript" src="../node_modules/pliny/pliny.js"></script>
+    <script type="text/javascript" src="../Primrose.js"></script>
+    <script type="text/javascript" src="../PrimroseDocumentation.js"></script><!-- end documentation.pug head append -->
+    <script type="text/javascript" src="../ga.js"></script>
+  </head>
+  <body>
+    <header role="banner"><a id="logo" href="../"><img src="../doc/images/primrose40.png" alt="logo" title="Primrose logo"></a>
+      <nav role="navigation">
+        <ul>
+          <li><a href="../doc/">Docs</a></li>
+          <li><a href="../doc/faq.html">FAQ</a></li>
+          <li><a href="../doc/community.html">Community</a></li>
+          <li><a href="https://github.com/NotionTheory/Primrose/" target="_blank">Github</a></li>
+        </ul>
+      </nav>
+      <h1>Documentation</h1>
+    </header><!-- start main.pug banner block --><!-- end main.pug banner block -->
+<!-- start main.pug main block -->
+    <main><!-- start documentation.pug main block -->
+      <div id="top"></div>
+      <div id="contents">
+        <nav>
+          <ul>
+            <li><a href="../doc/setup.html">Installation &amp; Setup</a></li>
+          </ul>
+        </nav>
+      </div>
+      <div id="documentation">
+        <section>
+          <article><!-- start documentation.pug documentation block -->
+            <h1>Using the VR Development Environment</h1>
+            <p>Primrose is not just a web development framework. It also provides a virtual reality, live-programming environment for rapid prototyping and exploratory programming. You can try out the <a href="../doc/editorVR.html">VR Editor</a> now.</p>
+            <blockquote>NOTE: there are two separate interaction modes in the VR Editor. You switch between these modes by clicking on different objects in the environment:
+              <ul>
+                <li>Navigation Mode - mouse clicks and keyboard events move your body around the environment.</li>
+                <li>Editing Mode - mouse clicks and keyboard events edit text within the Code Editor, but do not cause changes in your body's location.</li>
+              </ul>
+            </blockquote>
+            <h2>Dev Zone Layout</h2>
+            <p>Off the bat, there are three text areas visible at approximately arm's distance. We call this the "Dev Zone". It contains the interfaces you will use to read documentation, write code, and see debugging output as you work.</p>
+            <blockquote>You may reset your view to return to the center of the Dev Zone and zero your headset's position and orientation sensors by hitting the <kbd>Z</kbd> key on your keyboard.</blockquote>
+            <h3>Writing in the Code Editor</h3>
+            <p>The VR Editor starts in a blank space with a small demo script already loaded in the editor. The center text area is the code editor. It is rendered on the inside of a portion of a sphere, what we call a "shell". Rendering the code to the inside of a sphere means that all points of the editor will be equidistant from your viewing point when you are standing in front of the editor, helping to reduce distortion and make for a more comfortable reading experience.</p>
+            <blockquote>You may reset the editor and reload the original demo code at any time by hitting <kbd>CTRL+SHIFT+X</kbd> on Windows/Linux or <kbd>CMD+SHIFT+X</kbd> on OS X.</blockquote>
+            <p>Editing text in the Code Editor supports most of the common keyboard shortcuts that you have grown accustomed to in other text editors:</p>
+            <ul>
+              <li><kbd>Arrow keys</kbd> to move around.</li>
+              <li><kbd>CTRL+Left/Right Arrow keys</kbd> on Windows/Linux, or <kbd>ALT+Left/Right Arrow keys</kbd> on OS X to skip backwards/forwards by tokens.</li>
+              <li><kbd>CTRL+Up/Down Arrow keys</kbd> on Windows/Linux to scroll the document window without moving the text cursor (not supported on OS X).</li>
+              <li><kbd>Page Up/Page Down</kbd> to move by whole screens of text.</li>
+              <li><kbd>Home/End</kbd> on Windows/Linux, or <kbd>CMD+Left Arrow/Right Arrow key</kbd> to jump to the beginning or end of a line of text.</li>
+              <li><kbd>CTRL+Home/End</kbd> on Windows/Linux, or <kbd>CMD+Up Arrow/Down Arrow key</kbd> to jump to the beginning or end of the document.</li>
+              <li><kbd>SHIFT</kbd> plus one of the movement commands above to select text.</li>
+              <li><kbd>CTRL+A</kbd> on Windows/Linux or <kbd>CMD+A</kbd> on OS X to select all text.</li>
+              <li><kbd>CTRL+C</kbd> on Windows/Linux or <kbd>CMD+C</kbd> on OS X to copy text.</li>
+              <li><kbd>CTRL+X</kbd> on Windows/Linux or <kbd>CMD+X</kbd> on OS X to cut text.</li>
+              <li><kbd>CTRL+V</kbd> on Windows/Linux or <kbd>CMD+V</kbd> on OS X to paste text.</li>
+              <li><kbd>CTRL+Z</kbd> on Windows/Linux or <kbd>CMD+Z</kbd> on OS X to undo changes.</li>
+              <li><kbd>CTRL+Y</kbd> on Windows/Linux or <kbd>CMD+SHIFT+Z</kbd> on OS X to redo changes that were undone.</li>
+              <li><kbd>SHIFT+Delete</kbd> to delete an entire line.</li>
+            </ul>
+            <blockquote>The displaying of the Dev Zone may be toggled at any time by hitting <kbd>CTRL+SHIFT+E</kbd> on Windows/Linux or <kbd>CMD+OPT+E</kbd> on OS X</blockquote><img alt="screenshot" title="VR Editor Layout" src="images/editorVR/layout.jpg">
+            <h3>Documentation Window</h3>
+            <p>To the left of the Code Editor is the Documentation Window. For now, it's a static, read-only listing of the scripting functions that are available for using in the Code Editor. Eventually, it will become a live-query-able terminal for all of the documentation within Primrose.</p><img alt="screenshot" title="Documentation Window" src="images/editorVR/docWindow.jpg">
+            <h3>Console Window</h3>
+            <p>To the right of the Code Editor is the Console Window. For now, it's a static, read-only printing from whenever you call the <code>log()</code> function with a String parameter in the Code Editor, as well as a description of any errors that occurred during script execution. Eventually, it will become a live-executable terminal for both logging and REPL code execution, exactly the same as the JavaScript Console in your browser's Developer Tools view.</p><img alt="screenshot" title="Documentation Window" src="images/editorVR/consoleWindow.jpg">
+            <h2>Selection Sphere</h2>
+            <p>At the center of your view is a small sphere. This is your cursor--we call it the "Selection Sphere". It will follow your mouse, or--if you are not using a mouse--it will follow your head movements as you look around. The Selection Sphere performs different actions when activated in different contexts.</p>
+            <p>There are several ways to activate the Selection Sphere:</p>
+            <ul>
+              <li>clicking the <kbd>left mouse button</kbd>,</li>
+              <li>tapping anywhere on the screen,</li>
+              <li>depressing the bumper on your Google Cardboard,</li>
+              <li>tapping the <kbd>A</kbd> button on your Xbox 360 controller, or</li>
+              <li>hitting the <kbd>Enter</kbd> key on your keyboard.</li>
+            </ul>
+            <h3>Navigating with the Selection Sphere</h3>
+            <p>When you point the Selection Sphere to the ground, it turns white and grows in size. Activating the Selection Sphere will make you jump to that position. Additionally, if you are currently in Editing Mode, activating the Selection Sphere while pointing at the ground will switch you to Navigation Mode.</p>
+            <blockquote>Experience has shown that "blink" style movement between locations is the most reliable for avoiding nausea for people prone to simulator sickness while using a VR headset.</blockquote>
+            <p>There are a few additional ways to navigate the environment:</p>
+            <ul>
+              <li><kbd>WASD</kbd> keys on the keyboard, a common system from First Person Shooter video games,</li>
+              <li><kbd>Arrow-keys</kbd> on the keyboard, a simple fallback for <kbd>WASD</kbd> both for people who prefer arrow keys and supporting the <a href="http://store.steampowered.com/app/353370/">Steam Controller</a>,</li>
+              <li><kbd>left analog stick</kbd> on your Xbox 360 gamepad.</li>
+            </ul><img alt="screenshot" title="Cursor Sphere" src="images/editorVR/cursor1.jpg">
+            <h3>Making Text Selections with the Selection Sphere</h3>
+            <p>When you point the Selection Sphere at a text area, it turns white and shrinks in size. If you are currently in Navigation Mode, activating the Selection Sphere will switch you to Editing Mode.</p>
+            <p>Once in Editing Mode, depressing a button to begin activating the Selection Sphere will move the text cursor to that location and begin a text selection.</p><img alt="screenshot" title="Cursor Sphere" src="images/editorVR/cursor2.jpg">
+            <p>You may then move the Selection Sphere, dragging out a text selection. Releasing the button to activate the Selection Sphere will set the end of the text selection.</p><img alt="screenshot" title="Cursor Sphere" src="images/editorVR/cursor3.jpg">
+            <h3>Canceling Edit Mode without Navigating</h3>
+            <p>If there is no object under the Selection Sphere, it will turn red and shrink in size. If you are currently in Editing Mode, activating the Selection Sphere at this point will put you in Navigation Mode. If you are already in Navigation Mode, activating the Selection Sphere will have no effect.</p><img alt="screenshot" title="Cursor Sphere" src="images/editorVR/cursor4.jpg">
+            <h2>Scripting</h2>
+            <p>The Code Editor window will have a demo script loaded in it at first. When you edit code, Primrose will wait for you to stop typing for a second and then run your script automatically. In the background, Primrose is inserting the code you write inside of a function. That function provides a clean workspace for you to write your code, so that any variables you create won't clobber the values defined outside of your script.</p>
+            <h3>Setup and Animation</h3>
+            <p>The layout of your script is very simple. At the top level, you can create any variables you want. Use this section as your one-time setup for your script. Create whatever Three.js objects you want, and add them to your scene.</p>
+            <p>At the end, you return a function that Primrose can use to update and animate your scene. That function will receive a single parameter <code>dt</code>, which is the amount of time in milliseconds that has elapsed since the last time the update function ran.</p>
+            <p>In other words:</p>
+            <pre><code>grammar("JavaScript");
 // perform setup here
 var myBlock = put( brick( ROCK ) )
   .on( scene )
@@ -15,7 +135,9 @@ return function(dt){
   myBlock.position.x = Math.cos( t );
   myBlock.position.z = Math.sin( t );
 }
-</code></pre><p>The code that is currently running in the example demo is:</p><pre><code>grammar("JavaScript");
+</code></pre>
+            <p>The code that is currently running in the example demo is:</p>
+            <pre><code>grammar("JavaScript");
 var WIDTH = 5,
     HEIGHT = 5,
     DEPTH = 5
@@ -66,5 +188,68 @@ function update ( dt ) {
     }
   }
 }
-</code></pre><h3>Scripting Functions</h3><p>There are a few helper functions that are available while interactively building scripts. They are shortly-named functions for common operations to make them easy to type in the editor. The functions are grouped into a few separate purposes:</p><ul><li>3D Scene Objects. These objects can be added to a scene right away.<ul><li><a href="#axis"><code>axis(length, width)</code></a> - create a set of axis bars, red for X, green for Y, blue for Z. Length is how long each bar should be in its own axis. Width is how large each bar should be in the other axes.</li><li><a href="#brick"><code>brick(txt, w, h, l)</code></a> - create a textured block of a certain size.</li><li><a href="#cloud"><code>cloud(verts, color, size)</code></a> - create a point-cloud</li><li><a href="#hub"><code>hub()</code></a> - create a node in the scene graph in which you can group other objects.</li><li><a href="#light"><code>light(color, [intensity, [distance, [decay</code></a>])]] - create a light</li></ul></li><li>Geometries in need of texturing. The objects need to be bound with a material on a 3D object before they can be used in the scene.<ul><li><a href="#box"><code>box(width, height, length)</code></a> - short-cut function for creating a THREE.BoxGeometry object.</li><li><a href="#cylinder"><code>cylinder(radiusTop, radiusBottom, height, rS, hS, openEnded, thetaStart, thetaEnd)</code></a> - short-cut function for creating a THREE.CylinderGeometry object.</li><li><a href="#quad"><code>quad(width, height, s, t)</code></a> - create a single rectangle.</li><li><a href="#shell"><code>shell(r, slices, rings, phi, theta)</code></a> - create a section of an inside-out sphere.</li><li><a href="#sphere"><code>sphere(r, slices, rings)</code></a> - short-cut function for creating a THREE.BufferedSphereGeometry object.</li></ul></li><li>Other utility functions.<ul><li><a href="#fmt"><code>fmt(template, arg1, arg2, ...)</code></a> - string formatting.</li><li><a href="#log"><code>log(str)</code></a> - write out debugging output to the console.</li><li><a href="#put"><code>put(obj).on(obj).at(x, y, z)</code></a> - combine objects and space them apart.</li><li><a href="#range"><code>range(min, max, step, thunk)</code></a> - call a function a certain number of times.</li><li><a href="#textured"><code>textured(geometry, txt, unshaded, opacity, s, t)</code></a> - apply a texture to a geometry.</li><li><a href="#v3"><code>v3(x, y, z)</code></a> - short-cut function for creating a THREE.Vector3 object.</li></ul></li></ul><h3>User Input</h3><p>To be able to listen for user input, you create event listeners attached to the <a href="#Primrose_BrowserEnvironment"><code>BrowserEnvironment</code></a> object named <code>this</code> in the context of your script. To setup event listeners, in your script's setup header, call <code>this.addEventListener("&lt;eventName>", callbackFunction)</code>.</p><p>Currently, the available events are:</p><ul><li><a href="#Primrose_BrowserEnvironment__keydown"><code>keydown</code></a> - a key is depressed on the keyboard.</li><li><a href="#Primrose_BrowserEnvironment__keyup"><code>keyup</code></a> - a depressed key is released on the keyboard.</li><li><a href="#Primrose_BrowserEnvironment__keypress"><code>keypress</code></a> - a key is depressed and released on the keyboard.</li><li><a href="#Primrose_BrowserEnvironment__wheel"><code>wheel</code></a> - the user rolls the mouse wheel.</li><li><a href="#Primrose_BrowserEnvironment__mousedown"><code>mousedown</code></a> - a button is depressed on the mouse.</li><li><a href="#Primrose_BrowserEnvironment__mouseup"><code>mouseup</code></a> - a depressed button is released on the mouse.</li><li><a href="#Primrose_BrowserEnvironment__mousemove"><code>mousemove</code></a> - the mouse is moved.</li><li><a href="#Primrose_BrowserEnvironment__touchstart"><code>touchstart</code></a> - a finger touches down on a touch screen.</li><li><a href="#Primrose_BrowserEnvironment__touchend"><code>touchend</code></a> - a finger touching the touch screen is removed.</li><li><a href="#Primrose_BrowserEnvironment__touchmove"><code>touchmove</code></a> - a finger is slid across the screen.</li><li><a href="#Primrose_BrowserEnvironment__pointerstart"><code>pointerstart</code></a> - either a <code>touchstart</code> or a <code>mousedown</code> occurs.</li><li><a href="#Primrose_BrowserEnvironment__pointermove"><code>pointermove</code></a> - either a <code>touchend</code> or <code>mouseup</code> occurs.</li><li><a href="#Primrose_BrowserEnvironment__pointerend"><code>pointerend</code></a> - either a <code>touchmove</code> or <code>mousemove</code> occurs.</li><li><a href="#Primrose_BrowserEnvironment__gazestart"><code>gazestart</code></a> - occurs when the central Selection Sphere hovers over an object, inferring the user started looking at that object.</li><li><a href="#Primrose_BrowserEnvironment__gazecomplete"><code>gazecomplete</code></a> - occurs if the Selection Sphere does not leave the object it hit in <code>gazestart</code> before the <a href="#Primrose_BrowserEnvironment_DEFAULTS_gazeLength"><code>gazeLength</code></a> expires (default 1s).</li><li><a href="#Primrose_BrowserEnvironment__gazecancel"><code>gazecancel</code></a> - occurs if the Selection Sphere leaves the object it hit in <code>gazestart</code> before the <a href="#Primrose_BrowserEnvironment_DEFAULTS_gazeLength"><code>gazeLength</code></a> expires (default 1s).</li></ul><!-- end documentation.pug documentation block --></article></section></div><!-- end documentation.pug main block --></main><!-- end main.pug main block -->
-<!-- start main.pug footer block --><footer><div id="footerWrapper"><a href="../doc/readme.html">About</a><a href="../doc/license.html">License</a><a href="../doc/changelog.html">Changelog</a><a href="https://notiontheory.typeform.com/to/QzZmAD" target="_blank">Slack</a><a class="small icon github" href="https://www.github.com/NotionTheory/Primrose" target="_blank">&nbsp;</a><a class="small icon twitter" href="https://www.twitter.com/Primrose_VR" target="_blank">&nbsp;</a><a href="http://www.notiontheory.com/team" target="_blank" style="color:#ec2471">Made (with love) by NotionTheory</a></div><script type="text/javascript" async defer src="app.js"></script></footer><!-- end main.pug footer block --></body></html>
+</code></pre>
+            <h3>Scripting Functions</h3>
+            <p>There are a few helper functions that are available while interactively building scripts. They are shortly-named functions for common operations to make them easy to type in the editor. The functions are grouped into a few separate purposes:</p>
+            <ul>
+              <li>3D Scene Objects. These objects can be added to a scene right away.
+                <ul>
+                  <li><a href="#axis"><code>axis(length, width)</code></a> - create a set of axis bars, red for X, green for Y, blue for Z. Length is how long each bar should be in its own axis. Width is how large each bar should be in the other axes.</li>
+                  <li><a href="#brick"><code>brick(txt, w, h, l)</code></a> - create a textured block of a certain size.</li>
+                  <li><a href="#cloud"><code>cloud(verts, color, size)</code></a> - create a point-cloud</li>
+                  <li><a href="#hub"><code>hub()</code></a> - create a node in the scene graph in which you can group other objects.</li>
+                  <li><a href="#light"><code>light(color, [intensity, [distance, [decay</code></a>])]] - create a light</li>
+                </ul>
+              </li>
+              <li>Geometries in need of texturing. The objects need to be bound with a material on a 3D object before they can be used in the scene.
+                <ul>
+                  <li><a href="#box"><code>box(width, height, length)</code></a> - short-cut function for creating a THREE.BoxGeometry object.</li>
+                  <li><a href="#cylinder"><code>cylinder(radiusTop, radiusBottom, height, rS, hS, openEnded, thetaStart, thetaEnd)</code></a> - short-cut function for creating a THREE.CylinderGeometry object.</li>
+                  <li><a href="#quad"><code>quad(width, height, s, t)</code></a> - create a single rectangle.</li>
+                  <li><a href="#shell"><code>shell(r, slices, rings, phi, theta)</code></a> - create a section of an inside-out sphere.</li>
+                  <li><a href="#sphere"><code>sphere(r, slices, rings)</code></a> - short-cut function for creating a THREE.BufferedSphereGeometry object.</li>
+                </ul>
+              </li>
+              <li>Other utility functions.
+                <ul>
+                  <li><a href="#fmt"><code>fmt(template, arg1, arg2, ...)</code></a> - string formatting.</li>
+                  <li><a href="#log"><code>log(str)</code></a> - write out debugging output to the console.</li>
+                  <li><a href="#put"><code>put(obj).on(obj).at(x, y, z)</code></a> - combine objects and space them apart.</li>
+                  <li><a href="#range"><code>range(min, max, step, thunk)</code></a> - call a function a certain number of times.</li>
+                  <li><a href="#textured"><code>textured(geometry, txt, unshaded, opacity, s, t)</code></a> - apply a texture to a geometry.</li>
+                  <li><a href="#v3"><code>v3(x, y, z)</code></a> - short-cut function for creating a THREE.Vector3 object.</li>
+                </ul>
+              </li>
+            </ul>
+            <h3>User Input</h3>
+            <p>To be able to listen for user input, you create event listeners attached to the <a href="#Primrose_BrowserEnvironment"><code>BrowserEnvironment</code></a> object named <code>this</code> in the context of your script. To setup event listeners, in your script's setup header, call <code>this.addEventListener("&lt;eventName>", callbackFunction)</code>.</p>
+            <p>Currently, the available events are:</p>
+            <ul>
+              <li><a href="#Primrose_BrowserEnvironment__keydown"><code>keydown</code></a> - a key is depressed on the keyboard.</li>
+              <li><a href="#Primrose_BrowserEnvironment__keyup"><code>keyup</code></a> - a depressed key is released on the keyboard.</li>
+              <li><a href="#Primrose_BrowserEnvironment__keypress"><code>keypress</code></a> - a key is depressed and released on the keyboard.</li>
+              <li><a href="#Primrose_BrowserEnvironment__wheel"><code>wheel</code></a> - the user rolls the mouse wheel.</li>
+              <li><a href="#Primrose_BrowserEnvironment__mousedown"><code>mousedown</code></a> - a button is depressed on the mouse.</li>
+              <li><a href="#Primrose_BrowserEnvironment__mouseup"><code>mouseup</code></a> - a depressed button is released on the mouse.</li>
+              <li><a href="#Primrose_BrowserEnvironment__mousemove"><code>mousemove</code></a> - the mouse is moved.</li>
+              <li><a href="#Primrose_BrowserEnvironment__touchstart"><code>touchstart</code></a> - a finger touches down on a touch screen.</li>
+              <li><a href="#Primrose_BrowserEnvironment__touchend"><code>touchend</code></a> - a finger touching the touch screen is removed.</li>
+              <li><a href="#Primrose_BrowserEnvironment__touchmove"><code>touchmove</code></a> - a finger is slid across the screen.</li>
+              <li><a href="#Primrose_BrowserEnvironment__pointerstart"><code>pointerstart</code></a> - either a <code>touchstart</code> or a <code>mousedown</code> occurs.</li>
+              <li><a href="#Primrose_BrowserEnvironment__pointermove"><code>pointermove</code></a> - either a <code>touchend</code> or <code>mouseup</code> occurs.</li>
+              <li><a href="#Primrose_BrowserEnvironment__pointerend"><code>pointerend</code></a> - either a <code>touchmove</code> or <code>mousemove</code> occurs.</li>
+              <li><a href="#Primrose_BrowserEnvironment__gazestart"><code>gazestart</code></a> - occurs when the central Selection Sphere hovers over an object, inferring the user started looking at that object.</li>
+              <li><a href="#Primrose_BrowserEnvironment__gazecomplete"><code>gazecomplete</code></a> - occurs if the Selection Sphere does not leave the object it hit in <code>gazestart</code> before the <a href="#Primrose_BrowserEnvironment_DEFAULTS_gazeLength"><code>gazeLength</code></a> expires (default 1s).</li>
+              <li><a href="#Primrose_BrowserEnvironment__gazecancel"><code>gazecancel</code></a> - occurs if the Selection Sphere leaves the object it hit in <code>gazestart</code> before the <a href="#Primrose_BrowserEnvironment_DEFAULTS_gazeLength"><code>gazeLength</code></a> expires (default 1s).</li>
+            </ul><!-- end documentation.pug documentation block -->
+          </article>
+        </section>
+      </div><!-- end documentation.pug main block -->
+    </main><!-- end main.pug main block -->
+<!-- start main.pug footer block -->
+    <footer>
+      <div id="footerWrapper"><a href="../doc/readme.html">About</a><a href="../doc/license.html">License</a><a href="../doc/changelog.html">Changelog</a><a href="https://notiontheory.typeform.com/to/QzZmAD" target="_blank">Slack</a><a class="small icon github" href="https://www.github.com/NotionTheory/Primrose" target="_blank">&nbsp;</a><a class="small icon twitter" href="https://www.twitter.com/Primrose_VR" target="_blank">&nbsp;</a><a href="http://www.notiontheory.com/team" target="_blank" style="color:#ec2471">Made (with love) by NotionTheory</a></div>
+      <script type="text/javascript" async defer src="app.js"></script>
+    </footer><!-- end main.pug footer block -->
+  </body>
+</html>

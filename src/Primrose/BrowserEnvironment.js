@@ -581,37 +581,10 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       this.scene.remove(user.head);
     };
 
-    var showHideButtons = () => {
-      var hide = this.input.VR.isPresenting,
-        elem = this.renderer.domElement.nextElementSibling;
-      while (elem) {
-        if (hide) {
-          elem.dataset.originaldisplay = elem.style.display;
-          elem.style.display = "none";
-        }
-        else {
-          elem.style.display = elem.dataset.originaldisplay;
-        }
-        elem = elem.nextElementSibling;
-      }
-    };
-
-    var fixPointerLock = () => {
-      if (this.input.VR.isPresenting && !PointerLock.isActive && !isMobile) {
-        var canv = this.input.VR.currentCanvas;
-        if(canv){
-          PointerLock.request(canv);
-        }
-      }
-    };
-
     window.addEventListener("keydown", (evt) => {
       if (this.input.VR.isPresenting) {
         if (evt.keyCode === Primrose.Keys.ESCAPE && !this.input.VR.isPolyfilled) {
           this.input.VR.cancel();
-        }
-        else {
-          fixPointerLock();
         }
       }
     });
@@ -622,14 +595,11 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       }
     });
 
-    window.addEventListener("mousedown", fixPointerLock);
-
 
     window.addEventListener("vrdisplaypresentchange", (evt) => {
       if (!this.input.VR.isPresenting) {
         this.input.VR.cancel();
       }
-      showHideButtons();
       modifyScreen();
     });
     window.addEventListener("resize", modifyScreen, false);

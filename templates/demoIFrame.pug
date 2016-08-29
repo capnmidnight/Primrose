@@ -52,8 +52,13 @@ html
               p.value = n;
             });
           }).then(function () {
-            var p = document.querySelector("progress");
-            var c = document.getElementById("fullScreenButtonContainer");
+            var p = document.querySelector("progress"),
+              c = document.getElementById("fullScreenButtonContainer"),
+              t = document.getElementById("controls");
+            window.addEventListener("vrdisplaypresentchange", function(){
+              var cd = env.input.VR.currentDevice;
+              t.style.display = cd && cd.isPresenting ? "none" : "";
+            });
             p.style.display = "none";
             navigator.getVRDisplays().then(function(displays){
               displays.forEach(function(display, i) {

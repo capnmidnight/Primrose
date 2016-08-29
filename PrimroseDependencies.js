@@ -14055,7 +14055,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
           }, false);
 
           if (!created) {
-            displays.unshift(new StandardMonitor(displays[0]));
+            var toWrap = displays[0],
+                wrapped = new StandardMonitor(toWrap);
+            if (toWrap && toWrap.displayName === "Mouse and Keyboard VRDisplay (webvr-polyfill)") {
+              displays[0] = wrapped;
+            } else {
+              displays.unshift(wrapped);
+            }
           }
         }
 
