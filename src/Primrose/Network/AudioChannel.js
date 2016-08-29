@@ -208,7 +208,7 @@ class AudioChannel extends Primrose.WebRTCSocket {
     if (this.rtc.ontrack) {
       this.rtc.ontrack = null;
     }
-    if(this.rtc.onaddstream)
+    if(this.rtc.onaddstream) {
       this.rtc.onaddstream = null;
     }
   }
