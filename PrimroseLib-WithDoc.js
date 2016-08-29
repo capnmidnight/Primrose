@@ -10701,7 +10701,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var DISPLACEMENT = new THREE.Vector3(),
     EULER_TEMP = new THREE.Euler(),
-    WEDGE = Math.PI / 3;
+    WEDGE = Math.PI / 3,
+    TELEPORT_COOLDOWN = 250;
 
 pliny.class({
   parent: "Primrose.Input",
@@ -10842,12 +10843,6 @@ var FPSInput = function () {
         integrate: true,
         min: -Math.PI * 0.5,
         max: Math.PI * 0.5
-      },
-      pointerPitch: {
-        commands: ["dy"],
-        integrate: true,
-        min: -Math.PI * 0.25,
-        max: Math.PI * 0.25
       }
     }));
 
@@ -10898,9 +10893,7 @@ var FPSInput = function () {
 
           _this.pointers.push(ptr);
           ptr.addToBrowserEnvironment(null, _this.options.scene);
-          ptr.addEventListener("teleport", function (evt) {
-            return _this.moveStage(evt.position);
-          });
+          ptr.addEventListener("teleport", _this.teleport);
         } else {
           mgr = new Primrose.Input.Gamepad(pad, 0, {
             buttons: {
@@ -10956,10 +10949,10 @@ var FPSInput = function () {
     this.pointers.push(this.head);
     this.head.addToBrowserEnvironment(null, this.options.scene);
 
+    this.teleport = this.teleport.bind(this);
+    this.lastTeleport = 0;
     this.pointers.forEach(function (ptr) {
-      return ptr.addEventListener("teleport", function (evt) {
-        return _this.moveStage(evt.position);
-      });
+      return ptr.addEventListener("teleport", _this.teleport);
     });
 
     this.ready = Promise.all(this.managers.map(function (mgr) {
@@ -10968,6 +10961,16 @@ var FPSInput = function () {
   }
 
   _createClass(FPSInput, [{
+    key: "teleport",
+    value: function teleport(evt) {
+      var t = performance.now(),
+          dt = t - this.lastTeleport;
+      if (dt > TELEPORT_COOLDOWN) {
+        this.lastTeleport = t;
+        this.moveStage(evt.position);
+      }
+    }
+  }, {
     key: "remove",
     value: function remove(id) {
       var mgr = this[id],

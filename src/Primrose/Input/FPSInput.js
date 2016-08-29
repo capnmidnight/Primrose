@@ -1,6 +1,7 @@
 const DISPLACEMENT = new THREE.Vector3(),
   EULER_TEMP = new THREE.Euler(),
-  WEDGE = Math.PI / 3;
+  WEDGE = Math.PI / 3,
+  TELEPORT_COOLDOWN = 250;
 
 pliny.class({
   parent: "Primrose.Input",
@@ -188,7 +189,7 @@ class FPSInput {
 
           this.pointers.push(ptr);
           ptr.addToBrowserEnvironment(null, this.options.scene);
-          ptr.addEventListener("teleport", (evt) => this.moveStage(evt.position));
+          ptr.addEventListener("teleport", this.teleport);
         }
         else {
           mgr = new Primrose.Input.Gamepad(pad, 0, {
@@ -257,11 +258,22 @@ class FPSInput {
     this.pointers.push(this.head);
     this.head.addToBrowserEnvironment(null, this.options.scene);
 
-    this.pointers.forEach((ptr) => ptr.addEventListener("teleport", (evt) => this.moveStage(evt.position)));
+    this.teleport = this.teleport.bind(this);
+    this.lastTeleport = 0;
+    this.pointers.forEach((ptr) => ptr.addEventListener("teleport", this.teleport));
 
     this.ready = Promise.all(this.managers
       .map((mgr) => mgr.ready)
       .filter(identity));
+  }
+
+  teleport(evt) {
+    var t = performance.now(),
+      dt = t - this.lastTeleport;
+    if(dt > TELEPORT_COOLDOWN) {
+      this.lastTeleport = t;
+      this.moveStage(evt.position);
+    }
   }
 
   remove(id) {
