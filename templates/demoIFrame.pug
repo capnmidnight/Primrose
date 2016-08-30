@@ -62,14 +62,16 @@ html
             p.style.display = "none";
             navigator.getVRDisplays().then(function(displays){
               displays.forEach(function(display, i) {
-                var btn = document.createElement("button");
-                btn.type = "button";
-                btn.className = "secondary";
-                btn.appendChild(document.createTextNode(display.displayName));
-                btn.addEventListener("click", function(i){
-                  env.goFullScreen(i, "Button");
-                }.bind(null, i), false);
-                c.appendChild(btn);
+                if(display.displayName !== "Mouse and Keyboard VRDisplay (webvr-polyfill)") {
+                  var btn = document.createElement("button");
+                  btn.type = "button";
+                  btn.className = "secondary";
+                  btn.appendChild(document.createTextNode(display.displayName));
+                  btn.addEventListener("click", function(i){
+                    env.goFullScreen(i, "Button");
+                  }.bind(null, i), false);
+                  c.appendChild(btn);
+                }
               });
             });
           });
