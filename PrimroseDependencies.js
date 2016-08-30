@@ -13422,657 +13422,602 @@ module.exports = WebVRPolyfill;
 
 },{"./base.js":2,"./cardboard-vr-display.js":5,"./display-wrappers.js":8,"./mouse-keyboard-vr-display.js":15}]},{},[13]);
 
-"use strict";
+////////////////////////////////////////////////////////////////////////////////
+// start D:\Documents\VR\webvr-standard-monitor\src\AsyncLockRequest.js
+(function(){"use strict";
 
-(function () {
-  ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\webvr-bootstrapper\src\AsyncLockRequest.js
-  "use strict";
-
-  function findProperty(elem, arr) {
-    for (var i = 0; i < arr.length; ++i) {
-      if (elem[arr[i]] !== undefined) {
-        return arr[i];
-      }
+function findProperty(elem, arr) {
+  for (var i = 0; i < arr.length; ++i) {
+    if (elem[arr[i]] !== undefined) {
+      return arr[i];
     }
   }
+}
 
-  function AsyncLockRequest(name, elementOpts, changeEventOpts, errorEventOpts, requestMethodOpts, exitMethodOpts, testExtraParam) {
-    var elementName = findProperty(document, elementOpts),
-        changeEventName = findProperty(document, changeEventOpts),
-        errorEventName = findProperty(document, errorEventOpts),
-        requestMethodName = findProperty(document.documentElement, requestMethodOpts),
-        exitMethodName = findProperty(document, exitMethodOpts),
-        changeTimeout = null;
+function AsyncLockRequest(name, elementOpts, changeEventOpts, errorEventOpts, requestMethodOpts, exitMethodOpts, testExtraParam) {
+  var elementName = findProperty(document, elementOpts),
+      changeEventName = findProperty(document, changeEventOpts),
+      errorEventName = findProperty(document, errorEventOpts),
+      requestMethodName = findProperty(document.documentElement, requestMethodOpts),
+      exitMethodName = findProperty(document, exitMethodOpts),
+      changeTimeout = null;
 
-    changeEventName = changeEventName && changeEventName.substring(2);
-    errorEventName = errorEventName && errorEventName.substring(2);
+  changeEventName = changeEventName && changeEventName.substring(2);
+  errorEventName = errorEventName && errorEventName.substring(2);
 
-    var ns = {
-      addChangeListener: function addChangeListener(thunk, bubbles) {
-        return document.addEventListener(changeEventName, thunk, bubbles);
-      },
-      removeChangeListener: function removeChangeListener(thunk) {
-        return document.removeEventListener(changeEventName, thunk);
-      },
-      addErrorListener: function addErrorListener(thunk, bubbles) {
-        return document.addEventListener(errorEventName, thunk, bubbles);
-      },
-      removeErrorListener: function removeErrorListener(thunk) {
-        return document.removeEventListener(errorEventName, thunk);
-      },
-      withChange: function withChange(act) {
-        return new Promise(function (resolve, reject) {
-          var onSuccess = function onSuccess() {
-            setTimeout(tearDown);
-            resolve(ns.element);
-          },
-              onError = function onError(evt) {
-            setTimeout(tearDown);
-            reject(evt);
-          },
-              stop = function stop() {
-            if (changeTimeout) {
-              clearTimeout(changeTimeout);
-              changeTimeout = null;
-            }
-          },
-              tearDown = function tearDown() {
-            stop();
-            ns.removeChangeListener(onSuccess);
-            ns.removeErrorListener(onError);
-          };
-
-          ns.addChangeListener(onSuccess, false);
-          ns.addErrorListener(onError, false);
-
-          if (act()) {
-            // we've already gotten lock, so don't wait for it.
-            tearDown();
-            resolve(ns.element);
-          } else {
-            // Timeout waiting on the lock to happen, for systems like iOS that
-            // don't properly support it, even though they say they do.
-            stop();
-            changeTimeout = setTimeout(function () {
-              tearDown();
-              reject(name + " state did not change in allotted time");
-            }, 1000);
+  var ns = {
+    addChangeListener: function addChangeListener(thunk, bubbles) {
+      return document.addEventListener(changeEventName, thunk, bubbles);
+    },
+    removeChangeListener: function removeChangeListener(thunk) {
+      return document.removeEventListener(changeEventName, thunk);
+    },
+    addErrorListener: function addErrorListener(thunk, bubbles) {
+      return document.addEventListener(errorEventName, thunk, bubbles);
+    },
+    removeErrorListener: function removeErrorListener(thunk) {
+      return document.removeEventListener(errorEventName, thunk);
+    },
+    withChange: function withChange(act) {
+      return new Promise(function (resolve, reject) {
+        var onSuccess = function onSuccess() {
+          setTimeout(tearDown);
+          resolve(ns.element);
+        },
+            onError = function onError(evt) {
+          setTimeout(tearDown);
+          reject(evt);
+        },
+            stop = function stop() {
+          if (changeTimeout) {
+            clearTimeout(changeTimeout);
+            changeTimeout = null;
           }
-        });
-      },
-      request: function request(elem, extraParam) {
-        if (testExtraParam) {
-          extraParam = testExtraParam(extraParam);
-        }
-        return ns.withChange(function () {
-          if (!requestMethodName) {
-            throw new Error("No " + name + " API support.");
-          } else if (ns.isActive) {
-            return true;
-          } else if (extraParam) {
-            elem[requestMethodName](extraParam);
-          } else if (isChrome) {
-            elem[requestMethodName](window.Element.ALLOW_KEYBOARD_INPUT);
-          } else {
-            elem[requestMethodName]();
-          }
-        });
-      },
-      exit: function exit() {
-        return ns.withChange(function () {
-          if (!exitMethodName) {
-            throw new Error("No Fullscreen API support.");
-          } else if (!ns.isActive) {
-            return true;
-          } else {
-            document[exitMethodName]();
-          }
-        });
-      }
-    };
-
-    Object.defineProperties(ns, {
-      element: {
-        get: function get() {
-          return document[elementName];
-        }
-      },
-      isActive: {
-        get: function get() {
-          return !!document[elementName];
-        }
-      }
-    });
-
-    return ns;
-  }
-  // end D:\Documents\VR\webvr-bootstrapper\src\AsyncLockRequest.js
-  ////////////////////////////////////////////////////////////////////////////////
-  if (typeof window !== "undefined") window.AsyncLockRequest = AsyncLockRequest;
-})();
-"use strict";
-
-(function () {
-  ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\webvr-bootstrapper\src\FullScreen.js
-  "use strict";
-
-  var FullScreen = AsyncLockRequest("Fullscreen", ["fullscreenElement", "mozFullScreenElement", "webkitFullscreenElement", "msFullscreenElement"], ["onfullscreenchange", "onmozfullscreenchange", "onwebkitfullscreenchange", "onmsfullscreenchange"], ["onfullscreenerror", "onmozfullscreenerror", "onwebkitfullscreenerror", "onmsfullscreenerror"], ["requestFullscreen", "mozRequestFullScreen", "webkitRequestFullscreen", "webkitRequestFullScreen", "msRequestFullscreen"], ["exitFullscreen", "mozExitFullScreen", "webkitExitFullscreen", "webkitExitFullScreen", "msExitFullscreen"], function (arg) {
-    return arg || isChrome && window.Element.ALLOW_KEYBOARD_INPUT || undefined;
-  });
-  // end D:\Documents\VR\webvr-bootstrapper\src\FullScreen.js
-  ////////////////////////////////////////////////////////////////////////////////
-  if (typeof window !== "undefined") window.FullScreen = FullScreen;
-})();
-"use strict";
-
-(function () {
-  ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\webvr-bootstrapper\src\Orientation.js
-  "use strict";
-
-  function lockOrientation() {
-    var type = screen.orientation && screen.orientation.type || screen.mozOrientation || "";
-    if (type.indexOf("landscape") === -1) {
-      type = "landscape-primary";
-    }
-    if (screen.orientation && screen.orientation.lock) {
-      return screen.orientation.lock(type);
-    } else if (screen.mozLockOrientation) {
-      var locked = screen.mozLockOrientation(type);
-      if (locked) {
-        return Promise.resolve();
-      }
-    } else {
-      return Promise.reject();
-    }
-  }
-
-  function unlockOrientation() {
-    if (screen.orientation && screen.orientation.unlock) {
-      screen.orientation.unlock();
-    } else if (screen.mozUnlockOrientation) {
-      screen.mozUnlockOrientation();
-    }
-  }
-
-  var Orientation = {
-    lock: lockOrientation,
-    unlock: unlockOrientation
-  };
-  // end D:\Documents\VR\webvr-bootstrapper\src\Orientation.js
-  ////////////////////////////////////////////////////////////////////////////////
-  if (typeof window !== "undefined") window.Orientation = Orientation;
-})();
-"use strict";
-
-(function () {
-  ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\webvr-bootstrapper\src\PointerLock.js
-  "use strict";
-
-  var PointerLock = AsyncLockRequest("Pointer Lock", ["pointerLockElement", "mozPointerLockElement", "webkitPointerLockElement"], ["onpointerlockchange", "onmozpointerlockchange", "onwebkitpointerlockchange"], ["onpointerlockerror", "onmozpointerlockerror", "onwebkitpointerlockerror"], ["requestPointerLock", "mozRequestPointerLock", "webkitRequestPointerLock", "webkitRequestPointerLock"], ["exitPointerLock", "mozExitPointerLock", "webkitExitPointerLock", "webkitExitPointerLock"]);
-  // end D:\Documents\VR\webvr-bootstrapper\src\PointerLock.js
-  ////////////////////////////////////////////////////////////////////////////////
-  if (typeof window !== "undefined") window.PointerLock = PointerLock;
-})();
-"use strict";
-
-(function () {
-  ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\webvr-bootstrapper\src\StandardMonitor.js
-  "use strict";
-
-  function noop() {}
-
-  function immutable(value) {
-    return {
-      get: function get() {
-        return value;
-      }
-    };
-  }
-
-  function StandardMonitor(display) {
-    var _this = this;
-
-    var depthNear = 0.01,
-        depthFar = 10000.0,
-        capabilities = {},
-        currentLayers = [],
-        fireDisplayPresentChange = function (evt) {
-      if (!this.isPresenting) {
-        FullScreen.removeChangeListener(fireDisplayPresentChange);
-      }
-      window.dispatchEvent(new Event("vrdisplaypresentchange"));
-    }.bind(this);
-
-    Object.defineProperties(capabilities, {
-      hasPosition: immutable(false),
-      hasOrientation: immutable(isMobile),
-      hasExternalDisplay: immutable(false),
-      canPresent: immutable(true),
-      maxLayers: immutable(1)
-    });
-
-    var defaultFOV = function defaultFOV(side) {
-      if (side === "left") {
-        var width = _this.DOMElement && _this.DOMElement.offsetWidth || screen.width,
-            height = _this.DOMElement && _this.DOMElement.offsetHeight || screen.height,
-            aspect = width / height,
-            vFOV = 25,
-            hFOV = vFOV * aspect;
-        return {
-          renderWidth: width * devicePixelRatio,
-          renderHeight: height * devicePixelRatio,
-          offset: new Float32Array([0, 0, 0]),
-          fieldOfView: {
-            upDegrees: vFOV,
-            downDegrees: vFOV,
-            leftDegrees: hFOV,
-            rightDegrees: hFOV
-          }
+        },
+            tearDown = function tearDown() {
+          stop();
+          ns.removeChangeListener(onSuccess);
+          ns.removeErrorListener(onError);
         };
-      }
-    };
 
-    function defaultPose() {
-      return {
-        position: [0, 0, 0],
-        orientation: [0, 0, 0, 1],
-        linearVelocity: null,
-        linearAcceleration: null,
-        angularVelocity: null,
-        angularAcceleration: null
-      };
+        ns.addChangeListener(onSuccess, false);
+        ns.addErrorListener(onError, false);
+
+        if (act()) {
+          // we've already gotten lock, so don't wait for it.
+          onSuccess();
+        } else {
+          // Timeout waiting on the lock to happen, for systems like iOS that
+          // don't properly support it, even though they say they do.
+          stop();
+          changeTimeout = setTimeout(function () {
+            return onError(name + " state did not change in allotted time");
+          }, 1000);
+        }
+      });
+    },
+    request: function request(elem, extraParam) {
+      if (testExtraParam) {
+        extraParam = testExtraParam(extraParam);
+      }
+      return ns.withChange(function () {
+        if (!requestMethodName) {
+          throw new Error("No " + name + " API support.");
+        } else if (ns.isActive) {
+          return true;
+        } else if (extraParam) {
+          elem[requestMethodName](extraParam);
+        } else {
+          elem[requestMethodName]();
+        }
+      });
+    },
+    exit: function exit() {
+      return ns.withChange(function () {
+        if (!exitMethodName) {
+          throw new Error("No Fullscreen API support.");
+        } else if (!ns.isActive) {
+          return true;
+        } else {
+          document[exitMethodName]();
+        }
+      });
     }
+  };
+
+  Object.defineProperties(ns, {
+    element: {
+      get: function get() {
+        return document[elementName];
+      }
+    },
+    isActive: {
+      get: function get() {
+        return !!document[elementName];
+      }
+    }
+  });
+
+  return ns;
+}
+if(typeof window !== "undefined") window.AsyncLockRequest = AsyncLockRequest;
+})();
+// end D:\Documents\VR\webvr-standard-monitor\src\AsyncLockRequest.js
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// start D:\Documents\VR\webvr-standard-monitor\src\FullScreen.js
+(function(){"use strict";
+
+var FullScreen = AsyncLockRequest("Fullscreen", ["fullscreenElement", "mozFullScreenElement", "webkitFullscreenElement", "msFullscreenElement"], ["onfullscreenchange", "onmozfullscreenchange", "onwebkitfullscreenchange", "onmsfullscreenchange"], ["onfullscreenerror", "onmozfullscreenerror", "onwebkitfullscreenerror", "onmsfullscreenerror"], ["requestFullscreen", "mozRequestFullScreen", "webkitRequestFullscreen", "webkitRequestFullScreen", "msRequestFullscreen"], ["exitFullscreen", "mozExitFullScreen", "webkitExitFullscreen", "webkitExitFullScreen", "msExitFullscreen"], function (arg) {
+  return arg || window.Element && window.Element.ALLOW_KEYBOARD_INPUT || undefined;
+});
+if(typeof window !== "undefined") window.FullScreen = FullScreen;
+})();
+// end D:\Documents\VR\webvr-standard-monitor\src\FullScreen.js
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// start D:\Documents\VR\webvr-standard-monitor\src\Orientation.js
+(function(){"use strict";
+
+function lockOrientation() {
+  var type = screen.orientation && screen.orientation.type || screen.mozOrientation || "";
+  if (type.indexOf("landscape") === -1) {
+    type = "landscape-primary";
+  }
+  if (screen.orientation && screen.orientation.lock) {
+    return screen.orientation.lock(type);
+  } else if (screen.mozLockOrientation) {
+    var locked = screen.mozLockOrientation(type);
+    if (locked) {
+      return Promise.resolve();
+    }
+  } else {
+    return Promise.reject();
+  }
+}
+
+function unlockOrientation() {
+  if (screen.orientation && screen.orientation.unlock) {
+    screen.orientation.unlock();
+  } else if (screen.mozUnlockOrientation) {
+    screen.mozUnlockOrientation();
+  }
+}
+
+var Orientation = {
+  lock: lockOrientation,
+  unlock: unlockOrientation
+};
+if(typeof window !== "undefined") window.Orientation = Orientation;
+})();
+// end D:\Documents\VR\webvr-standard-monitor\src\Orientation.js
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// start D:\Documents\VR\webvr-standard-monitor\src\PointerLock.js
+(function(){"use strict";
+
+var PointerLock = AsyncLockRequest("Pointer Lock", ["pointerLockElement", "mozPointerLockElement", "webkitPointerLockElement"], ["onpointerlockchange", "onmozpointerlockchange", "onwebkitpointerlockchange"], ["onpointerlockerror", "onmozpointerlockerror", "onwebkitpointerlockerror"], ["requestPointerLock", "mozRequestPointerLock", "webkitRequestPointerLock", "webkitRequestPointerLock"], ["exitPointerLock", "mozExitPointerLock", "webkitExitPointerLock", "webkitExitPointerLock"]);
+if(typeof window !== "undefined") window.PointerLock = PointerLock;
+})();
+// end D:\Documents\VR\webvr-standard-monitor\src\PointerLock.js
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// start D:\Documents\VR\webvr-standard-monitor\src\WebVRStandardMonitor.js
+(function(){"use strict";
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+var isMobile = function (a) {
+  return (/(android|bb\d+|meego).+|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od|ad)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(a) || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substring(0, 4))
+  );
+}(navigator.userAgent || navigator.vendor || window.opera),
+    heap = new WeakMap();
+
+function priv(obj, value) {
+  if (!heap.has(obj)) {
+    heap.set(obj, value || {});
+  }
+  return heap.get(obj);
+}
+
+function immutable(value) {
+  var getter = typeof value === "function" ? value : function () {
+    return value;
+  };
+  return {
+    enumerable: true,
+    get: getter,
+    set: function set() {
+      throw new Error("This value is immutable and may only be read, not written.");
+    }
+  };
+}
+
+function mutable(value, type) {
+  return {
+    enumerable: true,
+    get: function get() {
+      return value;
+    },
+    set: function set(v) {
+      var t = typeof v === "undefined" ? "undefined" : _typeof(v);
+      if (t !== type) {
+        throw new Error("Value must be a " + type + ". An " + t + " was provided instead: " + v);
+      }
+      value = v;
+    }
+  };
+}
+
+var setup = false;
+
+function WebVRStandardMonitor(display) {
+  if (!setup) {
+    setup = true;
+    var oldGetVRDisplays = navigator.getVRDisplays || Promise.resolve.bind(Promise, []);
+    navigator.getVRDisplays = function () {
+      return oldGetVRDisplays.call(navigator).then(function (displays) {
+        var created = false;
+        for (var i = 0; i < displays.length && !created; ++i) {
+          created = display instanceof WebVRStandardMonitor;
+        }
+        if (!created) {
+          displays.unshift(new WebVRStandardMonitor(displays[0]));
+        }
+        return displays;
+      });
+    };
+  }
+
+  if (this !== window && this !== undefined) {
+    priv(this, {
+      currentLayers: [],
+      display: display
+    });
 
     Object.defineProperties(this, {
+      capabilities: immutable(Object.defineProperties({}, {
+        hasPosition: immutable(false),
+        hasOrientation: immutable(isMobile),
+        hasExternalDisplay: immutable(false),
+        canPresent: immutable(true),
+        maxLayers: immutable(1)
+      })),
       isPolyfilled: immutable(display && display.isPolyfilled || false),
-      displayId: immutable(display && display.displayId || "N/A"),
+      displayId: immutable(0),
       displayName: immutable(isMobile && "Magic Window" || "Standard Monitor"),
-      isConnected: immutable(!display || display.isConnected),
+      isConnected: immutable(true),
       stageParameters: immutable(null),
-
-      depthNear: {
-        get: function get() {
-          if (display) {
-            return display.depthNear;
-          } else {
-            return depthNear;
-          }
-        },
-        set: function set(v) {
-          if (display) {
-            display.depthNear = v;
-          } else {
-            depthNear = v;
-          }
-        }
-      },
-
-      depthFar: {
-        get: function get() {
-          if (display) {
-            return display.depthFar;
-          } else {
-            return depthFar;
-          }
-        },
-        set: function set(v) {
-          if (display) {
-            display.depthFar = v;
-          } else {
-            depthFar = v;
-          }
-        }
-      },
-
-      capabilities: immutable(capabilities),
-
-      requestAnimationFrame: immutable(window.requestAnimationFrame.bind(window)),
-      cancelAnimationFrame: immutable(window.cancelAnimationFrame.bind(window)),
-      submitFrame: immutable(noop),
-
-      requestPresent: immutable(function (layers) {
-        for (var i = 0; i < layers.length && i < 1; ++i) {
-          currentLayers[i] = layers[i];
-        }
-        FullScreen.addChangeListener(fireDisplayPresentChange);
-        var promise = FullScreen.request(layers[0].source);
-        if (isMobile) {
-          promise = promise.then(Orientation.lock);
-        }
-        return promise;
+      isPresenting: immutable(function () {
+        return FullScreen.isActive;
       }),
 
-      isPresenting: {
-        get: function get() {
-          return FullScreen.isActive;
-        }
-      },
-
-      getLayers: immutable(function () {
-        return currentLayers;
-      }),
-
-      exitPresent: immutable(function () {
-        currentLayers.splice(0);
-        var promise = FullScreen.exit();
-        if (isMobile) {
-          promise = promise.then(Orientation.unlock);
-        }
-        return promise;
-      }),
-
-      getEyeParameters: immutable(defaultFOV),
-      getPose: immutable(isMobile && display && display.getPose.bind(display) || defaultPose),
-      getImmediatePose: immutable(isMobile && display && display.getImmediatePose.bind(display) || defaultPose),
-      resetPose: immutable(isMobile && display && display.resetPose.bind(display) || noop)
+      depthNear: mutable(0.01, "number"),
+      depthFar: mutable(10000.0, "number")
     });
   }
-  // end D:\Documents\VR\webvr-bootstrapper\src\StandardMonitor.js
-  ////////////////////////////////////////////////////////////////////////////////
-  if (typeof window !== "undefined") window.StandardMonitor = StandardMonitor;
+}
+
+WebVRStandardMonitor.prototype.requestAnimationFrame = window.requestAnimationFrame.bind(window);
+WebVRStandardMonitor.prototype.cancelAnimationFrame = window.cancelAnimationFrame.bind(window);
+WebVRStandardMonitor.prototype.submitFrame = function () {};
+
+function defaultPose() {
+  return {
+    position: [0, 0, 0],
+    orientation: [0, 0, 0, 1],
+    linearVelocity: null,
+    linearAcceleration: null,
+    angularVelocity: null,
+    angularAcceleration: null
+  };
+}
+
+WebVRStandardMonitor.prototype.getPose = function () {
+  var display = isMobile && priv(this).display;
+  if (display) {
+    return display.getPose();
+  } else {
+    return defaultPose();
+  }
+};
+
+WebVRStandardMonitor.prototype.getImmediatePose = function () {
+  var display = isMobile && priv(this).display;
+  if (display) {
+    return display.getImmediatePose();
+  } else {
+    return defaultPose();
+  }
+};
+
+WebVRStandardMonitor.prototype.resetPose = function () {
+  var display = isMobile && priv(this).display;
+  if (display) {
+    return display.resetPose();
+  }
+};
+
+function fireDisplayPresentChange(evt) {
+  if (!FullScreen.isActive) {
+    FullScreen.removeChangeListener(fireDisplayPresentChange);
+  }
+  window.dispatchEvent(new Event("vrdisplaypresentchange"));
+}
+
+WebVRStandardMonitor.prototype.requestPresent = function (layers) {
+  for (var i = 0; i < this.capabilities.maxLayers && i < layers.length; ++i) {
+    priv(this).currentLayers[i] = layers[i];
+  }
+  FullScreen.addChangeListener(fireDisplayPresentChange);
+  var promise = FullScreen.request(layers[0].source);
+  if (isMobile) {
+    promise = promise.then(Orientation.lock);
+  }
+  return promise;
+};
+
+WebVRStandardMonitor.prototype.getLayers = function () {
+  return priv(this).currentLayers.slice();
+};
+
+WebVRStandardMonitor.prototype.exitPresent = function () {
+  priv(this).currentLayers.splice(0);
+  var promise = FullScreen.exit();
+  if (isMobile) {
+    promise = promise.then(Orientation.unlock);
+  }
+  return promise;
+};
+
+WebVRStandardMonitor.prototype.getEyeParameters = function (side) {
+  if (side === "left") {
+    var width = screen.width,
+        height = screen.height,
+        aspect = width / height,
+        vFOV = 25,
+        hFOV = vFOV * aspect;
+    return {
+      renderWidth: width * devicePixelRatio,
+      renderHeight: height * devicePixelRatio,
+      offset: new Float32Array([0, 0, 0]),
+      fieldOfView: {
+        upDegrees: vFOV,
+        downDegrees: vFOV,
+        leftDegrees: hFOV,
+        rightDegrees: hFOV
+      }
+    };
+  }
+};
+if(typeof window !== "undefined") window.WebVRStandardMonitor = WebVRStandardMonitor;
 })();
-"use strict";
+// end D:\Documents\VR\webvr-standard-monitor\src\WebVRStandardMonitor.js
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// start D:\Documents\VR\webvr-bootstrapper\src\ViewCameraTransform.js
+(function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-(function () {
-  ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\webvr-bootstrapper\src\ViewCameraTransform.js
-  "use strict";
+var heap = new WeakMap();
 
-  var ViewCameraTransform = function () {
-    _createClass(ViewCameraTransform, null, [{
-      key: "makeTransform",
-      value: function makeTransform(eye, near, far) {
-        return {
-          translation: new THREE.Vector3().fromArray(eye.offset),
-          projection: ViewCameraTransform.fieldOfViewToProjectionMatrix(eye.fieldOfView, near, far),
-          viewport: {
-            left: 0,
-            top: 0,
-            width: eye.renderWidth,
-            height: eye.renderHeight
-          }
-        };
-      }
-    }, {
-      key: "fieldOfViewToProjectionMatrix",
-      value: function fieldOfViewToProjectionMatrix(fov, zNear, zFar) {
-        var upTan = Math.tan(fov.upDegrees * Math.PI / 180.0),
-            downTan = Math.tan(fov.downDegrees * Math.PI / 180.0),
-            leftTan = Math.tan(fov.leftDegrees * Math.PI / 180.0),
-            rightTan = Math.tan(fov.rightDegrees * Math.PI / 180.0),
-            xScale = 2.0 / (leftTan + rightTan),
-            yScale = 2.0 / (upTan + downTan),
-            matrix = new THREE.Matrix4();
+function priv(obj, value) {
+  if (!heap.has(obj)) {
+    heap.set(obj, value || {});
+  }
+  return heap.get(obj);
+}
 
-        matrix.elements[0] = xScale;
-        matrix.elements[1] = 0.0;
-        matrix.elements[2] = 0.0;
-        matrix.elements[3] = 0.0;
-        matrix.elements[4] = 0.0;
-        matrix.elements[5] = yScale;
-        matrix.elements[6] = 0.0;
-        matrix.elements[7] = 0.0;
-        matrix.elements[8] = -((leftTan - rightTan) * xScale * 0.5);
-        matrix.elements[9] = (upTan - downTan) * yScale * 0.5;
-        matrix.elements[10] = -(zNear + zFar) / (zFar - zNear);
-        matrix.elements[11] = -1.0;
-        matrix.elements[12] = 0.0;
-        matrix.elements[13] = 0.0;
-        matrix.elements[14] = -(2.0 * zFar * zNear) / (zFar - zNear);
-        matrix.elements[15] = 0.0;
-
-        return matrix;
-      }
-    }]);
-
-    function ViewCameraTransform(display) {
-      _classCallCheck(this, ViewCameraTransform);
-
-      this._display = display;
-    }
-
-    _createClass(ViewCameraTransform, [{
-      key: "getTransforms",
-      value: function getTransforms(near, far) {
-        var l = this._display.getEyeParameters("left"),
-            r = this._display.getEyeParameters("right"),
-            params = [ViewCameraTransform.makeTransform(l, near, far)];
-        if (r) {
-          params.push(ViewCameraTransform.makeTransform(r, near, far));
+var ViewCameraTransform = function () {
+  _createClass(ViewCameraTransform, null, [{
+    key: "makeTransform",
+    value: function makeTransform(eye, near, far) {
+      return {
+        translation: new THREE.Vector3().fromArray(eye.offset),
+        projection: ViewCameraTransform.fieldOfViewToProjectionMatrix(eye.fieldOfView, near, far),
+        viewport: {
+          left: 0,
+          top: 0,
+          width: eye.renderWidth,
+          height: eye.renderHeight
         }
-        for (var i = 1; i < params.length; ++i) {
-          params[i].viewport.left = params[i - 1].viewport.left + params[i - 1].viewport.width;
-        }
-        return params;
-      }
-    }]);
-
-    return ViewCameraTransform;
-  }();
-  // end D:\Documents\VR\webvr-bootstrapper\src\ViewCameraTransform.js
-  ////////////////////////////////////////////////////////////////////////////////
-
-
-  if (typeof window !== "undefined") window.ViewCameraTransform = ViewCameraTransform;
-})();
-"use strict";
-
-(function () {
-  ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\webvr-bootstrapper\src\WebVRBootstrapper.js
-  "use strict";
-
-  function WebVRBootstrapper(manifest) {
-    wrapWebVR();
-    return documentReady().then(function () {
-      return manifest && function (progress) {
-        return loadFiles(manifest, progress);
       };
-    });
-  }
-  // end D:\Documents\VR\webvr-bootstrapper\src\WebVRBootstrapper.js
-  ////////////////////////////////////////////////////////////////////////////////
-  if (typeof window !== "undefined") window.WebVRBootstrapper = WebVRBootstrapper;
-})();
-"use strict";
-
-(function () {
-  ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\webvr-bootstrapper\src\documentReady.js
-  "use strict";
-
-  function documentReady() {
-    return new Promise(function (resolve, reject) {
-      function setup() {
-        var ready = document.readyState === "complete";
-        if (ready) {
-          document.removeEventListener("readystatechange", setup);
-          resolve();
-        }
-        return ready;
-      }
-
-      if (!setup()) {
-        document.addEventListener("readystatechange", setup);
-      }
-    });
-  }
-  // end D:\Documents\VR\webvr-bootstrapper\src\documentReady.js
-  ////////////////////////////////////////////////////////////////////////////////
-  if (typeof window !== "undefined") window.documentReady = documentReady;
-})();
-"use strict";
-
-(function () {
-  ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\webvr-bootstrapper\src\isChrome.js
-  "use strict";
-
-  var isChrome = !window.opera && navigator.userAgent.indexOf(' OPR/') === -1;
-  // end D:\Documents\VR\webvr-bootstrapper\src\isChrome.js
-  ////////////////////////////////////////////////////////////////////////////////
-  if (typeof window !== "undefined") window.isChrome = isChrome;
-})();
-"use strict";
-
-(function () {
-  ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\webvr-bootstrapper\src\isMobile.js
-  "use strict";
-
-  var isMobile = function (a) {
-    return (/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od|ad)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(a) || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substring(0, 4))
-    );
-  }(navigator.userAgent || navigator.vendor || window.opera);
-  // end D:\Documents\VR\webvr-bootstrapper\src\isMobile.js
-  ////////////////////////////////////////////////////////////////////////////////
-  if (typeof window !== "undefined") window.isMobile = isMobile;
-})();
-"use strict";
-
-(function () {
-  ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\webvr-bootstrapper\src\loadFiles.js
-  "use strict";
-
-  function get(url, done, progress) {
-    var req = new XMLHttpRequest();
-    req.onload = function () {
-      if (req.status < 400) {
-        done(req.response);
-      } else {
-        done(new Error(req.status));
-      }
-    };
-
-    req.open("GET", url);
-    req.onprogress = progress;
-    req.send();
-  }
-
-  function __loadFiles(files, done, progress, index, total, loaded) {
-    if (index < files.length) {
-      var file = files[index][0],
-          size = files[index][1],
-          shortExt = file.match(/\.\w+$/)[0] || "none",
-          longExt = file.match(/(\.\w+)+$/)[0] || "none",
-          lastLoaded = loaded;
-      get(file, function (content) {
-        if (content instanceof Error) {
-          console.error("Failed to load " + file + ": " + content.message);
-        } else if (shortExt === ".js" && longExt !== ".typeface.js") {
-          var s = document.createElement("script");
-          s.type = "text/javascript";
-          s.src = file;
-          s.defer = false;
-          s.async = false;
-          document.head.appendChild(s);
-        }
-
-        __loadFiles(files, done, progress, index + 1, total, loaded);
-      }, function (evt) {
-        return progress(loaded = lastLoaded + evt.loaded, total);
-      });
-    } else {
-      done();
     }
+  }, {
+    key: "fieldOfViewToProjectionMatrix",
+    value: function fieldOfViewToProjectionMatrix(fov, zNear, zFar) {
+      var upTan = Math.tan(fov.upDegrees * Math.PI / 180.0),
+          downTan = Math.tan(fov.downDegrees * Math.PI / 180.0),
+          leftTan = Math.tan(fov.leftDegrees * Math.PI / 180.0),
+          rightTan = Math.tan(fov.rightDegrees * Math.PI / 180.0),
+          xScale = 2.0 / (leftTan + rightTan),
+          yScale = 2.0 / (upTan + downTan),
+          matrix = new THREE.Matrix4();
+
+      matrix.elements[0] = xScale;
+      matrix.elements[1] = 0.0;
+      matrix.elements[2] = 0.0;
+      matrix.elements[3] = 0.0;
+      matrix.elements[4] = 0.0;
+      matrix.elements[5] = yScale;
+      matrix.elements[6] = 0.0;
+      matrix.elements[7] = 0.0;
+      matrix.elements[8] = -((leftTan - rightTan) * xScale * 0.5);
+      matrix.elements[9] = (upTan - downTan) * yScale * 0.5;
+      matrix.elements[10] = -(zNear + zFar) / (zFar - zNear);
+      matrix.elements[11] = -1.0;
+      matrix.elements[12] = 0.0;
+      matrix.elements[13] = 0.0;
+      matrix.elements[14] = -(2.0 * zFar * zNear) / (zFar - zNear);
+      matrix.elements[15] = 0.0;
+
+      return matrix;
+    }
+  }]);
+
+  function ViewCameraTransform(display) {
+    _classCallCheck(this, ViewCameraTransform);
+
+    priv(this, {
+      display: display
+    });
   }
 
-  /* syntax:
-  loadFiles([
-      // filename,  size
-      ["script1.js", 456],
-      ["script3.js", 8762],
-      ["script2.js", 12368]
-  ], function(objects){
-      // the thing to do when done.
-      console.assert(objects.name1 !== undefined);
-      console.assert(objects.name2 !== undefined);
-  }, function(n, m, size, total){
-      // track progress
-      console.log("loaded file %d of %d, loaded %d bytes of %d bytes total.", n, m, size, total);
+  _createClass(ViewCameraTransform, [{
+    key: "getTransforms",
+    value: function getTransforms(near, far) {
+      var d = priv(this).display,
+          l = d.getEyeParameters("left"),
+          r = d.getEyeParameters("right"),
+          params = [ViewCameraTransform.makeTransform(l, near, far)];
+      if (r) {
+        params.push(ViewCameraTransform.makeTransform(r, near, far));
+      }
+      for (var i = 1; i < params.length; ++i) {
+        params[i].viewport.left = params[i - 1].viewport.left + params[i - 1].viewport.width;
+      }
+      return params;
+    }
+  }]);
+
+  return ViewCameraTransform;
+}();
+if(typeof window !== "undefined") window.ViewCameraTransform = ViewCameraTransform;
+})();
+// end D:\Documents\VR\webvr-bootstrapper\src\ViewCameraTransform.js
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// start D:\Documents\VR\webvr-bootstrapper\src\WebVRBootstrapper.js
+(function(){"use strict";
+
+function WebVRBootstrapper(manifest) {
+  return documentReady.then(function () {
+    return manifest && function (progress) {
+      return loadFiles(manifest, progress);
+    };
   });
-  */
-  function _loadFiles(manifestSpec, progress, done) {
-    function readManifest(manifest) {
-      var total = 0;
-      for (var i = 0; i < manifest.length; ++i) {
+}
+if(typeof window !== "undefined") window.WebVRBootstrapper = WebVRBootstrapper;
+})();
+// end D:\Documents\VR\webvr-bootstrapper\src\WebVRBootstrapper.js
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// start D:\Documents\VR\webvr-bootstrapper\src\documentReady.js
+(function(){"use strict";
+
+var documentReady = new Promise(function (resolve, reject) {
+  function setup() {
+    var ready = document.readyState === "complete";
+    if (ready) {
+      document.removeEventListener("readystatechange", setup);
+      resolve();
+    }
+    return ready;
+  }
+
+  if (!setup()) {
+    document.addEventListener("readystatechange", setup);
+  }
+});
+if(typeof window !== "undefined") window.documentReady = documentReady;
+})();
+// end D:\Documents\VR\webvr-bootstrapper\src\documentReady.js
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// start D:\Documents\VR\webvr-bootstrapper\src\loadFiles.js
+(function(){"use strict";
+
+function get(url, done, progress) {
+  var req = new XMLHttpRequest();
+  req.onload = function () {
+    if (req.status < 400) {
+      done(req.response);
+    } else {
+      done(new Error(req.status));
+    }
+  };
+
+  req.open("GET", url);
+  req.onprogress = progress;
+  req.send();
+}
+
+function __loadFiles(files, done, progress, index, total, loaded) {
+  if (index < files.length) {
+    var file = files[index][0],
+        size = files[index][1],
+        shortExt = file.match(/\.\w+$/)[0] || "none",
+        longExt = file.match(/(\.\w+)+$/)[0] || "none",
+        lastLoaded = loaded;
+    get(file, function (content) {
+      if (content instanceof Error) {
+        console.error("Failed to load " + file + ": " + content.message);
+      } else if (shortExt === ".js" && longExt !== ".typeface.js") {
+        var s = document.createElement("script");
+        s.type = "text/javascript";
+        s.src = file;
+        s.defer = false;
+        s.async = false;
+        document.head.appendChild(s);
+      }
+
+      __loadFiles(files, done, progress, index + 1, total, loaded);
+    }, function (evt) {
+      return progress(loaded = lastLoaded + evt.loaded, total);
+    });
+  } else {
+    done();
+  }
+}
+
+/* syntax:
+loadFiles([
+    // filename,  size
+    ["script1.js", 456],
+    ["script3.js", 8762],
+    ["script2.js", 12368]
+], function(objects){
+    // the thing to do when done.
+    console.assert(objects.name1 !== undefined);
+    console.assert(objects.name2 !== undefined);
+}, function(n, m, size, total){
+    // track progress
+    console.log("loaded file %d of %d, loaded %d bytes of %d bytes total.", n, m, size, total);
+});
+*/
+function _loadFiles(manifestSpec, progress, done) {
+  function readManifest(manifest) {
+    var total = 0;
+    for (var i = 0; i < manifest.length; ++i) {
+      if (manifest[i] instanceof Array && manifest[i].length > 1) {
         total += manifest[i][1];
       }
-      progress = progress || console.log.bind(console, "File load progress");
-      __loadFiles(manifest, done, progress, 0, total, 0);
     }
-
-    if (manifestSpec instanceof String || typeof manifestSpec === "string") {
-      get(manifestSpec, function (manifestText) {
-        readManifest(JSON.parse(manifestText));
-      });
-    } else if (manifestSpec instanceof Array) {
-      readManifest(manifestSpec);
-    }
+    progress = progress || console.log.bind(console, "File load progress");
+    __loadFiles(manifest, done, progress, 0, total, 0);
   }
 
-  function loadFiles(manifestSpec, progress) {
-    return new Promise(function (resolve, reject) {
-      return _loadFiles(manifestSpec, progress, resolve);
+  if (manifestSpec instanceof String || typeof manifestSpec === "string") {
+    get(manifestSpec, function (manifestText) {
+      readManifest(JSON.parse(manifestText));
     });
+  } else if (manifestSpec instanceof Array) {
+    readManifest(manifestSpec);
   }
-  // end D:\Documents\VR\webvr-bootstrapper\src\loadFiles.js
-  ////////////////////////////////////////////////////////////////////////////////
-  if (typeof window !== "undefined") window.loadFiles = loadFiles;
+}
+
+function loadFiles(manifestSpec, progress) {
+  return new Promise(function (resolve, reject) {
+    return _loadFiles(manifestSpec, progress, resolve);
+  });
+}
+if(typeof window !== "undefined") window.loadFiles = loadFiles;
 })();
-"use strict";
-
-(function () {
-  ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\webvr-bootstrapper\src\wrapWebVR.js
-  "use strict";
-
-  function wrapWebVR() {
-    var oldGetVRDisplays = navigator.getVRDisplays || Promise.resolve.bind(Promise, []);
-    navigator.getVRDisplays = function () {
-      return oldGetVRDisplays.call(navigator).then(function (displays) {
-        var hasStandardMonitor = displays.map(function (display) {
-          return display instanceof StandardMonitor;
-        }).reduce(function (a, b) {
-          return a || b;
-        }, false);
-
-        if (!hasStandardMonitor) {
-          var created = displays.map(function (display) {
-            return display instanceof StandardMonitor;
-          }).reduce(function (a, b) {
-            return a || b;
-          }, false);
-
-          if (!created) {
-            var toWrap = displays[0],
-                wrapped = new StandardMonitor(toWrap);
-            if (toWrap && toWrap.displayName === "Mouse and Keyboard VRDisplay (webvr-polyfill)") {
-              displays[0] = wrapped;
-            } else {
-              displays.unshift(wrapped);
-            }
-          }
-        }
-
-        return displays;
-      });
-    };
-  }
-  // end D:\Documents\VR\webvr-bootstrapper\src\wrapWebVR.js
-  ////////////////////////////////////////////////////////////////////////////////
-  if (typeof window !== "undefined") window.wrapWebVR = wrapWebVR;
-})();
+// end D:\Documents\VR\webvr-bootstrapper\src\loadFiles.js
+////////////////////////////////////////////////////////////////////////////////
 /*
   html2canvas 0.5.0-beta4 <http://html2canvas.hertzen.com>
   Copyright (c) 2016 Niklas von Hertzen

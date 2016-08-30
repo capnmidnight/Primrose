@@ -1,229 +1,4 @@
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\InsideSphereGeometry.js
-(function(){"use strict";
-
-pliny.class({
-  name: "InsideSphereGeometry",
-  parameters: [{
-    name: "radius",
-    type: "Number",
-    description: "How far the sphere should extend away from a center point."
-  }, {
-    name: "widthSegments",
-    type: "Number",
-    description: "The number of faces wide in which to slice the geometry."
-  }, {
-    name: "heightSegments",
-    type: "Number",
-    description: "The number of faces tall in which to slice the geometry."
-  }, {
-    name: "phiStart",
-    type: "Number",
-    description: "The angle in radians around the Y-axis at which the sphere starts."
-  }, {
-    name: "phiLength",
-    type: "Number",
-    description: "The change of angle in radians around the Y-axis to which the sphere ends."
-  }, {
-    name: "thetaStart",
-    type: "Number",
-    description: "The angle in radians around the Z-axis at which the sphere starts."
-  }, {
-    name: "thetaLength",
-    type: "Number",
-    description: "The change of angle in radians around the Z-axis to which the sphere ends."
-  }],
-  description: "The InsideSphereGeometry is basically an inside-out Sphere. Or\n\
-more accurately, it's a Sphere where the face winding order is reversed, so that\n\
-textures appear on the inside of the sphere, rather than the outside. I know, that's\n\
-note exactly helpful.\n\
-\n\
-Say you want a to model the sky as a sphere, or the inside of a helmet. You don't\n\
-care anything about the outside of this sphere, only the inside. You would use\n\
-InsideSphereGeometry in this case. Or its alias, [`shell()`](#shell)."
-});
-
-function InsideSphereGeometry(radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength) {
-  THREE.Geometry.call(this);
-
-  this.type = 'InsideSphereGeometry';
-
-  this.parameters = {
-    radius: radius,
-    widthSegments: widthSegments,
-    heightSegments: heightSegments,
-    phiStart: phiStart,
-    phiLength: phiLength,
-    thetaStart: thetaStart,
-    thetaLength: thetaLength
-  };
-
-  radius = radius || 50;
-
-  widthSegments = Math.max(3, Math.floor(widthSegments) || 8);
-  heightSegments = Math.max(2, Math.floor(heightSegments) || 6);
-
-  phiStart = phiStart !== undefined ? phiStart : 0;
-  phiLength = phiLength !== undefined ? phiLength : Math.PI * 2;
-
-  thetaStart = thetaStart !== undefined ? thetaStart : 0;
-  thetaLength = thetaLength !== undefined ? thetaLength : Math.PI;
-
-  var x,
-      y,
-      vertices = [],
-      uvs = [];
-
-  for (y = 0; y <= heightSegments; y++) {
-
-    var verticesRow = [];
-    var uvsRow = [];
-
-    for (x = widthSegments; x >= 0; x--) {
-
-      var u = x / widthSegments;
-
-      var v = y / heightSegments;
-
-      var vertex = new THREE.Vector3();
-      vertex.x = -radius * Math.cos(phiStart + u * phiLength) * Math.sin(thetaStart + v * thetaLength);
-      vertex.y = radius * Math.cos(thetaStart + v * thetaLength);
-      vertex.z = radius * Math.sin(phiStart + u * phiLength) * Math.sin(thetaStart + v * thetaLength);
-
-      this.vertices.push(vertex);
-
-      verticesRow.push(this.vertices.length - 1);
-      uvsRow.push(new THREE.Vector2(1 - u, 1 - v));
-    }
-
-    vertices.push(verticesRow);
-    uvs.push(uvsRow);
-  }
-
-  for (y = 0; y < heightSegments; y++) {
-
-    for (x = 0; x < widthSegments; x++) {
-
-      var v1 = vertices[y][x + 1];
-      var v2 = vertices[y][x];
-      var v3 = vertices[y + 1][x];
-      var v4 = vertices[y + 1][x + 1];
-
-      var n1 = this.vertices[v1].clone().normalize();
-      var n2 = this.vertices[v2].clone().normalize();
-      var n3 = this.vertices[v3].clone().normalize();
-      var n4 = this.vertices[v4].clone().normalize();
-
-      var uv1 = uvs[y][x + 1].clone();
-      var uv2 = uvs[y][x].clone();
-      var uv3 = uvs[y + 1][x].clone();
-      var uv4 = uvs[y + 1][x + 1].clone();
-
-      if (Math.abs(this.vertices[v1].y) === radius) {
-
-        uv1.x = (uv1.x + uv2.x) / 2;
-        this.faces.push(new THREE.Face3(v1, v3, v4, [n1, n3, n4]));
-        this.faceVertexUvs[0].push([uv1, uv3, uv4]);
-      } else if (Math.abs(this.vertices[v3].y) === radius) {
-
-        uv3.x = (uv3.x + uv4.x) / 2;
-        this.faces.push(new THREE.Face3(v1, v2, v3, [n1, n2, n3]));
-        this.faceVertexUvs[0].push([uv1, uv2, uv3]);
-      } else {
-
-        this.faces.push(new THREE.Face3(v1, v2, v4, [n1, n2, n4]));
-        this.faceVertexUvs[0].push([uv1, uv2, uv4]);
-
-        this.faces.push(new THREE.Face3(v2, v3, v4, [n2.clone(), n3, n4.clone()]));
-        this.faceVertexUvs[0].push([uv2.clone(), uv3, uv4.clone()]);
-      }
-    }
-  }
-
-  this.computeFaceNormals();
-
-  for (var i = 0; i < this.faces.length; ++i) {
-    var f = this.faces[i];
-    f.normal.multiplyScalar(-1);
-    for (var j = 0; j < f.vertexNormals.length; ++j) {
-      f.vertexNormals[j].multiplyScalar(-1);
-    }
-  }
-
-  this.boundingSphere = new THREE.Sphere(new THREE.Vector3(), radius);
-}
-if (typeof window.THREE !== "undefined") {
-
-  InsideSphereGeometry.prototype = Object.create(THREE.Geometry.prototype);
-  InsideSphereGeometry.prototype.constructor = InsideSphereGeometry;
-}
-if(typeof window !== "undefined") window.InsideSphereGeometry = InsideSphereGeometry;
-})();
-// end D:\Documents\VR\Primrose\src\InsideSphereGeometry.js
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\PIXEL_SCALES.js
-(function(){"use strict";
-
-pliny.value({
-  name: "PIXEL_SCALES",
-  description: "Scaling factors for changing the resolution of the display when the render quality level changes."
-});
-var PIXEL_SCALES = [0.5, 0.25, 0.333333, 0.5, 1];
-if(typeof window !== "undefined") window.PIXEL_SCALES = PIXEL_SCALES;
-})();
-// end D:\Documents\VR\Primrose\src\PIXEL_SCALES.js
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose.js
-(function(){"use strict";
-
-/*
- * Copyright (C) 2014 - 2016 Sean T. McBeth <sean@seanmcbeth.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-pliny.namespace({
-  name: "Primrose",
-  description: "Primrose helps you make VR applications for web browsers as easy as making other types of interactive web pages.\n\nThis top-level namespace contains classes for manipulating and viewing 3D environments."
-});
-var Primrose = {};
-if(typeof window !== "undefined") window.Primrose = Primrose;
-})();
-// end D:\Documents\VR\Primrose\src\Primrose.js
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Quality.js
-(function(){"use strict";
-
-pliny.enumeration({
-  name: "Quality",
-  description: "Graphics quality settings."
-});
-var Quality = {
-  NONE: 0,
-  VERYLOW: 1,
-  LOW: 2,
-  MEDIUM: 3,
-  HIGH: 4,
-  MAXIMUM: PIXEL_SCALES.length - 1
-};
-if(typeof window !== "undefined") window.Quality = Quality;
-})();
-// end D:\Documents\VR\Primrose\src\Quality.js
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
 // start D:\Documents\VR\Primrose\src\axis.js
 (function(){"use strict";
 
@@ -918,6 +693,169 @@ if(typeof window !== "undefined") window.identity = identity;
 // end D:\Documents\VR\Primrose\src\identity.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+// start D:\Documents\VR\Primrose\src\InsideSphereGeometry.js
+(function(){"use strict";
+
+pliny.class({
+  name: "InsideSphereGeometry",
+  parameters: [{
+    name: "radius",
+    type: "Number",
+    description: "How far the sphere should extend away from a center point."
+  }, {
+    name: "widthSegments",
+    type: "Number",
+    description: "The number of faces wide in which to slice the geometry."
+  }, {
+    name: "heightSegments",
+    type: "Number",
+    description: "The number of faces tall in which to slice the geometry."
+  }, {
+    name: "phiStart",
+    type: "Number",
+    description: "The angle in radians around the Y-axis at which the sphere starts."
+  }, {
+    name: "phiLength",
+    type: "Number",
+    description: "The change of angle in radians around the Y-axis to which the sphere ends."
+  }, {
+    name: "thetaStart",
+    type: "Number",
+    description: "The angle in radians around the Z-axis at which the sphere starts."
+  }, {
+    name: "thetaLength",
+    type: "Number",
+    description: "The change of angle in radians around the Z-axis to which the sphere ends."
+  }],
+  description: "The InsideSphereGeometry is basically an inside-out Sphere. Or\n\
+more accurately, it's a Sphere where the face winding order is reversed, so that\n\
+textures appear on the inside of the sphere, rather than the outside. I know, that's\n\
+note exactly helpful.\n\
+\n\
+Say you want a to model the sky as a sphere, or the inside of a helmet. You don't\n\
+care anything about the outside of this sphere, only the inside. You would use\n\
+InsideSphereGeometry in this case. Or its alias, [`shell()`](#shell)."
+});
+
+function InsideSphereGeometry(radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength) {
+  THREE.Geometry.call(this);
+
+  this.type = 'InsideSphereGeometry';
+
+  this.parameters = {
+    radius: radius,
+    widthSegments: widthSegments,
+    heightSegments: heightSegments,
+    phiStart: phiStart,
+    phiLength: phiLength,
+    thetaStart: thetaStart,
+    thetaLength: thetaLength
+  };
+
+  radius = radius || 50;
+
+  widthSegments = Math.max(3, Math.floor(widthSegments) || 8);
+  heightSegments = Math.max(2, Math.floor(heightSegments) || 6);
+
+  phiStart = phiStart !== undefined ? phiStart : 0;
+  phiLength = phiLength !== undefined ? phiLength : Math.PI * 2;
+
+  thetaStart = thetaStart !== undefined ? thetaStart : 0;
+  thetaLength = thetaLength !== undefined ? thetaLength : Math.PI;
+
+  var x,
+      y,
+      vertices = [],
+      uvs = [];
+
+  for (y = 0; y <= heightSegments; y++) {
+
+    var verticesRow = [];
+    var uvsRow = [];
+
+    for (x = widthSegments; x >= 0; x--) {
+
+      var u = x / widthSegments;
+
+      var v = y / heightSegments;
+
+      var vertex = new THREE.Vector3();
+      vertex.x = -radius * Math.cos(phiStart + u * phiLength) * Math.sin(thetaStart + v * thetaLength);
+      vertex.y = radius * Math.cos(thetaStart + v * thetaLength);
+      vertex.z = radius * Math.sin(phiStart + u * phiLength) * Math.sin(thetaStart + v * thetaLength);
+
+      this.vertices.push(vertex);
+
+      verticesRow.push(this.vertices.length - 1);
+      uvsRow.push(new THREE.Vector2(1 - u, 1 - v));
+    }
+
+    vertices.push(verticesRow);
+    uvs.push(uvsRow);
+  }
+
+  for (y = 0; y < heightSegments; y++) {
+
+    for (x = 0; x < widthSegments; x++) {
+
+      var v1 = vertices[y][x + 1];
+      var v2 = vertices[y][x];
+      var v3 = vertices[y + 1][x];
+      var v4 = vertices[y + 1][x + 1];
+
+      var n1 = this.vertices[v1].clone().normalize();
+      var n2 = this.vertices[v2].clone().normalize();
+      var n3 = this.vertices[v3].clone().normalize();
+      var n4 = this.vertices[v4].clone().normalize();
+
+      var uv1 = uvs[y][x + 1].clone();
+      var uv2 = uvs[y][x].clone();
+      var uv3 = uvs[y + 1][x].clone();
+      var uv4 = uvs[y + 1][x + 1].clone();
+
+      if (Math.abs(this.vertices[v1].y) === radius) {
+
+        uv1.x = (uv1.x + uv2.x) / 2;
+        this.faces.push(new THREE.Face3(v1, v3, v4, [n1, n3, n4]));
+        this.faceVertexUvs[0].push([uv1, uv3, uv4]);
+      } else if (Math.abs(this.vertices[v3].y) === radius) {
+
+        uv3.x = (uv3.x + uv4.x) / 2;
+        this.faces.push(new THREE.Face3(v1, v2, v3, [n1, n2, n3]));
+        this.faceVertexUvs[0].push([uv1, uv2, uv3]);
+      } else {
+
+        this.faces.push(new THREE.Face3(v1, v2, v4, [n1, n2, n4]));
+        this.faceVertexUvs[0].push([uv1, uv2, uv4]);
+
+        this.faces.push(new THREE.Face3(v2, v3, v4, [n2.clone(), n3, n4.clone()]));
+        this.faceVertexUvs[0].push([uv2.clone(), uv3, uv4.clone()]);
+      }
+    }
+  }
+
+  this.computeFaceNormals();
+
+  for (var i = 0; i < this.faces.length; ++i) {
+    var f = this.faces[i];
+    f.normal.multiplyScalar(-1);
+    for (var j = 0; j < f.vertexNormals.length; ++j) {
+      f.vertexNormals[j].multiplyScalar(-1);
+    }
+  }
+
+  this.boundingSphere = new THREE.Sphere(new THREE.Vector3(), radius);
+}
+if (typeof window.THREE !== "undefined") {
+
+  InsideSphereGeometry.prototype = Object.create(THREE.Geometry.prototype);
+  InsideSphereGeometry.prototype.constructor = InsideSphereGeometry;
+}
+if(typeof window !== "undefined") window.InsideSphereGeometry = InsideSphereGeometry;
+})();
+// end D:\Documents\VR\Primrose\src\InsideSphereGeometry.js
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 // start D:\Documents\VR\Primrose\src\isChrome.js
 (function(){"use strict";
 
@@ -994,6 +932,22 @@ if(typeof window !== "undefined") window.isInIFrame = isInIFrame;
 // end D:\Documents\VR\Primrose\src\isInIFrame.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+// start D:\Documents\VR\Primrose\src\isiOS.js
+(function(){"use strict";
+
+pliny.value({
+  name: "isiOS",
+  type: "Boolean",
+  description: "Flag indicating the current system is a device running the Apple\n\
+iOS operating system: iPad, iPod Touch, iPhone. Useful for invoking optional code\n\
+paths necessary to deal with deficiencies in Apple's implementation of web standards."
+});
+var isiOS = /iP(hone|od|ad)/.test(navigator.userAgent || "");
+if(typeof window !== "undefined") window.isiOS = isiOS;
+})();
+// end D:\Documents\VR\Primrose\src\isiOS.js
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 // start D:\Documents\VR\Primrose\src\isMobile.js
 (function(){"use strict";
 
@@ -1004,28 +958,12 @@ pliny.value({
 device, usually possessing a motion sensor."
 });
 var isMobile = function (a) {
-  return (/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od|ad)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(a) || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substring(0, 4))
+  return (/(android|bb\d+|meego).+|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od|ad)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(a) || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substring(0, 4))
   );
 }(navigator.userAgent || navigator.vendor || window.opera);
 if(typeof window !== "undefined") window.isMobile = isMobile;
 })();
 // end D:\Documents\VR\Primrose\src\isMobile.js
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\isOSX.js
-(function(){"use strict";
-
-pliny.value({
-  name: "isOSX",
-  type: "Boolean",
-  description: "Flag indicating the current system is a computer running the Apple\n\
-OSX operating system. Useful for changing keyboard shortcuts to support Apple's\n\
-idiosynchratic, concensus-defying keyboard shortcuts."
-});
-var isOSX = /Macintosh/.test(navigator.userAgent || "");
-if(typeof window !== "undefined") window.isOSX = isOSX;
-})();
-// end D:\Documents\VR\Primrose\src\isOSX.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 // start D:\Documents\VR\Primrose\src\isOpera.js
@@ -1044,6 +982,22 @@ var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
 if(typeof window !== "undefined") window.isOpera = isOpera;
 })();
 // end D:\Documents\VR\Primrose\src\isOpera.js
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// start D:\Documents\VR\Primrose\src\isOSX.js
+(function(){"use strict";
+
+pliny.value({
+  name: "isOSX",
+  type: "Boolean",
+  description: "Flag indicating the current system is a computer running the Apple\n\
+OSX operating system. Useful for changing keyboard shortcuts to support Apple's\n\
+idiosynchratic, concensus-defying keyboard shortcuts."
+});
+var isOSX = /Macintosh/.test(navigator.userAgent || "");
+if(typeof window !== "undefined") window.isOSX = isOSX;
+})();
+// end D:\Documents\VR\Primrose\src\isOSX.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 // start D:\Documents\VR\Primrose\src\isSafari.js
@@ -1093,22 +1047,6 @@ var isWindows = /Windows/.test(navigator.userAgent || "");
 if(typeof window !== "undefined") window.isWindows = isWindows;
 })();
 // end D:\Documents\VR\Primrose\src\isWindows.js
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\isiOS.js
-(function(){"use strict";
-
-pliny.value({
-  name: "isiOS",
-  type: "Boolean",
-  description: "Flag indicating the current system is a device running the Apple\n\
-iOS operating system: iPad, iPod Touch, iPhone. Useful for invoking optional code\n\
-paths necessary to deal with deficiencies in Apple's implementation of web standards."
-});
-var isiOS = /iP(hone|od|ad)/.test(navigator.userAgent || "");
-if(typeof window !== "undefined") window.isiOS = isiOS;
-})();
-// end D:\Documents\VR\Primrose\src\isiOS.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 // start D:\Documents\VR\Primrose\src\light.js
@@ -1209,6 +1147,48 @@ function patch(obj1, obj2) {
 if(typeof window !== "undefined") window.patch = patch;
 })();
 // end D:\Documents\VR\Primrose\src\patch.js
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// start D:\Documents\VR\Primrose\src\PIXEL_SCALES.js
+(function(){"use strict";
+
+pliny.value({
+  name: "PIXEL_SCALES",
+  description: "Scaling factors for changing the resolution of the display when the render quality level changes."
+});
+var PIXEL_SCALES = [0.5, 0.25, 0.333333, 0.5, 1];
+if(typeof window !== "undefined") window.PIXEL_SCALES = PIXEL_SCALES;
+})();
+// end D:\Documents\VR\Primrose\src\PIXEL_SCALES.js
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// start D:\Documents\VR\Primrose\src\Primrose.js
+(function(){"use strict";
+
+/*
+ * Copyright (C) 2014 - 2016 Sean T. McBeth <sean@seanmcbeth.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+pliny.namespace({
+  name: "Primrose",
+  description: "Primrose helps you make VR applications for web browsers as easy as making other types of interactive web pages.\n\nThis top-level namespace contains classes for manipulating and viewing 3D environments."
+});
+var Primrose = {};
+if(typeof window !== "undefined") window.Primrose = Primrose;
+})();
+// end D:\Documents\VR\Primrose\src\Primrose.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 // start D:\Documents\VR\Primrose\src\put.js
@@ -1321,6 +1301,26 @@ function quad(w, h, s, t) {
 if(typeof window !== "undefined") window.quad = quad;
 })();
 // end D:\Documents\VR\Primrose\src\quad.js
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// start D:\Documents\VR\Primrose\src\Quality.js
+(function(){"use strict";
+
+pliny.enumeration({
+  name: "Quality",
+  description: "Graphics quality settings."
+});
+var Quality = {
+  NONE: 0,
+  VERYLOW: 1,
+  LOW: 2,
+  MEDIUM: 3,
+  HIGH: 4,
+  MAXIMUM: PIXEL_SCALES.length - 1
+};
+if(typeof window !== "undefined") window.Quality = Quality;
+})();
+// end D:\Documents\VR\Primrose\src\Quality.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 // start D:\Documents\VR\Primrose\src\range.js
@@ -7656,21 +7656,6 @@ if(typeof window !== "undefined") window.Primrose.SKINS_VALUES = SKINS_VALUES;
 // end D:\Documents\VR\Primrose\src\Primrose\SKINS_VALUES.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\SYS_FONTS.js
-(function(){"use strict";
-
-pliny.value({
-  parent: "Primrose",
-  name: "SYS_FONTS",
-  type: "String",
-  description: "A selection of fonts that will match whatever the user's operating system normally uses."
-});
-var SYS_FONTS = "-apple-system, '.SFNSText-Regular', 'San Francisco', 'Roboto', 'Segoe UI', 'Helvetica Neue', 'Lucida Grande', sans-serif";
-if(typeof window !== "undefined") window.Primrose.SYS_FONTS = SYS_FONTS;
-})();
-// end D:\Documents\VR\Primrose\src\Primrose\SYS_FONTS.js
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
 // start D:\Documents\VR\Primrose\src\Primrose\Surface.js
 (function(){"use strict";
 
@@ -8094,6 +8079,21 @@ var Surface = function (_Primrose$Entity) {
 if(typeof window !== "undefined") window.Primrose.Surface = Surface;
 })();
 // end D:\Documents\VR\Primrose\src\Primrose\Surface.js
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// start D:\Documents\VR\Primrose\src\Primrose\SYS_FONTS.js
+(function(){"use strict";
+
+pliny.value({
+  parent: "Primrose",
+  name: "SYS_FONTS",
+  type: "String",
+  description: "A selection of fonts that will match whatever the user's operating system normally uses."
+});
+var SYS_FONTS = "-apple-system, '.SFNSText-Regular', 'San Francisco', 'Roboto', 'Segoe UI', 'Helvetica Neue', 'Lucida Grande', sans-serif";
+if(typeof window !== "undefined") window.Primrose.SYS_FONTS = SYS_FONTS;
+})();
+// end D:\Documents\VR\Primrose\src\Primrose\SYS_FONTS.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 // start D:\Documents\VR\Primrose\src\Primrose\Text.js
@@ -10249,110 +10249,6 @@ if(typeof window !== "undefined") window.Primrose.DOM.makeHidingContainer = make
 // end D:\Documents\VR\Primrose\src\Primrose\DOM\makeHidingContainer.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\HTTP\XHR.js
-(function(){"use strict";
-
-pliny.function({
-  parent: "Primrose.HTTP",
-  name: "XHR",
-  description: "Wraps up the XMLHttpRequest object into a workflow that is easier for me to handle: a single function call. Can handle both GETs and POSTs, with or  without a payload.",
-  returns: "Promise",
-  parameters: [{
-    name: "method",
-    type: "String",
-    description: "The HTTP Verb being used for the request."
-  }, {
-    name: "type",
-    type: "String",
-    description: "How the response should be interpreted. One of [\"text\", \"json\", \"arraybuffer\"]. See the [MDN - XMLHttpRequest - responseType](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype).",
-    default: "\"text\""
-  }, {
-    name: "url",
-    type: "String",
-    description: "The resource to which the request is being sent."
-  }, {
-    name: "options.data",
-    type: "Object",
-    description: "The data object to use as the request body payload, if this is a PUT request."
-  }, {
-    name: "options.progress",
-    type: "Function",
-    optional: true,
-    description: "A callback function to be called as the download from the server progresses."
-  }],
-  examples: [{
-    name: "Make a GET request.",
-    description: "Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  Primrose.HTTP.XHR(\"GET\", \"json\", \"localFile.json\", {\n\
-    progress: console.log.bind(console, \"progress\"))\n\
-    .then(console.log.bind(console, \"done\")))\n\
-    .catch(console.error.bind(console));\n\
-\n\
-## Results:\n\
-> Object {field1: 1, field2: \"Field2\"}"
-  }]
-});
-
-function XHR(method, type, url, options) {
-  return new Promise(function (resolve, reject) {
-    options = options || {};
-    options.headers = options.headers || {};
-    if (method === "POST") {
-      options.headers["Content-Type"] = options.headers["Content-Type"] || type;
-    }
-
-    var req = new XMLHttpRequest();
-    req.onerror = function (evt) {
-      return reject(new Error("Request error: " + evt.message));
-    };
-    req.onabort = function (evt) {
-      return reject(new Error("Request abort: " + evt.message));
-    };
-    req.onload = function () {
-      // The other error events are client-errors. If there was a server error,
-      // we'd find out about it during this event. We need to only respond to
-      // successful requests, i.e. those with HTTP status code in the 200 or 300
-      // range.
-      if (req.status < 400) {
-        resolve(req.response);
-      } else {
-        reject(req);
-      }
-    };
-
-    // The order of these operations is very explicit. You have to call open
-    // first. It seems counter intuitive, but think of it more like you're opening
-    // an HTTP document to be able to write to it, and then you finish by sending
-    // the document. The "open" method does not refer to a network connection.
-    req.open(method, url);
-    if (type) {
-      req.responseType = type;
-    }
-
-    req.onprogress = options.progress;
-
-    for (var key in options.headers) {
-      req.setRequestHeader(key, options.headers[key]);
-    }
-
-    req.withCredentials = !!options.withCredentials;
-
-    if (options.data) {
-      req.send(JSON.stringify(options.data));
-    } else {
-      req.send();
-    }
-  });
-}
-if(typeof window !== "undefined") window.Primrose.HTTP.XHR = XHR;
-})();
-// end D:\Documents\VR\Primrose\src\Primrose\HTTP\XHR.js
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
 // start D:\Documents\VR\Primrose\src\Primrose\HTTP\del.js
 (function(){"use strict";
 
@@ -10670,6 +10566,110 @@ function postObject(url, options) {
 if(typeof window !== "undefined") window.Primrose.HTTP.postObject = postObject;
 })();
 // end D:\Documents\VR\Primrose\src\Primrose\HTTP\postObject.js
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// start D:\Documents\VR\Primrose\src\Primrose\HTTP\XHR.js
+(function(){"use strict";
+
+pliny.function({
+  parent: "Primrose.HTTP",
+  name: "XHR",
+  description: "Wraps up the XMLHttpRequest object into a workflow that is easier for me to handle: a single function call. Can handle both GETs and POSTs, with or  without a payload.",
+  returns: "Promise",
+  parameters: [{
+    name: "method",
+    type: "String",
+    description: "The HTTP Verb being used for the request."
+  }, {
+    name: "type",
+    type: "String",
+    description: "How the response should be interpreted. One of [\"text\", \"json\", \"arraybuffer\"]. See the [MDN - XMLHttpRequest - responseType](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype).",
+    default: "\"text\""
+  }, {
+    name: "url",
+    type: "String",
+    description: "The resource to which the request is being sent."
+  }, {
+    name: "options.data",
+    type: "Object",
+    description: "The data object to use as the request body payload, if this is a PUT request."
+  }, {
+    name: "options.progress",
+    type: "Function",
+    optional: true,
+    description: "A callback function to be called as the download from the server progresses."
+  }],
+  examples: [{
+    name: "Make a GET request.",
+    description: "Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  Primrose.HTTP.XHR(\"GET\", \"json\", \"localFile.json\", {\n\
+    progress: console.log.bind(console, \"progress\"))\n\
+    .then(console.log.bind(console, \"done\")))\n\
+    .catch(console.error.bind(console));\n\
+\n\
+## Results:\n\
+> Object {field1: 1, field2: \"Field2\"}"
+  }]
+});
+
+function XHR(method, type, url, options) {
+  return new Promise(function (resolve, reject) {
+    options = options || {};
+    options.headers = options.headers || {};
+    if (method === "POST") {
+      options.headers["Content-Type"] = options.headers["Content-Type"] || type;
+    }
+
+    var req = new XMLHttpRequest();
+    req.onerror = function (evt) {
+      return reject(new Error("Request error: " + evt.message));
+    };
+    req.onabort = function (evt) {
+      return reject(new Error("Request abort: " + evt.message));
+    };
+    req.onload = function () {
+      // The other error events are client-errors. If there was a server error,
+      // we'd find out about it during this event. We need to only respond to
+      // successful requests, i.e. those with HTTP status code in the 200 or 300
+      // range.
+      if (req.status < 400) {
+        resolve(req.response);
+      } else {
+        reject(req);
+      }
+    };
+
+    // The order of these operations is very explicit. You have to call open
+    // first. It seems counter intuitive, but think of it more like you're opening
+    // an HTTP document to be able to write to it, and then you finish by sending
+    // the document. The "open" method does not refer to a network connection.
+    req.open(method, url);
+    if (type) {
+      req.responseType = type;
+    }
+
+    req.onprogress = options.progress;
+
+    for (var key in options.headers) {
+      req.setRequestHeader(key, options.headers[key]);
+    }
+
+    req.withCredentials = !!options.withCredentials;
+
+    if (options.data) {
+      req.send(JSON.stringify(options.data));
+    } else {
+      req.send();
+    }
+  });
+}
+if(typeof window !== "undefined") window.Primrose.HTTP.XHR = XHR;
+})();
+// end D:\Documents\VR\Primrose\src\Primrose\HTTP\XHR.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 // start D:\Documents\VR\Primrose\src\Primrose\Input\FPSInput.js
@@ -12281,10 +12281,12 @@ var VR = function (_Primrose$PoseInputPr) {
             layers = [layers];
           }
 
+          // A hack to deal with a bug in the current build of Chromium
           if (_this2.isNativeMobileWebVR) {
             layers = layers[0];
           }
 
+          // If we're using WebVR-Polyfill, just let it do its job.
           if (_this2.currentDevice.isPolyfilled && isMobile) {
             promise = _this2.currentDevice.requestPresent(layers);
           } else {
@@ -13887,47 +13889,6 @@ if(typeof window !== "undefined") window.Primrose.Output.Speech = Speech;
 // end D:\Documents\VR\Primrose\src\Primrose\Output\Speech.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Random\ID.js
-(function(){"use strict";
-
-pliny.function({
-  parent: "Primrose.Random",
-  name: "ID",
-  description: "Returns a randomized string to be used as a general purpose identifier. Collisions are possible, but should be rare.",
-  returns: "String",
-  examples: [{
-    name: "Generate 10 random identifiers.",
-    description: "To generate a randomized identifier, call the `Primrose.Random.ID()` function as shown:\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  for(var i = 0; i < 10; ++i){\n\
-    console.log(Primrose.Random.ID());\n\
-  }\n\
-\n\
-## Result (note that this is just one possible outcome):\n\
-> 25xzdqnhg1ma2qsb3k1n61or\n\
-> 1hyajmimpyjb4chvge5ng66r\n\
-> cq3dy9qnkwhneza3vr3haor\n\
-> g3l5k2kfwmxjrxjwg0uj714i\n\
-> 7qsta7cutxke8t88pahy3nmi\n\
-> h75g0nj0d4gh7zsyowxko6r\n\
-> 7pbej49fhhd5icimp3krzfr\n\
-> 3vnlovkkvyvmetsjcyirizfr\n\
-> icrehedvz97dpgkusfumzpvi\n\
-> 9p06sytn6dfearuibsnn4s4i"
-  }]
-});
-
-function ID() {
-  return (Math.random() * Math.log(Number.MAX_VALUE)).toString(36).replace(".", "");
-}
-if(typeof window !== "undefined") window.Primrose.Random.ID = ID;
-})();
-// end D:\Documents\VR\Primrose\src\Primrose\Random\ID.js
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
 // start D:\Documents\VR\Primrose\src\Primrose\Random\color.js
 (function(){"use strict";
 
@@ -13970,6 +13931,47 @@ function color() {
 if(typeof window !== "undefined") window.Primrose.Random.color = color;
 })();
 // end D:\Documents\VR\Primrose\src\Primrose\Random\color.js
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// start D:\Documents\VR\Primrose\src\Primrose\Random\ID.js
+(function(){"use strict";
+
+pliny.function({
+  parent: "Primrose.Random",
+  name: "ID",
+  description: "Returns a randomized string to be used as a general purpose identifier. Collisions are possible, but should be rare.",
+  returns: "String",
+  examples: [{
+    name: "Generate 10 random identifiers.",
+    description: "To generate a randomized identifier, call the `Primrose.Random.ID()` function as shown:\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  for(var i = 0; i < 10; ++i){\n\
+    console.log(Primrose.Random.ID());\n\
+  }\n\
+\n\
+## Result (note that this is just one possible outcome):\n\
+> 25xzdqnhg1ma2qsb3k1n61or\n\
+> 1hyajmimpyjb4chvge5ng66r\n\
+> cq3dy9qnkwhneza3vr3haor\n\
+> g3l5k2kfwmxjrxjwg0uj714i\n\
+> 7qsta7cutxke8t88pahy3nmi\n\
+> h75g0nj0d4gh7zsyowxko6r\n\
+> 7pbej49fhhd5icimp3krzfr\n\
+> 3vnlovkkvyvmetsjcyirizfr\n\
+> icrehedvz97dpgkusfumzpvi\n\
+> 9p06sytn6dfearuibsnn4s4i"
+  }]
+});
+
+function ID() {
+  return (Math.random() * Math.log(Number.MAX_VALUE)).toString(36).replace(".", "");
+}
+if(typeof window !== "undefined") window.Primrose.Random.ID = ID;
+})();
+// end D:\Documents\VR\Primrose\src\Primrose\Random\ID.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 // start D:\Documents\VR\Primrose\src\Primrose\Random\int.js
@@ -15447,241 +15449,6 @@ Token.prototype.toString = function () {
 if(typeof window !== "undefined") window.Primrose.Text.Token = Token;
 })();
 // end D:\Documents\VR\Primrose\src\Primrose\Text\Token.js
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\X\LoginForm.js
-(function(){"use strict";
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var COUNTER = 0;
-
-var WIDTH = 512,
-    HEIGHT = 150;
-
-pliny.class({
-  parent: "Primrose.X",
-  name: "LoginForm",
-  baseClass: "Primrose.Controls.Form",
-  description: "A basic authentication form."
-});
-
-var LoginForm = function (_Primrose$Controls$Fo) {
-  _inherits(LoginForm, _Primrose$Controls$Fo);
-
-  _createClass(LoginForm, null, [{
-    key: "create",
-    value: function create() {
-      return new LoginForm();
-    }
-  }]);
-
-  function LoginForm() {
-    _classCallCheck(this, LoginForm);
-
-    var _this = _possibleConstructorReturn(this, (LoginForm.__proto__ || Object.getPrototypeOf(LoginForm)).call(this, {
-      id: "Primrose.X.LoginForm[" + COUNTER++ + "]",
-      bounds: new Primrose.Text.Rectangle(0, 0, WIDTH, HEIGHT)
-    }));
-
-    _this.listeners.login = [];
-    _this.listeners.signup = [];
-
-    _this.labelUserName = new Primrose.Controls.AbstractLabel({
-      id: _this.id + "-labelUserName",
-      bounds: new Primrose.Text.Rectangle(0, 0, WIDTH / 2, HEIGHT / 3),
-      fontSize: 32,
-      value: "User name:",
-      textAlign: "right"
-    });
-
-    _this.userName = new Primrose.Text.Controls.TextInput({
-      id: _this.id + "-userName",
-      bounds: new Primrose.Text.Rectangle(WIDTH / 2, 0, WIDTH / 2, HEIGHT / 3),
-      fontSize: 32
-    });
-
-    _this.labelPassword = new Primrose.Controls.AbstractLabel({
-      id: _this.id + "-labelPassword",
-      bounds: new Primrose.Text.Rectangle(0, HEIGHT / 3, WIDTH / 2, HEIGHT / 3),
-      fontSize: 32,
-      value: "Password:",
-      textAlign: "right"
-    });
-
-    _this.password = new Primrose.Text.Controls.TextInput({
-      id: _this.id + "-password",
-      bounds: new Primrose.Text.Rectangle(WIDTH / 2, HEIGHT / 3, WIDTH / 2, HEIGHT / 3),
-      fontSize: 32,
-      passwordCharacter: "*"
-    });
-
-    _this.signupButton = new Primrose.Controls.Button2D({
-      id: _this.id + "-signupButton",
-      bounds: new Primrose.Text.Rectangle(0, 2 * HEIGHT / 3, WIDTH / 2, HEIGHT / 3),
-      fontSize: 32,
-      value: "Sign up"
-    });
-
-    _this.loginButton = new Primrose.Controls.Button2D({
-      id: _this.id + "-loginButton",
-      bounds: new Primrose.Text.Rectangle(WIDTH / 2, 2 * HEIGHT / 3, WIDTH / 2, HEIGHT / 3),
-      fontSize: 32,
-      value: "Login"
-    });
-
-    _this.loginButton.addEventListener("click", function (evt) {
-      return emit.call(_this, "login", {
-        target: _this
-      });
-    }, false);
-    _this.signupButton.addEventListener("click", function (evt) {
-      return emit.call(_this, "signup", {
-        target: _this
-      });
-    }, false);
-
-    _this.appendChild(_this.labelUserName);
-    _this.appendChild(_this.userName);
-    _this.appendChild(_this.labelPassword);
-    _this.appendChild(_this.password);
-    _this.appendChild(_this.signupButton);
-    _this.appendChild(_this.loginButton);
-    return _this;
-  }
-
-  return LoginForm;
-}(Primrose.Controls.Form);
-if(typeof window !== "undefined") window.Primrose.X.LoginForm = LoginForm;
-})();
-// end D:\Documents\VR\Primrose\src\Primrose\X\LoginForm.js
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\X\SignupForm.js
-(function(){"use strict";
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var WIDTH = 512,
-    HEIGHT = 200;
-
-var COUNTER = 0;
-
-pliny.class({
-  parent: "Primrose.X",
-  name: "SignupForm",
-  baseClass: "Primrose.Controls.Form",
-  description: "A basic registration form."
-});
-
-var SignupForm = function (_Primrose$Controls$Fo) {
-  _inherits(SignupForm, _Primrose$Controls$Fo);
-
-  function SignupForm() {
-    _classCallCheck(this, SignupForm);
-
-    var _this = _possibleConstructorReturn(this, (SignupForm.__proto__ || Object.getPrototypeOf(SignupForm)).call(this, {
-      id: "Primrose.X.SignupForm[" + COUNTER++ + "]",
-      bounds: new Primrose.Text.Rectangle(0, 0, WIDTH, HEIGHT)
-    }));
-
-    _this.listeners.login = [];
-    _this.listeners.signup = [];
-
-    _this.labelEmail = new Primrose.Controls.AbstractLabel({
-      id: _this.id + "-labelEmail",
-      bounds: new Primrose.Text.Rectangle(0, 0, WIDTH / 2, HEIGHT / 4),
-      fontSize: 32,
-      value: "Email:",
-      textAlign: "right"
-    });
-
-    _this.email = new Primrose.Text.Controls.TextInput({
-      id: _this.id + "-email",
-      bounds: new Primrose.Text.Rectangle(WIDTH / 2, 0, WIDTH / 2, HEIGHT / 4),
-      fontSize: 32
-    });
-
-    _this.labelUserName = new Primrose.Controls.AbstractLabel({
-      id: _this.id + "-labelUserName",
-      bounds: new Primrose.Text.Rectangle(0, HEIGHT / 4, WIDTH / 2, HEIGHT / 4),
-      fontSize: 32,
-      value: "User name:",
-      textAlign: "right"
-    });
-
-    _this.userName = new Primrose.Text.Controls.TextInput({
-      id: _this.id + "-userName",
-      bounds: new Primrose.Text.Rectangle(WIDTH / 2, HEIGHT / 4, WIDTH / 2, HEIGHT / 4),
-      fontSize: 32
-    });
-
-    _this.labelPassword = new Primrose.Controls.AbstractLabel({
-      id: _this.id + "-labelPassword",
-      bounds: new Primrose.Text.Rectangle(0, HEIGHT / 2, WIDTH / 2, HEIGHT / 4),
-      fontSize: 32,
-      value: "Password:",
-      textAlign: "right"
-    });
-
-    _this.password = new Primrose.Text.Controls.TextInput({
-      id: _this.id + "-password",
-      bounds: new Primrose.Text.Rectangle(WIDTH / 2, HEIGHT / 2, WIDTH / 2, HEIGHT / 4),
-      fontSize: 32,
-      passwordCharacter: "*"
-    });
-
-    _this.loginButton = new Primrose.Controls.Button2D({
-      id: _this.id + "-loginButton",
-      bounds: new Primrose.Text.Rectangle(0, 3 * HEIGHT / 4, WIDTH / 2, HEIGHT / 4),
-      fontSize: 32,
-      value: "Log in"
-    });
-
-    _this.signupButton = new Primrose.Controls.Button2D({
-      id: _this.id + "-signupButton",
-      bounds: new Primrose.Text.Rectangle(WIDTH / 2, 3 * HEIGHT / 4, WIDTH / 2, HEIGHT / 4),
-      fontSize: 32,
-      value: "Sign up"
-    });
-
-    _this.loginButton.addEventListener("click", function (evt) {
-      return emit.call(_this, "login", {
-        target: _this
-      });
-    }, false);
-    _this.signupButton.addEventListener("click", function (evt) {
-      return emit.call(_this, "signup", {
-        target: _this
-      });
-    }, false);
-
-    _this.appendChild(_this.labelUserName);
-    _this.appendChild(_this.userName);
-    _this.appendChild(_this.labelEmail);
-    _this.appendChild(_this.email);
-    _this.appendChild(_this.labelPassword);
-    _this.appendChild(_this.password);
-    _this.appendChild(_this.loginButton);
-    _this.appendChild(_this.signupButton);
-    return _this;
-  }
-
-  return SignupForm;
-}(Primrose.Controls.Form);
-if(typeof window !== "undefined") window.Primrose.X.SignupForm = SignupForm;
-})();
-// end D:\Documents\VR\Primrose\src\Primrose\X\SignupForm.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 // start D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\DE_QWERTZ.js
@@ -18265,6 +18032,241 @@ var Default = {
 if(typeof window !== "undefined") window.Primrose.Text.Themes.Default = Default;
 })();
 // end D:\Documents\VR\Primrose\src\Primrose\Text\Themes\Default.js
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// start D:\Documents\VR\Primrose\src\Primrose\X\LoginForm.js
+(function(){"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var COUNTER = 0;
+
+var WIDTH = 512,
+    HEIGHT = 150;
+
+pliny.class({
+  parent: "Primrose.X",
+  name: "LoginForm",
+  baseClass: "Primrose.Controls.Form",
+  description: "A basic authentication form."
+});
+
+var LoginForm = function (_Primrose$Controls$Fo) {
+  _inherits(LoginForm, _Primrose$Controls$Fo);
+
+  _createClass(LoginForm, null, [{
+    key: "create",
+    value: function create() {
+      return new LoginForm();
+    }
+  }]);
+
+  function LoginForm() {
+    _classCallCheck(this, LoginForm);
+
+    var _this = _possibleConstructorReturn(this, (LoginForm.__proto__ || Object.getPrototypeOf(LoginForm)).call(this, {
+      id: "Primrose.X.LoginForm[" + COUNTER++ + "]",
+      bounds: new Primrose.Text.Rectangle(0, 0, WIDTH, HEIGHT)
+    }));
+
+    _this.listeners.login = [];
+    _this.listeners.signup = [];
+
+    _this.labelUserName = new Primrose.Controls.AbstractLabel({
+      id: _this.id + "-labelUserName",
+      bounds: new Primrose.Text.Rectangle(0, 0, WIDTH / 2, HEIGHT / 3),
+      fontSize: 32,
+      value: "User name:",
+      textAlign: "right"
+    });
+
+    _this.userName = new Primrose.Text.Controls.TextInput({
+      id: _this.id + "-userName",
+      bounds: new Primrose.Text.Rectangle(WIDTH / 2, 0, WIDTH / 2, HEIGHT / 3),
+      fontSize: 32
+    });
+
+    _this.labelPassword = new Primrose.Controls.AbstractLabel({
+      id: _this.id + "-labelPassword",
+      bounds: new Primrose.Text.Rectangle(0, HEIGHT / 3, WIDTH / 2, HEIGHT / 3),
+      fontSize: 32,
+      value: "Password:",
+      textAlign: "right"
+    });
+
+    _this.password = new Primrose.Text.Controls.TextInput({
+      id: _this.id + "-password",
+      bounds: new Primrose.Text.Rectangle(WIDTH / 2, HEIGHT / 3, WIDTH / 2, HEIGHT / 3),
+      fontSize: 32,
+      passwordCharacter: "*"
+    });
+
+    _this.signupButton = new Primrose.Controls.Button2D({
+      id: _this.id + "-signupButton",
+      bounds: new Primrose.Text.Rectangle(0, 2 * HEIGHT / 3, WIDTH / 2, HEIGHT / 3),
+      fontSize: 32,
+      value: "Sign up"
+    });
+
+    _this.loginButton = new Primrose.Controls.Button2D({
+      id: _this.id + "-loginButton",
+      bounds: new Primrose.Text.Rectangle(WIDTH / 2, 2 * HEIGHT / 3, WIDTH / 2, HEIGHT / 3),
+      fontSize: 32,
+      value: "Login"
+    });
+
+    _this.loginButton.addEventListener("click", function (evt) {
+      return emit.call(_this, "login", {
+        target: _this
+      });
+    }, false);
+    _this.signupButton.addEventListener("click", function (evt) {
+      return emit.call(_this, "signup", {
+        target: _this
+      });
+    }, false);
+
+    _this.appendChild(_this.labelUserName);
+    _this.appendChild(_this.userName);
+    _this.appendChild(_this.labelPassword);
+    _this.appendChild(_this.password);
+    _this.appendChild(_this.signupButton);
+    _this.appendChild(_this.loginButton);
+    return _this;
+  }
+
+  return LoginForm;
+}(Primrose.Controls.Form);
+if(typeof window !== "undefined") window.Primrose.X.LoginForm = LoginForm;
+})();
+// end D:\Documents\VR\Primrose\src\Primrose\X\LoginForm.js
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// start D:\Documents\VR\Primrose\src\Primrose\X\SignupForm.js
+(function(){"use strict";
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var WIDTH = 512,
+    HEIGHT = 200;
+
+var COUNTER = 0;
+
+pliny.class({
+  parent: "Primrose.X",
+  name: "SignupForm",
+  baseClass: "Primrose.Controls.Form",
+  description: "A basic registration form."
+});
+
+var SignupForm = function (_Primrose$Controls$Fo) {
+  _inherits(SignupForm, _Primrose$Controls$Fo);
+
+  function SignupForm() {
+    _classCallCheck(this, SignupForm);
+
+    var _this = _possibleConstructorReturn(this, (SignupForm.__proto__ || Object.getPrototypeOf(SignupForm)).call(this, {
+      id: "Primrose.X.SignupForm[" + COUNTER++ + "]",
+      bounds: new Primrose.Text.Rectangle(0, 0, WIDTH, HEIGHT)
+    }));
+
+    _this.listeners.login = [];
+    _this.listeners.signup = [];
+
+    _this.labelEmail = new Primrose.Controls.AbstractLabel({
+      id: _this.id + "-labelEmail",
+      bounds: new Primrose.Text.Rectangle(0, 0, WIDTH / 2, HEIGHT / 4),
+      fontSize: 32,
+      value: "Email:",
+      textAlign: "right"
+    });
+
+    _this.email = new Primrose.Text.Controls.TextInput({
+      id: _this.id + "-email",
+      bounds: new Primrose.Text.Rectangle(WIDTH / 2, 0, WIDTH / 2, HEIGHT / 4),
+      fontSize: 32
+    });
+
+    _this.labelUserName = new Primrose.Controls.AbstractLabel({
+      id: _this.id + "-labelUserName",
+      bounds: new Primrose.Text.Rectangle(0, HEIGHT / 4, WIDTH / 2, HEIGHT / 4),
+      fontSize: 32,
+      value: "User name:",
+      textAlign: "right"
+    });
+
+    _this.userName = new Primrose.Text.Controls.TextInput({
+      id: _this.id + "-userName",
+      bounds: new Primrose.Text.Rectangle(WIDTH / 2, HEIGHT / 4, WIDTH / 2, HEIGHT / 4),
+      fontSize: 32
+    });
+
+    _this.labelPassword = new Primrose.Controls.AbstractLabel({
+      id: _this.id + "-labelPassword",
+      bounds: new Primrose.Text.Rectangle(0, HEIGHT / 2, WIDTH / 2, HEIGHT / 4),
+      fontSize: 32,
+      value: "Password:",
+      textAlign: "right"
+    });
+
+    _this.password = new Primrose.Text.Controls.TextInput({
+      id: _this.id + "-password",
+      bounds: new Primrose.Text.Rectangle(WIDTH / 2, HEIGHT / 2, WIDTH / 2, HEIGHT / 4),
+      fontSize: 32,
+      passwordCharacter: "*"
+    });
+
+    _this.loginButton = new Primrose.Controls.Button2D({
+      id: _this.id + "-loginButton",
+      bounds: new Primrose.Text.Rectangle(0, 3 * HEIGHT / 4, WIDTH / 2, HEIGHT / 4),
+      fontSize: 32,
+      value: "Log in"
+    });
+
+    _this.signupButton = new Primrose.Controls.Button2D({
+      id: _this.id + "-signupButton",
+      bounds: new Primrose.Text.Rectangle(WIDTH / 2, 3 * HEIGHT / 4, WIDTH / 2, HEIGHT / 4),
+      fontSize: 32,
+      value: "Sign up"
+    });
+
+    _this.loginButton.addEventListener("click", function (evt) {
+      return emit.call(_this, "login", {
+        target: _this
+      });
+    }, false);
+    _this.signupButton.addEventListener("click", function (evt) {
+      return emit.call(_this, "signup", {
+        target: _this
+      });
+    }, false);
+
+    _this.appendChild(_this.labelUserName);
+    _this.appendChild(_this.userName);
+    _this.appendChild(_this.labelEmail);
+    _this.appendChild(_this.email);
+    _this.appendChild(_this.labelPassword);
+    _this.appendChild(_this.password);
+    _this.appendChild(_this.loginButton);
+    _this.appendChild(_this.signupButton);
+    return _this;
+  }
+
+  return SignupForm;
+}(Primrose.Controls.Form);
+if(typeof window !== "undefined") window.Primrose.X.SignupForm = SignupForm;
+})();
+// end D:\Documents\VR\Primrose\src\Primrose\X\SignupForm.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 // start D:\Documents\VR\Primrose\src\THREE\Matrix4\prototype\debug.js

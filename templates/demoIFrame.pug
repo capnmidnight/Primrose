@@ -60,6 +60,7 @@ html
               t.style.display = cd && cd.isPresenting ? "none" : "";
             });
             p.style.display = "none";
+            WebVRStandardMonitor();
             navigator.getVRDisplays().then(function(displays){
               displays.forEach(function(display, i) {
                 if(display.displayName !== "Mouse and Keyboard VRDisplay (webvr-polyfill)") {

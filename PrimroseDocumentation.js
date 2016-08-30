@@ -1,56 +1,3 @@
-pliny.class({
-  name: "InsideSphereGeometry",
-  parameters: [{
-    name: "radius",
-    type: "Number",
-    description: "How far the sphere should extend away from a center point."
-  }, {
-    name: "widthSegments",
-    type: "Number",
-    description: "The number of faces wide in which to slice the geometry."
-  }, {
-    name: "heightSegments",
-    type: "Number",
-    description: "The number of faces tall in which to slice the geometry."
-  }, {
-    name: "phiStart",
-    type: "Number",
-    description: "The angle in radians around the Y-axis at which the sphere starts."
-  }, {
-    name: "phiLength",
-    type: "Number",
-    description: "The change of angle in radians around the Y-axis to which the sphere ends."
-  }, {
-    name: "thetaStart",
-    type: "Number",
-    description: "The angle in radians around the Z-axis at which the sphere starts."
-  }, {
-    name: "thetaLength",
-    type: "Number",
-    description: "The change of angle in radians around the Z-axis to which the sphere ends."
-  }],
-  description: "The InsideSphereGeometry is basically an inside-out Sphere. Or\n\
-more accurately, it's a Sphere where the face winding order is reversed, so that\n\
-textures appear on the inside of the sphere, rather than the outside. I know, that's\n\
-note exactly helpful.\n\
-\n\
-Say you want a to model the sky as a sphere, or the inside of a helmet. You don't\n\
-care anything about the outside of this sphere, only the inside. You would use\n\
-InsideSphereGeometry in this case. Or its alias, [`shell()`](#shell)."
-});
-
-pliny.value({
-  name: "PIXEL_SCALES",
-  description: "Scaling factors for changing the resolution of the display when the render quality level changes."
-});
-pliny.namespace({
-  name: "Primrose",
-  description: "Primrose helps you make VR applications for web browsers as easy as making other types of interactive web pages.\n\nThis top-level namespace contains classes for manipulating and viewing 3D environments."
-});
-pliny.enumeration({
-  name: "Quality",
-  description: "Graphics quality settings."
-});
 pliny.function({
   name: "axis",
   description: "Creates a set of reference axes, with X as red, Y as green, and Z as blue.",
@@ -502,6 +449,47 @@ pliny.function({
   }]
 });
 
+pliny.class({
+  name: "InsideSphereGeometry",
+  parameters: [{
+    name: "radius",
+    type: "Number",
+    description: "How far the sphere should extend away from a center point."
+  }, {
+    name: "widthSegments",
+    type: "Number",
+    description: "The number of faces wide in which to slice the geometry."
+  }, {
+    name: "heightSegments",
+    type: "Number",
+    description: "The number of faces tall in which to slice the geometry."
+  }, {
+    name: "phiStart",
+    type: "Number",
+    description: "The angle in radians around the Y-axis at which the sphere starts."
+  }, {
+    name: "phiLength",
+    type: "Number",
+    description: "The change of angle in radians around the Y-axis to which the sphere ends."
+  }, {
+    name: "thetaStart",
+    type: "Number",
+    description: "The angle in radians around the Z-axis at which the sphere starts."
+  }, {
+    name: "thetaLength",
+    type: "Number",
+    description: "The change of angle in radians around the Z-axis to which the sphere ends."
+  }],
+  description: "The InsideSphereGeometry is basically an inside-out Sphere. Or\n\
+more accurately, it's a Sphere where the face winding order is reversed, so that\n\
+textures appear on the inside of the sphere, rather than the outside. I know, that's\n\
+note exactly helpful.\n\
+\n\
+Say you want a to model the sky as a sphere, or the inside of a helmet. You don't\n\
+care anything about the outside of this sphere, only the inside. You would use\n\
+InsideSphereGeometry in this case. Or its alias, [`shell()`](#shell)."
+});
+
 pliny.value({
   name: "isChrome",
   type: "Boolean",
@@ -534,17 +522,17 @@ pliny.value({
   description: "Flag indicating the script is currently running in an IFRAME or not."
 });
 pliny.value({
+  name: "isiOS",
+  type: "Boolean",
+  description: "Flag indicating the current system is a device running the Apple\n\
+iOS operating system: iPad, iPod Touch, iPhone. Useful for invoking optional code\n\
+paths necessary to deal with deficiencies in Apple's implementation of web standards."
+});
+pliny.value({
   name: "isMobile",
   type: "Boolean",
   description: "Flag indicating the current system is a recognized \"mobile\"\n\
 device, usually possessing a motion sensor."
-});
-pliny.value({
-  name: "isOSX",
-  type: "Boolean",
-  description: "Flag indicating the current system is a computer running the Apple\n\
-OSX operating system. Useful for changing keyboard shortcuts to support Apple's\n\
-idiosynchratic, concensus-defying keyboard shortcuts."
 });
 pliny.value({
   name: "isOpera",
@@ -554,6 +542,13 @@ Opera is a substandard browser that lags adoption of cutting edge web technologi
 so you are not likely to need this flag if you are using Primrose, other than to\n\
 cajole users into downloading a more advanced browser such as Mozilla Firefox or\n\
 Google Chrome."
+});
+pliny.value({
+  name: "isOSX",
+  type: "Boolean",
+  description: "Flag indicating the current system is a computer running the Apple\n\
+OSX operating system. Useful for changing keyboard shortcuts to support Apple's\n\
+idiosynchratic, concensus-defying keyboard shortcuts."
 });
 pliny.value({
   name: "isSafari",
@@ -576,13 +571,6 @@ pliny.value({
   type: "Boolean",
   description: "Flag indicating the current system is a computer running one of\n\
 the Microsoft Windows operating systems. We have not yet found a use for this flag."
-});
-pliny.value({
-  name: "isiOS",
-  type: "Boolean",
-  description: "Flag indicating the current system is a device running the Apple\n\
-iOS operating system: iPad, iPod Touch, iPhone. Useful for invoking optional code\n\
-paths necessary to deal with deficiencies in Apple's implementation of web standards."
 });
 pliny.function({
   name: "light",
@@ -656,6 +644,14 @@ pliny.function({
   }]
 });
 
+pliny.value({
+  name: "PIXEL_SCALES",
+  description: "Scaling factors for changing the resolution of the display when the render quality level changes."
+});
+pliny.namespace({
+  name: "Primrose",
+  description: "Primrose helps you make VR applications for web browsers as easy as making other types of interactive web pages.\n\nThis top-level namespace contains classes for manipulating and viewing 3D environments."
+});
 pliny.function({
   name: "put",
   description: "A literate interface for putting objects onto scenes with basic, common transformations. You call `put()` with an object, then have access to a series of methods that you can chain together, before receiving the object back again. This makes it possible to create objects in the parameter position of `put()` at the same time as declaring the variable that will hold it.\n\
@@ -686,6 +682,10 @@ pliny.function({
   description: "| [under construction]"
 });
 
+pliny.enumeration({
+  name: "Quality",
+  description: "Graphics quality settings."
+});
 pliny.function({
   name: "range",
   description: "| [under construction]"
@@ -1848,12 +1848,6 @@ pliny.value({
   type: "Array of Number",
   description: "A selection of color values that closely match skin colors of people."
 });
-pliny.value({
-  parent: "Primrose",
-  name: "SYS_FONTS",
-  type: "String",
-  description: "A selection of fonts that will match whatever the user's operating system normally uses."
-});
 pliny.class({
   parent: "Primrose",
   name: "Surface",
@@ -1875,7 +1869,13 @@ pliny.error({
         type: "Error",
         description: "If the element could not be found, could not be created, or one of the appropriate ID was found but did not match the expected type, an error is thrown to halt operation."
       });
-      pliny.namespace({
+      pliny.value({
+  parent: "Primrose",
+  name: "SYS_FONTS",
+  type: "String",
+  description: "A selection of fonts that will match whatever the user's operating system normally uses."
+});
+pliny.namespace({
   parent: "Primrose",
   name: "Text",
   description: "The Text namespace contains classes everything regarding the Primrose source code editor."
@@ -2541,51 +2541,6 @@ a newly created element if it does not exist, or an Element to manipulate and va
 
 pliny.function({
   parent: "Primrose.HTTP",
-  name: "XHR",
-  description: "Wraps up the XMLHttpRequest object into a workflow that is easier for me to handle: a single function call. Can handle both GETs and POSTs, with or  without a payload.",
-  returns: "Promise",
-  parameters: [{
-    name: "method",
-    type: "String",
-    description: "The HTTP Verb being used for the request."
-  }, {
-    name: "type",
-    type: "String",
-    description: "How the response should be interpreted. One of [\"text\", \"json\", \"arraybuffer\"]. See the [MDN - XMLHttpRequest - responseType](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype).",
-    default: "\"text\""
-  }, {
-    name: "url",
-    type: "String",
-    description: "The resource to which the request is being sent."
-  }, {
-    name: "options.data",
-    type: "Object",
-    description: "The data object to use as the request body payload, if this is a PUT request."
-  }, {
-    name: "options.progress",
-    type: "Function",
-    optional: true,
-    description: "A callback function to be called as the download from the server progresses."
-  }],
-  examples: [{
-    name: "Make a GET request.",
-    description: "Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  Primrose.HTTP.XHR(\"GET\", \"json\", \"localFile.json\", {\n\
-    progress: console.log.bind(console, \"progress\"))\n\
-    .then(console.log.bind(console, \"done\")))\n\
-    .catch(console.error.bind(console));\n\
-\n\
-## Results:\n\
-> Object {field1: 1, field2: \"Field2\"}"
-  }]
-});
-
-pliny.function({
-  parent: "Primrose.HTTP",
   name: "del",
   description: "Process an HTTP DELETE request.",
   returns: "Promise",
@@ -2812,6 +2767,51 @@ pliny.function({
     type: "Function",
     optional: true,
     description: "A callback function to be called as the download from the server progresses."
+  }]
+});
+
+pliny.function({
+  parent: "Primrose.HTTP",
+  name: "XHR",
+  description: "Wraps up the XMLHttpRequest object into a workflow that is easier for me to handle: a single function call. Can handle both GETs and POSTs, with or  without a payload.",
+  returns: "Promise",
+  parameters: [{
+    name: "method",
+    type: "String",
+    description: "The HTTP Verb being used for the request."
+  }, {
+    name: "type",
+    type: "String",
+    description: "How the response should be interpreted. One of [\"text\", \"json\", \"arraybuffer\"]. See the [MDN - XMLHttpRequest - responseType](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype).",
+    default: "\"text\""
+  }, {
+    name: "url",
+    type: "String",
+    description: "The resource to which the request is being sent."
+  }, {
+    name: "options.data",
+    type: "Object",
+    description: "The data object to use as the request body payload, if this is a PUT request."
+  }, {
+    name: "options.progress",
+    type: "Function",
+    optional: true,
+    description: "A callback function to be called as the download from the server progresses."
+  }],
+  examples: [{
+    name: "Make a GET request.",
+    description: "Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  Primrose.HTTP.XHR(\"GET\", \"json\", \"localFile.json\", {\n\
+    progress: console.log.bind(console, \"progress\"))\n\
+    .then(console.log.bind(console, \"done\")))\n\
+    .catch(console.error.bind(console));\n\
+\n\
+## Results:\n\
+> Object {field1: 1, field2: \"Field2\"}"
   }]
 });
 
@@ -3178,36 +3178,6 @@ pliny.class({
   });
   pliny.function({
   parent: "Primrose.Random",
-  name: "ID",
-  description: "Returns a randomized string to be used as a general purpose identifier. Collisions are possible, but should be rare.",
-  returns: "String",
-  examples: [{
-    name: "Generate 10 random identifiers.",
-    description: "To generate a randomized identifier, call the `Primrose.Random.ID()` function as shown:\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  for(var i = 0; i < 10; ++i){\n\
-    console.log(Primrose.Random.ID());\n\
-  }\n\
-\n\
-## Result (note that this is just one possible outcome):\n\
-> 25xzdqnhg1ma2qsb3k1n61or\n\
-> 1hyajmimpyjb4chvge5ng66r\n\
-> cq3dy9qnkwhneza3vr3haor\n\
-> g3l5k2kfwmxjrxjwg0uj714i\n\
-> 7qsta7cutxke8t88pahy3nmi\n\
-> h75g0nj0d4gh7zsyowxko6r\n\
-> 7pbej49fhhd5icimp3krzfr\n\
-> 3vnlovkkvyvmetsjcyirizfr\n\
-> icrehedvz97dpgkusfumzpvi\n\
-> 9p06sytn6dfearuibsnn4s4i"
-  }]
-});
-
-pliny.function({
-  parent: "Primrose.Random",
   name: "color",
   description: "Returns a random hex RGB number to be used as a color.",
   returns: "Number",
@@ -3233,6 +3203,36 @@ pliny.function({
 > 38541a\n\
 > 5a19db\n\
 > 5f5c50"
+  }]
+});
+
+pliny.function({
+  parent: "Primrose.Random",
+  name: "ID",
+  description: "Returns a randomized string to be used as a general purpose identifier. Collisions are possible, but should be rare.",
+  returns: "String",
+  examples: [{
+    name: "Generate 10 random identifiers.",
+    description: "To generate a randomized identifier, call the `Primrose.Random.ID()` function as shown:\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  for(var i = 0; i < 10; ++i){\n\
+    console.log(Primrose.Random.ID());\n\
+  }\n\
+\n\
+## Result (note that this is just one possible outcome):\n\
+> 25xzdqnhg1ma2qsb3k1n61or\n\
+> 1hyajmimpyjb4chvge5ng66r\n\
+> cq3dy9qnkwhneza3vr3haor\n\
+> g3l5k2kfwmxjrxjwg0uj714i\n\
+> 7qsta7cutxke8t88pahy3nmi\n\
+> h75g0nj0d4gh7zsyowxko6r\n\
+> 7pbej49fhhd5icimp3krzfr\n\
+> 3vnlovkkvyvmetsjcyirizfr\n\
+> icrehedvz97dpgkusfumzpvi\n\
+> 9p06sytn6dfearuibsnn4s4i"
   }]
 });
 
@@ -3639,20 +3639,6 @@ pliny.class({
   description: "| [under construction]"
 });
 
-pliny.class({
-  parent: "Primrose.X",
-  name: "LoginForm",
-  baseClass: "Primrose.Controls.Form",
-  description: "A basic authentication form."
-});
-
-pliny.class({
-  parent: "Primrose.X",
-  name: "SignupForm",
-  baseClass: "Primrose.Controls.Form",
-  description: "A basic registration form."
-});
-
 pliny.record({
   parent: "Primrose.Text.CodePages",
   name: "DE_QWERTZ",
@@ -3768,6 +3754,20 @@ pliny.record({
   name: "Default",
   description: "| [under construction]"
 });
+pliny.class({
+  parent: "Primrose.X",
+  name: "LoginForm",
+  baseClass: "Primrose.Controls.Form",
+  description: "A basic authentication form."
+});
+
+pliny.class({
+  parent: "Primrose.X",
+  name: "SignupForm",
+  baseClass: "Primrose.Controls.Form",
+  description: "A basic registration form."
+});
+
 pliny.method({
   parent: "THREE.Matrix4",
   name: "toString ",

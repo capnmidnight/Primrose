@@ -15,16 +15,19 @@
       t.style.display = cd && cd.isPresenting ? "none" : "";
     });
     p.style.display = "none";
+    WebVRStandardMonitor();
     navigator.getVRDisplays().then(function(displays){
       displays.forEach(function(display, i) {
-        var btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "secondary";
-        btn.appendChild(document.createTextNode(display.displayName));
-        btn.addEventListener("click", function(i){
-          env.goFullScreen(i, "Button");
-        }.bind(null, i), false);
-        c.appendChild(btn);
+        if(display.displayName !== "Mouse and Keyboard VRDisplay (webvr-polyfill)") {
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "secondary";
+          btn.appendChild(document.createTextNode(display.displayName));
+          btn.addEventListener("click", function(i){
+            env.goFullScreen(i, "Button");
+          }.bind(null, i), false);
+          c.appendChild(btn);
+        }
       });
     });
   });</script></head><body><!-- start main.pug main block --><h1>Example: Live programming in Virtual Reality</h1><canvas id="frontBuffer"></canvas><progress></progress><div id="controls"><div id="fullScreenButtonContainer"></div><div id="loginForm" style="display:none"><button class="secondary" id="closeButton">&times;</button><h1>Create your personal VR meeting room</h1><div class="inputRow" id="roomNameRow"><input id="roomName" type="text" placeholder="Pick a room name"><button class="primary" id="randomRoomName">&#x21bb;</button></div><br><div class="inputRow" id="userNameRow"><input id="userName" type="text" placeholder="Pick a username"><button class="primary" id="randomUserName">&#x21bb;</button><button class="primary" id="connect">&rarr;</button></div><div id="errorMessage" style="display:none"></div></div></div><div id="docPage" style="display:none"><h1>functions</h1><ul><li>console.log( msg ); - print a message to the window below the editor.</li><li>put( objectA ).on( objectB )[.at( x, y, z )];<br>objectA: a THREE.Object3D to be added to another,<br>
