@@ -66,10 +66,12 @@ class VR extends Primrose.PoseInputProcessor {
         layers = [layers];
       }
 
+      // A hack to deal with a bug in the current build of Chromium
       if (this.isNativeMobileWebVR) {
         layers = layers[0];
       }
 
+      // If we're using WebVR-Polyfill, just let it do its job.
       if(this.currentDevice.isPolyfilled && isMobile){
         promise = this.currentDevice.requestPresent(layers);
       }
