@@ -124,6 +124,7 @@ class FPSInput {
         max: 5
       },
       heading: {
+        metaKeys: [-Primrose.Keys.CTRL, -Primrose.Keys.ALT, -Primrose.Keys.SHIFT, -Primrose.Keys.META],
         commands: ["dx"],
         integrate: true
       },
@@ -135,6 +136,7 @@ class FPSInput {
         max: 5
       },
       pitch: {
+        metaKeys: [-Primrose.Keys.CTRL, -Primrose.Keys.ALT, -Primrose.Keys.SHIFT, -Primrose.Keys.META],
         commands: ["dy"],
         integrate: true,
         min: -Math.PI * 0.5,
