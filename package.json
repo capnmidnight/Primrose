@@ -1,7 +1,7 @@
 {
   "name": "primrose",
   "description": "Primrose is a for Virtual Reality applications in Web browsers. It includes a basic syntax highlighting text editor.",
-  "version": "0.26.5",
+  "version": "0.26.6",
   "engines": {
     "node": ">=4.0.0"
   },
