@@ -39,10 +39,12 @@ class Mouse extends Primrose.InputProcessor {
           mx = event.webkitMovementX || event.mozMovementX || 0;
           my = event.webkitMovementY || event.mozMovementY || 0;
         }
-        this.setMovement(mx, my);
+        this.setAxis("X", this.getAxis("X") + mx);
+        this.setAxis("Y", this.getAxis("Y") + my);
       }
       else {
-        this.setLocation(event.layerX, event.layerY);
+        this.setAxis("X", event.layerX);
+        this.setAxis("Y", event.layerY);
       }
     }, false);
 
@@ -59,15 +61,5 @@ class Mouse extends Primrose.InputProcessor {
       }
       event.preventDefault();
     }, false);
-  }
-
-  setLocation(x, y) {
-    this.setAxis("X", x);
-    this.setAxis("Y", y);
-  }
-
-  setMovement(dx, dy) {
-    this.setAxis("X", this.getAxis("X") + dx);
-    this.setAxis("Y", this.getAxis("Y") + dy);
   }
 }
