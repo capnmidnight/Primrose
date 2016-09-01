@@ -18,6 +18,11 @@ input {
 #logo > img {
   max-width: 200px;
 }
+#logo > .version-number {
+  color: #fff;
+  margin-left: 1em;
+  font-size: 18pt;
+}
 #cta {
   display: block;
 }
@@ -410,6 +415,9 @@ footer .icon {
   }
   #logo {
     margin-bottom: 1em;
+  }
+  header button {
+    margin: 0;
   }
   #frontBuffer {
     height: 60vw;

@@ -14625,3 +14625,4 @@ if(typeof window !== "undefined") window.THREE.Vector3.prototype.toString = toSt
 })();
 // end C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Vector3\prototype\toString.js
 ////////////////////////////////////////////////////////////////////////////////
+console.info("Primrose WebVR Framework v0.26.6. See https://www.primrosevr.com for more information.");

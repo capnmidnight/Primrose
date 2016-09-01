@@ -1,10 +1,10 @@
 var gulp = require("gulp"),
-  build = require("notiontheory-basic-build"),
+  build = require("../notiontheory-basic-build/src"),
   exec = require("child_process").exec,
   pliny = require("pliny"),
   rename = require("gulp-rename"),
   pkg = require("./package.json"),
-  nt = build.setup(gulp),
+  nt = build.setup(gulp, pkg),
   deps = nt.cat("PrimroseDependencies", [
     "node_modules/promise-polyfill/promise.js",
     "node_modules/lavu-details-polyfill/lib/index.js",
