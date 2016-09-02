@@ -1,5 +1,5 @@
 var gulp = require("gulp"),
-  build = require("../notiontheory-basic-build/src"),
+  build = require("notiontheory-basic-build"),
   exec = require("child_process").exec,
   pliny = require("pliny"),
   rename = require("gulp-rename"),
@@ -39,11 +39,7 @@ gulp.task("archive", [min.build], () => gulp.src(["Primrose*.js"])
   }))
   .pipe(gulp.dest("archive")));
 
-gulp.task("MeetingManifest", [tot.build], (cb) => exec("cd meeting && node ../node_modules/webvr-bootstrapper ../Primrose.min.js ../doc/models/meeting/meetingroom.obj ../doc/models/meeting/meetingroom.mtl ../doc/models/meeting/BackdropTexture.png ../doc/models/meeting/Chair1Texture.png ../doc/models/meeting/Chair2Texture.png ../doc/models/meeting/Chair3Texture.png ../doc/models/meeting/Chair4Texture.png ../doc/models/meeting/Cup1Texture.png ../doc/models/meeting/Cup2Texture.png ../doc/models/meeting/Cup3Texture.png ../doc/models/meeting/Cup4Texture.png ../doc/models/meeting/Cup5Texture.png ../doc/models/meeting/LampshadeTexture.png ../doc/models/meeting/RoomTexture.png ../doc/models/meeting/TableTexture.png ../doc/fonts/helvetiker_regular.typeface.jsonon ../doc/models/avatar.json ../doc/audio/wind.ogg app.js", (err, stdout, stderr) => {
-  console.log(stdout);
-  console.log(stderr);
-  cb(err);
-}));
+gulp.task("MeetingManifest", [tot.build], build.exec("cd meeting && node ../node_modules/webvr-bootstrapper ../doc/models/meeting/meetingroom.obj ../doc/models/meeting/meetingroom.mtl ../doc/models/meeting/BackdropTexture.png ../doc/models/meeting/Chair1Texture.png ../doc/models/meeting/Chair2Texture.png ../doc/models/meeting/Chair3Texture.png ../doc/models/meeting/Chair4Texture.png ../doc/models/meeting/Cup1Texture.png ../doc/models/meeting/Cup2Texture.png ../doc/models/meeting/Cup3Texture.png ../doc/models/meeting/Cup4Texture.png ../doc/models/meeting/Cup5Texture.png ../doc/models/meeting/LampshadeTexture.png ../doc/models/meeting/RoomTexture.png ../doc/models/meeting/TableTexture.png ../doc/fonts/helvetiker_regular.typeface.json ../doc/models/avatar.json ../doc/audio/wind.ogg app.js"));
 
 gulp.task("js", [js.default]);
 gulp.task("html", [html.debug]);
