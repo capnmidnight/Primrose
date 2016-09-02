@@ -47,7 +47,7 @@
           WebVRStandardMonitor();
           navigator.getVRDisplays().then(function(displays){
             displays.forEach(function(display, i) {
-             // if(display.displayName !== "Mouse and Keyboard VRDisplay (webvr-polyfill)") {
+              if(display.displayName !== "Mouse and Keyboard VRDisplay (webvr-polyfill)") {
                 var btn = document.createElement("button");
                 btn.type = "button";
                 btn.className = "secondary";
@@ -56,7 +56,7 @@
                   env.goFullScreen(i, "Button");
                 }.bind(null, i), false);
                 c.appendChild(btn);
-           //   }
+              }
             });
           });
         });
