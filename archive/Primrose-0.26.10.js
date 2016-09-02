@@ -78613,4 +78613,4 @@ function toString(digits) {
 })();
     // end C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Vector3\prototype\toString.js
     ////////////////////////////////////////////////////////////////////////////////
-console.info("index v0.26.10. see https://www.primrosevr.com for more information.");
+console.info("index v0.26.9. see https://www.primrosevr.com for more information.");
