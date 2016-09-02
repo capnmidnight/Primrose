@@ -24,7 +24,7 @@ class PoseInputProcessor extends Primrose.InputProcessor {
     this.matrix = new THREE.Matrix4();
   }
 
-  get hasPose {
+  get hasPose() {
     return !!this.currentPose;
   }
 
