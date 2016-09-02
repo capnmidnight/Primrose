@@ -13423,7 +13423,7 @@ module.exports = WebVRPolyfill;
 },{"./base.js":2,"./cardboard-vr-display.js":5,"./display-wrappers.js":8,"./mouse-keyboard-vr-display.js":15}]},{},[13]);
 
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\webvr-standard-monitor\src\AsyncLockRequest.js
+    // start D:\Documents\VR\webvr-standard-monitor\src\AsyncLockRequest.js
 (function(){"use strict";
 
 function findProperty(elem, arr) {
@@ -13540,23 +13540,23 @@ function AsyncLockRequest(name, elementOpts, changeEventOpts, errorEventOpts, re
 
   return ns;
 }
-if(typeof window !== "undefined") window.AsyncLockRequest = AsyncLockRequest;
+    if(typeof window !== "undefined") window.AsyncLockRequest = AsyncLockRequest;
 })();
-// end D:\Documents\VR\webvr-standard-monitor\src\AsyncLockRequest.js
+    // end D:\Documents\VR\webvr-standard-monitor\src\AsyncLockRequest.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\webvr-standard-monitor\src\FullScreen.js
+    // start D:\Documents\VR\webvr-standard-monitor\src\FullScreen.js
 (function(){"use strict";
 
 var FullScreen = AsyncLockRequest("Fullscreen", ["fullscreenElement", "mozFullScreenElement", "webkitFullscreenElement", "msFullscreenElement"], ["onfullscreenchange", "onmozfullscreenchange", "onwebkitfullscreenchange", "onmsfullscreenchange"], ["onfullscreenerror", "onmozfullscreenerror", "onwebkitfullscreenerror", "onmsfullscreenerror"], ["requestFullscreen", "mozRequestFullScreen", "webkitRequestFullscreen", "webkitRequestFullScreen", "msRequestFullscreen"], ["exitFullscreen", "mozExitFullScreen", "webkitExitFullscreen", "webkitExitFullScreen", "msExitFullscreen"], function (arg) {
   return arg || window.Element && window.Element.ALLOW_KEYBOARD_INPUT || undefined;
 });
-if(typeof window !== "undefined") window.FullScreen = FullScreen;
+    if(typeof window !== "undefined") window.FullScreen = FullScreen;
 })();
-// end D:\Documents\VR\webvr-standard-monitor\src\FullScreen.js
+    // end D:\Documents\VR\webvr-standard-monitor\src\FullScreen.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\webvr-standard-monitor\src\Orientation.js
+    // start D:\Documents\VR\webvr-standard-monitor\src\Orientation.js
 (function(){"use strict";
 
 function lockOrientation() {
@@ -13588,21 +13588,21 @@ var Orientation = {
   lock: lockOrientation,
   unlock: unlockOrientation
 };
-if(typeof window !== "undefined") window.Orientation = Orientation;
+    if(typeof window !== "undefined") window.Orientation = Orientation;
 })();
-// end D:\Documents\VR\webvr-standard-monitor\src\Orientation.js
+    // end D:\Documents\VR\webvr-standard-monitor\src\Orientation.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\webvr-standard-monitor\src\PointerLock.js
+    // start D:\Documents\VR\webvr-standard-monitor\src\PointerLock.js
 (function(){"use strict";
 
 var PointerLock = AsyncLockRequest("Pointer Lock", ["pointerLockElement", "mozPointerLockElement", "webkitPointerLockElement"], ["onpointerlockchange", "onmozpointerlockchange", "onwebkitpointerlockchange"], ["onpointerlockerror", "onmozpointerlockerror", "onwebkitpointerlockerror"], ["requestPointerLock", "mozRequestPointerLock", "webkitRequestPointerLock", "webkitRequestPointerLock"], ["exitPointerLock", "mozExitPointerLock", "webkitExitPointerLock", "webkitExitPointerLock"]);
-if(typeof window !== "undefined") window.PointerLock = PointerLock;
+    if(typeof window !== "undefined") window.PointerLock = PointerLock;
 })();
-// end D:\Documents\VR\webvr-standard-monitor\src\PointerLock.js
+    // end D:\Documents\VR\webvr-standard-monitor\src\PointerLock.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\webvr-standard-monitor\src\WebVRStandardMonitor.js
+    // start D:\Documents\VR\webvr-standard-monitor\src\WebVRStandardMonitor.js
 (function(){"use strict";
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -13649,17 +13649,16 @@ function mutable(value, type) {
   };
 }
 
-var setup = false;
-
 function WebVRStandardMonitor(display) {
-  if (!setup) {
-    setup = true;
+  if (!priv(WebVRStandardMonitor).shimSetup) {
+    priv(WebVRStandardMonitor).shimSetup = true;
     var oldGetVRDisplays = navigator.getVRDisplays || Promise.resolve.bind(Promise, []);
     navigator.getVRDisplays = function () {
       return oldGetVRDisplays.call(navigator).then(function (displays) {
         var created = false;
         for (var i = 0; i < displays.length && !created; ++i) {
-          created = display instanceof WebVRStandardMonitor;
+          var dsp = displays[i];
+          created = dsp instanceof WebVRStandardMonitor;
         }
         if (!created) {
           displays.unshift(new WebVRStandardMonitor(displays[0]));
@@ -13697,6 +13696,10 @@ function WebVRStandardMonitor(display) {
     });
   }
 }
+
+priv(WebVRStandardMonitor, {
+  shimSetup: false
+});
 
 WebVRStandardMonitor.prototype.requestAnimationFrame = window.requestAnimationFrame.bind(window);
 WebVRStandardMonitor.prototype.cancelAnimationFrame = window.cancelAnimationFrame.bind(window);
@@ -13790,10 +13793,10 @@ WebVRStandardMonitor.prototype.getEyeParameters = function (side) {
     };
   }
 };
-if(typeof window !== "undefined") window.WebVRStandardMonitor = WebVRStandardMonitor;
+    if(typeof window !== "undefined") window.WebVRStandardMonitor = WebVRStandardMonitor;
 })();
-// end D:\Documents\VR\webvr-standard-monitor\src\WebVRStandardMonitor.js
-////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\webvr-standard-monitor\src\WebVRStandardMonitor.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 // start D:\Documents\VR\webvr-bootstrapper\src\ViewCameraTransform.js
 (function(){"use strict";
