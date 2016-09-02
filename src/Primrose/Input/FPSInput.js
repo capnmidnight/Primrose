@@ -150,11 +150,10 @@ class FPSInput {
 
     Primrose.Input.Gamepad.addEventListener("gamepadconnected", (pad) => {
       var padID = Primrose.Input.Gamepad.ID(pad),
-        isMotion = padID.indexOf("Vive") === 0,
         mgr;
 
       if (padID !== "Unknown" && padID !== "Rift") {
-        if (isMotion) {
+        if (!!pad.pose) {
           var controllerNumber = 0;
           for (var i = 0; i < this.managers.length; ++i) {
             mgr = this.managers[i];
