@@ -23,7 +23,7 @@ var gulp = require("gulp"),
   js = nt.js("PrimroseLib-WithDoc", "src", ["format"], pliny.carve.bind(pliny, "PrimroseLib-WithDoc.js", "PrimroseLib.js", "PrimroseDocumentation.js")),
   min = nt.min("PrimroseDocumentation", ["PrimroseDocumentation.js"], [js.build]),
   tot = nt.cat("Primrose", ["PrimroseDependencies.js", "PrimroseLib.js"], [deps.build, min.build]),
-  html = nt.html("Primrose", ["*.pug", "doc/**/*.pug", "meeting/**/*.pug"]),
+  html = nt.html("Primrose", ["*.pug", "doc/**/*.pug", "meeting/**/*.pug", "templates/**/*.pug"]),
   css = nt.css("Primrose", ["*.styl", "doc/**/*.styl"]);
 
 gulp.task("format", [js.format]);
