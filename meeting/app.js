@@ -24,9 +24,6 @@ env = new Primrose.BrowserEnvironment({
   sceneModel: "../doc/models/meeting/meetingroom.obj",
   avatarModel: "../doc/models/avatar.json",
   useFog: false,
-  fullScreenIcon: "../doc/models/monitor.obj",
-  VRIcon: "../doc/models/cardboard.obj",
-  audioIcon: "../doc/models/microphone.obj",
   font: "../doc/fonts/helvetiker_regular.typeface.json",
   webRTC: Primrose.HTTP.getObject("/turn")
 });

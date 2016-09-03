@@ -13797,8 +13797,123 @@ WebVRStandardMonitor.prototype.getEyeParameters = function (side) {
 })();
     // end D:\Documents\VR\webvr-standard-monitor\src\WebVRStandardMonitor.js
     ////////////////////////////////////////////////////////////////////////////////
+console.info("webvr-standard-monitor v1.0.4. see http://www.primrosevr.com for more information.");
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\webvr-bootstrapper\src\ViewCameraTransform.js
+    // start D:\Documents\VR\webvr-bootstrapper\src\documentReady.js
+(function(){"use strict";
+
+var documentReady = new Promise(function (resolve, reject) {
+  function setup() {
+    var ready = document.readyState === "complete";
+    if (ready) {
+      document.removeEventListener("readystatechange", setup);
+      resolve();
+    }
+    return ready;
+  }
+
+  if (!setup()) {
+    document.addEventListener("readystatechange", setup);
+  }
+});
+    if(typeof window !== "undefined") window.documentReady = documentReady;
+})();
+    // end D:\Documents\VR\webvr-bootstrapper\src\documentReady.js
+    ////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+    // start D:\Documents\VR\webvr-bootstrapper\src\loadFiles.js
+(function(){"use strict";
+
+function get(url, done, progress) {
+  var req = new XMLHttpRequest();
+  req.onload = function () {
+    if (req.status < 400) {
+      done(req.response);
+    } else {
+      done(new Error(req.status));
+    }
+  };
+
+  req.open("GET", url);
+  req.onprogress = progress;
+  req.send();
+}
+
+function __loadFiles(files, done, progress, index, total, loaded) {
+  if (index < files.length) {
+    var file = files[index][0],
+        size = files[index][1],
+        shortExt = file.match(/\.\w+$/)[0] || "none",
+        longExt = file.match(/(\.\w+)+$/)[0] || "none",
+        lastLoaded = loaded;
+    get(file, function (content) {
+      if (content instanceof Error) {
+        console.error("Failed to load " + file + ": " + content.message);
+      } else if (shortExt === ".js" && longExt !== ".typeface.js") {
+        var s = document.createElement("script");
+        s.type = "text/javascript";
+        s.src = file;
+        s.defer = false;
+        s.async = false;
+        document.head.appendChild(s);
+      }
+
+      __loadFiles(files, done, progress, index + 1, total, loaded);
+    }, function (evt) {
+      return progress(loaded = lastLoaded + evt.loaded, total);
+    });
+  } else {
+    done();
+  }
+}
+
+/* syntax:
+loadFiles([
+    // filename,  size
+    ["script1.js", 456],
+    ["script3.js", 8762],
+    ["script2.js", 12368]
+], function(objects){
+    // the thing to do when done.
+    console.assert(objects.name1 !== undefined);
+    console.assert(objects.name2 !== undefined);
+}, function(n, m, size, total){
+    // track progress
+    console.log("loaded file %d of %d, loaded %d bytes of %d bytes total.", n, m, size, total);
+});
+*/
+function _loadFiles(manifestSpec, progress, done) {
+  function readManifest(manifest) {
+    var total = 0;
+    for (var i = 0; i < manifest.length; ++i) {
+      if (manifest[i] instanceof Array && manifest[i].length > 1) {
+        total += manifest[i][1];
+      }
+    }
+    progress = progress || console.log.bind(console, "File load progress");
+    __loadFiles(manifest, done, progress, 0, total, 0);
+  }
+
+  if (manifestSpec instanceof String || typeof manifestSpec === "string") {
+    get(manifestSpec, function (manifestText) {
+      readManifest(JSON.parse(manifestText));
+    });
+  } else if (manifestSpec instanceof Array) {
+    readManifest(manifestSpec);
+  }
+}
+
+function loadFiles(manifestSpec, progress) {
+  return new Promise(function (resolve, reject) {
+    return _loadFiles(manifestSpec, progress, resolve);
+  });
+}
+    if(typeof window !== "undefined") window.loadFiles = loadFiles;
+})();
+    // end D:\Documents\VR\webvr-bootstrapper\src\loadFiles.js
+    ////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+    // start D:\Documents\VR\webvr-bootstrapper\src\ViewCameraTransform.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -13888,12 +14003,12 @@ var ViewCameraTransform = function () {
 
   return ViewCameraTransform;
 }();
-if(typeof window !== "undefined") window.ViewCameraTransform = ViewCameraTransform;
+    if(typeof window !== "undefined") window.ViewCameraTransform = ViewCameraTransform;
 })();
-// end D:\Documents\VR\webvr-bootstrapper\src\ViewCameraTransform.js
+    // end D:\Documents\VR\webvr-bootstrapper\src\ViewCameraTransform.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\webvr-bootstrapper\src\WebVRBootstrapper.js
+    // start D:\Documents\VR\webvr-bootstrapper\src\WebVRBootstrapper.js
 (function(){"use strict";
 
 function WebVRBootstrapper(manifest) {
@@ -13903,124 +14018,11 @@ function WebVRBootstrapper(manifest) {
     };
   });
 }
-if(typeof window !== "undefined") window.WebVRBootstrapper = WebVRBootstrapper;
+    if(typeof window !== "undefined") window.WebVRBootstrapper = WebVRBootstrapper;
 })();
-// end D:\Documents\VR\webvr-bootstrapper\src\WebVRBootstrapper.js
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\webvr-bootstrapper\src\documentReady.js
-(function(){"use strict";
-
-var documentReady = new Promise(function (resolve, reject) {
-  function setup() {
-    var ready = document.readyState === "complete";
-    if (ready) {
-      document.removeEventListener("readystatechange", setup);
-      resolve();
-    }
-    return ready;
-  }
-
-  if (!setup()) {
-    document.addEventListener("readystatechange", setup);
-  }
-});
-if(typeof window !== "undefined") window.documentReady = documentReady;
-})();
-// end D:\Documents\VR\webvr-bootstrapper\src\documentReady.js
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\webvr-bootstrapper\src\loadFiles.js
-(function(){"use strict";
-
-function get(url, done, progress) {
-  var req = new XMLHttpRequest();
-  req.onload = function () {
-    if (req.status < 400) {
-      done(req.response);
-    } else {
-      done(new Error(req.status));
-    }
-  };
-
-  req.open("GET", url);
-  req.onprogress = progress;
-  req.send();
-}
-
-function __loadFiles(files, done, progress, index, total, loaded) {
-  if (index < files.length) {
-    var file = files[index][0],
-        size = files[index][1],
-        shortExt = file.match(/\.\w+$/)[0] || "none",
-        longExt = file.match(/(\.\w+)+$/)[0] || "none",
-        lastLoaded = loaded;
-    get(file, function (content) {
-      if (content instanceof Error) {
-        console.error("Failed to load " + file + ": " + content.message);
-      } else if (shortExt === ".js" && longExt !== ".typeface.js") {
-        var s = document.createElement("script");
-        s.type = "text/javascript";
-        s.src = file;
-        s.defer = false;
-        s.async = false;
-        document.head.appendChild(s);
-      }
-
-      __loadFiles(files, done, progress, index + 1, total, loaded);
-    }, function (evt) {
-      return progress(loaded = lastLoaded + evt.loaded, total);
-    });
-  } else {
-    done();
-  }
-}
-
-/* syntax:
-loadFiles([
-    // filename,  size
-    ["script1.js", 456],
-    ["script3.js", 8762],
-    ["script2.js", 12368]
-], function(objects){
-    // the thing to do when done.
-    console.assert(objects.name1 !== undefined);
-    console.assert(objects.name2 !== undefined);
-}, function(n, m, size, total){
-    // track progress
-    console.log("loaded file %d of %d, loaded %d bytes of %d bytes total.", n, m, size, total);
-});
-*/
-function _loadFiles(manifestSpec, progress, done) {
-  function readManifest(manifest) {
-    var total = 0;
-    for (var i = 0; i < manifest.length; ++i) {
-      if (manifest[i] instanceof Array && manifest[i].length > 1) {
-        total += manifest[i][1];
-      }
-    }
-    progress = progress || console.log.bind(console, "File load progress");
-    __loadFiles(manifest, done, progress, 0, total, 0);
-  }
-
-  if (manifestSpec instanceof String || typeof manifestSpec === "string") {
-    get(manifestSpec, function (manifestText) {
-      readManifest(JSON.parse(manifestText));
-    });
-  } else if (manifestSpec instanceof Array) {
-    readManifest(manifestSpec);
-  }
-}
-
-function loadFiles(manifestSpec, progress) {
-  return new Promise(function (resolve, reject) {
-    return _loadFiles(manifestSpec, progress, resolve);
-  });
-}
-if(typeof window !== "undefined") window.loadFiles = loadFiles;
-})();
-// end D:\Documents\VR\webvr-bootstrapper\src\loadFiles.js
-////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\webvr-bootstrapper\src\WebVRBootstrapper.js
+    ////////////////////////////////////////////////////////////////////////////////
+console.info("webvr-bootstrapper v4.0.4. see http://www.primrosevr.com for more information.");
 /*
   html2canvas 0.5.0-beta4 <http://html2canvas.hertzen.com>
   Copyright (c) 2016 Niklas von Hertzen
@@ -78622,4 +78624,4 @@ function toString(digits) {
 })();
     // end D:\Documents\VR\Primrose\src\THREE\Vector3\prototype\toString.js
     ////////////////////////////////////////////////////////////////////////////////
-console.info("main v0.26.11. see https://www.primrosevr.com for more information.");
+console.info("primrose v0.26.12. see https://www.primrosevr.com for more information.");
