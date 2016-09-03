@@ -70,10 +70,15 @@ class VR extends Primrose.PoseInputProcessor {
         layers = layers[0];
       }
 
-      var promise = Promise.resolve();
+      var promise = null;
 
       // If we're using WebVR-Polyfill, just let it do its job.
-      if(!this.currentDevice.isPolyfilled) {
+      if(this.currentDevice.isPolyfilled) {
+        // for Firefox's sake, this can't be done in a Promise.
+        promise = this.currentDevice.requestPresent(layers)
+          .catch((exp) => console.warn("requstPresent", exp));
+      }
+      else{
         // PCs with HMD should also make the browser window on the main
         // display full-screen.
         promise = FullScreen.request(elem)
@@ -88,11 +93,10 @@ class VR extends Primrose.PoseInputProcessor {
           promise = promise.then(() => PointerLock.request(elem))
             .catch((exp) => console.warn("PointerLock", exp));
         }
+
+        promise = promise.then(() => this.currentDevice.requestPresent(layers))
+          .catch((exp) => console.warn("requstPresent", exp));
       }
-
-      promise = promise.then(() => this.currentDevice.requestPresent(layers))
-        .catch((exp) => console.warn("requstPresent", exp));
-
       return promise;
     }
   }
