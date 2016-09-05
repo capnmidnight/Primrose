@@ -2,9 +2,10 @@
 
 append head
   <!-- start documentation.pug head append -->
-  script(type="text/javascript", src= fileRoot + "node_modules/pliny/pliny" + jsExt)
-  script(type="text/javascript", src= fileRoot + "Primrose" + jsExt)
-  script(type="text/javascript", src= fileRoot + "PrimroseDocumentation" + jsExt)
+  script(src= fileRoot + "node_modules/lavu-details-polyfill/lib/index." + jsExt)
+  script(src= fileRoot + "node_modules/pliny/pliny" + jsExt)
+  script(src= fileRoot + "Primrose" + jsExt)
+  script(src= fileRoot + "PrimroseDocumentation" + jsExt)
   <!-- end documentation.pug head append -->
 
 append header

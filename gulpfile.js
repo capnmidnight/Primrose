@@ -7,7 +7,6 @@ var gulp = require("gulp"),
   nt = build.setup(gulp, pkg),
   deps = nt.cat("PrimroseDependencies", [
     "node_modules/promise-polyfill/promise.js",
-    "node_modules/lavu-details-polyfill/lib/index.js",
     "node_modules/socket.io-client/socket.io.js",
     "node_modules/webvr-polyfill/build/webvr-polyfill.js",
     "node_modules/webvr-standard-monitor/webvr-standard-monitor.js",
