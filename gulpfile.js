@@ -57,10 +57,6 @@ gulp.task("debug", [
   css.build
 ]);
 
-gulp.task("js", [js.default]);
-gulp.task("html", [html.debug]);
-gulp.task("css", [css.build]);
-
 gulp.task("release",  [
   "archive",
   "MeetingManifest",
