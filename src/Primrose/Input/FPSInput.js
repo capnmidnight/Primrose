@@ -110,10 +110,10 @@ class FPSInput {
 
     this.add(new Primrose.Input.Mouse(DOMElement, {
       buttons: {
-        buttons: [1]
+        axes: ["BUTTONS"]
       },
       dButtons: {
-        buttons: [1],
+        axes: ["BUTTONS"],
         delta: true
       },
       dx: {
