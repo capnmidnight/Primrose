@@ -230,8 +230,7 @@ class Pointer extends Primrose.AbstractEventEmitter {
         isGround = false,
         object,
         control,
-        point,
-        output = "";
+        point;
 
       for(var i = 0; i < this.triggerDevices.length; ++i) {
         var obj = this.triggerDevices[i];
@@ -240,9 +239,6 @@ class Pointer extends Primrose.AbstractEventEmitter {
             v2 = obj.getValue("dButtons");
           buttons += v1;
           dButtons += v2;
-          if(obj.name === "Touch"){
-            output += `${v1} ${v2}`;
-          }
         }
       }
 
