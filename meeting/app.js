@@ -32,30 +32,45 @@ ctrls.closeButton.addEventListener("click", hideLoginForm, false);
 ctrls.userName.addEventListener("keyup", authenticate);
 ctrls.connect.addEventListener("click", authenticate);
 ctrls.randomRoomName.addEventListener("click", setRoomName);
-ctrls.randomUserName.addEventListener("click", setRandomUserName);
+ctrls.randomUserName.addEventListener("click", setUserName);
 
 window.addEventListener("popstate", setRoomName);
 env.addEventListener("ready", environmentReady);
 
-setRoomName();
-setRandomUserName();
+setRoomName({ state: {
+  roomName: fromField(location.search, roomPattern) || fromField(document.cookie, roomPattern)
+}});
 
-ctrls.roomName.value = fromField(location.search, roomPattern) || fromField(document.cookie, roomPattern);
-ctrls.userName.value = fromField(location.search, userPattern) || fromField(document.cookie, userPattern);
+setUserName({ state: {
+  userName: fromField(location.search, userPattern) || fromField(document.cookie, userPattern)
+}});
 
 function setRoomName(evt) {
-  defaultRoomName = evt && evt.state && evt.state.roomName || names.toString();
-  ctrls.roomName.placeholder = "Type a room name (currently " + defaultRoomName + ")";
-  ctrls.roomName.value = "";
+  defaultRoomName = evt && evt.state && evt.state.roomName;
+  if(defaultRoomName){
+    evt = evt || true;
+    ctrls.roomName.value = defaultRoomName;
+  }
+  else {
+    defaultRoomName = names.toString();
+    ctrls.roomName.placeholder = "Type a room name (currently " + defaultRoomName + ")";
+    ctrls.roomName.value = "";
+  }
   if(evt && evt.type !== "popstate"){
     history.pushState({ roomName: defaultRoomName }, "Room ID: " + defaultRoomName, "?room=" + defaultRoomName);
   }
 }
 
-function setRandomUserName() {
-  defaultUserName = names.toString();
-  ctrls.userName.placeholder = "Type a user name (currently " + defaultUserName + ")";
-  ctrls.userName.value = "";
+function setUserName(evt) {
+  defaultUserName = evt && evt.state && evt.state.userName;
+  if(defaultUserName){
+    ctrls.userName.value = defaultUserName;
+  }
+  else{
+    defaultUserName = names.toString();
+    ctrls.userName.placeholder = "Type a user name (currently " + defaultUserName + ")";
+    ctrls.userName.value = "";
+  }
 }
 
 function getRoomName() {
@@ -144,8 +159,7 @@ function authSucceeded() {
   disableLogin(false);
   hideLoginForm();
 
-  document.cookie = "user=" + getUserName() +
-  "\nroom=" + getRoomName();
+  document.cookie = "user=" + getUserName() + "&room=" + getRoomName();
   env.connect(socket, ctrls.userName.value);
   document.title = getUserName() + " in " + getRoomName();
 }
