@@ -67,7 +67,7 @@ class VR extends Primrose.PoseInputProcessor {
         rightParams = this.currentDevice.getEyeParameters("right"),
         fov = leftParams.fieldOfView;
       this.rotationAngle = Math.PI * (fov.leftDegrees + fov.rightDegrees) / 360;
-      this.isStereo = leftParams && rightParams && true;
+      this.isStereo = !!(leftParams && rightParams);
     }
   }
 

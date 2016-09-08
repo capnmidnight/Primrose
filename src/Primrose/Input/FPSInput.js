@@ -325,19 +325,21 @@ class FPSInput {
   }
 
   update(dt) {
-    var i;
-    this.Keyboard.enabled = this.Touch.enabled = this.Mouse.enabled = !this.hasMotionControllers;
-    if (this.Gamepad_0) {
-      this.Gamepad_0.enabled = !this.hasMotionControllers;
-    }
-
-    var hadGamepad = this.hasGamepad;
+    var i,
+      hadGamepad = this.hasGamepad;
     Primrose.Input.Gamepad.poll();
     for (i = 0; i < this.managers.length; ++i) {
       this.managers[i].update(dt);
     }
     if (!hadGamepad && this.hasGamepad) {
       this.Mouse.inPhysicalUse = false;
+    }
+
+    this.head.showPointer = this.VR.hasOrientation;
+    this.mousePointer.showPointer = (this.hasMouse || this.hasGamepad) && !this.hasMotionControllers;
+    this.Keyboard.enabled = this.Touch.enabled = this.Mouse.enabled = !this.hasMotionControllers;
+    if (this.Gamepad_0) {
+      this.Gamepad_0.enabled = !this.hasMotionControllers;
     }
 
     this.updateStage(dt);
@@ -353,15 +355,9 @@ class FPSInput {
       this.pointers[i].update();
     }
 
-    if (this.VR.isStereo) {
-      this.mousePointer.showPointer = (this.hasMouse || this.hasGamepad) && !(this.hasTouch || this.hasMotionControllers);
-      this.head.showPointer = true;
-    }
-    else {
+    if (!this.VR.isStereo && this.mousePointer.showPointer) {
       // if we're not using an HMD, then update the view according to the mouse
       this.head.quaternion.copy(this.mousePointer.quaternion);
-      this.head.showPointer = false;
-      this.mousePointer.showPointer = true;
     }
 
     // record the position and orientation of the user

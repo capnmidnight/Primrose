@@ -31,14 +31,14 @@ class Gamepad extends Primrose.PoseInputProcessor {
     if (id === "OpenVR Gamepad") {
       id = "Vive";
     }
-    else if (id.indexOf("Xbox") === 0) {
-      id = "Gamepad";
-    }
     else if (id.indexOf("Rift") === 0) {
       id = "Rift";
     }
     else if (id.indexOf("Unknown") === 0) {
       id = "Unknown";
+    }
+    else {
+      id = "Gamepad";
     }
     id = (id + "_" + (pad.index || 0))
       .replace(/\s+/g, "_");
@@ -116,21 +116,26 @@ class Gamepad extends Primrose.PoseInputProcessor {
   }
 
   checkDevice(pad) {
-    var i, buttonMap = 0;
+    var i, j, buttonMap = 0;
     this.currentDevice = pad;
     this.currentPose = pad.capabilities && pad.capabilities.hasOrientation && this.currentDevice.pose;
-    for (i = 0; i < pad.buttons.length; ++i) {
+    for (i = 0, j = pad.buttons.length; i < pad.buttons.length; ++i, ++j) {
       var btn = pad.buttons[i];
       this.setButton(i, btn.pressed);
       if (btn.pressed) {
         buttonMap |= 0x1 << i;
       }
-      this.setButton(i + pad.buttons.length, btn.touched);
+
+      this.setButton(j, btn.touched);
+      if(btn.touched){
+        buttonMap |= 0x1 << j;
+      }
     }
     this.setAxis("BUTTONS", buttonMap);
     for (i = 0; i < pad.axes.length; ++i) {
-      var axisName = this.axisNames[this.axisOffset * pad.axes.length + i];
-      this.setAxis(axisName, pad.axes[i]);
+      var axisName = this.axisNames[this.axisOffset * pad.axes.length + i],
+        axisValue = pad.axes[i];
+      this.setAxis(axisName, axisValue);
     }
   }
 
