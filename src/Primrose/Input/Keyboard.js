@@ -32,6 +32,10 @@ class Keyboard extends Primrose.InputProcessor {
     }
   }
 
+  get lockMovement(){
+    return this._pointerHack && this._pointerHack.lockMovement;
+  }
+
   constructor(input, commands) {
     super("Keyboard", commands);
     this.listeners.clipboard = [];
