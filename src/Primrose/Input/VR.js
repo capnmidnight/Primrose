@@ -2,7 +2,17 @@ const DEFAULT_POSE = {
     position: [0, 0, 0],
     orientation: [0, 0, 0, 1]
   },
-  GAZE_LENGTH = 3000;
+  GAZE_LENGTH = 3000,
+
+  heap = new WeakMap();
+
+function priv(obj, value) {
+  if(!heap.has(obj)) {
+    heap.set(obj, value || {});
+  }
+  return heap.get(obj);
+}
+
 pliny.class({
   parent: "Primrose.Input",
     name: "VR",
@@ -17,6 +27,11 @@ pliny.class({
 class VR extends Primrose.PoseInputProcessor {
   constructor(avatarHeight) {
     super("VR");
+
+    priv(this, {
+      requestPresent: (layers) => this.currentDevice.requestPresent(layers)
+          .catch((exp) => console.warn("requstPresent", exp))
+    });
 
     this.displays = [];
     this._transformers = [];
@@ -70,32 +85,19 @@ class VR extends Primrose.PoseInputProcessor {
         layers = layers[0];
       }
 
-      var promise = null;
+      var promise = null,
+        rp = priv(this).requestPresent;
 
       // If we're using WebVR-Polyfill, just let it do its job.
       if(this.currentDevice.isPolyfilled) {
         // for Firefox's sake, this can't be done in a Promise.
-        promise = this.currentDevice.requestPresent(layers)
-          .catch((exp) => console.warn("requstPresent", exp));
+        promise = rp(layers);
       }
       else{
         // PCs with HMD should also make the browser window on the main
-        // display full-screen.
-        promise = FullScreen.request(elem)
-          .catch((exp) => console.warn("FullScreen", exp));
-
-        // so we can then also lock pointer.
-        if(isMobile) {
-          promise = promise.then(Orientation.lock)
-            .catch((exp) => console.warn("OrientationLock", exp));
-        }
-        else {
-          promise = promise.then(() => PointerLock.request(elem))
-            .catch((exp) => console.warn("PointerLock", exp));
-        }
-
-        promise = promise.then(() => this.currentDevice.requestPresent(layers))
-          .catch((exp) => console.warn("requstPresent", exp));
+        // display full-screen, so we can then also lock pointer.
+        promise = WebVRStandardMonitor.standardFullScreenBehavior(elem)
+          .then(() => rp(layers));
       }
       return promise;
     }
