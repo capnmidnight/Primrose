@@ -13317,7 +13317,7 @@ var FullScreen = AsyncLockRequest("Fullscreen", ["fullscreenElement", "mozFullSc
     // start D:\Documents\VR\webvr-standard-monitor\src\Orientation.js
 (function(){"use strict";
 
-function lockOrientation() {
+function lockOrientation(element) {
   var type = screen.orientation && screen.orientation.type || screen.mozOrientation || "";
   if (type.indexOf("landscape") === -1) {
     type = "landscape-primary";
@@ -13327,10 +13327,10 @@ function lockOrientation() {
   } else if (screen.mozLockOrientation) {
     var locked = screen.mozLockOrientation(type);
     if (locked) {
-      return Promise.resolve();
+      return Promise.resolve(element);
     }
   } else {
-    return Promise.reject();
+    return Promise.reject(new Error("Pointer lock not supported."));
   }
 }
 
@@ -13404,6 +13404,19 @@ function mutable(value, type) {
       }
       value = v;
     }
+  };
+}
+
+function log(msg) {
+  return function (elem) {
+    console.log(msg, elem);
+    return elem;
+  };
+}
+
+function warn(msg) {
+  return function (exp) {
+    console.warn(msg, exp);
   };
 }
 
@@ -13506,16 +13519,22 @@ function fireDisplayPresentChange(evt) {
   window.dispatchEvent(new Event("vrdisplaypresentchange"));
 }
 
+WebVRStandardMonitor.standardFullScreenBehavior = function (elem) {
+  var promise = FullScreen.request(elem).catch(warn("FullScreen failed"));
+  if (isMobile) {
+    promise = promise.then(Orientation.lock).catch(warn("OrientationLock failed"));
+  } else {
+    promise = promise.then(PointerLock.request).catch(warn("PointerLock failed"));
+  }
+  return promise;
+};
+
 WebVRStandardMonitor.prototype.requestPresent = function (layers) {
   for (var i = 0; i < this.capabilities.maxLayers && i < layers.length; ++i) {
     priv(this).currentLayers[i] = layers[i];
   }
   FullScreen.addChangeListener(fireDisplayPresentChange);
-  var promise = FullScreen.request(layers[0].source);
-  if (isMobile) {
-    promise = promise.then(Orientation.lock);
-  }
-  return promise;
+  return WebVRStandardMonitor.standardFullScreenBehavior(layers[0].source);
 };
 
 WebVRStandardMonitor.prototype.getLayers = function () {
@@ -13555,7 +13574,7 @@ WebVRStandardMonitor.prototype.getEyeParameters = function (side) {
 })();
     // end D:\Documents\VR\webvr-standard-monitor\src\WebVRStandardMonitor.js
     ////////////////////////////////////////////////////////////////////////////////
-console.info("webvr-standard-monitor v1.0.4. see http://www.primrosevr.com for more information.");
+console.info("webvr-standard-monitor v1.0.5. see http://www.primrosevr.com for more information.");
 ////////////////////////////////////////////////////////////////////////////////
     // start D:\Documents\VR\webvr-bootstrapper\src\documentReady.js
 (function(){"use strict";
@@ -66052,6 +66071,7 @@ var InputProcessor = function () {
 
     window.addEventListener("keydown", readMetaKeys, false);
     window.addEventListener("keyup", readMetaKeys, false);
+    window.addEventListener("focus", readMetaKeys, false);
 
     this.axisNames = axisNames || [];
 
@@ -66160,119 +66180,117 @@ var InputProcessor = function () {
   }, {
     key: "update",
     value: function update(dt) {
-      if (this.enabled) {
-        if (this.ready && this.enabled && this.inPhysicalUse && !this.paused && dt > 0) {
-          for (var name in this.commands) {
-            var cmd = this.commands[name];
-            cmd.state.wasPressed = cmd.state.pressed;
-            cmd.state.pressed = false;
-            if (!cmd.disabled) {
-              var metaKeysSet = true,
-                  n;
+      if (this.enabled && this.ready && this.inPhysicalUse && !this.paused && dt > 0) {
+        for (var name in this.commands) {
+          var cmd = this.commands[name];
+          cmd.state.wasPressed = cmd.state.pressed;
+          cmd.state.pressed = false;
+          if (!cmd.disabled) {
+            var metaKeysSet = true,
+                n;
 
-              if (cmd.metaKeys) {
-                for (n = 0; n < cmd.metaKeys.length && metaKeysSet; ++n) {
-                  var m = cmd.metaKeys[n];
-                  metaKeysSet = metaKeysSet && (this.inputState[Primrose.Keys.MODIFIER_KEYS[m.index]] && !m.toggle || !this.inputState[Primrose.Keys.MODIFIER_KEYS[m.index]] && m.toggle);
+            if (cmd.metaKeys) {
+              for (n = 0; n < cmd.metaKeys.length && metaKeysSet; ++n) {
+                var m = cmd.metaKeys[n];
+                metaKeysSet = metaKeysSet && (this.inputState[Primrose.Keys.MODIFIER_KEYS[m.index]] && !m.toggle || !this.inputState[Primrose.Keys.MODIFIER_KEYS[m.index]] && m.toggle);
+              }
+            }
+
+            if (metaKeysSet) {
+              var pressed = true,
+                  value = 0,
+                  temp,
+                  anyButtons = false;
+
+              for (n in this.inputState.buttons) {
+                if (this.inputState.buttons[n]) {
+                  anyButtons = true;
+                  break;
                 }
               }
 
-              if (metaKeysSet) {
-                var pressed = true,
-                    value = 0,
-                    temp,
-                    anyButtons = false;
-
-                for (n in this.inputState.buttons) {
-                  if (this.inputState.buttons[n]) {
-                    anyButtons = true;
-                    break;
-                  }
-                }
-
-                if (cmd.buttons) {
-                  for (n = 0; n < cmd.buttons.length; ++n) {
-                    var btn = cmd.buttons[n],
-                        code = btn.index + 1,
-                        p = code === Primrose.Keys.ANY && anyButtons || !!this.inputState.buttons[code];
-                    temp = p ? btn.sign : 0;
-                    pressed = pressed && (p && !btn.toggle || !p && btn.toggle);
-                    if (Math.abs(temp) > Math.abs(value)) {
-                      value = temp;
-                    }
-                  }
-                }
-
-                if (cmd.axes) {
-                  for (n = 0; n < cmd.axes.length; ++n) {
-                    var a = cmd.axes[n];
-                    temp = a.sign * this.inputState.axes[a.index];
-                    if (Math.abs(temp) > Math.abs(value)) {
-                      value = temp;
-                    }
-                  }
-                }
-
-                for (n = 0; n < cmd.commands.length; ++n) {
-                  temp = this.getValue(cmd.commands[n]);
+              if (cmd.buttons) {
+                for (n = 0; n < cmd.buttons.length; ++n) {
+                  var btn = cmd.buttons[n],
+                      code = btn.index + 1,
+                      p = code === Primrose.Keys.ANY && anyButtons || !!this.inputState.buttons[code];
+                  temp = p ? btn.sign : 0;
+                  pressed = pressed && (p && !btn.toggle || !p && btn.toggle);
                   if (Math.abs(temp) > Math.abs(value)) {
                     value = temp;
                   }
                 }
+              }
 
-                if (cmd.scale !== undefined) {
-                  value *= cmd.scale;
-                }
-
-                if (cmd.offset !== undefined) {
-                  value += cmd.offset;
-                }
-
-                if (cmd.deadzone && Math.abs(value) < cmd.deadzone) {
-                  value = 0;
-                }
-
-                if (cmd.integrate) {
-                  value = this.getValue(cmd.name) + value * dt;
-                } else if (cmd.delta) {
-                  var ov = value;
-                  if (cmd.state.lv !== undefined) {
-                    value = (value - cmd.state.lv) / dt;
+              if (cmd.axes) {
+                for (n = 0; n < cmd.axes.length; ++n) {
+                  var a = cmd.axes[n];
+                  temp = a.sign * this.inputState.axes[a.index];
+                  if (Math.abs(temp) > Math.abs(value)) {
+                    value = temp;
                   }
-                  cmd.state.lv = ov;
                 }
-
-                if (cmd.min !== undefined) {
-                  value = Math.max(cmd.min, value);
-                }
-
-                if (cmd.max !== undefined) {
-                  value = Math.min(cmd.max, value);
-                }
-
-                if (cmd.threshold) {
-                  pressed = pressed && value > cmd.threshold;
-                }
-
-                cmd.state.pressed = pressed;
-                cmd.state.value = value;
               }
 
-              cmd.state.lt += dt;
-
-              cmd.state.fireAgain = cmd.state.pressed && cmd.state.lt >= cmd.dt && (cmd.repetitions === -1 || cmd.state.repeatCount < cmd.repetitions);
-
-              if (cmd.state.fireAgain) {
-                cmd.state.lt = 0;
-                ++cmd.state.repeatCount;
-              } else if (!cmd.state.pressed) {
-                cmd.state.repeatCount = 0;
+              for (n = 0; n < cmd.commands.length; ++n) {
+                temp = this.getValue(cmd.commands[n]);
+                if (Math.abs(temp) > Math.abs(value)) {
+                  value = temp;
+                }
               }
+
+              if (cmd.scale !== undefined) {
+                value *= cmd.scale;
+              }
+
+              if (cmd.offset !== undefined) {
+                value += cmd.offset;
+              }
+
+              if (cmd.deadzone && Math.abs(value) < cmd.deadzone) {
+                value = 0;
+              }
+
+              if (cmd.integrate) {
+                value = this.getValue(cmd.name) + value * dt;
+              } else if (cmd.delta) {
+                var ov = value;
+                if (cmd.state.lv !== undefined) {
+                  value = (value - cmd.state.lv) / dt;
+                }
+                cmd.state.lv = ov;
+              }
+
+              if (cmd.min !== undefined) {
+                value = Math.max(cmd.min, value);
+              }
+
+              if (cmd.max !== undefined) {
+                value = Math.min(cmd.max, value);
+              }
+
+              if (cmd.threshold) {
+                pressed = pressed && value > cmd.threshold;
+              }
+
+              cmd.state.pressed = pressed;
+              cmd.state.value = value;
+            }
+
+            cmd.state.lt += dt;
+
+            cmd.state.fireAgain = cmd.state.pressed && cmd.state.lt >= cmd.dt && (cmd.repetitions === -1 || cmd.state.repeatCount < cmd.repetitions);
+
+            if (cmd.state.fireAgain) {
+              cmd.state.lt = 0;
+              ++cmd.state.repeatCount;
+            } else if (!cmd.state.pressed) {
+              cmd.state.repeatCount = 0;
             }
           }
-
-          this.fireCommands();
         }
+
+        this.fireCommands();
       }
     }
   }, {
@@ -66491,7 +66509,7 @@ var InputProcessor = function () {
     key: "setAxis",
     value: function setAxis(name, value) {
       var i = this.axisNames.indexOf(name);
-      if (i > -1) {
+      if (i > -1 && (this.inPhysicalUse || value !== 0)) {
         this.inPhysicalUse = true;
         this.inputState.axes[i] = value;
       }
@@ -66499,8 +66517,10 @@ var InputProcessor = function () {
   }, {
     key: "setButton",
     value: function setButton(index, pressed) {
-      this.inPhysicalUse = true;
-      this.inputState.buttons[index] = pressed;
+      if (this.inPhysicalUse || pressed) {
+        this.inPhysicalUse = true;
+        this.inputState.buttons[index] = pressed;
+      }
     }
   }, {
     key: "isDown",
@@ -67213,7 +67233,7 @@ var PoseInputProcessor = function (_Primrose$InputProces) {
       if (this.currentDevice) {
         var pose = this.currentPose || this.lastPose || DEFAULT_POSE;
         this.lastPose = pose;
-        this.inPhysicalUse = !!this.currentPose;
+        this.inPhysicalUse = this.currentDevice.capabilities && this.currentDevice.capabilities.hasOrientation || this.inPhysicalUse;
         var orient = this.currentPose && this.currentPose.orientation,
             pos = this.currentPose && this.currentPose.position;
         if (orient) {
@@ -71766,7 +71786,7 @@ var FPSInput = function () {
           mgr;
 
       if (padID !== "Unknown" && padID !== "Rift") {
-        if (!!pad.pose) {
+        if (pad.pose && pad.capabilities && pad.capabilities.hasOrientation) {
           var controllerNumber = 0;
           for (var i = 0; i < _this.managers.length; ++i) {
             mgr = _this.managers[i];
@@ -71919,19 +71939,21 @@ var FPSInput = function () {
   }, {
     key: "update",
     value: function update(dt) {
-      var i;
-      this.Keyboard.enabled = this.Touch.enabled = this.Mouse.enabled = !this.hasMotionControllers;
-      if (this.Gamepad_0) {
-        this.Gamepad_0.enabled = !this.hasMotionControllers;
-      }
-
-      var hadGamepad = this.hasGamepad;
+      var i,
+          hadGamepad = this.hasGamepad;
       Primrose.Input.Gamepad.poll();
       for (i = 0; i < this.managers.length; ++i) {
         this.managers[i].update(dt);
       }
       if (!hadGamepad && this.hasGamepad) {
         this.Mouse.inPhysicalUse = false;
+      }
+
+      this.head.showPointer = this.VR.hasOrientation;
+      this.mousePointer.showPointer = (this.hasMouse || this.hasGamepad) && !this.hasMotionControllers;
+      this.Keyboard.enabled = this.Touch.enabled = this.Mouse.enabled = !this.hasMotionControllers;
+      if (this.Gamepad_0) {
+        this.Gamepad_0.enabled = !this.hasMotionControllers;
       }
 
       this.updateStage(dt);
@@ -71947,14 +71969,9 @@ var FPSInput = function () {
         this.pointers[i].update();
       }
 
-      if (this.VR.hasOrientation) {
-        this.mousePointer.showPointer = (this.hasMouse || this.hasGamepad) && !(this.hasTouch || this.hasMotionControllers);
-        this.head.showPointer = true;
-      } else {
+      if (!this.VR.isStereo && this.mousePointer.showPointer) {
         // if we're not using an HMD, then update the view according to the mouse
         this.head.quaternion.copy(this.mousePointer.quaternion);
-        this.head.showPointer = false;
-        this.mousePointer.showPointer = true;
       }
 
       // record the position and orientation of the user
@@ -72120,12 +72137,12 @@ var Gamepad = function (_Primrose$PoseInputPr) {
       var id = pad.id;
       if (id === "OpenVR Gamepad") {
         id = "Vive";
-      } else if (id.indexOf("Xbox") === 0) {
-        id = "Gamepad";
       } else if (id.indexOf("Rift") === 0) {
         id = "Rift";
       } else if (id.indexOf("Unknown") === 0) {
         id = "Unknown";
+      } else {
+        id = "Gamepad";
       }
       id = (id + "_" + (pad.index || 0)).replace(/\s+/g, "_");
       return id;
@@ -72214,21 +72231,27 @@ var Gamepad = function (_Primrose$PoseInputPr) {
     key: "checkDevice",
     value: function checkDevice(pad) {
       var i,
+          j,
           buttonMap = 0;
       this.currentDevice = pad;
-      this.currentPose = this.currentDevice.pose;
-      for (i = 0; i < pad.buttons.length; ++i) {
+      this.currentPose = pad.capabilities && pad.capabilities.hasOrientation && this.currentDevice.pose;
+      for (i = 0, j = pad.buttons.length; i < pad.buttons.length; ++i, ++j) {
         var btn = pad.buttons[i];
         this.setButton(i, btn.pressed);
         if (btn.pressed) {
           buttonMap |= 0x1 << i;
         }
-        this.setButton(i + pad.buttons.length, btn.touched);
+
+        this.setButton(j, btn.touched);
+        if (btn.touched) {
+          buttonMap |= 0x1 << j;
+        }
       }
       this.setAxis("BUTTONS", buttonMap);
       for (i = 0; i < pad.axes.length; ++i) {
-        var axisName = this.axisNames[this.axisOffset * pad.axes.length + i];
-        this.setAxis(axisName, pad.axes[i]);
+        var axisName = this.axisNames[this.axisOffset * pad.axes.length + i],
+            axisValue = pad.axes[i];
+        this.setAxis(axisName, axisValue);
       }
     }
   }, {
@@ -73036,7 +73059,16 @@ var DEFAULT_POSE = {
   position: [0, 0, 0],
   orientation: [0, 0, 0, 1]
 },
-    GAZE_LENGTH = 3000;
+    GAZE_LENGTH = 3000,
+    heap = new WeakMap();
+
+function priv(obj, value) {
+  if (!heap.has(obj)) {
+    heap.set(obj, value || {});
+  }
+  return heap.get(obj);
+}
+
 var VR = function (_Primrose$PoseInputPr) {
   _inherits(VR, _Primrose$PoseInputPr);
 
@@ -73044,6 +73076,14 @@ var VR = function (_Primrose$PoseInputPr) {
     _classCallCheck(this, VR);
 
     var _this = _possibleConstructorReturn(this, (VR.__proto__ || Object.getPrototypeOf(VR)).call(this, "VR"));
+
+    priv(_this, {
+      requestPresent: function requestPresent(layers) {
+        return _this.currentDevice.requestPresent(layers).catch(function (exp) {
+          return console.warn("requstPresent", exp);
+        });
+      }
+    });
 
     _this.displays = [];
     _this._transformers = [];
@@ -73053,6 +73093,7 @@ var VR = function (_Primrose$PoseInputPr) {
     _this.stage = null;
     _this.lastStageWidth = null;
     _this.lastStageDepth = null;
+    _this.isStereo = false;
 
     console.info("Checking for displays...");
     _this.ready = navigator.getVRDisplays().then(function (displays) {
@@ -73072,9 +73113,11 @@ var VR = function (_Primrose$PoseInputPr) {
       if (0 <= selectedIndex && selectedIndex <= this.displays.length) {
         this.currentDevice = this.displays[selectedIndex];
         this.currentPose = this.currentDevice.getPose();
-        var params = this.currentDevice.getEyeParameters("left"),
-            fov = params.fieldOfView;
+        var leftParams = this.currentDevice.getEyeParameters("left"),
+            rightParams = this.currentDevice.getEyeParameters("right"),
+            fov = leftParams.fieldOfView;
         this.rotationAngle = Math.PI * (fov.leftDegrees + fov.rightDegrees) / 360;
+        this.isStereo = !!(leftParams && rightParams);
       }
     }
   }, {
@@ -73085,7 +73128,7 @@ var VR = function (_Primrose$PoseInputPr) {
       if (!this.currentDevice) {
         return Promise.reject("No display");
       } else {
-        var promise;
+        var promise, rp;
 
         var _ret = function () {
           var layers = opts,
@@ -73101,38 +73144,18 @@ var VR = function (_Primrose$PoseInputPr) {
           }
 
           promise = null;
+          rp = priv(_this2).requestPresent;
 
           // If we're using WebVR-Polyfill, just let it do its job.
 
           if (_this2.currentDevice.isPolyfilled) {
             // for Firefox's sake, this can't be done in a Promise.
-            promise = _this2.currentDevice.requestPresent(layers).catch(function (exp) {
-              return console.warn("requstPresent", exp);
-            });
+            promise = rp(layers);
           } else {
             // PCs with HMD should also make the browser window on the main
-            // display full-screen.
-            promise = FullScreen.request(elem).catch(function (exp) {
-              return console.warn("FullScreen", exp);
-            });
-
-            // so we can then also lock pointer.
-            if (isMobile) {
-              promise = promise.then(Orientation.lock).catch(function (exp) {
-                return console.warn("OrientationLock", exp);
-              });
-            } else {
-              promise = promise.then(function () {
-                return PointerLock.request(elem);
-              }).catch(function (exp) {
-                return console.warn("PointerLock", exp);
-              });
-            }
-
-            promise = promise.then(function () {
-              return _this2.currentDevice.requestPresent(layers);
-            }).catch(function (exp) {
-              return console.warn("requstPresent", exp);
+            // display full-screen, so we can then also lock pointer.
+            promise = WebVRStandardMonitor.standardFullScreenBehavior(elem).then(function () {
+              return rp(layers);
             });
           }
           return {
@@ -78382,4 +78405,4 @@ function toString(digits) {
 })();
     // end D:\Documents\VR\Primrose\src\THREE\Vector3\prototype\toString.js
     ////////////////////////////////////////////////////////////////////////////////
-console.info("primrose v0.26.14. see https://www.primrosevr.com for more information.");
+console.info("primrose v0.26.15. see https://www.primrosevr.com for more information.");
