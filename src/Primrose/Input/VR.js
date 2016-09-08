@@ -41,6 +41,7 @@ class VR extends Primrose.PoseInputProcessor {
     this.stage = null;
     this.lastStageWidth = null;
     this.lastStageDepth = null;
+    this.isStereo = false;
 
     console.info("Checking for displays...");
     this.ready = navigator.getVRDisplays()
@@ -62,9 +63,11 @@ class VR extends Primrose.PoseInputProcessor {
     if (0 <= selectedIndex && selectedIndex <= this.displays.length) {
       this.currentDevice = this.displays[selectedIndex];
       this.currentPose = this.currentDevice.getPose();
-      var params = this.currentDevice.getEyeParameters("left"),
-        fov = params.fieldOfView;
+      var leftParams = this.currentDevice.getEyeParameters("left"),
+        rightParams = this.currentDevice.getEyeParameters("right"),
+        fov = leftParams.fieldOfView;
       this.rotationAngle = Math.PI * (fov.leftDegrees + fov.rightDegrees) / 360;
+      this.isStereo = leftParams && rightParams && true;
     }
   }
 

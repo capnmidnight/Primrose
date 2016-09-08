@@ -118,7 +118,7 @@ class Gamepad extends Primrose.PoseInputProcessor {
   checkDevice(pad) {
     var i, buttonMap = 0;
     this.currentDevice = pad;
-    this.currentPose = this.currentDevice.pose;
+    this.currentPose = pad.capabilities && pad.capabilities.hasOrientation && this.currentDevice.pose;
     for (i = 0; i < pad.buttons.length; ++i) {
       var btn = pad.buttons[i];
       this.setButton(i, btn.pressed);

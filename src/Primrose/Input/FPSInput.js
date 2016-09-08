@@ -153,7 +153,7 @@ class FPSInput {
         mgr;
 
       if (padID !== "Unknown" && padID !== "Rift") {
-        if (!!pad.pose) {
+        if (pad.pose && pad.capabilities && pad.capabilities.hasOrientation) {
           var controllerNumber = 0;
           for (var i = 0; i < this.managers.length; ++i) {
             mgr = this.managers[i];
@@ -353,7 +353,7 @@ class FPSInput {
       this.pointers[i].update();
     }
 
-    if (this.VR.hasOrientation) {
+    if (this.VR.isStereo) {
       this.mousePointer.showPointer = (this.hasMouse || this.hasGamepad) && !(this.hasTouch || this.hasMotionControllers);
       this.head.showPointer = true;
     }
