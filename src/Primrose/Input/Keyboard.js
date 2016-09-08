@@ -22,6 +22,16 @@ pliny.class({
     }]
 });
 class Keyboard extends Primrose.InputProcessor {
+  get currentControl() {
+    return this._pointerHack && this._pointerHack.currentControl;
+  }
+
+  set currentControl(v){
+    if(this._pointerHack){
+      this._pointerHack.currentControl = v;
+    }
+  }
+
   constructor(input, commands) {
     super("Keyboard", commands);
     this.listeners.clipboard = [];
@@ -31,6 +41,7 @@ class Keyboard extends Primrose.InputProcessor {
     this._operatingSystem = null;
     this.browser = isChrome ? "CHROMIUM" : (isFirefox ? "FIREFOX" : (isIE ? "IE" : (isOpera ? "OPERA" : (isSafari ? "SAFARI" : "UNKNOWN"))));
     this._codePage = null;
+    this._pointerHack = null;
 
     const execute = (evt) => {
       if (!input.lockMovement) {

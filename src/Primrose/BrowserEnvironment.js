@@ -635,6 +635,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       this.input.addEventListener("zero", this.zero, false);
       window.addEventListener("paste", this.input.Keyboard.withCurrentControl("readClipboard"), false);
       window.addEventListener("wheel", this.input.Keyboard.withCurrentControl("readWheel"), false);
+      this.input.Keyboard._pointerHack = this.input.mousePointer;
 
 
       this.input.Keyboard.operatingSystem = this.options.os;
