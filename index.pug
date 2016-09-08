@@ -11,7 +11,7 @@ block header
   h1 Rapidly prototype VR #[br] applications in your browser
   #cta
     button(onclick="document.location='doc/'") get started
-    button(onclick="document.location='meeting/'") try the demo
+    button(onclick="document.location='meeting/?room=demo'") try the demo
 
 block main
   section#intro
@@ -30,4 +30,4 @@ block main
       p Meet with people in virtual reality and voice-chat with them in life-like, face-to-face conversations. See their body language. Hear them from across the room. Through Primrose's common interaction space, design tools, and interface objects, users and developers can work together to create interactive multimedia and productivity applications.
 
   section#demo
-    iframe#frontBuffer(src= fileRoot + "meeting/", role="application", allowfullscreen)
+    iframe#frontBuffer(src= fileRoot + "meeting/?room=demo", role="application", allowfullscreen)

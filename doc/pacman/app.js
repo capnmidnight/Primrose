@@ -11,7 +11,6 @@ var GRASS = "../images/grass.png",
     autoRescaleQuality: false,
     backgroundColor: 0x000000,
     skyTexture: DECK,
-    ambientSound: "../audio/menu.ogg",
     groundTexture: DECK,
     font: "../fonts/helvetiker_regular.typeface.json"
   }),
