@@ -115,6 +115,7 @@ input:disabled, button:disabled {
     color: #222;
     padding: 0.75em;
     width: 24em;
+    max-width: 50vw;
     display: inline-flex;
   }
 
