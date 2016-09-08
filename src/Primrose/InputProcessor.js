@@ -46,6 +46,7 @@ class InputProcessor {
 
     window.addEventListener("keydown", readMetaKeys, false);
     window.addEventListener("keyup", readMetaKeys, false);
+    window.addEventListener("focus", readMetaKeys, false);
 
     this.axisNames = axisNames || [];
 
