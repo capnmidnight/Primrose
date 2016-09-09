@@ -1,14 +1,15 @@
 var textureLoader = null,
   textureCache = {};
 
-Primrose.loadTexture = function (url) {
+Primrose.loadTexture = function (url, progress) {
+  progress = progress || function(){};
   if (!textureLoader) {
     textureLoader = new THREE.TextureLoader();
   }
   textureLoader.setCrossOrigin(THREE.ImageUtils.crossOrigin);
   return cache(
     `Image(${url})`,
-    () => new Promise((resolve, reject) => textureLoader.load(url, resolve, null, reject)));
+    () => new Promise((resolve, reject) => textureLoader.load(url, resolve, progress, reject)));
 };
 
 pliny.function({
@@ -164,7 +165,7 @@ function textured(geometry, txt, options) {
       obj.surface = txt;
     }
     else if (typeof txt === "string") {
-      Primrose.loadTexture(txt)
+      Primrose.loadTexture(txt, options.progress)
         .then(setTexture)
         .catch(console.error.bind(console, "Error loading texture", txt));
     }
