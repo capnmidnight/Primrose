@@ -34,7 +34,7 @@ class PoseInputProcessor extends Primrose.InputProcessor {
     if (this.currentDevice) {
       var pose = this.currentPose || this.lastPose || DEFAULT_POSE;
       this.lastPose = pose;
-      this.inPhysicalUse = this.currentDevice.capabilities && this.currentDevice.capabilities.hasOrientation || this.inPhysicalUse;
+      this.inPhysicalUse = this.hasOrientation || this.inPhysicalUse;
       var orient = this.currentPose && this.currentPose.orientation,
         pos = this.currentPose && this.currentPose.position;
       if (orient) {

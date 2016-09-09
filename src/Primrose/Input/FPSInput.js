@@ -153,7 +153,7 @@ class FPSInput {
         mgr;
 
       if (padID !== "Unknown" && padID !== "Rift") {
-        if (pad.pose && pad.capabilities && pad.capabilities.hasOrientation) {
+        if (Primrose.Input.Gamepad.isMotionController(pad)) {
           var controllerNumber = 0;
           for (var i = 0; i < this.managers.length; ++i) {
             mgr = this.managers[i];
