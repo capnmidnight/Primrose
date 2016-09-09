@@ -1,6 +1,18 @@
 navigator.getGamepads = navigator.getGamepads ||
   navigator.webkitGetGamepads;
 
+function playPattern(devices, pattern, pause){
+  if(pattern.length > 0){
+    const length = pattern.shift();
+    if(!pause){
+      for(var i = 0; i < devices.length; ++i){
+        devices[0].vibrate(1, length);
+      }
+    }
+    setTimeout(playPattern, length, devices, pattern, !pause);
+  }
+}
+
 const listeners = {
     gamepadconnected: [],
     gamepaddisconnected: []
@@ -139,10 +151,19 @@ class Gamepad extends Primrose.PoseInputProcessor {
     }
   }
 
-  vibrate(pattern) {
-    if (this.currentDevice && this.currentDevice.vibrate) {
-      this.currentDevice.vibrate(pattern);
+  vibratePattern(pattern) {
+    if(this.currentDevice){
+      if (this.currentDevice.vibrate) {
+        this.currentDevice.vibrate(pattern);
+      }
+      else if(this.currentDevice.haptics && this.currentDevice.haptics.length > 0) {
+        playPattern(this.currentDevice.haptics, pattern);
+      }
     }
+  }
+
+  get haptics() {
+    return this.currentDevice && this.currentDevice.haptics;
   }
 }
 
