@@ -25,6 +25,13 @@ pliny.class({
     description: "An input manager for gamepad devices."
 });
 class VR extends Primrose.PoseInputProcessor {
+
+  static isStereoDisplay(display) {
+    const leftParams = display.getEyeParameters("left"),
+        rightParams = display.getEyeParameters("right");
+    return !!(leftParams && rightParams);
+  }
+
   constructor(avatarHeight) {
     super("VR");
 
@@ -64,10 +71,9 @@ class VR extends Primrose.PoseInputProcessor {
       this.currentDevice = this.displays[selectedIndex];
       this.currentPose = this.currentDevice.getPose();
       var leftParams = this.currentDevice.getEyeParameters("left"),
-        rightParams = this.currentDevice.getEyeParameters("right"),
         fov = leftParams.fieldOfView;
       this.rotationAngle = Math.PI * (fov.leftDegrees + fov.rightDegrees) / 360;
-      this.isStereo = !!(leftParams && rightParams);
+      this.isStereo = VR.isStereoDisplay(this.currentDevice);
     }
   }
 

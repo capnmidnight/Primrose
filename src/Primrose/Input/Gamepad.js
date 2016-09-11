@@ -118,6 +118,14 @@ class Gamepad extends Primrose.PoseInputProcessor {
     }
   }
 
+  static isMotionController(pad){
+    if(pad) {
+      const obj = pad.capabilities || pad.pose;
+      return obj && obj.hasOrientation;
+    }
+    return false;
+  }
+
   constructor(pad, axisOffset, commands) {
     var padID = Gamepad.ID(pad);
     super(padID, commands, ["LSX", "LSY", "RSX", "RSY", "IDK1", "IDK2", "Z", "BUTTONS"]);
@@ -127,10 +135,14 @@ class Gamepad extends Primrose.PoseInputProcessor {
     this.axisOffset = axisOffset;
   }
 
+  get hasOrientation() {
+    return Gamepad.isMotionController(this.currentDevice);
+  }
+
   checkDevice(pad) {
     var i, j, buttonMap = 0;
     this.currentDevice = pad;
-    this.currentPose = pad.capabilities && pad.capabilities.hasOrientation && this.currentDevice.pose;
+    this.currentPose = this.hasOrientation && this.currentDevice.pose;
     for (i = 0, j = pad.buttons.length; i < pad.buttons.length; ++i, ++j) {
       var btn = pad.buttons[i];
       this.setButton(i, btn.pressed);
