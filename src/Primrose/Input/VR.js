@@ -215,6 +215,8 @@ class VR extends Primrose.PoseInputProcessor {
       if (!this._transformers[this.currentDeviceIndex]) {
         this._transformers[this.currentDeviceIndex] = new ViewCameraTransform(this.currentDevice);
       }
+      this.currentDevice.depthNear = near;
+      this.currentDevice.depthFar = far;
       return this._transformers[this.currentDeviceIndex].getTransforms(near, far);
     }
   }
