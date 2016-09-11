@@ -11438,9 +11438,11 @@ var Keyboard = function (_Primrose$InputProces) {
 
     var _this = _possibleConstructorReturn(this, (Keyboard.__proto__ || Object.getPrototypeOf(Keyboard)).call(this, "Keyboard", commands));
 
-    _this.listeners.clipboard = [];
-    _this.listeners.keydown = [];
-    _this.listeners.keyup = [];
+    _this.listeners = {
+      clipboard: [],
+      keydown: [],
+      keyup: []
+    };
 
     _this._operatingSystem = null;
     _this.browser = isChrome ? "CHROMIUM" : isFirefox ? "FIREFOX" : isIE ? "IE" : isOpera ? "OPERA" : isSafari ? "SAFARI" : "UNKNOWN";
@@ -11498,6 +11500,13 @@ var Keyboard = function (_Primrose$InputProces) {
   }
 
   _createClass(Keyboard, [{
+    key: "addEventListener",
+    value: function addEventListener(name, thunk) {
+      if (this.listeners[name]) {
+        this.listeners[name].push(thunk);
+      }
+    }
+  }, {
     key: "doTyping",
     value: function doTyping(elem, evt) {
       if (elem) {

@@ -38,9 +38,11 @@ class Keyboard extends Primrose.InputProcessor {
 
   constructor(input, commands) {
     super("Keyboard", commands);
-    this.listeners.clipboard = [];
-    this.listeners.keydown = [];
-    this.listeners.keyup = [];
+    this.listeners = {
+      clipboard: [],
+      keydown: [],
+      keyup: []
+    };
 
     this._operatingSystem = null;
     this.browser = isChrome ? "CHROMIUM" : (isFirefox ? "FIREFOX" : (isIE ? "IE" : (isOpera ? "OPERA" : (isSafari ? "SAFARI" : "UNKNOWN"))));
@@ -95,6 +97,12 @@ class Keyboard extends Primrose.InputProcessor {
     window.addEventListener("keydown", focusClipboard, true);
     window.addEventListener("keydown", execute, false);
     window.addEventListener("keyup", execute, false);
+  }
+
+  addEventListener(name, thunk){
+    if(this.listeners[name]){
+      this.listeners[name].push(thunk);
+    }
   }
 
   doTyping(elem, evt) {
