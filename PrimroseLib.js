@@ -3264,13 +3264,13 @@ var Pointer = function (_Primrose$AbstractEve) {
 
         if (changed) {
           if (!buttons) {
-            var blurCurrentControl = !!this.currentControl,
-                currentControl = this.currentControl;
+            var lastControl = this.currentControl;
+
             this.currentControl = null;
 
             if (object) {
-              if (currentControl && currentControl === control) {
-                blurCurrentControl = false;
+              if (lastControl && lastControl === control) {
+                lastControl = null;
               }
 
               if (!this.currentControl && control) {
@@ -3288,8 +3288,8 @@ var Pointer = function (_Primrose$AbstractEve) {
               }
             }
 
-            if (blurCurrentControl) {
-              currentControl.blur();
+            if (lastControl) {
+              lastControl.blur();
             }
           } else if (this.currentControl) {
             this.currentControl.endPointer();
