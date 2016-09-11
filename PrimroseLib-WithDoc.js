@@ -3808,16 +3808,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var SETTINGS_TO_ZERO = ["heading", "pitch", "roll", "pointerPitch", "headX", "headY", "headZ"],
-    TELEPORT_PAD_RADIUS = 0.4,
-    FORWARD = new THREE.Vector3(0, 0, -1),
-    MAX_SELECT_DISTANCE = 2,
-    MAX_SELECT_DISTANCE_SQ = MAX_SELECT_DISTANCE * MAX_SELECT_DISTANCE,
-    MAX_MOVE_DISTANCE = 5,
-    MAX_MOVE_DISTANCE_SQ = MAX_MOVE_DISTANCE * MAX_MOVE_DISTANCE,
-    LASER_WIDTH = 0.01,
-    LASER_LENGTH = 3 * LASER_WIDTH,
-    moveTo = new THREE.Vector3(0, 0, 0);
+var SETTINGS_TO_ZERO = ["heading", "pitch", "roll", "pointerPitch", "headX", "headY", "headZ"];
 
 pliny.class({
   parent: "Primrose",
@@ -3846,12 +3837,9 @@ var InputProcessor = function () {
       shift: false,
       meta: false
     };
-    this.lastState = "";
-    this.listeners = {
-      teleport: []
-    };
 
-    var readMetaKeys = function readMetaKeys(event) {
+    var i,
+        readMetaKeys = function readMetaKeys(event) {
       for (var i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
         var m = Primrose.Keys.MODIFIER_KEYS[i];
         _this.inputState[m] = event[m + "Key"];
@@ -3872,7 +3860,6 @@ var InputProcessor = function () {
       this.addCommand(cmdName, commands[cmdName]);
     }
 
-    var i;
     for (i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
       this.inputState[Primrose.Keys.MODIFIER_KEYS[i]] = false;
     }
@@ -3897,13 +3884,6 @@ var InputProcessor = function () {
       };
       this.commands[name] = cmd;
       this.commandNames.push(name);
-    }
-  }, {
-    key: "addEventListener",
-    value: function addEventListener(evt, thunk, bubbles) {
-      if (this.listeners[evt]) {
-        this.listeners[evt].push(thunk);
-      }
     }
   }, {
     key: "cloneCommand",
@@ -4103,50 +4083,6 @@ var InputProcessor = function () {
             cmd.commandUp(this.name);
           }
         }
-      }
-    }
-  }, {
-    key: "makeStateSnapshot",
-    value: function makeStateSnapshot() {
-      var state = "",
-          i = 0,
-          l = Object.keys(this.commands).length;
-      for (var name in this.commands) {
-        var cmd = this.commands[name];
-        if (cmd.state) {
-          state += i << 2 | (cmd.state.pressed ? 0x1 : 0) | (cmd.state.fireAgain ? 0x2 : 0) + ":" + cmd.state.value;
-          if (i < l - 1) {
-            state += "|";
-          }
-        }
-        ++i;
-      }
-      return state;
-    }
-  }, {
-    key: "decodeStateSnapshot",
-    value: function decodeStateSnapshot(snapshot) {
-      var cmd, name;
-      for (name in this.commands) {
-        cmd = this.commands[name];
-        cmd.state.wasPressed = cmd.state.pressed;
-      }
-      var records = snapshot.split("|");
-      for (var i = 0; i < records.length; ++i) {
-        var record = records[i],
-            parts = record.split(":"),
-            cmdIndex = parseInt(parts[0], 10),
-            pressed = (cmdIndex & 0x1) !== 0,
-            fireAgain = (flags & 0x2) !== 0,
-            flags = parseInt(parts[2], 10);
-        cmdIndex >>= 2;
-        name = this.commandNames(cmdIndex);
-        cmd = this.commands[name];
-        cmd.state = {
-          value: parseFloat(parts[1]),
-          pressed: pressed,
-          fireAgain: fireAgain
-        };
       }
     }
   }, {
@@ -12496,6 +12432,8 @@ var VR = function (_Primrose$PoseInputPr) {
         if (!this._transformers[this.currentDeviceIndex]) {
           this._transformers[this.currentDeviceIndex] = new ViewCameraTransform(this.currentDevice);
         }
+        this.currentDevice.depthNear = near;
+        this.currentDevice.depthFar = far;
         return this._transformers[this.currentDeviceIndex].getTransforms(near, far);
       }
     }

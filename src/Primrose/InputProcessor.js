@@ -1,13 +1,4 @@
-const SETTINGS_TO_ZERO = ["heading", "pitch", "roll", "pointerPitch", "headX", "headY", "headZ"],
-  TELEPORT_PAD_RADIUS = 0.4,
-  FORWARD = new THREE.Vector3(0, 0, -1),
-  MAX_SELECT_DISTANCE = 2,
-  MAX_SELECT_DISTANCE_SQ = MAX_SELECT_DISTANCE * MAX_SELECT_DISTANCE,
-  MAX_MOVE_DISTANCE = 5,
-  MAX_MOVE_DISTANCE_SQ = MAX_MOVE_DISTANCE * MAX_MOVE_DISTANCE,
-  LASER_WIDTH = 0.01,
-  LASER_LENGTH = 3 * LASER_WIDTH,
-  moveTo = new THREE.Vector3(0, 0, 0);
+const SETTINGS_TO_ZERO = ["heading", "pitch", "roll", "pointerPitch", "headX", "headY", "headZ"];
 
 pliny.class({
   parent: "Primrose",
@@ -32,12 +23,9 @@ class InputProcessor {
       shift: false,
       meta: false
     };
-    this.lastState = "";
-    this.listeners = {
-      teleport: []
-    };
 
-    var readMetaKeys = (event) => {
+    var i,
+      readMetaKeys = (event) => {
       for (var i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
         var m = Primrose.Keys.MODIFIER_KEYS[i];
         this.inputState[m] = event[m + "Key"];
@@ -58,7 +46,6 @@ class InputProcessor {
       this.addCommand(cmdName, commands[cmdName]);
     }
 
-    var i;
     for (i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
       this.inputState[Primrose.Keys.MODIFIER_KEYS[i]] = false;
     }
@@ -81,12 +68,6 @@ class InputProcessor {
     };
     this.commands[name] = cmd;
     this.commandNames.push(name);
-  }
-
-  addEventListener(evt, thunk, bubbles) {
-    if (this.listeners[evt]) {
-      this.listeners[evt].push(thunk);
-    }
   }
 
   cloneCommand(cmd) {
@@ -290,52 +271,6 @@ class InputProcessor {
           cmd.commandUp(this.name);
         }
       }
-    }
-  }
-
-  makeStateSnapshot() {
-    var state = "",
-      i = 0,
-      l = Object.keys(this.commands)
-      .length;
-    for (var name in this.commands) {
-      var cmd = this.commands[name];
-      if (cmd.state) {
-        state += (i << 2) |
-          (cmd.state.pressed ? 0x1 : 0) |
-          (cmd.state.fireAgain ? 0x2 : 0) + ":" +
-          cmd.state.value;
-        if (i < l - 1) {
-          state += "|";
-        }
-      }
-      ++i;
-    }
-    return state;
-  }
-
-  decodeStateSnapshot(snapshot) {
-    var cmd, name;
-    for (name in this.commands) {
-      cmd = this.commands[name];
-      cmd.state.wasPressed = cmd.state.pressed;
-    }
-    var records = snapshot.split("|");
-    for (var i = 0; i < records.length; ++i) {
-      var record = records[i],
-        parts = record.split(":"),
-        cmdIndex = parseInt(parts[0], 10),
-        pressed = (cmdIndex & 0x1) !== 0,
-        fireAgain = (flags & 0x2) !== 0,
-        flags = parseInt(parts[2], 10);
-      cmdIndex >>= 2;
-      name = this.commandNames(cmdIndex);
-      cmd = this.commands[name];
-      cmd.state = {
-        value: parseFloat(parts[1]),
-        pressed: pressed,
-        fireAgain: fireAgain
-      };
     }
   }
 
