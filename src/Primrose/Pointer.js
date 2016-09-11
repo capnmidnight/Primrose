@@ -220,7 +220,7 @@ class Pointer extends Primrose.AbstractEventEmitter {
     if (this.showPointer) {
       // reset the mesh color to the base value
       textured(this.mesh, this.color, {
-        emissive: this.minorColor
+        emissive: this.emission
       });
       this.mesh.visible = true;
       var buttons = 0,
