@@ -21,7 +21,7 @@ class AbstractEventEmitter {
 
   emit(name, obj) {
     if (this._handlers[name]) {
-      if(typeof obj === "object"){
+      if(typeof obj === "object" && !(obj instanceof UIEvent)){
         obj.type = name;
       }
       for (var i = 0; i < this._handlers[name].length; ++i) {
