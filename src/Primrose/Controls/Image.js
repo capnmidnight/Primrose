@@ -198,6 +198,10 @@ class Image extends Primrose.Surface {
     this.setImage(this._currentImageIndex, img);
   }
 
+  clear(){
+    this._images.splice(0);
+  }
+
   getImage(i) {
     return this._images[i % this._images.length];
   }
