@@ -454,36 +454,6 @@ class Entity {
     }
   }
 
-  startDOMPointer(evt) {
-    pliny.method({
-      parent: "Primrose.Entity",
-      name: "startDOMPointer",
-      parameters: [{
-        name: "evt",
-        type: "Event",
-        description: "The pointer event to read"
-      }],
-      description: "Hooks up to the window's `mouseDown` and `touchStart` events and propagates it to any of its focused children."
-    });
-    for (var i = 0; i < this.children.length; ++i) {
-      this.children[i].startDOMPointer(evt);
-    }
-  }
-
-  moveDOMPointer(evt) {
-    pliny.method({
-      parent: "Primrose.Entity",
-      name: "moveDOMPointer",
-      parameters: [{
-        name: "evt",
-        type: "Event",
-        description: "The pointer event to read"
-      }],
-      description: "Hooks up to the window's `mouseMove` and `touchMove` events and propagates it to any of its focused children."
-    });
-    this._forFocusedChild("moveDOMPointer", evt);
-  }
-
   startUV(evt) {
     pliny.method({
       parent: "Primrose.Entity",

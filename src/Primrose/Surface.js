@@ -310,24 +310,8 @@ class Surface extends Primrose.Entity {
     return found || here && this;
   }
 
-  DOMInBounds(x, y) {
-    return this.inBounds(x * devicePixelRatio, y * devicePixelRatio);
-  }
-
-  UVInBounds(point) {
-    return this.inBounds(point[0] * this.imageWidth, (1 - point[1]) * this.imageHeight);
-  }
-
   inBounds(x, y) {
     return this.bounds.left <= x && x < this.bounds.right && this.bounds.top <= y && y < this.bounds.bottom;
-  }
-
-  startDOMPointer(evt) {
-    this.startPointer(x * devicePixelRatio, y * devicePixelRatio);
-  }
-
-  moveDOMPointer(evt) {
-    this.movePointer(x * devicePixelRatio, y * devicePixelRatio);
   }
 
   startPointer(x, y) {

@@ -555,52 +555,6 @@ class TextBox extends Primrose.Surface {
     this.render();
   }
 
-  mouseButtonDown(evt) {
-    if (evt.button === 0) {
-      this.startDOMPointer(evt);
-      evt.preventDefault();
-    }
-  }
-
-  mouseMove(evt) {
-    if (this.focused) {
-      this.moveDOMPointer(evt);
-    }
-  }
-
-  mouseButtonUp(evt) {
-    if (this.focused && evt.button === 0) {
-      this.endPointer();
-    }
-  }
-
-  touchStart(evt) {
-    if (this.focused && evt.touches.length > 0 && !this._dragging) {
-      var t = evt.touches[0];
-      this.startDOMPointer(t);
-      this._currentTouchID = t.identifier;
-    }
-  }
-
-  touchMove(evt) {
-    for (var i = 0; i < evt.changedTouches.length && this._dragging; ++i) {
-      var t = evt.changedTouches[i];
-      if (t.identifier === this._currentTouchID) {
-        this.moveDOMPointer(t);
-        break;
-      }
-    }
-  }
-
-  touchEnd(evt) {
-    for (var i = 0; i < evt.changedTouches.length && this._dragging; ++i) {
-      var t = evt.changedTouches[i];
-      if (t.identifier === this._currentTouchID) {
-        this.endPointer();
-      }
-    }
-  }
-
   setGutter() {
     if (this.showLineNumbers) {
       this._topLeftGutter.width = 1;
