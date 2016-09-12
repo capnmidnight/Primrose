@@ -2730,7 +2730,7 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
         evt.pointer.disk.visible = false;
       }
 
-      if (obj === _this.ground) {
+      if (evt.type !== "exit" && evt.hit && obj === _this.ground) {
         POSITION.fromArray(evt.hit.facePoint).sub(_this.input.head.position);
 
         var distSq = POSITION.x * POSITION.x + POSITION.z * POSITION.z;
@@ -2759,7 +2759,7 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
         }
       }
 
-      if (evt.type === "pointerend" || evt.type === "gazecomplete") {
+      if (evt.type === "pointerstart" || evt.type === "gazecomplete") {
         obj = obj && (obj.surface || obj.button);
         if (obj !== _this.currentControl) {
           if (_this.currentControl) {
@@ -2773,7 +2773,11 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
       }
 
       if (_this.currentControl) {
-        _this.currentControl.dispatchEvent(evt);
+        if (_this.currentControl.dispatchEvent) {
+          _this.currentControl.dispatchEvent(evt);
+        } else {
+          console.log(_this.currentControl);
+        }
       }
     };
 
@@ -3737,6 +3741,8 @@ var Entity = function () {
   }, {
     key: "dispatchEvent",
     value: function dispatchEvent(evt) {
+      var _this = this;
+
       switch (evt.type) {
         case "pointerstart":
           this.startUV(evt.hit.point);
@@ -3750,7 +3756,9 @@ var Entity = function () {
           break;
         case "gazecomplete":
           this.startUV(evt.hit.point);
-          this.endPointer(evt);
+          setTimeout(function () {
+            return _this.endPointer(evt);
+          }, 100);
           break;
         default:
           console.log(evt.type);
@@ -5073,9 +5081,7 @@ var Pointer = function (_Primrose$AbstractEve) {
       v.z -= LASER_LENGTH * 0.5 + 0.5;
     });
 
-    _this.disk = textured(sphere(TELEPORT_PAD_RADIUS, 128, 3), _this.color, {
-      emissive: _this.emission
-    });
+    _this.disk = textured(sphere(TELEPORT_PAD_RADIUS, 128, 3), _this.material);
     _this.disk.geometry.computeBoundingBox();
     _this.disk.geometry.vertices.forEach(function (v) {
       v.y = 0.1 * (v.y - _this.disk.geometry.boundingBox.min.y);
@@ -5083,17 +5089,21 @@ var Pointer = function (_Primrose$AbstractEve) {
     _this.disk.visible = false;
     _this.disk.geometry.computeBoundingBox();
 
-    _this.gazeMesh = new THREE.Mesh(new THREE.RingBufferGeometry(0.04, 0.08, 10, 1, 0, 0), _this.mesh.material);
-    _this.gazeMesh.position.set(0, 0, -0.5);
-    _this.gazeMesh.visible = false;
     _this.useGaze = false;
+
+    _this.gazeInner = new THREE.Mesh(new THREE.CircleBufferGeometry(GAZE_RING_INNER / 2, 10), _this.material);
+    _this.gazeInner.position.set(0, 0, -0.5);
+    _this.gazeInner.visible = _this.useGaze;
+
+    _this.gazeOuter = new THREE.Mesh(new THREE.RingBufferGeometry(GAZE_RING_INNER, GAZE_RING_OUTER, 10, 1, 0, 0), _this.material);
+    _this.gazeOuter.visible = false;
+    _this.gazeInner.add(_this.gazeOuter);
 
     _this.root = new THREE.Object3D();
     _this.add(_this.mesh);
-    _this.add(_this.gazeMesh);
+    _this.add(_this.gazeInner);
 
     _(_this, {
-      firstGaze: null,
       lastHit: null
     });
     return _this;
@@ -5206,12 +5216,13 @@ var Pointer = function (_Primrose$AbstractEve) {
         var _priv = _(this),
             lastHit = _priv.lastHit,
             moved = lastHit && currentHit && (currentHit.facePoint[0] !== lastHit.facePoint[0] || currentHit.facePoint[1] !== lastHit.facePoint[1] || currentHit.facePoint[2] !== lastHit.facePoint[2]),
+            dt = lastHit && lastHit.time && performance.now() - lastHit.time,
+            changed = !lastHit && currentHit || lastHit && !currentHit || lastHit && currentHit && currentHit.objectID !== lastHit.objectID,
             evt = {
-          name: this.name,
+          pointer: this,
           buttons: 0,
           hit: currentHit,
-          lastHit: lastHit,
-          pointer: this
+          lastHit: lastHit
         };
 
         if (moved) {
@@ -5220,13 +5231,9 @@ var Pointer = function (_Primrose$AbstractEve) {
           lastHit.facePoint[2] = currentHit.facePoint[2];
         }
 
-        // reset the mesh color to the base value
-        textured(this.mesh, this.color, {
-          emissive: this.emission
-        });
         this.mesh.visible = !this.useGaze;
 
-        if (!lastHit && currentHit || lastHit && !currentHit || lastHit && currentHit && currentHit.objectID !== lastHit.objectID) {
+        if (changed) {
           if (lastHit) {
             this.emit("exit", evt);
           }
@@ -5255,34 +5262,24 @@ var Pointer = function (_Primrose$AbstractEve) {
         }
 
         if (this.useGaze) {
-          var firstGaze = _priv.firstGaze;
-          var dt = firstGaze && firstGaze.time && performance.now() - firstGaze.time;
-
-          if (firstGaze && (!currentHit || currentHit.objectID !== firstGaze.objectID)) {
+          if (changed) {
             if (dt !== null && dt < GAZE_TIMEOUT) {
-              this.gazeMesh.visible = false;
+              this.gazeOuter.visible = false;
               this.emit("gazecancel", evt);
             }
-            _priv.firstGaze = firstGaze = null;
-          }
-
-          if (currentHit) {
-            if (!firstGaze) {
-              _priv.firstGaze = firstGaze = currentHit;
-
-              this.gazeMesh.visible = true;
-              this.emit("gazestart", {
-                name: this.name,
-                objectID: currentHit.objectID
-              });
-            } else if (dt !== null && dt >= GAZE_TIMEOUT) {
-              this.gazeMesh.visible = false;
+            if (currentHit) {
+              this.gazeOuter.visible = true;
+              this.emit("gazestart", evt);
+            }
+          } else if (dt !== null) {
+            if (dt >= GAZE_TIMEOUT) {
+              this.gazeOuter.visible = false;
               this.emit("gazecomplete", evt);
-              firstGaze.time = null;
+              lastHit.time = null;
             } else {
               var p = Math.round(36 * dt / GAZE_TIMEOUT),
                   a = 2 * Math.PI * p / 36;
-              this.gazeMesh.geometry = cache("RingBufferGeometry(" + GAZE_RING_INNER + ", " + GAZE_RING_OUTER + ", " + p + ", 1, 0, " + a + ")", function () {
+              this.gazeOuter.geometry = cache("RingBufferGeometry(" + GAZE_RING_INNER + ", " + GAZE_RING_OUTER + ", " + p + ", 1, 0, " + a + ")", function () {
                 return new THREE.RingBufferGeometry(GAZE_RING_INNER, GAZE_RING_OUTER, p, 1, 0, a);
               });
               if (moved) {
@@ -5292,8 +5289,21 @@ var Pointer = function (_Primrose$AbstractEve) {
           }
         }
 
-        _priv.lastHit = currentHit;
+        if (changed) {
+          _priv.lastHit = currentHit;
+        }
       }
+    }
+  }, {
+    key: "material",
+    get: function get() {
+      return this.mesh.material;
+    },
+    set: function set(v) {
+      this.mesh.material = v;
+      this.disk.material = v;
+      this.gazeInner.material = v;
+      this.gazeOuter.material = v;
     }
   }, {
     key: "position",
@@ -9302,7 +9312,7 @@ var Button2D = function (_Primrose$Controls$Ab) {
     key: "addToBrowserEnvironment",
     value: function addToBrowserEnvironment(env, scene) {
       var btn3d = env.buttonFactory.create();
-      btn3d.listeners = this.listeners;
+      btn3d._handlers = this.listeners;
       return env.appendChild(btn3d);
     }
   }, {
@@ -9394,13 +9404,11 @@ var Button3D = function (_Primrose$BaseControl) {
       name: "click",
       description: "Occurs when the button is activated."
     });
-    _this.listeners.click = [];
 
     pliny.event({
       name: "release",
       description: "Occurs when the button is deactivated."
     });
-    _this.listeners.release = [];
 
     pliny.property({
       name: "base",
@@ -9437,25 +9445,43 @@ var Button3D = function (_Primrose$BaseControl) {
     _this.color = _this.cap.material.color;
     _this.name = name;
     _this.element = null;
-    _this.startUV = function () {
+    _this.startUV = function (point) {
       this.color.copy(options.colorPressed);
       if (this.element) {
         this.element.click();
       } else {
-        emit.call(this, "click");
+        this.emit("click", { source: this });
       }
     };
 
-    _this.moveUV = function () {};
-
-    _this.endPointer = function () {
+    _this.endPointer = function (evt) {
       this.color.copy(options.colorUnpressed);
-      emit.call(this, "release");
+      this.emit("release", { source: this });
     };
     return _this;
   }
 
   _createClass(Button3D, [{
+    key: "dispatchEvent",
+    value: function dispatchEvent(evt) {
+      var _this2 = this;
+
+      switch (evt.type) {
+        case "pointerstart":
+          this.startUV(evt.hit.point);
+          break;
+        case "pointerend":
+          this.endPointer(evt);
+          break;
+        case "gazecomplete":
+          this.startUV(evt.hit.point);
+          setTimeout(function () {
+            return _this2.endPointer(evt);
+          }, 100);
+          break;
+      }
+    }
+  }, {
     key: "addToBrowserEnvironment",
     value: function addToBrowserEnvironment(env, scene) {
       scene.add(this.container);

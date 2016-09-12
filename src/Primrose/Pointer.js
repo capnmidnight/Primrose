@@ -68,9 +68,7 @@ class Pointer extends Primrose.AbstractEventEmitter {
       v.z -= LASER_LENGTH * 0.5 + 0.5;
     });
 
-    this.disk = textured(sphere(TELEPORT_PAD_RADIUS, 128, 3), this.color, {
-      emissive: this.emission
-    });
+    this.disk = textured(sphere(TELEPORT_PAD_RADIUS, 128, 3), this.material);
     this.disk.geometry.computeBoundingBox();
     this.disk.geometry.vertices.forEach((v) => {
       v.y = 0.1 * (v.y - this.disk.geometry.boundingBox.min.y);
@@ -78,19 +76,34 @@ class Pointer extends Primrose.AbstractEventEmitter {
     this.disk.visible = false;
     this.disk.geometry.computeBoundingBox();
 
-    this.gazeMesh = new THREE.Mesh( new THREE.RingBufferGeometry( 0.04, 0.08, 10, 1, 0, 0 ), this.mesh.material );
-    this.gazeMesh.position.set(0, 0, -0.5);
-    this.gazeMesh.visible = false;
     this.useGaze = false;
+
+    this.gazeInner = new THREE.Mesh( new THREE.CircleBufferGeometry( GAZE_RING_INNER / 2, 10 ), this.material );
+    this.gazeInner.position.set(0, 0, -0.5);
+    this.gazeInner.visible = this.useGaze;
+
+    this.gazeOuter = new THREE.Mesh( new THREE.RingBufferGeometry( GAZE_RING_INNER, GAZE_RING_OUTER, 10, 1, 0, 0 ), this.material );
+    this.gazeOuter.visible = false;
+    this.gazeInner.add(this.gazeOuter);
 
     this.root = new THREE.Object3D();
     this.add(this.mesh);
-    this.add(this.gazeMesh);
+    this.add(this.gazeInner);
 
     _(this, {
-      firstGaze: null,
       lastHit: null
     });
+  }
+
+  get material(){
+    return this.mesh.material;
+  }
+
+  set material(v){
+    this.mesh.material = v;
+    this.disk.material = v;
+    this.gazeInner.material = v;
+    this.gazeOuter.material = v;
   }
 
   add(obj) {
@@ -218,12 +231,15 @@ class Pointer extends Primrose.AbstractEventEmitter {
           (currentHit.facePoint[0] !== lastHit.facePoint[0] ||
           currentHit.facePoint[1] !== lastHit.facePoint[1] ||
           currentHit.facePoint[2] !== lastHit.facePoint[2]),
+        dt = lastHit && lastHit.time && (performance.now() - lastHit.time),
+        changed = !lastHit && currentHit ||
+          lastHit && !currentHit ||
+          lastHit && currentHit && currentHit.objectID !== lastHit.objectID,
         evt = {
-          name: this.name,
+          pointer: this,
           buttons: 0,
           hit: currentHit,
-          lastHit: lastHit,
-          pointer: this
+          lastHit: lastHit
         };
 
       if(moved){
@@ -232,14 +248,9 @@ class Pointer extends Primrose.AbstractEventEmitter {
         lastHit.facePoint[2] = currentHit.facePoint[2];
       }
 
-      // reset the mesh color to the base value
-      textured(this.mesh, this.color, {
-        emissive: this.emission
-      });
       this.mesh.visible = !this.useGaze;
 
-      if((!lastHit && currentHit) || (lastHit && !currentHit) ||
-        (lastHit && currentHit && currentHit.objectID !== lastHit.objectID)){
+      if(changed){
         if(lastHit){
           this.emit("exit", evt);
         }
@@ -270,36 +281,26 @@ class Pointer extends Primrose.AbstractEventEmitter {
       }
 
       if(this.useGaze){
-        var firstGaze = _priv.firstGaze;
-        const dt = firstGaze && firstGaze.time && (performance.now() - firstGaze.time);
-
-        if(firstGaze && (!currentHit || currentHit.objectID !== firstGaze.objectID)) {
+        if(changed) {
           if(dt !== null && dt < GAZE_TIMEOUT){
-            this.gazeMesh.visible = false;
+            this.gazeOuter.visible = false;
             this.emit("gazecancel", evt);
           }
-          _priv.firstGaze = firstGaze = null;
-        }
-
-        if(currentHit){
-          if(!firstGaze) {
-            _priv.firstGaze = firstGaze = currentHit;
-
-            this.gazeMesh.visible = true;
-            this.emit("gazestart", {
-              name: this.name,
-              objectID: currentHit.objectID
-            });
+          if(currentHit){
+            this.gazeOuter.visible = true;
+            this.emit("gazestart", evt);
           }
-          else if(dt !== null && dt >= GAZE_TIMEOUT){
-            this.gazeMesh.visible = false;
+        }
+        else if(dt !== null) {
+          if(dt >= GAZE_TIMEOUT){
+            this.gazeOuter.visible = false;
             this.emit("gazecomplete", evt);
-            firstGaze.time = null;
+            lastHit.time = null;
           }
           else {
             var p = Math.round(36 * dt / GAZE_TIMEOUT),
               a = 2 * Math.PI * p / 36;
-            this.gazeMesh.geometry = cache(
+            this.gazeOuter.geometry = cache(
               `RingBufferGeometry(${GAZE_RING_INNER}, ${GAZE_RING_OUTER}, ${p}, 1, 0, ${a})`,
               () => new THREE.RingBufferGeometry( GAZE_RING_INNER, GAZE_RING_OUTER, p, 1, 0, a ));
             if(moved) {
@@ -309,7 +310,9 @@ class Pointer extends Primrose.AbstractEventEmitter {
         }
       }
 
-      _priv.lastHit = currentHit;
+      if(changed){
+        _priv.lastHit = currentHit;
+      }
     }
   }
 }

@@ -30,13 +30,11 @@ class Button3D extends Primrose.BaseControl {
       name: "click",
       description: "Occurs when the button is activated."
     });
-    this.listeners.click = [];
 
     pliny.event({
       name: "release",
       description: "Occurs when the button is deactivated."
     });
-    this.listeners.release = [];
 
     pliny.property({
       name: "base",
@@ -73,24 +71,35 @@ class Button3D extends Primrose.BaseControl {
     this.color = this.cap.material.color;
     this.name = name;
     this.element = null;
-    this.startUV = function () {
+    this.startUV = function (point) {
       this.color.copy(options.colorPressed);
       if (this.element) {
         this.element.click();
       }
       else {
-        emit.call(this, "click");
+        this.emit("click", { source: this });
       }
     };
 
-    this.moveUV = function () {
-
-    };
-
-    this.endPointer = function () {
+    this.endPointer = function (evt) {
       this.color.copy(options.colorUnpressed);
-      emit.call(this, "release");
+      this.emit("release", { source: this });
     };
+  }
+
+  dispatchEvent(evt) {
+    switch(evt.type){
+      case "pointerstart":
+        this.startUV(evt.hit.point);
+      break;
+      case "pointerend":
+        this.endPointer(evt);
+      break;
+      case "gazecomplete":
+        this.startUV(evt.hit.point);
+        setTimeout(() => this.endPointer(evt), 100);
+      break;
+    }
   }
 
   get position() {

@@ -31,7 +31,7 @@ class Button2D extends Primrose.Controls.AbstractLabel {
 
   addToBrowserEnvironment(env, scene) {
     var btn3d = env.buttonFactory.create();
-    btn3d.listeners = this.listeners;
+    btn3d._handlers = this.listeners;
     return env.appendChild(btn3d);
   }
 

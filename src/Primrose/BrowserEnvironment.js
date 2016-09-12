@@ -488,7 +488,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
         evt.pointer.disk.visible = false;
       }
 
-      if(obj === this.ground) {
+      if(evt.type !== "exit" && evt.hit && obj === this.ground) {
         POSITION.fromArray(evt.hit.facePoint)
           .sub(this.input.head.position);
 
@@ -520,7 +520,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
         }
       }
 
-      if(evt.type === "pointerend" || evt.type === "gazecomplete") {
+      if(evt.type === "pointerstart" || evt.type === "gazecomplete") {
         obj = obj && (obj.surface || obj.button);
         if(obj !== this.currentControl){
           if(this.currentControl){
@@ -534,7 +534,12 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       }
 
       if(this.currentControl){
-        this.currentControl.dispatchEvent(evt);
+        if(this.currentControl.dispatchEvent){
+          this.currentControl.dispatchEvent(evt);
+        }
+        else{
+          console.log(this.currentControl);
+        }
       }
     };
 

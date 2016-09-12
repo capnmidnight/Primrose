@@ -2245,10 +2245,12 @@ pliny.event({
       name: "click",
       description: "Occurs when the button is activated."
     });
+
     pliny.event({
       name: "release",
       description: "Occurs when the button is deactivated."
     });
+
     pliny.property({
       name: "base",
       type: "THREE.Object3D",

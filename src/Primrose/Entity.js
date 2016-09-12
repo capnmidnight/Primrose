@@ -509,7 +509,7 @@ class Entity {
       break;
       case "gazecomplete":
         this.startUV(evt.hit.point);
-        this.endPointer(evt);
+        setTimeout(() => this.endPointer(evt), 100);
       break;
       default:
         console.log(evt.type);
