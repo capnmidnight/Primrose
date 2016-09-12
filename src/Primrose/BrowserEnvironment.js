@@ -236,7 +236,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
     };
 
     var moveSky = () => {
-      if (this.sky) {
+      if (this.sky && this.sky.mesh) {
         this.sky.position.copy(this.input.head.position);
       }
     };
