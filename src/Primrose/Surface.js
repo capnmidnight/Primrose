@@ -157,9 +157,11 @@ class Surface extends Primrose.Entity {
 
     this._texture = null;
     this._material = null;
+    this._environment = null;
   }
 
   addToBrowserEnvironment(env, scene) {
+    this._environment = env;
     var geom = this.className === "shell" ? shell(3, 10, 10) : quad(2, 2),
       mesh = textured(geom, this, {
         opacity: this._opacity
@@ -274,6 +276,19 @@ class Surface extends Primrose.Entity {
       this._texture = new THREE.Texture(this.canvas);
     }
     return this._texture;
+  }
+
+  get environment() {
+    var head = this;
+    while(head){
+      if(head._environment){
+        if(head !== this){
+          this._environment = head._environment;
+        }
+        return this._environment;
+      }
+      head = head.parent;
+    }
   }
 
   appendChild(child) {

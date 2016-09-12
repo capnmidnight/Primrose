@@ -1,13 +1,14 @@
 const TELEPORT_PAD_RADIUS = 0.4,
   FORWARD = new THREE.Vector3(0, 0, -1),
-  MAX_SELECT_DISTANCE = 2,
-  MAX_SELECT_DISTANCE_SQ = MAX_SELECT_DISTANCE * MAX_SELECT_DISTANCE,
-  MAX_MOVE_DISTANCE = 5,
-  MAX_MOVE_DISTANCE_SQ = MAX_MOVE_DISTANCE * MAX_MOVE_DISTANCE,
   LASER_WIDTH = 0.01,
   LASER_LENGTH = 3 * LASER_WIDTH,
   EULER_TEMP = new THREE.Euler(),
-  moveBy = new THREE.Vector3(0, 0, 0);
+  GAZE_TIMEOUT = 1000,
+  GAZE_RING_INNER = 0.01,
+  GAZE_RING_OUTER = 0.02,
+
+  _ = priv();
+
 
 pliny.class({
   parent: "Primrose",
@@ -56,7 +57,6 @@ class Pointer extends Primrose.AbstractEventEmitter {
     this.positionDevices = positionDevices || orientationDevices.slice();
     this.triggerDevices = triggerDevices || orientationDevices.slice();
 
-    this._currentControl = null;
     this.showPointer = true;
     this.color = color;
     this.emission = emission;
@@ -67,21 +67,23 @@ class Pointer extends Primrose.AbstractEventEmitter {
     this.mesh.geometry.vertices.forEach((v) => {
       v.z -= LASER_LENGTH * 0.5 + 0.5;
     });
+    this.gazeMesh = new THREE.Mesh( new THREE.RingBufferGeometry( 0.04, 0.08, 10, 1, 0, 0 ), this.mesh.material );
+    this.gazeMesh.position.set(0, 0, -0.5);
+    this.gazeMesh.visible = false;
+    this.useGaze = false;
 
-    this.disk = textured(sphere(TELEPORT_PAD_RADIUS, 128, 3), this.color, {
-      emissive: this.emission
-    });
-    this.disk.geometry.computeBoundingBox();
-    this.disk.geometry.vertices.forEach((v) => {
-      v.y -= this.disk.geometry.boundingBox.min.y;
-    });
-    this.disk.geometry.computeBoundingBox();
+    this.root = new THREE.Object3D();
+    this.add(this.mesh);
+    this.add(this.gazeMesh);
 
-    this.disk.scale.set(1, 0.1, 1);
+    _(this, {
+      firstGaze: null,
+      lastHit: null
+    });
   }
 
   add(obj) {
-    this.mesh.add(obj);
+    this.root.add(obj);
   }
 
   addDevice(orientation, position, trigger){
@@ -113,59 +115,35 @@ class Pointer extends Primrose.AbstractEventEmitter {
         description: "The scene to which to add the 3D cursor."
       }]
     });
-    scene.add(this.mesh);
-    scene.add(this.disk);
+    scene.add(this.root);
   }
 
   get position() {
-    return this.mesh.position;
+    return this.root.position;
   }
 
   get quaternion() {
-    return this.mesh.quaternion;
+    return this.root.quaternion;
   }
 
   get matrix() {
-    return this.mesh.matrix;
+    return this.root.matrix;
   }
 
   updateMatrix() {
-    return this.mesh.updateMatrix();
+    return this.root.updateMatrix();
   }
 
   applyMatrix(m) {
-    return this.mesh.applyMatrix(m);
-  }
-
-  get currentControl() {
-    return this._currentControl;
-  }
-
-  set currentControl(v) {
-    var head = this;
-    while (head) {
-      head._currentControl = v;
-      head = head.parent;
-    }
-  }
-
-  get lockMovement() {
-    var head = this;
-    while (head) {
-      if (this.currentControl && this.currentControl.lockMovement) {
-        return true;
-      }
-      head = head.parent;
-    }
-    return false;
+    return this.root.applyMatrix(m);
   }
 
   get segment() {
     if (this.showPointer) {
       FORWARD.set(0, 0, -1)
-        .applyQuaternion(this.mesh.quaternion)
-        .add(this.mesh.position);
-      return [this.name, this.mesh.position.toArray(), FORWARD.toArray()];
+        .applyQuaternion(this.root.quaternion)
+        .add(this.root.position);
+      return [this.name, this.root.position.toArray(), FORWARD.toArray()];
     }
   }
 
@@ -213,112 +191,99 @@ class Pointer extends Primrose.AbstractEventEmitter {
     }
   }
 
-  resolvePicking(currentHits, lastHits, objects) {
-    this.disk.visible = false;
+  resolvePicking(currentHit) {
     this.mesh.visible = false;
 
     if (this.showPointer) {
+      const _priv = _(this),
+        lastHit = _priv.lastHit,
+        moved = lastHit && currentHit &&
+          (currentHit.facePoint[0] !== lastHit.facePoint[0] ||
+          currentHit.facePoint[1] !== lastHit.facePoint[1] ||
+          currentHit.facePoint[2] !== lastHit.facePoint[2]),
+        evt = {
+          name: this.name,
+          buttons: 0,
+          hit: currentHit,
+          lastHit: lastHit
+        };
+
+      if(moved){
+        lastHit.facePoint[0] = currentHit.facePoint[0];
+        lastHit.facePoint[1] = currentHit.facePoint[1];
+        lastHit.facePoint[2] = currentHit.facePoint[2];
+      }
+
       // reset the mesh color to the base value
       textured(this.mesh, this.color, {
         emissive: this.emission
       });
-      this.mesh.visible = true;
-      var buttons = 0,
-        dButtons = 0,
-        currentHit = currentHits[this.name],
-        lastHit = lastHits && lastHits[this.name],
-        isGround = false,
-        object,
-        control,
-        point;
+      this.mesh.visible = !this.useGaze;
 
+      var dButtons = 0;
       for(var i = 0; i < this.triggerDevices.length; ++i) {
         var obj = this.triggerDevices[i];
         if(obj.enabled){
-          var v1 = obj.getValue("buttons"),
-            v2 = obj.getValue("dButtons");
-          buttons += v1;
-          dButtons += v2;
+          evt.buttons |= obj.getValue("buttons");
+          dButtons |= obj.getValue("dButtons");
         }
       }
 
-      var changed = dButtons !== 0;
+      if(dButtons){
+        if(evt.buttons){
+          this.emit("pointerstart", evt);
+        }
+        else{
+          this.emit("pointerend", evt);
+        }
+      }
+      else if(moved) {
+        this.emit("pointermove", evt);
+      }
 
-      if (currentHit) {
-        object = objects[currentHit.objectID];
-        isGround = object && object.name === "Ground";
+      if(this.useGaze){
+        var firstGaze = _priv.firstGaze;
+        const dt = firstGaze && firstGaze.time && (performance.now() - firstGaze.time);
 
-        var fp = currentHit.facePoint;
+        if(firstGaze && (!currentHit || currentHit.objectID !== firstGaze.objectID)) {
+          if(dt !== null && dt < GAZE_TIMEOUT){
+            this.gazeMesh.visible = false;
+            this.emit("gazecancel", evt);
+          }
+          _priv.firstGaze = firstGaze = null;
+        }
 
-        point = currentHit.point;
-        control = object && (object.button || object.surface);
+        if(currentHit){
+          if(!firstGaze) {
+            _priv.firstGaze = firstGaze = currentHit;
 
-        moveBy.fromArray(fp)
-          .sub(this.mesh.position);
-
-        this.disk.visible = isGround;
-        if (isGround) {
-          var distSq = moveBy.x * moveBy.x + moveBy.z * moveBy.z;
-          if (distSq > MAX_MOVE_DISTANCE_SQ) {
-            var dist = Math.sqrt(distSq),
-              factor = MAX_MOVE_DISTANCE / dist,
-              y = moveBy.y;
-            moveBy.y = 0;
-            moveBy.multiplyScalar(factor);
-            moveBy.y = y;
-            textured(this.mesh, 0xffff00, {
-              emissive: 0x7f7f00
+            this.gazeMesh.visible = true;
+            this.emit("gazestart", {
+              name: this.name,
+              objectID: currentHit.objectID
             });
           }
-          this.disk.position
-            .copy(this.mesh.position)
-            .add(moveBy);
-        }
-        else {
-          textured(this.mesh, 0x00ff00, {
-            emissive: 0x007f00
-          });
-        }
-      }
-
-      if (changed) {
-        if (!buttons) {
-          var lastControl = this.currentControl;
-
-          this.currentControl = null;
-
-          if (object) {
-            if (lastControl && lastControl === control) {
-              lastControl = null;
-            }
-
-            if (!this.currentControl && control) {
-              this.currentControl = control;
-              this.currentControl.focus();
-            }
-            else if (isGround) {
-              this.emit("teleport", {
-                name: this.name,
-                position: this.disk.position
-              });
-            }
-
-            if (this.currentControl) {
-              this.currentControl.startUV(point);
+          else if(dt !== null && dt >= GAZE_TIMEOUT){
+            this.gazeMesh.visible = false;
+            this.emit("gazecomplete", evt);
+            firstGaze.time = null;
+          }
+          else {
+            var p = Math.round(36 * dt / GAZE_TIMEOUT),
+              a = 2 * Math.PI * p / 36;
+            this.gazeMesh.geometry = cache(
+              `RingBufferGeometry(${GAZE_RING_INNER}, ${GAZE_RING_OUTER}, ${p}, 1, 0, ${a})`,
+              () => new THREE.RingBufferGeometry( GAZE_RING_INNER, GAZE_RING_OUTER, p, 1, 0, a ));
+            if(moved) {
+              this.emit("gazemove", evt);
             }
           }
+        }
+      }
 
-          if (lastControl) {
-            lastControl.blur();
-          }
-        }
-        else if (this.currentControl) {
-          this.currentControl.endPointer();
-        }
-      }
-      else if (!changed && buttons > 0 && this.currentControl && point) {
-        this.currentControl.moveUV(point);
-      }
+      _priv.lastHit = currentHit;
     }
   }
 }
+
+Pointer.EVENTS = ["pointerstart", "pointerend", "pointermove", "gazestart", "gazemove", "gazecomplete", "gazecancel"];

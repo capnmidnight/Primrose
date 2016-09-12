@@ -537,6 +537,23 @@ var Primrose = {};
     // end D:\Documents\VR\Primrose\src\Primrose.js
     ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+    // start D:\Documents\VR\Primrose\src\priv.js
+(function(){"use strict";
+
+function priv() {
+  var heap = new WeakMap();
+  return function (obj, value) {
+    if (!heap.has(obj)) {
+      heap.set(obj, value || {});
+    }
+    return heap.get(obj);
+  };
+}
+    if(typeof window !== "undefined") window.priv = priv;
+})();
+    // end D:\Documents\VR\Primrose\src\priv.js
+    ////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
     // start D:\Documents\VR\Primrose\src\put.js
 (function(){"use strict";
 
@@ -952,6 +969,8 @@ function writeForm(ctrls, state) {
     // start D:\Documents\VR\Primrose\src\Primrose\AbstractEventEmitter.js
 (function(){"use strict";
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -982,9 +1001,21 @@ var AbstractEventEmitter = function () {
       }
     }
   }, {
+    key: "forward",
+    value: function forward(obj, evts) {
+      var _this = this;
+
+      evts.forEach(function (evt) {
+        return _this.addEventListener(evt, obj.emit.bind(obj, evt));
+      });
+    }
+  }, {
     key: "emit",
     value: function emit(name, obj) {
       if (this._handlers[name]) {
+        if ((typeof obj === "undefined" ? "undefined" : _typeof(obj)) === "object" && !(obj instanceof UIEvent)) {
+          obj.type = name;
+        }
         for (var i = 0; i < this._handlers[name].length; ++i) {
           this._handlers[name][i](obj);
         }
@@ -1134,7 +1165,10 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var MILLISECONDS_TO_SECONDS = 0.001;
+var MILLISECONDS_TO_SECONDS = 0.001,
+    MAX_MOVE_DISTANCE = 5,
+    MAX_MOVE_DISTANCE_SQ = MAX_MOVE_DISTANCE * MAX_MOVE_DISTANCE,
+    TELEPORT_COOLDOWN = 250;
 
 var BrowserEnvironment = function (_Primrose$AbstractEve) {
   _inherits(BrowserEnvironment, _Primrose$AbstractEve);
@@ -1150,7 +1184,7 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
     _this.options.foregroundColor = _this.options.foregroundColor || complementColor(new THREE.Color(_this.options.backgroundColor)).getHex();
 
     _this.zero = function () {
-      if (!_this.input.lockMovement) {
+      if (!_this.lockMovement) {
         _this.input.zero();
         if (_this.quality === Quality.NONE) {
           _this.quality = Quality.HIGH;
@@ -1313,13 +1347,15 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
       }
     };
 
-    var lastHits = null,
-        currentHits = {},
+    var currentHits = {},
         handleHit = function handleHit(h) {
       var dt;
       _this.projector.ready = true;
-      lastHits = currentHits;
       currentHits = h;
+      for (var key in currentHits) {
+        var hit = currentHits[key];
+        hit.object = _this.pickableObjects[hit.objectID];
+      }
     };
 
     var update = function update(t) {
@@ -1329,7 +1365,7 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
       lt = t;
 
       movePlayer(dt);
-      _this.input.resolvePicking(currentHits, lastHits, _this.pickableObjects);
+      _this.input.resolvePicking(currentHits);
       moveSky();
       moveGround();
       _this.network.update(dt);
@@ -1589,6 +1625,50 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
     _this.music = new Primrose.Output.Music(_this.audio.context);
 
     _this.pickableObjects = {};
+    _this.currentControl = null;
+
+    var moveBy = new THREE.Vector3(),
+        lastTeleport = 0;
+
+    _this.selectControl = function (evt) {
+      var obj = evt.hit && evt.hit.object;
+      if ((evt.type === "pointerend" || evt.type === "gazecomplete") && obj === _this.ground) {
+        moveBy.fromArray(evt.hit.facePoint).sub(_this.input.head.position);
+
+        var distSq = moveBy.x * moveBy.x + moveBy.z * moveBy.z;
+        if (distSq > MAX_MOVE_DISTANCE_SQ) {
+          var dist = Math.sqrt(distSq),
+              factor = MAX_MOVE_DISTANCE / dist,
+              y = moveBy.y;
+          moveBy.y = 0;
+          moveBy.multiplyScalar(factor);
+          moveBy.y = y;
+        }
+
+        moveBy.add(_this.input.head.position);
+        var t = performance.now(),
+            dt = t - lastTeleport;
+        if (dt > TELEPORT_COOLDOWN) {
+          lastTeleport = t;
+          _this.input.moveStage(moveBy);
+        }
+      }
+
+      obj = obj && (obj.surface || obj.button);
+      if (obj !== _this.currentControl) {
+        if (_this.currentControl) {
+          _this.currentControl.blur();
+        }
+        _this.currentControl = obj;
+        if (_this.currentControl) {
+          _this.currentControl.focus();
+        }
+      }
+
+      if (_this.currentControl) {
+        _this.currentControl.dispatchEvent(evt);
+      }
+    };
 
     _this.projector = new Primrose.Workerize(Primrose.Projector);
 
@@ -1691,14 +1771,6 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
       _this.scene.remove(user.head);
     };
 
-    window.addEventListener("keydown", function (evt) {
-      if (_this.input.VR.isPresenting) {
-        if (evt.keyCode === Primrose.Keys.ESCAPE && !_this.input.VR.isPolyfilled) {
-          _this.input.VR.cancel();
-        }
-      }
-    });
-
     PointerLock.addChangeListener(function (evt) {
       if (_this.input.VR.isPresenting && !PointerLock.isActive) {
         _this.input.VR.cancel();
@@ -1741,12 +1813,89 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
 
       _this.input = new Primrose.Input.FPSInput(_this.renderer.domElement, _this.options);
       _this.input.addEventListener("zero", _this.zero, false);
-      window.addEventListener("paste", _this.input.Keyboard.withCurrentControl("readClipboard"), false);
-      window.addEventListener("wheel", _this.input.Keyboard.withCurrentControl("readWheel"), false);
-      _this.input.Keyboard._pointerHack = _this.input.mousePointer;
+      Primrose.Pointer.EVENTS.forEach(function (evt) {
+        return _this.input.addEventListener(evt, _this.selectControl.bind(_this), false);
+      });
+      _this.input.forward(_this, Primrose.Pointer.EVENTS);
 
-      _this.input.Keyboard.operatingSystem = _this.options.os;
-      _this.input.Keyboard.codePage = _this.options.language;
+      var keyDown = function keyDown(evt) {
+        if (_this.input.VR.isPresenting) {
+          if (evt.keyCode === Primrose.Keys.ESCAPE && !_this.input.VR.isPolyfilled) {
+            _this.input.VR.cancel();
+          }
+        }
+
+        if (!_this.lockMovement) {
+          _this.input.Keyboard.dispatchEvent(evt);
+        } else if (_this.currentControl) {
+          _this.currentControl.keyDown(evt);
+        }
+        _this.emit("keydown", evt);
+      },
+          keyUp = function keyUp(evt) {
+        if (!_this.lockMovement) {
+          _this.input.Keyboard.dispatchEvent(evt);
+        } else if (_this.currentControl) {
+          _this.currentControl.keyUp(evt);
+        }
+        _this.emit("keyup", evt);
+      },
+          withCurrentControl = function withCurrentControl(name) {
+        return function (evt) {
+          if (_this.currentControl) {
+            if (_this.currentControl[name]) {
+              _this.currentControl[name](evt);
+            } else {
+              console.warn("Couldn't find %s on %o", name, _this.currentControl);
+            }
+          }
+        };
+      };
+
+      window.addEventListener("keydown", keyDown, false);
+
+      window.addEventListener("keyup", keyUp, false);
+
+      window.addEventListener("paste", withCurrentControl("readClipboard"), false);
+      window.addEventListener("wheel", withCurrentControl("readWheel"), false);
+
+      var focusClipboard = function focusClipboard(evt) {
+        if (_this.lockMovement) {
+          var cmdName = _this.input.Keyboard.operatingSystem.makeCommandName(evt, _this.input.Keyboard.codePage);
+          if (cmdName === "CUT" || cmdName === "COPY") {
+            surrogate.style.display = "block";
+            surrogate.focus();
+          }
+        }
+      };
+
+      var clipboardOperation = function clipboardOperation(evt) {
+        if (_this.currentControl) {
+          _this.currentControl[evt.type + "SelectedText"](evt);
+          if (!evt.returnValue) {
+            evt.preventDefault();
+          }
+          surrogate.style.display = "none";
+          _this.currentControl.focus();
+        }
+      };
+
+      // the `surrogate` textarea makes clipboard events possible
+      var surrogate = Primrose.DOM.cascadeElement("primrose-surrogate-textarea", "textarea", HTMLTextAreaElement),
+          surrogateContainer = Primrose.DOM.makeHidingContainer("primrose-surrogate-textarea-container", surrogate);
+
+      surrogateContainer.style.position = "absolute";
+      surrogateContainer.style.overflow = "hidden";
+      surrogateContainer.style.width = 0;
+      surrogateContainer.style.height = 0;
+      surrogate.addEventListener("beforecopy", setFalse, false);
+      surrogate.addEventListener("copy", clipboardOperation, false);
+      surrogate.addEventListener("beforecut", setFalse, false);
+      surrogate.addEventListener("cut", clipboardOperation, false);
+      document.body.insertBefore(surrogateContainer, document.body.children[0]);
+
+      window.addEventListener("beforepaste", setFalse, false);
+      window.addEventListener("keydown", focusClipboard, true);
 
       _this.input.head.add(_this.camera);
 
@@ -1890,6 +2039,11 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
       return this.network && this.network.disconnect();
     }
   }, {
+    key: "lockMovement",
+    get: function get() {
+      return this.currentControl && this.currentControl.lockMovement;
+    }
+  }, {
     key: "displays",
     get: function get() {
       return this.input.VR.displays;
@@ -1993,13 +2147,13 @@ var Entity = function () {
   _createClass(Entity, null, [{
     key: "registerEntity",
     value: function registerEntity(e) {
-      entities.set(e.id, e);
-      entityKeys.push(e.id);
+      entities.set(e._idObj, e);
+      entityKeys.push(e._idObj);
       e.addEventListener("_idchanged", function (evt) {
         entityKeys.splice(entityKeys.indexOf(evt.oldID), 1);
         entities.delete(evt.oldID);
-        entities.set(evt.entity.id, evt.entity);
-        entityKeys.push(evt.entity.id);
+        entities.set(evt.entity._idObj, evt.entity);
+        entityKeys.push(evt.entity._idObj);
       }, false);
     }
   }, {
@@ -2115,18 +2269,6 @@ var Entity = function () {
       }
     }
   }, {
-    key: "startDOMPointer",
-    value: function startDOMPointer(evt) {
-      for (var i = 0; i < this.children.length; ++i) {
-        this.children[i].startDOMPointer(evt);
-      }
-    }
-  }, {
-    key: "moveDOMPointer",
-    value: function moveDOMPointer(evt) {
-      this._forFocusedChild("moveDOMPointer", evt);
-    }
-  }, {
     key: "startUV",
     value: function startUV(evt) {
       this._forFocusedChild("startUV", evt);
@@ -2138,8 +2280,31 @@ var Entity = function () {
     }
   }, {
     key: "endPointer",
-    value: function endPointer() {
-      this._forFocusedChild("endPointer");
+    value: function endPointer(evt) {
+      this._forFocusedChild("endPointer", evt);
+    }
+  }, {
+    key: "dispatchEvent",
+    value: function dispatchEvent(evt) {
+      switch (evt.type) {
+        case "pointerstart":
+          this.startUV(evt.hit.point);
+          break;
+        case "pointerend":
+          this.endPointer(evt);
+          break;
+        case "pointermove":
+        case "gazemove":
+          this.moveUV(evt.hit.point);
+          break;
+        case "gazecomplete":
+          this.startUV(evt.hit.point);
+          this.endPointer(evt);
+          break;
+        default:
+          console.log(evt.type);
+          break;
+      }
     }
   }, {
     key: "keyDown",
@@ -2177,12 +2342,16 @@ var Entity = function () {
       return this._id;
     },
     set: function set(v) {
-      var oldID = this._id;
-      this._id = new Object(v);
-      emit.call(this, "_idchanged", {
-        oldID: oldID,
-        entity: this
-      });
+      if (this._id !== v) {
+        var oldID = this._idObj;
+        this._id = v;
+        this._idObj = new Object(v);
+        // this `_idchanged` event is necessary to update the related ID in the WeakMap of entities for eye-blanking.
+        emit.call(this, "_idchanged", {
+          oldID: oldID,
+          entity: this
+        });
+      }
     }
   }, {
     key: "theme",
@@ -2199,7 +2368,7 @@ var Entity = function () {
     get: function get() {
       var lock = false;
       for (var i = 0; i < this.children.length && !lock; ++i) {
-        lock |= this.children[i].lockMovement;
+        lock = lock || this.children[i].lockMovement;
       }
       return lock;
     }
@@ -3067,14 +3236,13 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 var TELEPORT_PAD_RADIUS = 0.4,
     FORWARD = new THREE.Vector3(0, 0, -1),
-    MAX_SELECT_DISTANCE = 2,
-    MAX_SELECT_DISTANCE_SQ = MAX_SELECT_DISTANCE * MAX_SELECT_DISTANCE,
-    MAX_MOVE_DISTANCE = 5,
-    MAX_MOVE_DISTANCE_SQ = MAX_MOVE_DISTANCE * MAX_MOVE_DISTANCE,
     LASER_WIDTH = 0.01,
     LASER_LENGTH = 3 * LASER_WIDTH,
     EULER_TEMP = new THREE.Euler(),
-    moveBy = new THREE.Vector3(0, 0, 0);
+    GAZE_TIMEOUT = 1000,
+    GAZE_RING_INNER = 0.01,
+    GAZE_RING_OUTER = 0.02,
+    _ = priv();
 
 var Pointer = function (_Primrose$AbstractEve) {
   _inherits(Pointer, _Primrose$AbstractEve);
@@ -3092,7 +3260,6 @@ var Pointer = function (_Primrose$AbstractEve) {
     _this.positionDevices = positionDevices || orientationDevices.slice();
     _this.triggerDevices = triggerDevices || orientationDevices.slice();
 
-    _this._currentControl = null;
     _this.showPointer = true;
     _this.color = color;
     _this.emission = emission;
@@ -3103,24 +3270,26 @@ var Pointer = function (_Primrose$AbstractEve) {
     _this.mesh.geometry.vertices.forEach(function (v) {
       v.z -= LASER_LENGTH * 0.5 + 0.5;
     });
+    _this.gazeMesh = new THREE.Mesh(new THREE.RingBufferGeometry(0.04, 0.08, 10, 1, 0, 0), _this.mesh.material);
+    _this.gazeMesh.position.set(0, 0, -0.5);
+    _this.gazeMesh.visible = false;
+    _this.useGaze = false;
 
-    _this.disk = textured(sphere(TELEPORT_PAD_RADIUS, 128, 3), _this.color, {
-      emissive: _this.emission
-    });
-    _this.disk.geometry.computeBoundingBox();
-    _this.disk.geometry.vertices.forEach(function (v) {
-      v.y -= _this.disk.geometry.boundingBox.min.y;
-    });
-    _this.disk.geometry.computeBoundingBox();
+    _this.root = new THREE.Object3D();
+    _this.add(_this.mesh);
+    _this.add(_this.gazeMesh);
 
-    _this.disk.scale.set(1, 0.1, 1);
+    _(_this, {
+      firstGaze: null,
+      lastHit: null
+    });
     return _this;
   }
 
   _createClass(Pointer, [{
     key: "add",
     value: function add(obj) {
-      this.mesh.add(obj);
+      this.root.add(obj);
     }
   }, {
     key: "addDevice",
@@ -3140,18 +3309,17 @@ var Pointer = function (_Primrose$AbstractEve) {
   }, {
     key: "addToBrowserEnvironment",
     value: function addToBrowserEnvironment(env, scene) {
-      scene.add(this.mesh);
-      scene.add(this.disk);
+      scene.add(this.root);
     }
   }, {
     key: "updateMatrix",
     value: function updateMatrix() {
-      return this.mesh.updateMatrix();
+      return this.root.updateMatrix();
     }
   }, {
     key: "applyMatrix",
     value: function applyMatrix(m) {
-      return this.mesh.applyMatrix(m);
+      return this.root.applyMatrix(m);
     }
   }, {
     key: "update",
@@ -3198,158 +3366,121 @@ var Pointer = function (_Primrose$AbstractEve) {
     }
   }, {
     key: "resolvePicking",
-    value: function resolvePicking(currentHits, lastHits, objects) {
-      this.disk.visible = false;
+    value: function resolvePicking(currentHit) {
       this.mesh.visible = false;
 
       if (this.showPointer) {
+        var _priv = _(this),
+            lastHit = _priv.lastHit,
+            moved = lastHit && currentHit && (currentHit.facePoint[0] !== lastHit.facePoint[0] || currentHit.facePoint[1] !== lastHit.facePoint[1] || currentHit.facePoint[2] !== lastHit.facePoint[2]),
+            evt = {
+          name: this.name,
+          buttons: 0,
+          hit: currentHit,
+          lastHit: lastHit
+        };
+
+        if (moved) {
+          lastHit.facePoint[0] = currentHit.facePoint[0];
+          lastHit.facePoint[1] = currentHit.facePoint[1];
+          lastHit.facePoint[2] = currentHit.facePoint[2];
+        }
+
         // reset the mesh color to the base value
         textured(this.mesh, this.color, {
           emissive: this.emission
         });
-        this.mesh.visible = true;
-        var buttons = 0,
-            dButtons = 0,
-            currentHit = currentHits[this.name],
-            lastHit = lastHits && lastHits[this.name],
-            isGround = false,
-            object,
-            control,
-            point;
+        this.mesh.visible = !this.useGaze;
 
+        var dButtons = 0;
         for (var i = 0; i < this.triggerDevices.length; ++i) {
           var obj = this.triggerDevices[i];
           if (obj.enabled) {
-            var v1 = obj.getValue("buttons"),
-                v2 = obj.getValue("dButtons");
-            buttons += v1;
-            dButtons += v2;
+            evt.buttons |= obj.getValue("buttons");
+            dButtons |= obj.getValue("dButtons");
           }
         }
 
-        var changed = dButtons !== 0;
-
-        if (currentHit) {
-          object = objects[currentHit.objectID];
-          isGround = object && object.name === "Ground";
-
-          var fp = currentHit.facePoint;
-
-          point = currentHit.point;
-          control = object && (object.button || object.surface);
-
-          moveBy.fromArray(fp).sub(this.mesh.position);
-
-          this.disk.visible = isGround;
-          if (isGround) {
-            var distSq = moveBy.x * moveBy.x + moveBy.z * moveBy.z;
-            if (distSq > MAX_MOVE_DISTANCE_SQ) {
-              var dist = Math.sqrt(distSq),
-                  factor = MAX_MOVE_DISTANCE / dist,
-                  y = moveBy.y;
-              moveBy.y = 0;
-              moveBy.multiplyScalar(factor);
-              moveBy.y = y;
-              textured(this.mesh, 0xffff00, {
-                emissive: 0x7f7f00
-              });
-            }
-            this.disk.position.copy(this.mesh.position).add(moveBy);
+        if (dButtons) {
+          if (evt.buttons) {
+            this.emit("pointerstart", evt);
           } else {
-            textured(this.mesh, 0x00ff00, {
-              emissive: 0x007f00
-            });
+            this.emit("pointerend", evt);
+          }
+        } else if (moved) {
+          this.emit("pointermove", evt);
+        }
+
+        if (this.useGaze) {
+          var firstGaze = _priv.firstGaze;
+          var dt = firstGaze && firstGaze.time && performance.now() - firstGaze.time;
+
+          if (firstGaze && (!currentHit || currentHit.objectID !== firstGaze.objectID)) {
+            if (dt !== null && dt < GAZE_TIMEOUT) {
+              this.gazeMesh.visible = false;
+              this.emit("gazecancel", evt);
+            }
+            _priv.firstGaze = firstGaze = null;
+          }
+
+          if (currentHit) {
+            if (!firstGaze) {
+              _priv.firstGaze = firstGaze = currentHit;
+
+              this.gazeMesh.visible = true;
+              this.emit("gazestart", {
+                name: this.name,
+                objectID: currentHit.objectID
+              });
+            } else if (dt !== null && dt >= GAZE_TIMEOUT) {
+              this.gazeMesh.visible = false;
+              this.emit("gazecomplete", evt);
+              firstGaze.time = null;
+            } else {
+              var p = Math.round(36 * dt / GAZE_TIMEOUT),
+                  a = 2 * Math.PI * p / 36;
+              this.gazeMesh.geometry = cache("RingBufferGeometry(" + GAZE_RING_INNER + ", " + GAZE_RING_OUTER + ", " + p + ", 1, 0, " + a + ")", function () {
+                return new THREE.RingBufferGeometry(GAZE_RING_INNER, GAZE_RING_OUTER, p, 1, 0, a);
+              });
+              if (moved) {
+                this.emit("gazemove", evt);
+              }
+            }
           }
         }
 
-        if (changed) {
-          if (!buttons) {
-            var lastControl = this.currentControl;
-
-            this.currentControl = null;
-
-            if (object) {
-              if (lastControl && lastControl === control) {
-                lastControl = null;
-              }
-
-              if (!this.currentControl && control) {
-                this.currentControl = control;
-                this.currentControl.focus();
-              } else if (isGround) {
-                this.emit("teleport", {
-                  name: this.name,
-                  position: this.disk.position
-                });
-              }
-
-              if (this.currentControl) {
-                this.currentControl.startUV(point);
-              }
-            }
-
-            if (lastControl) {
-              lastControl.blur();
-            }
-          } else if (this.currentControl) {
-            this.currentControl.endPointer();
-          }
-        } else if (!changed && buttons > 0 && this.currentControl && point) {
-          this.currentControl.moveUV(point);
-        }
+        _priv.lastHit = currentHit;
       }
     }
   }, {
     key: "position",
     get: function get() {
-      return this.mesh.position;
+      return this.root.position;
     }
   }, {
     key: "quaternion",
     get: function get() {
-      return this.mesh.quaternion;
+      return this.root.quaternion;
     }
   }, {
     key: "matrix",
     get: function get() {
-      return this.mesh.matrix;
-    }
-  }, {
-    key: "currentControl",
-    get: function get() {
-      return this._currentControl;
-    },
-    set: function set(v) {
-      var head = this;
-      while (head) {
-        head._currentControl = v;
-        head = head.parent;
-      }
-    }
-  }, {
-    key: "lockMovement",
-    get: function get() {
-      var head = this;
-      while (head) {
-        if (this.currentControl && this.currentControl.lockMovement) {
-          return true;
-        }
-        head = head.parent;
-      }
-      return false;
+      return this.root.matrix;
     }
   }, {
     key: "segment",
     get: function get() {
       if (this.showPointer) {
-        FORWARD.set(0, 0, -1).applyQuaternion(this.mesh.quaternion).add(this.mesh.position);
-        return [this.name, this.mesh.position.toArray(), FORWARD.toArray()];
+        FORWARD.set(0, 0, -1).applyQuaternion(this.root.quaternion).add(this.root.position);
+        return [this.name, this.root.position.toArray(), FORWARD.toArray()];
       }
     }
   }]);
 
   return Pointer;
 }(Primrose.AbstractEventEmitter);
+
+Pointer.EVENTS = ["pointerstart", "pointerend", "pointermove", "gazestart", "gazemove", "gazecomplete", "gazecancel"];
     if(typeof window !== "undefined") window.Primrose.Pointer = Pointer;
 })();
     // end D:\Documents\VR\Primrose\src\Primrose\Pointer.js
@@ -5681,7 +5812,9 @@ Projector.prototype.projectPointers = function (args) {
               if (!value || dist < value.distance) {
                 value = {
                   name: name,
+                  time: performance.now(),
                   objectID: objID,
+                  object: null,
                   distance: dist,
                   faceIndex: j,
                   facePoint: this.c.toArray(),
@@ -5902,12 +6035,14 @@ var Surface = function (_Primrose$Entity) {
 
     _this._texture = null;
     _this._material = null;
+    _this._environment = null;
     return _this;
   }
 
   _createClass(Surface, [{
     key: "addToBrowserEnvironment",
     value: function addToBrowserEnvironment(env, scene) {
+      this._environment = env;
       var geom = this.className === "shell" ? shell(3, 10, 10) : quad(2, 2),
           mesh = textured(geom, this, {
         opacity: this._opacity
@@ -6007,29 +6142,9 @@ var Surface = function (_Primrose$Entity) {
       return found || here && this;
     }
   }, {
-    key: "DOMInBounds",
-    value: function DOMInBounds(x, y) {
-      return this.inBounds(x * devicePixelRatio, y * devicePixelRatio);
-    }
-  }, {
-    key: "UVInBounds",
-    value: function UVInBounds(point) {
-      return this.inBounds(point[0] * this.imageWidth, (1 - point[1]) * this.imageHeight);
-    }
-  }, {
     key: "inBounds",
     value: function inBounds(x, y) {
       return this.bounds.left <= x && x < this.bounds.right && this.bounds.top <= y && y < this.bounds.bottom;
-    }
-  }, {
-    key: "startDOMPointer",
-    value: function startDOMPointer(evt) {
-      this.startPointer(x * devicePixelRatio, y * devicePixelRatio);
-    }
-  }, {
-    key: "moveDOMPointer",
-    value: function moveDOMPointer(evt) {
-      this.movePointer(x * devicePixelRatio, y * devicePixelRatio);
     }
   }, {
     key: "startPointer",
@@ -6140,6 +6255,20 @@ var Surface = function (_Primrose$Entity) {
         this._texture = new THREE.Texture(this.canvas);
       }
       return this._texture;
+    }
+  }, {
+    key: "environment",
+    get: function get() {
+      var head = this;
+      while (head) {
+        if (head._environment) {
+          if (head !== this) {
+            this._environment = head._environment;
+          }
+          return this._environment;
+        }
+        head = head.parent;
+      }
     }
   }]);
 
@@ -7802,40 +7931,36 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
 var DISPLACEMENT = new THREE.Vector3(),
     EULER_TEMP = new THREE.Euler(),
-    WEDGE = Math.PI / 3,
-    TELEPORT_COOLDOWN = 250;
+    WEDGE = Math.PI / 3;
 
-var FPSInput = function () {
+var FPSInput = function (_Primrose$AbstractEve) {
+  _inherits(FPSInput, _Primrose$AbstractEve);
+
   function FPSInput(DOMElement, options) {
-    var _this = this;
-
     _classCallCheck(this, FPSInput);
 
+    var _this = _possibleConstructorReturn(this, (FPSInput.__proto__ || Object.getPrototypeOf(FPSInput)).call(this));
+
     DOMElement = DOMElement || window;
-    this.options = options;
-    this.listeners = {
-      zero: [],
-      motioncontroller: [],
-      gamepad: []
-    };
+    _this.options = options;
+    _this._handlers.zero = [];
+    _this._handlers.motioncontroller = [];
+    _this._handlers.gamepad = [];
 
-    this.managers = [];
-    this.newState = [];
-    this.pointers = [];
-    this.motionDevices = [];
-    this.velocity = new THREE.Vector3();
-    this.matrix = new THREE.Matrix4();
+    _this.managers = [];
+    _this.newState = [];
+    _this.pointers = [];
+    _this.motionDevices = [];
+    _this.velocity = new THREE.Vector3();
+    _this.matrix = new THREE.Matrix4();
 
-    var keyUp = function keyUp(evt) {
-      return _this.currentControl && _this.currentControl.keyUp && _this.currentControl.keyUp(evt);
-    };
-    var keyDown = function keyDown(evt) {
-      return _this.Keyboard.doTyping(_this.currentControl && _this.currentControl.focusedElement, evt);
-    };
-
-    this.add(new Primrose.Input.Keyboard(this, {
+    _this.add(new Primrose.Input.Keyboard(_this, {
       strafeLeft: {
         buttons: [-Primrose.Keys.A, -Primrose.Keys.LEFTARROW]
       },
@@ -7868,14 +7993,14 @@ var FPSInput = function () {
       zero: {
         buttons: [Primrose.Keys.Z],
         metaKeys: [-Primrose.Keys.CTRL, -Primrose.Keys.ALT, -Primrose.Keys.SHIFT, -Primrose.Keys.META],
-        commandUp: emit.bind(this, "zero")
+        commandUp: emit.bind(_this, "zero")
       }
     }));
 
-    this.Keyboard.addEventListener("keydown", keyDown);
-    this.Keyboard.addEventListener("keyup", keyUp);
+    _this.Keyboard.operatingSystem = _this.options.os;
+    _this.Keyboard.codePage = _this.options.language;
 
-    this.add(new Primrose.Input.Touch(DOMElement, {
+    _this.add(new Primrose.Input.Touch(DOMElement, {
       buttons: {
         axes: ["FINGERS"]
       },
@@ -7909,7 +8034,7 @@ var FPSInput = function () {
       }
     }));
 
-    this.add(new Primrose.Input.Mouse(DOMElement, {
+    _this.add(new Primrose.Input.Mouse(DOMElement, {
       buttons: {
         axes: ["BUTTONS"]
       },
@@ -7945,9 +8070,8 @@ var FPSInput = function () {
       }
     }));
 
-    this.add(new Primrose.Input.VR(this.options.avatarHeight));
-
-    this.motionDevices.push(this.VR);
+    _this.add(new Primrose.Input.VR(_this.options.avatarHeight));
+    _this.motionDevices.push(_this.VR);
 
     Primrose.Input.Gamepad.addEventListener("gamepadconnected", function (pad) {
       var padID = Primrose.Input.Gamepad.ID(pad),
@@ -7991,7 +8115,7 @@ var FPSInput = function () {
 
           _this.pointers.push(ptr);
           ptr.addToBrowserEnvironment(null, _this.options.scene);
-          ptr.addEventListener("teleport", _this.teleport);
+          ptr.forward(_this, Primrose.Pointer.EVENTS);
         } else {
           mgr = new Primrose.Input.Gamepad(pad, 0, {
             buttons: {
@@ -8037,40 +8161,28 @@ var FPSInput = function () {
       }
     });
 
-    Primrose.Input.Gamepad.addEventListener("gamepaddisconnected", this.remove.bind(this));
+    Primrose.Input.Gamepad.addEventListener("gamepaddisconnected", _this.remove.bind(_this));
 
-    this.stage = new THREE.Object3D();
+    _this.stage = new THREE.Object3D();
 
-    this.mousePointer = new Primrose.Pointer("MousePointer", 0xff0000, 0x7f0000, [this.Mouse], [this.VR, this.Keyboard]);
-    this.pointers.push(this.mousePointer);
-    this.mousePointer.addToBrowserEnvironment(null, this.options.scene);
+    _this.mousePointer = new Primrose.Pointer("MousePointer", 0xff0000, 0x7f0000, [_this.Mouse], [_this.VR, _this.Keyboard]);
+    _this.pointers.push(_this.mousePointer);
+    _this.mousePointer.addToBrowserEnvironment(null, _this.options.scene);
 
-    this.head = new Primrose.Pointer("GazePointer", 0xffff00, 0x7f7f00, [this.VR, this.Mouse, this.Touch, this.Keyboard]);
-    this.pointers.push(this.head);
-    this.head.addToBrowserEnvironment(null, this.options.scene);
-
-    this.teleport = this.teleport.bind(this);
-    this.lastTeleport = 0;
-    this.pointers.forEach(function (ptr) {
-      return ptr.addEventListener("teleport", _this.teleport);
+    _this.head = new Primrose.Pointer("GazePointer", 0xffff00, 0x7f7f00, [_this.VR, _this.Mouse, _this.Touch, _this.Keyboard]);
+    _this.head.useGaze = _this.options.useGaze;
+    _this.pointers.push(_this.head);
+    _this.head.addToBrowserEnvironment(null, _this.options.scene);
+    _this.pointers.forEach(function (ptr) {
+      return ptr.forward(_this, Primrose.Pointer.EVENTS);
     });
-
-    this.ready = Promise.all(this.managers.map(function (mgr) {
+    _this.ready = Promise.all(_this.managers.map(function (mgr) {
       return mgr.ready;
     }).filter(identity));
+    return _this;
   }
 
   _createClass(FPSInput, [{
-    key: "teleport",
-    value: function teleport(evt) {
-      var t = performance.now(),
-          dt = t - this.lastTeleport;
-      if (dt > TELEPORT_COOLDOWN) {
-        this.lastTeleport = t;
-        this.moveStage(evt.position);
-      }
-    }
-  }, {
     key: "remove",
     value: function remove(id) {
       var mgr = this[id],
@@ -8196,20 +8308,10 @@ var FPSInput = function () {
     }
   }, {
     key: "resolvePicking",
-    value: function resolvePicking(currentHits, lastHits, pickableObjects) {
+    value: function resolvePicking(currentHits) {
       for (var i = 0; i < this.pointers.length; ++i) {
-        this.pointers[i].resolvePicking(currentHits, lastHits, pickableObjects);
-      }
-    }
-  }, {
-    key: "addEventListener",
-    value: function addEventListener(evt, thunk, bubbles) {
-      if (this.listeners[evt]) {
-        this.listeners[evt].push(thunk);
-      } else {
-        for (var i = 0; i < this.managers.length; ++i) {
-          this.managers[i].addEventListener(evt, thunk, bubbles);
-        }
+        var ptr = this.pointers[i];
+        ptr.resolvePicking(currentHits[ptr.name]);
       }
     }
   }, {
@@ -8244,32 +8346,10 @@ var FPSInput = function () {
       }
       return segments;
     }
-  }, {
-    key: "lockMovement",
-    get: function get() {
-      for (var i = 0; i < this.pointers.length; ++i) {
-        var ptr = this.pointers[i];
-        if (ptr.lockMovement) {
-          return true;
-        }
-      }
-
-      return false;
-    }
-  }, {
-    key: "currentControl",
-    get: function get() {
-      for (var i = 0; i < this.pointers.length; ++i) {
-        var ptr = this.pointers[i];
-        if (ptr.currentControl) {
-          return ptr.currentControl;
-        }
-      }
-    }
   }]);
 
   return FPSInput;
-}();
+}(Primrose.AbstractEventEmitter);
     if(typeof window !== "undefined") window.Primrose.Input.FPSInput = FPSInput;
 })();
     // end D:\Documents\VR\Primrose\src\Primrose\Input\FPSInput.js
@@ -8537,23 +8617,6 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var Keyboard = function (_Primrose$InputProces) {
   _inherits(Keyboard, _Primrose$InputProces);
 
-  _createClass(Keyboard, [{
-    key: "currentControl",
-    get: function get() {
-      return this._pointerHack && this._pointerHack.currentControl;
-    },
-    set: function set(v) {
-      if (this._pointerHack) {
-        this._pointerHack.currentControl = v;
-      }
-    }
-  }, {
-    key: "lockMovement",
-    get: function get() {
-      return this._pointerHack && this._pointerHack.lockMovement;
-    }
-  }]);
-
   function Keyboard(input, commands) {
     _classCallCheck(this, Keyboard);
 
@@ -8568,59 +8631,15 @@ var Keyboard = function (_Primrose$InputProces) {
     _this._operatingSystem = null;
     _this.browser = isChrome ? "CHROMIUM" : isFirefox ? "FIREFOX" : isIE ? "IE" : isOpera ? "OPERA" : isSafari ? "SAFARI" : "UNKNOWN";
     _this._codePage = null;
-    _this._pointerHack = null;
-
-    var execute = function execute(evt) {
-      if (!input.lockMovement) {
-        _this.setButton(evt.keyCode, evt.type === "keydown");
-      } else {
-        emit.call(_this, evt.type, evt);
-      }
-    };
-
-    var focusClipboard = function focusClipboard(evt) {
-      if (_this.lockMovement) {
-        var cmdName = _this.operatingSystem.makeCommandName(evt, _this.codePage);
-        if (cmdName === "CUT" || cmdName === "COPY") {
-          surrogate.style.display = "block";
-          surrogate.focus();
-        }
-      }
-    };
-
-    var clipboardOperation = function clipboardOperation(evt) {
-      if (_this.currentControl) {
-        _this.currentControl[evt.type + "SelectedText"](evt);
-        if (!evt.returnValue) {
-          evt.preventDefault();
-        }
-        surrogate.style.display = "none";
-        _this.currentControl.focus();
-      }
-    };
-
-    // the `surrogate` textarea makes clipboard events possible
-    var surrogate = Primrose.DOM.cascadeElement("primrose-surrogate-textarea", "textarea", HTMLTextAreaElement),
-        surrogateContainer = Primrose.DOM.makeHidingContainer("primrose-surrogate-textarea-container", surrogate);
-
-    surrogateContainer.style.position = "absolute";
-    surrogateContainer.style.overflow = "hidden";
-    surrogateContainer.style.width = 0;
-    surrogateContainer.style.height = 0;
-    surrogate.addEventListener("beforecopy", setFalse, false);
-    surrogate.addEventListener("copy", clipboardOperation, false);
-    surrogate.addEventListener("beforecut", setFalse, false);
-    surrogate.addEventListener("cut", clipboardOperation, false);
-    document.body.insertBefore(surrogateContainer, document.body.children[0]);
-
-    window.addEventListener("beforepaste", setFalse, false);
-    window.addEventListener("keydown", focusClipboard, true);
-    window.addEventListener("keydown", execute, false);
-    window.addEventListener("keyup", execute, false);
     return _this;
   }
 
   _createClass(Keyboard, [{
+    key: "dispatchEvent",
+    value: function dispatchEvent(evt) {
+      this.setButton(evt.keyCode, evt.type === "keydown");
+    }
+  }, {
     key: "addEventListener",
     value: function addEventListener(name, thunk) {
       if (this.listeners[name]) {
@@ -8630,36 +8649,17 @@ var Keyboard = function (_Primrose$InputProces) {
   }, {
     key: "doTyping",
     value: function doTyping(elem, evt) {
-      if (elem) {
-        if (elem.execCommand && this.operatingSystem && this.browser && this.codePage) {
-          var oldDeadKeyState = this.operatingSystem._deadKeyState,
-              cmdName = this.operatingSystem.makeCommandName(evt, this.codePage);
+      if (elem && elem.execCommand && this.operatingSystem && this.browser && this.codePage) {
+        var oldDeadKeyState = this.operatingSystem._deadKeyState,
+            cmdName = this.operatingSystem.makeCommandName(evt, this.codePage);
 
-          if (elem.execCommand(this.browser, this.codePage, cmdName)) {
-            evt.preventDefault();
-          }
-          if (this.operatingSystem._deadKeyState === oldDeadKeyState) {
-            this.operatingSystem._deadKeyState = "";
-          }
-        } else {
-          elem.keyDown(evt);
+        if (elem.execCommand(this.browser, this.codePage, cmdName)) {
+          evt.preventDefault();
+        }
+        if (this.operatingSystem._deadKeyState === oldDeadKeyState) {
+          this.operatingSystem._deadKeyState = "";
         }
       }
-    }
-  }, {
-    key: "withCurrentControl",
-    value: function withCurrentControl(name) {
-      var _this2 = this;
-
-      return function (evt) {
-        if (_this2.currentControl) {
-          if (_this2.currentControl[name]) {
-            _this2.currentControl[name](evt);
-          } else {
-            console.warn("Couldn't find %s on %o", name, _this2.currentControl);
-          }
-        }
-      };
     }
   }, {
     key: "operatingSystem",
@@ -9290,14 +9290,7 @@ var DEFAULT_POSE = {
   orientation: [0, 0, 0, 1]
 },
     GAZE_LENGTH = 3000,
-    heap = new WeakMap();
-
-function priv(obj, value) {
-  if (!heap.has(obj)) {
-    heap.set(obj, value || {});
-  }
-  return heap.get(obj);
-}
+    _ = priv();
 
 var VR = function (_Primrose$PoseInputPr) {
   _inherits(VR, _Primrose$PoseInputPr);
@@ -9316,7 +9309,7 @@ var VR = function (_Primrose$PoseInputPr) {
 
     var _this = _possibleConstructorReturn(this, (VR.__proto__ || Object.getPrototypeOf(VR)).call(this, "VR"));
 
-    priv(_this, {
+    _(_this, {
       requestPresent: function requestPresent(layers) {
         return _this.currentDevice.requestPresent(layers).catch(function (exp) {
           return console.warn("requstPresent", exp);
@@ -9382,7 +9375,7 @@ var VR = function (_Primrose$PoseInputPr) {
           }
 
           promise = null;
-          rp = priv(_this2).requestPresent;
+          rp = _(_this2).requestPresent;
 
           // If we're using WebVR-Polyfill, just let it do its job.
 
@@ -12709,6 +12702,11 @@ var TextBox = function (_Primrose$Surface) {
       }
     }
   }, {
+    key: "keyDown",
+    value: function keyDown(evt) {
+      this.environment.input.Keyboard.doTyping(this, evt);
+    }
+  }, {
     key: "execCommand",
     value: function execCommand(browser, codePage, commandName) {
       if (commandName && this.focused && !this.readOnly) {
@@ -12839,58 +12837,6 @@ var TextBox = function (_Primrose$Surface) {
         }
       this._lastPointer.copy(this._pointer);
       this.render();
-    }
-  }, {
-    key: "mouseButtonDown",
-    value: function mouseButtonDown(evt) {
-      if (evt.button === 0) {
-        this.startDOMPointer(evt);
-        evt.preventDefault();
-      }
-    }
-  }, {
-    key: "mouseMove",
-    value: function mouseMove(evt) {
-      if (this.focused) {
-        this.moveDOMPointer(evt);
-      }
-    }
-  }, {
-    key: "mouseButtonUp",
-    value: function mouseButtonUp(evt) {
-      if (this.focused && evt.button === 0) {
-        this.endPointer();
-      }
-    }
-  }, {
-    key: "touchStart",
-    value: function touchStart(evt) {
-      if (this.focused && evt.touches.length > 0 && !this._dragging) {
-        var t = evt.touches[0];
-        this.startDOMPointer(t);
-        this._currentTouchID = t.identifier;
-      }
-    }
-  }, {
-    key: "touchMove",
-    value: function touchMove(evt) {
-      for (var i = 0; i < evt.changedTouches.length && this._dragging; ++i) {
-        var t = evt.changedTouches[i];
-        if (t.identifier === this._currentTouchID) {
-          this.moveDOMPointer(t);
-          break;
-        }
-      }
-    }
-  }, {
-    key: "touchEnd",
-    value: function touchEnd(evt) {
-      for (var i = 0; i < evt.changedTouches.length && this._dragging; ++i) {
-        var t = evt.changedTouches[i];
-        if (t.identifier === this._currentTouchID) {
-          this.endPointer();
-        }
-      }
     }
   }, {
     key: "setGutter",

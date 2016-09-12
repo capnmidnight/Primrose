@@ -22,20 +22,6 @@ pliny.class({
     }]
 });
 class Keyboard extends Primrose.InputProcessor {
-  get currentControl() {
-    return this._pointerHack && this._pointerHack.currentControl;
-  }
-
-  set currentControl(v){
-    if(this._pointerHack){
-      this._pointerHack.currentControl = v;
-    }
-  }
-
-  get lockMovement(){
-    return this._pointerHack && this._pointerHack.lockMovement;
-  }
-
   constructor(input, commands) {
     super("Keyboard", commands);
     this.listeners = {
@@ -47,56 +33,10 @@ class Keyboard extends Primrose.InputProcessor {
     this._operatingSystem = null;
     this.browser = isChrome ? "CHROMIUM" : (isFirefox ? "FIREFOX" : (isIE ? "IE" : (isOpera ? "OPERA" : (isSafari ? "SAFARI" : "UNKNOWN"))));
     this._codePage = null;
-    this._pointerHack = null;
+  }
 
-    const execute = (evt) => {
-      if (!input.lockMovement) {
-        this.setButton(evt.keyCode, evt.type === "keydown");
-      }
-      else {
-        emit.call(this, evt.type, evt);
-      }
-    };
-
-    const focusClipboard = (evt) => {
-      if (this.lockMovement) {
-        var cmdName = this.operatingSystem.makeCommandName(evt, this.codePage);
-        if (cmdName === "CUT" || cmdName === "COPY") {
-          surrogate.style.display = "block";
-          surrogate.focus();
-        }
-      }
-    };
-
-    const clipboardOperation = (evt) => {
-      if (this.currentControl) {
-        this.currentControl[evt.type + "SelectedText"](evt);
-        if (!evt.returnValue) {
-          evt.preventDefault();
-        }
-        surrogate.style.display = "none";
-        this.currentControl.focus();
-      }
-    };
-
-    // the `surrogate` textarea makes clipboard events possible
-    var surrogate = Primrose.DOM.cascadeElement("primrose-surrogate-textarea", "textarea", HTMLTextAreaElement),
-      surrogateContainer = Primrose.DOM.makeHidingContainer("primrose-surrogate-textarea-container", surrogate);
-
-    surrogateContainer.style.position = "absolute";
-    surrogateContainer.style.overflow = "hidden";
-    surrogateContainer.style.width = 0;
-    surrogateContainer.style.height = 0;
-    surrogate.addEventListener("beforecopy", setFalse, false);
-    surrogate.addEventListener("copy", clipboardOperation, false);
-    surrogate.addEventListener("beforecut", setFalse, false);
-    surrogate.addEventListener("cut", clipboardOperation, false);
-    document.body.insertBefore(surrogateContainer, document.body.children[0]);
-
-    window.addEventListener("beforepaste", setFalse, false);
-    window.addEventListener("keydown", focusClipboard, true);
-    window.addEventListener("keydown", execute, false);
-    window.addEventListener("keyup", execute, false);
+  dispatchEvent(evt) {
+    this.setButton(evt.keyCode, evt.type === "keydown");
   }
 
   addEventListener(name, thunk){
@@ -106,35 +46,17 @@ class Keyboard extends Primrose.InputProcessor {
   }
 
   doTyping(elem, evt) {
-    if (elem) {
-      if (elem.execCommand && this.operatingSystem && this.browser && this.codePage) {
-        var oldDeadKeyState = this.operatingSystem._deadKeyState,
-          cmdName = this.operatingSystem.makeCommandName(evt, this.codePage);
+    if (elem && elem.execCommand && this.operatingSystem && this.browser && this.codePage) {
+      var oldDeadKeyState = this.operatingSystem._deadKeyState,
+        cmdName = this.operatingSystem.makeCommandName(evt, this.codePage);
 
-        if (elem.execCommand(this.browser, this.codePage, cmdName)) {
-          evt.preventDefault();
-        }
-        if (this.operatingSystem._deadKeyState === oldDeadKeyState) {
-          this.operatingSystem._deadKeyState = "";
-        }
+      if (elem.execCommand(this.browser, this.codePage, cmdName)) {
+        evt.preventDefault();
       }
-      else {
-        elem.keyDown(evt);
+      if (this.operatingSystem._deadKeyState === oldDeadKeyState) {
+        this.operatingSystem._deadKeyState = "";
       }
     }
-  }
-
-  withCurrentControl(name) {
-    return (evt) => {
-      if (this.currentControl) {
-        if (this.currentControl[name]) {
-          this.currentControl[name](evt);
-        }
-        else {
-          console.warn("Couldn't find %s on %o", name, this.currentControl);
-        }
-      }
-    };
   }
 
   get operatingSystem() {

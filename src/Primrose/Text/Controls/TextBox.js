@@ -412,6 +412,10 @@ class TextBox extends Primrose.Surface {
     }
   }
 
+  keyDown(evt){
+    this.environment.input.Keyboard.doTyping(this, evt);
+  }
+
   execCommand(browser, codePage, commandName) {
     if (commandName && this.focused && !this.readOnly) {
       var altCommandName = browser + "_" + commandName,

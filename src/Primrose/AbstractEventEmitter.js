@@ -19,6 +19,10 @@ class AbstractEventEmitter {
     }
   }
 
+  forward(obj, evts){
+    evts.forEach((evt) => this.addEventListener(evt, obj.emit.bind(obj, evt)));
+  }
+
   emit(name, obj) {
     if (this._handlers[name]) {
       if(typeof obj === "object" && !(obj instanceof UIEvent)){

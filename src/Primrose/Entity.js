@@ -19,13 +19,13 @@ class Entity {
         description: "The entity to register."
       }]
     });
-    entities.set(e.id, e);
-    entityKeys.push(e.id);
+    entities.set(e._idObj, e);
+    entityKeys.push(e._idObj);
     e.addEventListener("_idchanged", (evt) => {
       entityKeys.splice(entityKeys.indexOf(evt.oldID), 1);
       entities.delete(evt.oldID);
-      entities.set(evt.entity.id, evt.entity);
-      entityKeys.push(evt.entity.id);
+      entities.set(evt.entity._idObj, evt.entity);
+      entityKeys.push(evt.entity._idObj);
     }, false);
   }
 
@@ -53,7 +53,7 @@ class Entity {
       parent: "Primrose.Entity",
       name: "parent ",
       type: "Primrose.Entity",
-      description: "The parent element of this eleemnt, if this element has been added as a child to another element."
+      description: "The parent element of this element, if this element has been added as a child to another element."
     });
     this.parent = null;
 
@@ -166,12 +166,16 @@ class Entity {
   }
 
   set id(v) {
-    var oldID = this._id;
-    this._id = new Object(v);
-    emit.call(this, "_idchanged", {
-      oldID: oldID,
-      entity: this
-    });
+    if(this._id !== v){
+      var oldID = this._idObj;
+      this._id = v;
+      this._idObj = new Object(v);
+      // this `_idchanged` event is necessary to update the related ID in the WeakMap of entities for eye-blanking.
+      emit.call(this, "_idchanged", {
+        oldID: oldID,
+        entity: this
+      });
+    }
   }
 
   addEventListener(event, func) {
@@ -403,7 +407,7 @@ class Entity {
     });
     var lock = false;
     for (var i = 0; i < this.children.length && !lock; ++i) {
-      lock |= this.children[i].lockMovement;
+      lock = lock || this.children[i].lockMovement;
     }
     return lock;
   }
@@ -482,13 +486,35 @@ class Entity {
     this._forFocusedChild("moveUV", evt);
   }
 
-  endPointer() {
+  endPointer(evt) {
     pliny.method({
       parent: "Primrose.Entity",
       name: "endPointer",
       description: "Hooks up to the window's `mouseUp` and `toucheEnd` events and propagates it to any of its focused children."
     });
-    this._forFocusedChild("endPointer");
+    this._forFocusedChild("endPointer", evt);
+  }
+
+  dispatchEvent(evt) {
+    switch(evt.type){
+      case "pointerstart":
+        this.startUV(evt.hit.point);
+      break;
+      case "pointerend":
+        this.endPointer(evt);
+      break;
+      case "pointermove":
+      case "gazemove":
+        this.moveUV(evt.hit.point);
+      break;
+      case "gazecomplete":
+        this.startUV(evt.hit.point);
+        this.endPointer(evt);
+      break;
+      default:
+        console.log(evt.type);
+      break;
+    }
   }
 
   keyDown(evt) {

@@ -2666,7 +2666,9 @@ Projector.prototype.projectPointers = function (args) {
               if (!value || dist < value.distance) {
                 value = {
                   name: name,
+                  time: performance.now(),
                   objectID: objID,
+                  object: null,
                   distance: dist,
                   faceIndex: j,
                   facePoint: this.c.toArray(),

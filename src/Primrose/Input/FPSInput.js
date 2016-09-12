@@ -1,22 +1,32 @@
 const DISPLACEMENT = new THREE.Vector3(),
   EULER_TEMP = new THREE.Euler(),
-  WEDGE = Math.PI / 3,
-  TELEPORT_COOLDOWN = 250;
+  WEDGE = Math.PI / 3;
 
 pliny.class({
   parent: "Primrose.Input",
     name: "FPSInput",
-    description: "| [under construction]"
+    baseClass: "Primrose.AbstractEventEmitter",
+    description: "A massive hairball of a class that handles all of the input abstraction.",
+    parameters: [{
+      name: "DOMElement",
+      type: "Element",
+      description: "The DOM element on which to add most events.",
+      optional: true,
+      defaultValue: "window"
+    }, {
+      name: "options",
+      type: "Object",
+      description: "Optional setup: avatarHeight, gravity, and scene."
+    }]
 });
-class FPSInput {
+class FPSInput extends Primrose.AbstractEventEmitter {
   constructor(DOMElement, options) {
+    super();
     DOMElement = DOMElement || window;
     this.options = options;
-    this.listeners = {
-      zero: [],
-      motioncontroller: [],
-      gamepad: []
-    };
+    this._handlers.zero = [];
+    this._handlers.motioncontroller = [];
+    this._handlers.gamepad = [];
 
     this.managers = [];
     this.newState = [];
@@ -24,9 +34,6 @@ class FPSInput {
     this.motionDevices = [];
     this.velocity = new THREE.Vector3();
     this.matrix = new THREE.Matrix4();
-
-    const keyUp = (evt) => this.currentControl && this.currentControl.keyUp && this.currentControl.keyUp(evt);
-    const keyDown = (evt) => this.Keyboard.doTyping(this.currentControl && this.currentControl.focusedElement, evt);
 
     this.add(new Primrose.Input.Keyboard(this, {
       strafeLeft: {
@@ -71,8 +78,8 @@ class FPSInput {
       }
     }));
 
-    this.Keyboard.addEventListener("keydown", keyDown);
-    this.Keyboard.addEventListener("keyup", keyUp);
+    this.Keyboard.operatingSystem = this.options.os;
+    this.Keyboard.codePage = this.options.language;
 
     this.add(new Primrose.Input.Touch(DOMElement, {
       buttons: {
@@ -145,7 +152,6 @@ class FPSInput {
     }));
 
     this.add(new Primrose.Input.VR(this.options.avatarHeight));
-
     this.motionDevices.push(this.VR);
 
     Primrose.Input.Gamepad.addEventListener("gamepadconnected", (pad) => {
@@ -190,7 +196,7 @@ class FPSInput {
 
           this.pointers.push(ptr);
           ptr.addToBrowserEnvironment(null, this.options.scene);
-          ptr.addEventListener("teleport", this.teleport);
+          ptr.forward(this, Primrose.Pointer.EVENTS);
         }
         else {
           mgr = new Primrose.Input.Gamepad(pad, 0, {
@@ -256,25 +262,13 @@ class FPSInput {
       this.Touch,
       this.Keyboard
     ]);
+    this.head.useGaze = this.options.useGaze;
     this.pointers.push(this.head);
     this.head.addToBrowserEnvironment(null, this.options.scene);
-
-    this.teleport = this.teleport.bind(this);
-    this.lastTeleport = 0;
-    this.pointers.forEach((ptr) => ptr.addEventListener("teleport", this.teleport));
-
+    this.pointers.forEach((ptr) => ptr.forward(this, Primrose.Pointer.EVENTS));
     this.ready = Promise.all(this.managers
       .map((mgr) => mgr.ready)
       .filter(identity));
-  }
-
-  teleport(evt) {
-    var t = performance.now(),
-      dt = t - this.lastTeleport;
-    if(dt > TELEPORT_COOLDOWN) {
-      this.lastTeleport = t;
-      this.moveStage(evt.position);
-    }
   }
 
   remove(id) {
@@ -427,40 +421,10 @@ class FPSInput {
     return segments;
   }
 
-  get lockMovement() {
+  resolvePicking(currentHits) {
     for (var i = 0; i < this.pointers.length; ++i) {
       var ptr = this.pointers[i];
-      if (ptr.lockMovement) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  get currentControl() {
-    for (var i = 0; i < this.pointers.length; ++i) {
-      var ptr = this.pointers[i];
-      if (ptr.currentControl) {
-        return ptr.currentControl;
-      }
-    }
-  }
-
-  resolvePicking(currentHits, lastHits, pickableObjects) {
-    for (var i = 0; i < this.pointers.length; ++i) {
-      this.pointers[i].resolvePicking(currentHits, lastHits, pickableObjects);
-    }
-  }
-
-  addEventListener(evt, thunk, bubbles) {
-    if (this.listeners[evt]) {
-      this.listeners[evt].push(thunk);
-    }
-    else {
-      for (var i = 0; i < this.managers.length; ++i) {
-        this.managers[i].addEventListener(evt, thunk, bubbles);
-      }
+      ptr.resolvePicking(currentHits[ptr.name]);
     }
   }
 }

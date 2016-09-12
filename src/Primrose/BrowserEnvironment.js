@@ -1,4 +1,7 @@
-var MILLISECONDS_TO_SECONDS = 0.001;
+var MILLISECONDS_TO_SECONDS = 0.001,
+  MAX_MOVE_DISTANCE = 5,
+  MAX_MOVE_DISTANCE_SQ = MAX_MOVE_DISTANCE * MAX_MOVE_DISTANCE,
+  TELEPORT_COOLDOWN = 250;
 
 pliny.class({
   parent: "Primrose",
@@ -13,7 +16,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       .getHex();
 
     this.zero = () => {
-      if (!this.input.lockMovement) {
+      if (!this.lockMovement) {
         this.input.zero();
         if (this.quality === Quality.NONE) {
           this.quality = Quality.HIGH;
@@ -177,13 +180,15 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       }
     };
 
-    var lastHits = null,
-      currentHits = {},
+    var currentHits = {},
       handleHit = (h) => {
         var dt;
         this.projector.ready = true;
-        lastHits = currentHits;
         currentHits = h;
+        for(var key in currentHits){
+          var hit = currentHits[key];
+          hit.object = this.pickableObjects[hit.objectID];
+        }
       };
 
     var update = (t) => {
@@ -192,7 +197,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       lt = t;
 
       movePlayer(dt);
-      this.input.resolvePicking(currentHits, lastHits, this.pickableObjects);
+      this.input.resolvePicking(currentHits);
       moveSky();
       moveGround();
       this.network.update(dt);
@@ -471,6 +476,51 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
     this.music = new Primrose.Output.Music(this.audio.context);
 
     this.pickableObjects = {};
+    this.currentControl = null;
+
+    var moveBy = new THREE.Vector3(),
+      lastTeleport = 0;
+
+    this.selectControl = (evt) => {
+      var obj = evt.hit && evt.hit.object;
+      if((evt.type === "pointerend" || evt.type === "gazecomplete") && obj === this.ground){
+        moveBy.fromArray(evt.hit.facePoint)
+          .sub(this.input.head.position);
+
+        var distSq = moveBy.x * moveBy.x + moveBy.z * moveBy.z;
+        if (distSq > MAX_MOVE_DISTANCE_SQ) {
+          var dist = Math.sqrt(distSq),
+            factor = MAX_MOVE_DISTANCE / dist,
+            y = moveBy.y;
+          moveBy.y = 0;
+          moveBy.multiplyScalar(factor);
+          moveBy.y = y;
+        }
+
+        moveBy.add(this.input.head.position);
+        var t = performance.now(),
+          dt = t - lastTeleport;
+        if(dt > TELEPORT_COOLDOWN) {
+          lastTeleport = t;
+          this.input.moveStage(moveBy);
+        }
+      }
+
+      obj = obj && (obj.surface || obj.button);
+      if(obj !== this.currentControl){
+        if(this.currentControl){
+          this.currentControl.blur();
+        }
+        this.currentControl = obj;
+        if(this.currentControl){
+          this.currentControl.focus();
+        }
+      }
+
+      if(this.currentControl){
+        this.currentControl.dispatchEvent(evt);
+      }
+    };
 
     this.projector = new Primrose.Workerize(Primrose.Projector);
 
@@ -581,14 +631,6 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       this.scene.remove(user.head);
     };
 
-    window.addEventListener("keydown", (evt) => {
-      if (this.input.VR.isPresenting) {
-        if (evt.keyCode === Primrose.Keys.ESCAPE && !this.input.VR.isPolyfilled) {
-          this.input.VR.cancel();
-        }
-      }
-    });
-
     PointerLock.addChangeListener((evt) => {
       if (this.input.VR.isPresenting && !PointerLock.isActive) {
         this.input.VR.cancel();
@@ -633,13 +675,97 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
 
       this.input = new Primrose.Input.FPSInput(this.renderer.domElement, this.options);
       this.input.addEventListener("zero", this.zero, false);
-      window.addEventListener("paste", this.input.Keyboard.withCurrentControl("readClipboard"), false);
-      window.addEventListener("wheel", this.input.Keyboard.withCurrentControl("readWheel"), false);
-      this.input.Keyboard._pointerHack = this.input.mousePointer;
+      Primrose.Pointer.EVENTS.forEach((evt) => this.input.addEventListener(evt, this.selectControl.bind(this), false));
+      this.input.forward(this, Primrose.Pointer.EVENTS);
 
 
-      this.input.Keyboard.operatingSystem = this.options.os;
-      this.input.Keyboard.codePage = this.options.language;
+
+      const keyDown =  (evt) => {
+          if (this.input.VR.isPresenting) {
+            if (evt.keyCode === Primrose.Keys.ESCAPE && !this.input.VR.isPolyfilled) {
+              this.input.VR.cancel();
+            }
+          }
+
+          if(!this.lockMovement){
+            this.input.Keyboard.dispatchEvent(evt);
+          }
+          else if(this.currentControl){
+            this.currentControl.keyDown(evt);
+          }
+          this.emit("keydown", evt);
+        },
+
+        keyUp = (evt) => {
+          if(!this.lockMovement){
+            this.input.Keyboard.dispatchEvent(evt);
+          }
+          else if(this.currentControl){
+            this.currentControl.keyUp(evt);
+          }
+          this.emit("keyup", evt);
+        },
+
+        withCurrentControl = (name) => {
+          return (evt) => {
+            if (this.currentControl) {
+              if (this.currentControl[name]) {
+                this.currentControl[name](evt);
+              }
+              else {
+                console.warn("Couldn't find %s on %o", name, this.currentControl);
+              }
+            }
+          };
+        };
+
+      window.addEventListener("keydown", keyDown, false);
+
+      window.addEventListener("keyup", keyUp, false);
+
+
+      window.addEventListener("paste", withCurrentControl("readClipboard"), false);
+      window.addEventListener("wheel", withCurrentControl("readWheel"), false);
+
+
+      const focusClipboard = (evt) => {
+        if (this.lockMovement) {
+          var cmdName = this.input.Keyboard.operatingSystem.makeCommandName(evt, this.input.Keyboard.codePage);
+          if (cmdName === "CUT" || cmdName === "COPY") {
+            surrogate.style.display = "block";
+            surrogate.focus();
+          }
+        }
+      };
+
+      const clipboardOperation = (evt) => {
+        if (this.currentControl) {
+          this.currentControl[evt.type + "SelectedText"](evt);
+          if (!evt.returnValue) {
+            evt.preventDefault();
+          }
+          surrogate.style.display = "none";
+          this.currentControl.focus();
+        }
+      };
+
+      // the `surrogate` textarea makes clipboard events possible
+      var surrogate = Primrose.DOM.cascadeElement("primrose-surrogate-textarea", "textarea", HTMLTextAreaElement),
+        surrogateContainer = Primrose.DOM.makeHidingContainer("primrose-surrogate-textarea-container", surrogate);
+
+      surrogateContainer.style.position = "absolute";
+      surrogateContainer.style.overflow = "hidden";
+      surrogateContainer.style.width = 0;
+      surrogateContainer.style.height = 0;
+      surrogate.addEventListener("beforecopy", setFalse, false);
+      surrogate.addEventListener("copy", clipboardOperation, false);
+      surrogate.addEventListener("beforecut", setFalse, false);
+      surrogate.addEventListener("cut", clipboardOperation, false);
+      document.body.insertBefore(surrogateContainer, document.body.children[0]);
+
+      window.addEventListener("beforepaste", setFalse, false);
+      window.addEventListener("keydown", focusClipboard, true);
+
 
       this.input.head.add(this.camera);
 
@@ -778,6 +904,10 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
     }
 
     this.start();
+  }
+
+  get lockMovement(){
+    return this.currentControl && this.currentControl.lockMovement;
   }
 
   connect(socket, userName) {

@@ -1171,7 +1171,7 @@ pliny.function({
       parent: "Primrose.Entity",
       name: "parent ",
       type: "Primrose.Entity",
-      description: "The parent element of this eleemnt, if this element has been added as a child to another element."
+      description: "The parent element of this element, if this element has been added as a child to another element."
     });
     pliny.property({
       parent: "Primrose.Entity",
@@ -1409,26 +1409,6 @@ pliny.function({
           description: "The eye to switch to: -1 for left, +1 for right."
         }],
         description: "Instructs any stereoscopically rendered surfaces to change their rendering offset."
-      });
-      pliny.method({
-        parent: "Primrose.Entity",
-        name: "startDOMPointer",
-        parameters: [{
-          name: "evt",
-          type: "Event",
-          description: "The pointer event to read"
-        }],
-        description: "Hooks up to the window's `mouseDown` and `touchStart` events and propagates it to any of its focused children."
-      });
-      pliny.method({
-        parent: "Primrose.Entity",
-        name: "moveDOMPointer",
-        parameters: [{
-          name: "evt",
-          type: "Event",
-          description: "The pointer event to read"
-        }],
-        description: "Hooks up to the window's `mouseMove` and `touchMove` events and propagates it to any of its focused children."
       });
       pliny.method({
         parent: "Primrose.Entity",
@@ -2818,7 +2798,19 @@ pliny.function({
 pliny.class({
   parent: "Primrose.Input",
   name: "FPSInput",
-  description: "| [under construction]"
+  baseClass: "Primrose.AbstractEventEmitter",
+  description: "A massive hairball of a class that handles all of the input abstraction.",
+  parameters: [{
+    name: "DOMElement",
+    type: "Element",
+    description: "The DOM element on which to add most events.",
+    optional: true,
+    defaultValue: "window"
+  }, {
+    name: "options",
+    type: "Object",
+    description: "Optional setup: avatarHeight, gravity, and scene."
+  }]
 });
 
 pliny.class({

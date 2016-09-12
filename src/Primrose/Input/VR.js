@@ -4,14 +4,7 @@ const DEFAULT_POSE = {
   },
   GAZE_LENGTH = 3000,
 
-  heap = new WeakMap();
-
-function priv(obj, value) {
-  if(!heap.has(obj)) {
-    heap.set(obj, value || {});
-  }
-  return heap.get(obj);
-}
+  _ = priv();
 
 pliny.class({
   parent: "Primrose.Input",
@@ -35,7 +28,7 @@ class VR extends Primrose.PoseInputProcessor {
   constructor(avatarHeight) {
     super("VR");
 
-    priv(this, {
+    _(this, {
       requestPresent: (layers) => this.currentDevice.requestPresent(layers)
           .catch((exp) => console.warn("requstPresent", exp))
     });
@@ -95,7 +88,7 @@ class VR extends Primrose.PoseInputProcessor {
       }
 
       var promise = null,
-        rp = priv(this).requestPresent;
+        rp = _(this).requestPresent;
 
       // If we're using WebVR-Polyfill, just let it do its job.
       if(this.currentDevice.isPolyfilled) {
