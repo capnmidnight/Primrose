@@ -58,6 +58,7 @@ class Image extends Primrose.Surface {
     this._currentImageIndex = 0;
     this.className = "";
     this.mesh = null;
+    this.enabled = true;
 
     if(options.value) {
       setTimeout(() => {
@@ -226,8 +227,10 @@ class Image extends Primrose.Surface {
   }
 
   eyeBlank(eye) {
-    this._currentImageIndex = eye;
-    this.render();
+    if(this.enabled){
+      this._currentImageIndex = eye;
+      this.render();
+    }
   }
 
   render(force) {
