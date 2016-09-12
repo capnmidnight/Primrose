@@ -58,34 +58,30 @@ class Image extends Primrose.Surface {
     this._currentImageIndex = 0;
     this.className = "";
     this.mesh = null;
+    this.ready = Promise.resolve();
     this.enabled = true;
 
     if(options.value) {
-      setTimeout(() => {
-        console.log(options.value)
-        if (options.value) {
-          if(options.value instanceof Array){
-            if(options.value.length === 2){
-              this.loadStereoImage(options.value[0], options.value[1]);
-            }
-            else if(options.value === 1) {
-              options.value = options.value[0];
-            }
-            else{
-              throw new Error("Don't know what to do with " + options.value.length + " images");
-            }
-          }
-
-          if(typeof options.value === "string") {
-            if (/\.stereo\./.test(options.value)) {
-              this.loadStereoImage(options.value);
-            }
-            else {
-              this.loadImage(options.value);
-            }
-          }
+      if(options.value instanceof Array){
+        if(options.value.length === 2){
+          this.ready = this.ready.then(() => this.loadStereoImage(options.value));
         }
-      });
+        else if(options.value === 1) {
+          options.value = options.value[0];
+        }
+        else{
+          throw new Error("Don't know what to do with " + options.value.length + " images");
+        }
+      }
+
+      if(typeof options.value === "string") {
+        if (/\.stereo\./.test(options.value)) {
+          this.ready = this.ready.then(() => this.loadStereoImage(options.value));
+        }
+        else {
+          this.ready = this.ready.then(() => this.loadImage(options.value));
+        }
+      }
     }
   }
 
@@ -122,7 +118,7 @@ class Image extends Primrose.Surface {
       src = i;
       i = 0;
     }
-    console.log("loadImage", i, src);
+
     return new Promise((resolve, reject) => {
         if (imageCache[src]) {
           resolve(imageCache[src]);
@@ -155,12 +151,8 @@ class Image extends Primrose.Surface {
       });
   }
 
-  loadStereoImage(srcLeft, srcRight) {
-    var imageLoaders = [this.loadImage(srcLeft)];
-    if(srcRight){
-      imageLoaders.push(this.loadImage(srcRight));
-    }
-    return Promise.all(imageLoaders)
+  loadStereoImage(images) {
+    return Promise.all(images.map((src, i) => this.loadImage(i, src)))
       .then((images) => {
         var bounds = null,
           imgLeft = null,
