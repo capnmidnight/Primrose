@@ -160,7 +160,6 @@ function textured(geometry, txt, options) {
     }
     else if (txt instanceof Primrose.Surface) {
       txt._material = material;
-      Primrose.Entity.registerEntity(txt);
       setTexture(txt);
       obj.surface = txt;
     }

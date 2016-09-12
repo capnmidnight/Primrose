@@ -36,6 +36,7 @@ class Image extends Primrose.Surface {
       bounds: new Primrose.Text.Rectangle(0, 0, 1, 1)
     }));
     this.listeners.load = [];
+    Primrose.Entity.registerEntity(this);
 
     ////////////////////////////////////////////////////////////////////////
     // initialization
