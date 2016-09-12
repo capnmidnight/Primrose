@@ -856,8 +856,14 @@ function textured(geometry, txt, options) {
               dimX = Math.ceil(Math.log(imgWidth) / Math.LN2),
               dimY = Math.ceil(Math.log(imgHeight) / Math.LN2),
               newWidth = Math.pow(2, dimX),
-              newHeight = Math.pow(2, dimY),
-              scaleX = imgWidth / newWidth,
+              newHeight = Math.pow(2, dimY);
+
+          if (options.scaleTexture) {
+            newWidth *= options.scaleTexture;
+            newHeight *= options.scaleTexture;
+          }
+
+          var scaleX = imgWidth / newWidth,
               scaleY = imgHeight / newHeight;
 
           if (scaleX !== 1 || scaleY !== 1) {
@@ -898,7 +904,7 @@ function textured(geometry, txt, options) {
             }
           }
         } else {
-          console.trace(geometry);
+          console.trace(geometry, options);
         }
       }
 
@@ -912,7 +918,6 @@ function textured(geometry, txt, options) {
       setTexture(textureCache[textureDescription]);
     } else if (txt instanceof Primrose.Surface) {
       txt._material = material;
-      Primrose.Entity.registerEntity(txt);
       setTexture(txt);
       obj.surface = txt;
     } else if (typeof txt === "string") {
@@ -1697,13 +1702,11 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
 
     _this.camera = new THREE.PerspectiveCamera(75, 1, _this.options.nearPlane, _this.options.nearPlane + _this.options.drawDistance);
     if (_this.options.skyTexture !== undefined) {
-      _this.sky = new Primrose.Controls.Image({
-        geometry: shell(_this.options.drawDistance, 144, 72, Math.PI * 2, Math.PI),
-        value: _this.options.skyTexture,
+      _this.sky = textured(shell(_this.options.drawDistance * 0.9, 18, 9, Math.PI * 2, Math.PI), _this.options.skyTexture, {
         unshaded: true
       });
       _this.sky.name = "Sky";
-      _this.appendChild(_this.sky);
+      _this.scene.add(_this.sky);
     }
 
     if (_this.options.groundTexture !== undefined) {
@@ -2049,15 +2052,6 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
   }
 
   _createClass(BrowserEnvironment, [{
-    key: "setSkyTexture",
-    value: function setSkyTexture(imgSpec) {
-      if (imgSpec instanceof Array) {
-        this.sky.loadStereoImage.apply(this.sky, imgSpec);
-      } else {
-        this.sky.loadImage(imgSpec);
-      }
-    }
-  }, {
     key: "connect",
     value: function connect(socket, userName) {
       return this.network && this.network.connect(socket, userName);
@@ -3505,7 +3499,7 @@ var Pointer = function (_Primrose$AbstractEve) {
       return this.gazeInner.visible;
     },
     set: function set(v) {
-      this.gazeInner.visible = v;
+      this.gazeInner.visible = !!v;
       this.mesh.visible = !v;
     }
   }, {
@@ -7524,12 +7518,17 @@ var Image = function (_Primrose$Surface) {
       };
     }
 
+    if (options.radius) {
+      options.geometry = shell(options.radius, 72, 36, Math.PI * 2, Math.PI);
+    }
+
     var _this = _possibleConstructorReturn(this, (Image.__proto__ || Object.getPrototypeOf(Image)).call(this, patch(options, {
       id: "Primrose.Controls.Image[" + COUNTER++ + "]",
       bounds: new Primrose.Text.Rectangle(0, 0, 1, 1)
     })));
 
     _this.listeners.load = [];
+    Primrose.Entity.registerEntity(_this);
 
     ////////////////////////////////////////////////////////////////////////
     // initialization
@@ -7542,30 +7541,33 @@ var Image = function (_Primrose$Surface) {
     _this._currentImageIndex = 0;
     _this.className = "";
     _this.mesh = null;
+    _this.ready = Promise.resolve();
+    _this.enabled = true;
 
     if (options.value) {
-      setTimeout(function () {
-        console.log(options.value);
-        if (options.value) {
-          if (options.value instanceof Array) {
-            if (options.value.length === 2) {
-              _this.loadStereoImage(options.value[0], options.value[1]);
-            } else if (options.value === 1) {
-              options.value = options.value[0];
-            } else {
-              throw new Error("Don't know what to do with " + options.value.length + " images");
-            }
-          }
-
-          if (typeof options.value === "string") {
-            if (/\.stereo\./.test(options.value)) {
-              _this.loadStereoImage(options.value);
-            } else {
-              _this.loadImage(options.value);
-            }
-          }
+      if (options.value instanceof Array) {
+        if (options.value.length === 2) {
+          _this.ready = _this.ready.then(function () {
+            return _this.loadStereoImage(options.value);
+          });
+        } else if (options.value === 1) {
+          options.value = options.value[0];
+        } else {
+          throw new Error("Don't know what to do with " + options.value.length + " images");
         }
-      });
+      }
+
+      if (typeof options.value === "string") {
+        if (/\.stereo\./.test(options.value)) {
+          _this.ready = _this.ready.then(function () {
+            return _this.loadStereoImage(options.value);
+          });
+        } else {
+          _this.ready = _this.ready.then(function () {
+            return _this.loadImage(options.value);
+          });
+        }
+      }
     }
     return _this;
   }
@@ -7587,7 +7589,7 @@ var Image = function (_Primrose$Surface) {
         src = i;
         i = 0;
       }
-      console.log("loadImage", i, src);
+
       return new Promise(function (resolve, reject) {
         if (imageCache[src]) {
           resolve(imageCache[src]);
@@ -7617,14 +7619,12 @@ var Image = function (_Primrose$Surface) {
     }
   }, {
     key: "loadStereoImage",
-    value: function loadStereoImage(srcLeft, srcRight) {
+    value: function loadStereoImage(images) {
       var _this3 = this;
 
-      var imageLoaders = [this.loadImage(srcLeft)];
-      if (srcRight) {
-        imageLoaders.push(this.loadImage(srcRight));
-      }
-      return Promise.all(imageLoaders).then(function (images) {
+      return Promise.all(images.map(function (src, i) {
+        return _this3.loadImage(i, src);
+      })).then(function (images) {
         var bounds = null,
             imgLeft = null,
             imgRight = null;
@@ -7653,6 +7653,11 @@ var Image = function (_Primrose$Surface) {
       });
     }
   }, {
+    key: "clear",
+    value: function clear() {
+      this._images.splice(0);
+    }
+  }, {
     key: "getImage",
     value: function getImage(i) {
       return this._images[i % this._images.length];
@@ -7677,8 +7682,10 @@ var Image = function (_Primrose$Surface) {
   }, {
     key: "eyeBlank",
     value: function eyeBlank(eye) {
-      this._currentImageIndex = eye;
-      this.render();
+      if (this.enabled) {
+        this._currentImageIndex = eye;
+        this.render();
+      }
     }
   }, {
     key: "render",
@@ -7691,7 +7698,7 @@ var Image = function (_Primrose$Surface) {
         }
 
         if (this.image) {
-          this.context.drawImage(this.image, 0, 0);
+          this.context.drawImage(this.image, 0, 0, this.imageWidth, this.imageHeight);
         }
 
         this._lastWidth = this.imageWidth;

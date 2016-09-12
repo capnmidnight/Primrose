@@ -235,7 +235,7 @@ class Image extends Primrose.Surface {
       }
 
       if (this.image) {
-        this.context.drawImage(this.image, 0, 0);
+        this.context.drawImage(this.image, 0, 0, this.imageWidth, this.imageHeight);
       }
 
       this._lastWidth = this.imageWidth;

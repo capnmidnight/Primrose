@@ -100,8 +100,14 @@ function textured(geometry, txt, options) {
             dimX = Math.ceil(Math.log(imgWidth) / Math.LN2),
             dimY = Math.ceil(Math.log(imgHeight) / Math.LN2),
             newWidth = Math.pow(2, dimX),
-            newHeight = Math.pow(2, dimY),
-            scaleX = imgWidth / newWidth,
+            newHeight = Math.pow(2, dimY);
+
+          if(options.scaleTexture){
+            newWidth *= options.scaleTexture;
+            newHeight *= options.scaleTexture;
+          }
+
+          var scaleX = imgWidth / newWidth,
             scaleY = imgHeight / newHeight;
 
           if (scaleX !== 1 || scaleY !== 1) {
@@ -144,7 +150,7 @@ function textured(geometry, txt, options) {
           }
         }
         else {
-          console.trace(geometry);
+          console.trace(geometry, options);
         }
       }
 
