@@ -1,7 +1,7 @@
 {
   "name": "primrose",
   "description": "Primrose is a framework for building Virtual Reality applications in Web browsers.",
-  "version": "0.26.17",
+  "version": "0.26.18",
   "engines": {
     "node": ">=4.0.0"
   },
@@ -69,6 +69,6 @@
     "gulp": "^3.9.1",
     "gulp-rename": "^1.2.2",
     "jstransformer-marked": "^1.0.1",
-    "notiontheory-basic-build": "^2.2.0"
+    "notiontheory-basic-build": "^2.3.0"
   }
 }
