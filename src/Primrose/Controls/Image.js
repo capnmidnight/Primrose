@@ -31,6 +31,15 @@ class Image extends Primrose.Surface {
       };
     }
 
+    if(options.radius){
+      options.geometry = shell(
+        options.radius,
+        72,
+        36,
+        Math.PI * 2,
+        Math.PI);
+    }
+
     super(patch(options, {
       id: "Primrose.Controls.Image[" + (COUNTER++) + "]",
       bounds: new Primrose.Text.Rectangle(0, 0, 1, 1)
