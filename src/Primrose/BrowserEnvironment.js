@@ -552,12 +552,23 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
 
     this.camera = new THREE.PerspectiveCamera(75, 1, this.options.nearPlane, this.options.nearPlane + this.options.drawDistance);
     if (this.options.skyTexture !== undefined) {
-      this.setSkyTexture(this.options.skyTexture);
+      this.sky = textured(
+        shell(
+         this.options.drawDistance * 0.9,
+         18,
+         9,
+         Math.PI * 2,
+         Math.PI),
+        this.options.skyTexture, {
+          unshaded: true
+        });
+      this.sky.name = "Sky";
+      this.scene.add(this.sky);
     }
 
     if (this.options.groundTexture !== undefined) {
       var dim = 10,
-        gm = new THREE.PlaneGeometry(dim * 5, dim * 5, dim, dim);
+      gm = new THREE.PlaneGeometry(dim * 5, dim * 5, dim, dim);
       this.ground = textured(gm, this.options.groundTexture, {
         txtRepeatS: dim * 5,
         txtRepeatT: dim * 5
@@ -914,38 +925,6 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
     }
 
     this.start();
-  }
-
-  setSkyTexture(imgSpec){
-    var addToScene = false,
-      promise = null;
-    if(this.sky){
-      this.sky.clear();
-    }
-    else{
-      addToScene = true;
-      this.sky = new Primrose.Controls.Image({
-        geometry: shell(
-          this.options.drawDistance,
-          144,
-          72,
-          Math.PI * 2,
-          Math.PI),
-        unshaded: true
-      });
-      this.sky.name = "Sky";
-    }
-    if(imgSpec instanceof Array){
-      promise = this.sky.loadStereoImage(imgSpec);
-    }
-    else{
-      promise = this.sky.loadImage(imgSpec);
-    }
-    if(addToScene){
-      promise = promise.then((img) => this.appendChild(this.sky));
-    }
-
-    return promise;
   }
 
   get lockMovement(){
