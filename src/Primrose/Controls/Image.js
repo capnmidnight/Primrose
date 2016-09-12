@@ -47,24 +47,49 @@ class Image extends Primrose.Surface {
     this._images = [];
     this._currentImageIndex = 0;
     this.className = "";
+    this.mesh = null;
 
-    setTimeout(() => {
-      if (options.value) {
-        if (/\.stereo\./.test(options.value)) {
-          this.loadStereoImage(options.value);
+    if(options.value) {
+      setTimeout(() => {
+        console.log(options.value)
+        if (options.value) {
+          if(options.value instanceof Array){
+            if(options.value.length === 2){
+              this.loadStereoImage(options.value[0], options.value[1]);
+            }
+            else if(options.value === 1) {
+              options.value = options.value[0];
+            }
+            else{
+              throw new Error("Don't know what to do with " + options.value.length + " images");
+            }
+          }
+
+          if(typeof options.value === "string") {
+            if (/\.stereo\./.test(options.value)) {
+              this.loadStereoImage(options.value);
+            }
+            else {
+              this.loadImage(options.value);
+            }
+          }
         }
-        else {
-          this.loadImage(options.value);
-        }
-      }
-    });
+      });
+    }
   }
 
   addToBrowserEnvironment(env, scene) {
-    var imageMesh = textured(quad(0.5, 0.5 * this.imageHeight / this.imageWidth), this);
-    scene.add(imageMesh);
-    env.registerPickableObject(imageMesh);
-    return imageMesh;
+    this.mesh = textured(
+      this.options.geometry || quad(0.5, 0.5 * this.imageHeight / this.imageWidth),
+      this,
+      this.options);
+    scene.add(this.mesh);
+    env.registerPickableObject(this.mesh);
+    return this.mesh;
+  }
+
+  get position(){
+    return this.mesh.position;
   }
 
   get src() {
@@ -86,6 +111,7 @@ class Image extends Primrose.Surface {
       src = i;
       i = 0;
     }
+    console.log("loadImage", i, src);
     return new Promise((resolve, reject) => {
         if (imageCache[src]) {
           resolve(imageCache[src]);
@@ -106,6 +132,8 @@ class Image extends Primrose.Surface {
         }
       })
       .then((img) => {
+        this.bounds.width = img.width;
+        this.bounds.height = img.height;
         this.setImage(i, img);
         return img;
       })
@@ -116,29 +144,38 @@ class Image extends Primrose.Surface {
       });
   }
 
-  loadStereoImage(src) {
-    return this.loadImage(src)
-      .then((img) => {
-        var bounds = new Primrose.Text.Rectangle(0, 0, img.width / 2, img.height),
-          a = new Primrose.Surface({
-            id: this.id + "-left",
-            bounds: bounds
-          }),
-          b = new Primrose.Surface({
-            id: this.id + "-right",
-            bounds: bounds
-          });
-        a.context.drawImage(img, 0, 0);
-        b.context.drawImage(img, -bounds.width, 0);
-        this.setImage(0, a.canvas);
-        this.setImage(1, b.canvas);
-        this.bounds.width = bounds.width;
-        this.bounds.height = bounds.height;
-        this.render();
-
-        emit.call(this, "load", {
-          target: this
-        });
+  loadStereoImage(srcLeft, srcRight) {
+    var imageLoaders = [this.loadImage(srcLeft)];
+    if(srcRight){
+      imageLoaders.push(this.loadImage(srcRight));
+    }
+    return Promise.all(imageLoaders)
+      .then((images) => {
+        var bounds = null,
+          imgLeft = null,
+          imgRight = null;
+        if(images.length === 2) {
+          imgLeft = images[0];
+          imgRight = images[1];
+          bounds = new Primrose.Text.Rectangle(0, 0, imgLeft.width, imgLeft.height);
+        }
+        else {
+          var img = images[0];
+          bounds = new Primrose.Text.Rectangle(0, 0, img.width / 2, img.height);
+          var a = new Primrose.Surface({
+              id: this.id + "-left",
+              bounds: bounds
+            }),
+            b = new Primrose.Surface({
+              id: this.id + "-right",
+              bounds: bounds
+            });
+          a.context.drawImage(img, 0, 0);
+          b.context.drawImage(img, -bounds.width, 0);
+          imgLeft = a.canvas;
+          imgRight = b.canvas;
+        }
+        this.setStereoImage(imgLeft, imgRight, bounds);
         return this;
       });
   }
@@ -153,6 +190,16 @@ class Image extends Primrose.Surface {
 
   getImage(i) {
     return this._images[i % this._images.length];
+  }
+
+  setStereoImage(left, right, bounds){
+    this.bounds.width = bounds.width;
+    this.bounds.height = bounds.height;
+    this.setImage(0, left);
+    this.setImage(1, right);
+    emit.call(this, "load", {
+      target: this
+    });
   }
 
   setImage(i, img) {

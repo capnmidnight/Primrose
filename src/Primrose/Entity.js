@@ -511,9 +511,6 @@ class Entity {
         this.startUV(evt.hit.point);
         setTimeout(() => this.endPointer(evt), 100);
       break;
-      default:
-        console.log(evt.type);
-      break;
     }
   }
 

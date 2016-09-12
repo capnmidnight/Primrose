@@ -76,11 +76,8 @@ class Pointer extends Primrose.AbstractEventEmitter {
     this.disk.visible = false;
     this.disk.geometry.computeBoundingBox();
 
-    this.useGaze = false;
-
     this.gazeInner = new THREE.Mesh( new THREE.CircleBufferGeometry( GAZE_RING_INNER / 2, 10 ), this.material );
     this.gazeInner.position.set(0, 0, -0.5);
-    this.gazeInner.visible = this.useGaze;
 
     this.gazeOuter = new THREE.Mesh( new THREE.RingBufferGeometry( GAZE_RING_INNER, GAZE_RING_OUTER, 10, 1, 0, 0 ), this.material );
     this.gazeOuter.visible = false;
@@ -90,9 +87,20 @@ class Pointer extends Primrose.AbstractEventEmitter {
     this.add(this.mesh);
     this.add(this.gazeInner);
 
+    this.useGaze = false;
+
     _(this, {
       lastHit: null
     });
+  }
+
+  get useGaze() {
+    return this.gazeInner.visible;
+  }
+
+  set useGaze(v) {
+    this.gazeInner.visible = v;
+    this.mesh.visible = !v;
   }
 
   get material(){

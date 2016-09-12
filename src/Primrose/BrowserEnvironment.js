@@ -552,18 +552,18 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
 
     this.camera = new THREE.PerspectiveCamera(75, 1, this.options.nearPlane, this.options.nearPlane + this.options.drawDistance);
     if (this.options.skyTexture !== undefined) {
-      this.sky = textured(
-        shell(
+      this.sky = new Primrose.Controls.Image({
+        geometry: shell(
           this.options.drawDistance,
-          18,
-          9,
+          144,
+          72,
           Math.PI * 2,
           Math.PI),
-        this.options.skyTexture, {
-          unshaded: true
-        });
+        value: this.options.skyTexture,
+        unshaded: true
+      });
       this.sky.name = "Sky";
-      this.scene.add(this.sky);
+      this.appendChild(this.sky);
     }
 
     if (this.options.groundTexture !== undefined) {
@@ -925,6 +925,15 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
     }
 
     this.start();
+  }
+
+  setSkyTexture(imgSpec){
+    if(imgSpec instanceof Array){
+      this.sky.loadStereoImage.apply(this.sky, imgSpec);
+    }
+    else{
+      this.sky.loadImage(imgSpec)
+    }
   }
 
   get lockMovement(){

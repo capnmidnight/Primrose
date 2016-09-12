@@ -2790,11 +2790,13 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
 
     _this.camera = new THREE.PerspectiveCamera(75, 1, _this.options.nearPlane, _this.options.nearPlane + _this.options.drawDistance);
     if (_this.options.skyTexture !== undefined) {
-      _this.sky = textured(shell(_this.options.drawDistance, 18, 9, Math.PI * 2, Math.PI), _this.options.skyTexture, {
+      _this.sky = new Primrose.Controls.Image({
+        geometry: shell(_this.options.drawDistance, 144, 72, Math.PI * 2, Math.PI),
+        value: _this.options.skyTexture,
         unshaded: true
       });
       _this.sky.name = "Sky";
-      _this.scene.add(_this.sky);
+      _this.appendChild(_this.sky);
     }
 
     if (_this.options.groundTexture !== undefined) {
@@ -3140,6 +3142,15 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
   }
 
   _createClass(BrowserEnvironment, [{
+    key: "setSkyTexture",
+    value: function setSkyTexture(imgSpec) {
+      if (imgSpec instanceof Array) {
+        this.sky.loadStereoImage.apply(this.sky, imgSpec);
+      } else {
+        this.sky.loadImage(imgSpec);
+      }
+    }
+  }, {
     key: "connect",
     value: function connect(socket, userName) {
       return this.network && this.network.connect(socket, userName);
@@ -3759,9 +3770,6 @@ var Entity = function () {
           setTimeout(function () {
             return _this.endPointer(evt);
           }, 100);
-          break;
-        default:
-          console.log(evt.type);
           break;
       }
     }
@@ -5089,11 +5097,8 @@ var Pointer = function (_Primrose$AbstractEve) {
     _this.disk.visible = false;
     _this.disk.geometry.computeBoundingBox();
 
-    _this.useGaze = false;
-
     _this.gazeInner = new THREE.Mesh(new THREE.CircleBufferGeometry(GAZE_RING_INNER / 2, 10), _this.material);
     _this.gazeInner.position.set(0, 0, -0.5);
-    _this.gazeInner.visible = _this.useGaze;
 
     _this.gazeOuter = new THREE.Mesh(new THREE.RingBufferGeometry(GAZE_RING_INNER, GAZE_RING_OUTER, 10, 1, 0, 0), _this.material);
     _this.gazeOuter.visible = false;
@@ -5102,6 +5107,8 @@ var Pointer = function (_Primrose$AbstractEve) {
     _this.root = new THREE.Object3D();
     _this.add(_this.mesh);
     _this.add(_this.gazeInner);
+
+    _this.useGaze = false;
 
     _(_this, {
       lastHit: null
@@ -5293,6 +5300,15 @@ var Pointer = function (_Primrose$AbstractEve) {
           _priv.lastHit = currentHit;
         }
       }
+    }
+  }, {
+    key: "useGaze",
+    get: function get() {
+      return this.gazeInner.visible;
+    },
+    set: function set(v) {
+      this.gazeInner.visible = v;
+      this.mesh.visible = !v;
     }
   }, {
     key: "material",
@@ -9871,26 +9887,42 @@ var Image = function (_Primrose$Surface) {
     _this._images = [];
     _this._currentImageIndex = 0;
     _this.className = "";
+    _this.mesh = null;
 
-    setTimeout(function () {
-      if (options.value) {
-        if (/\.stereo\./.test(options.value)) {
-          _this.loadStereoImage(options.value);
-        } else {
-          _this.loadImage(options.value);
+    if (options.value) {
+      setTimeout(function () {
+        console.log(options.value);
+        if (options.value) {
+          if (options.value instanceof Array) {
+            if (options.value.length === 2) {
+              _this.loadStereoImage(options.value[0], options.value[1]);
+            } else if (options.value === 1) {
+              options.value = options.value[0];
+            } else {
+              throw new Error("Don't know what to do with " + options.value.length + " images");
+            }
+          }
+
+          if (typeof options.value === "string") {
+            if (/\.stereo\./.test(options.value)) {
+              _this.loadStereoImage(options.value);
+            } else {
+              _this.loadImage(options.value);
+            }
+          }
         }
-      }
-    });
+      });
+    }
     return _this;
   }
 
   _createClass(Image, [{
     key: "addToBrowserEnvironment",
     value: function addToBrowserEnvironment(env, scene) {
-      var imageMesh = textured(quad(0.5, 0.5 * this.imageHeight / this.imageWidth), this);
-      scene.add(imageMesh);
-      env.registerPickableObject(imageMesh);
-      return imageMesh;
+      this.mesh = textured(this.options.geometry || quad(0.5, 0.5 * this.imageHeight / this.imageWidth), this, this.options);
+      scene.add(this.mesh);
+      env.registerPickableObject(this.mesh);
+      return this.mesh;
     }
   }, {
     key: "loadImage",
@@ -9901,6 +9933,7 @@ var Image = function (_Primrose$Surface) {
         src = i;
         i = 0;
       }
+      console.log("loadImage", i, src);
       return new Promise(function (resolve, reject) {
         if (imageCache[src]) {
           resolve(imageCache[src]);
@@ -9918,6 +9951,8 @@ var Image = function (_Primrose$Surface) {
           reject("Image was null");
         }
       }).then(function (img) {
+        _this2.bounds.width = img.width;
+        _this2.bounds.height = img.height;
         _this2.setImage(i, img);
         return img;
       }).catch(function (err) {
@@ -9928,30 +9963,38 @@ var Image = function (_Primrose$Surface) {
     }
   }, {
     key: "loadStereoImage",
-    value: function loadStereoImage(src) {
+    value: function loadStereoImage(srcLeft, srcRight) {
       var _this3 = this;
 
-      return this.loadImage(src).then(function (img) {
-        var bounds = new Primrose.Text.Rectangle(0, 0, img.width / 2, img.height),
-            a = new Primrose.Surface({
-          id: _this3.id + "-left",
-          bounds: bounds
-        }),
-            b = new Primrose.Surface({
-          id: _this3.id + "-right",
-          bounds: bounds
-        });
-        a.context.drawImage(img, 0, 0);
-        b.context.drawImage(img, -bounds.width, 0);
-        _this3.setImage(0, a.canvas);
-        _this3.setImage(1, b.canvas);
-        _this3.bounds.width = bounds.width;
-        _this3.bounds.height = bounds.height;
-        _this3.render();
-
-        emit.call(_this3, "load", {
-          target: _this3
-        });
+      var imageLoaders = [this.loadImage(srcLeft)];
+      if (srcRight) {
+        imageLoaders.push(this.loadImage(srcRight));
+      }
+      return Promise.all(imageLoaders).then(function (images) {
+        var bounds = null,
+            imgLeft = null,
+            imgRight = null;
+        if (images.length === 2) {
+          imgLeft = images[0];
+          imgRight = images[1];
+          bounds = new Primrose.Text.Rectangle(0, 0, imgLeft.width, imgLeft.height);
+        } else {
+          var img = images[0];
+          bounds = new Primrose.Text.Rectangle(0, 0, img.width / 2, img.height);
+          var a = new Primrose.Surface({
+            id: _this3.id + "-left",
+            bounds: bounds
+          }),
+              b = new Primrose.Surface({
+            id: _this3.id + "-right",
+            bounds: bounds
+          });
+          a.context.drawImage(img, 0, 0);
+          b.context.drawImage(img, -bounds.width, 0);
+          imgLeft = a.canvas;
+          imgRight = b.canvas;
+        }
+        _this3.setStereoImage(imgLeft, imgRight, bounds);
         return _this3;
       });
     }
@@ -9959,6 +10002,17 @@ var Image = function (_Primrose$Surface) {
     key: "getImage",
     value: function getImage(i) {
       return this._images[i % this._images.length];
+    }
+  }, {
+    key: "setStereoImage",
+    value: function setStereoImage(left, right, bounds) {
+      this.bounds.width = bounds.width;
+      this.bounds.height = bounds.height;
+      this.setImage(0, left);
+      this.setImage(1, right);
+      emit.call(this, "load", {
+        target: this
+      });
     }
   }, {
     key: "setImage",
@@ -9992,6 +10046,11 @@ var Image = function (_Primrose$Surface) {
 
         this.invalidate();
       }
+    }
+  }, {
+    key: "position",
+    get: function get() {
+      return this.mesh.position;
     }
   }, {
     key: "src",
