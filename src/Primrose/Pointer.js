@@ -99,7 +99,7 @@ class Pointer extends Primrose.AbstractEventEmitter {
   }
 
   set useGaze(v) {
-    this.gazeInner.visible = v;
+    this.gazeInner.visible = !!v;
     this.mesh.visible = !v;
   }
 
