@@ -185,37 +185,64 @@ function updateScript() {
       newScript.indexOf("return update") < 0) {
       newScript += "\nreturn update;";
     }
-    try {
-      console.log("----- loading new script -----");
-      var scriptUpdate = new Function("scene", newScript);
-      wipeScene();
-      scriptAnimate = scriptUpdate.call(env, subScene);
-      if (scriptAnimate) {
-        scriptAnimate(0);
-      }
-      console.log("----- script loaded -----");
-      if (!scriptAnimate) {
-        console.log("----- No update script provided -----");
-      }
-      else if (env.quality === Quality.NONE) {
-        env.quality = Quality.MEDIUM;
-      }
+    console.log("----- loading new script -----");
+    scriptAnimate = null;
+    var scriptUpdate = new Function("scene", newScript);
+    wipeScene();
+    scriptAnimate = scriptUpdate.call(env, subScene);
+    if (scriptAnimate) {
+      scriptAnimate(0);
     }
-    catch (exp) {
-      console.error(exp);
-      scriptAnimate = null;
-      throw exp;
+    console.log("----- script loaded -----");
+    if (!scriptAnimate) {
+      console.log("----- No update script provided -----");
+    }
+    else if (env.quality === Quality.NONE) {
+      env.quality = Quality.MEDIUM;
     }
   }
 }
 
-logger.setup(logger.USER, function (msg) {
+logger.setup(logger.USER, function (data) {
   if (output) {
-    var data = JSON.parse(msg),
-      t = output;
-    t.value += data.name + ":> " + data.args[0] + "\n";
-    t.selectionStart = t.selectionEnd = t.value.length;
-    t.scrollIntoView(t.frontCursor);
+    var msg = data.args.map(function(o){
+      if(typeof o === "object"){
+        if(o.type === "error"){
+          var stk = (o.stack && ("\n" + (o.stack.join && o.stack.join("\n") || o.stack))),
+            msg = o.time + (stk || (" [" + o.lineno + ", " + o.colno + "]: " + o.message + "\n" + o.source));
+          if(editor){
+            var script = editor.value,
+              lines = script.split(/\n/g),
+              line = parseFloat(o.lineno) - 3,
+              start = Math.max(0, line - 2),
+              end = Math.min(lines.length, line + 3),
+              section = lines.slice(start, end);
+            msg += "\n";
+            for(var i = start; i < end; ++i){
+              console._log(start, end, i, line);
+              msg += section[i - start] + "\n";
+              if(i === line){
+                for(var j = 0; j < o.colno - 1; ++j){
+                  msg += "\u2192";
+                }
+                msg += "\u2191\n";
+              }
+            }
+          }
+          return msg;
+        }
+        else{
+          return JSON.stringify(o);
+        }
+      }
+      return o;
+    }).join(", ");
+    output.value += data.name + ":> " + msg + "\n";
+    output.selectionStart = output.selectionEnd = output.value.length - 1;
+    output.scrollIntoView(output.frontCursor);
+    setTimeout(function() {
+      output.invalidate();
+    }, 10);
   }
 });
 

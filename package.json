@@ -51,7 +51,7 @@
     "highlighting"
   ],
   "dependencies": {
-    "bare-bones-logger": "^1.0.4",
+    "bare-bones-logger": "^2.0.0",
     "html2canvas": "^0.5.0-beta4",
     "jshashes": "^1.0.5",
     "lavu-details-polyfill": "^0.1.0",
