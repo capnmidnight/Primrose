@@ -478,42 +478,58 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
     this.pickableObjects = {};
     this.currentControl = null;
 
-    var moveBy = new THREE.Vector3(),
+    var POSITION = new THREE.Vector3(),
       lastTeleport = 0;
 
     this.selectControl = (evt) => {
       var obj = evt.hit && evt.hit.object;
-      if((evt.type === "pointerend" || evt.type === "gazecomplete") && obj === this.ground){
-        moveBy.fromArray(evt.hit.facePoint)
+
+      if(evt.type === "exit" && evt.lastHit && evt.lastHit.object === this.ground){
+        evt.pointer.disk.visible = false;
+      }
+
+      if(obj === this.ground) {
+        POSITION.fromArray(evt.hit.facePoint)
           .sub(this.input.head.position);
 
-        var distSq = moveBy.x * moveBy.x + moveBy.z * moveBy.z;
+        var distSq = POSITION.x * POSITION.x + POSITION.z * POSITION.z;
         if (distSq > MAX_MOVE_DISTANCE_SQ) {
           var dist = Math.sqrt(distSq),
             factor = MAX_MOVE_DISTANCE / dist,
-            y = moveBy.y;
-          moveBy.y = 0;
-          moveBy.multiplyScalar(factor);
-          moveBy.y = y;
+            y = POSITION.y;
+          POSITION.y = 0;
+          POSITION.multiplyScalar(factor);
+          POSITION.y = y;
         }
 
-        moveBy.add(this.input.head.position);
-        var t = performance.now(),
-          dt = t - lastTeleport;
-        if(dt > TELEPORT_COOLDOWN) {
-          lastTeleport = t;
-          this.input.moveStage(moveBy);
+        POSITION.add(this.input.head.position);
+
+        if(evt.type === "enter") {
+          evt.pointer.disk.visible = true;
+        }
+        else if(evt.type === "pointermove" || evt.type === "gazemove"){
+          evt.pointer.moveTeleportPad(POSITION);
+        }
+        else if(evt.type === "pointerend" || evt.type === "gazecomplete") {
+          var t = performance.now(),
+            dt = t - lastTeleport;
+          if(dt > TELEPORT_COOLDOWN) {
+            lastTeleport = t;
+            this.input.moveStage(POSITION);
+          }
         }
       }
 
-      obj = obj && (obj.surface || obj.button);
-      if(obj !== this.currentControl){
-        if(this.currentControl){
-          this.currentControl.blur();
-        }
-        this.currentControl = obj;
-        if(this.currentControl){
-          this.currentControl.focus();
+      if(evt.type === "pointerend" || evt.type === "gazecomplete") {
+        obj = obj && (obj.surface || obj.button);
+        if(obj !== this.currentControl){
+          if(this.currentControl){
+            this.currentControl.blur();
+          }
+          this.currentControl = obj;
+          if(this.currentControl){
+            this.currentControl.focus();
+          }
         }
       }
 

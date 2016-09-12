@@ -1627,41 +1627,55 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
     _this.pickableObjects = {};
     _this.currentControl = null;
 
-    var moveBy = new THREE.Vector3(),
+    var POSITION = new THREE.Vector3(),
         lastTeleport = 0;
 
     _this.selectControl = function (evt) {
       var obj = evt.hit && evt.hit.object;
-      if ((evt.type === "pointerend" || evt.type === "gazecomplete") && obj === _this.ground) {
-        moveBy.fromArray(evt.hit.facePoint).sub(_this.input.head.position);
 
-        var distSq = moveBy.x * moveBy.x + moveBy.z * moveBy.z;
+      if (evt.type === "exit" && evt.lastHit && evt.lastHit.object === _this.ground) {
+        evt.pointer.disk.visible = false;
+      }
+
+      if (obj === _this.ground) {
+        POSITION.fromArray(evt.hit.facePoint).sub(_this.input.head.position);
+
+        var distSq = POSITION.x * POSITION.x + POSITION.z * POSITION.z;
         if (distSq > MAX_MOVE_DISTANCE_SQ) {
           var dist = Math.sqrt(distSq),
               factor = MAX_MOVE_DISTANCE / dist,
-              y = moveBy.y;
-          moveBy.y = 0;
-          moveBy.multiplyScalar(factor);
-          moveBy.y = y;
+              y = POSITION.y;
+          POSITION.y = 0;
+          POSITION.multiplyScalar(factor);
+          POSITION.y = y;
         }
 
-        moveBy.add(_this.input.head.position);
-        var t = performance.now(),
-            dt = t - lastTeleport;
-        if (dt > TELEPORT_COOLDOWN) {
-          lastTeleport = t;
-          _this.input.moveStage(moveBy);
+        POSITION.add(_this.input.head.position);
+
+        if (evt.type === "enter") {
+          evt.pointer.disk.visible = true;
+        } else if (evt.type === "pointermove" || evt.type === "gazemove") {
+          evt.pointer.moveTeleportPad(POSITION);
+        } else if (evt.type === "pointerend" || evt.type === "gazecomplete") {
+          var t = performance.now(),
+              dt = t - lastTeleport;
+          if (dt > TELEPORT_COOLDOWN) {
+            lastTeleport = t;
+            _this.input.moveStage(POSITION);
+          }
         }
       }
 
-      obj = obj && (obj.surface || obj.button);
-      if (obj !== _this.currentControl) {
-        if (_this.currentControl) {
-          _this.currentControl.blur();
-        }
-        _this.currentControl = obj;
-        if (_this.currentControl) {
-          _this.currentControl.focus();
+      if (evt.type === "pointerend" || evt.type === "gazecomplete") {
+        obj = obj && (obj.surface || obj.button);
+        if (obj !== _this.currentControl) {
+          if (_this.currentControl) {
+            _this.currentControl.blur();
+          }
+          _this.currentControl = obj;
+          if (_this.currentControl) {
+            _this.currentControl.focus();
+          }
         }
       }
 
@@ -3270,6 +3284,17 @@ var Pointer = function (_Primrose$AbstractEve) {
     _this.mesh.geometry.vertices.forEach(function (v) {
       v.z -= LASER_LENGTH * 0.5 + 0.5;
     });
+
+    _this.disk = textured(sphere(TELEPORT_PAD_RADIUS, 128, 3), _this.color, {
+      emissive: _this.emission
+    });
+    _this.disk.geometry.computeBoundingBox();
+    _this.disk.geometry.vertices.forEach(function (v) {
+      v.y = 0.1 * (v.y - _this.disk.geometry.boundingBox.min.y);
+    });
+    _this.disk.visible = false;
+    _this.disk.geometry.computeBoundingBox();
+
     _this.gazeMesh = new THREE.Mesh(new THREE.RingBufferGeometry(0.04, 0.08, 10, 1, 0, 0), _this.mesh.material);
     _this.gazeMesh.position.set(0, 0, -0.5);
     _this.gazeMesh.visible = false;
@@ -3310,6 +3335,7 @@ var Pointer = function (_Primrose$AbstractEve) {
     key: "addToBrowserEnvironment",
     value: function addToBrowserEnvironment(env, scene) {
       scene.add(this.root);
+      scene.add(this.disk);
     }
   }, {
     key: "updateMatrix",
@@ -3365,6 +3391,11 @@ var Pointer = function (_Primrose$AbstractEve) {
       }
     }
   }, {
+    key: "moveTeleportPad",
+    value: function moveTeleportPad(point) {
+      this.disk.position.copy(point);
+    }
+  }, {
     key: "resolvePicking",
     value: function resolvePicking(currentHit) {
       this.mesh.visible = false;
@@ -3377,7 +3408,8 @@ var Pointer = function (_Primrose$AbstractEve) {
           name: this.name,
           buttons: 0,
           hit: currentHit,
-          lastHit: lastHit
+          lastHit: lastHit,
+          pointer: this
         };
 
         if (moved) {
@@ -3391,6 +3423,15 @@ var Pointer = function (_Primrose$AbstractEve) {
           emissive: this.emission
         });
         this.mesh.visible = !this.useGaze;
+
+        if (!lastHit && currentHit || lastHit && !currentHit || lastHit && currentHit && currentHit.objectID !== lastHit.objectID) {
+          if (lastHit) {
+            this.emit("exit", evt);
+          }
+          if (currentHit) {
+            this.emit("enter", evt);
+          }
+        }
 
         var dButtons = 0;
         for (var i = 0; i < this.triggerDevices.length; ++i) {
@@ -3480,7 +3521,7 @@ var Pointer = function (_Primrose$AbstractEve) {
   return Pointer;
 }(Primrose.AbstractEventEmitter);
 
-Pointer.EVENTS = ["pointerstart", "pointerend", "pointermove", "gazestart", "gazemove", "gazecomplete", "gazecancel"];
+Pointer.EVENTS = ["pointerstart", "pointerend", "pointermove", "gazestart", "gazemove", "gazecomplete", "gazecancel", "exit", "enter"];
     if(typeof window !== "undefined") window.Primrose.Pointer = Pointer;
 })();
     // end D:\Documents\VR\Primrose\src\Primrose\Pointer.js

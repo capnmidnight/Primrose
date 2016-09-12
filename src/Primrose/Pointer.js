@@ -67,6 +67,17 @@ class Pointer extends Primrose.AbstractEventEmitter {
     this.mesh.geometry.vertices.forEach((v) => {
       v.z -= LASER_LENGTH * 0.5 + 0.5;
     });
+
+    this.disk = textured(sphere(TELEPORT_PAD_RADIUS, 128, 3), this.color, {
+      emissive: this.emission
+    });
+    this.disk.geometry.computeBoundingBox();
+    this.disk.geometry.vertices.forEach((v) => {
+      v.y = 0.1 * (v.y - this.disk.geometry.boundingBox.min.y);
+    });
+    this.disk.visible = false;
+    this.disk.geometry.computeBoundingBox();
+
     this.gazeMesh = new THREE.Mesh( new THREE.RingBufferGeometry( 0.04, 0.08, 10, 1, 0, 0 ), this.mesh.material );
     this.gazeMesh.position.set(0, 0, -0.5);
     this.gazeMesh.visible = false;
@@ -116,6 +127,7 @@ class Pointer extends Primrose.AbstractEventEmitter {
       }]
     });
     scene.add(this.root);
+    scene.add(this.disk);
   }
 
   get position() {
@@ -191,6 +203,11 @@ class Pointer extends Primrose.AbstractEventEmitter {
     }
   }
 
+  moveTeleportPad(point){
+    this.disk.position
+      .copy(point);
+  }
+
   resolvePicking(currentHit) {
     this.mesh.visible = false;
 
@@ -205,7 +222,8 @@ class Pointer extends Primrose.AbstractEventEmitter {
           name: this.name,
           buttons: 0,
           hit: currentHit,
-          lastHit: lastHit
+          lastHit: lastHit,
+          pointer: this
         };
 
       if(moved){
@@ -219,6 +237,16 @@ class Pointer extends Primrose.AbstractEventEmitter {
         emissive: this.emission
       });
       this.mesh.visible = !this.useGaze;
+
+      if((!lastHit && currentHit) || (lastHit && !currentHit) ||
+        (lastHit && currentHit && currentHit.objectID !== lastHit.objectID)){
+        if(lastHit){
+          this.emit("exit", evt);
+        }
+        if(currentHit){
+          this.emit("enter", evt);
+        }
+      }
 
       var dButtons = 0;
       for(var i = 0; i < this.triggerDevices.length; ++i) {
@@ -286,4 +314,4 @@ class Pointer extends Primrose.AbstractEventEmitter {
   }
 }
 
-Pointer.EVENTS = ["pointerstart", "pointerend", "pointermove", "gazestart", "gazemove", "gazecomplete", "gazecancel"];
+Pointer.EVENTS = ["pointerstart", "pointerend", "pointermove", "gazestart", "gazemove", "gazecomplete", "gazecancel", "exit", "enter"];
