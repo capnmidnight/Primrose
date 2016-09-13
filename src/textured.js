@@ -134,7 +134,7 @@ function textured(geometry, txt, options) {
     else if (txt instanceof Primrose.Text.Controls.TextBox) {
       setTexture(txt.renderer.texture);
     }
-    else if (txt instanceof HTMLCanvasElement) {
+    else if (txt instanceof HTMLCanvasElement || txt instanceof HTMLVideoElement) {
       setTexture(new THREE.Texture(txt));
     }
     else {

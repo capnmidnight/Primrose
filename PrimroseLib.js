@@ -915,7 +915,7 @@ function textured(geometry, txt, options) {
       Primrose.loadTexture(txt, options.progress).then(setTexture).catch(console.error.bind(console, "Error loading texture", txt));
     } else if (txt instanceof Primrose.Text.Controls.TextBox) {
       setTexture(txt.renderer.texture);
-    } else if (txt instanceof HTMLCanvasElement) {
+    } else if (txt instanceof HTMLCanvasElement || txt instanceof HTMLVideoElement) {
       setTexture(new THREE.Texture(txt));
     } else {
       setTexture(txt);
@@ -7584,15 +7584,49 @@ var Image = function (_Primrose$Entity) {
       });
     }
   }, {
+    key: "loadVideo",
+    value: function loadVideo(src) {
+      var _this4 = this;
+
+      return new Promise(function (resolve, reject) {
+        var video = document.createElement("video"),
+            source = document.createElement("source");
+        video.muted = true;
+        video.preload = "auto";
+        video.autoplay = true;
+        video.loop = true;
+        video.oncanplay = function () {
+          _this4._images.push(video);
+          resolve();
+        };
+        video.onerror = function (evt) {
+          console.log(evt);
+          reject(evt);
+        };
+        video.src = src;
+        document.body.insertBefore(video, document.body.children[0]);
+      });
+    }
+  }, {
     key: "eyeBlank",
     value: function eyeBlank(eye) {
-      this._currentImageIndex = eye % this._images.length;
+      this._currentImageIndex = eye % this.meshes.length;
       for (var i = 0; i < this.meshes.length; ++i) {
         var m = this.meshes[i];
         m.visible = i === this._currentImageIndex;
         if (i > 0) {
           m.position.copy(this.position);
           m.quaternion.copy(this.quaternion);
+          m.scale.copy(this.scale);
+        }
+      }
+    }
+  }, {
+    key: "update",
+    value: function update() {
+      if (this.meshes) {
+        for (var i = 0; i < this.meshes.length; ++i) {
+          this.meshes[i].material.map.needsUpdate = true;
         }
       }
     }
@@ -7605,6 +7639,11 @@ var Image = function (_Primrose$Entity) {
     key: "quaternion",
     get: function get() {
       return this.meshes[0].quaternion;
+    }
+  }, {
+    key: "scale",
+    get: function get() {
+      return this.meshes[0].scale;
     }
   }]);
 

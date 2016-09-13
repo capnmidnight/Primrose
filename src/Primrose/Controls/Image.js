@@ -63,6 +63,10 @@ class Image extends Primrose.Entity {
     return this.meshes[0].quaternion;
   }
 
+  get scale(){
+    return this.meshes[0].scale;
+  }
+
   addToBrowserEnvironment(env, scene) {
     this.meshes = this._images.map((txt) => textured(this.options.geometry, txt, this.options));
     this.meshes.forEach((mesh, i) => {
@@ -86,14 +90,44 @@ class Image extends Primrose.Entity {
       }).then(() => this);
   }
 
+  loadVideo(src){
+    return new Promise((resolve, reject) => {
+      var video = document.createElement("video"),
+        source = document.createElement("source");
+      video.muted = true;
+      video.preload = "auto";
+      video.autoplay = true;
+      video.loop = true;
+      video.oncanplay = () => {
+        this._images.push(video);
+        resolve();
+      };
+      video.onerror = (evt) => {
+        console.log(evt);
+        reject(evt);
+      };
+      video.src = src;
+      document.body.insertBefore(video, document.body.children[0]);
+    });
+  }
+
   eyeBlank(eye) {
-    this._currentImageIndex = eye % this._images.length;
+    this._currentImageIndex = eye % this.meshes.length;
     for(var i = 0; i < this.meshes.length; ++i){
       var m = this.meshes[i];
       m.visible = (i === this._currentImageIndex);
       if(i > 0) {
         m.position.copy(this.position);
         m.quaternion.copy(this.quaternion);
+        m.scale.copy(this.scale);
+      }
+    }
+  }
+
+  update(){
+    if(this.meshes){
+      for(var i = 0; i < this.meshes.length; ++i){
+        this.meshes[i].material.map.needsUpdate = true;
       }
     }
   }
