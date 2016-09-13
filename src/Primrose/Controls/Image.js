@@ -82,16 +82,13 @@ class Image extends Primrose.Entity {
   }
 
   loadImages(images) {
-    return Promise.all(images.map((src, i) => Primrose.loadTexture(src)))
-      .then((txts) => this._images.push.apply(this._images, txts))
-      .catch((err) => {
-        console.error("Failed to load image " + src);
-        console.error(err);
-      }).then(() => this);
+    return Promise.all(images.map((src, i) =>
+      Primrose.loadTexture(src).then((txt) => this._images[i] = txt))
+    ).then(() => this);
   }
 
-  loadVideo(src){
-    return new Promise((resolve, reject) => {
+  loadVideos(videos){
+    return Promise.all(videos.map((src, i) => new Promise((resolve, reject) => {
       var video = document.createElement("video"),
         source = document.createElement("source");
       video.muted = true;
@@ -99,16 +96,13 @@ class Image extends Primrose.Entity {
       video.autoplay = true;
       video.loop = true;
       video.oncanplay = () => {
-        this._images.push(video);
+        this._images[i] = video;
         resolve();
       };
-      video.onerror = (evt) => {
-        console.log(evt);
-        reject(evt);
-      };
+      video.onerror = reject;
       video.src = src;
       document.body.insertBefore(video, document.body.children[0]);
-    });
+    }))).then(() => this);
   }
 
   eyeBlank(eye) {
