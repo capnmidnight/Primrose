@@ -174,7 +174,6 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
           faces: faces,
           uvs: uvs
         };
-
         this.pickableObjects[bag.uuid] = obj;
         this.projector.setObject(bag);
       }

@@ -64,9 +64,11 @@ class Pointer extends Primrose.AbstractEventEmitter {
     this.mesh = textured(box(LASER_WIDTH, LASER_WIDTH, LASER_LENGTH), this.color, {
       emissive: this.emission
     });
-    this.mesh.geometry.vertices.forEach((v) => {
-      v.z -= LASER_LENGTH * 0.5 + 0.5;
-    });
+
+    var arr = this.mesh.geometry.attributes.position;
+    for(var i = 2; i < arr.array.length; i += arr.itemSize){
+      arr.array[i] -= LASER_LENGTH * 0.5 + 0.5;
+    }
 
     this.disk = textured(sphere(TELEPORT_PAD_RADIUS, 128, 3), this.material);
     this.disk.geometry.computeBoundingBox();

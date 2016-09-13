@@ -41,6 +41,6 @@ function box(width, height, length) {
     length = width;
   }
   return cache(
-    `BoxGeometry(${width}, ${height}, ${length})`,
-    () => new THREE.BoxGeometry(width, height, length));
+    `BoxBufferGeometry(${width}, ${height}, ${length})`,
+    () => new THREE.BoxBufferGeometry(width, height, length));
 }

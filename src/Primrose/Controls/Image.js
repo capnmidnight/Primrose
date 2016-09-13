@@ -1,6 +1,5 @@
 var COUNTER = 0,
-  HTMLImage = window.Image,
-  imageCache = {};
+  _ = priv();
 
 pliny.class({
   parent: "Primrose.Controls",
@@ -13,7 +12,7 @@ pliny.class({
       description: "Named parameters for creating the Image."
     }]
 });
-class Image extends Primrose.Surface {
+class Image extends Primrose.Entity {
 
   static create() {
     return new Image();
@@ -39,210 +38,63 @@ class Image extends Primrose.Surface {
         Math.PI * 2,
         Math.PI);
     }
+    else if(!options.geometry){
+      options.geometry = quad(0.5, 0.5);
+    }
 
-    super(patch(options, {
-      id: "Primrose.Controls.Image[" + (COUNTER++) + "]",
-      bounds: new Primrose.Text.Rectangle(0, 0, 1, 1)
-    }));
-    this.listeners.load = [];
+    super("Primrose.Controls.Image[" + (COUNTER++) + "]");
+    this.options = options;
     Primrose.Entity.registerEntity(this);
 
     ////////////////////////////////////////////////////////////////////////
     // initialization
     ///////////////////////////////////////////////////////////////////////
 
-    this._lastWidth = -1;
-    this._lastHeight = -1;
-    this._lastImage = null;
     this._images = [];
     this._currentImageIndex = 0;
-    this.className = "";
-    this.mesh = null;
-    this.ready = Promise.resolve();
-    this.enabled = true;
-
-    if(options.value) {
-      if(options.value instanceof Array){
-        if(options.value.length === 2){
-          this.ready = this.ready.then(() => this.loadStereoImage(options.value));
-        }
-        else if(options.value === 1) {
-          options.value = options.value[0];
-        }
-        else{
-          throw new Error("Don't know what to do with " + options.value.length + " images");
-        }
-      }
-
-      if(typeof options.value === "string") {
-        if (/\.stereo\./.test(options.value)) {
-          this.ready = this.ready.then(() => this.loadStereoImage(options.value));
-        }
-        else {
-          this.ready = this.ready.then(() => this.loadImage(options.value));
-        }
-      }
-    }
-  }
-
-  addToBrowserEnvironment(env, scene) {
-    this.mesh = textured(
-      this.options.geometry || quad(0.5, 0.5 * this.imageHeight / this.imageWidth),
-      this,
-      this.options);
-    scene.add(this.mesh);
-    env.registerPickableObject(this.mesh);
-    return this.mesh;
+    this.meshes = null;
   }
 
   get position(){
-    return this.mesh.position;
+    return this.meshes[0].position;
   }
 
-  get src() {
-    return this.getImage(this._currentImageIndex)
-      .src;
+  get quaternion(){
+    return this.meshes[0].quaternion;
   }
 
-  set src(v) {
-    if (this.className === "stereo") {
-      this.loadStereoImage(v);
-    }
-    else {
-      this.loadImage(0, src);
-    }
-  }
-
-  loadImage(i, src) {
-    if (typeof i !== "number" && !(i instanceof Number)) {
-      src = i;
-      i = 0;
-    }
-
-    return new Promise((resolve, reject) => {
-        if (imageCache[src]) {
-          resolve(imageCache[src]);
-        }
-        else if (src) {
-          var temp = new HTMLImage();
-          temp.addEventListener("load", () => {
-            imageCache[src] = temp;
-            resolve(imageCache[src]);
-          }, false);
-          temp.addEventListener("error", () => {
-            reject("error loading image");
-          }, false);
-          temp.src = src;
-        }
-        else {
-          reject("Image was null");
-        }
-      })
-      .then((img) => {
-        this.bounds.width = img.width;
-        this.bounds.height = img.height;
-        this.setImage(i, img);
-        return img;
-      })
-      .catch((err) => {
-        console.error("Failed to load image " + src);
-        console.error(err);
-        this.setImage(i, null);
-      });
-  }
-
-  loadStereoImage(images) {
-    return Promise.all(images.map((src, i) => this.loadImage(i, src)))
-      .then((images) => {
-        var bounds = null,
-          imgLeft = null,
-          imgRight = null;
-        if(images.length === 2) {
-          imgLeft = images[0];
-          imgRight = images[1];
-          bounds = new Primrose.Text.Rectangle(0, 0, imgLeft.width, imgLeft.height);
-        }
-        else {
-          var img = images[0];
-          bounds = new Primrose.Text.Rectangle(0, 0, img.width / 2, img.height);
-          var a = new Primrose.Surface({
-              id: this.id + "-left",
-              bounds: bounds
-            }),
-            b = new Primrose.Surface({
-              id: this.id + "-right",
-              bounds: bounds
-            });
-          a.context.drawImage(img, 0, 0);
-          b.context.drawImage(img, -bounds.width, 0);
-          imgLeft = a.canvas;
-          imgRight = b.canvas;
-        }
-        this.setStereoImage(imgLeft, imgRight, bounds);
-        return this;
-      });
-  }
-
-  get image() {
-    return this.getImage(this._currentImageIndex);
-  }
-
-  set image(img) {
-    this.setImage(this._currentImageIndex, img);
-  }
-
-  clear(){
-    this._images.splice(0);
-  }
-
-  getImage(i) {
-    return this._images[i % this._images.length];
-  }
-
-  setStereoImage(left, right, bounds){
-    this.bounds.width = bounds.width;
-    this.bounds.height = bounds.height;
-    this.setImage(0, left);
-    this.setImage(1, right);
-    emit.call(this, "load", {
-      target: this
+  addToBrowserEnvironment(env, scene) {
+    this.meshes = this._images.map((txt) => textured(this.options.geometry, txt, this.options));
+    this.meshes.forEach((mesh, i) => {
+      scene.add(mesh);
+      mesh.name = this.id + "-" + i;
+      if(i > 0){
+        mesh.visible = false;
+      }
+      else{
+        env.registerPickableObject(mesh);
+      }
     });
   }
 
-  setImage(i, img) {
-    this._images[i] = img;
-    this.render();
-  }
-
-  get _changed() {
-    return this.resized || this.image !== this._lastImage;
+  loadImages(images) {
+    return Promise.all(images.map((src, i) => Primrose.loadTexture(src)))
+      .then((txts) => this._images.push.apply(this._images, txts))
+      .catch((err) => {
+        console.error("Failed to load image " + src);
+        console.error(err);
+      }).then(() => this);
   }
 
   eyeBlank(eye) {
-    if(this.enabled){
-      this._currentImageIndex = eye;
-      this.render();
-    }
-  }
-
-  render(force) {
-    if (this._changed || force) {
-      if (this.resized) {
-        this.resize();
+    this._currentImageIndex = eye % this._images.length;
+    for(var i = 0; i < this.meshes.length; ++i){
+      var m = this.meshes[i];
+      m.visible = (i === this._currentImageIndex);
+      if(i > 0) {
+        m.position.copy(this.position);
+        m.quaternion.copy(this.quaternion);
       }
-      else if (this.image !== this._lastImage) {
-        this.context.clearRect(0, 0, this.imageWidth, this.imageHeight);
-      }
-
-      if (this.image) {
-        this.context.drawImage(this.image, 0, 0, this.imageWidth, this.imageHeight);
-      }
-
-      this._lastWidth = this.imageWidth;
-      this._lastHeight = this.imageHeight;
-      this._lastImage = this.image;
-
-      this.invalidate();
     }
   }
 }
