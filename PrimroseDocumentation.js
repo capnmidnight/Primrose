@@ -53,7 +53,7 @@ pliny.function({
   \n\
     grammar(\"JavaScript\");\n\
     var geom = box(1, 2, 3),\n\
-      mesh = textured(geom, 0xff0000);\n\
+      mesh = colored(geom, 0xff0000);\n\
     put(mesh)\n\
       .on(scene)\n\
       .at(-2, 1, -5);\n\
@@ -139,6 +139,11 @@ pliny.function({
   }]
 });
 pliny.function({
+  name: "circle",
+  description: "| [under construction]"
+});
+
+pliny.function({
   name: "clone",
   parameters: [{
     name: "obj",
@@ -202,6 +207,13 @@ The results should look like this:\n\
 \n\
 <img src=\"images/cloud.jpg\">"
   }]
+});
+
+pliny.function({
+  name: "colored",
+  description: "Apply a color to a geometry, creating the intermediate material as necessary, and returning the resulting mesh",
+  returns: "THREE.Mesh",
+  parameters: [{ name: "geometry", type: "THREE.Geometry", description: "The geometry to which to apply the color." }, { name: "color", type: "Number", description: "A hexadecimal color value in RGB format." }, { name: "options", type: "Object", optional: true, description: "Optional settings for material properties." }, { name: "options.side", type: "Number", optional: true, defaultValue: "THREE.FrontSide", description: "Either THREE.FontSide, THREE.BackSide, or THREE.Both, for which side of the polygon should be shaded." }, { name: "options.opacity", type: "Number", optional: true, defaultValue: 1, description: "Make objects semi-transparent. Note: this usually doesn't work like you'd expect." }, { name: "options.roughness", type: "Number", optional: true, defaultValue: 0.5, description: "A value indicating the degree of light scattering the material causes." }, { name: "options.metalness", type: "Number", optional: true, defaultValue: 0, description: "A value indicating the degree of shininess the material causes." }, { name: "options.unshaded", type: "Boolean", optional: true, defaultValue: false, description: "Make objects not respond to lighting." }, { name: "options.wireframe", type: "Boolean", optional: true, defaultValue: false, description: "Draw objects as basic wireframes. Note: there's no control over the wire thickness. This should be considered a debugging feature, not a graphical feature." }]
 });
 
 pliny.function({
@@ -311,7 +323,7 @@ pliny.function({
   \n\
     grammar(\"JavaScript\");\n\
     var geom = cylinder(),\n\
-      mesh = textured(geom, 0xff0000);\n\
+      mesh = colored(geom, 0xff0000);\n\
     put(mesh)\n\
       .on(scene)\n\
       .at(-2, 1, -5);\n\
@@ -670,7 +682,7 @@ pliny.function({
   examples: [{
     name: "Put an object on a scene at a specific location.",
     description: "    grammar(\"JavaScript\");\n\
-    var myCylinder = put(textured(cylinder(), 0x00ff00))\n\
+    var myCylinder = put(colored(cylinder(), 0x00ff00))\n\
       .on(scene)\n\
       .at(1, 2, 3)\n\
       .obj();"
@@ -725,6 +737,11 @@ pliny.function({
     console.assert(ctrls.txt.value === \"mars\");\n\
     console.assert(ctrls.num.value === \"55\");"
   }]
+});
+
+pliny.function({
+  name: "ring",
+  description: "| [under construction]"
 });
 
 pliny.function({
@@ -3029,7 +3046,7 @@ pliny.class({
   }, {
     name: "nameMaterial",
     type: "Number",
-    description: "The color to use with `textured()` to set as the material for the NAME object that will float above the user's avatar."
+    description: "The color to use with `colored()` to set as the material for the NAME object that will float above the user's avatar."
   }]
 });
 

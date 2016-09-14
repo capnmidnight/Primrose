@@ -61,7 +61,7 @@ class Pointer extends Primrose.AbstractEventEmitter {
     this.color = color;
     this.emission = emission;
     this.velocity = new THREE.Vector3();
-    this.mesh = textured(box(LASER_WIDTH, LASER_WIDTH, LASER_LENGTH), this.color, {
+    this.mesh = colored(box(LASER_WIDTH, LASER_WIDTH, LASER_LENGTH), this.color, {
       emissive: this.emission
     });
 
@@ -70,7 +70,7 @@ class Pointer extends Primrose.AbstractEventEmitter {
       arr.array[i] -= LASER_LENGTH * 0.5 + 0.5;
     }
 
-    this.disk = textured(sphere(TELEPORT_PAD_RADIUS, 128, 3), this.material);
+    this.disk = colored(sphere(TELEPORT_PAD_RADIUS, 128, 3), this.material);
     this.disk.geometry.computeBoundingBox();
     this.disk.geometry.vertices.forEach((v) => {
       v.y = 0.1 * (v.y - this.disk.geometry.boundingBox.min.y);
@@ -78,10 +78,10 @@ class Pointer extends Primrose.AbstractEventEmitter {
     this.disk.visible = false;
     this.disk.geometry.computeBoundingBox();
 
-    this.gazeInner = new THREE.Mesh( new THREE.CircleBufferGeometry( GAZE_RING_INNER / 2, 10 ), this.material );
+    this.gazeInner = colored(circle(GAZE_RING_INNER / 2, 10), this.material);
     this.gazeInner.position.set(0, 0, -0.5);
 
-    this.gazeOuter = new THREE.Mesh( new THREE.RingBufferGeometry( GAZE_RING_INNER, GAZE_RING_OUTER, 10, 1, 0, 0 ), this.material );
+    this.gazeOuter = colored(ring(GAZE_RING_INNER, GAZE_RING_OUTER, 10), this.material);
     this.gazeOuter.visible = false;
     this.gazeInner.add(this.gazeOuter);
 
@@ -310,9 +310,7 @@ class Pointer extends Primrose.AbstractEventEmitter {
           else {
             var p = Math.round(36 * dt / GAZE_TIMEOUT),
               a = 2 * Math.PI * p / 36;
-            this.gazeOuter.geometry = cache(
-              `RingBufferGeometry(${GAZE_RING_INNER}, ${GAZE_RING_OUTER}, ${p}, 1, 0, ${a})`,
-              () => new THREE.RingBufferGeometry( GAZE_RING_INNER, GAZE_RING_OUTER, p, 1, 0, a ));
+            this.gazeOuter.geometry = ring(GAZE_RING_INNER, GAZE_RING_OUTER, p, 0, a);
             if(moved) {
               this.emit("gazemove", evt);
             }

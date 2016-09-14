@@ -64,6 +64,19 @@ var cache = function () {
     // end D:\Documents\VR\Primrose\src\cache.js
     ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+    // start D:\Documents\VR\Primrose\src\circle.js
+(function(){"use strict";
+
+function circle(r, sections) {
+  return cache("CircleBufferGeometry(" + r + ", " + sections + ")", function () {
+    return new THREE.CircleBufferGeometry(r, sections);
+  });
+}
+    if(typeof window !== "undefined") window.circle = circle;
+})();
+    // end D:\Documents\VR\Primrose\src\circle.js
+    ////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
     // start D:\Documents\VR\Primrose\src\clone.js
 (function(){"use strict";
 
@@ -94,6 +107,45 @@ function cloud(verts, c, s) {
     if(typeof window !== "undefined") window.cloud = cloud;
 })();
     // end D:\Documents\VR\Primrose\src\cloud.js
+    ////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+    // start D:\Documents\VR\Primrose\src\colored.js
+(function(){"use strict";
+
+function colored(geometry, color, options) {
+  options = options || {};
+  if (options.opacity === undefined) {
+    options.opacity = 1;
+  }
+  if (options.roughness === undefined) {
+    options.roughness = 0.5;
+  }
+  if (options.metalness === undefined) {
+    options.metalness = 0;
+  }
+
+  options.unshaded = !!options.unshaded;
+  options.wireframe = !!options.wireframe;
+
+  var mat = material("", options),
+      obj = null;
+
+  if (geometry.type.indexOf("Geometry") > -1) {
+    obj = new THREE.Mesh(geometry, mat);
+  } else if (geometry instanceof THREE.Object3D) {
+    obj = geometry;
+    obj.material = mat;
+  }
+
+  if (typeof color === "number" || color instanceof Number) {
+    mat.color.set(color);
+  }
+
+  return obj;
+}
+    if(typeof window !== "undefined") window.colored = colored;
+})();
+    // end D:\Documents\VR\Primrose\src\colored.js
     ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
     // start D:\Documents\VR\Primrose\src\copyObject.js
@@ -725,6 +777,22 @@ function readForm(ctrls) {
     if(typeof window !== "undefined") window.readForm = readForm;
 })();
     // end D:\Documents\VR\Primrose\src\readForm.js
+    ////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+    // start D:\Documents\VR\Primrose\src\ring.js
+(function(){"use strict";
+
+function ring(rInner, rOuter, sectors, start, end, rings) {
+  start = start || 0;
+  end = end || 2 * Math.PI;
+  rings = rings || 1;
+  return cache("RingBufferGeometry(" + rInner + ", " + rOuter + ", " + sectors + ", " + start + ", " + end + ", " + rings + ")", function () {
+    return new THREE.RingBufferGeometry(rInner, rOuter, sectors, start, end, rings);
+  });
+}
+    if(typeof window !== "undefined") window.ring = ring;
+})();
+    // end D:\Documents\VR\Primrose\src\ring.js
     ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
     // start D:\Documents\VR\Primrose\src\setFalse.js
@@ -1692,7 +1760,8 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
 
     _this.camera = new THREE.PerspectiveCamera(75, 1, _this.options.nearPlane, _this.options.nearPlane + _this.options.drawDistance);
     if (_this.options.skyTexture !== undefined) {
-      _this.sky = textured(shell(_this.options.drawDistance * 0.9, 18, 9, Math.PI * 2, Math.PI), _this.options.skyTexture, {
+      var skyFunc = typeof _this.options.skyTexture === "number" ? colored : textured;
+      _this.sky = skyFunc(shell(_this.options.drawDistance * 0.9, 18, 9, Math.PI * 2, Math.PI), _this.options.skyTexture, {
         unshaded: true
       });
       _this.sky.name = "Sky";
@@ -1702,7 +1771,8 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
     if (_this.options.groundTexture !== undefined) {
       var dim = 10,
           gm = new THREE.PlaneGeometry(dim * 5, dim * 5, dim, dim);
-      _this.ground = textured(gm, _this.options.groundTexture, {
+      var groundFunc = typeof _this.options.groundTexture === "number" ? colored : textured;
+      _this.ground = groundFunc(gm, _this.options.groundTexture, {
         txtRepeatS: dim * 5,
         txtRepeatT: dim * 5
       });
@@ -3297,7 +3367,7 @@ var Pointer = function (_Primrose$AbstractEve) {
     _this.color = color;
     _this.emission = emission;
     _this.velocity = new THREE.Vector3();
-    _this.mesh = textured(box(LASER_WIDTH, LASER_WIDTH, LASER_LENGTH), _this.color, {
+    _this.mesh = colored(box(LASER_WIDTH, LASER_WIDTH, LASER_LENGTH), _this.color, {
       emissive: _this.emission
     });
 
@@ -3306,7 +3376,7 @@ var Pointer = function (_Primrose$AbstractEve) {
       arr.array[i] -= LASER_LENGTH * 0.5 + 0.5;
     }
 
-    _this.disk = textured(sphere(TELEPORT_PAD_RADIUS, 128, 3), _this.material);
+    _this.disk = colored(sphere(TELEPORT_PAD_RADIUS, 128, 3), _this.material);
     _this.disk.geometry.computeBoundingBox();
     _this.disk.geometry.vertices.forEach(function (v) {
       v.y = 0.1 * (v.y - _this.disk.geometry.boundingBox.min.y);
@@ -3314,10 +3384,10 @@ var Pointer = function (_Primrose$AbstractEve) {
     _this.disk.visible = false;
     _this.disk.geometry.computeBoundingBox();
 
-    _this.gazeInner = new THREE.Mesh(new THREE.CircleBufferGeometry(GAZE_RING_INNER / 2, 10), _this.material);
+    _this.gazeInner = colored(circle(GAZE_RING_INNER / 2, 10), _this.material);
     _this.gazeInner.position.set(0, 0, -0.5);
 
-    _this.gazeOuter = new THREE.Mesh(new THREE.RingBufferGeometry(GAZE_RING_INNER, GAZE_RING_OUTER, 10, 1, 0, 0), _this.material);
+    _this.gazeOuter = colored(ring(GAZE_RING_INNER, GAZE_RING_OUTER, 10), _this.material);
     _this.gazeOuter.visible = false;
     _this.gazeInner.add(_this.gazeOuter);
 
@@ -3489,9 +3559,7 @@ var Pointer = function (_Primrose$AbstractEve) {
             } else {
               var p = Math.round(36 * dt / GAZE_TIMEOUT),
                   a = 2 * Math.PI * p / 36;
-              this.gazeOuter.geometry = cache("RingBufferGeometry(" + GAZE_RING_INNER + ", " + GAZE_RING_OUTER + ", " + p + ", 1, 0, " + a + ")", function () {
-                return new THREE.RingBufferGeometry(GAZE_RING_INNER, GAZE_RING_OUTER, p, 1, 0, a);
-              });
+              this.gazeOuter.geometry = ring(GAZE_RING_INNER, GAZE_RING_OUTER, p, 0, a);
               if (moved) {
                 this.emit("gazemove", evt);
               }
@@ -7573,38 +7641,36 @@ var Image = function (_Primrose$Entity) {
       var _this3 = this;
 
       return Promise.all(images.map(function (src, i) {
-        return Primrose.loadTexture(src);
-      })).then(function (txts) {
-        return _this3._images.push.apply(_this3._images, txts);
-      }).catch(function (err) {
-        console.error("Failed to load image " + src);
-        console.error(err);
-      }).then(function () {
+        return Primrose.loadTexture(src).then(function (txt) {
+          return _this3._images[i] = txt;
+        });
+      })).then(function () {
         return _this3;
       });
     }
   }, {
-    key: "loadVideo",
-    value: function loadVideo(src) {
+    key: "loadVideos",
+    value: function loadVideos(videos) {
       var _this4 = this;
 
-      return new Promise(function (resolve, reject) {
-        var video = document.createElement("video"),
-            source = document.createElement("source");
-        video.muted = true;
-        video.preload = "auto";
-        video.autoplay = true;
-        video.loop = true;
-        video.oncanplay = function () {
-          _this4._images.push(video);
-          resolve();
-        };
-        video.onerror = function (evt) {
-          console.log(evt);
-          reject(evt);
-        };
-        video.src = src;
-        document.body.insertBefore(video, document.body.children[0]);
+      return Promise.all(videos.map(function (src, i) {
+        return new Promise(function (resolve, reject) {
+          var video = document.createElement("video"),
+              source = document.createElement("source");
+          video.muted = true;
+          video.preload = "auto";
+          video.autoplay = true;
+          video.loop = true;
+          video.oncanplay = function () {
+            _this4._images[i] = video;
+            resolve();
+          };
+          video.onerror = reject;
+          video.src = src;
+          document.body.insertBefore(video, document.body.children[0]);
+        });
+      })).then(function () {
+        return _this4;
       });
     }
   }, {
@@ -8147,7 +8213,7 @@ var FPSInput = function (_Primrose$AbstractEve) {
               emission = 0x00007f << shift,
               ptr = new Primrose.Pointer(padID + "Pointer", color, emission, [mgr]);
 
-          ptr.add(textured(box(0.1, 0.025, 0.2), color, {
+          ptr.add(colored(box(0.1, 0.025, 0.2), color, {
             emissive: emission
           }));
 
@@ -10075,13 +10141,13 @@ var RemoteUser = function () {
     this.stage = modelFactory.clone();
     this.stage.traverse(function (obj) {
       if (obj.name === "AvatarBelt") {
-        textured(obj, Primrose.Random.color());
+        colored(obj, Primrose.Random.color());
       } else if (obj.name === "AvatarHead") {
         _this.head = obj;
       }
     });
 
-    this.nameObject = textured(text3D(0.1, userName), nameMaterial);
+    this.nameObject = colored(text3D(0.1, userName), nameMaterial);
     var bounds = this.nameObject.geometry.boundingBox.max;
     this.nameObject.rotation.set(0, Math.PI, 0);
     this.nameObject.position.set(bounds.x / 2, bounds.y, 0);

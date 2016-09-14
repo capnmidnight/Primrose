@@ -13,7 +13,7 @@ pliny.class({
     }, {
       name: "nameMaterial",
       type: "Number",
-      description: "The color to use with `textured()` to set as the material for the NAME object that will float above the user's avatar."
+      description: "The color to use with `colored()` to set as the material for the NAME object that will float above the user's avatar."
     }]
 });
 class RemoteUser {
@@ -25,14 +25,14 @@ class RemoteUser {
     this.stage = modelFactory.clone();
     this.stage.traverse((obj) => {
       if (obj.name === "AvatarBelt") {
-        textured(obj, Primrose.Random.color());
+        colored(obj, Primrose.Random.color());
       }
       else if (obj.name === "AvatarHead") {
         this.head = obj;
       }
     });
 
-    this.nameObject = textured(text3D(0.1, userName), nameMaterial);
+    this.nameObject = colored(text3D(0.1, userName), nameMaterial);
     var bounds = this.nameObject.geometry.boundingBox.max;
     this.nameObject.rotation.set(0, Math.PI, 0);
     this.nameObject.position.set(bounds.x / 2, bounds.y, 0);

@@ -23,7 +23,7 @@ pliny.function({
   \n\
     grammar(\"JavaScript\");\n\
     var geom = box(1, 2, 3),\n\
-      mesh = textured(geom, 0xff0000);\n\
+      mesh = colored(geom, 0xff0000);\n\
     put(mesh)\n\
       .on(scene)\n\
       .at(-2, 1, -5);\n\

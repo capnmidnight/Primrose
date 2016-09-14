@@ -551,7 +551,8 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
 
     this.camera = new THREE.PerspectiveCamera(75, 1, this.options.nearPlane, this.options.nearPlane + this.options.drawDistance);
     if (this.options.skyTexture !== undefined) {
-      this.sky = textured(
+      var skyFunc = (typeof this.options.skyTexture === "number") ? colored : textured;
+      this.sky = skyFunc(
         shell(
          this.options.drawDistance * 0.9,
          18,
@@ -568,7 +569,8 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
     if (this.options.groundTexture !== undefined) {
       var dim = 10,
       gm = new THREE.PlaneGeometry(dim * 5, dim * 5, dim, dim);
-      this.ground = textured(gm, this.options.groundTexture, {
+      var groundFunc = (typeof this.options.groundTexture === "number") ? colored : textured;
+      this.ground = groundFunc(gm, this.options.groundTexture, {
         txtRepeatS: dim * 5,
         txtRepeatT: dim * 5
       });

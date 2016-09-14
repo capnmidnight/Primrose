@@ -190,7 +190,7 @@ class FPSInput extends Primrose.AbstractEventEmitter {
             emission = 0x00007f << shift,
             ptr = new Primrose.Pointer(padID + "Pointer", color, emission, [mgr]);
 
-          ptr.add(textured(box(0.1, 0.025, 0.2), color, {
+          ptr.add(colored(box(0.1, 0.025, 0.2), color, {
             emissive: emission
           }));
 

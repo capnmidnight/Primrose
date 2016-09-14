@@ -146,7 +146,7 @@ function pacman() {
 
   function C(n, x, y) {
     if (n !== 0) {
-      put(textured(cylinder(0.5, 0.5, T), 0x0000ff))
+      put(colored(cylinder(0.5, 0.5, T), 0x0000ff))
         .on(scene)
         .rot(0, n * Math.PI / 2, Math.PI / 2)
         .at(T * x - W / 2, env.avatarHeight, T * y - H / 2);
@@ -166,7 +166,7 @@ function pacman() {
       ghosts = colors.map(function (color, i) {
         var g = ghost.clone(),
           body = g.children[0];
-        textured(body, color);
+        colored(body, color);
         scene.appendChild(g);
         g.position.set(i * 3 - 4, 0, -5);
         g.velocity = v3(0, 0, 0);

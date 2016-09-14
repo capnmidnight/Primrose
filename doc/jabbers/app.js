@@ -23,11 +23,11 @@ env.addEventListener("gazecomplete", makeJabJump);
 env.addEventListener("pointerend", makeJabJump);
 
 function eye(side, body) {
-  var ball = put(textured(sphere(0.05, 6, 3), 0xffffff))
+  var ball = put(colored(sphere(0.05, 6, 3), 0xffffff))
     .on(body)
     .at(side * 0.07, 0.05, 0.16)
     .obj();
-  put(textured(sphere(0.01, 3, 2), 0))
+  put(colored(sphere(0.01, 3, 2), 0))
     .on(ball)
     .at(0, 0, 0.045);
   return ball;
@@ -35,7 +35,7 @@ function eye(side, body) {
 
 function Jabber(w, h, s) {
   var skin = R.item(Primrose.SKINS_VALUES),
-    body = textured(sphere(0.2, 14, 7), skin),
+    body = colored(sphere(0.2, 14, 7), skin),
     velocity = v3(
       R.number(-s, s),
       0,

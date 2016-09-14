@@ -16,7 +16,7 @@ pliny.function({
   examples: [{
     name: "Put an object on a scene at a specific location.",
     description: "    grammar(\"JavaScript\");\n\
-    var myCylinder = put(textured(cylinder(), 0x00ff00))\n\
+    var myCylinder = put(colored(cylinder(), 0x00ff00))\n\
       .on(scene)\n\
       .at(1, 2, 3)\n\
       .obj();"
