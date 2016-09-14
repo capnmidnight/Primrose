@@ -1,5 +1,5 @@
 function material(textureDescription, options){
-  var materialDescription = `Primrose.material(${textureDescription}, ${options.unshaded}, ${options.opacity}, ${options.roughness}, ${options.metalness}, ${options.wireframe}, ${options.emissive}, ${options.wireframe})`;
+  var materialDescription = `Primrose.material(${textureDescription}, ${options.unshaded}, ${options.side}, ${options.opacity}, ${options.roughness}, ${options.metalness}, ${options.color}, ${options.emissive}, ${options.wireframe})`;
   return cache(materialDescription, () => {
     var materialOptions = {
         transparent: options.opacity < 1,
