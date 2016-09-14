@@ -70,7 +70,9 @@ class Pointer extends Primrose.AbstractEventEmitter {
       arr.array[i] -= LASER_LENGTH * 0.5 + 0.5;
     }
 
-    this.disk = colored(sphere(TELEPORT_PAD_RADIUS, 128, 3), this.material);
+    this.disk = colored(sphere(TELEPORT_PAD_RADIUS, 128, 3), this.color, {
+      emissive: this.emission
+    });
     this.disk.geometry.computeBoundingBox();
     this.disk.geometry.vertices.forEach((v) => {
       v.y = 0.1 * (v.y - this.disk.geometry.boundingBox.min.y);
@@ -78,10 +80,14 @@ class Pointer extends Primrose.AbstractEventEmitter {
     this.disk.visible = false;
     this.disk.geometry.computeBoundingBox();
 
-    this.gazeInner = colored(circle(GAZE_RING_INNER / 2, 10), this.material);
+    this.gazeInner = colored(circle(GAZE_RING_INNER / 2, 10), this.color, {
+      emissive: this.emission
+    });
     this.gazeInner.position.set(0, 0, -0.5);
 
-    this.gazeOuter = colored(ring(GAZE_RING_INNER, GAZE_RING_OUTER, 10), this.material);
+    this.gazeOuter = colored(ring(GAZE_RING_INNER, GAZE_RING_OUTER, 10), this.color, {
+      emissive: this.emission
+    });
     this.gazeOuter.visible = false;
     this.gazeInner.add(this.gazeOuter);
 
