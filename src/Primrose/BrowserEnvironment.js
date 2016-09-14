@@ -692,6 +692,13 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
         }
       }
 
+      var maxTabIndex = 0,
+        elementsWithTabIndex = document.querySelectorAll("[tabIndex]");
+      for(var i = 0; i < elementsWithTabIndex.length; ++i){
+        maxTabIndex = Math.max(maxTabIndex, elementsWithTabIndex[i].tabIndex);
+      }
+
+      this.renderer.domElement.tabIndex = maxTabIndex + 1;
       this.renderer.domElement.addEventListener('webglcontextlost', this.stop, false);
       this.renderer.domElement.addEventListener('webglcontextrestored', this.start, false);
 
