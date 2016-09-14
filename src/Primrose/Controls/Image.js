@@ -53,6 +53,7 @@ class Image extends Primrose.Entity {
     this._images = [];
     this._currentImageIndex = 0;
     this.meshes = null;
+    this.isVideo = false;
   }
 
   get position(){
@@ -81,10 +82,11 @@ class Image extends Primrose.Entity {
     });
   }
 
-  loadImages(images) {
+  loadImages(images, progress) {
     return Promise.all(images.map((src, i) =>
-      Primrose.loadTexture(src).then((txt) => this._images[i] = txt))
-    ).then(() => this);
+      Primrose.loadTexture(src, progress).then((txt) => this._images[i] = txt))
+    ).then(() => this.isVideo = false)
+    .then(() => this);
   }
 
   loadVideos(videos){
@@ -102,24 +104,27 @@ class Image extends Primrose.Entity {
       video.onerror = reject;
       video.src = src;
       document.body.insertBefore(video, document.body.children[0]);
-    }))).then(() => this);
+    }))).then(() => this.isVideo = true)
+    .then(() => this);
   }
 
   eyeBlank(eye) {
-    this._currentImageIndex = eye % this.meshes.length;
-    for(var i = 0; i < this.meshes.length; ++i){
-      var m = this.meshes[i];
-      m.visible = (i === this._currentImageIndex);
-      if(i > 0) {
-        m.position.copy(this.position);
-        m.quaternion.copy(this.quaternion);
-        m.scale.copy(this.scale);
+    if(this.meshes) {
+      this._currentImageIndex = eye % this.meshes.length;
+      for(var i = 0; i < this.meshes.length; ++i){
+        var m = this.meshes[i];
+        m.visible = (i === this._currentImageIndex);
+        if(i > 0) {
+          m.position.copy(this.position);
+          m.quaternion.copy(this.quaternion);
+          m.scale.copy(this.scale);
+        }
       }
     }
   }
 
   update(){
-    if(this.meshes){
+    if(this.meshes && this.isVideo){
       for(var i = 0; i < this.meshes.length; ++i){
         this.meshes[i].material.map.needsUpdate = true;
       }
