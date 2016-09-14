@@ -480,6 +480,15 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
     var POSITION = new THREE.Vector3(),
       lastTeleport = 0;
 
+    this.teleport = (pos) => {
+      var t = performance.now(),
+        dt = t - lastTeleport;
+      if(dt > TELEPORT_COOLDOWN) {
+        lastTeleport = t;
+        this.input.moveStage(pos);
+      }
+    };
+
     this.selectControl = (evt) => {
       var obj = evt.hit && evt.hit.object;
 
@@ -510,12 +519,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
           evt.pointer.moveTeleportPad(POSITION);
         }
         else if(evt.type === "pointerend" || evt.type === "gazecomplete") {
-          var t = performance.now(),
-            dt = t - lastTeleport;
-          if(dt > TELEPORT_COOLDOWN) {
-            lastTeleport = t;
-            this.input.moveStage(POSITION);
-          }
+          this.teleport(POSITION);
         }
       }
 
