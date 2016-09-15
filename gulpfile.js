@@ -27,7 +27,7 @@ var gulp = require("gulp"),
 
 gulp.task("format", [js.format]);
 
-gulp.task("archive", [min.build], () => gulp.src(["Primrose*.js"])
+gulp.task("archive", [tot.build], () => gulp.src(["Primrose*.js"])
   .pipe(rename(function (file) {
     if (file.basename.indexOf(".min") > -1) {
       file.extname = ".min.js";
