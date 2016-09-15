@@ -93,7 +93,7 @@ class Image extends Primrose.Entity {
     .then(() => this);
   }
 
-  loadVideos(videos){
+  loadVideos(videos, progress){
     return Promise.all(videos.map((src, i) => new Promise((resolve, reject) => {
       var video = document.createElement("video"),
         source = document.createElement("source");
@@ -103,8 +103,10 @@ class Image extends Primrose.Entity {
       video.loop = true;
       video.oncanplay = () => {
         this._images[i] = video;
+        console.log(video.videoWidth, video.videoHeight);
         resolve();
       };
+      video.onprogress = progress;
       video.onerror = reject;
       video.src = src;
       document.body.insertBefore(video, document.body.children[0]);

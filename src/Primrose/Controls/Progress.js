@@ -58,16 +58,19 @@ class Progress {
 
   set value(v){
     this.valueBar.scale.x = v * INSET_LARGE;
+    this.valueBar.position.x = -SIZE * (1 - v) * INSET_LARGE / 2;
   }
 
   onProgress(evt){
-    const file = evt.target.responseURL;
-    if(!this.fileState[file]){
-      this.fileState[file] = {};
+    const file = evt.target.responseURL || evt.target.currentSrc;
+    if(file && evt.loaded !== undefined){
+      if(!this.fileState[file]){
+        this.fileState[file] = {};
+      }
+      const f = this.fileState[file];
+      f.loaded = evt.loaded;
+      f.total = evt.total;
     }
-    const f = this.fileState[file];
-    f.loaded = evt.loaded;
-    f.total = evt.total;
 
     let total = 0, loaded = 0;
     for(let key in this.fileState){
