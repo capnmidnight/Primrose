@@ -42,7 +42,11 @@ class Image extends Primrose.Entity {
       options.geometry = quad(0.5, 0.5);
     }
 
-    super("Primrose.Controls.Image[" + (COUNTER++) + "]");
+    if(!options.id){
+      options.id = "Primrose.Controls.Image[" + (COUNTER++) + "]";
+    }
+
+    super(options.id);
     this.options = options;
     Primrose.Entity.registerEntity(this);
 
