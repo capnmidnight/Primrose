@@ -410,7 +410,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
         }
         else {
           this.buttonFactory = new Primrose.ButtonFactory(
-            brick(0xff0000, 1, 1, 1), {
+            colored(box(1, 1, 1), 0xff0000), {
               maxThrow: 0.1,
               minDeflection: 10,
               colorUnpressed: 0x7f0000,
@@ -423,7 +423,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
         console.error(err);
         if (!this.buttonFactory) {
           this.buttonFactory = new Primrose.ButtonFactory(
-            brick(0xff0000, 1, 1, 1), {
+            colored(box(1, 1, 1), 0xff0000), {
               maxThrow: 0.1,
               minDeflection: 10,
               colorUnpressed: 0x7f0000,

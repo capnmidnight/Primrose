@@ -22,6 +22,9 @@ function textured(geometry, txt, options) {
   if (options.metalness === undefined) {
     options.metalness = 0;
   }
+  if(options.color === undefined){
+    options.color = 0xffffff;
+  }
 
   options.unshaded = !!options.unshaded;
   options.wireframe = !!options.wireframe;
@@ -47,12 +50,7 @@ function textured(geometry, txt, options) {
     obj.material = mat;
   }
 
-  if (typeof txt === "number" || txt instanceof Number) {
-    mat.color.set(txt);
-  }
-  else if (txt) {
-    mat.color.set(0xffffff);
-
+  if (txt) {
     var setTexture = function (texture) {
       if (options.txtRepeatS * options.txtRepeatT > 1) {
         texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
