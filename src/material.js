@@ -1,5 +1,5 @@
 function material(textureDescription, options){
-  var materialDescription = `Primrose.material(${textureDescription}, ${options.unshaded}, ${options.side}, ${options.opacity}, ${options.roughness}, ${options.metalness}, ${options.color}, ${options.emissive}, ${options.wireframe})`;
+  var materialDescription = `Primrose.material(${textureDescription}, ${options.color}, ${options.unshaded}, ${options.side}, ${options.opacity}, ${options.roughness}, ${options.metalness}, ${options.color}, ${options.emissive}, ${options.wireframe})`;
   return cache(materialDescription, () => {
     var materialOptions = {
         transparent: options.opacity < 1,
@@ -21,6 +21,9 @@ function material(textureDescription, options){
       }
     }
     var mat = new MaterialType(materialOptions);
+    if (typeof options.color === "number" || options.color instanceof Number) {
+      mat.color.set(options.color);
+    }
     mat.wireframe = options.wireframe;
     return mat;
   });
