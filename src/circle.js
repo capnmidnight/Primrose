@@ -3,8 +3,10 @@ pliny.function({
   description: "| [under construction]"
 });
 
-function circle(r, sections) {
+function circle(r, sections, start, end) {
+  r = r || 1;
+  sections = sections || 18;
   return cache(
-    `CircleBufferGeometry(${r}, ${sections})`,
-    () => new THREE.CircleBufferGeometry(r, sections));
+    `CircleBufferGeometry(${r}, ${sections}, ${start}, ${end})`,
+    () => new THREE.CircleBufferGeometry(r, sections, start, end));
 }
