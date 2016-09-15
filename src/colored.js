@@ -29,6 +29,7 @@ function colored(geometry, color, options) {
 
   options.unshaded = !!options.unshaded;
   options.wireframe = !!options.wireframe;
+  options.color = color;
 
   var mat = material("", options),
     obj = null;
@@ -39,10 +40,6 @@ function colored(geometry, color, options) {
   else if (geometry instanceof THREE.Object3D) {
     obj = geometry;
     obj.material = mat;
-  }
-
-  if (typeof color === "number" || color instanceof Number) {
-    mat.color.set(color);
   }
 
   return obj;
