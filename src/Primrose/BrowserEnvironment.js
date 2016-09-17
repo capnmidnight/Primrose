@@ -557,7 +557,8 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
     if (this.options.skyTexture !== undefined) {
       var skyFunc = (typeof this.options.skyTexture === "number") ? colored : textured,
         skyDim = this.options.drawDistance * 0.9,
-        skyGeom = null;
+        skyGeom = null,
+        onSkyDone = () => this.scene.add(this.sky);
       if(typeof this.options.skyTexture === "string"){
         skyGeom = sphere(skyDim, 18, 9);
       }
@@ -566,10 +567,10 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       }
       this.sky = skyFunc(skyGeom, this.options.skyTexture, {
         side: THREE.BackSide,
-        unshaded: true
+        unshaded: true,
+        resolve: onSkyDone
       });
       this.sky.name = "Sky";
-      this.scene.add(this.sky);
     }
 
     if (this.options.groundTexture !== undefined) {
