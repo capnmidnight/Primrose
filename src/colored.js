@@ -17,18 +17,6 @@ pliny.function({
 
 function colored(geometry, color, options) {
   options = options || {};
-  if (options.opacity === undefined) {
-    options.opacity = 1;
-  }
-  if (options.roughness === undefined) {
-    options.roughness = 0.5;
-  }
-  if (options.metalness === undefined) {
-    options.metalness = 0;
-  }
-
-  options.unshaded = !!options.unshaded;
-  options.wireframe = !!options.wireframe;
   options.color = color;
 
   var mat = material("", options),
