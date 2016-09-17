@@ -555,17 +555,19 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
 
     this.camera = new THREE.PerspectiveCamera(75, 1, this.options.nearPlane, this.options.nearPlane + this.options.drawDistance);
     if (this.options.skyTexture !== undefined) {
-      var skyFunc = (typeof this.options.skyTexture === "number") ? colored : textured;
-      this.sky = skyFunc(
-        shell(
-         this.options.drawDistance * 0.9,
-         18,
-         9,
-         Math.PI * 2,
-         Math.PI),
-        this.options.skyTexture, {
-          unshaded: true
-        });
+      var skyFunc = (typeof this.options.skyTexture === "number") ? colored : textured,
+        skyDim = this.options.drawDistance * 0.9,
+        skyGeom = null;
+      if(typeof this.options.skyTexture === "string"){
+        skyGeom = sphere(skyDim, 18, 9);
+      }
+      else {
+        skyGeom = box(skyDim, skyDim, skyDim);
+      }
+      this.sky = skyFunc(skyGeom, this.options.skyTexture, {
+        side: THREE.BackSide,
+        unshaded: true
+      });
       this.sky.name = "Sky";
       this.scene.add(this.sky);
     }
