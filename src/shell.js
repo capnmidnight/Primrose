@@ -63,7 +63,7 @@ file to use as the texture, execute code as such:\n\
   }]
 });
 
-function shell(r, slices, rings, phi, theta) {
+function shell(r, slices, rings, phi, theta, options) {
   var SLICE = 0.45;
   if (phi === undefined) {
     phi = Math.PI * SLICE;
@@ -73,7 +73,8 @@ function shell(r, slices, rings, phi, theta) {
   }
   var phiStart = 1.5 * Math.PI - phi * 0.5,
     thetaStart = (Math.PI - theta) * 0.5;
+  options = options || {};
   return cache(
     `InsideSphereGeometry(${r}, ${slices}, ${rings}, ${phi}, ${theta})`,
-    () => new InsideSphereGeometry(r, slices, rings, phiStart, phi, thetaStart, theta, true));
+    () => fixGeometry(new InsideSphereGeometry(r, slices, rings, phiStart, phi, thetaStart, theta, true), options));
 }

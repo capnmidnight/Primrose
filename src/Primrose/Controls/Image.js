@@ -30,18 +30,6 @@ class Image extends Primrose.Entity {
       };
     }
 
-    if(options.radius){
-      options.geometry = shell(
-        options.radius,
-        72,
-        36,
-        Math.PI * 2,
-        Math.PI);
-    }
-    else if(!options.geometry){
-      options.geometry = quad(0.5, 0.5);
-    }
-
     options = patch(options, {
       id: "Primrose.Controls.Image[" + (COUNTER++) + "]"
     });
@@ -62,6 +50,14 @@ class Image extends Primrose.Entity {
     this._textures = [];
     this._currentImageIndex = 0;
     this.isVideo = false;
+  }
+
+  add(child){
+    this._meshes[0].add(child);
+  }
+
+  get matrixWorld() {
+    return this._meshes[0].matrixWorld;
   }
 
   get position(){
@@ -89,15 +85,31 @@ class Image extends Primrose.Entity {
     });
   }
 
+  _setGeometry(options) {
+    if(this.options.radius){
+      this.options.geometry = shell(
+        this.options.radius,
+        72,
+        36,
+        Math.PI * 2,
+        Math.PI,
+        options);
+    }
+    else if(!this.options.geometry){
+      this.options.geometry = quad(0.5, 0.5, options);
+    }
+  }
+
   loadImages(images, progress) {
-    return Promise.all(images.map((src, i) =>
-      Primrose.loadTexture(src, progress).then((txt) => {
-        this._textures[i] = txt;
-        this._meshes[i] = textured(
+    return Promise.all(images.map((src, i) => new Promise((resolve, reject) => {
+      const txt = Primrose.loadTexture(src, resolve, progress, reject);
+      this._textures[i] = txt;
+      this._setGeometry();
+      this._meshes[i] = textured(
           this.options.geometry,
           txt,
           this.options);
-      })))
+    })))
     .then(() => this.isVideo = false)
     .then(() => this);
   }
@@ -135,48 +147,15 @@ class Image extends Primrose.Entity {
 
           this._contexts[i] = this._canvases[i].getContext("2d");
 
+          this._setGeometry({
+            maxU: width / p2Width,
+            maxV: height / p2Height
+          });
+
           this._meshes[i] = textured(
             this.options.geometry,
             this._canvases[i],
             this.options);
-
-          if((p2Width !== width || p2Height !== height)){
-            const maxU = width / p2Width,
-              maxV = height / p2Height,
-              oldMaxU = this.options.scaleTextureWidth || 1,
-              oldMaxV = this.options.scaleTextureHeight || 1,
-              pU = maxU / oldMaxU,
-              pV = maxV / oldMaxV;
-
-            this.options.scaleTextureWidth = maxU;
-            this.options.scaleTextureHeight = maxV;
-            const geometry = this._meshes[i].geometry,
-              attrs = geometry.attributes || (geometry._bufferGeometry && geometry._bufferGeometry.attributes);
-            if (attrs && attrs.uv && attrs.uv.array) {
-              const uv = attrs.uv,
-                arr = uv.array;
-              for (let j = 0; j < arr.length; j += uv.itemSize) {
-                arr[j] *= pU;
-              }
-              for (let j = 1; j < arr.length; j += uv.itemSize) {
-                arr[j] = 1 - (1 - arr[j]) * pV;
-              }
-            }
-            else if(geometry.faceVertexUvs) {
-              const faces = geometry.faceVertexUvs;
-              for(let i = 0; i < faces.length; ++i){
-                const face = faces[i];
-                for(let j = 0; j < face.length; ++j){
-                  const uvs = face[j];
-                  for(let k = 0; k < uvs.length; ++k){
-                    const uv = uvs[k];
-                    uv.x *= pU;
-                    uv.y = 1 - (1 - uv.y) * pV;
-                  }
-                }
-              }
-            }
-          }
         }
 
         this._textures[i] = this._meshes[i].material.map;
