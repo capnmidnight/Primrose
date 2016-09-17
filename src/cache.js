@@ -32,9 +32,12 @@ pliny.function({
 });
 const cache = (function () {
   const _cache = {};
-  return (hash, makeObject) => {
+  return (hash, makeObject, onCacheHit) => {
     if (!_cache[hash]) {
       _cache[hash] = makeObject();
+    }
+    else if(onCacheHit) {
+      onCacheHit();
     }
     return _cache[hash];
   };
