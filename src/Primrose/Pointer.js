@@ -24,9 +24,9 @@ pliny.class({
       type: "Number",
       description: "The color to use to render the teleport pad and 3D pointer cursor."
     }, {
-      name: "emission",
+      name: "highlight",
       type: "Number",
-      description: "The color to use to highlight the teleport pad and 3D pointer cursor so that it's not 100% black outside of lighted areas."
+      description: "The color to use to highlight the teleport pad and 3D pointer cursor when it's pointing at a real thing."
     }, {
       name: "isHand",
       type: "Boolean",
@@ -50,7 +50,7 @@ pliny.class({
     }]
 });
 class Pointer extends Primrose.AbstractEventEmitter {
-  constructor(name, color, emission, highlight, orientationDevices, positionDevices = null, triggerDevices = null) {
+  constructor(name, color, highlight, orientationDevices, positionDevices = null, triggerDevices = null) {
     super();
     this.name = name;
     this.orientationDevices = orientationDevices;
@@ -60,10 +60,9 @@ class Pointer extends Primrose.AbstractEventEmitter {
     this.showPointer = true;
     this.color = color;
     this.highlight = highlight;
-    this.emission = emission;
     this.velocity = new THREE.Vector3();
     this.mesh = colored(box(LASER_WIDTH, LASER_WIDTH, LASER_LENGTH), this.color, {
-      emissive: this.emission
+      unshaded: true
     });
 
     var arr = this.mesh.geometry.attributes.position;
@@ -72,7 +71,7 @@ class Pointer extends Primrose.AbstractEventEmitter {
     }
 
     this.disk = colored(sphere(TELEPORT_PAD_RADIUS, 128, 3), this.color, {
-      emissive: this.emission
+      unshaded: true
     });
     this.disk.geometry.computeBoundingBox();
     this.disk.geometry.vertices.forEach((v) => {
@@ -82,12 +81,12 @@ class Pointer extends Primrose.AbstractEventEmitter {
     this.disk.geometry.computeBoundingBox();
 
     this.gazeInner = colored(circle(GAZE_RING_INNER / 2, 10), this.color, {
-      emissive: this.emission
+      unshaded: true
     });
     this.gazeInner.position.set(0, 0, -0.5);
 
     this.gazeOuter = colored(ring(GAZE_RING_INNER, GAZE_RING_OUTER, 10), this.color, {
-      emissive: this.emission
+      unshaded: true
     });
     this.gazeOuter.visible = false;
     this.gazeInner.add(this.gazeOuter);
@@ -243,7 +242,7 @@ class Pointer extends Primrose.AbstractEventEmitter {
 
     this.mesh.material = material("", {
       color: this.color,
-      emmissive: this.emmissive
+      unshaded: true
     });
 
     if (this.showPointer) {
@@ -267,7 +266,7 @@ class Pointer extends Primrose.AbstractEventEmitter {
       if(currentHit){
         this.mesh.material = material("", {
           color: this.highlight,
-          emmissive: this.emmissive
+          unshaded: true
         });
       }
 

@@ -187,9 +187,8 @@ class FPSInput extends Primrose.AbstractEventEmitter {
 
           var shift = (this.motionDevices.length - 2) * 8,
             color = 0x0000ff << shift,
-            emission = 0x00007f << shift,
             highlight = 0xff0000 >> shift,
-            ptr = new Primrose.Pointer(padID + "Pointer", color, emission, highlight, [mgr]);
+            ptr = new Primrose.Pointer(padID + "Pointer", color, highlight, [mgr]);
 
           ptr.add(colored(box(0.1, 0.025, 0.2), color, {
             emissive: emission
@@ -248,7 +247,7 @@ class FPSInput extends Primrose.AbstractEventEmitter {
 
     this.stage = new THREE.Object3D();
 
-    this.mousePointer = new Primrose.Pointer("MousePointer", 0xff0000, 0x7f0000, 0x00ff00, [
+    this.mousePointer = new Primrose.Pointer("MousePointer", 0xff0000, 0x00ff00, [
       this.Mouse
     ], [
       this.VR,
@@ -257,7 +256,7 @@ class FPSInput extends Primrose.AbstractEventEmitter {
     this.pointers.push(this.mousePointer);
     this.mousePointer.addToBrowserEnvironment(null, this.options.scene);
 
-    this.head = new Primrose.Pointer("GazePointer", 0xffff00, 0x7f7f00, 0x0000ff, [
+    this.head = new Primrose.Pointer("GazePointer", 0xffff00, 0x0000ff, [
       this.VR,
       this.Mouse,
       this.Touch,
