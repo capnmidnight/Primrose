@@ -101,7 +101,7 @@ class Image extends Primrose.Entity {
   }
 
   loadImages(images, progress) {
-    return Promise.all(images.map((src, i) => new Promise((resolve, reject) => {
+    return Promise.all(Array.prototype.map.call(images, (src, i) => new Promise((resolve, reject) => {
       const txt = Primrose.loadTexture(src, resolve, progress, reject);
       this._textures[i] = txt;
       this._setGeometry();
@@ -115,7 +115,7 @@ class Image extends Primrose.Entity {
   }
 
   loadVideos(videos, progress){
-    return Promise.all(videos.map((spec, i) => new Promise((resolve, reject) => {
+    return Promise.all(Array.prototype.map.call(videos, (spec, i) => new Promise((resolve, reject) => {
       var video = null;
       if(typeof spec === "string"){
         video = document.querySelector(`video[src='${spec}']`) ||
