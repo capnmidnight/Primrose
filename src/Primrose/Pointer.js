@@ -50,7 +50,7 @@ pliny.class({
     }]
 });
 class Pointer extends Primrose.AbstractEventEmitter {
-  constructor(name, color, emission, orientationDevices, positionDevices = null, triggerDevices = null) {
+  constructor(name, color, emission, highlight, orientationDevices, positionDevices = null, triggerDevices = null) {
     super();
     this.name = name;
     this.orientationDevices = orientationDevices;
@@ -59,6 +59,7 @@ class Pointer extends Primrose.AbstractEventEmitter {
 
     this.showPointer = true;
     this.color = color;
+    this.highlight = highlight;
     this.emission = emission;
     this.velocity = new THREE.Vector3();
     this.mesh = colored(box(LASER_WIDTH, LASER_WIDTH, LASER_LENGTH), this.color, {
@@ -240,6 +241,11 @@ class Pointer extends Primrose.AbstractEventEmitter {
   resolvePicking(currentHit) {
     this.mesh.visible = false;
 
+    this.mesh.material = material("", {
+      color: this.color,
+      emmissive: this.emmissive
+    });
+
     if (this.showPointer) {
       const _priv = _(this),
         lastHit = _priv.lastHit,
@@ -257,6 +263,13 @@ class Pointer extends Primrose.AbstractEventEmitter {
           hit: currentHit,
           lastHit: lastHit
         };
+
+      if(currentHit){
+        this.mesh.material = material("", {
+          color: this.highlight,
+          emmissive: this.emmissive
+        });
+      }
 
       if(moved){
         lastHit.facePoint[0] = currentHit.facePoint[0];
