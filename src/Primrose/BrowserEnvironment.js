@@ -1,7 +1,8 @@
-var MILLISECONDS_TO_SECONDS = 0.001,
+const MILLISECONDS_TO_SECONDS = 0.001,
   MAX_MOVE_DISTANCE = 5,
   MAX_MOVE_DISTANCE_SQ = MAX_MOVE_DISTANCE * MAX_MOVE_DISTANCE,
-  TELEPORT_COOLDOWN = 250;
+  TELEPORT_COOLDOWN = 250,
+  TELEPORT_DISPLACEMENT = new THREE.Vector3();
 
 pliny.class({
   parent: "Primrose",
@@ -510,9 +511,16 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       }
     };
 
-    this.teleport = (pos) => this.fadeOut()
-      .then(() => this.moveStage(pos))
-      .then(() => this.fadeIn());
+    this.teleport = (pos) => {
+      var dist = TELEPORT_DISPLACEMENT.copy(pos)
+        .sub(this.input.head.position)
+        .length();
+      if(dist > 0.1){
+        this.fadeOut()
+          .then(() => this.moveStage(pos))
+          .then(() => this.fadeIn());
+      }
+    };
 
     this.selectControl = (evt) => {
       var obj = evt.hit && evt.hit.object;
