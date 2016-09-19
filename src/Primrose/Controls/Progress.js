@@ -53,7 +53,7 @@ class Progress {
   }
 
   get value(){
-    return this.valueBar.scale.x;
+    return this.valueBar.scale.x / INSET_LARGE;
   }
 
   set value(v){

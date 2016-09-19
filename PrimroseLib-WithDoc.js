@@ -10430,7 +10430,7 @@ var Progress = function () {
   }, {
     key: "value",
     get: function get() {
-      return this.valueBar.scale.x;
+      return this.valueBar.scale.x / INSET_LARGE;
     },
     set: function set(v) {
       this.valueBar.scale.x = v * INSET_LARGE;
