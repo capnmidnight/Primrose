@@ -192,9 +192,11 @@ pliny.function({
 });
 var cache = function () {
   var _cache = {};
-  return function (hash, makeObject) {
+  return function (hash, makeObject, onCacheHit) {
     if (!_cache[hash]) {
       _cache[hash] = makeObject();
+    } else if (onCacheHit) {
+      onCacheHit();
     }
     return _cache[hash];
   };
@@ -334,18 +336,6 @@ pliny.function({
 
 function colored(geometry, color, options) {
   options = options || {};
-  if (options.opacity === undefined) {
-    options.opacity = 1;
-  }
-  if (options.roughness === undefined) {
-    options.roughness = 0.5;
-  }
-  if (options.metalness === undefined) {
-    options.metalness = 0;
-  }
-
-  options.unshaded = !!options.unshaded;
-  options.wireframe = !!options.wireframe;
   options.color = color;
 
   var mat = material("", options),
@@ -662,6 +652,44 @@ function findProperty(elem, arr) {
     if(typeof window !== "undefined") window.findProperty = findProperty;
 })();
     // end D:\Documents\VR\Primrose\src\findProperty.js
+    ////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+    // start D:\Documents\VR\Primrose\src\fixGeometry.js
+(function(){"use strict";
+
+function fixGeometry(geometry, options) {
+  var maxU = options.maxU || 1,
+      maxV = options.maxV || 1,
+      attrs = geometry.attributes || geometry._bufferGeometry && geometry._bufferGeometry.attributes;
+  if (attrs && attrs.uv && attrs.uv.array) {
+    var uv = attrs.uv,
+        arr = uv.array;
+    for (var j = 0; j < arr.length; j += uv.itemSize) {
+      arr[j] *= maxU;
+    }
+    for (var _j = 1; _j < arr.length; _j += uv.itemSize) {
+      arr[_j] = 1 - (1 - arr[_j]) * maxV;
+    }
+  } else if (geometry.faceVertexUvs) {
+    var faces = geometry.faceVertexUvs;
+    for (var i = 0; i < faces.length; ++i) {
+      var face = faces[i];
+      for (var _j2 = 0; _j2 < face.length; ++_j2) {
+        var uvs = face[_j2];
+        for (var k = 0; k < uvs.length; ++k) {
+          var _uv = uvs[k];
+          _uv.x *= maxU;
+          _uv.y = 1 - (1 - _uv.y) * maxV;
+        }
+      }
+    }
+  }
+
+  return geometry;
+}
+    if(typeof window !== "undefined") window.fixGeometry = fixGeometry;
+})();
+    // end D:\Documents\VR\Primrose\src\fixGeometry.js
     ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
     // start D:\Documents\VR\Primrose\src\getSetting.js
@@ -1163,10 +1191,28 @@ function light(color, intensity, distance, decay) {
 (function(){"use strict";
 
 function material(textureDescription, options) {
+  options = options || {};
+
+  if (options.opacity === undefined) {
+    options.opacity = 1;
+  }
+  if (options.roughness === undefined) {
+    options.roughness = 0.5;
+  }
+  if (options.metalness === undefined) {
+    options.metalness = 0;
+  }
+  if (options.color === undefined) {
+    options.color = 0xffffff;
+  }
+
+  options.unshaded = !!options.unshaded;
+  options.wireframe = !!options.wireframe;
+
   var materialDescription = "Primrose.material(" + textureDescription + ", " + options.color + ", " + options.unshaded + ", " + options.side + ", " + options.opacity + ", " + options.roughness + ", " + options.metalness + ", " + options.color + ", " + options.emissive + ", " + options.wireframe + ")";
   return cache(materialDescription, function () {
     var materialOptions = {
-      transparent: options.opacity < 1,
+      transparent: options.transparent || options.opacity < 1,
       opacity: options.opacity,
       side: options.side || THREE.FrontSide
     },
@@ -1183,6 +1229,13 @@ function material(textureDescription, options) {
         materialOptions.emissive = options.emissive;
       }
     }
+
+    if (options.texture instanceof THREE.CubeTexture) {
+      materialOptions.envMap = options.texture;
+    } else if (options.texture instanceof THREE.Texture) {
+      materialOptions.map = options.texture;
+    }
+
     var mat = new MaterialType(materialOptions);
     if (typeof options.color === "number" || options.color instanceof Number) {
       mat.color.set(options.color);
@@ -1407,12 +1460,19 @@ pliny.function({
   description: "| [under construction]"
 });
 
-function quad(w, h, s, t) {
+function quad(w, h, options) {
   if (h === undefined) {
     h = w;
   }
-  return cache("PlaneBufferGeometry(" + w + ", " + h + ", " + s + ", " + t + ")", function () {
-    return new THREE.PlaneBufferGeometry(w, h, s, t);
+  options = options || {};
+  if (options.s === undefined) {
+    options.s = 1;
+  }
+  if (options.t === undefined) {
+    options.t = 1;
+  }
+  return cache("PlaneBufferGeometry(" + w + ", " + h + ", " + options.s + ", " + options.t + ", " + options.maxU + ", $options.maxV)", function () {
+    return fixGeometry(new THREE.PlaneBufferGeometry(w, h, options.s, options.t), options);
   });
 }
     if(typeof window !== "undefined") window.quad = quad;
@@ -1671,7 +1731,7 @@ file to use as the texture, execute code as such:\n\
   }]
 });
 
-function shell(r, slices, rings, phi, theta) {
+function shell(r, slices, rings, phi, theta, options) {
   var SLICE = 0.45;
   if (phi === undefined) {
     phi = Math.PI * SLICE;
@@ -1681,8 +1741,9 @@ function shell(r, slices, rings, phi, theta) {
   }
   var phiStart = 1.5 * Math.PI - phi * 0.5,
       thetaStart = (Math.PI - theta) * 0.5;
+  options = options || {};
   return cache("InsideSphereGeometry(" + r + ", " + slices + ", " + rings + ", " + phi + ", " + theta + ")", function () {
-    return new InsideSphereGeometry(r, slices, rings, phiStart, phi, thetaStart, theta, true);
+    return fixGeometry(new InsideSphereGeometry(r, slices, rings, phiStart, phi, thetaStart, theta, true), options);
   });
 }
     if(typeof window !== "undefined") window.shell = shell;
@@ -1711,8 +1772,6 @@ function sphere(r, slices, rings) {
     // start D:\Documents\VR\Primrose\src\textured.js
 (function(){"use strict";
 
-var textureCache = {};
-
 pliny.function({
   name: "textured",
   description: "| [under construction]"
@@ -1720,83 +1779,17 @@ pliny.function({
 
 function textured(geometry, txt, options) {
   options = options || {};
-  if (options.opacity === undefined) {
-    options.opacity = 1;
-  }
   if (options.txtRepeatS === undefined) {
     options.txtRepeatS = 1;
   }
   if (options.txtRepeatT === undefined) {
     options.txtRepeatT = 1;
   }
-  if (options.roughness === undefined) {
-    options.roughness = 0.5;
-  }
-  if (options.metalness === undefined) {
-    options.metalness = 0;
-  }
-  if (options.color === undefined) {
-    options.color = 0xffffff;
-  }
 
-  options.unshaded = !!options.unshaded;
-  options.wireframe = !!options.wireframe;
-
-  var mat = null,
-      textureDescription;
-  if (txt instanceof THREE.Material) {
-    mat = txt;
-    txt = null;
-  } else {
-    var txtID = (txt.id || txt).toString();
-    textureDescription = "Primrose.textured(" + txtID + ", " + options.txtRepeatS + ", " + options.txtRepeatT + ")";
-    mat = material(textureDescription, options);
-  }
-
-  var obj = null;
-  if (geometry.type.indexOf("Geometry") > -1) {
-    obj = new THREE.Mesh(geometry, mat);
-  } else if (geometry instanceof THREE.Object3D) {
-    obj = geometry;
-    obj.material = mat;
-  }
-
-  if (txt) {
-    var setTexture = function setTexture(texture) {
-      if (options.txtRepeatS * options.txtRepeatT > 1) {
-        texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-        texture.repeat.set(options.txtRepeatS, options.txtRepeatT);
-      }
-
-      if (options.scaleTextureWidth || options.scaleTextureHeight) {
-        if (geometry.attributes && geometry.attributes.uv && geometry.attributes.uv.array) {
-          var uv = geometry.attributes.uv,
-              arr = uv.array,
-              i;
-          if (options.scaleTextureWidth) {
-            for (i = 0; i < arr.length; i += uv.itemSize) {
-              arr[i] *= options.scaleTextureWidth;
-            }
-          }
-          if (options.scaleTextureHeight) {
-            for (i = 1; i < arr.length; i += uv.itemSize) {
-              arr[i] = 1 - (1 - arr[i]) * options.scaleTextureHeight;
-            }
-          }
-        } else {
-          console.trace(geometry, options);
-        }
-      }
-
-      textureCache[textureDescription] = texture;
-      mat.map = texture;
-      mat.needsUpdate = true;
-      texture.needsUpdate = true;
-    };
-
-    if (textureCache[textureDescription]) {
-      setTexture(textureCache[textureDescription]);
-    } else if (txt instanceof Primrose.Surface) {
+  var txtID = (txt.id || txt).toString(),
+      textureDescription = "Primrose.textured(" + txtID + ", " + options.txtRepeatS + ", " + options.txtRepeatT + ")",
+      texture = cache(textureDescription, function () {
+    if (txt instanceof Primrose.Surface) {
       if (!options.scaleTextureWidth || !options.scaleTextureHeight) {
         obj.surface = txt;
         var imgWidth = txt.imageWidth,
@@ -1830,17 +1823,59 @@ function textured(geometry, txt, options) {
         }
       }
       txt._material = mat;
-      setTexture(txt.texture);
-    } else if (typeof txt === "string") {
-      Primrose.loadTexture(txt, options.progress).then(setTexture).catch(console.error.bind(console, "Error loading texture", txt));
+      return txt.texture;
+    } else if (typeof txt === "string" || txt instanceof Array || txt.length === 6) {
+      return Primrose.loadTexture(txt, options.resolve, options.progress, options.reject);
     } else if (txt instanceof Primrose.Text.Controls.TextBox) {
-      setTexture(txt.renderer.texture);
+      return txt.renderer.texture;
     } else if (txt instanceof HTMLCanvasElement || txt instanceof HTMLVideoElement) {
-      setTexture(new THREE.Texture(txt));
+      return new THREE.Texture(txt);
+    } else if (txt instanceof THREE.Texture) {
+      return txt;
     } else {
-      setTexture(txt);
+      throw new Error("Texture description couldn't be converted to a THREE.Texture object");
+    }
+  });
+
+  options.texture = texture;
+
+  var mat = material(textureDescription, options),
+      obj = null;
+  if (geometry.type.indexOf("Geometry") > -1) {
+    obj = new THREE.Mesh(geometry, mat);
+  } else if (geometry instanceof THREE.Mesh) {
+    obj = geometry;
+    obj.material = mat;
+    geometry = obj.geometry;
+  }
+
+  if (options.txtRepeatS * options.txtRepeatT > 1) {
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(options.txtRepeatS, options.txtRepeatT);
+  }
+
+  if (options.scaleTextureWidth || options.scaleTextureHeight) {
+    if (geometry.attributes && geometry.attributes.uv && geometry.attributes.uv.array) {
+      var uv = geometry.attributes.uv,
+          arr = uv.array,
+          i;
+      if (options.scaleTextureWidth) {
+        for (i = 0; i < arr.length; i += uv.itemSize) {
+          arr[i] *= options.scaleTextureWidth;
+        }
+      }
+      if (options.scaleTextureHeight) {
+        for (i = 1; i < arr.length; i += uv.itemSize) {
+          arr[i] = 1 - (1 - arr[i]) * options.scaleTextureHeight;
+        }
+      }
+    } else {
+      console.trace(geometry, options);
     }
   }
+
+  mat.needsUpdate = true;
+  texture.needsUpdate = true;
 
   return obj;
 }
@@ -2532,12 +2567,8 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
       }
     };
 
-    var update = function update(t) {
-      var dt = t - lt,
-          i,
-          j;
-      lt = t;
-
+    var update = function update(dt) {
+      dt *= MILLISECONDS_TO_SECONDS;
       movePlayer(dt);
       _this.input.resolvePicking(currentHits);
       moveSky();
@@ -2591,12 +2622,16 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
     };
 
     var animate = function animate(t) {
-      update(t * MILLISECONDS_TO_SECONDS);
-      render();
+      var dt = t - lt,
+          i,
+          j;
+      lt = t;
+      update(dt);
+      render(dt);
       RAF(animate);
     };
 
-    var render = function render() {
+    var render = function render(dt) {
       _this.camera.position.set(0, 0, 0);
       _this.camera.quaternion.set(0, 0, 0, 1);
       _this.audio.setPlayer(_this.input.head.mesh);
@@ -2612,7 +2647,7 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
           _this.camera.projectionMatrix.copy(st.projection);
           _this.camera.translateOnAxis(st.translation, 1);
           _this.renderer.setViewport(v.left * resolutionScale, v.top * resolutionScale, v.width * resolutionScale, v.height * resolutionScale);
-          _this.renderer.render(_this.scene, _this.camera);
+          _this.composer.render(dt);
           _this.camera.translateOnAxis(st.translation, -1);
         }
         _this.input.submitFrame();
@@ -2624,7 +2659,7 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
         _this.camera.updateProjectionMatrix();
         _this.renderer.clear(true, true, true);
         _this.renderer.setViewport(0, 0, _this.renderer.domElement.width, _this.renderer.domElement.height);
-        _this.renderer.render(_this.scene, _this.camera);
+        _this.composer.render(dt);
       }
     };
 
@@ -2644,6 +2679,7 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
 
         _this.renderer.domElement.width = canvasWidth;
         _this.renderer.domElement.height = canvasHeight;
+        _this.composer.setSize(canvasWidth, canvasHeight);
         if (!_this.timer) {
           render();
         }
@@ -2804,13 +2840,45 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
     var POSITION = new THREE.Vector3(),
         lastTeleport = 0;
 
-    _this.teleport = function (pos) {
+    _this.fadeOut = function () {
+      return new Promise(function (resolve, reject) {
+        var timer = setInterval(function () {
+          _this.fader.uniforms.amount.value -= 0.1;
+          if (_this.fader.uniforms.amount.value <= 0) {
+            clearInterval(timer);
+            resolve();
+          }
+        }, 10);
+      });
+    };
+
+    _this.fadeIn = function () {
+      return new Promise(function (resolve, reject) {
+        var timer = setInterval(function () {
+          _this.fader.uniforms.amount.value += 0.1;
+          if (_this.fader.uniforms.amount.value >= 1) {
+            clearInterval(timer);
+            resolve();
+          }
+        }, 10);
+      });
+    };
+
+    _this.moveStage = function (pos) {
       var t = performance.now(),
           dt = t - lastTeleport;
       if (dt > TELEPORT_COOLDOWN) {
         lastTeleport = t;
         _this.input.moveStage(pos);
       }
+    };
+
+    _this.teleport = function (pos) {
+      return _this.fadeOut().then(function () {
+        return _this.moveStage(pos);
+      }).then(function () {
+        return _this.fadeIn();
+      });
     };
 
     _this.selectControl = function (evt) {
@@ -2875,12 +2943,24 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
 
     _this.camera = new THREE.PerspectiveCamera(75, 1, _this.options.nearPlane, _this.options.nearPlane + _this.options.drawDistance);
     if (_this.options.skyTexture !== undefined) {
-      var skyFunc = typeof _this.options.skyTexture === "number" ? colored : textured;
-      _this.sky = skyFunc(shell(_this.options.drawDistance * 0.9, 18, 9, Math.PI * 2, Math.PI), _this.options.skyTexture, {
-        unshaded: true
+      var skyFunc = typeof _this.options.skyTexture === "number" ? colored : textured,
+          skyDim = _this.options.drawDistance * 0.9,
+          skyGeom = null,
+          onSkyDone = function onSkyDone() {
+        return _this.scene.add(_this.sky);
+      };
+      if (typeof _this.options.skyTexture === "string") {
+        skyGeom = sphere(skyDim, 18, 9);
+      } else {
+        skyGeom = box(skyDim, skyDim, skyDim);
+      }
+      _this.sky = skyFunc(skyGeom, _this.options.skyTexture, {
+        side: THREE.BackSide,
+        unshaded: true,
+        resolve: onSkyDone,
+        progress: _this.options.progress
       });
       _this.sky.name = "Sky";
-      _this.scene.add(_this.sky);
     }
 
     if (_this.options.groundTexture !== undefined) {
@@ -3022,6 +3102,18 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
         return _this.input.addEventListener(evt, _this.selectControl.bind(_this), false);
       });
       _this.input.forward(_this, Primrose.Pointer.EVENTS);
+
+      _this.composer = new THREE.EffectComposer(_this.renderer);
+
+      var renderPass = new THREE.RenderPass(_this.scene, _this.camera);
+      _this.composer.addPass(renderPass);
+
+      _this.fader = new THREE.ShaderPass(Primrose.ColorifyShader);
+      _this.composer.addPass(_this.fader);
+
+      var copyPass = new THREE.ShaderPass(THREE.CopyShader);
+      copyPass.renderToScreen = true;
+      _this.composer.addPass(copyPass);
 
       var keyDown = function keyDown(evt) {
         if (_this.input.VR.isPresenting) {
@@ -3358,6 +3450,26 @@ ButtonFactory.prototype.create = function (toggle) {
     if(typeof window !== "undefined") window.Primrose.ButtonFactory = ButtonFactory;
 })();
     // end D:\Documents\VR\Primrose\src\Primrose\ButtonFactory.js
+    ////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+    // start D:\Documents\VR\Primrose\src\Primrose\ColorifyShader.js
+(function(){"use strict";
+
+var ColorifyShader = {
+
+  uniforms: {
+    "tDiffuse": { value: null },
+    "amount": { value: 1.0 }
+  },
+
+  vertexShader: ["varying vec2 vUv;", "void main() {", "vUv = uv;", "gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );", "}"].join("\n"),
+
+  fragmentShader: ["uniform float amount;", "uniform sampler2D tDiffuse;", "varying vec2 vUv;", "void main() {", "vec4 texel = texture2D( tDiffuse, vUv );", "gl_FragColor = vec4(texel.xyz * amount, texel.w);", "}"].join("\n")
+
+};
+    if(typeof window !== "undefined") window.Primrose.ColorifyShader = ColorifyShader;
+})();
+    // end D:\Documents\VR\Primrose\src\Primrose\ColorifyShader.js
     ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
     // start D:\Documents\VR\Primrose\src\Primrose\Controls.js
@@ -4691,16 +4803,48 @@ for (var key in Keys) {
     // start D:\Documents\VR\Primrose\src\Primrose\loadTexture.js
 (function(){"use strict";
 
-var textureLoader = new THREE.TextureLoader();
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
-function loadTexture(url, progress) {
-  progress = progress || function () {};
-  textureLoader.setCrossOrigin(THREE.ImageUtils.crossOrigin);
-  return cache("Image(" + url + ")", function () {
-    return new Promise(function (resolve, reject) {
-      return textureLoader.load(url, resolve, progress, reject);
-    });
-  });
+var objectIDs = new WeakMap(),
+    counter = 0;
+
+function loadTexture(url, resolve, progress, reject) {
+  var textureLoader = null,
+      txtName = null;
+  if (url instanceof Array && url.length === 6) {
+    textureLoader = new THREE.CubeTextureLoader();
+    txtName = url.join(",");
+  } else {
+    if (url instanceof HTMLImageElement) {
+      txtName = url.src;
+      url = url.src;
+    } else if ((typeof url === "undefined" ? "undefined" : _typeof(url)) === "object") {
+      if (!objectIDs.has(url)) {
+        objectIDs.set(url, "object-" + counter++);
+      }
+      txtName = objectIDs.get(url);
+    }
+
+    if (typeof url === "string") {
+      txtName = url;
+      textureLoader = new THREE.TextureLoader();
+    }
+  }
+
+  if (textureLoader) {
+    textureLoader.setCrossOrigin(THREE.ImageUtils.crossOrigin);
+  }
+
+  return cache("Texture(" + txtName + ")", function () {
+    var txt = null;
+    if (textureLoader) {
+      txt = textureLoader.load(url, resolve, progress, reject);
+    } else {
+      txt = new THREE.Texture(url);
+      resolve();
+    }
+    return txt;
+  }, resolve);
 }
     if(typeof window !== "undefined") window.Primrose.loadTexture = loadTexture;
 })();
@@ -5138,9 +5282,9 @@ pliny.class({
     type: "Number",
     description: "The color to use to render the teleport pad and 3D pointer cursor."
   }, {
-    name: "emission",
+    name: "highlight",
     type: "Number",
-    description: "The color to use to highlight the teleport pad and 3D pointer cursor so that it's not 100% black outside of lighted areas."
+    description: "The color to use to highlight the teleport pad and 3D pointer cursor when it's pointing at a real thing."
   }, {
     name: "isHand",
     type: "Boolean",
@@ -5167,7 +5311,7 @@ pliny.class({
 var Pointer = function (_Primrose$AbstractEve) {
   _inherits(Pointer, _Primrose$AbstractEve);
 
-  function Pointer(name, color, emission, orientationDevices) {
+  function Pointer(name, color, highlight, orientationDevices) {
     var positionDevices = arguments.length <= 4 || arguments[4] === undefined ? null : arguments[4];
     var triggerDevices = arguments.length <= 5 || arguments[5] === undefined ? null : arguments[5];
 
@@ -5182,10 +5326,10 @@ var Pointer = function (_Primrose$AbstractEve) {
 
     _this.showPointer = true;
     _this.color = color;
-    _this.emission = emission;
+    _this.highlight = highlight;
     _this.velocity = new THREE.Vector3();
     _this.mesh = colored(box(LASER_WIDTH, LASER_WIDTH, LASER_LENGTH), _this.color, {
-      emissive: _this.emission
+      unshaded: true
     });
 
     var arr = _this.mesh.geometry.attributes.position;
@@ -5194,7 +5338,7 @@ var Pointer = function (_Primrose$AbstractEve) {
     }
 
     _this.disk = colored(sphere(TELEPORT_PAD_RADIUS, 128, 3), _this.color, {
-      emissive: _this.emission
+      unshaded: true
     });
     _this.disk.geometry.computeBoundingBox();
     _this.disk.geometry.vertices.forEach(function (v) {
@@ -5204,12 +5348,12 @@ var Pointer = function (_Primrose$AbstractEve) {
     _this.disk.geometry.computeBoundingBox();
 
     _this.gazeInner = colored(circle(GAZE_RING_INNER / 2, 10), _this.color, {
-      emissive: _this.emission
+      unshaded: true
     });
     _this.gazeInner.position.set(0, 0, -0.5);
 
     _this.gazeOuter = colored(ring(GAZE_RING_INNER, GAZE_RING_OUTER, 10), _this.color, {
-      emissive: _this.emission
+      unshaded: true
     });
     _this.gazeOuter.visible = false;
     _this.gazeInner.add(_this.gazeOuter);
@@ -5329,6 +5473,11 @@ var Pointer = function (_Primrose$AbstractEve) {
     value: function resolvePicking(currentHit) {
       this.mesh.visible = false;
 
+      this.mesh.material = material("", {
+        color: this.color,
+        unshaded: true
+      });
+
       if (this.showPointer) {
         var _priv = _(this),
             lastHit = _priv.lastHit,
@@ -5341,6 +5490,13 @@ var Pointer = function (_Primrose$AbstractEve) {
           hit: currentHit,
           lastHit: lastHit
         };
+
+        if (currentHit) {
+          this.mesh.material = material("", {
+            color: this.highlight,
+            unshaded: true
+          });
+        }
 
         if (moved) {
           lastHit.facePoint[0] = currentHit.facePoint[0];
@@ -9977,12 +10133,6 @@ var Image = function (_Primrose$Entity) {
       };
     }
 
-    if (options.radius) {
-      options.geometry = shell(options.radius, 72, 36, Math.PI * 2, Math.PI);
-    } else if (!options.geometry) {
-      options.geometry = quad(0.5, 0.5);
-    }
-
     options = patch(options, {
       id: "Primrose.Controls.Image[" + COUNTER++ + "]"
     });
@@ -10007,6 +10157,11 @@ var Image = function (_Primrose$Entity) {
   }
 
   _createClass(Image, [{
+    key: "add",
+    value: function add(child) {
+      this._meshes[0].add(child);
+    }
+  }, {
     key: "addToBrowserEnvironment",
     value: function addToBrowserEnvironment(env, scene) {
       var _this2 = this;
@@ -10022,13 +10177,24 @@ var Image = function (_Primrose$Entity) {
       });
     }
   }, {
+    key: "_setGeometry",
+    value: function _setGeometry(options) {
+      if (this.options.radius) {
+        this.options.geometry = shell(this.options.radius, 72, 36, Math.PI * 2, Math.PI, options);
+      } else if (!this.options.geometry) {
+        this.options.geometry = quad(0.5, 0.5, options);
+      }
+    }
+  }, {
     key: "loadImages",
     value: function loadImages(images, progress) {
       var _this3 = this;
 
-      return Promise.all(images.map(function (src, i) {
-        return Primrose.loadTexture(src, progress).then(function (txt) {
+      return Promise.all(Array.prototype.map.call(images, function (src, i) {
+        return new Promise(function (resolve, reject) {
+          var txt = Primrose.loadTexture(src, resolve, progress, reject);
           _this3._textures[i] = txt;
+          _this3._setGeometry();
           _this3._meshes[i] = textured(_this3.options.geometry, txt, _this3.options);
         });
       })).then(function () {
@@ -10042,7 +10208,7 @@ var Image = function (_Primrose$Entity) {
     value: function loadVideos(videos, progress) {
       var _this4 = this;
 
-      return Promise.all(videos.map(function (spec, i) {
+      return Promise.all(Array.prototype.map.call(videos, function (spec, i) {
         return new Promise(function (resolve, reject) {
           var video = null;
           if (typeof spec === "string") {
@@ -10069,44 +10235,12 @@ var Image = function (_Primrose$Entity) {
 
               _this4._contexts[i] = _this4._canvases[i].getContext("2d");
 
+              _this4._setGeometry({
+                maxU: width / p2Width,
+                maxV: height / p2Height
+              });
+
               _this4._meshes[i] = textured(_this4.options.geometry, _this4._canvases[i], _this4.options);
-
-              if (p2Width !== width || p2Height !== height) {
-                var maxU = width / p2Width,
-                    maxV = height / p2Height,
-                    oldMaxU = _this4.options.scaleTextureWidth || 1,
-                    oldMaxV = _this4.options.scaleTextureHeight || 1,
-                    pU = maxU / oldMaxU,
-                    pV = maxV / oldMaxV;
-
-                _this4.options.scaleTextureWidth = maxU;
-                _this4.options.scaleTextureHeight = maxV;
-                var geometry = _this4._meshes[i].geometry,
-                    attrs = geometry.attributes || geometry._bufferGeometry && geometry._bufferGeometry.attributes;
-                if (attrs && attrs.uv && attrs.uv.array) {
-                  var uv = attrs.uv,
-                      arr = uv.array;
-                  for (var j = 0; j < arr.length; j += uv.itemSize) {
-                    arr[j] *= pU;
-                  }
-                  for (var _j = 1; _j < arr.length; _j += uv.itemSize) {
-                    arr[_j] = 1 - (1 - arr[_j]) * pV;
-                  }
-                } else if (geometry.faceVertexUvs) {
-                  var faces = geometry.faceVertexUvs;
-                  for (var _i = 0; _i < faces.length; ++_i) {
-                    var face = faces[_i];
-                    for (var _j2 = 0; _j2 < face.length; ++_j2) {
-                      var uvs = face[_j2];
-                      for (var k = 0; k < uvs.length; ++k) {
-                        var _uv = uvs[k];
-                        _uv.x *= pU;
-                        _uv.y = 1 - (1 - _uv.y) * pV;
-                      }
-                    }
-                  }
-                }
-              }
             }
 
             _this4._textures[i] = _this4._meshes[i].material.map;
@@ -10156,6 +10290,11 @@ var Image = function (_Primrose$Entity) {
           this._textures[i].needsUpdate = true;
         }
       }
+    }
+  }, {
+    key: "matrixWorld",
+    get: function get() {
+      return this._meshes[0].matrixWorld;
     }
   }, {
     key: "position",
@@ -11253,8 +11392,8 @@ var FPSInput = function (_Primrose$AbstractEve) {
 
           var shift = (_this.motionDevices.length - 2) * 8,
               color = 0x0000ff << shift,
-              emission = 0x00007f << shift,
-              ptr = new Primrose.Pointer(padID + "Pointer", color, emission, [mgr]);
+              highlight = 0xff0000 >> shift,
+              ptr = new Primrose.Pointer(padID + "Pointer", color, highlight, [mgr]);
 
           ptr.add(colored(box(0.1, 0.025, 0.2), color, {
             emissive: emission
@@ -11312,11 +11451,11 @@ var FPSInput = function (_Primrose$AbstractEve) {
 
     _this.stage = new THREE.Object3D();
 
-    _this.mousePointer = new Primrose.Pointer("MousePointer", 0xff0000, 0x7f0000, [_this.Mouse], [_this.VR, _this.Keyboard]);
+    _this.mousePointer = new Primrose.Pointer("MousePointer", 0xff0000, 0x00ff00, [_this.Mouse], [_this.VR, _this.Keyboard]);
     _this.pointers.push(_this.mousePointer);
     _this.mousePointer.addToBrowserEnvironment(null, _this.options.scene);
 
-    _this.head = new Primrose.Pointer("GazePointer", 0xffff00, 0x7f7f00, [_this.VR, _this.Mouse, _this.Touch, _this.Keyboard]);
+    _this.head = new Primrose.Pointer("GazePointer", 0xffff00, 0x0000ff, [_this.VR, _this.Mouse, _this.Touch, _this.Keyboard]);
     _this.head.useGaze = _this.options.useGaze;
     _this.pointers.push(_this.head);
     _this.head.addToBrowserEnvironment(null, _this.options.scene);
@@ -12576,8 +12715,6 @@ var VR = function (_Primrose$PoseInputPr) {
     _this.lastStageWidth = null;
     _this.lastStageDepth = null;
     _this.isStereo = false;
-
-    console.info("Checking for displays...");
     _this.ready = navigator.getVRDisplays().then(function (displays) {
       // We skip the WebVR-Polyfill's Mouse and Keyboard display because it does not
       // play well with our interaction model.
@@ -18548,6 +18685,37 @@ var SignupForm = function (_Primrose$Controls$Fo) {
     if(typeof window !== "undefined") window.Primrose.X.SignupForm = SignupForm;
 })();
     // end D:\Documents\VR\Primrose\src\Primrose\X\SignupForm.js
+    ////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+    // start D:\Documents\VR\Primrose\src\THREE\CubeTextureLoader\prototype\load.js
+(function(){"use strict";
+
+function load(urls, onLoad, onProgress, onError) {
+  var texture = new THREE.CubeTexture();
+  var loader = new THREE.ImageLoader(this.manager);
+  loader.setCrossOrigin(this.crossOrigin);
+  loader.setPath(this.path);
+  var loaded = 0;
+  function loadTexture(i) {
+    loader.load(urls[i], function (image) {
+      texture.images[i] = image;
+      loaded++;
+      if (loaded === 6) {
+        texture.needsUpdate = true;
+        if (onLoad) onLoad(texture);
+      }
+    }, onProgress, onError);
+  }
+
+  for (var i = 0; i < urls.length; ++i) {
+    loadTexture(i);
+  }
+
+  return texture;
+}
+    if(typeof window !== "undefined") window.THREE.CubeTextureLoader.prototype.load = load;
+})();
+    // end D:\Documents\VR\Primrose\src\THREE\CubeTextureLoader\prototype\load.js
     ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
     // start D:\Documents\VR\Primrose\src\THREE\Matrix4\prototype\debug.js

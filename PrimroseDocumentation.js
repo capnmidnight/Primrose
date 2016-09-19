@@ -1777,9 +1777,9 @@ pliny.class({
     type: "Number",
     description: "The color to use to render the teleport pad and 3D pointer cursor."
   }, {
-    name: "emission",
+    name: "highlight",
     type: "Number",
-    description: "The color to use to highlight the teleport pad and 3D pointer cursor so that it's not 100% black outside of lighted areas."
+    description: "The color to use to highlight the teleport pad and 3D pointer cursor when it's pointing at a real thing."
   }, {
     name: "isHand",
     type: "Boolean",
