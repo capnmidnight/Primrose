@@ -72,6 +72,19 @@ class Image extends Primrose.Entity {
     return this._meshes[0].scale;
   }
 
+  get visible(){
+    for(var i = 0; i < this._meshes.length; ++i){
+      if(this._meshes[i].visible){
+        return true;
+      }
+    }
+    return false;
+  }
+
+  set visible(v){
+    this._meshes[this._currentImageIndex].visible = v;
+  }
+
   addToBrowserEnvironment(env, scene) {
     this._meshes.forEach((mesh, i) => {
       scene.add(mesh);
@@ -179,9 +192,10 @@ class Image extends Primrose.Entity {
   eyeBlank(eye) {
     if(this._meshes) {
       this._currentImageIndex = eye % this._meshes.length;
+      var isVisible = this.visible;
       for(var i = 0; i < this._meshes.length; ++i){
         var m = this._meshes[i];
-        m.visible = (i === this._currentImageIndex);
+        m.visible = isVisible && (i === this._currentImageIndex);
         if(i > 0) {
           m.position.copy(this.position);
           m.quaternion.copy(this.quaternion);

@@ -10268,9 +10268,10 @@ var Image = function (_Primrose$Entity) {
     value: function eyeBlank(eye) {
       if (this._meshes) {
         this._currentImageIndex = eye % this._meshes.length;
+        var isVisible = this.visible;
         for (var i = 0; i < this._meshes.length; ++i) {
           var m = this._meshes[i];
-          m.visible = i === this._currentImageIndex;
+          m.visible = isVisible && i === this._currentImageIndex;
           if (i > 0) {
             m.position.copy(this.position);
             m.quaternion.copy(this.quaternion);
@@ -10310,6 +10311,19 @@ var Image = function (_Primrose$Entity) {
     key: "scale",
     get: function get() {
       return this._meshes[0].scale;
+    }
+  }, {
+    key: "visible",
+    get: function get() {
+      for (var i = 0; i < this._meshes.length; ++i) {
+        if (this._meshes[i].visible) {
+          return true;
+        }
+      }
+      return false;
+    },
+    set: function set(v) {
+      this._meshes[this._currentImageIndex].visible = v;
     }
   }]);
 
