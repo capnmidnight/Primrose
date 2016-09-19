@@ -2372,7 +2372,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var MILLISECONDS_TO_SECONDS = 0.001,
     MAX_MOVE_DISTANCE = 5,
     MAX_MOVE_DISTANCE_SQ = MAX_MOVE_DISTANCE * MAX_MOVE_DISTANCE,
-    TELEPORT_COOLDOWN = 250;
+    TELEPORT_COOLDOWN = 250,
+    TELEPORT_DISPLACEMENT = new THREE.Vector3();
 
 pliny.class({
   parent: "Primrose",
@@ -2874,11 +2875,14 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
     };
 
     _this.teleport = function (pos) {
-      return _this.fadeOut().then(function () {
-        return _this.moveStage(pos);
-      }).then(function () {
-        return _this.fadeIn();
-      });
+      var dist = TELEPORT_DISPLACEMENT.copy(pos).sub(_this.input.head.position).length();
+      if (dist > 0.1) {
+        _this.fadeOut().then(function () {
+          return _this.moveStage(pos);
+        }).then(function () {
+          return _this.fadeIn();
+        });
+      }
     };
 
     _this.selectControl = function (evt) {
@@ -10182,7 +10186,13 @@ var Image = function (_Primrose$Entity) {
       if (this.options.radius) {
         this.options.geometry = shell(this.options.radius, 72, 36, Math.PI * 2, Math.PI, options);
       } else if (!this.options.geometry) {
-        this.options.geometry = quad(0.5, 0.5, options);
+        if (!this.options.width) {
+          this.options.width = 0.5;
+        }
+        if (!this.options.height) {
+          this.options.height = 0.5;
+        }
+        this.options.geometry = quad(this.options.width, this.options.height, options);
       }
     }
   }, {
@@ -10323,7 +10333,10 @@ var Image = function (_Primrose$Entity) {
       return false;
     },
     set: function set(v) {
-      this._meshes[this._currentImageIndex].visible = v;
+      var img = this._meshes[this._currentImageIndex];
+      if (img) {
+        img.visible = v;
+      }
     }
   }]);
 

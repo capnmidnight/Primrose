@@ -112,7 +112,13 @@ class Image extends Primrose.Entity {
         options);
     }
     else if(!this.options.geometry){
-      this.options.geometry = quad(0.5, 0.5, options);
+      if(!this.options.width){
+        this.options.width = 0.5;
+      }
+      if(!this.options.height){
+        this.options.height = 0.5;
+      }
+      this.options.geometry = quad(this.options.width, this.options.height, options);
     }
   }
 
