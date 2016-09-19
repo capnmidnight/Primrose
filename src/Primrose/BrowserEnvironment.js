@@ -190,11 +190,8 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
         }
       };
 
-    var update = (t) => {
-      var dt = t - lt,
-        i, j;
-      lt = t;
-
+    var update = (dt) => {
+      dt *= MILLISECONDS_TO_SECONDS;
       movePlayer(dt);
       this.input.resolvePicking(currentHits);
       moveSky();
@@ -250,12 +247,15 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
     };
 
     var animate = (t) => {
-      update(t * MILLISECONDS_TO_SECONDS);
-      render();
+      var dt = t - lt,
+        i, j;
+      lt = t;
+      update(dt);
+      render(dt);
       RAF(animate);
     };
 
-    var render = () => {
+    var render = (dt) => {
       this.camera.position.set(0, 0, 0);
       this.camera.quaternion.set(0, 0, 0, 1);
       this.audio.setPlayer(this.input.head.mesh);
@@ -277,7 +277,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
             v.top * resolutionScale,
             v.width * resolutionScale,
             v.height * resolutionScale);
-          this.renderer.render(this.scene, this.camera);
+          this.composer.render(dt);
           this.camera.translateOnAxis(st.translation, -1);
         }
         this.input.submitFrame();
@@ -289,7 +289,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
         this.camera.updateProjectionMatrix();
         this.renderer.clear(true, true, true);
         this.renderer.setViewport(0, 0, this.renderer.domElement.width, this.renderer.domElement.height);
-        this.renderer.render(this.scene, this.camera);
+        this.composer.render(dt);
       }
     };
 
@@ -311,6 +311,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
 
         this.renderer.domElement.width = canvasWidth;
         this.renderer.domElement.height = canvasHeight;
+        this.composer.setSize(canvasWidth, canvasHeight);
         if (!this.timer) {
           render();
         }
@@ -480,7 +481,27 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
     var POSITION = new THREE.Vector3(),
       lastTeleport = 0;
 
-    this.teleport = (pos) => {
+    this.fadeOut = () => new Promise((resolve, reject) => {
+      var timer = setInterval(() => {
+        this.fader.uniforms.amount.value -= 0.1;
+        if(this.fader.uniforms.amount.value <= 0){
+          clearInterval(timer);
+          resolve();
+        }
+      }, 10);
+    });
+
+    this.fadeIn = () => new Promise((resolve, reject) => {
+      var timer = setInterval(() => {
+        this.fader.uniforms.amount.value += 0.1;
+        if(this.fader.uniforms.amount.value >= 1){
+          clearInterval(timer);
+          resolve();
+        }
+      }, 10);
+    });
+
+    this.moveStage = (pos) => {
       var t = performance.now(),
         dt = t - lastTeleport;
       if(dt > TELEPORT_COOLDOWN) {
@@ -488,6 +509,10 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
         this.input.moveStage(pos);
       }
     };
+
+    this.teleport = (pos) => this.fadeOut()
+      .then(() => this.moveStage(pos))
+      .then(() => this.fadeIn());
 
     this.selectControl = (evt) => {
       var obj = evt.hit && evt.hit.object;
@@ -568,7 +593,8 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       this.sky = skyFunc(skyGeom, this.options.skyTexture, {
         side: THREE.BackSide,
         unshaded: true,
-        resolve: onSkyDone
+        resolve: onSkyDone,
+        progress: this.options.progress
       });
       this.sky.name = "Sky";
     }
@@ -714,6 +740,20 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       Primrose.Pointer.EVENTS.forEach((evt) => this.input.addEventListener(evt, this.selectControl.bind(this), false));
       this.input.forward(this, Primrose.Pointer.EVENTS);
 
+
+
+      this.composer = new THREE.EffectComposer(this.renderer);
+
+      var renderPass = new THREE.RenderPass(this.scene, this.camera);
+      this.composer.addPass(renderPass);
+
+      this.fader = new THREE.ShaderPass(Primrose.ColorifyShader);
+      this.composer.addPass(this.fader);
+
+
+      var copyPass = new THREE.ShaderPass( THREE.CopyShader );
+      copyPass.renderToScreen = true;
+      this.composer.addPass(copyPass);
 
 
       const keyDown =  (evt) => {
