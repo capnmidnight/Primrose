@@ -1,5 +1,7 @@
+var objectIDs = new WeakMap(),
+  counter = 0;
+
 function loadTexture(url, resolve, progress, reject) {
-  progress = progress || function(){};
   var textureLoader = null,
     txtName = null;
   if(url instanceof Array && url.length === 6) {
@@ -8,7 +10,14 @@ function loadTexture(url, resolve, progress, reject) {
   }
   else {
     if(url instanceof HTMLImageElement){
+      txtName = url.src;
       url = url.src;
+    }
+    else if(typeof url === "object"){
+      if(!objectIDs.has(url)) {
+        objectIDs.set(url, `object-${counter++}`);
+      }
+      txtName = objectIDs.get(url);
     }
 
     if(typeof url === "string") {
@@ -16,9 +25,23 @@ function loadTexture(url, resolve, progress, reject) {
       textureLoader = new THREE.TextureLoader();
     }
   }
-  textureLoader.setCrossOrigin(THREE.ImageUtils.crossOrigin);
+
+  if(textureLoader){
+    textureLoader.setCrossOrigin(THREE.ImageUtils.crossOrigin);
+  }
+
   return cache(
     `Texture(${txtName})`,
-    () => textureLoader.load(url, resolve, progress, reject),
+    () => {
+      var txt = null;
+      if(textureLoader){
+        txt = textureLoader.load(url, resolve, progress, reject);
+      }
+      else{
+        txt = new THREE.Texture(url);
+        resolve();
+      }
+      return txt;
+    },
     resolve);
 }
