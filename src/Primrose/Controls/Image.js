@@ -82,7 +82,10 @@ class Image extends Primrose.Entity {
   }
 
   set visible(v){
-    this._meshes[this._currentImageIndex].visible = v;
+    var img = this._meshes[this._currentImageIndex];
+    if(img){
+      img.visible = v;
+    }
   }
 
   addToBrowserEnvironment(env, scene) {
