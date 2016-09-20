@@ -30,18 +30,6 @@ var gulp = require("gulp"),
   css = nt.css("Primrose", ["*.styl", "doc/**/*.styl"]);
 
 gulp.task("format", [js.format]);
-
-gulp.task("archive", [tot.build], () => gulp.src(["Primrose*.js"])
-  .pipe(rename(function (file) {
-    if (file.basename.indexOf(".min") > -1) {
-      file.extname = ".min.js";
-      file.basename = file.basename.substring(0, file.basename.length - 4);
-    }
-    file.basename += "-" + pkg.version;
-    return file;
-  }))
-  .pipe(gulp.dest("archive")));
-
 gulp.task("MeetingManifest", [tot.build], build.exec("cd meeting && node ../node_modules/webvr-bootstrapper \
 ../doc/models/meeting/meetingroom.obj \
 ../doc/models/meeting/meetingroom.mtl \
@@ -80,7 +68,6 @@ gulp.task("debug", [
 ]);
 
 gulp.task("release",  [
-  "archive",
   "MeetingManifest",
   html.release,
   css.build
