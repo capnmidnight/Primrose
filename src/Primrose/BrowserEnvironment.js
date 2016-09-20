@@ -864,7 +864,8 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       frameTime = 0,
       NUM_FRAMES = 10,
       LEAD_TIME = 2000,
-      lastQualityChange = 0,
+      // skip testing quality during first 5 seconds to avoid testing startup
+      lastQualityChange = 5000,
       dq1 = 0,
       dq2 = 0;
 
