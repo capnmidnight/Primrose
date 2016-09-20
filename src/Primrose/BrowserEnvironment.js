@@ -479,9 +479,6 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
     this.pickableObjects = {};
     this.currentControl = null;
 
-    var POSITION = new THREE.Vector3(),
-      lastTeleport = 0;
-
     this.fadeOut = () => new Promise((resolve, reject) => {
       var timer = setInterval(() => {
         this.fader.uniforms.amount.value -= 0.1;
@@ -502,25 +499,28 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       }, 10);
     });
 
-    this.moveStage = (pos) => {
-      var t = performance.now(),
-        dt = t - lastTeleport;
-      if(dt > TELEPORT_COOLDOWN) {
-        lastTeleport = t;
+    this.teleportAvailable = true;
+
+    this.teleport = (pos, immediate) => {
+      if(immediate) {
         this.input.moveStage(pos);
+      }
+      else if(this.teleportAvailable) {
+        this.teleportAvailable = false;
+        var dist = TELEPORT_DISPLACEMENT.copy(pos)
+          .sub(this.input.head.position)
+          .length();
+        if(dist > 0.1){
+          this.fadeOut()
+            .then(() => this.input.moveStage(pos))
+            .then(() => this.fadeIn())
+            .catch(console.warn.bind(console, "Error while teleporting"))
+            .then(() => this.teleportAvailable = true);
+        }
       }
     };
 
-    this.teleport = (pos) => {
-      var dist = TELEPORT_DISPLACEMENT.copy(pos)
-        .sub(this.input.head.position)
-        .length();
-      if(dist > 0.1){
-        this.fadeOut()
-          .then(() => this.moveStage(pos))
-          .then(() => this.fadeIn());
-      }
-    };
+    var POSITION = new THREE.Vector3();
 
     this.selectControl = (evt) => {
       var obj = evt.hit && evt.hit.object;
