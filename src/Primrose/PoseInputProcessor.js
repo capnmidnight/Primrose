@@ -2,7 +2,8 @@ const DEFAULT_POSE = {
     position: [0, 0, 0],
     orientation: [0, 0, 0, 1]
   },
-  EMPTY_SCALE = new THREE.Vector3();
+  EMPTY_SCALE = new THREE.Vector3(),
+  IE_CORRECTION = new THREE.Quaternion(1, 0, 0, 0);
 
 pliny.class({
   parent: "Primrose",
@@ -39,6 +40,9 @@ class PoseInputProcessor extends Primrose.InputProcessor {
         pos = this.currentPose && this.currentPose.position;
       if (orient) {
         this.poseQuaternion.fromArray(orient);
+        if(isMobile && isIE){
+          this.poseQuaternion.multiply(IE_CORRECTION);
+        }
       }
       else {
         this.poseQuaternion.set(0, 0, 0, 1);
