@@ -65892,9 +65892,6 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
     _this.pickableObjects = {};
     _this.currentControl = null;
 
-    var POSITION = new THREE.Vector3(),
-        lastTeleport = 0;
-
     _this.fadeOut = function () {
       return new Promise(function (resolve, reject) {
         var timer = setInterval(function () {
@@ -65919,25 +65916,27 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
       });
     };
 
-    _this.moveStage = function (pos) {
-      var t = performance.now(),
-          dt = t - lastTeleport;
-      if (dt > TELEPORT_COOLDOWN) {
-        lastTeleport = t;
+    _this.teleportAvailable = true;
+
+    _this.teleport = function (pos, immediate) {
+      if (immediate) {
         _this.input.moveStage(pos);
+      } else if (_this.teleportAvailable) {
+        _this.teleportAvailable = false;
+        var dist = TELEPORT_DISPLACEMENT.copy(pos).sub(_this.input.head.position).length();
+        if (dist > 0.1) {
+          _this.fadeOut().then(function () {
+            return _this.input.moveStage(pos);
+          }).then(function () {
+            return _this.fadeIn();
+          }).catch(console.warn.bind(console, "Error while teleporting")).then(function () {
+            return _this.teleportAvailable = true;
+          });
+        }
       }
     };
 
-    _this.teleport = function (pos) {
-      var dist = TELEPORT_DISPLACEMENT.copy(pos).sub(_this.input.head.position).length();
-      if (dist > 0.1) {
-        _this.fadeOut().then(function () {
-          return _this.moveStage(pos);
-        }).then(function () {
-          return _this.fadeIn();
-        });
-      }
-    };
+    var POSITION = new THREE.Vector3();
 
     _this.selectControl = function (evt) {
       var obj = evt.hit && evt.hit.object;
@@ -66265,7 +66264,9 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
         frameTime = 0,
         NUM_FRAMES = 10,
         LEAD_TIME = 2000,
-        lastQualityChange = 0,
+
+    // skip testing quality during first 5 seconds to avoid testing startup
+    lastQualityChange = 5000,
         dq1 = 0,
         dq2 = 0;
 
@@ -79266,4 +79267,4 @@ function toString(digits) {
 })();
     // end D:\Documents\VR\Primrose\src\THREE\Vector3\prototype\toString.js
     ////////////////////////////////////////////////////////////////////////////////
-console.info("primrose v0.26.25. see https://www.primrosevr.com for more information.");
+console.info("primrose v0.26.26. see https://www.primrosevr.com for more information.");
