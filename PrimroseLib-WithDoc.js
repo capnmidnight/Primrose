@@ -11470,7 +11470,7 @@ var FPSInput = function (_Primrose$AbstractEve) {
               ptr = new Primrose.Pointer(padID + "Pointer", color, highlight, [mgr]);
 
           ptr.add(colored(box(0.1, 0.025, 0.2), color, {
-            emissive: emission
+            emissive: highlight
           }));
 
           _this.pointers.push(ptr);
