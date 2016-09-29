@@ -73216,7 +73216,7 @@ var FPSInput = function (_Primrose$AbstractEve) {
               ptr = new Primrose.Pointer(padID + "Pointer", color, highlight, [mgr]);
 
           ptr.add(colored(box(0.1, 0.025, 0.2), color, {
-            emissive: emission
+            emissive: highlight
           }));
 
           _this.pointers.push(ptr);
@@ -79729,4 +79729,4 @@ function toString(digits) {
 })();
     // end C:\Users\sean\Documents\VR\Primrose\src\THREE\Vector3\prototype\toString.js
     ////////////////////////////////////////////////////////////////////////////////
-console.info("primrose v0.26.29. see https://www.primrosevr.com for more information.");
+console.info("primrose v0.26.30. see https://www.primrosevr.com for more information.");
