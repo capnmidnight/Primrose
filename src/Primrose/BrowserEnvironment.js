@@ -313,6 +313,9 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
         this.renderer.domElement.width = canvasWidth;
         this.renderer.domElement.height = canvasHeight;
         this.composer.setSize(canvasWidth, canvasHeight);
+        if(this.fxaa){
+          this.fxaa.uniforms.resolution.value.set(1/canvasWidth, 1/canvasHeight);
+        }
         if (!this.timer) {
           render();
         }
@@ -756,6 +759,12 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
 
       var renderPass = new THREE.RenderPass(this.scene, this.camera);
       this.composer.addPass(renderPass);
+
+      this.fxaa = new THREE.ShaderPass(THREE.FXAAShader);
+      this.composer.addPass(this.fxaa);
+
+      this.ssao = new THREE.ShaderPass(THREE.SSAOShader);
+      this.composer.addPass(this.ssao);
 
       this.fader = new THREE.ShaderPass(Primrose.ColorifyShader);
       this.composer.addPass(this.fader);
