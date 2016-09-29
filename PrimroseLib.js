@@ -1558,7 +1558,9 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
     };
 
     var modifyScreen = function modifyScreen() {
-      var p = _this.input.VR.getTransforms(_this.options.nearPlane, _this.options.nearPlane + _this.options.drawDistance);
+      var near = _this.options.nearPlane,
+          far = near + _this.options.drawDistance,
+          p = _this.input.VR.getTransforms(near, far);
 
       if (p) {
         var canvasWidth = 0,
@@ -1576,6 +1578,11 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
         _this.composer.setSize(canvasWidth, canvasHeight);
         if (_this.fxaa) {
           _this.fxaa.uniforms.resolution.value.set(1 / canvasWidth, 1 / canvasHeight);
+        }
+        if (_this.ssao) {
+          _this.ssao.uniforms.cameraNear.value = near;
+          _this.ssao.uniforms.cameraFar.value = far;
+          _this.ssao.uniforms.size.value.set(canvasWidth, canvasHeight);
         }
         if (!_this.timer) {
           render();
@@ -1975,7 +1982,7 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
         _this.renderer = new THREE.WebGLRenderer({
           canvas: Primrose.DOM.cascadeElement(_this.options.canvasElement, "canvas", HTMLCanvasElement),
           context: _this.options.context,
-          antialias: _this.options.antialias,
+          antialias: false,
           alpha: true,
           logarithmicDepthBuffer: false
         });
@@ -2009,11 +2016,15 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
       var renderPass = new THREE.RenderPass(_this.scene, _this.camera);
       _this.composer.addPass(renderPass);
 
-      _this.fxaa = new THREE.ShaderPass(THREE.FXAAShader);
-      _this.composer.addPass(_this.fxaa);
+      if (_this.options.antialias) {
+        _this.fxaa = new THREE.ShaderPass(THREE.FXAAShader);
+        _this.composer.addPass(_this.fxaa);
+      }
 
-      _this.ssao = new THREE.ShaderPass(THREE.SSAOShader);
-      _this.composer.addPass(_this.ssao);
+      if (_this.options.ambientOcclusion) {
+        _this.ssao = new THREE.ShaderPass(THREE.SSAOShader);
+        _this.composer.addPass(_this.ssao);
+      }
 
       _this.fader = new THREE.ShaderPass(Primrose.ColorifyShader);
       _this.composer.addPass(_this.fader);
@@ -2261,6 +2272,7 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
 
 BrowserEnvironment.DEFAULTS = {
   antialias: true,
+  ambientOcclusion: false,
   autoScaleQuality: true,
   autoRescaleQuality: false,
   quality: Quality.MAXIMUM,

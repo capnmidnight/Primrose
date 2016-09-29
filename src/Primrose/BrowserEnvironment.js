@@ -295,9 +295,9 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
     };
 
     var modifyScreen = () => {
-      var p = this.input.VR.getTransforms(
-        this.options.nearPlane,
-        this.options.nearPlane + this.options.drawDistance);
+      var near = this.options.nearPlane,
+        far = near + this.options.drawDistance,
+        p = this.input.VR.getTransforms(near, far);
 
       if (p) {
         var canvasWidth = 0,
@@ -315,6 +315,11 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
         this.composer.setSize(canvasWidth, canvasHeight);
         if(this.fxaa){
           this.fxaa.uniforms.resolution.value.set(1/canvasWidth, 1/canvasHeight);
+        }
+        if(this.ssao){
+          this.ssao.uniforms.cameraNear.value = near;
+          this.ssao.uniforms.cameraFar.value = far;
+          this.ssao.uniforms.size.value.set(canvasWidth, canvasHeight);
         }
         if (!this.timer) {
           render();
@@ -726,7 +731,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
         this.renderer = new THREE.WebGLRenderer({
           canvas: Primrose.DOM.cascadeElement(this.options.canvasElement, "canvas", HTMLCanvasElement),
           context: this.options.context,
-          antialias: this.options.antialias,
+          antialias: false,
           alpha: true,
           logarithmicDepthBuffer: false
         });
@@ -760,11 +765,15 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       var renderPass = new THREE.RenderPass(this.scene, this.camera);
       this.composer.addPass(renderPass);
 
-      this.fxaa = new THREE.ShaderPass(THREE.FXAAShader);
-      this.composer.addPass(this.fxaa);
+      if(this.options.antialias) {
+        this.fxaa = new THREE.ShaderPass(THREE.FXAAShader);
+        this.composer.addPass(this.fxaa);
+      }
 
-      this.ssao = new THREE.ShaderPass(THREE.SSAOShader);
-      this.composer.addPass(this.ssao);
+      if(this.options.ambientOcclusion) {
+        this.ssao = new THREE.ShaderPass(THREE.SSAOShader);
+        this.composer.addPass(this.ssao);
+      }
 
       this.fader = new THREE.ShaderPass(Primrose.ColorifyShader);
       this.composer.addPass(this.fader);
@@ -1021,6 +1030,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
 
 BrowserEnvironment.DEFAULTS = {
   antialias: true,
+  ambientOcclusion: false,
   autoScaleQuality: true,
   autoRescaleQuality: false,
   quality: Quality.MAXIMUM,
