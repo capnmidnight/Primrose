@@ -17,7 +17,6 @@ function textured(geometry, txt, options) {
     texture = cache(textureDescription, () => {
       if (txt instanceof Primrose.Surface) {
         if (!options.scaleTextureWidth || !options.scaleTextureHeight) {
-          obj.surface = txt;
           var imgWidth = txt.imageWidth,
             imgHeight = txt.imageHeight,
             dimX = Math.ceil(Math.log(imgWidth) / Math.LN2),
@@ -79,6 +78,11 @@ function textured(geometry, txt, options) {
     obj = geometry;
     obj.material = mat;
     geometry = obj.geometry;
+  }
+
+
+  if (txt instanceof Primrose.Surface) {
+    obj.surface = txt;
   }
 
   if (options.txtRepeatS * options.txtRepeatT > 1) {
