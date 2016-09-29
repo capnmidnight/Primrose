@@ -1728,10 +1728,12 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
     _this.pickableObjects = {};
     _this.currentControl = null;
 
+    var FADE_SPEED = 0.1;
+
     _this.fadeOut = function () {
       return new Promise(function (resolve, reject) {
         var timer = setInterval(function () {
-          _this.fader.uniforms.amount.value -= 0.1;
+          _this.fader.uniforms.amount.value -= FADE_SPEED;
           if (_this.fader.uniforms.amount.value <= 0) {
             clearInterval(timer);
             resolve();
@@ -1743,7 +1745,7 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
     _this.fadeIn = function () {
       return new Promise(function (resolve, reject) {
         var timer = setInterval(function () {
-          _this.fader.uniforms.amount.value += 0.1;
+          _this.fader.uniforms.amount.value += FADE_SPEED;
           if (_this.fader.uniforms.amount.value >= 1) {
             clearInterval(timer);
             resolve();
@@ -2317,9 +2319,24 @@ var ColorifyShader = {
     "amount": { value: 1.0 }
   },
 
-  vertexShader: ["varying vec2 vUv;", "void main() {", "vUv = uv;", "gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );", "}"].join("\n"),
+  vertexShader: "varying vec2 vUv;\n\
+\n\
+void main() {\n\
+  vUv = uv;\n\
+  gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );\n\
+}",
 
-  fragmentShader: ["uniform float amount;", "uniform sampler2D tDiffuse;", "varying vec2 vUv;", "void main() {", "vec4 texel = texture2D( tDiffuse, vUv );", "gl_FragColor = vec4(texel.xyz * amount, texel.w);", "}"].join("\n")
+  fragmentShader: "uniform float amount;\n\
+uniform sampler2D tDiffuse;\n\
+\n\
+varying vec2 vUv;\n\
+\n\
+void main() {\n\
+  vec4 texel = texture2D( tDiffuse, vUv );\n\
+  vec2 p = vUv - vec2(0.5, 0.5);\n\
+  float scale = amount * min(1.0, 4.0 - pow(4.0 * dot(p, p), 2.0));\n\
+  gl_FragColor = vec4(texel.xyz * scale, texel.w);\n\
+}"
 
 };
     if(typeof window !== "undefined") window.Primrose.ColorifyShader = ColorifyShader;
@@ -3822,7 +3839,8 @@ var DEFAULT_POSE = {
   position: [0, 0, 0],
   orientation: [0, 0, 0, 1]
 },
-    EMPTY_SCALE = new THREE.Vector3();
+    EMPTY_SCALE = new THREE.Vector3(),
+    IE_CORRECTION = new THREE.Quaternion(1, 0, 0, 0);
 
 var PoseInputProcessor = function (_Primrose$InputProces) {
   _inherits(PoseInputProcessor, _Primrose$InputProces);
@@ -3856,6 +3874,9 @@ var PoseInputProcessor = function (_Primrose$InputProces) {
             pos = this.currentPose && this.currentPose.position;
         if (orient) {
           this.poseQuaternion.fromArray(orient);
+          if (isMobile && isIE) {
+            this.poseQuaternion.multiply(IE_CORRECTION);
+          }
         } else {
           this.poseQuaternion.set(0, 0, 0, 1);
         }

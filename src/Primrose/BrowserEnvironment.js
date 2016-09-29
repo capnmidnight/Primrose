@@ -479,9 +479,11 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
     this.pickableObjects = {};
     this.currentControl = null;
 
+    const FADE_SPEED = 0.1;
+
     this.fadeOut = () => new Promise((resolve, reject) => {
       var timer = setInterval(() => {
-        this.fader.uniforms.amount.value -= 0.1;
+        this.fader.uniforms.amount.value -= FADE_SPEED;
         if(this.fader.uniforms.amount.value <= 0){
           clearInterval(timer);
           resolve();
@@ -491,7 +493,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
 
     this.fadeIn = () => new Promise((resolve, reject) => {
       var timer = setInterval(() => {
-        this.fader.uniforms.amount.value += 0.1;
+        this.fader.uniforms.amount.value += FADE_SPEED;
         if(this.fader.uniforms.amount.value >= 1){
           clearInterval(timer);
           resolve();
