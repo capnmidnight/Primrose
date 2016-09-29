@@ -21,8 +21,8 @@ varying vec2 vUv;\n\
 \n\
 void main() {\n\
   vec4 texel = texture2D( tDiffuse, vUv );\n\
-  vec2 p = vUv - vec2(0.5, 0.5);\n\
-  float scale = amount * min(1.0, 4.0 - pow(4.0 * dot(p, p), 2.0));\n\
+//  vec2 p = vUv - vec2(0.5, 0.5);\n\
+  float scale = amount; // * min(1.0, 4.0 - pow(4.0 * dot(p, p), 2.0));\n\
   gl_FragColor = vec4(texel.xyz * scale, texel.w);\n\
 }"
 
