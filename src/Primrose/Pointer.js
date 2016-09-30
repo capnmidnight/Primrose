@@ -3,9 +3,10 @@ const TELEPORT_PAD_RADIUS = 0.4,
   LASER_WIDTH = 0.01,
   LASER_LENGTH = 3 * LASER_WIDTH,
   EULER_TEMP = new THREE.Euler(),
-  GAZE_TIMEOUT = 1000,
-  GAZE_RING_INNER = 0.005,
-  GAZE_RING_OUTER = 0.01,
+  GAZE_TIMEOUT = 1500,
+  GAZE_RING_DISTANCE  = -1.25,
+  GAZE_RING_INNER = 0.015,
+  GAZE_RING_OUTER = 0.03,
 
   _ = priv();
 
@@ -80,12 +81,16 @@ class Pointer extends Primrose.AbstractEventEmitter {
     this.disk.visible = false;
     this.disk.geometry.computeBoundingBox();
 
-    this.gazeInner = colored(circle(GAZE_RING_INNER / 2, 10), this.color, {
+    this.gazeInner = colored(circle(GAZE_RING_INNER / 2, 10), 0xc0c0c0, {
       unshaded: true
     });
-    this.gazeInner.position.set(0, 0, -0.5);
+    this.gazeInner.position.set(0, 0, GAZE_RING_DISTANCE);
 
-    this.gazeOuter = colored(ring(GAZE_RING_INNER, GAZE_RING_OUTER, 10), this.color, {
+    this.gazeInner.add(colored(ring(GAZE_RING_INNER * 0.5, GAZE_RING_INNER * 0.75, 10, 36, 0, 2 * Math.PI), 0xffffff, {
+      unshaded: true
+    }));
+
+    this.gazeOuter = colored(ring(GAZE_RING_INNER, GAZE_RING_OUTER, 10, 36, 0, 2 * Math.PI), 0xffffff, {
       unshaded: true
     });
     this.gazeOuter.visible = false;
