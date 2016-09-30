@@ -687,7 +687,9 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       if (evt !== "Gaze") {
         this.input.VR.connect(index);
         this.input.VR.requestPresent([{
-            source: this.renderer.domElement
+            source: !this.input.VR.isStereo || isMobile && !this.input.VR.isNativeMobileWebVR ?
+              this.options.fullscreenElement :
+              this.renderer.domElement
           }])
           .catch((exp) => console.error("whaaat", exp))
           .then(() => this.renderer.domElement.focus());
@@ -742,6 +744,8 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
           document.body.appendChild(this.renderer.domElement);
         }
       }
+
+      this.options.fullscreenElement = document.querySelector(this.options.fullscreenElement) || this.renderer.domElement;
 
       var maxTabIndex = 0,
         elementsWithTabIndex = document.querySelectorAll("[tabIndex]");
