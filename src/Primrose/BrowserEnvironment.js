@@ -449,6 +449,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
     this.avatarHeight = this.options.avatarHeight;
     this.walkSpeed = this.options.walkSpeed;
 
+    this.speech = new Primrose.Output.Speech(this.options.speech);
     this.audio = new Primrose.Output.Audio3D();
     var audioReady = null,
       ocean = null;
