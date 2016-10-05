@@ -155,13 +155,13 @@ class FPSInput extends Primrose.AbstractEventEmitter {
     this.motionDevices.push(this.VR);
 
     Primrose.Input.Gamepad.addEventListener("gamepadconnected", (pad) => {
-      var padID = Primrose.Input.Gamepad.ID(pad),
-        mgr;
+      const padID = Primrose.Input.Gamepad.ID(pad);
+      let mgr = null;
 
       if (padID !== "Unknown" && padID !== "Rift") {
         if (Primrose.Input.Gamepad.isMotionController(pad)) {
-          var controllerNumber = 0;
-          for (var i = 0; i < this.managers.length; ++i) {
+          let controllerNumber = 0;
+          for (let i = 0; i < this.managers.length; ++i) {
             mgr = this.managers[i];
             if (mgr.currentPad && mgr.currentPad.id === pad.id) {
               ++controllerNumber;
@@ -185,7 +185,7 @@ class FPSInput extends Primrose.AbstractEventEmitter {
           this.add(mgr);
           this.motionDevices.push(mgr);
 
-          var shift = (this.motionDevices.length - 2) * 8,
+          const shift = (this.motionDevices.length - 2) * 8,
             color = 0x0000ff << shift,
             highlight = 0xff0000 >> shift,
             ptr = new Primrose.Pointer(padID + "Pointer", color, highlight, [mgr]);
