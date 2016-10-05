@@ -760,8 +760,8 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
 
       this.input = new Primrose.Input.FPSInput(this.renderer.domElement, this.options);
       this.input.addEventListener("zero", this.zero, false);
-      Primrose.Pointer.EVENTS.forEach((evt) => this.input.addEventListener(evt, this.selectControl.bind(this), false));
-      this.input.forward(this, Primrose.Pointer.EVENTS);
+      Primrose.AbstractPointer.EVENTS.forEach((evt) => this.input.addEventListener(evt, this.selectControl.bind(this), false));
+      this.input.forward(this, Primrose.AbstractPointer.EVENTS);
 
 
 
@@ -1029,6 +1029,12 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
 
   get displays() {
     return this.input.VR.displays;
+  }
+
+  enableDragMode(enable){
+    const mode = (enable ? "add" : "remove") + "Button";
+    this.input.Mouse[mode]("heading", 0);
+    this.input.Mouse[mode]("pitch", 0);
   }
 }
 

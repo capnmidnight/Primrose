@@ -188,15 +188,11 @@ class FPSInput extends Primrose.AbstractEventEmitter {
           const shift = (this.motionDevices.length - 2) * 8,
             color = 0x0000ff << shift,
             highlight = 0xff0000 >> shift,
-            ptr = new Primrose.Pointer(padID + "Pointer", color, highlight, [mgr]);
-
-          ptr.add(colored(box(0.1, 0.025, 0.2), color, {
-            emissive: highlight
-          }));
+            ptr = new Primrose.PosePointer(padID + "Pointer", color, highlight, [mgr]);
 
           this.pointers.push(ptr);
           ptr.addToBrowserEnvironment(null, this.options.scene);
-          ptr.forward(this, Primrose.Pointer.EVENTS);
+          ptr.forward(this, Primrose.AbstractPointer.EVENTS);
         }
         else {
           mgr = new Primrose.Input.Gamepad(pad, 0, {
@@ -237,8 +233,8 @@ class FPSInput extends Primrose.AbstractEventEmitter {
             }
           });
           this.add(mgr);
-          this.mousePointer.addDevice(mgr, mgr, mgr);
-          this.head.addDevice(mgr, mgr, mgr);
+          this.mousePointer.addDevice(mgr, mgr);
+          this.head.addDevice(mgr, mgr);
         }
       }
     });
@@ -256,7 +252,7 @@ class FPSInput extends Primrose.AbstractEventEmitter {
     this.pointers.push(this.mousePointer);
     this.mousePointer.addToBrowserEnvironment(null, this.options.scene);
 
-    this.head = new Primrose.Pointer("GazePointer", 0xffff00, 0x0000ff, [
+    this.head = new Primrose.PosePointer("GazePointer", 0xffff00, 0x0000ff, [
       this.VR,
       this.Mouse,
       this.Touch,
@@ -265,7 +261,7 @@ class FPSInput extends Primrose.AbstractEventEmitter {
     this.head.useGaze = this.options.useGaze;
     this.pointers.push(this.head);
     this.head.addToBrowserEnvironment(null, this.options.scene);
-    this.pointers.forEach((ptr) => ptr.forward(this, Primrose.Pointer.EVENTS));
+    this.pointers.forEach((ptr) => ptr.forward(this, Primrose.AbstractPointer.EVENTS));
     this.ready = Promise.all(this.managers
       .map((mgr) => mgr.ready)
       .filter(identity));
