@@ -32,10 +32,9 @@ class InputProcessor {
       meta: false
     };
 
-    var i,
-      readMetaKeys = (event) => {
-      for (var i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
-        var m = Primrose.Keys.MODIFIER_KEYS[i];
+    const readMetaKeys = (event) => {
+      for (let i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
+        const m = Primrose.Keys.MODIFIER_KEYS[i];
         this.inputState[m] = event[m + "Key"];
       }
     };
@@ -46,15 +45,15 @@ class InputProcessor {
 
     this.axisNames = axisNames || [];
 
-    for (i = 0; i < this.axisNames.length; ++i) {
+    for (let i = 0; i < this.axisNames.length; ++i) {
       this.inputState.axes[i] = 0;
     }
 
-    for (var cmdName in commands) {
+    for (const cmdName in commands) {
       this.addCommand(cmdName, commands[cmdName]);
     }
 
-    for (i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
+    for (let i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
       this.inputState[Primrose.Keys.MODIFIER_KEYS[i]] = false;
     }
   }
