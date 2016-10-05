@@ -364,8 +364,12 @@ class InputProcessor {
     if (this.commands[name] && this.commands[name][key]) {
       var arr = this.commands[name][key],
         n = arr.indexOf(value);
-      if (n > -1) {
-        arr[n] *= -1;
+      for(let i = 0; i < arr.length; ++i){
+        const elem = arr[i];
+        if(elem.index === value){
+          elem.sign *= -1;
+          return;
+        }
       }
     }
   }
