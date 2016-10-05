@@ -8,6 +8,32 @@ function filterMetaKey(k) {
     }
   }
 }
+
+function filterValue(elem){
+  const t = typeof elem;
+  let index = 0,
+    toggle = false,
+    sign = 1;
+
+  if(t === "number"){
+    index = Math.abs(elem) - 1;
+    toggle = elem < 0;
+    sign = (elem < 0) ? -1 : 1;
+  }
+  else if(t === "string") {
+    index = this.axisNames.indexOf(elem);
+  }
+  else {
+    throw new Error("Cannot clone command spec. Element was type: " + t, elem);
+  }
+
+  return {
+    index: index,
+    toggle: toggle,
+    sign: sign
+  };
+}
+
 pliny.class({
   parent: "Primrose",
     name: "InputProcessor",
@@ -104,28 +130,7 @@ class InputProcessor {
     var output = [];
     if (arr) {
       for (var i = 0; i < arr.length; ++i) {
-        var index = 0,
-          toggle = false,
-          sign = 1,
-          t = typeof arr[i];
-
-        if(t === "number"){
-          index = Math.abs(arr[i]) - 1;
-          toggle = arr[i] < 0;
-          sign = (arr[i] < 0) ? -1 : 1;
-        }
-        else if(t === "string") {
-          index = this.axisNames.indexOf(arr[i]);
-        }
-        else {
-          throw new Error("Cannot clone command spec. Element was type: " + t, arr[i]);
-        }
-
-        output[i] = {
-          index: index,
-          toggle: toggle,
-          sign: sign
-        };
+        output[i] = filterValue.call(this, arr[i]);
       }
     }
     return output;
@@ -300,16 +305,9 @@ class InputProcessor {
     this.setProperty("max", name, value);
   }
 
-  addToArray(key, name, value) {
-    if (this.commands[name] && this.commands[name][key]) {
-      this.commands[name][key].push(value);
-    }
-  }
-
   addMetaKey(name, value) {
     this.addToArray("metaKeys", name, filterMetaKey(value));
   }
-
 
   addAxis(name, value) {
     this.addToArray("axes", name, value);
@@ -341,6 +339,12 @@ class InputProcessor {
 
   invertMetaKey(name, value) {
     this.invertInArray("metaKeys", name, value);
+  }
+
+  addToArray(key, name, value) {
+    if (this.commands[name] && this.commands[name][key]) {
+      this.commands[name][key].push(filterValue(value));
+    }
   }
 
   removeFromArray(key, name, value) {
