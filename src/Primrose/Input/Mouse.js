@@ -12,15 +12,13 @@ class Mouse extends Primrose.InputProcessor {
     DOMElement = DOMElement || window;
 
     var setState = (stateChange, event) => {
-      var state = event.buttons,
-        button = 0;
-      while(state > 0){
+      var state = event.buttons;
+      for(let button = 0; button < Mouse.NUM_BUTTONS; ++button) {
         var isDown = state & 0x1 !== 0;
         if(isDown && stateChange || !isDown && !stateChange){
           this.setButton(button, stateChange);
         }
         state >>= 1;
-        ++button;
       }
       this.setAxis("BUTTONS", event.buttons << 10);
       event.preventDefault();
@@ -63,3 +61,5 @@ class Mouse extends Primrose.InputProcessor {
     }, false);
   }
 }
+
+Mouse.NUM_BUTTONS = 3;
