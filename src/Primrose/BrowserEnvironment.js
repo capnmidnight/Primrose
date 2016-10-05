@@ -989,8 +989,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
 
     this.quality = this.options.quality;
 
-    if (window.alert.toString()
-      .indexOf("native code") > -1) {
+    if (window.alert.toString().indexOf("native code") > -1) {
       // overwrite the native alert functions so they can't be called while in
       // fullscreen VR mode.
 
