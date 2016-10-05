@@ -1,5 +1,13 @@
 const SETTINGS_TO_ZERO = ["heading", "pitch", "roll", "pointerPitch", "headX", "headY", "headZ"];
 
+function filterMetaKey(k) {
+  for (let i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
+    const m = Primrose.Keys.MODIFIER_KEYS[i];
+    if (Math.abs(k) === Primrose.Keys[m.toLocaleUpperCase()]) {
+      return Math.sign(k) * (i + 1);
+    }
+  }
+}
 pliny.class({
   parent: "Primrose",
     name: "InputProcessor",
@@ -87,14 +95,7 @@ class InputProcessor {
       axes: this.maybeClone(cmd.axes),
       commands: cmd.commands && cmd.commands.slice() || [],
       buttons: this.maybeClone(cmd.buttons),
-      metaKeys: this.maybeClone(cmd.metaKeys && cmd.metaKeys.map((k) => {
-        for (var i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
-          var m = Primrose.Keys.MODIFIER_KEYS[i];
-          if (Math.abs(k) === Primrose.Keys[m.toLocaleUpperCase()]) {
-            return Math.sign(k) * (i + 1);
-          }
-        }
-      })),
+      metaKeys: this.maybeClone(cmd.metaKeys && cmd.metaKeys.map(filterMetaKey)),
       commandDown: cmd.commandDown,
       commandUp: cmd.commandUp
     };
@@ -307,7 +308,7 @@ class InputProcessor {
   }
 
   addMetaKey(name, value) {
-    this.addToArray("metaKeys", name, value);
+    this.addToArray("metaKeys", name, filterMetaKey(value));
   }
 
 
