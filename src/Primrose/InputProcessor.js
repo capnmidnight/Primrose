@@ -349,10 +349,13 @@ class InputProcessor {
 
   removeFromArray(key, name, value) {
     if (this.commands[name] && this.commands[name][key]) {
-      var arr = this.commands[name][key],
-        n = arr.indexOf(value);
-      if (n > -1) {
-        arr.splice(n, 1);
+      --value;
+      const arr = this.commands[name][key];
+      for(let i = 0; i < arr.length; ++i){
+        const elem = arr[i];
+        if(elem.index === value){
+          return arr.splice(i, 1);
+        }
       }
     }
   }
