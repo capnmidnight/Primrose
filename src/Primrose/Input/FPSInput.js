@@ -272,7 +272,7 @@ class FPSInput extends Primrose.AbstractEventEmitter {
   }
 
   remove(id) {
-    var mgr = this[id],
+    const mgr = this[id],
       mgrIdx = this.managers.indexOf(mgr);
     if (mgrIdx > -1) {
       this.managers.splice(mgrIdx, 1);
@@ -282,7 +282,7 @@ class FPSInput extends Primrose.AbstractEventEmitter {
   }
 
   add(mgr) {
-    for (var i = this.managers.length - 1; i >= 0; --i) {
+    for (let i = this.managers.length - 1; i >= 0; --i) {
       if (this.managers[i].name === mgr.name) {
         this.managers.splice(i, 1);
       }
@@ -292,7 +292,7 @@ class FPSInput extends Primrose.AbstractEventEmitter {
   }
 
   zero() {
-    for (var i = 0; i < this.managers.length; ++i) {
+    for (let i = 0; i < this.managers.length; ++i) {
       this.managers[i].zero();
     }
   }
@@ -319,10 +319,9 @@ class FPSInput extends Primrose.AbstractEventEmitter {
   }
 
   update(dt) {
-    var i,
-      hadGamepad = this.hasGamepad;
+    const hadGamepad = this.hasGamepad;
     Primrose.Input.Gamepad.poll();
-    for (i = 0; i < this.managers.length; ++i) {
+    for (let i = 0; i < this.managers.length; ++i) {
       this.managers[i].update(dt);
     }
     if (!hadGamepad && this.hasGamepad) {
@@ -341,11 +340,11 @@ class FPSInput extends Primrose.AbstractEventEmitter {
     // update the motionDevices
     this.stage.updateMatrix();
     this.matrix.multiplyMatrices(this.stage.matrix, this.VR.stage.matrix);
-    for (i = 0; i < this.motionDevices.length; ++i) {
+    for (let i = 0; i < this.motionDevices.length; ++i) {
       this.motionDevices[i].updateStage(this.matrix);
     }
 
-    for (i = 0; i < this.pointers.length; ++i) {
+    for (let i = 0; i < this.pointers.length; ++i) {
       this.pointers[i].update();
     }
 
@@ -365,11 +364,11 @@ class FPSInput extends Primrose.AbstractEventEmitter {
 
   updateStage(dt) {
     // get the linear movement from the mouse/keyboard/gamepad
-    var heading = 0,
+    let heading = 0,
       strafe = 0,
       drive = 0;
-    for (var i = 0; i < this.managers.length; ++i) {
-      var mgr = this.managers[i];
+    for (let i = 0; i < this.managers.length; ++i) {
+      const mgr = this.managers[i];
       heading += mgr.getValue("heading");
       strafe += mgr.getValue("strafe");
       drive += mgr.getValue("drive");
@@ -411,9 +410,9 @@ class FPSInput extends Primrose.AbstractEventEmitter {
   }
 
   get segments() {
-    var segments = [];
-    for (var i = 0; i < this.pointers.length; ++i) {
-      var seg = this.pointers[i].segment;
+    const segments = [];
+    for (let i = 0; i < this.pointers.length; ++i) {
+      const seg = this.pointers[i].segment;
       if (seg) {
         segments.push(seg);
       }
@@ -422,8 +421,8 @@ class FPSInput extends Primrose.AbstractEventEmitter {
   }
 
   resolvePicking(currentHits) {
-    for (var i = 0; i < this.pointers.length; ++i) {
-      var ptr = this.pointers[i];
+    for (let i = 0; i < this.pointers.length; ++i) {
+      const ptr = this.pointers[i];
       ptr.resolvePicking(currentHits[ptr.name]);
     }
   }
