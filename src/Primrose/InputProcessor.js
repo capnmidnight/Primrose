@@ -182,20 +182,23 @@ class InputProcessor {
               }
             }
 
-            if (cmd.axes) {
-              for (n = 0; n < cmd.axes.length; ++n) {
-                var a = cmd.axes[n];
-                temp = a.sign * this.inputState.axes[a.index];
+            if (!cmd.buttons || pressed) {
+              value = 0;
+              if (cmd.axes) {
+                for (n = 0; n < cmd.axes.length; ++n) {
+                  var a = cmd.axes[n];
+                  temp = a.sign * this.inputState.axes[a.index];
+                  if (Math.abs(temp) > Math.abs(value)) {
+                    value = temp;
+                  }
+                }
+              }
+
+              for (n = 0; n < cmd.commands.length; ++n) {
+                temp = this.getValue(cmd.commands[n]);
                 if (Math.abs(temp) > Math.abs(value)) {
                   value = temp;
                 }
-              }
-            }
-
-            for (n = 0; n < cmd.commands.length; ++n) {
-              temp = this.getValue(cmd.commands[n]);
-              if (Math.abs(temp) > Math.abs(value)) {
-                value = temp;
               }
             }
 
