@@ -26,6 +26,7 @@ class Mouse extends Primrose.InputProcessor {
 
     DOMElement.addEventListener("mousedown", setState.bind(this, true), false);
     DOMElement.addEventListener("mouseup", setState.bind(this, false), false);
+    DOMElement.addEventListener("contextmenu", (event) => !(event.ctrlKey && event.shiftKey) && event.preventDefault(), false);
     DOMElement.addEventListener("mousemove", (event) => {
       setState(true, event);
 
