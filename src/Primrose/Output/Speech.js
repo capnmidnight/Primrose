@@ -41,12 +41,12 @@ const Speech = (function(){
           speechSynthesis.speak(msg);
         });
       }
-    }
+    };
   }
   else {
     // in case of error, return a shim that lets us continue unabated
-    return function () {
-      this.speak = function () {};
+    return class {
+      speak() {}
     };
   }
 })();
