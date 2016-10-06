@@ -1,18 +1,4 @@
-const PEERING_TIMEOUT_LENGTH = 10000;
-
-/* polyfills */
-window.RTCPeerConnection =
-  window.RTCPeerConnection ||
-  window.webkitRTCPeerConnection ||
-  window.mozRTCPeerConnection;
-
-window.RTCIceCandidate =
-  window.RTCIceCandidate ||
-  window.mozRTCIceCandidate;
-
-window.RTCSessionDescription =
-  window.RTCSessionDescription ||
-  window.mozRTCSessionDescription;
+const PEERING_TIMEOUT_LENGTH = 30000;
 
 // some useful information:
 // - https://www.webrtc-experiment.com/docs/STUN-or-TURN.html
@@ -85,9 +71,8 @@ class WebRTCSocket {
         if (level < MAX_LOG_LEVEL) {
           var t = new Date();
           const args = [
-            "[%s:%s %s] " + format,
-            INSTANCE_COUNT,
-            instanceNumber,
+            "[%s:%s] " + format,
+            level,
             formatTime(t)
           ];
           for (var i = 3; i < arguments.length; ++i) {
@@ -153,13 +138,19 @@ class WebRTCSocket {
       get: () => toUserIndex
     });
 
-    var iceServers = ICE_SERVERS.concat(extraIceServers);
-    if (isFirefox) {
-      iceServers = [{
-        urls: iceServers.map((s) => s.url)
-      }];
-    }
-
+    const iceServers = extraIceServers
+      .concat(ICE_SERVERS)
+      .map((server) => {
+        if(server.url && !server.urls){
+          server.urls = [server.url];
+          delete server.url;
+        }
+        if(isFirefox){
+          server.urls = server.urls.filter((url) => !/^turns:/.test(url));
+        }
+        return server;
+      })
+      .filter((server) => server.urls && server.urls.length > 0);
     this._log(1, iceServers);
 
     pliny.property({
@@ -169,6 +160,7 @@ class WebRTCSocket {
       description: "The raw RTCPeerConnection that got negotiated."
     });
     this.rtc = new RTCPeerConnection({
+      iceCandidatePoolSize: 100,
       // Indicate to the API what servers should be used to figure out NAT traversal.
       iceServers
     });

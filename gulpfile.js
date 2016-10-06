@@ -24,6 +24,7 @@ var gulp = require("gulp"),
     "node_modules/three/examples/js/postprocessing/RenderPass.js",
     "node_modules/three/examples/js/postprocessing/ShaderPass.js",
     "node_modules/bare-bones-logger/bare-bones-logger.js",
+    "node_modules/webrtc-adapter/out/adapter.js",
     "namegen.js"
   ]),
   js = nt.js("PrimroseLib-WithDoc", "src", ["format"], pliny.carve.bind(pliny, "PrimroseLib-WithDoc.js", "PrimroseLib.js", "PrimroseDocumentation.js")),

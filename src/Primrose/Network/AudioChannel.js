@@ -1,17 +1,4 @@
-const ENABLE_OPUS_HACK = false;
-
-if (!navigator.mediaDevices) {
-  navigator.mediaDevices = {};
-}
-if (!navigator.mediaDevices.getUserMedia) {
-  navigator.getUserMedia =
-    navigator.getUserMedia ||
-    navigator.webkitGetUserMedia ||
-    navigator.mozGetUserMedia ||
-    navigator.msGetUserMedia ||
-    navigator.oGetUserMedia;
-  navigator.mediaDevices.getUserMedia = (constraint) => new Promise((resolve, reject) => navigator.getUserMedia(constraint, resolve, reject));
-}
+const ENABLE_OPUS_HACK = true;
 
 var preferOpus = (function () {
   function preferOpus(description) {

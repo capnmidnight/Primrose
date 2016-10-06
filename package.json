@@ -60,6 +60,7 @@
     "replay-telemetry-webvr": "^1.0.6",
     "socket.io-client": "^1.4.8",
     "three": "^0.80.0",
+    "webrtc-adapter": "^2.0.4",
     "webvr-bootstrapper": "^4.0.0",
     "webvr-polyfill": "^0.9.16",
     "webvr-standard-monitor": "^1.0.1"

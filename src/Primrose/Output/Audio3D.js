@@ -76,12 +76,7 @@ class Audio3D {
       .length,
       element = Primrose.DOM.cascadeElement("audioStream" + audioElementCount, "audio", HTMLAudioElement, true);
     element.autoplay = true;
-    if (isFirefox) {
-      element.srcObject = stream;
-    }
-    else {
-      element.src = URL.createObjectURL(stream);
-    }
+    element.srcObject = stream;
     element.setAttribute("muted", "");
     return stream;
   }
@@ -155,12 +150,8 @@ class Audio3D {
         //volume: this.context.createGain(),
         //panner: this.context.createPanner()
       };
-    if (isChrome) {
-      element.src = URL.createObjectURL(stream);
-    }
-    else {
-      element.srcObject = stream;
-    }
+
+    element.srcObject = stream;
     element.autoplay = true;
     element.controls = true;
     element.muted = true;
