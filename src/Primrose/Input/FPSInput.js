@@ -22,7 +22,7 @@ pliny.class({
 class FPSInput extends Primrose.AbstractEventEmitter {
   constructor(DOMElement, options) {
     super();
-    DOMElement = DOMElement || window;
+    DOMElement = DOMElement || document.documentElement;
     this.options = options;
     this._handlers.zero = [];
     this._handlers.motioncontroller = [];
