@@ -189,6 +189,9 @@ class FPSInput extends Primrose.AbstractEventEmitter {
             color = 0x0000ff << shift,
             highlight = 0xff0000 >> shift,
             ptr = new Primrose.PosePointer(padID + "Pointer", color, highlight, [mgr]);
+          ptr.add(colored(box(0.1, 0.025, 0.2), color, {
+            emissive: highlight
+          }));
 
           this.pointers.push(ptr);
           ptr.addToBrowserEnvironment(null, this.options.scene);
