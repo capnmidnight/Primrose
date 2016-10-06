@@ -24,7 +24,6 @@ var env = new Primrose.BrowserEnvironment({
 // the basic scene hierarchy out of it, the "ready" event is fired,
 // indicating that we may make additional changes to the scene now.
 env.addEventListener("ready", function () {
-
   var numButtons = 8,
     middle = (numButtons - 1) / 2;
 

@@ -11991,6 +11991,9 @@ module.exports = RotateInstructions;
  * limitations under the License.
  */
 
+/**
+ * TODO: Fix up all "new THREE" instantiations to improve performance.
+ */
 var SensorSample = _dereq_('./sensor-sample.js');
 var MathUtil = _dereq_('../math-util.js');
 var Util = _dereq_('../util.js');
@@ -12019,14 +12022,9 @@ function ComplementaryFilter(kFilter) {
   this.currentGyroMeasurement = new SensorSample();
   this.previousGyroMeasurement = new SensorSample();
 
-  // Set default look direction to be in the correct direction.
-  if (Util.isIOS()) {
-    this.filterQ = new MathUtil.Quaternion(-1, 0, 0, 1);
-  } else {
-    this.filterQ = new MathUtil.Quaternion(1, 0, 0, 1);
-  }
+  // Set the quaternion to be looking in the -z direction by default.
+  this.filterQ = new MathUtil.Quaternion(1, 0, 0, 1);
   this.previousFilterQ = new MathUtil.Quaternion();
-  this.previousFilterQ.copy(this.filterQ);
 
   // Orientation based on the accelerometer.
   this.accelQ = new MathUtil.Quaternion();
@@ -42283,7 +42281,7 @@ module.exports = XHR;
 
 					}
 
-				}, undefined, onError );
+				}, null, onError );
 
 			}
 
@@ -57844,7 +57842,7 @@ module.exports = XHR;
 
 		function ( t ) {
 
-			var b2 = exports.ShapeUtils.b2;		
+			var b2 = exports.ShapeUtils.b2;
 
 			return new Vector3(
 				b2( t, this.v0.x, this.v1.x, this.v2.x ),

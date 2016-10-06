@@ -1781,19 +1781,9 @@ pliny.class({
     type: "Number",
     description: "The color to use to highlight the teleport pad and 3D pointer cursor when it's pointing at a real thing."
   }, {
-    name: "isHand",
-    type: "Boolean",
-    description: "Pass true to add a hand model at the origin of the pointer ray."
-  }, {
-    name: "orientationDevices",
+    name: "devices",
     type: "Array",
     description: "An Array of `Primrose.InputProcessor` objects that define the orientation for this pointer."
-  }, {
-    name: "positionDevices",
-    type: "Array",
-    description: "An Array of `Primrose.PoseInputProcessor` objects that define the position for this pointer.",
-    optional: true,
-    defaultValue: null
   }, {
     name: "triggerDevices",
     type: "Array",
@@ -3178,16 +3168,11 @@ pliny.class({
 });
 
 pliny.class({
-    parent: "Primrose.Output",
-    name: "Speech",
-    description: "| [under construction]"
-  });
-  pliny.class({
-    parent: "Primrose.Output",
-    name: "Speech",
-    description: "| [under construction]"
-  });
-  pliny.function({
+  parent: "Primrose.Output",
+  name: "Speech",
+  description: "| [under construction]"
+});
+pliny.function({
   parent: "Primrose.Random",
   name: "color",
   description: "Returns a random hex RGB number to be used as a color.",
@@ -3779,6 +3764,16 @@ pliny.class({
   description: "A basic registration form."
 });
 
+pliny.method({
+  parent: "THREE.Euler",
+  name: "toString ",
+  description: "A polyfill method for printing objects.",
+  parameters: [{
+    name: "digits",
+    type: "Number",
+    description: "the number of significant figures to print."
+  }]
+});
 pliny.method({
   parent: "THREE.Matrix4",
   name: "toString ",
