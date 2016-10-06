@@ -1,5 +1,6 @@
 const DISPLACEMENT = new THREE.Vector3(),
   EULER_TEMP = new THREE.Euler(),
+  QUAT_TEMP = new THREE.Quaternion(),
   WEDGE = Math.PI / 3;
 
 pliny.class({
@@ -51,9 +52,9 @@ class FPSInput extends Primrose.AbstractEventEmitter {
       strafe: {
         commands: ["strafeLeft", "strafeRight"]
       },
-      boost: {
+      lift: {
         buttons: [Primrose.Keys.E],
-        scale: 0.2
+        scale: 12
       },
       driveForward: {
         buttons: [
@@ -201,7 +202,7 @@ class FPSInput extends Primrose.AbstractEventEmitter {
           const shift = (this.motionDevices.length - 2) * 8,
             color = 0x0000ff << shift,
             highlight = 0xff0000 >> shift,
-            ptr = new Primrose.PosePointer(padID + "Pointer", color, highlight, [mgr]);
+            ptr = new Primrose.Pointer(padID + "Pointer", color, 1, highlight, [mgr]);
           ptr.add(colored(box(0.1, 0.025, 0.2), color, {
             emissive: highlight
           }));
@@ -249,8 +250,7 @@ class FPSInput extends Primrose.AbstractEventEmitter {
             }
           });
           this.add(mgr);
-          this.mousePointer.addDevice(mgr, mgr, mgr);
-          this.head.addDevice(mgr, mgr, mgr);
+          this.mousePointer.addDevice(mgr, mgr);
         }
       }
     });
@@ -260,14 +260,16 @@ class FPSInput extends Primrose.AbstractEventEmitter {
     this.stage = hub();
 
     this.head = new Primrose.Pointer("GazePointer", 0xffff00, 0x0000ff, 0.8, [
-      this.VR,
+      this.VR
+    ], [
       this.Mouse,
       this.Touch,
       this.Keyboard
     ]);
     this.head.useGaze = this.options.useGaze;
     this.pointers.push(this.head);
-    this.head.addToBrowserEnvironment(null, this.options.scene);
+    this.options.scene.add(this.head.root);
+    this.options.scene.add(this.head.disk);
 
     this.mousePointer = new Primrose.Pointer("MousePointer", 0xff0000, 0x00ff00, 1, [
       this.Mouse
@@ -337,6 +339,7 @@ class FPSInput extends Primrose.AbstractEventEmitter {
     for (let i = 0; i < this.managers.length; ++i) {
       this.managers[i].update(dt);
     }
+
     if (!hadGamepad && this.hasGamepad) {
       this.Mouse.inPhysicalUse = false;
     }
@@ -350,6 +353,8 @@ class FPSInput extends Primrose.AbstractEventEmitter {
     }
 
     this.updateStage(dt);
+    this.stage.position.y = this.options.avatarHeight;
+    this.VR.posePosition.y -= this.options.avatarHeight;
 
     // update the motionDevices
     this.stage.updateMatrix();
@@ -361,6 +366,7 @@ class FPSInput extends Primrose.AbstractEventEmitter {
     for (let i = 0; i < this.pointers.length; ++i) {
       this.pointers[i].update();
     }
+
 
     // record the position and orientation of the user
     this.newState = [];
@@ -374,31 +380,40 @@ class FPSInput extends Primrose.AbstractEventEmitter {
   updateStage(dt) {
     // get the linear movement from the mouse/keyboard/gamepad
     let heading = 0,
+      pitch = 0,
       strafe = 0,
-      drive = 0;
+      drive = 0,
+      lift = 0;
     for (let i = 0; i < this.managers.length; ++i) {
       const mgr = this.managers[i];
       if(mgr.enabled){
         heading += mgr.getValue("heading");
+        pitch += mgr.getValue("pitch");
         strafe += mgr.getValue("strafe");
         drive += mgr.getValue("drive");
+        lift += mgr.getValue("lift");
       }
     }
 
     // move stage according to heading and thrust
     if (this.VR.hasOrientation) {
       heading = WEDGE * Math.floor((heading / WEDGE) + 0.5);
+      pitch = 0;
     }
 
-    EULER_TEMP.set(0, heading, 0, "YXZ");
+    EULER_TEMP.set(pitch, heading, 0, "YXZ");
     this.stage.quaternion.setFromEuler(EULER_TEMP);
 
     // update the stage's velocity
-    this.velocity.x = strafe;
-    this.velocity.z = drive;
+    this.velocity.set(strafe, lift, drive);
 
-    if (!this.stage.isOnGround) {
-      this.velocity.y -= this.options.gravity * dt;
+    if (this.stage.isOnGround) {
+      if(this.velocity.y > 0){
+        this.stage.isOnGround = false;
+      }
+    }
+    else {
+      this.velocity.y -= this.options.gravity;
       if (this.stage.position.y < 0) {
         this.velocity.y = 0;
         this.stage.position.y = 0;
@@ -406,18 +421,23 @@ class FPSInput extends Primrose.AbstractEventEmitter {
       }
     }
 
+    QUAT_TEMP.copy(this.head.quaternion);
+    EULER_TEMP.setFromQuaternion(QUAT_TEMP);
+    EULER_TEMP.x = 0;
+    EULER_TEMP.z = 0;
+    QUAT_TEMP.setFromEuler(EULER_TEMP);
+
     this.moveStage(DISPLACEMENT
       .copy(this.velocity)
       .multiplyScalar(dt)
-      .applyQuaternion(this.stage.quaternion)
+      .applyQuaternion(QUAT_TEMP)
       .add(this.head.position));
   }
 
   moveStage(position) {
     DISPLACEMENT.copy(position)
       .sub(this.head.position);
-    this.stage.position.x += DISPLACEMENT.x;
-    this.stage.position.z += DISPLACEMENT.z;
+    this.stage.position.add(DISPLACEMENT);
   }
 
   get segments() {
