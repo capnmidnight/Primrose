@@ -190,13 +190,12 @@ class InputProcessor {
         cmd.state.wasPressed = cmd.state.pressed;
         cmd.state.pressed = false;
         if (!cmd.disabled) {
-          var metaKeysSet = true,
-            n;
-
+          let pressed = true,
+            value = 0;
           if (cmd.metaKeys) {
-            for (n = 0; n < cmd.metaKeys.length && metaKeysSet; ++n) {
+            for (let n = 0; n < cmd.metaKeys.length && pressed; ++n) {
               var m = cmd.metaKeys[n];
-              metaKeysSet = metaKeysSet &&
+              pressed = pressed &&
                 (this.inputState[Primrose.Keys.MODIFIER_KEYS[m.index]] &&
                   !m.toggle ||
                   !this.inputState[Primrose.Keys.MODIFIER_KEYS[m.index]] &&
@@ -204,14 +203,9 @@ class InputProcessor {
             }
           }
 
-          if (metaKeysSet) {
-            var pressed = true,
-              value = 0, temp,
-              anyButtons = false;
-
-
-            if (cmd.buttons) {
-              for (n = 0; n < cmd.buttons.length; ++n) {
+          if (pressed) {
+            if (cmd.buttons.length > 0) {
+              for (let n = 0; n < cmd.buttons.length; ++n) {
                 var btn = cmd.buttons[n],
                   code = btn.index + 1,
                   p = !!this.inputState.buttons[code];
@@ -224,37 +218,38 @@ class InputProcessor {
               }
             }
 
-            if (!cmd.buttons || pressed) {
-              value = 0;
-              if (cmd.axes) {
-                for (n = 0; n < cmd.axes.length; ++n) {
+            if (cmd.buttons.length === 0 || value !== 0) {
+              if (cmd.axes.length > 0) {
+                value = 0;
+                for (let n = 0; n < cmd.axes.length; ++n) {
                   var a = cmd.axes[n];
-                  temp = a.sign * this.inputState.axes[a.index];
+                  const temp = a.sign * this.inputState.axes[a.index];
+                  if (Math.abs(temp) > Math.abs(value)) {
+                    value = temp;
+                  }
+                }
+              }
+              else if(cmd.commands.length > 0){
+                value = 0;
+                for (let n = 0; n < cmd.commands.length; ++n) {
+                  const temp = this.getValue(cmd.commands[n]);
                   if (Math.abs(temp) > Math.abs(value)) {
                     value = temp;
                   }
                 }
               }
 
-              for (n = 0; n < cmd.commands.length; ++n) {
-                temp = this.getValue(cmd.commands[n]);
-                if (Math.abs(temp) > Math.abs(value)) {
-                  value = temp;
-                }
+              if (cmd.scale !== undefined) {
+                value *= cmd.scale;
               }
-            }
 
-            if (cmd.scale !== undefined) {
-              value *= cmd.scale;
-            }
+              if (cmd.offset !== undefined) {
+                value += cmd.offset;
+              }
 
-            if (cmd.offset !== undefined) {
-              value += cmd.offset;
-            }
-
-            if (cmd.deadzone && Math.abs(value) < cmd.deadzone) {
-              value = 0;
-            }
+              if (cmd.deadzone && Math.abs(value) < cmd.deadzone) {
+                value = 0;
+              }
 
               if (cmd.integrate) {
                 value = this.getValue(cmd.name) + value * dt;
@@ -277,14 +272,14 @@ class InputProcessor {
                 stateMod = resetInputState;
               }
 
-            if (cmd.threshold) {
-              pressed = pressed && (value > cmd.threshold);
+              if (cmd.threshold) {
+                pressed = pressed && (value > cmd.threshold);
+              }
             }
-
-            cmd.state.pressed = pressed;
-            cmd.state.value = value;
           }
 
+          cmd.state.pressed = pressed;
+          cmd.state.value = value;
           cmd.state.lt += dt;
 
           cmd.state.fireAgain = cmd.state.pressed &&
