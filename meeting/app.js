@@ -29,10 +29,12 @@ env = new Primrose.BrowserEnvironment({
 });
 
 ctrls.closeButton.addEventListener("click", hideLoginForm, false);
-ctrls.userName.addEventListener("keyup", authenticate);
-ctrls.connect.addEventListener("click", authenticate);
-ctrls.randomRoomName.addEventListener("click", setRoomName);
-ctrls.randomUserName.addEventListener("click", setUserName);
+ctrls.userName.addEventListener("keyup", authenticate, false);
+ctrls.connect.addEventListener("click", authenticate, false);
+ctrls.randomRoomName.addEventListener("click", setRoomName, false);
+ctrls.randomUserName.addEventListener("click", setUserName, false);
+ctrls.roomName.addEventListener("change", setRoomName, false);
+ctrls.userName.addEventListener("change", setUserName, false);
 
 window.addEventListener("popstate", setRoomName);
 env.addEventListener("ready", environmentReady);
@@ -51,6 +53,9 @@ function setRoomName(evt) {
     evt = evt || true;
     ctrls.roomName.value = defaultRoomName;
   }
+  else if(evt.type === "change"){
+    defaultRoomName = ctrls.roomName.value;
+  }
   else {
     defaultRoomName = names.toString();
     ctrls.roomName.placeholder = "Type a room name (currently " + defaultRoomName + ")";
@@ -65,6 +70,9 @@ function setUserName(evt) {
   defaultUserName = evt && evt.state && evt.state.userName;
   if(defaultUserName){
     ctrls.userName.value = defaultUserName;
+  }
+  else if(evt.type === "change"){
+    defaultUserName = ctrls.userName.value;
   }
   else{
     defaultUserName = names.toString();
