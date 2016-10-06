@@ -8698,6 +8698,8 @@ var WebRTCSocket = function () {
       return arguments[3];
     };
 
+    this.myResult = null;
+    this.theirResult = null;
     this._timeout = null;
     this._onError = null;
     this._log = print.bind(null, "log");
@@ -8832,15 +8834,25 @@ var WebRTCSocket = function () {
     // This is where things get gnarly
     this.ready = new Promise(function (resolve, reject) {
 
+      var setHandlers = function setHandlers(enabled) {
+        var method = enabled ? "on" : "off";
+
+        _this.proxyServer[method]("cancel", _this._onError);
+        _this.proxyServer[method]("query_request", onQuery);
+        _this.proxyServer[method]("query_result", onQueryResult);
+        _this.proxyServer[method]("offer", onOffer);
+        _this.proxyServer[method]("ice", onIce);
+        _this.proxyServer[method]("peer", onUser);
+        // When an answer is received, it's much simpler than receiving an offer. We just mark the progress and
+        // check to see if we're done.
+        _this.proxyServer[method]("answer", descriptionReceived);
+      };
+
       var done = function done(isError) {
         console.log(_this.rtc);
         _this._log(2, "Tearing down event handlers");
         _this.clearTimeout();
-        _this.proxyServer.off("cancel", _this._onError);
-        _this.proxyServer.off("peer", onUser);
-        _this.proxyServer.off("offer", onOffer);
-        _this.proxyServer.off("ice", onIce);
-        _this.proxyServer.off("answer", descriptionReceived);
+        setHandlers(false);
         _this.rtc.onsignalingstatechange = null;
         _this.rtc.oniceconnectionstatechange = null;
         _this.rtc.onnegotiationneeded = null;
@@ -8915,6 +8927,42 @@ var WebRTCSocket = function () {
         reject(exp);
       };
 
+      var checkQueryState = function checkQueryState() {
+        console.log("checkQueryState", _this.myResult, _this.theirResult);
+        if (_this.myResult && _this.theirResult) {
+          console.log(1, "Issuing request to peer.");
+          _this.issueRequest();
+        } else if (_this.myResult === false) {
+          console.log(1, "Local user couldn't peer.");
+          done();
+          resolve("Local user said they couldn't peer.");
+        } else if (_this.theirResult === false) {
+          console.log(1, "Remote user couldn't peer.");
+          done();
+          resolve("Remote user said they couldn't peer.");
+        } else if (_this.goFirst || _this.myResult) {
+          console.log("QUERYING", _this.goFirst, _this.theirResult);
+          _this.proxyServer.emit("query_request", _this.wrap());
+        }
+      };
+
+      var onQuery = function onQuery(evt) {
+        if (_this.isExpected("query request", evt)) {
+          _this.myResult = isChrome && !isiOS;
+          console.log("QUERY REQUEST", _this.myResult);
+          _this.proxyServer.emit("query_result", _this.wrap(_this.myResult));
+          checkQueryState();
+        }
+      };
+
+      var onQueryResult = function onQueryResult(evt) {
+        if (_this.isExpected("query result", evt)) {
+          _this.theirResult = evt.item;
+          console.log("QUERY RESULT", _this.theirResult);
+          checkQueryState();
+        }
+      };
+
       // When an offer is received, we need to create an answer in reply.
       var onOffer = function onOffer(offer) {
         _this._log(1, "offer", offer);
@@ -8944,14 +8992,6 @@ var WebRTCSocket = function () {
         // make several connection in sequence. The Socket.IO event handlers don't seem to reliably turn off, so
         // we have to make sure the message we here is the one meant for this particular instance of the socket manager.
         if (_this.isExpected("new user", evt)) {
-
-          // When an answer is recieved, it's much simpler than receiving an offer. We just mark the progress and
-          // check to see if we're done.
-          _this.proxyServer.on("cancel", _this._onError);
-          _this.proxyServer.on("answer", descriptionReceived);
-          _this.proxyServer.on("offer", onOffer);
-          _this.proxyServer.on("ice", onIce);
-
           // This is just for debugging purposes.
           _this.rtc.onsignalingstatechange = function (evt) {
             return _this._log(1, "[%s] Signal State: %s", instanceNumber, _this.rtc.signalingState);
@@ -8983,12 +9023,12 @@ var WebRTCSocket = function () {
             }
           };
 
-          _this.issueRequest();
+          checkQueryState();
         }
       };
 
       // We need to do two things, wait for the remote user to indicate they would like to peer, and...
-      _this.proxyServer.on("peer", onUser);
+      setHandlers(true);
 
       // ... let the server know to inform the remote user that we would like to peer. We need to delay a little
       // bit because it takes the remote user a little time between logging in and being ready to receive messages.
@@ -9004,7 +9044,7 @@ var WebRTCSocket = function () {
     key: "startTimeout",
     value: function startTimeout() {
       if (this._timeout === null) {
-        this._log(1, "Timing out in 10 seconds.");
+        this._log(1, "Timing out in " + Math.floor(PEERING_TIMEOUT_LENGTH / 1000) + " seconds.");
         this._timeout = setTimeout(this.cancel.bind(this), PEERING_TIMEOUT_LENGTH);
       }
     }
@@ -13268,7 +13308,7 @@ var AudioChannel = function (_Primrose$WebRTCSocke) {
       // Adding an audio stream to the peer connection is different between Firefox (which supports the latest
       //  version of the API) and Chrome.
       var addStream = function addStream() {
-        _this2._log(0, "adding stream", _this2.outAudio);
+        _this2._log(0, "adding stream", _this2.outAudio, _this2.rtc.addTrack);
 
         // Make sure we actually have audio to send to the remote.
         if (_this2.outAudio) {
@@ -13295,15 +13335,12 @@ var AudioChannel = function (_Primrose$WebRTCSocke) {
       };
 
       // Wait to receive an audio track.
-      if (this.rtc.ontrack) {
-        this.rtc.ontrack = function (evt) {
-          return onStream(evt.streams[0]);
-        };
-      } else {
-        this.rtc.onaddstream = function (evt) {
-          return onStream(evt.stream);
-        };
-      }
+      this.rtc.ontrack = function (evt) {
+        return onStream(evt.streams[0]);
+      };
+      this.rtc.onaddstream = function (evt) {
+        return onStream(evt.stream);
+      };
 
       // If we're the boss, tell people about it.
       if (this.goFirst) {
@@ -13498,6 +13535,7 @@ var Manager = function (_Primrose$AbstractEve) {
     _this.oldState = [];
     _this.users = {};
     _this.extraIceServers = [];
+    _this.peeringEnabled = true;
     if (options.webRTC) {
       _this.waitForLastUser = options.webRTC.then(function (obj) {
         if (obj) {
@@ -13594,13 +13632,16 @@ var Manager = function (_Primrose$AbstractEve) {
       this.users[toUserName] = user;
       this.updateUser(state);
       this.emit("addavatar", user);
-      this.waitForLastUser = this.waitForLastUser.then(function () {
-        return user.peer(_this2.extraIceServers, _this2._socket, _this2.microphone, _this2.userName, _this2.audio, goSecond);
-      }).then(function () {
-        return console.log("%s is peered with %s", _this2.userName, toUserName);
-      }).catch(function (exp) {
-        return console.error("Couldn't load user: " + name, exp);
-      });
+      if (this.peeringEnabled) {
+        this.waitForLastUser = this.waitForLastUser.then(function () {
+          return user.peer(_this2.extraIceServers, _this2._socket, _this2.microphone, _this2.userName, _this2.audio, goSecond);
+        }).then(function () {
+          return console.log("%s is peered (%s) with %s", _this2.userName, user.peered, toUserName);
+        }).catch(function (exp) {
+          _this2.peeringEnabled = false;
+          console.error("Couldn't load user: " + name, exp);
+        });
+      }
     }
   }, {
     key: "removeUser",
@@ -13608,7 +13649,9 @@ var Manager = function (_Primrose$AbstractEve) {
       console.log("User %s logging off.", key);
       var user = this.users[key];
       if (user) {
-        user.unpeer();
+        if (user.peered) {
+          user.unpeer();
+        }
         delete this.users[key];
         this.emit("removeavatar", user);
       }
@@ -13686,6 +13729,7 @@ var RemoteUser = function () {
     this.time = 0;
 
     this.userName = userName;
+    this.peered = false;
     this.stage = modelFactory.clone();
     this.stage.traverse(function (obj) {
       if (obj.name === "AvatarBelt") {
@@ -13776,28 +13820,28 @@ var RemoteUser = function () {
       return microphone.then(function (outAudio) {
         _this2.audioChannel = new Primrose.Network.AudioChannel(extraIceServers, peeringSocket, localUserName, _this2.userName, outAudio, goSecond);
         return _this2.audioChannel.ready.then(function () {
-          if (!_this2.audioChannel.inAudio) {
-            throw new Error("Didn't get an audio channel for " + _this2.userName);
+          if (_this2.audioChannel.inAudio) {
+            _this2.audioElement = new Audio();
+            Primrose.Output.Audio3D.setAudioStream(_this2.audioChannel.inAudio);
+            _this2.audioElement.controls = false;
+            _this2.audioElement.autoplay = true;
+            _this2.audioElement.crossOrigin = "anonymous";
+            document.body.appendChild(_this2.audioElement);
+
+            _this2.audioStream = audio.context.createMediaStreamSource(_this2.audioChannel.inAudio);
+            _this2.gain = audio.context.createGain();
+            _this2.panner = audio.context.createPanner();
+
+            _this2.audioStream.connect(_this2.gain);
+            _this2.gain.connect(_this2.panner);
+            _this2.panner.connect(audio.mainVolume);
+            _this2.panner.coneInnerAngle = 180;
+            _this2.panner.coneOuterAngle = 360;
+            _this2.panner.coneOuterGain = 0.1;
+            _this2.panner.panningModel = "HRTF";
+            _this2.panner.distanceModel = "exponential";
+            _this2.peered = true;
           }
-          _this2.audioElement = new Audio();
-          Primrose.Output.Audio3D.setAudioStream(_this2.audioChannel.inAudio);
-          _this2.audioElement.controls = false;
-          _this2.audioElement.autoplay = true;
-          _this2.audioElement.crossOrigin = "anonymous";
-          document.body.appendChild(_this2.audioElement);
-
-          _this2.audioStream = audio.context.createMediaStreamSource(_this2.audioChannel.inAudio);
-          _this2.gain = audio.context.createGain();
-          _this2.panner = audio.context.createPanner();
-
-          _this2.audioStream.connect(_this2.gain);
-          _this2.gain.connect(_this2.panner);
-          _this2.panner.connect(audio.mainVolume);
-          _this2.panner.coneInnerAngle = 180;
-          _this2.panner.coneOuterAngle = 360;
-          _this2.panner.coneOuterGain = 0.1;
-          _this2.panner.panningModel = "HRTF";
-          _this2.panner.distanceModel = "exponential";
         });
       });
     }
@@ -14210,6 +14254,7 @@ var Audio3D = function () {
       var audioElementCount = document.querySelectorAll("audio").length,
           element = Primrose.DOM.cascadeElement("audioStream" + audioElementCount, "audio", HTMLAudioElement, true);
       element.autoplay = true;
+      element.muted = true;
       element.srcObject = stream;
       element.setAttribute("muted", "");
       return stream;
@@ -19138,4 +19183,4 @@ function toString(digits) {
 })();
     // end D:\Documents\VR\primrose\src\THREE\Vector3\prototype\toString.js
     ////////////////////////////////////////////////////////////////////////////////
-console.info("primrose v0.27.1. see https://www.primrosevr.com for more information.");
+console.info("primrose v0.27.2. see https://www.primrosevr.com for more information.");
