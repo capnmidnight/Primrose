@@ -134,21 +134,27 @@ class FPSInput extends Primrose.AbstractEventEmitter {
         axes: ["BUTTONS"],
         delta: true
       },
-      dx: {
+      _dx: {
         axes: ["X"],
         delta: true,
-        min: -5,
-        max: 5
+        scale: 0.25
+      },
+      dx: {
+        buttons: [1],
+        commands: ["_dx"]
       },
       heading: {
         commands: ["dx"],
         integrate: true
       },
-      dy: {
+      _dy: {
         axes: ["Y"],
         delta: true,
-        min: -5,
-        max: 5
+        scale: 0.25
+      },
+      dy: {
+        buttons: [1],
+        commands: ["_dy"]
       },
       pitch: {
         commands: ["dy"],
