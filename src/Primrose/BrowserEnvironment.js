@@ -531,7 +531,8 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       }
     };
 
-    var POSITION = new THREE.Vector3();
+    const POSITION = new THREE.Vector3(),
+      START_POINT = new THREE.Vector3();
 
     this.selectControl = (evt) => {
       var obj = evt.hit && evt.hit.object;
@@ -559,11 +560,18 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
         if(evt.type === "enter") {
           evt.pointer.disk.visible = true;
         }
+        else if(evt.type === "pointerstart" || evt.type === "gazestart") {
+          START_POINT.copy(POSITION);
+        }
         else if(evt.type === "pointermove" || evt.type === "gazemove"){
           evt.pointer.moveTeleportPad(POSITION);
         }
         else if(evt.type === "pointerend" || evt.type === "gazecomplete") {
-          this.teleport(POSITION);
+          START_POINT.sub(POSITION);
+          const len = START_POINT.lengthSq();
+          if(len < 0.01){
+            this.teleport(POSITION);
+          }
         }
       }
 
