@@ -730,26 +730,21 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       }
     });
 
-    var wasPresenting = false;
     const fullScreenChange = (evt) => {
-      const presenting = this.input.VR.isPresenting;
-      if(presenting !== wasPresenting){
-        wasPresenting = presenting;
-        const cmd = (presenting ? "remove" : "add") + "Button";
-        this.input.Mouse[cmd]("dx", 1);
-        this.input.Mouse[cmd]("dy", 1);
-        this.input.Mouse.commands.U.disabled =
-          this.input.Mouse.commands.V.disabled = presenting && !this.input.VR.isStereo;
-        this.input.Mouse.commands.heading.scale = presenting ? -1 : 1;
-        this.input.Mouse.commands.pitch.scale = presenting ? -1 : 1;
-        if (!presenting) {
-          this.input.VR.cancel();
-        }
-        modifyScreen();
+      const presenting = !!this.input.VR.isPresenting,
+        cmd = (presenting ? "remove" : "add") + "Button";
+      this.input.Mouse[cmd]("dx", 1);
+      this.input.Mouse[cmd]("dy", 1);
+      this.input.Mouse.commands.U.disabled =
+        this.input.Mouse.commands.V.disabled = presenting && !this.input.VR.isStereo;
+      this.input.Mouse.commands.heading.scale = presenting ? -1 : 1;
+      this.input.Mouse.commands.pitch.scale = presenting ? -1 : 1;
+      if (!presenting) {
+        this.input.VR.cancel();
       }
+      modifyScreen();
     };
 
-    FullScreen.addChangeListener(fullScreenChange, false);
     window.addEventListener("vrdisplaypresentchange", fullScreenChange, false);
     window.addEventListener("resize", modifyScreen, false);
     window.addEventListener("blur", this.stop, false);

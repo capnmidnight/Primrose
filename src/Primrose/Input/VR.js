@@ -90,7 +90,7 @@ class VR extends Primrose.PoseInputProcessor {
         rp = _(this).requestPresent;
 
       // If we're using WebVR-Polyfill, just let it do its job.
-      if(this.currentDevice.isPolyfilled) {
+      if(this.currentDevice.isPolyfilled || !VR.isStereoDisplay(this.currentDevice)) {
         // for Firefox's sake, this can't be done in a Promise.
         promise = rp(layers);
       }
