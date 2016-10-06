@@ -1,5 +1,24 @@
 const SETTINGS_TO_ZERO = ["heading", "pitch", "roll", "pointerPitch", "headX", "headY", "headZ"];
 
+function initState(){
+  this.inputState = {
+    buttons: [],
+    axes: [],
+    ctrl: false,
+    alt: false,
+    shift: false,
+    meta: false
+  };
+  this.lastInputState = {
+    buttons: [],
+    axes: [],
+    ctrl: false,
+    alt: false,
+    shift: false,
+    meta: false
+  };
+}
+
 function filterMetaKey(k) {
   for (let i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
     const m = Primrose.Keys.MODIFIER_KEYS[i];
@@ -34,6 +53,18 @@ function filterValue(elem){
   };
 }
 
+class CommandState{
+  constructor(){
+    this.value = null;
+    this.pressed = false;
+    this.wasPressed = false;
+    this.fireAgain = false;
+    this.lt = 0;
+    this.ct = 0;
+    this.repeatCount = 0;
+  }
+}
+
 pliny.class({
   parent: "Primrose",
     name: "InputProcessor",
@@ -49,14 +80,7 @@ class InputProcessor {
     this.paused = false;
     this.ready = true;
     this.inPhysicalUse = false;
-    this.inputState = {
-      buttons: [],
-      axes: [],
-      ctrl: false,
-      alt: false,
-      shift: false,
-      meta: false
-    };
+    initState.call(this);
 
     const readMetaKeys = (event) => {
       for (let i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
@@ -90,15 +114,7 @@ class InputProcessor {
     if (typeof cmd.repetitions === "undefined") {
       cmd.repetitions = 1;
     }
-    cmd.state = {
-      value: null,
-      pressed: false,
-      wasPressed: false,
-      fireAgain: false,
-      lt: 0,
-      ct: 0,
-      repeatCount: 0
-    };
+    cmd.state = new CommandState();
     this.commands[name] = cmd;
     this.commandNames.push(name);
   }
@@ -262,8 +278,9 @@ class InputProcessor {
   }
 
   zero() {
-    for (var i = 0; this.enabled && i < SETTINGS_TO_ZERO.length; ++i) {
-      this.setValue(SETTINGS_TO_ZERO[i], 0);
+    initState.call(this);
+    for(const key in this.commands){
+      this.commands[key].state = new CommandState();
     }
   }
 
