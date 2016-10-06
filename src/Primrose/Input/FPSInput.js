@@ -103,7 +103,6 @@ class FPSInput extends Primrose.AbstractEventEmitter {
       dx: {
         axes: ["X0"],
         delta: true,
-        scale: -0.005,
         min: -5,
         max: 5
       },
@@ -114,7 +113,6 @@ class FPSInput extends Primrose.AbstractEventEmitter {
       dy: {
         axes: ["Y0"],
         delta: true,
-        scale: -0.005,
         min: -5,
         max: 5
       },
@@ -139,7 +137,6 @@ class FPSInput extends Primrose.AbstractEventEmitter {
       dx: {
         axes: ["X"],
         delta: true,
-        scale: -0.005,
         min: -5,
         max: 5
       },
@@ -151,7 +148,6 @@ class FPSInput extends Primrose.AbstractEventEmitter {
       dy: {
         axes: ["Y"],
         delta: true,
-        scale: -0.005,
         min: -5,
         max: 5
       },

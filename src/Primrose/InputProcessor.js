@@ -256,16 +256,16 @@ class InputProcessor {
               value = 0;
             }
 
-            if (cmd.integrate) {
-              value = this.getValue(cmd.name) + value * dt;
-            }
-            else if (cmd.delta) {
-              var ov = value;
-              if (cmd.state.lv !== undefined) {
-                value = (value - cmd.state.lv) / dt;
+              if (cmd.integrate) {
+                value = this.getValue(cmd.name) + value * dt;
               }
-              cmd.state.lv = ov;
-            }
+              else if (cmd.delta) {
+                var ov = value;
+                if (cmd.state.lv !== undefined) {
+                  value = (value - cmd.state.lv);
+                }
+                cmd.state.lv = ov;
+              }
 
               if (cmd.min !== undefined && value < cmd.min){
                 value = cmd.min;
