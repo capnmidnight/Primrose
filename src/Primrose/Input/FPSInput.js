@@ -366,9 +366,11 @@ class FPSInput extends Primrose.AbstractEventEmitter {
       drive = 0;
     for (let i = 0; i < this.managers.length; ++i) {
       const mgr = this.managers[i];
-      heading += mgr.getValue("heading");
-      strafe += mgr.getValue("strafe");
-      drive += mgr.getValue("drive");
+      if(mgr.enabled){
+        heading += mgr.getValue("heading");
+        strafe += mgr.getValue("strafe");
+        drive += mgr.getValue("drive");
+      }
     }
 
     // move stage according to heading and thrust
