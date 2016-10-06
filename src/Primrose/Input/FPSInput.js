@@ -79,13 +79,13 @@ class FPSInput extends Primrose.AbstractEventEmitter {
       },
       zero: {
         buttons: [Primrose.Keys.Z],
-        commandUp: emit.bind(this, "zero")
         metaKeys: [
           -Primrose.Keys.CTRL,
           -Primrose.Keys.ALT,
           -Primrose.Keys.SHIFT,
           -Primrose.Keys.META
         ],
+        commandUp: this.emit.bind(this, "zero")
       }
     }));
 
