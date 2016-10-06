@@ -154,6 +154,15 @@ class InputProcessor {
 
   update(dt) {
     if (this.enabled && this.ready && this.inPhysicalUse && !this.paused && dt > 0) {
+
+      this.inputState.buttons[Primrose.Keys.ANY] = false;
+      for (const n in this.inputState.buttons) {
+        if (this.inputState.buttons[n]) {
+          this.inputState.buttons[Primrose.Keys.ANY] = true;
+          break;
+        }
+      }
+
       for (var name in this.commands) {
         var cmd = this.commands[name];
         cmd.state.wasPressed = cmd.state.pressed;
@@ -178,19 +187,14 @@ class InputProcessor {
               value = 0, temp,
               anyButtons = false;
 
-            for (n in this.inputState.buttons) {
-              if (this.inputState.buttons[n]) {
-                anyButtons = true;
-                break;
-              }
-            }
 
             if (cmd.buttons) {
               for (n = 0; n < cmd.buttons.length; ++n) {
                 var btn = cmd.buttons[n],
                   code = btn.index + 1,
-                  p = (code === Primrose.Keys.ANY) && anyButtons || !!this.inputState.buttons[code];
-                temp = p ? btn.sign : 0;
+                  p = !!this.inputState.buttons[code];
+
+                const temp = p ? btn.sign : 0;
                 pressed = pressed && (p && !btn.toggle || !p && btn.toggle);
                 if (Math.abs(temp) > Math.abs(value)) {
                   value = temp;
