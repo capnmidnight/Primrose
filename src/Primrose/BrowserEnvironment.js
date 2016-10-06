@@ -289,6 +289,9 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
         this.camera.aspect = this.renderer.domElement.width / this.renderer.domElement.height;
         this.camera.updateProjectionMatrix();
         this.renderer.clear(true, true, true);
+        if(this.input.mousePointer.unproject){
+          this.input.mousePointer.unproject.getInverse(this.camera.projectionMatrix);
+        }
         this.renderer.setViewport(0, 0, this.renderer.domElement.width, this.renderer.domElement.height);
         this.composer.render(dt);
       }
@@ -307,6 +310,12 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
           canvasWidth += p[i].viewport.width;
           canvasHeight = Math.max(canvasHeight, p[i].viewport.height);
         }
+
+        this.input.Mouse.commands.U.scale = 2/canvasWidth;
+        this.input.Mouse.commands.U.offset = -1;
+        this.input.Mouse.commands.V.scale = 2/canvasHeight;
+        this.input.Mouse.commands.V.offset = -1;
+
         canvasWidth = Math.floor(canvasWidth * resolutionScale);
         canvasHeight = Math.floor(canvasHeight * resolutionScale);
 

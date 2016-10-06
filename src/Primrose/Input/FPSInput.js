@@ -127,6 +127,8 @@ class FPSInput extends Primrose.AbstractEventEmitter {
     }));
 
     this.add(new Primrose.Input.Mouse(DOMElement, {
+      U: { axes: ["X"], min: -1, max: 1 },
+      V: { axes: ["Y"], min: -1, max: 1 },
       buttons: {
         axes: ["BUTTONS"]
       },
