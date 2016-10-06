@@ -349,11 +349,6 @@ class FPSInput extends Primrose.AbstractEventEmitter {
       this.pointers[i].update();
     }
 
-    if (!this.VR.isStereo && this.mousePointer.showPointer) {
-      // if we're not using an HMD, then update the view according to the mouse
-      this.head.quaternion.copy(this.mousePointer.quaternion);
-    }
-
     // record the position and orientation of the user
     this.newState = [];
     this.head.updateMatrix();
