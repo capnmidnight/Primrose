@@ -53,6 +53,27 @@ function filterValue(elem){
   };
 }
 
+function swap(a, b){
+  for(let i = 0; i < this.inputState.buttons.length; ++i){
+    this[a].buttons[i] = this[b].buttons[i];
+  }
+  for(let i = 0; i < this.inputState.axes.length; ++i){
+    this[a].axes[i] = this[b].axes[i];
+  }
+  for (let i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
+    const m = Primrose.Keys.MODIFIER_KEYS[i];
+    this[a][m] = this[b][m];
+  }
+}
+
+function resetInputState(){
+  swap.call(this, "inputState", "lastInputState");
+}
+
+function recordLastState(){
+  swap.call(this, "lastInputState", "inputState");
+}
+
 class CommandState{
   constructor(){
     this.value = null;
@@ -163,6 +184,7 @@ class InputProcessor {
         }
       }
 
+      let stateMod = recordLastState;
       for (var name in this.commands) {
         var cmd = this.commands[name];
         cmd.state.wasPressed = cmd.state.pressed;
@@ -245,13 +267,15 @@ class InputProcessor {
               cmd.state.lv = ov;
             }
 
-            if (cmd.min !== undefined) {
-              value = Math.max(cmd.min, value);
-            }
+              if (cmd.min !== undefined && value < cmd.min){
+                value = cmd.min;
+                stateMod = resetInputState;
+              }
 
-            if (cmd.max !== undefined) {
-              value = Math.min(cmd.max, value);
-            }
+              if (cmd.max !== undefined && value > cmd.max) {
+                value = cmd.max;
+                stateMod = resetInputState;
+              }
 
             if (cmd.threshold) {
               pressed = pressed && (value > cmd.threshold);
@@ -276,6 +300,7 @@ class InputProcessor {
           }
         }
       }
+      stateMod.call(this);
 
       this.fireCommands();
     }
