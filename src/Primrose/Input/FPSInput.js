@@ -141,7 +141,7 @@ class FPSInput extends Primrose.AbstractEventEmitter {
         scale: 0.25
       },
       dx: {
-        buttons: [1],
+        buttons: [0],
         commands: ["_dx"]
       },
       heading: {
@@ -154,7 +154,7 @@ class FPSInput extends Primrose.AbstractEventEmitter {
         scale: 0.25
       },
       dy: {
-        buttons: [1],
+        buttons: [0],
         commands: ["_dy"]
       },
       pitch: {
