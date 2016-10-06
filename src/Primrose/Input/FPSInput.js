@@ -192,7 +192,7 @@ class FPSInput extends Primrose.AbstractEventEmitter {
 
           this.pointers.push(ptr);
           ptr.addToBrowserEnvironment(null, this.options.scene);
-          ptr.forward(this, Primrose.AbstractPointer.EVENTS);
+          ptr.forward(this, Primrose.Pointer.EVENTS);
         }
         else {
           mgr = new Primrose.Input.Gamepad(pad, 0, {
@@ -233,8 +233,8 @@ class FPSInput extends Primrose.AbstractEventEmitter {
             }
           });
           this.add(mgr);
-          this.mousePointer.addDevice(mgr, mgr);
-          this.head.addDevice(mgr, mgr);
+          this.mousePointer.addDevice(mgr, mgr, mgr);
+          this.head.addDevice(mgr, mgr, mgr);
         }
       }
     });
@@ -243,16 +243,7 @@ class FPSInput extends Primrose.AbstractEventEmitter {
 
     this.stage = new THREE.Object3D();
 
-    this.mousePointer = new Primrose.Pointer("MousePointer", 0xff0000, 0x00ff00, [
-      this.Mouse
-    ], [
-      this.VR,
-      this.Keyboard
-    ]);
-    this.pointers.push(this.mousePointer);
-    this.mousePointer.addToBrowserEnvironment(null, this.options.scene);
-
-    this.head = new Primrose.PosePointer("GazePointer", 0xffff00, 0x0000ff, [
+    this.head = new Primrose.Pointer("GazePointer", 0xffff00, 0x0000ff, 0.8, [
       this.VR,
       this.Mouse,
       this.Touch,
@@ -261,7 +252,17 @@ class FPSInput extends Primrose.AbstractEventEmitter {
     this.head.useGaze = this.options.useGaze;
     this.pointers.push(this.head);
     this.head.addToBrowserEnvironment(null, this.options.scene);
-    this.pointers.forEach((ptr) => ptr.forward(this, Primrose.AbstractPointer.EVENTS));
+
+    this.mousePointer = new Primrose.Pointer("MousePointer", 0xff0000, 0x00ff00, 1, [
+      this.Mouse
+    ]);
+    this.mousePointer.unproject = new THREE.Matrix4();
+    this.pointers.push(this.mousePointer);
+    this.head.add(this.mousePointer.root);
+    this.options.scene.add(this.mousePointer.disk);
+
+
+    this.pointers.forEach((ptr) => ptr.forward(this, Primrose.Pointer.EVENTS));
     this.ready = Promise.all(this.managers
       .map((mgr) => mgr.ready)
       .filter(identity));

@@ -768,8 +768,8 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
 
       this.input = new Primrose.Input.FPSInput(this.renderer.domElement, this.options);
       this.input.addEventListener("zero", this.zero, false);
-      Primrose.AbstractPointer.EVENTS.forEach((evt) => this.input.addEventListener(evt, this.selectControl.bind(this), false));
-      this.input.forward(this, Primrose.AbstractPointer.EVENTS);
+      Primrose.Pointer.EVENTS.forEach((evt) => this.input.addEventListener(evt, this.selectControl.bind(this), false));
+      this.input.forward(this, Primrose.Pointer.EVENTS);
 
 
 
