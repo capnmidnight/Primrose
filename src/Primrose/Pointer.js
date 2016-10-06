@@ -31,15 +31,9 @@ pliny.class({
       type: "Number",
       description: "The color to use to highlight the teleport pad and 3D pointer cursor when it's pointing at a real thing."
     }, {
-      name: "orientationDevices",
+      name: "devices",
       type: "Array",
       description: "An Array of `Primrose.InputProcessor` objects that define the orientation for this pointer."
-    }, {
-      name: "positionDevices",
-      type: "Array",
-      description: "An Array of `Primrose.PoseInputProcessor` objects that define the position for this pointer.",
-      optional: true,
-      defaultValue: null
     }, {
       name: "triggerDevices",
       type: "Array",
@@ -49,12 +43,11 @@ pliny.class({
     }]
 });
 class Pointer extends Primrose.AbstractEventEmitter {
-  constructor(name, color, highlight, s, orientationDevices, positionDevices = null, triggerDevices = null) {
+  constructor(name, color, highlight, s, devices, triggerDevices = null) {
     super();
     this.name = name;
-    this.orientationDevices = orientationDevices;
-    this.positionDevices = positionDevices || orientationDevices.slice();
-    this.triggerDevices = triggerDevices || orientationDevices.slice();
+    this.devices = devices;
+    this.triggerDevices = triggerDevices || devices.slice();
 
     this.unproject = null;
 
@@ -65,11 +58,7 @@ class Pointer extends Primrose.AbstractEventEmitter {
     this.mesh = colored(box(LASER_WIDTH / s, LASER_WIDTH / s, LASER_LENGTH * s), this.color, {
       unshaded: true
     });
-
-    var arr = this.mesh.geometry.attributes.position;
-    for(var i = 2; i < arr.array.length; i += arr.itemSize){
-      arr.array[i] -= LASER_LENGTH * 0.5 + 0.5;
-    }
+    this.mesh.position.z = -1.5;
 
     this.disk = colored(sphere(TELEPORT_PAD_RADIUS, 128, 3), this.color, {
       unshaded: true
@@ -97,8 +86,8 @@ class Pointer extends Primrose.AbstractEventEmitter {
     this.gazeInner.add(this.gazeOuter);
 
     this.root = new THREE.Object3D();
-    this.add(this.mesh);
-    this.add(this.gazeInner);
+    this.root.add(this.mesh);
+    this.root.add(this.gazeInner);
 
     this.useGaze = false;
     _(this, {
@@ -130,13 +119,9 @@ class Pointer extends Primrose.AbstractEventEmitter {
     this.root.add(obj);
   }
 
-  addDevice(orientation, position, trigger){
+  addDevice(orientation, trigger){
     if(orientation){
-      this.orientationDevices.push(orientation);
-    }
-
-    if(position){
-      this.positionDevices.push(position);
+      this.devices.push(orientation);
     }
 
     if(trigger){
@@ -199,8 +184,8 @@ class Pointer extends Primrose.AbstractEventEmitter {
     if(this.unproject) {
       QUAT_TEMP.set(0, 1, 0, 0);
       VECTOR_TEMP.set(0, 0, 0);
-      for(let i = 0; i < this.orientationDevices.length; ++i) {
-        const obj = this.orientationDevices[i];
+      for(let i = 0; i < this.devices.length; ++i) {
+        const obj = this.devices[i];
         if(obj.enabled) {
           VECTOR_TEMP.x += obj.getValue("U");
           VECTOR_TEMP.y += obj.getValue("V");
@@ -214,37 +199,20 @@ class Pointer extends Primrose.AbstractEventEmitter {
     else {
       this.quaternion.set(0, 0, 0, 1);
       EULER_TEMP.set(0, 0, 0, "YXZ");
-      for(let i = 0; i < this.orientationDevices.length; ++i) {
-        const obj = this.orientationDevices[i];
+      for(let i = 0; i < this.devices.length; ++i) {
+        const obj = this.devices[i];
         if(obj.enabled) {
-          if(obj.orientation){
-            this.quaternion.multiply(obj.orientation);
+          if(obj.quaternion) {
+            this.quaternion.multiply(obj.quaternion);
           }
-          else{
-            EULER_TEMP.x += obj.getValue("pitch");
-            EULER_TEMP.y += obj.getValue("heading");
+          if(obj.position) {
+            this.position.add(obj.position);
           }
         }
       }
 
       QUAT_TEMP.setFromEuler(EULER_TEMP);
       this.quaternion.multiply(QUAT_TEMP);
-
-      for(let i = 0; i < this.positionDevices.length; ++i) {
-        const obj = this.positionDevices[i];
-        if(obj.enabled) {
-          if(obj.position){
-            this.position.x += obj.position.x;
-            this.position.y += obj.position.y;
-            this.position.z += obj.position.z;
-          }
-          else{
-            this.position.x += obj.getValue("X");
-            this.position.y += obj.getValue("Y");
-            this.position.z += obj.getValue("Z");
-          }
-        }
-      }
     }
     this.root.updateMatrixWorld();
   }
