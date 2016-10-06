@@ -241,7 +241,7 @@ class FPSInput extends Primrose.AbstractEventEmitter {
 
     Primrose.Input.Gamepad.addEventListener("gamepaddisconnected", this.remove.bind(this));
 
-    this.stage = new THREE.Object3D();
+    this.stage = hub();
 
     this.head = new Primrose.Pointer("GazePointer", 0xffff00, 0x0000ff, 0.8, [
       this.VR,
