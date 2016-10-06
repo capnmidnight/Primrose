@@ -133,8 +133,6 @@ class VR extends Primrose.PoseInputProcessor {
   }
 
   update(dt) {
-    super.update(dt);
-
     var x, z, stage;
 
     if (this.currentDevice) {
@@ -144,6 +142,8 @@ class VR extends Primrose.PoseInputProcessor {
     else{
       stage = null;
     }
+
+    super.update(dt);
 
     if (stage) {
       this.movePlayer.fromArray(stage.sittingToStandingTransform);
