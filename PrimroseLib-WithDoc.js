@@ -19158,4 +19158,4 @@ function toString(digits) {
 })();
     // end D:\Documents\VR\primrose\src\THREE\Vector3\prototype\toString.js
     ////////////////////////////////////////////////////////////////////////////////
-console.info("primrose v0.26.30. see https://www.primrosevr.com for more information.");
+console.info("primrose v0.27.0. see https://www.primrosevr.com for more information.");
