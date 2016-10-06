@@ -8613,14 +8613,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var PEERING_TIMEOUT_LENGTH = 10000;
-
-/* polyfills */
-window.RTCPeerConnection = window.RTCPeerConnection || window.webkitRTCPeerConnection || window.mozRTCPeerConnection;
-
-window.RTCIceCandidate = window.RTCIceCandidate || window.mozRTCIceCandidate;
-
-window.RTCSessionDescription = window.RTCSessionDescription || window.mozRTCSessionDescription;
+var PEERING_TIMEOUT_LENGTH = 30000;
 
 // some useful information:
 // - https://www.webrtc-experiment.com/docs/STUN-or-TURN.html
@@ -8696,7 +8689,7 @@ var WebRTCSocket = function () {
         print = function print(name, level, format) {
       if (level < MAX_LOG_LEVEL) {
         var t = new Date();
-        var args = ["[%s:%s %s] " + format, INSTANCE_COUNT, instanceNumber, formatTime(t)];
+        var args = ["[%s:%s] " + format, level, formatTime(t)];
         for (var i = 3; i < arguments.length; ++i) {
           args.push(arguments[i]);
         }
@@ -8770,15 +8763,20 @@ var WebRTCSocket = function () {
       }
     });
 
-    var iceServers = ICE_SERVERS.concat(extraIceServers);
-    if (isFirefox) {
-      iceServers = [{
-        urls: iceServers.map(function (s) {
-          return s.url;
-        })
-      }];
-    }
-
+    var iceServers = extraIceServers.concat(ICE_SERVERS).map(function (server) {
+      if (server.url && !server.urls) {
+        server.urls = [server.url];
+        delete server.url;
+      }
+      if (isFirefox) {
+        server.urls = server.urls.filter(function (url) {
+          return !/^turns:/.test(url);
+        });
+      }
+      return server;
+    }).filter(function (server) {
+      return server.urls && server.urls.length > 0;
+    });
     this._log(1, iceServers);
 
     pliny.property({
@@ -8788,6 +8786,7 @@ var WebRTCSocket = function () {
       description: "The raw RTCPeerConnection that got negotiated."
     });
     this.rtc = new RTCPeerConnection({
+      iceCandidatePoolSize: 100,
       // Indicate to the API what servers should be used to figure out NAT traversal.
       iceServers: iceServers
     });
@@ -11474,7 +11473,7 @@ var FPSInput = function (_Primrose$AbstractEve) {
         scale: 0.25
       },
       dx: {
-        buttons: [1],
+        buttons: [0],
         commands: ["_dx"]
       },
       heading: {
@@ -11487,7 +11486,7 @@ var FPSInput = function (_Primrose$AbstractEve) {
         scale: 0.25
       },
       dy: {
-        buttons: [1],
+        buttons: [0],
         commands: ["_dy"]
       },
       pitch: {
@@ -13126,19 +13125,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var ENABLE_OPUS_HACK = false;
-
-if (!navigator.mediaDevices) {
-  navigator.mediaDevices = {};
-}
-if (!navigator.mediaDevices.getUserMedia) {
-  navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.oGetUserMedia;
-  navigator.mediaDevices.getUserMedia = function (constraint) {
-    return new Promise(function (resolve, reject) {
-      return navigator.getUserMedia(constraint, resolve, reject);
-    });
-  };
-}
+var ENABLE_OPUS_HACK = true;
 
 var preferOpus = function () {
   function preferOpus(description) {
@@ -14080,11 +14067,8 @@ var Audio3D = function () {
         audio: element,
         source: this.context.createMediaElementSource(element)
       };
-      if (isChrome) {
-        element.src = URL.createObjectURL(stream);
-      } else {
-        element.srcObject = stream;
-      }
+
+      element.srcObject = stream;
       element.autoplay = true;
       element.controls = true;
       element.muted = true;
@@ -14226,11 +14210,7 @@ var Audio3D = function () {
       var audioElementCount = document.querySelectorAll("audio").length,
           element = Primrose.DOM.cascadeElement("audioStream" + audioElementCount, "audio", HTMLAudioElement, true);
       element.autoplay = true;
-      if (isFirefox) {
-        element.srcObject = stream;
-      } else {
-        element.src = URL.createObjectURL(stream);
-      }
+      element.srcObject = stream;
       element.setAttribute("muted", "");
       return stream;
     }
@@ -19158,4 +19138,4 @@ function toString(digits) {
 })();
     // end D:\Documents\VR\primrose\src\THREE\Vector3\prototype\toString.js
     ////////////////////////////////////////////////////////////////////////////////
-console.info("primrose v0.27.0. see https://www.primrosevr.com for more information.");
+console.info("primrose v0.27.1. see https://www.primrosevr.com for more information.");
