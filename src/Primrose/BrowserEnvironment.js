@@ -715,7 +715,15 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
 
 
     window.addEventListener("vrdisplaypresentchange", (evt) => {
-      if (!this.input.VR.isPresenting) {
+      const presenting = this.input.VR.isPresenting,
+        cmd = (presenting ? "remove" : "add") + "Button";
+      this.input.Mouse[cmd]("dx", 1);
+      this.input.Mouse[cmd]("dy", 1);
+      this.input.Mouse.commands.U.disabled = presenting;
+      this.input.Mouse.commands.V.disabled = presenting;
+      this.input.Mouse.commands.heading.scale = presenting ? -1 : 1;
+      this.input.Mouse.commands.pitch.scale = presenting ? -1 : 1;
+      if (!presenting) {
         this.input.VR.cancel();
       }
       modifyScreen();
@@ -1029,12 +1037,6 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
 
   get displays() {
     return this.input.VR.displays;
-  }
-
-  enableDragMode(enable){
-    const mode = (enable ? "add" : "remove") + "Button";
-    this.input.Mouse[mode]("heading", 0);
-    this.input.Mouse[mode]("pitch", 0);
   }
 }
 
