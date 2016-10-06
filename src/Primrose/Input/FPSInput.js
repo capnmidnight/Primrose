@@ -37,7 +37,10 @@ class FPSInput extends Primrose.AbstractEventEmitter {
 
     this.add(new Primrose.Input.Keyboard(this, {
       strafeLeft: {
-        buttons: [-Primrose.Keys.A, -Primrose.Keys.LEFTARROW]
+        buttons: [
+          -Primrose.Keys.A,
+          -Primrose.Keys.LEFTARROW
+        ]
       },
       strafeRight: {
         buttons: [
@@ -53,7 +56,10 @@ class FPSInput extends Primrose.AbstractEventEmitter {
         scale: 0.2
       },
       driveForward: {
-        buttons: [-Primrose.Keys.W, -Primrose.Keys.UPARROW]
+        buttons: [
+          -Primrose.Keys.W,
+          -Primrose.Keys.UPARROW
+        ]
       },
       driveBack: {
         buttons: [
@@ -73,8 +79,13 @@ class FPSInput extends Primrose.AbstractEventEmitter {
       },
       zero: {
         buttons: [Primrose.Keys.Z],
-        metaKeys: [-Primrose.Keys.CTRL, -Primrose.Keys.ALT, -Primrose.Keys.SHIFT, -Primrose.Keys.META],
         commandUp: emit.bind(this, "zero")
+        metaKeys: [
+          -Primrose.Keys.CTRL,
+          -Primrose.Keys.ALT,
+          -Primrose.Keys.SHIFT,
+          -Primrose.Keys.META
+        ],
       }
     }));
 
