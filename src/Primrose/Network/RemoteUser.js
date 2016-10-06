@@ -22,6 +22,7 @@ class RemoteUser {
     this.time = 0;
 
     this.userName = userName;
+    this.peered = false;
     this.stage = modelFactory.clone();
     this.stage.traverse((obj) => {
       if (obj.name === "AvatarBelt") {
@@ -111,28 +112,28 @@ class RemoteUser {
       this.audioChannel = new Primrose.Network.AudioChannel(extraIceServers, peeringSocket, localUserName, this.userName, outAudio, goSecond);
       return this.audioChannel.ready
         .then(() => {
-          if (!this.audioChannel.inAudio) {
-            throw new Error("Didn't get an audio channel for " + this.userName);
+          if (this.audioChannel.inAudio) {
+            this.audioElement = new Audio();
+            Primrose.Output.Audio3D.setAudioStream(this.audioChannel.inAudio);
+            this.audioElement.controls = false;
+            this.audioElement.autoplay = true;
+            this.audioElement.crossOrigin = "anonymous";
+            document.body.appendChild(this.audioElement);
+
+            this.audioStream = audio.context.createMediaStreamSource(this.audioChannel.inAudio);
+            this.gain = audio.context.createGain();
+            this.panner = audio.context.createPanner();
+
+            this.audioStream.connect(this.gain);
+            this.gain.connect(this.panner);
+            this.panner.connect(audio.mainVolume);
+            this.panner.coneInnerAngle = 180;
+            this.panner.coneOuterAngle = 360;
+            this.panner.coneOuterGain = 0.1;
+            this.panner.panningModel = "HRTF";
+            this.panner.distanceModel = "exponential";
+            this.peered = true;
           }
-          this.audioElement = new Audio();
-          Primrose.Output.Audio3D.setAudioStream(this.audioChannel.inAudio);
-          this.audioElement.controls = false;
-          this.audioElement.autoplay = true;
-          this.audioElement.crossOrigin = "anonymous";
-          document.body.appendChild(this.audioElement);
-
-          this.audioStream = audio.context.createMediaStreamSource(this.audioChannel.inAudio);
-          this.gain = audio.context.createGain();
-          this.panner = audio.context.createPanner();
-
-          this.audioStream.connect(this.gain);
-          this.gain.connect(this.panner);
-          this.panner.connect(audio.mainVolume);
-          this.panner.coneInnerAngle = 180;
-          this.panner.coneOuterAngle = 360;
-          this.panner.coneOuterGain = 0.1;
-          this.panner.panningModel = "HRTF";
-          this.panner.distanceModel = "exponential";
         });
     });
   }

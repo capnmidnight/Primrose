@@ -26,6 +26,7 @@ class Manager extends Primrose.AbstractEventEmitter {
     this.oldState = [];
     this.users = {};
     this.extraIceServers = [];
+    this.peeringEnabled = true;
     if (options.webRTC) {
       this.waitForLastUser = options.webRTC.then((obj) => {
         if (obj) {
@@ -118,17 +119,24 @@ class Manager extends Primrose.AbstractEventEmitter {
     this.users[toUserName] = user;
     this.updateUser(state);
     this.emit("addavatar", user);
-    this.waitForLastUser = this.waitForLastUser
-      .then(() => user.peer(this.extraIceServers, this._socket, this.microphone, this.userName, this.audio, goSecond))
-      .then(() => console.log("%s is peered with %s", this.userName, toUserName))
-      .catch((exp) => console.error("Couldn't load user: " + name, exp));
+    if(this.peeringEnabled){
+      this.waitForLastUser = this.waitForLastUser
+        .then(() => user.peer(this.extraIceServers, this._socket, this.microphone, this.userName, this.audio, goSecond))
+        .then(() => console.log("%s is peered (%s) with %s", this.userName, user.peered, toUserName))
+        .catch((exp) => {
+          this.peeringEnabled = false;
+          console.error("Couldn't load user: " + name, exp);
+        });
+    }
   }
 
   removeUser(key) {
     console.log("User %s logging off.", key);
     var user = this.users[key];
     if (user) {
-      user.unpeer();
+      if(user.peered){
+        user.unpeer();
+      }
       delete this.users[key];
       this.emit("removeavatar", user);
     }

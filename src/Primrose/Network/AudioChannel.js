@@ -127,7 +127,7 @@ class AudioChannel extends Primrose.WebRTCSocket {
     // Adding an audio stream to the peer connection is different between Firefox (which supports the latest
     //  version of the API) and Chrome.
     const addStream = () => {
-      this._log(0, "adding stream", this.outAudio);
+      this._log(0, "adding stream", this.outAudio, this.rtc.addTrack);
 
       // Make sure we actually have audio to send to the remote.
       if (this.outAudio) {
@@ -154,12 +154,8 @@ class AudioChannel extends Primrose.WebRTCSocket {
     };
 
     // Wait to receive an audio track.
-    if (this.rtc.ontrack) {
-      this.rtc.ontrack = (evt) => onStream(evt.streams[0]);
-    }
-    else {
-      this.rtc.onaddstream = (evt) => onStream(evt.stream);
-    }
+    this.rtc.ontrack = (evt) => onStream(evt.streams[0]);
+    this.rtc.onaddstream = (evt) => onStream(evt.stream);
 
     // If we're the boss, tell people about it.
     if (this.goFirst) {

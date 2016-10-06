@@ -83,6 +83,8 @@ class WebRTCSocket {
         return arguments[3];
       };
 
+    this.myResult = null;
+    this.theirResult = null;
     this._timeout = null;
     this._onError = null;
     this._log = print.bind(null, "log");
@@ -202,15 +204,25 @@ class WebRTCSocket {
     // This is where things get gnarly
     this.ready = new Promise((resolve, reject) => {
 
+      const setHandlers = (enabled) => {
+        const method = enabled ? "on" : "off";
+
+        this.proxyServer[method]("cancel", this._onError);
+        this.proxyServer[method]("query_request", onQuery);
+        this.proxyServer[method]("query_result", onQueryResult);
+        this.proxyServer[method]("offer", onOffer);
+        this.proxyServer[method]("ice", onIce);
+        this.proxyServer[method]("peer", onUser);
+        // When an answer is received, it's much simpler than receiving an offer. We just mark the progress and
+        // check to see if we're done.
+        this.proxyServer[method]("answer", descriptionReceived);
+      };
+
       const done = (isError) => {
         console.log(this.rtc);
         this._log(2, "Tearing down event handlers");
         this.clearTimeout();
-        this.proxyServer.off("cancel", this._onError);
-        this.proxyServer.off("peer", onUser);
-        this.proxyServer.off("offer", onOffer);
-        this.proxyServer.off("ice", onIce);
-        this.proxyServer.off("answer", descriptionReceived);
+        setHandlers(false);
         this.rtc.onsignalingstatechange = null;
         this.rtc.oniceconnectionstatechange = null;
         this.rtc.onnegotiationneeded = null;
@@ -283,6 +295,45 @@ class WebRTCSocket {
         reject(exp);
       };
 
+      const checkQueryState = () => {
+        console.log("checkQueryState", this.myResult, this.theirResult);
+        if(this.myResult && this.theirResult){
+          console.log(1, "Issuing request to peer.");
+          this.issueRequest();
+        }
+        else if(this.myResult === false) {
+          console.log(1, "Local user couldn't peer.");
+          done();
+          resolve("Local user said they couldn't peer.");
+        }
+        else if(this.theirResult === false){
+          console.log(1, "Remote user couldn't peer.");
+          done();
+          resolve("Remote user said they couldn't peer.");
+        }
+        else if(this.goFirst || this.myResult) {
+          console.log("QUERYING", this.goFirst, this.theirResult);
+          this.proxyServer.emit("query_request", this.wrap());
+        }
+      };
+
+      const onQuery = (evt) => {
+        if(this.isExpected("query request", evt)) {
+          this.myResult = isChrome && !isiOS;
+          console.log("QUERY REQUEST", this.myResult);
+          this.proxyServer.emit("query_result", this.wrap(this.myResult));
+          checkQueryState();
+        }
+      };
+
+      const onQueryResult = (evt) => {
+        if(this.isExpected("query result", evt)){
+          this.theirResult = evt.item;
+          console.log("QUERY RESULT", this.theirResult);
+          checkQueryState();
+        }
+      };
+
       // When an offer is received, we need to create an answer in reply.
       const onOffer = (offer) => {
         this._log(1, "offer", offer);
@@ -312,14 +363,6 @@ class WebRTCSocket {
         // make several connection in sequence. The Socket.IO event handlers don't seem to reliably turn off, so
         // we have to make sure the message we here is the one meant for this particular instance of the socket manager.
         if (this.isExpected("new user", evt)) {
-
-          // When an answer is recieved, it's much simpler than receiving an offer. We just mark the progress and
-          // check to see if we're done.
-          this.proxyServer.on("cancel", this._onError);
-          this.proxyServer.on("answer", descriptionReceived);
-          this.proxyServer.on("offer", onOffer);
-          this.proxyServer.on("ice", onIce);
-
           // This is just for debugging purposes.
           this.rtc.onsignalingstatechange = (evt) => this._log(1, "[%s] Signal State: %s", instanceNumber, this.rtc.signalingState);
           this.rtc.oniceconnectionstatechange = (evt) => this._log(1, "[%s] ICE Connection %s, Gathering %s", instanceNumber, this.rtc.iceConnectionState, this.rtc.iceGatheringState);
@@ -345,12 +388,12 @@ class WebRTCSocket {
             }
           };
 
-          this.issueRequest();
+          checkQueryState();
         }
       };
 
       // We need to do two things, wait for the remote user to indicate they would like to peer, and...
-      this.proxyServer.on("peer", onUser);
+      setHandlers(true);
 
       // ... let the server know to inform the remote user that we would like to peer. We need to delay a little
       // bit because it takes the remote user a little time between logging in and being ready to receive messages.
@@ -362,7 +405,7 @@ class WebRTCSocket {
 
   startTimeout() {
     if (this._timeout === null) {
-      this._log(1, "Timing out in 10 seconds.");
+      this._log(1, "Timing out in " + Math.floor(PEERING_TIMEOUT_LENGTH / 1000) + " seconds.");
       this._timeout = setTimeout(this.cancel.bind(this), PEERING_TIMEOUT_LENGTH);
     }
   }

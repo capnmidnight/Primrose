@@ -76,6 +76,7 @@ class Audio3D {
       .length,
       element = Primrose.DOM.cascadeElement("audioStream" + audioElementCount, "audio", HTMLAudioElement, true);
     element.autoplay = true;
+    element.muted = true;
     element.srcObject = stream;
     element.setAttribute("muted", "");
     return stream;
