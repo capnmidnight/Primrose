@@ -166,8 +166,9 @@ function authSucceeded() {
   ctrls.errorMessage.style.display = "none";
   disableLogin(false);
   hideLoginForm();
-
-  document.cookie = "user=" + getUserName() + "&room=" + getRoomName();
-  env.connect(socket, ctrls.userName.value);
-  document.title = getUserName() + " in " + getRoomName();
+  const userName = getUserName(),
+    roomName = getRoomName();
+  document.cookie = "user=" + userName + "&room=" + roomName;
+  env.connect(socket, userName);
+  document.title = userName + " in " + roomName;
 }
