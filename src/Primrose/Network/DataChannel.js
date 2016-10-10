@@ -10,10 +10,6 @@ pliny.class({
       type: "string",
       description: "A request path at which to retrieve the extra ICE servers to use with the connection."
     }, {
-      name: "proxyServer",
-      type: "WebSocket",
-      description: "A connection over which to negotiate the peering."
-    }, {
       name: "fromUserName",
       type: "String",
       description: "The name of the local user, from which the peering is being initiated."
@@ -32,8 +28,8 @@ pliny.class({
     }]
 });
 class DataChannel extends Primrose.WebRTCSocket {
-  constructor(requestICEPath, proxyServer, fromUserName, fromUserIndex, toUserName, toUserIndex, goSecond) {
-    super(requestICEPath, proxyServer, fromUserName, fromUserIndex, toUserName, toUserIndex, goSecond);
+  constructor(requestICEPath, fromUserName, fromUserIndex, toUserName, toUserIndex, goSecond) {
+    super(requestICEPath, fromUserName, fromUserIndex, toUserName, toUserIndex, goSecond);
 
     pliny.property({
       parent: "Primrose.Network.DataChannel",

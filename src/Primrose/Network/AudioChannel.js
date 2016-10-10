@@ -82,10 +82,6 @@ pliny.class({
       type: "string",
       description: "A request path at which to retrieve the extra ICE servers to use with the connection."
     }, {
-      name: "proxyServer",
-      type: "WebSocket",
-      description: "A connection over which to negotiate the peering."
-    }, {
       name: "fromUserName",
       type: "String",
       description: "The name of the local user, from which the peering is being initiated."
@@ -95,14 +91,14 @@ pliny.class({
       description: "The name of the remote user, to which the peering is being requested."
     }, {
       name: "outAudio",
-      type: "MediaStream",
+      type: "Promise",
       description: "An audio stream from the local user to send to the remote user."
     }, ]
 });
 class AudioChannel extends Primrose.WebRTCSocket {
-  constructor(requestICEPath, proxyServer, fromUserName, toUserName, outAudio, goSecond) {
+  constructor(requestICEPath, fromUserName, toUserName, outAudio, goSecond) {
     console.log("attempting to peer audio from %s to %s. %s goes first.", fromUserName, toUserName, goSecond ? toUserName : fromUserName);
-    super(requestICEPath, proxyServer, fromUserName, 0, toUserName, 0, goSecond);
+    super(requestICEPath, fromUserName, 0, toUserName, 0, goSecond);
     pliny.property({
       parent: "Primrose.Network.AudioChannel",
       name: "outAudio",
@@ -124,21 +120,22 @@ class AudioChannel extends Primrose.WebRTCSocket {
   }
 
   issueRequest() {
+    console.log("going first", this.goFirst);
     // Adding an audio stream to the peer connection is different between Firefox (which supports the latest
     //  version of the API) and Chrome.
     const addStream = () => {
       this._log(0, "adding stream", this.outAudio, this.rtc.addTrack);
 
       // Make sure we actually have audio to send to the remote.
-      if (this.outAudio) {
+      this.outAudio.then((aud) => {
         if (this.rtc.addTrack) {
-          this.outAudio.getAudioTracks()
-            .forEach((track) => this.rtc.addTrack(track, this.outAudio));
+          aud.getAudioTracks()
+            .forEach((track) => this.rtc.addTrack(track, aud));
         }
         else {
-          this.rtc.addStream(this.outAudio);
+          this.rtc.addStream(aud);
         }
-      }
+      });
     };
 
     // Receiving an audio stream from the peer connection is just a
@@ -167,14 +164,14 @@ class AudioChannel extends Primrose.WebRTCSocket {
   // The peering process is complete when all offers are answered.
   get complete() {
     if (this.goFirst) {
-      this._log(1, "[First]: OC %s -> AR %s -> OR %s -> AC %s.",
+      this._log(1, "[First]: offer created: %s, answer recv: %s -> offer recv: %s -> answer created: %s.",
         this.progress.offer.created,
         this.progress.answer.received,
         this.progress.offer.received,
         this.progress.answer.created);
     }
     else {
-      this._log(1, "[Second]: OR %s -> AC %s -> OC %s -> AR %s.",
+      this._log(1, "[Second]: offer recv: %s, answer created: %s -> offer created: %s -> answer recv: %s.",
         this.progress.offer.received,
         this.progress.answer.created,
         this.progress.offer.created,

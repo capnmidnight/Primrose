@@ -137,8 +137,8 @@ function Projector(isWorker) {
           }
 
           // http://www.mathworks.com/matlabcentral/fileexchange/
-          // 	20696-function-to-convert-between-dcm-euler-angles-quaternions-and-euler-vectors/
-          //	content/SpinCalc.m
+          //   20696-function-to-convert-between-dcm-euler-angles-quaternions-and-euler-vectors/
+          //  content/SpinCalc.m
 
           var c1 = Math.cos(euler._x / 2);
           var c2 = Math.cos(euler._y / 2);

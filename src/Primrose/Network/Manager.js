@@ -91,6 +91,22 @@ class Manager extends Primrose.AbstractEventEmitter {
       this._socket.on("userState", this.updateUser.bind(this));
       this._socket.on("userLeft", this.removeUser.bind(this));
       this._socket.on("connection_lost", this.lostConnection.bind(this));
+
+      Primrose.WebRTCSocket.PEERING_EVENTS.forEach((name) => this._socket.on(name, (evt) => {
+        console.log("-->", evt.type, evt);
+        if(evt.toUserName === this.userName){
+          const user = this.users[evt.fromUserName],
+            methodName = "peering_" + name,
+            method = user && user[methodName];
+          if(method){
+            method.call(user, evt);
+          }
+          else{
+            console.warn("NO METHOD %s ON USER %s", methodName, user);
+          }
+        }
+      }));
+
       this._socket.emit("listUsers");
       this._socket.emit("getDeviceIndex");
     }
@@ -105,13 +121,21 @@ class Manager extends Primrose.AbstractEventEmitter {
   addUser(state, goSecond) {
     console.log("User %s logging on.", state[0]);
     var toUserName = state[0],
-      user = new Primrose.Network.RemoteUser(toUserName, this.factories.avatar, this.options.foregroundColor);
+      user = new Primrose.Network.RemoteUser(toUserName, this.factories.avatar, this.options.foregroundColor, this.options.webRTC, this.microphone, this.userName, goSecond);
     this.users[toUserName] = user;
+
+    Primrose.WebRTCSocket.PEERING_EVENTS.forEach((name) =>
+      user.addEventListener(name, (evt) => {
+        console.log("<--", name, evt);
+        this._socket.emit(name, evt);
+      }));
+
     this.updateUser(state);
     this.emit("addavatar", user);
+
     if(this.peeringEnabled){
       this.waitForLastUser = this.waitForLastUser
-        .then(() => user.peer(this.options.webRTC, this._socket, this.microphone, this.userName, this.audio, goSecond))
+        .then(() => user.peer(this.audio))
         .then(() => console.log("%s is peered (%s) with %s", this.userName, user.peered, toUserName))
         .catch((exp) => {
           this.peeringEnabled = false;
