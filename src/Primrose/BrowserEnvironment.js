@@ -703,14 +703,15 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
     //
     this.goFullScreen = (index, evt) => {
       if (evt !== "Gaze") {
+        const elem = !this.input.VR.isStereo || isMobile && !this.input.VR.isNativeMobileWebVR ?
+              this.options.fullscreenElement :
+              this.renderer.domElement;
         this.input.VR.connect(index);
         this.input.VR.requestPresent([{
-            source: !this.input.VR.isStereo || isMobile && !this.input.VR.isNativeMobileWebVR ?
-              this.options.fullscreenElement :
-              this.renderer.domElement
+            source: elem
           }])
           .catch((exp) => console.error("whaaat", exp))
-          .then(() => this.renderer.domElement.focus());
+          .then(() => elem.focus());
       }
     };
 
@@ -784,7 +785,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       this.renderer.domElement.addEventListener('webglcontextlost', this.stop, false);
       this.renderer.domElement.addEventListener('webglcontextrestored', this.start, false);
 
-      this.input = new Primrose.Input.FPSInput(this.renderer.domElement, this.options);
+      this.input = new Primrose.Input.FPSInput(this.options.fullscreenElement, this.options);
       this.input.addEventListener("zero", this.zero, false);
       Primrose.Pointer.EVENTS.forEach((evt) => this.input.addEventListener(evt, this.selectControl.bind(this), false));
       this.input.forward(this, Primrose.Pointer.EVENTS);
