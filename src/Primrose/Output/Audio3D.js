@@ -71,15 +71,17 @@ class Audio3D {
     }
   }
 
-  static setAudioStream(stream) {
+  static setAudioStream(stream, id) {
     const audioElementCount = document.querySelectorAll("audio")
       .length,
-      element = Primrose.DOM.cascadeElement("audioStream" + audioElementCount, "audio", HTMLAudioElement, true);
+      element = Primrose.DOM.cascadeElement(id || ("audioStream" + audioElementCount), "audio", HTMLAudioElement, true);
     element.autoplay = true;
+    element.controls = false;
+    element.crossOrigin = "anonymous";
     element.muted = true;
     element.srcObject = stream;
     element.setAttribute("muted", "");
-    return stream;
+    return element;
   }
 
   start() {
@@ -154,8 +156,9 @@ class Audio3D {
 
     element.srcObject = stream;
     element.autoplay = true;
-    element.controls = true;
+    element.controls = false;
     element.muted = true;
+    element.crossOrigin = "anonymous";
     snd.source.connect(this.mainVolume);
     //snd.source.connect(snd.volume):
     //snd.volume.connect(snd.panner);
@@ -239,6 +242,7 @@ class Audio3D {
       var audio = document.createElement("audio");
       audio.autoplay = true;
       audio.loop = loop;
+      audio.crossOrigin = "anonymous";
       sources.map((src) => {
           var source = document.createElement("source");
           source.src = src;

@@ -25,7 +25,6 @@ class Manager extends Primrose.AbstractEventEmitter {
     this.lastNetworkUpdate = 0;
     this.oldState = [];
     this.users = {};
-    this.peeringEnabled = true;
     this.waitForLastUser = Promise.resolve();
     this._socket = null;
     this.userName = null;
@@ -78,7 +77,7 @@ class Manager extends Primrose.AbstractEventEmitter {
           audio: true,
           video: false
         })
-        .then(Primrose.Output.Audio3D.setAudioStream)
+        //.then(Primrose.Output.Audio3D.setAudioStream)
         .catch(console.warn.bind(console, "Can't get audio"));
     }
     if (!this._socket) {
@@ -98,7 +97,7 @@ class Manager extends Primrose.AbstractEventEmitter {
           const user = this.users[evt.fromUserName],
             methodName = "peering_" + name,
             method = user && user[methodName];
-          if(method){
+          if((user.peered || user.peering) && method){
             method.call(user, evt);
           }
           else{
@@ -132,16 +131,14 @@ class Manager extends Primrose.AbstractEventEmitter {
 
     this.updateUser(state);
     this.emit("addavatar", user);
-
-    if(this.peeringEnabled){
-      this.waitForLastUser = this.waitForLastUser
-        .then(() => user.peer(this.audio))
-        .then(() => console.log("%s is peered (%s) with %s", this.userName, user.peered, toUserName))
-        .catch((exp) => {
-          this.peeringEnabled = false;
-          console.error("Couldn't load user: " + name, exp);
-        });
-    }
+    this.waitForLastUser = this.waitForLastUser
+      .then(() => user.peer(this.audio))
+      .then(() => console.log("%s is peered (%s) with %s", this.userName, user.peered, toUserName))
+      .then(() => {
+        if(user.peeringError) {
+          console.error("Couldn't load user: " + name, user.peeringError);
+        }
+      });
   }
 
   removeUser(key) {

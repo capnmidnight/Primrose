@@ -36,6 +36,8 @@ class RemoteUser extends Primrose.AbstractEventEmitter {
     this.time = 0;
 
     this.userName = userName;
+    this.peeringError = null;
+    this.peering = false;
     this.peered = false;
     this.stage = modelFactory.clone();
     this.stage.traverse((obj) => {
@@ -118,31 +120,33 @@ class RemoteUser extends Primrose.AbstractEventEmitter {
         description: "The audio context form which audio spatialization objects will be created, and to which the remote user's voice chat will be piped."
       }]
     });
-    return this.audioChannel.ready
-      .then(() => {
-        if (this.audioChannel.inAudio) {
-          this.audioElement = new Audio();
-          Primrose.Output.Audio3D.setAudioStream(this.audioChannel.inAudio);
-          this.audioElement.controls = false;
-          this.audioElement.autoplay = true;
-          this.audioElement.crossOrigin = "anonymous";
-          document.body.appendChild(this.audioElement);
+    if(!this.peered && !this.peering && !this.peeringError){
+      this.peering = true;
+      return this.audioChannel.ready
+        .then(() => {
+          if (this.audioChannel.inAudio) {
+            this.audioElement = Primrose.Output.Audio3D.setAudioStream(this.audioChannel.inAudio, "audio" + this.userName);
+            this.audioStream = audio.context.createMediaStreamSource(this.audioChannel.inAudio);
+            this.gain = audio.context.createGain();
+            this.panner = audio.context.createPanner();
 
-          this.audioStream = audio.context.createMediaStreamSource(this.audioChannel.inAudio);
-          this.gain = audio.context.createGain();
-          this.panner = audio.context.createPanner();
-
-          this.audioStream.connect(this.gain);
-          this.gain.connect(this.panner);
-          this.panner.connect(audio.mainVolume);
-          this.panner.coneInnerAngle = 180;
-          this.panner.coneOuterAngle = 360;
-          this.panner.coneOuterGain = 0.1;
-          this.panner.panningModel = "HRTF";
-          this.panner.distanceModel = "exponential";
-          this.peered = true;
-        }
-      });
+            this.audioStream.connect(this.gain);
+            this.gain.connect(this.panner);
+            this.panner.connect(audio.mainVolume);
+            this.panner.coneInnerAngle = 180;
+            this.panner.coneOuterAngle = 360;
+            this.panner.coneOuterGain = 0.1;
+            this.panner.panningModel = "HRTF";
+            this.panner.distanceModel = "exponential";
+            this.peered = true;
+          }
+        })
+        .catch((exp) => {
+          this.peered = false;
+          this.peeringError = exp;
+        })
+        .then(() => this.peering = false);
+    }
   }
 
   addEventListener(type, thunk){

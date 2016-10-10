@@ -138,7 +138,7 @@ class WebRTCSocket extends Primrose.AbstractEventEmitter {
     // When an offer or an answer is created, it's pretty much the same exact processing. Either type
     // of object gets wrapped with a context identifying which peer channel is being negotiated, and
     // then transmitted through the negotiation server to the remote user.
-    const descriptionCreated = (description) => {
+    this.descriptionCreated = (description) => {
       this.recordProgress(description, "created");
 
       // The description we create is always the local description, regardless of whether or not it's an offer
@@ -167,7 +167,7 @@ class WebRTCSocket extends Primrose.AbstractEventEmitter {
       var promise = this.peering_answer(offer);
       if (promise) {
         return promise.then(() => this.rtc.createAnswer())
-          .then(descriptionCreated);
+          .then(this.descriptionCreated);
       }
     };
 
@@ -216,9 +216,8 @@ class WebRTCSocket extends Primrose.AbstractEventEmitter {
         // you that negotiation is necessary, and only then create the offer. There is a race-condition between
         // the signaling state of the WebRTCPeerConnection and creating an offer after creating a channel if we
         // don't wait for the appropriate time.
-        this.rtc.onnegotiationneeded = (evt) => this.createOffer(this.offerOptions)
-          // record the local description.
-          .then(descriptionCreated);
+        this.rtc.onnegotiationneeded = (evt) => this.createOffer()
+          .then(this.descriptionCreated);
 
         // The API is going to figure out end-point configurations for us by communicating with the STUN servers
         // and seeing which end-points are visible and which require network address translation.
@@ -268,7 +267,7 @@ class WebRTCSocket extends Primrose.AbstractEventEmitter {
   }
 
   createOffer() {
-    return this.rtc.createOffer();
+    return this.rtc.createOffer(this.offerOptions);
   }
 
   recordProgress(description, method) {
