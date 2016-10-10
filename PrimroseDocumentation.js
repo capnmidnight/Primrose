@@ -1870,15 +1870,12 @@ pliny.namespace({
 pliny.class({
   parent: "Primrose",
   name: "WebRTCSocket",
+  baseClass: "Primrose.AbstractEventEmitter",
   description: "Manages the negotiation between peer users to set up bidirectional audio between the two.",
   parameters: [{
-    name: "extraIceServers",
-    type: "Array",
-    description: "A collection of ICE servers to use on top of the default Google STUN servers."
-  }, {
-    name: "proxyServer",
-    type: "WebSocket",
-    description: "A connection over which to negotiate the peering."
+    name: "requestICEPath",
+    type: "string",
+    description: "A request path at which to retrieve the extra ICE servers to use with the connection."
   }, {
     name: "fromUserName",
     type: "String",
@@ -1898,55 +1895,7 @@ pliny.class({
   }]
 });
 
-pliny.property({
-      parent: "Primrose.WebRTCSocket",
-      name: "proxyServer",
-      type: "WebSocket",
-      description: "The connection over which to negotiate the peering."
-    });
-    pliny.property({
-      parent: "Primrose.WebRTCSocket",
-      name: "fromUserName",
-      type: "String",
-      description: "The name of the local user."
-    });
-    pliny.property({
-      parent: "Primrose.WebRTCSocket",
-      name: "fromUserIndex",
-      type: "Number",
-      description: "The index of the local user's current device."
-    });
-    pliny.property({
-      parent: "Primrose.WebRTCSocket",
-      name: "toUserName",
-      type: "String",
-      description: "The name of the remote user."
-    });
-    pliny.property({
-      parent: "Primrose.WebRTCSocket",
-      name: "toUserIndex",
-      type: "Number",
-      description: "The index of the remote user's current device."
-    });
-    pliny.property({
-      parent: "Primrose.WebRTCSocket",
-      name: "rtc",
-      type: "RTCPeerConnection",
-      description: "The raw RTCPeerConnection that got negotiated."
-    });
-    pliny.property({
-      parent: "Primrose.WebRTCSocket",
-      name: "progress",
-      type: "WebSocket",
-      description: "The connection over which to negotiate the peering."
-    });
-    pliny.property({
-      parent: "Primrose.WebRTCSocket",
-      name: "goFirst",
-      type: "Boolean",
-      description: "We don't want the ICE candidates, offers, and answers clashing in the middle, so we need to be careful about order of operations. Users already in the room will initiate peer connections with users that are just joining."
-    });
-    pliny.method({
+pliny.method({
         parent: "Primrose.WebRTCSocket",
         name: "recordProgress",
         description: "mark that we made progress towards our goals.",
@@ -1960,33 +1909,6 @@ pliny.property({
           description: "Whether or not the description had been 'created' or 'received' here."
         }]
       });
-      pliny.method({
-        parent: "Primrose.WebRTCSocket",
-        name: "wrap",
-        returns: "Object",
-        description: "Provides the context into a message so that the remote user can tell if the message `this.isExpected()`",
-        parameters: [{
-          name: "item",
-          type: "Object",
-          description: "The object to wrap."
-        }]
-      });
-      pliny.method({
-        parent: "Primrose.WebRTCSocket",
-        name: "isExpected",
-        returns: "Boolean",
-        description: "A test to see if we were expecting a particular message. Sometimes the messages get criss-crossed on the negotiation server, and this just makes sure we don't cause an error.",
-        parameters: [{
-          name: "tag",
-          type: "String",
-          description: "A name for the operation being tested."
-        }, {
-          name: "obj",
-          type: "Object",
-          description: "The object within the operating being tested."
-        }]
-      });
-
       pliny.method({
         parent: "Primrose.WebRTCSocket",
         name: "close",
@@ -2931,13 +2853,9 @@ pliny.class({
   baseClass: "Primrose.WebRTCSocket",
   description: "Manages the negotiation between peer users to set up bidirectional audio between the two.",
   parameters: [{
-    name: "extraIceServers",
-    type: "Array",
-    description: "A collection of ICE servers to use on top of the default Google STUN servers."
-  }, {
-    name: "proxyServer",
-    type: "WebSocket",
-    description: "A connection over which to negotiate the peering."
+    name: "requestICEPath",
+    type: "string",
+    description: "A request path at which to retrieve the extra ICE servers to use with the connection."
   }, {
     name: "fromUserName",
     type: "String",
@@ -2948,7 +2866,7 @@ pliny.class({
     description: "The name of the remote user, to which the peering is being requested."
   }, {
     name: "outAudio",
-    type: "MediaStream",
+    type: "Promise",
     description: "An audio stream from the local user to send to the remote user."
   }]
 });
@@ -2971,13 +2889,9 @@ pliny.property({
   baseClass: "Primrose.WebRTCSocket",
   description: "Manages the negotiation between peer users to set up bidirectional audio between the two.",
   parameters: [{
-    name: "extraIceServers",
-    type: "Array",
-    description: "A collection of ICE servers to use on top of the default Google STUN servers."
-  }, {
-    name: "proxyServer",
-    type: "WebSocket",
-    description: "A connection over which to negotiate the peering."
+    name: "requestICEPath",
+    type: "string",
+    description: "A request path at which to retrieve the extra ICE servers to use with the connection."
   }, {
     name: "fromUserName",
     type: "String",
@@ -3024,6 +2938,7 @@ pliny.property({
 pliny.class({
   parent: "Primrose.Network",
   name: "RemoteUser",
+  baseClass: "Primrose.AbstractEventEmitter",
   description: "A networked user.",
   parameters: [{
     name: "userName",
@@ -3037,6 +2952,18 @@ pliny.class({
     name: "nameMaterial",
     type: "Number",
     description: "The color to use with `colored()` to set as the material for the NAME object that will float above the user's avatar."
+  }, {
+    name: "requestICEPath",
+    type: "string",
+    description: "A request path at which to retrieve the extra ICE servers to use with the connection."
+  }, {
+    name: "microphone",
+    type: "Promise",
+    description: "A promise that resolves with an audio stream that can be sent to the remote user, representing the local user's voice chat."
+  }, {
+    name: "localUserName",
+    type: "String",
+    description: "The name of the user initiating the peer connection."
   }]
 });
 
@@ -3046,28 +2973,11 @@ pliny.method({
         returns: "Promise",
         description: "Makes a WebRTCPeerConnection between the local user and this remote user and wires up the audio channel.",
         parameters: [{
-          name: "extraIceServers",
-          type: "Array",
-          description: "A collection of ICE servers to use on top of the default Google STUN servers."
-        }, {
-          name: "peeringSocket",
-          type: "WebSocket",
-          description: "A WebSocket over which the peer connection will be negotiated."
-        }, {
-          name: "microphone",
-          type: "Promise",
-          description: "A promise that resolves with an audio stream that can be sent to the remote user, representing the local user's voice chat."
-        }, {
-          name: "localUserName",
-          type: "String",
-          description: "The name of the user initiating the peer connection."
-        }, {
           name: "audio",
           type: "Primrose.Output.Audio3D",
           description: "The audio context form which audio spatialization objects will be created, and to which the remote user's voice chat will be piped."
         }]
       });
-
       pliny.method({
         parent: "Pliny.RemoteUser",
         name: "unpeer",

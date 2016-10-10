@@ -135,4 +135,6 @@ input:disabled, button:disabled {
   margin-top: 1em;
 }
 
-#connect {display: inline-block;
+#connect {
+  display: inline-block;
+}

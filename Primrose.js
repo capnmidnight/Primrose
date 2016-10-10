@@ -71376,8 +71376,8 @@ function Projector(isWorker) {
           }
 
           // http://www.mathworks.com/matlabcentral/fileexchange/
-          // 	20696-function-to-convert-between-dcm-euler-angles-quaternions-and-euler-vectors/
-          //	content/SpinCalc.m
+          //   20696-function-to-convert-between-dcm-euler-angles-quaternions-and-euler-vectors/
+          //  content/SpinCalc.m
 
           var c1 = Math.cos(euler._x / 2);
           var c2 = Math.cos(euler._y / 2);
@@ -73976,7 +73976,13 @@ var Text = {};
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var PEERING_TIMEOUT_LENGTH = 30000;
 
@@ -73985,45 +73991,28 @@ var PEERING_TIMEOUT_LENGTH = 30000;
 // - http://www.html5rocks.com/en/tutorials/webrtc/infrastructure/#after-signaling-using-ice-to-cope-with-nats-and-firewalls
 // - https://github.com/coturn/rfc5766-turn-server/
 var ICE_SERVERS = [{
-  url: "stun:stun.l.google.com:19302"
-}, {
-  url: "stun:stun1.l.google.com:19302"
-}, {
-  url: "stun:stun2.l.google.com:19302"
-}, {
-  url: "stun:stun3.l.google.com:19302"
-}, {
-  url: "stun:stun4.l.google.com:19302"
+  urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302", "stun:stun2.l.google.com:19302", "stun:stun3.l.google.com:19302", "stun:stun4.l.google.com:19302"]
 }];
 
 var INSTANCE_COUNT = 0;
 
-function formatTime(t) {
-  var ms = t.getMilliseconds().toString();
-  while (ms.length < 3) {
-    ms = "0" + ms;
-  }
-  return t.toLocaleTimeString().replace(/(\d+:\d+:\d+)/, function (_, g) {
-    return g + "." + ms;
-  });
-}
+var WebRTCSocket = function (_Primrose$AbstractEve) {
+  _inherits(WebRTCSocket, _Primrose$AbstractEve);
 
-var WebRTCSocket = function () {
   // Be forewarned, the WebRTC lifecycle is very complex and editing this class is likely to break it.
-  function WebRTCSocket(extraIceServers, proxyServer, fromUserName, fromUserIndex, toUserName, toUserIndex, goSecond) {
-    var _this = this;
-
+  function WebRTCSocket(requestICEPath, fromUserName, fromUserIndex, toUserName, toUserIndex, goSecond) {
     _classCallCheck(this, WebRTCSocket);
 
     // These logging constructs are basically off by default, but you will need them if you ever
     // need to debug the WebRTC workflow.
+    var _this = _possibleConstructorReturn(this, (WebRTCSocket.__proto__ || Object.getPrototypeOf(WebRTCSocket)).call(this));
+
     var attemptCount = 0;
     var MAX_LOG_LEVEL = 5,
         instanceNumber = ++INSTANCE_COUNT,
         print = function print(name, level, format) {
       if (level < MAX_LOG_LEVEL) {
-        var t = new Date();
-        var args = ["[%s:%s] " + format, level, formatTime(t)];
+        var args = ["%s: " + format, level];
         for (var i = 3; i < arguments.length; ++i) {
           args.push(arguments[i]);
         }
@@ -74032,66 +74021,18 @@ var WebRTCSocket = function () {
       return arguments[3];
     };
 
-    this.myResult = null;
-    this.theirResult = null;
-    this._timeout = null;
-    this._onError = null;
-    this._log = print.bind(null, "log");
-    this._error = print.bind(null, "error", 0);
-
-    Object.defineProperty(this, "proxyServer", {
-      get: function get() {
-        return proxyServer;
-      }
-    });
-
-    Object.defineProperty(this, "fromUserName", {
-      get: function get() {
-        return fromUserName;
-      }
-    });
-
-    Object.defineProperty(this, "fromUserIndex", {
-      get: function get() {
-        return fromUserIndex;
-      }
-    });
-
-    Object.defineProperty(this, "toUserName", {
-      get: function get() {
-        return toUserName;
-      }
-    });
-
-    Object.defineProperty(this, "toUserIndex", {
-      get: function get() {
-        return toUserIndex;
-      }
-    });
-
-    var iceServers = extraIceServers.concat(ICE_SERVERS).map(function (server) {
-      if (server.url && !server.urls) {
-        server.urls = [server.url];
-        delete server.url;
-      }
-      if (isFirefox) {
-        server.urls = server.urls.filter(function (url) {
-          return !/^turns:/.test(url);
-        });
-      }
-      return server;
-    }).filter(function (server) {
-      return server.urls && server.urls.length > 0;
-    });
-    this._log(1, iceServers);
-
-    this.rtc = new RTCPeerConnection({
-      iceCandidatePoolSize: 100,
-      // Indicate to the API what servers should be used to figure out NAT traversal.
-      iceServers: iceServers
-    });
-
-    var progress = {
+    _this.myResult = null;
+    _this.theirResult = null;
+    _this._timeout = null;
+    _this._log = print.bind(null, "log");
+    _this._error = print.bind(null, "error", 0);
+    _this.fromUserName = fromUserName;
+    _this.fromUserIndex = fromUserIndex;
+    _this.toUserName = toUserName;
+    _this.toUserIndex = toUserIndex;
+    _this.rtc = null;
+    _this.goFirst = !goSecond;
+    _this.progress = {
       offer: {
         created: false,
         received: false
@@ -74101,232 +74042,179 @@ var WebRTCSocket = function () {
         recieved: false
       }
     };
-    Object.defineProperty(this, "progress", {
-      get: function get() {
-        return progress;
-      }
-    });
-
-    Object.defineProperty(this, "goFirst", {
-      get: function get() {
-        return !goSecond;
-      }
-    });
-
     // If the user leaves the page, we want to at least fire off the close signal and perhaps
     // not completely surprise the remote user.
-    window.addEventListener("unload", this.close.bind(this));
+    window.addEventListener("unload", _this.close.bind(_this));
+
+    var resolve = null,
+        reject = null;
+
+    var done = function done(isError) {
+      _this._log(2, "Tearing down event handlers");
+      _this.clearTimeout();
+      _this.rtc.onsignalingstatechange = null;
+      _this.rtc.oniceconnectionstatechange = null;
+      _this.rtc.onnegotiationneeded = null;
+      _this.rtc.onicecandidate = null;
+
+      _this.teardown();
+      if (isError) {
+        _this.close();
+      }
+    };
+
+    // A pass-through function to include in the promise stream to see if the channels have all been
+    // set up correctly and ready to go.
+    var check = function check(obj) {
+      if (_this.complete) {
+        _this._log(1, "Timeout avoided.");
+        done();
+        resolve();
+      }
+      return obj;
+    };
+
+    // When an offer or an answer is received, it's pretty much the same exact processing. Either
+    // type of object gets checked to see if it was expected, then unwrapped.
+    _this.peering_answer = function (description) {
+      _this._log(1, "description", description);
+      // Check to see if we expected this sort of message from this user.
+      _this.recordProgress(description.item, "received");
+      // The description we received is always the remote description, regardless of whether or not it's an offer
+      // or an answer.
+      return _this.rtc.setRemoteDescription(new RTCSessionDescription(description.item))
+
+      // check to see if we're done.
+      .then(check)
+
+      // and if there are any errors, bomb out and shut everything down.
+      .catch(_this.peering_cancel);
+    };
+
+    // When an offer or an answer is created, it's pretty much the same exact processing. Either type
+    // of object gets wrapped with a context identifying which peer channel is being negotiated, and
+    // then transmitted through the negotiation server to the remote user.
+    _this.descriptionCreated = function (description) {
+      _this.recordProgress(description, "created");
+
+      // The description we create is always the local description, regardless of whether or not it's an offer
+      // or an answer.
+      return _this.rtc.setLocalDescription(description)
+      // Let the remote user know what happened.
+      .then(function () {
+        return _this.emit(description.type, description);
+      })
+      // check to see if we're done.
+      .then(check)
+      // and if there are any errors, bomb out and shut everything down.
+      .catch(_this.peering_cancel);
+    };
+
+    // A catch-all error handler to shut down the world if an error we couldn't handle happens.
+    _this.peering_cancel = function (exp) {
+      _this._error(exp);
+      _this.emit("cancel", exp);
+      _this._log(1, "Timeout avoided, but only because of an error.");
+      done(true);
+      reject(exp);
+    };
+
+    // When an offer is received, we need to create an answer in reply.
+    _this.peering_offer = function (offer) {
+      _this._log(1, "offer", offer);
+      var promise = _this.peering_answer(offer);
+      if (promise) {
+        return promise.then(function () {
+          return _this.rtc.createAnswer();
+        }).then(_this.descriptionCreated);
+      }
+    };
+
+    // ICE stands for Interactive Connectivity Establishment. It's basically a description of a local end-point,
+    // with enough information for the remote user to be able to connect to it.
+    _this.peering_ice = function (ice) {
+      _this._log(1, "ice", ice);
+      var candidate = new RTCIceCandidate(ice.item);
+      return _this.rtc.addIceCandidate(candidate).catch(_this._error);
+    };
+
+    _this.peering_peer = function (evt) {
+      _this._log(1, "peering", evt);
+      _this.hasRTC.then(function () {
+        return _this.issueRequest();
+      });
+    };
 
     // This is where things get gnarly
-    this.ready = new Promise(function (resolve, reject) {
-
-      var setHandlers = function setHandlers(enabled) {
-        var method = enabled ? "on" : "off";
-
-        _this.proxyServer[method]("cancel", _this._onError);
-        _this.proxyServer[method]("query_request", onQuery);
-        _this.proxyServer[method]("query_result", onQueryResult);
-        _this.proxyServer[method]("offer", onOffer);
-        _this.proxyServer[method]("ice", onIce);
-        _this.proxyServer[method]("peer", onUser);
-        // When an answer is received, it's much simpler than receiving an offer. We just mark the progress and
-        // check to see if we're done.
-        _this.proxyServer[method]("answer", descriptionReceived);
+    _this.hasRTC = Primrose.HTTP.getObject(requestICEPath).then(function (config) {
+      config.iceServers.push.apply(config.iceServers, ICE_SERVERS);
+      for (var i = config.iceServers.length - 1; i >= 0; --i) {
+        var server = config.iceServers[i];
+        if (!server.urls || server.urls.length === 0) {
+          config.iceServers.splice(i, 1);
+        } else {
+          if (server.url && !server.urls) {
+            server.urls = [server.url];
+            delete server.url;
+          }
+          if (server.username && server.credential) {
+            server.credentialType = "token";
+          }
+        }
+      }
+      config.iceCandidatePoolSize = 100;
+      _this._log(1, config);
+      _this.rtc = new RTCPeerConnection(config);
+      // This is just for debugging purposes.
+      _this.rtc.onsignalingstatechange = function (evt) {
+        return _this._log(1, "[%s] Signal State: %s", instanceNumber, _this.rtc.signalingState);
+      };
+      _this.rtc.oniceconnectionstatechange = function (evt) {
+        return _this._log(1, "[%s] ICE Connection %s, Gathering %s", instanceNumber, _this.rtc.iceConnectionState, _this.rtc.iceGatheringState);
       };
 
-      var done = function done(isError) {
-        console.log(_this.rtc);
-        _this._log(2, "Tearing down event handlers");
-        _this.clearTimeout();
-        setHandlers(false);
-        _this.rtc.onsignalingstatechange = null;
-        _this.rtc.oniceconnectionstatechange = null;
-        _this.rtc.onnegotiationneeded = null;
-        _this.rtc.onicecandidate = null;
+      // All of the literature you'll read on WebRTC show creating an offer right after creating a data channel
+      // or adding a stream to the peer connection. This is wrong. The correct way is to wait for the API to tell
+      // you that negotiation is necessary, and only then create the offer. There is a race-condition between
+      // the signaling state of the WebRTCPeerConnection and creating an offer after creating a channel if we
+      // don't wait for the appropriate time.
+      _this.rtc.onnegotiationneeded = function (evt) {
+        return _this.createOffer().then(_this.descriptionCreated);
+      };
 
-        _this.teardown();
-        if (isError) {
-          _this.close();
+      // The API is going to figure out end-point configurations for us by communicating with the STUN servers
+      // and seeing which end-points are visible and which require network address translation.
+      _this.rtc.onicecandidate = function (evt) {
+        // There is an error condition where sometimes the candidate returned in this event handler will be null.
+        if (evt.candidate) {
+          // Then let the remote user know of our folly.
+          _this.emit("ice", evt.candidate);
         }
       };
-
-      // A pass-through function to include in the promise stream to see if the channels have all been
-      // set up correctly and ready to go.
-      var check = function check(obj) {
-        if (_this.complete) {
-          _this._log(1, "Timeout avoided.");
-          done();
-          resolve();
-        }
-        return obj;
-      };
-
-      // When an offer or an answer is received, it's pretty much the same exact processing. Either
-      // type of object gets checked to see if it was expected, then unwrapped.
-      var descriptionReceived = function descriptionReceived(description) {
-        _this._log(1, "description", description);
-        // Check to see if we expected this sort of message from this user.
-        if (_this.isExpected(description.item.type, description)) {
-
-          _this.recordProgress(description.item, "received");
-
-          // The description we received is always the remote description, regardless of whether or not it's an offer
-          // or an answer.
-          return _this.rtc.setRemoteDescription(new RTCSessionDescription(description.item))
-
-          // check to see if we're done.
-          .then(check)
-
-          // and if there are any errors, bomb out and shut everything down.
-          .catch(_this._onError);
-        }
-      };
-
-      // When an offer or an answer is created, it's pretty much the same exact processing. Either type
-      // of object gets wrapped with a context identifying which peer channel is being negotiated, and
-      // then transmitted through the negotiation server to the remote user.
-      var descriptionCreated = function descriptionCreated(description) {
-        _this.recordProgress(description, "created");
-
-        // The description we create is always the local description, regardless of whether or not it's an offer
-        // or an answer.
-        return _this.rtc.setLocalDescription(description)
-
-        // Let the remote user know what happened.
-        .then(function () {
-          return _this.proxyServer.emit(description.type, _this.wrap(description));
-        })
-
-        // check to see if we're done.
-        .then(check)
-
-        // and if there are any errors, bomb out and shut everything down.
-        .catch(_this._onError);
-      };
-
-      // A catch-all error handler to shut down the world if an error we couldn't handle happens.
-      _this._onError = function (exp) {
-        _this._error(exp);
-        _this.proxyServer.emit("cancel", exp);
-        _this._log(1, "Timeout avoided, but only because of an error.");
-        done(true);
-        reject(exp);
-      };
-
-      var checkQueryState = function checkQueryState() {
-        console.log("checkQueryState", _this.myResult, _this.theirResult);
-        if (_this.myResult && _this.theirResult) {
-          console.log(1, "Issuing request to peer.");
-          _this.issueRequest();
-        } else if (_this.myResult === false) {
-          console.log(1, "Local user couldn't peer.");
-          done();
-          resolve("Local user said they couldn't peer.");
-        } else if (_this.theirResult === false) {
-          console.log(1, "Remote user couldn't peer.");
-          done();
-          resolve("Remote user said they couldn't peer.");
-        } else if (_this.goFirst || _this.myResult) {
-          console.log("QUERYING", _this.goFirst, _this.theirResult);
-          _this.proxyServer.emit("query_request", _this.wrap());
-        }
-      };
-
-      var onQuery = function onQuery(evt) {
-        if (_this.isExpected("query request", evt)) {
-          _this.myResult = isChrome && !isiOS;
-          console.log("QUERY REQUEST", _this.myResult);
-          _this.proxyServer.emit("query_result", _this.wrap(_this.myResult));
-          checkQueryState();
-        }
-      };
-
-      var onQueryResult = function onQueryResult(evt) {
-        if (_this.isExpected("query result", evt)) {
-          _this.theirResult = evt.item;
-          console.log("QUERY RESULT", _this.theirResult);
-          checkQueryState();
-        }
-      };
-
-      // When an offer is received, we need to create an answer in reply.
-      var onOffer = function onOffer(offer) {
-        _this._log(1, "offer", offer);
-        var promise = descriptionReceived(offer);
-        if (promise) {
-          return promise.then(function () {
-            return _this.rtc.createAnswer();
-          }).then(descriptionCreated);
-        }
-      };
-
-      // ICE stands for Interactive Connectivity Establishment. It's basically a description of a local end-point,
-      // with enough information for the remote user to be able to connect to it.
-      var onIce = function onIce(ice) {
-        _this._log(1, "ice", ice);
-        // Check to see if we expected this sort of message from this user.
-        if (_this.isExpected("ice", ice)) {
-          // And if so, store it in our database of possibilities.
-          var candidate = new RTCIceCandidate(ice.item);
-          return _this.rtc.addIceCandidate(candidate).catch(_this._error);
-        }
-      };
-
-      // This really long event handler is not really the start of the process. Skip ahead to `proxyServer.on("user", onUser)`
-      var onUser = function onUser(evt) {
-        // When a user is joining a room with more than one user currently, already in the room, they will have to
-        // make several connection in sequence. The Socket.IO event handlers don't seem to reliably turn off, so
-        // we have to make sure the message we here is the one meant for this particular instance of the socket manager.
-        if (_this.isExpected("new user", evt)) {
-          // This is just for debugging purposes.
-          _this.rtc.onsignalingstatechange = function (evt) {
-            return _this._log(1, "[%s] Signal State: %s", instanceNumber, _this.rtc.signalingState);
-          };
-          _this.rtc.oniceconnectionstatechange = function (evt) {
-            return _this._log(1, "[%s] ICE Connection %s, Gathering %s", instanceNumber, _this.rtc.iceConnectionState, _this.rtc.iceGatheringState);
-          };
-
-          // All of the literature you'll read on WebRTC show creating an offer right after creating a data channel
-          // or adding a stream to the peer connection. This is wrong. The correct way is to wait for the API to tell
-          // you that negotiation is necessary, and only then create the offer. There is a race-condition between
-          // the signaling state of the WebRTCPeerConnection and creating an offer after creating a channel if we
-          // don't wait for the appropriate time.
-          _this.rtc.onnegotiationneeded = function (evt) {
-            return _this.createOffer(_this.offerOptions)
-            // record the local description.
-            .then(descriptionCreated);
-          };
-
-          // The API is going to figure out end-point configurations for us by communicating with the STUN servers
-          // and seeing which end-points are visible and which require network address translation.
-          _this.rtc.onicecandidate = function (evt) {
-
-            // There is an error condition where sometimes the candidate returned in this event handler will be null.
-            if (evt.candidate) {
-
-              // Then let the remote user know of our folly.
-              _this.proxyServer.emit("ice", _this.wrap(evt.candidate));
-            }
-          };
-
-          checkQueryState();
-        }
-      };
-
-      // We need to do two things, wait for the remote user to indicate they would like to peer, and...
-      setHandlers(true);
-
-      // ... let the server know to inform the remote user that we would like to peer. We need to delay a little
-      // bit because it takes the remote user a little time between logging in and being ready to receive messages.
-      setTimeout(function () {
-        return _this.proxyServer.emit("peer", _this.wrap());
-      }, 250);
-
-      // Okay, now go back to onUser
     });
+
+    _this.ready = _this.hasRTC.then(function () {
+      return new Promise(function (resolver, rejecter) {
+        resolve = resolver;
+        reject = rejecter;
+        _this.emit("peer");
+      });
+    });
+    return _this;
   }
 
   _createClass(WebRTCSocket, [{
+    key: "emit",
+    value: function emit(type, evt) {
+      _get(WebRTCSocket.prototype.__proto__ || Object.getPrototypeOf(WebRTCSocket.prototype), "emit", this).call(this, type, {
+        fromUserName: this.fromUserName,
+        fromUserIndex: this.fromUserIndex,
+        toUserName: this.toUserName,
+        toUserIndex: this.toUserIndex,
+        item: evt
+      });
+    }
+  }, {
     key: "startTimeout",
     value: function startTimeout() {
       if (this._timeout === null) {
@@ -74356,42 +74244,17 @@ var WebRTCSocket = function () {
     key: "cancel",
     value: function cancel() {
       this._log(1, "Timed out!");
-      this._onError("Gave up waiting on the peering connection.");
+      this.peering_cancel("Gave up waiting on the peering connection.");
     }
   }, {
     key: "createOffer",
     value: function createOffer() {
-      return this.rtc.createOffer();
+      return this.rtc.createOffer(this.offerOptions);
     }
   }, {
     key: "recordProgress",
     value: function recordProgress(description, method) {
       this.progress[description.type][method] = true;
-    }
-  }, {
-    key: "wrap",
-    value: function wrap(item) {
-      return {
-        fromUserName: this.fromUserName,
-        fromUserIndex: this.fromUserIndex,
-        toUserName: this.toUserName,
-        toUserIndex: this.toUserIndex,
-        item: item
-      };
-    }
-  }, {
-    key: "isExpected",
-    value: function isExpected(tag, obj) {
-      var incomplete = !this.complete,
-          fromUser = obj.fromUserName === this.toUserName,
-          fromIndex = obj.fromUserIndex === this.toUserIndex,
-          toUser = obj.toUserName === this.fromUserName,
-          toIndex = obj.toUserIndex === this.fromUserIndex,
-          isExpected = incomplete && fromUser && fromIndex && toUser && toIndex;
-
-      this._log(1, "[%s->%s] I %s || FROM %s==%s (%s), %s==%s (%s) || TO %s==%s (%s), %s==%s (%s)", tag, isExpected, incomplete, obj.fromUserName, this.toUserName, fromUser, obj.fromUserIndex, this.toUserIndex, fromIndex, obj.toUserName, this.fromUserName, toUser, obj.toUserIndex, this.fromUserIndex, toIndex);
-      this._log(2, obj);
-      return isExpected;
     }
   }, {
     key: "close",
@@ -74419,7 +74282,9 @@ var WebRTCSocket = function () {
   }]);
 
   return WebRTCSocket;
-}();
+}(Primrose.AbstractEventEmitter);
+
+WebRTCSocket.PEERING_EVENTS = ["peer", "cancel", "offer", "ice", "answer"];
     if(typeof window !== "undefined") window.Primrose.WebRTCSocket = WebRTCSocket;
 })();
     // end D:\Documents\VR\Primrose\src\Primrose\WebRTCSocket.js
@@ -77474,87 +77339,83 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 var ENABLE_OPUS_HACK = true;
 
-var preferOpus = function () {
-  function preferOpus(description) {
-    if (ENABLE_OPUS_HACK) {
-      var sdp = description.sdp;
-      var sdpLines = sdp.split('\r\n');
-      var mLineIndex = null;
-      // Search for m line.
-      for (var i = 0; i < sdpLines.length; i++) {
-        if (sdpLines[i].search('m=audio') !== -1) {
-          mLineIndex = i;
-          break;
-        }
+function preferOpus(description) {
+  if (ENABLE_OPUS_HACK && description) {
+    var sdp = description.sdp;
+    var sdpLines = sdp.split('\r\n');
+    var mLineIndex = null;
+    // Search for m line.
+    for (var i = 0; i < sdpLines.length; i++) {
+      if (sdpLines[i].search('m=audio') !== -1) {
+        mLineIndex = i;
+        break;
       }
-      if (mLineIndex === null) return sdp;
-
-      // If Opus is available, set it as the default in m line.
-      for (var j = 0; j < sdpLines.length; j++) {
-        if (sdpLines[j].search('opus/48000') !== -1) {
-          var opusPayload = extractSdp(sdpLines[j], /:(\d+) opus\/48000/i);
-          if (opusPayload) sdpLines[mLineIndex] = setDefaultCodec(sdpLines[mLineIndex], opusPayload);
-          break;
-        }
-      }
-
-      // Remove CN in m line and sdp.
-      sdpLines = removeCN(sdpLines, mLineIndex);
-
-      description.sdp = sdpLines.join('\r\n');
     }
-    return description;
-  }
+    if (mLineIndex === null) return sdp;
 
-  function extractSdp(sdpLine, pattern) {
-    var result = sdpLine.match(pattern);
-    return result && result.length == 2 ? result[1] : null;
-  }
-
-  function setDefaultCodec(mLine, payload) {
-    var elements = mLine.split(' ');
-    var newLine = [];
-    var index = 0;
-    for (var i = 0; i < elements.length; i++) {
-      if (index === 3) // Format of media starts from the fourth.
-        newLine[index++] = payload; // Put target payload to the first.
-      if (elements[i] !== payload) newLine[index++] = elements[i];
-    }
-    return newLine.join(' ');
-  }
-
-  function removeCN(sdpLines, mLineIndex) {
-    var mLineElements = sdpLines[mLineIndex].split(' ');
-    // Scan from end for the convenience of removing an item.
-    for (var i = sdpLines.length - 1; i >= 0; i--) {
-      var payload = extractSdp(sdpLines[i], /a=rtpmap:(\d+) CN\/\d+/i);
-      if (payload) {
-        var cnPos = mLineElements.indexOf(payload);
-        if (cnPos !== -1) {
-          // Remove CN payload from m line.
-          mLineElements.splice(cnPos, 1);
-        }
-        // Remove CN line in sdp
-        sdpLines.splice(i, 1);
+    // If Opus is available, set it as the default in m line.
+    for (var j = 0; j < sdpLines.length; j++) {
+      if (sdpLines[j].search('opus/48000') !== -1) {
+        var opusPayload = extractSdp(sdpLines[j], /:(\d+) opus\/48000/i);
+        if (opusPayload) sdpLines[mLineIndex] = setDefaultCodec(sdpLines[mLineIndex], opusPayload);
+        break;
       }
     }
 
-    sdpLines[mLineIndex] = mLineElements.join(' ');
-    return sdpLines;
+    // Remove CN in m line and sdp.
+    sdpLines = removeCN(sdpLines, mLineIndex);
+
+    description.sdp = sdpLines.join('\r\n');
+  }
+  return description;
+}
+
+function extractSdp(sdpLine, pattern) {
+  var result = sdpLine.match(pattern);
+  return result && result.length == 2 ? result[1] : null;
+}
+
+function setDefaultCodec(mLine, payload) {
+  var elements = mLine.split(' ');
+  var newLine = [];
+  var index = 0;
+  for (var i = 0; i < elements.length; i++) {
+    if (index === 3) // Format of media starts from the fourth.
+      newLine[index++] = payload; // Put target payload to the first.
+    if (elements[i] !== payload) newLine[index++] = elements[i];
+  }
+  return newLine.join(' ');
+}
+
+function removeCN(sdpLines, mLineIndex) {
+  var mLineElements = sdpLines[mLineIndex].split(' ');
+  // Scan from end for the convenience of removing an item.
+  for (var i = sdpLines.length - 1; i >= 0; i--) {
+    var payload = extractSdp(sdpLines[i], /a=rtpmap:(\d+) CN\/\d+/i);
+    if (payload) {
+      var cnPos = mLineElements.indexOf(payload);
+      if (cnPos !== -1) {
+        // Remove CN payload from m line.
+        mLineElements.splice(cnPos, 1);
+      }
+      // Remove CN line in sdp
+      sdpLines.splice(i, 1);
+    }
   }
 
-  return preferOpus;
-}();
+  sdpLines[mLineIndex] = mLineElements.join(' ');
+  return sdpLines;
+}
 
 var AudioChannel = function (_Primrose$WebRTCSocke) {
   _inherits(AudioChannel, _Primrose$WebRTCSocke);
 
-  function AudioChannel(extraIceServers, proxyServer, fromUserName, toUserName, outAudio, goSecond) {
+  function AudioChannel(requestICEPath, fromUserName, toUserName, outAudio, goSecond) {
     _classCallCheck(this, AudioChannel);
 
     console.log("attempting to peer audio from %s to %s. %s goes first.", fromUserName, toUserName, goSecond ? toUserName : fromUserName);
 
-    var _this = _possibleConstructorReturn(this, (AudioChannel.__proto__ || Object.getPrototypeOf(AudioChannel)).call(this, extraIceServers, proxyServer, fromUserName, 0, toUserName, 0, goSecond));
+    var _this = _possibleConstructorReturn(this, (AudioChannel.__proto__ || Object.getPrototypeOf(AudioChannel)).call(this, requestICEPath, fromUserName, 0, toUserName, 0, goSecond));
 
     Object.defineProperty(_this, "outAudio", {
       get: function get() {
@@ -77572,21 +77433,26 @@ var AudioChannel = function (_Primrose$WebRTCSocke) {
     value: function issueRequest() {
       var _this2 = this;
 
+      console.log("going first", this.goFirst);
       // Adding an audio stream to the peer connection is different between Firefox (which supports the latest
       //  version of the API) and Chrome.
       var addStream = function addStream() {
         _this2._log(0, "adding stream", _this2.outAudio, _this2.rtc.addTrack);
 
         // Make sure we actually have audio to send to the remote.
-        if (_this2.outAudio) {
+        _this2.outAudio.then(function (aud) {
           if (_this2.rtc.addTrack) {
-            _this2.outAudio.getAudioTracks().forEach(function (track) {
-              return _this2.rtc.addTrack(track, _this2.outAudio);
+            aud.getAudioTracks().forEach(function (track) {
+              return _this2.rtc.addTrack(track, aud);
             });
           } else {
-            _this2.rtc.addStream(_this2.outAudio);
+            _this2.rtc.addStream(aud);
           }
-        }
+
+          if (isIE) {
+            _this2.createOffer().then(_this2.descriptionCreated);
+          }
+        });
       };
 
       // Receiving an audio stream from the peer connection is just a
@@ -77602,12 +77468,15 @@ var AudioChannel = function (_Primrose$WebRTCSocke) {
       };
 
       // Wait to receive an audio track.
-      this.rtc.ontrack = function (evt) {
-        return onStream(evt.streams[0]);
-      };
-      this.rtc.onaddstream = function (evt) {
-        return onStream(evt.stream);
-      };
+      if ("ontrack" in this.rtc) {
+        this.rtc.ontrack = function (evt) {
+          return onStream(evt.streams[0]);
+        };
+      } else {
+        this.rtc.onaddstream = function (evt) {
+          return onStream(evt.stream);
+        };
+      }
 
       // If we're the boss, tell people about it.
       if (this.goFirst) {
@@ -77621,10 +77490,9 @@ var AudioChannel = function (_Primrose$WebRTCSocke) {
   }, {
     key: 'teardown',
     value: function teardown() {
-      if (this.rtc.ontrack) {
+      if ("ontrack" in this.rtc) {
         this.rtc.ontrack = null;
-      }
-      if (this.rtc.onaddstream) {
+      } else {
         this.rtc.onaddstream = null;
       }
     }
@@ -77637,9 +77505,9 @@ var AudioChannel = function (_Primrose$WebRTCSocke) {
     key: 'complete',
     get: function get() {
       if (this.goFirst) {
-        this._log(1, "[First]: OC %s -> AR %s -> OR %s -> AC %s.", this.progress.offer.created, this.progress.answer.received, this.progress.offer.received, this.progress.answer.created);
+        this._log(1, "[First]: offer created: %s, answer recv: %s -> offer recv: %s -> answer created: %s.", this.progress.offer.created, this.progress.answer.received, this.progress.offer.received, this.progress.answer.created);
       } else {
-        this._log(1, "[Second]: OR %s -> AC %s -> OC %s -> AR %s.", this.progress.offer.received, this.progress.answer.created, this.progress.offer.created, this.progress.answer.received);
+        this._log(1, "[Second]: offer recv: %s, answer created: %s -> offer created: %s -> answer recv: %s.", this.progress.offer.received, this.progress.answer.created, this.progress.offer.created, this.progress.answer.received);
       }
 
       return _get(AudioChannel.prototype.__proto__ || Object.getPrototypeOf(AudioChannel.prototype), 'complete', this) || this.progress.offer.received && this.progress.offer.created && this.progress.answer.received && this.progress.answer.created;
@@ -77671,10 +77539,10 @@ var INSTANCE_COUNT = 0;
 var DataChannel = function (_Primrose$WebRTCSocke) {
   _inherits(DataChannel, _Primrose$WebRTCSocke);
 
-  function DataChannel(extraIceServers, proxyServer, fromUserName, fromUserIndex, toUserName, toUserIndex, goSecond) {
+  function DataChannel(requestICEPath, fromUserName, fromUserIndex, toUserName, toUserIndex, goSecond) {
     _classCallCheck(this, DataChannel);
 
-    var _this = _possibleConstructorReturn(this, (DataChannel.__proto__ || Object.getPrototypeOf(DataChannel)).call(this, extraIceServers, proxyServer, fromUserName, fromUserIndex, toUserName, toUserIndex, goSecond));
+    var _this = _possibleConstructorReturn(this, (DataChannel.__proto__ || Object.getPrototypeOf(DataChannel)).call(this, requestICEPath, fromUserName, fromUserIndex, toUserName, toUserIndex, goSecond));
 
     _this.dataChannel = null;
     return _this;
@@ -77745,17 +77613,7 @@ var Manager = function (_Primrose$AbstractEve) {
     _this.lastNetworkUpdate = 0;
     _this.oldState = [];
     _this.users = {};
-    _this.extraIceServers = [];
-    _this.peeringEnabled = true;
-    if (options.webRTC) {
-      _this.waitForLastUser = options.webRTC.then(function (obj) {
-        if (obj) {
-          _this.extraIceServers.push.apply(_this.extraIceServers, obj.iceServers);
-        }
-      });
-    } else {
-      _this.waitForLastUser = Promise.resolve();
-    }
+    _this.waitForLastUser = Promise.resolve();
     _this._socket = null;
     _this.userName = null;
     _this.microphone = null;
@@ -77804,12 +77662,16 @@ var Manager = function (_Primrose$AbstractEve) {
   }, {
     key: "connect",
     value: function connect(socket, userName) {
+      var _this2 = this;
+
       this.userName = userName.toLocaleUpperCase();
       if (!this.microphone) {
         this.microphone = navigator.mediaDevices.getUserMedia({
           audio: true,
           video: false
-        }).then(Primrose.Output.Audio3D.setAudioStream).catch(console.warn.bind(console, "Can't get audio"));
+        })
+        //.then(Primrose.Output.Audio3D.setAudioStream)
+        .catch(console.warn.bind(console, "Can't get audio"));
       }
       if (!this._socket) {
         this._socket = socket;
@@ -77821,6 +77683,23 @@ var Manager = function (_Primrose$AbstractEve) {
         this._socket.on("userState", this.updateUser.bind(this));
         this._socket.on("userLeft", this.removeUser.bind(this));
         this._socket.on("connection_lost", this.lostConnection.bind(this));
+
+        Primrose.WebRTCSocket.PEERING_EVENTS.forEach(function (name) {
+          return _this2._socket.on(name, function (evt) {
+            console.log("-->", evt.type, evt);
+            if (evt.toUserName === _this2.userName) {
+              var user = _this2.users[evt.fromUserName],
+                  methodName = "peering_" + name,
+                  method = user && user[methodName];
+              if ((user.peered || user.peering) && method) {
+                method.call(user, evt);
+              } else {
+                console.warn("NO METHOD %s ON USER %s", methodName, user);
+              }
+            }
+          });
+        });
+
         this._socket.emit("listUsers");
         this._socket.emit("getDeviceIndex");
       }
@@ -77835,24 +77714,31 @@ var Manager = function (_Primrose$AbstractEve) {
   }, {
     key: "addUser",
     value: function addUser(state, goSecond) {
-      var _this2 = this;
+      var _this3 = this;
 
       console.log("User %s logging on.", state[0]);
       var toUserName = state[0],
-          user = new Primrose.Network.RemoteUser(toUserName, this.factories.avatar, this.options.foregroundColor);
+          user = new Primrose.Network.RemoteUser(toUserName, this.factories.avatar, this.options.foregroundColor, this.options.webRTC, this.microphone, this.userName, goSecond);
       this.users[toUserName] = user;
+
+      Primrose.WebRTCSocket.PEERING_EVENTS.forEach(function (name) {
+        return user.addEventListener(name, function (evt) {
+          console.log("<--", name, evt);
+          _this3._socket.emit(name, evt);
+        });
+      });
+
       this.updateUser(state);
       this.emit("addavatar", user);
-      if (this.peeringEnabled) {
-        this.waitForLastUser = this.waitForLastUser.then(function () {
-          return user.peer(_this2.extraIceServers, _this2._socket, _this2.microphone, _this2.userName, _this2.audio, goSecond);
-        }).then(function () {
-          return console.log("%s is peered (%s) with %s", _this2.userName, user.peered, toUserName);
-        }).catch(function (exp) {
-          _this2.peeringEnabled = false;
-          console.error("Couldn't load user: " + name, exp);
-        });
-      }
+      this.waitForLastUser = this.waitForLastUser.then(function () {
+        return user.peer(_this3.audio);
+      }).then(function () {
+        return console.log("%s is peered (%s) with %s", _this3.userName, user.peered, toUserName);
+      }).then(function () {
+        if (user.peeringError) {
+          console.error("Couldn't load user: " + name, user.peeringError);
+        }
+      });
     }
   }, {
     key: "removeUser",
@@ -77910,20 +77796,30 @@ var Manager = function (_Primrose$AbstractEve) {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var RemoteUser = function () {
-  function RemoteUser(userName, modelFactory, nameMaterial) {
-    var _this = this;
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var RemoteUser = function (_Primrose$AbstractEve) {
+  _inherits(RemoteUser, _Primrose$AbstractEve);
+
+  function RemoteUser(userName, modelFactory, nameMaterial, requestICEPath, microphone, localUserName, goSecond) {
     _classCallCheck(this, RemoteUser);
 
-    this.time = 0;
+    var _this = _possibleConstructorReturn(this, (RemoteUser.__proto__ || Object.getPrototypeOf(RemoteUser)).call(this));
 
-    this.userName = userName;
-    this.peered = false;
-    this.stage = modelFactory.clone();
-    this.stage.traverse(function (obj) {
+    _this.time = 0;
+
+    _this.userName = userName;
+    _this.peeringError = null;
+    _this.peering = false;
+    _this.peered = false;
+    _this.stage = modelFactory.clone();
+    _this.stage.traverse(function (obj) {
       if (obj.name === "AvatarBelt") {
         colored(obj, Primrose.Random.color());
       } else if (obj.name === "AvatarHead") {
@@ -77931,67 +77827,77 @@ var RemoteUser = function () {
       }
     });
 
-    this.nameObject = colored(text3D(0.1, userName), nameMaterial);
-    var bounds = this.nameObject.geometry.boundingBox.max;
-    this.nameObject.rotation.set(0, Math.PI, 0);
-    this.nameObject.position.set(bounds.x / 2, bounds.y, 0);
-    this.head.add(this.nameObject);
+    _this.nameObject = colored(text3D(0.1, userName), nameMaterial);
+    var bounds = _this.nameObject.geometry.boundingBox.max;
+    _this.nameObject.rotation.set(0, Math.PI, 0);
+    _this.nameObject.position.set(bounds.x / 2, bounds.y, 0);
+    _this.head.add(_this.nameObject);
 
-    this.dStageQuaternion = new THREE.Quaternion();
-    this.dHeadPosition = new THREE.Vector3();
-    this.dHeadQuaternion = new THREE.Quaternion();
+    _this.dStageQuaternion = new THREE.Quaternion();
+    _this.dHeadPosition = new THREE.Vector3();
+    _this.dHeadQuaternion = new THREE.Quaternion();
 
-    this.lastStageQuaternion = new THREE.Quaternion();
-    this.lastHeadPosition = new THREE.Vector3();
-    this.lastHeadQuaternion = new THREE.Quaternion();
+    _this.lastStageQuaternion = new THREE.Quaternion();
+    _this.lastHeadPosition = new THREE.Vector3();
+    _this.lastHeadQuaternion = new THREE.Quaternion();
 
-    this.stageQuaternion = {
+    _this.stageQuaternion = {
       arr1: [],
       arr2: [],
-      last: this.lastStageQuaternion,
-      delta: this.dStageQuaternion,
-      curr: this.stage.quaternion
+      last: _this.lastStageQuaternion,
+      delta: _this.dStageQuaternion,
+      curr: _this.stage.quaternion
     };
 
-    this.headPosition = {
+    _this.headPosition = {
       arr1: [],
       arr2: [],
-      last: this.lastHeadPosition,
-      delta: this.dHeadPosition,
-      curr: this.head.position
+      last: _this.lastHeadPosition,
+      delta: _this.dHeadPosition,
+      curr: _this.head.position
     };
-    this.headQuaternion = {
+    _this.headQuaternion = {
       arr1: [],
       arr2: [],
-      last: this.lastHeadQuaternion,
-      delta: this.dHeadQuaternion,
-      curr: this.head.quaternion
+      last: _this.lastHeadQuaternion,
+      delta: _this.dHeadQuaternion,
+      curr: _this.head.quaternion
     };
 
-    this.audioChannel = null;
-    this.audioElement = null;
-    this.audioStream = null;
-    this.gain = null;
-    this.panner = null;
-    this.analyzer = null;
+    _this.audioChannel = null;
+    _this.audioElement = null;
+    _this.audioStream = null;
+    _this.gain = null;
+    _this.panner = null;
+    _this.analyzer = null;
+
+    Primrose.WebRTCSocket.PEERING_EVENTS.map(function (name) {
+      return "peering_" + name;
+    }).forEach(function (name) {
+      return _this[name] = function (evt) {
+        if (_this.audioChannel[name]) {
+          _this.audioChannel[name](evt);
+        } else {
+          console.warn(_this, "does not have method", name);
+        }
+      };
+    });
+
+    _this.audioChannel = new Primrose.Network.AudioChannel(requestICEPath, localUserName, userName, microphone, goSecond);
+    _this.audioChannel.forward(_this, Primrose.WebRTCSocket.PEERING_EVENTS);
+    return _this;
   }
 
   _createClass(RemoteUser, [{
     key: "peer",
-    value: function peer(extraIceServers, peeringSocket, microphone, localUserName, audio, goSecond) {
+    value: function peer(audio) {
       var _this2 = this;
 
-      return microphone.then(function (outAudio) {
-        _this2.audioChannel = new Primrose.Network.AudioChannel(extraIceServers, peeringSocket, localUserName, _this2.userName, outAudio, goSecond);
-        return _this2.audioChannel.ready.then(function () {
+      if (!this.peered && !this.peering && !this.peeringError) {
+        this.peering = true;
+        return this.audioChannel.ready.then(function () {
           if (_this2.audioChannel.inAudio) {
-            _this2.audioElement = new Audio();
-            Primrose.Output.Audio3D.setAudioStream(_this2.audioChannel.inAudio);
-            _this2.audioElement.controls = false;
-            _this2.audioElement.autoplay = true;
-            _this2.audioElement.crossOrigin = "anonymous";
-            document.body.appendChild(_this2.audioElement);
-
+            _this2.audioElement = Primrose.Output.Audio3D.setAudioStream(_this2.audioChannel.inAudio, "audio" + _this2.userName);
             _this2.audioStream = audio.context.createMediaStreamSource(_this2.audioChannel.inAudio);
             _this2.gain = audio.context.createGain();
             _this2.panner = audio.context.createPanner();
@@ -78006,8 +77912,22 @@ var RemoteUser = function () {
             _this2.panner.distanceModel = "exponential";
             _this2.peered = true;
           }
+        }).catch(function (exp) {
+          _this2.peered = false;
+          _this2.peeringError = exp;
+        }).then(function () {
+          return _this2.peering = false;
         });
-      });
+      }
+    }
+  }, {
+    key: "addEventListener",
+    value: function addEventListener(type, thunk) {
+      if (Primrose.WebRTCSocket.PEERING_EVENTS.indexOf(type) >= 0) {
+        this.audioChannel.addEventListener(type, thunk);
+      } else {
+        _get(RemoteUser.prototype.__proto__ || Object.getPrototypeOf(RemoteUser.prototype), "addEventListener", this).call(this, type, thunk);
+      }
     }
   }, {
     key: "unpeer",
@@ -78081,7 +78001,7 @@ var RemoteUser = function () {
   }]);
 
   return RemoteUser;
-}();
+}(Primrose.AbstractEventEmitter);
 
 RemoteUser.FADE_FACTOR = 0.5;
 RemoteUser.NETWORK_DT = 0.10;
@@ -78244,8 +78164,9 @@ var Audio3D = function () {
 
       element.srcObject = stream;
       element.autoplay = true;
-      element.controls = true;
+      element.controls = false;
       element.muted = true;
+      element.crossOrigin = "anonymous";
       snd.source.connect(this.mainVolume);
       //snd.source.connect(snd.volume):
       //snd.volume.connect(snd.panner);
@@ -78280,6 +78201,7 @@ var Audio3D = function () {
         var audio = document.createElement("audio");
         audio.autoplay = true;
         audio.loop = loop;
+        audio.crossOrigin = "anonymous";
         sources.map(function (src) {
           var source = document.createElement("source");
           source.src = src;
@@ -78327,14 +78249,16 @@ var Audio3D = function () {
     }
   }], [{
     key: "setAudioStream",
-    value: function setAudioStream(stream) {
+    value: function setAudioStream(stream, id) {
       var audioElementCount = document.querySelectorAll("audio").length,
-          element = Primrose.DOM.cascadeElement("audioStream" + audioElementCount, "audio", HTMLAudioElement, true);
+          element = Primrose.DOM.cascadeElement(id || "audioStream" + audioElementCount, "audio", HTMLAudioElement, true);
       element.autoplay = true;
+      element.controls = false;
+      element.crossOrigin = "anonymous";
       element.muted = true;
       element.srcObject = stream;
       element.setAttribute("muted", "");
-      return stream;
+      return element;
     }
   }]);
 
@@ -82587,4 +82511,4 @@ function toString(digits) {
 })();
     // end D:\Documents\VR\Primrose\src\THREE\Vector3\prototype\toString.js
     ////////////////////////////////////////////////////////////////////////////////
-console.info("primrose v0.27.3. see https://www.primrosevr.com for more information.");
+console.info("primrose v0.27.4. see https://www.primrosevr.com for more information.");
