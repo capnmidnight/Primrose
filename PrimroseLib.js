@@ -1953,14 +1953,17 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
     //
     _this.goFullScreen = function (index, evt) {
       if (evt !== "Gaze") {
-        _this.input.VR.connect(index);
-        _this.input.VR.requestPresent([{
-          source: !_this.input.VR.isStereo || isMobile && !_this.input.VR.isNativeMobileWebVR ? _this.options.fullscreenElement : _this.renderer.domElement
-        }]).catch(function (exp) {
-          return console.error("whaaat", exp);
-        }).then(function () {
-          return _this.renderer.domElement.focus();
-        });
+        (function () {
+          var elem = !_this.input.VR.isStereo || isMobile && !_this.input.VR.isNativeMobileWebVR ? _this.options.fullscreenElement : _this.renderer.domElement;
+          _this.input.VR.connect(index);
+          _this.input.VR.requestPresent([{
+            source: elem
+          }]).catch(function (exp) {
+            return console.error("whaaat", exp);
+          }).then(function () {
+            return elem.focus();
+          });
+        })();
       }
     };
 
@@ -2032,7 +2035,7 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
       _this.renderer.domElement.addEventListener('webglcontextlost', _this.stop, false);
       _this.renderer.domElement.addEventListener('webglcontextrestored', _this.start, false);
 
-      _this.input = new Primrose.Input.FPSInput(_this.renderer.domElement, _this.options);
+      _this.input = new Primrose.Input.FPSInput(_this.options.fullscreenElement, _this.options);
       _this.input.addEventListener("zero", _this.zero, false);
       Primrose.Pointer.EVENTS.forEach(function (evt) {
         return _this.input.addEventListener(evt, _this.selectControl.bind(_this), false);
@@ -15277,4 +15280,4 @@ function toString(digits) {
 })();
     // end C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Vector3\prototype\toString.js
     ////////////////////////////////////////////////////////////////////////////////
-console.info("primrose v0.27.4. see https://www.primrosevr.com for more information.");
+console.info("primrose v0.27.5. see https://www.primrosevr.com for more information.");
