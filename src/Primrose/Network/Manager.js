@@ -25,18 +25,8 @@ class Manager extends Primrose.AbstractEventEmitter {
     this.lastNetworkUpdate = 0;
     this.oldState = [];
     this.users = {};
-    this.extraIceServers = [];
     this.peeringEnabled = true;
-    if (options.webRTC) {
-      this.waitForLastUser = options.webRTC.then((obj) => {
-        if (obj) {
-          this.extraIceServers.push.apply(this.extraIceServers, obj.iceServers);
-        }
-      });
-    }
-    else {
-      this.waitForLastUser = Promise.resolve();
-    }
+    this.waitForLastUser = Promise.resolve();
     this._socket = null;
     this.userName = null;
     this.microphone = null;
@@ -121,7 +111,7 @@ class Manager extends Primrose.AbstractEventEmitter {
     this.emit("addavatar", user);
     if(this.peeringEnabled){
       this.waitForLastUser = this.waitForLastUser
-        .then(() => user.peer(this.extraIceServers, this._socket, this.microphone, this.userName, this.audio, goSecond))
+        .then(() => user.peer(this.options.webRTC, this._socket, this.microphone, this.userName, this.audio, goSecond))
         .then(() => console.log("%s is peered (%s) with %s", this.userName, user.peered, toUserName))
         .catch((exp) => {
           this.peeringEnabled = false;

@@ -6,9 +6,9 @@ pliny.class({
     baseClass: "Primrose.WebRTCSocket",
     description: "Manages the negotiation between peer users to set up bidirectional audio between the two.",
     parameters: [{
-      name: "extraIceServers",
-      type: "Array",
-      description: "A collection of ICE servers to use on top of the default Google STUN servers."
+      name: "requestICEPath",
+      type: "string",
+      description: "A request path at which to retrieve the extra ICE servers to use with the connection."
     }, {
       name: "proxyServer",
       type: "WebSocket",
@@ -32,8 +32,8 @@ pliny.class({
     }]
 });
 class DataChannel extends Primrose.WebRTCSocket {
-  constructor(extraIceServers, proxyServer, fromUserName, fromUserIndex, toUserName, toUserIndex, goSecond) {
-    super(extraIceServers, proxyServer, fromUserName, fromUserIndex, toUserName, toUserIndex, goSecond);
+  constructor(requestICEPath, proxyServer, fromUserName, fromUserIndex, toUserName, toUserIndex, goSecond) {
+    super(requestICEPath, proxyServer, fromUserName, fromUserIndex, toUserName, toUserIndex, goSecond);
 
     pliny.property({
       parent: "Primrose.Network.DataChannel",
