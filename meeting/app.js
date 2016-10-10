@@ -25,7 +25,7 @@ env = new Primrose.BrowserEnvironment({
   avatarModel: "../doc/models/avatar.json",
   useFog: false,
   font: "../doc/fonts/helvetiker_regular.typeface.json",
-  webRTC: Primrose.HTTP.getObject("/turn")
+  webRTC: "/turn"
 });
 
 ctrls.closeButton.addEventListener("click", hideLoginForm, false);
