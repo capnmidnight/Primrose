@@ -1,5 +1,6 @@
 ﻿extends ../templates/demoIFrame.pug
 append head
-  script(src="../node_modules/jshashes/hashes.js")
+  script(src= fileRoot + "node_modules/jshashes/hashes.js")
+  script(src="//static.opentok.com/v2/js/opentok.min.js")
 prepend main
   h1 Meeting Room

@@ -1,20 +1,16 @@
-"use strict";
-
 var ctrls = Primrose.DOM.findEverything(),
-loginControls = [
-ctrls.userName,
-ctrls.connect
-],
-names = NameGen.compile("!mi"),
-protocol = location.protocol.replace("http", "ws"),
-serverPath = protocol + "//" + location.hostname,
-roomPattern = /\broom=(\w+)/,
-userPattern = /\buser=(\w+)/,
-defaultRoomName = null,
-defaultUserName = null,
-socket = null,
-
-env = new Primrose.BrowserEnvironment({
+    loginControls = [ctrls.userName, ctrls.connect],
+    names = NameGen.compile("!mi"),
+    protocol = location.protocol.replace("http", "ws"),
+    serverPath = protocol + "//" + location.hostname,
+    roomPattern = /\broom=(\w+)/,
+    userPattern = /\buser=(\w+)/,
+    defaultRoomName = null,
+    defaultUserName = null,
+    socket = null,
+    session = null,
+    app = new Primrose.BrowserEnvironment({
+  useFog: false,
   autoScaleQuality: true,
   autoRescaleQuality: false,
   quality: Quality.HIGH,
@@ -25,7 +21,7 @@ env = new Primrose.BrowserEnvironment({
   avatarModel: "../doc/models/avatar.json",
   useFog: false,
   font: "../doc/fonts/helvetiker_regular.typeface.json",
-  webRTC: "/turn"
+  disableWebRTC: true
 });
 
 ctrls.closeButton.addEventListener("click", hideLoginForm, false);
@@ -37,44 +33,40 @@ ctrls.roomName.addEventListener("change", setRoomName, false);
 ctrls.userName.addEventListener("change", setUserName, false);
 
 window.addEventListener("popstate", setRoomName);
-env.addEventListener("ready", environmentReady);
+app.addEventListener("ready", environmentReady);
 
 setRoomName({ state: {
-  roomName: fromField(location.search, roomPattern) || fromField(document.cookie, roomPattern)
-}});
+    roomName: fromField(location.search, roomPattern) || fromField(document.cookie, roomPattern)
+  } });
 
 setUserName({ state: {
-  userName: fromField(location.search, userPattern) || fromField(document.cookie, userPattern)
-}});
+    userName: fromField(location.search, userPattern) || fromField(document.cookie, userPattern)
+  } });
 
 function setRoomName(evt) {
   defaultRoomName = evt && evt.state && evt.state.roomName;
-  if(defaultRoomName){
+  if (defaultRoomName) {
     evt = evt || true;
     ctrls.roomName.value = defaultRoomName;
-  }
-  else if(evt.type === "change"){
+  } else if (evt.type === "change") {
     defaultRoomName = ctrls.roomName.value;
-  }
-  else {
+  } else {
     defaultRoomName = names.toString();
     ctrls.roomName.placeholder = "Type a room name (currently " + defaultRoomName + ")";
     ctrls.roomName.value = "";
   }
-  if(evt && evt.type !== "popstate"){
+  if (evt && evt.type !== "popstate") {
     history.pushState({ roomName: defaultRoomName }, "Room ID: " + defaultRoomName, "?room=" + defaultRoomName);
   }
 }
 
 function setUserName(evt) {
   defaultUserName = evt && evt.state && evt.state.userName;
-  if(defaultUserName){
+  if (defaultUserName) {
     ctrls.userName.value = defaultUserName;
-  }
-  else if(evt.type === "change"){
+  } else if (evt.type === "change") {
     defaultUserName = ctrls.userName.value;
-  }
-  else{
+  } else {
     defaultUserName = names.toString();
     ctrls.userName.placeholder = "Type a user name (currently " + defaultUserName + ")";
     ctrls.userName.value = "";
@@ -95,8 +87,8 @@ function fromField(field, pattern) {
 }
 
 function hideLoginForm(evt) {
- ctrls.loginForm.style.display = "none";
- ctrls.frontBuffer.focus();
+  ctrls.loginForm.style.display = "none";
+  ctrls.frontBuffer.focus();
 }
 
 function showLoginForm() {
@@ -120,8 +112,7 @@ function disableLogin(v) {
 
 function environmentReady() {
   ctrls.loginForm.style.display = "";
-
-  env.scene.traverse(function (obj) {
+  app.scene.traverse(function (obj) {
     if (obj.name.indexOf("LightPanel") === 0) {
       obj.material.emissive.setRGB(1, 1, 1);
     }
@@ -153,7 +144,7 @@ function authenticate(evt) {
 function connectionError(evt) {
   socket.close();
   socket = null;
-  env.disconnect();
+  app.disconnect();
   authFailed("an error occured while connecting to the server.");
 }
 
@@ -166,9 +157,28 @@ function authSucceeded() {
   ctrls.errorMessage.style.display = "none";
   disableLogin(false);
   hideLoginForm();
-  const userName = getUserName(),
-    roomName = getRoomName();
+  var userName = getUserName(),
+      roomName = getRoomName();
   document.cookie = "user=" + userName + "&room=" + roomName;
-  env.connect(socket, userName);
+  app.connect(socket, userName);
   document.title = userName + " in " + roomName;
+
+  Primrose.HTTP.getObject("/tokbox/?room=" + roomName + "&user=" + userName).then(function (cred) {
+    console.log("tokbox", cred);
+    session = OT.initSession(cred.apiKey, cred.sessionId).on('streamCreated', function (evt) {
+      var userSpec = evt.stream.connection.data.match(userPattern);
+      console.log("tokbox streamCreated", evt, userSpec && userSpec[1]);
+      session.subscribe(evt.stream);
+    }).connect(cred.token, function (error) {
+      if (error) {
+        console.error("tokbox error", error);
+      } else {
+        var publisher = OT.initPublisher();
+        publisher.publishVideo(false);
+        console.log("tokbox publisher", publisher);
+        session.publish(publisher);
+      }
+    });
+    console.log("tokbox session", session);
+  });
 }

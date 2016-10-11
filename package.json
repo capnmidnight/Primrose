@@ -66,6 +66,7 @@
     "webvr-standard-monitor": "^1.0.1"
   },
   "devDependencies": {
+    "babel-cli": "^6.16.0",
     "gulp": "^3.9.1",
     "gulp-rename": "^1.2.2",
     "jstransformer-marked": "^1.0.1",
