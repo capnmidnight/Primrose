@@ -41,7 +41,7 @@ class DataChannel extends Primrose.WebRTCSocket {
   }
 
   issueRequest() {
-    if (goFirst) {
+    if (this.goFirst) {
       this._log(0, "Creating data channel");
       this.dataChannel = this.rtc.createDataChannel();
     }

@@ -89,28 +89,13 @@ pliny.class({
       name: "outAudio",
       type: "Promise",
       description: "An audio stream from the local user to send to the remote user."
-    }, ]
+    }]
 });
 class AudioChannel extends Primrose.WebRTCSocket {
   constructor(requestICEPath, fromUserName, toUserName, outAudio, goSecond) {
     console.log("attempting to peer audio from %s to %s. %s goes first.", fromUserName, toUserName, goSecond ? toUserName : fromUserName);
     super(requestICEPath, fromUserName, 0, toUserName, 0, goSecond);
-    pliny.property({
-      parent: "Primrose.Network.AudioChannel",
-      name: "outAudio",
-      type: "MediaStream",
-      description: "An audio channel from the local user to the remote user."
-    });
-    Object.defineProperty(this, "outAudio", {
-      get: () => outAudio
-    });
-
-    pliny.property({
-      parent: "Primrose.Network.AudioChannel",
-      name: "inAudio",
-      type: "MediaStream",
-      description: "An audio channel from the remote user to the local user."
-    });
+    this.outAudio = outAudio;
     this.inAudio = null;
     this.startTimeout();
   }
@@ -144,7 +129,7 @@ class AudioChannel extends Primrose.WebRTCSocket {
       this.inAudio = stream;
       if (!this.goFirst) {
         this._log(0, "Creating the second stream from %s to %s", this.fromUserName, this.toUserName);
-        this.clearTimeout();
+        this.stopTimeout();
         this._log(1, "Restarting timeout.");
         this.startTimeout();
         addStream();
@@ -173,14 +158,16 @@ class AudioChannel extends Primrose.WebRTCSocket {
         this.progress.offer.created,
         this.progress.answer.received,
         this.progress.offer.received,
-        this.progress.answer.created);
+        this.progress.answer.created,
+        this.rtc.signalingState);
     }
     else {
       this._log(1, "[Second]: offer recv: %s, answer created: %s -> offer created: %s -> answer recv: %s.",
         this.progress.offer.received,
         this.progress.answer.created,
         this.progress.offer.created,
-        this.progress.answer.received);
+        this.progress.answer.received,
+        this.rtc.signalingState);
     }
 
     return super.complete || (this.progress.offer.received &&

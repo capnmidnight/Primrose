@@ -86,26 +86,28 @@ class RemoteUser extends Primrose.AbstractEventEmitter {
       curr: this.head.quaternion
     };
 
-    this.audioChannel = null;
-    this.audioElement = null;
-    this.audioStream = null;
-    this.gain = null;
-    this.panner = null;
-    this.analyzer = null;
+    if(Primrose.Network.Manager.ENABLE_PEERING) {
+      this.audioChannel = null;
+      this.audioElement = null;
+      this.audioStream = null;
+      this.gain = null;
+      this.panner = null;
+      this.analyzer = null;
 
-    Primrose.WebRTCSocket.PEERING_EVENTS
-      .map((name) => "peering_" + name)
-      .forEach((name) => this[name] = (evt) => {
-        if(this.audioChannel[name]){
-          this.audioChannel[name](evt);
-        }
-        else{
-          console.warn(this, "does not have method", name);
-        }
-      });
+      Primrose.WebRTCSocket.PEERING_EVENTS
+        .map((name) => "peering_" + name)
+        .forEach((name) => this[name] = (evt) => {
+          if(this.audioChannel[name]){
+            this.audioChannel[name](evt);
+          }
+          else{
+            console.warn(this, "does not have method", name);
+          }
+        });
 
-    this.audioChannel = new Primrose.Network.AudioChannel(requestICEPath, localUserName, userName, microphone, goSecond);
-    this.audioChannel.forward(this, Primrose.WebRTCSocket.PEERING_EVENTS);
+      this.audioChannel = new Primrose.Network.AudioChannel(requestICEPath, localUserName, userName, microphone, goSecond);
+      this.audioChannel.forward(this, Primrose.WebRTCSocket.PEERING_EVENTS);
+    }
   }
 
   peer(audio) {

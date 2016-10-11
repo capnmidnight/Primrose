@@ -91,20 +91,25 @@ class Manager extends Primrose.AbstractEventEmitter {
       this._socket.on("userLeft", this.removeUser.bind(this));
       this._socket.on("connection_lost", this.lostConnection.bind(this));
 
-      Primrose.WebRTCSocket.PEERING_EVENTS.forEach((name) => this._socket.on(name, (evt) => {
-        console.log("-->", evt.type, evt);
-        if(evt.toUserName === this.userName){
-          const user = this.users[evt.fromUserName],
-            methodName = "peering_" + name,
-            method = user && user[methodName];
-          if((user.peered || user.peering) && method){
-            method.call(user, evt);
+      if(Manager.ENABLE_PEERING) {
+        Primrose.WebRTCSocket.PEERING_EVENTS.forEach((name) => this._socket.on(name, (evt) => {
+          console.log("-->", evt.type, evt);
+          if(evt.toUserName === this.userName){
+            const user = this.users[evt.fromUserName],
+              methodName = "peering_" + name,
+              method = user && user[methodName];
+            if((user.peered || user.peering) && method){
+              method.call(user, evt);
+            }
+            else{
+              console.warn("NO METHOD %s ON USER %s", methodName, user);
+            }
           }
           else{
-            console.warn("NO METHOD %s ON USER %s", methodName, user);
+            console.warn("MESSAGE SENT TO %s FROM %s BUT WE ARE %s", evt.toUserName, evt.fromUserName, this.userName);
           }
-        }
-      }));
+        }));
+      }
 
       this._socket.emit("listUsers");
       this._socket.emit("getDeviceIndex");
@@ -122,23 +127,24 @@ class Manager extends Primrose.AbstractEventEmitter {
     var toUserName = state[0],
       user = new Primrose.Network.RemoteUser(toUserName, this.factories.avatar, this.options.foregroundColor, this.options.webRTC, this.microphone, this.userName, goSecond);
     this.users[toUserName] = user;
-
-    Primrose.WebRTCSocket.PEERING_EVENTS.forEach((name) =>
-      user.addEventListener(name, (evt) => {
-        console.log("<--", name, evt);
-        this._socket.emit(name, evt);
-      }));
-
     this.updateUser(state);
     this.emit("addavatar", user);
-    this.waitForLastUser = this.waitForLastUser
-      .then(() => user.peer(this.audio))
-      .then(() => console.log("%s is peered (%s) with %s", this.userName, user.peered, toUserName))
-      .then(() => {
-        if(user.peeringError) {
-          console.error("Couldn't load user: " + name, user.peeringError);
-        }
-      });
+
+    if(Manager.ENABLE_PEERING) {
+      Primrose.WebRTCSocket.PEERING_EVENTS.forEach((name) =>
+        user.addEventListener(name, (evt) => {
+          console.log("<--", name, evt);
+          this._socket.emit(name, evt);
+        }));
+      this.waitForLastUser = this.waitForLastUser
+        .then(() => user.peer(this.audio))
+        .then(() => console.log("%s is peered (%s) with %s", this.userName, user.peered, toUserName))
+        .then(() => {
+          if(user.peeringError) {
+            console.error("Couldn't load user: " + name, user.peeringError);
+          }
+        });
+    }
   }
 
   removeUser(key) {
@@ -178,3 +184,5 @@ class Manager extends Primrose.AbstractEventEmitter {
     this.deviceIndex = index;
   }
 }
+
+Manager.ENABLE_PEERING = true;

@@ -95,7 +95,7 @@ class WebRTCSocket extends Primrose.AbstractEventEmitter {
 
     const done = (isError) => {
       this._log(2, "Tearing down event handlers");
-      this.clearTimeout();
+      this.stopTimeout();
       this.rtc.onsignalingstatechange = null;
       this.rtc.oniceconnectionstatechange = null;
       this.rtc.onnegotiationneeded = null;
@@ -132,7 +132,7 @@ class WebRTCSocket extends Primrose.AbstractEventEmitter {
         .then(check)
 
         // and if there are any errors, bomb out and shut everything down.
-        .catch(this.peering_cancel);
+        .catch(this.peering_error);
     };
 
     // When an offer or an answer is created, it's pretty much the same exact processing. Either type
@@ -149,13 +149,21 @@ class WebRTCSocket extends Primrose.AbstractEventEmitter {
         // check to see if we're done.
         .then(check)
         // and if there are any errors, bomb out and shut everything down.
-        .catch(this.peering_cancel);
+        .catch(this.peering_error);
+    };
+
+    // A catch-all error handler to shut down the world if an error we couldn't handle happens.
+    this.peering_error = (exp) => {
+      this._error(exp);
+      this.emit("cancel", exp);
+      this._log(1, "Timeout avoided, but only because of an error.");
+      done(true);
+      reject(exp);
     };
 
     // A catch-all error handler to shut down the world if an error we couldn't handle happens.
     this.peering_cancel = (exp) => {
       this._error(exp);
-      this.emit("cancel", exp);
       this._log(1, "Timeout avoided, but only because of an error.");
       done(true);
       reject(exp);
@@ -250,20 +258,15 @@ class WebRTCSocket extends Primrose.AbstractEventEmitter {
   startTimeout() {
     if (this._timeout === null) {
       this._log(1, "Timing out in " + Math.floor(PEERING_TIMEOUT_LENGTH / 1000) + " seconds.");
-      this._timeout = setTimeout(this.cancel.bind(this), PEERING_TIMEOUT_LENGTH);
+      this._timeout = setTimeout(this.peering_error.bind(this, "Gave up waiting on the peering connection."), PEERING_TIMEOUT_LENGTH);
     }
   }
 
-  clearTimeout() {
+  stopTimeout() {
     if (this._timeout !== null) {
       clearTimeout(this._timeout);
       this._timeout = null;
     }
-  }
-
-  cancel() {
-    this._log(1, "Timed out!");
-    this.peering_cancel("Gave up waiting on the peering connection.");
   }
 
   createOffer() {
@@ -285,6 +288,7 @@ class WebRTCSocket extends Primrose.AbstractEventEmitter {
         description: "Whether or not the description had been 'created' or 'received' here."
       }]
     });
+    this._log(2, "Logging progress [%s]: %s %s -> true", description.type, method, this.progress[description.type][method]);
     this.progress[description.type][method] = true;
   }
 
