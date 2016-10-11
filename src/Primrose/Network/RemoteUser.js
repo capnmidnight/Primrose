@@ -31,7 +31,7 @@ pliny.class({
 });
 class RemoteUser extends Primrose.AbstractEventEmitter {
 
-  constructor(userName, modelFactory, nameMaterial, requestICEPath, microphone, localUserName, goSecond) {
+  constructor(userName, modelFactory, nameMaterial, disableWebRTC, requestICEPath, microphone, localUserName, goSecond) {
     super();
     this.time = 0;
 
@@ -86,7 +86,7 @@ class RemoteUser extends Primrose.AbstractEventEmitter {
       curr: this.head.quaternion
     };
 
-    if(Primrose.Network.Manager.ENABLE_PEERING) {
+    if(!disableWebRTC) {
       this.audioChannel = null;
       this.audioElement = null;
       this.audioStream = null;

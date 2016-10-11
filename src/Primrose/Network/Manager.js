@@ -91,7 +91,7 @@ class Manager extends Primrose.AbstractEventEmitter {
       this._socket.on("userLeft", this.removeUser.bind(this));
       this._socket.on("connection_lost", this.lostConnection.bind(this));
 
-      if(Manager.ENABLE_PEERING) {
+      if(!this.options.disableWebRTC) {
         Primrose.WebRTCSocket.PEERING_EVENTS.forEach((name) => this._socket.on(name, (evt) => {
           console.log("-->", evt.type, evt);
           if(evt.toUserName === this.userName){
@@ -125,12 +125,12 @@ class Manager extends Primrose.AbstractEventEmitter {
   addUser(state, goSecond) {
     console.log("User %s logging on.", state[0]);
     var toUserName = state[0],
-      user = new Primrose.Network.RemoteUser(toUserName, this.factories.avatar, this.options.foregroundColor, this.options.webRTC, this.microphone, this.userName, goSecond);
+      user = new Primrose.Network.RemoteUser(toUserName, this.factories.avatar, this.options.foregroundColor, this.options.disableWebRTC, this.options.webRTC, this.microphone, this.userName, goSecond);
     this.users[toUserName] = user;
     this.updateUser(state);
     this.emit("addavatar", user);
 
-    if(Manager.ENABLE_PEERING) {
+    if(!this.options.disableWebRTC) {
       Primrose.WebRTCSocket.PEERING_EVENTS.forEach((name) =>
         user.addEventListener(name, (evt) => {
           console.log("<--", name, evt);
@@ -184,5 +184,3 @@ class Manager extends Primrose.AbstractEventEmitter {
     this.deviceIndex = index;
   }
 }
-
-Manager.ENABLE_PEERING = true;
