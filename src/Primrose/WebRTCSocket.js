@@ -70,7 +70,7 @@ class WebRTCSocket extends Primrose.AbstractEventEmitter {
     this.theirResult = null;
     this._timeout = null;
     this._log = print.bind(null, "log");
-    this._error = print.bind(null, "error", 0);
+    this._error = print.bind(null, "error", 0, "");
     this.fromUserName = fromUserName;
     this.fromUserIndex = fromUserIndex;
     this.toUserName = toUserName;
