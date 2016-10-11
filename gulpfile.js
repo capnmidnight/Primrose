@@ -27,7 +27,7 @@ var gulp = require("gulp"),
     "node_modules/webrtc-adapter/out/adapter.js",
     "namegen.js"
   ]),
-  js = nt.js("PrimroseLib-WithDoc", "src", ["format"], pliny.carve.bind(pliny, "PrimroseLib-WithDoc.js", "PrimroseLib.js", "PrimroseDocumentation.js")),
+  js = nt.js("PrimroseLib-WithDoc", "src", ["format"], pliny.carve.bind(pliny, "PrimroseLib-WithDoc.js", "PrimroseLib.js", "PrimroseDocumentation.js"), true),
   min = nt.min("PrimroseDocumentation", ["PrimroseDocumentation.js"], [js.build]),
   tot = nt.cat("Primrose", ["PrimroseDependencies.js", "PrimroseLib.js"], [deps.build, min.build]),
   html = nt.html("Primrose", ["*.pug", "doc/**/*.pug", "meeting/**/*.pug", "templates/**/*.pug"]),
