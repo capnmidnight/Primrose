@@ -74503,7 +74503,7 @@ var WebRTCSocket = function (_Primrose$AbstractEve) {
       },
       answer: {
         created: false,
-        recieved: false
+        received: false
       }
     };
     // If the user leaves the page, we want to at least fire off the close signal and perhaps
@@ -78028,7 +78028,7 @@ var DataChannel = function (_Primrose$WebRTCSocke) {
       } else {
         this._log(1, "[Second]: OC %s -> AR %s.", this.progress.offer.created, this.progress.answer.received);
       }
-      return _get(Object.getPrototypeOf(DataChannel.prototype), "complete", this) || this.goFirst && this.progress.offer.created && this.progress.answer.received || !this.goFirst && this.progress.offer.recieved && this.progress.answer.created;
+      return _get(Object.getPrototypeOf(DataChannel.prototype), "complete", this) || this.goFirst && this.progress.offer.created && this.progress.answer.received || !this.goFirst && this.progress.offer.received && this.progress.answer.created;
     }
   }]);
 
@@ -78136,7 +78136,7 @@ var Manager = function (_Primrose$AbstractEve) {
         this._socket.on("userLeft", this.removeUser.bind(this));
         this._socket.on("connection_lost", this.lostConnection.bind(this));
 
-        if (Manager.ENABLE_PEERING) {
+        if (!this.options.disableWebRTC) {
           Primrose.WebRTCSocket.PEERING_EVENTS.forEach(function (name) {
             return _this2._socket.on(name, function (evt) {
               console.log("-->", evt.type, evt);
@@ -78174,12 +78174,12 @@ var Manager = function (_Primrose$AbstractEve) {
 
       console.log("User %s logging on.", state[0]);
       var toUserName = state[0],
-          user = new Primrose.Network.RemoteUser(toUserName, this.factories.avatar, this.options.foregroundColor, this.options.webRTC, this.microphone, this.userName, goSecond);
+          user = new Primrose.Network.RemoteUser(toUserName, this.factories.avatar, this.options.foregroundColor, this.options.disableWebRTC, this.options.webRTC, this.microphone, this.userName, goSecond);
       this.users[toUserName] = user;
       this.updateUser(state);
       this.emit("addavatar", user);
 
-      if (Manager.ENABLE_PEERING) {
+      if (!this.options.disableWebRTC) {
         Primrose.WebRTCSocket.PEERING_EVENTS.forEach(function (name) {
           return user.addEventListener(name, function (evt) {
             console.log("<--", name, evt);
@@ -78243,8 +78243,6 @@ var Manager = function (_Primrose$AbstractEve) {
 
   return Manager;
 }(Primrose.AbstractEventEmitter);
-
-Manager.ENABLE_PEERING = true;
   if(typeof window !== "undefined") window.Primrose.Network.Manager = Manager;
 })();
   // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Network\Manager.js
@@ -78266,7 +78264,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var RemoteUser = function (_Primrose$AbstractEve) {
   _inherits(RemoteUser, _Primrose$AbstractEve);
 
-  function RemoteUser(userName, modelFactory, nameMaterial, requestICEPath, microphone, localUserName, goSecond) {
+  function RemoteUser(userName, modelFactory, nameMaterial, disableWebRTC, requestICEPath, microphone, localUserName, goSecond) {
     _classCallCheck(this, RemoteUser);
 
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(RemoteUser).call(this));
@@ -78323,7 +78321,7 @@ var RemoteUser = function (_Primrose$AbstractEve) {
       curr: _this.head.quaternion
     };
 
-    if (Primrose.Network.Manager.ENABLE_PEERING) {
+    if (!disableWebRTC) {
       _this.audioChannel = null;
       _this.audioElement = null;
       _this.audioStream = null;
