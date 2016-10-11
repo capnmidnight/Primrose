@@ -84,7 +84,7 @@ class WebRTCSocket extends Primrose.AbstractEventEmitter {
       },
       answer: {
         created: false,
-        recieved: false
+        received: false
       }
     };
     // If the user leaves the page, we want to at least fire off the close signal and perhaps

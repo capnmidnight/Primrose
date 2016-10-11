@@ -66,7 +66,7 @@ class DataChannel extends Primrose.WebRTCSocket {
     }
     return super.complete ||
       (this.goFirst && this.progress.offer.created && this.progress.answer.received ||
-        !this.goFirst && this.progress.offer.recieved && this.progress.answer.created);
+        !this.goFirst && this.progress.offer.received && this.progress.answer.created);
   }
 
   teardown() {
