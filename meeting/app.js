@@ -3,26 +3,28 @@ var ctrls = Primrose.DOM.findEverything(),
     names = NameGen.compile("!mi"),
     protocol = location.protocol.replace("http", "ws"),
     serverPath = protocol + "//" + location.hostname,
-    roomPattern = /\broom=(\w+)/,
-    userPattern = /\buser=(\w+)/,
+    roomPattern = /\broom=([a-zA-Z0-9_%]+)/,
+    userPattern = /\buser=([a-zA-Z0-9_%]+)/,
     defaultRoomName = null,
     defaultUserName = null,
     socket = null,
     session = null,
+    publisher = null,
+
     app = new Primrose.BrowserEnvironment({
-  useFog: false,
-  autoScaleQuality: true,
-  autoRescaleQuality: false,
-  quality: Quality.HIGH,
-  groundTexture: 0x000000,
-  backgroundColor: 0x000000,
-  disableDefaultLighting: true,
-  sceneModel: "../doc/models/meeting/meetingroom.obj",
-  avatarModel: "../doc/models/avatar.json",
-  useFog: false,
-  font: "../doc/fonts/helvetiker_regular.typeface.json",
-  disableWebRTC: true
-});
+      useFog: false,
+      autoScaleQuality: true,
+      autoRescaleQuality: false,
+      quality: Quality.HIGH,
+      groundTexture: 0x000000,
+      backgroundColor: 0x000000,
+      disableDefaultLighting: true,
+      sceneModel: "../doc/models/meeting/meetingroom.obj",
+      avatarModel: "../doc/models/avatar.json",
+      useFog: false,
+      font: "../doc/fonts/helvetiker_regular.typeface.json",
+      disableWebRTC: true
+    });
 
 ctrls.closeButton.addEventListener("click", hideLoginForm, false);
 ctrls.userName.addEventListener("keyup", authenticate, false);
@@ -83,7 +85,7 @@ function getUserName() {
 
 function fromField(field, pattern) {
   var spec = field.match(pattern);
-  return spec && spec[1];
+  return spec && decodeURI(spec[1]);
 }
 
 function hideLoginForm(evt) {
@@ -152,6 +154,27 @@ function authFailed(reason) {
   errorMessage("We couldn't log you in right now because " + reason.replace(/\[USER\]/g, ctrls.userName.value));
 }
 
+function getVideos(){
+  return document.querySelectorAll(".OT_subscriber video");
+}
+
+function findVideo(userName, index, count){
+  var videos = getVideos();
+  if(index === undefined){
+    index = videos.length;
+  }
+  if(count === undefined){
+    count = 0;
+  }
+
+  if(videos.length <= index){
+    setTimeout(findVideo, 0, userName, index, ++count);
+  }
+  else{
+    app.setAudioFromUser(userName, videos[index]);
+  }
+}
+
 function authSucceeded() {
   ctrls.errorMessage.innerHTML = "";
   ctrls.errorMessage.style.display = "none";
@@ -159,26 +182,24 @@ function authSucceeded() {
   hideLoginForm();
   var userName = getUserName(),
       roomName = getRoomName();
-  document.cookie = "user=" + userName + "&room=" + roomName;
+  document.cookie = "user=" + encodeURI(userName) + "&room=" + encodeURI(roomName);
   app.connect(socket, userName);
   document.title = userName + " in " + roomName;
 
-  Primrose.HTTP.getObject("/tokbox/?room=" + roomName + "&user=" + userName).then(function (cred) {
-    console.log("tokbox", cred);
+  Primrose.HTTP.getObject("/tokbox/?room=" + encodeURI(roomName) + "&user=" + encodeURI(userName)).then(function (cred) {
     session = OT.initSession(cred.apiKey, cred.sessionId).on('streamCreated', function (evt) {
-      var userSpec = evt.stream.connection.data.match(userPattern);
-      console.log("tokbox streamCreated", evt, userSpec && userSpec[1]);
+      var newUserName = evt.stream.connection.data;
+      console.log("tokbox streamCreated", evt.stream, newUserName);
       session.subscribe(evt.stream);
+      findVideo(newUserName);
     }).connect(cred.token, function (error) {
       if (error) {
         console.error("tokbox error", error);
       } else {
-        var publisher = OT.initPublisher();
+        publisher = OT.initPublisher();
         publisher.publishVideo(false);
-        console.log("tokbox publisher", publisher);
         session.publish(publisher);
       }
     });
-    console.log("tokbox session", session);
   });
 }
