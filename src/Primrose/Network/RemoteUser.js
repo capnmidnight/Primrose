@@ -86,13 +86,14 @@ class RemoteUser extends Primrose.AbstractEventEmitter {
       curr: this.head.quaternion
     };
 
-    if(!disableWebRTC) {
-      this.audioChannel = null;
-      this.audioElement = null;
-      this.audioStream = null;
-      this.gain = null;
-      this.panner = null;
-      this.analyzer = null;
+    this.audioChannel = null;
+    this.audioElement = null;
+    this.audioStream = null;
+    this.gain = null;
+    this.panner = null;
+    this.analyzer = null;
+
+    if(!disableWebRTC && "WebRTCSocket" in Primrose) {
 
       Primrose.WebRTCSocket.PEERING_EVENTS
         .map((name) => "peering_" + name)
@@ -122,7 +123,7 @@ class RemoteUser extends Primrose.AbstractEventEmitter {
         description: "The audio context form which audio spatialization objects will be created, and to which the remote user's voice chat will be piped."
       }]
     });
-    if(!this.peered && !this.peering && !this.peeringError){
+    if("WebRTCSocket" in Primrose && !this.peered && !this.peering && !this.peeringError){
       this.peering = true;
       return this.audioChannel.ready
         .then(() => {

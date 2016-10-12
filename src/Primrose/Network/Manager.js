@@ -91,7 +91,7 @@ class Manager extends Primrose.AbstractEventEmitter {
       this._socket.on("userLeft", this.removeUser.bind(this));
       this._socket.on("connection_lost", this.lostConnection.bind(this));
 
-      if(!this.options.disableWebRTC) {
+      if(!this.options.disableWebRTC && "WebRTCSocket" in Primrose) {
         Primrose.WebRTCSocket.PEERING_EVENTS.forEach((name) => this._socket.on(name, (evt) => {
           console.log("-->", evt.type, evt);
           if(evt.toUserName === this.userName){
@@ -130,7 +130,7 @@ class Manager extends Primrose.AbstractEventEmitter {
     this.updateUser(state);
     this.emit("addavatar", user);
 
-    if(!this.options.disableWebRTC) {
+    if(!this.options.disableWebRTC && "WebRTCSocket" in Primrose) {
       Primrose.WebRTCSocket.PEERING_EVENTS.forEach((name) =>
         user.addEventListener(name, (evt) => {
           console.log("<--", name, evt);
