@@ -16,6 +16,8 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
     this.options.foregroundColor = this.options.foregroundColor || complementColor(new THREE.Color(this.options.backgroundColor))
       .getHex();
 
+    this.audioQueue = [];
+
     this.zero = () => {
       if (!this.lockMovement) {
         this.input.zero();
@@ -1056,6 +1058,15 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
 
   get displays() {
     return this.input.VR.displays;
+  }
+
+  setAudioFromUser(userName, audioElement){
+    this.audioQueue.push([userName, audioElement]);
+    if(this.network){
+      while(this.audioQueue.length > 0){
+        this.network.setAudioFromUser.apply(this.network, this.audioQueue.shift());
+      }
+    }
   }
 }
 

@@ -128,19 +128,7 @@ class RemoteUser extends Primrose.AbstractEventEmitter {
       return this.audioChannel.ready
         .then(() => {
           if (this.audioChannel.inAudio) {
-            this.audioElement = Primrose.Output.Audio3D.setAudioStream(this.audioChannel.inAudio, "audio" + this.userName);
-            this.audioStream = audio.context.createMediaStreamSource(this.audioChannel.inAudio);
-            this.gain = audio.context.createGain();
-            this.panner = audio.context.createPanner();
-
-            this.audioStream.connect(this.gain);
-            this.gain.connect(this.panner);
-            this.panner.connect(audio.mainVolume);
-            this.panner.coneInnerAngle = 180;
-            this.panner.coneOuterAngle = 360;
-            this.panner.coneOuterGain = 0.1;
-            this.panner.panningModel = "HRTF";
-            this.panner.distanceModel = "exponential";
+            this.setAudio(audio, this.audioChannel.inAudio);
             this.peered = true;
           }
         })
@@ -150,6 +138,29 @@ class RemoteUser extends Primrose.AbstractEventEmitter {
         })
         .then(() => this.peering = false);
     }
+  }
+
+  setAudio(audio, audioSource){
+    if(audioSource instanceof Element){
+      this.audioElement = audioSource;
+      Primrose.Output.Audio3D.setAudioProperties(this.audioElement);
+      audioSource = audioSource.srcObject;
+    }
+    else {
+      this.audioElement = Primrose.Output.Audio3D.setAudioStream(audioSource, "audio" + this.userName);
+    }
+    this.audioStream = audio.context.createMediaStreamSource(audioSource);
+    this.gain = audio.context.createGain();
+    this.panner = audio.context.createPanner();
+
+    this.audioStream.connect(this.gain);
+    this.gain.connect(this.panner);
+    this.panner.connect(audio.mainVolume);
+    this.panner.coneInnerAngle = 180;
+    this.panner.coneOuterAngle = 360;
+    this.panner.coneOuterGain = 0.1;
+    this.panner.panningModel = "HRTF";
+    this.panner.distanceModel = "exponential";
   }
 
   addEventListener(type, thunk){

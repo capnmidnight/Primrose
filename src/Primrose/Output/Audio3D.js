@@ -75,13 +75,17 @@ class Audio3D {
     const audioElementCount = document.querySelectorAll("audio")
       .length,
       element = Primrose.DOM.cascadeElement(id || ("audioStream" + audioElementCount), "audio", HTMLAudioElement, true);
+    setAudioProperties(element);
+    element.srcObject = stream;
+    return element;
+  }
+
+  static setAudioProperties(element){
     element.autoplay = true;
     element.controls = false;
     element.crossOrigin = "anonymous";
     element.muted = true;
-    element.srcObject = stream;
     element.setAttribute("muted", "");
-    return element;
   }
 
   start() {

@@ -29,6 +29,7 @@ class Manager extends Primrose.AbstractEventEmitter {
     this._socket = null;
     this.userName = null;
     this.microphone = null;
+    this.audioHeap = {};
   }
 
   update(dt) {
@@ -48,6 +49,10 @@ class Manager extends Primrose.AbstractEventEmitter {
     for (var key in this.users) {
       var user = this.users[key];
       user.update(dt);
+      if(this.audioHeap[key]){
+        user.setAudio(this.audio, this.audioHeap[key]);
+        delete this.audioHeap[key];
+      }
     }
   }
 
@@ -182,5 +187,9 @@ class Manager extends Primrose.AbstractEventEmitter {
 
   setDeviceIndex(index) {
     this.deviceIndex = index;
+  }
+
+  setAudioFromUser(userName, audioElement){
+    this.audioHeap[userName] = audioElement;
   }
 }
