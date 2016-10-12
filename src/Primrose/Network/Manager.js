@@ -46,8 +46,8 @@ class Manager extends Primrose.AbstractEventEmitter {
         }
       }
     }
-    for (var key in this.users) {
-      var user = this.users[key];
+    for (const key in this.users) {
+      const user = this.users[key];
       user.update(dt);
       if(this.audioHeap[key]){
         user.setAudio(this.audio, this.audioHeap[key]);
@@ -57,9 +57,9 @@ class Manager extends Primrose.AbstractEventEmitter {
   }
 
   updateUser(state) {
-    var key = state[0];
+    const key = state[0];
     if (key !== this.userName) {
-      var user = this.users[key];
+      const user = this.users[key];
       if (user) {
         user.setState(state);
       }
@@ -79,7 +79,6 @@ class Manager extends Primrose.AbstractEventEmitter {
           audio: true,
           video: false
         })
-        //.then(Primrose.Output.Audio3D.setAudioStream)
         .catch(console.warn.bind(console, "Can't get audio"));
     }
     if (!this._socket) {

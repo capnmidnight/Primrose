@@ -12768,9 +12768,6 @@ var Manager = (function (superclass) {
       if (user) {
         user.setState(state);
       }
-      else {
-        console.error("Unknown user", key);
-      }
     }
     else if (this.deviceIndex > 0) {
       this.localUser.stage.mesh.position.fromArray(state, 1);
@@ -12789,7 +12786,6 @@ var Manager = (function (superclass) {
           audio: true,
           video: false
         })
-        //.then(Primrose.Output.Audio3D.setAudioStream)
         .catch(console.warn.bind(console, "Can't get audio"));
     }
     if (!this._socket) {
