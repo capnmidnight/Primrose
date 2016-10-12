@@ -138,3 +138,7 @@ input:disabled, button:disabled {
 #connect {
   display: inline-block;
 }
+
+.OT_root {
+  display: none;
+}
