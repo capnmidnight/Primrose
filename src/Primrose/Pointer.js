@@ -156,6 +156,10 @@ class Pointer extends Primrose.AbstractEventEmitter {
     return this.root.quaternion;
   }
 
+  get rotation(){
+    return this.root.rotation;
+  }
+
   get matrix() {
     return this.root.matrix;
   }

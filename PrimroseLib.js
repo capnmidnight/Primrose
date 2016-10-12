@@ -3598,7 +3598,7 @@ var Pointer = (function (superclass) {
   Pointer.prototype = Object.create( superclass && superclass.prototype );
   Pointer.prototype.constructor = Pointer;
 
-  var prototypeAccessors = { useGaze: {},material: {},position: {},quaternion: {},matrix: {},segment: {} };
+  var prototypeAccessors = { useGaze: {},material: {},position: {},quaternion: {},rotation: {},matrix: {},segment: {} };
 
   prototypeAccessors.useGaze.get = function () {
     return this.gazeInner.visible;
@@ -3645,6 +3645,10 @@ var Pointer = (function (superclass) {
 
   prototypeAccessors.quaternion.get = function () {
     return this.root.quaternion;
+  };
+
+  prototypeAccessors.rotation.get = function (){
+    return this.root.rotation;
   };
 
   prototypeAccessors.matrix.get = function () {
@@ -8646,19 +8650,32 @@ var FPSInput = (function (superclass) {
 
     this.updateStage(dt);
     this.stage.position.y = this.options.avatarHeight;
-    this.VR.posePosition.y -= this.options.avatarHeight;
+    for (var i$1 = 0; i$1 < this.motionDevices.length; ++i$1) {
+      this$1.motionDevices[i$1].posePosition.y -= this$1.options.avatarHeight;
+    }
 
     // update the motionDevices
     this.stage.updateMatrix();
     this.matrix.multiplyMatrices(this.stage.matrix, this.VR.stage.matrix);
-    for (var i$1 = 0; i$1 < this.motionDevices.length; ++i$1) {
-      this$1.motionDevices[i$1].updateStage(this$1.matrix);
+    for (var i$2 = 0; i$2 < this.motionDevices.length; ++i$2) {
+      this$1.motionDevices[i$2].updateStage(this$1.matrix);
     }
 
-    for (var i$2 = 0; i$2 < this.pointers.length; ++i$2) {
-      this$1.pointers[i$2].update();
+    for (var i$3 = 0; i$3 < this.pointers.length; ++i$3) {
+      this$1.pointers[i$3].update();
     }
 
+    if (!this.VR.hasOrientation) {
+      var pitch = 0;
+      for (var i$4 = 0; i$4 < this.managers.length; ++i$4) {
+        var mgr = this$1.managers[i$4];
+        if(mgr.enabled){
+          pitch += mgr.getValue("pitch");
+        }
+      }
+      this.head.rotation.order = "YXZ";
+      this.head.rotation.x = pitch;
+    }
 
     // record the position and orientation of the user
     this.newState = [];
@@ -8674,7 +8691,6 @@ var FPSInput = (function (superclass) {
 
     // get the linear movement from the mouse/keyboard/gamepad
     var heading = 0,
-      pitch = 0,
       strafe = 0,
       drive = 0,
       lift = 0;
@@ -8682,7 +8698,6 @@ var FPSInput = (function (superclass) {
       var mgr = this$1.managers[i];
       if(mgr.enabled){
         heading += mgr.getValue("heading");
-        pitch += mgr.getValue("pitch");
         strafe += mgr.getValue("strafe");
         drive += mgr.getValue("drive");
         lift += mgr.getValue("lift");
@@ -8690,12 +8705,7 @@ var FPSInput = (function (superclass) {
     }
 
     // move stage according to heading and thrust
-    if (this.VR.hasOrientation) {
-      heading = WEDGE * Math.floor((heading / WEDGE) + 0.5);
-      pitch = 0;
-    }
-
-    EULER_TEMP.set(pitch, heading, 0, "YXZ");
+    EULER_TEMP.set(0, heading, 0, "YXZ");
     this.stage.quaternion.setFromEuler(EULER_TEMP);
 
     // update the stage's velocity

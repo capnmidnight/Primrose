@@ -354,7 +354,9 @@ class FPSInput extends Primrose.AbstractEventEmitter {
 
     this.updateStage(dt);
     this.stage.position.y = this.options.avatarHeight;
-    this.VR.posePosition.y -= this.options.avatarHeight;
+    for (let i = 0; i < this.motionDevices.length; ++i) {
+      this.motionDevices[i].posePosition.y -= this.options.avatarHeight;
+    }
 
     // update the motionDevices
     this.stage.updateMatrix();
@@ -367,6 +369,17 @@ class FPSInput extends Primrose.AbstractEventEmitter {
       this.pointers[i].update();
     }
 
+    if (!this.VR.hasOrientation) {
+      let pitch = 0;
+      for (let i = 0; i < this.managers.length; ++i) {
+        const mgr = this.managers[i];
+        if(mgr.enabled){
+          pitch += mgr.getValue("pitch");
+        }
+      }
+      this.head.rotation.order = "YXZ";
+      this.head.rotation.x = pitch;
+    }
 
     // record the position and orientation of the user
     this.newState = [];
@@ -380,7 +393,6 @@ class FPSInput extends Primrose.AbstractEventEmitter {
   updateStage(dt) {
     // get the linear movement from the mouse/keyboard/gamepad
     let heading = 0,
-      pitch = 0,
       strafe = 0,
       drive = 0,
       lift = 0;
@@ -388,7 +400,6 @@ class FPSInput extends Primrose.AbstractEventEmitter {
       const mgr = this.managers[i];
       if(mgr.enabled){
         heading += mgr.getValue("heading");
-        pitch += mgr.getValue("pitch");
         strafe += mgr.getValue("strafe");
         drive += mgr.getValue("drive");
         lift += mgr.getValue("lift");
@@ -396,12 +407,7 @@ class FPSInput extends Primrose.AbstractEventEmitter {
     }
 
     // move stage according to heading and thrust
-    if (this.VR.hasOrientation) {
-      heading = WEDGE * Math.floor((heading / WEDGE) + 0.5);
-      pitch = 0;
-    }
-
-    EULER_TEMP.set(pitch, heading, 0, "YXZ");
+    EULER_TEMP.set(0, heading, 0, "YXZ");
     this.stage.quaternion.setFromEuler(EULER_TEMP);
 
     // update the stage's velocity
