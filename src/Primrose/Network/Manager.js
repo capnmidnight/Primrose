@@ -63,9 +63,6 @@ class Manager extends Primrose.AbstractEventEmitter {
       if (user) {
         user.setState(state);
       }
-      else {
-        console.error("Unknown user", key);
-      }
     }
     else if (this.deviceIndex > 0) {
       this.localUser.stage.mesh.position.fromArray(state, 1);
