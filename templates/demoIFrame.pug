@@ -43,56 +43,46 @@ html
         script(src=fileRoot + "PrimroseLib-WithDoc" + jsExt)
       else
         script(src=fileRoot + "Primrose" + jsExt)
-      script(type="text/javascript").
-        WebVRBootstrapper([["app.js", 0]])
-          .then(function (startDownload) {
-            var p = document.querySelector("progress");
-            return startDownload(function (n, m) {
-              p.max = m;
-              p.value = n;
-            });
-          }).then(function () {
-            var p = document.querySelector("progress"),
-              c = document.getElementById("fullScreenButtonContainer"),
-              t = document.getElementById("controls");
-            window.addEventListener("vrdisplaypresentchange", function(){
-              var cd = env.input.VR.currentDevice;
-              t.style.display = cd && cd.isPresenting ? "none" : "";
-            });
-            p.style.display = "none";
-            WebVRStandardMonitor();
-            navigator.getVRDisplays().then(function(displays){
-              displays.forEach(function(display, i) {
-                if(display.displayName !== "Mouse and Keyboard VRDisplay (webvr-polyfill)") {
-                  var btn = document.createElement("button");
-                  btn.type = "button";
-                  btn.className = "secondary";
-                  btn.appendChild(document.createTextNode(display.displayName));
-                  btn.addEventListener("click", function(i){
-                    env.goFullScreen(i, "Button");
-                  }.bind(null, i), false);
-                  c.appendChild(btn);
-                }
-              });
-            });
-          });
   body
     <!-- start main.pug main block -->
     block main
       canvas#frontBuffer
-      progress
       #controls
         #fullScreenButtonContainer
-        #loginForm(style="display:none")
-          button#closeButton.secondary &times;
-          h1 Create your personal VR meeting room
-          #roomNameRow.inputRow
-            input#roomName(type="text", placeholder="Pick a room name")
-            button#randomRoomName.primary &#x21bb;
-          br
-          #userNameRow.inputRow
-            input#userName(type="text", placeholder="Pick a username")
-            button#randomUserName.primary &#x21bb;
-            button#connect.primary &rarr;
-          #errorMessage(style="display:none")
+        block controls
+    script(type="text/javascript").
+      (function(){
+        WebVRStandardMonitor();
+        window.addEventListener("vrbrowserenvironmentready", function(evt){
+          var env = evt.detail,
+            c = document.getElementById("fullScreenButtonContainer"),
+            t = document.getElementById("controls");
+          window.addEventListener("vrdisplaypresentchange", function(){
+            var cd = env.input.VR.currentDevice;
+            t.style.display = cd && cd.isPresenting ? "none" : "";
+          });
+          env.displays.forEach(function(display, i){
+            var btn = document.createElement( "button" ),
+              isStereo = Primrose.Input.VR.isStereoDisplay(display),
+              enterVR = env.goFullScreen.bind(env, i);
+            btn.type = "button";
+            btn.className = "primary";
+            btn.innerHTML = isStereo ? "&#x1f453;" : "&boxplus;";
+            btn.title = display.displayName;
+            btn.addEventListener( "click", enterVR);
+            window.addEventListener("vrdisplayactivate", function(display, enterVR, evt){
+              if(evt.display === display) {
+                var exitVR = function(){
+                  window.removeEventListener("vrdisplaydeactivate", exitVR);
+                  env.input.VR.cancel();
+                };
+                window.addEventListener("vrdisplaydeactivate", exitVR, false);
+                enterVR();
+              }
+            }.bind(window, display, enterVR), false);
+            c.appendChild(btn);
+          });
+        });
+      })();
+    script(src="app.js")
     <!-- end main.pug main block -->

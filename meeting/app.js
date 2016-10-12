@@ -154,27 +154,6 @@ function authFailed(reason) {
   errorMessage("We couldn't log you in right now because " + reason.replace(/\[USER\]/g, ctrls.userName.value));
 }
 
-function getVideos(){
-  return document.querySelectorAll(".OT_subscriber video");
-}
-
-function findVideo(userName, index, count){
-  var videos = getVideos();
-  if(index === undefined){
-    index = videos.length;
-  }
-  if(count === undefined){
-    count = 0;
-  }
-
-  if(videos.length <= index){
-    setTimeout(findVideo, 0, userName, index, ++count);
-  }
-  else{
-    app.setAudioFromUser(userName, videos[index]);
-  }
-}
-
 function authSucceeded() {
   ctrls.errorMessage.innerHTML = "";
   ctrls.errorMessage.style.display = "none";
@@ -187,17 +166,41 @@ function authSucceeded() {
   document.title = userName + " in " + roomName;
 
   Primrose.HTTP.getObject("/tokbox/?room=" + encodeURI(roomName) + "&user=" + encodeURI(userName)).then(function (cred) {
-    session = OT.initSession(cred.apiKey, cred.sessionId).on('streamCreated', function (evt) {
+    session = OT.initSession(cred.apiKey, cred.sessionId);
+
+    session.on("streamCreated", function (evt) {
       var newUserName = evt.stream.connection.data;
-      console.log("tokbox streamCreated", evt.stream, newUserName);
-      session.subscribe(evt.stream);
-      findVideo(newUserName);
-    }).connect(cred.token, function (error) {
+      session.subscribe(evt.stream, "tokbox", {
+        subscribeToAudio: true,
+        subscribeToVideo: false,
+        insertMode: "append"
+      }, function(err, evt) {
+        if(err){
+          console.error("tokbox stream error", error);
+        }
+        else{
+          var vid = evt.element.querySelector("video");
+          console.log(newUserName, vid);
+          app.setAudioFromUser(newUserName, vid);
+        }
+      });
+    });
+
+    session.connect(cred.token, function (error) {
       if (error) {
-        console.error("tokbox error", error);
+        console.error("tokbox connect error", error);
       } else {
-        publisher = OT.initPublisher();
-        publisher.publishVideo(false);
+        publisher = OT.initPublisher("tokbox", {
+          publishAudio: true,
+          publishVideo: false,
+          videoSource: null,
+          name: userName,
+          style: {
+            nameDisplay: "off",
+            buttonDisplayMode: "off",
+            showControls: false
+          }
+        });
         session.publish(publisher);
       }
     });

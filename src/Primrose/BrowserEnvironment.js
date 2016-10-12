@@ -981,6 +981,9 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
         this.input.VR.displays[0].DOMElement = this.renderer.domElement;
         this.input.VR.connect(0);
         this.emit("ready");
+        window.dispatchEvent(new CustomEvent("vrbrowserenvironmentready", {
+          detail: this
+        }));
       });
 
     this.start = () => {

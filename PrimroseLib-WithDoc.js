@@ -3291,6 +3291,9 @@ var BrowserEnvironment = (function (superclass) {
         this$1.input.VR.displays[0].DOMElement = this$1.renderer.domElement;
         this$1.input.VR.connect(0);
         this$1.emit("ready");
+        window.dispatchEvent(new CustomEvent("vrbrowserenvironmentready", {
+          detail: this$1
+        }));
       });
 
     this.start = function () {
