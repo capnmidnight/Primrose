@@ -182,7 +182,7 @@ function authSucceeded() {
   hideLoginForm();
   var userName = getUserName(),
       roomName = getRoomName();
-  document.cookie = "user=" + encodeURI(userName) + "&room=" + encodeURI(roomName);
+  document.cookie = "room=" + encodeURI(roomName) + "&user=" + encodeURI(userName);
   app.connect(socket, userName);
   document.title = userName + " in " + roomName;
 
