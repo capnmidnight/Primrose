@@ -2,7 +2,6 @@ var gulp = require("gulp"),
   build = require("notiontheory-basic-build"),
   exec = require("child_process").exec,
   pliny = require("pliny"),
-  rename = require("gulp-rename"),
   pkg = require("./package.json"),
   nt = build.setup(gulp, pkg),
   deps = nt.cat("PrimroseDependencies", [
