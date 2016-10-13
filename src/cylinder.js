@@ -49,7 +49,7 @@ pliny.function({
     optional: true,
     description: "The angle at which to end sweeping the cylinder.",
     default: 2 * Math.PI
-  }, ],
+  }],
   returns: "THREE.CylinderGeometry",
   examples: [{
     name: "Basic usage",

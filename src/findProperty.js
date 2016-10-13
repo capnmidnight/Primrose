@@ -9,7 +9,7 @@ pliny.function({
     name: "arr",
     type: "Array",
     description: "An array of strings that lists the possible values for the property name."
-  }, ],
+  }],
   returns: "String",
   examples: [{
     name: "Find the right name of the fullScree element.",

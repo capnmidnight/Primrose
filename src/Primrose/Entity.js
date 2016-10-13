@@ -38,7 +38,7 @@ class Entity {
         name: "eye",
         type: "Number",
         description: "The eye to switch to: -1 for left, +1 for right."
-      }],
+      }]
     });
     entityKeys.forEach((id) => {
       entities.get(id)

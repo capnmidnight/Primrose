@@ -29,12 +29,9 @@ The result should appear as:\n\
 });
 
 function axis(length, width) {
-  var center = hub();
-  put(brick(0xff0000, length, width, width))
-    .on(center);
-  put(brick(0x00ff00, width, length, width))
-    .on(center);
-  put(brick(0x0000ff, width, width, length))
-    .on(center);
+  const center = hub();
+  put(brick(0xff0000, length, width, width)).on(center);
+  put(brick(0x00ff00, width, length, width)).on(center);
+  put(brick(0x0000ff, width, width, length)).on(center);
   return center;
 }

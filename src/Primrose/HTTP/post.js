@@ -21,7 +21,7 @@ pliny.function({
     type: "Function",
     optional: true,
     description: "A callback function to be called as the download from the server progresses."
-  }, ]
+  }]
 });
 
 function post(type, url, options) {

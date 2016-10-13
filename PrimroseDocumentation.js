@@ -325,7 +325,7 @@ pliny.function({
     optional: true,
     description: "The angle at which to end sweeping the cylinder.",
     default: 2 * Math.PI
-  }, ],
+  }],
   returns: "THREE.CylinderGeometry",
   examples: [{
     name: "Basic usage",
@@ -414,7 +414,7 @@ pliny.function({
     name: "arr",
     type: "Array",
     description: "An array of strings that lists the possible values for the property name."
-  }, ],
+  }],
   returns: "String",
   examples: [{
     name: "Find the right name of the fullScree element.",
@@ -621,7 +621,7 @@ pliny.function({
     optional: true,
     description: "How much the light dims over distance.",
     default: 1
-  }, ],
+  }],
   returns: "THREE.PointLight",
   examples: [{
     name: "Basic usage",
@@ -1190,7 +1190,7 @@ pliny.function({
         name: "eye",
         type: "Number",
         description: "The eye to switch to: -1 for left, +1 for right."
-      }],
+      }]
     });
     pliny.property({
       parent: "Primrose.Entity",
@@ -2405,7 +2405,7 @@ pliny.function({
     type: "Function",
     optional: true,
     description: "A callback function to be called as the download from the server progresses."
-  }, ]
+  }]
 });
 
 pliny.function({
@@ -2589,7 +2589,7 @@ pliny.function({
     type: "Function",
     optional: true,
     description: "A callback function to be called as the download from the server progresses."
-  }, ]
+  }]
 });
 
 pliny.function({

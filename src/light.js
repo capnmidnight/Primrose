@@ -25,7 +25,7 @@ pliny.function({
     optional: true,
     description: "How much the light dims over distance.",
     default: 1
-  }, ],
+  }],
   returns: "THREE.PointLight",
   examples: [{
     name: "Basic usage",

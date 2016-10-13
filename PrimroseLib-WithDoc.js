@@ -31,13 +31,10 @@ The result should appear as:\n\
 });
 
 function axis(length, width) {
-  var center = hub();
-  put(brick(0xff0000, length, width, width))
-    .on(center);
-  put(brick(0x00ff00, width, length, width))
-    .on(center);
-  put(brick(0x0000ff, width, width, length))
-    .on(center);
+  const center = hub();
+  put(brick(0xff0000, length, width, width)).on(center);
+  put(brick(0x00ff00, width, length, width)).on(center);
+  put(brick(0x0000ff, width, width, length)).on(center);
   return center;
 }
   if(typeof window !== "undefined") window.axis = axis;
@@ -486,7 +483,7 @@ function copyObject(dest, source, shallow) {
     optional: true,
     description: "The angle at which to end sweeping the cylinder.",
     default: 2 * Math.PI
-  }, ],
+  }],
   returns: "THREE.CylinderGeometry",
   examples: [{
     name: "Basic usage",
@@ -618,7 +615,7 @@ function emit(evt, args) {
     name: "arr",
     type: "Array",
     description: "An array of strings that lists the possible values for the property name."
-  }, ],
+  }],
   returns: "String",
   examples: [{
     name: "Find the right name of the fullScree element.",
@@ -1143,7 +1140,7 @@ const isWindows = /Windows/.test(navigator.userAgent || "");
     optional: true,
     description: "How much the light dims over distance.",
     default: 1
-  }, ],
+  }],
   returns: "THREE.PointLight",
   examples: [{
     name: "Basic usage",
@@ -3571,7 +3568,7 @@ class Entity {
         name: "eye",
         type: "Number",
         description: "The eye to switch to: -1 for left, +1 for right."
-      }],
+      }]
     });
     entityKeys.forEach((id) => {
       entities.get(id)
@@ -10394,7 +10391,7 @@ function makeHidingContainer(id, obj) {
     type: "Function",
     optional: true,
     description: "A callback function to be called as the download from the server progresses."
-  }, ]
+  }]
 });
 
 function del(type, url, options) {
@@ -10632,7 +10629,7 @@ function getText(url, options) {
     type: "Function",
     optional: true,
     description: "A callback function to be called as the download from the server progresses."
-  }, ]
+  }]
 });
 
 function post(type, url, options) {
