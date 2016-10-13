@@ -489,25 +489,39 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
     this.currentControl = null;
 
     const FADE_SPEED = 0.1;
-    this.fadeOut = () => new Promise((resolve, reject) => {
-      var timer = setInterval(() => {
-        this.fader.material.opacity += FADE_SPEED;
-        if(this.fader.material.opacity >= 1){
-          clearInterval(timer);
-          resolve();
-        }
-      }, 10);
-    });
+    this.fadeOut = () => {
+      if(this.fader) {
+        return new Promise((resolve, reject) => {
+          var timer = setInterval(() => {
+            this.fader.material.opacity += FADE_SPEED;
+            if(this.fader.material.opacity >= 1){
+              clearInterval(timer);
+              resolve();
+            }
+          }, 10);
+        });
+      }
+      else{
+        return Promise.resolve();
+      }
+    };
 
-    this.fadeIn = () => new Promise((resolve, reject) => {
-      var timer = setInterval(() => {
-        this.fader.material.opacity -= FADE_SPEED;
-        if(this.fader.material.opacity <= 0){
-          clearInterval(timer);
-          resolve();
-        }
-      }, 10);
-    });
+    this.fadeIn = () => {
+      if(this.fader) {
+        return new Promise((resolve, reject) => {
+          var timer = setInterval(() => {
+            this.fader.material.opacity -= FADE_SPEED;
+            if(this.fader.material.opacity <= 0){
+              clearInterval(timer);
+              resolve();
+            }
+          }, 10);
+        });
+      }
+      else{
+        return Promise.resolve();
+      }
+    };
 
     this.teleportAvailable = true;
 
@@ -521,11 +535,15 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
           .sub(this.input.head.position)
           .length();
         if(dist > 0.1){
+          this.fader.visible = true;
           this.fadeOut()
             .then(() => this.input.moveStage(pos))
             .then(() => this.fadeIn())
             .catch(console.warn.bind(console, "Error while teleporting"))
-            .then(() => this.teleportAvailable = true);
+            .then(() => {
+              this.teleportAvailable = true;
+              this.fader.visible = false;
+            });
         }
       }
     };
@@ -785,6 +803,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       this.input.addEventListener("zero", this.zero, false);
 
       this.fader = colored(box(1, 1, 1), 0x000000, {opacity: 0, transparent: true, unshaded: true, side: THREE.BackSide});
+      this.fader.visible = false;
       this.input.head.root.add(this.fader);
 
       Primrose.Pointer.EVENTS.forEach((evt) => this.input.addEventListener(evt, this.selectControl.bind(this), false));
