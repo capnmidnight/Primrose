@@ -13640,7 +13640,7 @@ module.exports = WebVRPolyfill;
 },{"./base.js":2,"./cardboard-vr-display.js":5,"./display-wrappers.js":8,"./mouse-keyboard-vr-display.js":15}]},{},[13]);
 
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\webvr-standard-monitor\src\AsyncLockRequest.js
+    // start C:\Users\sean\Documents\VR\webvr-standard-monitor\src\AsyncLockRequest.js
 (function(){"use strict";
 
 function findProperty(elem, arr) {
@@ -13759,10 +13759,10 @@ function AsyncLockRequest(name, elementOpts, changeEventOpts, errorEventOpts, re
 }
     if(typeof window !== "undefined") window.AsyncLockRequest = AsyncLockRequest;
 })();
-    // end D:\Documents\VR\webvr-standard-monitor\src\AsyncLockRequest.js
+    // end C:\Users\sean\Documents\VR\webvr-standard-monitor\src\AsyncLockRequest.js
     ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\webvr-standard-monitor\src\FullScreen.js
+    // start C:\Users\sean\Documents\VR\webvr-standard-monitor\src\FullScreen.js
 (function(){"use strict";
 
 var FullScreen = AsyncLockRequest("Fullscreen", ["fullscreenElement", "mozFullScreenElement", "webkitFullscreenElement", "msFullscreenElement"], ["onfullscreenchange", "onmozfullscreenchange", "onwebkitfullscreenchange", "onmsfullscreenchange"], ["onfullscreenerror", "onmozfullscreenerror", "onwebkitfullscreenerror", "onmsfullscreenerror"], ["requestFullscreen", "mozRequestFullScreen", "webkitRequestFullscreen", "webkitRequestFullScreen", "msRequestFullscreen"], ["exitFullscreen", "mozExitFullScreen", "webkitExitFullscreen", "webkitExitFullScreen", "msExitFullscreen"], function (arg) {
@@ -13770,10 +13770,10 @@ var FullScreen = AsyncLockRequest("Fullscreen", ["fullscreenElement", "mozFullSc
 });
     if(typeof window !== "undefined") window.FullScreen = FullScreen;
 })();
-    // end D:\Documents\VR\webvr-standard-monitor\src\FullScreen.js
+    // end C:\Users\sean\Documents\VR\webvr-standard-monitor\src\FullScreen.js
     ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\webvr-standard-monitor\src\Orientation.js
+    // start C:\Users\sean\Documents\VR\webvr-standard-monitor\src\Orientation.js
 (function(){"use strict";
 
 function lockOrientation(element) {
@@ -13807,19 +13807,19 @@ var Orientation = {
 };
     if(typeof window !== "undefined") window.Orientation = Orientation;
 })();
-    // end D:\Documents\VR\webvr-standard-monitor\src\Orientation.js
+    // end C:\Users\sean\Documents\VR\webvr-standard-monitor\src\Orientation.js
     ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\webvr-standard-monitor\src\PointerLock.js
+    // start C:\Users\sean\Documents\VR\webvr-standard-monitor\src\PointerLock.js
 (function(){"use strict";
 
 var PointerLock = AsyncLockRequest("Pointer Lock", ["pointerLockElement", "mozPointerLockElement", "webkitPointerLockElement"], ["onpointerlockchange", "onmozpointerlockchange", "onwebkitpointerlockchange"], ["onpointerlockerror", "onmozpointerlockerror", "onwebkitpointerlockerror"], ["requestPointerLock", "mozRequestPointerLock", "webkitRequestPointerLock", "webkitRequestPointerLock"], ["exitPointerLock", "mozExitPointerLock", "webkitExitPointerLock", "webkitExitPointerLock"]);
     if(typeof window !== "undefined") window.PointerLock = PointerLock;
 })();
-    // end D:\Documents\VR\webvr-standard-monitor\src\PointerLock.js
+    // end C:\Users\sean\Documents\VR\webvr-standard-monitor\src\PointerLock.js
     ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\webvr-standard-monitor\src\WebVRStandardMonitor.js
+    // start C:\Users\sean\Documents\VR\webvr-standard-monitor\src\WebVRStandardMonitor.js
 (function(){"use strict";
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -13979,13 +13979,15 @@ function fireDisplayPresentChange(evt) {
 }
 
 WebVRStandardMonitor.standardFullScreenBehavior = function (elem) {
-  var promise = FullScreen.request(elem).catch(warn("FullScreen failed"));
+  return FullScreen.request(elem).catch(warn("FullScreen failed")).then(WebVRStandardMonitor.standardLockBehavior);
+};
+
+WebVRStandardMonitor.standardLockBehavior = function (elem) {
   if (isMobile) {
-    promise = promise.then(Orientation.lock).catch(warn("OrientationLock failed"));
+    return Orientation.lock(elem).catch(warn("OrientationLock failed"));
   } else {
-    promise = promise.then(PointerLock.request).catch(warn("PointerLock failed"));
+    return PointerLock.request(elem).catch(warn("PointerLock failed"));
   }
-  return promise;
 };
 
 WebVRStandardMonitor.prototype.requestPresent = function (layers) {
@@ -14033,9 +14035,9 @@ WebVRStandardMonitor.prototype.getEyeParameters = function (side) {
 };
     if(typeof window !== "undefined") window.WebVRStandardMonitor = WebVRStandardMonitor;
 })();
-    // end D:\Documents\VR\webvr-standard-monitor\src\WebVRStandardMonitor.js
+    // end C:\Users\sean\Documents\VR\webvr-standard-monitor\src\WebVRStandardMonitor.js
     ////////////////////////////////////////////////////////////////////////////////
-console.info("webvr-standard-monitor v1.0.7. see https://github.com/NotionTheory/webvr-standard-monitor for more information.");
+console.info("webvr-standard-monitor v1.0.9. see https://github.com/NotionTheory/webvr-standard-monitor for more information.");
 ////////////////////////////////////////////////////////////////////////////////
     // start D:\Documents\VR\webvr-bootstrapper\src\documentReady.js
 (function(){"use strict";
@@ -68980,6 +68982,8 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
     _this.options = patch(options, BrowserEnvironment.DEFAULTS);
     _this.options.foregroundColor = _this.options.foregroundColor || complementColor(new THREE.Color(_this.options.backgroundColor)).getHex();
 
+    _this.audioQueue = [];
+
     _this.zero = function () {
       if (!_this.lockMovement) {
         _this.input.zero();
@@ -69905,6 +69909,9 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
       _this.input.VR.displays[0].DOMElement = _this.renderer.domElement;
       _this.input.VR.connect(0);
       _this.emit("ready");
+      window.dispatchEvent(new CustomEvent("vrbrowserenvironmentready", {
+        detail: _this
+      }));
     });
 
     _this.start = function () {
@@ -69978,6 +69985,16 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
     key: "disconnect",
     value: function disconnect() {
       return this.network && this.network.disconnect();
+    }
+  }, {
+    key: "setAudioFromUser",
+    value: function setAudioFromUser(userName, audioElement) {
+      this.audioQueue.push([userName, audioElement]);
+      if (this.network) {
+        while (this.audioQueue.length > 0) {
+          this.network.setAudioFromUser.apply(this.network, this.audioQueue.shift());
+        }
+      }
     }
   }, {
     key: "lockMovement",
@@ -71592,6 +71609,11 @@ var Pointer = function (_Primrose$AbstractEve) {
     key: "quaternion",
     get: function get() {
       return this.root.quaternion;
+    }
+  }, {
+    key: "rotation",
+    get: function get() {
+      return this.root.rotation;
     }
   }, {
     key: "matrix",
@@ -74433,320 +74455,6 @@ var Text = {};
   // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\WebRTCSocket.js
-(function(){"use strict";
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var PEERING_TIMEOUT_LENGTH = 30000;
-
-// some useful information:
-// - https://www.webrtc-experiment.com/docs/STUN-or-TURN.html
-// - http://www.html5rocks.com/en/tutorials/webrtc/infrastructure/#after-signaling-using-ice-to-cope-with-nats-and-firewalls
-// - https://github.com/coturn/rfc5766-turn-server/
-var ICE_SERVERS = [{
-  urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302", "stun:stun2.l.google.com:19302", "stun:stun3.l.google.com:19302", "stun:stun4.l.google.com:19302"]
-}];
-
-var INSTANCE_COUNT = 0;
-
-var WebRTCSocket = function (_Primrose$AbstractEve) {
-  _inherits(WebRTCSocket, _Primrose$AbstractEve);
-
-  // Be forewarned, the WebRTC lifecycle is very complex and editing this class is likely to break it.
-
-  function WebRTCSocket(requestICEPath, fromUserName, fromUserIndex, toUserName, toUserIndex, goSecond) {
-    _classCallCheck(this, WebRTCSocket);
-
-    // These logging constructs are basically off by default, but you will need them if you ever
-    // need to debug the WebRTC workflow.
-
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(WebRTCSocket).call(this));
-
-    var attemptCount = 0;
-    var MAX_LOG_LEVEL = 5,
-        instanceNumber = ++INSTANCE_COUNT,
-        print = function print(name, level, format) {
-      if (level < MAX_LOG_LEVEL) {
-        var args = ["%s: " + format, level];
-        for (var i = 3; i < arguments.length; ++i) {
-          args.push(arguments[i]);
-        }
-        console[name].apply(console, args);
-      }
-      return arguments[3];
-    };
-
-    _this.myResult = null;
-    _this.theirResult = null;
-    _this._timeout = null;
-    _this._log = print.bind(null, "log");
-    _this._error = print.bind(null, "error", 0, "");
-    _this.fromUserName = fromUserName;
-    _this.fromUserIndex = fromUserIndex;
-    _this.toUserName = toUserName;
-    _this.toUserIndex = toUserIndex;
-    _this.rtc = null;
-    _this.goFirst = !goSecond;
-    _this.progress = {
-      offer: {
-        created: false,
-        received: false
-      },
-      answer: {
-        created: false,
-        received: false
-      }
-    };
-    // If the user leaves the page, we want to at least fire off the close signal and perhaps
-    // not completely surprise the remote user.
-    window.addEventListener("unload", _this.close.bind(_this));
-
-    var resolve = null,
-        reject = null;
-
-    var done = function done(isError) {
-      _this._log(2, "Tearing down event handlers");
-      _this.stopTimeout();
-      _this.rtc.onsignalingstatechange = null;
-      _this.rtc.oniceconnectionstatechange = null;
-      _this.rtc.onnegotiationneeded = null;
-      _this.rtc.onicecandidate = null;
-
-      _this.teardown();
-      if (isError) {
-        _this.close();
-      }
-    };
-
-    // A pass-through function to include in the promise stream to see if the channels have all been
-    // set up correctly and ready to go.
-    var check = function check(obj) {
-      if (_this.complete) {
-        _this._log(1, "Timeout avoided.");
-        done();
-        resolve();
-      }
-      return obj;
-    };
-
-    // When an offer or an answer is received, it's pretty much the same exact processing. Either
-    // type of object gets checked to see if it was expected, then unwrapped.
-    _this.peering_answer = function (description) {
-      _this._log(1, "description", description);
-      // Check to see if we expected this sort of message from this user.
-      _this.recordProgress(description.item, "received");
-      // The description we received is always the remote description, regardless of whether or not it's an offer
-      // or an answer.
-      return _this.rtc.setRemoteDescription(new RTCSessionDescription(description.item))
-
-      // check to see if we're done.
-      .then(check)
-
-      // and if there are any errors, bomb out and shut everything down.
-      .catch(_this.peering_error);
-    };
-
-    // When an offer or an answer is created, it's pretty much the same exact processing. Either type
-    // of object gets wrapped with a context identifying which peer channel is being negotiated, and
-    // then transmitted through the negotiation server to the remote user.
-    _this.descriptionCreated = function (description) {
-      _this.recordProgress(description, "created");
-
-      // The description we create is always the local description, regardless of whether or not it's an offer
-      // or an answer.
-      return _this.rtc.setLocalDescription(description)
-      // Let the remote user know what happened.
-      .then(function () {
-        return _this.emit(description.type, description);
-      })
-      // check to see if we're done.
-      .then(check)
-      // and if there are any errors, bomb out and shut everything down.
-      .catch(_this.peering_error);
-    };
-
-    // A catch-all error handler to shut down the world if an error we couldn't handle happens.
-    _this.peering_error = function (exp) {
-      _this._error(exp);
-      _this.emit("cancel", exp);
-      _this._log(1, "Timeout avoided, but only because of an error.");
-      done(true);
-      reject(exp);
-    };
-
-    // A catch-all error handler to shut down the world if an error we couldn't handle happens.
-    _this.peering_cancel = function (exp) {
-      _this._error(exp);
-      _this._log(1, "Timeout avoided, but only because of an error.");
-      done(true);
-      reject(exp);
-    };
-
-    // When an offer is received, we need to create an answer in reply.
-    _this.peering_offer = function (offer) {
-      _this._log(1, "offer", offer);
-      var promise = _this.peering_answer(offer);
-      if (promise) {
-        return promise.then(function () {
-          return _this.rtc.createAnswer();
-        }).then(_this.descriptionCreated);
-      }
-    };
-
-    // ICE stands for Interactive Connectivity Establishment. It's basically a description of a local end-point,
-    // with enough information for the remote user to be able to connect to it.
-    _this.peering_ice = function (ice) {
-      _this._log(1, "ice", ice);
-      var candidate = new RTCIceCandidate(ice.item);
-      return _this.rtc.addIceCandidate(candidate).catch(_this._error);
-    };
-
-    _this.peering_peer = function (evt) {
-      _this._log(1, "peering", evt);
-      _this.hasRTC.then(function () {
-        return _this.issueRequest();
-      });
-    };
-
-    // This is where things get gnarly
-    _this.hasRTC = Primrose.HTTP.getObject(requestICEPath).then(function (config) {
-      config.iceServers.push.apply(config.iceServers, ICE_SERVERS);
-      for (var i = config.iceServers.length - 1; i >= 0; --i) {
-        var server = config.iceServers[i];
-        if (!server.urls || server.urls.length === 0) {
-          config.iceServers.splice(i, 1);
-        } else {
-          if (server.url && !server.urls) {
-            server.urls = [server.url];
-            delete server.url;
-          }
-          if (server.username && server.credential) {
-            server.credentialType = "token";
-          }
-        }
-      }
-      config.iceCandidatePoolSize = 100;
-      _this._log(1, config);
-      _this.rtc = new RTCPeerConnection(config);
-      // This is just for debugging purposes.
-      _this.rtc.onsignalingstatechange = function (evt) {
-        return _this._log(1, "[%s] Signal State: %s", instanceNumber, _this.rtc.signalingState);
-      };
-      _this.rtc.oniceconnectionstatechange = function (evt) {
-        return _this._log(1, "[%s] ICE Connection %s, Gathering %s", instanceNumber, _this.rtc.iceConnectionState, _this.rtc.iceGatheringState);
-      };
-
-      // All of the literature you'll read on WebRTC show creating an offer right after creating a data channel
-      // or adding a stream to the peer connection. This is wrong. The correct way is to wait for the API to tell
-      // you that negotiation is necessary, and only then create the offer. There is a race-condition between
-      // the signaling state of the WebRTCPeerConnection and creating an offer after creating a channel if we
-      // don't wait for the appropriate time.
-      _this.rtc.onnegotiationneeded = function (evt) {
-        return _this.createOffer().then(_this.descriptionCreated);
-      };
-
-      // The API is going to figure out end-point configurations for us by communicating with the STUN servers
-      // and seeing which end-points are visible and which require network address translation.
-      _this.rtc.onicecandidate = function (evt) {
-        // There is an error condition where sometimes the candidate returned in this event handler will be null.
-        if (evt.candidate) {
-          // Then let the remote user know of our folly.
-          _this.emit("ice", evt.candidate);
-        }
-      };
-    });
-
-    _this.ready = _this.hasRTC.then(function () {
-      return new Promise(function (resolver, rejecter) {
-        resolve = resolver;
-        reject = rejecter;
-        _this.emit("peer");
-      });
-    });
-    return _this;
-  }
-
-  _createClass(WebRTCSocket, [{
-    key: "emit",
-    value: function emit(type, evt) {
-      _get(Object.getPrototypeOf(WebRTCSocket.prototype), "emit", this).call(this, type, {
-        fromUserName: this.fromUserName,
-        fromUserIndex: this.fromUserIndex,
-        toUserName: this.toUserName,
-        toUserIndex: this.toUserIndex,
-        item: evt
-      });
-    }
-  }, {
-    key: "startTimeout",
-    value: function startTimeout() {
-      if (this._timeout === null) {
-        this._log(1, "Timing out in " + Math.floor(PEERING_TIMEOUT_LENGTH / 1000) + " seconds.");
-        this._timeout = setTimeout(this.peering_error.bind(this, "Gave up waiting on the peering connection."), PEERING_TIMEOUT_LENGTH);
-      }
-    }
-  }, {
-    key: "stopTimeout",
-    value: function stopTimeout() {
-      if (this._timeout !== null) {
-        clearTimeout(this._timeout);
-        this._timeout = null;
-      }
-    }
-  }, {
-    key: "createOffer",
-    value: function createOffer() {
-      return this.rtc.createOffer(this.offerOptions);
-    }
-  }, {
-    key: "recordProgress",
-    value: function recordProgress(description, method) {
-      this._log(2, "Logging progress [%s]: %s %s -> true", description.type, method, this.progress[description.type][method]);
-      this.progress[description.type][method] = true;
-    }
-  }, {
-    key: "close",
-    value: function close() {
-      if (this.rtc && this.rtc.signalingState !== "closed") {
-        this.rtc.close();
-        this.rtc = null;
-      }
-    }
-  }, {
-    key: "teardown",
-    value: function teardown() {
-      throw new Error("Not implemented.");
-    }
-  }, {
-    key: "issueRequest",
-    value: function issueRequest() {
-      throw new Error("Not implemented");
-    }
-  }, {
-    key: "complete",
-    get: function get() {
-      return !this.rtc || this.rtc.signalingState === "closed";
-    }
-  }]);
-
-  return WebRTCSocket;
-}(Primrose.AbstractEventEmitter);
-
-WebRTCSocket.PEERING_EVENTS = ["peer", "cancel", "offer", "ice", "answer"];
-  if(typeof window !== "undefined") window.Primrose.WebRTCSocket = WebRTCSocket;
-})();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\WebRTCSocket.js
-  ////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
   // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Workerize.js
 (function(){"use strict";
 
@@ -76440,17 +76148,31 @@ var FPSInput = function (_Primrose$AbstractEve) {
 
       this.updateStage(dt);
       this.stage.position.y = this.options.avatarHeight;
-      this.VR.posePosition.y -= this.options.avatarHeight;
+      for (var _i = 0; _i < this.motionDevices.length; ++_i) {
+        this.motionDevices[_i].posePosition.y -= this.options.avatarHeight;
+      }
 
       // update the motionDevices
       this.stage.updateMatrix();
       this.matrix.multiplyMatrices(this.stage.matrix, this.VR.stage.matrix);
-      for (var _i = 0; _i < this.motionDevices.length; ++_i) {
-        this.motionDevices[_i].updateStage(this.matrix);
+      for (var _i2 = 0; _i2 < this.motionDevices.length; ++_i2) {
+        this.motionDevices[_i2].updateStage(this.matrix);
       }
 
-      for (var _i2 = 0; _i2 < this.pointers.length; ++_i2) {
-        this.pointers[_i2].update();
+      for (var _i3 = 0; _i3 < this.pointers.length; ++_i3) {
+        this.pointers[_i3].update();
+      }
+
+      if (!this.VR.hasOrientation) {
+        var pitch = 0;
+        for (var _i4 = 0; _i4 < this.managers.length; ++_i4) {
+          var mgr = this.managers[_i4];
+          if (mgr.enabled) {
+            pitch += mgr.getValue("pitch");
+          }
+        }
+        this.head.rotation.order = "YXZ";
+        this.head.rotation.x = pitch;
       }
 
       // record the position and orientation of the user
@@ -76466,7 +76188,6 @@ var FPSInput = function (_Primrose$AbstractEve) {
     value: function updateStage(dt) {
       // get the linear movement from the mouse/keyboard/gamepad
       var heading = 0,
-          pitch = 0,
           strafe = 0,
           drive = 0,
           lift = 0;
@@ -76474,7 +76195,6 @@ var FPSInput = function (_Primrose$AbstractEve) {
         var mgr = this.managers[i];
         if (mgr.enabled) {
           heading += mgr.getValue("heading");
-          pitch += mgr.getValue("pitch");
           strafe += mgr.getValue("strafe");
           drive += mgr.getValue("drive");
           lift += mgr.getValue("lift");
@@ -76482,12 +76202,7 @@ var FPSInput = function (_Primrose$AbstractEve) {
       }
 
       // move stage according to heading and thrust
-      if (this.VR.hasOrientation) {
-        heading = WEDGE * Math.floor(heading / WEDGE + 0.5);
-        pitch = 0;
-      }
-
-      EULER_TEMP.set(pitch, heading, 0, "YXZ");
+      EULER_TEMP.set(0, heading, 0, "YXZ");
       this.stage.quaternion.setFromEuler(EULER_TEMP);
 
       // update the stage's velocity
@@ -77588,24 +77303,22 @@ var VR = function (_Primrose$PoseInputPr) {
           }
 
           // A hack to deal with a bug in the current build of Chromium
-          if (_this2.isNativeMobileWebVR) {
+          if (_this2.isNativeMobileWebVR && _this2.isStereo) {
             layers = layers[0];
           }
 
           promise = null;
           rp = _(_this2).requestPresent;
-
           // If we're using WebVR-Polyfill, just let it do its job.
 
-          if (_this2.currentDevice.isPolyfilled || !VR.isStereoDisplay(_this2.currentDevice)) {
-            // for Firefox's sake, this can't be done in a Promise.
-            promise = rp(layers);
-          } else {
+          if (_this2.currentDevice.capabilities.hasExternalDisplay) {
             // PCs with HMD should also make the browser window on the main
             // display full-screen, so we can then also lock pointer.
             promise = WebVRStandardMonitor.standardFullScreenBehavior(elem).then(function () {
               return rp(layers);
             });
+          } else {
+            promise = rp(layers).then(WebVRStandardMonitor.standardLockBehavior);
           }
           return {
             v: promise
@@ -77781,264 +77494,6 @@ var VR = function (_Primrose$PoseInputPr) {
   // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Input\VR.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Network\AudioChannel.js
-(function(){'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var ENABLE_OPUS_HACK = true;
-
-function preferOpus(description) {
-  if (ENABLE_OPUS_HACK && description) {
-    var sdp = description.sdp;
-    var sdpLines = sdp.split('\r\n');
-    var mLineIndex = null;
-    // Search for m line.
-    for (var i = 0; i < sdpLines.length; i++) {
-      if (sdpLines[i].search('m=audio') !== -1) {
-        mLineIndex = i;
-        break;
-      }
-    }
-    if (mLineIndex === null) return sdp;
-
-    // If Opus is available, set it as the default in m line.
-    for (var j = 0; j < sdpLines.length; j++) {
-      if (sdpLines[j].search('opus/48000') !== -1) {
-        var opusPayload = extractSdp(sdpLines[j], /:(\d+) opus\/48000/i);
-        if (opusPayload) sdpLines[mLineIndex] = setDefaultCodec(sdpLines[mLineIndex], opusPayload);
-        break;
-      }
-    }
-
-    // Remove CN in m line and sdp.
-    sdpLines = removeCN(sdpLines, mLineIndex);
-
-    description.sdp = sdpLines.join('\r\n');
-  }
-  return description;
-}
-
-function extractSdp(sdpLine, pattern) {
-  var result = sdpLine.match(pattern);
-  return result && result.length == 2 ? result[1] : null;
-}
-
-function setDefaultCodec(mLine, payload) {
-  var elements = mLine.split(' ');
-  var newLine = [];
-  var index = 0;
-  for (var i = 0; i < elements.length; i++) {
-    if (index === 3) // Format of media starts from the fourth.
-      newLine[index++] = payload; // Put target payload to the first.
-    if (elements[i] !== payload) newLine[index++] = elements[i];
-  }
-  return newLine.join(' ');
-}
-
-function removeCN(sdpLines, mLineIndex) {
-  var mLineElements = sdpLines[mLineIndex].split(' ');
-  // Scan from end for the convenience of removing an item.
-  for (var i = sdpLines.length - 1; i >= 0; i--) {
-    var payload = extractSdp(sdpLines[i], /a=rtpmap:(\d+) CN\/\d+/i);
-    if (payload) {
-      var cnPos = mLineElements.indexOf(payload);
-      if (cnPos !== -1) {
-        // Remove CN payload from m line.
-        mLineElements.splice(cnPos, 1);
-      }
-      // Remove CN line in sdp
-      sdpLines.splice(i, 1);
-    }
-  }
-
-  sdpLines[mLineIndex] = mLineElements.join(' ');
-  return sdpLines;
-}
-
-var AudioChannel = function (_Primrose$WebRTCSocke) {
-  _inherits(AudioChannel, _Primrose$WebRTCSocke);
-
-  function AudioChannel(requestICEPath, fromUserName, toUserName, outAudio, goSecond) {
-    _classCallCheck(this, AudioChannel);
-
-    console.log("attempting to peer audio from %s to %s. %s goes first.", fromUserName, toUserName, goSecond ? toUserName : fromUserName);
-
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(AudioChannel).call(this, requestICEPath, fromUserName, 0, toUserName, 0, goSecond));
-
-    _this.outAudio = outAudio;
-    _this.inAudio = null;
-    _this.startTimeout();
-    return _this;
-  }
-
-  _createClass(AudioChannel, [{
-    key: 'issueRequest',
-    value: function issueRequest() {
-      var _this2 = this;
-
-      console.log("going first", this.goFirst);
-      // Adding an audio stream to the peer connection is different between Firefox (which supports the latest
-      //  version of the API) and Chrome.
-      var addStream = function addStream() {
-        _this2._log(0, "adding stream", _this2.outAudio, _this2.rtc.addTrack);
-
-        // Make sure we actually have audio to send to the remote.
-        _this2.outAudio.then(function (aud) {
-          if (_this2.rtc.addTrack) {
-            aud.getAudioTracks().forEach(function (track) {
-              return _this2.rtc.addTrack(track, aud);
-            });
-          } else {
-            _this2.rtc.addStream(aud);
-          }
-
-          if (isIE) {
-            _this2.createOffer().then(_this2.descriptionCreated);
-          }
-        });
-      };
-
-      // Receiving an audio stream from the peer connection is just a
-      var onStream = function onStream(stream) {
-        _this2.inAudio = stream;
-        if (!_this2.goFirst) {
-          _this2._log(0, "Creating the second stream from %s to %s", _this2.fromUserName, _this2.toUserName);
-          _this2.stopTimeout();
-          _this2._log(1, "Restarting timeout.");
-          _this2.startTimeout();
-          addStream();
-        }
-      };
-
-      // Wait to receive an audio track.
-      if ("ontrack" in this.rtc) {
-        this.rtc.ontrack = function (evt) {
-          return onStream(evt.streams[0]);
-        };
-      } else {
-        this.rtc.onaddstream = function (evt) {
-          return onStream(evt.stream);
-        };
-      }
-
-      // If we're the boss, tell people about it.
-      if (this.goFirst) {
-        this._log(0, "Creating the first stream from %s to %s", this.fromUserName, this.toUserName);
-        addStream();
-      }
-    }
-
-    // The peering process is complete when all offers are answered.
-
-  }, {
-    key: 'teardown',
-    value: function teardown() {
-      if ("ontrack" in this.rtc) {
-        this.rtc.ontrack = null;
-      } else {
-        this.rtc.onaddstream = null;
-      }
-    }
-  }, {
-    key: 'createOffer',
-    value: function createOffer() {
-      return _get(Object.getPrototypeOf(AudioChannel.prototype), 'createOffer', this).call(this).then(preferOpus);
-    }
-  }, {
-    key: 'complete',
-    get: function get() {
-      if (this.goFirst) {
-        this._log(1, "[First]: offer created: %s, answer recv: %s -> offer recv: %s -> answer created: %s.", this.progress.offer.created, this.progress.answer.received, this.progress.offer.received, this.progress.answer.created, this.rtc.signalingState);
-      } else {
-        this._log(1, "[Second]: offer recv: %s, answer created: %s -> offer created: %s -> answer recv: %s.", this.progress.offer.received, this.progress.answer.created, this.progress.offer.created, this.progress.answer.received, this.rtc.signalingState);
-      }
-
-      return _get(Object.getPrototypeOf(AudioChannel.prototype), 'complete', this) || this.progress.offer.received && this.progress.offer.created && this.progress.answer.received && this.progress.answer.created;
-    }
-  }]);
-
-  return AudioChannel;
-}(Primrose.WebRTCSocket);
-  if(typeof window !== "undefined") window.Primrose.Network.AudioChannel = AudioChannel;
-})();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Network\AudioChannel.js
-  ////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Network\DataChannel.js
-(function(){"use strict";
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var INSTANCE_COUNT = 0;
-
-var DataChannel = function (_Primrose$WebRTCSocke) {
-  _inherits(DataChannel, _Primrose$WebRTCSocke);
-
-  function DataChannel(requestICEPath, fromUserName, fromUserIndex, toUserName, toUserIndex, goSecond) {
-    _classCallCheck(this, DataChannel);
-
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(DataChannel).call(this, requestICEPath, fromUserName, fromUserIndex, toUserName, toUserIndex, goSecond));
-
-    _this.dataChannel = null;
-    return _this;
-  }
-
-  _createClass(DataChannel, [{
-    key: "issueRequest",
-    value: function issueRequest() {
-      var _this2 = this;
-
-      if (this.goFirst) {
-        this._log(0, "Creating data channel");
-        this.dataChannel = this.rtc.createDataChannel();
-      } else {
-        this.ondatachannel = function (evt) {
-          _this2._log(0, "Receving data channel");
-          _this2.dataChannel = evt.channel;
-        };
-      }
-    }
-  }, {
-    key: "teardown",
-    value: function teardown() {
-      this.rtc.ondatachannel = null;
-    }
-  }, {
-    key: "complete",
-    get: function get() {
-      if (this.goFirst) {
-        this._log(1, "[First]: OC %s -> AR %s.", this.progress.offer.created, this.progress.answer.received);
-      } else {
-        this._log(1, "[Second]: OC %s -> AR %s.", this.progress.offer.created, this.progress.answer.received);
-      }
-      return _get(Object.getPrototypeOf(DataChannel.prototype), "complete", this) || this.goFirst && this.progress.offer.created && this.progress.answer.received || !this.goFirst && this.progress.offer.received && this.progress.answer.created;
-    }
-  }]);
-
-  return DataChannel;
-}(Primrose.WebRTCSocket);
-  if(typeof window !== "undefined") window.Primrose.Network.DataChannel = DataChannel;
-})();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Network\DataChannel.js
-  ////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
   // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Network\Manager.js
 (function(){"use strict";
 
@@ -78069,6 +77524,7 @@ var Manager = function (_Primrose$AbstractEve) {
     _this._socket = null;
     _this.userName = null;
     _this.microphone = null;
+    _this.audioHeap = {};
     return _this;
   }
 
@@ -78091,6 +77547,10 @@ var Manager = function (_Primrose$AbstractEve) {
       for (var key in this.users) {
         var user = this.users[key];
         user.update(dt);
+        if (this.audioHeap[key]) {
+          user.setAudio(this.audio, this.audioHeap[key]);
+          delete this.audioHeap[key];
+        }
       }
     }
   }, {
@@ -78101,8 +77561,6 @@ var Manager = function (_Primrose$AbstractEve) {
         var user = this.users[key];
         if (user) {
           user.setState(state);
-        } else {
-          console.error("Unknown user", key);
         }
       } else if (this.deviceIndex > 0) {
         this.localUser.stage.mesh.position.fromArray(state, 1);
@@ -78121,9 +77579,7 @@ var Manager = function (_Primrose$AbstractEve) {
         this.microphone = navigator.mediaDevices.getUserMedia({
           audio: true,
           video: false
-        })
-        //.then(Primrose.Output.Audio3D.setAudioStream)
-        .catch(console.warn.bind(console, "Can't get audio"));
+        }).catch(console.warn.bind(console, "Can't get audio"));
       }
       if (!this._socket) {
         this._socket = socket;
@@ -78136,7 +77592,7 @@ var Manager = function (_Primrose$AbstractEve) {
         this._socket.on("userLeft", this.removeUser.bind(this));
         this._socket.on("connection_lost", this.lostConnection.bind(this));
 
-        if (!this.options.disableWebRTC) {
+        if (!this.options.disableWebRTC && "WebRTCSocket" in Primrose) {
           Primrose.WebRTCSocket.PEERING_EVENTS.forEach(function (name) {
             return _this2._socket.on(name, function (evt) {
               console.log("-->", evt.type, evt);
@@ -78179,7 +77635,7 @@ var Manager = function (_Primrose$AbstractEve) {
       this.updateUser(state);
       this.emit("addavatar", user);
 
-      if (!this.options.disableWebRTC) {
+      if (!this.options.disableWebRTC && "WebRTCSocket" in Primrose) {
         Primrose.WebRTCSocket.PEERING_EVENTS.forEach(function (name) {
           return user.addEventListener(name, function (evt) {
             console.log("<--", name, evt);
@@ -78238,6 +77694,11 @@ var Manager = function (_Primrose$AbstractEve) {
     key: "setDeviceIndex",
     value: function setDeviceIndex(index) {
       this.deviceIndex = index;
+    }
+  }, {
+    key: "setAudioFromUser",
+    value: function setAudioFromUser(userName, audioElement) {
+      this.audioHeap[userName] = audioElement;
     }
   }]);
 
@@ -78321,13 +77782,14 @@ var RemoteUser = function (_Primrose$AbstractEve) {
       curr: _this.head.quaternion
     };
 
-    if (!disableWebRTC) {
-      _this.audioChannel = null;
-      _this.audioElement = null;
-      _this.audioStream = null;
-      _this.gain = null;
-      _this.panner = null;
-      _this.analyzer = null;
+    _this.audioChannel = null;
+    _this.audioElement = null;
+    _this.audioStream = null;
+    _this.gain = null;
+    _this.panner = null;
+    _this.analyzer = null;
+
+    if (!disableWebRTC && "WebRTCSocket" in Primrose) {
 
       Primrose.WebRTCSocket.PEERING_EVENTS.map(function (name) {
         return "peering_" + name;
@@ -78352,23 +77814,11 @@ var RemoteUser = function (_Primrose$AbstractEve) {
     value: function peer(audio) {
       var _this2 = this;
 
-      if (!this.peered && !this.peering && !this.peeringError) {
+      if ("WebRTCSocket" in Primrose && !this.peered && !this.peering && !this.peeringError) {
         this.peering = true;
         return this.audioChannel.ready.then(function () {
           if (_this2.audioChannel.inAudio) {
-            _this2.audioElement = Primrose.Output.Audio3D.setAudioStream(_this2.audioChannel.inAudio, "audio" + _this2.userName);
-            _this2.audioStream = audio.context.createMediaStreamSource(_this2.audioChannel.inAudio);
-            _this2.gain = audio.context.createGain();
-            _this2.panner = audio.context.createPanner();
-
-            _this2.audioStream.connect(_this2.gain);
-            _this2.gain.connect(_this2.panner);
-            _this2.panner.connect(audio.mainVolume);
-            _this2.panner.coneInnerAngle = 180;
-            _this2.panner.coneOuterAngle = 360;
-            _this2.panner.coneOuterGain = 0.1;
-            _this2.panner.panningModel = "HRTF";
-            _this2.panner.distanceModel = "exponential";
+            _this2.setAudio(audio, _this2.audioChannel.inAudio);
             _this2.peered = true;
           }
         }).catch(function (exp) {
@@ -78378,6 +77828,29 @@ var RemoteUser = function (_Primrose$AbstractEve) {
           return _this2.peering = false;
         });
       }
+    }
+  }, {
+    key: "setAudio",
+    value: function setAudio(audio, audioSource) {
+      if (audioSource instanceof Element) {
+        this.audioElement = audioSource;
+        Primrose.Output.Audio3D.setAudioProperties(this.audioElement);
+        audioSource = audioSource.srcObject;
+      } else {
+        this.audioElement = Primrose.Output.Audio3D.setAudioStream(audioSource, "audio" + this.userName);
+      }
+      this.audioStream = audio.context.createMediaStreamSource(audioSource);
+      this.gain = audio.context.createGain();
+      this.panner = audio.context.createPanner();
+
+      this.audioStream.connect(this.gain);
+      this.gain.connect(this.panner);
+      this.panner.connect(audio.mainVolume);
+      this.panner.coneInnerAngle = 180;
+      this.panner.coneOuterAngle = 360;
+      this.panner.coneOuterGain = 0.1;
+      this.panner.panningModel = "HRTF";
+      this.panner.distanceModel = "exponential";
     }
   }, {
     key: "addEventListener",
@@ -78711,13 +78184,18 @@ var Audio3D = function () {
     value: function setAudioStream(stream, id) {
       var audioElementCount = document.querySelectorAll("audio").length,
           element = Primrose.DOM.cascadeElement(id || "audioStream" + audioElementCount, "audio", HTMLAudioElement, true);
+      setAudioProperties(element);
+      element.srcObject = stream;
+      return element;
+    }
+  }, {
+    key: "setAudioProperties",
+    value: function setAudioProperties(element) {
       element.autoplay = true;
       element.controls = false;
       element.crossOrigin = "anonymous";
       element.muted = true;
-      element.srcObject = stream;
       element.setAttribute("muted", "");
-      return element;
     }
   }]);
 
