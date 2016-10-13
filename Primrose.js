@@ -61866,9 +61866,7 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
     };
 
     var moveSky = function moveSky() {
-      if (_this.sky) {
-        _this.sky.position.copy(_this.input.head.position);
-      }
+      _this.sky.position.copy(_this.input.head.position);
     };
 
     var moveGround = function moveGround() {
@@ -62107,27 +62105,35 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
 
     var FADE_SPEED = 0.1;
     _this.fadeOut = function () {
-      return new Promise(function (resolve, reject) {
-        var timer = setInterval(function () {
-          _this.fader.material.opacity += FADE_SPEED;
-          if (_this.fader.material.opacity >= 1) {
-            clearInterval(timer);
-            resolve();
-          }
-        }, 10);
-      });
+      if (_this.fader) {
+        return new Promise(function (resolve, reject) {
+          var timer = setInterval(function () {
+            _this.fader.material.opacity += FADE_SPEED;
+            if (_this.fader.material.opacity >= 1) {
+              clearInterval(timer);
+              resolve();
+            }
+          }, 10);
+        });
+      } else {
+        return Promise.resolve();
+      }
     };
 
     _this.fadeIn = function () {
-      return new Promise(function (resolve, reject) {
-        var timer = setInterval(function () {
-          _this.fader.material.opacity -= FADE_SPEED;
-          if (_this.fader.material.opacity <= 0) {
-            clearInterval(timer);
-            resolve();
-          }
-        }, 10);
-      });
+      if (_this.fader) {
+        return new Promise(function (resolve, reject) {
+          var timer = setInterval(function () {
+            _this.fader.material.opacity -= FADE_SPEED;
+            if (_this.fader.material.opacity <= 0) {
+              clearInterval(timer);
+              resolve();
+            }
+          }, 10);
+        });
+      } else {
+        return Promise.resolve();
+      }
     };
 
     _this.teleportAvailable = true;
@@ -62139,12 +62145,14 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
         _this.teleportAvailable = false;
         var dist = TELEPORT_DISPLACEMENT.copy(pos).sub(_this.input.head.position).length();
         if (dist > 0.1) {
+          _this.fader.visible = true;
           _this.fadeOut().then(function () {
             return _this.input.moveStage(pos);
           }).then(function () {
             return _this.fadeIn();
           }).catch(console.warn.bind(console, "Error while teleporting")).then(function () {
-            return _this.teleportAvailable = true;
+            _this.teleportAvailable = true;
+            _this.fader.visible = false;
           });
         }
       }
@@ -62195,10 +62203,12 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
         if (obj !== _this.currentControl) {
           if (_this.currentControl) {
             _this.currentControl.blur();
+            _this.input.Mouse.commands.pitch.disabled = _this.input.Mouse.commands.heading.disabled = false;
           }
           _this.currentControl = obj;
           if (_this.currentControl) {
             _this.currentControl.focus();
+            _this.input.Mouse.commands.pitch.disabled = _this.input.Mouse.commands.heading.disabled = !_this.input.VR.isPresenting;
           }
         }
       }
@@ -62220,26 +62230,29 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
     }
 
     _this.camera = new THREE.PerspectiveCamera(75, 1, _this.options.nearPlane, _this.options.nearPlane + _this.options.drawDistance);
-    if (_this.options.skyTexture !== undefined) {
-      var skyFunc = typeof _this.options.skyTexture === "number" ? colored : textured,
-          skyDim = _this.options.drawDistance * 0.9,
-          skyGeom = null,
-          onSkyDone = function onSkyDone() {
-        return _this.scene.add(_this.sky);
-      };
-      if (typeof _this.options.skyTexture === "string") {
-        skyGeom = sphere(skyDim, 18, 9);
-      } else {
-        skyGeom = box(skyDim, skyDim, skyDim);
-      }
-      _this.sky = skyFunc(skyGeom, _this.options.skyTexture, {
-        side: THREE.BackSide,
-        unshaded: true,
-        resolve: onSkyDone,
-        progress: _this.options.progress
-      });
-      _this.sky.name = "Sky";
+    if (_this.options.skyTexture === undefined) {
+      _this.options.skyTexture = _this.options.backgroundColor;
     }
+    var skyFunc = typeof _this.options.skyTexture === "number" ? colored : textured,
+        skyDim = _this.options.drawDistance * 0.9,
+        skyGeom = null,
+        onSkyDone = function onSkyDone() {
+      return _this.scene.add(_this.sky);
+    };
+    if (typeof _this.options.skyTexture === "string") {
+      skyGeom = sphere(skyDim, 18, 9);
+    } else {
+      skyGeom = box(skyDim, skyDim, skyDim);
+    }
+    _this.sky = skyFunc(skyGeom, _this.options.skyTexture, {
+      side: THREE.BackSide,
+      unshaded: true,
+      transparent: true,
+      opacity: 1,
+      resolve: onSkyDone,
+      progress: _this.options.progress
+    });
+    _this.sky.name = "Sky";
 
     if (_this.options.groundTexture !== undefined) {
       var dim = 10,
@@ -62388,10 +62401,11 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
       _this.renderer.domElement.addEventListener('webglcontextlost', _this.stop, false);
       _this.renderer.domElement.addEventListener('webglcontextrestored', _this.start, false);
 
-      _this.input = new Primrose.Input.FPSInput(_this.options.fullscreenElement, _this.options);
+      _this.input = new Primrose.Input.FPSInput(_this.renderer.domElement, _this.options);
       _this.input.addEventListener("zero", _this.zero, false);
 
       _this.fader = colored(box(1, 1, 1), 0x000000, { opacity: 0, transparent: true, unshaded: true, side: THREE.BackSide });
+      _this.fader.visible = false;
       _this.input.head.root.add(_this.fader);
 
       Primrose.Pointer.EVENTS.forEach(function (evt) {
