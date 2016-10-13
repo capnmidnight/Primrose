@@ -51,6 +51,12 @@ gulp.task("debug", [
   css.build
 ]);
 
+gulp.task("test", [
+  tot.build,
+  html.test,
+  css.build
+]);
+
 gulp.task("release",  [
   tot.build,
   html.release,
