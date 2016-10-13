@@ -61904,7 +61904,7 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
           _this.camera.projectionMatrix.copy(st.projection);
           _this.camera.translateOnAxis(st.translation, 1);
           _this.renderer.setViewport(v.left * resolutionScale, v.top * resolutionScale, v.width * resolutionScale, v.height * resolutionScale);
-          _this.composer.render(dt);
+          _this.renderer.render(_this.scene, _this.camera);
           _this.camera.translateOnAxis(st.translation, -1);
         }
         _this.input.submitFrame();
@@ -61919,7 +61919,7 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
           _this.input.mousePointer.unproject.getInverse(_this.camera.projectionMatrix);
         }
         _this.renderer.setViewport(0, 0, _this.renderer.domElement.width, _this.renderer.domElement.height);
-        _this.composer.render(dt);
+        _this.renderer.render(_this.scene, _this.camera);
       }
     };
 
@@ -61947,15 +61947,6 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
 
         _this.renderer.domElement.width = canvasWidth;
         _this.renderer.domElement.height = canvasHeight;
-        _this.composer.setSize(canvasWidth, canvasHeight);
-        if (_this.fxaa) {
-          _this.fxaa.uniforms.resolution.value.set(1 / canvasWidth, 1 / canvasHeight);
-        }
-        if (_this.ssao) {
-          _this.ssao.uniforms.cameraNear.value = near;
-          _this.ssao.uniforms.cameraFar.value = far;
-          _this.ssao.uniforms.size.value.set(canvasWidth, canvasHeight);
-        }
         if (!_this.timer) {
           render();
         }
@@ -62115,12 +62106,11 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
     _this.currentControl = null;
 
     var FADE_SPEED = 0.1;
-
     _this.fadeOut = function () {
       return new Promise(function (resolve, reject) {
         var timer = setInterval(function () {
-          _this.fader.uniforms.amount.value -= FADE_SPEED;
-          if (_this.fader.uniforms.amount.value <= 0) {
+          _this.fader.material.opacity += FADE_SPEED;
+          if (_this.fader.material.opacity >= 1) {
             clearInterval(timer);
             resolve();
           }
@@ -62131,8 +62121,8 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
     _this.fadeIn = function () {
       return new Promise(function (resolve, reject) {
         var timer = setInterval(function () {
-          _this.fader.uniforms.amount.value += FADE_SPEED;
-          if (_this.fader.uniforms.amount.value >= 1) {
+          _this.fader.material.opacity -= FADE_SPEED;
+          if (_this.fader.material.opacity <= 0) {
             clearInterval(timer);
             resolve();
           }
@@ -62374,7 +62364,7 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
         _this.renderer = new THREE.WebGLRenderer({
           canvas: Primrose.DOM.cascadeElement(_this.options.canvasElement, "canvas", HTMLCanvasElement),
           context: _this.options.context,
-          antialias: false,
+          antialias: _this.options.antialias,
           alpha: true,
           logarithmicDepthBuffer: false
         });
@@ -62400,32 +62390,14 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
 
       _this.input = new Primrose.Input.FPSInput(_this.options.fullscreenElement, _this.options);
       _this.input.addEventListener("zero", _this.zero, false);
+
+      _this.fader = colored(box(1, 1, 1), 0x000000, { opacity: 0, transparent: true, unshaded: true, side: THREE.BackSide });
+      _this.input.head.root.add(_this.fader);
+
       Primrose.Pointer.EVENTS.forEach(function (evt) {
         return _this.input.addEventListener(evt, _this.selectControl.bind(_this), false);
       });
       _this.input.forward(_this, Primrose.Pointer.EVENTS);
-
-      _this.composer = new THREE.EffectComposer(_this.renderer);
-
-      var renderPass = new THREE.RenderPass(_this.scene, _this.camera);
-      _this.composer.addPass(renderPass);
-
-      if (_this.options.antialias) {
-        _this.fxaa = new THREE.ShaderPass(THREE.FXAAShader);
-        _this.composer.addPass(_this.fxaa);
-      }
-
-      if (_this.options.ambientOcclusion) {
-        _this.ssao = new THREE.ShaderPass(THREE.SSAOShader);
-        _this.composer.addPass(_this.ssao);
-      }
-
-      _this.fader = new THREE.ShaderPass(Primrose.ColorifyShader);
-      _this.composer.addPass(_this.fader);
-
-      var copyPass = new THREE.ShaderPass(THREE.CopyShader);
-      copyPass.renderToScreen = true;
-      _this.composer.addPass(copyPass);
 
       var keyDown = function keyDown(evt) {
         if (_this.input.VR.isPresenting) {
@@ -62679,7 +62651,6 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
 
 BrowserEnvironment.DEFAULTS = {
   antialias: true,
-  ambientOcclusion: false,
   autoScaleQuality: true,
   autoRescaleQuality: false,
   quality: Quality.MAXIMUM,
