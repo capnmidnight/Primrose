@@ -3074,7 +3074,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       this.input = new Primrose.Input.FPSInput(this.options.fullscreenElement, this.options);
       this.input.addEventListener("zero", this.zero, false);
 
-      this.fader = colored(box(1, 1, 1), 0x000000, {opacity: 0, transparent: true, shaded: false, side: THREE.BackSide});
+      this.fader = colored(box(1, 1, 1), 0x000000, {opacity: 0, transparent: true, unshaded: true, side: THREE.BackSide});
       this.input.head.root.add(this.fader);
 
       Primrose.Pointer.EVENTS.forEach((evt) => this.input.addEventListener(evt, this.selectControl.bind(this), false));
