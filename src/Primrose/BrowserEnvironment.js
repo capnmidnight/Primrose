@@ -782,6 +782,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
         });
         this.renderer.autoClear = false;
         this.renderer.sortObjects = true;
+        this.renderer.setClearColor(this.options.backgroundColor);
         if (!this.renderer.domElement.parentElement) {
           document.body.appendChild(this.renderer.domElement);
         }
