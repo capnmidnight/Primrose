@@ -235,9 +235,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
     };
 
     var moveSky = () => {
-      if (this.sky) {
-        this.sky.position.copy(this.input.head.position);
-      }
+      this.sky.position.copy(this.input.head.position);
     };
 
     var moveGround = () => {
@@ -611,25 +609,28 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
     }
 
     this.camera = new THREE.PerspectiveCamera(75, 1, this.options.nearPlane, this.options.nearPlane + this.options.drawDistance);
-    if (this.options.skyTexture !== undefined) {
-      var skyFunc = (typeof this.options.skyTexture === "number") ? colored : textured,
-        skyDim = this.options.drawDistance * 0.9,
-        skyGeom = null,
-        onSkyDone = () => this.scene.add(this.sky);
-      if(typeof this.options.skyTexture === "string"){
-        skyGeom = sphere(skyDim, 18, 9);
-      }
-      else {
-        skyGeom = box(skyDim, skyDim, skyDim);
-      }
-      this.sky = skyFunc(skyGeom, this.options.skyTexture, {
-        side: THREE.BackSide,
-        unshaded: true,
-        resolve: onSkyDone,
-        progress: this.options.progress
-      });
-      this.sky.name = "Sky";
+    if (this.options.skyTexture === undefined) {
+      this.options.skyTexture = this.options.backgroundColor;
     }
+    var skyFunc = (typeof this.options.skyTexture === "number") ? colored : textured,
+      skyDim = this.options.drawDistance * 0.9,
+      skyGeom = null,
+      onSkyDone = () => this.scene.add(this.sky);
+    if(typeof this.options.skyTexture === "string"){
+      skyGeom = sphere(skyDim, 18, 9);
+    }
+    else {
+      skyGeom = box(skyDim, skyDim, skyDim);
+    }
+    this.sky = skyFunc(skyGeom, this.options.skyTexture, {
+      side: THREE.BackSide,
+      unshaded: true,
+      transparent: true,
+      opacity: 1,
+      resolve: onSkyDone,
+      progress: this.options.progress
+    });
+    this.sky.name = "Sky";
 
     if (this.options.groundTexture !== undefined) {
       var dim = 10,
@@ -763,7 +764,6 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
         });
         this.renderer.autoClear = false;
         this.renderer.sortObjects = true;
-        this.renderer.setClearColor(this.options.backgroundColor);
         if (!this.renderer.domElement.parentElement) {
           document.body.appendChild(this.renderer.domElement);
         }
