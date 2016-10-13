@@ -59,13 +59,15 @@ body, input, button {
   }
 
 button {
-  font-size: 1.5em;
+  /* font-size: 1.5em; */
 }
 
 button.primary {
   background-color: #ec2471;
   color: white;
-  width: 2.25em;
+  height: 2.25em;
+  margin-left: 0.25em;
+  padding:  0 1em;
 }
 
 #randomUserName {
@@ -75,9 +77,9 @@ button.primary {
 button.secondary{
   background-color: #30f3e1;
   color:  black;
-  border-radius: 5px;
-  padding: 0.25em 0.6em;
   margin-left: 0.5em;
+  width: 2em;
+  height: 2em;
 }
 
 input:disabled, button:disabled {
@@ -91,6 +93,14 @@ input:disabled, button:disabled {
   display: inline-flex;
   margin: 5px;
   color: #222;
+}
+
+.inputRow button {
+  font-size: 1.5em;
+  width: 2.25em;
+  height: auto;
+  margin: -2px auto;
+  padding: 2px;
 }
 
 #roomNameRow {
@@ -126,6 +136,7 @@ input:disabled, button:disabled {
   border-top-right-radius:  0;
   border-top-left-radius:  0;
   border-bottom-right-radius:  0;
+  font-size: 1.5em;
 }
 
 #errorMessage {

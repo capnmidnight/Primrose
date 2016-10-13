@@ -48,9 +48,7 @@
               enterVR = env.goFullScreen.bind(env, i);
             btn.type = "button";
             btn.className = "primary";
-            btn.innerHTML = isStereo ? "&#x1f453;" : "&boxplus;";
-            btn.title = display.displayName;
-            btn.style.height = "1.75em";
+            btn.innerHTML = display.displayName;
             btn.addEventListener( "click", enterVR);
             window.addEventListener("vrdisplayactivate", function(display, enterVR, evt){
               if(evt.display === display) {
