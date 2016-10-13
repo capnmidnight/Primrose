@@ -800,7 +800,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       this.renderer.domElement.addEventListener('webglcontextlost', this.stop, false);
       this.renderer.domElement.addEventListener('webglcontextrestored', this.start, false);
 
-      this.input = new Primrose.Input.FPSInput(this.options.fullscreenElement, this.options);
+      this.input = new Primrose.Input.FPSInput(this.renderer.domElement, this.options);
       this.input.addEventListener("zero", this.zero, false);
 
       this.fader = colored(box(1, 1, 1), 0x000000, {opacity: 0, transparent: true, unshaded: true, side: THREE.BackSide});
