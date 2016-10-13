@@ -581,10 +581,14 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
         if(obj !== this.currentControl){
           if(this.currentControl){
             this.currentControl.blur();
+            this.input.Mouse.commands.pitch.disabled =
+            this.input.Mouse.commands.heading.disabled = false;
           }
           this.currentControl = obj;
           if(this.currentControl){
             this.currentControl.focus();
+            this.input.Mouse.commands.pitch.disabled =
+            this.input.Mouse.commands.heading.disabled = !this.input.VR.isPresenting;
           }
         }
       }
