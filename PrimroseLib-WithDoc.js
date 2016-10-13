@@ -11039,6 +11039,8 @@ class FPSInput extends Primrose.AbstractEventEmitter {
       this.Touch,
       this.Keyboard
     ]);
+
+    this.head.rotation.order = "YXZ";
     this.head.useGaze = this.options.useGaze;
     this.pointers.push(this.head);
     this.options.scene.add(this.head.root);
@@ -11142,45 +11144,50 @@ class FPSInput extends Primrose.AbstractEventEmitter {
       this.pointers[i].update();
     }
 
-    if (!this.VR.hasOrientation) {
-      let pitch = 0;
-      for (let i = 0; i < this.managers.length; ++i) {
-        const mgr = this.managers[i];
-        if(mgr.enabled){
-          pitch += mgr.getValue("pitch");
-        }
-      }
-      this.head.rotation.order = "YXZ";
-      this.head.rotation.x = pitch;
-    }
-
     // record the position and orientation of the user
     this.newState = [];
     this.head.updateMatrix();
+    this.stage.rotation.x = 0;
+    this.stage.rotation.z = 0;
+    this.stage.quaternion.setFromEuler(this.stage.rotation);
     this.stage.updateMatrix();
     this.head.position.toArray(this.newState, 0);
-    this.stage.quaternion.toArray(this.newState, 3);
-    this.head.quaternion.toArray(this.newState, 7);
+    this.head.quaternion.toArray(this.newState, 3);
   }
 
   updateStage(dt) {
     // get the linear movement from the mouse/keyboard/gamepad
     let heading = 0,
+      pitch = 0,
       strafe = 0,
       drive = 0,
-      lift = 0;
+      lift = 0,
+      mouseHeading = 0;
     for (let i = 0; i < this.managers.length; ++i) {
       const mgr = this.managers[i];
       if(mgr.enabled){
-        heading += mgr.getValue("heading");
+        if(mgr.name === "Mouse"){
+          mouseHeading += mgr.getValue("heading");
+        }
+        else{
+          heading += mgr.getValue("heading");
+        }
+        pitch += mgr.getValue("pitch");
         strafe += mgr.getValue("strafe");
         drive += mgr.getValue("drive");
         lift += mgr.getValue("lift");
       }
     }
 
+    if (this.VR.hasOrientation) {
+      mouseHeading = WEDGE * Math.floor((mouseHeading / WEDGE) + 0.5);
+      pitch = 0;
+    }
+
+    heading += mouseHeading;
+
     // move stage according to heading and thrust
-    EULER_TEMP.set(0, heading, 0, "YXZ");
+    EULER_TEMP.set(pitch, heading, 0, "YXZ");
     this.stage.quaternion.setFromEuler(EULER_TEMP);
 
     // update the stage's velocity
@@ -12675,14 +12682,6 @@ class RemoteUser extends Primrose.AbstractEventEmitter {
     this.lastHeadPosition = new THREE.Vector3();
     this.lastHeadQuaternion = new THREE.Quaternion();
 
-    this.stageQuaternion = {
-      arr1: [],
-      arr2: [],
-      last: this.lastStageQuaternion,
-      delta: this.dStageQuaternion,
-      curr: this.stage.quaternion
-    };
-
     this.headPosition = {
       arr1: [],
       arr2: [],
@@ -12756,12 +12755,12 @@ class RemoteUser extends Primrose.AbstractEventEmitter {
     if(audioSource instanceof Element){
       this.audioElement = audioSource;
       Primrose.Output.Audio3D.setAudioProperties(this.audioElement);
-      audioSource = audioSource.srcObject;
+      this.audioStream = audio.context.createMediaElementSource(this.audioElement);
     }
     else {
       this.audioElement = Primrose.Output.Audio3D.setAudioStream(audioSource, "audio" + this.userName);
+      this.audioStream = audio.context.createMediaStreamSource(audioSource);
     }
-    this.audioStream = audio.context.createMediaStreamSource(audioSource);
     this.gain = audio.context.createGain();
     this.panner = audio.context.createPanner();
 
@@ -12843,8 +12842,10 @@ class RemoteUser extends Primrose.AbstractEventEmitter {
     this.time += dt;
     var fade = this.time >= RemoteUser.NETWORK_DT;
     this._updateV(this.headPosition, dt, fade);
-    this._updateV(this.stageQuaternion, dt, fade);
     this._updateV(this.headQuaternion, dt, fade);
+    this.stage.rotation.setFromQuaternion(this.headQuaternion.curr);
+    this.stage.rotation.x = 0;
+    this.stage.rotation.z = 0;
     this.stage.position.copy(this.headPosition.curr);
     this.stage.position.y = 0;
     if (this.panner) {
@@ -12867,8 +12868,7 @@ class RemoteUser extends Primrose.AbstractEventEmitter {
 
     this.time = 0;
     this._predict(this.headPosition, v, 1);
-    this._predict(this.stageQuaternion, v, 4);
-    this._predict(this.headQuaternion, v, 8);
+    this._predict(this.headQuaternion, v, 4);
   }
 
   toString(digits) {

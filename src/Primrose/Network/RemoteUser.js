@@ -63,14 +63,6 @@ class RemoteUser extends Primrose.AbstractEventEmitter {
     this.lastHeadPosition = new THREE.Vector3();
     this.lastHeadQuaternion = new THREE.Quaternion();
 
-    this.stageQuaternion = {
-      arr1: [],
-      arr2: [],
-      last: this.lastStageQuaternion,
-      delta: this.dStageQuaternion,
-      curr: this.stage.quaternion
-    };
-
     this.headPosition = {
       arr1: [],
       arr2: [],
@@ -144,12 +136,12 @@ class RemoteUser extends Primrose.AbstractEventEmitter {
     if(audioSource instanceof Element){
       this.audioElement = audioSource;
       Primrose.Output.Audio3D.setAudioProperties(this.audioElement);
-      audioSource = audioSource.srcObject;
+      this.audioStream = audio.context.createMediaElementSource(this.audioElement);
     }
     else {
       this.audioElement = Primrose.Output.Audio3D.setAudioStream(audioSource, "audio" + this.userName);
+      this.audioStream = audio.context.createMediaStreamSource(audioSource);
     }
-    this.audioStream = audio.context.createMediaStreamSource(audioSource);
     this.gain = audio.context.createGain();
     this.panner = audio.context.createPanner();
 
@@ -231,8 +223,10 @@ class RemoteUser extends Primrose.AbstractEventEmitter {
     this.time += dt;
     var fade = this.time >= RemoteUser.NETWORK_DT;
     this._updateV(this.headPosition, dt, fade);
-    this._updateV(this.stageQuaternion, dt, fade);
     this._updateV(this.headQuaternion, dt, fade);
+    this.stage.rotation.setFromQuaternion(this.headQuaternion.curr);
+    this.stage.rotation.x = 0;
+    this.stage.rotation.z = 0;
     this.stage.position.copy(this.headPosition.curr);
     this.stage.position.y = 0;
     if (this.panner) {
@@ -255,8 +249,7 @@ class RemoteUser extends Primrose.AbstractEventEmitter {
 
     this.time = 0;
     this._predict(this.headPosition, v, 1);
-    this._predict(this.stageQuaternion, v, 4);
-    this._predict(this.headQuaternion, v, 8);
+    this._predict(this.headQuaternion, v, 4);
   }
 
   toString(digits) {

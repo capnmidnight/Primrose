@@ -266,6 +266,8 @@ class FPSInput extends Primrose.AbstractEventEmitter {
       this.Touch,
       this.Keyboard
     ]);
+
+    this.head.rotation.order = "YXZ";
     this.head.useGaze = this.options.useGaze;
     this.pointers.push(this.head);
     this.options.scene.add(this.head.root);
@@ -369,45 +371,50 @@ class FPSInput extends Primrose.AbstractEventEmitter {
       this.pointers[i].update();
     }
 
-    if (!this.VR.hasOrientation) {
-      let pitch = 0;
-      for (let i = 0; i < this.managers.length; ++i) {
-        const mgr = this.managers[i];
-        if(mgr.enabled){
-          pitch += mgr.getValue("pitch");
-        }
-      }
-      this.head.rotation.order = "YXZ";
-      this.head.rotation.x = pitch;
-    }
-
     // record the position and orientation of the user
     this.newState = [];
     this.head.updateMatrix();
+    this.stage.rotation.x = 0;
+    this.stage.rotation.z = 0;
+    this.stage.quaternion.setFromEuler(this.stage.rotation);
     this.stage.updateMatrix();
     this.head.position.toArray(this.newState, 0);
-    this.stage.quaternion.toArray(this.newState, 3);
-    this.head.quaternion.toArray(this.newState, 7);
+    this.head.quaternion.toArray(this.newState, 3);
   }
 
   updateStage(dt) {
     // get the linear movement from the mouse/keyboard/gamepad
     let heading = 0,
+      pitch = 0,
       strafe = 0,
       drive = 0,
-      lift = 0;
+      lift = 0,
+      mouseHeading = 0;
     for (let i = 0; i < this.managers.length; ++i) {
       const mgr = this.managers[i];
       if(mgr.enabled){
-        heading += mgr.getValue("heading");
+        if(mgr.name === "Mouse"){
+          mouseHeading += mgr.getValue("heading");
+        }
+        else{
+          heading += mgr.getValue("heading");
+        }
+        pitch += mgr.getValue("pitch");
         strafe += mgr.getValue("strafe");
         drive += mgr.getValue("drive");
         lift += mgr.getValue("lift");
       }
     }
 
+    if (this.VR.hasOrientation) {
+      mouseHeading = WEDGE * Math.floor((mouseHeading / WEDGE) + 0.5);
+      pitch = 0;
+    }
+
+    heading += mouseHeading;
+
     // move stage according to heading and thrust
-    EULER_TEMP.set(0, heading, 0, "YXZ");
+    EULER_TEMP.set(pitch, heading, 0, "YXZ");
     this.stage.quaternion.setFromEuler(EULER_TEMP);
 
     // update the stage's velocity
