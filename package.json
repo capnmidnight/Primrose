@@ -61,7 +61,7 @@
     "socket.io-client": "^1.4.8",
     "three": "^0.80.0",
     "webvr-bootstrapper": "^4.0.0",
-    "webvr-polyfill": "^0.9.16",
+    "webvr-polyfill": "github:notiontheory/webvr-polyfill",
     "webvr-standard-monitor": "^1.0.1"
   },
   "devDependencies": {
