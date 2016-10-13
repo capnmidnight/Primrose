@@ -1455,7 +1455,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
             v.top * resolutionScale,
             v.width * resolutionScale,
             v.height * resolutionScale);
-          this.composer.render(dt);
+          this.renderer.render(this.scene, this.camera);
           this.camera.translateOnAxis(st.translation, -1);
         }
         this.input.submitFrame();
@@ -1470,7 +1470,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
           this.input.mousePointer.unproject.getInverse(this.camera.projectionMatrix);
         }
         this.renderer.setViewport(0, 0, this.renderer.domElement.width, this.renderer.domElement.height);
-        this.composer.render(dt);
+        this.renderer.render(this.scene, this.camera);
       }
     };
 
@@ -1498,15 +1498,6 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
 
         this.renderer.domElement.width = canvasWidth;
         this.renderer.domElement.height = canvasHeight;
-        this.composer.setSize(canvasWidth, canvasHeight);
-        if(this.fxaa){
-          this.fxaa.uniforms.resolution.value.set(1/canvasWidth, 1/canvasHeight);
-        }
-        if(this.ssao){
-          this.ssao.uniforms.cameraNear.value = near;
-          this.ssao.uniforms.cameraFar.value = far;
-          this.ssao.uniforms.size.value.set(canvasWidth, canvasHeight);
-        }
         if (!this.timer) {
           render();
         }
@@ -1675,11 +1666,10 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
     this.currentControl = null;
 
     const FADE_SPEED = 0.1;
-
     this.fadeOut = () => new Promise((resolve, reject) => {
       var timer = setInterval(() => {
-        this.fader.uniforms.amount.value -= FADE_SPEED;
-        if(this.fader.uniforms.amount.value <= 0){
+        this.fader.material.opacity += FADE_SPEED;
+        if(this.fader.material.opacity >= 1){
           clearInterval(timer);
           resolve();
         }
@@ -1688,8 +1678,8 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
 
     this.fadeIn = () => new Promise((resolve, reject) => {
       var timer = setInterval(() => {
-        this.fader.uniforms.amount.value += FADE_SPEED;
-        if(this.fader.uniforms.amount.value >= 1){
+        this.fader.material.opacity -= FADE_SPEED;
+        if(this.fader.material.opacity <= 0){
           clearInterval(timer);
           resolve();
         }
@@ -1938,7 +1928,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
         this.renderer = new THREE.WebGLRenderer({
           canvas: Primrose.DOM.cascadeElement(this.options.canvasElement, "canvas", HTMLCanvasElement),
           context: this.options.context,
-          antialias: false,
+          antialias: this.options.antialias,
           alpha: true,
           logarithmicDepthBuffer: false
         });
@@ -1964,34 +1954,12 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
 
       this.input = new Primrose.Input.FPSInput(this.options.fullscreenElement, this.options);
       this.input.addEventListener("zero", this.zero, false);
+
+      this.fader = colored(box(1, 1, 1), 0x000000, {opacity: 0, transparent: true, shaded: false, side: THREE.BackSide});
+      this.input.head.root.add(this.fader);
+
       Primrose.Pointer.EVENTS.forEach((evt) => this.input.addEventListener(evt, this.selectControl.bind(this), false));
       this.input.forward(this, Primrose.Pointer.EVENTS);
-
-
-
-      this.composer = new THREE.EffectComposer(this.renderer);
-
-      var renderPass = new THREE.RenderPass(this.scene, this.camera);
-      this.composer.addPass(renderPass);
-
-      if(this.options.antialias) {
-        this.fxaa = new THREE.ShaderPass(THREE.FXAAShader);
-        this.composer.addPass(this.fxaa);
-      }
-
-      if(this.options.ambientOcclusion) {
-        this.ssao = new THREE.ShaderPass(THREE.SSAOShader);
-        this.composer.addPass(this.ssao);
-      }
-
-      this.fader = new THREE.ShaderPass(Primrose.ColorifyShader);
-      this.composer.addPass(this.fader);
-
-
-      var copyPass = new THREE.ShaderPass( THREE.CopyShader );
-      copyPass.renderToScreen = true;
-      this.composer.addPass(copyPass);
-
 
       const keyDown =  (evt) => {
           if (this.input.VR.isPresenting) {
@@ -2250,7 +2218,6 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
 
 BrowserEnvironment.DEFAULTS = {
   antialias: true,
-  ambientOcclusion: false,
   autoScaleQuality: true,
   autoRescaleQuality: false,
   quality: Quality.MAXIMUM,

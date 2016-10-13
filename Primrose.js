@@ -8033,12 +8033,27 @@ var defaultLeftBounds = [0, 0, 0.5, 1];
 var defaultRightBounds = [0.5, 0, 0.5, 1];
 
 /**
+ * The base class for all VR frame data.
+ */
+
+function VRFrameData() {
+  this.leftProjectionMatrix = new Float32Array(16);
+  this.leftViewMatrix = new Float32Array(16);
+  this.rightProjectionMatrix = new Float32Array(16);
+  this.rightViewMatrix = new Float32Array(16);
+  this.pose = null;
+};
+
+/**
  * The base class for all VR displays.
  */
 function VRDisplay() {
   this.isPolyfilled = true;
   this.displayId = nextDisplayId++;
   this.displayName = 'webvr-polyfill displayName';
+
+  this.depthNear = 0.01;
+  this.depthFar = 10000.0;
 
   this.isConnected = true;
   this.isPresenting = false;
@@ -8065,6 +8080,12 @@ function VRDisplay() {
 
   this.wakelock_ = new WakeLock();
 }
+
+VRDisplay.prototype.getFrameData = function(frameData) {
+  // TODO: Technically this should retain it's value for the duration of a frame
+  // but I doubt that's practical to do in javascript.
+  return Util.frameDataFromPose(frameData, this.getPose(), this);
+};
 
 VRDisplay.prototype.getPose = function() {
   // TODO: Technically this should retain it's value for the duration of a frame
@@ -8339,17 +8360,27 @@ VRDisplay.prototype.addFullscreenListeners_ = function(element, changeHandler, e
   this.fullscreenErrorHandler_ = errorHandler;
 
   if (changeHandler) {
-    element.addEventListener('fullscreenchange', changeHandler, false);
-    element.addEventListener('webkitfullscreenchange', changeHandler, false);
-    document.addEventListener('mozfullscreenchange', changeHandler, false);
-    element.addEventListener('msfullscreenchange', changeHandler, false);
+    if (document.fullscreenEnabled) {
+      element.addEventListener('fullscreenchange', changeHandler, false);
+    } else if (document.webkitFullscreenEnabled) {
+      element.addEventListener('webkitfullscreenchange', changeHandler, false);
+    } else if (document.mozFullScreenEnabled) {
+      document.addEventListener('mozfullscreenchange', changeHandler, false);
+    } else if (document.msFullscreenEnabled) {
+      element.addEventListener('msfullscreenchange', changeHandler, false);
+    }
   }
 
   if (errorHandler) {
-    element.addEventListener('fullscreenerror', errorHandler, false);
-    element.addEventListener('webkitfullscreenerror', errorHandler, false);
-    document.addEventListener('mozfullscreenerror', errorHandler, false);
-    element.addEventListener('msfullscreenerror', errorHandler, false);
+    if (document.fullscreenEnabled) {
+      element.addEventListener('fullscreenerror', errorHandler, false);
+    } else if (document.webkitFullscreenEnabled) {
+      element.addEventListener('webkitfullscreenerror', errorHandler, false);
+    } else if (document.mozFullScreenEnabled) {
+      document.addEventListener('mozfullscreenerror', errorHandler, false);
+    } else if (document.msFullscreenEnabled) {
+      element.addEventListener('msfullscreenerror', errorHandler, false);
+    }
   }
 };
 
@@ -8411,26 +8442,11 @@ function VRDevice() {
   this.deviceName = 'webvr-polyfill deviceName';
 }
 
-/**
- * The base class for all VR HMD devices. (Deprecated)
- */
-function HMDVRDevice() {
-}
-HMDVRDevice.prototype = new VRDevice();
-
-/**
- * The base class for all VR position sensor devices. (Deprecated)
- */
-function PositionSensorVRDevice() {
-}
-PositionSensorVRDevice.prototype = new VRDevice();
-
+module.exports.VRFrameData = VRFrameData;
 module.exports.VRDisplay = VRDisplay;
 module.exports.VRDevice = VRDevice;
-module.exports.HMDVRDevice = HMDVRDevice;
-module.exports.PositionSensorVRDevice = PositionSensorVRDevice;
 
-},{"./util.js":22,"./wakelock.js":24}],3:[function(_dereq_,module,exports){
+},{"./util.js":14,"./wakelock.js":15}],3:[function(_dereq_,module,exports){
 /*
  * Copyright 2016 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -8446,949 +8462,9 @@ module.exports.PositionSensorVRDevice = PositionSensorVRDevice;
  * limitations under the License.
  */
 
-var CardboardUI = _dereq_('./cardboard-ui.js');
-var Util = _dereq_('./util.js');
-var WGLUPreserveGLState = _dereq_('./deps/wglu-preserve-state.js');
-
-var distortionVS = [
-  'attribute vec2 position;',
-  'attribute vec3 texCoord;',
-
-  'varying vec2 vTexCoord;',
-
-  'uniform vec4 viewportOffsetScale[2];',
-
-  'void main() {',
-  '  vec4 viewport = viewportOffsetScale[int(texCoord.z)];',
-  '  vTexCoord = (texCoord.xy * viewport.zw) + viewport.xy;',
-  '  gl_Position = vec4( position, 1.0, 1.0 );',
-  '}',
-].join('\n');
-
-var distortionFS = [
-  'precision mediump float;',
-  'uniform sampler2D diffuse;',
-
-  'varying vec2 vTexCoord;',
-
-  'void main() {',
-  '  gl_FragColor = texture2D(diffuse, vTexCoord);',
-  '}',
-].join('\n');
-
-/**
- * A mesh-based distorter.
- */
-function CardboardDistorter(gl) {
-  this.gl = gl;
-  this.ctxAttribs = gl.getContextAttributes();
-
-  this.meshWidth = 20;
-  this.meshHeight = 20;
-
-  this.bufferScale = WebVRConfig.BUFFER_SCALE;
-
-  this.bufferWidth = gl.drawingBufferWidth;
-  this.bufferHeight = gl.drawingBufferHeight;
-
-  // Patching support
-  this.realBindFramebuffer = gl.bindFramebuffer;
-  this.realEnable = gl.enable;
-  this.realDisable = gl.disable;
-  this.realColorMask = gl.colorMask;
-  this.realClearColor = gl.clearColor;
-  this.realViewport = gl.viewport;
-
-  if (!Util.isIOS()) {
-    this.realCanvasWidth = Object.getOwnPropertyDescriptor(gl.canvas.__proto__, 'width');
-    this.realCanvasHeight = Object.getOwnPropertyDescriptor(gl.canvas.__proto__, 'height');
-  }
-
-  this.isPatched = false;
-
-  // State tracking
-  this.lastBoundFramebuffer = null;
-  this.cullFace = false;
-  this.depthTest = false;
-  this.blend = false;
-  this.scissorTest = false;
-  this.stencilTest = false;
-  this.viewport = [0, 0, 0, 0];
-  this.colorMask = [true, true, true, true];
-  this.clearColor = [0, 0, 0, 0];
-
-  this.attribs = {
-    position: 0,
-    texCoord: 1
-  };
-  this.program = Util.linkProgram(gl, distortionVS, distortionFS, this.attribs);
-  this.uniforms = Util.getProgramUniforms(gl, this.program);
-
-  this.viewportOffsetScale = new Float32Array(8);
-  this.setTextureBounds();
-
-  this.vertexBuffer = gl.createBuffer();
-  this.indexBuffer = gl.createBuffer();
-  this.indexCount = 0;
-
-  this.renderTarget = gl.createTexture();
-  this.framebuffer = gl.createFramebuffer();
-
-  this.depthStencilBuffer = null;
-  this.depthBuffer = null;
-  this.stencilBuffer = null;
-
-  if (this.ctxAttribs.depth && this.ctxAttribs.stencil) {
-    this.depthStencilBuffer = gl.createRenderbuffer();
-  } else if (this.ctxAttribs.depth) {
-    this.depthBuffer = gl.createRenderbuffer();
-  } else if (this.ctxAttribs.stencil) {
-    this.stencilBuffer = gl.createRenderbuffer();
-  }
-
-  this.patch();
-
-  this.onResize();
-
-  if (!WebVRConfig.CARDBOARD_UI_DISABLED) {
-    this.cardboardUI = new CardboardUI(gl);
-  }
-};
-
-/**
- * Tears down all the resources created by the distorter and removes any
- * patches.
- */
-CardboardDistorter.prototype.destroy = function() {
-  var gl = this.gl;
-
-  this.unpatch();
-
-  gl.deleteProgram(this.program);
-  gl.deleteBuffer(this.vertexBuffer);
-  gl.deleteBuffer(this.indexBuffer);
-  gl.deleteTexture(this.renderTarget);
-  gl.deleteFramebuffer(this.framebuffer);
-  if (this.depthStencilBuffer) {
-    gl.deleteRenderbuffer(this.depthStencilBuffer);
-  }
-  if (this.depthBuffer) {
-    gl.deleteRenderbuffer(this.depthBuffer);
-  }
-  if (this.stencilBuffer) {
-    gl.deleteRenderbuffer(this.stencilBuffer);
-  }
-
-  if (this.cardboardUI) {
-    this.cardboardUI.destroy();
-  }
-};
-
-
-/**
- * Resizes the backbuffer to match the canvas width and height.
- */
-CardboardDistorter.prototype.onResize = function() {
-  var gl = this.gl;
-  var self = this;
-
-  var glState = [
-    gl.RENDERBUFFER_BINDING,
-    gl.TEXTURE_BINDING_2D, gl.TEXTURE0
-  ];
-
-  WGLUPreserveGLState(gl, glState, function(gl) {
-    // Bind real backbuffer and clear it once. We don't need to clear it again
-    // after that because we're overwriting the same area every frame.
-    self.realBindFramebuffer.call(gl, gl.FRAMEBUFFER, null);
-
-    // Put things in a good state
-    if (self.scissorTest) { self.realDisable.call(gl, gl.SCISSOR_TEST); }
-    self.realColorMask.call(gl, true, true, true, true);
-    self.realViewport.call(gl, 0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-    self.realClearColor.call(gl, 0, 0, 0, 1);
-
-    gl.clear(gl.COLOR_BUFFER_BIT);
-
-    // Now bind and resize the fake backbuffer
-    self.realBindFramebuffer.call(gl, gl.FRAMEBUFFER, self.framebuffer);
-
-    gl.bindTexture(gl.TEXTURE_2D, self.renderTarget);
-    gl.texImage2D(gl.TEXTURE_2D, 0, self.ctxAttribs.alpha ? gl.RGBA : gl.RGB,
-        self.bufferWidth, self.bufferHeight, 0,
-        self.ctxAttribs.alpha ? gl.RGBA : gl.RGB, gl.UNSIGNED_BYTE, null);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, self.renderTarget, 0);
-
-    if (self.ctxAttribs.depth && self.ctxAttribs.stencil) {
-      gl.bindRenderbuffer(gl.RENDERBUFFER, self.depthStencilBuffer);
-      gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_STENCIL,
-          self.bufferWidth, self.bufferHeight);
-      gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT,
-          gl.RENDERBUFFER, self.depthStencilBuffer);
-    } else if (self.ctxAttribs.depth) {
-      gl.bindRenderbuffer(gl.RENDERBUFFER, self.depthBuffer);
-      gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16,
-          self.bufferWidth, self.bufferHeight);
-      gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT,
-          gl.RENDERBUFFER, self.depthBuffer);
-    } else if (self.ctxAttribs.stencil) {
-      gl.bindRenderbuffer(gl.RENDERBUFFER, self.stencilBuffer);
-      gl.renderbufferStorage(gl.RENDERBUFFER, gl.STENCIL_INDEX8,
-          self.bufferWidth, self.bufferHeight);
-      gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.STENCIL_ATTACHMENT,
-          gl.RENDERBUFFER, self.stencilBuffer);
-    }
-
-    if (!gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE) {
-      console.error('Framebuffer incomplete!');
-    }
-
-    self.realBindFramebuffer.call(gl, gl.FRAMEBUFFER, self.lastBoundFramebuffer);
-
-    if (self.scissorTest) { self.realEnable.call(gl, gl.SCISSOR_TEST); }
-
-    self.realColorMask.apply(gl, self.colorMask);
-    self.realViewport.apply(gl, self.viewport);
-    self.realClearColor.apply(gl, self.clearColor);
-  });
-
-  if (this.cardboardUI) {
-    this.cardboardUI.onResize();
-  }
-};
-
-CardboardDistorter.prototype.patch = function() {
-  if (this.isPatched) {
-    return;
-  }
-
-  var self = this;
-  var canvas = this.gl.canvas;
-  var gl = this.gl;
-
-  if (!Util.isIOS()) {
-    canvas.width = Util.getScreenWidth() * this.bufferScale;
-    canvas.height = Util.getScreenHeight() * this.bufferScale;
-
-    Object.defineProperty(canvas, 'width', {
-      configurable: true,
-      enumerable: true,
-      get: function() {
-        return self.bufferWidth;
-      },
-      set: function(value) {
-        self.bufferWidth = value;
-        self.onResize();
-      }
-    });
-
-    Object.defineProperty(canvas, 'height', {
-      configurable: true,
-      enumerable: true,
-      get: function() {
-        return self.bufferHeight;
-      },
-      set: function(value) {
-        self.bufferHeight = value;
-        self.onResize();
-      }
-    });
-  }
-
-  this.lastBoundFramebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING);
-
-  if (this.lastBoundFramebuffer == null) {
-    this.lastBoundFramebuffer = this.framebuffer;
-    this.gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
-  }
-
-  this.gl.bindFramebuffer = function(target, framebuffer) {
-    self.lastBoundFramebuffer = framebuffer ? framebuffer : self.framebuffer;
-    // Silently make calls to bind the default framebuffer bind ours instead.
-    self.realBindFramebuffer.call(gl, target, self.lastBoundFramebuffer);
-  };
-
-  this.cullFace = gl.getParameter(gl.CULL_FACE);
-  this.depthTest = gl.getParameter(gl.DEPTH_TEST);
-  this.blend = gl.getParameter(gl.BLEND);
-  this.scissorTest = gl.getParameter(gl.SCISSOR_TEST);
-  this.stencilTest = gl.getParameter(gl.STENCIL_TEST);
-
-  gl.enable = function(pname) {
-    switch (pname) {
-      case gl.CULL_FACE: self.cullFace = true; break;
-      case gl.DEPTH_TEST: self.depthTest = true; break;
-      case gl.BLEND: self.blend = true; break;
-      case gl.SCISSOR_TEST: self.scissorTest = true; break;
-      case gl.STENCIL_TEST: self.stencilTest = true; break;
-    }
-    self.realEnable.call(gl, pname);
-  };
-
-  gl.disable = function(pname) {
-    switch (pname) {
-      case gl.CULL_FACE: self.cullFace = false; break;
-      case gl.DEPTH_TEST: self.depthTest = false; break;
-      case gl.BLEND: self.blend = false; break;
-      case gl.SCISSOR_TEST: self.scissorTest = false; break;
-      case gl.STENCIL_TEST: self.stencilTest = false; break;
-    }
-    self.realDisable.call(gl, pname);
-  };
-
-  this.colorMask = gl.getParameter(gl.COLOR_WRITEMASK);
-  gl.colorMask = function(r, g, b, a) {
-    self.colorMask[0] = r;
-    self.colorMask[1] = g;
-    self.colorMask[2] = b;
-    self.colorMask[3] = a;
-    self.realColorMask.call(gl, r, g, b, a);
-  };
-
-  this.clearColor = gl.getParameter(gl.COLOR_CLEAR_VALUE);
-  gl.clearColor = function(r, g, b, a) {
-    self.clearColor[0] = r;
-    self.clearColor[1] = g;
-    self.clearColor[2] = b;
-    self.clearColor[3] = a;
-    self.realClearColor.call(gl, r, g, b, a);
-  };
-
-  this.viewport = gl.getParameter(gl.VIEWPORT);
-  gl.viewport = function(x, y, w, h) {
-    self.viewport[0] = x;
-    self.viewport[1] = y;
-    self.viewport[2] = w;
-    self.viewport[3] = h;
-    self.realViewport.call(gl, x, y, w, h);
-  };
-
-  this.isPatched = true;
-  Util.safariCssSizeWorkaround(canvas);
-};
-
-CardboardDistorter.prototype.unpatch = function() {
-  if (!this.isPatched) {
-    return;
-  }
-
-  var gl = this.gl;
-  var canvas = this.gl.canvas;
-
-  if (!Util.isIOS()) {
-    Object.defineProperty(canvas, 'width', this.realCanvasWidth);
-    Object.defineProperty(canvas, 'height', this.realCanvasHeight);
-  }
-  canvas.width = this.bufferWidth;
-  canvas.height = this.bufferHeight;
-
-  gl.bindFramebuffer = this.realBindFramebuffer;
-  gl.enable = this.realEnable;
-  gl.disable = this.realDisable;
-  gl.colorMask = this.realColorMask;
-  gl.clearColor = this.realClearColor;
-  gl.viewport = this.realViewport;
-
-  // Check to see if our fake backbuffer is bound and bind the real backbuffer
-  // if that's the case.
-  if (this.lastBoundFramebuffer == this.framebuffer) {
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-  }
-
-  this.isPatched = false;
-
-  setTimeout(function() {
-    Util.safariCssSizeWorkaround(canvas);
-  }, 1);
-};
-
-CardboardDistorter.prototype.setTextureBounds = function(leftBounds, rightBounds) {
-  if (!leftBounds) {
-    leftBounds = [0, 0, 0.5, 1];
-  }
-
-  if (!rightBounds) {
-    rightBounds = [0.5, 0, 0.5, 1];
-  }
-
-  // Left eye
-  this.viewportOffsetScale[0] = leftBounds[0]; // X
-  this.viewportOffsetScale[1] = leftBounds[1]; // Y
-  this.viewportOffsetScale[2] = leftBounds[2]; // Width
-  this.viewportOffsetScale[3] = leftBounds[3]; // Height
-
-  // Right eye
-  this.viewportOffsetScale[4] = rightBounds[0]; // X
-  this.viewportOffsetScale[5] = rightBounds[1]; // Y
-  this.viewportOffsetScale[6] = rightBounds[2]; // Width
-  this.viewportOffsetScale[7] = rightBounds[3]; // Height
-};
-
-/**
- * Performs distortion pass on the injected backbuffer, rendering it to the real
- * backbuffer.
- */
-CardboardDistorter.prototype.submitFrame = function() {
-  var gl = this.gl;
-  var self = this;
-
-  var glState = [];
-
-  if (!WebVRConfig.DIRTY_SUBMIT_FRAME_BINDINGS) {
-    glState.push(
-      gl.CURRENT_PROGRAM,
-      gl.ARRAY_BUFFER_BINDING,
-      gl.ELEMENT_ARRAY_BUFFER_BINDING,
-      gl.TEXTURE_BINDING_2D, gl.TEXTURE0
-    );
-  }
-
-  WGLUPreserveGLState(gl, glState, function(gl) {
-    // Bind the real default framebuffer
-    self.realBindFramebuffer.call(gl, gl.FRAMEBUFFER, null);
-
-    // Make sure the GL state is in a good place
-    if (self.cullFace) { self.realDisable.call(gl, gl.CULL_FACE); }
-    if (self.depthTest) { self.realDisable.call(gl, gl.DEPTH_TEST); }
-    if (self.blend) { self.realDisable.call(gl, gl.BLEND); }
-    if (self.scissorTest) { self.realDisable.call(gl, gl.SCISSOR_TEST); }
-    if (self.stencilTest) { self.realDisable.call(gl, gl.STENCIL_TEST); }
-    self.realColorMask.call(gl, true, true, true, true);
-    self.realViewport.call(gl, 0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-
-    // If the backbuffer has an alpha channel clear every frame so the page
-    // doesn't show through.
-    if (self.ctxAttribs.alpha || Util.isIOS()) {
-      self.realClearColor.call(gl, 0, 0, 0, 1);
-      gl.clear(gl.COLOR_BUFFER_BIT);
-    }
-
-    // Bind distortion program and mesh
-    gl.useProgram(self.program);
-
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, self.indexBuffer);
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, self.vertexBuffer);
-    gl.enableVertexAttribArray(self.attribs.position);
-    gl.enableVertexAttribArray(self.attribs.texCoord);
-    gl.vertexAttribPointer(self.attribs.position, 2, gl.FLOAT, false, 20, 0);
-    gl.vertexAttribPointer(self.attribs.texCoord, 3, gl.FLOAT, false, 20, 8);
-
-    gl.activeTexture(gl.TEXTURE0);
-    gl.uniform1i(self.uniforms.diffuse, 0);
-    gl.bindTexture(gl.TEXTURE_2D, self.renderTarget);
-
-    gl.uniform4fv(self.uniforms.viewportOffsetScale, self.viewportOffsetScale);
-
-    // Draws both eyes
-    gl.drawElements(gl.TRIANGLES, self.indexCount, gl.UNSIGNED_SHORT, 0);
-
-    if (self.cardboardUI) {
-      self.cardboardUI.renderNoState();
-    }
-
-    // Bind the fake default framebuffer again
-    self.realBindFramebuffer.call(self.gl, gl.FRAMEBUFFER, self.framebuffer);
-
-    // If preserveDrawingBuffer == false clear the framebuffer
-    if (!self.ctxAttribs.preserveDrawingBuffer) {
-      self.realClearColor.call(gl, 0, 0, 0, 0);
-      gl.clear(gl.COLOR_BUFFER_BIT);
-    }
-
-    if (!WebVRConfig.DIRTY_SUBMIT_FRAME_BINDINGS) {
-      self.realBindFramebuffer.call(gl, gl.FRAMEBUFFER, self.lastBoundFramebuffer);
-    }
-
-    // Restore state
-    if (self.cullFace) { self.realEnable.call(gl, gl.CULL_FACE); }
-    if (self.depthTest) { self.realEnable.call(gl, gl.DEPTH_TEST); }
-    if (self.blend) { self.realEnable.call(gl, gl.BLEND); }
-    if (self.scissorTest) { self.realEnable.call(gl, gl.SCISSOR_TEST); }
-    if (self.stencilTest) { self.realEnable.call(gl, gl.STENCIL_TEST); }
-
-    self.realColorMask.apply(gl, self.colorMask);
-    self.realViewport.apply(gl, self.viewport);
-    if (self.ctxAttribs.alpha || !self.ctxAttribs.preserveDrawingBuffer) {
-      self.realClearColor.apply(gl, self.clearColor);
-    }
-  });
-
-  // Workaround for the fact that Safari doesn't allow us to patch the canvas
-  // width and height correctly. After each submit frame check to see what the
-  // real backbuffer size has been set to and resize the fake backbuffer size
-  // to match.
-  if (Util.isIOS()) {
-    var canvas = gl.canvas;
-    if (canvas.width != self.bufferWidth || canvas.height != self.bufferHeight) {
-      self.bufferWidth = canvas.width;
-      self.bufferHeight = canvas.height;
-      self.onResize();
-    }
-  }
-};
-
-/**
- * Call when the deviceInfo has changed. At this point we need
- * to re-calculate the distortion mesh.
- */
-CardboardDistorter.prototype.updateDeviceInfo = function(deviceInfo) {
-  var gl = this.gl;
-  var self = this;
-
-  var glState = [gl.ARRAY_BUFFER_BINDING, gl.ELEMENT_ARRAY_BUFFER_BINDING];
-  WGLUPreserveGLState(gl, glState, function(gl) {
-    var vertices = self.computeMeshVertices_(self.meshWidth, self.meshHeight, deviceInfo);
-    gl.bindBuffer(gl.ARRAY_BUFFER, self.vertexBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
-
-    // Indices don't change based on device parameters, so only compute once.
-    if (!self.indexCount) {
-      var indices = self.computeMeshIndices_(self.meshWidth, self.meshHeight);
-      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, self.indexBuffer);
-      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
-      self.indexCount = indices.length;
-    }
-  });
-};
-
-/**
- * Build the distortion mesh vertices.
- * Based on code from the Unity cardboard plugin.
- */
-CardboardDistorter.prototype.computeMeshVertices_ = function(width, height, deviceInfo) {
-  var vertices = new Float32Array(2 * width * height * 5);
-
-  var lensFrustum = deviceInfo.getLeftEyeVisibleTanAngles();
-  var noLensFrustum = deviceInfo.getLeftEyeNoLensTanAngles();
-  var viewport = deviceInfo.getLeftEyeVisibleScreenRect(noLensFrustum);
-  var vidx = 0;
-  var iidx = 0;
-  for (var e = 0; e < 2; e++) {
-    for (var j = 0; j < height; j++) {
-      for (var i = 0; i < width; i++, vidx++) {
-        var u = i / (width - 1);
-        var v = j / (height - 1);
-
-        // Grid points regularly spaced in StreoScreen, and barrel distorted in
-        // the mesh.
-        var s = u;
-        var t = v;
-        var x = Util.lerp(lensFrustum[0], lensFrustum[2], u);
-        var y = Util.lerp(lensFrustum[3], lensFrustum[1], v);
-        var d = Math.sqrt(x * x + y * y);
-        var r = deviceInfo.distortion.distortInverse(d);
-        var p = x * r / d;
-        var q = y * r / d;
-        u = (p - noLensFrustum[0]) / (noLensFrustum[2] - noLensFrustum[0]);
-        v = (q - noLensFrustum[3]) / (noLensFrustum[1] - noLensFrustum[3]);
-
-        // Convert u,v to mesh screen coordinates.
-        var aspect = deviceInfo.device.widthMeters / deviceInfo.device.heightMeters;
-
-        // FIXME: The original Unity plugin multiplied U by the aspect ratio
-        // and didn't multiply either value by 2, but that seems to get it
-        // really close to correct looking for me. I hate this kind of "Don't
-        // know why it works" code though, and wold love a more logical
-        // explanation of what needs to happen here.
-        u = (viewport.x + u * viewport.width - 0.5) * 2.0; //* aspect;
-        v = (viewport.y + v * viewport.height - 0.5) * 2.0;
-
-        vertices[(vidx * 5) + 0] = u; // position.x
-        vertices[(vidx * 5) + 1] = v; // position.y
-        vertices[(vidx * 5) + 2] = s; // texCoord.x
-        vertices[(vidx * 5) + 3] = t; // texCoord.y
-        vertices[(vidx * 5) + 4] = e; // texCoord.z (viewport index)
-      }
-    }
-    var w = lensFrustum[2] - lensFrustum[0];
-    lensFrustum[0] = -(w + lensFrustum[0]);
-    lensFrustum[2] = w - lensFrustum[2];
-    w = noLensFrustum[2] - noLensFrustum[0];
-    noLensFrustum[0] = -(w + noLensFrustum[0]);
-    noLensFrustum[2] = w - noLensFrustum[2];
-    viewport.x = 1 - (viewport.x + viewport.width);
-  }
-  return vertices;
-}
-
-/**
- * Build the distortion mesh indices.
- * Based on code from the Unity cardboard plugin.
- */
-CardboardDistorter.prototype.computeMeshIndices_ = function(width, height) {
-  var indices = new Uint16Array(2 * (width - 1) * (height - 1) * 6);
-  var halfwidth = width / 2;
-  var halfheight = height / 2;
-  var vidx = 0;
-  var iidx = 0;
-  for (var e = 0; e < 2; e++) {
-    for (var j = 0; j < height; j++) {
-      for (var i = 0; i < width; i++, vidx++) {
-        if (i == 0 || j == 0)
-          continue;
-        // Build a quad.  Lower right and upper left quadrants have quads with
-        // the triangle diagonal flipped to get the vignette to interpolate
-        // correctly.
-        if ((i <= halfwidth) == (j <= halfheight)) {
-          // Quad diagonal lower left to upper right.
-          indices[iidx++] = vidx;
-          indices[iidx++] = vidx - width - 1;
-          indices[iidx++] = vidx - width;
-          indices[iidx++] = vidx - width - 1;
-          indices[iidx++] = vidx;
-          indices[iidx++] = vidx - 1;
-        } else {
-          // Quad diagonal upper left to lower right.
-          indices[iidx++] = vidx - 1;
-          indices[iidx++] = vidx - width;
-          indices[iidx++] = vidx;
-          indices[iidx++] = vidx - width;
-          indices[iidx++] = vidx - 1;
-          indices[iidx++] = vidx - width - 1;
-        }
-      }
-    }
-  }
-  return indices;
-};
-
-CardboardDistorter.prototype.getOwnPropertyDescriptor_ = function(proto, attrName) {
-  var descriptor = Object.getOwnPropertyDescriptor(proto, attrName);
-  // In some cases (ahem... Safari), the descriptor returns undefined get and
-  // set fields. In this case, we need to create a synthetic property
-  // descriptor. This works around some of the issues in
-  // https://github.com/borismus/webvr-polyfill/issues/46
-  if (descriptor.get === undefined || descriptor.set === undefined) {
-    descriptor.configurable = true;
-    descriptor.enumerable = true;
-    descriptor.get = function() {
-      return this.getAttribute(attrName);
-    };
-    descriptor.set = function(val) {
-      this.setAttribute(attrName, val);
-    };
-  }
-  return descriptor;
-};
-
-module.exports = CardboardDistorter;
-
-},{"./cardboard-ui.js":4,"./deps/wglu-preserve-state.js":6,"./util.js":22}],4:[function(_dereq_,module,exports){
-/*
- * Copyright 2016 Google Inc. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-var Util = _dereq_('./util.js');
-var WGLUPreserveGLState = _dereq_('./deps/wglu-preserve-state.js');
-
-var uiVS = [
-  'attribute vec2 position;',
-
-  'uniform mat4 projectionMat;',
-
-  'void main() {',
-  '  gl_Position = projectionMat * vec4( position, -1.0, 1.0 );',
-  '}',
-].join('\n');
-
-var uiFS = [
-  'precision mediump float;',
-
-  'uniform vec4 color;',
-
-  'void main() {',
-  '  gl_FragColor = color;',
-  '}',
-].join('\n');
-
-var DEG2RAD = Math.PI/180.0;
-
-// The gear has 6 identical sections, each spanning 60 degrees.
-var kAnglePerGearSection = 60;
-
-// Half-angle of the span of the outer rim.
-var kOuterRimEndAngle = 12;
-
-// Angle between the middle of the outer rim and the start of the inner rim.
-var kInnerRimBeginAngle = 20;
-
-// Distance from center to outer rim, normalized so that the entire model
-// fits in a [-1, 1] x [-1, 1] square.
-var kOuterRadius = 1;
-
-// Distance from center to depressed rim, in model units.
-var kMiddleRadius = 0.75;
-
-// Radius of the inner hollow circle, in model units.
-var kInnerRadius = 0.3125;
-
-// Center line thickness in DP.
-var kCenterLineThicknessDp = 4;
-
-// Button width in DP.
-var kButtonWidthDp = 28;
-
-// Factor to scale the touch area that responds to the touch.
-var kTouchSlopFactor = 1.5;
-
-var Angles = [
-  0, kOuterRimEndAngle, kInnerRimBeginAngle,
-  kAnglePerGearSection - kInnerRimBeginAngle,
-  kAnglePerGearSection - kOuterRimEndAngle
-];
-
-/**
- * Renders the alignment line and "options" gear. It is assumed that the canvas
- * this is rendered into covers the entire screen (or close to it.)
- */
-function CardboardUI(gl) {
-  this.gl = gl;
-
-  this.attribs = {
-    position: 0
-  };
-  this.program = Util.linkProgram(gl, uiVS, uiFS, this.attribs);
-  this.uniforms = Util.getProgramUniforms(gl, this.program);
-
-  this.vertexBuffer = gl.createBuffer();
-  this.gearOffset = 0;
-  this.gearVertexCount = 0;
-  this.arrowOffset = 0;
-  this.arrowVertexCount = 0;
-
-  this.projMat = new Float32Array(16);
-
-  this.listener = null;
-
-  this.onResize();
-};
-
-/**
- * Tears down all the resources created by the UI renderer.
- */
-CardboardUI.prototype.destroy = function() {
-  var gl = this.gl;
-
-  if (this.listener) {
-    gl.canvas.removeEventListener('click', this.listener, false);
-  }
-
-  gl.deleteProgram(this.program);
-  gl.deleteBuffer(this.vertexBuffer);
-};
-
-/**
- * Adds a listener to clicks on the gear and back icons
- */
-CardboardUI.prototype.listen = function(optionsCallback, backCallback) {
-  var canvas = this.gl.canvas;
-  this.listener = function(event) {
-    var midline = canvas.clientWidth / 2;
-    var buttonSize = kButtonWidthDp * kTouchSlopFactor;
-    // Check to see if the user clicked on (or around) the gear icon
-    if (event.clientX > midline - buttonSize &&
-        event.clientX < midline + buttonSize &&
-        event.clientY > canvas.clientHeight - buttonSize) {
-      optionsCallback(event);
-    }
-    // Check to see if the user clicked on (or around) the back icon
-    else if (event.clientX < buttonSize && event.clientY < buttonSize) {
-      backCallback(event);
-    }
-  };
-  canvas.addEventListener('click', this.listener, false);
-};
-
-/**
- * Builds the UI mesh.
- */
-CardboardUI.prototype.onResize = function() {
-  var gl = this.gl;
-  var self = this;
-
-  var glState = [
-    gl.ARRAY_BUFFER_BINDING
-  ];
-
-  WGLUPreserveGLState(gl, glState, function(gl) {
-    var vertices = [];
-
-    var midline = gl.drawingBufferWidth / 2;
-
-    // Assumes your canvas width and height is scaled proportionately.
-    // TODO(smus): The following causes buttons to become huge on iOS, but seems
-    // like the right thing to do. For now, added a hack. But really, investigate why.
-    var dps = (gl.drawingBufferWidth / (screen.width * window.devicePixelRatio));
-    if (!Util.isIOS()) {
-      dps *= window.devicePixelRatio;
-    }
-
-    var lineWidth = kCenterLineThicknessDp * dps / 2;
-    var buttonSize = kButtonWidthDp * kTouchSlopFactor * dps;
-    var buttonScale = kButtonWidthDp * dps / 2;
-    var buttonBorder = ((kButtonWidthDp * kTouchSlopFactor) - kButtonWidthDp) * dps;
-
-    // Build centerline
-    vertices.push(midline - lineWidth, buttonSize);
-    vertices.push(midline - lineWidth, gl.drawingBufferHeight);
-    vertices.push(midline + lineWidth, buttonSize);
-    vertices.push(midline + lineWidth, gl.drawingBufferHeight);
-
-    // Build gear
-    self.gearOffset = (vertices.length / 2);
-
-    function addGearSegment(theta, r) {
-      var angle = (90 - theta) * DEG2RAD;
-      var x = Math.cos(angle);
-      var y = Math.sin(angle);
-      vertices.push(kInnerRadius * x * buttonScale + midline, kInnerRadius * y * buttonScale + buttonScale);
-      vertices.push(r * x * buttonScale + midline, r * y * buttonScale + buttonScale);
-    }
-
-    for (var i = 0; i <= 6; i++) {
-      var segmentTheta = i * kAnglePerGearSection;
-
-      addGearSegment(segmentTheta, kOuterRadius);
-      addGearSegment(segmentTheta + kOuterRimEndAngle, kOuterRadius);
-      addGearSegment(segmentTheta + kInnerRimBeginAngle, kMiddleRadius);
-      addGearSegment(segmentTheta + (kAnglePerGearSection - kInnerRimBeginAngle), kMiddleRadius);
-      addGearSegment(segmentTheta + (kAnglePerGearSection - kOuterRimEndAngle), kOuterRadius);
-    }
-
-    self.gearVertexCount = (vertices.length / 2) - self.gearOffset;
-
-    // Build back arrow
-    self.arrowOffset = (vertices.length / 2);
-
-    function addArrowVertex(x, y) {
-      vertices.push(buttonBorder + x, gl.drawingBufferHeight - buttonBorder - y);
-    }
-
-    var angledLineWidth = lineWidth / Math.sin(45 * DEG2RAD);
-
-    addArrowVertex(0, buttonScale);
-    addArrowVertex(buttonScale, 0);
-    addArrowVertex(buttonScale + angledLineWidth, angledLineWidth);
-    addArrowVertex(angledLineWidth, buttonScale + angledLineWidth);
-
-    addArrowVertex(angledLineWidth, buttonScale - angledLineWidth);
-    addArrowVertex(0, buttonScale);
-    addArrowVertex(buttonScale, buttonScale * 2);
-    addArrowVertex(buttonScale + angledLineWidth, (buttonScale * 2) - angledLineWidth);
-
-    addArrowVertex(angledLineWidth, buttonScale - angledLineWidth);
-    addArrowVertex(0, buttonScale);
-
-    addArrowVertex(angledLineWidth, buttonScale - lineWidth);
-    addArrowVertex(kButtonWidthDp * dps, buttonScale - lineWidth);
-    addArrowVertex(angledLineWidth, buttonScale + lineWidth);
-    addArrowVertex(kButtonWidthDp * dps, buttonScale + lineWidth);
-
-    self.arrowVertexCount = (vertices.length / 2) - self.arrowOffset;
-
-    // Buffer data
-    gl.bindBuffer(gl.ARRAY_BUFFER, self.vertexBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-  });
-};
-
-/**
- * Performs distortion pass on the injected backbuffer, rendering it to the real
- * backbuffer.
- */
-CardboardUI.prototype.render = function() {
-  var gl = this.gl;
-  var self = this;
-
-  var glState = [
-    gl.CULL_FACE,
-    gl.DEPTH_TEST,
-    gl.BLEND,
-    gl.SCISSOR_TEST,
-    gl.STENCIL_TEST,
-    gl.COLOR_WRITEMASK,
-    gl.VIEWPORT,
-
-    gl.CURRENT_PROGRAM,
-    gl.ARRAY_BUFFER_BINDING
-  ];
-
-  WGLUPreserveGLState(gl, glState, function(gl) {
-    // Make sure the GL state is in a good place
-    gl.disable(gl.CULL_FACE);
-    gl.disable(gl.DEPTH_TEST);
-    gl.disable(gl.BLEND);
-    gl.disable(gl.SCISSOR_TEST);
-    gl.disable(gl.STENCIL_TEST);
-    gl.colorMask(true, true, true, true);
-    gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-
-    self.renderNoState();
-  });
-};
-
-CardboardUI.prototype.renderNoState = function() {
-  var gl = this.gl;
-
-  // Bind distortion program and mesh
-  gl.useProgram(this.program);
-
-  gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
-  gl.enableVertexAttribArray(this.attribs.position);
-  gl.vertexAttribPointer(this.attribs.position, 2, gl.FLOAT, false, 8, 0);
-
-  gl.uniform4f(this.uniforms.color, 1.0, 1.0, 1.0, 1.0);
-
-  Util.orthoMatrix(this.projMat, 0, gl.drawingBufferWidth, 0, gl.drawingBufferHeight, 0.1, 1024.0);
-  gl.uniformMatrix4fv(this.uniforms.projectionMat, false, this.projMat);
-
-  // Draws UI element
-  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-  gl.drawArrays(gl.TRIANGLE_STRIP, this.gearOffset, this.gearVertexCount);
-  gl.drawArrays(gl.TRIANGLE_STRIP, this.arrowOffset, this.arrowVertexCount);
-};
-
-module.exports = CardboardUI;
-
-},{"./deps/wglu-preserve-state.js":6,"./util.js":22}],5:[function(_dereq_,module,exports){
-/*
- * Copyright 2016 Google Inc. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-var CardboardDistorter = _dereq_('./cardboard-distorter.js');
-var CardboardUI = _dereq_('./cardboard-ui.js');
 var DeviceInfo = _dereq_('./device-info.js');
 var Dpdb = _dereq_('./dpdb/dpdb.js');
 var FusionPoseSensor = _dereq_('./sensor-fusion/fusion-pose-sensor.js');
-var RotateInstructions = _dereq_('./rotate-instructions.js');
-var ViewerSelector = _dereq_('./viewer-selector.js');
 var VRDisplay = _dereq_('./base.js').VRDisplay;
 var Util = _dereq_('./util.js');
 
@@ -9409,21 +8485,9 @@ function CardboardVRDisplay() {
   // "Private" members.
   this.bufferScale_ = WebVRConfig.BUFFER_SCALE;
   this.poseSensor_ = new FusionPoseSensor();
-  this.distorter_ = null;
-  this.cardboardUI_ = null;
 
   this.dpdb_ = new Dpdb(true, this.onDeviceParamsUpdated_.bind(this));
   this.deviceInfo_ = new DeviceInfo(this.dpdb_.getDeviceParams());
-
-  this.viewerSelector_ = new ViewerSelector();
-  this.viewerSelector_.on('change', this.onViewerChanged_.bind(this));
-
-  // Set the correct initial viewer.
-  this.deviceInfo_.setViewer(this.viewerSelector_.getCurrentViewer());
-
-  if (!WebVRConfig.ROTATE_INSTRUCTIONS_DISABLED) {
-    this.rotateInstructions_ = new RotateInstructions();
-  }
 
   if (Util.isIOS()) {
     // Listen for resize events to workaround this awful Safari bug.
@@ -9474,16 +8538,9 @@ CardboardVRDisplay.prototype.getEyeParameters = function(whichEye) {
 CardboardVRDisplay.prototype.onDeviceParamsUpdated_ = function(newParams) {
   console.log('DPDB reported that device params were updated.');
   this.deviceInfo_.updateDeviceParams(newParams);
-
-  if (this.distorter_) {
-    this.distorter_.updateDeviceInfo(this.deviceInfo_);
-  }
 };
 
 CardboardVRDisplay.prototype.updateBounds_ = function () {
-  if (this.layer_ && this.distorter_ && (this.layer_.leftBounds || this.layer_.rightBounds)) {
-    this.distorter_.setTextureBounds(this.layer_.leftBounds, this.layer_.rightBounds);
-  }
 };
 
 CardboardVRDisplay.prototype.beginPresent_ = function() {
@@ -9493,46 +8550,6 @@ CardboardVRDisplay.prototype.beginPresent_ = function() {
   if (!gl)
     gl = this.layer_.source.getContext('webgl2');
 
-  if (!gl)
-    return; // Can't do distortion without a WebGL context.
-
-  // Provides a way to opt out of distortion
-  if (this.layer_.predistorted) {
-    if (!WebVRConfig.CARDBOARD_UI_DISABLED) {
-      gl.canvas.width = Util.getScreenWidth() * this.bufferScale_;
-      gl.canvas.height = Util.getScreenHeight() * this.bufferScale_;
-      this.cardboardUI_ = new CardboardUI(gl);
-    }
-  } else {
-    // Create a new distorter for the target context
-    this.distorter_ = new CardboardDistorter(gl);
-    this.distorter_.updateDeviceInfo(this.deviceInfo_);
-    this.cardboardUI_ = this.distorter_.cardboardUI;
-  }
-
-  if (this.cardboardUI_) {
-    this.cardboardUI_.listen(function(e) {
-      // Options clicked.
-      this.viewerSelector_.show(this.layer_.source.parentElement);
-      e.stopPropagation();
-      e.preventDefault();
-    }.bind(this), function(e) {
-      // Back clicked.
-      this.exitPresent();
-      e.stopPropagation();
-      e.preventDefault();
-    }.bind(this));
-  }
-
-  if (this.rotateInstructions_) {
-    if (Util.isLandscapeMode() && Util.isMobile()) {
-      // In landscape mode, temporarily show the "put into Cardboard"
-      // interstitial. Otherwise, do the default thing.
-      this.rotateInstructions_.showTemporarily(3000, this.layer_.source.parentElement);
-    } else {
-      this.rotateInstructions_.update();
-    }
-  }
 
   // Listen for orientation change events in order to show interstitial.
   this.orientationHandler = this.onOrientationChange_.bind(this);
@@ -9548,52 +8565,15 @@ CardboardVRDisplay.prototype.beginPresent_ = function() {
 };
 
 CardboardVRDisplay.prototype.endPresent_ = function() {
-  if (this.distorter_) {
-    this.distorter_.destroy();
-    this.distorter_ = null;
-  }
-  if (this.cardboardUI_) {
-    this.cardboardUI_.destroy();
-    this.cardboardUI_ = null;
-  }
-
-  if (this.rotateInstructions_) {
-    this.rotateInstructions_.hide();
-  }
-  this.viewerSelector_.hide();
-
   window.removeEventListener('orientationchange', this.orientationHandler);
   window.removeEventListener('vrdisplaypresentchange', this.vrdisplaypresentchangeHandler);
 };
 
 CardboardVRDisplay.prototype.submitFrame = function(pose) {
-  if (this.distorter_) {
-    this.distorter_.submitFrame();
-  } else if (this.cardboardUI_ && this.layer_) {
-    // Hack for predistorted: true.
-    var canvas = this.layer_.source.getContext('webgl').canvas;
-    if (canvas.width != this.lastWidth || canvas.height != this.lastHeight) {
-      this.cardboardUI_.onResize();
-    }
-    this.lastWidth = canvas.width;
-    this.lastHeight = canvas.height;
-
-    // Render the Cardboard UI.
-    this.cardboardUI_.render();
-  }
 };
 
 CardboardVRDisplay.prototype.onOrientationChange_ = function(e) {
   console.log('onOrientationChange_');
-
-  // Hide the viewer selector.
-  this.viewerSelector_.hide();
-
-  // Update the rotate instructions.
-  if (this.rotateInstructions_) {
-    this.rotateInstructions_.update();
-  }
-
   this.onResize_();
 };
 
@@ -9624,11 +8604,6 @@ CardboardVRDisplay.prototype.onResize_ = function(e) {
 CardboardVRDisplay.prototype.onViewerChanged_ = function(viewer) {
   this.deviceInfo_.setViewer(viewer);
 
-  if (this.distorter_) {
-    // Update the distortion appropriately.
-    this.distorter_.updateDeviceInfo(this.deviceInfo_);
-  }
-
   // Fire a new event containing viewer and device parameters for clients that
   // want to implement their own geometry-based distortion.
   this.fireVRDisplayDeviceParamsChange_();
@@ -9646,172 +8621,7 @@ CardboardVRDisplay.prototype.fireVRDisplayDeviceParamsChange_ = function() {
 
 module.exports = CardboardVRDisplay;
 
-},{"./base.js":2,"./cardboard-distorter.js":3,"./cardboard-ui.js":4,"./device-info.js":7,"./dpdb/dpdb.js":11,"./rotate-instructions.js":16,"./sensor-fusion/fusion-pose-sensor.js":18,"./util.js":22,"./viewer-selector.js":23}],6:[function(_dereq_,module,exports){
-/*
-Copyright (c) 2016, Brandon Jones.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-*/
-
-/*
-Caches specified GL state, runs a callback, and restores the cached state when
-done.
-
-Example usage:
-
-var savedState = [
-  gl.ARRAY_BUFFER_BINDING,
-
-  // TEXTURE_BINDING_2D or _CUBE_MAP must always be followed by the texure unit.
-  gl.TEXTURE_BINDING_2D, gl.TEXTURE0,
-
-  gl.CLEAR_COLOR,
-];
-// After this call the array buffer, texture unit 0, active texture, and clear
-// color will be restored. The viewport will remain changed, however, because
-// gl.VIEWPORT was not included in the savedState list.
-WGLUPreserveGLState(gl, savedState, function(gl) {
-  gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-
-  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-  gl.bufferData(gl.ARRAY_BUFFER, ....);
-
-  gl.activeTexture(gl.TEXTURE0);
-  gl.bindTexture(gl.TEXTURE_2D, texture);
-  gl.texImage2D(gl.TEXTURE_2D, ...);
-
-  gl.clearColor(1, 0, 0, 1);
-  gl.clear(gl.COLOR_BUFFER_BIT);
-});
-
-Note that this is not intended to be fast. Managing state in your own code to
-avoid redundant state setting and querying will always be faster. This function
-is most useful for cases where you may not have full control over the WebGL
-calls being made, such as tooling or effect injectors.
-*/
-
-function WGLUPreserveGLState(gl, bindings, callback) {
-  if (!bindings) {
-    callback(gl);
-    return;
-  }
-
-  var boundValues = [];
-
-  var activeTexture = null;
-  for (var i = 0; i < bindings.length; ++i) {
-    var binding = bindings[i];
-    switch (binding) {
-      case gl.TEXTURE_BINDING_2D:
-      case gl.TEXTURE_BINDING_CUBE_MAP:
-        var textureUnit = bindings[++i];
-        if (textureUnit < gl.TEXTURE0 || textureUnit > gl.TEXTURE31) {
-          console.error("TEXTURE_BINDING_2D or TEXTURE_BINDING_CUBE_MAP must be followed by a valid texture unit");
-          boundValues.push(null, null);
-          break;
-        }
-        if (!activeTexture) {
-          activeTexture = gl.getParameter(gl.ACTIVE_TEXTURE);
-        }
-        gl.activeTexture(textureUnit);
-        boundValues.push(gl.getParameter(binding), null);
-        break;
-      case gl.ACTIVE_TEXTURE:
-        activeTexture = gl.getParameter(gl.ACTIVE_TEXTURE);
-        boundValues.push(null);
-        break;
-      default:
-        boundValues.push(gl.getParameter(binding));
-        break;
-    }
-  }
-
-  callback(gl);
-
-  for (var i = 0; i < bindings.length; ++i) {
-    var binding = bindings[i];
-    var boundValue = boundValues[i];
-    switch (binding) {
-      case gl.ACTIVE_TEXTURE:
-        break; // Ignore this binding, since we special-case it to happen last.
-      case gl.ARRAY_BUFFER_BINDING:
-        gl.bindBuffer(gl.ARRAY_BUFFER, boundValue);
-        break;
-      case gl.COLOR_CLEAR_VALUE:
-        gl.clearColor(boundValue[0], boundValue[1], boundValue[2], boundValue[3]);
-        break;
-      case gl.COLOR_WRITEMASK:
-        gl.colorMask(boundValue[0], boundValue[1], boundValue[2], boundValue[3]);
-        break;
-      case gl.CURRENT_PROGRAM:
-        gl.useProgram(boundValue);
-        break;
-      case gl.ELEMENT_ARRAY_BUFFER_BINDING:
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, boundValue);
-        break;
-      case gl.FRAMEBUFFER_BINDING:
-        gl.bindFramebuffer(gl.FRAMEBUFFER, boundValue);
-        break;
-      case gl.RENDERBUFFER_BINDING:
-        gl.bindRenderbuffer(gl.RENDERBUFFER, boundValue);
-        break;
-      case gl.TEXTURE_BINDING_2D:
-        var textureUnit = bindings[++i];
-        if (textureUnit < gl.TEXTURE0 || textureUnit > gl.TEXTURE31)
-          break;
-        gl.activeTexture(textureUnit);
-        gl.bindTexture(gl.TEXTURE_2D, boundValue);
-        break;
-      case gl.TEXTURE_BINDING_CUBE_MAP:
-        var textureUnit = bindings[++i];
-        if (textureUnit < gl.TEXTURE0 || textureUnit > gl.TEXTURE31)
-          break;
-        gl.activeTexture(textureUnit);
-        gl.bindTexture(gl.TEXTURE_CUBE_MAP, boundValue);
-        break;
-      case gl.VIEWPORT:
-        gl.viewport(boundValue[0], boundValue[1], boundValue[2], boundValue[3]);
-        break;
-      case gl.BLEND:
-      case gl.CULL_FACE:
-      case gl.DEPTH_TEST:
-      case gl.SCISSOR_TEST:
-      case gl.STENCIL_TEST:
-        if (boundValue) {
-          gl.enable(binding);
-        } else {
-          gl.disable(binding);
-        }
-        break;
-      default:
-        console.log("No GL restore behavior for 0x" + binding.toString(16));
-        break;
-    }
-
-    if (activeTexture) {
-      gl.activeTexture(activeTexture);
-    }
-  }
-}
-
-module.exports = WGLUPreserveGLState;
-},{}],7:[function(_dereq_,module,exports){
+},{"./base.js":2,"./device-info.js":4,"./dpdb/dpdb.js":7,"./sensor-fusion/fusion-pose-sensor.js":11,"./util.js":14}],4:[function(_dereq_,module,exports){
 /*
  * Copyright 2015 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -10178,99 +8988,7 @@ function CardboardViewer(params) {
 DeviceInfo.Viewers = Viewers;
 module.exports = DeviceInfo;
 
-},{"./distortion/distortion.js":9,"./math-util.js":14,"./util.js":22}],8:[function(_dereq_,module,exports){
-/*
- * Copyright 2016 Google Inc. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-var VRDisplay = _dereq_('./base.js').VRDisplay;
-var HMDVRDevice = _dereq_('./base.js').HMDVRDevice;
-var PositionSensorVRDevice = _dereq_('./base.js').PositionSensorVRDevice;
-
-/**
- * Wraps a VRDisplay and exposes it as a HMDVRDevice
- */
-function VRDisplayHMDDevice(display) {
-  this.display = display;
-
-  this.hardwareUnitId = display.displayId;
-  this.deviceId = 'webvr-polyfill:HMD:' + display.displayId;
-  this.deviceName = display.displayName + ' (HMD)';
-}
-VRDisplayHMDDevice.prototype = new HMDVRDevice();
-
-VRDisplayHMDDevice.prototype.getEyeParameters = function(whichEye) {
-  var eyeParameters = this.display.getEyeParameters(whichEye);
-
-  return {
-    currentFieldOfView: eyeParameters.fieldOfView,
-    maximumFieldOfView: eyeParameters.fieldOfView,
-    minimumFieldOfView: eyeParameters.fieldOfView,
-    recommendedFieldOfView: eyeParameters.fieldOfView,
-    eyeTranslation: { x: eyeParameters.offset[0], y: eyeParameters.offset[1], z: eyeParameters.offset[2] },
-    renderRect: {
-      x: (whichEye == 'right') ? eyeParameters.renderWidth : 0,
-      y: 0,
-      width: eyeParameters.renderWidth,
-      height: eyeParameters.renderHeight
-    }
-  };
-};
-
-VRDisplayHMDDevice.prototype.setFieldOfView =
-    function(opt_fovLeft, opt_fovRight, opt_zNear, opt_zFar) {
-  // Not supported. getEyeParameters reports that the min, max, and recommended
-  // FoV is all the same, so no adjustment can be made.
-};
-
-// TODO: Need to hook requestFullscreen to see if a wrapped VRDisplay was passed
-// in as an option. If so we should prevent the default fullscreen behavior and
-// call VRDisplay.requestPresent instead.
-
-/**
- * Wraps a VRDisplay and exposes it as a PositionSensorVRDevice
- */
-function VRDisplayPositionSensorDevice(display) {
-  this.display = display;
-
-  this.hardwareUnitId = display.displayId;
-  this.deviceId = 'webvr-polyfill:PositionSensor: ' + display.displayId;
-  this.deviceName = display.displayName + ' (PositionSensor)';
-}
-VRDisplayPositionSensorDevice.prototype = new PositionSensorVRDevice();
-
-VRDisplayPositionSensorDevice.prototype.getState = function() {
-  var pose = this.display.getPose();
-  return {
-    position: pose.position ? { x: pose.position[0], y: pose.position[1], z: pose.position[2] } : null,
-    orientation: pose.orientation ? { x: pose.orientation[0], y: pose.orientation[1], z: pose.orientation[2], w: pose.orientation[3] } : null,
-    linearVelocity: null,
-    linearAcceleration: null,
-    angularVelocity: null,
-    angularAcceleration: null
-  };
-};
-
-VRDisplayPositionSensorDevice.prototype.resetState = function() {
-  return this.positionDevice.resetPose();
-};
-
-
-module.exports.VRDisplayHMDDevice = VRDisplayHMDDevice;
-module.exports.VRDisplayPositionSensorDevice = VRDisplayPositionSensorDevice;
-
-
-},{"./base.js":2}],9:[function(_dereq_,module,exports){
+},{"./distortion/distortion.js":5,"./math-util.js":9,"./util.js":14}],5:[function(_dereq_,module,exports){
 /**
  * TODO(smus): Implement coefficient inversion.
  */
@@ -10453,7 +9171,7 @@ Distortion.prototype.approximateInverse = function(maxRadius, numSamples) {
 
 module.exports = Distortion;
 
-},{}],10:[function(_dereq_,module,exports){
+},{}],6:[function(_dereq_,module,exports){
 /*
  * Copyright 2015 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -11424,7 +10142,7 @@ var DPDB_CACHE = {
 
 module.exports = DPDB_CACHE;
 
-},{}],11:[function(_dereq_,module,exports){
+},{}],7:[function(_dereq_,module,exports){
 /*
  * Copyright 2015 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -11614,51 +10332,7 @@ function DeviceParams(params) {
 }
 
 module.exports = Dpdb;
-},{"../util.js":22,"./dpdb-cache.js":10}],12:[function(_dereq_,module,exports){
-/*
- * Copyright 2015 Google Inc. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-function Emitter() {
-  this.callbacks = {};
-}
-
-Emitter.prototype.emit = function(eventName) {
-  var callbacks = this.callbacks[eventName];
-  if (!callbacks) {
-    //console.log('No valid callback specified.');
-    return;
-  }
-  var args = [].slice.call(arguments);
-  // Eliminate the first param (the callback).
-  args.shift();
-  for (var i = 0; i < callbacks.length; i++) {
-    callbacks[i].apply(this, args);
-  }
-};
-
-Emitter.prototype.on = function(eventName, callback) {
-  if (eventName in this.callbacks) {
-    this.callbacks[eventName].push(callback);
-  } else {
-    this.callbacks[eventName] = [callback];
-  }
-};
-
-module.exports = Emitter;
-
-},{}],13:[function(_dereq_,module,exports){
+},{"../util.js":14,"./dpdb-cache.js":6}],8:[function(_dereq_,module,exports){
 /*
  * Copyright 2015 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -11674,7 +10348,7 @@ module.exports = Emitter;
  * limitations under the License.
  */
 var Util = _dereq_('./util.js');
-var WebVRPolyfill = _dereq_('./webvr-polyfill.js');
+var WebVRPolyfill = _dereq_('./webvr-polyfill.js').WebVRPolyfill;
 
 // Initialize a WebVRConfig just in case.
 window.WebVRConfig = Util.extend({
@@ -11687,8 +10361,8 @@ window.WebVRConfig = Util.extend({
   // How far into the future to predict during fast motion (in seconds).
   PREDICTION_TIME_S: 0.040,
 
-  // Flag to disable touch panner. In case you have your own touch controls.
-  TOUCH_PANNER_DISABLED: false,
+  // Flag to enable touch panner. In case you have your own touch controls.
+  TOUCH_PANNER_DISABLED: true,
 
   // Flag to disabled the UI in VR Mode.
   CARDBOARD_UI_DISABLED: false, // Default: false
@@ -11735,7 +10409,7 @@ if (!window.WebVRConfig.DEFER_INITIALIZATION) {
   }
 }
 
-},{"./util.js":22,"./webvr-polyfill.js":25}],14:[function(_dereq_,module,exports){
+},{"./util.js":14,"./webvr-polyfill.js":16}],9:[function(_dereq_,module,exports){
 /*
  * Copyright 2016 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12094,332 +10768,7 @@ MathUtil.Quaternion.prototype = {
 
 module.exports = MathUtil;
 
-},{}],15:[function(_dereq_,module,exports){
-/*
- * Copyright 2016 Google Inc. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-var VRDisplay = _dereq_('./base.js').VRDisplay;
-var MathUtil = _dereq_('./math-util.js');
-var Util = _dereq_('./util.js');
-
-// How much to rotate per key stroke.
-var KEY_SPEED = 0.15;
-var KEY_ANIMATION_DURATION = 80;
-
-// How much to rotate for mouse events.
-var MOUSE_SPEED_X = 0.5;
-var MOUSE_SPEED_Y = 0.3;
-
-/**
- * VRDisplay based on mouse and keyboard input. Designed for desktops/laptops
- * where orientation events aren't supported. Cannot present.
- */
-function MouseKeyboardVRDisplay() {
-  this.displayName = 'Mouse and Keyboard VRDisplay (webvr-polyfill)';
-
-  this.capabilities.hasOrientation = true;
-
-  // Attach to mouse and keyboard events.
-  window.addEventListener('keydown', this.onKeyDown_.bind(this));
-  window.addEventListener('mousemove', this.onMouseMove_.bind(this));
-  window.addEventListener('mousedown', this.onMouseDown_.bind(this));
-  window.addEventListener('mouseup', this.onMouseUp_.bind(this));
-
-  // "Private" members.
-  this.phi_ = 0;
-  this.theta_ = 0;
-
-  // Variables for keyboard-based rotation animation.
-  this.targetAngle_ = null;
-  this.angleAnimation_ = null;
-
-  // State variables for calculations.
-  this.orientation_ = new MathUtil.Quaternion();
-
-  // Variables for mouse-based rotation.
-  this.rotateStart_ = new MathUtil.Vector2();
-  this.rotateEnd_ = new MathUtil.Vector2();
-  this.rotateDelta_ = new MathUtil.Vector2();
-  this.isDragging_ = false;
-
-  this.orientationOut_ = new Float32Array(4);
-}
-MouseKeyboardVRDisplay.prototype = new VRDisplay();
-
-MouseKeyboardVRDisplay.prototype.getImmediatePose = function() {
-  this.orientation_.setFromEulerYXZ(this.phi_, this.theta_, 0);
-
-  this.orientationOut_[0] = this.orientation_.x;
-  this.orientationOut_[1] = this.orientation_.y;
-  this.orientationOut_[2] = this.orientation_.z;
-  this.orientationOut_[3] = this.orientation_.w;
-
-  return {
-    position: null,
-    orientation: this.orientationOut_,
-    linearVelocity: null,
-    linearAcceleration: null,
-    angularVelocity: null,
-    angularAcceleration: null
-  };
-};
-
-MouseKeyboardVRDisplay.prototype.onKeyDown_ = function(e) {
-  // Track WASD and arrow keys.
-  if (e.keyCode == 38) { // Up key.
-    this.animatePhi_(this.phi_ + KEY_SPEED);
-  } else if (e.keyCode == 39) { // Right key.
-    this.animateTheta_(this.theta_ - KEY_SPEED);
-  } else if (e.keyCode == 40) { // Down key.
-    this.animatePhi_(this.phi_ - KEY_SPEED);
-  } else if (e.keyCode == 37) { // Left key.
-    this.animateTheta_(this.theta_ + KEY_SPEED);
-  }
-};
-
-MouseKeyboardVRDisplay.prototype.animateTheta_ = function(targetAngle) {
-  this.animateKeyTransitions_('theta_', targetAngle);
-};
-
-MouseKeyboardVRDisplay.prototype.animatePhi_ = function(targetAngle) {
-  // Prevent looking too far up or down.
-  targetAngle = Util.clamp(targetAngle, -Math.PI/2, Math.PI/2);
-  this.animateKeyTransitions_('phi_', targetAngle);
-};
-
-/**
- * Start an animation to transition an angle from one value to another.
- */
-MouseKeyboardVRDisplay.prototype.animateKeyTransitions_ = function(angleName, targetAngle) {
-  // If an animation is currently running, cancel it.
-  if (this.angleAnimation_) {
-    cancelAnimationFrame(this.angleAnimation_);
-  }
-  var startAngle = this[angleName];
-  var startTime = new Date();
-  // Set up an interval timer to perform the animation.
-  this.angleAnimation_ = requestAnimationFrame(function animate() {
-    // Once we're finished the animation, we're done.
-    var elapsed = new Date() - startTime;
-    if (elapsed >= KEY_ANIMATION_DURATION) {
-      this[angleName] = targetAngle;
-      cancelAnimationFrame(this.angleAnimation_);
-      return;
-    }
-    // loop with requestAnimationFrame
-    this.angleAnimation_ = requestAnimationFrame(animate.bind(this))
-    // Linearly interpolate the angle some amount.
-    var percent = elapsed / KEY_ANIMATION_DURATION;
-    this[angleName] = startAngle + (targetAngle - startAngle) * percent;
-  }.bind(this));
-};
-
-MouseKeyboardVRDisplay.prototype.onMouseDown_ = function(e) {
-  this.rotateStart_.set(e.clientX, e.clientY);
-  this.isDragging_ = true;
-};
-
-// Very similar to https://gist.github.com/mrflix/8351020
-MouseKeyboardVRDisplay.prototype.onMouseMove_ = function(e) {
-  if (!this.isDragging_ && !this.isPointerLocked_()) {
-    return;
-  }
-  // Support pointer lock API.
-  if (this.isPointerLocked_()) {
-    var movementX = e.movementX || e.mozMovementX || 0;
-    var movementY = e.movementY || e.mozMovementY || 0;
-    this.rotateEnd_.set(this.rotateStart_.x - movementX, this.rotateStart_.y - movementY);
-  } else {
-    this.rotateEnd_.set(e.clientX, e.clientY);
-  }
-  // Calculate how much we moved in mouse space.
-  this.rotateDelta_.subVectors(this.rotateEnd_, this.rotateStart_);
-  this.rotateStart_.copy(this.rotateEnd_);
-
-  // Keep track of the cumulative euler angles.
-  this.phi_ += 2 * Math.PI * this.rotateDelta_.y / screen.height * MOUSE_SPEED_Y;
-  this.theta_ += 2 * Math.PI * this.rotateDelta_.x / screen.width * MOUSE_SPEED_X;
-
-  // Prevent looking too far up or down.
-  this.phi_ = Util.clamp(this.phi_, -Math.PI/2, Math.PI/2);
-};
-
-MouseKeyboardVRDisplay.prototype.onMouseUp_ = function(e) {
-  this.isDragging_ = false;
-};
-
-MouseKeyboardVRDisplay.prototype.isPointerLocked_ = function() {
-  var el = document.pointerLockElement || document.mozPointerLockElement ||
-      document.webkitPointerLockElement;
-  return el !== undefined;
-};
-
-MouseKeyboardVRDisplay.prototype.resetPose = function() {
-  this.phi_ = 0;
-  this.theta_ = 0;
-};
-
-module.exports = MouseKeyboardVRDisplay;
-
-},{"./base.js":2,"./math-util.js":14,"./util.js":22}],16:[function(_dereq_,module,exports){
-/*
- * Copyright 2015 Google Inc. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-var Util = _dereq_('./util.js');
-
-function RotateInstructions() {
-  this.loadIcon_();
-
-  var overlay = document.createElement('div');
-  var s = overlay.style;
-  s.position = 'fixed';
-  s.top = 0;
-  s.right = 0;
-  s.bottom = 0;
-  s.left = 0;
-  s.backgroundColor = 'gray';
-  s.fontFamily = 'sans-serif';
-  // Force this to be above the fullscreen canvas, which is at zIndex: 999999.
-  s.zIndex = 1000000;
-
-  var img = document.createElement('img');
-  img.src = this.icon;
-  var s = img.style;
-  s.marginLeft = '25%';
-  s.marginTop = '25%';
-  s.width = '50%';
-  overlay.appendChild(img);
-
-  var text = document.createElement('div');
-  var s = text.style;
-  s.textAlign = 'center';
-  s.fontSize = '16px';
-  s.lineHeight = '24px';
-  s.margin = '24px 25%';
-  s.width = '50%';
-  text.innerHTML = 'Place your phone into your Cardboard viewer.';
-  overlay.appendChild(text);
-
-  var snackbar = document.createElement('div');
-  var s = snackbar.style;
-  s.backgroundColor = '#CFD8DC';
-  s.position = 'fixed';
-  s.bottom = 0;
-  s.width = '100%';
-  s.height = '48px';
-  s.padding = '14px 24px';
-  s.boxSizing = 'border-box';
-  s.color = '#656A6B';
-  overlay.appendChild(snackbar);
-
-  var snackbarText = document.createElement('div');
-  snackbarText.style.float = 'left';
-  snackbarText.innerHTML = 'No Cardboard viewer?';
-
-  var snackbarButton = document.createElement('a');
-  snackbarButton.href = 'https://www.google.com/get/cardboard/get-cardboard/';
-  snackbarButton.innerHTML = 'get one';
-  snackbarButton.target = '_blank';
-  var s = snackbarButton.style;
-  s.float = 'right';
-  s.fontWeight = 600;
-  s.textTransform = 'uppercase';
-  s.borderLeft = '1px solid gray';
-  s.paddingLeft = '24px';
-  s.textDecoration = 'none';
-  s.color = '#656A6B';
-
-  snackbar.appendChild(snackbarText);
-  snackbar.appendChild(snackbarButton);
-
-  this.overlay = overlay;
-  this.text = text;
-
-  this.hide();
-}
-
-RotateInstructions.prototype.show = function(parent) {
-  if (!parent && !this.overlay.parentElement) {
-    document.body.appendChild(this.overlay);
-  } else if (parent) {
-    if (this.overlay.parentElement && this.overlay.parentElement != parent)
-      this.overlay.parentElement.removeChild(this.overlay);
-
-    parent.appendChild(this.overlay);
-  }
-
-  this.overlay.style.display = 'block';
-
-  var img = this.overlay.querySelector('img');
-  var s = img.style;
-
-  if (Util.isLandscapeMode()) {
-    s.width = '20%';
-    s.marginLeft = '40%';
-    s.marginTop = '3%';
-  } else {
-    s.width = '50%';
-    s.marginLeft = '25%';
-    s.marginTop = '25%';
-  }
-};
-
-RotateInstructions.prototype.hide = function() {
-  this.overlay.style.display = 'none';
-};
-
-RotateInstructions.prototype.showTemporarily = function(ms, parent) {
-  this.show(parent);
-  this.timer = setTimeout(this.hide.bind(this), ms);
-};
-
-RotateInstructions.prototype.disableShowTemporarily = function() {
-  clearTimeout(this.timer);
-};
-
-RotateInstructions.prototype.update = function() {
-  this.disableShowTemporarily();
-  // In portrait VR mode, tell the user to rotate to landscape. Otherwise, hide
-  // the instructions.
-  if (!Util.isLandscapeMode() && Util.isMobile()) {
-    this.show();
-  } else {
-    this.hide();
-  }
-};
-
-RotateInstructions.prototype.loadIcon_ = function() {
-  // Encoded asset_src/rotate-instructions.svg
-  this.icon = Util.base64('image/svg+xml', 'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+Cjxzdmcgd2lkdGg9IjE5OHB4IiBoZWlnaHQ9IjI0MHB4IiB2aWV3Qm94PSIwIDAgMTk4IDI0MCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4bWxuczpza2V0Y2g9Imh0dHA6Ly93d3cuYm9oZW1pYW5jb2RpbmcuY29tL3NrZXRjaC9ucyI+CiAgICA8IS0tIEdlbmVyYXRvcjogU2tldGNoIDMuMy4zICgxMjA4MSkgLSBodHRwOi8vd3d3LmJvaGVtaWFuY29kaW5nLmNvbS9za2V0Y2ggLS0+CiAgICA8dGl0bGU+dHJhbnNpdGlvbjwvdGl0bGU+CiAgICA8ZGVzYz5DcmVhdGVkIHdpdGggU2tldGNoLjwvZGVzYz4KICAgIDxkZWZzPjwvZGVmcz4KICAgIDxnIGlkPSJQYWdlLTEiIHN0cm9rZT0ibm9uZSIgc3Ryb2tlLXdpZHRoPSIxIiBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIHNrZXRjaDp0eXBlPSJNU1BhZ2UiPgogICAgICAgIDxnIGlkPSJ0cmFuc2l0aW9uIiBza2V0Y2g6dHlwZT0iTVNBcnRib2FyZEdyb3VwIj4KICAgICAgICAgICAgPGcgaWQ9IkltcG9ydGVkLUxheWVycy1Db3B5LTQtKy1JbXBvcnRlZC1MYXllcnMtQ29weS0rLUltcG9ydGVkLUxheWVycy1Db3B5LTItQ29weSIgc2tldGNoOnR5cGU9Ik1TTGF5ZXJHcm91cCI+CiAgICAgICAgICAgICAgICA8ZyBpZD0iSW1wb3J0ZWQtTGF5ZXJzLUNvcHktNCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMC4wMDAwMDAsIDEwNy4wMDAwMDApIiBza2V0Y2g6dHlwZT0iTVNTaGFwZUdyb3VwIj4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTQ5LjYyNSwyLjUyNyBDMTQ5LjYyNSwyLjUyNyAxNTUuODA1LDYuMDk2IDE1Ni4zNjIsNi40MTggTDE1Ni4zNjIsNy4zMDQgQzE1Ni4zNjIsNy40ODEgMTU2LjM3NSw3LjY2NCAxNTYuNCw3Ljg1MyBDMTU2LjQxLDcuOTM0IDE1Ni40Miw4LjAxNSAxNTYuNDI3LDguMDk1IEMxNTYuNTY3LDkuNTEgMTU3LjQwMSwxMS4wOTMgMTU4LjUzMiwxMi4wOTQgTDE2NC4yNTIsMTcuMTU2IEwxNjQuMzMzLDE3LjA2NiBDMTY0LjMzMywxNy4wNjYgMTY4LjcxNSwxNC41MzYgMTY5LjU2OCwxNC4wNDIgQzE3MS4wMjUsMTQuODgzIDE5NS41MzgsMjkuMDM1IDE5NS41MzgsMjkuMDM1IEwxOTUuNTM4LDgzLjAzNiBDMTk1LjUzOCw4My44MDcgMTk1LjE1Miw4NC4yNTMgMTk0LjU5LDg0LjI1MyBDMTk0LjM1Nyw4NC4yNTMgMTk0LjA5NSw4NC4xNzcgMTkzLjgxOCw4NC4wMTcgTDE2OS44NTEsNzAuMTc5IEwxNjkuODM3LDcwLjIwMyBMMTQyLjUxNSw4NS45NzggTDE0MS42NjUsODQuNjU1IEMxMzYuOTM0LDgzLjEyNiAxMzEuOTE3LDgxLjkxNSAxMjYuNzE0LDgxLjA0NSBDMTI2LjcwOSw4MS4wNiAxMjYuNzA3LDgxLjA2OSAxMjYuNzA3LDgxLjA2OSBMMTIxLjY0LDk4LjAzIEwxMTMuNzQ5LDEwMi41ODYgTDExMy43MTIsMTAyLjUyMyBMMTEzLjcxMiwxMzAuMTEzIEMxMTMuNzEyLDEzMC44ODUgMTEzLjMyNiwxMzEuMzMgMTEyLjc2NCwxMzEuMzMgQzExMi41MzIsMTMxLjMzIDExMi4yNjksMTMxLjI1NCAxMTEuOTkyLDEzMS4wOTQgTDY5LjUxOSwxMDYuNTcyIEM2OC41NjksMTA2LjAyMyA2Ny43OTksMTA0LjY5NSA2Ny43OTksMTAzLjYwNSBMNjcuNzk5LDEwMi41NyBMNjcuNzc4LDEwMi42MTcgQzY3LjI3LDEwMi4zOTMgNjYuNjQ4LDEwMi4yNDkgNjUuOTYyLDEwMi4yMTggQzY1Ljg3NSwxMDIuMjE0IDY1Ljc4OCwxMDIuMjEyIDY1LjcwMSwxMDIuMjEyIEM2NS42MDYsMTAyLjIxMiA2NS41MTEsMTAyLjIxNSA2NS40MTYsMTAyLjIxOSBDNjUuMTk1LDEwMi4yMjkgNjQuOTc0LDEwMi4yMzUgNjQuNzU0LDEwMi4yMzUgQzY0LjMzMSwxMDIuMjM1IDYzLjkxMSwxMDIuMjE2IDYzLjQ5OCwxMDIuMTc4IEM2MS44NDMsMTAyLjAyNSA2MC4yOTgsMTAxLjU3OCA1OS4wOTQsMTAwLjg4MiBMMTIuNTE4LDczLjk5MiBMMTIuNTIzLDc0LjAwNCBMMi4yNDUsNTUuMjU0IEMxLjI0NCw1My40MjcgMi4wMDQsNTEuMDM4IDMuOTQzLDQ5LjkxOCBMNTkuOTU0LDE3LjU3MyBDNjAuNjI2LDE3LjE4NSA2MS4zNSwxNy4wMDEgNjIuMDUzLDE3LjAwMSBDNjMuMzc5LDE3LjAwMSA2NC42MjUsMTcuNjYgNjUuMjgsMTguODU0IEw2NS4yODUsMTguODUxIEw2NS41MTIsMTkuMjY0IEw2NS41MDYsMTkuMjY4IEM2NS45MDksMjAuMDAzIDY2LjQwNSwyMC42OCA2Ni45ODMsMjEuMjg2IEw2Ny4yNiwyMS41NTYgQzY5LjE3NCwyMy40MDYgNzEuNzI4LDI0LjM1NyA3NC4zNzMsMjQuMzU3IEM3Ni4zMjIsMjQuMzU3IDc4LjMyMSwyMy44NCA4MC4xNDgsMjIuNzg1IEM4MC4xNjEsMjIuNzg1IDg3LjQ2NywxOC41NjYgODcuNDY3LDE4LjU2NiBDODguMTM5LDE4LjE3OCA4OC44NjMsMTcuOTk0IDg5LjU2NiwxNy45OTQgQzkwLjg5MiwxNy45OTQgOTIuMTM4LDE4LjY1MiA5Mi43OTIsMTkuODQ3IEw5Ni4wNDIsMjUuNzc1IEw5Ni4wNjQsMjUuNzU3IEwxMDIuODQ5LDI5LjY3NCBMMTAyLjc0NCwyOS40OTIgTDE0OS42MjUsMi41MjcgTTE0OS42MjUsMC44OTIgQzE0OS4zNDMsMC44OTIgMTQ5LjA2MiwwLjk2NSAxNDguODEsMS4xMSBMMTAyLjY0MSwyNy42NjYgTDk3LjIzMSwyNC41NDIgTDk0LjIyNiwxOS4wNjEgQzkzLjMxMywxNy4zOTQgOTEuNTI3LDE2LjM1OSA4OS41NjYsMTYuMzU4IEM4OC41NTUsMTYuMzU4IDg3LjU0NiwxNi42MzIgODYuNjQ5LDE3LjE1IEM4My44NzgsMTguNzUgNzkuNjg3LDIxLjE2OSA3OS4zNzQsMjEuMzQ1IEM3OS4zNTksMjEuMzUzIDc5LjM0NSwyMS4zNjEgNzkuMzMsMjEuMzY5IEM3Ny43OTgsMjIuMjU0IDc2LjA4NCwyMi43MjIgNzQuMzczLDIyLjcyMiBDNzIuMDgxLDIyLjcyMiA2OS45NTksMjEuODkgNjguMzk3LDIwLjM4IEw2OC4xNDUsMjAuMTM1IEM2Ny43MDYsMTkuNjcyIDY3LjMyMywxOS4xNTYgNjcuMDA2LDE4LjYwMSBDNjYuOTg4LDE4LjU1OSA2Ni45NjgsMTguNTE5IDY2Ljk0NiwxOC40NzkgTDY2LjcxOSwxOC4wNjUgQzY2LjY5LDE4LjAxMiA2Ni42NTgsMTcuOTYgNjYuNjI0LDE3LjkxMSBDNjUuNjg2LDE2LjMzNyA2My45NTEsMTUuMzY2IDYyLjA1MywxNS4zNjYgQzYxLjA0MiwxNS4zNjYgNjAuMDMzLDE1LjY0IDU5LjEzNiwxNi4xNTggTDMuMTI1LDQ4LjUwMiBDMC40MjYsNTAuMDYxIC0wLjYxMyw1My40NDIgMC44MTEsNTYuMDQgTDExLjA4OSw3NC43OSBDMTEuMjY2LDc1LjExMyAxMS41MzcsNzUuMzUzIDExLjg1LDc1LjQ5NCBMNTguMjc2LDEwMi4yOTggQzU5LjY3OSwxMDMuMTA4IDYxLjQzMywxMDMuNjMgNjMuMzQ4LDEwMy44MDYgQzYzLjgxMiwxMDMuODQ4IDY0LjI4NSwxMDMuODcgNjQuNzU0LDEwMy44NyBDNjUsMTAzLjg3IDY1LjI0OSwxMDMuODY0IDY1LjQ5NCwxMDMuODUyIEM2NS41NjMsMTAzLjg0OSA2NS42MzIsMTAzLjg0NyA2NS43MDEsMTAzLjg0NyBDNjUuNzY0LDEwMy44NDcgNjUuODI4LDEwMy44NDkgNjUuODksMTAzLjg1MiBDNjUuOTg2LDEwMy44NTYgNjYuMDgsMTAzLjg2MyA2Ni4xNzMsMTAzLjg3NCBDNjYuMjgyLDEwNS40NjcgNjcuMzMyLDEwNy4xOTcgNjguNzAyLDEwNy45ODggTDExMS4xNzQsMTMyLjUxIEMxMTEuNjk4LDEzMi44MTIgMTEyLjIzMiwxMzIuOTY1IDExMi43NjQsMTMyLjk2NSBDMTE0LjI2MSwxMzIuOTY1IDExNS4zNDcsMTMxLjc2NSAxMTUuMzQ3LDEzMC4xMTMgTDExNS4zNDcsMTAzLjU1MSBMMTIyLjQ1OCw5OS40NDYgQzEyMi44MTksOTkuMjM3IDEyMy4wODcsOTguODk4IDEyMy4yMDcsOTguNDk4IEwxMjcuODY1LDgyLjkwNSBDMTMyLjI3OSw4My43MDIgMTM2LjU1Nyw4NC43NTMgMTQwLjYwNyw4Ni4wMzMgTDE0MS4xNCw4Ni44NjIgQzE0MS40NTEsODcuMzQ2IDE0MS45NzcsODcuNjEzIDE0Mi41MTYsODcuNjEzIEMxNDIuNzk0LDg3LjYxMyAxNDMuMDc2LDg3LjU0MiAxNDMuMzMzLDg3LjM5MyBMMTY5Ljg2NSw3Mi4wNzYgTDE5Myw4NS40MzMgQzE5My41MjMsODUuNzM1IDE5NC4wNTgsODUuODg4IDE5NC41OSw4NS44ODggQzE5Ni4wODcsODUuODg4IDE5Ny4xNzMsODQuNjg5IDE5Ny4xNzMsODMuMDM2IEwxOTcuMTczLDI5LjAzNSBDMTk3LjE3MywyOC40NTEgMTk2Ljg2MSwyNy45MTEgMTk2LjM1NSwyNy42MTkgQzE5Ni4zNTUsMjcuNjE5IDE3MS44NDMsMTMuNDY3IDE3MC4zODUsMTIuNjI2IEMxNzAuMTMyLDEyLjQ4IDE2OS44NSwxMi40MDcgMTY5LjU2OCwxMi40MDcgQzE2OS4yODUsMTIuNDA3IDE2OS4wMDIsMTIuNDgxIDE2OC43NDksMTIuNjI3IEMxNjguMTQzLDEyLjk3OCAxNjUuNzU2LDE0LjM1NyAxNjQuNDI0LDE1LjEyNSBMMTU5LjYxNSwxMC44NyBDMTU4Ljc5NiwxMC4xNDUgMTU4LjE1NCw4LjkzNyAxNTguMDU0LDcuOTM0IEMxNTguMDQ1LDcuODM3IDE1OC4wMzQsNy43MzkgMTU4LjAyMSw3LjY0IEMxNTguMDA1LDcuNTIzIDE1Ny45OTgsNy40MSAxNTcuOTk4LDcuMzA0IEwxNTcuOTk4LDYuNDE4IEMxNTcuOTk4LDUuODM0IDE1Ny42ODYsNS4yOTUgMTU3LjE4MSw1LjAwMiBDMTU2LjYyNCw0LjY4IDE1MC40NDIsMS4xMTEgMTUwLjQ0MiwxLjExMSBDMTUwLjE4OSwwLjk2NSAxNDkuOTA3LDAuODkyIDE0OS42MjUsMC44OTIiIGlkPSJGaWxsLTEiIGZpbGw9IiM0NTVBNjQiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNOTYuMDI3LDI1LjYzNiBMMTQyLjYwMyw1Mi41MjcgQzE0My44MDcsNTMuMjIyIDE0NC41ODIsNTQuMTE0IDE0NC44NDUsNTUuMDY4IEwxNDQuODM1LDU1LjA3NSBMNjMuNDYxLDEwMi4wNTcgTDYzLjQ2LDEwMi4wNTcgQzYxLjgwNiwxMDEuOTA1IDYwLjI2MSwxMDEuNDU3IDU5LjA1NywxMDAuNzYyIEwxMi40ODEsNzMuODcxIEw5Ni4wMjcsMjUuNjM2IiBpZD0iRmlsbC0yIiBmaWxsPSIjRkFGQUZBIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTYzLjQ2MSwxMDIuMTc0IEM2My40NTMsMTAyLjE3NCA2My40NDYsMTAyLjE3NCA2My40MzksMTAyLjE3MiBDNjEuNzQ2LDEwMi4wMTYgNjAuMjExLDEwMS41NjMgNTguOTk4LDEwMC44NjMgTDEyLjQyMiw3My45NzMgQzEyLjM4Niw3My45NTIgMTIuMzY0LDczLjkxNCAxMi4zNjQsNzMuODcxIEMxMi4zNjQsNzMuODMgMTIuMzg2LDczLjc5MSAxMi40MjIsNzMuNzcgTDk1Ljk2OCwyNS41MzUgQzk2LjAwNCwyNS41MTQgOTYuMDQ5LDI1LjUxNCA5Ni4wODUsMjUuNTM1IEwxNDIuNjYxLDUyLjQyNiBDMTQzLjg4OCw1My4xMzQgMTQ0LjY4Miw1NC4wMzggMTQ0Ljk1Nyw1NS4wMzcgQzE0NC45Nyw1NS4wODMgMTQ0Ljk1Myw1NS4xMzMgMTQ0LjkxNSw1NS4xNjEgQzE0NC45MTEsNTUuMTY1IDE0NC44OTgsNTUuMTc0IDE0NC44OTQsNTUuMTc3IEw2My41MTksMTAyLjE1OCBDNjMuNTAxLDEwMi4xNjkgNjMuNDgxLDEwMi4xNzQgNjMuNDYxLDEwMi4xNzQgTDYzLjQ2MSwxMDIuMTc0IFogTTEyLjcxNCw3My44NzEgTDU5LjExNSwxMDAuNjYxIEM2MC4yOTMsMTAxLjM0MSA2MS43ODYsMTAxLjc4MiA2My40MzUsMTAxLjkzNyBMMTQ0LjcwNyw1NS4wMTUgQzE0NC40MjgsNTQuMTA4IDE0My42ODIsNTMuMjg1IDE0Mi41NDQsNTIuNjI4IEw5Ni4wMjcsMjUuNzcxIEwxMi43MTQsNzMuODcxIEwxMi43MTQsNzMuODcxIFoiIGlkPSJGaWxsLTMiIGZpbGw9IiM2MDdEOEIiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTQ4LjMyNyw1OC40NzEgQzE0OC4xNDUsNTguNDggMTQ3Ljk2Miw1OC40OCAxNDcuNzgxLDU4LjQ3MiBDMTQ1Ljg4Nyw1OC4zODkgMTQ0LjQ3OSw1Ny40MzQgMTQ0LjYzNiw1Ni4zNCBDMTQ0LjY4OSw1NS45NjcgMTQ0LjY2NCw1NS41OTcgMTQ0LjU2NCw1NS4yMzUgTDYzLjQ2MSwxMDIuMDU3IEM2NC4wODksMTAyLjExNSA2NC43MzMsMTAyLjEzIDY1LjM3OSwxMDIuMDk5IEM2NS41NjEsMTAyLjA5IDY1Ljc0MywxMDIuMDkgNjUuOTI1LDEwMi4wOTggQzY3LjgxOSwxMDIuMTgxIDY5LjIyNywxMDMuMTM2IDY5LjA3LDEwNC4yMyBMMTQ4LjMyNyw1OC40NzEiIGlkPSJGaWxsLTQiIGZpbGw9IiNGRkZGRkYiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNNjkuMDcsMTA0LjM0NyBDNjkuMDQ4LDEwNC4zNDcgNjkuMDI1LDEwNC4zNCA2OS4wMDUsMTA0LjMyNyBDNjguOTY4LDEwNC4zMDEgNjguOTQ4LDEwNC4yNTcgNjguOTU1LDEwNC4yMTMgQzY5LDEwMy44OTYgNjguODk4LDEwMy41NzYgNjguNjU4LDEwMy4yODggQzY4LjE1MywxMDIuNjc4IDY3LjEwMywxMDIuMjY2IDY1LjkyLDEwMi4yMTQgQzY1Ljc0MiwxMDIuMjA2IDY1LjU2MywxMDIuMjA3IDY1LjM4NSwxMDIuMjE1IEM2NC43NDIsMTAyLjI0NiA2NC4wODcsMTAyLjIzMiA2My40NSwxMDIuMTc0IEM2My4zOTksMTAyLjE2OSA2My4zNTgsMTAyLjEzMiA2My4zNDcsMTAyLjA4MiBDNjMuMzM2LDEwMi4wMzMgNjMuMzU4LDEwMS45ODEgNjMuNDAyLDEwMS45NTYgTDE0NC41MDYsNTUuMTM0IEMxNDQuNTM3LDU1LjExNiAxNDQuNTc1LDU1LjExMyAxNDQuNjA5LDU1LjEyNyBDMTQ0LjY0Miw1NS4xNDEgMTQ0LjY2OCw1NS4xNyAxNDQuNjc3LDU1LjIwNCBDMTQ0Ljc4MSw1NS41ODUgMTQ0LjgwNiw1NS45NzIgMTQ0Ljc1MSw1Ni4zNTcgQzE0NC43MDYsNTYuNjczIDE0NC44MDgsNTYuOTk0IDE0NS4wNDcsNTcuMjgyIEMxNDUuNTUzLDU3Ljg5MiAxNDYuNjAyLDU4LjMwMyAxNDcuNzg2LDU4LjM1NSBDMTQ3Ljk2NCw1OC4zNjMgMTQ4LjE0Myw1OC4zNjMgMTQ4LjMyMSw1OC4zNTQgQzE0OC4zNzcsNTguMzUyIDE0OC40MjQsNTguMzg3IDE0OC40MzksNTguNDM4IEMxNDguNDU0LDU4LjQ5IDE0OC40MzIsNTguNTQ1IDE0OC4zODUsNTguNTcyIEw2OS4xMjksMTA0LjMzMSBDNjkuMTExLDEwNC4zNDIgNjkuMDksMTA0LjM0NyA2OS4wNywxMDQuMzQ3IEw2OS4wNywxMDQuMzQ3IFogTTY1LjY2NSwxMDEuOTc1IEM2NS43NTQsMTAxLjk3NSA2NS44NDIsMTAxLjk3NyA2NS45MywxMDEuOTgxIEM2Ny4xOTYsMTAyLjAzNyA2OC4yODMsMTAyLjQ2OSA2OC44MzgsMTAzLjEzOSBDNjkuMDY1LDEwMy40MTMgNjkuMTg4LDEwMy43MTQgNjkuMTk4LDEwNC4wMjEgTDE0Ny44ODMsNTguNTkyIEMxNDcuODQ3LDU4LjU5MiAxNDcuODExLDU4LjU5MSAxNDcuNzc2LDU4LjU4OSBDMTQ2LjUwOSw1OC41MzMgMTQ1LjQyMiw1OC4xIDE0NC44NjcsNTcuNDMxIEMxNDQuNTg1LDU3LjA5MSAxNDQuNDY1LDU2LjcwNyAxNDQuNTIsNTYuMzI0IEMxNDQuNTYzLDU2LjAyMSAxNDQuNTUyLDU1LjcxNiAxNDQuNDg4LDU1LjQxNCBMNjMuODQ2LDEwMS45NyBDNjQuMzUzLDEwMi4wMDIgNjQuODY3LDEwMi4wMDYgNjUuMzc0LDEwMS45ODIgQzY1LjQ3MSwxMDEuOTc3IDY1LjU2OCwxMDEuOTc1IDY1LjY2NSwxMDEuOTc1IEw2NS42NjUsMTAxLjk3NSBaIiBpZD0iRmlsbC01IiBmaWxsPSIjNjA3RDhCIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTIuMjA4LDU1LjEzNCBDMS4yMDcsNTMuMzA3IDEuOTY3LDUwLjkxNyAzLjkwNiw0OS43OTcgTDU5LjkxNywxNy40NTMgQzYxLjg1NiwxNi4zMzMgNjQuMjQxLDE2LjkwNyA2NS4yNDMsMTguNzM0IEw2NS40NzUsMTkuMTQ0IEM2NS44NzIsMTkuODgyIDY2LjM2OCwyMC41NiA2Ni45NDUsMjEuMTY1IEw2Ny4yMjMsMjEuNDM1IEM3MC41NDgsMjQuNjQ5IDc1LjgwNiwyNS4xNTEgODAuMTExLDIyLjY2NSBMODcuNDMsMTguNDQ1IEM4OS4zNywxNy4zMjYgOTEuNzU0LDE3Ljg5OSA5Mi43NTUsMTkuNzI3IEw5Ni4wMDUsMjUuNjU1IEwxMi40ODYsNzMuODg0IEwyLjIwOCw1NS4xMzQgWiIgaWQ9IkZpbGwtNiIgZmlsbD0iI0ZBRkFGQSI+PC9wYXRoPgogICAgICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik0xMi40ODYsNzQuMDAxIEMxMi40NzYsNzQuMDAxIDEyLjQ2NSw3My45OTkgMTIuNDU1LDczLjk5NiBDMTIuNDI0LDczLjk4OCAxMi4zOTksNzMuOTY3IDEyLjM4NCw3My45NCBMMi4xMDYsNTUuMTkgQzEuMDc1LDUzLjMxIDEuODU3LDUwLjg0NSAzLjg0OCw0OS42OTYgTDU5Ljg1OCwxNy4zNTIgQzYwLjUyNSwxNi45NjcgNjEuMjcxLDE2Ljc2NCA2Mi4wMTYsMTYuNzY0IEM2My40MzEsMTYuNzY0IDY0LjY2NiwxNy40NjYgNjUuMzI3LDE4LjY0NiBDNjUuMzM3LDE4LjY1NCA2NS4zNDUsMTguNjYzIDY1LjM1MSwxOC42NzQgTDY1LjU3OCwxOS4wODggQzY1LjU4NCwxOS4xIDY1LjU4OSwxOS4xMTIgNjUuNTkxLDE5LjEyNiBDNjUuOTg1LDE5LjgzOCA2Ni40NjksMjAuNDk3IDY3LjAzLDIxLjA4NSBMNjcuMzA1LDIxLjM1MSBDNjkuMTUxLDIzLjEzNyA3MS42NDksMjQuMTIgNzQuMzM2LDI0LjEyIEM3Ni4zMTMsMjQuMTIgNzguMjksMjMuNTgyIDgwLjA1MywyMi41NjMgQzgwLjA2NCwyMi41NTcgODAuMDc2LDIyLjU1MyA4MC4wODgsMjIuNTUgTDg3LjM3MiwxOC4zNDQgQzg4LjAzOCwxNy45NTkgODguNzg0LDE3Ljc1NiA4OS41MjksMTcuNzU2IEM5MC45NTYsMTcuNzU2IDkyLjIwMSwxOC40NzIgOTIuODU4LDE5LjY3IEw5Ni4xMDcsMjUuNTk5IEM5Ni4xMzgsMjUuNjU0IDk2LjExOCwyNS43MjQgOTYuMDYzLDI1Ljc1NiBMMTIuNTQ1LDczLjk4NSBDMTIuNTI2LDczLjk5NiAxMi41MDYsNzQuMDAxIDEyLjQ4Niw3NC4wMDEgTDEyLjQ4Niw3NC4wMDEgWiBNNjIuMDE2LDE2Ljk5NyBDNjEuMzEyLDE2Ljk5NyA2MC42MDYsMTcuMTkgNTkuOTc1LDE3LjU1NCBMMy45NjUsNDkuODk5IEMyLjA4Myw1MC45ODUgMS4zNDEsNTMuMzA4IDIuMzEsNTUuMDc4IEwxMi41MzEsNzMuNzIzIEw5NS44NDgsMjUuNjExIEw5Mi42NTMsMTkuNzgyIEM5Mi4wMzgsMTguNjYgOTAuODcsMTcuOTkgODkuNTI5LDE3Ljk5IEM4OC44MjUsMTcuOTkgODguMTE5LDE4LjE4MiA4Ny40ODksMTguNTQ3IEw4MC4xNzIsMjIuNzcyIEM4MC4xNjEsMjIuNzc4IDgwLjE0OSwyMi43ODIgODAuMTM3LDIyLjc4NSBDNzguMzQ2LDIzLjgxMSA3Ni4zNDEsMjQuMzU0IDc0LjMzNiwyNC4zNTQgQzcxLjU4OCwyNC4zNTQgNjkuMDMzLDIzLjM0NyA2Ny4xNDIsMjEuNTE5IEw2Ni44NjQsMjEuMjQ5IEM2Ni4yNzcsMjAuNjM0IDY1Ljc3NCwxOS45NDcgNjUuMzY3LDE5LjIwMyBDNjUuMzYsMTkuMTkyIDY1LjM1NiwxOS4xNzkgNjUuMzU0LDE5LjE2NiBMNjUuMTYzLDE4LjgxOSBDNjUuMTU0LDE4LjgxMSA2NS4xNDYsMTguODAxIDY1LjE0LDE4Ljc5IEM2NC41MjUsMTcuNjY3IDYzLjM1NywxNi45OTcgNjIuMDE2LDE2Ljk5NyBMNjIuMDE2LDE2Ljk5NyBaIiBpZD0iRmlsbC03IiBmaWxsPSIjNjA3RDhCIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTQyLjQzNCw0OC44MDggTDQyLjQzNCw0OC44MDggQzM5LjkyNCw0OC44MDcgMzcuNzM3LDQ3LjU1IDM2LjU4Miw0NS40NDMgQzM0Ljc3MSw0Mi4xMzkgMzYuMTQ0LDM3LjgwOSAzOS42NDEsMzUuNzg5IEw1MS45MzIsMjguNjkxIEM1My4xMDMsMjguMDE1IDU0LjQxMywyNy42NTggNTUuNzIxLDI3LjY1OCBDNTguMjMxLDI3LjY1OCA2MC40MTgsMjguOTE2IDYxLjU3MywzMS4wMjMgQzYzLjM4NCwzNC4zMjcgNjIuMDEyLDM4LjY1NyA1OC41MTQsNDAuNjc3IEw0Ni4yMjMsNDcuNzc1IEM0NS4wNTMsNDguNDUgNDMuNzQyLDQ4LjgwOCA0Mi40MzQsNDguODA4IEw0Mi40MzQsNDguODA4IFogTTU1LjcyMSwyOC4xMjUgQzU0LjQ5NSwyOC4xMjUgNTMuMjY1LDI4LjQ2MSA1Mi4xNjYsMjkuMDk2IEwzOS44NzUsMzYuMTk0IEMzNi41OTYsMzguMDg3IDM1LjMwMiw0Mi4xMzYgMzYuOTkyLDQ1LjIxOCBDMzguMDYzLDQ3LjE3MyA0MC4wOTgsNDguMzQgNDIuNDM0LDQ4LjM0IEM0My42NjEsNDguMzQgNDQuODksNDguMDA1IDQ1Ljk5LDQ3LjM3IEw1OC4yODEsNDAuMjcyIEM2MS41NiwzOC4zNzkgNjIuODUzLDM0LjMzIDYxLjE2NCwzMS4yNDggQzYwLjA5MiwyOS4yOTMgNTguMDU4LDI4LjEyNSA1NS43MjEsMjguMTI1IEw1NS43MjEsMjguMTI1IFoiIGlkPSJGaWxsLTgiIGZpbGw9IiM2MDdEOEIiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTQ5LjU4OCwyLjQwNyBDMTQ5LjU4OCwyLjQwNyAxNTUuNzY4LDUuOTc1IDE1Ni4zMjUsNi4yOTcgTDE1Ni4zMjUsNy4xODQgQzE1Ni4zMjUsNy4zNiAxNTYuMzM4LDcuNTQ0IDE1Ni4zNjIsNy43MzMgQzE1Ni4zNzMsNy44MTQgMTU2LjM4Miw3Ljg5NCAxNTYuMzksNy45NzUgQzE1Ni41Myw5LjM5IDE1Ny4zNjMsMTAuOTczIDE1OC40OTUsMTEuOTc0IEwxNjUuODkxLDE4LjUxOSBDMTY2LjA2OCwxOC42NzUgMTY2LjI0OSwxOC44MTQgMTY2LjQzMiwxOC45MzQgQzE2OC4wMTEsMTkuOTc0IDE2OS4zODIsMTkuNCAxNjkuNDk0LDE3LjY1MiBDMTY5LjU0MywxNi44NjggMTY5LjU1MSwxNi4wNTcgMTY5LjUxNywxNS4yMjMgTDE2OS41MTQsMTUuMDYzIEwxNjkuNTE0LDEzLjkxMiBDMTcwLjc4LDE0LjY0MiAxOTUuNTAxLDI4LjkxNSAxOTUuNTAxLDI4LjkxNSBMMTk1LjUwMSw4Mi45MTUgQzE5NS41MDEsODQuMDA1IDE5NC43MzEsODQuNDQ1IDE5My43ODEsODMuODk3IEwxNTEuMzA4LDU5LjM3NCBDMTUwLjM1OCw1OC44MjYgMTQ5LjU4OCw1Ny40OTcgMTQ5LjU4OCw1Ni40MDggTDE0OS41ODgsMjIuMzc1IiBpZD0iRmlsbC05IiBmaWxsPSIjRkFGQUZBIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTE5NC41NTMsODQuMjUgQzE5NC4yOTYsODQuMjUgMTk0LjAxMyw4NC4xNjUgMTkzLjcyMiw4My45OTcgTDE1MS4yNSw1OS40NzYgQzE1MC4yNjksNTguOTA5IDE0OS40NzEsNTcuNTMzIDE0OS40NzEsNTYuNDA4IEwxNDkuNDcxLDIyLjM3NSBMMTQ5LjcwNSwyMi4zNzUgTDE0OS43MDUsNTYuNDA4IEMxNDkuNzA1LDU3LjQ1OSAxNTAuNDUsNTguNzQ0IDE1MS4zNjYsNTkuMjc0IEwxOTMuODM5LDgzLjc5NSBDMTk0LjI2Myw4NC4wNCAxOTQuNjU1LDg0LjA4MyAxOTQuOTQyLDgzLjkxNyBDMTk1LjIyNyw4My43NTMgMTk1LjM4NCw4My4zOTcgMTk1LjM4NCw4Mi45MTUgTDE5NS4zODQsMjguOTgyIEMxOTQuMTAyLDI4LjI0MiAxNzIuMTA0LDE1LjU0MiAxNjkuNjMxLDE0LjExNCBMMTY5LjYzNCwxNS4yMiBDMTY5LjY2OCwxNi4wNTIgMTY5LjY2LDE2Ljg3NCAxNjkuNjEsMTcuNjU5IEMxNjkuNTU2LDE4LjUwMyAxNjkuMjE0LDE5LjEyMyAxNjguNjQ3LDE5LjQwNSBDMTY4LjAyOCwxOS43MTQgMTY3LjE5NywxOS41NzggMTY2LjM2NywxOS4wMzIgQzE2Ni4xODEsMTguOTA5IDE2NS45OTUsMTguNzY2IDE2NS44MTQsMTguNjA2IEwxNTguNDE3LDEyLjA2MiBDMTU3LjI1OSwxMS4wMzYgMTU2LjQxOCw5LjQzNyAxNTYuMjc0LDcuOTg2IEMxNTYuMjY2LDcuOTA3IDE1Ni4yNTcsNy44MjcgMTU2LjI0Nyw3Ljc0OCBDMTU2LjIyMSw3LjU1NSAxNTYuMjA5LDcuMzY1IDE1Ni4yMDksNy4xODQgTDE1Ni4yMDksNi4zNjQgQzE1NS4zNzUsNS44ODMgMTQ5LjUyOSwyLjUwOCAxNDkuNTI5LDIuNTA4IEwxNDkuNjQ2LDIuMzA2IEMxNDkuNjQ2LDIuMzA2IDE1NS44MjcsNS44NzQgMTU2LjM4NCw2LjE5NiBMMTU2LjQ0Miw2LjIzIEwxNTYuNDQyLDcuMTg0IEMxNTYuNDQyLDcuMzU1IDE1Ni40NTQsNy41MzUgMTU2LjQ3OCw3LjcxNyBDMTU2LjQ4OSw3LjggMTU2LjQ5OSw3Ljg4MiAxNTYuNTA3LDcuOTYzIEMxNTYuNjQ1LDkuMzU4IDE1Ny40NTUsMTAuODk4IDE1OC41NzIsMTEuODg2IEwxNjUuOTY5LDE4LjQzMSBDMTY2LjE0MiwxOC41ODQgMTY2LjMxOSwxOC43MiAxNjYuNDk2LDE4LjgzNyBDMTY3LjI1NCwxOS4zMzYgMTY4LDE5LjQ2NyAxNjguNTQzLDE5LjE5NiBDMTY5LjAzMywxOC45NTMgMTY5LjMyOSwxOC40MDEgMTY5LjM3NywxNy42NDUgQzE2OS40MjcsMTYuODY3IDE2OS40MzQsMTYuMDU0IDE2OS40MDEsMTUuMjI4IEwxNjkuMzk3LDE1LjA2NSBMMTY5LjM5NywxMy43MSBMMTY5LjU3MiwxMy44MSBDMTcwLjgzOSwxNC41NDEgMTk1LjU1OSwyOC44MTQgMTk1LjU1OSwyOC44MTQgTDE5NS42MTgsMjguODQ3IEwxOTUuNjE4LDgyLjkxNSBDMTk1LjYxOCw4My40ODQgMTk1LjQyLDgzLjkxMSAxOTUuMDU5LDg0LjExOSBDMTk0LjkwOCw4NC4yMDYgMTk0LjczNyw4NC4yNSAxOTQuNTUzLDg0LjI1IiBpZD0iRmlsbC0xMCIgZmlsbD0iIzYwN0Q4QiI+PC9wYXRoPgogICAgICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik0xNDUuNjg1LDU2LjE2MSBMMTY5LjgsNzAuMDgzIEwxNDMuODIyLDg1LjA4MSBMMTQyLjM2LDg0Ljc3NCBDMTM1LjgyNiw4Mi42MDQgMTI4LjczMiw4MS4wNDYgMTIxLjM0MSw4MC4xNTggQzExNi45NzYsNzkuNjM0IDExMi42NzgsODEuMjU0IDExMS43NDMsODMuNzc4IEMxMTEuNTA2LDg0LjQxNCAxMTEuNTAzLDg1LjA3MSAxMTEuNzMyLDg1LjcwNiBDMTEzLjI3LDg5Ljk3MyAxMTUuOTY4LDk0LjA2OSAxMTkuNzI3LDk3Ljg0MSBMMTIwLjI1OSw5OC42ODYgQzEyMC4yNiw5OC42ODUgOTQuMjgyLDExMy42ODMgOTQuMjgyLDExMy42ODMgTDcwLjE2Nyw5OS43NjEgTDE0NS42ODUsNTYuMTYxIiBpZD0iRmlsbC0xMSIgZmlsbD0iI0ZGRkZGRiI+PC9wYXRoPgogICAgICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik05NC4yODIsMTEzLjgxOCBMOTQuMjIzLDExMy43ODUgTDY5LjkzMyw5OS43NjEgTDcwLjEwOCw5OS42NiBMMTQ1LjY4NSw1Ni4wMjYgTDE0NS43NDMsNTYuMDU5IEwxNzAuMDMzLDcwLjA4MyBMMTQzLjg0Miw4NS4yMDUgTDE0My43OTcsODUuMTk1IEMxNDMuNzcyLDg1LjE5IDE0Mi4zMzYsODQuODg4IDE0Mi4zMzYsODQuODg4IEMxMzUuNzg3LDgyLjcxNCAxMjguNzIzLDgxLjE2MyAxMjEuMzI3LDgwLjI3NCBDMTIwLjc4OCw4MC4yMDkgMTIwLjIzNiw4MC4xNzcgMTE5LjY4OSw4MC4xNzcgQzExNS45MzEsODAuMTc3IDExMi42MzUsODEuNzA4IDExMS44NTIsODMuODE5IEMxMTEuNjI0LDg0LjQzMiAxMTEuNjIxLDg1LjA1MyAxMTEuODQyLDg1LjY2NyBDMTEzLjM3Nyw4OS45MjUgMTE2LjA1OCw5My45OTMgMTE5LjgxLDk3Ljc1OCBMMTE5LjgyNiw5Ny43NzkgTDEyMC4zNTIsOTguNjE0IEMxMjAuMzU0LDk4LjYxNyAxMjAuMzU2LDk4LjYyIDEyMC4zNTgsOTguNjI0IEwxMjAuNDIyLDk4LjcyNiBMMTIwLjMxNyw5OC43ODcgQzEyMC4yNjQsOTguODE4IDk0LjU5OSwxMTMuNjM1IDk0LjM0LDExMy43ODUgTDk0LjI4MiwxMTMuODE4IEw5NC4yODIsMTEzLjgxOCBaIE03MC40MDEsOTkuNzYxIEw5NC4yODIsMTEzLjU0OSBMMTE5LjA4NCw5OS4yMjkgQzExOS42Myw5OC45MTQgMTE5LjkzLDk4Ljc0IDEyMC4xMDEsOTguNjU0IEwxMTkuNjM1LDk3LjkxNCBDMTE1Ljg2NCw5NC4xMjcgMTEzLjE2OCw5MC4wMzMgMTExLjYyMiw4NS43NDYgQzExMS4zODIsODUuMDc5IDExMS4zODYsODQuNDA0IDExMS42MzMsODMuNzM4IEMxMTIuNDQ4LDgxLjUzOSAxMTUuODM2LDc5Ljk0MyAxMTkuNjg5LDc5Ljk0MyBDMTIwLjI0Niw3OS45NDMgMTIwLjgwNiw3OS45NzYgMTIxLjM1NSw4MC4wNDIgQzEyOC43NjcsODAuOTMzIDEzNS44NDYsODIuNDg3IDE0Mi4zOTYsODQuNjYzIEMxNDMuMjMyLDg0LjgzOCAxNDMuNjExLDg0LjkxNyAxNDMuNzg2LDg0Ljk2NyBMMTY5LjU2Niw3MC4wODMgTDE0NS42ODUsNTYuMjk1IEw3MC40MDEsOTkuNzYxIEw3MC40MDEsOTkuNzYxIFoiIGlkPSJGaWxsLTEyIiBmaWxsPSIjNjA3RDhCIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTE2Ny4yMywxOC45NzkgTDE2Ny4yMyw2OS44NSBMMTM5LjkwOSw4NS42MjMgTDEzMy40NDgsNzEuNDU2IEMxMzIuNTM4LDY5LjQ2IDEzMC4wMiw2OS43MTggMTI3LjgyNCw3Mi4wMyBDMTI2Ljc2OSw3My4xNCAxMjUuOTMxLDc0LjU4NSAxMjUuNDk0LDc2LjA0OCBMMTE5LjAzNCw5Ny42NzYgTDkxLjcxMiwxMTMuNDUgTDkxLjcxMiw2Mi41NzkgTDE2Ny4yMywxOC45NzkiIGlkPSJGaWxsLTEzIiBmaWxsPSIjRkZGRkZGIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTkxLjcxMiwxMTMuNTY3IEM5MS42OTIsMTEzLjU2NyA5MS42NzIsMTEzLjU2MSA5MS42NTMsMTEzLjU1MSBDOTEuNjE4LDExMy41MyA5MS41OTUsMTEzLjQ5MiA5MS41OTUsMTEzLjQ1IEw5MS41OTUsNjIuNTc5IEM5MS41OTUsNjIuNTM3IDkxLjYxOCw2Mi40OTkgOTEuNjUzLDYyLjQ3OCBMMTY3LjE3MiwxOC44NzggQzE2Ny4yMDgsMTguODU3IDE2Ny4yNTIsMTguODU3IDE2Ny4yODgsMTguODc4IEMxNjcuMzI0LDE4Ljg5OSAxNjcuMzQ3LDE4LjkzNyAxNjcuMzQ3LDE4Ljk3OSBMMTY3LjM0Nyw2OS44NSBDMTY3LjM0Nyw2OS44OTEgMTY3LjMyNCw2OS45MyAxNjcuMjg4LDY5Ljk1IEwxMzkuOTY3LDg1LjcyNSBDMTM5LjkzOSw4NS43NDEgMTM5LjkwNSw4NS43NDUgMTM5Ljg3Myw4NS43MzUgQzEzOS44NDIsODUuNzI1IDEzOS44MTYsODUuNzAyIDEzOS44MDIsODUuNjcyIEwxMzMuMzQyLDcxLjUwNCBDMTMyLjk2Nyw3MC42ODIgMTMyLjI4LDcwLjIyOSAxMzEuNDA4LDcwLjIyOSBDMTMwLjMxOSw3MC4yMjkgMTI5LjA0NCw3MC45MTUgMTI3LjkwOCw3Mi4xMSBDMTI2Ljg3NCw3My4yIDEyNi4wMzQsNzQuNjQ3IDEyNS42MDYsNzYuMDgyIEwxMTkuMTQ2LDk3LjcwOSBDMTE5LjEzNyw5Ny43MzggMTE5LjExOCw5Ny43NjIgMTE5LjA5Miw5Ny43NzcgTDkxLjc3LDExMy41NTEgQzkxLjc1MiwxMTMuNTYxIDkxLjczMiwxMTMuNTY3IDkxLjcxMiwxMTMuNTY3IEw5MS43MTIsMTEzLjU2NyBaIE05MS44MjksNjIuNjQ3IEw5MS44MjksMTEzLjI0OCBMMTE4LjkzNSw5Ny41OTggTDEyNS4zODIsNzYuMDE1IEMxMjUuODI3LDc0LjUyNSAxMjYuNjY0LDczLjA4MSAxMjcuNzM5LDcxLjk1IEMxMjguOTE5LDcwLjcwOCAxMzAuMjU2LDY5Ljk5NiAxMzEuNDA4LDY5Ljk5NiBDMTMyLjM3Nyw2OS45OTYgMTMzLjEzOSw3MC40OTcgMTMzLjU1NCw3MS40MDcgTDEzOS45NjEsODUuNDU4IEwxNjcuMTEzLDY5Ljc4MiBMMTY3LjExMywxOS4xODEgTDkxLjgyOSw2Mi42NDcgTDkxLjgyOSw2Mi42NDcgWiIgaWQ9IkZpbGwtMTQiIGZpbGw9IiM2MDdEOEIiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTY4LjU0MywxOS4yMTMgTDE2OC41NDMsNzAuMDgzIEwxNDEuMjIxLDg1Ljg1NyBMMTM0Ljc2MSw3MS42ODkgQzEzMy44NTEsNjkuNjk0IDEzMS4zMzMsNjkuOTUxIDEyOS4xMzcsNzIuMjYzIEMxMjguMDgyLDczLjM3NCAxMjcuMjQ0LDc0LjgxOSAxMjYuODA3LDc2LjI4MiBMMTIwLjM0Niw5Ny45MDkgTDkzLjAyNSwxMTMuNjgzIEw5My4wMjUsNjIuODEzIEwxNjguNTQzLDE5LjIxMyIgaWQ9IkZpbGwtMTUiIGZpbGw9IiNGRkZGRkYiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNOTMuMDI1LDExMy44IEM5My4wMDUsMTEzLjggOTIuOTg0LDExMy43OTUgOTIuOTY2LDExMy43ODUgQzkyLjkzMSwxMTMuNzY0IDkyLjkwOCwxMTMuNzI1IDkyLjkwOCwxMTMuNjg0IEw5Mi45MDgsNjIuODEzIEM5Mi45MDgsNjIuNzcxIDkyLjkzMSw2Mi43MzMgOTIuOTY2LDYyLjcxMiBMMTY4LjQ4NCwxOS4xMTIgQzE2OC41MiwxOS4wOSAxNjguNTY1LDE5LjA5IDE2OC42MDEsMTkuMTEyIEMxNjguNjM3LDE5LjEzMiAxNjguNjYsMTkuMTcxIDE2OC42NiwxOS4yMTIgTDE2OC42Niw3MC4wODMgQzE2OC42Niw3MC4xMjUgMTY4LjYzNyw3MC4xNjQgMTY4LjYwMSw3MC4xODQgTDE0MS4yOCw4NS45NTggQzE0MS4yNTEsODUuOTc1IDE0MS4yMTcsODUuOTc5IDE0MS4xODYsODUuOTY4IEMxNDEuMTU0LDg1Ljk1OCAxNDEuMTI5LDg1LjkzNiAxNDEuMTE1LDg1LjkwNiBMMTM0LjY1NSw3MS43MzggQzEzNC4yOCw3MC45MTUgMTMzLjU5Myw3MC40NjMgMTMyLjcyLDcwLjQ2MyBDMTMxLjYzMiw3MC40NjMgMTMwLjM1Nyw3MS4xNDggMTI5LjIyMSw3Mi4zNDQgQzEyOC4xODYsNzMuNDMzIDEyNy4zNDcsNzQuODgxIDEyNi45MTksNzYuMzE1IEwxMjAuNDU4LDk3Ljk0MyBDMTIwLjQ1LDk3Ljk3MiAxMjAuNDMxLDk3Ljk5NiAxMjAuNDA1LDk4LjAxIEw5My4wODMsMTEzLjc4NSBDOTMuMDY1LDExMy43OTUgOTMuMDQ1LDExMy44IDkzLjAyNSwxMTMuOCBMOTMuMDI1LDExMy44IFogTTkzLjE0Miw2Mi44ODEgTDkzLjE0MiwxMTMuNDgxIEwxMjAuMjQ4LDk3LjgzMiBMMTI2LjY5NSw3Ni4yNDggQzEyNy4xNCw3NC43NTggMTI3Ljk3Nyw3My4zMTUgMTI5LjA1Miw3Mi4xODMgQzEzMC4yMzEsNzAuOTQyIDEzMS41NjgsNzAuMjI5IDEzMi43Miw3MC4yMjkgQzEzMy42ODksNzAuMjI5IDEzNC40NTIsNzAuNzMxIDEzNC44NjcsNzEuNjQxIEwxNDEuMjc0LDg1LjY5MiBMMTY4LjQyNiw3MC4wMTYgTDE2OC40MjYsMTkuNDE1IEw5My4xNDIsNjIuODgxIEw5My4xNDIsNjIuODgxIFoiIGlkPSJGaWxsLTE2IiBmaWxsPSIjNjA3RDhCIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTE2OS44LDcwLjA4MyBMMTQyLjQ3OCw4NS44NTcgTDEzNi4wMTgsNzEuNjg5IEMxMzUuMTA4LDY5LjY5NCAxMzIuNTksNjkuOTUxIDEzMC4zOTMsNzIuMjYzIEMxMjkuMzM5LDczLjM3NCAxMjguNSw3NC44MTkgMTI4LjA2NCw3Ni4yODIgTDEyMS42MDMsOTcuOTA5IEw5NC4yODIsMTEzLjY4MyBMOTQuMjgyLDYyLjgxMyBMMTY5LjgsMTkuMjEzIEwxNjkuOCw3MC4wODMgWiIgaWQ9IkZpbGwtMTciIGZpbGw9IiNGQUZBRkEiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNOTQuMjgyLDExMy45MTcgQzk0LjI0MSwxMTMuOTE3IDk0LjIwMSwxMTMuOTA3IDk0LjE2NSwxMTMuODg2IEM5NC4wOTMsMTEzLjg0NSA5NC4wNDgsMTEzLjc2NyA5NC4wNDgsMTEzLjY4NCBMOTQuMDQ4LDYyLjgxMyBDOTQuMDQ4LDYyLjczIDk0LjA5Myw2Mi42NTIgOTQuMTY1LDYyLjYxMSBMMTY5LjY4MywxOS4wMSBDMTY5Ljc1NSwxOC45NjkgMTY5Ljg0NCwxOC45NjkgMTY5LjkxNywxOS4wMSBDMTY5Ljk4OSwxOS4wNTIgMTcwLjAzMywxOS4xMjkgMTcwLjAzMywxOS4yMTIgTDE3MC4wMzMsNzAuMDgzIEMxNzAuMDMzLDcwLjE2NiAxNjkuOTg5LDcwLjI0NCAxNjkuOTE3LDcwLjI4NSBMMTQyLjU5NSw4Ni4wNiBDMTQyLjUzOCw4Ni4wOTIgMTQyLjQ2OSw4Ni4xIDE0Mi40MDcsODYuMDggQzE0Mi4zNDQsODYuMDYgMTQyLjI5Myw4Ni4wMTQgMTQyLjI2Niw4NS45NTQgTDEzNS44MDUsNzEuNzg2IEMxMzUuNDQ1LDcwLjk5NyAxMzQuODEzLDcwLjU4IDEzMy45NzcsNzAuNTggQzEzMi45MjEsNzAuNTggMTMxLjY3Niw3MS4yNTIgMTMwLjU2Miw3Mi40MjQgQzEyOS41NCw3My41MDEgMTI4LjcxMSw3NC45MzEgMTI4LjI4Nyw3Ni4zNDggTDEyMS44MjcsOTcuOTc2IEMxMjEuODEsOTguMDM0IDEyMS43NzEsOTguMDgyIDEyMS43Miw5OC4xMTIgTDk0LjM5OCwxMTMuODg2IEM5NC4zNjIsMTEzLjkwNyA5NC4zMjIsMTEzLjkxNyA5NC4yODIsMTEzLjkxNyBMOTQuMjgyLDExMy45MTcgWiBNOTQuNTE1LDYyLjk0OCBMOTQuNTE1LDExMy4yNzkgTDEyMS40MDYsOTcuNzU0IEwxMjcuODQsNzYuMjE1IEMxMjguMjksNzQuNzA4IDEyOS4xMzcsNzMuMjQ3IDEzMC4yMjQsNzIuMTAzIEMxMzEuNDI1LDcwLjgzOCAxMzIuNzkzLDcwLjExMiAxMzMuOTc3LDcwLjExMiBDMTM0Ljk5NSw3MC4xMTIgMTM1Ljc5NSw3MC42MzggMTM2LjIzLDcxLjU5MiBMMTQyLjU4NCw4NS41MjYgTDE2OS41NjYsNjkuOTQ4IEwxNjkuNTY2LDE5LjYxNyBMOTQuNTE1LDYyLjk0OCBMOTQuNTE1LDYyLjk0OCBaIiBpZD0iRmlsbC0xOCIgZmlsbD0iIzYwN0Q4QiI+PC9wYXRoPgogICAgICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik0xMDkuODk0LDkyLjk0MyBMMTA5Ljg5NCw5Mi45NDMgQzEwOC4xMiw5Mi45NDMgMTA2LjY1Myw5Mi4yMTggMTA1LjY1LDkwLjgyMyBDMTA1LjU4Myw5MC43MzEgMTA1LjU5Myw5MC42MSAxMDUuNjczLDkwLjUyOSBDMTA1Ljc1Myw5MC40NDggMTA1Ljg4LDkwLjQ0IDEwNS45NzQsOTAuNTA2IEMxMDYuNzU0LDkxLjA1MyAxMDcuNjc5LDkxLjMzMyAxMDguNzI0LDkxLjMzMyBDMTEwLjA0Nyw5MS4zMzMgMTExLjQ3OCw5MC44OTQgMTEyLjk4LDkwLjAyNyBDMTE4LjI5MSw4Ni45NiAxMjIuNjExLDc5LjUwOSAxMjIuNjExLDczLjQxNiBDMTIyLjYxMSw3MS40ODkgMTIyLjE2OSw2OS44NTYgMTIxLjMzMyw2OC42OTIgQzEyMS4yNjYsNjguNiAxMjEuMjc2LDY4LjQ3MyAxMjEuMzU2LDY4LjM5MiBDMTIxLjQzNiw2OC4zMTEgMTIxLjU2Myw2OC4yOTkgMTIxLjY1Niw2OC4zNjUgQzEyMy4zMjcsNjkuNTM3IDEyNC4yNDcsNzEuNzQ2IDEyNC4yNDcsNzQuNTg0IEMxMjQuMjQ3LDgwLjgyNiAxMTkuODIxLDg4LjQ0NyAxMTQuMzgyLDkxLjU4NyBDMTEyLjgwOCw5Mi40OTUgMTExLjI5OCw5Mi45NDMgMTA5Ljg5NCw5Mi45NDMgTDEwOS44OTQsOTIuOTQzIFogTTEwNi45MjUsOTEuNDAxIEMxMDcuNzM4LDkyLjA1MiAxMDguNzQ1LDkyLjI3OCAxMDkuODkzLDkyLjI3OCBMMTA5Ljg5NCw5Mi4yNzggQzExMS4yMTUsOTIuMjc4IDExMi42NDcsOTEuOTUxIDExNC4xNDgsOTEuMDg0IEMxMTkuNDU5LDg4LjAxNyAxMjMuNzgsODAuNjIxIDEyMy43OCw3NC41MjggQzEyMy43OCw3Mi41NDkgMTIzLjMxNyw3MC45MjkgMTIyLjQ1NCw2OS43NjcgQzEyMi44NjUsNzAuODAyIDEyMy4wNzksNzIuMDQyIDEyMy4wNzksNzMuNDAyIEMxMjMuMDc5LDc5LjY0NSAxMTguNjUzLDg3LjI4NSAxMTMuMjE0LDkwLjQyNSBDMTExLjY0LDkxLjMzNCAxMTAuMTMsOTEuNzQyIDEwOC43MjQsOTEuNzQyIEMxMDguMDgzLDkxLjc0MiAxMDcuNDgxLDkxLjU5MyAxMDYuOTI1LDkxLjQwMSBMMTA2LjkyNSw5MS40MDEgWiIgaWQ9IkZpbGwtMTkiIGZpbGw9IiM2MDdEOEIiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTEzLjA5Nyw5MC4yMyBDMTE4LjQ4MSw4Ny4xMjIgMTIyLjg0NSw3OS41OTQgMTIyLjg0NSw3My40MTYgQzEyMi44NDUsNzEuMzY1IDEyMi4zNjIsNjkuNzI0IDEyMS41MjIsNjguNTU2IEMxMTkuNzM4LDY3LjMwNCAxMTcuMTQ4LDY3LjM2MiAxMTQuMjY1LDY5LjAyNiBDMTA4Ljg4MSw3Mi4xMzQgMTA0LjUxNyw3OS42NjIgMTA0LjUxNyw4NS44NCBDMTA0LjUxNyw4Ny44OTEgMTA1LDg5LjUzMiAxMDUuODQsOTAuNyBDMTA3LjYyNCw5MS45NTIgMTEwLjIxNCw5MS44OTQgMTEzLjA5Nyw5MC4yMyIgaWQ9IkZpbGwtMjAiIGZpbGw9IiNGQUZBRkEiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTA4LjcyNCw5MS42MTQgTDEwOC43MjQsOTEuNjE0IEMxMDcuNTgyLDkxLjYxNCAxMDYuNTY2LDkxLjQwMSAxMDUuNzA1LDkwLjc5NyBDMTA1LjY4NCw5MC43ODMgMTA1LjY2NSw5MC44MTEgMTA1LjY1LDkwLjc5IEMxMDQuNzU2LDg5LjU0NiAxMDQuMjgzLDg3Ljg0MiAxMDQuMjgzLDg1LjgxNyBDMTA0LjI4Myw3OS41NzUgMTA4LjcwOSw3MS45NTMgMTE0LjE0OCw2OC44MTIgQzExNS43MjIsNjcuOTA0IDExNy4yMzIsNjcuNDQ5IDExOC42MzgsNjcuNDQ5IEMxMTkuNzgsNjcuNDQ5IDEyMC43OTYsNjcuNzU4IDEyMS42NTYsNjguMzYyIEMxMjEuNjc4LDY4LjM3NyAxMjEuNjk3LDY4LjM5NyAxMjEuNzEyLDY4LjQxOCBDMTIyLjYwNiw2OS42NjIgMTIzLjA3OSw3MS4zOSAxMjMuMDc5LDczLjQxNSBDMTIzLjA3OSw3OS42NTggMTE4LjY1Myw4Ny4xOTggMTEzLjIxNCw5MC4zMzggQzExMS42NCw5MS4yNDcgMTEwLjEzLDkxLjYxNCAxMDguNzI0LDkxLjYxNCBMMTA4LjcyNCw5MS42MTQgWiBNMTA2LjAwNiw5MC41MDUgQzEwNi43OCw5MS4wMzcgMTA3LjY5NCw5MS4yODEgMTA4LjcyNCw5MS4yODEgQzExMC4wNDcsOTEuMjgxIDExMS40NzgsOTAuODY4IDExMi45OCw5MC4wMDEgQzExOC4yOTEsODYuOTM1IDEyMi42MTEsNzkuNDk2IDEyMi42MTEsNzMuNDAzIEMxMjIuNjExLDcxLjQ5NCAxMjIuMTc3LDY5Ljg4IDEyMS4zNTYsNjguNzE4IEMxMjAuNTgyLDY4LjE4NSAxMTkuNjY4LDY3LjkxOSAxMTguNjM4LDY3LjkxOSBDMTE3LjMxNSw2Ny45MTkgMTE1Ljg4Myw2OC4zNiAxMTQuMzgyLDY5LjIyNyBDMTA5LjA3MSw3Mi4yOTMgMTA0Ljc1MSw3OS43MzMgMTA0Ljc1MSw4NS44MjYgQzEwNC43NTEsODcuNzM1IDEwNS4xODUsODkuMzQzIDEwNi4wMDYsOTAuNTA1IEwxMDYuMDA2LDkwLjUwNSBaIiBpZD0iRmlsbC0yMSIgZmlsbD0iIzYwN0Q4QiI+PC9wYXRoPgogICAgICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik0xNDkuMzE4LDcuMjYyIEwxMzkuMzM0LDE2LjE0IEwxNTUuMjI3LDI3LjE3MSBMMTYwLjgxNiwyMS4wNTkgTDE0OS4zMTgsNy4yNjIiIGlkPSJGaWxsLTIyIiBmaWxsPSIjRkFGQUZBIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTE2OS42NzYsMTMuODQgTDE1OS45MjgsMTkuNDY3IEMxNTYuMjg2LDIxLjU3IDE1MC40LDIxLjU4IDE0Ni43ODEsMTkuNDkxIEMxNDMuMTYxLDE3LjQwMiAxNDMuMTgsMTQuMDAzIDE0Ni44MjIsMTEuOSBMMTU2LjMxNyw2LjI5MiBMMTQ5LjU4OCwyLjQwNyBMNjcuNzUyLDQ5LjQ3OCBMMTEzLjY3NSw3NS45OTIgTDExNi43NTYsNzQuMjEzIEMxMTcuMzg3LDczLjg0OCAxMTcuNjI1LDczLjMxNSAxMTcuMzc0LDcyLjgyMyBDMTE1LjAxNyw2OC4xOTEgMTE0Ljc4MSw2My4yNzcgMTE2LjY5MSw1OC41NjEgQzEyMi4zMjksNDQuNjQxIDE0MS4yLDMzLjc0NiAxNjUuMzA5LDMwLjQ5MSBDMTczLjQ3OCwyOS4zODggMTgxLjk4OSwyOS41MjQgMTkwLjAxMywzMC44ODUgQzE5MC44NjUsMzEuMDMgMTkxLjc4OSwzMC44OTMgMTkyLjQyLDMwLjUyOCBMMTk1LjUwMSwyOC43NSBMMTY5LjY3NiwxMy44NCIgaWQ9IkZpbGwtMjMiIGZpbGw9IiNGQUZBRkEiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTEzLjY3NSw3Ni40NTkgQzExMy41OTQsNzYuNDU5IDExMy41MTQsNzYuNDM4IDExMy40NDIsNzYuMzk3IEw2Ny41MTgsNDkuODgyIEM2Ny4zNzQsNDkuNzk5IDY3LjI4NCw0OS42NDUgNjcuMjg1LDQ5LjQ3OCBDNjcuMjg1LDQ5LjMxMSA2Ny4zNzQsNDkuMTU3IDY3LjUxOSw0OS4wNzMgTDE0OS4zNTUsMi4wMDIgQzE0OS40OTksMS45MTkgMTQ5LjY3NywxLjkxOSAxNDkuODIxLDIuMDAyIEwxNTYuNTUsNS44ODcgQzE1Ni43NzQsNi4wMTcgMTU2Ljg1LDYuMzAyIDE1Ni43MjIsNi41MjYgQzE1Ni41OTIsNi43NDkgMTU2LjMwNyw2LjgyNiAxNTYuMDgzLDYuNjk2IEwxNDkuNTg3LDIuOTQ2IEw2OC42ODcsNDkuNDc5IEwxMTMuNjc1LDc1LjQ1MiBMMTE2LjUyMyw3My44MDggQzExNi43MTUsNzMuNjk3IDExNy4xNDMsNzMuMzk5IDExNi45NTgsNzMuMDM1IEMxMTQuNTQyLDY4LjI4NyAxMTQuMyw2My4yMjEgMTE2LjI1OCw1OC4zODUgQzExOS4wNjQsNTEuNDU4IDEyNS4xNDMsNDUuMTQzIDEzMy44NCw0MC4xMjIgQzE0Mi40OTcsMzUuMTI0IDE1My4zNTgsMzEuNjMzIDE2NS4yNDcsMzAuMDI4IEMxNzMuNDQ1LDI4LjkyMSAxODIuMDM3LDI5LjA1OCAxOTAuMDkxLDMwLjQyNSBDMTkwLjgzLDMwLjU1IDE5MS42NTIsMzAuNDMyIDE5Mi4xODYsMzAuMTI0IEwxOTQuNTY3LDI4Ljc1IEwxNjkuNDQyLDE0LjI0NCBDMTY5LjIxOSwxNC4xMTUgMTY5LjE0MiwxMy44MjkgMTY5LjI3MSwxMy42MDYgQzE2OS40LDEzLjM4MiAxNjkuNjg1LDEzLjMwNiAxNjkuOTA5LDEzLjQzNSBMMTk1LjczNCwyOC4zNDUgQzE5NS44NzksMjguNDI4IDE5NS45NjgsMjguNTgzIDE5NS45NjgsMjguNzUgQzE5NS45NjgsMjguOTE2IDE5NS44NzksMjkuMDcxIDE5NS43MzQsMjkuMTU0IEwxOTIuNjUzLDMwLjkzMyBDMTkxLjkzMiwzMS4zNSAxOTAuODksMzEuNTA4IDE4OS45MzUsMzEuMzQ2IEMxODEuOTcyLDI5Ljk5NSAxNzMuNDc4LDI5Ljg2IDE2NS4zNzIsMzAuOTU0IEMxNTMuNjAyLDMyLjU0MyAxNDIuODYsMzUuOTkzIDEzNC4zMDcsNDAuOTMxIEMxMjUuNzkzLDQ1Ljg0NyAxMTkuODUxLDUyLjAwNCAxMTcuMTI0LDU4LjczNiBDMTE1LjI3LDYzLjMxNCAxMTUuNTAxLDY4LjExMiAxMTcuNzksNzIuNjExIEMxMTguMTYsNzMuMzM2IDExNy44NDUsNzQuMTI0IDExNi45OSw3NC42MTcgTDExMy45MDksNzYuMzk3IEMxMTMuODM2LDc2LjQzOCAxMTMuNzU2LDc2LjQ1OSAxMTMuNjc1LDc2LjQ1OSIgaWQ9IkZpbGwtMjQiIGZpbGw9IiM0NTVBNjQiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTUzLjMxNiwyMS4yNzkgQzE1MC45MDMsMjEuMjc5IDE0OC40OTUsMjAuNzUxIDE0Ni42NjQsMTkuNjkzIEMxNDQuODQ2LDE4LjY0NCAxNDMuODQ0LDE3LjIzMiAxNDMuODQ0LDE1LjcxOCBDMTQzLjg0NCwxNC4xOTEgMTQ0Ljg2LDEyLjc2MyAxNDYuNzA1LDExLjY5OCBMMTU2LjE5OCw2LjA5MSBDMTU2LjMwOSw2LjAyNSAxNTYuNDUyLDYuMDYyIDE1Ni41MTgsNi4xNzMgQzE1Ni41ODMsNi4yODQgMTU2LjU0Nyw2LjQyNyAxNTYuNDM2LDYuNDkzIEwxNDYuOTQsMTIuMTAyIEMxNDUuMjQ0LDEzLjA4MSAxNDQuMzEyLDE0LjM2NSAxNDQuMzEyLDE1LjcxOCBDMTQ0LjMxMiwxNy4wNTggMTQ1LjIzLDE4LjMyNiAxNDYuODk3LDE5LjI4OSBDMTUwLjQ0NiwyMS4zMzggMTU2LjI0LDIxLjMyNyAxNTkuODExLDE5LjI2NSBMMTY5LjU1OSwxMy42MzcgQzE2OS42NywxMy41NzMgMTY5LjgxMywxMy42MTEgMTY5Ljg3OCwxMy43MjMgQzE2OS45NDMsMTMuODM0IDE2OS45MDQsMTMuOTc3IDE2OS43OTMsMTQuMDQyIEwxNjAuMDQ1LDE5LjY3IEMxNTguMTg3LDIwLjc0MiAxNTUuNzQ5LDIxLjI3OSAxNTMuMzE2LDIxLjI3OSIgaWQ9IkZpbGwtMjUiIGZpbGw9IiM2MDdEOEIiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTEzLjY3NSw3NS45OTIgTDY3Ljc2Miw0OS40ODQiIGlkPSJGaWxsLTI2IiBmaWxsPSIjNDU1QTY0Ij48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTExMy42NzUsNzYuMzQyIEMxMTMuNjE1LDc2LjM0MiAxMTMuNTU1LDc2LjMyNyAxMTMuNSw3Ni4yOTUgTDY3LjU4Nyw0OS43ODcgQzY3LjQxOSw0OS42OSA2Ny4zNjIsNDkuNDc2IDY3LjQ1OSw0OS4zMDkgQzY3LjU1Niw0OS4xNDEgNjcuNzcsNDkuMDgzIDY3LjkzNyw0OS4xOCBMMTEzLjg1LDc1LjY4OCBDMTE0LjAxOCw3NS43ODUgMTE0LjA3NSw3NiAxMTMuOTc4LDc2LjE2NyBDMTEzLjkxNCw3Ni4yNzkgMTEzLjc5Niw3Ni4zNDIgMTEzLjY3NSw3Ni4zNDIiIGlkPSJGaWxsLTI3IiBmaWxsPSIjNDU1QTY0Ij48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTY3Ljc2Miw0OS40ODQgTDY3Ljc2MiwxMDMuNDg1IEM2Ny43NjIsMTA0LjU3NSA2OC41MzIsMTA1LjkwMyA2OS40ODIsMTA2LjQ1MiBMMTExLjk1NSwxMzAuOTczIEMxMTIuOTA1LDEzMS41MjIgMTEzLjY3NSwxMzEuMDgzIDExMy42NzUsMTI5Ljk5MyBMMTEzLjY3NSw3NS45OTIiIGlkPSJGaWxsLTI4IiBmaWxsPSIjRkFGQUZBIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTExMi43MjcsMTMxLjU2MSBDMTEyLjQzLDEzMS41NjEgMTEyLjEwNywxMzEuNDY2IDExMS43OCwxMzEuMjc2IEw2OS4zMDcsMTA2Ljc1NSBDNjguMjQ0LDEwNi4xNDIgNjcuNDEyLDEwNC43MDUgNjcuNDEyLDEwMy40ODUgTDY3LjQxMiw0OS40ODQgQzY3LjQxMiw0OS4yOSA2Ny41NjksNDkuMTM0IDY3Ljc2Miw0OS4xMzQgQzY3Ljk1Niw0OS4xMzQgNjguMTEzLDQ5LjI5IDY4LjExMyw0OS40ODQgTDY4LjExMywxMDMuNDg1IEM2OC4xMTMsMTA0LjQ0NSA2OC44MiwxMDUuNjY1IDY5LjY1NywxMDYuMTQ4IEwxMTIuMTMsMTMwLjY3IEMxMTIuNDc0LDEzMC44NjggMTEyLjc5MSwxMzAuOTEzIDExMywxMzAuNzkyIEMxMTMuMjA2LDEzMC42NzMgMTEzLjMyNSwxMzAuMzgxIDExMy4zMjUsMTI5Ljk5MyBMMTEzLjMyNSw3NS45OTIgQzExMy4zMjUsNzUuNzk4IDExMy40ODIsNzUuNjQxIDExMy42NzUsNzUuNjQxIEMxMTMuODY5LDc1LjY0MSAxMTQuMDI1LDc1Ljc5OCAxMTQuMDI1LDc1Ljk5MiBMMTE0LjAyNSwxMjkuOTkzIEMxMTQuMDI1LDEzMC42NDggMTEzLjc4NiwxMzEuMTQ3IDExMy4zNSwxMzEuMzk5IEMxMTMuMTYyLDEzMS41MDcgMTEyLjk1MiwxMzEuNTYxIDExMi43MjcsMTMxLjU2MSIgaWQ9IkZpbGwtMjkiIGZpbGw9IiM0NTVBNjQiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTEyLjg2LDQwLjUxMiBDMTEyLjg2LDQwLjUxMiAxMTIuODYsNDAuNTEyIDExMi44NTksNDAuNTEyIEMxMTAuNTQxLDQwLjUxMiAxMDguMzYsMzkuOTkgMTA2LjcxNywzOS4wNDEgQzEwNS4wMTIsMzguMDU3IDEwNC4wNzQsMzYuNzI2IDEwNC4wNzQsMzUuMjkyIEMxMDQuMDc0LDMzLjg0NyAxMDUuMDI2LDMyLjUwMSAxMDYuNzU0LDMxLjUwNCBMMTE4Ljc5NSwyNC41NTEgQzEyMC40NjMsMjMuNTg5IDEyMi42NjksMjMuMDU4IDEyNS4wMDcsMjMuMDU4IEMxMjcuMzI1LDIzLjA1OCAxMjkuNTA2LDIzLjU4MSAxMzEuMTUsMjQuNTMgQzEzMi44NTQsMjUuNTE0IDEzMy43OTMsMjYuODQ1IDEzMy43OTMsMjguMjc4IEMxMzMuNzkzLDI5LjcyNCAxMzIuODQxLDMxLjA2OSAxMzEuMTEzLDMyLjA2NyBMMTE5LjA3MSwzOS4wMTkgQzExNy40MDMsMzkuOTgyIDExNS4xOTcsNDAuNTEyIDExMi44Niw0MC41MTIgTDExMi44Niw0MC41MTIgWiBNMTI1LjAwNywyMy43NTkgQzEyMi43OSwyMy43NTkgMTIwLjcwOSwyNC4yNTYgMTE5LjE0NiwyNS4xNTggTDEwNy4xMDQsMzIuMTEgQzEwNS42MDIsMzIuOTc4IDEwNC43NzQsMzQuMTA4IDEwNC43NzQsMzUuMjkyIEMxMDQuNzc0LDM2LjQ2NSAxMDUuNTg5LDM3LjU4MSAxMDcuMDY3LDM4LjQzNCBDMTA4LjYwNSwzOS4zMjMgMTEwLjY2MywzOS44MTIgMTEyLjg1OSwzOS44MTIgTDExMi44NiwzOS44MTIgQzExNS4wNzYsMzkuODEyIDExNy4xNTgsMzkuMzE1IDExOC43MjEsMzguNDEzIEwxMzAuNzYyLDMxLjQ2IEMxMzIuMjY0LDMwLjU5MyAxMzMuMDkyLDI5LjQ2MyAxMzMuMDkyLDI4LjI3OCBDMTMzLjA5MiwyNy4xMDYgMTMyLjI3OCwyNS45OSAxMzAuOCwyNS4xMzYgQzEyOS4yNjEsMjQuMjQ4IDEyNy4yMDQsMjMuNzU5IDEyNS4wMDcsMjMuNzU5IEwxMjUuMDA3LDIzLjc1OSBaIiBpZD0iRmlsbC0zMCIgZmlsbD0iIzYwN0Q4QiI+PC9wYXRoPgogICAgICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik0xNjUuNjMsMTYuMjE5IEwxNTkuODk2LDE5LjUzIEMxNTYuNzI5LDIxLjM1OCAxNTEuNjEsMjEuMzY3IDE0OC40NjMsMTkuNTUgQzE0NS4zMTYsMTcuNzMzIDE0NS4zMzIsMTQuNzc4IDE0OC40OTksMTIuOTQ5IEwxNTQuMjMzLDkuNjM5IEwxNjUuNjMsMTYuMjE5IiBpZD0iRmlsbC0zMSIgZmlsbD0iI0ZBRkFGQSI+PC9wYXRoPgogICAgICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik0xNTQuMjMzLDEwLjQ0OCBMMTY0LjIyOCwxNi4yMTkgTDE1OS41NDYsMTguOTIzIEMxNTguMTEyLDE5Ljc1IDE1Ni4xOTQsMjAuMjA2IDE1NC4xNDcsMjAuMjA2IEMxNTIuMTE4LDIwLjIwNiAxNTAuMjI0LDE5Ljc1NyAxNDguODE0LDE4Ljk0MyBDMTQ3LjUyNCwxOC4xOTkgMTQ2LjgxNCwxNy4yNDkgMTQ2LjgxNCwxNi4yNjkgQzE0Ni44MTQsMTUuMjc4IDE0Ny41MzcsMTQuMzE0IDE0OC44NSwxMy41NTYgTDE1NC4yMzMsMTAuNDQ4IE0xNTQuMjMzLDkuNjM5IEwxNDguNDk5LDEyLjk0OSBDMTQ1LjMzMiwxNC43NzggMTQ1LjMxNiwxNy43MzMgMTQ4LjQ2MywxOS41NSBDMTUwLjAzMSwyMC40NTUgMTUyLjA4NiwyMC45MDcgMTU0LjE0NywyMC45MDcgQzE1Ni4yMjQsMjAuOTA3IDE1OC4zMDYsMjAuNDQ3IDE1OS44OTYsMTkuNTMgTDE2NS42MywxNi4yMTkgTDE1NC4yMzMsOS42MzkiIGlkPSJGaWxsLTMyIiBmaWxsPSIjNjA3RDhCIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTE0NS40NDUsNzIuNjY3IEwxNDUuNDQ1LDcyLjY2NyBDMTQzLjY3Miw3Mi42NjcgMTQyLjIwNCw3MS44MTcgMTQxLjIwMiw3MC40MjIgQzE0MS4xMzUsNzAuMzMgMTQxLjE0NSw3MC4xNDcgMTQxLjIyNSw3MC4wNjYgQzE0MS4zMDUsNjkuOTg1IDE0MS40MzIsNjkuOTQ2IDE0MS41MjUsNzAuMDExIEMxNDIuMzA2LDcwLjU1OSAxNDMuMjMxLDcwLjgyMyAxNDQuMjc2LDcwLjgyMiBDMTQ1LjU5OCw3MC44MjIgMTQ3LjAzLDcwLjM3NiAxNDguNTMyLDY5LjUwOSBDMTUzLjg0Miw2Ni40NDMgMTU4LjE2Myw1OC45ODcgMTU4LjE2Myw1Mi44OTQgQzE1OC4xNjMsNTAuOTY3IDE1Ny43MjEsNDkuMzMyIDE1Ni44ODQsNDguMTY4IEMxNTYuODE4LDQ4LjA3NiAxNTYuODI4LDQ3Ljk0OCAxNTYuOTA4LDQ3Ljg2NyBDMTU2Ljk4OCw0Ny43ODYgMTU3LjExNCw0Ny43NzQgMTU3LjIwOCw0Ny44NCBDMTU4Ljg3OCw0OS4wMTIgMTU5Ljc5OCw1MS4yMiAxNTkuNzk4LDU0LjA1OSBDMTU5Ljc5OCw2MC4zMDEgMTU1LjM3Myw2OC4wNDYgMTQ5LjkzMyw3MS4xODYgQzE0OC4zNiw3Mi4wOTQgMTQ2Ljg1LDcyLjY2NyAxNDUuNDQ1LDcyLjY2NyBMMTQ1LjQ0NSw3Mi42NjcgWiBNMTQyLjQ3Niw3MSBDMTQzLjI5LDcxLjY1MSAxNDQuMjk2LDcyLjAwMiAxNDUuNDQ1LDcyLjAwMiBDMTQ2Ljc2Nyw3Mi4wMDIgMTQ4LjE5OCw3MS41NSAxNDkuNyw3MC42ODIgQzE1NS4wMSw2Ny42MTcgMTU5LjMzMSw2MC4xNTkgMTU5LjMzMSw1NC4wNjUgQzE1OS4zMzEsNTIuMDg1IDE1OC44NjgsNTAuNDM1IDE1OC4wMDYsNDkuMjcyIEMxNTguNDE3LDUwLjMwNyAxNTguNjMsNTEuNTMyIDE1OC42Myw1Mi44OTIgQzE1OC42Myw1OS4xMzQgMTU0LjIwNSw2Ni43NjcgMTQ4Ljc2NSw2OS45MDcgQzE0Ny4xOTIsNzAuODE2IDE0NS42ODEsNzEuMjgzIDE0NC4yNzYsNzEuMjgzIEMxNDMuNjM0LDcxLjI4MyAxNDMuMDMzLDcxLjE5MiAxNDIuNDc2LDcxIEwxNDIuNDc2LDcxIFoiIGlkPSJGaWxsLTMzIiBmaWxsPSIjNjA3RDhCIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTE0OC42NDgsNjkuNzA0IEMxNTQuMDMyLDY2LjU5NiAxNTguMzk2LDU5LjA2OCAxNTguMzk2LDUyLjg5MSBDMTU4LjM5Niw1MC44MzkgMTU3LjkxMyw0OS4xOTggMTU3LjA3NCw0OC4wMyBDMTU1LjI4OSw0Ni43NzggMTUyLjY5OSw0Ni44MzYgMTQ5LjgxNiw0OC41MDEgQzE0NC40MzMsNTEuNjA5IDE0MC4wNjgsNTkuMTM3IDE0MC4wNjgsNjUuMzE0IEMxNDAuMDY4LDY3LjM2NSAxNDAuNTUyLDY5LjAwNiAxNDEuMzkxLDcwLjE3NCBDMTQzLjE3Niw3MS40MjcgMTQ1Ljc2NSw3MS4zNjkgMTQ4LjY0OCw2OS43MDQiIGlkPSJGaWxsLTM0IiBmaWxsPSIjRkFGQUZBIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTE0NC4yNzYsNzEuMjc2IEwxNDQuMjc2LDcxLjI3NiBDMTQzLjEzMyw3MS4yNzYgMTQyLjExOCw3MC45NjkgMTQxLjI1Nyw3MC4zNjUgQzE0MS4yMzYsNzAuMzUxIDE0MS4yMTcsNzAuMzMyIDE0MS4yMDIsNzAuMzExIEMxNDAuMzA3LDY5LjA2NyAxMzkuODM1LDY3LjMzOSAxMzkuODM1LDY1LjMxNCBDMTM5LjgzNSw1OS4wNzMgMTQ0LjI2LDUxLjQzOSAxNDkuNyw0OC4yOTggQzE1MS4yNzMsNDcuMzkgMTUyLjc4NCw0Ni45MjkgMTU0LjE4OSw0Ni45MjkgQzE1NS4zMzIsNDYuOTI5IDE1Ni4zNDcsNDcuMjM2IDE1Ny4yMDgsNDcuODM5IEMxNTcuMjI5LDQ3Ljg1NCAxNTcuMjQ4LDQ3Ljg3MyAxNTcuMjYzLDQ3Ljg5NCBDMTU4LjE1Nyw0OS4xMzggMTU4LjYzLDUwLjg2NSAxNTguNjMsNTIuODkxIEMxNTguNjMsNTkuMTMyIDE1NC4yMDUsNjYuNzY2IDE0OC43NjUsNjkuOTA3IEMxNDcuMTkyLDcwLjgxNSAxNDUuNjgxLDcxLjI3NiAxNDQuMjc2LDcxLjI3NiBMMTQ0LjI3Niw3MS4yNzYgWiBNMTQxLjU1OCw3MC4xMDQgQzE0Mi4zMzEsNzAuNjM3IDE0My4yNDUsNzEuMDA1IDE0NC4yNzYsNzEuMDA1IEMxNDUuNTk4LDcxLjAwNSAxNDcuMDMsNzAuNDY3IDE0OC41MzIsNjkuNiBDMTUzLjg0Miw2Ni41MzQgMTU4LjE2Myw1OS4wMzMgMTU4LjE2Myw1Mi45MzkgQzE1OC4xNjMsNTEuMDMxIDE1Ny43MjksNDkuMzg1IDE1Ni45MDcsNDguMjIzIEMxNTYuMTMzLDQ3LjY5MSAxNTUuMjE5LDQ3LjQwOSAxNTQuMTg5LDQ3LjQwOSBDMTUyLjg2Nyw0Ny40MDkgMTUxLjQzNSw0Ny44NDIgMTQ5LjkzMyw0OC43MDkgQzE0NC42MjMsNTEuNzc1IDE0MC4zMDIsNTkuMjczIDE0MC4zMDIsNjUuMzY2IEMxNDAuMzAyLDY3LjI3NiAxNDAuNzM2LDY4Ljk0MiAxNDEuNTU4LDcwLjEwNCBMMTQxLjU1OCw3MC4xMDQgWiIgaWQ9IkZpbGwtMzUiIGZpbGw9IiM2MDdEOEIiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTUwLjcyLDY1LjM2MSBMMTUwLjM1Nyw2NS4wNjYgQzE1MS4xNDcsNjQuMDkyIDE1MS44NjksNjMuMDQgMTUyLjUwNSw2MS45MzggQzE1My4zMTMsNjAuNTM5IDE1My45NzgsNTkuMDY3IDE1NC40ODIsNTcuNTYzIEwxNTQuOTI1LDU3LjcxMiBDMTU0LjQxMiw1OS4yNDUgMTUzLjczMyw2MC43NDUgMTUyLjkxLDYyLjE3MiBDMTUyLjI2Miw2My4yOTUgMTUxLjUyNSw2NC4zNjggMTUwLjcyLDY1LjM2MSIgaWQ9IkZpbGwtMzYiIGZpbGw9IiM2MDdEOEIiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTE1LjkxNyw4NC41MTQgTDExNS41NTQsODQuMjIgQzExNi4zNDQsODMuMjQ1IDExNy4wNjYsODIuMTk0IDExNy43MDIsODEuMDkyIEMxMTguNTEsNzkuNjkyIDExOS4xNzUsNzguMjIgMTE5LjY3OCw3Ni43MTcgTDEyMC4xMjEsNzYuODY1IEMxMTkuNjA4LDc4LjM5OCAxMTguOTMsNzkuODk5IDExOC4xMDYsODEuMzI2IEMxMTcuNDU4LDgyLjQ0OCAxMTYuNzIyLDgzLjUyMSAxMTUuOTE3LDg0LjUxNCIgaWQ9IkZpbGwtMzciIGZpbGw9IiM2MDdEOEIiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTE0LDEzMC40NzYgTDExNCwxMzAuMDA4IEwxMTQsNzYuMDUyIEwxMTQsNzUuNTg0IEwxMTQsNzYuMDUyIEwxMTQsMTMwLjAwOCBMMTE0LDEzMC40NzYiIGlkPSJGaWxsLTM4IiBmaWxsPSIjNjA3RDhCIj48L3BhdGg+CiAgICAgICAgICAgICAgICA8L2c+CiAgICAgICAgICAgICAgICA8ZyBpZD0iSW1wb3J0ZWQtTGF5ZXJzLUNvcHkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDYyLjAwMDAwMCwgMC4wMDAwMDApIiBza2V0Y2g6dHlwZT0iTVNTaGFwZUdyb3VwIj4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTkuODIyLDM3LjQ3NCBDMTkuODM5LDM3LjMzOSAxOS43NDcsMzcuMTk0IDE5LjU1NSwzNy4wODIgQzE5LjIyOCwzNi44OTQgMTguNzI5LDM2Ljg3MiAxOC40NDYsMzcuMDM3IEwxMi40MzQsNDAuNTA4IEMxMi4zMDMsNDAuNTg0IDEyLjI0LDQwLjY4NiAxMi4yNDMsNDAuNzkzIEMxMi4yNDUsNDAuOTI1IDEyLjI0NSw0MS4yNTQgMTIuMjQ1LDQxLjM3MSBMMTIuMjQ1LDQxLjQxNCBMMTIuMjM4LDQxLjU0MiBDOC4xNDgsNDMuODg3IDUuNjQ3LDQ1LjMyMSA1LjY0Nyw0NS4zMjEgQzUuNjQ2LDQ1LjMyMSAzLjU3LDQ2LjM2NyAyLjg2LDUwLjUxMyBDMi44Niw1MC41MTMgMS45NDgsNTcuNDc0IDEuOTYyLDcwLjI1OCBDMS45NzcsODIuODI4IDIuNTY4LDg3LjMyOCAzLjEyOSw5MS42MDkgQzMuMzQ5LDkzLjI5MyA2LjEzLDkzLjczNCA2LjEzLDkzLjczNCBDNi40NjEsOTMuNzc0IDYuODI4LDkzLjcwNyA3LjIxLDkzLjQ4NiBMODIuNDgzLDQ5LjkzNSBDODQuMjkxLDQ4Ljg2NiA4NS4xNSw0Ni4yMTYgODUuNTM5LDQzLjY1MSBDODYuNzUyLDM1LjY2MSA4Ny4yMTQsMTAuNjczIDg1LjI2NCwzLjc3MyBDODUuMDY4LDMuMDggODQuNzU0LDIuNjkgODQuMzk2LDIuNDkxIEw4Mi4zMSwxLjcwMSBDODEuNTgzLDEuNzI5IDgwLjg5NCwyLjE2OCA4MC43NzYsMi4yMzYgQzgwLjYzNiwyLjMxNyA0MS44MDcsMjQuNTg1IDIwLjAzMiwzNy4wNzIgTDE5LjgyMiwzNy40NzQiIGlkPSJGaWxsLTEiIGZpbGw9IiNGRkZGRkYiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNODIuMzExLDEuNzAxIEw4NC4zOTYsMi40OTEgQzg0Ljc1NCwyLjY5IDg1LjA2OCwzLjA4IDg1LjI2NCwzLjc3MyBDODcuMjEzLDEwLjY3MyA4Ni43NTEsMzUuNjYgODUuNTM5LDQzLjY1MSBDODUuMTQ5LDQ2LjIxNiA4NC4yOSw0OC44NjYgODIuNDgzLDQ5LjkzNSBMNy4yMSw5My40ODYgQzYuODk3LDkzLjY2NyA2LjU5NSw5My43NDQgNi4zMTQsOTMuNzQ0IEw2LjEzMSw5My43MzMgQzYuMTMxLDkzLjczNCAzLjM0OSw5My4yOTMgMy4xMjgsOTEuNjA5IEMyLjU2OCw4Ny4zMjcgMS45NzcsODIuODI4IDEuOTYzLDcwLjI1OCBDMS45NDgsNTcuNDc0IDIuODYsNTAuNTEzIDIuODYsNTAuNTEzIEMzLjU3LDQ2LjM2NyA1LjY0Nyw0NS4zMjEgNS42NDcsNDUuMzIxIEM1LjY0Nyw0NS4zMjEgOC4xNDgsNDMuODg3IDEyLjIzOCw0MS41NDIgTDEyLjI0NSw0MS40MTQgTDEyLjI0NSw0MS4zNzEgQzEyLjI0NSw0MS4yNTQgMTIuMjQ1LDQwLjkyNSAxMi4yNDMsNDAuNzkzIEMxMi4yNCw0MC42ODYgMTIuMzAyLDQwLjU4MyAxMi40MzQsNDAuNTA4IEwxOC40NDYsMzcuMDM2IEMxOC41NzQsMzYuOTYyIDE4Ljc0NiwzNi45MjYgMTguOTI3LDM2LjkyNiBDMTkuMTQ1LDM2LjkyNiAxOS4zNzYsMzYuOTc5IDE5LjU1NCwzNy4wODIgQzE5Ljc0NywzNy4xOTQgMTkuODM5LDM3LjM0IDE5LjgyMiwzNy40NzQgTDIwLjAzMywzNy4wNzIgQzQxLjgwNiwyNC41ODUgODAuNjM2LDIuMzE4IDgwLjc3NywyLjIzNiBDODAuODk0LDIuMTY4IDgxLjU4MywxLjcyOSA4Mi4zMTEsMS43MDEgTTgyLjMxMSwwLjcwNCBMODIuMjcyLDAuNzA1IEM4MS42NTQsMC43MjggODAuOTg5LDAuOTQ5IDgwLjI5OCwxLjM2MSBMODAuMjc3LDEuMzczIEM4MC4xMjksMS40NTggNTkuNzY4LDEzLjEzNSAxOS43NTgsMzYuMDc5IEMxOS41LDM1Ljk4MSAxOS4yMTQsMzUuOTI5IDE4LjkyNywzNS45MjkgQzE4LjU2MiwzNS45MjkgMTguMjIzLDM2LjAxMyAxNy45NDcsMzYuMTczIEwxMS45MzUsMzkuNjQ0IEMxMS40OTMsMzkuODk5IDExLjIzNiw0MC4zMzQgMTEuMjQ2LDQwLjgxIEwxMS4yNDcsNDAuOTYgTDUuMTY3LDQ0LjQ0NyBDNC43OTQsNDQuNjQ2IDIuNjI1LDQ1Ljk3OCAxLjg3Nyw1MC4zNDUgTDEuODcxLDUwLjM4NCBDMS44NjIsNTAuNDU0IDAuOTUxLDU3LjU1NyAwLjk2NSw3MC4yNTkgQzAuOTc5LDgyLjg3OSAxLjU2OCw4Ny4zNzUgMi4xMzcsOTEuNzI0IEwyLjEzOSw5MS43MzkgQzIuNDQ3LDk0LjA5NCA1LjYxNCw5NC42NjIgNS45NzUsOTQuNzE5IEw2LjAwOSw5NC43MjMgQzYuMTEsOTQuNzM2IDYuMjEzLDk0Ljc0MiA2LjMxNCw5NC43NDIgQzYuNzksOTQuNzQyIDcuMjYsOTQuNjEgNy43MSw5NC4zNSBMODIuOTgzLDUwLjc5OCBDODQuNzk0LDQ5LjcyNyA4NS45ODIsNDcuMzc1IDg2LjUyNSw0My44MDEgQzg3LjcxMSwzNS45ODcgODguMjU5LDEwLjcwNSA4Ni4yMjQsMy41MDIgQzg1Ljk3MSwyLjYwOSA4NS41MiwxLjk3NSA4NC44ODEsMS42MiBMODQuNzQ5LDEuNTU4IEw4Mi42NjQsMC43NjkgQzgyLjU1MSwwLjcyNSA4Mi40MzEsMC43MDQgODIuMzExLDAuNzA0IiBpZD0iRmlsbC0yIiBmaWxsPSIjNDU1QTY0Ij48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTY2LjI2NywxMS41NjUgTDY3Ljc2MiwxMS45OTkgTDExLjQyMyw0NC4zMjUiIGlkPSJGaWxsLTMiIGZpbGw9IiNGRkZGRkYiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTIuMjAyLDkwLjU0NSBDMTIuMDI5LDkwLjU0NSAxMS44NjIsOTAuNDU1IDExLjc2OSw5MC4yOTUgQzExLjYzMiw5MC4wNTcgMTEuNzEzLDg5Ljc1MiAxMS45NTIsODkuNjE0IEwzMC4zODksNzguOTY5IEMzMC42MjgsNzguODMxIDMwLjkzMyw3OC45MTMgMzEuMDcxLDc5LjE1MiBDMzEuMjA4LDc5LjM5IDMxLjEyNyw3OS42OTYgMzAuODg4LDc5LjgzMyBMMTIuNDUxLDkwLjQ3OCBMMTIuMjAyLDkwLjU0NSIgaWQ9IkZpbGwtNCIgZmlsbD0iIzYwN0Q4QiI+PC9wYXRoPgogICAgICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik0xMy43NjQsNDIuNjU0IEwxMy42NTYsNDIuNTkyIEwxMy43MDIsNDIuNDIxIEwxOC44MzcsMzkuNDU3IEwxOS4wMDcsMzkuNTAyIEwxOC45NjIsMzkuNjczIEwxMy44MjcsNDIuNjM3IEwxMy43NjQsNDIuNjU0IiBpZD0iRmlsbC01IiBmaWxsPSIjNjA3RDhCIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTguNTIsOTAuMzc1IEw4LjUyLDQ2LjQyMSBMOC41ODMsNDYuMzg1IEw3NS44NCw3LjU1NCBMNzUuODQsNTEuNTA4IEw3NS43NzgsNTEuNTQ0IEw4LjUyLDkwLjM3NSBMOC41Miw5MC4zNzUgWiBNOC43Nyw0Ni41NjQgTDguNzcsODkuOTQ0IEw3NS41OTEsNTEuMzY1IEw3NS41OTEsNy45ODUgTDguNzcsNDYuNTY0IEw4Ljc3LDQ2LjU2NCBaIiBpZD0iRmlsbC02IiBmaWxsPSIjNjA3RDhCIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTI0Ljk4Niw4My4xODIgQzI0Ljc1Niw4My4zMzEgMjQuMzc0LDgzLjU2NiAyNC4xMzcsODMuNzA1IEwxMi42MzIsOTAuNDA2IEMxMi4zOTUsOTAuNTQ1IDEyLjQyNiw5MC42NTggMTIuNyw5MC42NTggTDEzLjI2NSw5MC42NTggQzEzLjU0LDkwLjY1OCAxMy45NTgsOTAuNTQ1IDE0LjE5NSw5MC40MDYgTDI1LjcsODMuNzA1IEMyNS45MzcsODMuNTY2IDI2LjEyOCw4My40NTIgMjYuMTI1LDgzLjQ0OSBDMjYuMTIyLDgzLjQ0NyAyNi4xMTksODMuMjIgMjYuMTE5LDgyLjk0NiBDMjYuMTE5LDgyLjY3MiAyNS45MzEsODIuNTY5IDI1LjcwMSw4Mi43MTkgTDI0Ljk4Niw4My4xODIiIGlkPSJGaWxsLTciIGZpbGw9IiM2MDdEOEIiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTMuMjY2LDkwLjc4MiBMMTIuNyw5MC43ODIgQzEyLjUsOTAuNzgyIDEyLjM4NCw5MC43MjYgMTIuMzU0LDkwLjYxNiBDMTIuMzI0LDkwLjUwNiAxMi4zOTcsOTAuMzk5IDEyLjU2OSw5MC4yOTkgTDI0LjA3NCw4My41OTcgQzI0LjMxLDgzLjQ1OSAyNC42ODksODMuMjI2IDI0LjkxOCw4My4wNzggTDI1LjYzMyw4Mi42MTQgQzI1LjcyMyw4Mi41NTUgMjUuODEzLDgyLjUyNSAyNS44OTksODIuNTI1IEMyNi4wNzEsODIuNTI1IDI2LjI0NCw4Mi42NTUgMjYuMjQ0LDgyLjk0NiBDMjYuMjQ0LDgzLjE2IDI2LjI0NSw4My4zMDkgMjYuMjQ3LDgzLjM4MyBMMjYuMjUzLDgzLjM4NyBMMjYuMjQ5LDgzLjQ1NiBDMjYuMjQ2LDgzLjUzMSAyNi4yNDYsODMuNTMxIDI1Ljc2Myw4My44MTIgTDE0LjI1OCw5MC41MTQgQzE0LDkwLjY2NSAxMy41NjQsOTAuNzgyIDEzLjI2Niw5MC43ODIgTDEzLjI2Niw5MC43ODIgWiBNMTIuNjY2LDkwLjUzMiBMMTIuNyw5MC41MzMgTDEzLjI2Niw5MC41MzMgQzEzLjUxOCw5MC41MzMgMTMuOTE1LDkwLjQyNSAxNC4xMzIsOTAuMjk5IEwyNS42MzcsODMuNTk3IEMyNS44MDUsODMuNDk5IDI1LjkzMSw4My40MjQgMjUuOTk4LDgzLjM4MyBDMjUuOTk0LDgzLjI5OSAyNS45OTQsODMuMTY1IDI1Ljk5NCw4Mi45NDYgTDI1Ljg5OSw4Mi43NzUgTDI1Ljc2OCw4Mi44MjQgTDI1LjA1NCw4My4yODcgQzI0LjgyMiw4My40MzcgMjQuNDM4LDgzLjY3MyAyNC4yLDgzLjgxMiBMMTIuNjk1LDkwLjUxNCBMMTIuNjY2LDkwLjUzMiBMMTIuNjY2LDkwLjUzMiBaIiBpZD0iRmlsbC04IiBmaWxsPSIjNjA3RDhCIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTEzLjI2Niw4OS44NzEgTDEyLjcsODkuODcxIEMxMi41LDg5Ljg3MSAxMi4zODQsODkuODE1IDEyLjM1NCw4OS43MDUgQzEyLjMyNCw4OS41OTUgMTIuMzk3LDg5LjQ4OCAxMi41NjksODkuMzg4IEwyNC4wNzQsODIuNjg2IEMyNC4zMzIsODIuNTM1IDI0Ljc2OCw4Mi40MTggMjUuMDY3LDgyLjQxOCBMMjUuNjMyLDgyLjQxOCBDMjUuODMyLDgyLjQxOCAyNS45NDgsODIuNDc0IDI1Ljk3OCw4Mi41ODQgQzI2LjAwOCw4Mi42OTQgMjUuOTM1LDgyLjgwMSAyNS43NjMsODIuOTAxIEwxNC4yNTgsODkuNjAzIEMxNCw4OS43NTQgMTMuNTY0LDg5Ljg3MSAxMy4yNjYsODkuODcxIEwxMy4yNjYsODkuODcxIFogTTEyLjY2Niw4OS42MjEgTDEyLjcsODkuNjIyIEwxMy4yNjYsODkuNjIyIEMxMy41MTgsODkuNjIyIDEzLjkxNSw4OS41MTUgMTQuMTMyLDg5LjM4OCBMMjUuNjM3LDgyLjY4NiBMMjUuNjY3LDgyLjY2OCBMMjUuNjMyLDgyLjY2NyBMMjUuMDY3LDgyLjY2NyBDMjQuODE1LDgyLjY2NyAyNC40MTgsODIuNzc1IDI0LjIsODIuOTAxIEwxMi42OTUsODkuNjAzIEwxMi42NjYsODkuNjIxIEwxMi42NjYsODkuNjIxIFoiIGlkPSJGaWxsLTkiIGZpbGw9IiM2MDdEOEIiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTIuMzcsOTAuODAxIEwxMi4zNyw4OS41NTQgTDEyLjM3LDkwLjgwMSIgaWQ9IkZpbGwtMTAiIGZpbGw9IiM2MDdEOEIiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNNi4xMyw5My45MDEgQzUuMzc5LDkzLjgwOCA0LjgxNiw5My4xNjQgNC42OTEsOTIuNTI1IEMzLjg2LDg4LjI4NyAzLjU0LDgzLjc0MyAzLjUyNiw3MS4xNzMgQzMuNTExLDU4LjM4OSA0LjQyMyw1MS40MjggNC40MjMsNTEuNDI4IEM1LjEzNCw0Ny4yODIgNy4yMSw0Ni4yMzYgNy4yMSw0Ni4yMzYgQzcuMjEsNDYuMjM2IDgxLjY2NywzLjI1IDgyLjA2OSwzLjAxNyBDODIuMjkyLDIuODg4IDg0LjU1NiwxLjQzMyA4NS4yNjQsMy45NCBDODcuMjE0LDEwLjg0IDg2Ljc1MiwzNS44MjcgODUuNTM5LDQzLjgxOCBDODUuMTUsNDYuMzgzIDg0LjI5MSw0OS4wMzMgODIuNDgzLDUwLjEwMSBMNy4yMSw5My42NTMgQzYuODI4LDkzLjg3NCA2LjQ2MSw5My45NDEgNi4xMyw5My45MDEgQzYuMTMsOTMuOTAxIDMuMzQ5LDkzLjQ2IDMuMTI5LDkxLjc3NiBDMi41NjgsODcuNDk1IDEuOTc3LDgyLjk5NSAxLjk2Miw3MC40MjUgQzEuOTQ4LDU3LjY0MSAyLjg2LDUwLjY4IDIuODYsNTAuNjggQzMuNTcsNDYuNTM0IDUuNjQ3LDQ1LjQ4OSA1LjY0Nyw0NS40ODkgQzUuNjQ2LDQ1LjQ4OSA4LjA2NSw0NC4wOTIgMTIuMjQ1LDQxLjY3OSBMMTMuMTE2LDQxLjU2IEwxOS43MTUsMzcuNzMgTDE5Ljc2MSwzNy4yNjkgTDYuMTMsOTMuOTAxIiBpZD0iRmlsbC0xMSIgZmlsbD0iI0ZBRkFGQSI+PC9wYXRoPgogICAgICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik02LjMxNyw5NC4xNjEgTDYuMTAyLDk0LjE0OCBMNi4xMDEsOTQuMTQ4IEw1Ljg1Nyw5NC4xMDEgQzUuMTM4LDkzLjk0NSAzLjA4NSw5My4zNjUgMi44ODEsOTEuODA5IEMyLjMxMyw4Ny40NjkgMS43MjcsODIuOTk2IDEuNzEzLDcwLjQyNSBDMS42OTksNTcuNzcxIDIuNjA0LDUwLjcxOCAyLjYxMyw1MC42NDggQzMuMzM4LDQ2LjQxNyA1LjQ0NSw0NS4zMSA1LjUzNSw0NS4yNjYgTDEyLjE2Myw0MS40MzkgTDEzLjAzMyw0MS4zMiBMMTkuNDc5LDM3LjU3OCBMMTkuNTEzLDM3LjI0NCBDMTkuNTI2LDM3LjEwNyAxOS42NDcsMzcuMDA4IDE5Ljc4NiwzNy4wMjEgQzE5LjkyMiwzNy4wMzQgMjAuMDIzLDM3LjE1NiAyMC4wMDksMzcuMjkzIEwxOS45NSwzNy44ODIgTDEzLjE5OCw0MS44MDEgTDEyLjMyOCw0MS45MTkgTDUuNzcyLDQ1LjcwNCBDNS43NDEsNDUuNzIgMy43ODIsNDYuNzcyIDMuMTA2LDUwLjcyMiBDMy4wOTksNTAuNzgyIDIuMTk4LDU3LjgwOCAyLjIxMiw3MC40MjQgQzIuMjI2LDgyLjk2MyAyLjgwOSw4Ny40MiAzLjM3Myw5MS43MjkgQzMuNDY0LDkyLjQyIDQuMDYyLDkyLjg4MyA0LjY4Miw5My4xODEgQzQuNTY2LDkyLjk4NCA0LjQ4Niw5Mi43NzYgNC40NDYsOTIuNTcyIEMzLjY2NSw4OC41ODggMy4yOTEsODQuMzcgMy4yNzYsNzEuMTczIEMzLjI2Miw1OC41MiA0LjE2Nyw1MS40NjYgNC4xNzYsNTEuMzk2IEM0LjkwMSw0Ny4xNjUgNy4wMDgsNDYuMDU5IDcuMDk4LDQ2LjAxNCBDNy4wOTQsNDYuMDE1IDgxLjU0MiwzLjAzNCA4MS45NDQsMi44MDIgTDgxLjk3MiwyLjc4NSBDODIuODc2LDIuMjQ3IDgzLjY5MiwyLjA5NyA4NC4zMzIsMi4zNTIgQzg0Ljg4NywyLjU3MyA4NS4yODEsMy4wODUgODUuNTA0LDMuODcyIEM4Ny41MTgsMTEgODYuOTY0LDM2LjA5MSA4NS43ODUsNDMuODU1IEM4NS4yNzgsNDcuMTk2IDg0LjIxLDQ5LjM3IDgyLjYxLDUwLjMxNyBMNy4zMzUsOTMuODY5IEM2Ljk5OSw5NC4wNjMgNi42NTgsOTQuMTYxIDYuMzE3LDk0LjE2MSBMNi4zMTcsOTQuMTYxIFogTTYuMTcsOTMuNjU0IEM2LjQ2Myw5My42OSA2Ljc3NCw5My42MTcgNy4wODUsOTMuNDM3IEw4Mi4zNTgsNDkuODg2IEM4NC4xODEsNDguODA4IDg0Ljk2LDQ1Ljk3MSA4NS4yOTIsNDMuNzggQzg2LjQ2NiwzNi4wNDkgODcuMDIzLDExLjA4NSA4NS4wMjQsNC4wMDggQzg0Ljg0NiwzLjM3NyA4NC41NTEsMi45NzYgODQuMTQ4LDIuODE2IEM4My42NjQsMi42MjMgODIuOTgyLDIuNzY0IDgyLjIyNywzLjIxMyBMODIuMTkzLDMuMjM0IEM4MS43OTEsMy40NjYgNy4zMzUsNDYuNDUyIDcuMzM1LDQ2LjQ1MiBDNy4zMDQsNDYuNDY5IDUuMzQ2LDQ3LjUyMSA0LjY2OSw1MS40NzEgQzQuNjYyLDUxLjUzIDMuNzYxLDU4LjU1NiAzLjc3NSw3MS4xNzMgQzMuNzksODQuMzI4IDQuMTYxLDg4LjUyNCA0LjkzNiw5Mi40NzYgQzUuMDI2LDkyLjkzNyA1LjQxMiw5My40NTkgNS45NzMsOTMuNjE1IEM2LjA4Nyw5My42NCA2LjE1OCw5My42NTIgNi4xNjksOTMuNjU0IEw2LjE3LDkzLjY1NCBMNi4xNyw5My42NTQgWiIgaWQ9IkZpbGwtMTIiIGZpbGw9IiM0NTVBNjQiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNNy4zMTcsNjguOTgyIEM3LjgwNiw2OC43MDEgOC4yMDIsNjguOTI2IDguMjAyLDY5LjQ4NyBDOC4yMDIsNzAuMDQ3IDcuODA2LDcwLjczIDcuMzE3LDcxLjAxMiBDNi44MjksNzEuMjk0IDYuNDMzLDcxLjA2OSA2LjQzMyw3MC41MDggQzYuNDMzLDY5Ljk0OCA2LjgyOSw2OS4yNjUgNy4zMTcsNjguOTgyIiBpZD0iRmlsbC0xMyIgZmlsbD0iI0ZGRkZGRiI+PC9wYXRoPgogICAgICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik02LjkyLDcxLjEzMyBDNi42MzEsNzEuMTMzIDYuNDMzLDcwLjkwNSA2LjQzMyw3MC41MDggQzYuNDMzLDY5Ljk0OCA2LjgyOSw2OS4yNjUgNy4zMTcsNjguOTgyIEM3LjQ2LDY4LjkgNy41OTUsNjguODYxIDcuNzE0LDY4Ljg2MSBDOC4wMDMsNjguODYxIDguMjAyLDY5LjA5IDguMjAyLDY5LjQ4NyBDOC4yMDIsNzAuMDQ3IDcuODA2LDcwLjczIDcuMzE3LDcxLjAxMiBDNy4xNzQsNzEuMDk0IDcuMDM5LDcxLjEzMyA2LjkyLDcxLjEzMyBNNy43MTQsNjguNjc0IEM3LjU1Nyw2OC42NzQgNy4zOTIsNjguNzIzIDcuMjI0LDY4LjgyMSBDNi42NzYsNjkuMTM4IDYuMjQ2LDY5Ljg3OSA2LjI0Niw3MC41MDggQzYuMjQ2LDcwLjk5NCA2LjUxNyw3MS4zMiA2LjkyLDcxLjMyIEM3LjA3OCw3MS4zMiA3LjI0Myw3MS4yNzEgNy40MTEsNzEuMTc0IEM3Ljk1OSw3MC44NTcgOC4zODksNzAuMTE3IDguMzg5LDY5LjQ4NyBDOC4zODksNjkuMDAxIDguMTE3LDY4LjY3NCA3LjcxNCw2OC42NzQiIGlkPSJGaWxsLTE0IiBmaWxsPSIjODA5N0EyIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTYuOTIsNzAuOTQ3IEM2LjY0OSw3MC45NDcgNi42MjEsNzAuNjQgNi42MjEsNzAuNTA4IEM2LjYyMSw3MC4wMTcgNi45ODIsNjkuMzkyIDcuNDExLDY5LjE0NSBDNy41MjEsNjkuMDgyIDcuNjI1LDY5LjA0OSA3LjcxNCw2OS4wNDkgQzcuOTg2LDY5LjA0OSA4LjAxNSw2OS4zNTUgOC4wMTUsNjkuNDg3IEM4LjAxNSw2OS45NzggNy42NTIsNzAuNjAzIDcuMjI0LDcwLjg1MSBDNy4xMTUsNzAuOTE0IDcuMDEsNzAuOTQ3IDYuOTIsNzAuOTQ3IE03LjcxNCw2OC44NjEgQzcuNTk1LDY4Ljg2MSA3LjQ2LDY4LjkgNy4zMTcsNjguOTgyIEM2LjgyOSw2OS4yNjUgNi40MzMsNjkuOTQ4IDYuNDMzLDcwLjUwOCBDNi40MzMsNzAuOTA1IDYuNjMxLDcxLjEzMyA2LjkyLDcxLjEzMyBDNy4wMzksNzEuMTMzIDcuMTc0LDcxLjA5NCA3LjMxNyw3MS4wMTIgQzcuODA2LDcwLjczIDguMjAyLDcwLjA0NyA4LjIwMiw2OS40ODcgQzguMjAyLDY5LjA5IDguMDAzLDY4Ljg2MSA3LjcxNCw2OC44NjEiIGlkPSJGaWxsLTE1IiBmaWxsPSIjODA5N0EyIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTcuNDQ0LDg1LjM1IEM3LjcwOCw4NS4xOTggNy45MjEsODUuMzE5IDcuOTIxLDg1LjYyMiBDNy45MjEsODUuOTI1IDcuNzA4LDg2LjI5MiA3LjQ0NCw4Ni40NDQgQzcuMTgxLDg2LjU5NyA2Ljk2Nyw4Ni40NzUgNi45NjcsODYuMTczIEM2Ljk2Nyw4NS44NzEgNy4xODEsODUuNTAyIDcuNDQ0LDg1LjM1IiBpZD0iRmlsbC0xNiIgZmlsbD0iI0ZGRkZGRiI+PC9wYXRoPgogICAgICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik03LjIzLDg2LjUxIEM3LjA3NCw4Ni41MSA2Ljk2Nyw4Ni4zODcgNi45NjcsODYuMTczIEM2Ljk2Nyw4NS44NzEgNy4xODEsODUuNTAyIDcuNDQ0LDg1LjM1IEM3LjUyMSw4NS4zMDUgNy41OTQsODUuMjg0IDcuNjU4LDg1LjI4NCBDNy44MTQsODUuMjg0IDcuOTIxLDg1LjQwOCA3LjkyMSw4NS42MjIgQzcuOTIxLDg1LjkyNSA3LjcwOCw4Ni4yOTIgNy40NDQsODYuNDQ0IEM3LjM2Nyw4Ni40ODkgNy4yOTQsODYuNTEgNy4yMyw4Ni41MSBNNy42NTgsODUuMDk4IEM3LjU1OCw4NS4wOTggNy40NTUsODUuMTI3IDcuMzUxLDg1LjE4OCBDNy4wMzEsODUuMzczIDYuNzgxLDg1LjgwNiA2Ljc4MSw4Ni4xNzMgQzYuNzgxLDg2LjQ4MiA2Ljk2Niw4Ni42OTcgNy4yMyw4Ni42OTcgQzcuMzMsODYuNjk3IDcuNDMzLDg2LjY2NiA3LjUzOCw4Ni42MDcgQzcuODU4LDg2LjQyMiA4LjEwOCw4NS45ODkgOC4xMDgsODUuNjIyIEM4LjEwOCw4NS4zMTMgNy45MjMsODUuMDk4IDcuNjU4LDg1LjA5OCIgaWQ9IkZpbGwtMTciIGZpbGw9IiM4MDk3QTIiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNNy4yMyw4Ni4zMjIgTDcuMTU0LDg2LjE3MyBDNy4xNTQsODUuOTM4IDcuMzMzLDg1LjYyOSA3LjUzOCw4NS41MTIgTDcuNjU4LDg1LjQ3MSBMNy43MzQsODUuNjIyIEM3LjczNCw4NS44NTYgNy41NTUsODYuMTY0IDcuMzUxLDg2LjI4MiBMNy4yMyw4Ni4zMjIgTTcuNjU4LDg1LjI4NCBDNy41OTQsODUuMjg0IDcuNTIxLDg1LjMwNSA3LjQ0NCw4NS4zNSBDNy4xODEsODUuNTAyIDYuOTY3LDg1Ljg3MSA2Ljk2Nyw4Ni4xNzMgQzYuOTY3LDg2LjM4NyA3LjA3NCw4Ni41MSA3LjIzLDg2LjUxIEM3LjI5NCw4Ni41MSA3LjM2Nyw4Ni40ODkgNy40NDQsODYuNDQ0IEM3LjcwOCw4Ni4yOTIgNy45MjEsODUuOTI1IDcuOTIxLDg1LjYyMiBDNy45MjEsODUuNDA4IDcuODE0LDg1LjI4NCA3LjY1OCw4NS4yODQiIGlkPSJGaWxsLTE4IiBmaWxsPSIjODA5N0EyIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTc3LjI3OCw3Ljc2OSBMNzcuMjc4LDUxLjQzNiBMMTAuMjA4LDkwLjE2IEwxMC4yMDgsNDYuNDkzIEw3Ny4yNzgsNy43NjkiIGlkPSJGaWxsLTE5IiBmaWxsPSIjNDU1QTY0Ij48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTEwLjA4Myw5MC4zNzUgTDEwLjA4Myw0Ni40MjEgTDEwLjE0Niw0Ni4zODUgTDc3LjQwMyw3LjU1NCBMNzcuNDAzLDUxLjUwOCBMNzcuMzQxLDUxLjU0NCBMMTAuMDgzLDkwLjM3NSBMMTAuMDgzLDkwLjM3NSBaIE0xMC4zMzMsNDYuNTY0IEwxMC4zMzMsODkuOTQ0IEw3Ny4xNTQsNTEuMzY1IEw3Ny4xNTQsNy45ODUgTDEwLjMzMyw0Ni41NjQgTDEwLjMzMyw0Ni41NjQgWiIgaWQ9IkZpbGwtMjAiIGZpbGw9IiM2MDdEOEIiPjwvcGF0aD4KICAgICAgICAgICAgICAgIDwvZz4KICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik0xMjUuNzM3LDg4LjY0NyBMMTE4LjA5OCw5MS45ODEgTDExOC4wOTgsODQgTDEwNi42MzksODguNzEzIEwxMDYuNjM5LDk2Ljk4MiBMOTksMTAwLjMxNSBMMTEyLjM2OSwxMDMuOTYxIEwxMjUuNzM3LDg4LjY0NyIgaWQ9IkltcG9ydGVkLUxheWVycy1Db3B5LTIiIGZpbGw9IiM0NTVBNjQiIHNrZXRjaDp0eXBlPSJNU1NoYXBlR3JvdXAiPjwvcGF0aD4KICAgICAgICAgICAgPC9nPgogICAgICAgIDwvZz4KICAgIDwvZz4KPC9zdmc+');
-};
-
-module.exports = RotateInstructions;
-
-},{"./util.js":22}],17:[function(_dereq_,module,exports){
+},{}],10:[function(_dereq_,module,exports){
 /*
  * Copyright 2015 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12589,7 +10938,7 @@ ComplementaryFilter.prototype.gyroToQuaternionDelta_ = function(gyro, dt) {
 
 module.exports = ComplementaryFilter;
 
-},{"../math-util.js":14,"../util.js":22,"./sensor-sample.js":20}],18:[function(_dereq_,module,exports){
+},{"../math-util.js":9,"../util.js":14,"./sensor-sample.js":13}],11:[function(_dereq_,module,exports){
 /*
  * Copyright 2015 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12606,7 +10955,6 @@ module.exports = ComplementaryFilter;
  */
 var ComplementaryFilter = _dereq_('./complementary-filter.js');
 var PosePredictor = _dereq_('./pose-predictor.js');
-var TouchPanner = _dereq_('../touch-panner.js');
 var MathUtil = _dereq_('../math-util.js');
 var Util = _dereq_('../util.js');
 
@@ -12625,7 +10973,6 @@ function FusionPoseSensor() {
 
   this.filter = new ComplementaryFilter(WebVRConfig.K_FILTER);
   this.posePredictor = new PosePredictor(WebVRConfig.PREDICTION_TIME_S);
-  this.touchPanner = new TouchPanner();
 
   this.filterToWorldQ = new MathUtil.Quaternion();
 
@@ -12674,9 +11021,6 @@ FusionPoseSensor.prototype.getOrientation = function() {
   var out = new MathUtil.Quaternion();
   out.copy(this.filterToWorldQ);
   out.multiply(this.resetQ);
-  if (!WebVRConfig.TOUCH_PANNER_DISABLED) {
-    out.multiply(this.touchPanner.getOrientation());
-  }
   out.multiply(this.predictedQ);
   out.multiply(this.worldToScreenQ);
 
@@ -12710,10 +11054,6 @@ FusionPoseSensor.prototype.resetPose = function() {
 
   // Take into account original pose.
   this.resetQ.multiply(this.originalPoseAdjustQ);
-
-  if (!WebVRConfig.TOUCH_PANNER_DISABLED) {
-    this.touchPanner.resetSensor();
-  }
 };
 
 FusionPoseSensor.prototype.onDeviceMotionChange_ = function(deviceMotion) {
@@ -12774,7 +11114,7 @@ FusionPoseSensor.prototype.setScreenTransform_ = function() {
 
 module.exports = FusionPoseSensor;
 
-},{"../math-util.js":14,"../touch-panner.js":21,"../util.js":22,"./complementary-filter.js":17,"./pose-predictor.js":19}],19:[function(_dereq_,module,exports){
+},{"../math-util.js":9,"../util.js":14,"./complementary-filter.js":10,"./pose-predictor.js":12}],12:[function(_dereq_,module,exports){
 /*
  * Copyright 2015 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12857,7 +11197,7 @@ PosePredictor.prototype.getPrediction = function(currentQ, gyro, timestampS) {
 
 module.exports = PosePredictor;
 
-},{"../math-util.js":14}],20:[function(_dereq_,module,exports){
+},{"../math-util.js":9}],13:[function(_dereq_,module,exports){
 function SensorSample(sample, timestampS) {
   this.set(sample, timestampS);
 };
@@ -12873,85 +11213,7 @@ SensorSample.prototype.copy = function(sensorSample) {
 
 module.exports = SensorSample;
 
-},{}],21:[function(_dereq_,module,exports){
-/*
- * Copyright 2015 Google Inc. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-var MathUtil = _dereq_('./math-util.js');
-var Util = _dereq_('./util.js');
-
-var ROTATE_SPEED = 0.5;
-/**
- * Provides a quaternion responsible for pre-panning the scene before further
- * transformations due to device sensors.
- */
-function TouchPanner() {
-  window.addEventListener('touchstart', this.onTouchStart_.bind(this));
-  window.addEventListener('touchmove', this.onTouchMove_.bind(this));
-  window.addEventListener('touchend', this.onTouchEnd_.bind(this));
-
-  this.isTouching = false;
-  this.rotateStart = new MathUtil.Vector2();
-  this.rotateEnd = new MathUtil.Vector2();
-  this.rotateDelta = new MathUtil.Vector2();
-
-  this.theta = 0;
-  this.orientation = new MathUtil.Quaternion();
-}
-
-TouchPanner.prototype.getOrientation = function() {
-  this.orientation.setFromEulerXYZ(0, 0, this.theta);
-  return this.orientation;
-};
-
-TouchPanner.prototype.resetSensor = function() {
-  this.theta = 0;
-};
-
-TouchPanner.prototype.onTouchStart_ = function(e) {
-  // Only respond if there is exactly one touch.
-  if (e.touches.length != 1) {
-    return;
-  }
-  this.rotateStart.set(e.touches[0].pageX, e.touches[0].pageY);
-  this.isTouching = true;
-};
-
-TouchPanner.prototype.onTouchMove_ = function(e) {
-  if (!this.isTouching) {
-    return;
-  }
-  this.rotateEnd.set(e.touches[0].pageX, e.touches[0].pageY);
-  this.rotateDelta.subVectors(this.rotateEnd, this.rotateStart);
-  this.rotateStart.copy(this.rotateEnd);
-
-  // On iOS, direction is inverted.
-  if (Util.isIOS()) {
-    this.rotateDelta.x *= -1;
-  }
-
-  var element = document.body;
-  this.theta += 2 * Math.PI * this.rotateDelta.x / element.clientWidth * ROTATE_SPEED;
-};
-
-TouchPanner.prototype.onTouchEnd_ = function(e) {
-  this.isTouching = false;
-};
-
-module.exports = TouchPanner;
-
-},{"./math-util.js":14,"./util.js":22}],22:[function(_dereq_,module,exports){
+},{}],14:[function(_dereq_,module,exports){
 /*
  * Copyright 2015 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13169,210 +11431,187 @@ Util.safariCssSizeWorkaround = function(canvas) {
   window.canvas = canvas;
 };
 
+Util.frameDataFromPose = (function() {
+  var piOver180 = Math.PI / 180.0;
+  var rad45 = Math.PI * 0.25;
+
+  // Borrowed from glMatrix.
+  function mat4_perspectiveFromFieldOfView(out, fov, near, far) {
+    var upTan = Math.tan(fov ? (fov.upDegrees * piOver180) : rad45),
+    downTan = Math.tan(fov ? (fov.downDegrees * piOver180) : rad45),
+    leftTan = Math.tan(fov ? (fov.leftDegrees * piOver180) : rad45),
+    rightTan = Math.tan(fov ? (fov.rightDegrees * piOver180) : rad45),
+    xScale = 2.0 / (leftTan + rightTan),
+    yScale = 2.0 / (upTan + downTan);
+
+    out[0] = xScale;
+    out[1] = 0.0;
+    out[2] = 0.0;
+    out[3] = 0.0;
+    out[4] = 0.0;
+    out[5] = yScale;
+    out[6] = 0.0;
+    out[7] = 0.0;
+    out[8] = -((leftTan - rightTan) * xScale * 0.5);
+    out[9] = ((upTan - downTan) * yScale * 0.5);
+    out[10] = far / (near - far);
+    out[11] = -1.0;
+    out[12] = 0.0;
+    out[13] = 0.0;
+    out[14] = (far * near) / (near - far);
+    out[15] = 0.0;
+    return out;
+  }
+
+  function mat4_fromRotationTranslation(out, q, v) {
+    // Quaternion math
+    var x = q[0], y = q[1], z = q[2], w = q[3],
+        x2 = x + x,
+        y2 = y + y,
+        z2 = z + z,
+
+        xx = x * x2,
+        xy = x * y2,
+        xz = x * z2,
+        yy = y * y2,
+        yz = y * z2,
+        zz = z * z2,
+        wx = w * x2,
+        wy = w * y2,
+        wz = w * z2;
+
+    out[0] = 1 - (yy + zz);
+    out[1] = xy + wz;
+    out[2] = xz - wy;
+    out[3] = 0;
+    out[4] = xy - wz;
+    out[5] = 1 - (xx + zz);
+    out[6] = yz + wx;
+    out[7] = 0;
+    out[8] = xz + wy;
+    out[9] = yz - wx;
+    out[10] = 1 - (xx + yy);
+    out[11] = 0;
+    out[12] = v[0];
+    out[13] = v[1];
+    out[14] = v[2];
+    out[15] = 1;
+
+    return out;
+  };
+
+  function mat4_translate(out, a, v) {
+    var x = v[0], y = v[1], z = v[2],
+        a00, a01, a02, a03,
+        a10, a11, a12, a13,
+        a20, a21, a22, a23;
+
+    if (a === out) {
+      out[12] = a[0] * x + a[4] * y + a[8] * z + a[12];
+      out[13] = a[1] * x + a[5] * y + a[9] * z + a[13];
+      out[14] = a[2] * x + a[6] * y + a[10] * z + a[14];
+      out[15] = a[3] * x + a[7] * y + a[11] * z + a[15];
+    } else {
+      a00 = a[0]; a01 = a[1]; a02 = a[2]; a03 = a[3];
+      a10 = a[4]; a11 = a[5]; a12 = a[6]; a13 = a[7];
+      a20 = a[8]; a21 = a[9]; a22 = a[10]; a23 = a[11];
+
+      out[0] = a00; out[1] = a01; out[2] = a02; out[3] = a03;
+      out[4] = a10; out[5] = a11; out[6] = a12; out[7] = a13;
+      out[8] = a20; out[9] = a21; out[10] = a22; out[11] = a23;
+
+      out[12] = a00 * x + a10 * y + a20 * z + a[12];
+      out[13] = a01 * x + a11 * y + a21 * z + a[13];
+      out[14] = a02 * x + a12 * y + a22 * z + a[14];
+      out[15] = a03 * x + a13 * y + a23 * z + a[15];
+    }
+
+    return out;
+  };
+
+  mat4_invert = function(out, a) {
+    var a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3],
+        a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7],
+        a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11],
+        a30 = a[12], a31 = a[13], a32 = a[14], a33 = a[15],
+
+        b00 = a00 * a11 - a01 * a10,
+        b01 = a00 * a12 - a02 * a10,
+        b02 = a00 * a13 - a03 * a10,
+        b03 = a01 * a12 - a02 * a11,
+        b04 = a01 * a13 - a03 * a11,
+        b05 = a02 * a13 - a03 * a12,
+        b06 = a20 * a31 - a21 * a30,
+        b07 = a20 * a32 - a22 * a30,
+        b08 = a20 * a33 - a23 * a30,
+        b09 = a21 * a32 - a22 * a31,
+        b10 = a21 * a33 - a23 * a31,
+        b11 = a22 * a33 - a23 * a32,
+
+        // Calculate the determinant
+        det = b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
+
+    if (!det) {
+      return null;
+    }
+    det = 1.0 / det;
+
+    out[0] = (a11 * b11 - a12 * b10 + a13 * b09) * det;
+    out[1] = (a02 * b10 - a01 * b11 - a03 * b09) * det;
+    out[2] = (a31 * b05 - a32 * b04 + a33 * b03) * det;
+    out[3] = (a22 * b04 - a21 * b05 - a23 * b03) * det;
+    out[4] = (a12 * b08 - a10 * b11 - a13 * b07) * det;
+    out[5] = (a00 * b11 - a02 * b08 + a03 * b07) * det;
+    out[6] = (a32 * b02 - a30 * b05 - a33 * b01) * det;
+    out[7] = (a20 * b05 - a22 * b02 + a23 * b01) * det;
+    out[8] = (a10 * b10 - a11 * b08 + a13 * b06) * det;
+    out[9] = (a01 * b08 - a00 * b10 - a03 * b06) * det;
+    out[10] = (a30 * b04 - a31 * b02 + a33 * b00) * det;
+    out[11] = (a21 * b02 - a20 * b04 - a23 * b00) * det;
+    out[12] = (a11 * b07 - a10 * b09 - a12 * b06) * det;
+    out[13] = (a00 * b09 - a01 * b07 + a02 * b06) * det;
+    out[14] = (a31 * b01 - a30 * b03 - a32 * b00) * det;
+    out[15] = (a20 * b03 - a21 * b01 + a22 * b00) * det;
+
+    return out;
+  };
+
+  var defaultOrientation = new Float32Array([0, 0, 0, 1]);
+  var defaultPosition = new Float32Array([0, 0, 0]);
+
+  function updateEyeMatrices(projection, view, pose, parameters, vrDisplay) {
+    mat4_perspectiveFromFieldOfView(projection, parameters ? parameters.fieldOfView : null, vrDisplay.depthNear, vrDisplay.depthFar);
+
+    var orientation = pose.orientation || defaultOrientation;
+    var position = pose.position || defaultPosition;
+
+    mat4_fromRotationTranslation(view, orientation, position);
+    if (parameters)
+      mat4_translate(view, view, parameters.offset);
+    mat4_invert(view, view);
+  }
+
+  return function(frameData, pose, vrDisplay) {
+    if (!frameData || !pose)
+      return false;
+
+    frameData.pose = pose;
+    frameData.timestamp = pose.timestamp;
+
+    updateEyeMatrices(
+        frameData.leftProjectionMatrix, frameData.leftViewMatrix,
+        pose, vrDisplay.getEyeParameters("left"), vrDisplay);
+    updateEyeMatrices(
+        frameData.rightProjectionMatrix, frameData.rightViewMatrix,
+        pose, vrDisplay.getEyeParameters("right"), vrDisplay);
+
+    return true;
+  };
+})();
+
 module.exports = Util;
 
-},{"object-assign":1}],23:[function(_dereq_,module,exports){
-/*
- * Copyright 2015 Google Inc. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-var Emitter = _dereq_('./emitter.js');
-var Util = _dereq_('./util.js');
-var DeviceInfo = _dereq_('./device-info.js');
-
-var DEFAULT_VIEWER = 'CardboardV1';
-var VIEWER_KEY = 'WEBVR_CARDBOARD_VIEWER';
-var CLASS_NAME = 'webvr-polyfill-viewer-selector';
-
-/**
- * Creates a viewer selector with the options specified. Supports being shown
- * and hidden. Generates events when viewer parameters change. Also supports
- * saving the currently selected index in localStorage.
- */
-function ViewerSelector() {
-  // Try to load the selected key from local storage. If none exists, use the
-  // default key.
-  try {
-    this.selectedKey = localStorage.getItem(VIEWER_KEY) || DEFAULT_VIEWER;
-  } catch (error) {
-    console.error('Failed to load viewer profile: %s', error);
-  }
-  this.dialog = this.createDialog_(DeviceInfo.Viewers);
-  this.root = null;
-}
-ViewerSelector.prototype = new Emitter();
-
-ViewerSelector.prototype.show = function(root) {
-  this.root = root;
-
-  root.appendChild(this.dialog);
-  //console.log('ViewerSelector.show');
-
-  // Ensure the currently selected item is checked.
-  var selected = this.dialog.querySelector('#' + this.selectedKey);
-  selected.checked = true;
-
-  // Show the UI.
-  this.dialog.style.display = 'block';
-};
-
-ViewerSelector.prototype.hide = function() {
-  if (this.root && this.root.contains(this.dialog)) {
-    this.root.removeChild(this.dialog);
-  }
-  //console.log('ViewerSelector.hide');
-  this.dialog.style.display = 'none';
-};
-
-ViewerSelector.prototype.getCurrentViewer = function() {
-  return DeviceInfo.Viewers[this.selectedKey];
-};
-
-ViewerSelector.prototype.getSelectedKey_ = function() {
-  var input = this.dialog.querySelector('input[name=field]:checked');
-  if (input) {
-    return input.id;
-  }
-  return null;
-};
-
-ViewerSelector.prototype.onSave_ = function() {
-  this.selectedKey = this.getSelectedKey_();
-  if (!this.selectedKey || !DeviceInfo.Viewers[this.selectedKey]) {
-    console.error('ViewerSelector.onSave_: this should never happen!');
-    return;
-  }
-
-  this.emit('change', DeviceInfo.Viewers[this.selectedKey]);
-
-  // Attempt to save the viewer profile, but fails in private mode.
-  try {
-    localStorage.setItem(VIEWER_KEY, this.selectedKey);
-  } catch(error) {
-    console.error('Failed to save viewer profile: %s', error);
-  }
-  this.hide();
-};
-
-/**
- * Creates the dialog.
- */
-ViewerSelector.prototype.createDialog_ = function(options) {
-  var container = document.createElement('div');
-  container.classList.add(CLASS_NAME);
-  container.style.display = 'none';
-  // Create an overlay that dims the background, and which goes away when you
-  // tap it.
-  var overlay = document.createElement('div');
-  var s = overlay.style;
-  s.position = 'fixed';
-  s.left = 0;
-  s.top = 0;
-  s.width = '100%';
-  s.height = '100%';
-  s.background = 'rgba(0, 0, 0, 0.3)';
-  overlay.addEventListener('click', this.hide.bind(this));
-
-  var width = 280;
-  var dialog = document.createElement('div');
-  var s = dialog.style;
-  s.boxSizing = 'border-box';
-  s.position = 'fixed';
-  s.top = '24px';
-  s.left = '50%';
-  s.marginLeft = (-width/2) + 'px';
-  s.width = width + 'px';
-  s.padding = '24px';
-  s.overflow = 'hidden';
-  s.background = '#fafafa';
-  s.fontFamily = "'Roboto', sans-serif";
-  s.boxShadow = '0px 5px 20px #666';
-
-  dialog.appendChild(this.createH1_('Select your viewer'));
-  for (var id in options) {
-    dialog.appendChild(this.createChoice_(id, options[id].label));
-  }
-  dialog.appendChild(this.createButton_('Save', this.onSave_.bind(this)));
-
-  container.appendChild(overlay);
-  container.appendChild(dialog);
-
-  return container;
-};
-
-ViewerSelector.prototype.createH1_ = function(name) {
-  var h1 = document.createElement('h1');
-  var s = h1.style;
-  s.color = 'black';
-  s.fontSize = '20px';
-  s.fontWeight = 'bold';
-  s.marginTop = 0;
-  s.marginBottom = '24px';
-  h1.innerHTML = name;
-  return h1;
-};
-
-ViewerSelector.prototype.createChoice_ = function(id, name) {
-  /*
-  <div class="choice">
-  <input id="v1" type="radio" name="field" value="v1">
-  <label for="v1">Cardboard V1</label>
-  </div>
-  */
-  var div = document.createElement('div');
-  div.style.marginTop = '8px';
-  div.style.color = 'black';
-
-  var input = document.createElement('input');
-  input.style.fontSize = '30px';
-  input.setAttribute('id', id);
-  input.setAttribute('type', 'radio');
-  input.setAttribute('value', id);
-  input.setAttribute('name', 'field');
-
-  var label = document.createElement('label');
-  label.style.marginLeft = '4px';
-  label.setAttribute('for', id);
-  label.innerHTML = name;
-
-  div.appendChild(input);
-  div.appendChild(label);
-
-  return div;
-};
-
-ViewerSelector.prototype.createButton_ = function(label, onclick) {
-  var button = document.createElement('button');
-  button.innerHTML = label;
-  var s = button.style;
-  s.float = 'right';
-  s.textTransform = 'uppercase';
-  s.color = '#1094f7';
-  s.fontSize = '14px';
-  s.letterSpacing = 0;
-  s.border = 0;
-  s.background = 'none';
-  s.marginTop = '16px';
-
-  button.addEventListener('click', onclick);
-
-  return button;
-};
-
-module.exports = ViewerSelector;
-
-},{"./device-info.js":7,"./emitter.js":12,"./util.js":22}],24:[function(_dereq_,module,exports){
+},{"object-assign":1}],15:[function(_dereq_,module,exports){
 /*
  * Copyright 2015 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13447,7 +11686,7 @@ function getWakeLock() {
 }
 
 module.exports = getWakeLock();
-},{"./util.js":22}],25:[function(_dereq_,module,exports){
+},{"./util.js":14}],16:[function(_dereq_,module,exports){
 /*
  * Copyright 2015 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13463,15 +11702,10 @@ module.exports = getWakeLock();
  * limitations under the License.
  */
 
+var Util = _dereq_('./util.js');
 var CardboardVRDisplay = _dereq_('./cardboard-vr-display.js');
-var MouseKeyboardVRDisplay = _dereq_('./mouse-keyboard-vr-display.js');
-// Uncomment to add positional tracking via webcam.
-//var WebcamPositionSensorVRDevice = require('./webcam-position-sensor-vr-device.js');
 var VRDisplay = _dereq_('./base.js').VRDisplay;
-var HMDVRDevice = _dereq_('./base.js').HMDVRDevice;
-var PositionSensorVRDevice = _dereq_('./base.js').PositionSensorVRDevice;
-var VRDisplayHMDDevice = _dereq_('./display-wrappers.js').VRDisplayHMDDevice;
-var VRDisplayPositionSensorDevice = _dereq_('./display-wrappers.js').VRDisplayPositionSensorDevice;
+var VRFrameData = _dereq_('./base.js').VRFrameData;
 
 function WebVRPolyfill() {
   this.displays = [];
@@ -13488,6 +11722,9 @@ function WebVRPolyfill() {
       this.enableDeprecatedPolyfill();
     }
   }
+
+  // Put a shim in place to update the API to 1.1 if needed.
+  InstallWebVRSpecShim();
 }
 
 WebVRPolyfill.prototype.isWebVRAvailable = function() {
@@ -13510,31 +11747,7 @@ WebVRPolyfill.prototype.populateDevices = function() {
   if (this.isCardboardCompatible()) {
     vrDisplay = new CardboardVRDisplay();
     this.displays.push(vrDisplay);
-
-    // For backwards compatibility
-    if (WebVRConfig.ENABLE_DEPRECATED_API) {
-      this.devices.push(new VRDisplayHMDDevice(vrDisplay));
-      this.devices.push(new VRDisplayPositionSensorDevice(vrDisplay));
-    }
   }
-
-  // Add a Mouse and Keyboard driven VRDisplay for desktops/laptops
-  if (!this.isMobile() && !WebVRConfig.MOUSE_KEYBOARD_CONTROLS_DISABLED) {
-    vrDisplay = new MouseKeyboardVRDisplay();
-    this.displays.push(vrDisplay);
-
-    // For backwards compatibility
-    if (WebVRConfig.ENABLE_DEPRECATED_API) {
-      this.devices.push(new VRDisplayHMDDevice(vrDisplay));
-      this.devices.push(new VRDisplayPositionSensorDevice(vrDisplay));
-    }
-  }
-
-  // Uncomment to add positional tracking via webcam.
-  //if (!this.isMobile() && WebVRConfig.ENABLE_DEPRECATED_API) {
-  //  positionDevice = new WebcamPositionSensorVRDevice();
-  //  this.devices.push(positionDevice);
-  //}
 
   this.devicesPopulated = true;
 };
@@ -13557,15 +11770,14 @@ WebVRPolyfill.prototype.enablePolyfill = function() {
           false);
     }
   });
+
+  // Provide the VRFrameData object.
+  window.VRFrameData = VRFrameData;
 };
 
 WebVRPolyfill.prototype.enableDeprecatedPolyfill = function() {
   // Provide navigator.getVRDevices.
   navigator.getVRDevices = this.getVRDevices.bind(this);
-
-  // Provide the CardboardHMDVRDevice and PositionSensorVRDevice objects.
-  window.HMDVRDevice = HMDVRDevice;
-  window.PositionSensorVRDevice = PositionSensorVRDevice;
 };
 
 WebVRPolyfill.prototype.getVRDisplays = function() {
@@ -13579,48 +11791,6 @@ WebVRPolyfill.prototype.getVRDisplays = function() {
     }
   });
 };
-
-WebVRPolyfill.prototype.getVRDevices = function() {
-  console.warn('getVRDevices is deprecated. Please update your code to use getVRDisplays instead.');
-  var self = this;
-  return new Promise(function(resolve, reject) {
-    try {
-      if (!self.devicesPopulated) {
-        if (self.nativeWebVRAvailable) {
-          return navigator.getVRDisplays(function(displays) {
-            for (var i = 0; i < displays.length; ++i) {
-              self.devices.push(new VRDisplayHMDDevice(displays[i]));
-              self.devices.push(new VRDisplayPositionSensorDevice(displays[i]));
-            }
-            self.devicesPopulated = true;
-            resolve(self.devices);
-          }, reject);
-        }
-
-        if (self.nativeLegacyWebVRAvailable) {
-          return (navigator.getVRDDevices || navigator.mozGetVRDevices)(function(devices) {
-            for (var i = 0; i < devices.length; ++i) {
-              if (devices[i] instanceof HMDVRDevice) {
-                self.devices.push(devices[i]);
-              }
-              if (devices[i] instanceof PositionSensorVRDevice) {
-                self.devices.push(devices[i]);
-              }
-            }
-            self.devicesPopulated = true;
-            resolve(self.devices);
-          }, reject);
-        }
-      }
-
-      self.populateDevices();
-      resolve(self.devices);
-    } catch (e) {
-      reject(e);
-    }
-  });
-};
-
 /**
  * Determine if a device is mobile.
  */
@@ -13635,9 +11805,31 @@ WebVRPolyfill.prototype.isCardboardCompatible = function() {
   return this.isMobile() || WebVRConfig.FORCE_ENABLE_VR;
 };
 
-module.exports = WebVRPolyfill;
+// Installs a shim that updates a WebVR 1.0 spec implementation to WebVR 1.1
+function InstallWebVRSpecShim() {
+  if ('VRDisplay' in window && !('VRFrameData' in window)) {
+    // Provide the VRFrameData object.
+    window.VRFrameData = VRFrameData;
 
-},{"./base.js":2,"./cardboard-vr-display.js":5,"./display-wrappers.js":8,"./mouse-keyboard-vr-display.js":15}]},{},[13]);
+    // A lot of Chrome builds don't have depthNear and depthFar, even
+    // though they're in the WebVR 1.0 spec. Patch them in if they're not present.
+    if(!('depthNear' in window.VRDisplay.prototype)) {
+      window.VRDisplay.prototype.depthNear = 0.01;
+    }
+
+    if(!('depthFar' in window.VRDisplay.prototype)) {
+      window.VRDisplay.prototype.depthFar = 10000.0;
+    }
+
+    window.VRDisplay.prototype.getFrameData = function(frameData) {
+      return Util.frameDataFromPose(frameData, this.getPose(), this);
+    }
+  }
+};
+
+module.exports.WebVRPolyfill = WebVRPolyfill;
+
+},{"./base.js":2,"./cardboard-vr-display.js":3,"./util.js":14}]},{},[8]);
 
 ////////////////////////////////////////////////////////////////////////////////
     // start C:\Users\sean\Documents\VR\webvr-standard-monitor\src\AsyncLockRequest.js
@@ -14038,6 +12230,231 @@ WebVRStandardMonitor.prototype.getEyeParameters = function (side) {
     // end C:\Users\sean\Documents\VR\webvr-standard-monitor\src\WebVRStandardMonitor.js
     ////////////////////////////////////////////////////////////////////////////////
 console.info("webvr-standard-monitor v1.0.9. see https://github.com/NotionTheory/webvr-standard-monitor for more information.");
+////////////////////////////////////////////////////////////////////////////////
+    // start D:\Documents\VR\webvr-bootstrapper\src\documentReady.js
+(function(){"use strict";
+
+var documentReady = new Promise(function (resolve, reject) {
+  function setup() {
+    var ready = document.readyState === "complete";
+    if (ready) {
+      document.removeEventListener("readystatechange", setup);
+      resolve();
+    }
+    return ready;
+  }
+
+  if (!setup()) {
+    document.addEventListener("readystatechange", setup);
+  }
+});
+    if(typeof window !== "undefined") window.documentReady = documentReady;
+})();
+    // end D:\Documents\VR\webvr-bootstrapper\src\documentReady.js
+    ////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+    // start D:\Documents\VR\webvr-bootstrapper\src\loadFiles.js
+(function(){"use strict";
+
+function get(url, done, progress) {
+  var req = new XMLHttpRequest();
+  req.onload = function () {
+    if (req.status < 400) {
+      done(req.response);
+    } else {
+      done(new Error(req.status));
+    }
+  };
+
+  req.open("GET", url);
+  req.onprogress = progress;
+  req.send();
+}
+
+function __loadFiles(files, done, progress, index, total, loaded) {
+  if (index < files.length) {
+    var file = files[index][0],
+        size = files[index][1],
+        shortExt = file.match(/\.\w+$/)[0] || "none",
+        longExt = file.match(/(\.\w+)+$/)[0] || "none",
+        lastLoaded = loaded;
+    get(file, function (content) {
+      if (content instanceof Error) {
+        console.error("Failed to load " + file + ": " + content.message);
+      } else if (shortExt === ".js" && longExt !== ".typeface.js") {
+        var s = document.createElement("script");
+        s.type = "text/javascript";
+        s.src = file;
+        s.defer = false;
+        s.async = false;
+        document.head.appendChild(s);
+      }
+
+      __loadFiles(files, done, progress, index + 1, total, loaded);
+    }, function (evt) {
+      return progress(loaded = lastLoaded + evt.loaded, total);
+    });
+  } else {
+    done();
+  }
+}
+
+/* syntax:
+loadFiles([
+    // filename,  size
+    ["script1.js", 456],
+    ["script3.js", 8762],
+    ["script2.js", 12368]
+], function(objects){
+    // the thing to do when done.
+    console.assert(objects.name1 !== undefined);
+    console.assert(objects.name2 !== undefined);
+}, function(n, m, size, total){
+    // track progress
+    console.log("loaded file %d of %d, loaded %d bytes of %d bytes total.", n, m, size, total);
+});
+*/
+function _loadFiles(manifestSpec, progress, done) {
+  function readManifest(manifest) {
+    var total = 0;
+    for (var i = 0; i < manifest.length; ++i) {
+      if (manifest[i] instanceof Array && manifest[i].length > 1) {
+        total += manifest[i][1];
+      }
+    }
+    progress = progress || console.log.bind(console, "File load progress");
+    __loadFiles(manifest, done, progress, 0, total, 0);
+  }
+
+  if (manifestSpec instanceof String || typeof manifestSpec === "string") {
+    get(manifestSpec, function (manifestText) {
+      readManifest(JSON.parse(manifestText));
+    });
+  } else if (manifestSpec instanceof Array) {
+    readManifest(manifestSpec);
+  }
+}
+
+function loadFiles(manifestSpec, progress) {
+  return new Promise(function (resolve, reject) {
+    return _loadFiles(manifestSpec, progress, resolve);
+  });
+}
+    if(typeof window !== "undefined") window.loadFiles = loadFiles;
+})();
+    // end D:\Documents\VR\webvr-bootstrapper\src\loadFiles.js
+    ////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+    // start D:\Documents\VR\webvr-bootstrapper\src\ViewCameraTransform.js
+(function(){"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var heap = new WeakMap();
+
+function priv(obj, value) {
+  if (!heap.has(obj)) {
+    heap.set(obj, value || {});
+  }
+  return heap.get(obj);
+}
+
+var ViewCameraTransform = function () {
+  _createClass(ViewCameraTransform, null, [{
+    key: "makeTransform",
+    value: function makeTransform(eye, near, far) {
+      return {
+        translation: new THREE.Vector3().fromArray(eye.offset),
+        projection: ViewCameraTransform.fieldOfViewToProjectionMatrix(eye.fieldOfView, near, far),
+        viewport: {
+          left: 0,
+          top: 0,
+          width: eye.renderWidth,
+          height: eye.renderHeight
+        }
+      };
+    }
+  }, {
+    key: "fieldOfViewToProjectionMatrix",
+    value: function fieldOfViewToProjectionMatrix(fov, zNear, zFar) {
+      var upTan = Math.tan(fov.upDegrees * Math.PI / 180.0),
+          downTan = Math.tan(fov.downDegrees * Math.PI / 180.0),
+          leftTan = Math.tan(fov.leftDegrees * Math.PI / 180.0),
+          rightTan = Math.tan(fov.rightDegrees * Math.PI / 180.0),
+          xScale = 2.0 / (leftTan + rightTan),
+          yScale = 2.0 / (upTan + downTan),
+          matrix = new THREE.Matrix4();
+
+      matrix.elements[0] = xScale;
+      matrix.elements[1] = 0.0;
+      matrix.elements[2] = 0.0;
+      matrix.elements[3] = 0.0;
+      matrix.elements[4] = 0.0;
+      matrix.elements[5] = yScale;
+      matrix.elements[6] = 0.0;
+      matrix.elements[7] = 0.0;
+      matrix.elements[8] = -((leftTan - rightTan) * xScale * 0.5);
+      matrix.elements[9] = (upTan - downTan) * yScale * 0.5;
+      matrix.elements[10] = -(zNear + zFar) / (zFar - zNear);
+      matrix.elements[11] = -1.0;
+      matrix.elements[12] = 0.0;
+      matrix.elements[13] = 0.0;
+      matrix.elements[14] = -(2.0 * zFar * zNear) / (zFar - zNear);
+      matrix.elements[15] = 0.0;
+
+      return matrix;
+    }
+  }]);
+
+  function ViewCameraTransform(display) {
+    _classCallCheck(this, ViewCameraTransform);
+
+    priv(this, {
+      display: display
+    });
+  }
+
+  _createClass(ViewCameraTransform, [{
+    key: "getTransforms",
+    value: function getTransforms(near, far) {
+      var d = priv(this).display,
+          l = d.getEyeParameters("left"),
+          r = d.getEyeParameters("right"),
+          params = [ViewCameraTransform.makeTransform(l, near, far)];
+      if (r) {
+        params.push(ViewCameraTransform.makeTransform(r, near, far));
+      }
+      for (var i = 1; i < params.length; ++i) {
+        params[i].viewport.left = params[i - 1].viewport.left + params[i - 1].viewport.width;
+      }
+      return params;
+    }
+  }]);
+
+  return ViewCameraTransform;
+}();
+    if(typeof window !== "undefined") window.ViewCameraTransform = ViewCameraTransform;
+})();
+    // end D:\Documents\VR\webvr-bootstrapper\src\ViewCameraTransform.js
+    ////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+    // start D:\Documents\VR\webvr-bootstrapper\src\WebVRBootstrapper.js
+(function(){"use strict";
+
+function WebVRBootstrapper(manifest) {
+  return documentReady.then(function () {
+    return manifest && function (progress) {
+      return loadFiles(manifest, progress);
+    };
+  });
+}
+    if(typeof window !== "undefined") window.WebVRBootstrapper = WebVRBootstrapper;
+})();
+    // end D:\Documents\VR\webvr-bootstrapper\src\WebVRBootstrapper.js
+    ////////////////////////////////////////////////////////////////////////////////
+console.info("webvr-bootstrapper v4.0.5. see https://github.com/capnmidnight/WebVR-Bootstrapper for more information.");
 /*
   html2canvas 0.5.0-beta4 <http://html2canvas.hertzen.com>
   Copyright (c) 2016 Niklas von Hertzen
@@ -60573,2771 +58990,6 @@ THREE.MTLLoader.MaterialCreator.prototype = {
 };
 
 /**
- * @author yamahigashi https://github.com/yamahigashi
- *
- * This loader loads FBX file in *ASCII and version 7 format*.
- *
- * Support
- *  - mesh
- *  - skinning
- *  - normal / uv
- *
- *  Not Support
- *  - material
- *  - texture
- *  - morph
- */
-
-( function() {
-
-	THREE.FBXLoader = function ( manager ) {
-
-		THREE.Loader.call( this );
-		this.manager = ( manager !== undefined ) ? manager : THREE.DefaultLoadingManager;
-		this.textureLoader = null;
-		this.textureBasePath = null;
-
-	};
-
-	THREE.FBXLoader.prototype = Object.create( THREE.Loader.prototype );
-
-	THREE.FBXLoader.prototype.constructor = THREE.FBXLoader;
-
-	THREE.FBXLoader.prototype.load = function ( url, onLoad, onProgress, onError ) {
-
-		var scope = this;
-
-		var loader = new THREE.XHRLoader( scope.manager );
-		// loader.setCrossOrigin( this.crossOrigin );
-		loader.load( url, function ( text ) {
-
-			if ( ! scope.isFbxFormatASCII( text ) ) {
-
-				console.warn( 'FBXLoader: !!! FBX Binary format not supported !!!' );
-
-			} else if ( ! scope.isFbxVersionSupported( text ) ) {
-
-				console.warn( 'FBXLoader: !!! FBX Version below 7 not supported !!!' );
-
-			} else {
-
-				scope.textureBasePath = scope.extractUrlBase( url );
-				onLoad( scope.parse( text ) );
-
-			}
-
-		}, onProgress, onError );
-
-	};
-
-	THREE.FBXLoader.prototype.setCrossOrigin = function ( value ) {
-
-		this.crossOrigin = value;
-
-	};
-
-	THREE.FBXLoader.prototype.isFbxFormatASCII = function ( body ) {
-
-		CORRECT = [ 'K', 'a', 'y', 'd', 'a', 'r', 'a', '\\', 'F', 'B', 'X', '\\', 'B', 'i', 'n', 'a', 'r', 'y', '\\', '\\' ];
-
-		var cursor = 0;
-		var read = function ( offset ) {
-
-			var result = body[ offset - 1 ];
-			body = body.slice( cursor + offset );
-			cursor ++;
-			return result;
-
-		};
-
-		for ( var i = 0; i < CORRECT.length; ++ i ) {
-
-			num = read( 1 );
-			if ( num == CORRECT[ i ] ) {
-
-				return false;
-
-			}
-
-		}
-
-		return true;
-
-	};
-
-	THREE.FBXLoader.prototype.isFbxVersionSupported = function ( body ) {
-
-		var versionExp = /FBXVersion: (\d+)/;
-		match = body.match( versionExp );
-		if ( match ) {
-
-			var version = parseInt( match[ 1 ] );
-			console.log( 'FBXLoader: FBX version ' + version );
-			return version >= 7000;
-
-		}
-		return false;
-
-	};
-
-	THREE.FBXLoader.prototype.parse = function ( text ) {
-
-		var scope = this;
-
-		console.time( 'FBXLoader' );
-
-		console.time( 'FBXLoader: TextParser' );
-		var nodes = new FBXParser().parse( text );
-		console.timeEnd( 'FBXLoader: TextParser' );
-
-		console.time( 'FBXLoader: ObjectParser' );
-		scope.hierarchy = ( new Bones() ).parseHierarchy( nodes );
-		scope.weights	= ( new Weights() ).parse( nodes, scope.hierarchy );
-		scope.animations = ( new Animation() ).parse( nodes, scope.hierarchy );
-		scope.textures = ( new Textures() ).parse( nodes, scope.hierarchy );
-		console.timeEnd( 'FBXLoader: ObjectParser' );
-
-		console.time( 'FBXLoader: GeometryParser' );
-		geometries = this.parseGeometries( nodes );
-		console.timeEnd( 'FBXLoader: GeometryParser' );
-
-		var container = new THREE.Group();
-
-		for ( var i = 0; i < geometries.length; ++ i ) {
-
-			if ( geometries[ i ] === undefined ) {
-
-				continue;
-
-			}
-
-			container.add( geometries[ i ] );
-
-			//wireframe = new THREE.WireframeHelper( geometries[i], 0x00ff00 );
-			//container.add( wireframe );
-
-			//vnh = new THREE.VertexNormalsHelper( geometries[i], 0.6 );
-			//container.add( vnh );
-
-			//skh = new THREE.SkeletonHelper( geometries[i] );
-			//container.add( skh );
-
-			// container.add( new THREE.BoxHelper( geometries[i] ) );
-
-		}
-
-		console.timeEnd( 'FBXLoader' );
-		return container;
-
-	};
-
-	THREE.FBXLoader.prototype.parseGeometries = function ( node ) {
-
-		// has not geo, return []
-		if ( ! ( 'Geometry' in node.Objects.subNodes ) ) {
-
-			return [];
-
-		}
-
-		// has many
-		var geoCount = 0;
-		for ( var geo in node.Objects.subNodes.Geometry ) {
-
-			if ( geo.match( /^\d+$/ ) ) {
-
-				geoCount ++;
-
-			}
-
-		}
-
-		var res = [];
-		if ( geoCount > 0 ) {
-
-			for ( geo in node.Objects.subNodes.Geometry ) {
-
-				if ( node.Objects.subNodes.Geometry[ geo ].attrType === 'Mesh' ) {
-
-					res.push( this.parseGeometry( node.Objects.subNodes.Geometry[ geo ], node ) );
-
-				}
-
-			}
-
-		} else {
-
-			res.push( this.parseGeometry( node.Objects.subNodes.Geometry, node ) );
-
-		}
-
-		return res;
-
-	};
-
-	THREE.FBXLoader.prototype.parseGeometry = function ( node, nodes ) {
-
-		geo = ( new Geometry() ).parse( node );
-		geo.addBones( this.hierarchy.hierarchy );
-
-		//*
-		var geometry = new THREE.BufferGeometry();
-		geometry.name = geo.name;
-		geometry.addAttribute( 'position', new THREE.BufferAttribute( new Float32Array( geo.vertices ), 3 ) );
-
-		if ( geo.normals !== undefined && geo.normals.length > 0 ) {
-
-			geometry.addAttribute( 'normal', new THREE.BufferAttribute( new Float32Array( geo.normals ), 3 ) );
-
-		}
-
-		if ( geo.uvs !== undefined && geo.uvs.length > 0 ) {
-
-			geometry.addAttribute( 'uv', new THREE.BufferAttribute( new Float32Array( geo.uvs ), 2 ) );
-
-		}
-
-		if ( geo.indices !== undefined && geo.indices.length > 65535 ) {
-
-			geometry.setIndex( new THREE.BufferAttribute( new Uint32Array( geo.indices ), 1 ) );
-
-		} else if ( geo.indices !== undefined ) {
-
-			geometry.setIndex( new THREE.BufferAttribute( new Uint16Array( geo.indices ), 1 ) );
-
-		}
-
-		geometry.verticesNeedUpdate = true;
-		geometry.computeBoundingSphere();
-		geometry.computeBoundingBox();
-
-		// TODO: texture & material support
-		var texture;
-		var texs = this.textures.getById( nodes.searchConnectionParent( geo.id ) );
-		if ( texs !== undefined && texs.length > 0 ) {
-
-			if ( this.textureLoader === null ) {
-
-				this.textureLoader = new THREE.TextureLoader();
-
-			}
-			texture = this.textureLoader.load( this.textureBasePath + '/' + texs[ 0 ].fileName );
-
-		}
-
-		var material;
-		if ( texture !== undefined ) {
-
-			material = new THREE.MeshBasicMaterial( { map: texture } );
-
-		} else {
-
-			material = new THREE.MeshBasicMaterial( { color: 0x3300ff } );
-
-		}
-
-		geometry = new THREE.Geometry().fromBufferGeometry( geometry );
-		geometry.bones = geo.bones;
-		geometry.skinIndices = this.weights.skinIndices;
-		geometry.skinWeights = this.weights.skinWeights;
-
-		var mesh = null;
-		if ( geo.bones === undefined || geo.skins === undefined || this.animations === undefined || this.animations.length === 0 ) {
-
-			mesh = new THREE.Mesh( geometry, material );
-
-		} else {
-
-			material.skinning = true;
-			mesh = new THREE.SkinnedMesh( geometry, material );
-			this.addAnimation( mesh, this.weights.matrices, this.animations );
-
-		}
-
-		return mesh;
-
-	};
-
-	THREE.FBXLoader.prototype.addAnimation = function ( mesh, matrices, animations ) {
-
-		var animationdata = { "name": 'animationtest', "fps": 30, "length": animations.length, "hierarchy": [] };
-
-		for ( var i = 0; i < mesh.geometry.bones.length; ++ i ) {
-
-			var name = mesh.geometry.bones[ i ].name;
-			name = name.replace( /.*:/, '' );
-			animationdata.hierarchy.push( { parent: mesh.geometry.bones[ i ].parent, name: name, keys: [] } );
-
-		}
-
-		var hasCurve = function ( animNode, attr ) {
-
-			if ( animNode === undefined ) {
-
-				return false;
-
-			}
-
-			var attrNode;
-			switch ( attr ) {
-
-				case 'S':
-					if ( animNode.S === undefined ) {
-
-						return false;
-
-					}
-					attrNode = animNode.S;
-					break;
-
-				case 'R':
-					if ( animNode.R === undefined ) {
-
-						return false;
-
-					}
-					attrNode = animNode.R;
-					break;
-
-				case 'T':
-					if ( animNode.T === undefined ) {
-
-						return false;
-
-					}
-					attrNode = animNode.T;
-					break;
-			}
-
-			if ( attrNode.curves.x === undefined ) {
-
-				return false;
-
-			}
-
-			if ( attrNode.curves.y === undefined ) {
-
-				return false;
-
-			}
-
-			if ( attrNode.curves.z === undefined ) {
-
-				return false;
-
-			}
-
-			return true;
-
-		};
-
-		var hasKeyOnFrame = function ( attrNode, frame ) {
-
-			var x = isKeyExistOnFrame( attrNode.curves.x, frame );
-			var y = isKeyExistOnFrame( attrNode.curves.y, frame );
-			var z = isKeyExistOnFrame( attrNode.curves.z, frame );
-
-			return x && y && z;
-
-		};
-
-		var isKeyExistOnFrame = function ( curve, frame ) {
-
-			var value = curve.values[ frame ];
-			return value !== undefined;
-
-		};
-
-
-		var genKey = function ( animNode, bone ) {
-
-			// key initialize with its bone's bind pose at first
-			var key = {};
-			key.time = frame / animations.fps; // TODO:
-			key.pos = bone.pos;
-			key.rot = bone.rotq;
-			key.scl = bone.scl;
-
-			if ( animNode === undefined ) {
-
-				return key;
-
-			}
-
-			try {
-
-				if ( hasCurve( animNode, 'T' ) && hasKeyOnFrame( animNode.T, frame ) ) {
-
-					var pos = new THREE.Vector3(
-						animNode.T.curves.x.values[ frame ],
-						animNode.T.curves.y.values[ frame ],
-						animNode.T.curves.z.values[ frame ] );
-					key.pos = [ pos.x, pos.y, pos.z ];
-
-				} else {
-
-					delete key.pos;
-
-				}
-
-				if ( hasCurve( animNode, 'R' ) && hasKeyOnFrame( animNode.R, frame ) ) {
-
-					var rx = degToRad( animNode.R.curves.x.values[ frame ] );
-					var ry = degToRad( animNode.R.curves.y.values[ frame ] );
-					var rz = degToRad( animNode.R.curves.z.values[ frame ] );
-					var eul = new THREE.Vector3( rx, ry, rz );
-					var rot = quatFromVec( eul.x, eul.y, eul.z );
-					key.rot = [ rot.x, rot.y, rot.z, rot.w ];
-
-				} else {
-
-					delete key.rot;
-
-				}
-
-				if ( hasCurve( animNode, 'S' ) && hasKeyOnFrame( animNode.S, frame ) ) {
-
-					var scl = new THREE.Vector3(
-						animNode.S.curves.x.values[ frame ],
-						animNode.S.curves.y.values[ frame ],
-						animNode.S.curves.z.values[ frame ] );
-					key.scl = [ scl.x, scl.y, scl.z ];
-
-				} else {
-
-					delete key.scl;
-
-				}
-
-			} catch ( e ) {
-
-				// curve is not full plotted
-				console.log( bone );
-				console.log( e );
-
-			}
-
-			return key;
-
-		};
-
-		var bones = mesh.geometry.bones;
-		for ( frame = 0; frame < animations.frames; frame ++ ) {
-
-
-			for ( i = 0; i < bones.length; i ++ ) {
-
-				var bone = bones[ i ];
-				var animNode = animations.curves[ i ];
-
-				for ( var j = 0; j < animationdata.hierarchy.length; j ++ ) {
-
-					if ( animationdata.hierarchy[ j ].name === bone.name ) {
-
-						animationdata.hierarchy[ j ].keys.push( genKey( animNode, bone ) );
-
-					}
-
-				}
-
-			}
-
-		}
-
-		if ( mesh.geometry.animations === undefined ) {
-
-			mesh.geometry.animations = [];
-
-		}
-
-		mesh.geometry.animations.push( THREE.AnimationClip.parseAnimation( animationdata, mesh.geometry.bones ) );
-
-	};
-
-	THREE.FBXLoader.prototype.parseMaterials = function ( node ) {
-
-		// has not mat, return []
-		if ( ! ( 'Material' in node.subNodes ) ) {
-
-			return [];
-
-		}
-
-		// has many
-		var matCount = 0;
-		for ( var mat in node.subNodes.Materials ) {
-
-			if ( mat.match( /^\d+$/ ) ) {
-
-				matCount ++;
-
-			}
-
-		}
-
-		var res = [];
-		if ( matCount > 0 ) {
-
-			for ( mat in node.subNodes.Material ) {
-
-				res.push( parseMaterial( node.subNodes.Material[ mat ] ) );
-
-			}
-
-		} else {
-
-			res.push( parseMaterial( node.subNodes.Material ) );
-
-		}
-
-		return res;
-
-	};
-
-	// TODO
-	THREE.FBXLoader.prototype.parseMaterial = function ( node ) {
-
-	};
-
-
-	THREE.FBXLoader.prototype.loadFile = function ( url, onLoad, onProgress, onError, responseType ) {
-
-		var loader = new THREE.XHRLoader( this.manager );
-
-		loader.setResponseType( responseType );
-
-		var request = loader.load( url, function ( result ) {
-
-			onLoad( result );
-
-		}, onProgress, onError );
-
-		return request;
-
-	};
-
-	THREE.FBXLoader.prototype.loadFileAsBuffer = function ( url, onload, onProgress, onError ) {
-
-		this.loadFile( url, onLoad, onProgress, onError, 'arraybuffer' );
-
-	};
-
-	THREE.FBXLoader.prototype.loadFileAsText = function ( url, onLoad, onProgress, onError ) {
-
-		this.loadFile( url, onLoad, onProgress, onError, 'text' );
-
-	};
-
-
-	/* ----------------------------------------------------------------- */
-
-	function FBXNodes() {}
-
-	FBXNodes.prototype.add = function ( key, val ) {
-
-		this[ key ] = val;
-
-	};
-
-	FBXNodes.prototype.searchConnectionParent = function ( id ) {
-
-		if ( this.__cache_search_connection_parent === undefined ) {
-
-			this.__cache_search_connection_parent = [];
-
-		}
-
-		if ( this.__cache_search_connection_parent[ id ] !== undefined ) {
-
-			return this.__cache_search_connection_parent[ id ];
-
-		} else {
-
-			this.__cache_search_connection_parent[ id ] = [];
-
-		}
-
-		var conns = this.Connections.properties.connections;
-
-		var results = [];
-		for ( var i = 0; i < conns.length; ++ i ) {
-
-			if ( conns[ i ][ 0 ] == id ) {
-
-				// 0 means scene root
-				var res = conns[ i ][ 1 ] === 0 ? - 1 : conns[ i ][ 1 ];
-				results.push( res );
-
-			}
-
-		}
-
-		if ( results.length > 0 ) {
-
-			this.__cache_search_connection_parent[ id ] = this.__cache_search_connection_parent[ id ].concat( results );
-			return results;
-
-		} else {
-
-			this.__cache_search_connection_parent[ id ] = [ - 1 ];
-			return [ - 1 ];
-
-		}
-
-	};
-
-	FBXNodes.prototype.searchConnectionChildren = function ( id ) {
-
-		if ( this.__cache_search_connection_children === undefined ) {
-
-			this.__cache_search_connection_children = [];
-
-		}
-
-		if ( this.__cache_search_connection_children[ id ] !== undefined ) {
-
-			return this.__cache_search_connection_children[ id ];
-
-		} else {
-
-			this.__cache_search_connection_children[ id ] = [];
-
-		}
-
-		var conns = this.Connections.properties.connections;
-
-		var res = [];
-		for ( var i = 0; i < conns.length; ++ i ) {
-
-			if ( conns[ i ][ 1 ] == id ) {
-
-				// 0 means scene root
-				res.push( conns[ i ][ 0 ] === 0 ? - 1 : conns[ i ][ 0 ] );
-				// there may more than one kid, then search to the end
-
-			}
-
-		}
-
-		if ( res.length > 0 ) {
-
-			this.__cache_search_connection_children[ id ] = this.__cache_search_connection_children[ id ].concat( res );
-			return res;
-
-		} else {
-
-			this.__cache_search_connection_children[ id ] = [ - 1 ];
-			return [ - 1 ];
-
-		}
-
-	};
-
-	FBXNodes.prototype.searchConnectionType = function ( id, to ) {
-
-		var key = id + ',' + to; // TODO: to hash
-		if ( this.__cache_search_connection_type === undefined ) {
-
-			this.__cache_search_connection_type = '';
-
-		}
-
-		if ( this.__cache_search_connection_type[ key ] !== undefined ) {
-
-			return this.__cache_search_connection_type[ key ];
-
-		} else {
-
-			this.__cache_search_connection_type[ key ] = '';
-
-		}
-
-		var conns = this.Connections.properties.connections;
-
-		for ( var i = 0; i < conns.length; ++ i ) {
-
-			if ( conns[ i ][ 0 ] == id && conns[ i ][ 1 ] == to ) {
-
-				// 0 means scene root
-				this.__cache_search_connection_type[ key ] = conns[ i ][ 2 ];
-				return conns[ i ][ 2 ];
-
-			}
-
-		}
-
-		this.__cache_search_connection_type[ id ] = null;
-		return null;
-
-	};
-
-	function FBXParser() {}
-
-	FBXParser.prototype = {
-
-		// constructor: FBXParser,
-
-		// ------------ node stack manipulations ----------------------------------
-
-		getPrevNode: function () {
-
-			return this.nodeStack[ this.currentIndent - 2 ];
-
-		},
-
-		getCurrentNode: function () {
-
-			return this.nodeStack[ this.currentIndent - 1 ];
-
-		},
-
-		getCurrentProp: function () {
-
-			return this.currentProp;
-
-		},
-
-		pushStack: function ( node ) {
-
-			this.nodeStack.push( node );
-			this.currentIndent += 1;
-
-		},
-
-		popStack: function () {
-
-			this.nodeStack.pop();
-			this.currentIndent -= 1;
-
-		},
-
-		setCurrentProp: function ( val, name ) {
-
-			this.currentProp = val;
-			this.currentPropName = name;
-
-		},
-
-		// ----------parse ---------------------------------------------------
-		parse: function ( text ) {
-
-			this.currentIndent = 0;
-			this.allNodes = new FBXNodes();
-			this.nodeStack = [];
-			this.currentProp = [];
-			this.currentPropName = '';
-
-			var split = text.split( "\n" );
-			for ( var line in split ) {
-
-				var l = split[ line ];
-
-				// short cut
-				if ( l.match( /^[\s\t]*;/ ) ) {
-
-					continue;
-
-				} // skip comment line
-				if ( l.match( /^[\s\t]*$/ ) ) {
-
-					continue;
-
-				} // skip empty line
-
-				// beginning of node
-				var beginningOfNodeExp = new RegExp( "^\\t{" + this.currentIndent + "}(\\w+):(.*){", '' );
-				match = l.match( beginningOfNodeExp );
-				if ( match ) {
-
-					var nodeName = match[ 1 ].trim().replace( /^"/, '' ).replace( /"$/, "" );
-					var nodeAttrs = match[ 2 ].split( ',' ).map( function ( element ) {
-
-						return element.trim().replace( /^"/, '' ).replace( /"$/, '' );
-
-					} );
-
-					this.parseNodeBegin( l, nodeName, nodeAttrs || null );
-					continue;
-
-				}
-
-				// node's property
-				var propExp = new RegExp( "^\\t{" + ( this.currentIndent ) + "}(\\w+):[\\s\\t\\r\\n](.*)" );
-				match = l.match( propExp );
-				if ( match ) {
-
-					var propName = match[ 1 ].replace( /^"/, '' ).replace( /"$/, "" ).trim();
-					var propValue = match[ 2 ].replace( /^"/, '' ).replace( /"$/, "" ).trim();
-
-					this.parseNodeProperty( l, propName, propValue );
-					continue;
-
-				}
-
-				// end of node
-				var endOfNodeExp = new RegExp( "^\\t{" + ( this.currentIndent - 1 ) + "}}" );
-				if ( l.match( endOfNodeExp ) ) {
-
-					this.nodeEnd();
-					continue;
-
-				}
-
-				// for special case,
-				//
-				//	  Vertices: *8670 {
-				//		  a: 0.0356229953467846,13.9599733352661,-0.399196773.....(snip)
-				// -0.0612030513584614,13.960485458374,-0.409748703241348,-0.10.....
-				// 0.12490539252758,13.7450733184814,-0.454119384288788,0.09272.....
-				// 0.0836158767342567,13.5432004928589,-0.435397416353226,0.028.....
-				//
-				// these case the lines must contiue with previous line
-				if ( l.match( /^[^\s\t}]/ ) ) {
-
-					this.parseNodePropertyContinued( l );
-
-				}
-
-			}
-
-			return this.allNodes;
-
-		},
-
-		parseNodeBegin: function ( line, nodeName, nodeAttrs ) {
-
-			// var nodeName = match[1];
-			var node = { 'name': nodeName, properties: {}, 'subNodes': {} };
-			var attrs = this.parseNodeAttr( nodeAttrs );
-			var currentNode = this.getCurrentNode();
-
-			// a top node
-			if ( this.currentIndent === 0 ) {
-
-				this.allNodes.add( nodeName, node );
-
-			} else {
-
-				// a subnode
-
-				// already exists subnode, then append it
-				if ( nodeName in currentNode.subNodes ) {
-
-					var tmp = currentNode.subNodes[ nodeName ];
-
-					// console.log( "duped entry found\nkey: " + nodeName + "\nvalue: " + propValue );
-					if ( this.isFlattenNode( currentNode.subNodes[ nodeName ] ) ) {
-
-
-						if ( attrs.id === '' ) {
-
-							currentNode.subNodes[ nodeName ] = [];
-							currentNode.subNodes[ nodeName ].push( tmp );
-
-						} else {
-
-							currentNode.subNodes[ nodeName ] = {};
-							currentNode.subNodes[ nodeName ][ tmp.id ] = tmp;
-
-						}
-
-					}
-
-					if ( attrs.id === '' ) {
-
-						currentNode.subNodes[ nodeName ].push( node );
-
-					} else {
-
-						currentNode.subNodes[ nodeName ][ attrs.id ] = node;
-
-					}
-
-				} else {
-
-					currentNode.subNodes[ nodeName ] = node;
-
-				}
-
-			}
-
-			// for this		  ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
-			// NodeAttribute: 1001463072, "NodeAttribute::", "LimbNode" {
-			if ( nodeAttrs ) {
-
-				node.id = attrs.id;
-				node.attrName = attrs.name;
-				node.attrType = attrs.type;
-
-			}
-
-			this.pushStack( node );
-
-		},
-
-		parseNodeAttr: function ( attrs ) {
-
-			var id = attrs[ 0 ];
-
-			if ( attrs[ 0 ] !== "" ) {
-
-				id = parseInt( attrs[ 0 ] );
-
-				if ( isNaN( id ) ) {
-
-					// PolygonVertexIndex: *16380 {
-					id = attrs[ 0 ];
-
-				}
-
-			}
-
-			var name;
-			var type;
-			if ( attrs.length > 1 ) {
-
-				name = attrs[ 1 ].replace( /^(\w+)::/, '' );
-				type = attrs[ 2 ];
-
-			}
-
-			return { id: id, name: name || '', type: type || '' };
-
-		},
-
-		parseNodeProperty: function ( line, propName, propValue ) {
-
-			var currentNode = this.getCurrentNode();
-			var parentName = currentNode.name;
-
-			// special case parent node's is like "Properties70"
-			// these chilren nodes must treat with careful
-			if ( parentName !== undefined ) {
-
-				var propMatch = parentName.match( /Properties(\d)+/ );
-				if ( propMatch ) {
-
-					this.parseNodeSpecialProperty( line, propName, propValue );
-					return;
-
-				}
-
-			}
-
-			// special case Connections
-			if ( propName == 'C' ) {
-
-				var connProps = propValue.split( ',' ).slice( 1 );
-				var from = parseInt( connProps[ 0 ] );
-				var to = parseInt( connProps[ 1 ] );
-
-				var rest = propValue.split( ',' ).slice( 3 );
-
-				propName = 'connections';
-				propValue = [ from, to ];
-				propValue = propValue.concat( rest );
-
-				if ( currentNode.properties[ propName ] === undefined ) {
-
-					currentNode.properties[ propName ] = [];
-
-				}
-
-			}
-
-			// special case Connections
-			if ( propName == 'Node' ) {
-
-				var id = parseInt( propValue );
-				currentNode.properties.id = id;
-				currentNode.id = id;
-
-			}
-
-			// already exists in properties, then append this
-			if ( propName in currentNode.properties ) {
-
-				// console.log( "duped entry found\nkey: " + propName + "\nvalue: " + propValue );
-				if ( Array.isArray( currentNode.properties[ propName ] ) ) {
-
-					currentNode.properties[ propName ].push( propValue );
-
-				} else {
-
-					currentNode.properties[ propName ] += propValue;
-
-				}
-
-			} else {
-
-				// console.log( propName + ":  " + propValue );
-				if ( Array.isArray( currentNode.properties[ propName ] ) ) {
-
-					currentNode.properties[ propName ].push( propValue );
-
-				} else {
-
-					currentNode.properties[ propName ] = propValue;
-
-				}
-
-			}
-
-			this.setCurrentProp( currentNode.properties, propName );
-
-		},
-
-		// TODO:
-		parseNodePropertyContinued: function ( line ) {
-
-			this.currentProp[ this.currentPropName ] += line;
-
-		},
-
-		parseNodeSpecialProperty: function ( line, propName, propValue ) {
-
-			// split this
-			// P: "Lcl Scaling", "Lcl Scaling", "", "A",1,1,1
-			// into array like below
-			// ["Lcl Scaling", "Lcl Scaling", "", "A", "1,1,1" ]
-			var props = propValue.split( '",' ).map( function ( element ) {
-
-				return element.trim().replace( /^\"/, '' ).replace( /\s/, '_' );
-
-			} );
-
-			var innerPropName = props[ 0 ];
-			var innerPropType1 = props[ 1 ];
-			var innerPropType2 = props[ 2 ];
-			var innerPropFlag = props[ 3 ];
-			var innerPropValue = props[ 4 ];
-
-			/*
-			if ( innerPropValue === undefined ) {
-				innerPropValue = props[3];
-			}
-			*/
-
-			// cast value in its type
-			switch ( innerPropType1 ) {
-
-				case "int":
-					innerPropValue = parseInt( innerPropValue );
-					break;
-
-				case "double":
-					innerPropValue = parseFloat( innerPropValue );
-					break;
-
-				case "ColorRGB":
-				case "Vector3D":
-					var tmp = innerPropValue.split( ',' );
-					innerPropValue = new THREE.Vector3( tmp[ 0 ], tmp[ 1 ], tmp[ 2 ] );
-					break;
-
-			}
-
-			// CAUTION: these props must append to parent's parent
-			this.getPrevNode().properties[ innerPropName ] = {
-
-				'type': innerPropType1,
-				'type2': innerPropType2,
-				'flag': innerPropFlag,
-				'value': innerPropValue
-
-			};
-
-			this.setCurrentProp( this.getPrevNode().properties, innerPropName );
-
-		},
-
-		nodeEnd: function ( line ) {
-
-			this.popStack();
-
-		},
-
-		/* ---------------------------------------------------------------- */
-		/*		util													  */
-		isFlattenNode: function ( node ) {
-
-			return ( 'subNodes' in node && 'properties' in node ) ? true : false;
-
-		}
-
-	};
-
-	function FBXAnalyzer() {}
-
-	FBXAnalyzer.prototype = {
-
-	};
-
-
-	// generate skinIndices, skinWeights
-	//	  @skinIndices: per vertex data, this represents the bone indexes affects that vertex
-	//	  @skinWeights: per vertex data, this represents the Weight Values affects that vertex
-	//	  @matrices:	per `bones` data
-	function Weights() {
-
-		this.skinIndices = [];
-		this.skinWeights = [];
-
-		this.matrices	= [];
-
-	}
-
-
-	Weights.prototype.parseCluster = function ( node, id, entry ) {
-
-		var _p = node.searchConnectionParent( id );
-		var _indices = toInt( entry.subNodes.Indexes.properties.a.split( ',' ) );
-		var _weights = toFloat( entry.subNodes.Weights.properties.a.split( ',' ) );
-		var _transform = toMat44( toFloat( entry.subNodes.Transform.properties.a.split( ',' ) ) );
-		var _link = toMat44( toFloat( entry.subNodes.TransformLink.properties.a.split( ',' ) ) );
-
-		return {
-
-			'parent': _p,
-			'id': parseInt( id ),
-			'indices': _indices,
-			'weights': _weights,
-			'transform': _transform,
-			'transformlink': _link,
-			'linkMode': entry.properties.Mode
-
-		};
-
-	};
-
-	Weights.prototype.parse = function ( node, bones ) {
-
-		this.skinIndices = [];
-		this.skinWeights = [];
-
-		this.matrices = [];
-
-		var deformers = node.Objects.subNodes.Deformer;
-
-		var clusters = {};
-		for ( var id in deformers ) {
-
-			if ( deformers[ id ].attrType === 'Cluster' ) {
-
-				if ( ! ( 'Indexes' in deformers[ id ].subNodes ) ) {
-
-					continue;
-
-				}
-
-				//clusters.push( this.parseCluster( node, id, deformers[id] ) );
-				var cluster = this.parseCluster( node, id, deformers[ id ] );
-				var boneId = node.searchConnectionChildren( cluster.id )[ 0 ];
-				clusters[ boneId ] = cluster;
-
-			}
-
-		}
-
-
-		// this clusters is per Bone data, thus we make this into per vertex data
-		var weights = [];
-		var hi = bones.hierarchy;
-		for ( var b = 0; b < hi.length; ++ b ) {
-
-			var bid = hi[ b ].internalId;
-			if ( clusters[ bid ] === undefined ) {
-
-				//console.log( bid );
-				this.matrices.push( new THREE.Matrix4() );
-				continue;
-
-			}
-
-			var clst = clusters[ bid ];
-			// store transform matrix per bones
-			this.matrices.push( clst.transform );
-			//this.matrices.push( clst.transformlink );
-			for ( var v = 0; v < clst.indices.length; ++ v ) {
-
-				if ( weights[ clst.indices[ v ] ] === undefined ) {
-
-					weights[ clst.indices[ v ] ] = {};
-					weights[ clst.indices[ v ] ].joint = [];
-					weights[ clst.indices[ v ] ].weight = [];
-
-				}
-
-				// indices
-				var affect = node.searchConnectionChildren( clst.id );
-
-				if ( affect.length > 1 ) {
-
-					console.warn( "FBXLoader: node " + clst.id + " have many weight kids: " + affect );
-
-				}
-				weights[ clst.indices[ v ] ].joint.push( bones.getBoneIdfromInternalId( node, affect[ 0 ] ) );
-
-				// weight value
-				weights[ clst.indices[ v ] ].weight.push( clst.weights[ v ] );
-
-			}
-
-		}
-
-		// normalize the skin weights
-		// TODO -  this might be a good place to choose greatest 4 weights
-		for ( var i = 0; i < weights.length; i ++ ) {
-
-			var indicies = new THREE.Vector4(
-				weights[ i ].joint[ 0 ] ? weights[ i ].joint[ 0 ] : 0,
-				weights[ i ].joint[ 1 ] ? weights[ i ].joint[ 1 ] : 0,
-				weights[ i ].joint[ 2 ] ? weights[ i ].joint[ 2 ] : 0,
-				weights[ i ].joint[ 3 ] ? weights[ i ].joint[ 3 ] : 0 );
-
-			var weight = new THREE.Vector4(
-				weights[ i ].weight[ 0 ] ? weights[ i ].weight[ 0 ] : 0,
-				weights[ i ].weight[ 1 ] ? weights[ i ].weight[ 1 ] : 0,
-				weights[ i ].weight[ 2 ] ? weights[ i ].weight[ 2 ] : 0,
-				weights[ i ].weight[ 3 ] ? weights[ i ].weight[ 3 ] : 0 );
-
-			this.skinIndices.push( indicies );
-			this.skinWeights.push( weight );
-
-		}
-
-		//console.log( this );
-		return this;
-
-	};
-
-	function Bones() {
-
-		// returns bones hierarchy tree.
-		//	  [
-		//		  {
-		//			  "parent": id,
-		//			  "name": name,
-		//			  "pos": pos,
-		//			  "rotq": quat
-		//		  },
-		//		  ...
-		//		  {},
-		//		  ...
-		//	  ]
-		//
-		/* sample response
-
-		   "bones" : [
-			{"parent":-1, "name":"Fbx01",			"pos":[-0.002,	 98.739,   1.6e-05],	 "rotq":[0, 0, 0, 1]},
-			{"parent":0,  "name":"Fbx01_Pelvis",	 "pos":[0.00015963, 0,		7.33107e-08], "rotq":[0, 0, 0, 1]},
-			{"parent":1,  "name":"Fbx01_Spine",	  "pos":[6.577e-06,  10.216,   0.0106811],   "rotq":[0, 0, 0, 1]},
-			{"parent":2,  "name":"Fbx01_R_Thigh",	"pos":[14.6537,	-10.216,  -0.00918758], "rotq":[0, 0, 0, 1]},
-			{"parent":3,  "name":"Fbx01_R_Calf",	 "pos":[-3.70047,	 -42.9681,	 -7.78158],	 "rotq":[0, 0, 0, 1]},
-			{"parent":4,  "name":"Fbx01_R_Foot",	 "pos":[-2.0696,	  -46.0488,	 9.42052],	  "rotq":[0, 0, 0, 1]},
-			{"parent":5,  "name":"Fbx01_R_Toe0",	 "pos":[-0.0234785,   -9.46233,	 -15.3187],	 "rotq":[0, 0, 0, 1]},
-			{"parent":2,  "name":"Fbx01_L_Thigh",	"pos":[-14.6537,	 -10.216,	  -0.00918314],  "rotq":[0, 0, 0, 1]},
-			{"parent":7,  "name":"Fbx01_L_Calf",	 "pos":[3.70037,	  -42.968,	  -7.78155],	 "rotq":[0, 0, 0, 1]},
-			{"parent":8,  "name":"Fbx01_L_Foot",	 "pos":[2.06954,	  -46.0488,	 9.42052],	  "rotq":[0, 0, 0, 1]},
-			{"parent":9,  "name":"Fbx01_L_Toe0",	 "pos":[0.0234566,	-9.46235,	 -15.3187],	 "rotq":[0, 0, 0, 1]},
-			{"parent":2,  "name":"Fbx01_Spine1",	 "pos":[-2.97523e-05, 11.5892,	  -9.81027e-05], "rotq":[0, 0, 0, 1]},
-			{"parent":11, "name":"Fbx01_Spine2",	 "pos":[-2.91292e-05, 11.4685,	  8.27126e-05],  "rotq":[0, 0, 0, 1]},
-			{"parent":12, "name":"Fbx01_Spine3",	 "pos":[-4.48857e-05, 11.5783,	  8.35108e-05],  "rotq":[0, 0, 0, 1]},
-			{"parent":13, "name":"Fbx01_Neck",	   "pos":[1.22987e-05,  11.5582,	  -0.0044775],   "rotq":[0, 0, 0, 1]},
-			{"parent":14, "name":"Fbx01_Head",	   "pos":[-3.50709e-05, 6.62915,	  -0.00523254],  "rotq":[0, 0, 0, 1]},
-			{"parent":15, "name":"Fbx01_R_Eye",	  "pos":[3.31681,	  12.739,	   -10.5267],	 "rotq":[0, 0, 0, 1]},
-			{"parent":15, "name":"Fbx01_L_Eye",	  "pos":[-3.32038,	 12.7391,	  -10.5267],	 "rotq":[0, 0, 0, 1]},
-			{"parent":15, "name":"Jaw",			  "pos":[-0.0017738,   7.43481,	  -4.08114],	 "rotq":[0, 0, 0, 1]},
-			{"parent":14, "name":"Fbx01_R_Clavicle", "pos":[3.10919,	  2.46577,	  -0.0115284],   "rotq":[0, 0, 0, 1]},
-			{"parent":19, "name":"Fbx01_R_UpperArm", "pos":[16.014,	   4.57764e-05,  3.10405],	  "rotq":[0, 0, 0, 1]},
-			{"parent":20, "name":"Fbx01_R_Forearm",  "pos":[22.7068,	  -1.66322,	 -2.13803],	 "rotq":[0, 0, 0, 1]},
-			{"parent":21, "name":"Fbx01_R_Hand",	 "pos":[25.5881,	  -0.80249,	 -6.37307],	 "rotq":[0, 0, 0, 1]},
-			...
-			{"parent":27, "name":"Fbx01_R_Finger32", "pos":[2.15572,	  -0.548737,	-0.539604],	"rotq":[0, 0, 0, 1]},
-			{"parent":22, "name":"Fbx01_R_Finger2",  "pos":[9.79318,	  0.132553,	 -2.97845],	 "rotq":[0, 0, 0, 1]},
-			{"parent":29, "name":"Fbx01_R_Finger21", "pos":[2.74037,	  0.0483093,	-0.650531],	"rotq":[0, 0, 0, 1]},
-			{"parent":55, "name":"Fbx01_L_Finger02", "pos":[-1.65308,	 -1.43208,	 -1.82885],	 "rotq":[0, 0, 0, 1]}
-			]
-		*/
-		this.hierarchy = [];
-
-	}
-
-	Bones.prototype.parseHierarchy = function ( node ) {
-
-		var objects = node.Objects;
-		var models = objects.subNodes.Model;
-
-		var bones = [];
-		for ( var id in models ) {
-
-			if ( models[ id ].attrType === undefined ) {
-
-				continue;
-
-			}
-			bones.push( models[ id ] );
-
-		}
-
-		this.hierarchy = [];
-		for ( var i = 0; i < bones.length; ++ i ) {
-
-			var bone = bones[ i ];
-
-			var p = node.searchConnectionParent( bone.id )[ 0 ];
-			var t = [ 0.0, 0.0, 0.0 ];
-			var r = [ 0.0, 0.0, 0.0, 1.0 ];
-			var s = [ 1.0, 1.0, 1.0 ];
-
-			if ( 'Lcl_Translation' in bone.properties ) {
-
-				t = toFloat( bone.properties.Lcl_Translation.value.split( ',' ) );
-
-			}
-
-			if ( 'Lcl_Rotation' in bone.properties ) {
-
-				r = toRad( toFloat( bone.properties.Lcl_Rotation.value.split( ',' ) ) );
-				var q = new THREE.Quaternion();
-				q.setFromEuler( new THREE.Euler( r[ 0 ], r[ 1 ], r[ 2 ], 'ZYX' ) );
-				r = [ q.x, q.y, q.z, q.w ];
-
-			}
-
-			if ( 'Lcl_Scaling' in bone.properties ) {
-
-				s = toFloat( bone.properties.Lcl_Scaling.value.split( ',' ) );
-
-			}
-
-			// replace unsafe character
-			var name = bone.attrName;
-			name = name.replace( /:/, '' );
-			name = name.replace( /_/, '' );
-			name = name.replace( /-/, '' );
-			this.hierarchy.push( { "parent": p, "name": name, "pos": t, "rotq": r, "scl": s, "internalId": bone.id } );
-
-		}
-
-		this.reindexParentId();
-
-		this.restoreBindPose( node );
-
-		return this;
-
-	};
-
-	Bones.prototype.reindexParentId = function () {
-
-		for ( var h = 0; h < this.hierarchy.length; h ++ ) {
-
-			for ( var ii = 0; ii < this.hierarchy.length; ++ ii ) {
-
-				if ( this.hierarchy[ h ].parent == this.hierarchy[ ii ].internalId ) {
-
-					this.hierarchy[ h ].parent = ii;
-					break;
-
-				}
-
-			}
-
-		}
-
-	};
-
-	Bones.prototype.restoreBindPose = function ( node ) {
-
-		var bindPoseNode = node.Objects.subNodes.Pose;
-		if ( bindPoseNode === undefined ) {
-
-			return;
-
-		}
-
-		var poseNode = bindPoseNode.subNodes.PoseNode;
-		var localMatrices = {}; // store local matrices, modified later( initialy world space )
-		var worldMatrices = {}; // store world matrices
-
-		for ( var i = 0; i < poseNode.length; ++ i ) {
-
-			var rawMatLcl = toMat44( poseNode[ i ].subNodes.Matrix.properties.a.split( ',' ) );
-			var rawMatWrd = toMat44( poseNode[ i ].subNodes.Matrix.properties.a.split( ',' ) );
-
-			localMatrices[ poseNode[ i ].id ] = rawMatLcl;
-			worldMatrices[ poseNode[ i ].id ] = rawMatWrd;
-
-		}
-
-		for ( var h = 0; h < this.hierarchy.length; ++ h ) {
-
-			var bone = this.hierarchy[ h ];
-			var inId = bone.internalId;
-
-			if ( worldMatrices[ inId ] === undefined ) {
-
-				// has no bind pose node, possibly be mesh
-				// console.log( bone );
-				continue;
-
-			}
-
-			var t = new THREE.Vector3( 0, 0, 0 );
-			var r = new THREE.Quaternion();
-			var s = new THREE.Vector3( 1, 1, 1 );
-
-			var parentId;
-			var parentNodes = node.searchConnectionParent( inId );
-			for ( var pn = 0; pn < parentNodes.length; ++ pn ) {
-
-				if ( this.isBoneNode( parentNodes[ pn ] ) ) {
-
-					parentId = parentNodes[ pn ];
-					break;
-
-				}
-
-			}
-
-			if ( parentId !== undefined && localMatrices[ parentId ] !== undefined ) {
-
-				// convert world space matrix into local space
-				var inv = new THREE.Matrix4();
-				inv.getInverse( worldMatrices[ parentId ] );
-				inv.multiply( localMatrices[ inId ] );
-				localMatrices[ inId ] = inv;
-
-			} else {
-				//console.log( bone );
-			}
-
-			localMatrices[ inId ].decompose( t, r, s );
-			bone.pos = [ t.x, t.y, t.z ];
-			bone.rotq = [ r.x, r.y, r.z, r.w ];
-			bone.scl = [ s.x, s.y, s.z ];
-
-		}
-
-	};
-
-	Bones.prototype.searchRealId = function ( internalId ) {
-
-		for ( var h = 0; h < this.hierarchy.length; h ++ ) {
-
-			if ( internalId == this.hierarchy[ h ].internalId ) {
-
-				return h;
-
-			}
-
-		}
-
-		// console.warn( 'FBXLoader: notfound internalId in bones: ' + internalId);
-		return - 1;
-
-	};
-
-	Bones.prototype.getByInternalId = function ( internalId ) {
-
-		for ( var h = 0; h < this.hierarchy.length; h ++ ) {
-
-			if ( internalId == this.hierarchy[ h ].internalId ) {
-
-				return this.hierarchy[ h ];
-
-			}
-
-		}
-
-		return null;
-
-	};
-
-	Bones.prototype.isBoneNode = function ( id ) {
-
-		for ( var i = 0; i < this.hierarchy.length; ++ i ) {
-
-			if ( id === this.hierarchy[ i ].internalId ) {
-
-				return true;
-
-			}
-
-		}
-		return false;
-
-	};
-
-	Bones.prototype.getBoneIdfromInternalId = function ( node, id ) {
-
-		if ( node.__cache_get_boneid_from_internalid === undefined ) {
-
-			node.__cache_get_boneid_from_internalid = [];
-
-		}
-
-		if ( node.__cache_get_boneid_from_internalid[ id ] !== undefined ) {
-
-			return node.__cache_get_boneid_from_internalid[ id ];
-
-		}
-
-		for ( var i = 0; i < this.hierarchy.length; ++ i ) {
-
-			if ( this.hierarchy[ i ].internalId == id ) {
-
-				var res = i;
-				node.__cache_get_boneid_from_internalid[ id ] = i;
-				return i;
-
-			}
-
-		}
-
-		// console.warn( 'FBXLoader: bone internalId(' + id + ') not found in bone hierarchy' );
-		return - 1;
-
-	};
-
-
-	function Geometry() {
-
-		this.node = null;
-		this.name = null;
-		this.id = null;
-
-		this.vertices = [];
-		this.indices = [];
-		this.normals = [];
-		this.uvs = [];
-
-		this.bones = [];
-		this.skins = null;
-
-	}
-
-	Geometry.prototype.parse = function ( geoNode ) {
-
-		this.node = geoNode;
-		this.name = geoNode.attrName;
-		this.id = geoNode.id;
-
-		this.vertices = this.getVertices();
-
-		if ( this.vertices === undefined ) {
-
-			console.log( 'FBXLoader: Geometry.parse(): pass' + this.node.id );
-			return;
-
-		}
-
-		this.indices = this.getPolygonVertexIndices();
-		this.uvs = ( new UV() ).parse( this.node, this );
-		this.normals = ( new Normal() ).parse( this.node, this );
-
-		if ( this.getPolygonTopologyMax() > 3 ) {
-
-			this.indices = this.convertPolyIndicesToTri(
-								this.indices, this.getPolygonTopologyArray() );
-
-		}
-
-		return this;
-
-	};
-
-
-	Geometry.prototype.getVertices = function () {
-
-		if ( this.node.__cache_vertices ) {
-
-			return this.node.__cache_vertices;
-
-		}
-
-		if ( this.node.subNodes.Vertices === undefined ) {
-
-			console.warn( 'this.node: ' + this.node.attrName + "(" + this.node.id + ") does not have Vertices" );
-			this.node.__cache_vertices = undefined;
-			return null;
-
-		}
-
-		var rawTextVert	= this.node.subNodes.Vertices.properties.a;
-		var vertices = rawTextVert.split( ',' ).map( function ( element ) {
-
-			return parseFloat( element );
-
-		} );
-
-		this.node.__cache_vertices = vertices;
-		return this.node.__cache_vertices;
-
-	};
-
-	Geometry.prototype.getPolygonVertexIndices = function () {
-
-		if ( this.node.__cache_indices && this.node.__cache_poly_topology_max ) {
-
-			return this.node.__cache_indices;
-
-		}
-
-		if ( this.node.subNodes === undefined ) {
-
-			console.error( 'this.node.subNodes undefined' );
-			console.log( this.node );
-			return;
-
-		}
-
-		if ( this.node.subNodes.PolygonVertexIndex === undefined ) {
-
-			console.warn( 'this.node: ' + this.node.attrName + "(" + this.node.id + ") does not have PolygonVertexIndex " );
-			this.node.__cache_indices = undefined;
-			return;
-
-		}
-
-		var rawTextIndices = this.node.subNodes.PolygonVertexIndex.properties.a;
-		var indices = rawTextIndices.split( ',' );
-
-		var currentTopo = 1;
-		var topologyN = null;
-		var topologyArr = [];
-
-		// The indices that make up the polygon are in order and a negative index
-		// means that it’s the last index of the polygon. That index needs
-		// to be made positive and then you have to subtract 1 from it!
-		for ( var i = 0; i < indices.length; ++ i ) {
-
-			var tmpI = parseInt( indices[ i ] );
-			// found n
-			if ( tmpI < 0 ) {
-
-				if ( currentTopo > topologyN ) {
-
-					topologyN = currentTopo;
-
-				}
-
-				indices[ i ] = tmpI ^ - 1;
-				topologyArr.push( currentTopo );
-				currentTopo = 1;
-
-			} else {
-
-				indices[ i ] = tmpI;
-				currentTopo ++;
-
-			}
-
-		}
-
-		if ( topologyN === null ) {
-
-			console.warn( "FBXLoader: topology N not found: " + this.node.attrName );
-			console.warn( this.node );
-			topologyN = 3;
-
-		}
-
-		this.node.__cache_poly_topology_max = topologyN;
-		this.node.__cache_poly_topology_arr = topologyArr;
-		this.node.__cache_indices = indices;
-
-		return this.node.__cache_indices;
-
-	};
-
-	Geometry.prototype.getPolygonTopologyMax = function () {
-
-		if ( this.node.__cache_indices && this.node.__cache_poly_topology_max ) {
-
-			return this.node.__cache_poly_topology_max;
-
-		}
-
-		this.getPolygonVertexIndices( this.node );
-		return this.node.__cache_poly_topology_max;
-
-	};
-
-	Geometry.prototype.getPolygonTopologyArray = function () {
-
-		if ( this.node.__cache_indices && this.node.__cache_poly_topology_max ) {
-
-			return this.node.__cache_poly_topology_arr;
-
-		}
-
-		this.getPolygonVertexIndices( this.node );
-		return this.node.__cache_poly_topology_arr;
-
-	};
-
-	// a - d
-	// |   |
-	// b - c
-	//
-	// [( a, b, c, d ) ...........
-	// [( a, b, c ), (a, c, d )....
-	Geometry.prototype.convertPolyIndicesToTri = function ( indices, strides ) {
-
-		var res = [];
-
-		var i = 0;
-		var tmp = [];
-		var currentPolyNum = 0;
-		var currentStride = 0;
-
-		while ( i < indices.length ) {
-
-			currentStride = strides[ currentPolyNum ];
-
-			// CAUTIN: NG over 6gon
-			for ( var j = 0; j <= ( currentStride - 3 ); j ++ ) {
-
-				res.push( indices[ i ] );
-				res.push( indices[ i + ( currentStride - 2 - j ) ] );
-				res.push( indices[ i + ( currentStride - 1 - j ) ] );
-
-			}
-
-			currentPolyNum ++;
-			i += currentStride;
-
-		}
-
-		return res;
-
-	};
-
-	Geometry.prototype.addBones = function ( bones ) {
-
-		this.bones = bones;
-
-	};
-
-
-	function UV() {
-
-		this.uv = null;
-		this.map = null;
-		this.ref = null;
-		this.node = null;
-		this.index = null;
-
-	}
-
-	UV.prototype.getUV = function ( node ) {
-
-		if ( this.node && this.uv && this.map && this.ref ) {
-
-			return this.uv;
-
-		} else {
-
-			return this._parseText( node );
-
-		}
-
-	};
-
-	UV.prototype.getMap = function ( node ) {
-
-		if ( this.node && this.uv && this.map && this.ref ) {
-
-			return this.map;
-
-		} else {
-
-			this._parseText( node );
-			return this.map;
-
-		}
-
-	};
-
-	UV.prototype.getRef = function ( node ) {
-
-		if ( this.node && this.uv && this.map && this.ref ) {
-
-			return this.ref;
-
-		} else {
-
-			this._parseText( node );
-			return this.ref;
-
-		}
-
-	};
-
-	UV.prototype.getIndex = function ( node ) {
-
-		if ( this.node && this.uv && this.map && this.ref ) {
-
-			return this.index;
-
-		} else {
-
-			this._parseText( node );
-			return this.index;
-
-		}
-
-	};
-
-	UV.prototype.getNode = function ( topnode ) {
-
-		if ( this.node !== null ) {
-
-			return this.node;
-
-		}
-
-		this.node = topnode.subNodes.LayerElementUV;
-		return this.node;
-
-	};
-
-	UV.prototype._parseText = function ( node ) {
-
-		var uvNode = this.getNode( node );
-		if ( uvNode === undefined ) {
-
-			// console.log( node.attrName + "(" + node.id + ")" + " has no LayerElementUV." );
-			return [];
-
-		}
-
-		var count = 0;
-		var x = '';
-		for ( var n in uvNode ) {
-
-			if ( n.match( /^\d+$/ ) ) {
-
-				count ++;
-				x = n;
-
-			}
-
-		}
-
-		if ( count > 0 ) {
-
-			console.warn( 'multi uv not supported' );
-			uvNode = uvNode[ n ];
-
-		}
-
-		var uvIndex = uvNode.subNodes.UVIndex.properties.a;
-		var uvs = uvNode.subNodes.UV.properties.a;
-		var uvMap = uvNode.properties.MappingInformationType;
-		var uvRef = uvNode.properties.ReferenceInformationType;
-
-
-		this.uv	= toFloat( uvs.split( ',' ) );
-		this.index = toInt( uvIndex.split( ',' ) );
-
-		this.map = uvMap; // TODO: normalize notation shaking... FOR BLENDER
-		this.ref = uvRef;
-
-		return this.uv;
-
-	};
-
-	UV.prototype.parse = function ( node, geo ) {
-
-		this.uvNode = this.getNode( node );
-
-		this.uv = this.getUV( node );
-		var mappingType = this.getMap( node );
-		var refType = this.getRef( node );
-		var indices = this.getIndex( node );
-
-		var strides = geo.getPolygonTopologyArray();
-
-		// it means that there is a normal for every vertex of every polygon of the model.
-		// For example, if the models has 8 vertices that make up four quads, then there
-		// will be 16 normals (one normal * 4 polygons * 4 vertices of the polygon). Note
-		// that generally a game engine needs the vertices to have only one normal defined.
-		// So, if you find a vertex has more tha one normal, you can either ignore the normals
-		// you find after the first, or calculate the mean from all of them (normal smoothing).
-		//if ( mappingType == "ByPolygonVertex" ){
-		switch ( mappingType ) {
-
-			case "ByPolygonVertex":
-
-				switch ( refType ) {
-
-					// Direct
-					// The this.uv are in order.
-					case "Direct":
-						this.uv = this.parseUV_ByPolygonVertex_Direct( this.uv, indices, strides, 2 );
-						break;
-
-					// IndexToDirect
-					// The order of the this.uv is given by the uvsIndex property.
-					case "IndexToDirect":
-						this.uv = this.parseUV_ByPolygonVertex_IndexToDirect( this.uv, indices );
-						break;
-
-				}
-
-				// convert from by polygon(vert) data into by verts data
-				this.uv = mapByPolygonVertexToByVertex( this.uv, geo.getPolygonVertexIndices( node ), 2 );
-				break;
-
-			case "ByPolygon":
-
-				switch ( refType ) {
-
-					// Direct
-					// The this.uv are in order.
-					case "Direct":
-						this.uv = this.parseUV_ByPolygon_Direct();
-						break;
-
-					// IndexToDirect
-					// The order of the this.uv is given by the uvsIndex property.
-					case "IndexToDirect":
-						this.uv = this.parseUV_ByPolygon_IndexToDirect();
-						break;
-
-				}
-				break;
-		}
-
-		return this.uv;
-
-	};
-
-	UV.prototype.parseUV_ByPolygonVertex_Direct = function ( node, indices, strides, itemSize ) {
-
-		return parse_Data_ByPolygonVertex_Direct( node, indices, strides, itemSize );
-
-	};
-
-	UV.prototype.parseUV_ByPolygonVertex_IndexToDirect = function ( node, indices ) {
-
-		return parse_Data_ByPolygonVertex_IndexToDirect( node, indices, 2 );
-
-	};
-
-	UV.prototype.parseUV_ByPolygon_Direct = function ( node ) {
-
-		console.warn( "not implemented" );
-		return node;
-
-	};
-
-	UV.prototype.parseUV_ByPolygon_IndexToDirect = function ( node ) {
-
-		console.warn( "not implemented" );
-		return node;
-
-	};
-
-	UV.prototype.parseUV_ByVertex_Direct = function ( node ) {
-
-		console.warn( "not implemented" );
-		return node;
-
-	};
-
-
-	function Normal() {
-
-		this.normal = null;
-		this.map	= null;
-		this.ref	= null;
-		this.node = null;
-		this.index = null;
-
-	}
-
-	Normal.prototype.getNormal = function ( node ) {
-
-		if ( this.node && this.normal && this.map && this.ref ) {
-
-			return this.normal;
-
-		} else {
-
-			this._parseText( node );
-			return this.normal;
-
-		}
-
-	};
-
-	// mappingType: possible variant
-	//	  ByPolygon
-	//	  ByPolygonVertex
-	//	  ByVertex (or also ByVertice, as the Blender exporter writes)
-	//	  ByEdge
-	//	  AllSame
-	//	var mappingType = node.properties.MappingInformationType;
-	Normal.prototype.getMap = function ( node ) {
-
-		if ( this.node && this.normal && this.map && this.ref ) {
-
-			return this.map;
-
-		} else {
-
-			this._parseText( node );
-			return this.map;
-
-		}
-
-	};
-
-	// refType: possible variants
-	//	  Direct
-	//	  IndexToDirect (or Index for older versions)
-	// var refType	 = node.properties.ReferenceInformationType;
-	Normal.prototype.getRef = function ( node ) {
-
-		if ( this.node && this.normal && this.map && this.ref ) {
-
-			return this.ref;
-
-		} else {
-
-			this._parseText( node );
-			return this.ref;
-
-		}
-
-	};
-
-	Normal.prototype.getNode = function ( node ) {
-
-		if ( this.node ) {
-
-			return this.node;
-
-		}
-
-		this.node = node.subNodes.LayerElementNormal;
-		return this.node;
-
-	};
-
-	Normal.prototype._parseText = function ( node ) {
-
-		var normalNode = this.getNode( node );
-
-		if ( normalNode === undefined ) {
-
-			console.warn( 'node: ' + node.attrName + "(" + node.id + ") does not have LayerElementNormal" );
-			return;
-
-		}
-
-		var mappingType = normalNode.properties.MappingInformationType;
-		var refType = normalNode.properties.ReferenceInformationType;
-
-		var rawTextNormals = normalNode.subNodes.Normals.properties.a;
-		this.normal = toFloat( rawTextNormals.split( ',' ) );
-
-		// TODO: normalize notation shaking, vertex / vertice... blender...
-		this.map	= mappingType;
-		this.ref	= refType;
-
-	};
-
-	Normal.prototype.parse = function ( topnode, geo ) {
-
-		var normals = this.getNormal( topnode );
-		var normalNode = this.getNode( topnode );
-		var mappingType = this.getMap( topnode );
-		var refType = this.getRef( topnode );
-
-		var indices = geo.getPolygonVertexIndices( topnode );
-		var strides = geo.getPolygonTopologyArray( topnode );
-
-		// it means that there is a normal for every vertex of every polygon of the model.
-		// For example, if the models has 8 vertices that make up four quads, then there
-		// will be 16 normals (one normal * 4 polygons * 4 vertices of the polygon). Note
-		// that generally a game engine needs the vertices to have only one normal defined.
-		// So, if you find a vertex has more tha one normal, you can either ignore the normals
-		// you find after the first, or calculate the mean from all of them (normal smoothing).
-		//if ( mappingType == "ByPolygonVertex" ){
-		switch ( mappingType ) {
-
-			case "ByPolygonVertex":
-
-				switch ( refType ) {
-
-					// Direct
-					// The normals are in order.
-					case "Direct":
-						normals = this.parseNormal_ByPolygonVertex_Direct( normals, indices, strides, 3 );
-						break;
-
-					// IndexToDirect
-					// The order of the normals is given by the NormalsIndex property.
-					case "IndexToDirect":
-						normals = this.parseNormal_ByPolygonVertex_IndexToDirect();
-						break;
-
-				}
-				break;
-
-			case "ByPolygon":
-
-				switch ( refType ) {
-
-					// Direct
-					// The normals are in order.
-					case "Direct":
-						normals = this.parseNormal_ByPolygon_Direct();
-						break;
-
-					// IndexToDirect
-					// The order of the normals is given by the NormalsIndex property.
-					case "IndexToDirect":
-						normals = this.parseNormal_ByPolygon_IndexToDirect();
-						break;
-
-				}
-				break;
-		}
-
-		return normals;
-
-	};
-
-	Normal.prototype.parseNormal_ByPolygonVertex_Direct = function ( node, indices, strides, itemSize ) {
-
-		return parse_Data_ByPolygonVertex_Direct( node, indices, strides, itemSize );
-
-	};
-
-	Normal.prototype.parseNormal_ByPolygonVertex_IndexToDirect = function ( node ) {
-
-		console.warn( "not implemented" );
-		return node;
-
-	};
-
-	Normal.prototype.parseNormal_ByPolygon_Direct = function ( node ) {
-
-		console.warn( "not implemented" );
-		return node;
-
-	};
-
-	Normal.prototype.parseNormal_ByPolygon_IndexToDirect = function ( node ) {
-
-		console.warn( "not implemented" );
-		return node;
-
-	};
-
-	Normal.prototype.parseNormal_ByVertex_Direct = function ( node ) {
-
-		console.warn( "not implemented" );
-		return node;
-
-	};
-
-	function AnimationCurve() {
-
-		this.version = null;
-
-		this.id = null;
-		this.internalId = null;
-		this.times = null;
-		this.values = null;
-
-		this.attrFlag = null; // tangeant
-		this.attrData = null; // slope, weight
-
-	}
-
-	AnimationCurve.prototype.fromNode = function ( curveNode ) {
-
-		this.id = curveNode.id;
-		this.internalId = curveNode.id;
-		this.times = curveNode.subNodes.KeyTime.properties.a;
-		this.values = curveNode.subNodes.KeyValueFloat.properties.a;
-
-		this.attrFlag = curveNode.subNodes.KeyAttrFlags.properties.a;
-		this.attrData = curveNode.subNodes.KeyAttrDataFloat.properties.a;
-
-		this.times = toFloat( this.times.split(	',' ) );
-		this.values = toFloat( this.values.split( ',' ) );
-		this.attrData = toFloat( this.attrData.split( ',' ) );
-		this.attrFlag = toInt( this.attrFlag.split( ',' ) );
-
-		this.times = this.times.map( function ( element ) {
-
-			return FBXTimeToSeconds( element );
-
-		} );
-
-		return this;
-
-	};
-
-	AnimationCurve.prototype.getLength = function () {
-
-		return this.times[ this.times.length - 1 ];
-
-	};
-
-	function AnimationNode() {
-
-		this.id = null;
-		this.attr = null; // S, R, T
-		this.attrX = false;
-		this.attrY = false;
-		this.attrZ = false;
-		this.internalId = null;
-		this.containerInternalId = null; // bone, null etc Id
-		this.containerBoneId = null; // bone, null etc Id
-		this.curveIdx = null; // AnimationCurve's indices
-		this.curves = [];	// AnimationCurve refs
-
-	}
-
-	AnimationNode.prototype.fromNode = function ( allNodes, node, bones ) {
-
-		this.id = node.id;
-		this.attr = node.attrName;
-		this.internalId = node.id;
-
-		if ( this.attr.match( /S|R|T/ ) ) {
-
-			for ( var attrKey in node.properties ) {
-
-				if ( attrKey.match( /X/ ) ) {
-
-					this.attrX = true;
-
-				}
-				if ( attrKey.match( /Y/ ) ) {
-
-					this.attrY = true;
-
-				}
-				if ( attrKey.match( /Z/ ) ) {
-
-					this.attrZ = true;
-
-				}
-
-			}
-
-		} else {
-
-			// may be deform percent nodes
-			return null;
-
-		}
-
-		this.containerIndices = allNodes.searchConnectionParent( this.id );
-		this.curveIdx	= allNodes.searchConnectionChildren( this.id );
-
-		for ( var i = this.containerIndices.length - 1; i >= 0; -- i ) {
-
-			var boneId = bones.searchRealId( this.containerIndices[ i ] );
-			if ( boneId >= 0 ) {
-
-				this.containerBoneId = boneId;
-				this.containerId = this.containerIndices [ i ];
-
-			}
-
-			if ( boneId >= 0 ) {
-
-				break;
-
-			}
-
-		}
-		// this.containerBoneId = bones.searchRealId( this.containerIndices );
-
-		return this;
-
-	};
-
-	AnimationNode.prototype.setCurve = function ( curve ) {
-
-		this.curves.push( curve );
-
-	};
-
-	function Animation() {
-
-		this.curves = {};
-		this.length = 0.0;
-		this.fps	= 30.0;
-		this.frames = 0.0;
-
-	}
-
-	Animation.prototype.parse = function ( node, bones ) {
-
-		var rawNodes = node.Objects.subNodes.AnimationCurveNode;
-		var rawCurves = node.Objects.subNodes.AnimationCurve;
-
-		// first: expand AnimationCurveNode into curve nodes
-		var curveNodes = [];
-		for ( var key in rawNodes ) {
-
-			if ( key.match( /\d+/ ) ) {
-
-				var a = ( new AnimationNode() ).fromNode( node, rawNodes[ key ], bones );
-				curveNodes.push( a );
-
-			}
-
-		}
-
-		// second: gen dict, mapped by internalId
-		var tmp = {};
-		for ( var i = 0; i < curveNodes.length; ++ i ) {
-
-			if ( curveNodes[ i ] === null ) {
-
-				continue;
-
-			}
-
-			tmp[ curveNodes[ i ].id ] = curveNodes[ i ];
-
-		}
-
-		// third: insert curves into the dict
-		var ac = [];
-		var max = 0.0;
-		for ( key in rawCurves ) {
-
-			if ( key.match( /\d+/ ) ) {
-
-				var c = ( new AnimationCurve() ).fromNode( rawCurves[ key ] );
-				ac.push( c );
-				max = c.getLength() ? c.getLength() : max;
-
-				var parentId = node.searchConnectionParent( c.id )[ 0 ];
-				var axis = node.searchConnectionType( c.id, parentId );
-
-				if ( axis.match( /X/ ) ) {
-
-					axis = 'x';
-
-				}
-				if ( axis.match( /Y/ ) ) {
-
-					axis = 'y';
-
-				}
-				if ( axis.match( /Z/ ) ) {
-
-					axis = 'z';
-
-				}
-
-				tmp[ parentId ].curves[ axis ] = c;
-
-			}
-
-		}
-
-		// forth:
-		for ( var t in tmp ) {
-
-			var id = tmp[ t ].containerBoneId;
-			if ( this.curves[ id ] === undefined ) {
-
-				this.curves[ id ] = {};
-
-			}
-
-			this.curves[ id ][ tmp[ t ].attr ] = tmp[ t ];
-
-		}
-
-		this.length = max;
-		this.frames = this.length * this.fps;
-
-		return this;
-
-	};
-
-
-	function Textures() {
-
-		this.textures = [];
-		this.perGeoMap = {};
-
-	}
-
-	Textures.prototype.add = function ( tex ) {
-
-		if ( this.textures === undefined ) {
-
-			this.textures = [];
-
-		}
-
-		this.textures.push( tex );
-
-		for ( var i = 0; i < tex.parentIds.length; ++ i ) {
-
-			if ( this.perGeoMap[ tex.parentIds[ i ] ] === undefined ) {
-
-				this.perGeoMap[ tex.parentIds[ i ] ] = [];
-
-			}
-
-			this.perGeoMap[ tex.parentIds[ i ] ].push( this.textures[ this.textures.length - 1 ] );
-
-		}
-
-	};
-
-	Textures.prototype.parse = function ( node, bones ) {
-
-		var rawNodes = node.Objects.subNodes.Texture;
-
-		for ( var n in rawNodes ) {
-
-			var tex = ( new Texture() ).parse( rawNodes[ n ], node );
-			this.add( tex );
-
-		}
-
-		return this;
-
-	};
-
-	Textures.prototype.getById = function ( id ) {
-
-		return this.perGeoMap[ id ];
-
-	};
-
-	function Texture() {
-
-		this.fileName = "";
-		this.name = "";
-		this.id = null;
-		this.parentIds = [];
-
-	}
-
-	Texture.prototype.parse = function ( node, nodes ) {
-
-		this.id = node.id;
-		this.name = node.attrName;
-		this.fileName = this.parseFileName( node.properties.FileName );
-
-		this.parentIds = this.searchParents( this.id, nodes );
-
-		return this;
-
-	};
-
-	// TODO: support directory
-	Texture.prototype.parseFileName = function ( fname ) {
-
-		if ( fname === undefined ) {
-
-			return "";
-
-		}
-
-		// ignore directory structure, flatten path
-		var splitted = fname.split( /[\\\/]/ );
-		if ( splitted.length > 0 ) {
-
-			return splitted[ splitted.length - 1 ];
-
-		} else {
-
-			return fname;
-
-		}
-
-	};
-
-	Texture.prototype.searchParents = function ( id, nodes ) {
-
-		var p = nodes.searchConnectionParent( id );
-
-		return p;
-
-	};
-
-
-	/* --------------------------------------------------------------------- */
-	/* --------------------------------------------------------------------- */
-	/* --------------------------------------------------------------------- */
-	/* --------------------------------------------------------------------- */
-
-	function loadTextureImage( texture, url ) {
-
-		var loader = new THREE.ImageLoader();
-
-		loader.load( url, function ( image ) {
-
-
-		} );
-
-		loader.load( url, function ( image ) {
-
-			texture.image = image;
-			texture.needUpdate = true;
-			console.log( 'tex load done' );
-
-		},
-
-		// Function called when download progresses
-			function ( xhr ) {
-
-				console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
-
-			},
-
-			// Function called when download errors
-			function ( xhr ) {
-
-				console.log( 'An error happened' );
-
-			}
-		);
-
-	}
-
-	// LayerElementUV: 0 {
-	// 	Version: 101
-	//	Name: "Texture_Projection"
-	//	MappingInformationType: "ByPolygonVertex"
-	//	ReferenceInformationType: "IndexToDirect"
-	//	UV: *1746 {
-	//	UVIndex: *7068 {
-	//
-	//	The order of the uvs is given by the UVIndex property.
-	function parse_Data_ByPolygonVertex_IndexToDirect( node, indices, itemSize ) {
-
-		var res = [];
-
-		for ( var i = 0; i < indices.length; ++ i ) {
-
-			for ( var j = 0; j < itemSize; ++ j ) {
-
-				res.push( node[ ( indices[ i ] * itemSize ) + j ] );
-
-			}
-
-		}
-
-		return res;
-
-	}
-
-
-	// what want:　normal per vertex, order vertice
-	// i have: normal per polygon
-	// i have: indice per polygon
-	parse_Data_ByPolygonVertex_Direct = function ( node, indices, strides, itemSize ) {
-
-		// *21204 > 3573
-		// Geometry: 690680816, "Geometry::", "Mesh" {
-		//  Vertices: *3573 {
-		//  PolygonVertexIndex: *7068 {
-
-		var tmp = [];
-		var currentIndex = 0;
-
-		// first: sort to per vertex
-		for ( var i = 0; i < indices.length; ++ i ) {
-
-			tmp[ indices[ i ] ] = [];
-
-			// TODO: duped entry? blend or something?
-			for ( var s = 0; s < itemSize; ++ s ) {
-
-				tmp[ indices[ i ] ][ s ] = node[ currentIndex + s ];
-
-			}
-
-			currentIndex += itemSize;
-
-		}
-
-		// second: expand x,y,z into serial array
-		var res = [];
-		for ( var jj = 0; jj < tmp.length; ++ jj ) {
-
-			if ( tmp[ jj ] === undefined ) {
-
-				continue;
-
-			}
-
-			for ( var t = 0; t < itemSize; ++ t ) {
-
-				if ( tmp[ jj ][ t ] === undefined ) {
-
-					continue;
-
-				}
-				res.push( tmp[ jj ][ t ] );
-
-			}
-
-		}
-
-		return res;
-
-	};
-
-	// convert from by polygon(vert) data into by verts data
-	function mapByPolygonVertexToByVertex( data, indices, stride ) {
-
-		var tmp = {};
-		var res = [];
-		var max = 0;
-
-		for ( var i = 0; i < indices.length; ++ i ) {
-
-			if ( indices[ i ] in tmp ) {
-
-				continue;
-
-			}
-
-			tmp[ indices[ i ] ] = {};
-
-			for ( var j = 0; j < stride; ++ j ) {
-
-				tmp[ indices[ i ] ][ j ] = data[ i * stride + j ];
-
-			}
-
-			max = max < indices[ i ] ? indices[ i ] : max;
-
-		}
-
-		try {
-
-			for ( i = 0; i <= max; i ++ ) {
-
-				for ( var s = 0; s < stride; s ++ ) {
-
-					res.push( tmp[ i ][ s ] );
-
-				}
-
-			}
-
-		} catch ( e ) {
-			//console.log( max );
-			//console.log( tmp );
-			//console.log( i );
-			//console.log( e );
-		}
-
-		return res;
-
-	}
-
-	// AUTODESK uses broken clock. i guess
-	var FBXTimeToSeconds = function ( adskTime ) {
-
-		return adskTime / 46186158000;
-
-	};
-
-	degToRad = function ( degrees ) {
-
-		return degrees * Math.PI / 180;
-
-	};
-
-	radToDeg = function ( radians ) {
-
-		return radians * 180 / Math.PI;
-
-	};
-
-	quatFromVec = function ( x, y, z ) {
-
-		var euler = new THREE.Euler( x, y, z, 'ZYX' );
-		var quat = new THREE.Quaternion();
-		quat.setFromEuler( euler );
-
-		return quat;
-
-	};
-
-
-	// extend Array.prototype ?  ....uuuh
-	toInt = function ( arr ) {
-
-		return arr.map( function ( element ) {
-
-			return parseInt( element );
-
-		} );
-
-	};
-
-	toFloat = function ( arr ) {
-
-		return arr.map( function ( element ) {
-
-			return parseFloat( element );
-
-		} );
-
-	};
-
-	toRad = function ( arr ) {
-
-		return arr.map( function ( element ) {
-
-			return degToRad( element );
-
-		} );
-
-	};
-
-	toMat44 = function ( arr ) {
-
-		var mat = new THREE.Matrix4();
-		mat.set(
-			arr[ 0 ], arr[ 4 ], arr[ 8 ], arr[ 12 ],
-			arr[ 1 ], arr[ 5 ], arr[ 9 ], arr[ 13 ],
-			arr[ 2 ], arr[ 6 ], arr[ 10 ], arr[ 14 ],
-			arr[ 3 ], arr[ 7 ], arr[ 11 ], arr[ 15 ]
-		);
-
-		/*
-		mat.set(
-			arr[ 0], arr[ 1], arr[ 2], arr[ 3],
-			arr[ 4], arr[ 5], arr[ 6], arr[ 7],
-			arr[ 8], arr[ 9], arr[10], arr[11],
-			arr[12], arr[13], arr[14], arr[15]
-		);
-		// */
-
-		return mat;
-
-	};
-
-} )();
-
-/**
  * @author alteredq / http://alteredqualia.com/
  *
  * Full-screen textured quad shader
@@ -63466,111 +59118,6 @@ THREE.FXAAShader = {
 				"gl_FragColor = rgbB;",
 
 			"}",
-
-		"}"
-
-	].join( "\n" )
-
-};
-
-/**
- * @author alteredq / http://alteredqualia.com/
- *
- * Film grain & scanlines shader
- *
- * - ported from HLSL to WebGL / GLSL
- * http://www.truevision3d.com/forums/showcase/staticnoise_colorblackwhite_scanline_shaders-t18698.0.html
- *
- * Screen Space Static Postprocessor
- *
- * Produces an analogue noise overlay similar to a film grain / TV static
- *
- * Original implementation and noise algorithm
- * Pat 'Hawthorne' Shearon
- *
- * Optimized scanlines + noise version with intensity scaling
- * Georg 'Leviathan' Steinrohder
- *
- * This version is provided under a Creative Commons Attribution 3.0 License
- * http://creativecommons.org/licenses/by/3.0/
- */
-
-THREE.FilmShader = {
-
-	uniforms: {
-
-		"tDiffuse":   { value: null },
-		"time":       { value: 0.0 },
-		"nIntensity": { value: 0.5 },
-		"sIntensity": { value: 0.05 },
-		"sCount":     { value: 4096 },
-		"grayscale":  { value: 1 }
-
-	},
-
-	vertexShader: [
-
-		"varying vec2 vUv;",
-
-		"void main() {",
-
-			"vUv = uv;",
-			"gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
-
-		"}"
-
-	].join( "\n" ),
-
-	fragmentShader: [
-
-		"#include <common>",
-		
-		// control parameter
-		"uniform float time;",
-
-		"uniform bool grayscale;",
-
-		// noise effect intensity value (0 = no effect, 1 = full effect)
-		"uniform float nIntensity;",
-
-		// scanlines effect intensity value (0 = no effect, 1 = full effect)
-		"uniform float sIntensity;",
-
-		// scanlines effect count value (0 = no effect, 4096 = full effect)
-		"uniform float sCount;",
-
-		"uniform sampler2D tDiffuse;",
-
-		"varying vec2 vUv;",
-
-		"void main() {",
-
-			// sample the source
-			"vec4 cTextureScreen = texture2D( tDiffuse, vUv );",
-
-			// make some noise
-			"float dx = rand( vUv + time );",
-
-			// add noise
-			"vec3 cResult = cTextureScreen.rgb + cTextureScreen.rgb * clamp( 0.1 + dx, 0.0, 1.0 );",
-
-			// get us a sine and cosine
-			"vec2 sc = vec2( sin( vUv.y * sCount ), cos( vUv.y * sCount ) );",
-
-			// add scanlines
-			"cResult += cTextureScreen.rgb * vec3( sc.x, sc.y, sc.x ) * sIntensity;",
-
-			// interpolate between source and result by intensity
-			"cResult = cTextureScreen.rgb + clamp( nIntensity, 0.0,1.0 ) * ( cResult - cTextureScreen.rgb );",
-
-			// convert to grayscale if desired
-			"if( grayscale ) {",
-
-				"cResult = vec3( cResult.r * 0.3 + cResult.g * 0.59 + cResult.b * 0.11 );",
-
-			"}",
-
-			"gl_FragColor =  vec4( cResult, cTextureScreen.a );",
 
 		"}"
 
@@ -64248,2662 +59795,6 @@ function setup(type, target) {
     // end D:\Documents\VR\bare-bones-logger\src\logger\setup.js
     ////////////////////////////////////////////////////////////////////////////////
 console.info("bare-bones-logger v2.0.7. see https://github.com/capnmidnight/logger for more information.");
-(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.adapter = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
- /* eslint-env node */
-'use strict';
-
-// SDP helpers.
-var SDPUtils = {};
-
-// Generate an alphanumeric identifier for cname or mids.
-// TODO: use UUIDs instead? https://gist.github.com/jed/982883
-SDPUtils.generateIdentifier = function() {
-  return Math.random().toString(36).substr(2, 10);
-};
-
-// The RTCP CNAME used by all peerconnections from the same JS.
-SDPUtils.localCName = SDPUtils.generateIdentifier();
-
-// Splits SDP into lines, dealing with both CRLF and LF.
-SDPUtils.splitLines = function(blob) {
-  return blob.trim().split('\n').map(function(line) {
-    return line.trim();
-  });
-};
-// Splits SDP into sessionpart and mediasections. Ensures CRLF.
-SDPUtils.splitSections = function(blob) {
-  var parts = blob.split('\nm=');
-  return parts.map(function(part, index) {
-    return (index > 0 ? 'm=' + part : part).trim() + '\r\n';
-  });
-};
-
-// Returns lines that start with a certain prefix.
-SDPUtils.matchPrefix = function(blob, prefix) {
-  return SDPUtils.splitLines(blob).filter(function(line) {
-    return line.indexOf(prefix) === 0;
-  });
-};
-
-// Parses an ICE candidate line. Sample input:
-// candidate:702786350 2 udp 41819902 8.8.8.8 60769 typ relay raddr 8.8.8.8
-// rport 55996"
-SDPUtils.parseCandidate = function(line) {
-  var parts;
-  // Parse both variants.
-  if (line.indexOf('a=candidate:') === 0) {
-    parts = line.substring(12).split(' ');
-  } else {
-    parts = line.substring(10).split(' ');
-  }
-
-  var candidate = {
-    foundation: parts[0],
-    component: parts[1],
-    protocol: parts[2].toLowerCase(),
-    priority: parseInt(parts[3], 10),
-    ip: parts[4],
-    port: parseInt(parts[5], 10),
-    // skip parts[6] == 'typ'
-    type: parts[7]
-  };
-
-  for (var i = 8; i < parts.length; i += 2) {
-    switch (parts[i]) {
-      case 'raddr':
-        candidate.relatedAddress = parts[i + 1];
-        break;
-      case 'rport':
-        candidate.relatedPort = parseInt(parts[i + 1], 10);
-        break;
-      case 'tcptype':
-        candidate.tcpType = parts[i + 1];
-        break;
-      default: // Unknown extensions are silently ignored.
-        break;
-    }
-  }
-  return candidate;
-};
-
-// Translates a candidate object into SDP candidate attribute.
-SDPUtils.writeCandidate = function(candidate) {
-  var sdp = [];
-  sdp.push(candidate.foundation);
-  sdp.push(candidate.component);
-  sdp.push(candidate.protocol.toUpperCase());
-  sdp.push(candidate.priority);
-  sdp.push(candidate.ip);
-  sdp.push(candidate.port);
-
-  var type = candidate.type;
-  sdp.push('typ');
-  sdp.push(type);
-  if (type !== 'host' && candidate.relatedAddress &&
-      candidate.relatedPort) {
-    sdp.push('raddr');
-    sdp.push(candidate.relatedAddress); // was: relAddr
-    sdp.push('rport');
-    sdp.push(candidate.relatedPort); // was: relPort
-  }
-  if (candidate.tcpType && candidate.protocol.toLowerCase() === 'tcp') {
-    sdp.push('tcptype');
-    sdp.push(candidate.tcpType);
-  }
-  return 'candidate:' + sdp.join(' ');
-};
-
-// Parses an rtpmap line, returns RTCRtpCoddecParameters. Sample input:
-// a=rtpmap:111 opus/48000/2
-SDPUtils.parseRtpMap = function(line) {
-  var parts = line.substr(9).split(' ');
-  var parsed = {
-    payloadType: parseInt(parts.shift(), 10) // was: id
-  };
-
-  parts = parts[0].split('/');
-
-  parsed.name = parts[0];
-  parsed.clockRate = parseInt(parts[1], 10); // was: clockrate
-  // was: channels
-  parsed.numChannels = parts.length === 3 ? parseInt(parts[2], 10) : 1;
-  return parsed;
-};
-
-// Generate an a=rtpmap line from RTCRtpCodecCapability or
-// RTCRtpCodecParameters.
-SDPUtils.writeRtpMap = function(codec) {
-  var pt = codec.payloadType;
-  if (codec.preferredPayloadType !== undefined) {
-    pt = codec.preferredPayloadType;
-  }
-  return 'a=rtpmap:' + pt + ' ' + codec.name + '/' + codec.clockRate +
-      (codec.numChannels !== 1 ? '/' + codec.numChannels : '') + '\r\n';
-};
-
-// Parses an a=extmap line (headerextension from RFC 5285). Sample input:
-// a=extmap:2 urn:ietf:params:rtp-hdrext:toffset
-SDPUtils.parseExtmap = function(line) {
-  var parts = line.substr(9).split(' ');
-  return {
-    id: parseInt(parts[0], 10),
-    uri: parts[1]
-  };
-};
-
-// Generates a=extmap line from RTCRtpHeaderExtensionParameters or
-// RTCRtpHeaderExtension.
-SDPUtils.writeExtmap = function(headerExtension) {
-  return 'a=extmap:' + (headerExtension.id || headerExtension.preferredId) +
-       ' ' + headerExtension.uri + '\r\n';
-};
-
-// Parses an ftmp line, returns dictionary. Sample input:
-// a=fmtp:96 vbr=on;cng=on
-// Also deals with vbr=on; cng=on
-SDPUtils.parseFmtp = function(line) {
-  var parsed = {};
-  var kv;
-  var parts = line.substr(line.indexOf(' ') + 1).split(';');
-  for (var j = 0; j < parts.length; j++) {
-    kv = parts[j].trim().split('=');
-    parsed[kv[0].trim()] = kv[1];
-  }
-  return parsed;
-};
-
-// Generates an a=ftmp line from RTCRtpCodecCapability or RTCRtpCodecParameters.
-SDPUtils.writeFmtp = function(codec) {
-  var line = '';
-  var pt = codec.payloadType;
-  if (codec.preferredPayloadType !== undefined) {
-    pt = codec.preferredPayloadType;
-  }
-  if (codec.parameters && Object.keys(codec.parameters).length) {
-    var params = [];
-    Object.keys(codec.parameters).forEach(function(param) {
-      params.push(param + '=' + codec.parameters[param]);
-    });
-    line += 'a=fmtp:' + pt + ' ' + params.join(';') + '\r\n';
-  }
-  return line;
-};
-
-// Parses an rtcp-fb line, returns RTCPRtcpFeedback object. Sample input:
-// a=rtcp-fb:98 nack rpsi
-SDPUtils.parseRtcpFb = function(line) {
-  var parts = line.substr(line.indexOf(' ') + 1).split(' ');
-  return {
-    type: parts.shift(),
-    parameter: parts.join(' ')
-  };
-};
-// Generate a=rtcp-fb lines from RTCRtpCodecCapability or RTCRtpCodecParameters.
-SDPUtils.writeRtcpFb = function(codec) {
-  var lines = '';
-  var pt = codec.payloadType;
-  if (codec.preferredPayloadType !== undefined) {
-    pt = codec.preferredPayloadType;
-  }
-  if (codec.rtcpFeedback && codec.rtcpFeedback.length) {
-    // FIXME: special handling for trr-int?
-    codec.rtcpFeedback.forEach(function(fb) {
-      lines += 'a=rtcp-fb:' + pt + ' ' + fb.type +
-      (fb.parameter && fb.parameter.length ? ' ' + fb.parameter : '') +
-          '\r\n';
-    });
-  }
-  return lines;
-};
-
-// Parses an RFC 5576 ssrc media attribute. Sample input:
-// a=ssrc:3735928559 cname:something
-SDPUtils.parseSsrcMedia = function(line) {
-  var sp = line.indexOf(' ');
-  var parts = {
-    ssrc: parseInt(line.substr(7, sp - 7), 10)
-  };
-  var colon = line.indexOf(':', sp);
-  if (colon > -1) {
-    parts.attribute = line.substr(sp + 1, colon - sp - 1);
-    parts.value = line.substr(colon + 1);
-  } else {
-    parts.attribute = line.substr(sp + 1);
-  }
-  return parts;
-};
-
-// Extracts DTLS parameters from SDP media section or sessionpart.
-// FIXME: for consistency with other functions this should only
-//   get the fingerprint line as input. See also getIceParameters.
-SDPUtils.getDtlsParameters = function(mediaSection, sessionpart) {
-  var lines = SDPUtils.splitLines(mediaSection);
-  // Search in session part, too.
-  lines = lines.concat(SDPUtils.splitLines(sessionpart));
-  var fpLine = lines.filter(function(line) {
-    return line.indexOf('a=fingerprint:') === 0;
-  })[0].substr(14);
-  // Note: a=setup line is ignored since we use the 'auto' role.
-  var dtlsParameters = {
-    role: 'auto',
-    fingerprints: [{
-      algorithm: fpLine.split(' ')[0],
-      value: fpLine.split(' ')[1]
-    }]
-  };
-  return dtlsParameters;
-};
-
-// Serializes DTLS parameters to SDP.
-SDPUtils.writeDtlsParameters = function(params, setupType) {
-  var sdp = 'a=setup:' + setupType + '\r\n';
-  params.fingerprints.forEach(function(fp) {
-    sdp += 'a=fingerprint:' + fp.algorithm + ' ' + fp.value + '\r\n';
-  });
-  return sdp;
-};
-// Parses ICE information from SDP media section or sessionpart.
-// FIXME: for consistency with other functions this should only
-//   get the ice-ufrag and ice-pwd lines as input.
-SDPUtils.getIceParameters = function(mediaSection, sessionpart) {
-  var lines = SDPUtils.splitLines(mediaSection);
-  // Search in session part, too.
-  lines = lines.concat(SDPUtils.splitLines(sessionpart));
-  var iceParameters = {
-    usernameFragment: lines.filter(function(line) {
-      return line.indexOf('a=ice-ufrag:') === 0;
-    })[0].substr(12),
-    password: lines.filter(function(line) {
-      return line.indexOf('a=ice-pwd:') === 0;
-    })[0].substr(10)
-  };
-  return iceParameters;
-};
-
-// Serializes ICE parameters to SDP.
-SDPUtils.writeIceParameters = function(params) {
-  return 'a=ice-ufrag:' + params.usernameFragment + '\r\n' +
-      'a=ice-pwd:' + params.password + '\r\n';
-};
-
-// Parses the SDP media section and returns RTCRtpParameters.
-SDPUtils.parseRtpParameters = function(mediaSection) {
-  var description = {
-    codecs: [],
-    headerExtensions: [],
-    fecMechanisms: [],
-    rtcp: []
-  };
-  var lines = SDPUtils.splitLines(mediaSection);
-  var mline = lines[0].split(' ');
-  for (var i = 3; i < mline.length; i++) { // find all codecs from mline[3..]
-    var pt = mline[i];
-    var rtpmapline = SDPUtils.matchPrefix(
-        mediaSection, 'a=rtpmap:' + pt + ' ')[0];
-    if (rtpmapline) {
-      var codec = SDPUtils.parseRtpMap(rtpmapline);
-      var fmtps = SDPUtils.matchPrefix(
-          mediaSection, 'a=fmtp:' + pt + ' ');
-      // Only the first a=fmtp:<pt> is considered.
-      codec.parameters = fmtps.length ? SDPUtils.parseFmtp(fmtps[0]) : {};
-      codec.rtcpFeedback = SDPUtils.matchPrefix(
-          mediaSection, 'a=rtcp-fb:' + pt + ' ')
-        .map(SDPUtils.parseRtcpFb);
-      description.codecs.push(codec);
-      // parse FEC mechanisms from rtpmap lines.
-      switch (codec.name.toUpperCase()) {
-        case 'RED':
-        case 'ULPFEC':
-          description.fecMechanisms.push(codec.name.toUpperCase());
-          break;
-        default: // only RED and ULPFEC are recognized as FEC mechanisms.
-          break;
-      }
-    }
-  }
-  SDPUtils.matchPrefix(mediaSection, 'a=extmap:').forEach(function(line) {
-    description.headerExtensions.push(SDPUtils.parseExtmap(line));
-  });
-  // FIXME: parse rtcp.
-  return description;
-};
-
-// Generates parts of the SDP media section describing the capabilities /
-// parameters.
-SDPUtils.writeRtpDescription = function(kind, caps) {
-  var sdp = '';
-
-  // Build the mline.
-  sdp += 'm=' + kind + ' ';
-  sdp += caps.codecs.length > 0 ? '9' : '0'; // reject if no codecs.
-  sdp += ' UDP/TLS/RTP/SAVPF ';
-  sdp += caps.codecs.map(function(codec) {
-    if (codec.preferredPayloadType !== undefined) {
-      return codec.preferredPayloadType;
-    }
-    return codec.payloadType;
-  }).join(' ') + '\r\n';
-
-  sdp += 'c=IN IP4 0.0.0.0\r\n';
-  sdp += 'a=rtcp:9 IN IP4 0.0.0.0\r\n';
-
-  // Add a=rtpmap lines for each codec. Also fmtp and rtcp-fb.
-  caps.codecs.forEach(function(codec) {
-    sdp += SDPUtils.writeRtpMap(codec);
-    sdp += SDPUtils.writeFmtp(codec);
-    sdp += SDPUtils.writeRtcpFb(codec);
-  });
-  // FIXME: add headerExtensions, fecMechanismş and rtcp.
-  sdp += 'a=rtcp-mux\r\n';
-  return sdp;
-};
-
-// Parses the SDP media section and returns an array of
-// RTCRtpEncodingParameters.
-SDPUtils.parseRtpEncodingParameters = function(mediaSection) {
-  var encodingParameters = [];
-  var description = SDPUtils.parseRtpParameters(mediaSection);
-  var hasRed = description.fecMechanisms.indexOf('RED') !== -1;
-  var hasUlpfec = description.fecMechanisms.indexOf('ULPFEC') !== -1;
-
-  // filter a=ssrc:... cname:, ignore PlanB-msid
-  var ssrcs = SDPUtils.matchPrefix(mediaSection, 'a=ssrc:')
-  .map(function(line) {
-    return SDPUtils.parseSsrcMedia(line);
-  })
-  .filter(function(parts) {
-    return parts.attribute === 'cname';
-  });
-  var primarySsrc = ssrcs.length > 0 && ssrcs[0].ssrc;
-  var secondarySsrc;
-
-  var flows = SDPUtils.matchPrefix(mediaSection, 'a=ssrc-group:FID')
-  .map(function(line) {
-    var parts = line.split(' ');
-    parts.shift();
-    return parts.map(function(part) {
-      return parseInt(part, 10);
-    });
-  });
-  if (flows.length > 0 && flows[0].length > 1 && flows[0][0] === primarySsrc) {
-    secondarySsrc = flows[0][1];
-  }
-
-  description.codecs.forEach(function(codec) {
-    if (codec.name.toUpperCase() === 'RTX' && codec.parameters.apt) {
-      var encParam = {
-        ssrc: primarySsrc,
-        codecPayloadType: parseInt(codec.parameters.apt, 10),
-        rtx: {
-          payloadType: codec.payloadType,
-          ssrc: secondarySsrc
-        }
-      };
-      encodingParameters.push(encParam);
-      if (hasRed) {
-        encParam = JSON.parse(JSON.stringify(encParam));
-        encParam.fec = {
-          ssrc: secondarySsrc,
-          mechanism: hasUlpfec ? 'red+ulpfec' : 'red'
-        };
-        encodingParameters.push(encParam);
-      }
-    }
-  });
-  if (encodingParameters.length === 0 && primarySsrc) {
-    encodingParameters.push({
-      ssrc: primarySsrc
-    });
-  }
-
-  // we support both b=AS and b=TIAS but interpret AS as TIAS.
-  var bandwidth = SDPUtils.matchPrefix(mediaSection, 'b=');
-  if (bandwidth.length) {
-    if (bandwidth[0].indexOf('b=TIAS:') === 0) {
-      bandwidth = parseInt(bandwidth[0].substr(7), 10);
-    } else if (bandwidth[0].indexOf('b=AS:') === 0) {
-      bandwidth = parseInt(bandwidth[0].substr(5), 10);
-    }
-    encodingParameters.forEach(function(params) {
-      params.maxBitrate = bandwidth;
-    });
-  }
-  return encodingParameters;
-};
-
-SDPUtils.writeSessionBoilerplate = function() {
-  // FIXME: sess-id should be an NTP timestamp.
-  return 'v=0\r\n' +
-      'o=thisisadapterortc 8169639915646943137 2 IN IP4 127.0.0.1\r\n' +
-      's=-\r\n' +
-      't=0 0\r\n';
-};
-
-SDPUtils.writeMediaSection = function(transceiver, caps, type, stream) {
-  var sdp = SDPUtils.writeRtpDescription(transceiver.kind, caps);
-
-  // Map ICE parameters (ufrag, pwd) to SDP.
-  sdp += SDPUtils.writeIceParameters(
-      transceiver.iceGatherer.getLocalParameters());
-
-  // Map DTLS parameters to SDP.
-  sdp += SDPUtils.writeDtlsParameters(
-      transceiver.dtlsTransport.getLocalParameters(),
-      type === 'offer' ? 'actpass' : 'active');
-
-  sdp += 'a=mid:' + transceiver.mid + '\r\n';
-
-  if (transceiver.rtpSender && transceiver.rtpReceiver) {
-    sdp += 'a=sendrecv\r\n';
-  } else if (transceiver.rtpSender) {
-    sdp += 'a=sendonly\r\n';
-  } else if (transceiver.rtpReceiver) {
-    sdp += 'a=recvonly\r\n';
-  } else {
-    sdp += 'a=inactive\r\n';
-  }
-
-  // FIXME: for RTX there might be multiple SSRCs. Not implemented in Edge yet.
-  if (transceiver.rtpSender) {
-    var msid = 'msid:' + stream.id + ' ' +
-        transceiver.rtpSender.track.id + '\r\n';
-    sdp += 'a=' + msid;
-    sdp += 'a=ssrc:' + transceiver.sendEncodingParameters[0].ssrc +
-        ' ' + msid;
-  }
-  // FIXME: this should be written by writeRtpDescription.
-  sdp += 'a=ssrc:' + transceiver.sendEncodingParameters[0].ssrc +
-      ' cname:' + SDPUtils.localCName + '\r\n';
-  return sdp;
-};
-
-// Gets the direction from the mediaSection or the sessionpart.
-SDPUtils.getDirection = function(mediaSection, sessionpart) {
-  // Look for sendrecv, sendonly, recvonly, inactive, default to sendrecv.
-  var lines = SDPUtils.splitLines(mediaSection);
-  for (var i = 0; i < lines.length; i++) {
-    switch (lines[i]) {
-      case 'a=sendrecv':
-      case 'a=sendonly':
-      case 'a=recvonly':
-      case 'a=inactive':
-        return lines[i].substr(2);
-      default:
-        // FIXME: What should happen here?
-    }
-  }
-  if (sessionpart) {
-    return SDPUtils.getDirection(sessionpart);
-  }
-  return 'sendrecv';
-};
-
-// Expose public methods.
-module.exports = SDPUtils;
-
-},{}],2:[function(require,module,exports){
-/*
- *  Copyright (c) 2016 The WebRTC project authors. All Rights Reserved.
- *
- *  Use of this source code is governed by a BSD-style license
- *  that can be found in the LICENSE file in the root of the source
- *  tree.
- */
- /* eslint-env node */
-
-'use strict';
-
-// Shimming starts here.
-(function() {
-  // Utils.
-  var logging = require('./utils').log;
-  var browserDetails = require('./utils').browserDetails;
-  // Export to the adapter global object visible in the browser.
-  module.exports.browserDetails = browserDetails;
-  module.exports.extractVersion = require('./utils').extractVersion;
-  module.exports.disableLog = require('./utils').disableLog;
-
-  // Uncomment the line below if you want logging to occur, including logging
-  // for the switch statement below. Can also be turned on in the browser via
-  // adapter.disableLog(false), but then logging from the switch statement below
-  // will not appear.
-  // require('./utils').disableLog(false);
-
-  // Browser shims.
-  var chromeShim = require('./chrome/chrome_shim') || null;
-  var edgeShim = require('./edge/edge_shim') || null;
-  var firefoxShim = require('./firefox/firefox_shim') || null;
-  var safariShim = require('./safari/safari_shim') || null;
-
-  // Shim browser if found.
-  switch (browserDetails.browser) {
-    case 'opera': // fallthrough as it uses chrome shims
-    case 'chrome':
-      if (!chromeShim || !chromeShim.shimPeerConnection) {
-        logging('Chrome shim is not included in this adapter release.');
-        return;
-      }
-      logging('adapter.js shimming chrome.');
-      // Export to the adapter global object visible in the browser.
-      module.exports.browserShim = chromeShim;
-
-      chromeShim.shimGetUserMedia();
-      chromeShim.shimMediaStream();
-      chromeShim.shimSourceObject();
-      chromeShim.shimPeerConnection();
-      chromeShim.shimOnTrack();
-      break;
-    case 'firefox':
-      if (!firefoxShim || !firefoxShim.shimPeerConnection) {
-        logging('Firefox shim is not included in this adapter release.');
-        return;
-      }
-      logging('adapter.js shimming firefox.');
-      // Export to the adapter global object visible in the browser.
-      module.exports.browserShim = firefoxShim;
-
-      firefoxShim.shimGetUserMedia();
-      firefoxShim.shimSourceObject();
-      firefoxShim.shimPeerConnection();
-      firefoxShim.shimOnTrack();
-      break;
-    case 'edge':
-      if (!edgeShim || !edgeShim.shimPeerConnection) {
-        logging('MS edge shim is not included in this adapter release.');
-        return;
-      }
-      logging('adapter.js shimming edge.');
-      // Export to the adapter global object visible in the browser.
-      module.exports.browserShim = edgeShim;
-
-      edgeShim.shimGetUserMedia();
-      edgeShim.shimPeerConnection();
-      break;
-    case 'safari':
-      if (!safariShim) {
-        logging('Safari shim is not included in this adapter release.');
-        return;
-      }
-      logging('adapter.js shimming safari.');
-      // Export to the adapter global object visible in the browser.
-      module.exports.browserShim = safariShim;
-
-      safariShim.shimGetUserMedia();
-      break;
-    default:
-      logging('Unsupported browser!');
-  }
-})();
-
-},{"./chrome/chrome_shim":3,"./edge/edge_shim":5,"./firefox/firefox_shim":7,"./safari/safari_shim":9,"./utils":10}],3:[function(require,module,exports){
-
-/*
- *  Copyright (c) 2016 The WebRTC project authors. All Rights Reserved.
- *
- *  Use of this source code is governed by a BSD-style license
- *  that can be found in the LICENSE file in the root of the source
- *  tree.
- */
- /* eslint-env node */
-'use strict';
-var logging = require('../utils.js').log;
-var browserDetails = require('../utils.js').browserDetails;
-
-var chromeShim = {
-  shimMediaStream: function() {
-    window.MediaStream = window.MediaStream || window.webkitMediaStream;
-  },
-
-  shimOnTrack: function() {
-    if (typeof window === 'object' && window.RTCPeerConnection && !('ontrack' in
-        window.RTCPeerConnection.prototype)) {
-      Object.defineProperty(window.RTCPeerConnection.prototype, 'ontrack', {
-        get: function() {
-          return this._ontrack;
-        },
-        set: function(f) {
-          var self = this;
-          if (this._ontrack) {
-            this.removeEventListener('track', this._ontrack);
-            this.removeEventListener('addstream', this._ontrackpoly);
-          }
-          this.addEventListener('track', this._ontrack = f);
-          this.addEventListener('addstream', this._ontrackpoly = function(e) {
-            // onaddstream does not fire when a track is added to an existing
-            // stream. But stream.onaddtrack is implemented so we use that.
-            e.stream.addEventListener('addtrack', function(te) {
-              var event = new Event('track');
-              event.track = te.track;
-              event.receiver = {track: te.track};
-              event.streams = [e.stream];
-              self.dispatchEvent(event);
-            });
-            e.stream.getTracks().forEach(function(track) {
-              var event = new Event('track');
-              event.track = track;
-              event.receiver = {track: track};
-              event.streams = [e.stream];
-              this.dispatchEvent(event);
-            }.bind(this));
-          }.bind(this));
-        }
-      });
-    }
-  },
-
-  shimSourceObject: function() {
-    if (typeof window === 'object') {
-      if (window.HTMLMediaElement &&
-        !('srcObject' in window.HTMLMediaElement.prototype)) {
-        // Shim the srcObject property, once, when HTMLMediaElement is found.
-        Object.defineProperty(window.HTMLMediaElement.prototype, 'srcObject', {
-          get: function() {
-            return this._srcObject;
-          },
-          set: function(stream) {
-            var self = this;
-            // Use _srcObject as a private property for this shim
-            this._srcObject = stream;
-            if (this.src) {
-              URL.revokeObjectURL(this.src);
-            }
-
-            if (!stream) {
-              this.src = '';
-              return;
-            }
-            this.src = URL.createObjectURL(stream);
-            // We need to recreate the blob url when a track is added or
-            // removed. Doing it manually since we want to avoid a recursion.
-            stream.addEventListener('addtrack', function() {
-              if (self.src) {
-                URL.revokeObjectURL(self.src);
-              }
-              self.src = URL.createObjectURL(stream);
-            });
-            stream.addEventListener('removetrack', function() {
-              if (self.src) {
-                URL.revokeObjectURL(self.src);
-              }
-              self.src = URL.createObjectURL(stream);
-            });
-          }
-        });
-      }
-    }
-  },
-
-  shimPeerConnection: function() {
-    // The RTCPeerConnection object.
-    window.RTCPeerConnection = function(pcConfig, pcConstraints) {
-      // Translate iceTransportPolicy to iceTransports,
-      // see https://code.google.com/p/webrtc/issues/detail?id=4869
-      logging('PeerConnection');
-      if (pcConfig && pcConfig.iceTransportPolicy) {
-        pcConfig.iceTransports = pcConfig.iceTransportPolicy;
-      }
-
-      var pc = new webkitRTCPeerConnection(pcConfig, pcConstraints);
-      var origGetStats = pc.getStats.bind(pc);
-      pc.getStats = function(selector, successCallback, errorCallback) {
-        var self = this;
-        var args = arguments;
-
-        // If selector is a function then we are in the old style stats so just
-        // pass back the original getStats format to avoid breaking old users.
-        if (arguments.length > 0 && typeof selector === 'function') {
-          return origGetStats(selector, successCallback);
-        }
-
-        var fixChromeStats_ = function(response) {
-          var standardReport = {};
-          var reports = response.result();
-          reports.forEach(function(report) {
-            var standardStats = {
-              id: report.id,
-              timestamp: report.timestamp,
-              type: report.type
-            };
-            report.names().forEach(function(name) {
-              standardStats[name] = report.stat(name);
-            });
-            standardReport[standardStats.id] = standardStats;
-          });
-
-          return standardReport;
-        };
-
-        // shim getStats with maplike support
-        var makeMapStats = function(stats, legacyStats) {
-          var map = new Map(Object.keys(stats).map(function(key) {
-            return[key, stats[key]];
-          }));
-          legacyStats = legacyStats || stats;
-          Object.keys(legacyStats).forEach(function(key) {
-            map[key] = legacyStats[key];
-          });
-          return map;
-        };
-
-        if (arguments.length >= 2) {
-          var successCallbackWrapper_ = function(response) {
-            args[1](makeMapStats(fixChromeStats_(response)));
-          };
-
-          return origGetStats.apply(this, [successCallbackWrapper_,
-              arguments[0]]);
-        }
-
-        // promise-support
-        return new Promise(function(resolve, reject) {
-          if (args.length === 1 && typeof selector === 'object') {
-            origGetStats.apply(self, [
-              function(response) {
-                resolve(makeMapStats(fixChromeStats_(response)));
-              }, reject]);
-          } else {
-            // Preserve legacy chrome stats only on legacy access of stats obj
-            origGetStats.apply(self, [
-              function(response) {
-                resolve(makeMapStats(fixChromeStats_(response),
-                    response.result()));
-              }, reject]);
-          }
-        }).then(successCallback, errorCallback);
-      };
-
-      return pc;
-    };
-    window.RTCPeerConnection.prototype = webkitRTCPeerConnection.prototype;
-
-    // wrap static methods. Currently just generateCertificate.
-    if (webkitRTCPeerConnection.generateCertificate) {
-      Object.defineProperty(window.RTCPeerConnection, 'generateCertificate', {
-        get: function() {
-          return webkitRTCPeerConnection.generateCertificate;
-        }
-      });
-    }
-
-    ['createOffer', 'createAnswer'].forEach(function(method) {
-      var nativeMethod = webkitRTCPeerConnection.prototype[method];
-      webkitRTCPeerConnection.prototype[method] = function() {
-        var self = this;
-        if (arguments.length < 1 || (arguments.length === 1 &&
-            typeof arguments[0] === 'object')) {
-          var opts = arguments.length === 1 ? arguments[0] : undefined;
-          return new Promise(function(resolve, reject) {
-            nativeMethod.apply(self, [resolve, reject, opts]);
-          });
-        }
-        return nativeMethod.apply(this, arguments);
-      };
-    });
-
-    // add promise support -- natively available in Chrome 51
-    if (browserDetails.version < 51) {
-      ['setLocalDescription', 'setRemoteDescription', 'addIceCandidate']
-          .forEach(function(method) {
-            var nativeMethod = webkitRTCPeerConnection.prototype[method];
-            webkitRTCPeerConnection.prototype[method] = function() {
-              var args = arguments;
-              var self = this;
-              var promise = new Promise(function(resolve, reject) {
-                nativeMethod.apply(self, [args[0], resolve, reject]);
-              });
-              if (args.length < 2) {
-                return promise;
-              }
-              return promise.then(function() {
-                args[1].apply(null, []);
-              },
-              function(err) {
-                if (args.length >= 3) {
-                  args[2].apply(null, [err]);
-                }
-              });
-            };
-          });
-    }
-
-    // shim implicit creation of RTCSessionDescription/RTCIceCandidate
-    ['setLocalDescription', 'setRemoteDescription', 'addIceCandidate']
-        .forEach(function(method) {
-          var nativeMethod = webkitRTCPeerConnection.prototype[method];
-          webkitRTCPeerConnection.prototype[method] = function() {
-            arguments[0] = new ((method === 'addIceCandidate') ?
-                RTCIceCandidate : RTCSessionDescription)(arguments[0]);
-            return nativeMethod.apply(this, arguments);
-          };
-        });
-
-    // support for addIceCandidate(null)
-    var nativeAddIceCandidate =
-        RTCPeerConnection.prototype.addIceCandidate;
-    RTCPeerConnection.prototype.addIceCandidate = function() {
-      return arguments[0] === null ? Promise.resolve()
-          : nativeAddIceCandidate.apply(this, arguments);
-    };
-  }
-};
-
-
-// Expose public methods.
-module.exports = {
-  shimMediaStream: chromeShim.shimMediaStream,
-  shimOnTrack: chromeShim.shimOnTrack,
-  shimSourceObject: chromeShim.shimSourceObject,
-  shimPeerConnection: chromeShim.shimPeerConnection,
-  shimGetUserMedia: require('./getusermedia')
-};
-
-},{"../utils.js":10,"./getusermedia":4}],4:[function(require,module,exports){
-/*
- *  Copyright (c) 2016 The WebRTC project authors. All Rights Reserved.
- *
- *  Use of this source code is governed by a BSD-style license
- *  that can be found in the LICENSE file in the root of the source
- *  tree.
- */
- /* eslint-env node */
-'use strict';
-var logging = require('../utils.js').log;
-
-// Expose public methods.
-module.exports = function() {
-  var constraintsToChrome_ = function(c) {
-    if (typeof c !== 'object' || c.mandatory || c.optional) {
-      return c;
-    }
-    var cc = {};
-    Object.keys(c).forEach(function(key) {
-      if (key === 'require' || key === 'advanced' || key === 'mediaSource') {
-        return;
-      }
-      var r = (typeof c[key] === 'object') ? c[key] : {ideal: c[key]};
-      if (r.exact !== undefined && typeof r.exact === 'number') {
-        r.min = r.max = r.exact;
-      }
-      var oldname_ = function(prefix, name) {
-        if (prefix) {
-          return prefix + name.charAt(0).toUpperCase() + name.slice(1);
-        }
-        return (name === 'deviceId') ? 'sourceId' : name;
-      };
-      if (r.ideal !== undefined) {
-        cc.optional = cc.optional || [];
-        var oc = {};
-        if (typeof r.ideal === 'number') {
-          oc[oldname_('min', key)] = r.ideal;
-          cc.optional.push(oc);
-          oc = {};
-          oc[oldname_('max', key)] = r.ideal;
-          cc.optional.push(oc);
-        } else {
-          oc[oldname_('', key)] = r.ideal;
-          cc.optional.push(oc);
-        }
-      }
-      if (r.exact !== undefined && typeof r.exact !== 'number') {
-        cc.mandatory = cc.mandatory || {};
-        cc.mandatory[oldname_('', key)] = r.exact;
-      } else {
-        ['min', 'max'].forEach(function(mix) {
-          if (r[mix] !== undefined) {
-            cc.mandatory = cc.mandatory || {};
-            cc.mandatory[oldname_(mix, key)] = r[mix];
-          }
-        });
-      }
-    });
-    if (c.advanced) {
-      cc.optional = (cc.optional || []).concat(c.advanced);
-    }
-    return cc;
-  };
-
-  var shimConstraints_ = function(constraints, func) {
-    constraints = JSON.parse(JSON.stringify(constraints));
-    if (constraints && constraints.audio) {
-      constraints.audio = constraintsToChrome_(constraints.audio);
-    }
-    if (constraints && typeof constraints.video === 'object') {
-      // Shim facingMode for mobile, where it defaults to "user".
-      var face = constraints.video.facingMode;
-      face = face && ((typeof face === 'object') ? face : {ideal: face});
-
-      if ((face && (face.exact === 'user' || face.exact === 'environment' ||
-                    face.ideal === 'user' || face.ideal === 'environment')) &&
-          !(navigator.mediaDevices.getSupportedConstraints &&
-            navigator.mediaDevices.getSupportedConstraints().facingMode)) {
-        delete constraints.video.facingMode;
-        if (face.exact === 'environment' || face.ideal === 'environment') {
-          // Look for "back" in label, or use last cam (typically back cam).
-          return navigator.mediaDevices.enumerateDevices()
-          .then(function(devices) {
-            devices = devices.filter(function(d) {
-              return d.kind === 'videoinput';
-            });
-            var back = devices.find(function(d) {
-              return d.label.toLowerCase().indexOf('back') !== -1;
-            }) || (devices.length && devices[devices.length - 1]);
-            if (back) {
-              constraints.video.deviceId = face.exact ? {exact: back.deviceId} :
-                                                        {ideal: back.deviceId};
-            }
-            constraints.video = constraintsToChrome_(constraints.video);
-            logging('chrome: ' + JSON.stringify(constraints));
-            return func(constraints);
-          });
-        }
-      }
-      constraints.video = constraintsToChrome_(constraints.video);
-    }
-    logging('chrome: ' + JSON.stringify(constraints));
-    return func(constraints);
-  };
-
-  var shimError_ = function(e) {
-    return {
-      name: {
-        PermissionDeniedError: 'NotAllowedError',
-        ConstraintNotSatisfiedError: 'OverconstrainedError'
-      }[e.name] || e.name,
-      message: e.message,
-      constraint: e.constraintName,
-      toString: function() {
-        return this.name + (this.message && ': ') + this.message;
-      }
-    };
-  };
-
-  var getUserMedia_ = function(constraints, onSuccess, onError) {
-    shimConstraints_(constraints, function(c) {
-      navigator.webkitGetUserMedia(c, onSuccess, function(e) {
-        onError(shimError_(e));
-      });
-    });
-  };
-
-  navigator.getUserMedia = getUserMedia_;
-
-  // Returns the result of getUserMedia as a Promise.
-  var getUserMediaPromise_ = function(constraints) {
-    return new Promise(function(resolve, reject) {
-      navigator.getUserMedia(constraints, resolve, reject);
-    });
-  };
-
-  if (!navigator.mediaDevices) {
-    navigator.mediaDevices = {
-      getUserMedia: getUserMediaPromise_,
-      enumerateDevices: function() {
-        return new Promise(function(resolve) {
-          var kinds = {audio: 'audioinput', video: 'videoinput'};
-          return MediaStreamTrack.getSources(function(devices) {
-            resolve(devices.map(function(device) {
-              return {label: device.label,
-                      kind: kinds[device.kind],
-                      deviceId: device.id,
-                      groupId: ''};
-            }));
-          });
-        });
-      }
-    };
-  }
-
-  // A shim for getUserMedia method on the mediaDevices object.
-  // TODO(KaptenJansson) remove once implemented in Chrome stable.
-  if (!navigator.mediaDevices.getUserMedia) {
-    navigator.mediaDevices.getUserMedia = function(constraints) {
-      return getUserMediaPromise_(constraints);
-    };
-  } else {
-    // Even though Chrome 45 has navigator.mediaDevices and a getUserMedia
-    // function which returns a Promise, it does not accept spec-style
-    // constraints.
-    var origGetUserMedia = navigator.mediaDevices.getUserMedia.
-        bind(navigator.mediaDevices);
-    navigator.mediaDevices.getUserMedia = function(cs) {
-      return shimConstraints_(cs, function(c) {
-        return origGetUserMedia(c).then(function(stream) {
-          if (c.audio && !stream.getAudioTracks().length ||
-              c.video && !stream.getVideoTracks().length) {
-            stream.getTracks().forEach(function(track) {
-              track.stop();
-            });
-            throw new DOMException('', 'NotFoundError');
-          }
-          return stream;
-        }, function(e) {
-          return Promise.reject(shimError_(e));
-        });
-      });
-    };
-  }
-
-  // Dummy devicechange event methods.
-  // TODO(KaptenJansson) remove once implemented in Chrome stable.
-  if (typeof navigator.mediaDevices.addEventListener === 'undefined') {
-    navigator.mediaDevices.addEventListener = function() {
-      logging('Dummy mediaDevices.addEventListener called.');
-    };
-  }
-  if (typeof navigator.mediaDevices.removeEventListener === 'undefined') {
-    navigator.mediaDevices.removeEventListener = function() {
-      logging('Dummy mediaDevices.removeEventListener called.');
-    };
-  }
-};
-
-},{"../utils.js":10}],5:[function(require,module,exports){
-/*
- *  Copyright (c) 2016 The WebRTC project authors. All Rights Reserved.
- *
- *  Use of this source code is governed by a BSD-style license
- *  that can be found in the LICENSE file in the root of the source
- *  tree.
- */
- /* eslint-env node */
-'use strict';
-
-var SDPUtils = require('sdp');
-var browserDetails = require('../utils').browserDetails;
-
-var edgeShim = {
-  shimPeerConnection: function() {
-    if (window.RTCIceGatherer) {
-      // ORTC defines an RTCIceCandidate object but no constructor.
-      // Not implemented in Edge.
-      if (!window.RTCIceCandidate) {
-        window.RTCIceCandidate = function(args) {
-          return args;
-        };
-      }
-      // ORTC does not have a session description object but
-      // other browsers (i.e. Chrome) that will support both PC and ORTC
-      // in the future might have this defined already.
-      if (!window.RTCSessionDescription) {
-        window.RTCSessionDescription = function(args) {
-          return args;
-        };
-      }
-    }
-
-    window.RTCPeerConnection = function(config) {
-      var self = this;
-
-      var _eventTarget = document.createDocumentFragment();
-      ['addEventListener', 'removeEventListener', 'dispatchEvent']
-          .forEach(function(method) {
-            self[method] = _eventTarget[method].bind(_eventTarget);
-          });
-
-      this.onicecandidate = null;
-      this.onaddstream = null;
-      this.ontrack = null;
-      this.onremovestream = null;
-      this.onsignalingstatechange = null;
-      this.oniceconnectionstatechange = null;
-      this.onnegotiationneeded = null;
-      this.ondatachannel = null;
-
-      this.localStreams = [];
-      this.remoteStreams = [];
-      this.getLocalStreams = function() {
-        return self.localStreams;
-      };
-      this.getRemoteStreams = function() {
-        return self.remoteStreams;
-      };
-
-      this.localDescription = new RTCSessionDescription({
-        type: '',
-        sdp: ''
-      });
-      this.remoteDescription = new RTCSessionDescription({
-        type: '',
-        sdp: ''
-      });
-      this.signalingState = 'stable';
-      this.iceConnectionState = 'new';
-      this.iceGatheringState = 'new';
-
-      this.iceOptions = {
-        gatherPolicy: 'all',
-        iceServers: []
-      };
-      if (config && config.iceTransportPolicy) {
-        switch (config.iceTransportPolicy) {
-          case 'all':
-          case 'relay':
-            this.iceOptions.gatherPolicy = config.iceTransportPolicy;
-            break;
-          case 'none':
-            // FIXME: remove once implementation and spec have added this.
-            throw new TypeError('iceTransportPolicy "none" not supported');
-          default:
-            // don't set iceTransportPolicy.
-            break;
-        }
-      }
-      this.usingBundle = config && config.bundlePolicy === 'max-bundle';
-
-      if (config && config.iceServers) {
-        // Edge does not like
-        // 1) stun:
-        // 2) turn: that does not have all of turn:host:port?transport=udp
-        // 3) turn: with ipv6 addresses
-        var iceServers = JSON.parse(JSON.stringify(config.iceServers));
-        this.iceOptions.iceServers = iceServers.filter(function(server) {
-          if (server && server.urls) {
-            var urls = server.urls;
-            if (typeof urls === 'string') {
-              urls = [urls];
-            }
-            urls = urls.filter(function(url) {
-              return (url.indexOf('turn:') === 0 &&
-                  url.indexOf('transport=udp') !== -1 &&
-                  url.indexOf('turn:[') === -1) ||
-                  (url.indexOf('stun:') === 0 &&
-                    browserDetails.version >= 14393);
-            })[0];
-            return !!urls;
-          }
-          return false;
-        });
-      }
-
-      // per-track iceGathers, iceTransports, dtlsTransports, rtpSenders, ...
-      // everything that is needed to describe a SDP m-line.
-      this.transceivers = [];
-
-      // since the iceGatherer is currently created in createOffer but we
-      // must not emit candidates until after setLocalDescription we buffer
-      // them in this array.
-      this._localIceCandidatesBuffer = [];
-    };
-
-    window.RTCPeerConnection.prototype._emitBufferedCandidates = function() {
-      var self = this;
-      var sections = SDPUtils.splitSections(self.localDescription.sdp);
-      // FIXME: need to apply ice candidates in a way which is async but
-      // in-order
-      this._localIceCandidatesBuffer.forEach(function(event) {
-        var end = !event.candidate || Object.keys(event.candidate).length === 0;
-        if (end) {
-          for (var j = 1; j < sections.length; j++) {
-            if (sections[j].indexOf('\r\na=end-of-candidates\r\n') === -1) {
-              sections[j] += 'a=end-of-candidates\r\n';
-            }
-          }
-        } else if (event.candidate.candidate.indexOf('typ endOfCandidates')
-            === -1) {
-          sections[event.candidate.sdpMLineIndex + 1] +=
-              'a=' + event.candidate.candidate + '\r\n';
-        }
-        self.localDescription.sdp = sections.join('');
-        self.dispatchEvent(event);
-        if (self.onicecandidate !== null) {
-          self.onicecandidate(event);
-        }
-        if (!event.candidate && self.iceGatheringState !== 'complete') {
-          var complete = self.transceivers.every(function(transceiver) {
-            return transceiver.iceGatherer &&
-                transceiver.iceGatherer.state === 'completed';
-          });
-          if (complete) {
-            self.iceGatheringState = 'complete';
-          }
-        }
-      });
-      this._localIceCandidatesBuffer = [];
-    };
-
-    window.RTCPeerConnection.prototype.addStream = function(stream) {
-      // Clone is necessary for local demos mostly, attaching directly
-      // to two different senders does not work (build 10547).
-      this.localStreams.push(stream.clone());
-      this._maybeFireNegotiationNeeded();
-    };
-
-    window.RTCPeerConnection.prototype.removeStream = function(stream) {
-      var idx = this.localStreams.indexOf(stream);
-      if (idx > -1) {
-        this.localStreams.splice(idx, 1);
-        this._maybeFireNegotiationNeeded();
-      }
-    };
-
-    window.RTCPeerConnection.prototype.getSenders = function() {
-      return this.transceivers.filter(function(transceiver) {
-        return !!transceiver.rtpSender;
-      })
-      .map(function(transceiver) {
-        return transceiver.rtpSender;
-      });
-    };
-
-    window.RTCPeerConnection.prototype.getReceivers = function() {
-      return this.transceivers.filter(function(transceiver) {
-        return !!transceiver.rtpReceiver;
-      })
-      .map(function(transceiver) {
-        return transceiver.rtpReceiver;
-      });
-    };
-
-    // Determines the intersection of local and remote capabilities.
-    window.RTCPeerConnection.prototype._getCommonCapabilities =
-        function(localCapabilities, remoteCapabilities) {
-          var commonCapabilities = {
-            codecs: [],
-            headerExtensions: [],
-            fecMechanisms: []
-          };
-          localCapabilities.codecs.forEach(function(lCodec) {
-            for (var i = 0; i < remoteCapabilities.codecs.length; i++) {
-              var rCodec = remoteCapabilities.codecs[i];
-              if (lCodec.name.toLowerCase() === rCodec.name.toLowerCase() &&
-                  lCodec.clockRate === rCodec.clockRate &&
-                  lCodec.numChannels === rCodec.numChannels) {
-                // push rCodec so we reply with offerer payload type
-                commonCapabilities.codecs.push(rCodec);
-
-                // determine common feedback mechanisms
-                rCodec.rtcpFeedback = rCodec.rtcpFeedback.filter(function(fb) {
-                  for (var j = 0; j < lCodec.rtcpFeedback.length; j++) {
-                    if (lCodec.rtcpFeedback[j].type === fb.type &&
-                        lCodec.rtcpFeedback[j].parameter === fb.parameter) {
-                      return true;
-                    }
-                  }
-                  return false;
-                });
-                // FIXME: also need to determine .parameters
-                //  see https://github.com/openpeer/ortc/issues/569
-                break;
-              }
-            }
-          });
-
-          localCapabilities.headerExtensions
-              .forEach(function(lHeaderExtension) {
-                for (var i = 0; i < remoteCapabilities.headerExtensions.length;
-                     i++) {
-                  var rHeaderExtension = remoteCapabilities.headerExtensions[i];
-                  if (lHeaderExtension.uri === rHeaderExtension.uri) {
-                    commonCapabilities.headerExtensions.push(rHeaderExtension);
-                    break;
-                  }
-                }
-              });
-
-          // FIXME: fecMechanisms
-          return commonCapabilities;
-        };
-
-    // Create ICE gatherer, ICE transport and DTLS transport.
-    window.RTCPeerConnection.prototype._createIceAndDtlsTransports =
-        function(mid, sdpMLineIndex) {
-          var self = this;
-          var iceGatherer = new RTCIceGatherer(self.iceOptions);
-          var iceTransport = new RTCIceTransport(iceGatherer);
-          iceGatherer.onlocalcandidate = function(evt) {
-            var event = new Event('icecandidate');
-            event.candidate = {sdpMid: mid, sdpMLineIndex: sdpMLineIndex};
-
-            var cand = evt.candidate;
-            var end = !cand || Object.keys(cand).length === 0;
-            // Edge emits an empty object for RTCIceCandidateComplete‥
-            if (end) {
-              // polyfill since RTCIceGatherer.state is not implemented in
-              // Edge 10547 yet.
-              if (iceGatherer.state === undefined) {
-                iceGatherer.state = 'completed';
-              }
-
-              // Emit a candidate with type endOfCandidates to make the samples
-              // work. Edge requires addIceCandidate with this empty candidate
-              // to start checking. The real solution is to signal
-              // end-of-candidates to the other side when getting the null
-              // candidate but some apps (like the samples) don't do that.
-              event.candidate.candidate =
-                  'candidate:1 1 udp 1 0.0.0.0 9 typ endOfCandidates';
-            } else {
-              // RTCIceCandidate doesn't have a component, needs to be added
-              cand.component = iceTransport.component === 'RTCP' ? 2 : 1;
-              event.candidate.candidate = SDPUtils.writeCandidate(cand);
-            }
-
-            // update local description.
-            var sections = SDPUtils.splitSections(self.localDescription.sdp);
-            if (event.candidate.candidate.indexOf('typ endOfCandidates')
-                === -1) {
-              sections[event.candidate.sdpMLineIndex + 1] +=
-                  'a=' + event.candidate.candidate + '\r\n';
-            } else {
-              sections[event.candidate.sdpMLineIndex + 1] +=
-                  'a=end-of-candidates\r\n';
-            }
-            self.localDescription.sdp = sections.join('');
-
-            var complete = self.transceivers.every(function(transceiver) {
-              return transceiver.iceGatherer &&
-                  transceiver.iceGatherer.state === 'completed';
-            });
-
-            // Emit candidate if localDescription is set.
-            // Also emits null candidate when all gatherers are complete.
-            switch (self.iceGatheringState) {
-              case 'new':
-                self._localIceCandidatesBuffer.push(event);
-                if (end && complete) {
-                  self._localIceCandidatesBuffer.push(
-                      new Event('icecandidate'));
-                }
-                break;
-              case 'gathering':
-                self._emitBufferedCandidates();
-                self.dispatchEvent(event);
-                if (self.onicecandidate !== null) {
-                  self.onicecandidate(event);
-                }
-                if (complete) {
-                  self.dispatchEvent(new Event('icecandidate'));
-                  if (self.onicecandidate !== null) {
-                    self.onicecandidate(new Event('icecandidate'));
-                  }
-                  self.iceGatheringState = 'complete';
-                }
-                break;
-              case 'complete':
-                // should not happen... currently!
-                break;
-              default: // no-op.
-                break;
-            }
-          };
-          iceTransport.onicestatechange = function() {
-            self._updateConnectionState();
-          };
-
-          var dtlsTransport = new RTCDtlsTransport(iceTransport);
-          dtlsTransport.ondtlsstatechange = function() {
-            self._updateConnectionState();
-          };
-          dtlsTransport.onerror = function() {
-            // onerror does not set state to failed by itself.
-            dtlsTransport.state = 'failed';
-            self._updateConnectionState();
-          };
-
-          return {
-            iceGatherer: iceGatherer,
-            iceTransport: iceTransport,
-            dtlsTransport: dtlsTransport
-          };
-        };
-
-    // Start the RTP Sender and Receiver for a transceiver.
-    window.RTCPeerConnection.prototype._transceive = function(transceiver,
-        send, recv) {
-      var params = this._getCommonCapabilities(transceiver.localCapabilities,
-          transceiver.remoteCapabilities);
-      if (send && transceiver.rtpSender) {
-        params.encodings = transceiver.sendEncodingParameters;
-        params.rtcp = {
-          cname: SDPUtils.localCName
-        };
-        if (transceiver.recvEncodingParameters.length) {
-          params.rtcp.ssrc = transceiver.recvEncodingParameters[0].ssrc;
-        }
-        transceiver.rtpSender.send(params);
-      }
-      if (recv && transceiver.rtpReceiver) {
-        params.encodings = transceiver.recvEncodingParameters;
-        params.rtcp = {
-          cname: transceiver.cname
-        };
-        if (transceiver.sendEncodingParameters.length) {
-          params.rtcp.ssrc = transceiver.sendEncodingParameters[0].ssrc;
-        }
-        transceiver.rtpReceiver.receive(params);
-      }
-    };
-
-    window.RTCPeerConnection.prototype.setLocalDescription =
-        function(description) {
-          var self = this;
-          var sections;
-          var sessionpart;
-          if (description.type === 'offer') {
-            // FIXME: What was the purpose of this empty if statement?
-            // if (!this._pendingOffer) {
-            // } else {
-            if (this._pendingOffer) {
-              // VERY limited support for SDP munging. Limited to:
-              // * changing the order of codecs
-              sections = SDPUtils.splitSections(description.sdp);
-              sessionpart = sections.shift();
-              sections.forEach(function(mediaSection, sdpMLineIndex) {
-                var caps = SDPUtils.parseRtpParameters(mediaSection);
-                self._pendingOffer[sdpMLineIndex].localCapabilities = caps;
-              });
-              this.transceivers = this._pendingOffer;
-              delete this._pendingOffer;
-            }
-          } else if (description.type === 'answer') {
-            sections = SDPUtils.splitSections(self.remoteDescription.sdp);
-            sessionpart = sections.shift();
-            var isIceLite = SDPUtils.matchPrefix(sessionpart,
-                'a=ice-lite').length > 0;
-            sections.forEach(function(mediaSection, sdpMLineIndex) {
-              var transceiver = self.transceivers[sdpMLineIndex];
-              var iceGatherer = transceiver.iceGatherer;
-              var iceTransport = transceiver.iceTransport;
-              var dtlsTransport = transceiver.dtlsTransport;
-              var localCapabilities = transceiver.localCapabilities;
-              var remoteCapabilities = transceiver.remoteCapabilities;
-
-              var rejected = mediaSection.split('\n', 1)[0]
-                  .split(' ', 2)[1] === '0';
-
-              if (!rejected && !transceiver.isDatachannel) {
-                var remoteIceParameters = SDPUtils.getIceParameters(
-                    mediaSection, sessionpart);
-                if (isIceLite) {
-                  var cands = SDPUtils.matchPrefix(mediaSection, 'a=candidate:')
-                  .map(function(cand) {
-                    return SDPUtils.parseCandidate(cand);
-                  })
-                  .filter(function(cand) {
-                    return cand.component === '1';
-                  });
-                  // ice-lite only includes host candidates in the SDP so we can
-                  // use setRemoteCandidates (which implies an
-                  // RTCIceCandidateComplete)
-                  if (cands.length) {
-                    iceTransport.setRemoteCandidates(cands);
-                  }
-                }
-                var remoteDtlsParameters = SDPUtils.getDtlsParameters(
-                    mediaSection, sessionpart);
-                if (isIceLite) {
-                  remoteDtlsParameters.role = 'server';
-                }
-
-                if (!self.usingBundle || sdpMLineIndex === 0) {
-                  iceTransport.start(iceGatherer, remoteIceParameters,
-                      isIceLite ? 'controlling' : 'controlled');
-                  dtlsTransport.start(remoteDtlsParameters);
-                }
-
-                // Calculate intersection of capabilities.
-                var params = self._getCommonCapabilities(localCapabilities,
-                    remoteCapabilities);
-
-                // Start the RTCRtpSender. The RTCRtpReceiver for this
-                // transceiver has already been started in setRemoteDescription.
-                self._transceive(transceiver,
-                    params.codecs.length > 0,
-                    false);
-              }
-            });
-          }
-
-          this.localDescription = {
-            type: description.type,
-            sdp: description.sdp
-          };
-          switch (description.type) {
-            case 'offer':
-              this._updateSignalingState('have-local-offer');
-              break;
-            case 'answer':
-              this._updateSignalingState('stable');
-              break;
-            default:
-              throw new TypeError('unsupported type "' + description.type +
-                  '"');
-          }
-
-          // If a success callback was provided, emit ICE candidates after it
-          // has been executed. Otherwise, emit callback after the Promise is
-          // resolved.
-          var hasCallback = arguments.length > 1 &&
-            typeof arguments[1] === 'function';
-          if (hasCallback) {
-            var cb = arguments[1];
-            window.setTimeout(function() {
-              cb();
-              if (self.iceGatheringState === 'new') {
-                self.iceGatheringState = 'gathering';
-              }
-              self._emitBufferedCandidates();
-            }, 0);
-          }
-          var p = Promise.resolve();
-          p.then(function() {
-            if (!hasCallback) {
-              if (self.iceGatheringState === 'new') {
-                self.iceGatheringState = 'gathering';
-              }
-              // Usually candidates will be emitted earlier.
-              window.setTimeout(self._emitBufferedCandidates.bind(self), 500);
-            }
-          });
-          return p;
-        };
-
-    window.RTCPeerConnection.prototype.setRemoteDescription =
-        function(description) {
-          var self = this;
-          var stream = new MediaStream();
-          var receiverList = [];
-          var sections = SDPUtils.splitSections(description.sdp);
-          var sessionpart = sections.shift();
-          var isIceLite = SDPUtils.matchPrefix(sessionpart,
-              'a=ice-lite').length > 0;
-          this.usingBundle = SDPUtils.matchPrefix(sessionpart,
-              'a=group:BUNDLE ').length > 0;
-          sections.forEach(function(mediaSection, sdpMLineIndex) {
-            var lines = SDPUtils.splitLines(mediaSection);
-            var mline = lines[0].substr(2).split(' ');
-            var kind = mline[0];
-            var rejected = mline[1] === '0';
-            var direction = SDPUtils.getDirection(mediaSection, sessionpart);
-
-            var mid = SDPUtils.matchPrefix(mediaSection, 'a=mid:');
-            if (mid.length) {
-              mid = mid[0].substr(6);
-            } else {
-              mid = SDPUtils.generateIdentifier();
-            }
-
-            // Reject datachannels which are not implemented yet.
-            if (kind === 'application' && mline[2] === 'DTLS/SCTP') {
-              self.transceivers[sdpMLineIndex] = {
-                mid: mid,
-                isDatachannel: true
-              };
-              return;
-            }
-
-            var transceiver;
-            var iceGatherer;
-            var iceTransport;
-            var dtlsTransport;
-            var rtpSender;
-            var rtpReceiver;
-            var sendEncodingParameters;
-            var recvEncodingParameters;
-            var localCapabilities;
-
-            var track;
-            // FIXME: ensure the mediaSection has rtcp-mux set.
-            var remoteCapabilities = SDPUtils.parseRtpParameters(mediaSection);
-            var remoteIceParameters;
-            var remoteDtlsParameters;
-            if (!rejected) {
-              remoteIceParameters = SDPUtils.getIceParameters(mediaSection,
-                  sessionpart);
-              remoteDtlsParameters = SDPUtils.getDtlsParameters(mediaSection,
-                  sessionpart);
-              remoteDtlsParameters.role = 'client';
-            }
-            recvEncodingParameters =
-                SDPUtils.parseRtpEncodingParameters(mediaSection);
-
-            var cname;
-            // Gets the first SSRC. Note that with RTX there might be multiple
-            // SSRCs.
-            var remoteSsrc = SDPUtils.matchPrefix(mediaSection, 'a=ssrc:')
-                .map(function(line) {
-                  return SDPUtils.parseSsrcMedia(line);
-                })
-                .filter(function(obj) {
-                  return obj.attribute === 'cname';
-                })[0];
-            if (remoteSsrc) {
-              cname = remoteSsrc.value;
-            }
-
-            var isComplete = SDPUtils.matchPrefix(mediaSection,
-                'a=end-of-candidates', sessionpart).length > 0;
-            var cands = SDPUtils.matchPrefix(mediaSection, 'a=candidate:')
-                .map(function(cand) {
-                  return SDPUtils.parseCandidate(cand);
-                })
-                .filter(function(cand) {
-                  return cand.component === '1';
-                });
-            if (description.type === 'offer' && !rejected) {
-              var transports = self.usingBundle && sdpMLineIndex > 0 ? {
-                iceGatherer: self.transceivers[0].iceGatherer,
-                iceTransport: self.transceivers[0].iceTransport,
-                dtlsTransport: self.transceivers[0].dtlsTransport
-              } : self._createIceAndDtlsTransports(mid, sdpMLineIndex);
-
-              if (isComplete) {
-                transports.iceTransport.setRemoteCandidates(cands);
-              }
-
-              localCapabilities = RTCRtpReceiver.getCapabilities(kind);
-
-              // filter RTX until additional stuff needed for RTX is implemented
-              // in adapter.js
-              localCapabilities.codecs = localCapabilities.codecs.filter(
-                  function(codec) {
-                    return codec.name !== 'rtx';
-                  });
-
-              sendEncodingParameters = [{
-                ssrc: (2 * sdpMLineIndex + 2) * 1001
-              }];
-
-              rtpReceiver = new RTCRtpReceiver(transports.dtlsTransport, kind);
-
-              track = rtpReceiver.track;
-              receiverList.push([track, rtpReceiver]);
-              // FIXME: not correct when there are multiple streams but that is
-              // not currently supported in this shim.
-              stream.addTrack(track);
-
-              // FIXME: look at direction.
-              if (self.localStreams.length > 0 &&
-                  self.localStreams[0].getTracks().length >= sdpMLineIndex) {
-                var localTrack;
-                if (kind === 'audio') {
-                  localTrack = self.localStreams[0].getAudioTracks()[0];
-                } else if (kind === 'video') {
-                  localTrack = self.localStreams[0].getVideoTracks()[0];
-                }
-                if (localTrack) {
-                  rtpSender = new RTCRtpSender(localTrack,
-                      transports.dtlsTransport);
-                }
-              }
-
-              self.transceivers[sdpMLineIndex] = {
-                iceGatherer: transports.iceGatherer,
-                iceTransport: transports.iceTransport,
-                dtlsTransport: transports.dtlsTransport,
-                localCapabilities: localCapabilities,
-                remoteCapabilities: remoteCapabilities,
-                rtpSender: rtpSender,
-                rtpReceiver: rtpReceiver,
-                kind: kind,
-                mid: mid,
-                cname: cname,
-                sendEncodingParameters: sendEncodingParameters,
-                recvEncodingParameters: recvEncodingParameters
-              };
-              // Start the RTCRtpReceiver now. The RTPSender is started in
-              // setLocalDescription.
-              self._transceive(self.transceivers[sdpMLineIndex],
-                  false,
-                  direction === 'sendrecv' || direction === 'sendonly');
-            } else if (description.type === 'answer' && !rejected) {
-              transceiver = self.transceivers[sdpMLineIndex];
-              iceGatherer = transceiver.iceGatherer;
-              iceTransport = transceiver.iceTransport;
-              dtlsTransport = transceiver.dtlsTransport;
-              rtpSender = transceiver.rtpSender;
-              rtpReceiver = transceiver.rtpReceiver;
-              sendEncodingParameters = transceiver.sendEncodingParameters;
-              localCapabilities = transceiver.localCapabilities;
-
-              self.transceivers[sdpMLineIndex].recvEncodingParameters =
-                  recvEncodingParameters;
-              self.transceivers[sdpMLineIndex].remoteCapabilities =
-                  remoteCapabilities;
-              self.transceivers[sdpMLineIndex].cname = cname;
-
-              if ((isIceLite || isComplete) && cands.length) {
-                iceTransport.setRemoteCandidates(cands);
-              }
-              if (!self.usingBundle || sdpMLineIndex === 0) {
-                iceTransport.start(iceGatherer, remoteIceParameters,
-                    'controlling');
-                dtlsTransport.start(remoteDtlsParameters);
-              }
-
-              self._transceive(transceiver,
-                  direction === 'sendrecv' || direction === 'recvonly',
-                  direction === 'sendrecv' || direction === 'sendonly');
-
-              if (rtpReceiver &&
-                  (direction === 'sendrecv' || direction === 'sendonly')) {
-                track = rtpReceiver.track;
-                receiverList.push([track, rtpReceiver]);
-                stream.addTrack(track);
-              } else {
-                // FIXME: actually the receiver should be created later.
-                delete transceiver.rtpReceiver;
-              }
-            }
-          });
-
-          this.remoteDescription = {
-            type: description.type,
-            sdp: description.sdp
-          };
-          switch (description.type) {
-            case 'offer':
-              this._updateSignalingState('have-remote-offer');
-              break;
-            case 'answer':
-              this._updateSignalingState('stable');
-              break;
-            default:
-              throw new TypeError('unsupported type "' + description.type +
-                  '"');
-          }
-          if (stream.getTracks().length) {
-            self.remoteStreams.push(stream);
-            window.setTimeout(function() {
-              var event = new Event('addstream');
-              event.stream = stream;
-              self.dispatchEvent(event);
-              if (self.onaddstream !== null) {
-                window.setTimeout(function() {
-                  self.onaddstream(event);
-                }, 0);
-              }
-
-              receiverList.forEach(function(item) {
-                var track = item[0];
-                var receiver = item[1];
-                var trackEvent = new Event('track');
-                trackEvent.track = track;
-                trackEvent.receiver = receiver;
-                trackEvent.streams = [stream];
-                self.dispatchEvent(event);
-                if (self.ontrack !== null) {
-                  window.setTimeout(function() {
-                    self.ontrack(trackEvent);
-                  }, 0);
-                }
-              });
-            }, 0);
-          }
-          if (arguments.length > 1 && typeof arguments[1] === 'function') {
-            window.setTimeout(arguments[1], 0);
-          }
-          return Promise.resolve();
-        };
-
-    window.RTCPeerConnection.prototype.close = function() {
-      this.transceivers.forEach(function(transceiver) {
-        /* not yet
-        if (transceiver.iceGatherer) {
-          transceiver.iceGatherer.close();
-        }
-        */
-        if (transceiver.iceTransport) {
-          transceiver.iceTransport.stop();
-        }
-        if (transceiver.dtlsTransport) {
-          transceiver.dtlsTransport.stop();
-        }
-        if (transceiver.rtpSender) {
-          transceiver.rtpSender.stop();
-        }
-        if (transceiver.rtpReceiver) {
-          transceiver.rtpReceiver.stop();
-        }
-      });
-      // FIXME: clean up tracks, local streams, remote streams, etc
-      this._updateSignalingState('closed');
-    };
-
-    // Update the signaling state.
-    window.RTCPeerConnection.prototype._updateSignalingState =
-        function(newState) {
-          this.signalingState = newState;
-          var event = new Event('signalingstatechange');
-          this.dispatchEvent(event);
-          if (this.onsignalingstatechange !== null) {
-            this.onsignalingstatechange(event);
-          }
-        };
-
-    // Determine whether to fire the negotiationneeded event.
-    window.RTCPeerConnection.prototype._maybeFireNegotiationNeeded =
-        function() {
-          // Fire away (for now).
-          var event = new Event('negotiationneeded');
-          this.dispatchEvent(event);
-          if (this.onnegotiationneeded !== null) {
-            this.onnegotiationneeded(event);
-          }
-        };
-
-    // Update the connection state.
-    window.RTCPeerConnection.prototype._updateConnectionState = function() {
-      var self = this;
-      var newState;
-      var states = {
-        'new': 0,
-        closed: 0,
-        connecting: 0,
-        checking: 0,
-        connected: 0,
-        completed: 0,
-        failed: 0
-      };
-      this.transceivers.forEach(function(transceiver) {
-        states[transceiver.iceTransport.state]++;
-        states[transceiver.dtlsTransport.state]++;
-      });
-      // ICETransport.completed and connected are the same for this purpose.
-      states.connected += states.completed;
-
-      newState = 'new';
-      if (states.failed > 0) {
-        newState = 'failed';
-      } else if (states.connecting > 0 || states.checking > 0) {
-        newState = 'connecting';
-      } else if (states.disconnected > 0) {
-        newState = 'disconnected';
-      } else if (states.new > 0) {
-        newState = 'new';
-      } else if (states.connected > 0 || states.completed > 0) {
-        newState = 'connected';
-      }
-
-      if (newState !== self.iceConnectionState) {
-        self.iceConnectionState = newState;
-        var event = new Event('iceconnectionstatechange');
-        this.dispatchEvent(event);
-        if (this.oniceconnectionstatechange !== null) {
-          this.oniceconnectionstatechange(event);
-        }
-      }
-    };
-
-    window.RTCPeerConnection.prototype.createOffer = function() {
-      var self = this;
-      if (this._pendingOffer) {
-        throw new Error('createOffer called while there is a pending offer.');
-      }
-      var offerOptions;
-      if (arguments.length === 1 && typeof arguments[0] !== 'function') {
-        offerOptions = arguments[0];
-      } else if (arguments.length === 3) {
-        offerOptions = arguments[2];
-      }
-
-      var tracks = [];
-      var numAudioTracks = 0;
-      var numVideoTracks = 0;
-      // Default to sendrecv.
-      if (this.localStreams.length) {
-        numAudioTracks = this.localStreams[0].getAudioTracks().length;
-        numVideoTracks = this.localStreams[0].getVideoTracks().length;
-      }
-      // Determine number of audio and video tracks we need to send/recv.
-      if (offerOptions) {
-        // Reject Chrome legacy constraints.
-        if (offerOptions.mandatory || offerOptions.optional) {
-          throw new TypeError(
-              'Legacy mandatory/optional constraints not supported.');
-        }
-        if (offerOptions.offerToReceiveAudio !== undefined) {
-          numAudioTracks = offerOptions.offerToReceiveAudio;
-        }
-        if (offerOptions.offerToReceiveVideo !== undefined) {
-          numVideoTracks = offerOptions.offerToReceiveVideo;
-        }
-      }
-      if (this.localStreams.length) {
-        // Push local streams.
-        this.localStreams[0].getTracks().forEach(function(track) {
-          tracks.push({
-            kind: track.kind,
-            track: track,
-            wantReceive: track.kind === 'audio' ?
-                numAudioTracks > 0 : numVideoTracks > 0
-          });
-          if (track.kind === 'audio') {
-            numAudioTracks--;
-          } else if (track.kind === 'video') {
-            numVideoTracks--;
-          }
-        });
-      }
-      // Create M-lines for recvonly streams.
-      while (numAudioTracks > 0 || numVideoTracks > 0) {
-        if (numAudioTracks > 0) {
-          tracks.push({
-            kind: 'audio',
-            wantReceive: true
-          });
-          numAudioTracks--;
-        }
-        if (numVideoTracks > 0) {
-          tracks.push({
-            kind: 'video',
-            wantReceive: true
-          });
-          numVideoTracks--;
-        }
-      }
-
-      var sdp = SDPUtils.writeSessionBoilerplate();
-      var transceivers = [];
-      tracks.forEach(function(mline, sdpMLineIndex) {
-        // For each track, create an ice gatherer, ice transport,
-        // dtls transport, potentially rtpsender and rtpreceiver.
-        var track = mline.track;
-        var kind = mline.kind;
-        var mid = SDPUtils.generateIdentifier();
-
-        var transports = self.usingBundle && sdpMLineIndex > 0 ? {
-          iceGatherer: transceivers[0].iceGatherer,
-          iceTransport: transceivers[0].iceTransport,
-          dtlsTransport: transceivers[0].dtlsTransport
-        } : self._createIceAndDtlsTransports(mid, sdpMLineIndex);
-
-        var localCapabilities = RTCRtpSender.getCapabilities(kind);
-        // filter RTX until additional stuff needed for RTX is implemented
-        // in adapter.js
-        localCapabilities.codecs = localCapabilities.codecs.filter(
-            function(codec) {
-              return codec.name !== 'rtx';
-            });
-
-        var rtpSender;
-        var rtpReceiver;
-
-        // generate an ssrc now, to be used later in rtpSender.send
-        var sendEncodingParameters = [{
-          ssrc: (2 * sdpMLineIndex + 1) * 1001
-        }];
-        if (track) {
-          rtpSender = new RTCRtpSender(track, transports.dtlsTransport);
-        }
-
-        if (mline.wantReceive) {
-          rtpReceiver = new RTCRtpReceiver(transports.dtlsTransport, kind);
-        }
-
-        transceivers[sdpMLineIndex] = {
-          iceGatherer: transports.iceGatherer,
-          iceTransport: transports.iceTransport,
-          dtlsTransport: transports.dtlsTransport,
-          localCapabilities: localCapabilities,
-          remoteCapabilities: null,
-          rtpSender: rtpSender,
-          rtpReceiver: rtpReceiver,
-          kind: kind,
-          mid: mid,
-          sendEncodingParameters: sendEncodingParameters,
-          recvEncodingParameters: null
-        };
-      });
-      if (this.usingBundle) {
-        sdp += 'a=group:BUNDLE ' + transceivers.map(function(t) {
-          return t.mid;
-        }).join(' ') + '\r\n';
-      }
-      tracks.forEach(function(mline, sdpMLineIndex) {
-        var transceiver = transceivers[sdpMLineIndex];
-        sdp += SDPUtils.writeMediaSection(transceiver,
-            transceiver.localCapabilities, 'offer', self.localStreams[0]);
-      });
-
-      this._pendingOffer = transceivers;
-      var desc = new RTCSessionDescription({
-        type: 'offer',
-        sdp: sdp
-      });
-      if (arguments.length && typeof arguments[0] === 'function') {
-        window.setTimeout(arguments[0], 0, desc);
-      }
-      return Promise.resolve(desc);
-    };
-
-    window.RTCPeerConnection.prototype.createAnswer = function() {
-      var self = this;
-
-      var sdp = SDPUtils.writeSessionBoilerplate();
-      if (this.usingBundle) {
-        sdp += 'a=group:BUNDLE ' + this.transceivers.map(function(t) {
-          return t.mid;
-        }).join(' ') + '\r\n';
-      }
-      this.transceivers.forEach(function(transceiver) {
-        if (transceiver.isDatachannel) {
-          sdp += 'm=application 0 DTLS/SCTP 5000\r\n' +
-              'c=IN IP4 0.0.0.0\r\n' +
-              'a=mid:' + transceiver.mid + '\r\n';
-          return;
-        }
-        // Calculate intersection of capabilities.
-        var commonCapabilities = self._getCommonCapabilities(
-            transceiver.localCapabilities,
-            transceiver.remoteCapabilities);
-
-        sdp += SDPUtils.writeMediaSection(transceiver, commonCapabilities,
-            'answer', self.localStreams[0]);
-      });
-
-      var desc = new RTCSessionDescription({
-        type: 'answer',
-        sdp: sdp
-      });
-      if (arguments.length && typeof arguments[0] === 'function') {
-        window.setTimeout(arguments[0], 0, desc);
-      }
-      return Promise.resolve(desc);
-    };
-
-    window.RTCPeerConnection.prototype.addIceCandidate = function(candidate) {
-      if (candidate === null) {
-        this.transceivers.forEach(function(transceiver) {
-          transceiver.iceTransport.addRemoteCandidate({});
-        });
-      } else {
-        var mLineIndex = candidate.sdpMLineIndex;
-        if (candidate.sdpMid) {
-          for (var i = 0; i < this.transceivers.length; i++) {
-            if (this.transceivers[i].mid === candidate.sdpMid) {
-              mLineIndex = i;
-              break;
-            }
-          }
-        }
-        var transceiver = this.transceivers[mLineIndex];
-        if (transceiver) {
-          var cand = Object.keys(candidate.candidate).length > 0 ?
-              SDPUtils.parseCandidate(candidate.candidate) : {};
-          // Ignore Chrome's invalid candidates since Edge does not like them.
-          if (cand.protocol === 'tcp' && (cand.port === 0 || cand.port === 9)) {
-            return;
-          }
-          // Ignore RTCP candidates, we assume RTCP-MUX.
-          if (cand.component !== '1') {
-            return;
-          }
-          // A dirty hack to make samples work.
-          if (cand.type === 'endOfCandidates') {
-            cand = {};
-          }
-          transceiver.iceTransport.addRemoteCandidate(cand);
-
-          // update the remoteDescription.
-          var sections = SDPUtils.splitSections(this.remoteDescription.sdp);
-          sections[mLineIndex + 1] += (cand.type ? candidate.candidate.trim()
-              : 'a=end-of-candidates') + '\r\n';
-          this.remoteDescription.sdp = sections.join('');
-        }
-      }
-      if (arguments.length > 1 && typeof arguments[1] === 'function') {
-        window.setTimeout(arguments[1], 0);
-      }
-      return Promise.resolve();
-    };
-
-    window.RTCPeerConnection.prototype.getStats = function() {
-      var promises = [];
-      this.transceivers.forEach(function(transceiver) {
-        ['rtpSender', 'rtpReceiver', 'iceGatherer', 'iceTransport',
-            'dtlsTransport'].forEach(function(method) {
-              if (transceiver[method]) {
-                promises.push(transceiver[method].getStats());
-              }
-            });
-      });
-      var cb = arguments.length > 1 && typeof arguments[1] === 'function' &&
-          arguments[1];
-      return new Promise(function(resolve) {
-        // shim getStats with maplike support
-        var results = new Map();
-        Promise.all(promises).then(function(res) {
-          res.forEach(function(result) {
-            Object.keys(result).forEach(function(id) {
-              results.set(id, result[id]);
-              results[id] = result[id];
-            });
-          });
-          if (cb) {
-            window.setTimeout(cb, 0, results);
-          }
-          resolve(results);
-        });
-      });
-    };
-  }
-};
-
-// Expose public methods.
-module.exports = {
-  shimPeerConnection: edgeShim.shimPeerConnection,
-  shimGetUserMedia: require('./getusermedia')
-};
-
-},{"../utils":10,"./getusermedia":6,"sdp":1}],6:[function(require,module,exports){
-/*
- *  Copyright (c) 2016 The WebRTC project authors. All Rights Reserved.
- *
- *  Use of this source code is governed by a BSD-style license
- *  that can be found in the LICENSE file in the root of the source
- *  tree.
- */
- /* eslint-env node */
-'use strict';
-
-// Expose public methods.
-module.exports = function() {
-  var shimError_ = function(e) {
-    return {
-      name: {PermissionDeniedError: 'NotAllowedError'}[e.name] || e.name,
-      message: e.message,
-      constraint: e.constraint,
-      toString: function() {
-        return this.name;
-      }
-    };
-  };
-
-  // getUserMedia error shim.
-  var origGetUserMedia = navigator.mediaDevices.getUserMedia.
-      bind(navigator.mediaDevices);
-  navigator.mediaDevices.getUserMedia = function(c) {
-    return origGetUserMedia(c).catch(function(e) {
-      return Promise.reject(shimError_(e));
-    });
-  };
-};
-
-},{}],7:[function(require,module,exports){
-/*
- *  Copyright (c) 2016 The WebRTC project authors. All Rights Reserved.
- *
- *  Use of this source code is governed by a BSD-style license
- *  that can be found in the LICENSE file in the root of the source
- *  tree.
- */
- /* eslint-env node */
-'use strict';
-
-var browserDetails = require('../utils').browserDetails;
-
-var firefoxShim = {
-  shimOnTrack: function() {
-    if (typeof window === 'object' && window.RTCPeerConnection && !('ontrack' in
-        window.RTCPeerConnection.prototype)) {
-      Object.defineProperty(window.RTCPeerConnection.prototype, 'ontrack', {
-        get: function() {
-          return this._ontrack;
-        },
-        set: function(f) {
-          if (this._ontrack) {
-            this.removeEventListener('track', this._ontrack);
-            this.removeEventListener('addstream', this._ontrackpoly);
-          }
-          this.addEventListener('track', this._ontrack = f);
-          this.addEventListener('addstream', this._ontrackpoly = function(e) {
-            e.stream.getTracks().forEach(function(track) {
-              var event = new Event('track');
-              event.track = track;
-              event.receiver = {track: track};
-              event.streams = [e.stream];
-              this.dispatchEvent(event);
-            }.bind(this));
-          }.bind(this));
-        }
-      });
-    }
-  },
-
-  shimSourceObject: function() {
-    // Firefox has supported mozSrcObject since FF22, unprefixed in 42.
-    if (typeof window === 'object') {
-      if (window.HTMLMediaElement &&
-        !('srcObject' in window.HTMLMediaElement.prototype)) {
-        // Shim the srcObject property, once, when HTMLMediaElement is found.
-        Object.defineProperty(window.HTMLMediaElement.prototype, 'srcObject', {
-          get: function() {
-            return this.mozSrcObject;
-          },
-          set: function(stream) {
-            this.mozSrcObject = stream;
-          }
-        });
-      }
-    }
-  },
-
-  shimPeerConnection: function() {
-    if (typeof window !== 'object' || !(window.RTCPeerConnection ||
-        window.mozRTCPeerConnection)) {
-      return; // probably media.peerconnection.enabled=false in about:config
-    }
-    // The RTCPeerConnection object.
-    if (!window.RTCPeerConnection) {
-      window.RTCPeerConnection = function(pcConfig, pcConstraints) {
-        if (browserDetails.version < 38) {
-          // .urls is not supported in FF < 38.
-          // create RTCIceServers with a single url.
-          if (pcConfig && pcConfig.iceServers) {
-            var newIceServers = [];
-            for (var i = 0; i < pcConfig.iceServers.length; i++) {
-              var server = pcConfig.iceServers[i];
-              if (server.hasOwnProperty('urls')) {
-                for (var j = 0; j < server.urls.length; j++) {
-                  var newServer = {
-                    url: server.urls[j]
-                  };
-                  if (server.urls[j].indexOf('turn') === 0) {
-                    newServer.username = server.username;
-                    newServer.credential = server.credential;
-                  }
-                  newIceServers.push(newServer);
-                }
-              } else {
-                newIceServers.push(pcConfig.iceServers[i]);
-              }
-            }
-            pcConfig.iceServers = newIceServers;
-          }
-        }
-        return new mozRTCPeerConnection(pcConfig, pcConstraints);
-      };
-      window.RTCPeerConnection.prototype = mozRTCPeerConnection.prototype;
-
-      // wrap static methods. Currently just generateCertificate.
-      if (mozRTCPeerConnection.generateCertificate) {
-        Object.defineProperty(window.RTCPeerConnection, 'generateCertificate', {
-          get: function() {
-            return mozRTCPeerConnection.generateCertificate;
-          }
-        });
-      }
-
-      window.RTCSessionDescription = mozRTCSessionDescription;
-      window.RTCIceCandidate = mozRTCIceCandidate;
-    }
-
-    // shim away need for obsolete RTCIceCandidate/RTCSessionDescription.
-    ['setLocalDescription', 'setRemoteDescription', 'addIceCandidate']
-        .forEach(function(method) {
-          var nativeMethod = RTCPeerConnection.prototype[method];
-          RTCPeerConnection.prototype[method] = function() {
-            arguments[0] = new ((method === 'addIceCandidate') ?
-                RTCIceCandidate : RTCSessionDescription)(arguments[0]);
-            return nativeMethod.apply(this, arguments);
-          };
-        });
-
-    // support for addIceCandidate(null)
-    var nativeAddIceCandidate =
-        RTCPeerConnection.prototype.addIceCandidate;
-    RTCPeerConnection.prototype.addIceCandidate = function() {
-      return arguments[0] === null ? Promise.resolve()
-          : nativeAddIceCandidate.apply(this, arguments);
-    };
-
-    // shim getStats with maplike support
-    var makeMapStats = function(stats) {
-      var map = new Map();
-      Object.keys(stats).forEach(function(key) {
-        map.set(key, stats[key]);
-        map[key] = stats[key];
-      });
-      return map;
-    };
-
-    var nativeGetStats = RTCPeerConnection.prototype.getStats;
-    RTCPeerConnection.prototype.getStats = function(selector, onSucc, onErr) {
-      return nativeGetStats.apply(this, [selector || null])
-        .then(function(stats) {
-          return makeMapStats(stats);
-        })
-        .then(onSucc, onErr);
-    };
-  }
-};
-
-// Expose public methods.
-module.exports = {
-  shimOnTrack: firefoxShim.shimOnTrack,
-  shimSourceObject: firefoxShim.shimSourceObject,
-  shimPeerConnection: firefoxShim.shimPeerConnection,
-  shimGetUserMedia: require('./getusermedia')
-};
-
-},{"../utils":10,"./getusermedia":8}],8:[function(require,module,exports){
-/*
- *  Copyright (c) 2016 The WebRTC project authors. All Rights Reserved.
- *
- *  Use of this source code is governed by a BSD-style license
- *  that can be found in the LICENSE file in the root of the source
- *  tree.
- */
- /* eslint-env node */
-'use strict';
-
-var logging = require('../utils').log;
-var browserDetails = require('../utils').browserDetails;
-
-// Expose public methods.
-module.exports = function() {
-  var shimError_ = function(e) {
-    return {
-      name: {
-        SecurityError: 'NotAllowedError',
-        PermissionDeniedError: 'NotAllowedError'
-      }[e.name] || e.name,
-      message: {
-        'The operation is insecure.': 'The request is not allowed by the ' +
-        'user agent or the platform in the current context.'
-      }[e.message] || e.message,
-      constraint: e.constraint,
-      toString: function() {
-        return this.name + (this.message && ': ') + this.message;
-      }
-    };
-  };
-
-  // getUserMedia constraints shim.
-  var getUserMedia_ = function(constraints, onSuccess, onError) {
-    var constraintsToFF37_ = function(c) {
-      if (typeof c !== 'object' || c.require) {
-        return c;
-      }
-      var require = [];
-      Object.keys(c).forEach(function(key) {
-        if (key === 'require' || key === 'advanced' || key === 'mediaSource') {
-          return;
-        }
-        var r = c[key] = (typeof c[key] === 'object') ?
-            c[key] : {ideal: c[key]};
-        if (r.min !== undefined ||
-            r.max !== undefined || r.exact !== undefined) {
-          require.push(key);
-        }
-        if (r.exact !== undefined) {
-          if (typeof r.exact === 'number') {
-            r. min = r.max = r.exact;
-          } else {
-            c[key] = r.exact;
-          }
-          delete r.exact;
-        }
-        if (r.ideal !== undefined) {
-          c.advanced = c.advanced || [];
-          var oc = {};
-          if (typeof r.ideal === 'number') {
-            oc[key] = {min: r.ideal, max: r.ideal};
-          } else {
-            oc[key] = r.ideal;
-          }
-          c.advanced.push(oc);
-          delete r.ideal;
-          if (!Object.keys(r).length) {
-            delete c[key];
-          }
-        }
-      });
-      if (require.length) {
-        c.require = require;
-      }
-      return c;
-    };
-    constraints = JSON.parse(JSON.stringify(constraints));
-    if (browserDetails.version < 38) {
-      logging('spec: ' + JSON.stringify(constraints));
-      if (constraints.audio) {
-        constraints.audio = constraintsToFF37_(constraints.audio);
-      }
-      if (constraints.video) {
-        constraints.video = constraintsToFF37_(constraints.video);
-      }
-      logging('ff37: ' + JSON.stringify(constraints));
-    }
-    return navigator.mozGetUserMedia(constraints, onSuccess, function(e) {
-      onError(shimError_(e));
-    });
-  };
-
-  // Returns the result of getUserMedia as a Promise.
-  var getUserMediaPromise_ = function(constraints) {
-    return new Promise(function(resolve, reject) {
-      getUserMedia_(constraints, resolve, reject);
-    });
-  };
-
-  // Shim for mediaDevices on older versions.
-  if (!navigator.mediaDevices) {
-    navigator.mediaDevices = {getUserMedia: getUserMediaPromise_,
-      addEventListener: function() { },
-      removeEventListener: function() { }
-    };
-  }
-  navigator.mediaDevices.enumerateDevices =
-      navigator.mediaDevices.enumerateDevices || function() {
-        return new Promise(function(resolve) {
-          var infos = [
-            {kind: 'audioinput', deviceId: 'default', label: '', groupId: ''},
-            {kind: 'videoinput', deviceId: 'default', label: '', groupId: ''}
-          ];
-          resolve(infos);
-        });
-      };
-
-  if (browserDetails.version < 41) {
-    // Work around http://bugzil.la/1169665
-    var orgEnumerateDevices =
-        navigator.mediaDevices.enumerateDevices.bind(navigator.mediaDevices);
-    navigator.mediaDevices.enumerateDevices = function() {
-      return orgEnumerateDevices().then(undefined, function(e) {
-        if (e.name === 'NotFoundError') {
-          return [];
-        }
-        throw e;
-      });
-    };
-  }
-  if (browserDetails.version < 49) {
-    var origGetUserMedia = navigator.mediaDevices.getUserMedia.
-        bind(navigator.mediaDevices);
-    navigator.mediaDevices.getUserMedia = function(c) {
-      return origGetUserMedia(c).then(function(stream) {
-        // Work around https://bugzil.la/802326
-        if (c.audio && !stream.getAudioTracks().length ||
-            c.video && !stream.getVideoTracks().length) {
-          stream.getTracks().forEach(function(track) {
-            track.stop();
-          });
-          throw new DOMException('The object can not be found here.',
-                                 'NotFoundError');
-        }
-        return stream;
-      }, function(e) {
-        return Promise.reject(shimError_(e));
-      });
-    };
-  }
-  navigator.getUserMedia = function(constraints, onSuccess, onError) {
-    if (browserDetails.version < 44) {
-      return getUserMedia_(constraints, onSuccess, onError);
-    }
-    // Replace Firefox 44+'s deprecation warning with unprefixed version.
-    console.warn('navigator.getUserMedia has been replaced by ' +
-                 'navigator.mediaDevices.getUserMedia');
-    navigator.mediaDevices.getUserMedia(constraints).then(onSuccess, onError);
-  };
-};
-
-},{"../utils":10}],9:[function(require,module,exports){
-/*
- *  Copyright (c) 2016 The WebRTC project authors. All Rights Reserved.
- *
- *  Use of this source code is governed by a BSD-style license
- *  that can be found in the LICENSE file in the root of the source
- *  tree.
- */
-'use strict';
-var safariShim = {
-  // TODO: DrAlex, should be here, double check against LayoutTests
-  // shimOnTrack: function() { },
-
-  // TODO: once the back-end for the mac port is done, add.
-  // TODO: check for webkitGTK+
-  // shimPeerConnection: function() { },
-
-  shimGetUserMedia: function() {
-    navigator.getUserMedia = navigator.webkitGetUserMedia;
-  }
-};
-
-// Expose public methods.
-module.exports = {
-  shimGetUserMedia: safariShim.shimGetUserMedia
-  // TODO
-  // shimOnTrack: safariShim.shimOnTrack,
-  // shimPeerConnection: safariShim.shimPeerConnection
-};
-
-},{}],10:[function(require,module,exports){
-/*
- *  Copyright (c) 2016 The WebRTC project authors. All Rights Reserved.
- *
- *  Use of this source code is governed by a BSD-style license
- *  that can be found in the LICENSE file in the root of the source
- *  tree.
- */
- /* eslint-env node */
-'use strict';
-
-var logDisabled_ = true;
-
-// Utility methods.
-var utils = {
-  disableLog: function(bool) {
-    if (typeof bool !== 'boolean') {
-      return new Error('Argument type: ' + typeof bool +
-          '. Please use a boolean.');
-    }
-    logDisabled_ = bool;
-    return (bool) ? 'adapter.js logging disabled' :
-        'adapter.js logging enabled';
-  },
-
-  log: function() {
-    if (typeof window === 'object') {
-      if (logDisabled_) {
-        return;
-      }
-      if (typeof console !== 'undefined' && typeof console.log === 'function') {
-        console.log.apply(console, arguments);
-      }
-    }
-  },
-
-  /**
-   * Extract browser version out of the provided user agent string.
-   *
-   * @param {!string} uastring userAgent string.
-   * @param {!string} expr Regular expression used as match criteria.
-   * @param {!number} pos position in the version string to be returned.
-   * @return {!number} browser version.
-   */
-  extractVersion: function(uastring, expr, pos) {
-    var match = uastring.match(expr);
-    return match && match.length >= pos && parseInt(match[pos], 10);
-  },
-
-  /**
-   * Browser detector.
-   *
-   * @return {object} result containing browser and version
-   *     properties.
-   */
-  detectBrowser: function() {
-    // Returned result object.
-    var result = {};
-    result.browser = null;
-    result.version = null;
-
-    // Fail early if it's not a browser
-    if (typeof window === 'undefined' || !window.navigator) {
-      result.browser = 'Not a browser.';
-      return result;
-    }
-
-    // Firefox.
-    if (navigator.mozGetUserMedia) {
-      result.browser = 'firefox';
-      result.version = this.extractVersion(navigator.userAgent,
-          /Firefox\/([0-9]+)\./, 1);
-
-    // all webkit-based browsers
-    } else if (navigator.webkitGetUserMedia) {
-      // Chrome, Chromium, Webview, Opera, all use the chrome shim for now
-      if (window.webkitRTCPeerConnection) {
-        result.browser = 'chrome';
-        result.version = this.extractVersion(navigator.userAgent,
-          /Chrom(e|ium)\/([0-9]+)\./, 2);
-
-      // Safari or unknown webkit-based
-      // for the time being Safari has support for MediaStreams but not webRTC
-      } else {
-        // Safari UA substrings of interest for reference:
-        // - webkit version:           AppleWebKit/602.1.25 (also used in Op,Cr)
-        // - safari UI version:        Version/9.0.3 (unique to Safari)
-        // - safari UI webkit version: Safari/601.4.4 (also used in Op,Cr)
-        //
-        // if the webkit version and safari UI webkit versions are equals,
-        // ... this is a stable version.
-        //
-        // only the internal webkit version is important today to know if
-        // media streams are supported
-        //
-        if (navigator.userAgent.match(/Version\/(\d+).(\d+)/)) {
-          result.browser = 'safari';
-          result.version = this.extractVersion(navigator.userAgent,
-            /AppleWebKit\/([0-9]+)\./, 1);
-
-        // unknown webkit-based browser
-        } else {
-          result.browser = 'Unsupported webkit-based browser ' +
-              'with GUM support but no WebRTC support.';
-          return result;
-        }
-      }
-
-    // Edge.
-    } else if (navigator.mediaDevices &&
-        navigator.userAgent.match(/Edge\/(\d+).(\d+)$/)) {
-      result.browser = 'edge';
-      result.version = this.extractVersion(navigator.userAgent,
-          /Edge\/(\d+).(\d+)$/, 2);
-
-    // Default fallthrough: not supported.
-    } else {
-      result.browser = 'Not a supported browser.';
-      return result;
-    }
-
-    return result;
-  }
-};
-
-// Export.
-module.exports = {
-  log: utils.log,
-  disableLog: utils.disableLog,
-  browserDetails: utils.detectBrowser(),
-  extractVersion: utils.extractVersion
-};
-
-},{}]},{},[2])(2)
-});
 /**
  * @file A fantasy name generator library.
  * @version 1.0.0
@@ -75846,6 +68737,8 @@ var FPSInput = function (_Primrose$AbstractEve) {
     _this.stage = hub();
 
     _this.head = new Primrose.Pointer("GazePointer", 0xffff00, 0x0000ff, 0.8, [_this.VR], [_this.Mouse, _this.Touch, _this.Keyboard]);
+
+    _this.head.rotation.order = "YXZ";
     _this.head.useGaze = _this.options.useGaze;
     _this.pointers.push(_this.head);
     _this.options.scene.add(_this.head.root);
@@ -75938,46 +68831,50 @@ var FPSInput = function (_Primrose$AbstractEve) {
         this.pointers[_i3].update();
       }
 
-      if (!this.VR.hasOrientation) {
-        var pitch = 0;
-        for (var _i4 = 0; _i4 < this.managers.length; ++_i4) {
-          var mgr = this.managers[_i4];
-          if (mgr.enabled) {
-            pitch += mgr.getValue("pitch");
-          }
-        }
-        this.head.rotation.order = "YXZ";
-        this.head.rotation.x = pitch;
-      }
-
       // record the position and orientation of the user
       this.newState = [];
       this.head.updateMatrix();
+      this.stage.rotation.x = 0;
+      this.stage.rotation.z = 0;
+      this.stage.quaternion.setFromEuler(this.stage.rotation);
       this.stage.updateMatrix();
       this.head.position.toArray(this.newState, 0);
-      this.stage.quaternion.toArray(this.newState, 3);
-      this.head.quaternion.toArray(this.newState, 7);
+      this.head.quaternion.toArray(this.newState, 3);
     }
   }, {
     key: "updateStage",
     value: function updateStage(dt) {
       // get the linear movement from the mouse/keyboard/gamepad
       var heading = 0,
+          pitch = 0,
           strafe = 0,
           drive = 0,
-          lift = 0;
+          lift = 0,
+          mouseHeading = 0;
       for (var i = 0; i < this.managers.length; ++i) {
         var mgr = this.managers[i];
         if (mgr.enabled) {
-          heading += mgr.getValue("heading");
+          if (mgr.name === "Mouse") {
+            mouseHeading += mgr.getValue("heading");
+          } else {
+            heading += mgr.getValue("heading");
+          }
+          pitch += mgr.getValue("pitch");
           strafe += mgr.getValue("strafe");
           drive += mgr.getValue("drive");
           lift += mgr.getValue("lift");
         }
       }
 
+      if (this.VR.hasOrientation) {
+        mouseHeading = WEDGE * Math.floor(mouseHeading / WEDGE + 0.5);
+        pitch = 0;
+      }
+
+      heading += mouseHeading;
+
       // move stage according to heading and thrust
-      EULER_TEMP.set(0, heading, 0, "YXZ");
+      EULER_TEMP.set(pitch, heading, 0, "YXZ");
       this.stage.quaternion.setFromEuler(EULER_TEMP);
 
       // update the stage's velocity
@@ -77534,14 +70431,6 @@ var RemoteUser = function (_Primrose$AbstractEve) {
     _this.lastHeadPosition = new THREE.Vector3();
     _this.lastHeadQuaternion = new THREE.Quaternion();
 
-    _this.stageQuaternion = {
-      arr1: [],
-      arr2: [],
-      last: _this.lastStageQuaternion,
-      delta: _this.dStageQuaternion,
-      curr: _this.stage.quaternion
-    };
-
     _this.headPosition = {
       arr1: [],
       arr2: [],
@@ -77610,11 +70499,11 @@ var RemoteUser = function (_Primrose$AbstractEve) {
       if (audioSource instanceof Element) {
         this.audioElement = audioSource;
         Primrose.Output.Audio3D.setAudioProperties(this.audioElement);
-        audioSource = audioSource.srcObject;
+        this.audioStream = audio.context.createMediaElementSource(this.audioElement);
       } else {
         this.audioElement = Primrose.Output.Audio3D.setAudioStream(audioSource, "audio" + this.userName);
+        this.audioStream = audio.context.createMediaStreamSource(audioSource);
       }
-      this.audioStream = audio.context.createMediaStreamSource(audioSource);
       this.gain = audio.context.createGain();
       this.panner = audio.context.createPanner();
 
@@ -77683,8 +70572,10 @@ var RemoteUser = function (_Primrose$AbstractEve) {
       this.time += dt;
       var fade = this.time >= RemoteUser.NETWORK_DT;
       this._updateV(this.headPosition, dt, fade);
-      this._updateV(this.stageQuaternion, dt, fade);
       this._updateV(this.headQuaternion, dt, fade);
+      this.stage.rotation.setFromQuaternion(this.headQuaternion.curr);
+      this.stage.rotation.x = 0;
+      this.stage.rotation.z = 0;
       this.stage.position.copy(this.headPosition.curr);
       this.stage.position.y = 0;
       if (this.panner) {
@@ -77697,8 +70588,7 @@ var RemoteUser = function (_Primrose$AbstractEve) {
     value: function setState(v) {
       this.time = 0;
       this._predict(this.headPosition, v, 1);
-      this._predict(this.stageQuaternion, v, 4);
-      this._predict(this.headQuaternion, v, 8);
+      this._predict(this.headQuaternion, v, 4);
     }
   }, {
     key: "toString",
