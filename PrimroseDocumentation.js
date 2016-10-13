@@ -1172,379 +1172,379 @@ pliny.class({
     name: "Entity",
     description: "The Entity class is the parent class for all 3D controls. It manages a unique ID for every new control, the focus state of the control, and performs basic conversions from DOM elements to the internal Control format."
 });
-pliny.property({
-    parent: "Primrose.Entity",
-    name: "parent ",
-    type: "Primrose.Entity",
-    description: "The parent element of this element, if this element has been added as a child to another element."
-  });
-  pliny.property({
-    parent: "Primrose.Entity",
-    name: "children",
-    type: "Array",
-    description: "The child elements of this element."
-  });
-  pliny.property({
-    parent: "Primrose.Entity",
-    name: "focused",
-    type: "Boolean",
-    description: "A flag indicating if the element, or a child element within it, has received focus from the user."
-  });
-  pliny.property({
-    parent: "Primrose.Entity",
-    name: "focusable",
-    type: "Boolean",
-    description: "A flag indicating if the element, or any child elements within it, is capable of receiving focus."
-  });
-  pliny.property({
-    parent: "Primrose.Entity",
-    name: "listeners",
-    type: "Object",
-    description: "The event listener container, holding the callbacks to trigger for each type of event."
-  });
-  pliny.event({
-    parent: "Primrose.Entity",
-    name: "focus",
-    description: "If the element is focusable, occurs when the user clicks on an element for the first time, or when a program calls the `focus()` method."
-  });
-
-  pliny.event({
-    parent: "Primrose.Entity",
-    name: "blur",
-    description: "If the element is focused (which implies it is also focusable), occurs when the user clicks off of an element, or when a program calls the `blur()` method."
-  });
-
-  pliny.event({
-    parent: "Primrose.Entity",
-    name: "click",
-    description: "Occurs whenever the user clicks on an element."
-  });
-
-  pliny.event({
-    parent: "Primrose.Entity",
-    name: "keydown",
-    description: "Occurs when the user pushes a key down while focused on the element."
-  });
-
-  pliny.event({
-    parent: "Primrose.Entity",
-    name: "keyup",
-    description: "Occurs when the user releases a key while focused on the element."
-  });
-
-  pliny.event({
-    parent: "Primrose.Entity",
-    name: "paste",
-    description: "Occurs when the user activates the clipboard's `paste` command while focused on the element."
-  });
-
-  pliny.event({
-    parent: "Primrose.Entity",
-    name: "cut",
-    description: "Occurs when the user activates the clipboard's `cut` command while focused on the element."
-  });
-
-  pliny.event({
-    parent: "Primrose.Entity",
-    name: "copy",
-    description: "Occurs when the user activates the clipboard's `copy` command while focused on the element."
-  });
-
-  pliny.event({
-    parent: "Primrose.Entity",
-    name: "wheel",
-    description: "Occurs when the user scrolls the mouse wheel while focused on the element."
-  });
 pliny.function({
-    parent: "Primrose.Entity",
-    name: "registerEntity",
-    description: "Register an entity to be able to receive eyeBlank events.",
-    parameters: [{
-      name: "e",
+      parent: "Primrose.Entity",
+      name: "registerEntity",
+      description: "Register an entity to be able to receive eyeBlank events.",
+      parameters: [{
+        name: "e",
+        type: "Primrose.Entity",
+        description: "The entity to register."
+      }]
+    });
+    pliny.function({
+      parent: "Primrose.Entity",
+      name: "eyeBlankAll",
+      description: "Trigger the eyeBlank event for all registered entities.",
+      parameters: [{
+        name: "eye",
+        type: "Number",
+        description: "The eye to switch to: -1 for left, +1 for right."
+      }],
+    });
+    pliny.property({
+      parent: "Primrose.Entity",
+      name: "parent ",
       type: "Primrose.Entity",
-      description: "The entity to register."
-    }]
-  });
-  pliny.function({
-    parent: "Primrose.Entity",
-    name: "eyeBlankAll",
-    description: "Trigger the eyeBlank event for all registered entities.",
-    parameters: [{
-      name: "eye",
-      type: "Number",
-      description: "The eye to switch to: -1 for left, +1 for right."
-    }],
-  });
+      description: "The parent element of this element, if this element has been added as a child to another element."
+    });
+    pliny.property({
+      parent: "Primrose.Entity",
+      name: "children",
+      type: "Array",
+      description: "The child elements of this element."
+    });
+    pliny.property({
+      parent: "Primrose.Entity",
+      name: "focused",
+      type: "Boolean",
+      description: "A flag indicating if the element, or a child element within it, has received focus from the user."
+    });
+    pliny.property({
+      parent: "Primrose.Entity",
+      name: "focusable",
+      type: "Boolean",
+      description: "A flag indicating if the element, or any child elements within it, is capable of receiving focus."
+    });
+    pliny.property({
+      parent: "Primrose.Entity",
+      name: "listeners",
+      type: "Object",
+      description: "The event listener container, holding the callbacks to trigger for each type of event."
+    });
+    pliny.event({
+      parent: "Primrose.Entity",
+      name: "focus",
+      description: "If the element is focusable, occurs when the user clicks on an element for the first time, or when a program calls the `focus()` method."
+    });
+
+    pliny.event({
+      parent: "Primrose.Entity",
+      name: "blur",
+      description: "If the element is focused (which implies it is also focusable), occurs when the user clicks off of an element, or when a program calls the `blur()` method."
+    });
+
+    pliny.event({
+      parent: "Primrose.Entity",
+      name: "click",
+      description: "Occurs whenever the user clicks on an element."
+    });
+
+    pliny.event({
+      parent: "Primrose.Entity",
+      name: "keydown",
+      description: "Occurs when the user pushes a key down while focused on the element."
+    });
+
+    pliny.event({
+      parent: "Primrose.Entity",
+      name: "keyup",
+      description: "Occurs when the user releases a key while focused on the element."
+    });
+
+    pliny.event({
+      parent: "Primrose.Entity",
+      name: "paste",
+      description: "Occurs when the user activates the clipboard's `paste` command while focused on the element."
+    });
+
+    pliny.event({
+      parent: "Primrose.Entity",
+      name: "cut",
+      description: "Occurs when the user activates the clipboard's `cut` command while focused on the element."
+    });
+
+    pliny.event({
+      parent: "Primrose.Entity",
+      name: "copy",
+      description: "Occurs when the user activates the clipboard's `copy` command while focused on the element."
+    });
+
+    pliny.event({
+      parent: "Primrose.Entity",
+      name: "wheel",
+      description: "Occurs when the user scrolls the mouse wheel while focused on the element."
+    });
   pliny.property({
-    parent: "Primrose.Entity",
-    name: "id ",
-    type: "String",
-    description: "Get or set the id for the control."
-  });
-  pliny.method({
-    parent: "Primrose.Entity",
-    name: "addEventListener",
-    description: "Adding an event listener registers a function as being ready to receive events.",
-    parameters: [{
-      name: "evt",
+      parent: "Primrose.Entity",
+      name: "id ",
       type: "String",
-      description: "The name of the event for which we are listening."
-    }, {
-      name: "thunk",
-      type: "Function",
-      description: "The callback to fire when the event occurs."
-    }],
-    examples: [{
-      name: "Add an event listener.",
-      description: "The `addEventListener()` method operates nearly identically to the method of the same name on DOM elements.\n\
+      description: "Get or set the id for the control."
+    });
+    pliny.method({
+      parent: "Primrose.Entity",
+      name: "addEventListener",
+      description: "Adding an event listener registers a function as being ready to receive events.",
+      parameters: [{
+        name: "evt",
+        type: "String",
+        description: "The name of the event for which we are listening."
+      }, {
+        name: "thunk",
+        type: "Function",
+        description: "The callback to fire when the event occurs."
+      }],
+      examples: [{
+        name: "Add an event listener.",
+        description: "The `addEventListener()` method operates nearly identically to the method of the same name on DOM elements.\n\
 \n\
-grammar(\"JavaScript\");\n\
-var txt = new Primrose.Text.Controls.TextBox();\n\
-txt.addEventListener(\"mousemove\", console.log.bind(console, \"mouse move\"));\n\
-txt.addEventListener(\"keydown\", console.log.bind(console, \"key down\"));"
-    }]
-  });
-  pliny.method({
-    parent: "Primrose.Entity",
-    name: "removeEventListener",
-    description: "Removing an event listener so that it no longer receives events from this object. Note that it must be the same function instance that was used when the event listener was added.",
-    parameters: [{
-      name: "evt",
-      type: "String",
-      description: "The name of the event from which we are removing."
-    }, {
-      name: "thunk",
-      type: "Function",
-      description: "The callback to remove."
-    }],
-    examples: [{
-      name: "Remove an event listener.",
-      description: "The `removeEventListener()` method operates nearly identically to the method of the same name on DOM elements.\n\
+  grammar(\"JavaScript\");\n\
+  var txt = new Primrose.Text.Controls.TextBox();\n\
+  txt.addEventListener(\"mousemove\", console.log.bind(console, \"mouse move\"));\n\
+  txt.addEventListener(\"keydown\", console.log.bind(console, \"key down\"));"
+      }]
+    });
+    pliny.method({
+      parent: "Primrose.Entity",
+      name: "removeEventListener",
+      description: "Removing an event listener so that it no longer receives events from this object. Note that it must be the same function instance that was used when the event listener was added.",
+      parameters: [{
+        name: "evt",
+        type: "String",
+        description: "The name of the event from which we are removing."
+      }, {
+        name: "thunk",
+        type: "Function",
+        description: "The callback to remove."
+      }],
+      examples: [{
+        name: "Remove an event listener.",
+        description: "The `removeEventListener()` method operates nearly identically to the method of the same name on DOM elements.\n\
 \n\
-grammar(\"JavaScript\");\n\
-var txt = new Primrose.Text.Controls.TextBox(),\n\
-func = console.log.bind(console, \"mouse move\");\n\
-txt.addEventListener(\"mousemove\", func);\n\
-txt.removeEventListener(\"mousemove\", func);"
-    }]
-  });
-  pliny.method({
-    parent: "Primrose.Entity",
-    name: "focus",
-    description: "If the control is focusable, sets the focus property of the control, does not change the focus property of any other control.",
-    examples: [{
-      name: "Focus on one control, blur all the rest",
-      description: "When we have a list of controls and we are trying to track focus between them all, we must coordinate calls between `focus()` and `blur()`.\n\
+  grammar(\"JavaScript\");\n\
+  var txt = new Primrose.Text.Controls.TextBox(),\n\
+  func = console.log.bind(console, \"mouse move\");\n\
+  txt.addEventListener(\"mousemove\", func);\n\
+  txt.removeEventListener(\"mousemove\", func);"
+      }]
+    });
+    pliny.method({
+      parent: "Primrose.Entity",
+      name: "focus",
+      description: "If the control is focusable, sets the focus property of the control, does not change the focus property of any other control.",
+      examples: [{
+        name: "Focus on one control, blur all the rest",
+        description: "When we have a list of controls and we are trying to track focus between them all, we must coordinate calls between `focus()` and `blur()`.\n\
 \n\
-grammar(\"JavaScript\");\n\
-var ctrls = [\n\
-new Primrose.Text.Controls.TextBox(),\n\
-new Primrose.Text.Controls.TextBox(),\n\
-new Primrose.Text.Button()\n\
-];\n\
-\n\
-function focusOn(id){\n\
-  for(var i = 0; i < ctrls.length; ++i){\n\
-    var c = ctrls[i];\n\
-    if(c.controlID === id){\n\
-      c.focus();\n\
+  grammar(\"JavaScript\");\n\
+  var ctrls = [\n\
+  new Primrose.Text.Controls.TextBox(),\n\
+  new Primrose.Text.Controls.TextBox(),\n\
+  new Primrose.Text.Button()\n\
+  ];\n\
+  \n\
+  function focusOn(id){\n\
+    for(var i = 0; i < ctrls.length; ++i){\n\
+      var c = ctrls[i];\n\
+      if(c.controlID === id){\n\
+        c.focus();\n\
+      }\n\
+      else{\n\
+        c.blur();\n\
+      }\n\
     }\n\
-    else{\n\
-      c.blur();\n\
-    }\n\
-  }\n\
-}"
-    }]
-  });
-  pliny.method({
-    parent: "Primrose.Entity",
-    name: "blur",
-    description: "If the element is focused, unsets the focus property of the control and all child controls. Does not change the focus property of any parent or sibling controls.",
-    examples: [{
-      name: "Focus on one control, blur all the rest",
-      description: "When we have a list of controls and we are trying to track focus between them all, we must coordinate calls between `focus()` and `blur()`.\n\
+  }"
+      }]
+    });
+    pliny.method({
+      parent: "Primrose.Entity",
+      name: "blur",
+      description: "If the element is focused, unsets the focus property of the control and all child controls. Does not change the focus property of any parent or sibling controls.",
+      examples: [{
+        name: "Focus on one control, blur all the rest",
+        description: "When we have a list of controls and we are trying to track focus between them all, we must coordinate calls between `focus()` and `blur()`.\n\
 \n\
-grammar(\"JavaScript\");\n\
-var ctrls = [\n\
-new Primrose.Text.Controls.TextBox(),\n\
-new Primrose.Text.Controls.TextBox(),\n\
-new Primrose.Text.Button()\n\
-];\n\
+  grammar(\"JavaScript\");\n\
+  var ctrls = [\n\
+  new Primrose.Text.Controls.TextBox(),\n\
+  new Primrose.Text.Controls.TextBox(),\n\
+  new Primrose.Text.Button()\n\
+  ];\n\
+  \n\
+  function focusOn(id){\n\
+    for(var i = 0; i < ctrls.length; ++i){\n\
+      var c = ctrls[i];\n\
+      if(c.controlID === id){\n\
+        c.focus();\n\
+      }\n\
+      else{\n\
+        c.blur();\n\
+      }\n\
+    }\n\
+  }"
+      }]
+    });
+    pliny.method({
+      parent: "Primrose.Entity",
+      name: "appendChild",
+      description: "Adds an Entity as a child entity of this entity.",
+      parameters: [{
+        name: "child",
+        type: "Primrose.Entity",
+        description: "The object to add. Will only succeed if `child.parent` is not set to a value."
+      }],
+      examples: [{
+        name: "Add an entity to another entity",
+        description: "Entities can be arranged in parent-child relationships.\n\
 \n\
-function focusOn(id){\n\
-  for(var i = 0; i < ctrls.length; ++i){\n\
-    var c = ctrls[i];\n\
-    if(c.controlID === id){\n\
-      c.focus();\n\
-    }\n\
-    else{\n\
-      c.blur();\n\
-    }\n\
-  }\n\
-}"
-    }]
-  });
-  pliny.method({
-    parent: "Primrose.Entity",
-    name: "appendChild",
-    description: "Adds an Entity as a child entity of this entity.",
-    parameters: [{
-      name: "child",
+  grammar(\"JavaScript\");\n\
+  var a = new Primrose.Entity(),\n\
+  b = new Primrose.Entity();\n\
+  a.appendChild(b);\n\
+  console.assert(a.children.length === 1);\n\
+  console.assert(a.children[0] === b);\n\
+  console.assert(b.parent === a);"
+      }]
+    });
+    pliny.method({
+      parent: "Primrose.Entity",
+      name: "removeChild",
+      description: "Removes an Entity from another Entity of this entity.",
+      parameters: [{
+        name: "child",
+        type: "Primrose.Entity",
+        description: "The object to remove. Will only succeed if `child.parent` is this object."
+      }],
+      examples: [{
+        name: "Remove an entity from another entity",
+        description: "Entities can be arranged in parent-child relationships.\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var a = new Primrose.Entity(),\n\
+  b = new Primrose.Entity();\n\
+  a.appendChild(b);\n\
+  console.assert(a.children.length === 1);\n\
+  console.assert(a.children[0] === b);\n\
+  console.assert(b.parent === a);\n\
+  a.removeChild(b);\n\
+  console.assert(a.children.length === 0)\n\
+  console.assert(b.parent === null);"
+      }]
+    });
+    pliny.property({
+      parent: "Primrose.Entity",
+      name: "theme",
+      type: "Primrose.Text.Themes.*",
+      description: "Get or set the theme used for rendering text on any controls in the control tree."
+    });
+    pliny.property({
+      parent: "Primrose.Entity",
+      name: "lockMovement",
+      type: "Boolean",
+      description: "Recursively searches the deepest leaf-node of the control graph for a control that has its `lockMovement` property set to `true`, indicating that key events should not be used to navigate the user, because they are being interpreted as typing commands."
+    });
+    pliny.property({
+      parent: "Primrose.Entity",
+      name: "focusedElement",
       type: "Primrose.Entity",
-      description: "The object to add. Will only succeed if `child.parent` is not set to a value."
-    }],
-    examples: [{
-      name: "Add an entity to another entity",
-      description: "Entities can be arranged in parent-child relationships.\n\
-\n\
-grammar(\"JavaScript\");\n\
-var a = new Primrose.Entity(),\n\
-b = new Primrose.Entity();\n\
-a.appendChild(b);\n\
-console.assert(a.children.length === 1);\n\
-console.assert(a.children[0] === b);\n\
-console.assert(b.parent === a);"
-    }]
-  });
-  pliny.method({
-    parent: "Primrose.Entity",
-    name: "removeChild",
-    description: "Removes an Entity from another Entity of this entity.",
-    parameters: [{
-      name: "child",
-      type: "Primrose.Entity",
-      description: "The object to remove. Will only succeed if `child.parent` is this object."
-    }],
-    examples: [{
-      name: "Remove an entity from another entity",
-      description: "Entities can be arranged in parent-child relationships.\n\
-\n\
-grammar(\"JavaScript\");\n\
-var a = new Primrose.Entity(),\n\
-b = new Primrose.Entity();\n\
-a.appendChild(b);\n\
-console.assert(a.children.length === 1);\n\
-console.assert(a.children[0] === b);\n\
-console.assert(b.parent === a);\n\
-a.removeChild(b);\n\
-console.assert(a.children.length === 0)\n\
-console.assert(b.parent === null);"
-    }]
-  });
-  pliny.property({
-    parent: "Primrose.Entity",
-    name: "theme",
-    type: "Primrose.Text.Themes.*",
-    description: "Get or set the theme used for rendering text on any controls in the control tree."
-  });
-  pliny.property({
-    parent: "Primrose.Entity",
-    name: "lockMovement",
-    type: "Boolean",
-    description: "Recursively searches the deepest leaf-node of the control graph for a control that has its `lockMovement` property set to `true`, indicating that key events should not be used to navigate the user, because they are being interpreted as typing commands."
-  });
-  pliny.property({
-    parent: "Primrose.Entity",
-    name: "focusedElement",
-    type: "Primrose.Entity",
-    description: "Searches the deepest leaf-node of the control graph for a control that has its `focused` property set to `true`."
-  });
-  pliny.method({
-    parent: "Primrose.Entity",
-    name: "eyeBlank",
-    parameters: [{
-      name: "eye",
-      type: "Number",
-      description: "The eye to switch to: -1 for left, +1 for right."
-    }],
-    description: "Instructs any stereoscopically rendered surfaces to change their rendering offset."
-  });
-  pliny.method({
-    parent: "Primrose.Entity",
-    name: "startUV",
-    parameters: [{
-      name: "evt",
-      type: "Event",
-      description: "The pointer event to read"
-    }],
-    description: "Hooks up to the window's `mouseDown` and `touchStart` events, with coordinates translated to tangent-space UV coordinates, and propagates it to any of its focused children."
-  });
-  pliny.method({
-    parent: "Primrose.Entity",
-    name: "moveUV",
-    parameters: [{
-      name: "evt",
-      type: "Event",
-      description: "The pointer event to read"
-    }],
-    description: "Hooks up to the window's `mouseMove` and `touchMove` events, with coordinates translated to tangent-space UV coordinates, and propagates it to any of its focused children."
-  });
-  pliny.method({
-    parent: "Primrose.Entity",
-    name: "endPointer",
-    description: "Hooks up to the window's `mouseUp` and `toucheEnd` events and propagates it to any of its focused children."
-  });
-  pliny.method({
-    parent: "Primrose.Entity",
-    name: "keyDown",
-    parameters: [{
-      name: "evt",
-      type: "Event",
-      description: "The key event to read"
-    }],
-    description: "Hooks up to the window's `keyDown` event and propagates it to any of its focused children."
-  });
-  pliny.method({
-    parent: "Primrose.Entity",
-    name: "keyUp",
-    parameters: [{
-      name: "evt",
-      type: "Event",
-      description: "The key event to read"
-    }],
-    description: "Hooks up to the window's `keyUp` event and propagates it to any of its focused children."
-  });
-  pliny.method({
-    parent: "Primrose.Entity",
-    name: "readClipboard",
-    parameters: [{
-      name: "evt",
-      type: "Event",
-      description: "The clipboard event to read"
-    }],
-    description: "Hooks up to the clipboard's `paste` event and propagates it to any of its focused children."
-  });
-  pliny.method({
-    parent: "Primrose.Entity",
-    name: "copySelectedText",
-    parameters: [{
-      name: "evt",
-      type: "Event",
-      description: "The clipboard event to read"
-    }],
-    description: "Hooks up to the clipboard's `copy` event and propagates it to any of its focused children."
-  });
-  pliny.method({
-    parent: "Primrose.Entity",
-    name: "cutSelectedText",
-    parameters: [{
-      name: "evt",
-      type: "Event",
-      description: "The clipboard event to read"
-    }],
-    description: "Hooks up to the clipboard's `cut` event and propagates it to any of its focused children."
-  });
-  pliny.method({
-    parent: "Primrose.Entity",
-    name: "readWheel",
-    parameters: [{
-      name: "evt",
-      type: "Event",
-      description: "The wheel event to read"
-    }],
-    description: "Hooks up to the window's `wheel` event and propagates it to any of its focused children."
-  });
-  pliny.namespace({
+      description: "Searches the deepest leaf-node of the control graph for a control that has its `focused` property set to `true`."
+    });
+    pliny.method({
+      parent: "Primrose.Entity",
+      name: "eyeBlank",
+      parameters: [{
+        name: "eye",
+        type: "Number",
+        description: "The eye to switch to: -1 for left, +1 for right."
+      }],
+      description: "Instructs any stereoscopically rendered surfaces to change their rendering offset."
+    });
+    pliny.method({
+      parent: "Primrose.Entity",
+      name: "startUV",
+      parameters: [{
+        name: "evt",
+        type: "Event",
+        description: "The pointer event to read"
+      }],
+      description: "Hooks up to the window's `mouseDown` and `touchStart` events, with coordinates translated to tangent-space UV coordinates, and propagates it to any of its focused children."
+    });
+    pliny.method({
+      parent: "Primrose.Entity",
+      name: "moveUV",
+      parameters: [{
+        name: "evt",
+        type: "Event",
+        description: "The pointer event to read"
+      }],
+      description: "Hooks up to the window's `mouseMove` and `touchMove` events, with coordinates translated to tangent-space UV coordinates, and propagates it to any of its focused children."
+    });
+    pliny.method({
+      parent: "Primrose.Entity",
+      name: "endPointer",
+      description: "Hooks up to the window's `mouseUp` and `toucheEnd` events and propagates it to any of its focused children."
+    });
+    pliny.method({
+      parent: "Primrose.Entity",
+      name: "keyDown",
+      parameters: [{
+        name: "evt",
+        type: "Event",
+        description: "The key event to read"
+      }],
+      description: "Hooks up to the window's `keyDown` event and propagates it to any of its focused children."
+    });
+    pliny.method({
+      parent: "Primrose.Entity",
+      name: "keyUp",
+      parameters: [{
+        name: "evt",
+        type: "Event",
+        description: "The key event to read"
+      }],
+      description: "Hooks up to the window's `keyUp` event and propagates it to any of its focused children."
+    });
+    pliny.method({
+      parent: "Primrose.Entity",
+      name: "readClipboard",
+      parameters: [{
+        name: "evt",
+        type: "Event",
+        description: "The clipboard event to read"
+      }],
+      description: "Hooks up to the clipboard's `paste` event and propagates it to any of its focused children."
+    });
+    pliny.method({
+      parent: "Primrose.Entity",
+      name: "copySelectedText",
+      parameters: [{
+        name: "evt",
+        type: "Event",
+        description: "The clipboard event to read"
+      }],
+      description: "Hooks up to the clipboard's `copy` event and propagates it to any of its focused children."
+    });
+    pliny.method({
+      parent: "Primrose.Entity",
+      name: "cutSelectedText",
+      parameters: [{
+        name: "evt",
+        type: "Event",
+        description: "The clipboard event to read"
+      }],
+      description: "Hooks up to the clipboard's `cut` event and propagates it to any of its focused children."
+    });
+    pliny.method({
+      parent: "Primrose.Entity",
+      name: "readWheel",
+      parameters: [{
+        name: "evt",
+        type: "Event",
+        description: "The wheel event to read"
+      }],
+      description: "Hooks up to the window's `wheel` event and propagates it to any of its focused children."
+    });
+    pliny.namespace({
   parent: "Primrose",
   name: "HTTP",
   description: "A collection of basic XMLHttpRequest wrappers."
@@ -2863,59 +2863,59 @@ pliny.method({
     description: "| [under construction]"
 });
 pliny.method({
-    parent: "Primrose.Output.Audio3D",
-    name: "loadSound",
-    returns: "Promise<MediaElementAudioSourceNode>",
-    parameters: [{
-      name: "sources",
-      type: "String|Array<String>",
-      description: "A string URI to an audio source, or an array of string URIs to audio sources. Will be used as a collection of HTML5 &lt;source> tags as children of an HTML5 &lt;audio> tag."
-    }, {
-      name: "loop",
-      type: "Boolean",
-      optional: true,
-      description: "indicate that the sound should be played on loop."
-    }],
-    description: "Loads the first element of the `sources` array for which the browser supports the file format as an HTML5 &lt;audio> tag to use as an `AudioSourceNode` attached to the current `AudioContext`. This does not load all of the audio files. It only loads the first one of a list of options that could work, because all browsers do not support the same audio formats.",
-    examples: [{
-      name: "Load a single audio file.",
-      description: "There is no one, good, compressed audio format supported in all browsers, but they do all support uncompressed WAV. You shouldn't use this on the Internet, but it might be okay for a local solution.\n\
+      parent: "Primrose.Output.Audio3D",
+      name: "loadSound",
+      returns: "Promise<MediaElementAudioSourceNode>",
+      parameters: [{
+        name: "sources",
+        type: "String|Array<String>",
+        description: "A string URI to an audio source, or an array of string URIs to audio sources. Will be used as a collection of HTML5 &lt;source> tags as children of an HTML5 &lt;audio> tag."
+      }, {
+        name: "loop",
+        type: "Boolean",
+        optional: true,
+        description: "indicate that the sound should be played on loop."
+      }],
+      description: "Loads the first element of the `sources` array for which the browser supports the file format as an HTML5 &lt;audio> tag to use as an `AudioSourceNode` attached to the current `AudioContext`. This does not load all of the audio files. It only loads the first one of a list of options that could work, because all browsers do not support the same audio formats.",
+      examples: [{
+        name: "Load a single audio file.",
+        description: "There is no one, good, compressed audio format supported in all browsers, but they do all support uncompressed WAV. You shouldn't use this on the Internet, but it might be okay for a local solution.\n\
 \n\
-grammar(\"JavaScript\");\n\
-var audio = new Primrose.Output.Audio3D();\n\
-audio.loadSource(\"mySong.wav\").then(function(node){\n\
-  node.connect(audio.context.destination);\n\
-});"
-    }, {
-      name: "Load a single audio file from a list of options.",
-      description: "There is no one, good, compressed audio format supported in all browsers. As a hack around the problem, HTML5 media tags may include one or more &lt;source> tags as children to specify a cascading list of media sources. The browser will select the first one that it can successfully decode.\n\
+  grammar(\"JavaScript\");\n\
+  var audio = new Primrose.Output.Audio3D();\n\
+  audio.loadSource(\"mySong.wav\").then(function(node){\n\
+    node.connect(audio.context.destination);\n\
+  });"
+      }, {
+        name: "Load a single audio file from a list of options.",
+        description: "There is no one, good, compressed audio format supported in all browsers. As a hack around the problem, HTML5 media tags may include one or more &lt;source> tags as children to specify a cascading list of media sources. The browser will select the first one that it can successfully decode.\n\
 \n\
-grammar(\"JavaScript\");\n\
-var audio = new Primrose.Output.Audio3D();\n\
-audio.loadSource([\n\
-  \"mySong.mp3\",\n\
-  \"mySong.aac\",\n\
-  \"mySong.ogg\"\n\
-]).then(function(node){\n\
-  node.connect(audio.context.destination);\n\
-});"
-    }, {
-      name: "Load an ambient audio file that should be looped.",
-      description: "The only audio option that is available is whether or not the audio file should be looped. You specify this with the second parameter to the `loadSource()` method, a `Boolean` value to indicate that looping is desired.\n\
+  grammar(\"JavaScript\");\n\
+  var audio = new Primrose.Output.Audio3D();\n\
+  audio.loadSource([\n\
+    \"mySong.mp3\",\n\
+    \"mySong.aac\",\n\
+    \"mySong.ogg\"\n\
+  ]).then(function(node){\n\
+    node.connect(audio.context.destination);\n\
+  });"
+      }, {
+        name: "Load an ambient audio file that should be looped.",
+        description: "The only audio option that is available is whether or not the audio file should be looped. You specify this with the second parameter to the `loadSource()` method, a `Boolean` value to indicate that looping is desired.\n\
 \n\
-grammar(\"JavaScript\");\n\
-var audio = new Primrose.Output.Audio3D();\n\
-audio.loadSource([\n\
-  \"mySong.mp3\",\n\
-  \"mySong.aac\",\n\
-  \"mySong.ogg\"\n\
-], true).then(function(node){\n\
-  node.connect(audio.context.destination);\n\
-});"
-    }]
-  });
+  grammar(\"JavaScript\");\n\
+  var audio = new Primrose.Output.Audio3D();\n\
+  audio.loadSource([\n\
+    \"mySong.mp3\",\n\
+    \"mySong.aac\",\n\
+    \"mySong.ogg\"\n\
+  ], true).then(function(node){\n\
+    node.connect(audio.context.destination);\n\
+  });"
+      }]
+    });
 
-  pliny.class({
+    pliny.class({
   parent: "Primrose.Output",
     name: "HapticGlove",
     description: "| [under construction]"

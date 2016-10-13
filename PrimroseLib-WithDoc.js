@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\axis.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\axis.js
 (function(){pliny.function({
   name: "axis",
   description: "Creates a set of reference axes, with X as red, Y as green, and Z as blue.",
@@ -40,12 +40,12 @@ function axis(length, width) {
     .on(center);
   return center;
 }
-    if(typeof window !== "undefined") window.axis = axis;
+  if(typeof window !== "undefined") window.axis = axis;
 })();
-    // end D:\Documents\VR\Primrose\src\axis.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\axis.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\box.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\box.js
 (function(){pliny.function({
   name: "box",
   description: "A shortcut function for the THREE.BoxGeometry class. Creates a \"rectilinear prism\", i.e. the general class of rectangular objects that includes cubes.",
@@ -89,15 +89,15 @@ function box(width, height, length) {
     length = width;
   }
   return cache(
-    ("BoxBufferGeometry(" + width + ", " + height + ", " + length + ")"),
-    function () { return new THREE.BoxBufferGeometry(width, height, length); });
+    `BoxBufferGeometry(${width}, ${height}, ${length})`,
+    () => new THREE.BoxBufferGeometry(width, height, length));
 }
-    if(typeof window !== "undefined") window.box = box;
+  if(typeof window !== "undefined") window.box = box;
 })();
-    // end D:\Documents\VR\Primrose\src\box.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\box.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\brick.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\brick.js
 (function(){pliny.function({
   name: "brick",
   description: "Creates a textured box. See [`box()`](#box) and [`textured()`](#textured). The texture will be repeated across the box.",
@@ -147,12 +147,12 @@ function brick(txt, w, h, l) {
     txtRepeatT: l
   });
 }
-    if(typeof window !== "undefined") window.brick = brick;
+  if(typeof window !== "undefined") window.brick = brick;
 })();
-    // end D:\Documents\VR\Primrose\src\brick.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\brick.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\cache.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\cache.js
 (function(){pliny.function({
   name: "cache",
   description: "Looks for the hashed name of the object in the object cache, and if it exists, returns it. If it doesn't exist, calls the makeObject function, using the return results to set the object in the cache, and returning it. In other words, a simple sort of memoization.",
@@ -185,9 +185,9 @@ function brick(txt, w, h, l) {
     console.assert(a === c);"
   }]
 });
-var cache = (function () {
-  var _cache = {};
-  return function (hash, makeObject, onCacheHit) {
+const cache = (function () {
+  const _cache = {};
+  return (hash, makeObject, onCacheHit) => {
     if (!_cache[hash]) {
       _cache[hash] = makeObject();
     }
@@ -197,12 +197,12 @@ var cache = (function () {
     return _cache[hash];
   };
 })();
-    if(typeof window !== "undefined") window.cache = cache;
+  if(typeof window !== "undefined") window.cache = cache;
 })();
-    // end D:\Documents\VR\Primrose\src\cache.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\cache.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\circle.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\circle.js
 (function(){pliny.function({
   name: "circle",
   description: "| [under construction]"
@@ -212,15 +212,15 @@ function circle(r, sections, start, end) {
   r = r || 1;
   sections = sections || 18;
   return cache(
-    ("CircleBufferGeometry(" + r + ", " + sections + ", " + start + ", " + end + ")"),
-    function () { return new THREE.CircleBufferGeometry(r, sections, start, end); });
+    `CircleBufferGeometry(${r}, ${sections}, ${start}, ${end})`,
+    () => new THREE.CircleBufferGeometry(r, sections, start, end));
 }
-    if(typeof window !== "undefined") window.circle = circle;
+  if(typeof window !== "undefined") window.circle = circle;
 })();
-    // end D:\Documents\VR\Primrose\src\circle.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\circle.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\clone.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\clone.js
 (function(){pliny.function({
   name: "clone",
   parameters: [{
@@ -247,12 +247,12 @@ function circle(r, sections, start, end) {
 function clone(obj) {
   return JSON.parse(JSON.stringify(obj));
 }
-    if(typeof window !== "undefined") window.clone = clone;
+  if(typeof window !== "undefined") window.clone = clone;
 })();
-    // end D:\Documents\VR\Primrose\src\clone.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\clone.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\cloud.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\cloud.js
 (function(){pliny.function({
   name: "cloud",
   description: "Creates a point cloud with points of a fixed color and size out of an array of vertices.",
@@ -302,19 +302,19 @@ function cloud(verts, c, s) {
     geom.vertices.push(verts[i]);
   }
   var mat = cache(
-    ("PointsMaterial(" + c + ", " + s + ")"),
-    function () { return new THREE.PointsMaterial({
+    `PointsMaterial(${c}, ${s})`,
+    () => new THREE.PointsMaterial({
       color: c,
       size: s
-    }); });
+    }));
   return new THREE.Points(geom, mat);
 }
-    if(typeof window !== "undefined") window.cloud = cloud;
+  if(typeof window !== "undefined") window.cloud = cloud;
 })();
-    // end D:\Documents\VR\Primrose\src\cloud.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\cloud.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\colored.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\colored.js
 (function(){pliny.function({
   name: "colored",
   description: "Apply a color to a geometry, creating the intermediate material as necessary, and returning the resulting mesh",
@@ -349,12 +349,12 @@ function colored(geometry, color, options) {
 
   return obj;
 }
-    if(typeof window !== "undefined") window.colored = colored;
+  if(typeof window !== "undefined") window.colored = colored;
 })();
-    // end D:\Documents\VR\Primrose\src\colored.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\colored.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\copyObject.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\copyObject.js
 (function(){pliny.function({
   name: "copyObject",
   description: "Copies properties from one object to another, essentially cloning the source object into the destination object. Uses a local stack to perform recursive copying. Overwrites any fields that already exist in the destination. For convenience, also returns the destination object.",
@@ -429,12 +429,12 @@ function copyObject(dest, source, shallow) {
   }
   return dest;
 }
-    if(typeof window !== "undefined") window.copyObject = copyObject;
+  if(typeof window !== "undefined") window.copyObject = copyObject;
 })();
-    // end D:\Documents\VR\Primrose\src\copyObject.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\copyObject.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\cylinder.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\cylinder.js
 (function(){pliny.function({
   name: "cylinder",
   description: "Shorthand functino for creating a new THREE.CylinderGeometry object.",
@@ -515,15 +515,15 @@ function cylinder(rT, rB, height, rS, hS, openEnded, thetaStart, thetaEnd) {
     height = 1;
   }
   return cache(
-    ("CylinderBufferGeometry(" + rT + ", " + rB + ", " + height + ", " + rS + ", " + hS + ", " + openEnded + ", " + thetaStart + ", " + thetaEnd + ")"),
-    function () { return new THREE.CylinderBufferGeometry(rT, rB, height, rS, hS, openEnded, thetaStart, thetaEnd); });
+    `CylinderBufferGeometry(${rT}, ${rB}, ${height}, ${rS}, ${hS}, ${openEnded}, ${thetaStart}, ${thetaEnd})`,
+    () => new THREE.CylinderBufferGeometry(rT, rB, height, rS, hS, openEnded, thetaStart, thetaEnd));
 }
-    if(typeof window !== "undefined") window.cylinder = cylinder;
+  if(typeof window !== "undefined") window.cylinder = cylinder;
 })();
-    // end D:\Documents\VR\Primrose\src\cylinder.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\cylinder.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\deleteSetting.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\deleteSetting.js
 (function(){pliny.function({
   name: "deleteSetting",
   parameters: [{
@@ -550,12 +550,12 @@ function deleteSetting(name) {
     window.localStorage.removeItem(name);
   }
 }
-    if(typeof window !== "undefined") window.deleteSetting = deleteSetting;
+  if(typeof window !== "undefined") window.deleteSetting = deleteSetting;
 })();
-    // end D:\Documents\VR\Primrose\src\deleteSetting.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\deleteSetting.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\emit.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\emit.js
 (function(){pliny.function({
   name: "emit",
   description: "A shorthand function for triggering events. Can be `.call()`ed on objects that have a `listeners` property.",
@@ -601,12 +601,12 @@ function emit(evt, args) {
     handlers[i](args);
   }
 }
-    if(typeof window !== "undefined") window.emit = emit;
+  if(typeof window !== "undefined") window.emit = emit;
 })();
-    // end D:\Documents\VR\Primrose\src\emit.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\emit.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\findProperty.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\findProperty.js
 (function(){pliny.function({
   name: "findProperty",
   description: "Searches an object for a property that might go by different names in different browsers.",
@@ -637,36 +637,36 @@ function findProperty(elem, arr) {
     }
   }
 }
-    if(typeof window !== "undefined") window.findProperty = findProperty;
+  if(typeof window !== "undefined") window.findProperty = findProperty;
 })();
-    // end D:\Documents\VR\Primrose\src\findProperty.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\findProperty.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\fixGeometry.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\fixGeometry.js
 (function(){function fixGeometry(geometry, options){
-  var maxU = options.maxU || 1,
+  const maxU = options.maxU || 1,
     maxV = options.maxV || 1,
     attrs = geometry.attributes || (geometry._bufferGeometry && geometry._bufferGeometry.attributes);
   if (attrs && attrs.uv && attrs.uv.array) {
-    var uv = attrs.uv,
+    const uv = attrs.uv,
       arr = uv.array;
-    for (var j = 0; j < arr.length; j += uv.itemSize) {
+    for (let j = 0; j < arr.length; j += uv.itemSize) {
       arr[j] *= maxU;
     }
-    for (var j$1 = 1; j$1 < arr.length; j$1 += uv.itemSize) {
-      arr[j$1] = 1 - (1 - arr[j$1]) * maxV;
+    for (let j = 1; j < arr.length; j += uv.itemSize) {
+      arr[j] = 1 - (1 - arr[j]) * maxV;
     }
   }
   else if(geometry.faceVertexUvs) {
-    var faces = geometry.faceVertexUvs;
-    for(var i = 0; i < faces.length; ++i){
-      var face = faces[i];
-      for(var j$2 = 0; j$2 < face.length; ++j$2){
-        var uvs = face[j$2];
-        for(var k = 0; k < uvs.length; ++k){
-          var uv$1 = uvs[k];
-          uv$1.x *= maxU;
-          uv$1.y = 1 - (1 - uv$1.y) * maxV;
+    const faces = geometry.faceVertexUvs;
+    for(let i = 0; i < faces.length; ++i){
+      const face = faces[i];
+      for(let j = 0; j < face.length; ++j){
+        const uvs = face[j];
+        for(let k = 0; k < uvs.length; ++k){
+          const uv = uvs[k];
+          uv.x *= maxU;
+          uv.y = 1 - (1 - uv.y) * maxV;
         }
       }
     }
@@ -674,12 +674,12 @@ function findProperty(elem, arr) {
 
   return geometry;
 }
-    if(typeof window !== "undefined") window.fixGeometry = fixGeometry;
+  if(typeof window !== "undefined") window.fixGeometry = fixGeometry;
 })();
-    // end D:\Documents\VR\Primrose\src\fixGeometry.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\fixGeometry.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\getSetting.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\getSetting.js
 (function(){pliny.function({
   name: "getSetting",
   parameters: [{
@@ -729,12 +729,12 @@ function getSetting(name, defValue) {
   }
   return defValue;
 }
-    if(typeof window !== "undefined") window.getSetting = getSetting;
+  if(typeof window !== "undefined") window.getSetting = getSetting;
 })();
-    // end D:\Documents\VR\Primrose\src\getSetting.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\getSetting.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\hub.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\hub.js
 (function(){pliny.function({
   name: "hub",
   description: "Calling `hub()` is a short-hand for creating a new `THREE.Object3D`. This is useful in live-coding examples to keep code terse and easy to write. It also polyfills in a method for being able to add the object to a `Primrose.BrowserEnvironment` using `appendChild()` and to add other elements to the hub using `appendChild()` such that they may be pickable in the scene.",
@@ -750,21 +750,21 @@ function getSetting(name, defValue) {
 function hub() {
   return new THREE.Object3D();
 }
-    if(typeof window !== "undefined") window.hub = hub;
+  if(typeof window !== "undefined") window.hub = hub;
 })();
-    // end D:\Documents\VR\Primrose\src\hub.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\hub.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\identity.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\identity.js
 (function(){function identity(obj) {
   return obj;
 }
-    if(typeof window !== "undefined") window.identity = identity;
+  if(typeof window !== "undefined") window.identity = identity;
 })();
-    // end D:\Documents\VR\Primrose\src\identity.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\identity.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\InsideSphereGeometry.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\InsideSphereGeometry.js
 (function(){pliny.class({
   name: "InsideSphereGeometry",
     parameters: [{
@@ -807,8 +807,6 @@ InsideSphereGeometry in this case. Or its alias, [`shell()`](#shell)."
 });
 
 function InsideSphereGeometry(radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength) {
-  var this$1 = this;
-
   THREE.Geometry.call(this);
 
   this.type = 'InsideSphereGeometry';
@@ -857,9 +855,9 @@ function InsideSphereGeometry(radius, widthSegments, heightSegments, phiStart, p
       vertex.z = radius * Math.sin(phiStart + u * phiLength) * Math.sin(
         thetaStart + v * thetaLength);
 
-      this$1.vertices.push(vertex);
+      this.vertices.push(vertex);
 
-      verticesRow.push(this$1.vertices.length - 1);
+      verticesRow.push(this.vertices.length - 1);
       uvsRow.push(new THREE.Vector2(1 - u, 1 - v));
 
     }
@@ -878,13 +876,13 @@ function InsideSphereGeometry(radius, widthSegments, heightSegments, phiStart, p
       var v3 = vertices[y + 1][x];
       var v4 = vertices[y + 1][x + 1];
 
-      var n1 = this$1.vertices[v1].clone()
+      var n1 = this.vertices[v1].clone()
         .normalize();
-      var n2 = this$1.vertices[v2].clone()
+      var n2 = this.vertices[v2].clone()
         .normalize();
-      var n3 = this$1.vertices[v3].clone()
+      var n3 = this.vertices[v3].clone()
         .normalize();
-      var n4 = this$1.vertices[v4].clone()
+      var n4 = this.vertices[v4].clone()
         .normalize();
 
       var uv1 = uvs[y][x + 1].clone();
@@ -892,29 +890,29 @@ function InsideSphereGeometry(radius, widthSegments, heightSegments, phiStart, p
       var uv3 = uvs[y + 1][x].clone();
       var uv4 = uvs[y + 1][x + 1].clone();
 
-      if (Math.abs(this$1.vertices[v1].y) === radius) {
+      if (Math.abs(this.vertices[v1].y) === radius) {
 
         uv1.x = (uv1.x + uv2.x) / 2;
-        this$1.faces.push(new THREE.Face3(v1, v3, v4, [n1, n3, n4]));
-        this$1.faceVertexUvs[0].push([uv1, uv3, uv4]);
+        this.faces.push(new THREE.Face3(v1, v3, v4, [n1, n3, n4]));
+        this.faceVertexUvs[0].push([uv1, uv3, uv4]);
 
       }
-      else if (Math.abs(this$1.vertices[v3].y) === radius) {
+      else if (Math.abs(this.vertices[v3].y) === radius) {
 
         uv3.x = (uv3.x + uv4.x) / 2;
-        this$1.faces.push(new THREE.Face3(v1, v2, v3, [n1, n2, n3]));
-        this$1.faceVertexUvs[0].push([uv1, uv2, uv3]);
+        this.faces.push(new THREE.Face3(v1, v2, v3, [n1, n2, n3]));
+        this.faceVertexUvs[0].push([uv1, uv2, uv3]);
 
       }
       else {
 
-        this$1.faces.push(new THREE.Face3(v1, v2, v4, [n1, n2, n4]));
-        this$1.faceVertexUvs[0].push([uv1, uv2, uv4]);
+        this.faces.push(new THREE.Face3(v1, v2, v4, [n1, n2, n4]));
+        this.faceVertexUvs[0].push([uv1, uv2, uv4]);
 
-        this$1.faces.push(new THREE.Face3(v2, v3, v4, [n2.clone(), n3,
+        this.faces.push(new THREE.Face3(v2, v3, v4, [n2.clone(), n3,
           n4.clone()
         ]));
-        this$1.faceVertexUvs[0].push([uv2.clone(), uv3, uv4.clone()]);
+        this.faceVertexUvs[0].push([uv2.clone(), uv3, uv4.clone()]);
 
       }
 
@@ -925,7 +923,7 @@ function InsideSphereGeometry(radius, widthSegments, heightSegments, phiStart, p
   this.computeFaceNormals();
 
   for (var i = 0; i < this.faces.length; ++i) {
-    var f = this$1.faces[i];
+    var f = this.faces[i];
     f.normal.multiplyScalar(-1);
     for (var j = 0; j < f.vertexNormals.length; ++j) {
       f.vertexNormals[j].multiplyScalar(-1);
@@ -940,12 +938,12 @@ if (typeof window.THREE !== "undefined") {
   InsideSphereGeometry.prototype = Object.create(THREE.Geometry.prototype);
   InsideSphereGeometry.prototype.constructor = InsideSphereGeometry;
 }
-    if(typeof window !== "undefined") window.InsideSphereGeometry = InsideSphereGeometry;
+  if(typeof window !== "undefined") window.InsideSphereGeometry = InsideSphereGeometry;
 })();
-    // end D:\Documents\VR\Primrose\src\InsideSphereGeometry.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\InsideSphereGeometry.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\isChrome.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\isChrome.js
 (function(){pliny.value({
   name: "isChrome",
   type: "Boolean",
@@ -953,13 +951,13 @@ if (typeof window.THREE !== "undefined") {
 or Chromium. Chromium was one of the first browsers to implement virtual reality\n\
 features directly in the browser, thanks to the work of Brandon \"Toji\" Jones."
 });
-var isChrome = !!window.chrome && !window.isOpera;
-    if(typeof window !== "undefined") window.isChrome = isChrome;
+const isChrome = !!window.chrome && !window.isOpera;
+  if(typeof window !== "undefined") window.isChrome = isChrome;
 })();
-    // end D:\Documents\VR\Primrose\src\isChrome.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\isChrome.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\isFirefox.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\isFirefox.js
 (function(){pliny.value({
   name: "isFirefox",
   type: "Boolean",
@@ -967,25 +965,25 @@ var isChrome = !!window.chrome && !window.isOpera;
 Firefox was one of the first browsers to implement virtual reality features directly\n\
 in the browser, thanks to the work of the MozVR team."
 });
-var isFirefox = typeof window.InstallTrigger !== 'undefined';
-    if(typeof window !== "undefined") window.isFirefox = isFirefox;
+const isFirefox = typeof window.InstallTrigger !== 'undefined';
+  if(typeof window !== "undefined") window.isFirefox = isFirefox;
 })();
-    // end D:\Documents\VR\Primrose\src\isFirefox.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\isFirefox.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\isGearVR.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\isGearVR.js
 (function(){pliny.value({
   name: "isGearVR",
   type: "Boolean",
   description: "Flag indicating the application is running on the Samsung Gear VR in the Samsung Internet app."
 });
-var isGearVR = navigator.userAgent.indexOf("Mobile VR") > -1;
-    if(typeof window !== "undefined") window.isGearVR = isGearVR;
+const isGearVR = navigator.userAgent.indexOf("Mobile VR") > -1;
+  if(typeof window !== "undefined") window.isGearVR = isGearVR;
 })();
-    // end D:\Documents\VR\Primrose\src\isGearVR.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\isGearVR.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\isIE.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\isIE.js
 (function(){pliny.value({
   name: "isIE",
   type: "Boolean",
@@ -993,25 +991,25 @@ var isGearVR = navigator.userAgent.indexOf("Mobile VR") > -1;
 Explorer. Once the bane of every web developer's existence, it has since passed\n\
 the torch on to Safari in all of its many useless incarnations."
 });
-var isIE = /*@cc_on!@*/ false || !!document.documentMode;
-    if(typeof window !== "undefined") window.isIE = isIE;
+const isIE = /*@cc_on!@*/ false || !!document.documentMode;
+  if(typeof window !== "undefined") window.isIE = isIE;
 })();
-    // end D:\Documents\VR\Primrose\src\isIE.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\isIE.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\isInIFrame.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\isInIFrame.js
 (function(){pliny.value({
   name: "isHomeScreen",
   type: "Boolean",
   description: "Flag indicating the script is currently running in an IFRAME or not."
 });
-var isInIFrame = (window.self !== window.top);
-    if(typeof window !== "undefined") window.isInIFrame = isInIFrame;
+const isInIFrame = (window.self !== window.top);
+  if(typeof window !== "undefined") window.isInIFrame = isInIFrame;
 })();
-    // end D:\Documents\VR\Primrose\src\isInIFrame.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\isInIFrame.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\isiOS.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\isiOS.js
 (function(){pliny.value({
   name: "isiOS",
   type: "Boolean",
@@ -1019,31 +1017,31 @@ var isInIFrame = (window.self !== window.top);
 iOS operating system: iPad, iPod Touch, iPhone. Useful for invoking optional code\n\
 paths necessary to deal with deficiencies in Apple's implementation of web standards."
 });
-var isiOS = /iP(hone|od|ad)/.test(navigator.userAgent || "");
-    if(typeof window !== "undefined") window.isiOS = isiOS;
+const isiOS = /iP(hone|od|ad)/.test(navigator.userAgent || "");
+  if(typeof window !== "undefined") window.isiOS = isiOS;
 })();
-    // end D:\Documents\VR\Primrose\src\isiOS.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\isiOS.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\isMobile.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\isMobile.js
 (function(){pliny.value({
   name: "isMobile",
   type: "Boolean",
   description: "Flag indicating the current system is a recognized \"mobile\"\n\
 device, usually possessing a motion sensor."
 });
-var isMobile = (function (a) {
+const isMobile = (function (a) {
   return /(android|bb\d+|meego).+|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od|ad)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(
       a) ||
     /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(
       a.substring(0, 4));
 })(navigator.userAgent || navigator.vendor || window.opera);
-    if(typeof window !== "undefined") window.isMobile = isMobile;
+  if(typeof window !== "undefined") window.isMobile = isMobile;
 })();
-    // end D:\Documents\VR\Primrose\src\isMobile.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\isMobile.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\isOpera.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\isOpera.js
 (function(){pliny.value({
   name: "isOpera",
   type: "Boolean",
@@ -1053,13 +1051,13 @@ so you are not likely to need this flag if you are using Primrose, other than to
 cajole users into downloading a more advanced browser such as Mozilla Firefox or\n\
 Google Chrome."
 });
-var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
-    if(typeof window !== "undefined") window.isOpera = isOpera;
+const isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
+  if(typeof window !== "undefined") window.isOpera = isOpera;
 })();
-    // end D:\Documents\VR\Primrose\src\isOpera.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\isOpera.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\isOSX.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\isOSX.js
 (function(){pliny.value({
   name: "isOSX",
   type: "Boolean",
@@ -1067,13 +1065,13 @@ var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
 OSX operating system. Useful for changing keyboard shortcuts to support Apple's\n\
 idiosynchratic, concensus-defying keyboard shortcuts."
 });
-var isOSX = /Macintosh/.test(navigator.userAgent || "");
-    if(typeof window !== "undefined") window.isOSX = isOSX;
+const isOSX = /Macintosh/.test(navigator.userAgent || "");
+  if(typeof window !== "undefined") window.isOSX = isOSX;
 })();
-    // end D:\Documents\VR\Primrose\src\isOSX.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\isOSX.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\isSafari.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\isSafari.js
 (function(){pliny.value({
   name: "isSafari",
   type: "Boolean",
@@ -1083,14 +1081,14 @@ themselves in such a way as to prevent users from gaining access to the latest i
 cutting-edge web technologies. Essentially, it was replaced Microsoft Internet\n\
 Explorer as the Internet Explorer of the web."
 });
-var isSafari = Object.prototype.toString.call(window.HTMLElement)
+const isSafari = Object.prototype.toString.call(window.HTMLElement)
   .indexOf('Constructor') > 0;
-    if(typeof window !== "undefined") window.isSafari = isSafari;
+  if(typeof window !== "undefined") window.isSafari = isSafari;
 })();
-    // end D:\Documents\VR\Primrose\src\isSafari.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\isSafari.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\isWebKit.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\isWebKit.js
 (function(){pliny.value({
   name: "isWebKit",
   type: "Boolean",
@@ -1098,26 +1096,26 @@ var isSafari = Object.prototype.toString.call(window.HTMLElement)
 WebKit browsers have certain issues in common that can be treated together, like\n\
 a common basis for orientation events."
 });
-var isWebKit = !(/iP(hone|od|ad)/.test(navigator.userAgent || "")) || isOpera || isChrome;
-    if(typeof window !== "undefined") window.isWebKit = isWebKit;
+const isWebKit = !(/iP(hone|od|ad)/.test(navigator.userAgent || "")) || isOpera || isChrome;
+  if(typeof window !== "undefined") window.isWebKit = isWebKit;
 })();
-    // end D:\Documents\VR\Primrose\src\isWebKit.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\isWebKit.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\isWindows.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\isWindows.js
 (function(){pliny.value({
   name: "isWindows",
   type: "Boolean",
   description: "Flag indicating the current system is a computer running one of\n\
 the Microsoft Windows operating systems. We have not yet found a use for this flag."
 });
-var isWindows = /Windows/.test(navigator.userAgent || "");
-    if(typeof window !== "undefined") window.isWindows = isWindows;
+const isWindows = /Windows/.test(navigator.userAgent || "");
+  if(typeof window !== "undefined") window.isWindows = isWindows;
 })();
-    // end D:\Documents\VR\Primrose\src\isWindows.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\isWindows.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\light.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\light.js
 (function(){pliny.function({
   name: "light",
   description: "Shortcut function for creating a new THREE.PointLight object.",
@@ -1157,12 +1155,12 @@ var isWindows = /Windows/.test(navigator.userAgent || "");
 function light(color, intensity, distance, decay) {
   return new THREE.PointLight(color, intensity, distance, decay);
 }
-    if(typeof window !== "undefined") window.light = light;
+  if(typeof window !== "undefined") window.light = light;
 })();
-    // end D:\Documents\VR\Primrose\src\light.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\light.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\material.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\material.js
 (function(){function material(textureDescription, options){
   options = options || {};
 
@@ -1182,8 +1180,8 @@ function light(color, intensity, distance, decay) {
   options.unshaded = !!options.unshaded;
   options.wireframe = !!options.wireframe;
 
-  var materialDescription = "Primrose.material(" + textureDescription + ", " + (options.color) + ", " + (options.unshaded) + ", " + (options.side) + ", " + (options.opacity) + ", " + (options.roughness) + ", " + (options.metalness) + ", " + (options.color) + ", " + (options.emissive) + ", " + (options.wireframe) + ")";
-  return cache(materialDescription, function () {
+  var materialDescription = `Primrose.material(${textureDescription}, ${options.color}, ${options.unshaded}, ${options.side}, ${options.opacity}, ${options.roughness}, ${options.metalness}, ${options.color}, ${options.emissive}, ${options.wireframe})`;
+  return cache(materialDescription, () => {
     var materialOptions = {
         transparent: options.transparent || options.opacity < 1,
         opacity: options.opacity,
@@ -1219,12 +1217,12 @@ function light(color, intensity, distance, decay) {
     return mat;
   });
 }
-    if(typeof window !== "undefined") window.material = material;
+  if(typeof window !== "undefined") window.material = material;
 })();
-    // end D:\Documents\VR\Primrose\src\material.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\material.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\patch.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\patch.js
 (function(){pliny.function({
   name: "patch",
   parameters: [{
@@ -1270,29 +1268,29 @@ function patch(obj1, obj2) {
   }
   return obj1;
 }
-    if(typeof window !== "undefined") window.patch = patch;
+  if(typeof window !== "undefined") window.patch = patch;
 })();
-    // end D:\Documents\VR\Primrose\src\patch.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\patch.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\PIXEL_SCALES.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\PIXEL_SCALES.js
 (function(){pliny.value({
   name: "PIXEL_SCALES",
   description: "Scaling factors for changing the resolution of the display when the render quality level changes."
 });
-var PIXEL_SCALES = [
+const PIXEL_SCALES = [
   0.5,
   0.25,
   0.333333,
   0.5,
   1
 ];
-    if(typeof window !== "undefined") window.PIXEL_SCALES = PIXEL_SCALES;
+  if(typeof window !== "undefined") window.PIXEL_SCALES = PIXEL_SCALES;
 })();
-    // end D:\Documents\VR\Primrose\src\PIXEL_SCALES.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\PIXEL_SCALES.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose.js
 (function(){/*
  * Copyright (C) 2014 - 2016 Sean T. McBeth <sean@seanmcbeth.com>
  *
@@ -1314,12 +1312,12 @@ pliny.namespace({
   description: "Primrose helps you make VR applications for web browsers as easy as making other types of interactive web pages.\n\nThis top-level namespace contains classes for manipulating and viewing 3D environments."
 });
 var Primrose = {};
-    if(typeof window !== "undefined") window.Primrose = Primrose;
+  if(typeof window !== "undefined") window.Primrose = Primrose;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\priv.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\priv.js
 (function(){function priv() {
   var heap = new WeakMap();
   return function(obj, value) {
@@ -1330,12 +1328,12 @@ var Primrose = {};
   };
 }
 
-    if(typeof window !== "undefined") window.priv = priv;
+  if(typeof window !== "undefined") window.priv = priv;
 })();
-    // end D:\Documents\VR\Primrose\src\priv.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\priv.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\put.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\put.js
 (function(){pliny.function({
   name: "put",
   description: "A literate interface for putting objects onto scenes with basic, common transformations. You call `put()` with an object, then have access to a series of methods that you can chain together, before receiving the object back again. This makes it possible to create objects in the parameter position of `put()` at the same time as declaring the variable that will hold it.\n\
@@ -1367,7 +1365,7 @@ function put(object) {
       at: null,
       rot: null,
       scale: null,
-      obj: function () { return object; }
+      obj: () => object
     },
     on = function (scene) {
       if (scene.appendChild) {
@@ -1422,12 +1420,12 @@ function put(object) {
 
   return box;
 }
-    if(typeof window !== "undefined") window.put = put;
+  if(typeof window !== "undefined") window.put = put;
 })();
-    // end D:\Documents\VR\Primrose\src\put.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\put.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\quad.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\quad.js
 (function(){pliny.function({
   name: "quad",
   description: "| [under construction]"
@@ -1445,20 +1443,20 @@ function quad(w, h, options) {
     options.t = 1;
   }
   return cache(
-    ("PlaneBufferGeometry(" + w + ", " + h + ", " + (options.s) + ", " + (options.t) + ", " + (options.maxU) + ", $options.maxV)"),
-    function () { return fixGeometry(new THREE.PlaneBufferGeometry(w, h, options.s, options.t), options); });
+    `PlaneBufferGeometry(${w}, ${h}, ${options.s}, ${options.t}, ${options.maxU}, $options.maxV)`,
+    () => fixGeometry(new THREE.PlaneBufferGeometry(w, h, options.s, options.t), options));
 }
-    if(typeof window !== "undefined") window.quad = quad;
+  if(typeof window !== "undefined") window.quad = quad;
 })();
-    // end D:\Documents\VR\Primrose\src\quad.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\quad.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Quality.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Quality.js
 (function(){pliny.enumeration({
   name: "Quality",
   description: "Graphics quality settings."
 });
-var Quality = {
+const Quality = {
   NONE: 0,
   VERYLOW: 1,
   LOW: 2,
@@ -1466,12 +1464,12 @@ var Quality = {
   HIGH: 4,
   MAXIMUM: PIXEL_SCALES.length - 1
 };
-    if(typeof window !== "undefined") window.Quality = Quality;
+  if(typeof window !== "undefined") window.Quality = Quality;
 })();
-    // end D:\Documents\VR\Primrose\src\Quality.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Quality.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\range.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\range.js
 (function(){pliny.function({
   name: "range",
   description: "| [under construction]"
@@ -1486,12 +1484,12 @@ function range(n, m, s, t) {
     t2(i);
   }
 }
-    if(typeof window !== "undefined") window.range = range;
+  if(typeof window !== "undefined") window.range = range;
 })();
-    // end D:\Documents\VR\Primrose\src\range.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\range.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\readForm.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\readForm.js
 (function(){pliny.function({
   name: "readForm",
   parameters: [{
@@ -1546,12 +1544,12 @@ function readForm(ctrls) {
   }
   return state;
 }
-    if(typeof window !== "undefined") window.readForm = readForm;
+  if(typeof window !== "undefined") window.readForm = readForm;
 })();
-    // end D:\Documents\VR\Primrose\src\readForm.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\readForm.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\ring.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\ring.js
 (function(){pliny.function({
   name: "ring",
   description: "| [under construction]"
@@ -1562,24 +1560,24 @@ function ring(rInner, rOuter, sectors, start, end, rings) {
   end = end || 2 * Math.PI;
   rings = rings || 1;
   return cache(
-    ("RingBufferGeometry(" + rInner + ", " + rOuter + ", " + sectors + ", " + start + ", " + end + ", " + rings + ")"),
-    function () { return new THREE.RingBufferGeometry(rInner, rOuter, sectors, start, end, rings); });
+    `RingBufferGeometry(${rInner}, ${rOuter}, ${sectors}, ${start}, ${end}, ${rings})`,
+    () => new THREE.RingBufferGeometry(rInner, rOuter, sectors, start, end, rings));
 }
-    if(typeof window !== "undefined") window.ring = ring;
+  if(typeof window !== "undefined") window.ring = ring;
 })();
-    // end D:\Documents\VR\Primrose\src\ring.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\ring.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\setFalse.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\setFalse.js
 (function(){function setFalse(evt) {
   evt.returnValue = false;
 }
-    if(typeof window !== "undefined") window.setFalse = setFalse;
+  if(typeof window !== "undefined") window.setFalse = setFalse;
 })();
-    // end D:\Documents\VR\Primrose\src\setFalse.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\setFalse.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\setSetting.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\setSetting.js
 (function(){pliny.function({
   name: "setSetting",
   parameters: [{
@@ -1620,12 +1618,12 @@ function setSetting(name, val) {
     }
   }
 }
-    if(typeof window !== "undefined") window.setSetting = setSetting;
+  if(typeof window !== "undefined") window.setSetting = setSetting;
 })();
-    // end D:\Documents\VR\Primrose\src\setSetting.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\setSetting.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\shell.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\shell.js
 (function(){pliny.function({
   name: "shell",
   parameters: [{
@@ -1703,15 +1701,15 @@ function shell(r, slices, rings, phi, theta, options) {
     thetaStart = (Math.PI - theta) * 0.5;
   options = options || {};
   return cache(
-    ("InsideSphereGeometry(" + r + ", " + slices + ", " + rings + ", " + phi + ", " + theta + ")"),
-    function () { return fixGeometry(new InsideSphereGeometry(r, slices, rings, phiStart, phi, thetaStart, theta, true), options); });
+    `InsideSphereGeometry(${r}, ${slices}, ${rings}, ${phi}, ${theta})`,
+    () => fixGeometry(new InsideSphereGeometry(r, slices, rings, phiStart, phi, thetaStart, theta, true), options));
 }
-    if(typeof window !== "undefined") window.shell = shell;
+  if(typeof window !== "undefined") window.shell = shell;
 })();
-    // end D:\Documents\VR\Primrose\src\shell.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\shell.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\sphere.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\sphere.js
 (function(){pliny.function({
   name: "sphere",
   description: "| [under construction]"
@@ -1719,15 +1717,15 @@ function shell(r, slices, rings, phi, theta, options) {
 
 function sphere(r, slices, rings) {
   return cache(
-    ("SphereGeometry(" + r + ", " + slices + ", " + rings + ")"),
-    function () { return new THREE.SphereGeometry(r, slices, rings); });
+    `SphereGeometry(${r}, ${slices}, ${rings})`,
+    () => new THREE.SphereGeometry(r, slices, rings));
 }
-    if(typeof window !== "undefined") window.sphere = sphere;
+  if(typeof window !== "undefined") window.sphere = sphere;
 })();
-    // end D:\Documents\VR\Primrose\src\sphere.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\sphere.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\textured.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\textured.js
 (function(){pliny.function({
   name: "textured",
   description: "| [under construction]"
@@ -1743,8 +1741,8 @@ function textured(geometry, txt, options) {
   }
 
   var txtID = (txt.id || txt).toString(),
-    textureDescription = "Primrose.textured(" + txtID + ", " + (options.txtRepeatS) + ", " + (options.txtRepeatT) + ")",
-    texture = cache(textureDescription, function () {
+    textureDescription = `Primrose.textured(${txtID}, ${options.txtRepeatS}, ${options.txtRepeatT})`,
+    texture = cache(textureDescription, () => {
       if (txt instanceof Primrose.Surface) {
         if (!options.scaleTextureWidth || !options.scaleTextureHeight) {
           var imgWidth = txt.imageWidth,
@@ -1846,12 +1844,12 @@ function textured(geometry, txt, options) {
 
   return obj;
 }
-    if(typeof window !== "undefined") window.textured = textured;
+  if(typeof window !== "undefined") window.textured = textured;
 })();
-    // end D:\Documents\VR\Primrose\src\textured.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\textured.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\v3.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\v3.js
 (function(){pliny.function({
   name: "v3",
   description: "A shortcut function for creating a new THREE.Vector3 object.",
@@ -1883,12 +1881,12 @@ function textured(geometry, txt, options) {
 function v3(x, y, z) {
   return new THREE.Vector3(x, y, z);
 }
-    if(typeof window !== "undefined") window.v3 = v3;
+  if(typeof window !== "undefined") window.v3 = v3;
 })();
-    // end D:\Documents\VR\Primrose\src\v3.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\v3.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\writeForm.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\writeForm.js
 (function(){pliny.function({
   name: "writeForm",
   parameters: [{
@@ -1946,56 +1944,54 @@ function writeForm(ctrls, state) {
     }
   }
 }
-    if(typeof window !== "undefined") window.writeForm = writeForm;
+  if(typeof window !== "undefined") window.writeForm = writeForm;
 })();
-    // end D:\Documents\VR\Primrose\src\writeForm.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\writeForm.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\AbstractEventEmitter.js
-(function(){var AbstractEventEmitter = function AbstractEventEmitter() {
-  this._handlers = {};
-};
-
-AbstractEventEmitter.prototype.addEventListener = function addEventListener (name, thunk) {
-  if (!this._handlers[name]) {
-    this._handlers[name] = [];
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\AbstractEventEmitter.js
+(function(){class AbstractEventEmitter {
+  constructor() {
+    this._handlers = {};
   }
-  this._handlers[name].push(thunk);
-};
 
-AbstractEventEmitter.prototype.removeEventListener = function removeEventListener (name, thunk) {
-  if (this._handlers[name]) {
-    var idx = this._handlers[name].indexOf(thunk);
-    if (idx > -1) {
-      this._handlers[name].splice(idx, 1);
+  addEventListener(name, thunk) {
+    if (!this._handlers[name]) {
+      this._handlers[name] = [];
+    }
+    this._handlers[name].push(thunk);
+  }
+
+  removeEventListener(name, thunk) {
+    if (this._handlers[name]) {
+      var idx = this._handlers[name].indexOf(thunk);
+      if (idx > -1) {
+        this._handlers[name].splice(idx, 1);
+      }
     }
   }
-};
 
-AbstractEventEmitter.prototype.forward = function forward (obj, evts){
-    var this$1 = this;
+  forward(obj, evts){
+    evts.forEach((evt) => this.addEventListener(evt, obj.emit.bind(obj, evt)));
+  }
 
-  evts.forEach(function (evt) { return this$1.addEventListener(evt, obj.emit.bind(obj, evt)); });
-};
-
-AbstractEventEmitter.prototype.emit = function emit (name, obj) {
-    var this$1 = this;
-
-  if (this._handlers[name]) {
-    if(typeof obj === "object" && !(obj instanceof UIEvent)){
-      obj.type = name;
-    }
-    for (var i = 0; i < this._handlers[name].length; ++i) {
-      this$1._handlers[name][i](obj);
+  emit(name, obj) {
+    if (this._handlers[name]) {
+      if(typeof obj === "object" && !(obj instanceof UIEvent)){
+        obj.type = name;
+      }
+      for (var i = 0; i < this._handlers[name].length; ++i) {
+        this._handlers[name][i](obj);
+      }
     }
   }
-};
-    if(typeof window !== "undefined") window.Primrose.AbstractEventEmitter = AbstractEventEmitter;
+}
+  if(typeof window !== "undefined") window.Primrose.AbstractEventEmitter = AbstractEventEmitter;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\AbstractEventEmitter.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\AbstractEventEmitter.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Angle.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Angle.js
 (function(){var DEG2RAD = Math.PI / 180,
   RAD2DEG = 180 / Math.PI;
 pliny.class({
@@ -2125,12 +2121,12 @@ Object.defineProperty(Angle.prototype, "radians", {
     this.degrees = val * RAD2DEG;
   }
 });
-    if(typeof window !== "undefined") window.Primrose.Angle = Angle;
+  if(typeof window !== "undefined") window.Primrose.Angle = Angle;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Angle.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Angle.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\BaseControl.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\BaseControl.js
 (function(){var ID = 1,
   NUMBER_PATTERN = "([+-]?(?:(?:\\d+(?:\\.\\d*)?)|(?:\\.\\d+)))",
   DELIM = "\\s*,\\s*",
@@ -2237,9 +2233,9 @@ to a 3D element on-the-fly.\n\
   }]
 });
 
-var BaseControl = (function (superclass) {
-  function BaseControl() {
-    superclass.call(this);
+class BaseControl extends Primrose.AbstractEventEmitter {
+  constructor() {
+    super();
 
     pliny.property({
       name: "controlID",
@@ -2256,25 +2252,21 @@ var BaseControl = (function (superclass) {
     this.focused = false;
   }
 
-  if ( superclass ) BaseControl.__proto__ = superclass;
-  BaseControl.prototype = Object.create( superclass && superclass.prototype );
-  BaseControl.prototype.constructor = BaseControl;
-
-  BaseControl.prototype.focus = function focus () {
+  focus() {
     this.focused = true;
     this.emit("focus", {
       target: this
     });
-  };
+  }
 
-  BaseControl.prototype.blur = function blur () {
+  blur() {
     this.focused = false;
     emit.call(this, "blur", {
       target: this
     });
-  };
+  }
 
-  BaseControl.prototype.copyElement = function copyElement (elem) {
+  copyElement(elem) {
     this.element = elem;
     if (elem.style.transform) {
       var match = TRANSLATE_PATTERN.exec(elem.style.transform);
@@ -2295,17 +2287,15 @@ var BaseControl = (function (superclass) {
           parseFloat(match[4]));
       }
     }
-  };
-
-  return BaseControl;
-}(Primrose.AbstractEventEmitter));
-    if(typeof window !== "undefined") window.Primrose.BaseControl = BaseControl;
+  }
+}
+  if(typeof window !== "undefined") window.Primrose.BaseControl = BaseControl;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\BaseControl.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\BaseControl.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\BrowserEnvironment.js
-(function(){var MILLISECONDS_TO_SECONDS = 0.001,
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\BrowserEnvironment.js
+(function(){const MILLISECONDS_TO_SECONDS = 0.001,
   MAX_MOVE_DISTANCE = 5,
   MAX_MOVE_DISTANCE_SQ = MAX_MOVE_DISTANCE * MAX_MOVE_DISTANCE,
   TELEPORT_COOLDOWN = 250,
@@ -2316,29 +2306,26 @@ pliny.class({
     name: "BrowserEnvironment",
     description: "Make a Virtual Reality app in your web browser!"
 });
-var BrowserEnvironment = (function (superclass) {
-  function BrowserEnvironment(options) {
-    var arguments$1 = arguments;
-    var this$1 = this;
-
-    superclass.call(this);
+class BrowserEnvironment extends Primrose.AbstractEventEmitter {
+  constructor(options) {
+    super();
     this.options = patch(options, BrowserEnvironment.DEFAULTS);
     this.options.foregroundColor = this.options.foregroundColor || complementColor(new THREE.Color(this.options.backgroundColor))
       .getHex();
 
     this.audioQueue = [];
 
-    this.zero = function () {
-      if (!this$1.lockMovement) {
-        this$1.input.zero();
-        if (this$1.quality === Quality.NONE) {
-          this$1.quality = Quality.HIGH;
+    this.zero = () => {
+      if (!this.lockMovement) {
+        this.input.zero();
+        if (this.quality === Quality.NONE) {
+          this.quality = Quality.HIGH;
         }
       }
     };
 
 
-    var createPickableObject = function (obj, includeGeometry) {
+    var createPickableObject = (obj, includeGeometry) => {
       var geomObj = obj;
       if ((obj.type === "Object3D" || obj.type === "Group") && obj.children[0]) {
         geomObj = obj.children[0];
@@ -2372,7 +2359,7 @@ var BrowserEnvironment = (function (superclass) {
         mLeft = mRight;
         mRight = mSwap;
         head = head.parent;
-        inScene = inScene || (head === this$1.scene);
+        inScene = inScene || (head === this.scene);
       }
 
       if (!lastBag || lastBag.visible !== obj.visible) {
@@ -2430,7 +2417,7 @@ var BrowserEnvironment = (function (superclass) {
 
     var objectHistory = {};
 
-    this.registerPickableObject = function (obj) {
+    this.registerPickableObject = (obj) => {
       if (obj) {
         var bag = createPickableObject(obj, true),
           verts, faces, uvs, i,
@@ -2467,7 +2454,7 @@ var BrowserEnvironment = (function (superclass) {
           }
         }
         else {
-          verts = geometry.vertices.map(function (v) { return v.toArray(); });
+          verts = geometry.vertices.map((v) => v.toArray());
           faces = [];
           uvs = [];
           // IDK why, but non-buffered geometry has an additional array layer
@@ -2487,43 +2474,43 @@ var BrowserEnvironment = (function (superclass) {
           faces: faces,
           uvs: uvs
         };
-        this$1.pickableObjects[bag.uuid] = obj;
-        this$1.projector.setObject(bag);
+        this.pickableObjects[bag.uuid] = obj;
+        this.projector.setObject(bag);
       }
     };
 
     var currentHits = {},
-      handleHit = function (h) {
+      handleHit = (h) => {
         var dt;
-        this$1.projector.ready = true;
+        this.projector.ready = true;
         currentHits = h;
         for(var key in currentHits){
           var hit = currentHits[key];
-          hit.object = this$1.pickableObjects[hit.objectID];
+          hit.object = this.pickableObjects[hit.objectID];
         }
       };
 
-    var update = function (dt) {
+    var update = (dt) => {
       dt *= MILLISECONDS_TO_SECONDS;
       movePlayer(dt);
-      this$1.input.resolvePicking(currentHits);
+      this.input.resolvePicking(currentHits);
       moveSky();
       moveGround();
-      this$1.network.update(dt);
+      this.network.update(dt);
       checkQuality();
 
-      this$1.emit("update", dt);
+      this.emit("update", dt);
     };
 
-    var movePlayer = function (dt) {
-      this$1.input.update(dt);
+    var movePlayer = (dt) => {
+      this.input.update(dt);
 
-      if (this$1.projector.ready) {
-        this$1.projector.ready = false;
+      if (this.projector.ready) {
+        this.projector.ready = false;
         var arr = [],
           del = [];
-        for (var key in this$1.pickableObjects) {
-          var obj = this$1.pickableObjects[key],
+        for (var key in this.pickableObjects) {
+          var obj = this.pickableObjects[key],
             p = createPickableObject(obj);
           if (p) {
             arr.push(p);
@@ -2534,32 +2521,32 @@ var BrowserEnvironment = (function (superclass) {
         }
 
         if (arr.length > 0) {
-          this$1.projector.updateObjects(arr);
+          this.projector.updateObjects(arr);
         }
         for (var i = 0; i < del.length; ++i) {
-          delete this$1.pickableObjects[del[i]];
+          delete this.pickableObjects[del[i]];
         }
 
-        this$1.projector.projectPointers(this$1.input.segments);
+        this.projector.projectPointers(this.input.segments);
       }
     };
 
-    var moveSky = function () {
-      if (this$1.sky) {
-        this$1.sky.position.copy(this$1.input.head.position);
+    var moveSky = () => {
+      if (this.sky) {
+        this.sky.position.copy(this.input.head.position);
       }
     };
 
-    var moveGround = function () {
-      if (this$1.ground) {
-        this$1.ground.position.set(
-          Math.floor(this$1.input.head.position.x), -0.02,
-          Math.floor(this$1.input.head.position.z));
-        this$1.ground.material.needsUpdate = true;
+    var moveGround = () => {
+      if (this.ground) {
+        this.ground.position.set(
+          Math.floor(this.input.head.position.x), -0.02,
+          Math.floor(this.input.head.position.z));
+        this.ground.material.needsUpdate = true;
       }
     };
 
-    var animate = function (t) {
+    var animate = (t) => {
       var dt = t - lt,
         i, j;
       lt = t;
@@ -2568,51 +2555,51 @@ var BrowserEnvironment = (function (superclass) {
       RAF(animate);
     };
 
-    var render = function (dt) {
-      this$1.camera.position.set(0, 0, 0);
-      this$1.camera.quaternion.set(0, 0, 0, 1);
-      this$1.audio.setPlayer(this$1.input.head.mesh);
-      if (this$1.input.VR.isPresenting) {
-        this$1.renderer.clear(true, true, true);
+    var render = (dt) => {
+      this.camera.position.set(0, 0, 0);
+      this.camera.quaternion.set(0, 0, 0, 1);
+      this.audio.setPlayer(this.input.head.mesh);
+      if (this.input.VR.isPresenting) {
+        this.renderer.clear(true, true, true);
 
-        var trans = this$1.input.VR.getTransforms(
-          this$1.options.nearPlane,
-          this$1.options.nearPlane + this$1.options.drawDistance);
+        var trans = this.input.VR.getTransforms(
+          this.options.nearPlane,
+          this.options.nearPlane + this.options.drawDistance);
         for (var i = 0; trans && i < trans.length; ++i) {
           var st = trans[i],
             v = st.viewport,
             side = (2 * i) - 1;
           Primrose.Entity.eyeBlankAll(i);
-          this$1.camera.projectionMatrix.copy(st.projection);
-          this$1.camera.translateOnAxis(st.translation, 1);
-          this$1.renderer.setViewport(
+          this.camera.projectionMatrix.copy(st.projection);
+          this.camera.translateOnAxis(st.translation, 1);
+          this.renderer.setViewport(
             v.left * resolutionScale,
             v.top * resolutionScale,
             v.width * resolutionScale,
             v.height * resolutionScale);
-          this$1.composer.render(dt);
-          this$1.camera.translateOnAxis(st.translation, -1);
+          this.composer.render(dt);
+          this.camera.translateOnAxis(st.translation, -1);
         }
-        this$1.input.submitFrame();
+        this.input.submitFrame();
       }
 
-      if (!this$1.input.VR.isPresenting || (this$1.input.VR.canMirror && !this$1.options.disableMirroring)) {
-        this$1.camera.fov = this$1.options.defaultFOV;
-        this$1.camera.aspect = this$1.renderer.domElement.width / this$1.renderer.domElement.height;
-        this$1.camera.updateProjectionMatrix();
-        this$1.renderer.clear(true, true, true);
-        if(this$1.input.mousePointer.unproject){
-          this$1.input.mousePointer.unproject.getInverse(this$1.camera.projectionMatrix);
+      if (!this.input.VR.isPresenting || (this.input.VR.canMirror && !this.options.disableMirroring)) {
+        this.camera.fov = this.options.defaultFOV;
+        this.camera.aspect = this.renderer.domElement.width / this.renderer.domElement.height;
+        this.camera.updateProjectionMatrix();
+        this.renderer.clear(true, true, true);
+        if(this.input.mousePointer.unproject){
+          this.input.mousePointer.unproject.getInverse(this.camera.projectionMatrix);
         }
-        this$1.renderer.setViewport(0, 0, this$1.renderer.domElement.width, this$1.renderer.domElement.height);
-        this$1.composer.render(dt);
+        this.renderer.setViewport(0, 0, this.renderer.domElement.width, this.renderer.domElement.height);
+        this.composer.render(dt);
       }
     };
 
-    var modifyScreen = function () {
-      var near = this$1.options.nearPlane,
-        far = near + this$1.options.drawDistance,
-        p = this$1.input.VR.getTransforms(near, far);
+    var modifyScreen = () => {
+      var near = this.options.nearPlane,
+        far = near + this.options.drawDistance,
+        p = this.input.VR.getTransforms(near, far);
 
       if (p) {
         var canvasWidth = 0,
@@ -2623,26 +2610,26 @@ var BrowserEnvironment = (function (superclass) {
           canvasHeight = Math.max(canvasHeight, p[i].viewport.height);
         }
 
-        this$1.input.Mouse.commands.U.scale = 2/canvasWidth;
-        this$1.input.Mouse.commands.U.offset = -1;
-        this$1.input.Mouse.commands.V.scale = 2/canvasHeight;
-        this$1.input.Mouse.commands.V.offset = -1;
+        this.input.Mouse.commands.U.scale = 2/canvasWidth;
+        this.input.Mouse.commands.U.offset = -1;
+        this.input.Mouse.commands.V.scale = 2/canvasHeight;
+        this.input.Mouse.commands.V.offset = -1;
 
         canvasWidth = Math.floor(canvasWidth * resolutionScale);
         canvasHeight = Math.floor(canvasHeight * resolutionScale);
 
-        this$1.renderer.domElement.width = canvasWidth;
-        this$1.renderer.domElement.height = canvasHeight;
-        this$1.composer.setSize(canvasWidth, canvasHeight);
-        if(this$1.fxaa){
-          this$1.fxaa.uniforms.resolution.value.set(1/canvasWidth, 1/canvasHeight);
+        this.renderer.domElement.width = canvasWidth;
+        this.renderer.domElement.height = canvasHeight;
+        this.composer.setSize(canvasWidth, canvasHeight);
+        if(this.fxaa){
+          this.fxaa.uniforms.resolution.value.set(1/canvasWidth, 1/canvasHeight);
         }
-        if(this$1.ssao){
-          this$1.ssao.uniforms.cameraNear.value = near;
-          this$1.ssao.uniforms.cameraFar.value = far;
-          this$1.ssao.uniforms.size.value.set(canvasWidth, canvasHeight);
+        if(this.ssao){
+          this.ssao.uniforms.cameraNear.value = near;
+          this.ssao.uniforms.cameraFar.value = far;
+          this.ssao.uniforms.size.value.set(canvasWidth, canvasHeight);
         }
-        if (!this$1.timer) {
+        if (!this.timer) {
           render();
         }
       }
@@ -2672,29 +2659,29 @@ var BrowserEnvironment = (function (superclass) {
         textarea: Primrose.Text.Controls.TextBox,
         avatar: null,
         pre: {
-          create: function () { return new Primrose.Text.Controls.TextBox({
+          create: () => new Primrose.Text.Controls.TextBox({
             tokenizer: Primrose.Text.Grammars.PlainText,
             hideLineNumbers: true,
             readOnly: true
-          }); }
+          })
         }
       };
 
     this.factories = factories;
 
-    this.createElement = function (type) {
+    this.createElement = (type) => {
       if (factories[type]) {
         return factories[type].create();
       }
     };
 
-    this.appendChild = function (elem) {
+    this.appendChild = (elem) => {
       if (elem instanceof THREE.Mesh) {
-        this$1.scene.add(elem);
-        this$1.registerPickableObject(elem);
+        this.scene.add(elem);
+        this.registerPickableObject(elem);
       }
       else {
-        return elem.addToBrowserEnvironment(this$1, this$1.scene);
+        return elem.addToBrowserEnvironment(this, this.scene);
       }
     };
 
@@ -2713,7 +2700,7 @@ var BrowserEnvironment = (function (superclass) {
     }
 
     var modelsReady = Primrose.ModelLoader.loadObjects(modelFiles)
-      .then(function (models) {
+      .then((models) => {
         window.text3D = function (font, size, text) {
           var geom = new THREE.TextGeometry(text, {
             font: font,
@@ -2735,12 +2722,12 @@ var BrowserEnvironment = (function (superclass) {
         }
 
         if (models.button) {
-          this$1.buttonFactory = new Primrose.ButtonFactory(
+          this.buttonFactory = new Primrose.ButtonFactory(
             models.button,
-            this$1.options.button.options);
+            this.options.button.options);
         }
         else {
-          this$1.buttonFactory = new Primrose.ButtonFactory(
+          this.buttonFactory = new Primrose.ButtonFactory(
             colored(box(1, 1, 1), 0xff0000), {
               maxThrow: 0.1,
               minDeflection: 10,
@@ -2750,10 +2737,10 @@ var BrowserEnvironment = (function (superclass) {
             });
         }
       })
-      .catch(function (err) {
+      .catch((err) => {
         console.error(err);
-        if (!this$1.buttonFactory) {
-          this$1.buttonFactory = new Primrose.ButtonFactory(
+        if (!this.buttonFactory) {
+          this.buttonFactory = new Primrose.ButtonFactory(
             colored(box(1, 1, 1), 0xff0000), {
               maxThrow: 0.1,
               minDeflection: 10,
@@ -2776,7 +2763,7 @@ var BrowserEnvironment = (function (superclass) {
       ocean = null;
     if (this.options.ambientSound && !isMobile) {
       audioReady = this.audio.load3DSound(this.options.ambientSound, true, -1, 1, -1)
-        .then(function (aud) {
+        .then((aud) => {
           ocean = aud;
           if (!(ocean.source instanceof MediaElementAudioSourceNode)) {
             ocean.volume.gain.value = 0.1;
@@ -2795,8 +2782,8 @@ var BrowserEnvironment = (function (superclass) {
       documentReady = Promise.resolve("already");
     }
     else {
-      documentReady = new Promise(function (resolve, reject) {
-        document.addEventListener("readystatechange", function (evt) {
+      documentReady = new Promise((resolve, reject) => {
+        document.addEventListener("readystatechange", (evt) => {
           if (document.readyState === "complete") {
             resolve("had to wait for it");
           }
@@ -2809,62 +2796,62 @@ var BrowserEnvironment = (function (superclass) {
     this.pickableObjects = {};
     this.currentControl = null;
 
-    var FADE_SPEED = 0.1;
+    const FADE_SPEED = 0.1;
 
-    this.fadeOut = function () { return new Promise(function (resolve, reject) {
-      var timer = setInterval(function () {
-        this$1.fader.uniforms.amount.value -= FADE_SPEED;
-        if(this$1.fader.uniforms.amount.value <= 0){
+    this.fadeOut = () => new Promise((resolve, reject) => {
+      var timer = setInterval(() => {
+        this.fader.uniforms.amount.value -= FADE_SPEED;
+        if(this.fader.uniforms.amount.value <= 0){
           clearInterval(timer);
           resolve();
         }
       }, 10);
-    }); };
+    });
 
-    this.fadeIn = function () { return new Promise(function (resolve, reject) {
-      var timer = setInterval(function () {
-        this$1.fader.uniforms.amount.value += FADE_SPEED;
-        if(this$1.fader.uniforms.amount.value >= 1){
+    this.fadeIn = () => new Promise((resolve, reject) => {
+      var timer = setInterval(() => {
+        this.fader.uniforms.amount.value += FADE_SPEED;
+        if(this.fader.uniforms.amount.value >= 1){
           clearInterval(timer);
           resolve();
         }
       }, 10);
-    }); };
+    });
 
     this.teleportAvailable = true;
 
-    this.teleport = function (pos, immediate) {
+    this.teleport = (pos, immediate) => {
       if(immediate) {
-        this$1.input.moveStage(pos);
+        this.input.moveStage(pos);
       }
-      else if(this$1.teleportAvailable) {
-        this$1.teleportAvailable = false;
+      else if(this.teleportAvailable) {
+        this.teleportAvailable = false;
         var dist = TELEPORT_DISPLACEMENT.copy(pos)
-          .sub(this$1.input.head.position)
+          .sub(this.input.head.position)
           .length();
         if(dist > 0.1){
-          this$1.fadeOut()
-            .then(function () { return this$1.input.moveStage(pos); })
-            .then(function () { return this$1.fadeIn(); })
+          this.fadeOut()
+            .then(() => this.input.moveStage(pos))
+            .then(() => this.fadeIn())
             .catch(console.warn.bind(console, "Error while teleporting"))
-            .then(function () { return this$1.teleportAvailable = true; });
+            .then(() => this.teleportAvailable = true);
         }
       }
     };
 
-    var POSITION = new THREE.Vector3(),
+    const POSITION = new THREE.Vector3(),
       START_POINT = new THREE.Vector3();
 
-    this.selectControl = function (evt) {
+    this.selectControl = (evt) => {
       var obj = evt.hit && evt.hit.object;
 
-      if(evt.type === "exit" && evt.lastHit && evt.lastHit.object === this$1.ground){
+      if(evt.type === "exit" && evt.lastHit && evt.lastHit.object === this.ground){
         evt.pointer.disk.visible = false;
       }
 
-      if(evt.type !== "exit" && evt.hit && obj === this$1.ground) {
+      if(evt.type !== "exit" && evt.hit && obj === this.ground) {
         POSITION.fromArray(evt.hit.facePoint)
-          .sub(this$1.input.head.position);
+          .sub(this.input.head.position);
 
         var distSq = POSITION.x * POSITION.x + POSITION.z * POSITION.z;
         if (distSq > MAX_MOVE_DISTANCE_SQ) {
@@ -2876,7 +2863,7 @@ var BrowserEnvironment = (function (superclass) {
           POSITION.y = y;
         }
 
-        POSITION.add(this$1.input.head.position);
+        POSITION.add(this.input.head.position);
 
         if(evt.type === "enter") {
           evt.pointer.disk.visible = true;
@@ -2889,32 +2876,32 @@ var BrowserEnvironment = (function (superclass) {
         }
         else if(evt.type === "pointerend" || evt.type === "gazecomplete") {
           START_POINT.sub(POSITION);
-          var len = START_POINT.lengthSq();
+          const len = START_POINT.lengthSq();
           if(len < 0.01){
-            this$1.teleport(POSITION);
+            this.teleport(POSITION);
           }
         }
       }
 
       if(evt.type === "pointerstart" || evt.type === "gazecomplete") {
         obj = obj && (obj.surface || obj.button);
-        if(obj !== this$1.currentControl){
-          if(this$1.currentControl){
-            this$1.currentControl.blur();
+        if(obj !== this.currentControl){
+          if(this.currentControl){
+            this.currentControl.blur();
           }
-          this$1.currentControl = obj;
-          if(this$1.currentControl){
-            this$1.currentControl.focus();
+          this.currentControl = obj;
+          if(this.currentControl){
+            this.currentControl.focus();
           }
         }
       }
 
-      if(this$1.currentControl){
-        if(this$1.currentControl.dispatchEvent){
-          this$1.currentControl.dispatchEvent(evt);
+      if(this.currentControl){
+        if(this.currentControl.dispatchEvent){
+          this.currentControl.dispatchEvent(evt);
         }
         else{
-          console.log(this$1.currentControl);
+          console.log(this.currentControl);
         }
       }
     };
@@ -2931,7 +2918,7 @@ var BrowserEnvironment = (function (superclass) {
       var skyFunc = (typeof this.options.skyTexture === "number") ? colored : textured,
         skyDim = this.options.drawDistance * 0.9,
         skyGeom = null,
-        onSkyDone = function () { return this$1.scene.add(this$1.sky); };
+        onSkyDone = () => this.scene.add(this.sky);
       if(typeof this.options.skyTexture === "string"){
         skyGeom = sphere(skyDim, 18, 9);
       }
@@ -2968,7 +2955,7 @@ var BrowserEnvironment = (function (superclass) {
       this.camera.add(this.passthrough.mesh);
     }
 
-    var buildScene = function (sceneGraph) {
+    var buildScene = (sceneGraph) => {
       sceneGraph.buttons = [];
       sceneGraph.traverse(function (child) {
         if (child.isButton) {
@@ -2979,20 +2966,20 @@ var BrowserEnvironment = (function (superclass) {
           sceneGraph[child.name] = child;
         }
       });
-      this$1.scene.add.apply(this$1.scene, sceneGraph.children);
-      this$1.scene.traverse(function (obj) {
-        if (this$1.options.disableDefaultLighting && obj.material && obj.material.map) {
+      this.scene.add.apply(this.scene, sceneGraph.children);
+      this.scene.traverse((obj) => {
+        if (this.options.disableDefaultLighting && obj.material && obj.material.map) {
           textured(obj, obj.material.map, {
             unshaded: true
           });
         }
         if (obj.name) {
-          this$1.scene[obj.name] = obj;
+          this.scene[obj.name] = obj;
         }
       });
       if (sceneGraph.Camera) {
-        this$1.camera.position.copy(sceneGraph.Camera.position);
-        this$1.camera.quaternion.copy(sceneGraph.Camera.quaternion);
+        this.camera.position.copy(sceneGraph.Camera.position);
+        this.camera.quaternion.copy(sceneGraph.Camera.quaternion);
       }
       return sceneGraph;
     };
@@ -3003,57 +2990,57 @@ var BrowserEnvironment = (function (superclass) {
 
     var currentTimerObject = null;
     this.timer = 0;
-    var RAF = function (callback) {
-      currentTimerObject = this$1.input.VR.currentDevice || window;
-      if (this$1.timer !== null) {
-        this$1.timer = currentTimerObject.requestAnimationFrame(callback);
+    var RAF = (callback) => {
+      currentTimerObject = this.input.VR.currentDevice || window;
+      if (this.timer !== null) {
+        this.timer = currentTimerObject.requestAnimationFrame(callback);
       }
     };
 
     //
     // Manage full-screen state
     //
-    this.goFullScreen = function (index, evt) {
+    this.goFullScreen = (index, evt) => {
       if (evt !== "Gaze") {
-        var elem = !this$1.input.VR.isStereo || isMobile && !this$1.input.VR.isNativeMobileWebVR ?
-              this$1.options.fullscreenElement :
-              this$1.renderer.domElement;
-        this$1.input.VR.connect(index);
-        this$1.input.VR.requestPresent([{
+        const elem = !this.input.VR.isStereo || isMobile && !this.input.VR.isNativeMobileWebVR ?
+              this.options.fullscreenElement :
+              this.renderer.domElement;
+        this.input.VR.connect(index);
+        this.input.VR.requestPresent([{
             source: elem
           }])
-          .catch(function (exp) { return console.error("whaaat", exp); })
-          .then(function () { return elem.focus(); });
+          .catch((exp) => console.error("whaaat", exp))
+          .then(() => elem.focus());
       }
     };
 
-    var addAvatar = function (user) {
-      this$1.scene.add(user.stage);
-      this$1.scene.add(user.head);
+    var addAvatar = (user) => {
+      this.scene.add(user.stage);
+      this.scene.add(user.head);
     };
 
-    var removeAvatar = function (user) {
-      this$1.scene.remove(user.stage);
-      this$1.scene.remove(user.head);
+    var removeAvatar = (user) => {
+      this.scene.remove(user.stage);
+      this.scene.remove(user.head);
     };
 
-    PointerLock.addChangeListener(function (evt) {
-      if (this$1.input.VR.isPresenting && !PointerLock.isActive) {
-        this$1.input.VR.cancel();
+    PointerLock.addChangeListener((evt) => {
+      if (this.input.VR.isPresenting && !PointerLock.isActive) {
+        this.input.VR.cancel();
       }
     });
 
-    var fullScreenChange = function (evt) {
-      var presenting = !!this$1.input.VR.isPresenting,
+    const fullScreenChange = (evt) => {
+      const presenting = !!this.input.VR.isPresenting,
         cmd = (presenting ? "remove" : "add") + "Button";
-      this$1.input.Mouse[cmd]("dx", 0);
-      this$1.input.Mouse[cmd]("dy", 0);
-      this$1.input.Mouse.commands.U.disabled =
-        this$1.input.Mouse.commands.V.disabled = presenting && !this$1.input.VR.isStereo;
-      this$1.input.Mouse.commands.heading.scale = presenting ? -1 : 1;
-      this$1.input.Mouse.commands.pitch.scale = presenting ? -1 : 1;
+      this.input.Mouse[cmd]("dx", 0);
+      this.input.Mouse[cmd]("dy", 0);
+      this.input.Mouse.commands.U.disabled =
+        this.input.Mouse.commands.V.disabled = presenting && !this.input.VR.isStereo;
+      this.input.Mouse.commands.heading.scale = presenting ? -1 : 1;
+      this.input.Mouse.commands.pitch.scale = presenting ? -1 : 1;
       if (!presenting) {
-        this$1.input.VR.cancel();
+        this.input.VR.cancel();
       }
       modifyScreen();
     };
@@ -3065,27 +3052,27 @@ var BrowserEnvironment = (function (superclass) {
 
     this.projector.addEventListener("hit", handleHit, false);
 
-    documentReady = documentReady.then(function () {
-      if (this$1.options.renderer) {
-        this$1.renderer = this$1.options.renderer;
+    documentReady = documentReady.then(() => {
+      if (this.options.renderer) {
+        this.renderer = this.options.renderer;
       }
       else {
-        this$1.renderer = new THREE.WebGLRenderer({
-          canvas: Primrose.DOM.cascadeElement(this$1.options.canvasElement, "canvas", HTMLCanvasElement),
-          context: this$1.options.context,
+        this.renderer = new THREE.WebGLRenderer({
+          canvas: Primrose.DOM.cascadeElement(this.options.canvasElement, "canvas", HTMLCanvasElement),
+          context: this.options.context,
           antialias: false,
           alpha: true,
           logarithmicDepthBuffer: false
         });
-        this$1.renderer.autoClear = false;
-        this$1.renderer.sortObjects = true;
-        this$1.renderer.setClearColor(this$1.options.backgroundColor);
-        if (!this$1.renderer.domElement.parentElement) {
-          document.body.appendChild(this$1.renderer.domElement);
+        this.renderer.autoClear = false;
+        this.renderer.sortObjects = true;
+        this.renderer.setClearColor(this.options.backgroundColor);
+        if (!this.renderer.domElement.parentElement) {
+          document.body.appendChild(this.renderer.domElement);
         }
       }
 
-      this$1.options.fullscreenElement = document.querySelector(this$1.options.fullscreenElement) || this$1.renderer.domElement;
+      this.options.fullscreenElement = document.querySelector(this.options.fullscreenElement) || this.renderer.domElement;
 
       var maxTabIndex = 0,
         elementsWithTabIndex = document.querySelectorAll("[tabIndex]");
@@ -3093,75 +3080,75 @@ var BrowserEnvironment = (function (superclass) {
         maxTabIndex = Math.max(maxTabIndex, elementsWithTabIndex[i].tabIndex);
       }
 
-      this$1.renderer.domElement.tabIndex = maxTabIndex + 1;
-      this$1.renderer.domElement.addEventListener('webglcontextlost', this$1.stop, false);
-      this$1.renderer.domElement.addEventListener('webglcontextrestored', this$1.start, false);
+      this.renderer.domElement.tabIndex = maxTabIndex + 1;
+      this.renderer.domElement.addEventListener('webglcontextlost', this.stop, false);
+      this.renderer.domElement.addEventListener('webglcontextrestored', this.start, false);
 
-      this$1.input = new Primrose.Input.FPSInput(this$1.options.fullscreenElement, this$1.options);
-      this$1.input.addEventListener("zero", this$1.zero, false);
-      Primrose.Pointer.EVENTS.forEach(function (evt) { return this$1.input.addEventListener(evt, this$1.selectControl.bind(this$1), false); });
-      this$1.input.forward(this$1, Primrose.Pointer.EVENTS);
+      this.input = new Primrose.Input.FPSInput(this.options.fullscreenElement, this.options);
+      this.input.addEventListener("zero", this.zero, false);
+      Primrose.Pointer.EVENTS.forEach((evt) => this.input.addEventListener(evt, this.selectControl.bind(this), false));
+      this.input.forward(this, Primrose.Pointer.EVENTS);
 
 
 
-      this$1.composer = new THREE.EffectComposer(this$1.renderer);
+      this.composer = new THREE.EffectComposer(this.renderer);
 
-      var renderPass = new THREE.RenderPass(this$1.scene, this$1.camera);
-      this$1.composer.addPass(renderPass);
+      var renderPass = new THREE.RenderPass(this.scene, this.camera);
+      this.composer.addPass(renderPass);
 
-      if(this$1.options.antialias) {
-        this$1.fxaa = new THREE.ShaderPass(THREE.FXAAShader);
-        this$1.composer.addPass(this$1.fxaa);
+      if(this.options.antialias) {
+        this.fxaa = new THREE.ShaderPass(THREE.FXAAShader);
+        this.composer.addPass(this.fxaa);
       }
 
-      if(this$1.options.ambientOcclusion) {
-        this$1.ssao = new THREE.ShaderPass(THREE.SSAOShader);
-        this$1.composer.addPass(this$1.ssao);
+      if(this.options.ambientOcclusion) {
+        this.ssao = new THREE.ShaderPass(THREE.SSAOShader);
+        this.composer.addPass(this.ssao);
       }
 
-      this$1.fader = new THREE.ShaderPass(Primrose.ColorifyShader);
-      this$1.composer.addPass(this$1.fader);
+      this.fader = new THREE.ShaderPass(Primrose.ColorifyShader);
+      this.composer.addPass(this.fader);
 
 
       var copyPass = new THREE.ShaderPass( THREE.CopyShader );
       copyPass.renderToScreen = true;
-      this$1.composer.addPass(copyPass);
+      this.composer.addPass(copyPass);
 
 
-      var keyDown =  function (evt) {
-          if (this$1.input.VR.isPresenting) {
-            if (evt.keyCode === Primrose.Keys.ESCAPE && !this$1.input.VR.isPolyfilled) {
-              this$1.input.VR.cancel();
+      const keyDown =  (evt) => {
+          if (this.input.VR.isPresenting) {
+            if (evt.keyCode === Primrose.Keys.ESCAPE && !this.input.VR.isPolyfilled) {
+              this.input.VR.cancel();
             }
           }
 
-          if(!this$1.lockMovement){
-            this$1.input.Keyboard.dispatchEvent(evt);
+          if(!this.lockMovement){
+            this.input.Keyboard.dispatchEvent(evt);
           }
-          else if(this$1.currentControl){
-            this$1.currentControl.keyDown(evt);
+          else if(this.currentControl){
+            this.currentControl.keyDown(evt);
           }
-          this$1.emit("keydown", evt);
+          this.emit("keydown", evt);
         },
 
-        keyUp = function (evt) {
-          if(!this$1.lockMovement){
-            this$1.input.Keyboard.dispatchEvent(evt);
+        keyUp = (evt) => {
+          if(!this.lockMovement){
+            this.input.Keyboard.dispatchEvent(evt);
           }
-          else if(this$1.currentControl){
-            this$1.currentControl.keyUp(evt);
+          else if(this.currentControl){
+            this.currentControl.keyUp(evt);
           }
-          this$1.emit("keyup", evt);
+          this.emit("keyup", evt);
         },
 
-        withCurrentControl = function (name) {
-          return function (evt) {
-            if (this$1.currentControl) {
-              if (this$1.currentControl[name]) {
-                this$1.currentControl[name](evt);
+        withCurrentControl = (name) => {
+          return (evt) => {
+            if (this.currentControl) {
+              if (this.currentControl[name]) {
+                this.currentControl[name](evt);
               }
               else {
-                console.warn("Couldn't find %s on %o", name, this$1.currentControl);
+                console.warn("Couldn't find %s on %o", name, this.currentControl);
               }
             }
           };
@@ -3176,9 +3163,9 @@ var BrowserEnvironment = (function (superclass) {
       window.addEventListener("wheel", withCurrentControl("readWheel"), false);
 
 
-      var focusClipboard = function (evt) {
-        if (this$1.lockMovement) {
-          var cmdName = this$1.input.Keyboard.operatingSystem.makeCommandName(evt, this$1.input.Keyboard.codePage);
+      const focusClipboard = (evt) => {
+        if (this.lockMovement) {
+          var cmdName = this.input.Keyboard.operatingSystem.makeCommandName(evt, this.input.Keyboard.codePage);
           if (cmdName === "CUT" || cmdName === "COPY") {
             surrogate.style.display = "block";
             surrogate.focus();
@@ -3186,14 +3173,14 @@ var BrowserEnvironment = (function (superclass) {
         }
       };
 
-      var clipboardOperation = function (evt) {
-        if (this$1.currentControl) {
-          this$1.currentControl[evt.type + "SelectedText"](evt);
+      const clipboardOperation = (evt) => {
+        if (this.currentControl) {
+          this.currentControl[evt.type + "SelectedText"](evt);
           if (!evt.returnValue) {
             evt.preventDefault();
           }
           surrogate.style.display = "none";
-          this$1.currentControl.focus();
+          this.currentControl.focus();
         }
       };
 
@@ -3215,13 +3202,13 @@ var BrowserEnvironment = (function (superclass) {
       window.addEventListener("keydown", focusClipboard, true);
 
 
-      this$1.input.head.add(this$1.camera);
+      this.input.head.add(this.camera);
 
-      this$1.network = new Primrose.Network.Manager(this$1.input, this$1.audio, factories, this$1.options);
-      this$1.network.addEventListener("addavatar", addAvatar);
-      this$1.network.addEventListener("removeavatar", removeAvatar);
+      this.network = new Primrose.Network.Manager(this.input, this.audio, factories, this.options);
+      this.network.addEventListener("addavatar", addAvatar);
+      this.network.addEventListener("removeavatar", removeAvatar);
 
-      return this$1.input.ready;
+      return this.input.ready;
     });
 
     var frameCount = 0,
@@ -3233,10 +3220,10 @@ var BrowserEnvironment = (function (superclass) {
       dq1 = 0,
       dq2 = 0;
 
-    var checkQuality = function () {
-      if (this$1.options.autoScaleQuality &&
+    var checkQuality = () => {
+      if (this.options.autoScaleQuality &&
         // don't check quality if we've already hit the bottom of the barrel.
-        this$1.quality !== Quality.NONE) {
+        this.quality !== Quality.NONE) {
         if (frameTime < lastQualityChange + LEAD_TIME) {
           // wait a few seconds before testing quality
           frameTime = performance.now();
@@ -3260,11 +3247,11 @@ var BrowserEnvironment = (function (superclass) {
               // don't upgrade on mobile devices
               !isMobile &&
               // don't upgrade if the user says not to
-              this$1.options.autoRescaleQuality &&
+              this.options.autoRescaleQuality &&
               //good speed
               fps >= 60 &&
               // still room to grow
-              this$1.quality < Quality.MAXIMUM &&
+              this.quality < Quality.MAXIMUM &&
               // and the last change wasn't a downgrade
               dq2 !== -1) {
               dq1 = 1;
@@ -3273,7 +3260,7 @@ var BrowserEnvironment = (function (superclass) {
               dq1 = 0;
             }
             if (dq1 !== 0) {
-              this$1.quality += dq1;
+              this.quality += dq1;
             }
             lastQualityChange = now;
           }
@@ -3286,39 +3273,39 @@ var BrowserEnvironment = (function (superclass) {
         audioReady,
         documentReady
       ])
-      .then(function () {
-        this$1.renderer.domElement.style.cursor = "default";
-        this$1.input.VR.displays[0].DOMElement = this$1.renderer.domElement;
-        this$1.input.VR.connect(0);
-        this$1.emit("ready");
+      .then(() => {
+        this.renderer.domElement.style.cursor = "default";
+        this.input.VR.displays[0].DOMElement = this.renderer.domElement;
+        this.input.VR.connect(0);
+        this.emit("ready");
         window.dispatchEvent(new CustomEvent("vrbrowserenvironmentready", {
-          detail: this$1
+          detail: this
         }));
       });
 
-    this.start = function () {
+    this.start = () => {
       allReady
-        .then(function () {
-          this$1.audio.start();
+        .then(() => {
+          this.audio.start();
           lt = performance.now() * MILLISECONDS_TO_SECONDS;
           RAF(animate);
         });
     };
 
-    this.stop = function () {
+    this.stop = () => {
       if (currentTimerObject) {
-        currentTimerObject.cancelAnimationFrame(this$1.timer);
-        this$1.audio.stop();
-        this$1.timer = null;
+        currentTimerObject.cancelAnimationFrame(this.timer);
+        this.audio.stop();
+        this.timer = null;
       }
     };
 
     Object.defineProperties(this, {
       quality: {
-        get: function () { return this$1.options.quality; },
-        set: function (v) {
+        get: () => this.options.quality,
+        set: (v) => {
           if (0 <= v && v < PIXEL_SCALES.length) {
-            this$1.options.quality = v;
+            this.options.quality = v;
             resolutionScale = PIXEL_SCALES[v];
             if ("WebVRConfig" in window) {
               WebVRConfig.BUFFER_SCALE = resolutionScale;
@@ -3335,16 +3322,16 @@ var BrowserEnvironment = (function (superclass) {
       // overwrite the native alert functions so they can't be called while in
       // fullscreen VR mode.
 
-      var rerouteDialog = function (oldFunction, newFunction) {
+      var rerouteDialog = (oldFunction, newFunction) => {
         if (!newFunction) {
           newFunction = function () {};
         }
-        return function () {
-          if (this$1.input.VR.isPresenting) {
+        return () => {
+          if (this.input.VR.isPresenting) {
             newFunction();
           }
           else {
-            oldFunction.apply(window, arguments$1);
+            oldFunction.apply(window, arguments);
           }
         };
       };
@@ -3357,43 +3344,31 @@ var BrowserEnvironment = (function (superclass) {
     this.start();
   }
 
-  if ( superclass ) BrowserEnvironment.__proto__ = superclass;
-  BrowserEnvironment.prototype = Object.create( superclass && superclass.prototype );
-  BrowserEnvironment.prototype.constructor = BrowserEnvironment;
-
-  var prototypeAccessors = { lockMovement: {},displays: {} };
-
-  prototypeAccessors.lockMovement.get = function (){
+  get lockMovement(){
     return this.currentControl && this.currentControl.lockMovement;
-  };
+  }
 
-  BrowserEnvironment.prototype.connect = function connect (socket, userName) {
+  connect(socket, userName) {
     return this.network && this.network.connect(socket, userName);
-  };
+  }
 
-  BrowserEnvironment.prototype.disconnect = function disconnect () {
+  disconnect() {
     return this.network && this.network.disconnect();
-  };
+  }
 
-  prototypeAccessors.displays.get = function () {
+  get displays() {
     return this.input.VR.displays;
-  };
+  }
 
-  BrowserEnvironment.prototype.setAudioFromUser = function setAudioFromUser (userName, audioElement){
-    var this$1 = this;
-
+  setAudioFromUser(userName, audioElement){
     this.audioQueue.push([userName, audioElement]);
     if(this.network){
       while(this.audioQueue.length > 0){
-        this$1.network.setAudioFromUser.apply(this$1.network, this$1.audioQueue.shift());
+        this.network.setAudioFromUser.apply(this.network, this.audioQueue.shift());
       }
     }
-  };
-
-  Object.defineProperties( BrowserEnvironment.prototype, prototypeAccessors );
-
-  return BrowserEnvironment;
-}(Primrose.AbstractEventEmitter));
+  }
+}
 
 BrowserEnvironment.DEFAULTS = {
   antialias: true,
@@ -3432,12 +3407,12 @@ BrowserEnvironment.DEFAULTS = {
   // THREE.js scene, if one had already been created.
   scene: null
 };
-    if(typeof window !== "undefined") window.Primrose.BrowserEnvironment = BrowserEnvironment;
+  if(typeof window !== "undefined") window.Primrose.BrowserEnvironment = BrowserEnvironment;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\BrowserEnvironment.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\BrowserEnvironment.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\ButtonFactory.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\ButtonFactory.js
 (function(){var buttonCount = 0;
 
 pliny.class({
@@ -3491,13 +3466,13 @@ ButtonFactory.prototype.create = function (toggle) {
   var btn = new Primrose.Controls.Button3D(obj, name, this.options, toggle);
   return btn;
 };
-    if(typeof window !== "undefined") window.Primrose.ButtonFactory = ButtonFactory;
+  if(typeof window !== "undefined") window.Primrose.ButtonFactory = ButtonFactory;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\ButtonFactory.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\ButtonFactory.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\ColorifyShader.js
-(function(){var ColorifyShader = {
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\ColorifyShader.js
+(function(){const ColorifyShader = {
 
   uniforms: {
     "tDiffuse": { value: null },
@@ -3526,36 +3501,36 @@ void main() {\n\
 }"
 
 };
-    if(typeof window !== "undefined") window.Primrose.ColorifyShader = ColorifyShader;
+  if(typeof window !== "undefined") window.Primrose.ColorifyShader = ColorifyShader;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\ColorifyShader.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\ColorifyShader.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Controls.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Controls.js
 (function(){pliny.namespace({
   name: "Controls",
   parent: "Primrose",
   description: "Various 3D control objects."
 });
-var Controls = {};
-    if(typeof window !== "undefined") window.Primrose.Controls = Controls;
+const Controls = {};
+  if(typeof window !== "undefined") window.Primrose.Controls = Controls;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Controls.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Controls.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\DOM.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\DOM.js
 (function(){pliny.namespace({
   parent: "Primrose",
   name: "DOM",
   description: "A few functions for manipulating DOM."
 });
-var DOM = {};
-    if(typeof window !== "undefined") window.Primrose.DOM = DOM;
+const DOM = {};
+  if(typeof window !== "undefined") window.Primrose.DOM = DOM;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\DOM.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\DOM.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Entity.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Entity.js
 (function(){var entityKeys = [],
   entities = new WeakMap();
 
@@ -3564,640 +3539,629 @@ pliny.class({
     name: "Entity",
     description: "The Entity class is the parent class for all 3D controls. It manages a unique ID for every new control, the focus state of the control, and performs basic conversions from DOM elements to the internal Control format."
 });
-var Entity = function Entity(id) {
-  this.id = id;
+class Entity {
 
-  pliny.property({
-    parent: "Primrose.Entity",
-    name: "parent ",
-    type: "Primrose.Entity",
-    description: "The parent element of this element, if this element has been added as a child to another element."
-  });
-  this.parent = null;
+  static registerEntity(e) {
+    pliny.function({
+      parent: "Primrose.Entity",
+      name: "registerEntity",
+      description: "Register an entity to be able to receive eyeBlank events.",
+      parameters: [{
+        name: "e",
+        type: "Primrose.Entity",
+        description: "The entity to register."
+      }]
+    });
+    entities.set(e._idObj, e);
+    entityKeys.push(e._idObj);
+    e.addEventListener("_idchanged", (evt) => {
+      entityKeys.splice(entityKeys.indexOf(evt.oldID), 1);
+      entities.delete(evt.oldID);
+      entities.set(evt.entity._idObj, evt.entity);
+      entityKeys.push(evt.entity._idObj);
+    }, false);
+  }
 
-  pliny.property({
-    parent: "Primrose.Entity",
-    name: "children",
-    type: "Array",
-    description: "The child elements of this element."
-  });
-  this.children = [];
+  static eyeBlankAll(eye) {
+    pliny.function({
+      parent: "Primrose.Entity",
+      name: "eyeBlankAll",
+      description: "Trigger the eyeBlank event for all registered entities.",
+      parameters: [{
+        name: "eye",
+        type: "Number",
+        description: "The eye to switch to: -1 for left, +1 for right."
+      }],
+    });
+    entityKeys.forEach((id) => {
+      entities.get(id)
+        .eyeBlank(eye);
+    });
+  }
 
-  pliny.property({
-    parent: "Primrose.Entity",
-    name: "focused",
-    type: "Boolean",
-    description: "A flag indicating if the element, or a child element within it, has received focus from the user."
-  });
-  this.focused = false;
+  constructor(id) {
+    this.id = id;
 
-  pliny.property({
-    parent: "Primrose.Entity",
-    name: "focusable",
-    type: "Boolean",
-    description: "A flag indicating if the element, or any child elements within it, is capable of receiving focus."
-  });
-  this.focusable = true;
-
-  pliny.property({
-    parent: "Primrose.Entity",
-    name: "listeners",
-    type: "Object",
-    description: "The event listener container, holding the callbacks to trigger for each type of event."
-  });
-  this.listeners = {
-    focus: [],
-    blur: [],
-    click: [],
-    keydown: [],
-    keyup: [],
-    paste: [],
-    copy: [],
-    cut: [],
-    wheel: [],
-    _idchanged: []
-  };
-
-  pliny.event({
-    parent: "Primrose.Entity",
-    name: "focus",
-    description: "If the element is focusable, occurs when the user clicks on an element for the first time, or when a program calls the `focus()` method."
-  });
-
-  pliny.event({
-    parent: "Primrose.Entity",
-    name: "blur",
-    description: "If the element is focused (which implies it is also focusable), occurs when the user clicks off of an element, or when a program calls the `blur()` method."
-  });
-
-  pliny.event({
-    parent: "Primrose.Entity",
-    name: "click",
-    description: "Occurs whenever the user clicks on an element."
-  });
-
-  pliny.event({
-    parent: "Primrose.Entity",
-    name: "keydown",
-    description: "Occurs when the user pushes a key down while focused on the element."
-  });
-
-  pliny.event({
-    parent: "Primrose.Entity",
-    name: "keyup",
-    description: "Occurs when the user releases a key while focused on the element."
-  });
-
-  pliny.event({
-    parent: "Primrose.Entity",
-    name: "paste",
-    description: "Occurs when the user activates the clipboard's `paste` command while focused on the element."
-  });
-
-  pliny.event({
-    parent: "Primrose.Entity",
-    name: "cut",
-    description: "Occurs when the user activates the clipboard's `cut` command while focused on the element."
-  });
-
-  pliny.event({
-    parent: "Primrose.Entity",
-    name: "copy",
-    description: "Occurs when the user activates the clipboard's `copy` command while focused on the element."
-  });
-
-  pliny.event({
-    parent: "Primrose.Entity",
-    name: "wheel",
-    description: "Occurs when the user scrolls the mouse wheel while focused on the element."
-  });
-};
-
-var prototypeAccessors = { id: {},theme: {},lockMovement: {},focusedElement: {} };
-
-Entity.registerEntity = function registerEntity (e) {
-  pliny.function({
-    parent: "Primrose.Entity",
-    name: "registerEntity",
-    description: "Register an entity to be able to receive eyeBlank events.",
-    parameters: [{
-      name: "e",
+    pliny.property({
+      parent: "Primrose.Entity",
+      name: "parent ",
       type: "Primrose.Entity",
-      description: "The entity to register."
-    }]
-  });
-  entities.set(e._idObj, e);
-  entityKeys.push(e._idObj);
-  e.addEventListener("_idchanged", function (evt) {
-    entityKeys.splice(entityKeys.indexOf(evt.oldID), 1);
-    entities.delete(evt.oldID);
-    entities.set(evt.entity._idObj, evt.entity);
-    entityKeys.push(evt.entity._idObj);
-  }, false);
-};
-
-Entity.eyeBlankAll = function eyeBlankAll (eye) {
-  pliny.function({
-    parent: "Primrose.Entity",
-    name: "eyeBlankAll",
-    description: "Trigger the eyeBlank event for all registered entities.",
-    parameters: [{
-      name: "eye",
-      type: "Number",
-      description: "The eye to switch to: -1 for left, +1 for right."
-    }],
-  });
-  entityKeys.forEach(function (id) {
-    entities.get(id)
-      .eyeBlank(eye);
-  });
-};
-
-prototypeAccessors.id.get = function () {
-  pliny.property({
-    parent: "Primrose.Entity",
-    name: "id ",
-    type: "String",
-    description: "Get or set the id for the control."
-  });
-  return this._id;
-};
-
-prototypeAccessors.id.set = function (v) {
-  if(this._id !== v){
-    var oldID = this._idObj;
-    this._id = v;
-    this._idObj = new Object(v);
-    // this `_idchanged` event is necessary to update the related ID in the WeakMap of entities for eye-blanking.
-    emit.call(this, "_idchanged", {
-      oldID: oldID,
-      entity: this
+      description: "The parent element of this element, if this element has been added as a child to another element."
     });
-  }
-};
+    this.parent = null;
 
-Entity.prototype.addEventListener = function addEventListener (event, func) {
-  pliny.method({
-    parent: "Primrose.Entity",
-    name: "addEventListener",
-    description: "Adding an event listener registers a function as being ready to receive events.",
-    parameters: [{
-      name: "evt",
-      type: "String",
-      description: "The name of the event for which we are listening."
-    }, {
-      name: "thunk",
-      type: "Function",
-      description: "The callback to fire when the event occurs."
-    }],
-    examples: [{
-      name: "Add an event listener.",
-      description: "The `addEventListener()` method operates nearly identically to the method of the same name on DOM elements.\n\
-\n\
-grammar(\"JavaScript\");\n\
-var txt = new Primrose.Text.Controls.TextBox();\n\
-txt.addEventListener(\"mousemove\", console.log.bind(console, \"mouse move\"));\n\
-txt.addEventListener(\"keydown\", console.log.bind(console, \"key down\"));"
-    }]
-  });
-  if (this.listeners[event]) {
-    this.listeners[event].push(func);
-  }
-};
-
-Entity.prototype.removeEventListener = function removeEventListener (event, func) {
-  pliny.method({
-    parent: "Primrose.Entity",
-    name: "removeEventListener",
-    description: "Removing an event listener so that it no longer receives events from this object. Note that it must be the same function instance that was used when the event listener was added.",
-    parameters: [{
-      name: "evt",
-      type: "String",
-      description: "The name of the event from which we are removing."
-    }, {
-      name: "thunk",
-      type: "Function",
-      description: "The callback to remove."
-    }],
-    examples: [{
-      name: "Remove an event listener.",
-      description: "The `removeEventListener()` method operates nearly identically to the method of the same name on DOM elements.\n\
-\n\
-grammar(\"JavaScript\");\n\
-var txt = new Primrose.Text.Controls.TextBox(),\n\
-func = console.log.bind(console, \"mouse move\");\n\
-txt.addEventListener(\"mousemove\", func);\n\
-txt.removeEventListener(\"mousemove\", func);"
-    }]
-  });
-  var evts = this.listeners[event];
-  if (evt) {
-    var i = evts.indexOf(func);
-    if (0 <= i && i < evts.length) {
-      evts.splice(i, 1);
-    }
-  }
-};
-
-Entity.prototype.focus = function focus () {
-  pliny.method({
-    parent: "Primrose.Entity",
-    name: "focus",
-    description: "If the control is focusable, sets the focus property of the control, does not change the focus property of any other control.",
-    examples: [{
-      name: "Focus on one control, blur all the rest",
-      description: "When we have a list of controls and we are trying to track focus between them all, we must coordinate calls between `focus()` and `blur()`.\n\
-\n\
-grammar(\"JavaScript\");\n\
-var ctrls = [\n\
-new Primrose.Text.Controls.TextBox(),\n\
-new Primrose.Text.Controls.TextBox(),\n\
-new Primrose.Text.Button()\n\
-];\n\
-\n\
-function focusOn(id){\n\
-  for(var i = 0; i < ctrls.length; ++i){\n\
-    var c = ctrls[i];\n\
-    if(c.controlID === id){\n\
-      c.focus();\n\
-    }\n\
-    else{\n\
-      c.blur();\n\
-    }\n\
-  }\n\
-}"
-    }]
-  });
-  if (this.focusable) {
-    this.focused = true;
-    emit.call(this, "focus", {
-      target: this
+    pliny.property({
+      parent: "Primrose.Entity",
+      name: "children",
+      type: "Array",
+      description: "The child elements of this element."
     });
-  }
-};
+    this.children = [];
 
-Entity.prototype.blur = function blur () {
-    var this$1 = this;
-
-  pliny.method({
-    parent: "Primrose.Entity",
-    name: "blur",
-    description: "If the element is focused, unsets the focus property of the control and all child controls. Does not change the focus property of any parent or sibling controls.",
-    examples: [{
-      name: "Focus on one control, blur all the rest",
-      description: "When we have a list of controls and we are trying to track focus between them all, we must coordinate calls between `focus()` and `blur()`.\n\
-\n\
-grammar(\"JavaScript\");\n\
-var ctrls = [\n\
-new Primrose.Text.Controls.TextBox(),\n\
-new Primrose.Text.Controls.TextBox(),\n\
-new Primrose.Text.Button()\n\
-];\n\
-\n\
-function focusOn(id){\n\
-  for(var i = 0; i < ctrls.length; ++i){\n\
-    var c = ctrls[i];\n\
-    if(c.controlID === id){\n\
-      c.focus();\n\
-    }\n\
-    else{\n\
-      c.blur();\n\
-    }\n\
-  }\n\
-}"
-    }]
-  });
-  if (this.focused) {
+    pliny.property({
+      parent: "Primrose.Entity",
+      name: "focused",
+      type: "Boolean",
+      description: "A flag indicating if the element, or a child element within it, has received focus from the user."
+    });
     this.focused = false;
-    for (var i = 0; i < this.children.length; ++i) {
-      if (this$1.children[i].focused) {
-        this$1.children[i].blur();
-      }
-    }
-    emit.call(this, "blur", {
-      target: this
+
+    pliny.property({
+      parent: "Primrose.Entity",
+      name: "focusable",
+      type: "Boolean",
+      description: "A flag indicating if the element, or any child elements within it, is capable of receiving focus."
+    });
+    this.focusable = true;
+
+    pliny.property({
+      parent: "Primrose.Entity",
+      name: "listeners",
+      type: "Object",
+      description: "The event listener container, holding the callbacks to trigger for each type of event."
+    });
+    this.listeners = {
+      focus: [],
+      blur: [],
+      click: [],
+      keydown: [],
+      keyup: [],
+      paste: [],
+      copy: [],
+      cut: [],
+      wheel: [],
+      _idchanged: []
+    };
+
+    pliny.event({
+      parent: "Primrose.Entity",
+      name: "focus",
+      description: "If the element is focusable, occurs when the user clicks on an element for the first time, or when a program calls the `focus()` method."
+    });
+
+    pliny.event({
+      parent: "Primrose.Entity",
+      name: "blur",
+      description: "If the element is focused (which implies it is also focusable), occurs when the user clicks off of an element, or when a program calls the `blur()` method."
+    });
+
+    pliny.event({
+      parent: "Primrose.Entity",
+      name: "click",
+      description: "Occurs whenever the user clicks on an element."
+    });
+
+    pliny.event({
+      parent: "Primrose.Entity",
+      name: "keydown",
+      description: "Occurs when the user pushes a key down while focused on the element."
+    });
+
+    pliny.event({
+      parent: "Primrose.Entity",
+      name: "keyup",
+      description: "Occurs when the user releases a key while focused on the element."
+    });
+
+    pliny.event({
+      parent: "Primrose.Entity",
+      name: "paste",
+      description: "Occurs when the user activates the clipboard's `paste` command while focused on the element."
+    });
+
+    pliny.event({
+      parent: "Primrose.Entity",
+      name: "cut",
+      description: "Occurs when the user activates the clipboard's `cut` command while focused on the element."
+    });
+
+    pliny.event({
+      parent: "Primrose.Entity",
+      name: "copy",
+      description: "Occurs when the user activates the clipboard's `copy` command while focused on the element."
+    });
+
+    pliny.event({
+      parent: "Primrose.Entity",
+      name: "wheel",
+      description: "Occurs when the user scrolls the mouse wheel while focused on the element."
     });
   }
-};
 
-Entity.prototype.appendChild = function appendChild (child) {
-  pliny.method({
-    parent: "Primrose.Entity",
-    name: "appendChild",
-    description: "Adds an Entity as a child entity of this entity.",
-    parameters: [{
-      name: "child",
-      type: "Primrose.Entity",
-      description: "The object to add. Will only succeed if `child.parent` is not set to a value."
-    }],
-    examples: [{
-      name: "Add an entity to another entity",
-      description: "Entities can be arranged in parent-child relationships.\n\
+  get id() {
+    pliny.property({
+      parent: "Primrose.Entity",
+      name: "id ",
+      type: "String",
+      description: "Get or set the id for the control."
+    });
+    return this._id;
+  }
+
+  set id(v) {
+    if(this._id !== v){
+      var oldID = this._idObj;
+      this._id = v;
+      this._idObj = new Object(v);
+      // this `_idchanged` event is necessary to update the related ID in the WeakMap of entities for eye-blanking.
+      emit.call(this, "_idchanged", {
+        oldID: oldID,
+        entity: this
+      });
+    }
+  }
+
+  addEventListener(event, func) {
+    pliny.method({
+      parent: "Primrose.Entity",
+      name: "addEventListener",
+      description: "Adding an event listener registers a function as being ready to receive events.",
+      parameters: [{
+        name: "evt",
+        type: "String",
+        description: "The name of the event for which we are listening."
+      }, {
+        name: "thunk",
+        type: "Function",
+        description: "The callback to fire when the event occurs."
+      }],
+      examples: [{
+        name: "Add an event listener.",
+        description: "The `addEventListener()` method operates nearly identically to the method of the same name on DOM elements.\n\
 \n\
-grammar(\"JavaScript\");\n\
-var a = new Primrose.Entity(),\n\
-b = new Primrose.Entity();\n\
-a.appendChild(b);\n\
-console.assert(a.children.length === 1);\n\
-console.assert(a.children[0] === b);\n\
-console.assert(b.parent === a);"
-    }]
-  });
-  if (child && !child.parent) {
-    child.parent = this;
-    this.children.push(child);
+  grammar(\"JavaScript\");\n\
+  var txt = new Primrose.Text.Controls.TextBox();\n\
+  txt.addEventListener(\"mousemove\", console.log.bind(console, \"mouse move\"));\n\
+  txt.addEventListener(\"keydown\", console.log.bind(console, \"key down\"));"
+      }]
+    });
+    if (this.listeners[event]) {
+      this.listeners[event].push(func);
+    }
   }
-};
 
-Entity.prototype.removeChild = function removeChild (child) {
-  pliny.method({
-    parent: "Primrose.Entity",
-    name: "removeChild",
-    description: "Removes an Entity from another Entity of this entity.",
-    parameters: [{
-      name: "child",
-      type: "Primrose.Entity",
-      description: "The object to remove. Will only succeed if `child.parent` is this object."
-    }],
-    examples: [{
-      name: "Remove an entity from another entity",
-      description: "Entities can be arranged in parent-child relationships.\n\
+  removeEventListener(event, func) {
+    pliny.method({
+      parent: "Primrose.Entity",
+      name: "removeEventListener",
+      description: "Removing an event listener so that it no longer receives events from this object. Note that it must be the same function instance that was used when the event listener was added.",
+      parameters: [{
+        name: "evt",
+        type: "String",
+        description: "The name of the event from which we are removing."
+      }, {
+        name: "thunk",
+        type: "Function",
+        description: "The callback to remove."
+      }],
+      examples: [{
+        name: "Remove an event listener.",
+        description: "The `removeEventListener()` method operates nearly identically to the method of the same name on DOM elements.\n\
 \n\
-grammar(\"JavaScript\");\n\
-var a = new Primrose.Entity(),\n\
-b = new Primrose.Entity();\n\
-a.appendChild(b);\n\
-console.assert(a.children.length === 1);\n\
-console.assert(a.children[0] === b);\n\
-console.assert(b.parent === a);\n\
-a.removeChild(b);\n\
-console.assert(a.children.length === 0)\n\
-console.assert(b.parent === null);"
-    }]
-  });
-  var i = this.children.indexOf(child);
-  if (0 <= i && i < this.children.length) {
-    this.children.splice(i, 1);
-    child.parent = null;
-  }
-};
-
-prototypeAccessors.theme.get = function () {
-  pliny.property({
-    parent: "Primrose.Entity",
-    name: "theme",
-    type: "Primrose.Text.Themes.*",
-    description: "Get or set the theme used for rendering text on any controls in the control tree."
-  });
-  return null;
-};
-
-prototypeAccessors.theme.set = function (v) {
-    var this$1 = this;
-
-  for (var i = 0; i < this.children.length; ++i) {
-    this$1.children[i].theme = v;
-  }
-};
-
-prototypeAccessors.lockMovement.get = function () {
-    var this$1 = this;
-
-  pliny.property({
-    parent: "Primrose.Entity",
-    name: "lockMovement",
-    type: "Boolean",
-    description: "Recursively searches the deepest leaf-node of the control graph for a control that has its `lockMovement` property set to `true`, indicating that key events should not be used to navigate the user, because they are being interpreted as typing commands."
-  });
-  var lock = false;
-  for (var i = 0; i < this.children.length && !lock; ++i) {
-    lock = lock || this$1.children[i].lockMovement;
-  }
-  return lock;
-};
-
-prototypeAccessors.focusedElement.get = function () {
-  pliny.property({
-    parent: "Primrose.Entity",
-    name: "focusedElement",
-    type: "Primrose.Entity",
-    description: "Searches the deepest leaf-node of the control graph for a control that has its `focused` property set to `true`."
-  });
-  var result = null,
-    head = this;
-  while (head && head.focused) {
-    result = head;
-    var children = head.children;
-    head = null;
-    for (var i = 0; i < children.length; ++i) {
-      var child = children[i];
-      if (child.focused) {
-        head = child;
+  grammar(\"JavaScript\");\n\
+  var txt = new Primrose.Text.Controls.TextBox(),\n\
+  func = console.log.bind(console, \"mouse move\");\n\
+  txt.addEventListener(\"mousemove\", func);\n\
+  txt.removeEventListener(\"mousemove\", func);"
+      }]
+    });
+    const evts = this.listeners[event];
+    if (evt) {
+      const i = evts.indexOf(func);
+      if (0 <= i && i < evts.length) {
+        evts.splice(i, 1);
       }
     }
   }
-  return result;
-};
 
-Entity.prototype.eyeBlank = function eyeBlank (eye) {
-    var this$1 = this;
-
-  pliny.method({
-    parent: "Primrose.Entity",
-    name: "eyeBlank",
-    parameters: [{
-      name: "eye",
-      type: "Number",
-      description: "The eye to switch to: -1 for left, +1 for right."
-    }],
-    description: "Instructs any stereoscopically rendered surfaces to change their rendering offset."
-  });
-  for (var i = 0; i < this.children.length; ++i) {
-    this$1.children[i].eyeBlank(eye);
+  focus() {
+    pliny.method({
+      parent: "Primrose.Entity",
+      name: "focus",
+      description: "If the control is focusable, sets the focus property of the control, does not change the focus property of any other control.",
+      examples: [{
+        name: "Focus on one control, blur all the rest",
+        description: "When we have a list of controls and we are trying to track focus between them all, we must coordinate calls between `focus()` and `blur()`.\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var ctrls = [\n\
+  new Primrose.Text.Controls.TextBox(),\n\
+  new Primrose.Text.Controls.TextBox(),\n\
+  new Primrose.Text.Button()\n\
+  ];\n\
+  \n\
+  function focusOn(id){\n\
+    for(var i = 0; i < ctrls.length; ++i){\n\
+      var c = ctrls[i];\n\
+      if(c.controlID === id){\n\
+        c.focus();\n\
+      }\n\
+      else{\n\
+        c.blur();\n\
+      }\n\
+    }\n\
+  }"
+      }]
+    });
+    if (this.focusable) {
+      this.focused = true;
+      emit.call(this, "focus", {
+        target: this
+      });
+    }
   }
-};
 
-Entity.prototype._forFocusedChild = function _forFocusedChild (name, evt) {
-  var elem = this.focusedElement;
-  if (elem && elem !== this) {
-    elem[name](evt);
+  blur() {
+    pliny.method({
+      parent: "Primrose.Entity",
+      name: "blur",
+      description: "If the element is focused, unsets the focus property of the control and all child controls. Does not change the focus property of any parent or sibling controls.",
+      examples: [{
+        name: "Focus on one control, blur all the rest",
+        description: "When we have a list of controls and we are trying to track focus between them all, we must coordinate calls between `focus()` and `blur()`.\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var ctrls = [\n\
+  new Primrose.Text.Controls.TextBox(),\n\
+  new Primrose.Text.Controls.TextBox(),\n\
+  new Primrose.Text.Button()\n\
+  ];\n\
+  \n\
+  function focusOn(id){\n\
+    for(var i = 0; i < ctrls.length; ++i){\n\
+      var c = ctrls[i];\n\
+      if(c.controlID === id){\n\
+        c.focus();\n\
+      }\n\
+      else{\n\
+        c.blur();\n\
+      }\n\
+    }\n\
+  }"
+      }]
+    });
+    if (this.focused) {
+      this.focused = false;
+      for (var i = 0; i < this.children.length; ++i) {
+        if (this.children[i].focused) {
+          this.children[i].blur();
+        }
+      }
+      emit.call(this, "blur", {
+        target: this
+      });
+    }
   }
-};
 
-Entity.prototype.startUV = function startUV (evt) {
-  pliny.method({
-    parent: "Primrose.Entity",
-    name: "startUV",
-    parameters: [{
-      name: "evt",
-      type: "Event",
-      description: "The pointer event to read"
-    }],
-    description: "Hooks up to the window's `mouseDown` and `touchStart` events, with coordinates translated to tangent-space UV coordinates, and propagates it to any of its focused children."
-  });
-  this._forFocusedChild("startUV", evt);
-};
-
-Entity.prototype.moveUV = function moveUV (evt) {
-  pliny.method({
-    parent: "Primrose.Entity",
-    name: "moveUV",
-    parameters: [{
-      name: "evt",
-      type: "Event",
-      description: "The pointer event to read"
-    }],
-    description: "Hooks up to the window's `mouseMove` and `touchMove` events, with coordinates translated to tangent-space UV coordinates, and propagates it to any of its focused children."
-  });
-  this._forFocusedChild("moveUV", evt);
-};
-
-Entity.prototype.endPointer = function endPointer (evt) {
-  pliny.method({
-    parent: "Primrose.Entity",
-    name: "endPointer",
-    description: "Hooks up to the window's `mouseUp` and `toucheEnd` events and propagates it to any of its focused children."
-  });
-  this._forFocusedChild("endPointer", evt);
-};
-
-Entity.prototype.dispatchEvent = function dispatchEvent (evt) {
-    var this$1 = this;
-
-  switch(evt.type){
-    case "pointerstart":
-      this.startUV(evt.hit.point);
-    break;
-    case "pointerend":
-      this.endPointer(evt);
-    break;
-    case "pointermove":
-    case "gazemove":
-      this.moveUV(evt.hit.point);
-    break;
-    case "gazecomplete":
-      this.startUV(evt.hit.point);
-      setTimeout(function () { return this$1.endPointer(evt); }, 100);
-    break;
+  appendChild(child) {
+    pliny.method({
+      parent: "Primrose.Entity",
+      name: "appendChild",
+      description: "Adds an Entity as a child entity of this entity.",
+      parameters: [{
+        name: "child",
+        type: "Primrose.Entity",
+        description: "The object to add. Will only succeed if `child.parent` is not set to a value."
+      }],
+      examples: [{
+        name: "Add an entity to another entity",
+        description: "Entities can be arranged in parent-child relationships.\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var a = new Primrose.Entity(),\n\
+  b = new Primrose.Entity();\n\
+  a.appendChild(b);\n\
+  console.assert(a.children.length === 1);\n\
+  console.assert(a.children[0] === b);\n\
+  console.assert(b.parent === a);"
+      }]
+    });
+    if (child && !child.parent) {
+      child.parent = this;
+      this.children.push(child);
+    }
   }
-};
 
-Entity.prototype.keyDown = function keyDown (evt) {
-  pliny.method({
-    parent: "Primrose.Entity",
-    name: "keyDown",
-    parameters: [{
-      name: "evt",
-      type: "Event",
-      description: "The key event to read"
-    }],
-    description: "Hooks up to the window's `keyDown` event and propagates it to any of its focused children."
-  });
-  this._forFocusedChild("keyDown", evt);
-};
+  removeChild(child) {
+    pliny.method({
+      parent: "Primrose.Entity",
+      name: "removeChild",
+      description: "Removes an Entity from another Entity of this entity.",
+      parameters: [{
+        name: "child",
+        type: "Primrose.Entity",
+        description: "The object to remove. Will only succeed if `child.parent` is this object."
+      }],
+      examples: [{
+        name: "Remove an entity from another entity",
+        description: "Entities can be arranged in parent-child relationships.\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var a = new Primrose.Entity(),\n\
+  b = new Primrose.Entity();\n\
+  a.appendChild(b);\n\
+  console.assert(a.children.length === 1);\n\
+  console.assert(a.children[0] === b);\n\
+  console.assert(b.parent === a);\n\
+  a.removeChild(b);\n\
+  console.assert(a.children.length === 0)\n\
+  console.assert(b.parent === null);"
+      }]
+    });
+    const i = this.children.indexOf(child);
+    if (0 <= i && i < this.children.length) {
+      this.children.splice(i, 1);
+      child.parent = null;
+    }
+  }
 
-Entity.prototype.keyUp = function keyUp (evt) {
-  pliny.method({
-    parent: "Primrose.Entity",
-    name: "keyUp",
-    parameters: [{
-      name: "evt",
-      type: "Event",
-      description: "The key event to read"
-    }],
-    description: "Hooks up to the window's `keyUp` event and propagates it to any of its focused children."
-  });
-  this._forFocusedChild("keyUp", evt);
-};
+  get theme() {
+    pliny.property({
+      parent: "Primrose.Entity",
+      name: "theme",
+      type: "Primrose.Text.Themes.*",
+      description: "Get or set the theme used for rendering text on any controls in the control tree."
+    });
+    return null;
+  }
 
-Entity.prototype.readClipboard = function readClipboard (evt) {
-  pliny.method({
-    parent: "Primrose.Entity",
-    name: "readClipboard",
-    parameters: [{
-      name: "evt",
-      type: "Event",
-      description: "The clipboard event to read"
-    }],
-    description: "Hooks up to the clipboard's `paste` event and propagates it to any of its focused children."
-  });
-  this._forFocusedChild("readClipboard", evt);
-};
+  set theme(v) {
+    for (var i = 0; i < this.children.length; ++i) {
+      this.children[i].theme = v;
+    }
+  }
 
-Entity.prototype.copySelectedText = function copySelectedText (evt) {
-  pliny.method({
-    parent: "Primrose.Entity",
-    name: "copySelectedText",
-    parameters: [{
-      name: "evt",
-      type: "Event",
-      description: "The clipboard event to read"
-    }],
-    description: "Hooks up to the clipboard's `copy` event and propagates it to any of its focused children."
-  });
-  this._forFocusedChild("copySelectedText", evt);
-};
+  get lockMovement() {
+    pliny.property({
+      parent: "Primrose.Entity",
+      name: "lockMovement",
+      type: "Boolean",
+      description: "Recursively searches the deepest leaf-node of the control graph for a control that has its `lockMovement` property set to `true`, indicating that key events should not be used to navigate the user, because they are being interpreted as typing commands."
+    });
+    var lock = false;
+    for (var i = 0; i < this.children.length && !lock; ++i) {
+      lock = lock || this.children[i].lockMovement;
+    }
+    return lock;
+  }
 
-Entity.prototype.cutSelectedText = function cutSelectedText (evt) {
-  pliny.method({
-    parent: "Primrose.Entity",
-    name: "cutSelectedText",
-    parameters: [{
-      name: "evt",
-      type: "Event",
-      description: "The clipboard event to read"
-    }],
-    description: "Hooks up to the clipboard's `cut` event and propagates it to any of its focused children."
-  });
-  this._forFocusedChild("cutSelectedText", evt);
-};
+  get focusedElement() {
+    pliny.property({
+      parent: "Primrose.Entity",
+      name: "focusedElement",
+      type: "Primrose.Entity",
+      description: "Searches the deepest leaf-node of the control graph for a control that has its `focused` property set to `true`."
+    });
+    var result = null,
+      head = this;
+    while (head && head.focused) {
+      result = head;
+      var children = head.children;
+      head = null;
+      for (var i = 0; i < children.length; ++i) {
+        var child = children[i];
+        if (child.focused) {
+          head = child;
+        }
+      }
+    }
+    return result;
+  }
 
-Entity.prototype.readWheel = function readWheel (evt) {
-  pliny.method({
-    parent: "Primrose.Entity",
-    name: "readWheel",
-    parameters: [{
-      name: "evt",
-      type: "Event",
-      description: "The wheel event to read"
-    }],
-    description: "Hooks up to the window's `wheel` event and propagates it to any of its focused children."
-  });
-  this._forFocusedChild("readWheel", evt);
-};
+  eyeBlank(eye) {
+    pliny.method({
+      parent: "Primrose.Entity",
+      name: "eyeBlank",
+      parameters: [{
+        name: "eye",
+        type: "Number",
+        description: "The eye to switch to: -1 for left, +1 for right."
+      }],
+      description: "Instructs any stereoscopically rendered surfaces to change their rendering offset."
+    });
+    for (var i = 0; i < this.children.length; ++i) {
+      this.children[i].eyeBlank(eye);
+    }
+  }
 
-Object.defineProperties( Entity.prototype, prototypeAccessors );
-    if(typeof window !== "undefined") window.Primrose.Entity = Entity;
+  _forFocusedChild(name, evt) {
+    var elem = this.focusedElement;
+    if (elem && elem !== this) {
+      elem[name](evt);
+    }
+  }
+
+  startUV(evt) {
+    pliny.method({
+      parent: "Primrose.Entity",
+      name: "startUV",
+      parameters: [{
+        name: "evt",
+        type: "Event",
+        description: "The pointer event to read"
+      }],
+      description: "Hooks up to the window's `mouseDown` and `touchStart` events, with coordinates translated to tangent-space UV coordinates, and propagates it to any of its focused children."
+    });
+    this._forFocusedChild("startUV", evt);
+  }
+
+  moveUV(evt) {
+    pliny.method({
+      parent: "Primrose.Entity",
+      name: "moveUV",
+      parameters: [{
+        name: "evt",
+        type: "Event",
+        description: "The pointer event to read"
+      }],
+      description: "Hooks up to the window's `mouseMove` and `touchMove` events, with coordinates translated to tangent-space UV coordinates, and propagates it to any of its focused children."
+    });
+    this._forFocusedChild("moveUV", evt);
+  }
+
+  endPointer(evt) {
+    pliny.method({
+      parent: "Primrose.Entity",
+      name: "endPointer",
+      description: "Hooks up to the window's `mouseUp` and `toucheEnd` events and propagates it to any of its focused children."
+    });
+    this._forFocusedChild("endPointer", evt);
+  }
+
+  dispatchEvent(evt) {
+    switch(evt.type){
+      case "pointerstart":
+        this.startUV(evt.hit.point);
+      break;
+      case "pointerend":
+        this.endPointer(evt);
+      break;
+      case "pointermove":
+      case "gazemove":
+        this.moveUV(evt.hit.point);
+      break;
+      case "gazecomplete":
+        this.startUV(evt.hit.point);
+        setTimeout(() => this.endPointer(evt), 100);
+      break;
+    }
+  }
+
+  keyDown(evt) {
+    pliny.method({
+      parent: "Primrose.Entity",
+      name: "keyDown",
+      parameters: [{
+        name: "evt",
+        type: "Event",
+        description: "The key event to read"
+      }],
+      description: "Hooks up to the window's `keyDown` event and propagates it to any of its focused children."
+    });
+    this._forFocusedChild("keyDown", evt);
+  }
+
+  keyUp(evt) {
+    pliny.method({
+      parent: "Primrose.Entity",
+      name: "keyUp",
+      parameters: [{
+        name: "evt",
+        type: "Event",
+        description: "The key event to read"
+      }],
+      description: "Hooks up to the window's `keyUp` event and propagates it to any of its focused children."
+    });
+    this._forFocusedChild("keyUp", evt);
+  }
+
+  readClipboard(evt) {
+    pliny.method({
+      parent: "Primrose.Entity",
+      name: "readClipboard",
+      parameters: [{
+        name: "evt",
+        type: "Event",
+        description: "The clipboard event to read"
+      }],
+      description: "Hooks up to the clipboard's `paste` event and propagates it to any of its focused children."
+    });
+    this._forFocusedChild("readClipboard", evt);
+  }
+
+  copySelectedText(evt) {
+    pliny.method({
+      parent: "Primrose.Entity",
+      name: "copySelectedText",
+      parameters: [{
+        name: "evt",
+        type: "Event",
+        description: "The clipboard event to read"
+      }],
+      description: "Hooks up to the clipboard's `copy` event and propagates it to any of its focused children."
+    });
+    this._forFocusedChild("copySelectedText", evt);
+  }
+
+  cutSelectedText(evt) {
+    pliny.method({
+      parent: "Primrose.Entity",
+      name: "cutSelectedText",
+      parameters: [{
+        name: "evt",
+        type: "Event",
+        description: "The clipboard event to read"
+      }],
+      description: "Hooks up to the clipboard's `cut` event and propagates it to any of its focused children."
+    });
+    this._forFocusedChild("cutSelectedText", evt);
+  }
+
+  readWheel(evt) {
+    pliny.method({
+      parent: "Primrose.Entity",
+      name: "readWheel",
+      parameters: [{
+        name: "evt",
+        type: "Event",
+        description: "The wheel event to read"
+      }],
+      description: "Hooks up to the window's `wheel` event and propagates it to any of its focused children."
+    });
+    this._forFocusedChild("readWheel", evt);
+  }
+}
+  if(typeof window !== "undefined") window.Primrose.Entity = Entity;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Entity.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Entity.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\HTTP.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\HTTP.js
 (function(){pliny.namespace({
   parent: "Primrose",
   name: "HTTP",
   description: "A collection of basic XMLHttpRequest wrappers."
 });
-var HTTP = {};
-    if(typeof window !== "undefined") window.Primrose.HTTP = HTTP;
+const HTTP = {};
+  if(typeof window !== "undefined") window.Primrose.HTTP = HTTP;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\HTTP.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\HTTP.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Input.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Input.js
 (function(){pliny.namespace({
   parent: "Primrose",
   name: "Input",
   description: "The Input namespace contains classes that handle user input, for use in navigating the 3D environment."
 });
-var Input = {};
-    if(typeof window !== "undefined") window.Primrose.Input = Input;
+const Input = {};
+  if(typeof window !== "undefined") window.Primrose.Input = Input;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Input.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Input.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\InputProcessor.js
-(function(){var SETTINGS_TO_ZERO = ["heading", "pitch", "roll", "pointerPitch", "headX", "headY", "headZ"];
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\InputProcessor.js
+(function(){const SETTINGS_TO_ZERO = ["heading", "pitch", "roll", "pointerPitch", "headX", "headY", "headZ"];
 
 function initState(){
   this.inputState = {
@@ -4219,8 +4183,8 @@ function initState(){
 }
 
 function filterMetaKey(k) {
-  for (var i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
-    var m = Primrose.Keys.MODIFIER_KEYS[i];
+  for (let i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
+    const m = Primrose.Keys.MODIFIER_KEYS[i];
     if (Math.abs(k) === Primrose.Keys[m.toLocaleUpperCase()]) {
       return Math.sign(k) * (i + 1);
     }
@@ -4228,8 +4192,8 @@ function filterMetaKey(k) {
 }
 
 function filterValue(elem){
-  var t = typeof elem;
-  var index = 0,
+  const t = typeof elem;
+  let index = 0,
     toggle = false,
     sign = 1;
 
@@ -4253,17 +4217,15 @@ function filterValue(elem){
 }
 
 function swap(a, b){
-  var this$1 = this;
-
-  for(var i = 0; i < this.inputState.buttons.length; ++i){
-    this$1[a].buttons[i] = this$1[b].buttons[i];
+  for(let i = 0; i < this.inputState.buttons.length; ++i){
+    this[a].buttons[i] = this[b].buttons[i];
   }
-  for(var i$1 = 0; i$1 < this.inputState.axes.length; ++i$1){
-    this$1[a].axes[i$1] = this$1[b].axes[i$1];
+  for(let i = 0; i < this.inputState.axes.length; ++i){
+    this[a].axes[i] = this[b].axes[i];
   }
-  for (var i$2 = 0; i$2 < Primrose.Keys.MODIFIER_KEYS.length; ++i$2) {
-    var m = Primrose.Keys.MODIFIER_KEYS[i$2];
-    this$1[a][m] = this$1[b][m];
+  for (let i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
+    const m = Primrose.Keys.MODIFIER_KEYS[i];
+    this[a][m] = this[b][m];
   }
 }
 
@@ -4275,440 +4237,435 @@ function recordLastState(){
   swap.call(this, "lastInputState", "inputState");
 }
 
-var CommandState = function CommandState(){
-  this.value = null;
-  this.pressed = false;
-  this.wasPressed = false;
-  this.fireAgain = false;
-  this.lt = 0;
-  this.ct = 0;
-  this.repeatCount = 0;
-};
+class CommandState{
+  constructor(){
+    this.value = null;
+    this.pressed = false;
+    this.wasPressed = false;
+    this.fireAgain = false;
+    this.lt = 0;
+    this.ct = 0;
+    this.repeatCount = 0;
+  }
+}
 
 pliny.class({
   parent: "Primrose",
     name: "InputProcessor",
     description: "| [under construction]"
 });
-var InputProcessor = function InputProcessor(name, commands, axisNames) {
-  var this$1 = this;
+class InputProcessor {
 
-  this.name = name;
-  this.commands = {};
-  this.commandNames = [];
-  this.enabled = true;
-  this.paused = false;
-  this.ready = true;
-  this.inPhysicalUse = false;
-  initState.call(this);
+  constructor(name, commands, axisNames) {
+    this.name = name;
+    this.commands = {};
+    this.commandNames = [];
+    this.enabled = true;
+    this.paused = false;
+    this.ready = true;
+    this.inPhysicalUse = false;
+    initState.call(this);
 
-  var readMetaKeys = function (event) {
-    for (var i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
-      var m = Primrose.Keys.MODIFIER_KEYS[i];
-      this$1.inputState[m] = event[m + "Key"];
+    const readMetaKeys = (event) => {
+      for (let i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
+        const m = Primrose.Keys.MODIFIER_KEYS[i];
+        this.inputState[m] = event[m + "Key"];
+      }
+    };
+
+    window.addEventListener("keydown", readMetaKeys, false);
+    window.addEventListener("keyup", readMetaKeys, false);
+    window.addEventListener("focus", readMetaKeys, false);
+
+    this.axisNames = axisNames || [];
+
+    for (let i = 0; i < this.axisNames.length; ++i) {
+      this.inputState.axes[i] = 0;
     }
-  };
 
-  window.addEventListener("keydown", readMetaKeys, false);
-  window.addEventListener("keyup", readMetaKeys, false);
-  window.addEventListener("focus", readMetaKeys, false);
+    for (const cmdName in commands) {
+      this.addCommand(cmdName, commands[cmdName]);
+    }
 
-  this.axisNames = axisNames || [];
-
-  for (var i = 0; i < this.axisNames.length; ++i) {
-    this$1.inputState.axes[i] = 0;
-  }
-
-  for (var cmdName in commands) {
-    this$1.addCommand(cmdName, commands[cmdName]);
-  }
-
-  for (var i$1 = 0; i$1 < Primrose.Keys.MODIFIER_KEYS.length; ++i$1) {
-    this$1.inputState[Primrose.Keys.MODIFIER_KEYS[i$1]] = false;
-  }
-};
-
-InputProcessor.prototype.addCommand = function addCommand (name, cmd) {
-  cmd.name = name;
-  cmd = this.cloneCommand(cmd);
-  if (typeof cmd.repetitions === "undefined") {
-    cmd.repetitions = 1;
-  }
-  cmd.state = new CommandState();
-  this.commands[name] = cmd;
-  this.commandNames.push(name);
-};
-
-InputProcessor.prototype.cloneCommand = function cloneCommand (cmd) {
-  return {
-    name: cmd.name,
-    disabled: !!cmd.disabled,
-    dt: cmd.dt || 0,
-    deadzone: cmd.deadzone || 0,
-    threshold: cmd.threshold || 0,
-    repetitions: cmd.repetitions,
-    scale: cmd.scale,
-    offset: cmd.offset,
-    min: cmd.min,
-    max: cmd.max,
-    integrate: !!cmd.integrate,
-    delta: !!cmd.delta,
-    axes: this.maybeClone(cmd.axes),
-    commands: cmd.commands && cmd.commands.slice() || [],
-    buttons: this.maybeClone(cmd.buttons),
-    metaKeys: this.maybeClone(cmd.metaKeys && cmd.metaKeys.map(filterMetaKey)),
-    commandDown: cmd.commandDown,
-    commandUp: cmd.commandUp
-  };
-};
-
-InputProcessor.prototype.maybeClone = function maybeClone (arr) {
-    var this$1 = this;
-
-  var output = [];
-  if (arr) {
-    for (var i = 0; i < arr.length; ++i) {
-      output[i] = filterValue.call(this$1, arr[i]);
+    for (let i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
+      this.inputState[Primrose.Keys.MODIFIER_KEYS[i]] = false;
     }
   }
-  return output;
-};
 
-InputProcessor.prototype.update = function update (dt) {
-    var this$1 = this;
+  addCommand(name, cmd) {
+    cmd.name = name;
+    cmd = this.cloneCommand(cmd);
+    if (typeof cmd.repetitions === "undefined") {
+      cmd.repetitions = 1;
+    }
+    cmd.state = new CommandState();
+    this.commands[name] = cmd;
+    this.commandNames.push(name);
+  }
 
-  if (this.enabled && this.ready && this.inPhysicalUse && !this.paused && dt > 0) {
+  cloneCommand(cmd) {
+    return {
+      name: cmd.name,
+      disabled: !!cmd.disabled,
+      dt: cmd.dt || 0,
+      deadzone: cmd.deadzone || 0,
+      threshold: cmd.threshold || 0,
+      repetitions: cmd.repetitions,
+      scale: cmd.scale,
+      offset: cmd.offset,
+      min: cmd.min,
+      max: cmd.max,
+      integrate: !!cmd.integrate,
+      delta: !!cmd.delta,
+      axes: this.maybeClone(cmd.axes),
+      commands: cmd.commands && cmd.commands.slice() || [],
+      buttons: this.maybeClone(cmd.buttons),
+      metaKeys: this.maybeClone(cmd.metaKeys && cmd.metaKeys.map(filterMetaKey)),
+      commandDown: cmd.commandDown,
+      commandUp: cmd.commandUp
+    };
+  }
 
-    this.inputState.buttons[Primrose.Keys.ANY] = false;
-    for (var n in this.inputState.buttons) {
-      if (this$1.inputState.buttons[n]) {
-        this$1.inputState.buttons[Primrose.Keys.ANY] = true;
-        break;
+  maybeClone(arr) {
+    var output = [];
+    if (arr) {
+      for (var i = 0; i < arr.length; ++i) {
+        output[i] = filterValue.call(this, arr[i]);
       }
     }
+    return output;
+  }
 
-    var stateMod = recordLastState;
-    for (var name in this.commands) {
-      var cmd = this$1.commands[name];
-      cmd.state.wasPressed = cmd.state.pressed;
-      cmd.state.pressed = false;
-      if (!cmd.disabled) {
-        var pressed = true,
-          value = 0;
-        if (cmd.metaKeys) {
-          for (var n$1 = 0; n$1 < cmd.metaKeys.length && pressed; ++n$1) {
-            var m = cmd.metaKeys[n$1];
-            pressed = pressed &&
-              (this$1.inputState[Primrose.Keys.MODIFIER_KEYS[m.index]] &&
-                !m.toggle ||
-                !this$1.inputState[Primrose.Keys.MODIFIER_KEYS[m.index]] &&
-                m.toggle);
-          }
+  update(dt) {
+    if (this.enabled && this.ready && this.inPhysicalUse && !this.paused && dt > 0) {
+
+      this.inputState.buttons[Primrose.Keys.ANY] = false;
+      for (const n in this.inputState.buttons) {
+        if (this.inputState.buttons[n]) {
+          this.inputState.buttons[Primrose.Keys.ANY] = true;
+          break;
         }
+      }
 
-        if (pressed) {
-          if (cmd.buttons.length > 0) {
-            for (var n$2 = 0; n$2 < cmd.buttons.length; ++n$2) {
-              var btn = cmd.buttons[n$2],
-                code = btn.index + 1,
-                p = !!this$1.inputState.buttons[code];
-
-              var temp = p ? btn.sign : 0;
-              pressed = pressed && (p && !btn.toggle || !p && btn.toggle);
-              if (Math.abs(temp) > Math.abs(value)) {
-                value = temp;
-              }
+      let stateMod = recordLastState;
+      for (var name in this.commands) {
+        var cmd = this.commands[name];
+        cmd.state.wasPressed = cmd.state.pressed;
+        cmd.state.pressed = false;
+        if (!cmd.disabled) {
+          let pressed = true,
+            value = 0;
+          if (cmd.metaKeys) {
+            for (let n = 0; n < cmd.metaKeys.length && pressed; ++n) {
+              var m = cmd.metaKeys[n];
+              pressed = pressed &&
+                (this.inputState[Primrose.Keys.MODIFIER_KEYS[m.index]] &&
+                  !m.toggle ||
+                  !this.inputState[Primrose.Keys.MODIFIER_KEYS[m.index]] &&
+                  m.toggle);
             }
           }
 
-          if (cmd.buttons.length === 0 || value !== 0) {
-            if (cmd.axes.length > 0) {
-              value = 0;
-              for (var n$3 = 0; n$3 < cmd.axes.length; ++n$3) {
-                var a = cmd.axes[n$3];
-                var temp$1 = a.sign * this$1.inputState.axes[a.index];
-                if (Math.abs(temp$1) > Math.abs(value)) {
-                  value = temp$1;
-                }
-              }
-            }
-            else if(cmd.commands.length > 0){
-              value = 0;
-              for (var n$4 = 0; n$4 < cmd.commands.length; ++n$4) {
-                var temp$2 = this$1.getValue(cmd.commands[n$4]);
-                if (Math.abs(temp$2) > Math.abs(value)) {
-                  value = temp$2;
+          if (pressed) {
+            if (cmd.buttons.length > 0) {
+              for (let n = 0; n < cmd.buttons.length; ++n) {
+                var btn = cmd.buttons[n],
+                  code = btn.index + 1,
+                  p = !!this.inputState.buttons[code];
+
+                const temp = p ? btn.sign : 0;
+                pressed = pressed && (p && !btn.toggle || !p && btn.toggle);
+                if (Math.abs(temp) > Math.abs(value)) {
+                  value = temp;
                 }
               }
             }
 
-            if (cmd.scale !== undefined) {
-              value *= cmd.scale;
-            }
-
-            if (cmd.offset !== undefined) {
-              value += cmd.offset;
-            }
-
-            if (cmd.deadzone && Math.abs(value) < cmd.deadzone) {
-              value = 0;
-            }
-
-            if (cmd.integrate) {
-              value = this$1.getValue(cmd.name) + value * dt;
-            }
-            else if (cmd.delta) {
-              var ov = value;
-              if (cmd.state.lv !== undefined) {
-                value = (value - cmd.state.lv);
+            if (cmd.buttons.length === 0 || value !== 0) {
+              if (cmd.axes.length > 0) {
+                value = 0;
+                for (let n = 0; n < cmd.axes.length; ++n) {
+                  var a = cmd.axes[n];
+                  const temp = a.sign * this.inputState.axes[a.index];
+                  if (Math.abs(temp) > Math.abs(value)) {
+                    value = temp;
+                  }
+                }
               }
-              cmd.state.lv = ov;
-            }
+              else if(cmd.commands.length > 0){
+                value = 0;
+                for (let n = 0; n < cmd.commands.length; ++n) {
+                  const temp = this.getValue(cmd.commands[n]);
+                  if (Math.abs(temp) > Math.abs(value)) {
+                    value = temp;
+                  }
+                }
+              }
 
-            if (cmd.min !== undefined && value < cmd.min){
-              value = cmd.min;
-              stateMod = resetInputState;
-            }
+              if (cmd.scale !== undefined) {
+                value *= cmd.scale;
+              }
 
-            if (cmd.max !== undefined && value > cmd.max) {
-              value = cmd.max;
-              stateMod = resetInputState;
-            }
+              if (cmd.offset !== undefined) {
+                value += cmd.offset;
+              }
 
-            if (cmd.threshold) {
-              pressed = pressed && (value > cmd.threshold);
+              if (cmd.deadzone && Math.abs(value) < cmd.deadzone) {
+                value = 0;
+              }
+
+              if (cmd.integrate) {
+                value = this.getValue(cmd.name) + value * dt;
+              }
+              else if (cmd.delta) {
+                var ov = value;
+                if (cmd.state.lv !== undefined) {
+                  value = (value - cmd.state.lv);
+                }
+                cmd.state.lv = ov;
+              }
+
+              if (cmd.min !== undefined && value < cmd.min){
+                value = cmd.min;
+                stateMod = resetInputState;
+              }
+
+              if (cmd.max !== undefined && value > cmd.max) {
+                value = cmd.max;
+                stateMod = resetInputState;
+              }
+
+              if (cmd.threshold) {
+                pressed = pressed && (value > cmd.threshold);
+              }
             }
           }
+
+          cmd.state.pressed = pressed;
+          cmd.state.value = value;
+          cmd.state.lt += dt;
+
+          cmd.state.fireAgain = cmd.state.pressed &&
+            cmd.state.lt >= cmd.dt &&
+            (cmd.repetitions === -1 || cmd.state.repeatCount < cmd.repetitions);
+
+          if (cmd.state.fireAgain) {
+            cmd.state.lt = 0;
+            ++cmd.state.repeatCount;
+          }
+          else if (!cmd.state.pressed) {
+            cmd.state.repeatCount = 0;
+          }
+        }
+      }
+      stateMod.call(this);
+
+      this.fireCommands();
+    }
+  }
+
+  zero() {
+    initState.call(this);
+    for(const key in this.commands){
+      this.commands[key].state = new CommandState();
+    }
+  }
+
+  fireCommands() {
+    if (this.ready && !this.paused) {
+      for (var name in this.commands) {
+        var cmd = this.commands[name];
+        if (cmd.state.fireAgain && cmd.commandDown) {
+          cmd.commandDown(this.name);
         }
 
-        cmd.state.pressed = pressed;
-        cmd.state.value = value;
-        cmd.state.lt += dt;
-
-        cmd.state.fireAgain = cmd.state.pressed &&
-          cmd.state.lt >= cmd.dt &&
-          (cmd.repetitions === -1 || cmd.state.repeatCount < cmd.repetitions);
-
-        if (cmd.state.fireAgain) {
-          cmd.state.lt = 0;
-          ++cmd.state.repeatCount;
-        }
-        else if (!cmd.state.pressed) {
-          cmd.state.repeatCount = 0;
+        if (!cmd.state.pressed && cmd.state.wasPressed && cmd.commandUp) {
+          cmd.commandUp(this.name);
         }
       }
     }
-    stateMod.call(this);
-
-    this.fireCommands();
   }
-};
 
-InputProcessor.prototype.zero = function zero () {
-    var this$1 = this;
-
-  initState.call(this);
-  for(var key in this.commands){
-    this$1.commands[key].state = new CommandState();
+  setProperty(key, name, value) {
+    if (this.commands[name]) {
+      this.commands[name][key] = value;
+    }
   }
-};
 
-InputProcessor.prototype.fireCommands = function fireCommands () {
-    var this$1 = this;
+  setDeadzone(name, value) {
+    this.setProperty("deadzone", name, value);
+  }
 
-  if (this.ready && !this.paused) {
-    for (var name in this.commands) {
-      var cmd = this$1.commands[name];
-      if (cmd.state.fireAgain && cmd.commandDown) {
-        cmd.commandDown(this$1.name);
-      }
+  setScale(name, value) {
+    this.setProperty("scale", name, value);
+  }
 
-      if (!cmd.state.pressed && cmd.state.wasPressed && cmd.commandUp) {
-        cmd.commandUp(this$1.name);
+  setDT(name, value) {
+    this.setProperty("dt", name, value);
+  }
+
+  setMin(name, value) {
+    this.setProperty("min", name, value);
+  }
+
+  setMax(name, value) {
+    this.setProperty("max", name, value);
+  }
+
+  addMetaKey(name, value) {
+    this.addToArray("metaKeys", name, filterMetaKey(value));
+  }
+
+  addAxis(name, value) {
+    this.addToArray("axes", name, value);
+  }
+
+  addButton(name, value) {
+    this.addToArray("buttons", name, value);
+  }
+
+  removeMetaKey(name, value) {
+    this.removeFromArray("metaKeys", name, value);
+  }
+
+  removeAxis(name, value) {
+    this.removeFromArray("axes", name, value);
+  }
+
+  removeButton(name, value) {
+    this.removeFromArray("buttons", name, value);
+  }
+
+  invertAxis(name, value) {
+    this.invertInArray("axes", name, value);
+  }
+
+  invertButton(name, value) {
+    this.invertInArray("buttons", name, value);
+  }
+
+  invertMetaKey(name, value) {
+    this.invertInArray("metaKeys", name, value);
+  }
+
+  addToArray(key, name, value) {
+    if (this.commands[name] && this.commands[name][key]) {
+      this.commands[name][key].push(filterValue(value));
+    }
+  }
+
+  removeFromArray(key, name, value) {
+    if (this.commands[name] && this.commands[name][key]) {
+      --value;
+      const arr = this.commands[name][key];
+      for(let i = 0; i < arr.length; ++i){
+        const elem = arr[i];
+        if(elem.index === value){
+          return arr.splice(i, 1);
+        }
       }
     }
   }
-};
 
-InputProcessor.prototype.setProperty = function setProperty (key, name, value) {
-  if (this.commands[name]) {
-    this.commands[name][key] = value;
-  }
-};
-
-InputProcessor.prototype.setDeadzone = function setDeadzone (name, value) {
-  this.setProperty("deadzone", name, value);
-};
-
-InputProcessor.prototype.setScale = function setScale (name, value) {
-  this.setProperty("scale", name, value);
-};
-
-InputProcessor.prototype.setDT = function setDT (name, value) {
-  this.setProperty("dt", name, value);
-};
-
-InputProcessor.prototype.setMin = function setMin (name, value) {
-  this.setProperty("min", name, value);
-};
-
-InputProcessor.prototype.setMax = function setMax (name, value) {
-  this.setProperty("max", name, value);
-};
-
-InputProcessor.prototype.addMetaKey = function addMetaKey (name, value) {
-  this.addToArray("metaKeys", name, filterMetaKey(value));
-};
-
-InputProcessor.prototype.addAxis = function addAxis (name, value) {
-  this.addToArray("axes", name, value);
-};
-
-InputProcessor.prototype.addButton = function addButton (name, value) {
-  this.addToArray("buttons", name, value);
-};
-
-InputProcessor.prototype.removeMetaKey = function removeMetaKey (name, value) {
-  this.removeFromArray("metaKeys", name, value);
-};
-
-InputProcessor.prototype.removeAxis = function removeAxis (name, value) {
-  this.removeFromArray("axes", name, value);
-};
-
-InputProcessor.prototype.removeButton = function removeButton (name, value) {
-  this.removeFromArray("buttons", name, value);
-};
-
-InputProcessor.prototype.invertAxis = function invertAxis (name, value) {
-  this.invertInArray("axes", name, value);
-};
-
-InputProcessor.prototype.invertButton = function invertButton (name, value) {
-  this.invertInArray("buttons", name, value);
-};
-
-InputProcessor.prototype.invertMetaKey = function invertMetaKey (name, value) {
-  this.invertInArray("metaKeys", name, value);
-};
-
-InputProcessor.prototype.addToArray = function addToArray (key, name, value) {
-  if (this.commands[name] && this.commands[name][key]) {
-    this.commands[name][key].push(filterValue(value));
-  }
-};
-
-InputProcessor.prototype.removeFromArray = function removeFromArray (key, name, value) {
-  if (this.commands[name] && this.commands[name][key]) {
-    --value;
-    var arr = this.commands[name][key];
-    for(var i = 0; i < arr.length; ++i){
-      var elem = arr[i];
-      if(elem.index === value){
-        return arr.splice(i, 1);
+  invertInArray(key, name, value) {
+    if (this.commands[name] && this.commands[name][key]) {
+      var arr = this.commands[name][key],
+        n = arr.indexOf(value);
+      for(let i = 0; i < arr.length; ++i){
+        const elem = arr[i];
+        if(elem.index === value){
+          elem.sign *= -1;
+          return;
+        }
       }
     }
   }
-};
 
-InputProcessor.prototype.invertInArray = function invertInArray (key, name, value) {
-  if (this.commands[name] && this.commands[name][key]) {
-    var arr = this.commands[name][key],
-      n = arr.indexOf(value);
-    for(var i = 0; i < arr.length; ++i){
-      var elem = arr[i];
-      if(elem.index === value){
-        elem.sign *= -1;
-        return;
-      }
+  pause(v) {
+    this.paused = v;
+  }
+
+  isPaused() {
+    return this.paused;
+  }
+
+  enable(k, v) {
+    if (v === undefined || v === null) {
+      v = k;
+      k = null;
+    }
+
+    if (k) {
+      this.setProperty("disabled", k, !v);
+    }
+    else {
+      this.enabled = v;
     }
   }
-};
 
-InputProcessor.prototype.pause = function pause (v) {
-  this.paused = v;
-};
-
-InputProcessor.prototype.isPaused = function isPaused () {
-  return this.paused;
-};
-
-InputProcessor.prototype.enable = function enable (k, v) {
-  if (v === undefined || v === null) {
-    v = k;
-    k = null;
+  isEnabled(name) {
+    return name && this.commands[name] && !this.commands[name].disabled;
   }
 
-  if (k) {
-    this.setProperty("disabled", k, !v);
+  getAxis(name) {
+    var i = this.axisNames.indexOf(name);
+    if (i > -1) {
+      var value = this.inputState.axes[i] || 0;
+      return value;
+    }
+    return null;
   }
-  else {
-    this.enabled = v;
+
+  setAxis(name, value) {
+    var i = this.axisNames.indexOf(name);
+    if (i > -1 && (this.inPhysicalUse || value !== 0)) {
+      this.inPhysicalUse = true;
+      this.inputState.axes[i] = value;
+    }
   }
-};
 
-InputProcessor.prototype.isEnabled = function isEnabled (name) {
-  return name && this.commands[name] && !this.commands[name].disabled;
-};
-
-InputProcessor.prototype.getAxis = function getAxis (name) {
-  var i = this.axisNames.indexOf(name);
-  if (i > -1) {
-    var value = this.inputState.axes[i] || 0;
-    return value;
+  setButton(index, pressed) {
+    if(this.inPhysicalUse || pressed){
+      this.inPhysicalUse = true;
+      this.inputState.buttons[index] = pressed;
+    }
   }
-  return null;
-};
 
-InputProcessor.prototype.setAxis = function setAxis (name, value) {
-  var i = this.axisNames.indexOf(name);
-  if (i > -1 && (this.inPhysicalUse || value !== 0)) {
-    this.inPhysicalUse = true;
-    this.inputState.axes[i] = value;
-  }
-};
-
-InputProcessor.prototype.setButton = function setButton (index, pressed) {
-  if(this.inPhysicalUse || pressed){
-    this.inPhysicalUse = true;
-    this.inputState.buttons[index] = pressed;
-  }
-};
-
-InputProcessor.prototype.isDown = function isDown (name) {
-  return this.enabled &&
-    this.isEnabled(name) &&
-    this.commands[name].state.pressed;
-};
-
-InputProcessor.prototype.isUp = function isUp (name) {
-  return this.enabled &&
-    this.isEnabled(name) &&
-    this.commands[name].state.pressed;
-};
-
-InputProcessor.prototype.getValue = function getValue (name) {
-  return this.enabled &&
+  isDown(name) {
+    return this.enabled &&
       this.isEnabled(name) &&
-      (this.commands[name].state.value || this.getAxis(name)) ||
-      0;
-};
+      this.commands[name].state.pressed;
+  }
 
-InputProcessor.prototype.setValue = function setValue (name, value) {
-  var j = this.axisNames.indexOf(name);
-  if (!this.commands[name] && j > -1) {
-    this.setAxis(name, value);
+  isUp(name) {
+    return this.enabled &&
+      this.isEnabled(name) &&
+      this.commands[name].state.pressed;
   }
-  else if (this.commands[name] && !this.commands[name].disabled) {
-    this.commands[name].state.value = value;
+
+  getValue(name) {
+    return this.enabled &&
+        this.isEnabled(name) &&
+        (this.commands[name].state.value || this.getAxis(name)) ||
+        0;
   }
-};
-    if(typeof window !== "undefined") window.Primrose.InputProcessor = InputProcessor;
+
+  setValue(name, value) {
+    var j = this.axisNames.indexOf(name);
+    if (!this.commands[name] && j > -1) {
+      this.setAxis(name, value);
+    }
+    else if (this.commands[name] && !this.commands[name].disabled) {
+      this.commands[name].state.value = value;
+    }
+  }
+}
+  if(typeof window !== "undefined") window.Primrose.InputProcessor = InputProcessor;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\InputProcessor.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\InputProcessor.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Keys.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Keys.js
 (function(){pliny.enumeration({
   parent: "Primrose",
   name: "Keys",
@@ -4846,12 +4803,12 @@ for (var key in Keys) {
     Keys[val] = key;
   }
 }
-    if(typeof window !== "undefined") window.Primrose.Keys = Keys;
+  if(typeof window !== "undefined") window.Primrose.Keys = Keys;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Keys.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Keys.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\loadTexture.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\loadTexture.js
 (function(){var objectIDs = new WeakMap(),
   counter = 0;
 
@@ -4869,7 +4826,7 @@ function loadTexture(url, resolve, progress, reject) {
     }
     else if(typeof url === "object"){
       if(!objectIDs.has(url)) {
-        objectIDs.set(url, ("object-" + (counter++)));
+        objectIDs.set(url, `object-${counter++}`);
       }
       txtName = objectIDs.get(url);
     }
@@ -4885,8 +4842,8 @@ function loadTexture(url, resolve, progress, reject) {
   }
 
   return cache(
-    ("Texture(" + txtName + ")"),
-    function () {
+    `Texture(${txtName})`,
+    () => {
       var txt = null;
       if(textureLoader){
         txt = textureLoader.load(url, resolve, progress, reject);
@@ -4899,12 +4856,12 @@ function loadTexture(url, resolve, progress, reject) {
     },
     resolve);
 }
-    if(typeof window !== "undefined") window.Primrose.loadTexture = loadTexture;
+  if(typeof window !== "undefined") window.Primrose.loadTexture = loadTexture;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\loadTexture.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\loadTexture.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\ModelLoader.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\ModelLoader.js
 (function(){// The JSON format object loader is not always included in the Three.js distribution,
 // so we have to first check for it.
 var loaders = {
@@ -5008,7 +4965,7 @@ function ModelLoader(template) {
 }
 ModelLoader.loadModel = function (src, type, progress) {
   return ModelLoader.loadObject(src, type, progress)
-    .then(function (scene) { return new ModelLoader(scene); });
+    .then((scene) => new ModelLoader(scene));
 };
 
 pliny.method({
@@ -5043,18 +5000,16 @@ pliny.method({
   }]
 });
 ModelLoader.prototype.clone = function () {
-  var this$1 = this;
-
   var obj = this.template.clone();
 
-  obj.traverse(function (child) {
+  obj.traverse((child) => {
     if (child instanceof THREE.SkinnedMesh) {
       obj.animation = new THREE.Animation(child, child.geometry.animation);
-      if (!this$1.template.originalAnimationData && obj.animation.data) {
-        this$1.template.originalAnimationData = obj.animation.data;
+      if (!this.template.originalAnimationData && obj.animation.data) {
+        this.template.originalAnimationData = obj.animation.data;
       }
       if (!obj.animation.data) {
-        obj.animation.data = this$1.template.originalAnimationData;
+        obj.animation.data = this.template.originalAnimationData;
       }
     }
   });
@@ -5137,8 +5092,8 @@ ModelLoader.loadObject = function (src, type, progress) {
       if (extension === ".obj") {
         var newPath = src.replace(EXTENSION_PATTERN, ".mtl");
         promise = promise
-          .then(function () { return ModelLoader.loadObject(newPath, "mtl", progress); })
-          .then(function (materials) {
+          .then(() => ModelLoader.loadObject(newPath, "mtl", progress))
+          .then((materials) => {
             materials.preload();
             Loader.setMaterials(materials);
           });
@@ -5158,13 +5113,13 @@ ModelLoader.loadObject = function (src, type, progress) {
             return s.trim();
           })
           .join("\n");
-        promise = promise.then(function () { return Loader.parse(elemSource); });
+        promise = promise.then(() => Loader.parse(elemSource));
       }
       else {
         if (Loader.setCrossOrigin) {
           Loader.setCrossOrigin(THREE.ImageUtils.crossOrigin);
         }
-        promise = promise.then(function () { return new Promise(function (resolve, reject) { return Loader.load(src, resolve, progress, reject); }); });
+        promise = promise.then(() => new Promise((resolve, reject) => Loader.load(src, resolve, progress, reject)));
       }
 
       if (extension === ".json") {
@@ -5259,43 +5214,43 @@ ModelLoader.loadObjects = function (map) {
 };
 
 function loader(map, key) {
-  return function (obj) { return ModelLoader.loadObject(map[key])
-    .then(function (model) {
+  return (obj) => ModelLoader.loadObject(map[key])
+    .then((model) => {
       obj[key] = model;
       return obj;
-    }); };
+    });
 }
-    if(typeof window !== "undefined") window.Primrose.ModelLoader = ModelLoader;
+  if(typeof window !== "undefined") window.Primrose.ModelLoader = ModelLoader;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\ModelLoader.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\ModelLoader.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Network.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Network.js
 (function(){pliny.namespace({
   parent: "Primrose",
   name: "Network",
   description: "The Network namespace contains classes for communicating events between entities in a graph relationship across different types of communication boundaries: in-thread, cross-thread, cross-WAN, and cross-LAN."
 });
-var Network = {};
-    if(typeof window !== "undefined") window.Primrose.Network = Network;
+const Network = {};
+  if(typeof window !== "undefined") window.Primrose.Network = Network;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Network.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Network.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Output.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Output.js
 (function(){pliny.namespace({
   parent: "Primrose",
   name: "Output",
   description: "The Output namespace contains classes that handle output to devices other than the screen (e.g. Audio, Music, etc.)."
 });
-var Output = {};
-    if(typeof window !== "undefined") window.Primrose.Output = Output;
+const Output = {};
+  if(typeof window !== "undefined") window.Primrose.Output = Output;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Output.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Output.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Pointer.js
-(function(){var TELEPORT_PAD_RADIUS = 0.4,
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Pointer.js
+(function(){const TELEPORT_PAD_RADIUS = 0.4,
   FORWARD = new THREE.Vector3(0, 0, -1),
   LASER_WIDTH = 0.01,
   LASER_LENGTH = 3 * LASER_WIDTH,
@@ -5339,12 +5294,9 @@ pliny.class({
       defaultValue: null
     }]
 });
-var Pointer = (function (superclass) {
-  function Pointer(name, color, highlight, s, devices, triggerDevices) {
-    var this$1 = this;
-    if ( triggerDevices === void 0 ) triggerDevices = null;
-
-    superclass.call(this);
+class Pointer extends Primrose.AbstractEventEmitter {
+  constructor(name, color, highlight, s, devices, triggerDevices = null) {
+    super();
     this.name = name;
     this.devices = devices;
     this.triggerDevices = triggerDevices || devices.slice();
@@ -5364,8 +5316,8 @@ var Pointer = (function (superclass) {
       unshaded: true
     });
     this.disk.geometry.computeBoundingBox();
-    this.disk.geometry.vertices.forEach(function (v) {
-      v.y = 0.1 * (v.y - this$1.disk.geometry.boundingBox.min.y);
+    this.disk.geometry.vertices.forEach((v) => {
+      v.y = 0.1 * (v.y - this.disk.geometry.boundingBox.min.y);
     });
     this.disk.visible = false;
     this.disk.geometry.computeBoundingBox();
@@ -5395,37 +5347,31 @@ var Pointer = (function (superclass) {
     });
   }
 
-  if ( superclass ) Pointer.__proto__ = superclass;
-  Pointer.prototype = Object.create( superclass && superclass.prototype );
-  Pointer.prototype.constructor = Pointer;
-
-  var prototypeAccessors = { useGaze: {},material: {},position: {},quaternion: {},rotation: {},matrix: {},segment: {} };
-
-  prototypeAccessors.useGaze.get = function () {
+  get useGaze() {
     return this.gazeInner.visible;
-  };
+  }
 
-  prototypeAccessors.useGaze.set = function (v) {
+  set useGaze(v) {
     this.gazeInner.visible = !!v;
     this.mesh.visible = !v;
-  };
+  }
 
-  prototypeAccessors.material.get = function (){
+  get material(){
     return this.mesh.material;
-  };
+  }
 
-  prototypeAccessors.material.set = function (v){
+  set material(v){
     this.mesh.material = v;
     this.disk.material = v;
     this.gazeInner.material = v;
     this.gazeOuter.material = v;
-  };
+  }
 
-  Pointer.prototype.add = function add (obj) {
+  add(obj) {
     this.root.add(obj);
-  };
+  }
 
-  Pointer.prototype.addDevice = function addDevice (orientation, trigger){
+  addDevice(orientation, trigger){
     if(orientation){
       this.devices.push(orientation);
     }
@@ -5433,9 +5379,9 @@ var Pointer = (function (superclass) {
     if(trigger){
       this.triggerDevices.push(trigger);
     }
-  };
+  }
 
-  Pointer.prototype.addToBrowserEnvironment = function addToBrowserEnvironment (env, scene) {
+  addToBrowserEnvironment(env, scene) {
     pliny.method({
       parent: "Primrose.Pointer",
       name: "addToBrowserEnvironment",
@@ -5452,33 +5398,33 @@ var Pointer = (function (superclass) {
     });
     scene.add(this.root);
     scene.add(this.disk);
-  };
+  }
 
-  prototypeAccessors.position.get = function () {
+  get position() {
     return this.root.position;
-  };
+  }
 
-  prototypeAccessors.quaternion.get = function () {
+  get quaternion() {
     return this.root.quaternion;
-  };
+  }
 
-  prototypeAccessors.rotation.get = function (){
+  get rotation(){
     return this.root.rotation;
-  };
+  }
 
-  prototypeAccessors.matrix.get = function () {
+  get matrix() {
     return this.root.matrix;
-  };
+  }
 
-  Pointer.prototype.updateMatrix = function updateMatrix () {
+  updateMatrix() {
     return this.root.updateMatrix();
-  };
+  }
 
-  Pointer.prototype.applyMatrix = function applyMatrix (m) {
+  applyMatrix(m) {
     return this.root.applyMatrix(m);
-  };
+  }
 
-  prototypeAccessors.segment.get = function () {
+  get segment() {
     if (this.showPointer) {
       VECTOR_TEMP.set(0, 0, 0)
         .applyMatrix4(this.root.matrixWorld);
@@ -5486,18 +5432,16 @@ var Pointer = (function (superclass) {
         .applyMatrix4(this.root.matrixWorld);
       return [this.name, VECTOR_TEMP.toArray(), FORWARD.toArray()];
     }
-  };
+  }
 
-  Pointer.prototype.update = function update () {
-    var this$1 = this;
-
+  update() {
     this.position.set(0, 0, 0);
 
     if(this.unproject) {
       QUAT_TEMP.set(0, 1, 0, 0);
       VECTOR_TEMP.set(0, 0, 0);
-      for(var i = 0; i < this.devices.length; ++i) {
-        var obj = this$1.devices[i];
+      for(let i = 0; i < this.devices.length; ++i) {
+        const obj = this.devices[i];
         if(obj.enabled) {
           VECTOR_TEMP.x += obj.getValue("U");
           VECTOR_TEMP.y += obj.getValue("V");
@@ -5511,14 +5455,14 @@ var Pointer = (function (superclass) {
     else {
       this.quaternion.set(0, 0, 0, 1);
       EULER_TEMP.set(0, 0, 0, "YXZ");
-      for(var i$1 = 0; i$1 < this.devices.length; ++i$1) {
-        var obj$1 = this$1.devices[i$1];
-        if(obj$1.enabled) {
-          if(obj$1.quaternion) {
-            this$1.quaternion.multiply(obj$1.quaternion);
+      for(let i = 0; i < this.devices.length; ++i) {
+        const obj = this.devices[i];
+        if(obj.enabled) {
+          if(obj.quaternion) {
+            this.quaternion.multiply(obj.quaternion);
           }
-          if(obj$1.position) {
-            this$1.position.add(obj$1.position);
+          if(obj.position) {
+            this.position.add(obj.position);
           }
         }
       }
@@ -5527,16 +5471,14 @@ var Pointer = (function (superclass) {
       this.quaternion.multiply(QUAT_TEMP);
     }
     this.root.updateMatrixWorld();
-  };
+  }
 
-  Pointer.prototype.moveTeleportPad = function moveTeleportPad (point){
+  moveTeleportPad(point){
     this.disk.position
       .copy(point);
-  };
+  }
 
-  Pointer.prototype.resolvePicking = function resolvePicking (currentHit) {
-    var this$1 = this;
-
+  resolvePicking(currentHit) {
     this.mesh.visible = false;
 
     this.mesh.material = material("", {
@@ -5545,7 +5487,7 @@ var Pointer = (function (superclass) {
     });
 
     if (this.showPointer) {
-      var _priv = _(this),
+      const _priv = _(this),
         lastHit = _priv.lastHit,
         moved = lastHit && currentHit &&
           (currentHit.facePoint[0] !== lastHit.facePoint[0] ||
@@ -5588,7 +5530,7 @@ var Pointer = (function (superclass) {
 
       var dButtons = 0;
       for(var i = 0; i < this.triggerDevices.length; ++i) {
-        var obj = this$1.triggerDevices[i];
+        var obj = this.triggerDevices[i];
         if(obj.enabled){
           evt.buttons |= obj.getValue("buttons");
           dButtons |= obj.getValue("dButtons");
@@ -5639,21 +5581,17 @@ var Pointer = (function (superclass) {
         _priv.lastHit = currentHit;
       }
     }
-  };
-
-  Object.defineProperties( Pointer.prototype, prototypeAccessors );
-
-  return Pointer;
-}(Primrose.AbstractEventEmitter));
+  }
+}
 
 Pointer.EVENTS = ["pointerstart", "pointerend", "pointermove", "gazestart", "gazemove", "gazecomplete", "gazecancel", "exit", "enter"];
-    if(typeof window !== "undefined") window.Primrose.Pointer = Pointer;
+  if(typeof window !== "undefined") window.Primrose.Pointer = Pointer;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Pointer.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Pointer.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\PoseInputProcessor.js
-(function(){var DEFAULT_POSE = {
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\PoseInputProcessor.js
+(function(){const DEFAULT_POSE = {
     position: [0, 0, 0],
     orientation: [0, 0, 0, 1]
   },
@@ -5666,9 +5604,9 @@ pliny.class({
     baseClass: "Primrose.InputProcessor",
     description: "| [under construction]"
 });
-var PoseInputProcessor = (function (superclass) {
-  function PoseInputProcessor(name, commands, axisNames) {
-    superclass.call(this, name, commands, axisNames);
+class PoseInputProcessor extends Primrose.InputProcessor {
+  constructor(name, commands, axisNames) {
+    super(name, commands, axisNames);
 
     this.currentDevice = null;
     this.lastPose = null;
@@ -5680,18 +5618,12 @@ var PoseInputProcessor = (function (superclass) {
     this.matrix = new THREE.Matrix4();
   }
 
-  if ( superclass ) PoseInputProcessor.__proto__ = superclass;
-  PoseInputProcessor.prototype = Object.create( superclass && superclass.prototype );
-  PoseInputProcessor.prototype.constructor = PoseInputProcessor;
-
-  var prototypeAccessors = { hasPose: {} };
-
-  prototypeAccessors.hasPose.get = function () {
+  get hasPose() {
     return !!this.currentPose;
-  };
+  }
 
-  PoseInputProcessor.prototype.update = function update (dt) {
-    superclass.prototype.update.call(this, dt);
+  update(dt) {
+    super.update(dt);
 
     if (this.currentDevice) {
       var pose = this.currentPose || this.lastPose || DEFAULT_POSE;
@@ -5715,25 +5647,21 @@ var PoseInputProcessor = (function (superclass) {
         this.posePosition.set(0, 0, 0);
       }
     }
-  };
+  }
 
-  PoseInputProcessor.prototype.updateStage = function updateStage (stageMatrix) {
+  updateStage(stageMatrix) {
     this.matrix.makeRotationFromQuaternion(this.poseQuaternion);
     this.matrix.setPosition(this.posePosition);
     this.matrix.multiplyMatrices(stageMatrix, this.matrix);
     this.matrix.decompose(this.position, this.quaternion, EMPTY_SCALE);
-  };
-
-  Object.defineProperties( PoseInputProcessor.prototype, prototypeAccessors );
-
-  return PoseInputProcessor;
-}(Primrose.InputProcessor));
-    if(typeof window !== "undefined") window.Primrose.PoseInputProcessor = PoseInputProcessor;
+  }
+}
+  if(typeof window !== "undefined") window.Primrose.PoseInputProcessor = PoseInputProcessor;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\PoseInputProcessor.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\PoseInputProcessor.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Projector.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Projector.js
 (function(){pliny.class({
   parent: "Primrose",
     name: "Projector",
@@ -7504,8 +7432,6 @@ function Projector(isWorker) {
 
           var v1;
           return function (array, offset, length) {
-            var this$1 = this;
-
 
             if (v1 === undefined)
               v1 = new THREE.Vector3();
@@ -7521,7 +7447,7 @@ function Projector(isWorker) {
               3) {
 
               v1.fromArray(array, j);
-              v1.applyMatrix4(this$1);
+              v1.applyMatrix4(this);
               v1.toArray(array, j);
             }
 
@@ -7532,8 +7458,6 @@ function Projector(isWorker) {
 
           var v1;
           return function applyToBuffer(buffer, offset, length) {
-            var this$1 = this;
-
 
             if (v1 === undefined)
               v1 = new THREE.Vector3();
@@ -7549,7 +7473,7 @@ function Projector(isWorker) {
               v1.x = buffer.getX(j);
               v1.y = buffer.getY(j);
               v1.z = buffer.getZ(j);
-              v1.applyMatrix4(this$1);
+              v1.applyMatrix4(this);
               buffer.setXYZ(v1.x, v1.y, v1.z);
             }
 
@@ -8262,13 +8186,11 @@ Projector.prototype._transform = function (obj, v) {
 // coordinations, because the object they are on could be rotated or
 // positioned somewhere else.
 Projector.prototype._getVerts = function (obj) {
-  var this$1 = this;
-
   var trans = [];
   var geometry = this.geometryCache[obj.geomID],
     verts = geometry.vertices;
   for (var i = 0; i < verts.length; ++i) {
-    trans[i] = this$1._transform(obj, verts[i]);
+    trans[i] = this._transform(obj, verts[i]);
   }
   return trans;
 };
@@ -8319,34 +8241,32 @@ Projector.prototype.setObject = function (obj) {
 };
 
 Projector.prototype.updateObjects = function (objs) {
-  var this$1 = this;
-
   for (var i = 0; i < objs.length; ++i) {
     var obj = objs[i];
     if (obj.inScene !== false) {
       var head = obj,
-        curObj = this$1.objects[obj.uuid];
+        curObj = this.objects[obj.uuid];
       if (obj.matrix !== null) {
         curObj.matrix.fromArray(obj.matrix);
       }
       if (obj.visible !== null) {
-        this$1.setProperty(obj.uuid, "visible", obj.visible);
+        this.setProperty(obj.uuid, "visible", obj.visible);
       }
       if (obj.disabled !== null) {
-        this$1.setProperty(obj.uuid, "disabled", obj.disabled);
+        this.setProperty(obj.uuid, "disabled", obj.disabled);
       }
     }
     else {
-      delete this$1.objects[obj.uuid];
+      delete this.objects[obj.uuid];
       var found = false;
       for (var j = 0; !found && j < this.objectIDs.length; ++j) {
-        var obj2 = this$1.objects[this$1.objectIDs[j]];
+        var obj2 = this.objects[this.objectIDs[j]];
         found = found || obj2 && obj2.geomID === obj.geomID;
       }
       if (!found) {
-        delete this$1.geometryCache[obj.geomID];
+        delete this.geometryCache[obj.geomID];
       }
-      this$1.objectIDs.splice(this$1.objectIDs.indexOf(obj.uuid), 1);
+      this.objectIDs.splice(this.objectIDs.indexOf(obj.uuid), 1);
     }
   }
 };
@@ -8368,8 +8288,6 @@ Projector.prototype.setProperty = function (objID, propName, value) {
 };
 
 Projector.prototype.projectPointers = function (args) {
-  var this$1 = this;
-
   var results = {};
   for (var n = 0; n < args.length; ++n) {
     var pack = args[n],
@@ -8377,14 +8295,14 @@ Projector.prototype.projectPointers = function (args) {
       from = pack[1],
       to = pack[2],
       value = null;
-    this$1.from.fromArray(from);
-    this$1.to.fromArray(to);
+    this.from.fromArray(from);
+    this.to.fromArray(to);
 
     for (var i = 0; i < this.objectIDs.length; ++i) {
-      var objID = this$1.objectIDs[i],
-        obj = this$1.objects[objID];
+      var objID = this.objectIDs[i],
+        obj = this.objects[objID];
       if (!obj.disabled) {
-        var verts = this$1._getVerts(obj),
+        var verts = this._getVerts(obj),
           faces = obj.geometry.faces,
           uvs = obj.geometry.uvs;
 
@@ -8393,22 +8311,22 @@ Projector.prototype.projectPointers = function (args) {
             v0 = verts[face[0] % verts.length],
             v1 = verts[face[1] % verts.length],
             v2 = verts[face[2] % verts.length];
-          this$1.a.subVectors(v1, v0);
-          this$1.b.subVectors(v2, v0);
-          this$1.c.subVectors(this$1.to, this$1.from);
-          this$1.m.set(
-            this$1.a.x, this$1.b.x, -this$1.c.x, 0,
-            this$1.a.y, this$1.b.y, -this$1.c.y, 0,
-            this$1.a.z, this$1.b.z, -this$1.c.z, 0,
+          this.a.subVectors(v1, v0);
+          this.b.subVectors(v2, v0);
+          this.c.subVectors(this.to, this.from);
+          this.m.set(
+            this.a.x, this.b.x, -this.c.x, 0,
+            this.a.y, this.b.y, -this.c.y, 0,
+            this.a.z, this.b.z, -this.c.z, 0,
             0, 0, 0, 1);
-          if (Math.abs(this$1.m.determinant()) > 1e-10) {
-            this$1.m.getInverse(this$1.m);
-            this$1.d.subVectors(this$1.from, v0)
-              .applyMatrix4(this$1.m);
-            if (0 <= this$1.d.x && this$1.d.x <= 1 && 0 <= this$1.d.y && this$1.d.y <= 1 && this$1.d.z > 0) {
-              this$1.c.multiplyScalar(this$1.d.z)
-                .add(this$1.from);
-              var dist = Math.sign(this$1.d.z) * this$1.to.distanceTo(this$1.c);
+          if (Math.abs(this.m.determinant()) > 1e-10) {
+            this.m.getInverse(this.m);
+            this.d.subVectors(this.from, v0)
+              .applyMatrix4(this.m);
+            if (0 <= this.d.x && this.d.x <= 1 && 0 <= this.d.y && this.d.y <= 1 && this.d.z > 0) {
+              this.c.multiplyScalar(this.d.z)
+                .add(this.from);
+              var dist = Math.sign(this.d.z) * this.to.distanceTo(this.c);
               if (!value || dist < value.distance) {
                 value = {
                   name: name,
@@ -8417,16 +8335,16 @@ Projector.prototype.projectPointers = function (args) {
                   object: null,
                   distance: dist,
                   faceIndex: j,
-                  facePoint: this$1.c.toArray(),
-                  faceNormal: this$1.d.toArray()
+                  facePoint: this.c.toArray(),
+                  faceNormal: this.d.toArray()
                 };
 
                 if (uvs) {
                   v0 = uvs[face[0] % uvs.length];
                   v1 = uvs[face[1] % uvs.length];
                   v2 = uvs[face[2] % uvs.length];
-                  var u = this$1.d.x * (v1[0] - v0[0]) + this$1.d.y * (v2[0] - v0[0]) + v0[0],
-                    v = this$1.d.x * (v1[1] - v0[1]) + this$1.d.y * (v2[1] - v0[1]) + v0[1];
+                  var u = this.d.x * (v1[0] - v0[0]) + this.d.y * (v2[0] - v0[0]) + v0[0],
+                    v = this.d.x * (v1[1] - v0[1]) + this.d.y * (v2[1] - v0[1]) + v0[1];
                   if (obj.minU <= u && u <= obj.maxU && obj.minV <= v && v < obj.maxV) {
                     value.point = [u, v];
                   }
@@ -8446,55 +8364,55 @@ Projector.prototype.projectPointers = function (args) {
   }
   this._emit("hit", results);
 };
-    if(typeof window !== "undefined") window.Primrose.Projector = Projector;
+  if(typeof window !== "undefined") window.Primrose.Projector = Projector;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Projector.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Projector.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Random.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Random.js
 (function(){pliny.namespace({
   parent: "Primrose",
   name: "Random",
   description: "Functions for handling random numbers of different criteria, or selecting random elements of arrays."
 });
-var Random = {};
-    if(typeof window !== "undefined") window.Primrose.Random = Random;
+const Random = {};
+  if(typeof window !== "undefined") window.Primrose.Random = Random;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Random.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Random.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\SKINS.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\SKINS.js
 (function(){pliny.value({
   name: "SKINS",
   type: "Array of String",
   description: "A selection of color values that closely match skin colors of people."
 });
-var SKINS = ["#FFDFC4", "#F0D5BE", "#EECEB3", "#E1B899", "#E5C298", "#FFDCB2",
+const SKINS = ["#FFDFC4", "#F0D5BE", "#EECEB3", "#E1B899", "#E5C298", "#FFDCB2",
   "#E5B887", "#E5A073", "#E79E6D", "#DB9065", "#CE967C", "#C67856", "#BA6C49",
   "#A57257", "#F0C8C9", "#DDA8A0", "#B97C6D", "#A8756C", "#AD6452", "#5C3836",
   "#CB8442", "#BD723C", "#704139", "#A3866A", "#870400", "#710101", "#430000",
   "#5B0001", "#302E2E"
 ];
-    if(typeof window !== "undefined") window.Primrose.SKINS = SKINS;
+  if(typeof window !== "undefined") window.Primrose.SKINS = SKINS;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\SKINS.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\SKINS.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\SKINS_VALUES.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\SKINS_VALUES.js
 (function(){pliny.value({
   name: "SKIN_VALUES",
   type: "Array of Number",
   description: "A selection of color values that closely match skin colors of people."
 });
-var SKINS_VALUES = Primrose.SKINS.map(function (s) {
+const SKINS_VALUES = Primrose.SKINS.map(function (s) {
   return parseInt(s.substring(1), 16);
 });
-    if(typeof window !== "undefined") window.Primrose.SKINS_VALUES = SKINS_VALUES;
+  if(typeof window !== "undefined") window.Primrose.SKINS_VALUES = SKINS_VALUES;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\SKINS_VALUES.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\SKINS_VALUES.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Surface.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Surface.js
 (function(){var COUNTER = 0;
 
 pliny.class({
@@ -8512,11 +8430,14 @@ pliny.class({
       description: "The size and location of the surface to create."
     }]
 });
-var Surface = (function (superclass) {
-  function Surface(options) {
-    var this$1 = this;
+class Surface extends Primrose.Entity {
 
-    superclass.call(this);
+  static create() {
+    return new Surface();
+  }
+
+  constructor(options) {
+    super();
     this.options = patch(options, {
       id: "Primrose.Surface[" + (COUNTER++) + "]",
       bounds: new Primrose.Text.Rectangle()
@@ -8531,69 +8452,69 @@ var Surface = (function (superclass) {
 
     Object.defineProperties(this.style, {
       width: {
-        get: function () {
-          return this$1.bounds.width;
+        get: () => {
+          return this.bounds.width;
         },
-        set: function (v) {
-          this$1.bounds.width = v;
-          this$1.resize();
+        set: (v) => {
+          this.bounds.width = v;
+          this.resize();
         }
       },
       height: {
-        get: function () {
-          return this$1.bounds.height;
+        get: () => {
+          return this.bounds.height;
         },
-        set: function (v) {
-          this$1.bounds.height = v;
-          this$1.resize();
+        set: (v) => {
+          this.bounds.height = v;
+          this.resize();
         }
       },
       left: {
-        get: function () {
-          return this$1.bounds.left;
+        get: () => {
+          return this.bounds.left;
         },
-        set: function (v) {
-          this$1.bounds.left = v;
+        set: (v) => {
+          this.bounds.left = v;
         }
       },
       top: {
-        get: function () {
-          return this$1.bounds.top;
+        get: () => {
+          return this.bounds.top;
         },
-        set: function (v) {
-          this$1.bounds.top = v;
+        set: (v) => {
+          this.bounds.top = v;
         }
       },
       opacity: {
-        get: function () {
-          return this$1._opacity;
+        get: () => {
+          return this._opacity;
         },
-        set: function (v) {
-          this$1._opacity = v;
+        set: (v) => {
+          this._opacity = v;
         }
       },
       fontSize: {
-        get: function () {
-          return this$1.fontSize;
+        get: () => {
+          return this.fontSize;
         },
-        set: function (v) {
-          this$1.fontSize = v;
+        set: (v) => {
+          this.fontSize = v;
         }
       },
       backgroundColor: {
-        get: function () {
-          return this$1.backgroundColor;
+        get: () => {
+          return this.backgroundColor;
         },
-        set: function (v) {
-          this$1.backgroundColor = v;
+        set: (v) => {
+          this.backgroundColor = v;
         }
       },
       color: {
-        get: function () {
-          return this$1.color;
+        get: () => {
+          return this.color;
         },
-        set: function (v) {
-          this$1.color = v;
+        set: (v) => {
+          this.color = v;
         }
       }
     });
@@ -8654,17 +8575,7 @@ var Surface = (function (superclass) {
     this._environment = null;
   }
 
-  if ( superclass ) Surface.__proto__ = superclass;
-  Surface.prototype = Object.create( superclass && superclass.prototype );
-  Surface.prototype.constructor = Surface;
-
-  var prototypeAccessors = { imageWidth: {},imageHeight: {},elementWidth: {},elementHeight: {},surfaceWidth: {},surfaceHeight: {},resized: {},texture: {},environment: {} };
-
-  Surface.create = function create () {
-    return new Surface();
-  };
-
-  Surface.prototype.addToBrowserEnvironment = function addToBrowserEnvironment (env, scene) {
+  addToBrowserEnvironment(env, scene) {
     this._environment = env;
     var geom = this.className === "shell" ? shell(3, 10, 10) : quad(2, 2),
       mesh = textured(geom, this, {
@@ -8673,11 +8584,9 @@ var Surface = (function (superclass) {
     scene.add(mesh);
     env.registerPickableObject(mesh);
     return mesh;
-  };
+  }
 
-  Surface.prototype.invalidate = function invalidate (bounds) {
-    var this$1 = this;
-
+  invalidate(bounds) {
     var useDefault = !bounds;
     if (!bounds) {
       bounds = this.bounds.clone();
@@ -8688,12 +8597,12 @@ var Surface = (function (superclass) {
       bounds = bounds.clone();
     }
     for (var i = 0; i < this.children.length; ++i) {
-      var child = this$1.children[i],
+      var child = this.children[i],
         overlap = bounds.overlap(child.bounds);
       if (overlap) {
         var x = overlap.left - child.bounds.left,
           y = overlap.top - child.bounds.top;
-        this$1.context.drawImage(
+        this.context.drawImage(
           child.canvas,
           x, y, overlap.width, overlap.height,
           overlap.x, overlap.y, overlap.width, overlap.height);
@@ -8710,122 +8619,118 @@ var Surface = (function (superclass) {
       bounds.top += this.bounds.top;
       this.parent.invalidate(bounds);
     }
-  };
+  }
 
-  Surface.prototype.render = function render () {
+  render() {
     this.invalidate();
-  };
+  }
 
-  prototypeAccessors.imageWidth.get = function () {
+  get imageWidth() {
     return this.canvas.width;
-  };
+  }
 
-  prototypeAccessors.imageWidth.set = function (v) {
+  set imageWidth(v) {
     this.canvas.width = v;
     this.bounds.width = v;
-  };
+  }
 
-  prototypeAccessors.imageHeight.get = function () {
+  get imageHeight() {
     return this.canvas.height;
-  };
+  }
 
-  prototypeAccessors.imageHeight.set = function (v) {
+  set imageHeight(v) {
     this.canvas.height = v;
     this.bounds.height = v;
-  };
+  }
 
-  prototypeAccessors.elementWidth.get = function () {
+  get elementWidth() {
     return this.canvas.clientWidth * devicePixelRatio;
-  };
+  }
 
-  prototypeAccessors.elementWidth.set = function (v) {
+  set elementWidth(v) {
     this.canvas.style.width = (v / devicePixelRatio) + "px";
-  };
+  }
 
-  prototypeAccessors.elementHeight.get = function () {
+  get elementHeight() {
     return this.canvas.clientHeight * devicePixelRatio;
-  };
+  }
 
-  prototypeAccessors.elementHeight.set = function (v) {
+  set elementHeight(v) {
     this.canvas.style.height = (v / devicePixelRatio) + "px";
-  };
+  }
 
-  prototypeAccessors.surfaceWidth.get = function () {
+  get surfaceWidth() {
     return this.canvas.parentElement ? this.elementWidth : this.bounds.width;
-  };
+  }
 
-  prototypeAccessors.surfaceHeight.get = function () {
+  get surfaceHeight() {
     return this.canvas.parentElement ? this.elementHeight : this.bounds.height;
-  };
+  }
 
-  prototypeAccessors.resized.get = function () {
+  get resized() {
     return this.imageWidth !== this.surfaceWidth ||
       this.imageHeight !== this.surfaceHeight;
-  };
+  }
 
-  Surface.prototype.resize = function resize () {
+  resize() {
     this.setSize(this.surfaceWidth, this.surfaceHeight);
-  };
+  }
 
-  Surface.prototype.setSize = function setSize (width, height) {
-    var oldTextBaseline = this.context.textBaseline,
+  setSize(width, height) {
+    const oldTextBaseline = this.context.textBaseline,
       oldTextAlign = this.context.textAlign;
     this.imageWidth = width;
     this.imageHeight = height;
 
     this.context.textBaseline = oldTextBaseline;
     this.context.textAlign = oldTextAlign;
-  };
+  }
 
-  prototypeAccessors.texture.get = function () {
+  get texture() {
     if (!this._texture) {
       this._texture = new THREE.Texture(this.canvas);
     }
     return this._texture;
-  };
+  }
 
-  prototypeAccessors.environment.get = function () {
-    var this$1 = this;
-
+  get environment() {
     var head = this;
     while(head){
       if(head._environment){
-        if(head !== this$1){
-          this$1._environment = head._environment;
+        if(head !== this){
+          this._environment = head._environment;
         }
-        return this$1._environment;
+        return this._environment;
       }
       head = head.parent;
     }
-  };
+  }
 
-  Surface.prototype.appendChild = function appendChild (child) {
+  appendChild(child) {
     if (!(child instanceof Surface)) {
       throw new Error("Can only append other Surfaces to a Surface. You gave: " + child);
     }
-    superclass.prototype.appendChild.call(this, child);
+    super.appendChild(child);
     this.invalidate();
-  };
+  }
 
-  Surface.prototype.mapUV = function mapUV (point) {
+  mapUV(point) {
     return {
       x: point[0] * this.imageWidth,
       y: (1 - point[1]) * this.imageHeight
     };
-  };
+  }
 
-  Surface.prototype.unmapUV = function unmapUV (point) {
+  unmapUV(point) {
     return [point.x / this.imageWidth, (1 - point.y / this.imageHeight)];
-  };
+  }
 
-  Surface.prototype._findChild = function _findChild (x, y, thunk) {
-    var this$1 = this;
-
+  _findChild(x, y, thunk) {
     var here = this.inBounds(x, y),
       found = null;
     for (var i = this.children.length - 1; i >= 0; --i) {
-      var child = this$1.children[i];
-      if (!found && child.inBounds(x - this$1.bounds.left, y - this$1.bounds.top)) {
+      var child = this.children[i];
+      if (!found && child.inBounds(x - this.bounds.left, y - this.bounds.top)) {
         found = child;
       }
       else if (child.focused) {
@@ -8833,23 +8738,23 @@ var Surface = (function (superclass) {
       }
     }
     return found || here && this;
-  };
+  }
 
-  Surface.prototype.inBounds = function inBounds (x, y) {
+  inBounds(x, y) {
     return this.bounds.left <= x && x < this.bounds.right && this.bounds.top <= y && y < this.bounds.bottom;
-  };
+  }
 
-  Surface.prototype.startPointer = function startPointer (x, y) {
+  startPointer(x, y) {
     if (this.inBounds(x, y)) {
-      var target = this._findChild(x, y, function (child, x2, y2) { return child.startPointer(x2, y2); });
+      var target = this._findChild(x, y, (child, x2, y2) => child.startPointer(x2, y2));
       if (target) {
         if (!this.focused) {
           this.focus();
         }
         emit.call(this, "click", {
-          target: target,
-          x: x,
-          y: y
+          target,
+          x,
+          y
         });
         if (target !== this) {
           target.startPointer(x - this.bounds.left, y - this.bounds.top);
@@ -8859,67 +8764,63 @@ var Surface = (function (superclass) {
         this.blur();
       }
     }
-  };
+  }
 
-  Surface.prototype.movePointer = function movePointer (x, y) {
-    var target = this._findChild(x, y, function (child, x2, y2) { return child.startPointer(x2, y2); });
+  movePointer(x, y) {
+    var target = this._findChild(x, y, (child, x2, y2) => child.startPointer(x2, y2));
     if (target) {
       emit.call(this, "move", {
-        target: target,
-        x: x,
-        y: y
+        target,
+        x,
+        y
       });
       if (target !== this) {
         target.movePointer(x - this.bounds.left, y - this.bounds.top);
       }
     }
-  };
+  }
 
-  Surface.prototype.startUV = function startUV (point) {
+  startUV(point) {
     var p = this.mapUV(point);
     this.startPointer(p.x, p.y);
-  };
+  }
 
-  Surface.prototype.moveUV = function moveUV (point) {
+  moveUV(point) {
     var p = this.mapUV(point);
     this.movePointer(p.x, p.y);
-  };
-
-  Object.defineProperties( Surface.prototype, prototypeAccessors );
-
-  return Surface;
-}(Primrose.Entity));
-    if(typeof window !== "undefined") window.Primrose.Surface = Surface;
+  }
+}
+  if(typeof window !== "undefined") window.Primrose.Surface = Surface;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Surface.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Surface.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\SYS_FONTS.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\SYS_FONTS.js
 (function(){pliny.value({
   parent: "Primrose",
   name: "SYS_FONTS",
   type: "String",
   description: "A selection of fonts that will match whatever the user's operating system normally uses."
 });
-var SYS_FONTS = "-apple-system, '.SFNSText-Regular', 'San Francisco', 'Roboto', 'Segoe UI', 'Helvetica Neue', 'Lucida Grande', sans-serif";
-    if(typeof window !== "undefined") window.Primrose.SYS_FONTS = SYS_FONTS;
+const SYS_FONTS = "-apple-system, '.SFNSText-Regular', 'San Francisco', 'Roboto', 'Segoe UI', 'Helvetica Neue', 'Lucida Grande', sans-serif";
+  if(typeof window !== "undefined") window.Primrose.SYS_FONTS = SYS_FONTS;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\SYS_FONTS.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\SYS_FONTS.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Text.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text.js
 (function(){pliny.namespace({
   parent: "Primrose",
   name: "Text",
   description: "The Text namespace contains classes everything regarding the Primrose source code editor."
 });
-var Text = {};
-    if(typeof window !== "undefined") window.Primrose.Text = Text;
+const Text = {};
+  if(typeof window !== "undefined") window.Primrose.Text = Text;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Text.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Workerize.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Workerize.js
 (function(){pliny.class({
   parent: "Primrose",
     name: "Workerize",
@@ -9038,8 +8939,6 @@ Then we can create and use an automatically workerized version of it as follows.
 });
 
 function Workerize(func) {
-  var this$1 = this;
-
   // First, rebuild the script that defines the class. Since we're dealing
   // with pre-ES6 browsers, we have to use ES5 syntax in the script, or invoke
   // a conversion at a point post-script reconstruction, pre-workerization.
@@ -9116,7 +9015,7 @@ function Workerize(func) {
   });
   this.listeners = {};
 
-  this.worker.onmessage = function (e) { return emit.call(this$1, e.data[0], e.data[1]); };
+  this.worker.onmessage = (e) => emit.call(this, e.data[0], e.data[1]);
 
   // create mappers from the UI-thread side method calls to the UI-thread side
   // postMessage method, to inform the worker thread that methods were called,
@@ -9131,7 +9030,7 @@ function Workerize(func) {
     // different way, to be able to pass messages across the thread boundary.
     if (k !== "addEventListener" && k[0] !== '_') {
       // make the name of the function the first argument, no matter what.
-      this$1[k] = this$1.methodShim.bind(this$1, k);
+      this[k] = this.methodShim.bind(this, k);
     }
   }
 
@@ -9213,24 +9112,24 @@ Workerize.createWorker = function (script, stripFunc) {
 
   return new Worker(dataURI);
 };
-    if(typeof window !== "undefined") window.Primrose.Workerize = Workerize;
+  if(typeof window !== "undefined") window.Primrose.Workerize = Workerize;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Workerize.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Workerize.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\X.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\X.js
 (function(){pliny.namespace({
   parent: "Primrose",
   name: "X",
   description: "Extensions and components that combine other Primrose elements."
 });
-var X = {};
-    if(typeof window !== "undefined") window.Primrose.X = X;
+const X = {};
+  if(typeof window !== "undefined") window.Primrose.X = X;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\X.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\X.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Controls\AbstractLabel.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Controls\AbstractLabel.js
 (function(){var COUNTER = 0;
 
 pliny.class({
@@ -9248,12 +9147,12 @@ pliny.class({
       description: "Named parameters for creating the Button."
     }]
 });
-var AbstractLabel = (function (superclass) {
-  function AbstractLabel(options) {
+class AbstractLabel extends Primrose.Surface {
+  constructor(options) {
     ////////////////////////////////////////////////////////////////////////
     // normalize input parameters
     ////////////////////////////////////////////////////////////////////////
-    superclass.call(this, patch(options, {
+    super(patch(options, {
       id: "Primrose.Controls.AbstractLabel[" + (COUNTER++) + "]"
     }));
 
@@ -9280,43 +9179,37 @@ var AbstractLabel = (function (superclass) {
     this.value = this.options.value;
   }
 
-  if ( superclass ) AbstractLabel.__proto__ = superclass;
-  AbstractLabel.prototype = Object.create( superclass && superclass.prototype );
-  AbstractLabel.prototype.constructor = AbstractLabel;
-
-  var prototypeAccessors = { textAlign: {},value: {},theme: {} };
-
-  prototypeAccessors.textAlign.get = function () {
+  get textAlign() {
     return this.context.textAlign;
-  };
+  }
 
-  prototypeAccessors.textAlign.set = function (v) {
+  set textAlign(v) {
     this.context.textAlign = v;
     this.render();
-  };
+  }
 
-  prototypeAccessors.value.get = function () {
+  get value() {
     return this._value;
-  };
+  }
 
-  prototypeAccessors.value.set = function (txt) {
+  set value(txt) {
     txt = txt || "";
     this._value = txt.replace(/\r\n/g, "\n");
     this.render();
-  };
+  }
 
-  prototypeAccessors.theme.get = function () {
+  get theme() {
     return this._theme;
-  };
+  }
 
-  prototypeAccessors.theme.set = function (t) {
+  set theme(t) {
     this._theme = clone(t || Primrose.Text.Themes.Default);
     this._theme.fontSize = this.fontSize;
     this.refreshCharacter();
     this.render();
-  };
+  }
 
-  AbstractLabel.prototype.refreshCharacter = function refreshCharacter () {
+  refreshCharacter() {
     this.character.height = this.fontSize;
     this.context.font = this.character.height + "px " + this.theme.fontFamily;
     // measure 100 letter M's, then divide by 100, to get the width of an M
@@ -9326,9 +9219,9 @@ var AbstractLabel = (function (superclass) {
         "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM")
       .width /
       100;
-  };
+  }
 
-  AbstractLabel.prototype._isChanged = function _isChanged () {
+  _isChanged() {
     var textChanged = this._lastText !== this.value,
       characterWidthChanged = this.character.width !== this._lastCharacterWidth,
       characterHeightChanged = this.character.height !== this._lastCharacterHeight,
@@ -9336,11 +9229,9 @@ var AbstractLabel = (function (superclass) {
       alignChanged = this.textAlign !== this._lastTextAlign,
       changed = this.resized || textChanged || characterWidthChanged || characterHeightChanged || this.resized || fontChanged || alignChanged;
     return changed;
-  };
+  }
 
-  AbstractLabel.prototype.render = function render () {
-    var this$1 = this;
-
+  render() {
     if (this.resized) {
       this.resize();
     }
@@ -9367,26 +9258,26 @@ var AbstractLabel = (function (superclass) {
         var lines = this.value.split("\n");
         for (var y = 0; y < lines.length; ++y) {
           var line = lines[y],
-            textY = (this$1.imageHeight - lines.length * this$1.character.height) / 2 + y * this$1.character.height;
+            textY = (this.imageHeight - lines.length * this.character.height) / 2 + y * this.character.height;
 
           var textX = null;
-          switch (this$1.textAlign) {
+          switch (this.textAlign) {
             case "right":
-              textX = this$1.imageWidth;
+              textX = this.imageWidth;
               break;
             case "center":
-              textX = this$1.imageWidth / 2;
+              textX = this.imageWidth / 2;
               break;
             default:
               textX = 0;
           }
 
-          var font = (this$1.theme.regular.fontWeight || "") +
-            " " + (this$1.theme.regular.fontStyle || "") +
-            " " + this$1.character.height + "px " + this$1.theme.fontFamily;
-          this$1.context.font = font.trim();
-          this$1.context.fillStyle = this$1.color;
-          this$1.context.fillText(line, textX, textY);
+          var font = (this.theme.regular.fontWeight || "") +
+            " " + (this.theme.regular.fontStyle || "") +
+            " " + this.character.height + "px " + this.theme.fontFamily;
+          this.context.font = font.trim();
+          this.context.fillStyle = this.color;
+          this.context.fillText(line, textX, textY);
         }
       }
 
@@ -9394,20 +9285,16 @@ var AbstractLabel = (function (superclass) {
 
       this.invalidate();
     }
-  };
+  }
 
-  AbstractLabel.prototype.renderCanvasTrim = function renderCanvasTrim () {};
-
-  Object.defineProperties( AbstractLabel.prototype, prototypeAccessors );
-
-  return AbstractLabel;
-}(Primrose.Surface));
-    if(typeof window !== "undefined") window.Primrose.Controls.AbstractLabel = AbstractLabel;
+  renderCanvasTrim() {}
+}
+  if(typeof window !== "undefined") window.Primrose.Controls.AbstractLabel = AbstractLabel;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Controls\AbstractLabel.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Controls\AbstractLabel.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Controls\Button2D.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Controls\Button2D.js
 (function(){var COUNTER = 0;
 
 pliny.class({
@@ -9425,36 +9312,33 @@ pliny.class({
       description: "Named parameters for creating the Button."
     }]
 });
-var Button2D = (function (superclass) {
-  function Button2D(options) {
-    superclass.call(this, patch(options, {
+class Button2D extends Primrose.Controls.AbstractLabel {
+
+  static create() {
+    return new Button2D();
+  }
+
+  constructor(options) {
+    super(patch(options, {
       id: "Primrose.Controls.Button2D[" + (COUNTER++) + "]",
       textAlign: "center"
     }));
     this._lastActivated = null;
   }
 
-  if ( superclass ) Button2D.__proto__ = superclass;
-  Button2D.prototype = Object.create( superclass && superclass.prototype );
-  Button2D.prototype.constructor = Button2D;
-
-  Button2D.create = function create () {
-    return new Button2D();
-  };
-
-  Button2D.prototype.addToBrowserEnvironment = function addToBrowserEnvironment (env, scene) {
+  addToBrowserEnvironment(env, scene) {
     var btn3d = env.buttonFactory.create();
     btn3d._handlers = this.listeners;
     return env.appendChild(btn3d);
-  };
+  }
 
-  Button2D.prototype.startPointer = function startPointer (x, y) {
+  startPointer(x, y) {
     this.focus();
     this._activated = true;
     this.render();
-  };
+  }
 
-  Button2D.prototype.endPointer = function endPointer () {
+  endPointer() {
     if (this._activated) {
       this._activated = false;
       emit.call(this, "click", {
@@ -9462,28 +9346,26 @@ var Button2D = (function (superclass) {
       });
       this.render();
     }
-  };
+  }
 
-  Button2D.prototype._isChanged = function _isChanged () {
+  _isChanged() {
     var activatedChanged = this._activated !== this._lastActivated,
-      changed = superclass.prototype._isChanged || activatedChanged;
+      changed = super._isChanged || activatedChanged;
     return changed;
-  };
+  }
 
-  Button2D.prototype.renderCanvasTrim = function renderCanvasTrim () {
+  renderCanvasTrim() {
     this.context.lineWidth = this._activated ? 4 : 2;
     this.context.strokeStyle = this.theme.regular.foreColor || Primrose.Text.Themes.Default.regular.foreColor;
     this.context.strokeRect(0, 0, this.imageWidth, this.imageHeight);
-  };
-
-  return Button2D;
-}(Primrose.Controls.AbstractLabel));
-    if(typeof window !== "undefined") window.Primrose.Controls.Button2D = Button2D;
+  }
+}
+  if(typeof window !== "undefined") window.Primrose.Controls.Button2D = Button2D;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Controls\Button2D.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Controls\Button2D.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Controls\Button3D.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Controls\Button3D.js
 (function(){pliny.class({
   parent: "Primrose",
     name: "Button3D",
@@ -9503,9 +9385,9 @@ var Button2D = (function (superclass) {
     }],
     description: "A 3D button control, with a separate cap from a stand that it sits on. You click and depress the cap on top of the stand to actuate."
 });
-var Button3D = (function (superclass) {
-  function Button3D(model, name, options) {
-    superclass.call(this);
+class Button3D extends Primrose.BaseControl {
+  constructor(model, name, options) {
+    super();
 
     options = patch(options, Button3D);
     options.minDeflection = Math.cos(options.minDeflection);
@@ -9573,15 +9455,7 @@ var Button3D = (function (superclass) {
     };
   }
 
-  if ( superclass ) Button3D.__proto__ = superclass;
-  Button3D.prototype = Object.create( superclass && superclass.prototype );
-  Button3D.prototype.constructor = Button3D;
-
-  var prototypeAccessors = { position: {} };
-
-  Button3D.prototype.dispatchEvent = function dispatchEvent (evt) {
-    var this$1 = this;
-
+  dispatchEvent(evt) {
     switch(evt.type){
       case "pointerstart":
         this.startUV(evt.hit.point);
@@ -9591,25 +9465,21 @@ var Button3D = (function (superclass) {
       break;
       case "gazecomplete":
         this.startUV(evt.hit.point);
-        setTimeout(function () { return this$1.endPointer(evt); }, 100);
+        setTimeout(() => this.endPointer(evt), 100);
       break;
     }
-  };
+  }
 
-  prototypeAccessors.position.get = function () {
+  get position() {
     return this.container.position;
-  };
+  }
 
-  Button3D.prototype.addToBrowserEnvironment = function addToBrowserEnvironment (env, scene) {
+  addToBrowserEnvironment(env, scene) {
     scene.add(this.container);
     env.registerPickableObject(this.cap);
     return this.container;
-  };
-
-  Object.defineProperties( Button3D.prototype, prototypeAccessors );
-
-  return Button3D;
-}(Primrose.BaseControl));
+  }
+}
 
 pliny.record({
   parent: "Primrose.Controls.Button3D",
@@ -9661,12 +9531,12 @@ Button3D.DEFAULTS = {
   colorPressed: 0x007f00,
   toggle: true
 };
-    if(typeof window !== "undefined") window.Primrose.Controls.Button3D = Button3D;
+  if(typeof window !== "undefined") window.Primrose.Controls.Button3D = Button3D;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Controls\Button3D.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Controls\Button3D.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Controls\Form.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Controls\Form.js
 (function(){var COUNTER = 0;
 pliny.class({
   parent: "Primrose.Controls",
@@ -9674,98 +9544,87 @@ pliny.class({
     baseClass: "Primrose.Entity",
     description: "A basic 2D form control, with its own mesh to use as a frame."
 });
-var Form = (function (superclass) {
-  function Form(options) {
-    var this$1 = this;
+class Form extends Primrose.Surface {
 
-    superclass.call(this, patch(options, {
-      id: ("Primrose.Controls.Form[" + (COUNTER++) + "]")
+  static create() {
+    return new Form();
+  }
+
+  constructor(options) {
+    super(patch(options, {
+      id: `Primrose.Controls.Form[${COUNTER++}]`
     }));
     this._mesh = textured(quad(1, this.bounds.height / this.bounds.width), this);
     this._mesh.name = this.id + "-mesh";
     Object.defineProperties(this.style, {
       display: {
-        get: function () { return this$1._mesh.visible ? "" : "none"; },
-        set: function (v) {
+        get: () => this._mesh.visible ? "" : "none",
+        set: (v) => {
           if (v === "none") {
-            this$1.hide();
+            this.hide();
           }
           else {
-            this$1.show();
+            this.show();
           }
         }
       },
       visible: {
-        get: function () { return this$1._mesh.visible ? "" : "hidden"; },
-        set: function (v) { return this$1.visible = v !== "hidden"; }
+        get: () => this._mesh.visible ? "" : "hidden",
+        set: (v) => this.visible = v !== "hidden"
       }
     });
   }
 
-  if ( superclass ) Form.__proto__ = superclass;
-  Form.prototype = Object.create( superclass && superclass.prototype );
-  Form.prototype.constructor = Form;
-
-  var prototypeAccessors = { position: {},visible: {},disabled: {},enabled: {} };
-
-  Form.create = function create () {
-    return new Form();
-  };
-
-  Form.prototype.addToBrowserEnvironment = function addToBrowserEnvironment (env, scene) {
+  addToBrowserEnvironment(env, scene) {
     scene.add(this._mesh);
     env.registerPickableObject(this._mesh);
     return this._mesh;
-  };
+  }
 
-  prototypeAccessors.position.get = function () {
+  get position() {
     return this._mesh.position;
-  };
+  }
 
-  prototypeAccessors.visible.get = function () {
+  get visible() {
     return this._mesh.visible;
-  };
+  }
 
-  prototypeAccessors.visible.set = function (v) {
+  set visible(v) {
     this._mesh.visible = v;
-  };
+  }
 
-  prototypeAccessors.disabled.get = function () {
+  get disabled() {
     return this._mesh.disabled;
-  };
+  }
 
-  prototypeAccessors.disabled.set = function (v) {
+  set disabled(v) {
     this._mesh.disabled = v;
-  };
+  }
 
-  prototypeAccessors.enabled.get = function () {
+  get enabled() {
     return !this.disabled;
-  };
+  }
 
-  prototypeAccessors.enabled.set = function (v) {
+  set enabled(v) {
     this.disabled = !v;
-  };
+  }
 
-  Form.prototype.hide = function hide () {
+  hide() {
     this.visible = false;
     this.disabled = true;
-  };
+  }
 
-  Form.prototype.show = function show () {
+  show() {
     this.visible = true;
     this.disabled = false;
-  };
-
-  Object.defineProperties( Form.prototype, prototypeAccessors );
-
-  return Form;
-}(Primrose.Surface));
-    if(typeof window !== "undefined") window.Primrose.Controls.Form = Form;
+  }
+}
+  if(typeof window !== "undefined") window.Primrose.Controls.Form = Form;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Controls\Form.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Controls\Form.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Controls\HtmlDoc.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Controls\HtmlDoc.js
 (function(){var COUNTER = 0;
 
 pliny.class({
@@ -9779,9 +9638,14 @@ pliny.class({
       description: "Named parameters for creating the Document."
     }]
 });
-var HtmlDoc = (function (superclass) {
-  function HtmlDoc(options) {
-    superclass.call(this, patch(options, {
+class HtmlDoc extends Primrose.Surface {
+
+  static create() {
+    return new HtmlDoc();
+  }
+
+  constructor(options) {
+    super(patch(options, {
       id: "Primrose.Controls.HtmlDoc[" + (COUNTER++) + "]"
     }));
     ////////////////////////////////////////////////////////////////////////
@@ -9805,21 +9669,11 @@ var HtmlDoc = (function (superclass) {
     this.element = this.options.element;
   }
 
-  if ( superclass ) HtmlDoc.__proto__ = superclass;
-  HtmlDoc.prototype = Object.create( superclass && superclass.prototype );
-  HtmlDoc.prototype.constructor = HtmlDoc;
-
-  var prototypeAccessors = { element: {},value: {} };
-
-  HtmlDoc.create = function create () {
-    return new HtmlDoc();
-  };
-
-  prototypeAccessors.element.get = function () {
+  get element() {
     return this._element;
-  };
+  }
 
-  prototypeAccessors.element.set = function (v) {
+  set element(v) {
     if (v) {
       this._element = Primrose.DOM.cascadeElement(v, "DIV", HTMLDivElement);
       this._element.style.position = "absolute";
@@ -9829,39 +9683,37 @@ var HtmlDoc = (function (superclass) {
       document.body.appendChild(Primrose.DOM.makeHidingContainer(this.id + "-hider", this._element));
       this._render();
     }
-  };
+  }
 
-  HtmlDoc.prototype.addToBrowserEnvironment = function addToBrowserEnvironment (env, scene) {
+  addToBrowserEnvironment(env, scene) {
     var mesh = textured(quad(2, 2), this);
     scene.add(mesh);
     env.registerPickableObject(mesh);
     return mesh;
-  };
+  }
 
-  prototypeAccessors.value.get = function () {
+  get value() {
     return this._element.innerHTML;
-  };
+  }
 
-  prototypeAccessors.value.set = function (v) {
+  set value(v) {
     if (v !== this._element.innerHTML) {
       this._element.innerHTML = v;
       this._render();
     }
-  };
+  }
 
-  HtmlDoc.prototype._render = function _render () {
-    var this$1 = this;
-
+  _render() {
     html2canvas(this._element, {
-      onrendered: function (canvas) {
-        this$1._image = canvas;
-        this$1.setSize(canvas.width, canvas.height);
-        this$1.render();
+      onrendered: (canvas) => {
+        this._image = canvas;
+        this.setSize(canvas.width, canvas.height);
+        this.render();
       }
     });
-  };
+  }
 
-  HtmlDoc.prototype.render = function render () {
+  render() {
     if (this._image !== this._lastImage) {
       this._lastImage = this._image;
       this.context.fillStyle = "white";
@@ -9869,18 +9721,14 @@ var HtmlDoc = (function (superclass) {
       this.context.drawImage(this._image, 0, 0);
       this.invalidate();
     }
-  };
-
-  Object.defineProperties( HtmlDoc.prototype, prototypeAccessors );
-
-  return HtmlDoc;
-}(Primrose.Surface));
-    if(typeof window !== "undefined") window.Primrose.Controls.HtmlDoc = HtmlDoc;
+  }
+}
+  if(typeof window !== "undefined") window.Primrose.Controls.HtmlDoc = HtmlDoc;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Controls\HtmlDoc.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Controls\HtmlDoc.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Controls\Image.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Controls\Image.js
 (function(){var COUNTER = 0,
   _ = priv();
 
@@ -9895,8 +9743,13 @@ pliny.class({
       description: "Named parameters for creating the Image."
     }]
 });
-var Image = (function (superclass) {
-  function Image(options) {
+class Image extends Primrose.Entity {
+
+  static create() {
+    return new Image();
+  }
+
+  constructor(options) {
     ////////////////////////////////////////////////////////////////////////
     // normalize input parameters
     ////////////////////////////////////////////////////////////////////////
@@ -9912,7 +9765,7 @@ var Image = (function (superclass) {
       id: "Primrose.Controls.Image[" + (COUNTER++) + "]"
     });
 
-    superclass.call(this, options.id);
+    super(options.id);
 
     this.options = options;
 
@@ -9930,70 +9783,56 @@ var Image = (function (superclass) {
     this.isVideo = false;
   }
 
-  if ( superclass ) Image.__proto__ = superclass;
-  Image.prototype = Object.create( superclass && superclass.prototype );
-  Image.prototype.constructor = Image;
-
-  var prototypeAccessors = { matrixWorld: {},position: {},quaternion: {},scale: {},visible: {} };
-
-  Image.create = function create () {
-    return new Image();
-  };
-
-  Image.prototype.add = function add (child){
+  add(child){
     this._meshes[0].add(child);
-  };
+  }
 
-  prototypeAccessors.matrixWorld.get = function () {
+  get matrixWorld() {
     return this._meshes[0].matrixWorld;
-  };
+  }
 
-  prototypeAccessors.position.get = function (){
+  get position(){
     return this._meshes[0].position;
-  };
+  }
 
-  prototypeAccessors.quaternion.get = function (){
+  get quaternion(){
     return this._meshes[0].quaternion;
-  };
+  }
 
-  prototypeAccessors.scale.get = function (){
+  get scale(){
     return this._meshes[0].scale;
-  };
+  }
 
-  prototypeAccessors.visible.get = function (){
-    var this$1 = this;
-
+  get visible(){
     for(var i = 0; i < this._meshes.length; ++i){
-      if(this$1._meshes[i].visible){
+      if(this._meshes[i].visible){
         return true;
       }
     }
     return false;
-  };
+  }
 
-  prototypeAccessors.visible.set = function (v){
+  set visible(v){
     var img = this._meshes[this._currentImageIndex];
     if(img){
       img.visible = v;
     }
-  };
+  }
 
-  Image.prototype.addToBrowserEnvironment = function addToBrowserEnvironment (env, scene) {
-    var this$1 = this;
-
-    this._meshes.forEach(function (mesh, i) {
+  addToBrowserEnvironment(env, scene) {
+    this._meshes.forEach((mesh, i) => {
       scene.add(mesh);
-      mesh.name = this$1.id + "-" + i;
+      mesh.name = this.id + "-" + i;
       if(i > 0){
         mesh.visible = false;
       }
-      else if(this$1.options.pickable) {
+      else if(this.options.pickable) {
         env.registerPickableObject(mesh);
       }
     });
-  };
+  }
 
-  Image.prototype._setGeometry = function _setGeometry (options) {
+  _setGeometry(options) {
     if(this.options.radius){
       this.options.geometry = shell(
         this.options.radius,
@@ -10012,71 +9851,67 @@ var Image = (function (superclass) {
       }
       this.options.geometry = quad(this.options.width, this.options.height, options);
     }
-  };
+  }
 
-  Image.prototype.loadImages = function loadImages (images, progress) {
-    var this$1 = this;
-
-    return Promise.all(Array.prototype.map.call(images, function (src, i) { return new Promise(function (resolve, reject) {
-      var txt = Primrose.loadTexture(src, resolve, progress, reject);
-      this$1._textures[i] = txt;
-      this$1._setGeometry();
-      this$1._meshes[i] = textured(
-          this$1.options.geometry,
+  loadImages(images, progress) {
+    return Promise.all(Array.prototype.map.call(images, (src, i) => new Promise((resolve, reject) => {
+      const txt = Primrose.loadTexture(src, resolve, progress, reject);
+      this._textures[i] = txt;
+      this._setGeometry();
+      this._meshes[i] = textured(
+          this.options.geometry,
           txt,
-          this$1.options);
-    }); }))
-    .then(function () { return this$1.isVideo = false; })
-    .then(function () { return this$1; });
-  };
+          this.options);
+    })))
+    .then(() => this.isVideo = false)
+    .then(() => this);
+  }
 
-  Image.prototype.loadVideos = function loadVideos (videos, progress){
-    var this$1 = this;
-
-    return Promise.all(Array.prototype.map.call(videos, function (spec, i) { return new Promise(function (resolve, reject) {
+  loadVideos(videos, progress){
+    return Promise.all(Array.prototype.map.call(videos, (spec, i) => new Promise((resolve, reject) => {
       var video = null;
       if(typeof spec === "string"){
-        video = document.querySelector(("video[src='" + spec + "']")) ||
+        video = document.querySelector(`video[src='${spec}']`) ||
           document.createElement("video");
         video.src = spec;
       }
       else if(spec instanceof HTMLVideoElement){
         video = spec;
       }
-      video.oncanplaythrough = function () {
-        var width = video.videoWidth,
+      video.oncanplaythrough = () => {
+        const width = video.videoWidth,
           height = video.videoHeight,
           p2Width = Math.pow(2, Math.ceil(Math.log2(width))),
           p2Height = Math.pow(2, Math.ceil(Math.log2(height)));
 
         if(width === p2Width && height === p2Height){
-          this$1._meshes[i] = textured(
-            this$1.options.geometry,
+          this._meshes[i] = textured(
+            this.options.geometry,
             elem,
-            this$1.options);
+            this.options);
         }
         else{
-          this$1._elements[i] = video;
+          this._elements[i] = video;
 
-          this$1._canvases[i] = document.createElement("canvas");
-          this$1._canvases[i].id = (video.id || this$1.id) + "-canvas";
-          this$1._canvases[i].width = p2Width;
-          this$1._canvases[i].height = p2Height;
+          this._canvases[i] = document.createElement("canvas");
+          this._canvases[i].id = (video.id || this.id) + "-canvas";
+          this._canvases[i].width = p2Width;
+          this._canvases[i].height = p2Height;
 
-          this$1._contexts[i] = this$1._canvases[i].getContext("2d");
+          this._contexts[i] = this._canvases[i].getContext("2d");
 
-          this$1._setGeometry({
+          this._setGeometry({
             maxU: width / p2Width,
             maxV: height / p2Height
           });
 
-          this$1._meshes[i] = textured(
-            this$1.options.geometry,
-            this$1._canvases[i],
-            this$1.options);
+          this._meshes[i] = textured(
+            this.options.geometry,
+            this._canvases[i],
+            this.options);
         }
 
-        this$1._textures[i] = this$1._meshes[i].material.map;
+        this._textures[i] = this._meshes[i].material.map;
         video.oncanplaythrough = null;
         resolve();
       };
@@ -10089,150 +9924,139 @@ var Image = (function (superclass) {
       if(!video.parentElement){
         document.body.insertBefore(video, document.body.children[0]);
       }
-    }); }))
-    .then(function () { return this$1.isVideo = true; })
-    .then(function () { return this$1; });
-  };
+    })))
+    .then(() => this.isVideo = true)
+    .then(() => this);
+  }
 
-  Image.prototype.eyeBlank = function eyeBlank (eye) {
-    var this$1 = this;
-
+  eyeBlank(eye) {
     if(this._meshes) {
       this._currentImageIndex = eye % this._meshes.length;
       var isVisible = this.visible;
       for(var i = 0; i < this._meshes.length; ++i){
-        var m = this$1._meshes[i];
-        m.visible = isVisible && (i === this$1._currentImageIndex);
+        var m = this._meshes[i];
+        m.visible = isVisible && (i === this._currentImageIndex);
         if(i > 0) {
-          m.position.copy(this$1.position);
-          m.quaternion.copy(this$1.quaternion);
-          m.scale.copy(this$1.scale);
+          m.position.copy(this.position);
+          m.quaternion.copy(this.quaternion);
+          m.scale.copy(this.scale);
         }
       }
     }
-  };
+  }
 
-  Image.prototype.update = function update (){
-    var this$1 = this;
-
+  update(){
     if(this.isVideo){
       for(var i = 0; i < this._textures.length; ++i) {
-        if(i < this$1._contexts.length) {
-          this$1._contexts[i].drawImage(this$1._elements[i], 0, 0);
+        if(i < this._contexts.length) {
+          this._contexts[i].drawImage(this._elements[i], 0, 0);
         }
-        this$1._textures[i].needsUpdate = true;
+        this._textures[i].needsUpdate = true;
       }
     }
-  };
-
-  Object.defineProperties( Image.prototype, prototypeAccessors );
-
-  return Image;
-}(Primrose.Entity));
-    if(typeof window !== "undefined") window.Primrose.Controls.Image = Image;
+  }
+}
+  if(typeof window !== "undefined") window.Primrose.Controls.Image = Image;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Controls\Image.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Controls\Image.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Controls\Progress.js
-(function(){var SIZE = 1,
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Controls\Progress.js
+(function(){const SIZE = 1,
   INSET = 0.8,
   PROPORTION = 10,
   SIZE_SMALL = SIZE / PROPORTION,
   INSET_LARGE = (1 - (1 - INSET) / PROPORTION);
 
-var Progress = function Progress(majorColor, minorColor) {
-  majorColor = majorColor || 0xffffff;
-  minorColor = minorColor || 0x000000;
-  var geom = box(SIZE, SIZE_SMALL, SIZE_SMALL);
+class Progress {
 
-  this.totalBar = colored(geom, minorColor, {
-    unshaded: true,
-    side: THREE.BackSide
-  });
+  constructor(majorColor, minorColor) {
+    majorColor = majorColor || 0xffffff;
+    minorColor = minorColor || 0x000000;
+    var geom = box(SIZE, SIZE_SMALL, SIZE_SMALL);
 
-  this.valueBar = colored(geom, majorColor, {
-    unshaded: true
-  });
-  this.valueBar.scale.set(0, INSET, INSET);
+    this.totalBar = colored(geom, minorColor, {
+      unshaded: true,
+      side: THREE.BackSide
+    });
 
-  this.totalBar.add(this.valueBar);
+    this.valueBar = colored(geom, majorColor, {
+      unshaded: true
+    });
+    this.valueBar.scale.set(0, INSET, INSET);
 
-  this.fileState = null;
-  this.reset();
-};
+    this.totalBar.add(this.valueBar);
 
-var prototypeAccessors = { visible: {},position: {},quaternion: {},value: {} };
-
-Progress.prototype.addToBrowserEnvironment = function addToBrowserEnvironment (env, scene){
-  scene.add(this.totalBar);
-};
-
-Progress.prototype.reset = function reset (){
-  this.fileState = {};
-  this.value = 0;
-};
-
-prototypeAccessors.visible.get = function (){
-  return this.totalBar.visible;
-};
-
-prototypeAccessors.visible.set = function (v){
-  this.totalBar.visible = v;
-};
-
-prototypeAccessors.position.get = function (){
-  return this.totalBar.position;
-};
-
-prototypeAccessors.quaternion.get = function (){
-  return this.totalBar.quaternion;
-};
-
-prototypeAccessors.value.get = function (){
-  return this.valueBar.scale.x / INSET_LARGE;
-};
-
-prototypeAccessors.value.set = function (v){
-  this.valueBar.scale.x = v * INSET_LARGE;
-  this.valueBar.position.x = -SIZE * (1 - v) * INSET_LARGE / 2;
-};
-
-Progress.prototype.onProgress = function onProgress (evt){
-    var this$1 = this;
-
-  var file = evt.target.responseURL || evt.target.currentSrc;
-  if(file && evt.loaded !== undefined){
-    if(!this.fileState[file]){
-      this.fileState[file] = {};
-    }
-    var f = this.fileState[file];
-    f.loaded = evt.loaded;
-    f.total = evt.total;
+    this.fileState = null;
+    this.reset();
   }
 
-  var total = 0, loaded = 0;
-  for(var key in this.fileState){
-    var f$1 = this$1.fileState[key];
-    total += f$1.total;
-    loaded += f$1.loaded;
+  addToBrowserEnvironment(env, scene){
+    scene.add(this.totalBar);
   }
 
-  if(total > 0){
-    this.value = loaded / total;
-  }
-  else{
+  reset(){
+    this.fileState = {};
     this.value = 0;
   }
-};
 
-Object.defineProperties( Progress.prototype, prototypeAccessors );
-    if(typeof window !== "undefined") window.Primrose.Controls.Progress = Progress;
+  get visible(){
+    return this.totalBar.visible;
+  }
+
+  set visible(v){
+    this.totalBar.visible = v;
+  }
+
+  get position(){
+    return this.totalBar.position;
+  }
+
+  get quaternion(){
+    return this.totalBar.quaternion;
+  }
+
+  get value(){
+    return this.valueBar.scale.x / INSET_LARGE;
+  }
+
+  set value(v){
+    this.valueBar.scale.x = v * INSET_LARGE;
+    this.valueBar.position.x = -SIZE * (1 - v) * INSET_LARGE / 2;
+  }
+
+  onProgress(evt){
+    const file = evt.target.responseURL || evt.target.currentSrc;
+    if(file && evt.loaded !== undefined){
+      if(!this.fileState[file]){
+        this.fileState[file] = {};
+      }
+      const f = this.fileState[file];
+      f.loaded = evt.loaded;
+      f.total = evt.total;
+    }
+
+    let total = 0, loaded = 0;
+    for(let key in this.fileState){
+      const f = this.fileState[key];
+      total += f.total;
+      loaded += f.loaded;
+    }
+
+    if(total > 0){
+      this.value = loaded / total;
+    }
+    else{
+      this.value = 0;
+    }
+  }
+}
+  if(typeof window !== "undefined") window.Primrose.Controls.Progress = Progress;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Controls\Progress.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Controls\Progress.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Controls\VUMeter.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Controls\VUMeter.js
 (function(){var COUNTER = 0;
 
 pliny.class({
@@ -10250,8 +10074,9 @@ pliny.class({
       description: "Named parameters for creating the Button."
     }]
 });
-var VUMeter = (function (superclass) {
-  function VUMeter(analyzer, options) {
+class VUMeter extends Primrose.Surface {
+
+  constructor(analyzer, options) {
     ////////////////////////////////////////////////////////////////////////
     // normalize input parameters
     ////////////////////////////////////////////////////////////////////////
@@ -10263,7 +10088,7 @@ var VUMeter = (function (superclass) {
       };
     }
 
-    superclass.call(this, patch(options, {
+    super(patch(options, {
       id: "Primrose.Controls.VUMeter[" + (COUNTER++) + "]",
       bounds: new Primrose.Text.Rectangle(0, 0, 512, 256),
       backgroundColor: 0x000000,
@@ -10279,20 +10104,14 @@ var VUMeter = (function (superclass) {
     this.buffer = new Uint8Array(this.analyzer.frequencyBinCount);
   }
 
-  if ( superclass ) VUMeter.__proto__ = superclass;
-  VUMeter.prototype = Object.create( superclass && superclass.prototype );
-  VUMeter.prototype.constructor = VUMeter;
-
-  VUMeter.prototype.addToBrowserEnvironment = function addToBrowserEnvironment (env, scene) {
+  addToBrowserEnvironment(env, scene) {
     var imageMesh = textured(quad(0.5, 0.5 * this.imageHeight / this.imageWidth), this);
     scene.add(imageMesh);
     env.registerPickableObject(imageMesh);
     return imageMesh;
-  };
+  }
 
-  VUMeter.prototype.render = function render () {
-    var this$1 = this;
-
+  render() {
     if (this.resized) {
       this.resize();
     }
@@ -10304,23 +10123,21 @@ var VUMeter = (function (superclass) {
     this.context.strokeStyle = this.options.foregroundColor;
     this.context.beginPath();
     for (var i = 0; i < this.buffer.length; ++i) {
-      var x = i * this$1.bounds.width / this$1.buffer.length,
-        y = this$1.buffer[i] * this$1.bounds.height / 256,
+      var x = i * this.bounds.width / this.buffer.length,
+        y = this.buffer[i] * this.bounds.height / 256,
         func = i > 0 ? "lineTo" : "moveTo";
-      this$1.context[func](x, y);
+      this.context[func](x, y);
     }
     this.context.stroke();
     this.invalidate();
-  };
-
-  return VUMeter;
-}(Primrose.Surface));
-    if(typeof window !== "undefined") window.Primrose.Controls.VUMeter = VUMeter;
+  }
+}
+  if(typeof window !== "undefined") window.Primrose.Controls.VUMeter = VUMeter;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Controls\VUMeter.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Controls\VUMeter.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\DOM\cascadeElement.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\DOM\cascadeElement.js
 (function(){pliny.function({
   parent: "Primrose.DOM",
   name: "cascadeElement",
@@ -10438,12 +10255,12 @@ function cascadeElement(id, tag, DOMClass, add) {
   }
   return elem;
 }
-    if(typeof window !== "undefined") window.Primrose.DOM.cascadeElement = cascadeElement;
+  if(typeof window !== "undefined") window.Primrose.DOM.cascadeElement = cascadeElement;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\DOM\cascadeElement.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\DOM\cascadeElement.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\DOM\findEverything.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\DOM\findEverything.js
 (function(){pliny.function({
   parent: "Primrose.DOM",
   name: "findEverything",
@@ -10510,12 +10327,12 @@ function findEverything(elem, obj) {
   }
   return obj;
 }
-    if(typeof window !== "undefined") window.Primrose.DOM.findEverything = findEverything;
+  if(typeof window !== "undefined") window.Primrose.DOM.findEverything = findEverything;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\DOM\findEverything.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\DOM\findEverything.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\DOM\makeHidingContainer.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\DOM\makeHidingContainer.js
 (function(){pliny.function({
   parent: "Primrose.DOM",
   name: "makeHidingContainer",
@@ -10548,12 +10365,12 @@ function makeHidingContainer(id, obj) {
   elem.appendChild(obj);
   return elem;
 }
-    if(typeof window !== "undefined") window.Primrose.DOM.makeHidingContainer = makeHidingContainer;
+  if(typeof window !== "undefined") window.Primrose.DOM.makeHidingContainer = makeHidingContainer;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\DOM\makeHidingContainer.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\DOM\makeHidingContainer.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\HTTP\del.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\HTTP\del.js
 (function(){pliny.function({
   parent: "Primrose.HTTP",
   name: "del",
@@ -10583,12 +10400,12 @@ function makeHidingContainer(id, obj) {
 function del(type, url, options) {
   return Primrose.HTTP.XHR("DELETE", type, url, options);
 }
-    if(typeof window !== "undefined") window.Primrose.HTTP.del = del;
+  if(typeof window !== "undefined") window.Primrose.HTTP.del = del;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\HTTP\del.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\HTTP\del.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\HTTP\delObject.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\HTTP\delObject.js
 (function(){pliny.function({
   parent: "Primrose.HTTP",
   name: "delObject",
@@ -10613,12 +10430,12 @@ function del(type, url, options) {
 function delObject(url, options) {
   return Primrose.HTTP.del("json", url, options);
 }
-    if(typeof window !== "undefined") window.Primrose.HTTP.delObject = delObject;
+  if(typeof window !== "undefined") window.Primrose.HTTP.delObject = delObject;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\HTTP\delObject.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\HTTP\delObject.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\HTTP\get.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\HTTP\get.js
 (function(){pliny.function({
   parent: "Primrose.HTTP",
   name: "get",
@@ -10659,12 +10476,12 @@ function delObject(url, options) {
 function get(type, url, options) {
   return Primrose.HTTP.XHR("GET", type || "text", url, options);
 }
-    if(typeof window !== "undefined") window.Primrose.HTTP.get = get;
+  if(typeof window !== "undefined") window.Primrose.HTTP.get = get;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\HTTP\get.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\HTTP\get.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\HTTP\getBuffer.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\HTTP\getBuffer.js
 (function(){pliny.function({
   parent: "Primrose.HTTP",
   name: "getBuffer",
@@ -10703,12 +10520,12 @@ function get(type, url, options) {
 function getBuffer(url, options) {
   return Primrose.HTTP.get("arraybuffer", url, options);
 }
-    if(typeof window !== "undefined") window.Primrose.HTTP.getBuffer = getBuffer;
+  if(typeof window !== "undefined") window.Primrose.HTTP.getBuffer = getBuffer;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\HTTP\getBuffer.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\HTTP\getBuffer.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\HTTP\getObject.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\HTTP\getObject.js
 (function(){pliny.function({
   parent: "Primrose.HTTP",
   name: "getObject",
@@ -10745,12 +10562,12 @@ function getBuffer(url, options) {
 function getObject(url, options) {
   return Primrose.HTTP.get("json", url, options);
 }
-    if(typeof window !== "undefined") window.Primrose.HTTP.getObject = getObject;
+  if(typeof window !== "undefined") window.Primrose.HTTP.getObject = getObject;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\HTTP\getObject.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\HTTP\getObject.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\HTTP\getText.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\HTTP\getText.js
 (function(){pliny.function({
   parent: "Primrose.HTTP",
   name: "getText",
@@ -10786,12 +10603,12 @@ function getObject(url, options) {
 function getText(url, options) {
   return Primrose.HTTP.get("text", url, options);
 }
-    if(typeof window !== "undefined") window.Primrose.HTTP.getText = getText;
+  if(typeof window !== "undefined") window.Primrose.HTTP.getText = getText;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\HTTP\getText.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\HTTP\getText.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\HTTP\post.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\HTTP\post.js
 (function(){pliny.function({
   parent: "Primrose.HTTP",
   name: "post",
@@ -10821,12 +10638,12 @@ function getText(url, options) {
 function post(type, url, options) {
   return Primrose.HTTP.XHR("POST", type, url, options);
 }
-    if(typeof window !== "undefined") window.Primrose.HTTP.post = post;
+  if(typeof window !== "undefined") window.Primrose.HTTP.post = post;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\HTTP\post.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\HTTP\post.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\HTTP\postObject.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\HTTP\postObject.js
 (function(){pliny.function({
   parent: "Primrose.HTTP",
   name: "postObject",
@@ -10851,12 +10668,12 @@ function post(type, url, options) {
 function postObject(url, options) {
   return Primrose.HTTP.post("json", url, options);
 }
-    if(typeof window !== "undefined") window.Primrose.HTTP.postObject = postObject;
+  if(typeof window !== "undefined") window.Primrose.HTTP.postObject = postObject;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\HTTP\postObject.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\HTTP\postObject.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\HTTP\XHR.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\HTTP\XHR.js
 (function(){pliny.function({
   parent: "Primrose.HTTP",
   name: "XHR",
@@ -10911,8 +10728,8 @@ function XHR(method, type, url, options) {
     }
 
     var req = new XMLHttpRequest();
-    req.onerror = function (evt) { return reject(new Error("Request error: " + evt.message)); };
-    req.onabort = function (evt) { return reject(new Error("Request abort: " + evt.message)); };
+    req.onerror = (evt) => reject(new Error("Request error: " + evt.message));
+    req.onabort = (evt) => reject(new Error("Request abort: " + evt.message));
     req.onload = function () {
       // The other error events are client-errors. If there was a server error,
       // we'd find out about it during this event. We need to only respond to
@@ -10951,13 +10768,13 @@ function XHR(method, type, url, options) {
     }
   });
 }
-    if(typeof window !== "undefined") window.Primrose.HTTP.XHR = XHR;
+  if(typeof window !== "undefined") window.Primrose.HTTP.XHR = XHR;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\HTTP\XHR.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\HTTP\XHR.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Input\FPSInput.js
-(function(){var DISPLACEMENT = new THREE.Vector3(),
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Input\FPSInput.js
+(function(){const DISPLACEMENT = new THREE.Vector3(),
   EULER_TEMP = new THREE.Euler(),
   QUAT_TEMP = new THREE.Quaternion(),
   WEDGE = Math.PI / 3;
@@ -10979,11 +10796,9 @@ pliny.class({
       description: "Optional setup: avatarHeight, gravity, and scene."
     }]
 });
-var FPSInput = (function (superclass) {
-  function FPSInput(DOMElement, options) {
-    var this$1 = this;
-
-    superclass.call(this);
+class FPSInput extends Primrose.AbstractEventEmitter {
+  constructor(DOMElement, options) {
+    super();
     DOMElement = DOMElement || document.documentElement;
     this.options = options;
     this._handlers.zero = [];
@@ -11129,15 +10944,15 @@ var FPSInput = (function (superclass) {
     this.add(new Primrose.Input.VR(this.options.avatarHeight));
     this.motionDevices.push(this.VR);
 
-    Primrose.Input.Gamepad.addEventListener("gamepadconnected", function (pad) {
-      var padID = Primrose.Input.Gamepad.ID(pad);
-      var mgr = null;
+    Primrose.Input.Gamepad.addEventListener("gamepadconnected", (pad) => {
+      const padID = Primrose.Input.Gamepad.ID(pad);
+      let mgr = null;
 
       if (padID !== "Unknown" && padID !== "Rift") {
         if (Primrose.Input.Gamepad.isMotionController(pad)) {
-          var controllerNumber = 0;
-          for (var i = 0; i < this$1.managers.length; ++i) {
-            mgr = this$1.managers[i];
+          let controllerNumber = 0;
+          for (let i = 0; i < this.managers.length; ++i) {
+            mgr = this.managers[i];
             if (mgr.currentPad && mgr.currentPad.id === pad.id) {
               ++controllerNumber;
             }
@@ -11153,14 +10968,14 @@ var FPSInput = (function (superclass) {
             },
             zero: {
               buttons: [Primrose.Input.Gamepad.VIVE_BUTTONS.GRIP_PRESSED],
-              commandUp: emit.bind(this$1, "zero")
+              commandUp: emit.bind(this, "zero")
             }
           });
 
-          this$1.add(mgr);
-          this$1.motionDevices.push(mgr);
+          this.add(mgr);
+          this.motionDevices.push(mgr);
 
-          var shift = (this$1.motionDevices.length - 2) * 8,
+          const shift = (this.motionDevices.length - 2) * 8,
             color = 0x0000ff << shift,
             highlight = 0xff0000 >> shift,
             ptr = new Primrose.Pointer(padID + "Pointer", color, 1, highlight, [mgr]);
@@ -11168,9 +10983,9 @@ var FPSInput = (function (superclass) {
             emissive: highlight
           }));
 
-          this$1.pointers.push(ptr);
-          ptr.addToBrowserEnvironment(null, this$1.options.scene);
-          ptr.forward(this$1, Primrose.Pointer.EVENTS);
+          this.pointers.push(ptr);
+          ptr.addToBrowserEnvironment(null, this.options.scene);
+          ptr.forward(this, Primrose.Pointer.EVENTS);
         }
         else {
           mgr = new Primrose.Input.Gamepad(pad, 0, {
@@ -11207,11 +11022,11 @@ var FPSInput = (function (superclass) {
             },
             zero: {
               buttons: [Primrose.Input.Gamepad.XBOX_ONE_BUTTONS.BACK],
-              commandUp: emit.bind(this$1, "zero")
+              commandUp: emit.bind(this, "zero")
             }
           });
-          this$1.add(mgr);
-          this$1.mousePointer.addDevice(mgr, mgr);
+          this.add(mgr);
+          this.mousePointer.addDevice(mgr, mgr);
         }
       }
     });
@@ -11241,76 +11056,64 @@ var FPSInput = (function (superclass) {
     this.options.scene.add(this.mousePointer.disk);
 
 
-    this.pointers.forEach(function (ptr) { return ptr.forward(this$1, Primrose.Pointer.EVENTS); });
+    this.pointers.forEach((ptr) => ptr.forward(this, Primrose.Pointer.EVENTS));
     this.ready = Promise.all(this.managers
-      .map(function (mgr) { return mgr.ready; })
+      .map((mgr) => mgr.ready)
       .filter(identity));
   }
 
-  if ( superclass ) FPSInput.__proto__ = superclass;
-  FPSInput.prototype = Object.create( superclass && superclass.prototype );
-  FPSInput.prototype.constructor = FPSInput;
-
-  var prototypeAccessors = { hasMotionControllers: {},hasGamepad: {},hasMouse: {},hasTouch: {},segments: {} };
-
-  FPSInput.prototype.remove = function remove (id) {
-    var mgr = this[id],
+  remove(id) {
+    const mgr = this[id],
       mgrIdx = this.managers.indexOf(mgr);
     if (mgrIdx > -1) {
       this.managers.splice(mgrIdx, 1);
       delete this[id];
     }
     console.log("removed", mgr);
-  };
+  }
 
-  FPSInput.prototype.add = function add (mgr) {
-    var this$1 = this;
-
-    for (var i = this.managers.length - 1; i >= 0; --i) {
-      if (this$1.managers[i].name === mgr.name) {
-        this$1.managers.splice(i, 1);
+  add(mgr) {
+    for (let i = this.managers.length - 1; i >= 0; --i) {
+      if (this.managers[i].name === mgr.name) {
+        this.managers.splice(i, 1);
       }
     }
     this.managers.push(mgr);
     this[mgr.name] = mgr;
-  };
+  }
 
-  FPSInput.prototype.zero = function zero () {
-    var this$1 = this;
-
-    for (var i = 0; i < this.managers.length; ++i) {
-      this$1.managers[i].zero();
+  zero() {
+    for (let i = 0; i < this.managers.length; ++i) {
+      this.managers[i].zero();
     }
-  };
+  }
 
-  prototypeAccessors.hasMotionControllers.get = function () {
+  get hasMotionControllers() {
     return !!(this.Vive_0 && this.Vive_0.enabled && this.Vive_0.inPhysicalUse ||
       this.Vive_1 && this.Vive_1.enabled && this.Vive_1.inPhysicalUse);
-  };
+  }
 
-  prototypeAccessors.hasGamepad.get = function () {
+  get hasGamepad() {
     return !!(this.Gamepad_0 && this.Gamepad_0.enabled && this.Gamepad_0.inPhysicalUse);
-  };
+  }
 
-  prototypeAccessors.hasMouse.get = function () {
+  get hasMouse() {
     return !!(this.Mouse && this.Mouse.enabled && this.Mouse.inPhysicalUse);
-  };
+  }
 
-  prototypeAccessors.hasTouch.get = function () {
+  get hasTouch() {
     return !!(this.Touch && this.Touch.enabled && this.Touch.inPhysicalUse);
-  };
+  }
 
-  FPSInput.prototype.submitFrame = function submitFrame () {
+  submitFrame() {
     this.VR.submitFrame();
-  };
+  }
 
-  FPSInput.prototype.update = function update (dt) {
-    var this$1 = this;
-
-    var hadGamepad = this.hasGamepad;
+  update(dt) {
+    const hadGamepad = this.hasGamepad;
     Primrose.Input.Gamepad.poll();
-    for (var i = 0; i < this.managers.length; ++i) {
-      this$1.managers[i].update(dt);
+    for (let i = 0; i < this.managers.length; ++i) {
+      this.managers[i].update(dt);
     }
 
     if (!hadGamepad && this.hasGamepad) {
@@ -11327,25 +11130,25 @@ var FPSInput = (function (superclass) {
 
     this.updateStage(dt);
     this.stage.position.y = this.options.avatarHeight;
-    for (var i$1 = 0; i$1 < this.motionDevices.length; ++i$1) {
-      this$1.motionDevices[i$1].posePosition.y -= this$1.options.avatarHeight;
+    for (let i = 0; i < this.motionDevices.length; ++i) {
+      this.motionDevices[i].posePosition.y -= this.options.avatarHeight;
     }
 
     // update the motionDevices
     this.stage.updateMatrix();
     this.matrix.multiplyMatrices(this.stage.matrix, this.VR.stage.matrix);
-    for (var i$2 = 0; i$2 < this.motionDevices.length; ++i$2) {
-      this$1.motionDevices[i$2].updateStage(this$1.matrix);
+    for (let i = 0; i < this.motionDevices.length; ++i) {
+      this.motionDevices[i].updateStage(this.matrix);
     }
 
-    for (var i$3 = 0; i$3 < this.pointers.length; ++i$3) {
-      this$1.pointers[i$3].update();
+    for (let i = 0; i < this.pointers.length; ++i) {
+      this.pointers[i].update();
     }
 
     if (!this.VR.hasOrientation) {
-      var pitch = 0;
-      for (var i$4 = 0; i$4 < this.managers.length; ++i$4) {
-        var mgr = this$1.managers[i$4];
+      let pitch = 0;
+      for (let i = 0; i < this.managers.length; ++i) {
+        const mgr = this.managers[i];
         if(mgr.enabled){
           pitch += mgr.getValue("pitch");
         }
@@ -11361,18 +11164,16 @@ var FPSInput = (function (superclass) {
     this.head.position.toArray(this.newState, 0);
     this.stage.quaternion.toArray(this.newState, 3);
     this.head.quaternion.toArray(this.newState, 7);
-  };
+  }
 
-  FPSInput.prototype.updateStage = function updateStage (dt) {
-    var this$1 = this;
-
+  updateStage(dt) {
     // get the linear movement from the mouse/keyboard/gamepad
-    var heading = 0,
+    let heading = 0,
       strafe = 0,
       drive = 0,
       lift = 0;
-    for (var i = 0; i < this.managers.length; ++i) {
-      var mgr = this$1.managers[i];
+    for (let i = 0; i < this.managers.length; ++i) {
+      const mgr = this.managers[i];
       if(mgr.enabled){
         heading += mgr.getValue("heading");
         strafe += mgr.getValue("strafe");
@@ -11413,52 +11214,44 @@ var FPSInput = (function (superclass) {
       .multiplyScalar(dt)
       .applyQuaternion(QUAT_TEMP)
       .add(this.head.position));
-  };
+  }
 
-  FPSInput.prototype.moveStage = function moveStage (position) {
+  moveStage(position) {
     DISPLACEMENT.copy(position)
       .sub(this.head.position);
     this.stage.position.add(DISPLACEMENT);
-  };
+  }
 
-  prototypeAccessors.segments.get = function () {
-    var this$1 = this;
-
-    var segments = [];
-    for (var i = 0; i < this.pointers.length; ++i) {
-      var seg = this$1.pointers[i].segment;
+  get segments() {
+    const segments = [];
+    for (let i = 0; i < this.pointers.length; ++i) {
+      const seg = this.pointers[i].segment;
       if (seg) {
         segments.push(seg);
       }
     }
     return segments;
-  };
+  }
 
-  FPSInput.prototype.resolvePicking = function resolvePicking (currentHits) {
-    var this$1 = this;
-
-    for (var i = 0; i < this.pointers.length; ++i) {
-      var ptr = this$1.pointers[i];
+  resolvePicking(currentHits) {
+    for (let i = 0; i < this.pointers.length; ++i) {
+      const ptr = this.pointers[i];
       ptr.resolvePicking(currentHits[ptr.name]);
     }
-  };
-
-  Object.defineProperties( FPSInput.prototype, prototypeAccessors );
-
-  return FPSInput;
-}(Primrose.AbstractEventEmitter));
-    if(typeof window !== "undefined") window.Primrose.Input.FPSInput = FPSInput;
+  }
+}
+  if(typeof window !== "undefined") window.Primrose.Input.FPSInput = FPSInput;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Input\FPSInput.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Input\FPSInput.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Input\Gamepad.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Input\Gamepad.js
 (function(){navigator.getGamepads = navigator.getGamepads ||
   navigator.webkitGetGamepads;
 
 function playPattern(devices, pattern, pause){
   if(pattern.length > 0){
-    var length = pattern.shift();
+    const length = pattern.shift();
     if(!pause){
       for(var i = 0; i < devices.length; ++i){
         devices[0].vibrate(1, length);
@@ -11468,7 +11261,7 @@ function playPattern(devices, pattern, pause){
   }
 }
 
-var listeners = {
+const listeners = {
     gamepadconnected: [],
     gamepaddisconnected: []
   },
@@ -11492,24 +11285,8 @@ pliny.class({
     }],
     description: "An input processor for Gamepads, including those with positional data."
 });
-var Gamepad = (function (superclass) {
-  function Gamepad(pad, axisOffset, commands) {
-    var padID = Gamepad.ID(pad);
-    superclass.call(this, padID, commands, ["LSX", "LSY", "RSX", "RSY", "IDK1", "IDK2", "Z", "BUTTONS"]);
-    currentManagers[padID] = this;
-
-    this.currentDevice = pad;
-    this.axisOffset = axisOffset;
-  }
-
-  if ( superclass ) Gamepad.__proto__ = superclass;
-  Gamepad.prototype = Object.create( superclass && superclass.prototype );
-  Gamepad.prototype.constructor = Gamepad;
-
-  var prototypeAccessors = { hasOrientation: {},haptics: {} };
-  var staticAccessors = { pads: {},listeners: {} };
-
-  Gamepad.ID = function ID (pad) {
+class Gamepad extends Primrose.PoseInputProcessor {
+  static ID(pad) {
     var id = pad.id;
     if (id === "OpenVR Gamepad") {
       id = "Vive";
@@ -11526,9 +11303,9 @@ var Gamepad = (function (superclass) {
     id = (id + "_" + (pad.index || 0))
       .replace(/\s+/g, "_");
     return id;
-  };
+  }
 
-  Gamepad.poll = function poll () {
+  static poll() {
     var maybePads = navigator.getGamepads(),
       pads = [],
       padIDs = [],
@@ -11573,61 +11350,68 @@ var Gamepad = (function (superclass) {
 
     newPads.forEach(emit.bind(Gamepad, "gamepadconnected"));
     oldPads.forEach(emit.bind(Gamepad, "gamepaddisconnected"));
-  };
+  }
 
-  staticAccessors.pads.get = function () {
+  static get pads() {
     return currentDevices;
-  };
+  }
 
-  staticAccessors.listeners.get = function () {
+  static get listeners() {
     return listeners;
-  };
+  }
 
-  Gamepad.addEventListener = function addEventListener (evt, thunk) {
+  static addEventListener(evt, thunk) {
     if (listeners[evt]) {
       listeners[evt].push(thunk);
     }
-  };
+  }
 
-  Gamepad.isMotionController = function isMotionController (pad){
+  static isMotionController(pad){
     if(pad) {
-      var obj = pad.capabilities || pad.pose;
+      const obj = pad.capabilities || pad.pose;
       return obj && obj.hasOrientation;
     }
     return false;
-  };
+  }
 
-  prototypeAccessors.hasOrientation.get = function () {
+  constructor(pad, axisOffset, commands) {
+    var padID = Gamepad.ID(pad);
+    super(padID, commands, ["LSX", "LSY", "RSX", "RSY", "IDK1", "IDK2", "Z", "BUTTONS"]);
+    currentManagers[padID] = this;
+
+    this.currentDevice = pad;
+    this.axisOffset = axisOffset;
+  }
+
+  get hasOrientation() {
     return Gamepad.isMotionController(this.currentDevice);
-  };
+  }
 
-  Gamepad.prototype.checkDevice = function checkDevice (pad) {
-    var this$1 = this;
-
+  checkDevice(pad) {
     var i, j, buttonMap = 0;
     this.currentDevice = pad;
     this.currentPose = this.hasOrientation && this.currentDevice.pose;
     for (i = 0, j = pad.buttons.length; i < pad.buttons.length; ++i, ++j) {
       var btn = pad.buttons[i];
-      this$1.setButton(i, btn.pressed);
+      this.setButton(i, btn.pressed);
       if (btn.pressed) {
         buttonMap |= 0x1 << i;
       }
 
-      this$1.setButton(j, btn.touched);
+      this.setButton(j, btn.touched);
       if(btn.touched){
         buttonMap |= 0x1 << j;
       }
     }
     this.setAxis("BUTTONS", buttonMap);
     for (i = 0; i < pad.axes.length; ++i) {
-      var axisName = this$1.axisNames[this$1.axisOffset * pad.axes.length + i],
+      var axisName = this.axisNames[this.axisOffset * pad.axes.length + i],
         axisValue = pad.axes[i];
-      this$1.setAxis(axisName, axisValue);
+      this.setAxis(axisName, axisValue);
     }
-  };
+  }
 
-  Gamepad.prototype.vibratePattern = function vibratePattern (pattern) {
+  vibratePattern(pattern) {
     if(this.currentDevice){
       if (this.currentDevice.vibrate) {
         this.currentDevice.vibrate(pattern);
@@ -11636,17 +11420,12 @@ var Gamepad = (function (superclass) {
         playPattern(this.currentDevice.haptics, pattern);
       }
     }
-  };
+  }
 
-  prototypeAccessors.haptics.get = function () {
+  get haptics() {
     return this.currentDevice && this.currentDevice.haptics;
-  };
-
-  Object.defineProperties( Gamepad.prototype, prototypeAccessors );
-  Object.defineProperties( Gamepad, staticAccessors );
-
-  return Gamepad;
-}(Primrose.PoseInputProcessor));
+  }
+}
 
 pliny.enumeration({
   parent: "Primrose.Input.Gamepad",
@@ -11712,12 +11491,12 @@ Gamepad.VIVE_BUTTONS = {
   GRIP_TOUCHED: 6,
   MENU_TOUCHED: 7
 };
-    if(typeof window !== "undefined") window.Primrose.Input.Gamepad = Gamepad;
+  if(typeof window !== "undefined") window.Primrose.Input.Gamepad = Gamepad;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Input\Gamepad.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Input\Gamepad.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Input\Keyboard.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Input\Keyboard.js
 (function(){pliny.class({
   parent: "Primrose.Input",
     name: "Keyboard",
@@ -11741,9 +11520,9 @@ Gamepad.VIVE_BUTTONS = {
       description: ""
     }]
 });
-var Keyboard = (function (superclass) {
-  function Keyboard(input, commands) {
-    superclass.call(this, "Keyboard", commands);
+class Keyboard extends Primrose.InputProcessor {
+  constructor(input, commands) {
+    super("Keyboard", commands);
     this.listeners = {
       clipboard: [],
       keydown: [],
@@ -11755,23 +11534,17 @@ var Keyboard = (function (superclass) {
     this._codePage = null;
   }
 
-  if ( superclass ) Keyboard.__proto__ = superclass;
-  Keyboard.prototype = Object.create( superclass && superclass.prototype );
-  Keyboard.prototype.constructor = Keyboard;
-
-  var prototypeAccessors = { operatingSystem: {},codePage: {} };
-
-  Keyboard.prototype.dispatchEvent = function dispatchEvent (evt) {
+  dispatchEvent(evt) {
     this.setButton(evt.keyCode, evt.type === "keydown");
-  };
+  }
 
-  Keyboard.prototype.addEventListener = function addEventListener (name, thunk){
+  addEventListener(name, thunk){
     if(this.listeners[name]){
       this.listeners[name].push(thunk);
     }
-  };
+  }
 
-  Keyboard.prototype.doTyping = function doTyping (elem, evt) {
+  doTyping(elem, evt) {
     if (elem && elem.execCommand && this.operatingSystem && this.browser && this.codePage) {
       var oldDeadKeyState = this.operatingSystem._deadKeyState,
         cmdName = this.operatingSystem.makeCommandName(evt, this.codePage);
@@ -11783,23 +11556,21 @@ var Keyboard = (function (superclass) {
         this.operatingSystem._deadKeyState = "";
       }
     }
-  };
+  }
 
-  prototypeAccessors.operatingSystem.get = function () {
+  get operatingSystem() {
     return this._operatingSystem;
-  };
+  }
 
-  prototypeAccessors.operatingSystem.set = function (os) {
+  set operatingSystem(os) {
     this._operatingSystem = os || (isOSX ? Primrose.Text.OperatingSystems.OSX : Primrose.Text.OperatingSystems.Windows);
-  };
+  }
 
-  prototypeAccessors.codePage.get = function () {
+  get codePage() {
     return this._codePage;
-  };
+  }
 
-  prototypeAccessors.codePage.set = function (cp) {
-    var this$1 = this;
-
+  set codePage(cp) {
     var key,
       code,
       char,
@@ -11818,7 +11589,7 @@ var Keyboard = (function (superclass) {
       for (key in Primrose.Text.CodePages) {
         cp = Primrose.Text.CodePages[key];
         if (cp.language === lang) {
-          this$1._codePage = cp;
+          this._codePage = cp;
           break;
         }
       }
@@ -11827,18 +11598,14 @@ var Keyboard = (function (superclass) {
         this._codePage = Primrose.Text.CodePages.EN_US;
       }
     }
-  };
-
-  Object.defineProperties( Keyboard.prototype, prototypeAccessors );
-
-  return Keyboard;
-}(Primrose.InputProcessor));
-    if(typeof window !== "undefined") window.Primrose.Input.Keyboard = Keyboard;
+  }
+}
+  if(typeof window !== "undefined") window.Primrose.Input.Keyboard = Keyboard;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Input\Keyboard.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Input\Keyboard.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Input\LeapMotion.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Input\LeapMotion.js
 (function(){function processFingerParts(i) {
   return LeapMotion.FINGER_PARTS.map(function (p) {
     return "FINGER" + i + p.toUpperCase();
@@ -11852,9 +11619,9 @@ pliny.class({
     baseClass: "Primrose.InputProcessor",
     description: "| [under construction]"
 });
-var LeapMotion = (function (superclass) {
-  function LeapMotion(commands) {
-    superclass.call(this, "LeapMotion", commands, ["X0", "Y0", "Z0",
+class LeapMotion extends Primrose.InputProcessor {
+  constructor(commands) {
+    super("LeapMotion", commands, ["X0", "Y0", "Z0",
       "X1", "Y1", "Z1",
       "FINGER0TIPX", "FINGER0TIPY",
       "FINGER0DIPX", "FINGER0DIPY",
@@ -11914,11 +11681,7 @@ var LeapMotion = (function (superclass) {
     });
   }
 
-  if ( superclass ) LeapMotion.__proto__ = superclass;
-  LeapMotion.prototype = Object.create( superclass && superclass.prototype );
-  LeapMotion.prototype.constructor = LeapMotion;
-
-  LeapMotion.prototype.E = function E (e, f) {
+  E(e, f) {
     if (f) {
       this.controller.on(e, f);
     }
@@ -11926,24 +11689,22 @@ var LeapMotion = (function (superclass) {
       this.controller.on(e, console.log.bind(console,
         "Leap Motion Event: " + e));
     }
-  };
+  }
 
-  LeapMotion.prototype.start = function start (gameUpdateLoop) {
-    var this$1 = this;
-
+  start(gameUpdateLoop) {
     if (this.isEnabled()) {
       var canceller = null,
         startAlternate = null;
       if (gameUpdateLoop) {
-        var alternateLooper = function (t) {
+        var alternateLooper = (t) => {
           requestAnimationFrame(alternateLooper);
           gameUpdateLoop(t);
         };
         startAlternate = requestAnimationFrame.bind(window, alternateLooper);
         var timeout = setTimeout(startAlternate, LeapMotion.CONNECTION_TIMEOUT);
-        canceller = function () {
+        canceller = () => {
           clearTimeout(timeout);
-          this$1.isStreaming = true;
+          this.isStreaming = true;
         };
         this.E("deviceStreaming", canceller);
         this.E("streamingStarted", canceller);
@@ -11956,17 +11717,15 @@ var LeapMotion = (function (superclass) {
       this.E("frame", this.setState.bind(this, gameUpdateLoop));
       this.controller.connect();
     }
-  };
+  }
 
-  LeapMotion.prototype.setState = function setState (gameUpdateLoop, frame) {
-    var this$1 = this;
-
+  setState(gameUpdateLoop, frame) {
     var prevFrame = this.controller.history.get(1),
       i,
       j;
     if (!prevFrame || frame.hands.length !== prevFrame.hands.length) {
       for (i = 0; i < this.commands.length; ++i) {
-        this$1.enable(this$1.commands[i].name, frame.hands.length > 0);
+        this.enable(this.commands[i].name, frame.hands.length > 0);
       }
     }
 
@@ -11974,7 +11733,7 @@ var LeapMotion = (function (superclass) {
       var hand = frame.hands[i].palmPosition;
       var handName = "HAND" + i;
       for (j = 0; j < LeapMotion.COMPONENTS.length; ++j) {
-        this$1.setAxis(handName + LeapMotion.COMPONENTS[j], hand[j]);
+        this.setAxis(handName + LeapMotion.COMPONENTS[j], hand[j]);
       }
     }
 
@@ -11986,7 +11745,7 @@ var LeapMotion = (function (superclass) {
         var jointName = fingerName +
           LeapMotion.FINGER_PARTS[j].toUpperCase();
         for (var k = 0; k < LeapMotion.COMPONENTS.length; ++k) {
-          this$1.setAxis(jointName + LeapMotion.COMPONENTS[k],
+          this.setAxis(jointName + LeapMotion.COMPONENTS[k],
             joint[k]);
         }
       }
@@ -11997,10 +11756,8 @@ var LeapMotion = (function (superclass) {
     }
 
     this.update();
-  };
-
-  return LeapMotion;
-}(Primrose.InputProcessor));
+  }
+}
 
 LeapMotion.COMPONENTS = ["X", "Y", "Z"];
 
@@ -12011,23 +11768,21 @@ LeapMotion.NUM_FINGERS = 10;
 LeapMotion.FINGER_PARTS = ["tip", "dip", "pip", "mcp", "carp"];
 
 LeapMotion.CONNECTION_TIMEOUT = 5000;
-    if(typeof window !== "undefined") window.Primrose.Input.LeapMotion = LeapMotion;
+  if(typeof window !== "undefined") window.Primrose.Input.LeapMotion = LeapMotion;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Input\LeapMotion.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Input\LeapMotion.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Input\Location.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Input\Location.js
 (function(){pliny.class({
   parent: "Primrose.Input",
     name: "Location",
     baseClass: "Primrose.InputProcessor",
     description: "| [under construction]"
 });
-var Location = (function (superclass) {
-  function Location(commands, options) {
-    var this$1 = this;
-
-    superclass.call(this, "Location", commands, ["LONGITUDE", "LATITUDE", "ALTITUDE", "HEADING", "SPEED"]);
+class Location extends Primrose.InputProcessor {
+  constructor(commands, options) {
+    super("Location", commands, ["LONGITUDE", "LATITUDE", "ALTITUDE", "HEADING", "SPEED"]);
 
     this.options = patch(options, Location.DEFAULTS);
 
@@ -12035,73 +11790,63 @@ var Location = (function (superclass) {
     if (this.available) {
       navigator.geolocation.watchPosition(
         this.setState.bind(this),
-        function () { return this$1.available = false; },
+        () => this.available = false,
         this.options);
     }
   }
 
-  if ( superclass ) Location.__proto__ = superclass;
-  Location.prototype = Object.create( superclass && superclass.prototype );
-  Location.prototype.constructor = Location;
-
-  Location.prototype.setState = function setState (location) {
-    var this$1 = this;
-
+  setState(location) {
     for (var p in location.coords) {
       var k = p.toUpperCase();
-      if (this$1.axisNames.indexOf(k) > -1) {
-        this$1.setAxis(k, location.coords[p]);
+      if (this.axisNames.indexOf(k) > -1) {
+        this.setAxis(k, location.coords[p]);
       }
     }
     this.update();
-  };
-
-  return Location;
-}(Primrose.InputProcessor));
+  }
+}
 
 Location.DEFAULTS = {
   enableHighAccuracy: true,
   maximumAge: 30000,
   timeout: 25000
 };
-    if(typeof window !== "undefined") window.Primrose.Input.Location = Location;
+  if(typeof window !== "undefined") window.Primrose.Input.Location = Location;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Input\Location.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Input\Location.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Input\Mouse.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Input\Mouse.js
 (function(){pliny.class({
   parent: "Primrose.Input",
     name: "Mouse",
     baseClass: "Primrose.InputProcessor",
     description: "| [under construction]"
 });
-var Mouse = (function (superclass) {
-  function Mouse(DOMElement, commands) {
-    var this$1 = this;
-
-    superclass.call(this, "Mouse", commands, ["BUTTONS", "X", "Y", "Z", "W"]);
+class Mouse extends Primrose.InputProcessor {
+  constructor(DOMElement, commands) {
+    super("Mouse", commands, ["BUTTONS", "X", "Y", "Z", "W"]);
     this.timer = null;
 
     DOMElement = DOMElement || window;
 
-    var setState = function (stateChange, event) {
+    var setState = (stateChange, event) => {
       var state = event.buttons;
-      for(var button = 0; button < Mouse.NUM_BUTTONS; ++button) {
+      for(let button = 0; button < Mouse.NUM_BUTTONS; ++button) {
         var isDown = state & 0x1 !== 0;
         if(isDown && stateChange || !isDown && !stateChange){
-          this$1.setButton(button, stateChange);
+          this.setButton(button, stateChange);
         }
         state >>= 1;
       }
-      this$1.setAxis("BUTTONS", event.buttons << 10);
+      this.setAxis("BUTTONS", event.buttons << 10);
       event.preventDefault();
     };
 
     DOMElement.addEventListener("mousedown", setState.bind(this, true), false);
     DOMElement.addEventListener("mouseup", setState.bind(this, false), false);
-    DOMElement.addEventListener("contextmenu", function (event) { return !(event.ctrlKey && event.shiftKey) && event.preventDefault(); }, false);
-    DOMElement.addEventListener("mousemove", function (event) {
+    DOMElement.addEventListener("contextmenu", (event) => !(event.ctrlKey && event.shiftKey) && event.preventDefault(), false);
+    DOMElement.addEventListener("mousemove", (event) => {
       setState(true, event);
 
       if (PointerLock.isActive) {
@@ -12112,44 +11857,38 @@ var Mouse = (function (superclass) {
           mx = event.webkitMovementX || event.mozMovementX || 0;
           my = event.webkitMovementY || event.mozMovementY || 0;
         }
-        this$1.setAxis("X", this$1.getAxis("X") + mx);
-        this$1.setAxis("Y", this$1.getAxis("Y") + my);
+        this.setAxis("X", this.getAxis("X") + mx);
+        this.setAxis("Y", this.getAxis("Y") + my);
       }
       else {
-        this$1.setAxis("X", event.layerX);
-        this$1.setAxis("Y", event.layerY);
+        this.setAxis("X", event.layerX);
+        this.setAxis("Y", event.layerY);
       }
     }, false);
 
-    DOMElement.addEventListener("wheel", function (event) {
+    DOMElement.addEventListener("wheel", (event) => {
       if (isChrome) {
-        this$1.W += event.deltaX;
-        this$1.Z += event.deltaY;
+        this.W += event.deltaX;
+        this.Z += event.deltaY;
       }
       else if (event.shiftKey) {
-        this$1.W += event.deltaY;
+        this.W += event.deltaY;
       }
       else {
-        this$1.Z += event.deltaY;
+        this.Z += event.deltaY;
       }
       event.preventDefault();
     }, false);
   }
-
-  if ( superclass ) Mouse.__proto__ = superclass;
-  Mouse.prototype = Object.create( superclass && superclass.prototype );
-  Mouse.prototype.constructor = Mouse;
-
-  return Mouse;
-}(Primrose.InputProcessor));
+}
 
 Mouse.NUM_BUTTONS = 3;
-    if(typeof window !== "undefined") window.Primrose.Input.Mouse = Mouse;
+  if(typeof window !== "undefined") window.Primrose.Input.Mouse = Mouse;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Input\Mouse.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Input\Mouse.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Input\Speech.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Input\Speech.js
 (function(){////
 //   Class: SpeechInput
 //
@@ -12204,9 +11943,9 @@ pliny.class({
     baseClass: "Primrose.InputProcessor",
     description: "| [under construction]"
 });
-var Speech = (function (superclass) {
-  function Speech(commands) {
-    superclass.call(this, "Speech", commands);
+class Speech extends Primrose.InputProcessor {
+  constructor(commands) {
+    super("Speech", commands);
     var running = false,
       recognition = null,
       errorMessage = null;
@@ -12324,15 +12063,11 @@ var Speech = (function (superclass) {
     }
   }
 
-  if ( superclass ) Speech.__proto__ = superclass;
-  Speech.prototype = Object.create( superclass && superclass.prototype );
-  Speech.prototype.constructor = Speech;
-
-  Speech.maybeClone = function maybeClone (arr) {
+  static maybeClone(arr) {
     return (arr && arr.slice()) || [];
-  };
+  }
 
-  Speech.prototype.cloneCommand = function cloneCommand (cmd) {
+  cloneCommand(cmd) {
     return {
       name: cmd.name,
       preamble: cmd.preamble,
@@ -12340,51 +12075,45 @@ var Speech = (function (superclass) {
       commandUp: cmd.commandUp,
       disabled: cmd.disabled
     };
-  };
+  }
 
-  Speech.prototype.evalCommand = function evalCommand (cmd, cmdState, metaKeysSet, dt) {
-    var this$1 = this;
-
+  evalCommand(cmd, cmdState, metaKeysSet, dt) {
     if (metaKeysSet && this.inputState.text) {
       for (var i = 0; i < cmd.keywords.length; ++i) {
-        if (this$1.inputState.text.indexOf(cmd.keywords[i]) === 0 && (cmd.preamble || cmd.keywords[i].length === this$1.inputState.text.length)) {
+        if (this.inputState.text.indexOf(cmd.keywords[i]) === 0 && (cmd.preamble || cmd.keywords[i].length === this.inputState.text.length)) {
           cmdState.pressed = true;
-          cmdState.value = this$1.inputState.text.substring(cmd.keywords[i].length)
+          cmdState.value = this.inputState.text.substring(cmd.keywords[i].length)
             .trim();
-          this$1.inputState.text = null;
+          this.inputState.text = null;
         }
       }
     }
-  };
+  }
 
-  Speech.prototype.enable = function enable (k, v) {
-    superclass.prototype.enable.call(this, k, v);
+  enable(k, v) {
+    super.enable(k, v);
     this.check();
-  };
+  }
 
-  Speech.prototype.transmit = function transmit (v) {
-    superclass.prototype.transmit.call(this, v);
+  transmit(v) {
+    super.transmit(v);
     this.check();
-  };
-
-  return Speech;
-}(Primrose.InputProcessor));
-    if(typeof window !== "undefined") window.Primrose.Input.Speech = Speech;
+  }
+}
+  if(typeof window !== "undefined") window.Primrose.Input.Speech = Speech;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Input\Speech.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Input\Speech.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Input\Touch.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Input\Touch.js
 (function(){pliny.class({
   parent: "Primrose.Input",
     name: "Touch",
     baseClass: "Primrose.InputProcessor",
     description: "| [under construction]"
 });
-var Touch = (function (superclass) {
-  function Touch(DOMElement, commands) {
-    var this$1 = this;
-
+class Touch extends Primrose.InputProcessor {
+  constructor(DOMElement, commands) {
     var axes = ["FINGERS"];
     for (var i = 0; i < 10; ++i) {
       axes.push("X" + i);
@@ -12392,10 +12121,10 @@ var Touch = (function (superclass) {
       axes.push("LX" + i);
       axes.push("LY" + i);
     }
-    superclass.call(this, "Touch", commands, axes);
+    super("Touch", commands, axes);
     DOMElement = DOMElement || window;
 
-    var setState = function (stateChange, setAxis, event) {
+    var setState = (stateChange, setAxis, event) => {
       var touches = event.changedTouches,
         i = 0,
         t = null;
@@ -12403,24 +12132,24 @@ var Touch = (function (superclass) {
         t = touches[i];
 
         if (setAxis) {
-          this$1.setAxis("X" + t.identifier, t.pageX);
-          this$1.setAxis("Y" + t.identifier, t.pageY);
+          this.setAxis("X" + t.identifier, t.pageX);
+          this.setAxis("Y" + t.identifier, t.pageY);
         }
         else {
-          this$1.setAxis("LX" + t.identifier, t.pageX);
-          this$1.setAxis("LY" + t.identifier, t.pageY);
+          this.setAxis("LX" + t.identifier, t.pageX);
+          this.setAxis("LY" + t.identifier, t.pageY);
         }
 
-        this$1.setButton("FINGER" + t.identifier, stateChange);
+        this.setButton("FINGER" + t.identifier, stateChange);
       }
       touches = event.touches;
       var fingerState = 0,
-        before = this$1.getAxis("FINGERS");
+        before = this.getAxis("FINGERS");
       for (i = 0; i < touches.length; ++i) {
         t = touches[i];
         fingerState |= 1 << t.identifier;
       }
-      this$1.setAxis("FINGERS", fingerState);
+      this.setAxis("FINGERS", fingerState);
       event.preventDefault();
     };
 
@@ -12428,20 +12157,14 @@ var Touch = (function (superclass) {
     DOMElement.addEventListener("touchend", setState.bind(this, false, true), false);
     DOMElement.addEventListener("touchmove", setState.bind(this, true, true), false);
   }
-
-  if ( superclass ) Touch.__proto__ = superclass;
-  Touch.prototype = Object.create( superclass && superclass.prototype );
-  Touch.prototype.constructor = Touch;
-
-  return Touch;
-}(Primrose.InputProcessor));
-    if(typeof window !== "undefined") window.Primrose.Input.Touch = Touch;
+}
+  if(typeof window !== "undefined") window.Primrose.Input.Touch = Touch;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Input\Touch.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Input\Touch.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Input\VR.js
-(function(){var DEFAULT_POSE = {
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Input\VR.js
+(function(){const DEFAULT_POSE = {
     position: [0, 0, 0],
     orientation: [0, 0, 0, 1]
   },
@@ -12460,15 +12183,20 @@ pliny.class({
     }],
     description: "An input manager for gamepad devices."
 });
-var VR = (function (superclass) {
-  function VR(avatarHeight) {
-    var this$1 = this;
+class VR extends Primrose.PoseInputProcessor {
 
-    superclass.call(this, "VR");
+  static isStereoDisplay(display) {
+    const leftParams = display.getEyeParameters("left"),
+        rightParams = display.getEyeParameters("right");
+    return !!(leftParams && rightParams);
+  }
+
+  constructor(avatarHeight) {
+    super("VR");
 
     _(this, {
-      requestPresent: function (layers) { return this$1.currentDevice.requestPresent(layers)
-          .catch(function (exp) { return console.warn("requstPresent", exp); }); }
+      requestPresent: (layers) => this.currentDevice.requestPresent(layers)
+          .catch((exp) => console.warn("requstPresent", exp))
     });
 
     this.displays = [];
@@ -12481,31 +12209,19 @@ var VR = (function (superclass) {
     this.lastStageDepth = null;
     this.isStereo = false;
     this.ready = navigator.getVRDisplays()
-      .then(function (displays) {
+      .then((displays) => {
         // We skip the WebVR-Polyfill's Mouse and Keyboard display because it does not
         // play well with our interaction model.
-        this$1.displays.push.apply(this$1.displays, displays.filter(function (display) { return display.displayName !== "Mouse and Keyboard VRDisplay (webvr-polyfill)"; }));
-        return this$1.displays;
+        this.displays.push.apply(this.displays, displays.filter((display) => display.displayName !== "Mouse and Keyboard VRDisplay (webvr-polyfill)"));
+        return this.displays;
       });
   }
 
-  if ( superclass ) VR.__proto__ = superclass;
-  VR.prototype = Object.create( superclass && superclass.prototype );
-  VR.prototype.constructor = VR;
-
-  var prototypeAccessors = { isNativeMobileWebVR: {},hasStage: {},canMirror: {},isPolyfilled: {},isPresenting: {},hasOrientation: {},currentCanvas: {} };
-
-  VR.isStereoDisplay = function isStereoDisplay (display) {
-    var leftParams = display.getEyeParameters("left"),
-        rightParams = display.getEyeParameters("right");
-    return !!(leftParams && rightParams);
-  };
-
-  prototypeAccessors.isNativeMobileWebVR.get = function () {
+  get isNativeMobileWebVR() {
     return !(this.currentDevice && this.currentDevice.isPolyfilled) && isChrome && isMobile;
-  };
+  }
 
-  VR.prototype.connect = function connect (selectedIndex) {
+  connect(selectedIndex) {
     this.currentDevice = null;
     this.currentDeviceIndex = selectedIndex;
     this.currentPose = null;
@@ -12517,14 +12233,14 @@ var VR = (function (superclass) {
       this.rotationAngle = Math.PI * (fov.leftDegrees + fov.rightDegrees) / 360;
       this.isStereo = VR.isStereoDisplay(this.currentDevice);
     }
-  };
+  }
 
-  VR.prototype.requestPresent = function requestPresent (opts) {
+  requestPresent(opts) {
     if (!this.currentDevice) {
       return Promise.reject("No display");
     }
     else {
-      var layers = opts,
+      let layers = opts,
         elem = opts[0].source;
 
       if (!(layers instanceof Array)) {
@@ -12532,32 +12248,28 @@ var VR = (function (superclass) {
       }
 
       // A hack to deal with a bug in the current build of Chromium
-      if (this.isNativeMobileWebVR) {
+      if (this.isNativeMobileWebVR && this.isStereo) {
         layers = layers[0];
       }
 
       var promise = null,
         rp = _(this).requestPresent;
-
       // If we're using WebVR-Polyfill, just let it do its job.
-      if(this.currentDevice.isPolyfilled || !VR.isStereoDisplay(this.currentDevice)) {
-        // for Firefox's sake, this can't be done in a Promise.
-        promise = rp(layers);
-      }
-      else{
+      if(this.currentDevice.capabilities.hasExternalDisplay){
         // PCs with HMD should also make the browser window on the main
         // display full-screen, so we can then also lock pointer.
         promise = WebVRStandardMonitor.standardFullScreenBehavior(elem)
-          .then(function () { return rp(layers); });
+          .then(() => rp(layers));
+      }
+      else {
+        promise = rp(layers).then(WebVRStandardMonitor.standardLockBehavior);
       }
       return promise;
     }
-  };
+  }
 
-  VR.prototype.cancel = function cancel () {
-    var this$1 = this;
-
-    var promise = null;
+  cancel() {
+    let promise = null;
     if (this.isPresenting) {
       promise = this.currentDevice.exitPresent();
       this.currentDevice = null;
@@ -12574,17 +12286,17 @@ var VR = (function (superclass) {
 
     return promise
       .then(PointerLock.exit)
-      .then(function () { return this$1.connect(0); });
-  };
+      .then(() => this.connect(0));
+  }
 
-  VR.prototype.zero = function zero () {
-    superclass.prototype.zero.call(this);
+  zero() {
+    super.zero();
     if (this.currentDevice) {
       this.currentDevice.resetPose();
     }
-  };
+  }
 
-  VR.prototype.update = function update (dt) {
+  update(dt) {
     var x, z, stage;
 
     if (this.currentDevice) {
@@ -12595,7 +12307,7 @@ var VR = (function (superclass) {
       stage = null;
     }
 
-    superclass.prototype.update.call(this, dt);
+    super.update(dt);
 
     if (stage) {
       this.movePlayer.fromArray(stage.sittingToStandingTransform);
@@ -12617,20 +12329,20 @@ var VR = (function (superclass) {
     if (!this.stage || s.sizeX !== this.stage.sizeX || s.sizeZ !== this.stage.sizeZ) {
       this.stage = s;
     }
-  };
+  }
 
-  prototypeAccessors.hasStage.get = function () {
+  get hasStage() {
     return this.stage && this.stage.sizeX * this.stage.sizeZ > 0;
-  };
+  }
 
-  VR.prototype.submitFrame = function submitFrame () {
+  submitFrame() {
     if (this.currentDevice) {
       this.currentDevice.submitFrame(this.currentPose);
     }
-  };
+  }
 
-  VR.prototype.resolvePicking = function resolvePicking (currentHits, lastHits, objects) {
-    superclass.prototype.resolvePicking.call(this, currentHits, lastHits, objects);
+  resolvePicking(currentHits, lastHits, objects) {
+    super.resolvePicking(currentHits, lastHits, objects);
 
     var currentHit = currentHits.VR,
       lastHit = lastHits && lastHits.VR,
@@ -12658,9 +12370,9 @@ var VR = (function (superclass) {
         emit.call(this, "gazestart", currentHit);
       }
     }
-  };
+  }
 
-  VR.prototype.getTransforms = function getTransforms (near, far) {
+  getTransforms(near, far) {
     if (this.currentDevice) {
       if (!this._transformers[this.currentDeviceIndex]) {
         this._transformers[this.currentDeviceIndex] = new ViewCameraTransform(this.currentDevice);
@@ -12669,25 +12381,25 @@ var VR = (function (superclass) {
       this.currentDevice.depthFar = far;
       return this._transformers[this.currentDeviceIndex].getTransforms(near, far);
     }
-  };
+  }
 
-  prototypeAccessors.canMirror.get = function () {
+  get canMirror() {
     return this.currentDevice && this.currentDevice.capabilities.hasExternalDisplay;
-  };
+  }
 
-  prototypeAccessors.isPolyfilled.get = function () {
+  get isPolyfilled() {
     return this.currentDevice && this.currentDevice.isPolyfilled;
-  };
+  }
 
-  prototypeAccessors.isPresenting.get = function () {
+  get isPresenting() {
     return this.currentDevice && this.currentDevice.isPresenting;
-  };
+  }
 
-  prototypeAccessors.hasOrientation.get = function () {
+  get hasOrientation() {
     return this.currentDevice && this.currentDevice.capabilities.hasOrientation;
-  };
+  }
 
-  prototypeAccessors.currentCanvas.get = function () {
+  get currentCanvas() {
     if(this.isPresenting) {
       var layers = this.currentDevice.getLayers();
       if(layers.length > 0){
@@ -12695,18 +12407,14 @@ var VR = (function (superclass) {
       }
     }
     return null;
-  };
-
-  Object.defineProperties( VR.prototype, prototypeAccessors );
-
-  return VR;
-}(Primrose.PoseInputProcessor));
-    if(typeof window !== "undefined") window.Primrose.Input.VR = VR;
+  }
+}
+  if(typeof window !== "undefined") window.Primrose.Input.VR = VR;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Input\VR.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Input\VR.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Network\Manager.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Network\Manager.js
 (function(){pliny.class({
   parent: "Primrose.Network",
     name: "Manager",
@@ -12724,9 +12432,9 @@ var VR = (function (superclass) {
       description: "Model factory for creating avatars for new remote users."
     }]
 });
-var Manager = (function (superclass) {
-  function Manager(localUser, audio, factories, options) {
-    superclass.call(this);
+class Manager extends Primrose.AbstractEventEmitter {
+  constructor(localUser, audio, factories, options) {
+    super();
     this.localUser = localUser;
     this.audio = audio;
     this.factories = factories;
@@ -12741,40 +12449,34 @@ var Manager = (function (superclass) {
     this.audioHeap = {};
   }
 
-  if ( superclass ) Manager.__proto__ = superclass;
-  Manager.prototype = Object.create( superclass && superclass.prototype );
-  Manager.prototype.constructor = Manager;
-
-  Manager.prototype.update = function update (dt) {
-    var this$1 = this;
-
+  update(dt) {
     if (this._socket && this.deviceIndex === 0) {
       this.lastNetworkUpdate += dt;
       if (this.lastNetworkUpdate >= Primrose.Network.RemoteUser.NETWORK_DT) {
         this.lastNetworkUpdate -= Primrose.Network.RemoteUser.NETWORK_DT;
         for (var i = 0; i < this.localUser.newState.length; ++i) {
-          if (this$1.oldState[i] !== this$1.localUser.newState[i]) {
-            this$1._socket.emit("userState", this$1.localUser.newState);
-            this$1.oldState = this$1.localUser.newState;
+          if (this.oldState[i] !== this.localUser.newState[i]) {
+            this._socket.emit("userState", this.localUser.newState);
+            this.oldState = this.localUser.newState;
             break;
           }
         }
       }
     }
-    for (var key in this.users) {
-      var user = this$1.users[key];
+    for (const key in this.users) {
+      const user = this.users[key];
       user.update(dt);
-      if(this$1.audioHeap[key]){
-        user.setAudio(this$1.audio, this$1.audioHeap[key]);
-        delete this$1.audioHeap[key];
+      if(this.audioHeap[key]){
+        user.setAudio(this.audio, this.audioHeap[key]);
+        delete this.audioHeap[key];
       }
     }
-  };
+  }
 
-  Manager.prototype.updateUser = function updateUser (state) {
-    var key = state[0];
+  updateUser(state) {
+    const key = state[0];
     if (key !== this.userName) {
-      var user = this.users[key];
+      const user = this.users[key];
       if (user) {
         user.setState(state);
       }
@@ -12785,11 +12487,9 @@ var Manager = (function (superclass) {
       this.localUser.head.mesh.position.fromArray(state, 8);
       this.localUser.head.mesh.quaternion.fromArray(state, 11);
     }
-  };
+  }
 
-  Manager.prototype.connect = function connect (socket, userName) {
-    var this$1 = this;
-
+  connect(socket, userName) {
     this.userName = userName.toLocaleUpperCase();
     if (!this.microphone) {
       this.microphone = navigator.mediaDevices.getUserMedia({
@@ -12810,10 +12510,10 @@ var Manager = (function (superclass) {
       this._socket.on("connection_lost", this.lostConnection.bind(this));
 
       if(!this.options.disableWebRTC && "WebRTCSocket" in Primrose) {
-        Primrose.WebRTCSocket.PEERING_EVENTS.forEach(function (name) { return this$1._socket.on(name, function (evt) {
+        Primrose.WebRTCSocket.PEERING_EVENTS.forEach((name) => this._socket.on(name, (evt) => {
           console.log("-->", evt.type, evt);
-          if(evt.toUserName === this$1.userName){
-            var user = this$1.users[evt.fromUserName],
+          if(evt.toUserName === this.userName){
+            const user = this.users[evt.fromUserName],
               methodName = "peering_" + name,
               method = user && user[methodName];
             if((user.peered || user.peering) && method){
@@ -12824,25 +12524,23 @@ var Manager = (function (superclass) {
             }
           }
           else{
-            console.warn("MESSAGE SENT TO %s FROM %s BUT WE ARE %s", evt.toUserName, evt.fromUserName, this$1.userName);
+            console.warn("MESSAGE SENT TO %s FROM %s BUT WE ARE %s", evt.toUserName, evt.fromUserName, this.userName);
           }
-        }); });
+        }));
       }
 
       this._socket.emit("listUsers");
       this._socket.emit("getDeviceIndex");
     }
-  };
+  }
 
-  Manager.prototype.disconnect = function disconnect () {
+  disconnect() {
     this.userName = null;
     this._socket.close();
     this._socket = null;
-  };
+  }
 
-  Manager.prototype.addUser = function addUser (state, goSecond) {
-    var this$1 = this;
-
+  addUser(state, goSecond) {
     console.log("User %s logging on.", state[0]);
     var toUserName = state[0],
       user = new Primrose.Network.RemoteUser(toUserName, this.factories.avatar, this.options.foregroundColor, this.options.disableWebRTC, this.options.webRTC, this.microphone, this.userName, goSecond);
@@ -12851,22 +12549,23 @@ var Manager = (function (superclass) {
     this.emit("addavatar", user);
 
     if(!this.options.disableWebRTC && "WebRTCSocket" in Primrose) {
-      Primrose.WebRTCSocket.PEERING_EVENTS.forEach(function (name) { return user.addEventListener(name, function (evt) {
+      Primrose.WebRTCSocket.PEERING_EVENTS.forEach((name) =>
+        user.addEventListener(name, (evt) => {
           console.log("<--", name, evt);
-          this$1._socket.emit(name, evt);
-        }); });
+          this._socket.emit(name, evt);
+        }));
       this.waitForLastUser = this.waitForLastUser
-        .then(function () { return user.peer(this$1.audio); })
-        .then(function () { return console.log("%s is peered (%s) with %s", this$1.userName, user.peered, toUserName); })
-        .then(function () {
+        .then(() => user.peer(this.audio))
+        .then(() => console.log("%s is peered (%s) with %s", this.userName, user.peered, toUserName))
+        .then(() => {
           if(user.peeringError) {
             console.error("Couldn't load user: " + name, user.peeringError);
           }
         });
     }
-  };
+  }
 
-  Manager.prototype.removeUser = function removeUser (key) {
+  removeUser(key) {
     console.log("User %s logging off.", key);
     var user = this.users[key];
     if (user) {
@@ -12876,48 +12575,44 @@ var Manager = (function (superclass) {
       delete this.users[key];
       this.emit("removeavatar", user);
     }
-  };
+  }
 
-  Manager.prototype.listUsers = function listUsers (newUsers) {
-    var this$1 = this;
-
+  listUsers(newUsers) {
     Object.keys(this.users)
       .forEach(this.removeUser.bind(this));
     while (newUsers.length > 0) {
-      this$1.addUser(newUsers.shift(), true);
+      this.addUser(newUsers.shift(), true);
     }
     this.emit("authorizationsucceeded");
-  };
+  }
 
-  Manager.prototype.receiveChat = function receiveChat (evt) {
+  receiveChat(evt) {
     console.log("chat", evt);
-  };
+  }
 
-  Manager.prototype.lostConnection = function lostConnection () {
+  lostConnection() {
     this.deviceIndex = null;
-  };
+  }
 
-  Manager.prototype.addDevice = function addDevice (index) {
+  addDevice(index) {
     console.log("addDevice", index);
-  };
+  }
 
-  Manager.prototype.setDeviceIndex = function setDeviceIndex (index) {
+  setDeviceIndex(index) {
     this.deviceIndex = index;
-  };
+  }
 
-  Manager.prototype.setAudioFromUser = function setAudioFromUser (userName, audioElement){
+  setAudioFromUser(userName, audioElement){
     this.audioHeap[userName] = audioElement;
-  };
+  }
+}
 
-  return Manager;
-}(Primrose.AbstractEventEmitter));
-
-    if(typeof window !== "undefined") window.Primrose.Network.Manager = Manager;
+  if(typeof window !== "undefined") window.Primrose.Network.Manager = Manager;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Network\Manager.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Network\Manager.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Network\RemoteUser.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Network\RemoteUser.js
 (function(){pliny.class({
   parent: "Primrose.Network",
   name: "RemoteUser",
@@ -12949,11 +12644,10 @@ var Manager = (function (superclass) {
     description: "The name of the user initiating the peer connection."
   }]
 });
-var RemoteUser = (function (superclass) {
-  function RemoteUser(userName, modelFactory, nameMaterial, disableWebRTC, requestICEPath, microphone, localUserName, goSecond) {
-    var this$1 = this;
+class RemoteUser extends Primrose.AbstractEventEmitter {
 
-    superclass.call(this);
+  constructor(userName, modelFactory, nameMaterial, disableWebRTC, requestICEPath, microphone, localUserName, goSecond) {
+    super();
     this.time = 0;
 
     this.userName = userName;
@@ -12961,12 +12655,12 @@ var RemoteUser = (function (superclass) {
     this.peering = false;
     this.peered = false;
     this.stage = modelFactory.clone();
-    this.stage.traverse(function (obj) {
+    this.stage.traverse((obj) => {
       if (obj.name === "AvatarBelt") {
         colored(obj, Primrose.Random.color());
       }
       else if (obj.name === "AvatarHead") {
-        this$1.head = obj;
+        this.head = obj;
       }
     });
 
@@ -13017,28 +12711,22 @@ var RemoteUser = (function (superclass) {
     if(!disableWebRTC && "WebRTCSocket" in Primrose) {
 
       Primrose.WebRTCSocket.PEERING_EVENTS
-        .map(function (name) { return "peering_" + name; })
-        .forEach(function (name) { return this$1[name] = function (evt) {
-          if(this$1.audioChannel[name]){
-            this$1.audioChannel[name](evt);
+        .map((name) => "peering_" + name)
+        .forEach((name) => this[name] = (evt) => {
+          if(this.audioChannel[name]){
+            this.audioChannel[name](evt);
           }
           else{
-            console.warn(this$1, "does not have method", name);
+            console.warn(this, "does not have method", name);
           }
-        }; });
+        });
 
       this.audioChannel = new Primrose.Network.AudioChannel(requestICEPath, localUserName, userName, microphone, goSecond);
       this.audioChannel.forward(this, Primrose.WebRTCSocket.PEERING_EVENTS);
     }
   }
 
-  if ( superclass ) RemoteUser.__proto__ = superclass;
-  RemoteUser.prototype = Object.create( superclass && superclass.prototype );
-  RemoteUser.prototype.constructor = RemoteUser;
-
-  RemoteUser.prototype.peer = function peer (audio) {
-    var this$1 = this;
-
+  peer(audio) {
     pliny.method({
       parent: "Pliny.RemoteUser",
       name: "peer",
@@ -13053,21 +12741,21 @@ var RemoteUser = (function (superclass) {
     if("WebRTCSocket" in Primrose && !this.peered && !this.peering && !this.peeringError){
       this.peering = true;
       return this.audioChannel.ready
-        .then(function () {
-          if (this$1.audioChannel.inAudio) {
-            this$1.setAudio(audio, this$1.audioChannel.inAudio);
-            this$1.peered = true;
+        .then(() => {
+          if (this.audioChannel.inAudio) {
+            this.setAudio(audio, this.audioChannel.inAudio);
+            this.peered = true;
           }
         })
-        .catch(function (exp) {
-          this$1.peered = false;
-          this$1.peeringError = exp;
+        .catch((exp) => {
+          this.peered = false;
+          this.peeringError = exp;
         })
-        .then(function () { return this$1.peering = false; });
+        .then(() => this.peering = false);
     }
-  };
+  }
 
-  RemoteUser.prototype.setAudio = function setAudio (audio, audioSource){
+  setAudio(audio, audioSource){
     if(audioSource instanceof Element){
       this.audioElement = audioSource;
       Primrose.Output.Audio3D.setAudioProperties(this.audioElement);
@@ -13088,18 +12776,18 @@ var RemoteUser = (function (superclass) {
     this.panner.coneOuterGain = 0.1;
     this.panner.panningModel = "HRTF";
     this.panner.distanceModel = "exponential";
-  };
+  }
 
-  RemoteUser.prototype.addEventListener = function addEventListener (type, thunk){
+  addEventListener(type, thunk){
     if(Primrose.WebRTCSocket.PEERING_EVENTS.indexOf(type) >= 0){
       this.audioChannel.addEventListener(type, thunk);
     }
     else {
-      superclass.prototype.addEventListener.call(this, type, thunk);
+      super.addEventListener(type, thunk);
     }
-  };
+  }
 
-  RemoteUser.prototype.unpeer = function unpeer () {
+  unpeer() {
     pliny.method({
       parent: "Pliny.RemoteUser",
       name: "unpeer",
@@ -13117,9 +12805,9 @@ var RemoteUser = (function (superclass) {
         }
       }
     }
-  };
+  }
 
-  RemoteUser.prototype._updateV = function _updateV (v, dt, fade) {
+  _updateV(v, dt, fade) {
     v.curr.toArray(v.arr1);
     v.delta.toArray(v.arr2);
     for (var i = 0; i < v.arr1.length; ++i) {
@@ -13131,9 +12819,9 @@ var RemoteUser = (function (superclass) {
 
     v.curr.fromArray(v.arr1);
     v.delta.fromArray(v.arr2);
-  };
+  }
 
-  RemoteUser.prototype._predict = function _predict (v, state, off) {
+  _predict(v, state, off) {
     v.delta.fromArray(state, off);
     v.delta.toArray(v.arr1);
     v.curr.toArray(v.arr2);
@@ -13141,9 +12829,9 @@ var RemoteUser = (function (superclass) {
       v.arr1[i] = (v.arr1[i] - v.arr2[i]) * RemoteUser.NETWORK_DT_INV;
     }
     v.delta.fromArray(v.arr1);
-  };
+  }
 
-  RemoteUser.prototype.update = function update (dt) {
+  update(dt) {
     pliny.method({
       parent: "Pliny.RemoteUser",
       name: "update",
@@ -13166,9 +12854,9 @@ var RemoteUser = (function (superclass) {
       this.panner.setPosition(this.stage.position.x, this.stage.position.y, this.stage.position.z);
       this.panner.setOrientation(Math.sin(this.stage.rotation.y), 0, Math.cos(this.stage.rotation.y));
     }
-  };
+  }
 
-  RemoteUser.prototype.setState = function setState (v) {
+  setState(v) {
     pliny.property({
       parent: "Pliny.RemoteUser",
       name: "state",
@@ -13184,24 +12872,22 @@ var RemoteUser = (function (superclass) {
     this._predict(this.headPosition, v, 1);
     this._predict(this.stageQuaternion, v, 4);
     this._predict(this.headQuaternion, v, 8);
-  };
+  }
 
-  RemoteUser.prototype.toString = function toString (digits) {
+  toString(digits) {
     return this.stage.position.curr.toString(digits) + " " + this.headPosition.curr.toString(digits);
-  };
-
-  return RemoteUser;
-}(Primrose.AbstractEventEmitter));
+  }
+}
 
 RemoteUser.FADE_FACTOR = 0.5;
 RemoteUser.NETWORK_DT = 0.10;
 RemoteUser.NETWORK_DT_INV = 1 / RemoteUser.NETWORK_DT;
-    if(typeof window !== "undefined") window.Primrose.Network.RemoteUser = RemoteUser;
+  if(typeof window !== "undefined") window.Primrose.Network.RemoteUser = RemoteUser;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Network\RemoteUser.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Network\RemoteUser.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Output\Audio3D.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Output\Audio3D.js
 (function(){// polyfill
 Window.prototype.AudioContext =
   Window.prototype.AudioContext ||
@@ -13213,301 +12899,294 @@ pliny.class({
     name: "Audio3D",
     description: "| [under construction]"
 });
-var Audio3D = function Audio3D() {
-  var this$1 = this;
+class Audio3D {
+  constructor() {
 
+    try {
+      this.context = new AudioContext();
+      this.sampleRate = this.context.sampleRate;
+      this.mainVolume = this.context.createGain();
 
-  try {
-    this.context = new AudioContext();
-    this.sampleRate = this.context.sampleRate;
-    this.mainVolume = this.context.createGain();
+      var vec = new THREE.Vector3(),
+        up = new THREE.Vector3(),
+        left = new THREE.Matrix4()
+        .identity(),
+        right = new THREE.Matrix4()
+        .identity(),
+        swap = null;
 
-    var vec = new THREE.Vector3(),
-      up = new THREE.Vector3(),
-      left = new THREE.Matrix4()
-      .identity(),
-      right = new THREE.Matrix4()
-      .identity(),
-      swap = null;
-
-    this.setVelocity = this.context.listener.setVelocity.bind(this.context.listener);
-    this.setPlayer = function (obj) {
-      var head = obj;
-      left.identity();
-      right.identity();
-      while (head !== null) {
-        left.fromArray(head.matrix.elements);
-        left.multiply(right);
+      this.setVelocity = this.context.listener.setVelocity.bind(this.context.listener);
+      this.setPlayer = (obj) => {
+        var head = obj;
+        left.identity();
+        right.identity();
+        while (head !== null) {
+          left.fromArray(head.matrix.elements);
+          left.multiply(right);
+          swap = left;
+          left = right;
+          right = swap;
+          head = head.parent;
+        }
         swap = left;
-        left = right;
-        right = swap;
-        head = head.parent;
-      }
-      swap = left;
-      var mx = swap.elements[12],
-        my = swap.elements[13],
-        mz = swap.elements[14];
-      swap.elements[12] = swap.elements[13] = swap.elements[14] = 0;
+        var mx = swap.elements[12],
+          my = swap.elements[13],
+          mz = swap.elements[14];
+        swap.elements[12] = swap.elements[13] = swap.elements[14] = 0;
 
-      this$1.context.listener.setPosition(mx, my, mz);
-      vec.set(0, 0, 1);
-      vec.applyProjection(right);
-      vec.normalize();
-      up.set(0, -1, 0);
-      up.applyProjection(right);
-      up.normalize();
-      this$1.context.listener.setOrientation(vec.x, vec.y, vec.z, up.x, up.y, up.z);
-      right.elements[12] = mx;
-      right.elements[13] = my;
-      right.elements[14] = mz;
-    };
-    this.isAvailable = true;
-    this.start();
-  }
-  catch (exp) {
-    console.error(exp);
-    console.error("AudioContext not available.");
-    this.isAvailable = false;
-    this.setPlayer = function () {};
-    this.setVelocity = function () {};
-    this.start = function () {};
-    this.stop = function () {};
-    this.error = exp;
-  }
-};
-
-Audio3D.setAudioStream = function setAudioStream (stream, id) {
-  var audioElementCount = document.querySelectorAll("audio")
-    .length,
-    element = Primrose.DOM.cascadeElement(id || ("audioStream" + audioElementCount), "audio", HTMLAudioElement, true);
-  setAudioProperties(element);
-  element.srcObject = stream;
-  return element;
-};
-
-Audio3D.setAudioProperties = function setAudioProperties (element){
-  element.autoplay = true;
-  element.controls = false;
-  element.crossOrigin = "anonymous";
-  element.muted = true;
-  element.setAttribute("muted", "");
-};
-
-Audio3D.prototype.start = function start () {
-  this.mainVolume.connect(this.context.destination);
-};
-
-Audio3D.prototype.stop = function stop () {
-  this.mainVolume.disconnect();
-};
-
-Audio3D.prototype.loadURL = function loadURL (src) {
-    var this$1 = this;
-
-  return Primrose.HTTP.getBuffer(src)
-    .then(function (data) { return new Promise(function (resolve, reject) { return this$1.context.decodeAudioData(data, resolve, reject); }); });
-};
-
-Audio3D.prototype.loadURLCascadeSrcList = function loadURLCascadeSrcList (srcs, index) {
-    var this$1 = this;
-
-  index = index || 0;
-  if (index >= srcs.length) {
-    return Promise.reject("Failed to load a file from " + srcs.length + " files.");
-  }
-  else {
-    return this.loadURL(srcs[index])
-      .catch(function (err) {
-        console.error(err);
-        return this$1.loadURLCascadeSrcList(srcs, index + 1);
-      });
-  }
-};
-
-Audio3D.prototype.createRawSound = function createRawSound (pcmData) {
-  if (pcmData.length !== 1 && pcmData.length !== 2) {
-    throw new Error("Incorrect number of channels. Expected 1 or 2, got " + pcmData.length);
-  }
-
-  var frameCount = pcmData[0].length;
-  if (pcmData.length > 1 && pcmData[1].length !== frameCount) {
-    throw new Error(
-      "Second channel is not the same length as the first channel. Expected " + frameCount + ", but was " + pcmData[1].length);
-  }
-
-  var buffer = this.context.createBuffer(pcmData.length, frameCount, this.sampleRate);
-  for (var c = 0; c < pcmData.length; ++c) {
-    var channel = buffer.getChannelData(c);
-    for (var i = 0; i < frameCount; ++i) {
-      channel[i] = pcmData[c][i];
+        this.context.listener.setPosition(mx, my, mz);
+        vec.set(0, 0, 1);
+        vec.applyProjection(right);
+        vec.normalize();
+        up.set(0, -1, 0);
+        up.applyProjection(right);
+        up.normalize();
+        this.context.listener.setOrientation(vec.x, vec.y, vec.z, up.x, up.y, up.z);
+        right.elements[12] = mx;
+        right.elements[13] = my;
+        right.elements[14] = mz;
+      };
+      this.isAvailable = true;
+      this.start();
+    }
+    catch (exp) {
+      console.error(exp);
+      console.error("AudioContext not available.");
+      this.isAvailable = false;
+      this.setPlayer = function () {};
+      this.setVelocity = function () {};
+      this.start = function () {};
+      this.stop = function () {};
+      this.error = exp;
     }
   }
-  return buffer;
-};
 
-Audio3D.prototype.createSound = function createSound (loop, buffer) {
-  var snd = {
-    volume: this.context.createGain(),
-    source: this.context.createBufferSource()
-  };
-  snd.source.buffer = buffer;
-  snd.source.loop = loop;
-  snd.source.connect(snd.volume);
-  return snd;
-};
+  static setAudioStream(stream, id) {
+    const audioElementCount = document.querySelectorAll("audio")
+      .length,
+      element = Primrose.DOM.cascadeElement(id || ("audioStream" + audioElementCount), "audio", HTMLAudioElement, true);
+    setAudioProperties(element);
+    element.srcObject = stream;
+    return element;
+  }
 
-Audio3D.prototype.create3DMediaStream = function create3DMediaStream (x, y, z, stream) {
-  console.log(stream);
-  var element = document.createElement("audio"),
-    snd = {
-      audio: element,
-      source: this.context.createMediaElementSource(element),
-      //volume: this.context.createGain(),
-      //panner: this.context.createPanner()
-    };
+  static setAudioProperties(element){
+    element.autoplay = true;
+    element.controls = false;
+    element.crossOrigin = "anonymous";
+    element.muted = true;
+    element.setAttribute("muted", "");
+  }
 
-  element.srcObject = stream;
-  element.autoplay = true;
-  element.controls = false;
-  element.muted = true;
-  element.crossOrigin = "anonymous";
-  snd.source.connect(this.mainVolume);
-  //snd.source.connect(snd.volume):
-  //snd.volume.connect(snd.panner);
-  //snd.panner.connect(this.mainVolume);
-  //snd.panner.setPosition(x, y, z);
-  return snd;
-};
+  start() {
+    this.mainVolume.connect(this.context.destination);
+  }
 
-Audio3D.prototype.create3DSound = function create3DSound (x, y, z, snd) {
-  snd.panner = this.context.createPanner();
-  snd.panner.setPosition(x, y, z);
-  snd.panner.connect(this.mainVolume);
-  snd.volume.connect(snd.panner);
-  return snd;
-};
+  stop() {
+    this.mainVolume.disconnect();
+  }
 
-Audio3D.prototype.createFixedSound = function createFixedSound (snd) {
-  snd.volume.connect(this.mainVolume);
-  return snd;
-};
+  loadURL(src) {
+    return Primrose.HTTP.getBuffer(src)
+      .then((data) => new Promise((resolve, reject) =>
+        this.context.decodeAudioData(data, resolve, reject)));
+  }
 
-Audio3D.prototype.loadSource = function loadSource (sources, loop) {
-    var this$1 = this;
-
-
-  pliny.method({
-    parent: "Primrose.Output.Audio3D",
-    name: "loadSound",
-    returns: "Promise<MediaElementAudioSourceNode>",
-    parameters: [{
-      name: "sources",
-      type: "String|Array<String>",
-      description: "A string URI to an audio source, or an array of string URIs to audio sources. Will be used as a collection of HTML5 &lt;source> tags as children of an HTML5 &lt;audio> tag."
-    }, {
-      name: "loop",
-      type: "Boolean",
-      optional: true,
-      description: "indicate that the sound should be played on loop."
-    }],
-    description: "Loads the first element of the `sources` array for which the browser supports the file format as an HTML5 &lt;audio> tag to use as an `AudioSourceNode` attached to the current `AudioContext`. This does not load all of the audio files. It only loads the first one of a list of options that could work, because all browsers do not support the same audio formats.",
-    examples: [{
-      name: "Load a single audio file.",
-      description: "There is no one, good, compressed audio format supported in all browsers, but they do all support uncompressed WAV. You shouldn't use this on the Internet, but it might be okay for a local solution.\n\
-\n\
-grammar(\"JavaScript\");\n\
-var audio = new Primrose.Output.Audio3D();\n\
-audio.loadSource(\"mySong.wav\").then(function(node){\n\
-  node.connect(audio.context.destination);\n\
-});"
-    }, {
-      name: "Load a single audio file from a list of options.",
-      description: "There is no one, good, compressed audio format supported in all browsers. As a hack around the problem, HTML5 media tags may include one or more &lt;source> tags as children to specify a cascading list of media sources. The browser will select the first one that it can successfully decode.\n\
-\n\
-grammar(\"JavaScript\");\n\
-var audio = new Primrose.Output.Audio3D();\n\
-audio.loadSource([\n\
-  \"mySong.mp3\",\n\
-  \"mySong.aac\",\n\
-  \"mySong.ogg\"\n\
-]).then(function(node){\n\
-  node.connect(audio.context.destination);\n\
-});"
-    }, {
-      name: "Load an ambient audio file that should be looped.",
-      description: "The only audio option that is available is whether or not the audio file should be looped. You specify this with the second parameter to the `loadSource()` method, a `Boolean` value to indicate that looping is desired.\n\
-\n\
-grammar(\"JavaScript\");\n\
-var audio = new Primrose.Output.Audio3D();\n\
-audio.loadSource([\n\
-  \"mySong.mp3\",\n\
-  \"mySong.aac\",\n\
-  \"mySong.ogg\"\n\
-], true).then(function(node){\n\
-  node.connect(audio.context.destination);\n\
-});"
-    }]
-  });
-
-  return new Promise(function (resolve, reject) {
-    if (!(sources instanceof Array)) {
-      sources = [sources];
+  loadURLCascadeSrcList(srcs, index) {
+    index = index || 0;
+    if (index >= srcs.length) {
+      return Promise.reject("Failed to load a file from " + srcs.length + " files.");
     }
-    var audio = document.createElement("audio");
-    audio.autoplay = true;
-    audio.loop = loop;
-    audio.crossOrigin = "anonymous";
-    sources.map(function (src) {
-        var source = document.createElement("source");
-        source.src = src;
-        return source;
-      })
-      .forEach(audio.appendChild.bind(audio));
-    audio.oncanplay = function () {
-      var snd = null;
-      if (this$1.context) {
-        audio.oncanplay = null;
-        snd = {
-          volume: this$1.context.createGain(),
-          source: this$1.context.createMediaElementSource(audio)
-        };
-        snd.source.connect(snd.volume);
+    else {
+      return this.loadURL(srcs[index])
+        .catch((err) => {
+          console.error(err);
+          return this.loadURLCascadeSrcList(srcs, index + 1);
+        });
+    }
+  }
+
+  createRawSound(pcmData) {
+    if (pcmData.length !== 1 && pcmData.length !== 2) {
+      throw new Error("Incorrect number of channels. Expected 1 or 2, got " + pcmData.length);
+    }
+
+    var frameCount = pcmData[0].length;
+    if (pcmData.length > 1 && pcmData[1].length !== frameCount) {
+      throw new Error(
+        "Second channel is not the same length as the first channel. Expected " + frameCount + ", but was " + pcmData[1].length);
+    }
+
+    var buffer = this.context.createBuffer(pcmData.length, frameCount, this.sampleRate);
+    for (var c = 0; c < pcmData.length; ++c) {
+      var channel = buffer.getChannelData(c);
+      for (var i = 0; i < frameCount; ++i) {
+        channel[i] = pcmData[c][i];
       }
-      resolve(snd);
+    }
+    return buffer;
+  }
+
+  createSound(loop, buffer) {
+    var snd = {
+      volume: this.context.createGain(),
+      source: this.context.createBufferSource()
     };
-    audio.onerror = reject;
-    document.body.appendChild(audio);
-  });
-};
+    snd.source.buffer = buffer;
+    snd.source.loop = loop;
+    snd.source.connect(snd.volume);
+    return snd;
+  }
 
-Audio3D.prototype.load3DSound = function load3DSound (src, loop, x, y, z) {
-  return this.loadSource(src, loop)
-    .then(this.create3DSound.bind(this, x, y, z));
-};
+  create3DMediaStream(x, y, z, stream) {
+    console.log(stream);
+    var element = document.createElement("audio"),
+      snd = {
+        audio: element,
+        source: this.context.createMediaElementSource(element),
+        //volume: this.context.createGain(),
+        //panner: this.context.createPanner()
+      };
 
-Audio3D.prototype.loadFixedSound = function loadFixedSound (src, loop) {
-  return this.loadSource(src, loop)
-    .then(this.createFixedSound.bind(this));
-};
+    element.srcObject = stream;
+    element.autoplay = true;
+    element.controls = false;
+    element.muted = true;
+    element.crossOrigin = "anonymous";
+    snd.source.connect(this.mainVolume);
+    //snd.source.connect(snd.volume):
+    //snd.volume.connect(snd.panner);
+    //snd.panner.connect(this.mainVolume);
+    //snd.panner.setPosition(x, y, z);
+    return snd;
+  }
 
-Audio3D.prototype.playBufferImmediate = function playBufferImmediate (buffer, volume) {
-    var this$1 = this;
+  create3DSound(x, y, z, snd) {
+    snd.panner = this.context.createPanner();
+    snd.panner.setPosition(x, y, z);
+    snd.panner.connect(this.mainVolume);
+    snd.volume.connect(snd.panner);
+    return snd;
+  }
 
-  var snd = this.createSound(false, buffer);
-  snd = this.createFixedSound(snd);
-  snd.volume.gain.value = volume;
-  snd.source.addEventListener("ended", function (evt) {
-    snd.volume.disconnect(this$1.mainVolume);
-  });
-  snd.source.start(0);
-  return snd;
-};
-    if(typeof window !== "undefined") window.Primrose.Output.Audio3D = Audio3D;
+  createFixedSound(snd) {
+    snd.volume.connect(this.mainVolume);
+    return snd;
+  }
+
+  loadSource(sources, loop) {
+
+    pliny.method({
+      parent: "Primrose.Output.Audio3D",
+      name: "loadSound",
+      returns: "Promise<MediaElementAudioSourceNode>",
+      parameters: [{
+        name: "sources",
+        type: "String|Array<String>",
+        description: "A string URI to an audio source, or an array of string URIs to audio sources. Will be used as a collection of HTML5 &lt;source> tags as children of an HTML5 &lt;audio> tag."
+      }, {
+        name: "loop",
+        type: "Boolean",
+        optional: true,
+        description: "indicate that the sound should be played on loop."
+      }],
+      description: "Loads the first element of the `sources` array for which the browser supports the file format as an HTML5 &lt;audio> tag to use as an `AudioSourceNode` attached to the current `AudioContext`. This does not load all of the audio files. It only loads the first one of a list of options that could work, because all browsers do not support the same audio formats.",
+      examples: [{
+        name: "Load a single audio file.",
+        description: "There is no one, good, compressed audio format supported in all browsers, but they do all support uncompressed WAV. You shouldn't use this on the Internet, but it might be okay for a local solution.\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var audio = new Primrose.Output.Audio3D();\n\
+  audio.loadSource(\"mySong.wav\").then(function(node){\n\
+    node.connect(audio.context.destination);\n\
+  });"
+      }, {
+        name: "Load a single audio file from a list of options.",
+        description: "There is no one, good, compressed audio format supported in all browsers. As a hack around the problem, HTML5 media tags may include one or more &lt;source> tags as children to specify a cascading list of media sources. The browser will select the first one that it can successfully decode.\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var audio = new Primrose.Output.Audio3D();\n\
+  audio.loadSource([\n\
+    \"mySong.mp3\",\n\
+    \"mySong.aac\",\n\
+    \"mySong.ogg\"\n\
+  ]).then(function(node){\n\
+    node.connect(audio.context.destination);\n\
+  });"
+      }, {
+        name: "Load an ambient audio file that should be looped.",
+        description: "The only audio option that is available is whether or not the audio file should be looped. You specify this with the second parameter to the `loadSource()` method, a `Boolean` value to indicate that looping is desired.\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var audio = new Primrose.Output.Audio3D();\n\
+  audio.loadSource([\n\
+    \"mySong.mp3\",\n\
+    \"mySong.aac\",\n\
+    \"mySong.ogg\"\n\
+  ], true).then(function(node){\n\
+    node.connect(audio.context.destination);\n\
+  });"
+      }]
+    });
+
+    return new Promise((resolve, reject) => {
+      if (!(sources instanceof Array)) {
+        sources = [sources];
+      }
+      var audio = document.createElement("audio");
+      audio.autoplay = true;
+      audio.loop = loop;
+      audio.crossOrigin = "anonymous";
+      sources.map((src) => {
+          var source = document.createElement("source");
+          source.src = src;
+          return source;
+        })
+        .forEach(audio.appendChild.bind(audio));
+      audio.oncanplay = () => {
+        var snd = null;
+        if (this.context) {
+          audio.oncanplay = null;
+          snd = {
+            volume: this.context.createGain(),
+            source: this.context.createMediaElementSource(audio)
+          };
+          snd.source.connect(snd.volume);
+        }
+        resolve(snd);
+      };
+      audio.onerror = reject;
+      document.body.appendChild(audio);
+    });
+  }
+
+  load3DSound(src, loop, x, y, z) {
+    return this.loadSource(src, loop)
+      .then(this.create3DSound.bind(this, x, y, z));
+  }
+
+  loadFixedSound(src, loop) {
+    return this.loadSource(src, loop)
+      .then(this.createFixedSound.bind(this));
+  }
+
+  playBufferImmediate(buffer, volume) {
+    var snd = this.createSound(false, buffer);
+    snd = this.createFixedSound(snd);
+    snd.volume.gain.value = volume;
+    snd.source.addEventListener("ended", (evt) => {
+      snd.volume.disconnect(this.mainVolume);
+    });
+    snd.source.start(0);
+    return snd;
+  }
+}
+  if(typeof window !== "undefined") window.Primrose.Output.Audio3D = Audio3D;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Output\Audio3D.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Output\Audio3D.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Output\HapticGlove.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Output\HapticGlove.js
 (function(){pliny.class({
   parent: "Primrose.Output",
     name: "HapticGlove",
@@ -13544,8 +13223,6 @@ function HapticGlove(options) {
   ];
 
   function readFrame(frame) {
-    var this$1 = this;
-
     if (frame.valid) {
       enabled = frame.hands.length > 0;
       for (var h = 0; h < options.hands && h < frame.hands.length; ++h) {
@@ -13554,9 +13231,9 @@ function HapticGlove(options) {
           var finger = hand.fingers[f];
           for (var j = 0; j < options.joints; ++j) {
             var n = h * options.fingers * options.joints + f * options.joints + j;
-            if (n < this$1.tips.length) {
+            if (n < this.tips.length) {
               var p = finger[tipNames[j]];
-              var t = this$1.tips[n];
+              var t = this.tips[n];
               t.position.set(p[0], p[1], p[2]);
             }
           }
@@ -13589,24 +13266,22 @@ function HapticGlove(options) {
   });
 
   this.readContacts = function (contacts) {
-    var this$1 = this;
-
     var count = 0;
     for (var c = 0; enabled && count < 2 && c < contacts.length; ++c) {
       var contact = contacts[c];
       for (var h = 0; h < options.hands && count < 2; ++h) {
         for (var f = 0; f < options.fingers; ++f) {
-          var t = this$1.tips[f];
+          var t = this.tips[f];
           var found = false;
           if (contact.bi === t) {
             if (contact.bj.graphics && contact.bj.graphics.isSolid) {
-              this$1.setFingerState(f, true);
+              this.setFingerState(f, true);
               found = true;
               ++count;
             }
           }
           if (!found) {
-            this$1.setFingerState(f, false);
+            this.setFingerState(f, false);
           }
         }
       }
@@ -13629,12 +13304,12 @@ function HapticGlove(options) {
 
 HapticGlove.DEFAULT_PORT = 8383;
 HapticGlove.DEFAULT_HOST = document.location.hostname;
-    if(typeof window !== "undefined") window.Primrose.Output.HapticGlove = HapticGlove;
+  if(typeof window !== "undefined") window.Primrose.Output.HapticGlove = HapticGlove;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Output\HapticGlove.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Output\HapticGlove.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Output\Music.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Output\Music.js
 (function(){/* polyfill */
 Window.prototype.AudioContext =
   Window.prototype.AudioContext ||
@@ -13655,8 +13330,6 @@ pliny.class({
 });
 
 function Music(context, type, numNotes) {
-  var this$1 = this;
-
   this.audio = context || new AudioContext();
   if (this.audio && this.audio.createGain) {
     if (numNotes === undefined) {
@@ -13672,14 +13345,14 @@ function Music(context, type, numNotes) {
     this.oscillators = [];
 
     for (var i = 0; i < this.numNotes; ++i) {
-      var o = this$1.audio.createOscillator(),
-        g = this$1.audio.createGain();
+      var o = this.audio.createOscillator(),
+        g = this.audio.createGain();
       o.type = type;
       o.frequency.value = 0;
       o.connect(g);
       o.start();
-      g.connect(this$1.mainVolume);
-      this$1.oscillators.push({
+      g.connect(this.mainVolume);
+      this.oscillators.push({
         osc: o,
         gn: g,
         timeout: null
@@ -13731,12 +13404,12 @@ Music.prototype.play = function (i, volume, duration, n) {
       .bind(this, n, o), duration * 1000);
   }
 };
-    if(typeof window !== "undefined") window.Primrose.Output.Music = Music;
+  if(typeof window !== "undefined") window.Primrose.Output.Music = Music;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Output\Music.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Output\Music.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Output\Speech.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Output\Speech.js
 (function(){function wrap(thunk) {
   return function(evt) {
     this.speaking = false;
@@ -13749,12 +13422,10 @@ pliny.class({
     name: "Speech",
     description: "| [under construction]"
 });
-var Speech = (function(){
+const Speech = (function(){
   if(window.speechSynthesis !== undefined) {
-    return (function () {
-      function anonymous (options) {
-      var this$1 = this;
-
+    return class {
+      constructor (options) {
         this.options = patch(options, {
           remoteVoices: false,
           volume: 1,
@@ -13764,47 +13435,39 @@ var Speech = (function(){
         });
         this.voices = speechSynthesis
           .getVoices()
-          .filter(function (v) { return this$1.options.remoteVoices || v.default || v.localService; });
+          .filter((v) => this.options.remoteVoices || v.default || v.localService);
         this.speaking = false;
       }
 
-      anonymous.prototype.speak = function speak (txt, opts) {
-        var this$1 = this;
-
-        return new Promise(function (resolve, reject) {
-          this$1.speaking = true;
+      speak(txt, opts) {
+        return new Promise((resolve, reject) => {
+          this.speaking = true;
           var msg = new SpeechSynthesisUtterance();
-          msg.voice = this$1.voices[opts && opts.voice || this$1.options.voice];
-          msg.volume = opts && opts.volume || this$1.options.volume;
-          msg.rate = opts && opts.rate || this$1.options.rate;
-          msg.pitch = opts && opts.pitch || this$1.options.pitch;
+          msg.voice = this.voices[opts && opts.voice || this.options.voice];
+          msg.volume = opts && opts.volume || this.options.volume;
+          msg.rate = opts && opts.rate || this.options.rate;
+          msg.pitch = opts && opts.pitch || this.options.pitch;
           msg.text = txt;
-          msg.onend = wrap(resolve).bind(this$1);
-          msg.onerror = wrap(reject).bind(this$1);
+          msg.onend = wrap(resolve).bind(this);
+          msg.onerror = wrap(reject).bind(this);
           speechSynthesis.speak(msg);
         });
-      };
-
-      return anonymous;
-    }());
+      }
+    };
   }
   else {
     // in case of error, return a shim that lets us continue unabated
-    return (function () {
-      function anonymous$1 () {}
-
-      anonymous$1.prototype.speak = function speak () {};
-
-      return anonymous$1;
-    }());
+    return class {
+      speak() {}
+    };
   }
 })();
-    if(typeof window !== "undefined") window.Primrose.Output.Speech = Speech;
+  if(typeof window !== "undefined") window.Primrose.Output.Speech = Speech;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Output\Speech.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Output\Speech.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Random\color.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Random\color.js
 (function(){pliny.function({
   parent: "Primrose.Random",
   name: "color",
@@ -13841,12 +13504,12 @@ function color() {
     b = Primrose.Random.int(0, 256);
   return r << 16 | g << 8 | b;
 }
-    if(typeof window !== "undefined") window.Primrose.Random.color = color;
+  if(typeof window !== "undefined") window.Primrose.Random.color = color;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Random\color.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Random\color.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Random\ID.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Random\ID.js
 (function(){pliny.function({
   parent: "Primrose.Random",
   name: "ID",
@@ -13882,12 +13545,12 @@ function ID() {
     .toString(36)
     .replace(".", "");
 }
-    if(typeof window !== "undefined") window.Primrose.Random.ID = ID;
+  if(typeof window !== "undefined") window.Primrose.Random.ID = ID;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Random\ID.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Random\ID.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Random\int.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Random\int.js
 (function(){pliny.function({
   parent: "Primrose.Random",
   name: "int",
@@ -13965,12 +13628,12 @@ function int(min, max, power) {
     n = Math.pow(Math.random(), power);
   return Math.floor(min + n * delta);
 }
-    if(typeof window !== "undefined") window.Primrose.Random.int = int;
+  if(typeof window !== "undefined") window.Primrose.Random.int = int;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Random\int.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Random\int.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Random\item.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Random\item.js
 (function(){pliny.function({
   parent: "Primrose.Random",
   name: "item",
@@ -14016,12 +13679,12 @@ function int(min, max, power) {
 function item(arr) {
   return arr[Primrose.Random.int(arr.length)];
 }
-    if(typeof window !== "undefined") window.Primrose.Random.item = item;
+  if(typeof window !== "undefined") window.Primrose.Random.item = item;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Random\item.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Random\item.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Random\number.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Random\number.js
 (function(){pliny.function({
   parent: "Primrose.Random",
   name: "number",
@@ -14064,12 +13727,12 @@ function item(arr) {
 function number(min, max) {
   return Math.random() * (max - min) + min;
 }
-    if(typeof window !== "undefined") window.Primrose.Random.number = number;
+  if(typeof window !== "undefined") window.Primrose.Random.number = number;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Random\number.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Random\number.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Random\steps.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Random\steps.js
 (function(){pliny.function({
   parent: "Primrose.Random",
   name: "steps",
@@ -14116,12 +13779,12 @@ function number(min, max) {
 function steps(min, max, steps) {
   return min + Primrose.Random.int(0, (1 + max - min) / steps) * steps;
 }
-    if(typeof window !== "undefined") window.Primrose.Random.steps = steps;
+  if(typeof window !== "undefined") window.Primrose.Random.steps = steps;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Random\steps.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Random\steps.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Text\CodePage.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CodePage.js
 (function(){pliny.class({
   parent: "Primrose.Text",
     name: "CodePage",
@@ -14129,8 +13792,6 @@ function steps(min, max, steps) {
 });
 
 function CodePage(name, lang, options) {
-  var this$1 = this;
-
   this.name = name;
   this.language = lang;
 
@@ -14212,7 +13873,7 @@ function CodePage(name, lang, options) {
   for (char in Primrose.Keys) {
     code = Primrose.Keys[char];
     if (!isNaN(code)) {
-      this$1.keyNames[code] = char;
+      this.keyNames[code] = char;
     }
   }
 
@@ -14235,13 +13896,13 @@ function CodePage(name, lang, options) {
           char = commands.NORMAL[code];
           cmdName = type + "_" + char;
         }
-        this$1.commandNames.push(cmdName);
-        this$1.keyNames[code] = char;
+        this.commandNames.push(cmdName);
+        this.keyNames[code] = char;
         var func = codes[code];
         if (typeof func !== "function") {
           func = overwriteText.bind(null, func);
         }
-        this$1[cmdName] = func;
+        this[cmdName] = func;
       }
     }
   }
@@ -14252,24 +13913,24 @@ CodePage.DEAD = function (key) {
     prim.setDeadKeyState("DEAD" + key);
   };
 };
-    if(typeof window !== "undefined") window.Primrose.Text.CodePage = CodePage;
+  if(typeof window !== "undefined") window.Primrose.Text.CodePage = CodePage;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Text\CodePage.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CodePage.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Text\CodePages.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CodePages.js
 (function(){pliny.namespace({
   parent: "Primrose.Text",
   name: "CodePages",
   description: "The CodePages namespace contains international keyboard parameters."
 });
-var CodePages = {};
-    if(typeof window !== "undefined") window.Primrose.Text.CodePages = CodePages;
+const CodePages = {};
+  if(typeof window !== "undefined") window.Primrose.Text.CodePages = CodePages;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Text\CodePages.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CodePages.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Text\CommandPack.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CommandPack.js
 (function(){pliny.class({
   parent: "Primrose.Text",
     name: "CommandPack",
@@ -14280,36 +13941,36 @@ function CommandPack(name, commands) {
   this.name = name;
   copyObject(this, commands);
 }
-    if(typeof window !== "undefined") window.Primrose.Text.CommandPack = CommandPack;
+  if(typeof window !== "undefined") window.Primrose.Text.CommandPack = CommandPack;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Text\CommandPack.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CommandPack.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CommandPacks.js
 (function(){pliny.namespace({
   parent: "Primrose.Text",
   name: "CommandPacks",
   description: "The CommandPacks namespace contains sets of keyboard shortcuts for different types of text-oriented controls."
 });
-var CommandPacks = {};
-    if(typeof window !== "undefined") window.Primrose.Text.CommandPacks = CommandPacks;
+const CommandPacks = {};
+  if(typeof window !== "undefined") window.Primrose.Text.CommandPacks = CommandPacks;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CommandPacks.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Text\Controls.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Controls.js
 (function(){pliny.namespace({
   parent: "Primrose.Text",
   name: "Controls",
   description: "The Controls namespace contains different types of text-oriented controls."
 });
-var Controls = {};
-    if(typeof window !== "undefined") window.Primrose.Text.Controls = Controls;
+const Controls = {};
+  if(typeof window !== "undefined") window.Primrose.Text.Controls = Controls;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Text\Controls.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Controls.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Text\Cursor.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Cursor.js
 (function(){// unicode-aware string reverse
 var reverse = (function () {
   var combiningMarks =
@@ -14381,14 +14042,12 @@ Cursor.prototype.fullhome = function () {
 };
 
 Cursor.prototype.fullend = function (lines) {
-  var this$1 = this;
-
   this.i = 0;
   var lastLength = 0;
   for (var y = 0; y < lines.length; ++y) {
     var line = lines[y];
     lastLength = line.length;
-    this$1.i += lastLength;
+    this.i += lastLength;
   }
   this.y = lines.length - 1;
   this.x = lastLength;
@@ -14445,23 +14104,21 @@ Cursor.prototype.skipright = function (lines) {
 };
 
 Cursor.prototype.fixCursor = function (lines) {
-  var this$1 = this;
-
   this.x = this.i;
   this.y = 0;
   var total = 0;
   var line = lines[this.y];
   while (this.x > line.length) {
-    this$1.x -= line.length;
+    this.x -= line.length;
     total += line.length;
-    if (this$1.y >= lines.length - 1) {
-      this$1.i = total;
-      this$1.x = line.length;
-      this$1.moved = true;
+    if (this.y >= lines.length - 1) {
+      this.i = total;
+      this.x = line.length;
+      this.moved = true;
       break;
     }
-    ++this$1.y;
-    line = lines[this$1.y];
+    ++this.y;
+    line = lines[this.y];
   }
   return this.moved;
 };
@@ -14525,28 +14182,24 @@ Cursor.prototype.down = function (lines) {
 };
 
 Cursor.prototype.incY = function (dy, lines) {
-  var this$1 = this;
-
   this.y = Math.max(0, Math.min(lines.length - 1, this.y + dy));
   var line = lines[this.y];
   this.x = Math.max(0, Math.min(line.length, this.x));
   this.i = this.x;
   for (var i = 0; i < this.y; ++i) {
-    this$1.i += lines[i].length;
+    this.i += lines[i].length;
   }
   this.reverseFromNewline(lines);
   this.moved = true;
 };
 
 Cursor.prototype.setXY = function (x, y, lines) {
-  var this$1 = this;
-
   this.y = Math.max(0, Math.min(lines.length - 1, y));
   var line = lines[this.y];
   this.x = Math.max(0, Math.min(line.length, x));
   this.i = this.x;
   for (var i = 0; i < this.y; ++i) {
-    this$1.i += lines[i].length;
+    this.i += lines[i].length;
   }
   this.reverseFromNewline(lines);
   this.moved = true;
@@ -14567,12 +14220,12 @@ Cursor.prototype.reverseFromNewline = function (lines) {
   }
   return false;
 };
-    if(typeof window !== "undefined") window.Primrose.Text.Cursor = Cursor;
+  if(typeof window !== "undefined") window.Primrose.Text.Cursor = Cursor;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Text\Cursor.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Cursor.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Text\Grammar.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Grammar.js
 (function(){pliny.class({
   parent: "Primrose.Text",
     name: "Grammar",
@@ -14779,13 +14432,11 @@ function Grammar(name, rules) {
     }]
   });
   this.tokenize = function (text) {
-    var this$1 = this;
-
     // all text starts off as regular text, then gets cut up into tokens of
     // more specific type
     var tokens = [new Primrose.Text.Token(text, "regular", 0)];
     for (var i = 0; i < this.grammar.length; ++i) {
-      var rule = this$1.grammar[i];
+      var rule = this.grammar[i];
       for (var j = 0; j < tokens.length; ++j) {
         rule.carveOutMatchedToken(tokens, j);
       }
@@ -14795,24 +14446,24 @@ function Grammar(name, rules) {
     return tokens;
   };
 }
-    if(typeof window !== "undefined") window.Primrose.Text.Grammar = Grammar;
+  if(typeof window !== "undefined") window.Primrose.Text.Grammar = Grammar;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Text\Grammar.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Grammar.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Text\Grammars.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Grammars.js
 (function(){pliny.namespace({
   parent: "Primrose.Text",
   name: "Grammars",
   description: "The Grammars namespace contains grammar parsers for different types of programming languages, to enable syntax highlighting."
 });
-var Grammars = {};
-    if(typeof window !== "undefined") window.Primrose.Text.Grammars = Grammars;
+const Grammars = {};
+  if(typeof window !== "undefined") window.Primrose.Text.Grammars = Grammars;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Text\Grammars.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Grammars.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystem.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\OperatingSystem.js
 (function(){function setCursorCommand(obj, mod, key, func, cur) {
   var name = mod + "_" + key;
   obj[name] = function (prim, tokenRows) {
@@ -14830,84 +14481,86 @@ pliny.class({
     name: "OperatingSystem",
     description: "| [under construction]"
 });
-var OperatingSystem = function OperatingSystem(name, pre1, pre2, redo, pre3, home, end, pre5, fullHome, fullEnd) {
-  var pre4 = pre3;
-  pre3 = pre3.length > 0 ? pre3 : "NORMAL";
+class OperatingSystem {
+  constructor(name, pre1, pre2, redo, pre3, home, end, pre5, fullHome, fullEnd) {
+    var pre4 = pre3;
+    pre3 = pre3.length > 0 ? pre3 : "NORMAL";
 
-  this[pre1 + "_a"] = "SELECT_ALL";
-  this[pre1 + "_c"] = "COPY";
-  this[pre1 + "_x"] = "CUT";
-  this[pre1 + "_v"] = "PASTE";
-  this[redo] = "REDO";
-  this[pre1 + "_z"] = "UNDO";
-  this[pre1 + "_DOWNARROW"] = "WINDOW_SCROLL_DOWN";
-  this[pre1 + "_UPARROW"] = "WINDOW_SCROLL_UP";
-  this[pre2 + "_LEFTARROW"] = "NORMAL_SKIPLEFT";
-  this[pre2 + "SHIFT_LEFTARROW"] = "SHIFT_SKIPLEFT";
-  this[pre2 + "_RIGHTARROW"] = "NORMAL_SKIPRIGHT";
-  this[pre2 + "SHIFT_RIGHTARROW"] = "SHIFT_SKIPRIGHT";
-  this[pre3 + "_HOME"] = "NORMAL_HOME";
-  this[pre4 + "SHIFT_HOME"] = "SHIFT_HOME";
-  this[pre3 + "_END"] = "NORMAL_END";
-  this[pre4 + "SHIFT_END"] = "SHIFT_END";
-  this[pre5 + "_HOME"] = "CTRL_HOME";
-  this[pre5 + "SHIFT_HOME"] = "CTRLSHIFT_HOME";
-  this[pre5 + "_END"] = "CTRL_END";
-  this[pre5 + "SHIFT_END"] = "CTRLSHIFT_END";
+    this[pre1 + "_a"] = "SELECT_ALL";
+    this[pre1 + "_c"] = "COPY";
+    this[pre1 + "_x"] = "CUT";
+    this[pre1 + "_v"] = "PASTE";
+    this[redo] = "REDO";
+    this[pre1 + "_z"] = "UNDO";
+    this[pre1 + "_DOWNARROW"] = "WINDOW_SCROLL_DOWN";
+    this[pre1 + "_UPARROW"] = "WINDOW_SCROLL_UP";
+    this[pre2 + "_LEFTARROW"] = "NORMAL_SKIPLEFT";
+    this[pre2 + "SHIFT_LEFTARROW"] = "SHIFT_SKIPLEFT";
+    this[pre2 + "_RIGHTARROW"] = "NORMAL_SKIPRIGHT";
+    this[pre2 + "SHIFT_RIGHTARROW"] = "SHIFT_SKIPRIGHT";
+    this[pre3 + "_HOME"] = "NORMAL_HOME";
+    this[pre4 + "SHIFT_HOME"] = "SHIFT_HOME";
+    this[pre3 + "_END"] = "NORMAL_END";
+    this[pre4 + "SHIFT_END"] = "SHIFT_END";
+    this[pre5 + "_HOME"] = "CTRL_HOME";
+    this[pre5 + "SHIFT_HOME"] = "CTRLSHIFT_HOME";
+    this[pre5 + "_END"] = "CTRL_END";
+    this[pre5 + "SHIFT_END"] = "CTRLSHIFT_END";
 
-  this._deadKeyState = "";
-};
-
-OperatingSystem.prototype.makeCommandName = function makeCommandName (evt, codePage) {
-  var key = evt.keyCode;
-  if (key !== Primrose.Keys.CTRL &&
-    key !== Primrose.Keys.ALT &&
-    key !== Primrose.Keys.META_L &&
-    key !== Primrose.Keys.META_R &&
-    key !== Primrose.Keys.SHIFT) {
-
-    var oldDeadKeyState = this._deadKeyState,
-      commandName = this._deadKeyState;
-
-    if (evt.ctrlKey) {
-      commandName += "CTRL";
-    }
-    if (evt.altKey) {
-      commandName += "ALT";
-    }
-    if (evt.metaKey) {
-      commandName += "META";
-    }
-    if (evt.shiftKey) {
-      commandName += "SHIFT";
-    }
-    if (commandName === this._deadKeyState) {
-      commandName += "NORMAL";
-    }
-
-    commandName += "_" + codePage.keyNames[key];
-
-    return this[commandName] || commandName;
+    this._deadKeyState = "";
   }
-};
-    if(typeof window !== "undefined") window.Primrose.Text.OperatingSystem = OperatingSystem;
+
+  makeCommandName(evt, codePage) {
+    var key = evt.keyCode;
+    if (key !== Primrose.Keys.CTRL &&
+      key !== Primrose.Keys.ALT &&
+      key !== Primrose.Keys.META_L &&
+      key !== Primrose.Keys.META_R &&
+      key !== Primrose.Keys.SHIFT) {
+
+      var oldDeadKeyState = this._deadKeyState,
+        commandName = this._deadKeyState;
+
+      if (evt.ctrlKey) {
+        commandName += "CTRL";
+      }
+      if (evt.altKey) {
+        commandName += "ALT";
+      }
+      if (evt.metaKey) {
+        commandName += "META";
+      }
+      if (evt.shiftKey) {
+        commandName += "SHIFT";
+      }
+      if (commandName === this._deadKeyState) {
+        commandName += "NORMAL";
+      }
+
+      commandName += "_" + codePage.keyNames[key];
+
+      return this[commandName] || commandName;
+    }
+  }
+}
+  if(typeof window !== "undefined") window.Primrose.Text.OperatingSystem = OperatingSystem;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystem.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\OperatingSystem.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems.js
 (function(){pliny.namespace({
   parent: "Primrose.Text",
   name: "OperatingSystems",
   description: "The OperatingSystems namespace contains sets of keyboard shortcuts for different operating systems."
 });
-var OperatingSystems = {};
-    if(typeof window !== "undefined") window.Primrose.Text.OperatingSystems = OperatingSystems;
+const OperatingSystems = {};
+  if(typeof window !== "undefined") window.Primrose.Text.OperatingSystems = OperatingSystems;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Text\Point.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Point.js
 (function(){pliny.class({
   parent: "Primrose.Text",
     name: "Point",
@@ -14937,122 +14590,120 @@ Point.prototype.clone = function () {
 Point.prototype.toString = function () {
   return "(x:" + this.x + ", y:" + this.y + ")";
 };
-    if(typeof window !== "undefined") window.Primrose.Text.Point = Point;
+  if(typeof window !== "undefined") window.Primrose.Text.Point = Point;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Text\Point.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Point.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Text\Rectangle.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Rectangle.js
 (function(){pliny.class({
   parent: "Primrose.Text",
     name: "Rectangle",
     description: "| [under construction]"
 });
-var Rectangle = function Rectangle(x, y, width, height) {
-  this.point = new Primrose.Text.Point(x, y);
-  this.size = new Primrose.Text.Size(width, height);
-};
-
-var prototypeAccessors = { x: {},left: {},width: {},right: {},y: {},top: {},height: {},bottom: {},area: {} };
-
-prototypeAccessors.x.get = function () {
-  return this.point.x;
-};
-
-prototypeAccessors.x.set = function (x) {
-  this.point.x = x;
-};
-
-prototypeAccessors.left.get = function () {
-  return this.point.x;
-};
-prototypeAccessors.left.set = function (x) {
-  this.point.x = x;
-};
-
-prototypeAccessors.width.get = function () {
-  return this.size.width;
-};
-prototypeAccessors.width.set = function (width) {
-  this.size.width = width;
-};
-
-prototypeAccessors.right.get = function () {
-  return this.point.x + this.size.width;
-};
-prototypeAccessors.right.set = function (right) {
-  this.point.x = right - this.size.width;
-};
-
-prototypeAccessors.y.get = function () {
-  return this.point.y;
-};
-prototypeAccessors.y.set = function (y) {
-  this.point.y = y;
-};
-
-prototypeAccessors.top.get = function () {
-  return this.point.y;
-};
-prototypeAccessors.top.set = function (y) {
-  this.point.y = y;
-};
-
-prototypeAccessors.height.get = function () {
-  return this.size.height;
-};
-prototypeAccessors.height.set = function (height) {
-  this.size.height = height;
-};
-
-prototypeAccessors.bottom.get = function () {
-  return this.point.y + this.size.height;
-};
-prototypeAccessors.bottom.set = function (bottom) {
-  this.point.y = bottom - this.size.height;
-};
-
-prototypeAccessors.area.get = function () {
-  return this.width * this.height;
-};
-
-Rectangle.prototype.set = function set (x, y, width, height) {
-  this.point.set(x, y);
-  this.size.set(width, height);
-};
-
-Rectangle.prototype.copy = function copy (r) {
-  if (r) {
-    this.point.copy(r.point);
-    this.size.copy(r.size);
+class Rectangle {
+  constructor(x, y, width, height) {
+    this.point = new Primrose.Text.Point(x, y);
+    this.size = new Primrose.Text.Size(width, height);
   }
-};
 
-Rectangle.prototype.clone = function clone () {
-  return new Rectangle(this.point.x, this.point.y, this.size.width, this.size.height);
-};
-
-Rectangle.prototype.toString = function toString () {
-  return ("[" + (this.point.toString()) + " x " + (this.size.toString()) + "]");
-};
-
-Rectangle.prototype.overlap = function overlap (r) {
-  var left = Math.max(this.left, r.left),
-    top = Math.max(this.top, r.top),
-    right = Math.min(this.right, r.right),
-    bottom = Math.min(this.bottom, r.bottom);
-  if (right > left && bottom > top) {
-    return new Rectangle(left, top, right - left, bottom - top);
+  get x() {
+    return this.point.x;
   }
-};
 
-Object.defineProperties( Rectangle.prototype, prototypeAccessors );
-    if(typeof window !== "undefined") window.Primrose.Text.Rectangle = Rectangle;
+  set x(x) {
+    this.point.x = x;
+  }
+
+  get left() {
+    return this.point.x;
+  }
+  set left(x) {
+    this.point.x = x;
+  }
+
+  get width() {
+    return this.size.width;
+  }
+  set width(width) {
+    this.size.width = width;
+  }
+
+  get right() {
+    return this.point.x + this.size.width;
+  }
+  set right(right) {
+    this.point.x = right - this.size.width;
+  }
+
+  get y() {
+    return this.point.y;
+  }
+  set y(y) {
+    this.point.y = y;
+  }
+
+  get top() {
+    return this.point.y;
+  }
+  set top(y) {
+    this.point.y = y;
+  }
+
+  get height() {
+    return this.size.height;
+  }
+  set height(height) {
+    this.size.height = height;
+  }
+
+  get bottom() {
+    return this.point.y + this.size.height;
+  }
+  set bottom(bottom) {
+    this.point.y = bottom - this.size.height;
+  }
+
+  get area() {
+    return this.width * this.height;
+  }
+
+  set(x, y, width, height) {
+    this.point.set(x, y);
+    this.size.set(width, height);
+  }
+
+  copy(r) {
+    if (r) {
+      this.point.copy(r.point);
+      this.size.copy(r.size);
+    }
+  }
+
+  clone() {
+    return new Rectangle(this.point.x, this.point.y, this.size.width, this.size.height);
+  }
+
+  toString() {
+    return `[${this.point.toString()} x ${this.size.toString()}]`;
+  }
+
+  overlap(r) {
+    var left = Math.max(this.left, r.left),
+      top = Math.max(this.top, r.top),
+      right = Math.min(this.right, r.right),
+      bottom = Math.min(this.bottom, r.bottom);
+    if (right > left && bottom > top) {
+      return new Rectangle(left, top, right - left, bottom - top);
+    }
+  }
+}
+  if(typeof window !== "undefined") window.Primrose.Text.Rectangle = Rectangle;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Text\Rectangle.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Rectangle.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Text\Rule.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Rule.js
 (function(){pliny.class({
   parent: "Primrose.Text",
     name: "Rule",
@@ -15099,12 +14750,12 @@ Rule.prototype.carveOutMatchedToken = function (tokens, j) {
     }
   }
 };
-    if(typeof window !== "undefined") window.Primrose.Text.Rule = Rule;
+  if(typeof window !== "undefined") window.Primrose.Text.Rule = Rule;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Text\Rule.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Rule.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Text\Size.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Size.js
 (function(){pliny.class({
   parent: "Primrose.Text",
     name: "Size",
@@ -15134,150 +14785,152 @@ Size.prototype.clone = function () {
 Size.prototype.toString = function () {
   return "<w:" + this.width + ", h:" + this.height + ">";
 };
-    if(typeof window !== "undefined") window.Primrose.Text.Size = Size;
+  if(typeof window !== "undefined") window.Primrose.Text.Size = Size;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Text\Size.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Size.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Text\Terminal.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Terminal.js
 (function(){pliny.class({
   parent: "Primrose.Text",
     name: "Terminal",
     description: "| [under construction]"
 });
-var Terminal = function Terminal(inputEditor, outputEditor) {
-  outputEditor = outputEditor || inputEditor;
+class Terminal {
+  constructor(inputEditor, outputEditor) {
+    outputEditor = outputEditor || inputEditor;
 
-  var inputCallback = null,
-    currentProgram = null,
-    originalGrammar = null,
-    currentEditIndex = 0,
-    pageSize = 40,
-    outputQueue = [],
-    buffer = "",
-    restoreInput = inputEditor === outputEditor,
-    self = this;
+    var inputCallback = null,
+      currentProgram = null,
+      originalGrammar = null,
+      currentEditIndex = 0,
+      pageSize = 40,
+      outputQueue = [],
+      buffer = "",
+      restoreInput = inputEditor === outputEditor,
+      self = this;
 
-  this.running = false;
-  this.waitingForInput = false;
+    this.running = false;
+    this.waitingForInput = false;
 
-  function toEnd(editor) {
-    editor.selectionStart = editor.selectionEnd = editor.value.length;
-    editor.scrollIntoView(editor.frontCursor);
-  }
-
-  function done() {
-    if (self.running) {
-      flush();
-      self.running = false;
-      if (restoreInput) {
-        inputEditor.tokenizer = originalGrammar;
-        inputEditor.value = currentProgram;
-      }
-      toEnd(inputEditor);
+    function toEnd(editor) {
+      editor.selectionStart = editor.selectionEnd = editor.value.length;
+      editor.scrollIntoView(editor.frontCursor);
     }
-  }
 
-  function clearScreen() {
-    outputEditor.selectionStart = outputEditor.selectionEnd = 0;
-    outputEditor.value = "";
-    return true;
-  }
-
-  function flush() {
-    if (buffer.length > 0) {
-      var lines = buffer.split("\n");
-      for (var i = 0; i < pageSize && lines.length > 0; ++i) {
-        outputQueue.push(lines.shift());
-      }
-      if (lines.length > 0) {
-        outputQueue.push(" ----- more -----");
-      }
-      buffer = lines.join("\n");
-    }
-  }
-
-  function input(callback) {
-    inputCallback = callback;
-    self.waitingForInput = true;
-    flush();
-  }
-
-  function stdout(str) {
-    buffer += str;
-  }
-
-  this.sendInput = function (evt) {
-    if (buffer.length > 0) {
-      flush();
-    }
-    else {
-      outputEditor.keyDown(evt);
-      var str = outputEditor.value.substring(currentEditIndex);
-      inputCallback(str.trim());
-      inputCallback = null;
-      this.waitingForInput = false;
-    }
-  };
-
-  this.execute = function () {
-    pageSize = 10;
-    originalGrammar = inputEditor.tokenizer;
-    if (originalGrammar && originalGrammar.interpret) {
-      this.running = true;
-      var looper,
-        next = function () {
-          if (self.running) {
-            setTimeout(looper, 1);
-          }
-        };
-
-      currentProgram = inputEditor.value;
-      looper = originalGrammar.interpret(currentProgram, input, stdout,
-        stdout, next, clearScreen, this.loadFile.bind(this), done);
-      outputEditor.tokenizer = Primrose.Text.Grammars.PlainText;
-      clearScreen();
-      next();
-    }
-  };
-
-  this.loadFile = function (fileName) {
-    return Primrose.HTTP.getText(fileName.toLowerCase())
-      .then(function (file) {
-        if (isOSX) {
-          file = file.replace("CTRL+SHIFT+SPACE", "CMD+OPT+E");
+    function done() {
+      if (self.running) {
+        flush();
+        self.running = false;
+        if (restoreInput) {
+          inputEditor.tokenizer = originalGrammar;
+          inputEditor.value = currentProgram;
         }
-        inputEditor.value = currentProgram = file;
-        return file;
-      });
-  };
-
-  this.update = function () {
-    if (outputQueue.length > 0) {
-      outputEditor.value += outputQueue.shift() + "\n";
-      toEnd(outputEditor);
-      currentEditIndex = outputEditor.selectionStart;
+        toEnd(inputEditor);
+      }
     }
-  };
-};
-    if(typeof window !== "undefined") window.Primrose.Text.Terminal = Terminal;
+
+    function clearScreen() {
+      outputEditor.selectionStart = outputEditor.selectionEnd = 0;
+      outputEditor.value = "";
+      return true;
+    }
+
+    function flush() {
+      if (buffer.length > 0) {
+        var lines = buffer.split("\n");
+        for (var i = 0; i < pageSize && lines.length > 0; ++i) {
+          outputQueue.push(lines.shift());
+        }
+        if (lines.length > 0) {
+          outputQueue.push(" ----- more -----");
+        }
+        buffer = lines.join("\n");
+      }
+    }
+
+    function input(callback) {
+      inputCallback = callback;
+      self.waitingForInput = true;
+      flush();
+    }
+
+    function stdout(str) {
+      buffer += str;
+    }
+
+    this.sendInput = function (evt) {
+      if (buffer.length > 0) {
+        flush();
+      }
+      else {
+        outputEditor.keyDown(evt);
+        var str = outputEditor.value.substring(currentEditIndex);
+        inputCallback(str.trim());
+        inputCallback = null;
+        this.waitingForInput = false;
+      }
+    };
+
+    this.execute = function () {
+      pageSize = 10;
+      originalGrammar = inputEditor.tokenizer;
+      if (originalGrammar && originalGrammar.interpret) {
+        this.running = true;
+        var looper,
+          next = function () {
+            if (self.running) {
+              setTimeout(looper, 1);
+            }
+          };
+
+        currentProgram = inputEditor.value;
+        looper = originalGrammar.interpret(currentProgram, input, stdout,
+          stdout, next, clearScreen, this.loadFile.bind(this), done);
+        outputEditor.tokenizer = Primrose.Text.Grammars.PlainText;
+        clearScreen();
+        next();
+      }
+    };
+
+    this.loadFile = function (fileName) {
+      return Primrose.HTTP.getText(fileName.toLowerCase())
+        .then(function (file) {
+          if (isOSX) {
+            file = file.replace("CTRL+SHIFT+SPACE", "CMD+OPT+E");
+          }
+          inputEditor.value = currentProgram = file;
+          return file;
+        });
+    };
+
+    this.update = function () {
+      if (outputQueue.length > 0) {
+        outputEditor.value += outputQueue.shift() + "\n";
+        toEnd(outputEditor);
+        currentEditIndex = outputEditor.selectionStart;
+      }
+    };
+  }
+}
+  if(typeof window !== "undefined") window.Primrose.Text.Terminal = Terminal;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Text\Terminal.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Terminal.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Text\Themes.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Themes.js
 (function(){pliny.namespace({
   parent: "Primrose.Text",
   name: "Themes",
   description: "The Themes namespace contains color themes for text-oriented controls, for use when coupled with a parsing grammar."
 });
-var Themes = {};
-    if(typeof window !== "undefined") window.Primrose.Text.Themes = Themes;
+const Themes = {};
+  if(typeof window !== "undefined") window.Primrose.Text.Themes = Themes;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Text\Themes.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Themes.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Text\Token.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Token.js
 (function(){pliny.class({
   parent: "Primrose.Text",
     name: "Token",
@@ -15304,12 +14957,12 @@ Token.prototype.splitAt = function (i) {
 Token.prototype.toString = function () {
   return "[" + this.type + ": " + this.value + "]";
 };
-    if(typeof window !== "undefined") window.Primrose.Text.Token = Token;
+  if(typeof window !== "undefined") window.Primrose.Text.Token = Token;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Text\Token.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Token.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\DE_QWERTZ.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CodePages\DE_QWERTZ.js
 (function(){var CodePage = Primrose.Text.CodePage;
 
 pliny.record({
@@ -15317,7 +14970,7 @@ pliny.record({
   name: "DE_QWERTZ",
   description: "| [under construction]"
 });
-var DE_QWERTZ = new CodePage("Deutsch: QWERTZ", "de", {
+const DE_QWERTZ = new CodePage("Deutsch: QWERTZ", "de", {
   deadKeys: [220, 221, 160, 192],
   NORMAL: {
     "32": " ",
@@ -15434,12 +15087,12 @@ var DE_QWERTZ = new CodePage("Deutsch: QWERTZ", "de", {
     "89": "y"
   }
 });
-    if(typeof window !== "undefined") window.Primrose.Text.CodePages.DE_QWERTZ = DE_QWERTZ;
+  if(typeof window !== "undefined") window.Primrose.Text.CodePages.DE_QWERTZ = DE_QWERTZ;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\DE_QWERTZ.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CodePages\DE_QWERTZ.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_UKX.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_UKX.js
 (function(){var CodePage = Primrose.Text.CodePage;
 
 pliny.record({
@@ -15447,7 +15100,7 @@ pliny.record({
   name: "EN_UKX",
   description: "| [under construction]"
 });
-var EN_UKX = new CodePage("English: UK Extended", "en-GB", {
+const EN_UKX = new CodePage("English: UK Extended", "en-GB", {
   CTRLALT: {
     "52": "€",
     "65": "á",
@@ -15527,12 +15180,12 @@ var EN_UKX = new CodePage("English: UK Extended", "en-GB", {
     "223": "¬"
   }
 });
-    if(typeof window !== "undefined") window.Primrose.Text.CodePages.EN_UKX = EN_UKX;
+  if(typeof window !== "undefined") window.Primrose.Text.CodePages.EN_UKX = EN_UKX;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_UKX.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_UKX.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_US.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_US.js
 (function(){var CodePage = Primrose.Text.CodePage;
 
 pliny.record({
@@ -15540,7 +15193,7 @@ pliny.record({
   name: "EN_US",
   description: "| [under construction]"
 });
-var EN_US = new CodePage("English: USA", "en-US", {
+const EN_US = new CodePage("English: USA", "en-US", {
   NORMAL: {
     "32": " ",
     "48": "0",
@@ -15594,12 +15247,12 @@ var EN_US = new CodePage("English: USA", "en-US", {
     "222": "\""
   }
 });
-    if(typeof window !== "undefined") window.Primrose.Text.CodePages.EN_US = EN_US;
+  if(typeof window !== "undefined") window.Primrose.Text.CodePages.EN_US = EN_US;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_US.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_US.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\FR_AZERTY.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CodePages\FR_AZERTY.js
 (function(){var CodePage = Primrose.Text.CodePage;
 
 pliny.record({
@@ -15607,7 +15260,7 @@ pliny.record({
   name: "FR_AZERTY",
   description: "| [under construction]"
 });
-var FR_AZERTY = new CodePage("Français: AZERTY", "fr", {
+const FR_AZERTY = new CodePage("Français: AZERTY", "fr", {
   deadKeys: [221, 50, 55],
   NORMAL: {
     "32": " ",
@@ -15695,20 +15348,20 @@ var FR_AZERTY = new CodePage("Français: AZERTY", "fr", {
     "85": "ù"
   }
 });
-    if(typeof window !== "undefined") window.Primrose.Text.CodePages.FR_AZERTY = FR_AZERTY;
+  if(typeof window !== "undefined") window.Primrose.Text.CodePages.FR_AZERTY = FR_AZERTY;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\FR_AZERTY.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CodePages\FR_AZERTY.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\BasicTextInput.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\BasicTextInput.js
 (function(){pliny.record({
   parent: "Primrose.Text.CommandPacks",
   name: "TextInput",
   baseClass: "Primrose.Text.CommandPack",
   description: "| [under construction]"
 });
-var BasicTextInput = (function (superclass) {
-  function BasicTextInput(additionalName, additionalCommands) {
+class BasicTextInput extends Primrose.Text.CommandPack {
+  constructor(additionalName, additionalCommands) {
     var commands = {
       NORMAL_LEFTARROW: function (prim, tokenRows) {
         prim.cursorLeft(tokenRows, prim.frontCursor);
@@ -15812,27 +15465,21 @@ var BasicTextInput = (function (superclass) {
       }
     }
 
-    superclass.call(this, additionalName || "Text editor commands", commands);
+    super(additionalName || "Text editor commands", commands);
   }
-
-  if ( superclass ) BasicTextInput.__proto__ = superclass;
-  BasicTextInput.prototype = Object.create( superclass && superclass.prototype );
-  BasicTextInput.prototype.constructor = BasicTextInput;
-
-  return BasicTextInput;
-}(Primrose.Text.CommandPack));
-    if(typeof window !== "undefined") window.Primrose.Text.CommandPacks.BasicTextInput = BasicTextInput;
+}
+  if(typeof window !== "undefined") window.Primrose.Text.CommandPacks.BasicTextInput = BasicTextInput;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\BasicTextInput.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\BasicTextInput.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextEditor.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextEditor.js
 (function(){pliny.record({
   parent: "Primrose.Text.CommandPacks",
   name: "TextEditor",
   description: "| [under construction]"
 });
-var TextEditor = new Primrose.Text.CommandPacks.BasicTextInput(
+const TextEditor = new Primrose.Text.CommandPacks.BasicTextInput(
   "Text Area input commands", {
     NORMAL_UPARROW: function (prim, tokenRows) {
       prim.cursorUp(tokenRows, prim.frontCursor);
@@ -15880,12 +15527,12 @@ var TextEditor = new Primrose.Text.CommandPacks.BasicTextInput(
       }
     }
   });
-    if(typeof window !== "undefined") window.Primrose.Text.CommandPacks.TextEditor = TextEditor;
+  if(typeof window !== "undefined") window.Primrose.Text.CommandPacks.TextEditor = TextEditor;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextEditor.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextEditor.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextInput.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextInput.js
 (function(){////
 // For all of these commands, the "current" cursor is:
 // If SHIFT is not held, then "front.
@@ -15896,13 +15543,13 @@ pliny.record({
   name: "TextInput",
   description: "| [under construction]"
 });
-var TextInput = new Primrose.Text.CommandPacks.BasicTextInput("Text Line input commands");
-    if(typeof window !== "undefined") window.Primrose.Text.CommandPacks.TextInput = TextInput;
+const TextInput = new Primrose.Text.CommandPacks.BasicTextInput("Text Line input commands");
+  if(typeof window !== "undefined") window.Primrose.Text.CommandPacks.TextInput = TextInput;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextInput.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextInput.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Text\Controls\PlainText.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Controls\PlainText.js
 (function(){pliny.class({
   parent: "Primrose.Text.Controls",
     name: "PlainText",
@@ -15961,12 +15608,12 @@ function PlainText(text, size, fgcolor, bgcolor, x, y, z, hAlign) {
   textMesh.position.set(x, y, z);
   return textMesh;
 }
-    if(typeof window !== "undefined") window.Primrose.Text.Controls.PlainText = PlainText;
+  if(typeof window !== "undefined") window.Primrose.Text.Controls.PlainText = PlainText;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Text\Controls\PlainText.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Controls\PlainText.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Text\Controls\TextBox.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Controls\TextBox.js
 (function(){var SCROLL_SCALE = isFirefox ? 3 : 100,
   COUNTER = 0,
   OFFSET = 0;
@@ -15986,9 +15633,14 @@ pliny.class({
       description: "Named parameters for creating the TextBox."
     }]
 });
-var TextBox = (function (superclass) {
-  function TextBox(options) {
-    superclass.call(this, patch(options, {
+class TextBox extends Primrose.Surface {
+
+  static create() {
+    return new TextBox();
+  }
+
+  constructor(options) {
+    super(patch(options, {
       id: "Primrose.Text.Controls.TextBox[" + (COUNTER++) + "]"
     }));
     this.listeners.change = [];
@@ -16106,35 +15758,25 @@ var TextBox = (function (superclass) {
     this.addEventListener("blur", this.render.bind(this), false);
   }
 
-  if ( superclass ) TextBox.__proto__ = superclass;
-  TextBox.prototype = Object.create( superclass && superclass.prototype );
-  TextBox.prototype.constructor = TextBox;
-
-  var prototypeAccessors = { value: {},selectedText: {},padding: {},wordWrap: {},showLineNumbers: {},showScrollBars: {},theme: {},commandPack: {},selectionStart: {},selectionEnd: {},selectionDirection: {},tokenizer: {},tabWidth: {},tabString: {},fontSize: {},lockMovement: {} };
-
-  TextBox.create = function create () {
-    return new TextBox();
-  };
-
-  TextBox.prototype.cursorPageUp = function cursorPageUp (lines, cursor) {
+  cursorPageUp(lines, cursor) {
     cursor.incY(-this.gridBounds.height, lines);
     this.scrollIntoView(cursor);
-  };
+  }
 
-  TextBox.prototype.cursorPageDown = function cursorPageDown (lines, cursor) {
+  cursorPageDown(lines, cursor) {
     cursor.incY(this.gridBounds.height, lines);
     this.scrollIntoView(cursor);
-  };
+  }
 
-  TextBox.prototype.setDeadKeyState = function setDeadKeyState (st) {
+  setDeadKeyState(st) {
     this._deadKeyState = st || "";
-  };
+  }
 
-  prototypeAccessors.value.get = function () {
+  get value() {
     return this._history[this._historyFrame].join("\n");
-  };
+  }
 
-  prototypeAccessors.value.set = function (txt) {
+  set value(txt) {
     txt = txt || "";
     txt = txt.replace(/\r\n/g, "\n");
     if (!this.multiline) {
@@ -16146,15 +15788,15 @@ var TextBox = (function (superclass) {
     emit.call(this, "change", {
       target: this
     });
-  };
+  }
 
-  prototypeAccessors.selectedText.get = function () {
+  get selectedText() {
     var minCursor = Primrose.Text.Cursor.min(this.frontCursor, this.backCursor),
       maxCursor = Primrose.Text.Cursor.max(this.frontCursor, this.backCursor);
     return this.value.substring(minCursor.i, maxCursor.i);
-  };
+  }
 
-  prototypeAccessors.selectedText.set = function (str) {
+  set selectedText(str) {
     str = str || "";
     str = str.replace(/\r\n/g, "\n");
 
@@ -16176,118 +15818,116 @@ var TextBox = (function (superclass) {
       maxCursor.copy(minCursor);
       this.render();
     }
-  };
+  }
 
-  prototypeAccessors.padding.get = function () {
+  get padding() {
     return this._padding;
-  };
+  }
 
-  prototypeAccessors.padding.set = function (v) {
+  set padding(v) {
     this._padding = v;
     this.render();
-  };
+  }
 
-  prototypeAccessors.wordWrap.get = function () {
+  get wordWrap() {
     return this._wordWrap;
-  };
+  }
 
-  prototypeAccessors.wordWrap.set = function (v) {
+  set wordWrap(v) {
     this._wordWrap = v || false;
     this.setGutter();
-  };
+  }
 
-  prototypeAccessors.showLineNumbers.get = function () {
+  get showLineNumbers() {
     return this._showLineNumbers;
-  };
+  }
 
-  prototypeAccessors.showLineNumbers.set = function (v) {
+  set showLineNumbers(v) {
     this._showLineNumbers = v;
     this.setGutter();
-  };
+  }
 
-  prototypeAccessors.showScrollBars.get = function () {
+  get showScrollBars() {
     return this._showScrollBars;
-  };
+  }
 
-  prototypeAccessors.showScrollBars.set = function (v) {
+  set showScrollBars(v) {
     this._showScrollBars = v;
     this.setGutter();
-  };
+  }
 
-  prototypeAccessors.theme.get = function () {
+  get theme() {
     return this._theme;
-  };
+  }
 
-  prototypeAccessors.theme.set = function (t) {
+  set theme(t) {
     this._theme = clone(t || Primrose.Text.Themes.Default);
     this._theme.fontSize = this.fontSize;
     this._rowCache = {};
     this.render();
-  };
+  }
 
-  prototypeAccessors.commandPack.get = function () {
+  get commandPack() {
     return this._commandPack;
-  };
+  }
 
-  prototypeAccessors.commandPack.set = function (v) {
+  set commandPack(v) {
     this._commandPack = v;
-  };
+  }
 
-  prototypeAccessors.selectionStart.get = function () {
+  get selectionStart() {
     return this.frontCursor.i;
-  };
+  }
 
-  prototypeAccessors.selectionStart.set = function (i) {
+  set selectionStart(i) {
     this.frontCursor.setI(i, this.lines);
-  };
+  }
 
-  prototypeAccessors.selectionEnd.get = function () {
+  get selectionEnd() {
     return this.backCursor.i;
-  };
+  }
 
-  prototypeAccessors.selectionEnd.set = function (i) {
+  set selectionEnd(i) {
     this.backCursor.setI(i, this.lines);
-  };
+  }
 
-  prototypeAccessors.selectionDirection.get = function () {
+  get selectionDirection() {
     return this.frontCursor.i <= this.backCursor.i ? "forward" : "backward";
-  };
+  }
 
-  prototypeAccessors.tokenizer.get = function () {
+  get tokenizer() {
     return this._tokenizer;
-  };
+  }
 
-  prototypeAccessors.tokenizer.set = function (tk) {
+  set tokenizer(tk) {
     this._tokenizer = tk || Primrose.Text.Grammars.JavaScript;
     if (this._history && this._history.length > 0) {
       this.refreshTokens();
       this.render();
     }
-  };
+  }
 
-  prototypeAccessors.tabWidth.get = function () {
+  get tabWidth() {
     return this._tabWidth;
-  };
+  }
 
-  prototypeAccessors.tabWidth.set = function (tw) {
-    var this$1 = this;
-
+  set tabWidth(tw) {
     this._tabWidth = tw || 2;
     this._tabString = "";
     for (var i = 0; i < this._tabWidth; ++i) {
-      this$1._tabString += " ";
+      this._tabString += " ";
     }
-  };
+  }
 
-  prototypeAccessors.tabString.get = function () {
+  get tabString() {
     return this._tabString;
-  };
+  }
 
-  prototypeAccessors.fontSize.get = function () {
+  get fontSize() {
     return this._fontSize || 16;
-  };
+  }
 
-  prototypeAccessors.fontSize.set = function (v) {
+  set fontSize(v) {
     v = v || 16;
     this._fontSize = v;
     if (this.theme) {
@@ -16295,13 +15935,13 @@ var TextBox = (function (superclass) {
       this.resize();
       this.render();
     }
-  };
+  }
 
-  prototypeAccessors.lockMovement.get = function () {
+  get lockMovement() {
     return this.focused && !this.readOnly;
-  };
+  }
 
-  TextBox.prototype.pushUndo = function pushUndo (lines) {
+  pushUndo(lines) {
     if (this._historyFrame < this._history.length - 1) {
       this._history.splice(this._historyFrame + 1);
     }
@@ -16309,35 +15949,35 @@ var TextBox = (function (superclass) {
     this._historyFrame = this._history.length - 1;
     this.refreshTokens();
     this.render();
-  };
+  }
 
-  TextBox.prototype.redo = function redo () {
+  redo() {
     if (this._historyFrame < this._history.length - 1) {
       ++this._historyFrame;
     }
     this.refreshTokens();
     this.fixCursor();
     this.render();
-  };
+  }
 
-  TextBox.prototype.undo = function undo () {
+  undo() {
     if (this._historyFrame > 0) {
       --this._historyFrame;
     }
     this.refreshTokens();
     this.fixCursor();
     this.render();
-  };
+  }
 
-  TextBox.prototype.scrollIntoView = function scrollIntoView (currentCursor) {
+  scrollIntoView(currentCursor) {
     this.scroll.y += this.minDelta(currentCursor.y, this.scroll.y, this.scroll.y + this.gridBounds.height);
     if (!this.wordWrap) {
       this.scroll.x += this.minDelta(currentCursor.x, this.scroll.x, this.scroll.x + this.gridBounds.width);
     }
     this.clampScroll();
-  };
+  }
 
-  TextBox.prototype.readWheel = function readWheel (evt) {
+  readWheel(evt) {
     if (this.focused) {
       if (evt.shiftKey || isChrome) {
         this.fontSize += -evt.deltaX / SCROLL_SCALE;
@@ -16349,50 +15989,50 @@ var TextBox = (function (superclass) {
       this.render();
       evt.preventDefault();
     }
-  };
+  }
 
-  TextBox.prototype.startPointer = function startPointer (x, y) {
-    if (!superclass.prototype.startPointer.call(this, x, y)) {
+  startPointer(x, y) {
+    if (!super.startPointer(x, y)) {
       this._dragging = true;
       this.setCursorXY(this.frontCursor, x, y);
     }
-  };
+  }
 
-  TextBox.prototype.movePointer = function movePointer (x, y) {
+  movePointer(x, y) {
     if (this._dragging) {
       this.setCursorXY(this.backCursor, x, y);
     }
-  };
+  }
 
-  TextBox.prototype.endPointer = function endPointer () {
-    superclass.prototype.endPointer.call(this);
+  endPointer() {
+    super.endPointer();
     this._dragging = false;
     this._scrolling = false;
-  };
+  }
 
-  TextBox.prototype.copySelectedText = function copySelectedText (evt) {
+  copySelectedText(evt) {
     if (this.focused && this.frontCursor.i !== this.backCursor.i) {
       var clipboard = evt.clipboardData || window.clipboardData;
       clipboard.setData(
         window.clipboardData ? "Text" : "text/plain", this.selectedText);
       evt.returnValue = false;
     }
-  };
+  }
 
-  TextBox.prototype.cutSelectedText = function cutSelectedText (evt) {
+  cutSelectedText(evt) {
     if (this.focused) {
       this.copySelectedText(evt);
       if (!this.readOnly) {
         this.selectedText = "";
       }
     }
-  };
+  }
 
-  TextBox.prototype.keyDown = function keyDown (evt){
+  keyDown(evt){
     this.environment.input.Keyboard.doTyping(this, evt);
-  };
+  }
 
-  TextBox.prototype.execCommand = function execCommand (browser, codePage, commandName) {
+  execCommand(browser, codePage, commandName) {
     if (commandName && this.focused && !this.readOnly) {
       var altCommandName = browser + "_" + commandName,
         func = this.commandPack[altCommandName] ||
@@ -16428,9 +16068,9 @@ var TextBox = (function (superclass) {
         return true;
       }
     }
-  };
+  }
 
-  TextBox.prototype.readClipboard = function readClipboard (evt) {
+  readClipboard(evt) {
     if (this.focused && !this.readOnly) {
       evt.returnValue = false;
       var clipboard = evt.clipboardData || window.clipboardData,
@@ -16439,10 +16079,10 @@ var TextBox = (function (superclass) {
         this.selectedText = str;
       }
     }
-  };
+  }
 
-  TextBox.prototype.resize = function resize () {
-    superclass.prototype.resize.call(this);
+  resize() {
+    super.resize();
     this._bg.setSize(this.surfaceWidth, this.surfaceHeight);
     this._fg.setSize(this.surfaceWidth, this.surfaceHeight);
     this._trim.setSize(this.surfaceWidth, this.surfaceHeight);
@@ -16458,45 +16098,41 @@ var TextBox = (function (superclass) {
         100;
     }
     this.render();
-  };
+  }
 
-  TextBox.prototype.pixel2cell = function pixel2cell (point) {
-    var x = point.x * this.imageWidth / this.surfaceWidth,
+  pixel2cell(point) {
+    const x = point.x * this.imageWidth / this.surfaceWidth,
       y = point.y * this.imageHeight / this.surfaceHeight;
     point.set(
       Math.round(point.x / this.character.width) + this.scroll.x - this.gridBounds.x,
       Math.floor((point.y / this.character.height) - 0.25) + this.scroll.y);
-  };
+  }
 
-  TextBox.prototype.clampScroll = function clampScroll () {
-    var this$1 = this;
-
+  clampScroll() {
     if (this.scroll.y < 0) {
       this.scroll.y = 0;
     }
     else {
       while (0 < this.scroll.y &&
         this.scroll.y > this.lines.length - this.gridBounds.height) {
-        --this$1.scroll.y;
+        --this.scroll.y;
       }
     }
-  };
+  }
 
-  TextBox.prototype.refreshTokens = function refreshTokens () {
+  refreshTokens() {
     this.tokens = this.tokenizer.tokenize(this.value);
-  };
+  }
 
-  TextBox.prototype.fixCursor = function fixCursor () {
+  fixCursor() {
     var moved = this.frontCursor.fixCursor(this.lines) ||
       this.backCursor.fixCursor(this.lines);
     if (moved) {
       this.render();
     }
-  };
+  }
 
-  TextBox.prototype.setCursorXY = function setCursorXY (cursor, x, y) {
-    var this$1 = this;
-
+  setCursorXY(cursor, x, y) {
     x = Math.round(x);
     y = Math.round(y);
     this._pointer.set(x, y);
@@ -16521,7 +16157,7 @@ var TextBox = (function (superclass) {
     else if (onBottom && !onLeft) {
       var maxWidth = 0;
       for (var dy = 0; dy < this.lines.length; ++dy) {
-        maxWidth = Math.max(maxWidth, this$1.lines[dy].length);
+        maxWidth = Math.max(maxWidth, this.lines[dy].length);
       }
       var scrollWidth = maxWidth - this.gridBounds.width;
       if (gx >= 0 && scrollWidth >= 0) {
@@ -16537,9 +16173,9 @@ var TextBox = (function (superclass) {
     }
     this._lastPointer.copy(this._pointer);
     this.render();
-  };
+  }
 
-  TextBox.prototype.setGutter = function setGutter () {
+  setGutter() {
     if (this.showLineNumbers) {
       this._topLeftGutter.width = 1;
     }
@@ -16556,9 +16192,9 @@ var TextBox = (function (superclass) {
     else {
       this._bottomRightGutter.set(this._VSCROLL_WIDTH, 1);
     }
-  };
+  }
 
-  TextBox.prototype.refreshGridBounds = function refreshGridBounds () {
+  refreshGridBounds() {
     this._lineCountWidth = 0;
     if (this.showLineNumbers) {
       this._lineCountWidth = Math.max(1, Math.ceil(Math.log(this._history[this._historyFrame].length) / Math.LN10));
@@ -16569,11 +16205,9 @@ var TextBox = (function (superclass) {
       w = Math.floor((this.imageWidth - 2 * this.padding) / this.character.width) - x - this._bottomRightGutter.width,
       h = Math.floor((this.imageHeight - 2 * this.padding) / this.character.height) - y - this._bottomRightGutter.height;
     this.gridBounds.set(x, y, w, h);
-  };
+  }
 
-  TextBox.prototype.performLayout = function performLayout () {
-    var this$1 = this;
-
+  performLayout() {
 
     // group the tokens into rows
     this._tokenRows = [
@@ -16585,31 +16219,31 @@ var TextBox = (function (superclass) {
     var tokenQueue = this.tokens.slice();
     for (var i = 0; i < tokenQueue.length; ++i) {
       var t = tokenQueue[i].clone();
-      var widthLeft = this$1.gridBounds.width - currentRowWidth;
-      var wrap = this$1.wordWrap && t.type !== "newlines" && t.value.length > widthLeft;
+      var widthLeft = this.gridBounds.width - currentRowWidth;
+      var wrap = this.wordWrap && t.type !== "newlines" && t.value.length > widthLeft;
       var breakLine = t.type === "newlines" || wrap;
       if (wrap) {
-        var split = t.value.length > this$1.gridBounds.width ? widthLeft : 0;
+        var split = t.value.length > this.gridBounds.width ? widthLeft : 0;
         tokenQueue.splice(i + 1, 0, t.splitAt(split));
       }
 
       if (t.value.length > 0) {
-        this$1._tokenRows[this$1._tokenRows.length - 1].push(t);
-        this$1._tokenHashes[this$1._tokenHashes.length - 1] += JSON.stringify(t);
-        this$1.lines[this$1.lines.length - 1] += t.value;
+        this._tokenRows[this._tokenRows.length - 1].push(t);
+        this._tokenHashes[this._tokenHashes.length - 1] += JSON.stringify(t);
+        this.lines[this.lines.length - 1] += t.value;
         currentRowWidth += t.value.length;
       }
 
       if (breakLine) {
-        this$1._tokenRows.push([]);
-        this$1._tokenHashes.push("");
-        this$1.lines.push("");
+        this._tokenRows.push([]);
+        this._tokenHashes.push("");
+        this.lines.push("");
         currentRowWidth = 0;
       }
     }
-  };
+  }
 
-  TextBox.prototype.minDelta = function minDelta (v, minV, maxV) {
+  minDelta(v, minV, maxV) {
     var dvMinV = v - minV,
       dvMaxV = v - maxV + 5,
       dv = 0;
@@ -16620,29 +16254,27 @@ var TextBox = (function (superclass) {
     }
 
     return dv;
-  };
+  }
 
-  TextBox.prototype.fillRect = function fillRect (gfx, fill, x, y, w, h) {
+  fillRect(gfx, fill, x, y, w, h) {
     gfx.fillStyle = fill;
     gfx.fillRect(
       x * this.character.width,
       y * this.character.height,
       w * this.character.width + 1,
       h * this.character.height + 1);
-  };
+  }
 
-  TextBox.prototype.strokeRect = function strokeRect (gfx, stroke, x, y, w, h) {
+  strokeRect(gfx, stroke, x, y, w, h) {
     gfx.strokeStyle = stroke;
     gfx.strokeRect(
       x * this.character.width,
       y * this.character.height,
       w * this.character.width + 1,
       h * this.character.height + 1);
-  };
+  }
 
-  TextBox.prototype.renderCanvasBackground = function renderCanvasBackground () {
-    var this$1 = this;
-
+  renderCanvasBackground() {
     var minCursor = Primrose.Text.Cursor.min(this.frontCursor, this.backCursor),
       maxCursor = Primrose.Text.Cursor.max(this.frontCursor, this.backCursor),
       tokenFront = new Primrose.Text.Cursor(),
@@ -16671,7 +16303,7 @@ var TextBox = (function (superclass) {
 
     for (var y = 0; y < this._tokenRows.length; ++y) {
       // draw the tokens on this row
-      var row = this$1._tokenRows[y];
+      var row = this._tokenRows[y];
 
       for (var i = 0; i < row.length; ++i) {
         var t = row[i];
@@ -16679,9 +16311,9 @@ var TextBox = (function (superclass) {
         tokenBack.i += t.value.length;
 
         // skip drawing tokens that aren't in view
-        if (this$1.scroll.y <= y && y < this$1.scroll.y + this$1.gridBounds.height &&
-          this$1.scroll.x <= tokenBack.x && tokenFront.x < this$1.scroll.x +
-          this$1.gridBounds.width) {
+        if (this.scroll.y <= y && y < this.scroll.y + this.gridBounds.height &&
+          this.scroll.x <= tokenBack.x && tokenFront.x < this.scroll.x +
+          this.gridBounds.width) {
           // draw the selection box
           var inSelection = minCursor.i <= tokenBack.i && tokenFront.i <
             maxCursor.i;
@@ -16690,7 +16322,7 @@ var TextBox = (function (superclass) {
               tokenFront);
             var selectionBack = Primrose.Text.Cursor.min(maxCursor, tokenBack);
             var cw = selectionBack.i - selectionFront.i;
-            this$1.fillRect(this$1._bgfx, this$1.theme.regular.selectedBackColor ||
+            this.fillRect(this._bgfx, this.theme.regular.selectedBackColor ||
               Primrose.Text.Themes.Default.regular.selectedBackColor,
               selectionFront.x, selectionFront.y + OFFSETY,
               cw, 1);
@@ -16713,11 +16345,9 @@ var TextBox = (function (superclass) {
       this.fillRect(this._bgfx, cc, maxCursor.x, maxCursor.y + OFFSETY, w, 1);
     }
     this._bgfx.restore();
-  };
+  }
 
-  TextBox.prototype.renderCanvasForeground = function renderCanvasForeground () {
-    var this$1 = this;
-
+  renderCanvasForeground() {
     var tokenFront = new Primrose.Text.Cursor(),
       tokenBack = new Primrose.Text.Cursor();
 
@@ -16726,10 +16356,10 @@ var TextBox = (function (superclass) {
     this._fgfx.translate((this.gridBounds.x - this.scroll.x) * this.character.width + this.padding, this.padding);
     for (var y = 0; y < this._tokenRows.length; ++y) {
       // draw the tokens on this row
-      var line = this$1.lines[y] + this$1.padding,
-        row = this$1._tokenRows[y],
+      var line = this.lines[y] + this.padding,
+        row = this._tokenRows[y],
         drawn = false,
-        textY = (y - this$1.scroll.y) * this$1.character.height;
+        textY = (y - this.scroll.y) * this.character.height;
 
       for (var i = 0; i < row.length; ++i) {
         var t = row[i];
@@ -16737,25 +16367,25 @@ var TextBox = (function (superclass) {
         tokenBack.i += t.value.length;
 
         // skip drawing tokens that aren't in view
-        if (this$1.scroll.y <= y && y < this$1.scroll.y + this$1.gridBounds.height &&
-          this$1.scroll.x <= tokenBack.x && tokenFront.x < this$1.scroll.x +
-          this$1.gridBounds.width) {
+        if (this.scroll.y <= y && y < this.scroll.y + this.gridBounds.height &&
+          this.scroll.x <= tokenBack.x && tokenFront.x < this.scroll.x +
+          this.gridBounds.width) {
 
           // draw the text
-          if (this$1.useCaching && this$1._rowCache[line] !== undefined) {
+          if (this.useCaching && this._rowCache[line] !== undefined) {
             if (i === 0) {
-              this$1._fgfx.putImageData(this$1._rowCache[line], this$1.padding, textY + this$1.padding + OFFSET);
+              this._fgfx.putImageData(this._rowCache[line], this.padding, textY + this.padding + OFFSET);
             }
           }
           else {
-            var style = this$1.theme[t.type] || {};
-            var font = (style.fontWeight || this$1.theme.regular.fontWeight || "") +
-              " " + (style.fontStyle || this$1.theme.regular.fontStyle || "") +
-              " " + this$1.character.height + "px " + this$1.theme.fontFamily;
-            this$1._fgfx.font = font.trim();
-            this$1._fgfx.fillStyle = style.foreColor || this$1.theme.regular.foreColor;
-            this$1.drawText(this$1._fgfx, t.value,
-              tokenFront.x * this$1.character.width,
+            var style = this.theme[t.type] || {};
+            var font = (style.fontWeight || this.theme.regular.fontWeight || "") +
+              " " + (style.fontStyle || this.theme.regular.fontStyle || "") +
+              " " + this.character.height + "px " + this.theme.fontFamily;
+            this._fgfx.font = font.trim();
+            this._fgfx.fillStyle = style.foreColor || this.theme.regular.foreColor;
+            this.drawText(this._fgfx, t.value,
+              tokenFront.x * this.character.width,
               textY);
             drawn = true;
           }
@@ -16767,27 +16397,25 @@ var TextBox = (function (superclass) {
       tokenFront.x = 0;
       ++tokenFront.y;
       tokenBack.copy(tokenFront);
-      if (this$1.useCaching && drawn && this$1._rowCache[line] === undefined) {
-        this$1._rowCache[line] = this$1._fgfx.getImageData(
-          this$1.padding,
-          textY + this$1.padding + OFFSET,
-          this$1.imageWidth - 2 * this$1.padding,
-          this$1.character.height);
+      if (this.useCaching && drawn && this._rowCache[line] === undefined) {
+        this._rowCache[line] = this._fgfx.getImageData(
+          this.padding,
+          textY + this.padding + OFFSET,
+          this.imageWidth - 2 * this.padding,
+          this.character.height);
       }
     }
 
     this._fgfx.restore();
-  };
+  }
 
   // provides a hook for TextInput to be able to override text drawing and spit out password blanking characters
-  TextBox.prototype.drawText = function drawText (ctx, txt, x, y) {
+  drawText(ctx, txt, x, y) {
     ctx.fillText(txt, x, y);
-  };
+  }
 
 
-  TextBox.prototype.renderCanvasTrim = function renderCanvasTrim () {
-    var this$1 = this;
-
+  renderCanvasTrim() {
     var tokenFront = new Primrose.Text.Cursor(),
       tokenBack = new Primrose.Text.Cursor(),
       maxLineWidth = 0;
@@ -16799,7 +16427,7 @@ var TextBox = (function (superclass) {
     this._tgfx.lineWidth = 2;
     this._tgfx.translate(0, -this.scroll.y * this.character.height);
     for (var y = 0, lastLine = -1; y < this._tokenRows.length; ++y) {
-      var row = this$1._tokenRows[y];
+      var row = this._tokenRows[y];
 
       for (var i = 0; i < row.length; ++i) {
         var t = row[i];
@@ -16813,26 +16441,26 @@ var TextBox = (function (superclass) {
       ++tokenFront.y;
       tokenBack.copy(tokenFront);
 
-      if (this$1.showLineNumbers && this$1.scroll.y <= y && y < this$1.scroll.y + this$1.gridBounds.height) {
+      if (this.showLineNumbers && this.scroll.y <= y && y < this.scroll.y + this.gridBounds.height) {
         var currentLine = row.length > 0 ? row[0].line : lastLine + 1;
         // draw the left gutter
         var lineNumber = currentLine.toString();
         while (lineNumber.length < this._lineCountWidth) {
           lineNumber = " " + lineNumber;
         }
-        this$1.fillRect(this$1._tgfx,
-          this$1.theme.regular.selectedBackColor ||
+        this.fillRect(this._tgfx,
+          this.theme.regular.selectedBackColor ||
           Primrose.Text.Themes.Default.regular.selectedBackColor,
           0, y,
-          this$1.gridBounds.x, 1);
-        this$1._tgfx.font = "bold " + this$1.character.height + "px " +
-          this$1.theme.fontFamily;
+          this.gridBounds.x, 1);
+        this._tgfx.font = "bold " + this.character.height + "px " +
+          this.theme.fontFamily;
 
         if (currentLine > lastLine) {
-          this$1._tgfx.fillStyle = this$1.theme.regular.foreColor;
-          this$1._tgfx.fillText(
+          this._tgfx.fillStyle = this.theme.regular.foreColor;
+          this._tgfx.fillText(
             lineNumber,
-            0, y * this$1.character.height);
+            0, y * this.character.height);
         }
         lastLine = currentLine;
       }
@@ -16885,9 +16513,9 @@ var TextBox = (function (superclass) {
       this._tgfx.fillStyle = this.theme.regular.unfocused || Primrose.Text.Themes.Default.regular.unfocused;
       this._tgfx.fillRect(0, 0, this.imageWidth, this.imageHeight);
     }
-  };
+  }
 
-  TextBox.prototype.render = function render () {
+  render() {
     if (this.tokens && this.theme) {
       this.refreshGridBounds();
       var boundsChanged = this.gridBounds.toString() !== this._lastGridBounds,
@@ -16957,18 +16585,14 @@ var TextBox = (function (superclass) {
       this._lastScrollX = this.scroll.x;
       this._lastScrollY = this.scroll.y;
     }
-  };
-
-  Object.defineProperties( TextBox.prototype, prototypeAccessors );
-
-  return TextBox;
-}(Primrose.Surface));
-    if(typeof window !== "undefined") window.Primrose.Text.Controls.TextBox = TextBox;
+  }
+}
+  if(typeof window !== "undefined") window.Primrose.Text.Controls.TextBox = TextBox;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Text\Controls\TextBox.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Controls\TextBox.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Text\Controls\TextInput.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Controls\TextInput.js
 (function(){var COUNTER = 0;
 
 pliny.class({
@@ -16986,9 +16610,9 @@ pliny.class({
       description: "Named parameters for creating the TextInput."
     }]
 });
-var TextInput = (function (superclass) {
-  function TextInput(options) {
-    superclass.call(this, copyObject(
+class TextInput extends Primrose.Text.Controls.TextBox {
+  constructor(options) {
+    super(copyObject(
       patch(options, {
         id: "Primrose.Text.Controls.TextInput[" + (COUNTER++) + "]",
         padding: 5
@@ -17005,55 +16629,43 @@ var TextInput = (function (superclass) {
     this.passwordCharacter = this.options.passwordCharacter;
   }
 
-  if ( superclass ) TextInput.__proto__ = superclass;
-  TextInput.prototype = Object.create( superclass && superclass.prototype );
-  TextInput.prototype.constructor = TextInput;
+  get value() {
+    return super.value;
+  }
 
-  var prototypeAccessors = { value: {},selectedText: {} };
-
-  prototypeAccessors.value.get = function () {
-    return superclass.prototype.value;
-  };
-
-  prototypeAccessors.value.set = function (v) {
+  set value(v) {
     v = v || "";
     v = v.replace(/\r?\n/g, "");
-    superclass.prototype.value = v;
-  };
+    super.value = v;
+  }
 
-  prototypeAccessors.selectedText.get = function () {
-    return superclass.prototype.selectedText;
-  };
+  get selectedText() {
+    return super.selectedText;
+  }
 
-  prototypeAccessors.selectedText.set = function (v) {
+  set selectedText(v) {
     v = v || "";
     v = v.replace(/\r?\n/g, "");
-    superclass.prototype.selectedText = v;
-  };
+    super.selectedText = v;
+  }
 
-  TextInput.prototype.drawText = function drawText (ctx, txt, x, y) {
-    var this$1 = this;
-
+  drawText(ctx, txt, x, y) {
     if (this.passwordCharacter) {
       var val = "";
       for (var i = 0; i < txt.length; ++i) {
-        val += this$1.passwordCharacter;
+        val += this.passwordCharacter;
       }
       txt = val;
     }
-    superclass.prototype.drawText.call(this, ctx, txt, x, y);
-  };
-
-  Object.defineProperties( TextInput.prototype, prototypeAccessors );
-
-  return TextInput;
-}(Primrose.Text.Controls.TextBox));
-    if(typeof window !== "undefined") window.Primrose.Text.Controls.TextInput = TextInput;
+    super.drawText(ctx, txt, x, y);
+  }
+}
+  if(typeof window !== "undefined") window.Primrose.Text.Controls.TextInput = TextInput;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Text\Controls\TextInput.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Controls\TextInput.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\Basic.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Grammars\Basic.js
 (function(){// we don't use strict here because this grammar includes an interpreter that uses `eval()`
 
 pliny.value({
@@ -17709,18 +17321,18 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next,
     }
   };
 };
-    if(typeof window !== "undefined") window.Primrose.Text.Grammars.Basic = Basic;
+  if(typeof window !== "undefined") window.Primrose.Text.Grammars.Basic = Basic;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\Basic.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Grammars\Basic.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\JavaScript.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Grammars\JavaScript.js
 (function(){pliny.value({
   parent: "Primrose.Text.Grammars",
   name: "JavaScript",
   description: "| [under construction]"
 });
-var JavaScript = new Primrose.Text.Grammar("JavaScript", [
+const JavaScript = new Primrose.Text.Grammar("JavaScript", [
   ["newlines", /(?:\r\n|\r|\n)/],
   ["startBlockComments", /\/\*/],
   ["endBlockComments", /\*\//],
@@ -17735,32 +17347,32 @@ var JavaScript = new Primrose.Text.Grammar("JavaScript", [
   ["members", /(\w+)\./],
   ["members", /((\w+\.)+)(\w+)/]
 ]);
-    if(typeof window !== "undefined") window.Primrose.Text.Grammars.JavaScript = JavaScript;
+  if(typeof window !== "undefined") window.Primrose.Text.Grammars.JavaScript = JavaScript;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\JavaScript.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Grammars\JavaScript.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\PlainText.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Grammars\PlainText.js
 (function(){pliny.value({
   parent: "Primrose.Text.Grammars",
   name: "PlainText",
   description: "| [under construction]"
 });
-var PlainText = new Primrose.Text.Grammar("PlainText", [
+const PlainText = new Primrose.Text.Grammar("PlainText", [
   ["newlines", /(?:\r\n|\r|\n)/]
 ]);
-    if(typeof window !== "undefined") window.Primrose.Text.Grammars.PlainText = PlainText;
+  if(typeof window !== "undefined") window.Primrose.Text.Grammars.PlainText = PlainText;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\PlainText.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Grammars\PlainText.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\TestResults.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Grammars\TestResults.js
 (function(){pliny.value({
   parent: "Primrose.Text.Grammars",
   name: "TestResults",
   description: "| [under construction]"
 });
-var TestResults = new Primrose.Text.Grammar("TestResults", [
+const TestResults = new Primrose.Text.Grammar("TestResults", [
   ["newlines", /(?:\r\n|\r|\n)/, true],
   ["numbers", /(\[)(o+)/, true],
   ["numbers", /(\d+ succeeded), 0 failed/, true],
@@ -17772,27 +17384,27 @@ var TestResults = new Primrose.Text.Grammar("TestResults", [
   ["keywords", /(Test results for )(\w+):/, true],
   ["strings", /        \w+/, true]
 ]);
-    if(typeof window !== "undefined") window.Primrose.Text.Grammars.TestResults = TestResults;
+  if(typeof window !== "undefined") window.Primrose.Text.Grammars.TestResults = TestResults;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\TestResults.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Grammars\TestResults.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\OSX.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\OSX.js
 (function(){pliny.value({
   parent: "Primrose.Text.OperatingSystems",
   name: "OSX",
   description: "| [under construction]"
 });
-var OSX = new Primrose.Text.OperatingSystem(
+const OSX = new Primrose.Text.OperatingSystem(
   "OS X", "META", "ALT", "METASHIFT_z",
   "META", "LEFTARROW", "RIGHTARROW",
   "META", "UPARROW", "DOWNARROW");
-    if(typeof window !== "undefined") window.Primrose.Text.OperatingSystems.OSX = OSX;
+  if(typeof window !== "undefined") window.Primrose.Text.OperatingSystems.OSX = OSX;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\OSX.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\OSX.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\Windows.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\Windows.js
 (function(){////
 // cut, copy, and paste commands are events that the browser manages,
 // so we don't have to include handlers for them here.
@@ -17802,22 +17414,22 @@ pliny.value({
   name: "OSX",
   description: "| [under construction]"
 });
-var Windows = new Primrose.Text.OperatingSystem(
+const Windows = new Primrose.Text.OperatingSystem(
   "Windows", "CTRL", "CTRL", "CTRL_y",
   "", "HOME", "END",
   "CTRL", "HOME", "END");
-    if(typeof window !== "undefined") window.Primrose.Text.OperatingSystems.Windows = Windows;
+  if(typeof window !== "undefined") window.Primrose.Text.OperatingSystems.Windows = Windows;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\Windows.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\Windows.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Text\Themes\Dark.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Themes\Dark.js
 (function(){pliny.record({
   parent: "Primrose.Text.Themes",
   name: "Dark",
   description: "| [under construction]"
 });
-var Dark = {
+const Dark = {
   name: "Dark",
   fontFamily: "'Droid Sans Mono', 'Consolas', 'Lucida Console', 'Courier New', 'Courier', monospace",
   cursorColor: "white",
@@ -17862,18 +17474,18 @@ var Dark = {
     fontStyle: "underline italic"
   }
 };
-    if(typeof window !== "undefined") window.Primrose.Text.Themes.Dark = Dark;
+  if(typeof window !== "undefined") window.Primrose.Text.Themes.Dark = Dark;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Text\Themes\Dark.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Themes\Dark.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\Text\Themes\Default.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Themes\Default.js
 (function(){pliny.record({
   parent: "Primrose.Text.Themes",
   name: "Default",
   description: "| [under construction]"
 });
-var Default = {
+const Default = {
   name: "Light",
   fontFamily: "'Droid Sans Mono', 'Consolas', 'Lucida Console', 'Courier New', 'Courier', monospace",
   cursorColor: "black",
@@ -17918,15 +17530,15 @@ var Default = {
     fontStyle: "underline italic"
   }
 };
-    if(typeof window !== "undefined") window.Primrose.Text.Themes.Default = Default;
+  if(typeof window !== "undefined") window.Primrose.Text.Themes.Default = Default;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\Text\Themes\Default.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Themes\Default.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\X\LoginForm.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\X\LoginForm.js
 (function(){var COUNTER = 0;
 
-var WIDTH = 512,
+const WIDTH = 512,
   HEIGHT = 150;
 
 pliny.class({
@@ -17935,12 +17547,15 @@ pliny.class({
     baseClass: "Primrose.Controls.Form",
     description: "A basic authentication form."
 });
-var LoginForm = (function (superclass) {
-  function LoginForm() {
-    var this$1 = this;
+class LoginForm extends Primrose.Controls.Form {
 
-    superclass.call(this, {
-      id: ("Primrose.X.LoginForm[" + (COUNTER++) + "]"),
+  static create() {
+    return new LoginForm();
+  }
+
+  constructor() {
+    super({
+      id: `Primrose.X.LoginForm[${COUNTER++}]`,
       bounds: new Primrose.Text.Rectangle(0, 0, WIDTH, HEIGHT)
     });
 
@@ -17990,12 +17605,12 @@ var LoginForm = (function (superclass) {
       value: "Login"
     });
 
-    this.loginButton.addEventListener("click", function (evt) { return emit.call(this$1, "login", {
-      target: this$1
-    }); }, false);
-    this.signupButton.addEventListener("click", function (evt) { return emit.call(this$1, "signup", {
-      target: this$1
-    }); }, false);
+    this.loginButton.addEventListener("click", (evt) => emit.call(this, "login", {
+      target: this
+    }), false);
+    this.signupButton.addEventListener("click", (evt) => emit.call(this, "signup", {
+      target: this
+    }), false);
 
     this.appendChild(this.labelUserName);
     this.appendChild(this.userName);
@@ -18004,27 +17619,17 @@ var LoginForm = (function (superclass) {
     this.appendChild(this.signupButton);
     this.appendChild(this.loginButton);
   }
-
-  if ( superclass ) LoginForm.__proto__ = superclass;
-  LoginForm.prototype = Object.create( superclass && superclass.prototype );
-  LoginForm.prototype.constructor = LoginForm;
-
-  LoginForm.create = function create () {
-    return new LoginForm();
-  };
-
-  return LoginForm;
-}(Primrose.Controls.Form));
-    if(typeof window !== "undefined") window.Primrose.X.LoginForm = LoginForm;
+}
+  if(typeof window !== "undefined") window.Primrose.X.LoginForm = LoginForm;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\X\LoginForm.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\X\LoginForm.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\Primrose\X\SignupForm.js
-(function(){var WIDTH = 512,
+  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\X\SignupForm.js
+(function(){const WIDTH = 512,
   HEIGHT = 200;
 
-var COUNTER = 0;
+let COUNTER = 0;
 
 pliny.class({
   parent: "Primrose.X",
@@ -18032,13 +17637,11 @@ pliny.class({
     baseClass: "Primrose.Controls.Form",
     description: "A basic registration form."
 });
-var SignupForm = (function (superclass) {
-  function SignupForm() {
-    var this$1 = this;
+class SignupForm extends Primrose.Controls.Form {
+  constructor() {
 
-
-    superclass.call(this, {
-      id: ("Primrose.X.SignupForm[" + (COUNTER++) + "]"),
+    super({
+      id: `Primrose.X.SignupForm[${COUNTER++}]`,
       bounds: new Primrose.Text.Rectangle(0, 0, WIDTH, HEIGHT)
     });
 
@@ -18102,12 +17705,12 @@ var SignupForm = (function (superclass) {
       value: "Sign up"
     });
 
-    this.loginButton.addEventListener("click", function (evt) { return emit.call(this$1, "login", {
-      target: this$1
-    }); }, false);
-    this.signupButton.addEventListener("click", function (evt) { return emit.call(this$1, "signup", {
-      target: this$1
-    }); }, false);
+    this.loginButton.addEventListener("click", (evt) => emit.call(this, "login", {
+      target: this
+    }), false);
+    this.signupButton.addEventListener("click", (evt) => emit.call(this, "signup", {
+      target: this
+    }), false);
 
     this.appendChild(this.labelUserName);
     this.appendChild(this.userName);
@@ -18118,19 +17721,13 @@ var SignupForm = (function (superclass) {
     this.appendChild(this.loginButton);
     this.appendChild(this.signupButton);
   }
-
-  if ( superclass ) SignupForm.__proto__ = superclass;
-  SignupForm.prototype = Object.create( superclass && superclass.prototype );
-  SignupForm.prototype.constructor = SignupForm;
-
-  return SignupForm;
-}(Primrose.Controls.Form));
-    if(typeof window !== "undefined") window.Primrose.X.SignupForm = SignupForm;
+}
+  if(typeof window !== "undefined") window.Primrose.X.SignupForm = SignupForm;
 })();
-    // end D:\Documents\VR\Primrose\src\Primrose\X\SignupForm.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\X\SignupForm.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\THREE\CubeTextureLoader\prototype\load.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\THREE\CubeTextureLoader\prototype\load.js
 (function(){function load( urls, onLoad, onProgress, onError ) {
   var texture = new THREE.CubeTexture();
   var loader = new THREE.ImageLoader( this.manager );
@@ -18154,12 +17751,12 @@ var SignupForm = (function (superclass) {
 
   return texture;
 }
-    if(typeof window !== "undefined") window.THREE.CubeTextureLoader.prototype.load = load;
+  if(typeof window !== "undefined") window.THREE.CubeTextureLoader.prototype.load = load;
 })();
-    // end D:\Documents\VR\Primrose\src\THREE\CubeTextureLoader\prototype\load.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\THREE\CubeTextureLoader\prototype\load.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\THREE\Euler\prototype\debug.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\THREE\Euler\prototype\debug.js
 (function(){function debug(label, digits) {
   var val = this.toString(digits);
   if (val !== this.lastVal) {
@@ -18167,12 +17764,12 @@ var SignupForm = (function (superclass) {
     console.log(label, val);
   }
 }
-    if(typeof window !== "undefined") window.THREE.Euler.prototype.debug = debug;
+  if(typeof window !== "undefined") window.THREE.Euler.prototype.debug = debug;
 })();
-    // end D:\Documents\VR\Primrose\src\THREE\Euler\prototype\debug.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\THREE\Euler\prototype\debug.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\THREE\Euler\prototype\toString.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\THREE\Euler\prototype\toString.js
 (function(){pliny.method({
   parent: "THREE.Euler",
   name: "toString ",
@@ -18197,12 +17794,12 @@ function toString(digits) {
   }
   return "[" + parts.join(", ") + "]";
 }
-    if(typeof window !== "undefined") window.THREE.Euler.prototype.toString = toString;
+  if(typeof window !== "undefined") window.THREE.Euler.prototype.toString = toString;
 })();
-    // end D:\Documents\VR\Primrose\src\THREE\Euler\prototype\toString.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\THREE\Euler\prototype\toString.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\THREE\Matrix4\prototype\debug.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\THREE\Matrix4\prototype\debug.js
 (function(){function debug(label, digits) {
   var val = this.toString(digits);
   if (val !== this.lastVal) {
@@ -18210,12 +17807,12 @@ function toString(digits) {
     console.log(label + "\n" + val);
   }
 }
-    if(typeof window !== "undefined") window.THREE.Matrix4.prototype.debug = debug;
+  if(typeof window !== "undefined") window.THREE.Matrix4.prototype.debug = debug;
 })();
-    // end D:\Documents\VR\Primrose\src\THREE\Matrix4\prototype\debug.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\THREE\Matrix4\prototype\debug.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\THREE\Matrix4\prototype\toString.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\THREE\Matrix4\prototype\toString.js
 (function(){pliny.method({
   parent: "THREE.Matrix4",
   name: "toString ",
@@ -18234,29 +17831,29 @@ function toString(digits) {
   var parts = this.toArray();
   this.transpose();
   if (digits !== undefined) {
-    for (var i = 0; i < parts.length; ++i) {
+    for (let i = 0; i < parts.length; ++i) {
     }
   }
   var output = "";
-  for (var i$1 = 0; i$1 < parts.length; ++i$1) {
-    if ((i$1 % 4) === 0) {
+  for (let i = 0; i < parts.length; ++i) {
+    if ((i % 4) === 0) {
       output += "| ";
     }
-    if(Math.sign(parts[i$1]) === -1){
+    if(Math.sign(parts[i]) === -1){
       output += "-";
     }
     else{
       output += " ";
     }
 
-    if (parts[i$1] !== null && parts[i$1] !== undefined) {
-      output += Math.abs(parts[i$1]).toFixed(digits);
+    if (parts[i] !== null && parts[i] !== undefined) {
+      output += Math.abs(parts[i]).toFixed(digits);
     }
     else {
       output += "undefined".substring(0, digits);
     }
 
-    if ((i$1 % 4) === 3) {
+    if ((i % 4) === 3) {
       output += " |\n";
     }
     else {
@@ -18265,12 +17862,12 @@ function toString(digits) {
   }
   return output;
 }
-    if(typeof window !== "undefined") window.THREE.Matrix4.prototype.toString = toString;
+  if(typeof window !== "undefined") window.THREE.Matrix4.prototype.toString = toString;
 })();
-    // end D:\Documents\VR\Primrose\src\THREE\Matrix4\prototype\toString.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\THREE\Matrix4\prototype\toString.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\THREE\Object3D\prototype\addToBrowserEnvironment.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\THREE\Object3D\prototype\addToBrowserEnvironment.js
 (function(){pliny.method({
   parent: "THREE.Object3D",
   name: "addToBrowserEnvironment",
@@ -18286,8 +17883,6 @@ function toString(digits) {
   }]
 });
 function addToBrowserEnvironment(env, scene) {
-  var this$1 = this;
-
   scene.add(this);
   // this has to be done as a lambda expression because it needs to capture the
   // env variable provided in the addToBrowserEnvironment call;
@@ -18302,23 +17897,23 @@ function addToBrowserEnvironment(env, scene) {
       description: "Any Primrose.Entity or THREE.Object3D to add to this object."
     }]
   });
-  this.appendChild = function (child) {
+  this.appendChild = (child) => {
     if (child.addToBrowserEnvironment) {
-      return child.addToBrowserEnvironment(env, this$1);
+      return child.addToBrowserEnvironment(env, this);
     }
     else {
-      this$1.add(child);
+      this.add(child);
       env.registerPickableObject(child);
       return child;
     }
   };
 }
-    if(typeof window !== "undefined") window.THREE.Object3D.prototype.addToBrowserEnvironment = addToBrowserEnvironment;
+  if(typeof window !== "undefined") window.THREE.Object3D.prototype.addToBrowserEnvironment = addToBrowserEnvironment;
 })();
-    // end D:\Documents\VR\Primrose\src\THREE\Object3D\prototype\addToBrowserEnvironment.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\THREE\Object3D\prototype\addToBrowserEnvironment.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\THREE\Quaternion\prototype\debug.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\THREE\Quaternion\prototype\debug.js
 (function(){function debug(label, digits) {
   var val = this.toString(digits);
   if (val !== this.lastVal) {
@@ -18326,12 +17921,12 @@ function addToBrowserEnvironment(env, scene) {
     console.log(label, val);
   }
 }
-    if(typeof window !== "undefined") window.THREE.Quaternion.prototype.debug = debug;
+  if(typeof window !== "undefined") window.THREE.Quaternion.prototype.debug = debug;
 })();
-    // end D:\Documents\VR\Primrose\src\THREE\Quaternion\prototype\debug.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\THREE\Quaternion\prototype\debug.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\THREE\Quaternion\prototype\toString.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\THREE\Quaternion\prototype\toString.js
 (function(){pliny.method({
   parent: "THREE.Quaternion",
   name: "toString ",
@@ -18356,12 +17951,12 @@ function toString(digits) {
   }
   return "{" + parts.join(", ") + "}";
 }
-    if(typeof window !== "undefined") window.THREE.Quaternion.prototype.toString = toString;
+  if(typeof window !== "undefined") window.THREE.Quaternion.prototype.toString = toString;
 })();
-    // end D:\Documents\VR\Primrose\src\THREE\Quaternion\prototype\toString.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\THREE\Quaternion\prototype\toString.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\THREE\Vector3\prototype\debug.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\THREE\Vector3\prototype\debug.js
 (function(){function debug(label, digits) {
   var val = this.toString(digits);
   if (val !== this.lastVal) {
@@ -18369,12 +17964,12 @@ function toString(digits) {
     console.log(label, val);
   }
 }
-    if(typeof window !== "undefined") window.THREE.Vector3.prototype.debug = debug;
+  if(typeof window !== "undefined") window.THREE.Vector3.prototype.debug = debug;
 })();
-    // end D:\Documents\VR\Primrose\src\THREE\Vector3\prototype\debug.js
-    ////////////////////////////////////////////////////////////////////////////////
+  // end C:\Users\sean\Documents\VR\Primrose\src\THREE\Vector3\prototype\debug.js
+  ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\Primrose\src\THREE\Vector3\prototype\toString.js
+  // start C:\Users\sean\Documents\VR\Primrose\src\THREE\Vector3\prototype\toString.js
 (function(){pliny.method({
   parent: "THREE.Vector3",
   name: "toString ",
@@ -18399,8 +17994,7 @@ function toString(digits) {
   }
   return "<" + parts.join(", ") + ">";
 }
-    if(typeof window !== "undefined") window.THREE.Vector3.prototype.toString = toString;
+  if(typeof window !== "undefined") window.THREE.Vector3.prototype.toString = toString;
 })();
-    // end D:\Documents\VR\Primrose\src\THREE\Vector3\prototype\toString.js
-    ////////////////////////////////////////////////////////////////////////////////
-console.info("primrose v0.28.0. see https://www.primrosevr.com for more information.");
+  // end C:\Users\sean\Documents\VR\Primrose\src\THREE\Vector3\prototype\toString.js
+  ////////////////////////////////////////////////////////////////////////////////

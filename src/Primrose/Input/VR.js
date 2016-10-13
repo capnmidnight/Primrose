@@ -82,23 +82,21 @@ class VR extends Primrose.PoseInputProcessor {
       }
 
       // A hack to deal with a bug in the current build of Chromium
-      if (this.isNativeMobileWebVR) {
+      if (this.isNativeMobileWebVR && this.isStereo) {
         layers = layers[0];
       }
 
       var promise = null,
         rp = _(this).requestPresent;
-
       // If we're using WebVR-Polyfill, just let it do its job.
-      if(this.currentDevice.isPolyfilled || !VR.isStereoDisplay(this.currentDevice)) {
-        // for Firefox's sake, this can't be done in a Promise.
-        promise = rp(layers);
-      }
-      else{
+      if(this.currentDevice.capabilities.hasExternalDisplay){
         // PCs with HMD should also make the browser window on the main
         // display full-screen, so we can then also lock pointer.
         promise = WebVRStandardMonitor.standardFullScreenBehavior(elem)
           .then(() => rp(layers));
+      }
+      else {
+        promise = rp(layers).then(WebVRStandardMonitor.standardLockBehavior);
       }
       return promise;
     }
