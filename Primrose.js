@@ -63615,8 +63615,11 @@ var Image = function (_Primrose$Entity) {
         return new Promise(function (resolve, reject) {
           var video = null;
           if (typeof spec === "string") {
-            video = document.querySelector("video[src='" + spec + "']") || document.createElement("video");
-            video.src = spec;
+            video = document.querySelector("video[src='" + spec + "']");
+            if (!video) {
+              video = document.createElement("video");
+              video.src = spec;
+            }
           } else if (spec instanceof HTMLVideoElement) {
             video = spec;
           }
@@ -63627,7 +63630,7 @@ var Image = function (_Primrose$Entity) {
           video.preload = "auto";
           video.autoplay = true;
           video.loop = true;
-          video.oncanplay = function () {
+          video.oncanplaythrough = function () {
             var width = video.videoWidth,
                 height = video.videoHeight,
                 p2Width = Math.pow(2, Math.ceil(Math.log2(width))),
@@ -63660,6 +63663,7 @@ var Image = function (_Primrose$Entity) {
           if (!video.parentElement) {
             document.body.insertBefore(video, document.body.children[0]);
           }
+          video.play();
         });
       })).then(function () {
         return _this4.isVideo = true;

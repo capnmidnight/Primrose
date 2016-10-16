@@ -140,9 +140,11 @@ class Image extends Primrose.Entity {
     return Promise.all(Array.prototype.map.call(videos, (spec, i) => new Promise((resolve, reject) => {
       var video = null;
       if(typeof spec === "string"){
-        video = document.querySelector(`video[src='${spec}']`) ||
-          document.createElement("video");
-        video.src = spec;
+        video = document.querySelector(`video[src='${spec}']`);
+        if(!video) {
+          video = document.createElement("video");
+          video.src = spec;
+        }
       }
       else if(spec instanceof HTMLVideoElement){
         video = spec;
@@ -154,7 +156,7 @@ class Image extends Primrose.Entity {
       video.preload = "auto";
       video.autoplay = true;
       video.loop = true;
-      video.oncanplay = () => {
+      video.oncanplaythrough = () => {
         const width = video.videoWidth,
           height = video.videoHeight,
           p2Width = Math.pow(2, Math.ceil(Math.log2(width))),
@@ -194,6 +196,7 @@ class Image extends Primrose.Entity {
       if(!video.parentElement){
         document.body.insertBefore(video, document.body.children[0]);
       }
+      video.play();
     })))
     .then(() => this.isVideo = true)
     .then(() => this);
