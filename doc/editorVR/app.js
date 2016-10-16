@@ -100,11 +100,46 @@ env.addEventListener("ready", function () {
   editorFrameMesh.name = "MyWindow";
   editorFrameMesh.position.set(0, env.avatarHeight, 0);
 
-  documentation = env.createElement("div");
+  documentation = env.createElement("pre");
   documentation.id = "Documentation";
   documentation.style.width = editorSize;
   documentation.style.height = editorSize;
-  documentation.element = "docPage";
+  documentation.value = "functions\n\
+  console.log( msg ); - print a message to the window below the editor.\n\
+  put( objectA ).on( objectB )[.at( x, y, z )];#[br]\n\
+    | objectA: a THREE.Object3D to be added to another,#[br]\n\
+    | objectB: a THREE.Object3D where objectA will be added,#[br]\n\
+    | x, y, z: a location to set for objectA relative to objectB#[br]\n\
+  light( color [, intensity[, distance[, decay]]] );#[br]\n\
+    | creates a THREE.PointLight with the same parameters.#[br]\n\
+  brick( txtName );#[br]\n\
+    | creates a textured cube with the named texture, one of:#[br]\n\
+    |   [SAND, WATER, ROCK, GRASS, DECK].#[br]\n\
+  quad( width[, height] );#[br]\n\
+    | creates a THREE.PlaneBufferGeometry with the same parameters.#[br]\n\
+    | if height is undefined, height is set to width (square).#[br]\n\
+  box( width[, height, length] );#[br]\n\
+    | creates a THREE.BoxGeometry with the same parameters.#[br]\n\
+    | if height is undefined, height and length are set to width (cube).#[br]\n\
+  hub( );#[br]\n\
+    | creates a raw THREE.Object3D. Useful for combining objects.#[br]\n\
+  sphere( radius[, slices, rings] );#[br]\n\
+    | creates a THREE.SphereGeometry with the same parameters.#[br]\n\
+  shell( radius[, slices, rings[, phi, theta]] );#[br]\n\
+    | creates a portion of the inside surface of a sphere.#[br]\n\
+  from( start ).to( end ).exec( thunk );#[br]\n\
+    | iterates on the range [start, end), passing the index as the parameter#[br]\n\
+    | to thunk, accumulating an array of thunk's return value.#[br]\n\
+  textured( geometry, txt[, options: { unshaded: false, wireframe: false, opacity: 1, txtRepeatS: 1, txtRepeatT: 1} ] );#[br]\n\
+    | geometry: a THREE.Geometry object#[br]\n\
+    | txt: a material definition of some kind. It could be a:#[br]\n\
+    |   number - a solid hex color#[br]\n\
+    |   string - a path to a texture image#[br]\n\
+    |   Primrose.Text.Controls.TextBox - a text editor#[br]\n\
+    | unshaded: set to true to use constant lighting (default false)#[br]\n\
+    | opacity: 1 - opaque, 0 - transparent (default 1).#[br]\n\
+    | txtRepeatS: texture repeat in S direction (default 1).#[br]\n\
+    | txtRepeat: texture repeat in T direction (default 1).";
 
   documentationMesh = env.appendChild(documentation);
   documentationMesh.position.set(-2.2, env.avatarHeight, -1);

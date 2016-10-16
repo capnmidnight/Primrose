@@ -51,7 +51,6 @@
   ],
   "dependencies": {
     "bare-bones-logger": "^2.0.0",
-    "html2canvas": "^0.5.0-beta4",
     "jshashes": "^1.0.5",
     "lavu-details-polyfill": "^0.1.0",
     "leapjs": "^0.6.4",
@@ -66,6 +65,6 @@
   },
   "devDependencies": {
     "jstransformer-marked": "^1.0.1",
-    "notiontheory-basic-build": "^2.3.0"
+    "notiontheory-basic-build": "^2.6.0"
   }
 }

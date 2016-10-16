@@ -2185,18 +2185,6 @@ pliny.class({
 
 pliny.class({
   parent: "Primrose.Controls",
-  name: "HtmlDoc",
-  baseClass: "Primrose.Surface",
-  description: "A rendering of an HTML document.",
-  parameters: [{
-    name: "options",
-    type: "Object",
-    description: "Named parameters for creating the Document."
-  }]
-});
-
-pliny.class({
-  parent: "Primrose.Controls",
   name: "Image",
   baseClass: "Primrose.Surface",
   description: "A simple 2D image to put on a Surface.",

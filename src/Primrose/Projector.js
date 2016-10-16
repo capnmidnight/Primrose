@@ -2580,8 +2580,7 @@ Projector.prototype.updateObjects = function (objs) {
   for (var i = 0; i < objs.length; ++i) {
     var obj = objs[i];
     if (obj.inScene !== false) {
-      var head = obj,
-        curObj = this.objects[obj.uuid];
+      var curObj = this.objects[obj.uuid];
       if (obj.matrix !== null) {
         curObj.matrix.fromArray(obj.matrix);
       }

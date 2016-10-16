@@ -346,7 +346,6 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       factories = {
         button: Primrose.Controls.Button2D,
         img: Primrose.Controls.Image,
-        div: Primrose.Controls.HtmlDoc,
         section: Primrose.Surface,
         textarea: Primrose.Text.Controls.TextBox,
         avatar: null,
@@ -525,28 +524,27 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
 
     this.teleportAvailable = true;
 
-    this.teleport = (pos, immediate) => {
+    this.transition = (thunk, check, immediate) => {
       if(immediate) {
-        this.input.moveStage(pos);
+        thunk();
+        return Promise.resolve();
       }
-      else if(this.teleportAvailable) {
-        this.teleportAvailable = false;
-        var dist = TELEPORT_DISPLACEMENT.copy(pos)
-          .sub(this.input.head.position)
-          .length();
-        if(dist > 0.1){
-          this.fader.visible = true;
-          this.fadeOut()
-            .then(() => this.input.moveStage(pos))
-            .then(() => this.fadeIn())
-            .catch(console.warn.bind(console, "Error while teleporting"))
-            .then(() => {
-              this.teleportAvailable = true;
-              this.fader.visible = false;
-            });
-        }
+      else if(!check || check()){
+        this.fader.visible = true;
+        return this.fadeOut()
+          .then(thunk)
+          .then(() => this.fadeIn())
+          .catch(console.warn.bind(console, "Error while transitioning"))
+          .then(() => this.fader.visible = false);
       }
     };
+
+    this.teleport = (pos, immediate) => this.transition(
+      () => this.input.moveStage(pos),
+      () => this.teleportAvailable && TELEPORT_DISPLACEMENT.copy(pos)
+        .sub(this.input.head.position)
+        .length() > 0.2,
+      immediate);
 
     const POSITION = new THREE.Vector3(),
       START_POINT = new THREE.Vector3();

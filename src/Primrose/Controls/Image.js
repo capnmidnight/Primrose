@@ -147,7 +147,14 @@ class Image extends Primrose.Entity {
       else if(spec instanceof HTMLVideoElement){
         video = spec;
       }
-      video.oncanplaythrough = () => {
+      video.onprogress = progress;
+      video.onloadedmetadata = progress;
+      video.onerror = reject;
+      video.muted = true;
+      video.preload = "auto";
+      video.autoplay = true;
+      video.loop = true;
+      video.oncanplay = () => {
         const width = video.videoWidth,
           height = video.videoHeight,
           p2Width = Math.pow(2, Math.ceil(Math.log2(width))),
@@ -184,12 +191,6 @@ class Image extends Primrose.Entity {
         video.oncanplaythrough = null;
         resolve();
       };
-      video.onprogress = progress;
-      video.onerror = reject;
-      video.muted = true;
-      video.preload = "auto";
-      video.autoplay = true;
-      video.loop = true;
       if(!video.parentElement){
         document.body.insertBefore(video, document.body.children[0]);
       }
