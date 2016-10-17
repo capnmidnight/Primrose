@@ -1792,12 +1792,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       }
     };
 
-    if(true){
-      this.projector = new Primrose.Projector();
-    }
-    else{
-      this.projector = new Primrose.Workerize(Primrose.Projector);
-    }
+    this.projector = new Primrose.Workerize(Primrose.Projector);
 
     this.options.scene = this.scene = this.options.scene || new THREE.Scene();
     if (this.options.useFog) {
@@ -6410,9 +6405,6 @@ Projector.prototype.updateObjects = function (objs) {
     if (obj.inScene !== false) {
       var curObj = this.objects[obj.uuid];
       if (obj.matrix !== null) {
-        if(!curObj.matrix || !(curObj.matrix instanceof THREE.Matrix4)){
-          curObj.matrix = new THREE.Matrix4();
-        }
         curObj.matrix.fromArray(obj.matrix);
       }
       if (obj.visible !== null) {
@@ -14214,10 +14206,11 @@ class SignupForm extends Primrose.Controls.Form {
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
   // start C:\Users\sean\Documents\VR\Primrose\src\THREE\Matrix4\prototype\debug.js
-(function(){function debug(label, digits) {
+(function(){const cache = {};
+function debug(label, digits) {
   var val = this.toString(digits);
-  if (val !== this.lastVal) {
-    this.lastVal = val;
+  if (val !== cache[label]) {
+    cache[label] = val;
     console.log(label + "\n" + val);
   }
 }
