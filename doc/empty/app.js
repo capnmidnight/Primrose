@@ -1,4 +1,5 @@
 "use strict";
+logger.setup(logger.HTTP, "/logger");
 var env = new Primrose.BrowserEnvironment({
   autoScaleQuality: false,
   skyTexture: "../images/bg.jpg",
