@@ -168,94 +168,96 @@ class FPSInput extends Primrose.AbstractEventEmitter {
     this.add(new Primrose.Input.VR(this.options.avatarHeight));
     this.motionDevices.push(this.VR);
 
-    Primrose.Input.Gamepad.addEventListener("gamepadconnected", (pad) => {
-      const padID = Primrose.Input.Gamepad.ID(pad);
-      let mgr = null;
+    if(Primrose.Input.Gamepad.isAvailable){
+      Primrose.Input.Gamepad.addEventListener("gamepadconnected", (pad) => {
+        const padID = Primrose.Input.Gamepad.ID(pad);
+        let mgr = null;
 
-      if (padID !== "Unknown" && padID !== "Rift") {
-        if (Primrose.Input.Gamepad.isMotionController(pad)) {
-          let controllerNumber = 0;
-          for (let i = 0; i < this.managers.length; ++i) {
-            mgr = this.managers[i];
-            if (mgr.currentPad && mgr.currentPad.id === pad.id) {
-              ++controllerNumber;
+        if (padID !== "Unknown" && padID !== "Rift") {
+          if (Primrose.Input.Gamepad.isMotionController(pad)) {
+            let controllerNumber = 0;
+            for (let i = 0; i < this.managers.length; ++i) {
+              mgr = this.managers[i];
+              if (mgr.currentPad && mgr.currentPad.id === pad.id) {
+                ++controllerNumber;
+              }
             }
+
+            mgr = new Primrose.Input.Gamepad(pad, controllerNumber, {
+              buttons: {
+                axes: ["BUTTONS"]
+              },
+              dButtons: {
+                axes: ["BUTTONS"],
+                delta: true
+              },
+              zero: {
+                buttons: [Primrose.Input.Gamepad.VIVE_BUTTONS.GRIP_PRESSED],
+                commandUp: emit.bind(this, "zero")
+              }
+            });
+
+            this.add(mgr);
+            this.motionDevices.push(mgr);
+
+            const shift = (this.motionDevices.length - 2) * 8,
+              color = 0x0000ff << shift,
+              highlight = 0xff0000 >> shift,
+              ptr = new Primrose.Pointer(padID + "Pointer", color, 1, highlight, [mgr]);
+            ptr.add(colored(box(0.1, 0.025, 0.2), color, {
+              emissive: highlight
+            }));
+
+            this.pointers.push(ptr);
+            ptr.addToBrowserEnvironment(null, this.options.scene);
+            ptr.forward(this, Primrose.Pointer.EVENTS);
           }
-
-          mgr = new Primrose.Input.Gamepad(pad, controllerNumber, {
-            buttons: {
-              axes: ["BUTTONS"]
-            },
-            dButtons: {
-              axes: ["BUTTONS"],
-              delta: true
-            },
-            zero: {
-              buttons: [Primrose.Input.Gamepad.VIVE_BUTTONS.GRIP_PRESSED],
-              commandUp: emit.bind(this, "zero")
-            }
-          });
-
-          this.add(mgr);
-          this.motionDevices.push(mgr);
-
-          const shift = (this.motionDevices.length - 2) * 8,
-            color = 0x0000ff << shift,
-            highlight = 0xff0000 >> shift,
-            ptr = new Primrose.Pointer(padID + "Pointer", color, 1, highlight, [mgr]);
-          ptr.add(colored(box(0.1, 0.025, 0.2), color, {
-            emissive: highlight
-          }));
-
-          this.pointers.push(ptr);
-          ptr.addToBrowserEnvironment(null, this.options.scene);
-          ptr.forward(this, Primrose.Pointer.EVENTS);
+          else {
+            mgr = new Primrose.Input.Gamepad(pad, 0, {
+              buttons: {
+                axes: ["BUTTONS"]
+              },
+              dButtons: {
+                axes: ["BUTTONS"],
+                delta: true
+              },
+              strafe: {
+                axes: ["LSX"],
+                deadzone: 0.2
+              },
+              drive: {
+                axes: ["LSY"],
+                deadzone: 0.2
+              },
+              heading: {
+                axes: ["RSX"],
+                scale: -1,
+                deadzone: 0.2,
+                integrate: true
+              },
+              dHeading: {
+                commands: ["heading"],
+                delta: true
+              },
+              pitch: {
+                axes: ["RSY"],
+                scale: -1,
+                deadzone: 0.2,
+                integrate: true
+              },
+              zero: {
+                buttons: [Primrose.Input.Gamepad.XBOX_ONE_BUTTONS.BACK],
+                commandUp: emit.bind(this, "zero")
+              }
+            });
+            this.add(mgr);
+            this.mousePointer.addDevice(mgr, mgr);
+          }
         }
-        else {
-          mgr = new Primrose.Input.Gamepad(pad, 0, {
-            buttons: {
-              axes: ["BUTTONS"]
-            },
-            dButtons: {
-              axes: ["BUTTONS"],
-              delta: true
-            },
-            strafe: {
-              axes: ["LSX"],
-              deadzone: 0.2
-            },
-            drive: {
-              axes: ["LSY"],
-              deadzone: 0.2
-            },
-            heading: {
-              axes: ["RSX"],
-              scale: -1,
-              deadzone: 0.2,
-              integrate: true
-            },
-            dHeading: {
-              commands: ["heading"],
-              delta: true
-            },
-            pitch: {
-              axes: ["RSY"],
-              scale: -1,
-              deadzone: 0.2,
-              integrate: true
-            },
-            zero: {
-              buttons: [Primrose.Input.Gamepad.XBOX_ONE_BUTTONS.BACK],
-              commandUp: emit.bind(this, "zero")
-            }
-          });
-          this.add(mgr);
-          this.mousePointer.addDevice(mgr, mgr);
-        }
-      }
-    });
+      });
 
-    Primrose.Input.Gamepad.addEventListener("gamepaddisconnected", this.remove.bind(this));
+      Primrose.Input.Gamepad.addEventListener("gamepaddisconnected", this.remove.bind(this));
+    }
 
     this.stage = hub();
 
@@ -337,7 +339,9 @@ class FPSInput extends Primrose.AbstractEventEmitter {
 
   update(dt) {
     const hadGamepad = this.hasGamepad;
-    Primrose.Input.Gamepad.poll();
+    if(Primrose.Input.Gamepad.isAvailable){
+      Primrose.Input.Gamepad.poll();
+    }
     for (let i = 0; i < this.managers.length; ++i) {
       this.managers[i].update(dt);
     }

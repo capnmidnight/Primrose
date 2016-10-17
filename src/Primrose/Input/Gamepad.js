@@ -38,6 +38,10 @@ pliny.class({
     description: "An input processor for Gamepads, including those with positional data."
 });
 class Gamepad extends Primrose.PoseInputProcessor {
+  static get isAvailable() {
+    return !!navigator.getGamepads;
+  }
+
   static ID(pad) {
     var id = pad.id;
     if (id === "OpenVR Gamepad") {
@@ -58,50 +62,52 @@ class Gamepad extends Primrose.PoseInputProcessor {
   }
 
   static poll() {
-    var maybePads = navigator.getGamepads(),
-      pads = [],
-      padIDs = [],
-      newPads = [],
-      oldPads = [],
-      i, padID;
+    if(Gamepad.isAvailable){
+      var maybePads = navigator.getGamepads(),
+        pads = [],
+        padIDs = [],
+        newPads = [],
+        oldPads = [],
+        i, padID;
 
-    if (maybePads) {
-      for (i = 0; i < maybePads.length; ++i) {
-        var maybePad = maybePads[i];
-        if (maybePad) {
-          padID = Gamepad.ID(maybePad);
-          var padIdx = currentDeviceIDs.indexOf(padID);
-          pads.push(maybePad);
-          padIDs.push(padID);
-          if (padIdx === -1) {
-            newPads.push(maybePad);
-            currentDeviceIDs.push(padID);
-            currentDevices.push(maybePad);
-            delete currentManagers[padID];
-          }
-          else {
-            currentDevices[padIdx] = maybePad;
+      if (maybePads) {
+        for (i = 0; i < maybePads.length; ++i) {
+          var maybePad = maybePads[i];
+          if (maybePad) {
+            padID = Gamepad.ID(maybePad);
+            var padIdx = currentDeviceIDs.indexOf(padID);
+            pads.push(maybePad);
+            padIDs.push(padID);
+            if (padIdx === -1) {
+              newPads.push(maybePad);
+              currentDeviceIDs.push(padID);
+              currentDevices.push(maybePad);
+              delete currentManagers[padID];
+            }
+            else {
+              currentDevices[padIdx] = maybePad;
+            }
           }
         }
       }
-    }
 
-    for (i = currentDeviceIDs.length - 1; i >= 0; --i) {
-      padID = currentDeviceIDs[i];
-      var mgr = currentManagers[padID],
-        pad = currentDevices[i];
-      if (padIDs.indexOf(padID) === -1) {
-        oldPads.push(padID);
-        currentDevices.splice(i, 1);
-        currentDeviceIDs.splice(i, 1);
+      for (i = currentDeviceIDs.length - 1; i >= 0; --i) {
+        padID = currentDeviceIDs[i];
+        var mgr = currentManagers[padID],
+          pad = currentDevices[i];
+        if (padIDs.indexOf(padID) === -1) {
+          oldPads.push(padID);
+          currentDevices.splice(i, 1);
+          currentDeviceIDs.splice(i, 1);
+        }
+        else if (mgr) {
+          mgr.checkDevice(pad);
+        }
       }
-      else if (mgr) {
-        mgr.checkDevice(pad);
-      }
-    }
 
-    newPads.forEach(emit.bind(Gamepad, "gamepadconnected"));
-    oldPads.forEach(emit.bind(Gamepad, "gamepaddisconnected"));
+      newPads.forEach(emit.bind(Gamepad, "gamepadconnected"));
+      oldPads.forEach(emit.bind(Gamepad, "gamepaddisconnected"));
+    }
   }
 
   static get pads() {
