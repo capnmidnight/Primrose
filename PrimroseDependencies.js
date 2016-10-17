@@ -37389,7 +37389,7 @@ console.info("webvr-bootstrapper v4.0.5. see https://github.com/capnmidnight/Web
 
 					}
 
-				}, null, onError );
+				}, undefined, onError );
 
 			}
 
@@ -52950,7 +52950,7 @@ console.info("webvr-bootstrapper v4.0.5. see https://github.com/capnmidnight/Web
 
 		function ( t ) {
 
-			var b2 = exports.ShapeUtils.b2;
+			var b2 = exports.ShapeUtils.b2;		
 
 			return new Vector3(
 				b2( t, this.v0.x, this.v1.x, this.v2.x ),

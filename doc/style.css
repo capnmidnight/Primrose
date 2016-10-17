@@ -145,7 +145,7 @@ footer * {
   display: inline-block;
 }
 main {
-  margin-bottom: 5em;
+  padding-bottom: 10em;
 }
 footer {
   position: fixed;
