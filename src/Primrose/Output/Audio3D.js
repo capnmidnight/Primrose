@@ -1,8 +1,7 @@
 // polyfill
-Window.prototype.AudioContext =
-  Window.prototype.AudioContext ||
-  Window.prototype.webkitAudioContext ||
-  function () {};
+window.AudioContext =
+  window.AudioContext ||
+  window.webkitAudioContext;
 
 pliny.class({
   parent: "Primrose.Output",
@@ -10,14 +9,40 @@ pliny.class({
     description: "| [under construction]"
 });
 class Audio3D {
-  constructor() {
+  static get isAvailable() {
+    return !!window.AudioContext;
+  }
 
-    try {
+  constructor() {
+    if(Audio3D.isAvailable){
       this.context = new AudioContext();
       this.sampleRate = this.context.sampleRate;
       this.mainVolume = this.context.createGain();
 
-      var vec = new THREE.Vector3(),
+      if(isiOS){
+        const unlock = () => {
+          const buffer = this.context.createBuffer(1, 1, 22050),
+            source = this.context.createBufferSource();
+          source.buffer = buffer;
+          source.connect(this.context.destination);
+          source.noteOn(0);
+          setTimeout(() => {
+            console.log("Playback State", source.playbackState);
+            if((source.playbackState === source.PLAYING_STATE || source.playbackState === source.FINISHED_STATE)) {
+              window.removeEventListener("mouseup", unlock);
+              window.removeEventListener("touchend", unlock);
+              window.removeEventListener("keyup", unlock);
+            }
+          }, 0);
+        };
+
+        window.addEventListener("mouseup", unlock, false);
+        window.addEventListener("touchend", unlock, false);
+        window.addEventListener("keyup", unlock, false);
+        unlock();
+      }
+
+      let vec = new THREE.Vector3(),
         up = new THREE.Vector3(),
         left = new THREE.Matrix4()
         .identity(),
@@ -56,18 +81,12 @@ class Audio3D {
         right.elements[13] = my;
         right.elements[14] = mz;
       };
-      this.isAvailable = true;
       this.start();
     }
-    catch (exp) {
-      console.error(exp);
-      console.error("AudioContext not available.");
-      this.isAvailable = false;
-      this.setPlayer = function () {};
+    else {
+      console.warn("Audio is not available.");
       this.setVelocity = function () {};
-      this.start = function () {};
-      this.stop = function () {};
-      this.error = exp;
+      this.setPlayer = function () {};
     }
   }
 
@@ -89,17 +108,26 @@ class Audio3D {
   }
 
   start() {
-    this.mainVolume.connect(this.context.destination);
+    if(this.mainVolume){
+      this.mainVolume.connect(this.context.destination);
+    }
   }
 
   stop() {
-    this.mainVolume.disconnect();
+    if(this.mainVolume){
+      this.mainVolume.disconnect();
+    }
   }
 
   loadURL(src) {
-    return Primrose.HTTP.getBuffer(src)
-      .then((data) => new Promise((resolve, reject) =>
-        this.context.decodeAudioData(data, resolve, reject)));
+    if(this.context){
+      return Primrose.HTTP.getBuffer(src)
+        .then((data) => new Promise((resolve, reject) =>
+          this.context.decodeAudioData(data, resolve, reject)));
+    }
+    else{
+      return Promise.reject("No audio context.");
+    }
   }
 
   loadURLCascadeSrcList(srcs, index) {
