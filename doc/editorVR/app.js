@@ -14,14 +14,8 @@ var GRASS = "../images/grass.png",
   subScene = new THREE.Object3D(),
 
   editor = null,
-  output = null,
-  button1 = null,
   editorFrame = null,
   editorFrameMesh = null,
-  documentation = null,
-  documentationMesh = null,
-  stereoImage = null,
-  stereoImageMesh = null,
 
   modA = isOSX ? "metaKey" : "ctrlKey",
   modB = isOSX ? "altKey" : "shiftKey",
@@ -36,16 +30,6 @@ var GRASS = "../images/grass.png",
 env.addEventListener("ready", function () {
   env.scene.add(subScene);
 
-  stereoImage = env.createElement("img");
-  stereoImage.id = "StereoImage";
-  stereoImage.className = "stereo";
-  stereoImage.addEventListener("load", function (evt) {
-    stereoImageMesh = env.appendChild(stereoImage);
-    stereoImageMesh.rotation.set(0, 75 * Math.PI / 180, 0);
-    stereoImageMesh.position.set(-4, env.avatarHeight, -1);
-  }, false);
-  stereoImage.src = "../images/prong.stereo.jpg";
-
   var editorSize = isMobile ? 512 : 1024,
     fontSize = isMobile ? 10 : 20;
 
@@ -58,92 +42,16 @@ env.addEventListener("ready", function () {
   editor = env.createElement("textarea");
   editor.id = "Editor";
   editor.style.width = editorFrame.surfaceWidth;
-  editor.style.height = Math.floor(editorFrame.surfaceHeight * 2 / 3);
+  editor.style.height = editorFrame.surfaceHeight;
   editor.style.fontSize = fontSize;
   editor.tokenizer = Primrose.Text.Grammars.JavaScript;
   editor.value = getSourceCode(isInIFrame);
 
-  output = env.createElement("pre");
-  output.id = "Output";
-  output.style.top = editor.surfaceHeight + 25;
-  output.style.width = editorFrame.surfaceWidth;
-  output.style.height = editorFrame.surfaceHeight - editor.surfaceHeight - 25;
-  output.style.fontSize = fontSize;
-
-  button1 = env.createElement("button");
-  button1.id = "ThemeButton";
-  button1.style.backgroundColor = "#ffff00";
-  button1.style.color = "#0000ff";
-  button1.style.left = editorFrame.surfaceWidth - 400;
-  button1.style.top = output.bounds.top;
-  button1.style.width = 400;
-  button1.style.height = 45;
-  button1.value = "Switch to dark theme";
-
-  button1.addEventListener("click", function () {
-    var nextTheme = Primrose.Text.Themes.Default,
-      nextString = "Switch to dark theme";
-    if (editor.theme.name === nextTheme.name) {
-      nextTheme = Primrose.Text.Themes.Dark;
-      nextString = "Switch to light theme";
-    }
-    console.log("Switching to theme: " + nextTheme.name);
-    documentation.theme = output.theme = editor.theme = nextTheme;
-    button1.value = nextString;
-  }, false);
-
-  editorFrame.appendChild(output);
   editorFrame.appendChild(editor);
-  editorFrame.appendChild(button1);
 
   editorFrameMesh = env.appendChild(editorFrame);
   editorFrameMesh.name = "MyWindow";
   editorFrameMesh.position.set(0, env.avatarHeight, 0);
-
-  documentation = env.createElement("pre");
-  documentation.id = "Documentation";
-  documentation.style.width = editorSize;
-  documentation.style.height = editorSize;
-  documentation.value = "functions\n\
-  console.log( msg ); - print a message to the window below the editor.\n\
-  put( objectA ).on( objectB )[.at( x, y, z )];#[br]\n\
-    | objectA: a THREE.Object3D to be added to another,#[br]\n\
-    | objectB: a THREE.Object3D where objectA will be added,#[br]\n\
-    | x, y, z: a location to set for objectA relative to objectB#[br]\n\
-  light( color [, intensity[, distance[, decay]]] );#[br]\n\
-    | creates a THREE.PointLight with the same parameters.#[br]\n\
-  brick( txtName );#[br]\n\
-    | creates a textured cube with the named texture, one of:#[br]\n\
-    |   [SAND, WATER, ROCK, GRASS, DECK].#[br]\n\
-  quad( width[, height] );#[br]\n\
-    | creates a THREE.PlaneBufferGeometry with the same parameters.#[br]\n\
-    | if height is undefined, height is set to width (square).#[br]\n\
-  box( width[, height, length] );#[br]\n\
-    | creates a THREE.BoxGeometry with the same parameters.#[br]\n\
-    | if height is undefined, height and length are set to width (cube).#[br]\n\
-  hub( );#[br]\n\
-    | creates a raw THREE.Object3D. Useful for combining objects.#[br]\n\
-  sphere( radius[, slices, rings] );#[br]\n\
-    | creates a THREE.SphereGeometry with the same parameters.#[br]\n\
-  shell( radius[, slices, rings[, phi, theta]] );#[br]\n\
-    | creates a portion of the inside surface of a sphere.#[br]\n\
-  from( start ).to( end ).exec( thunk );#[br]\n\
-    | iterates on the range [start, end), passing the index as the parameter#[br]\n\
-    | to thunk, accumulating an array of thunk's return value.#[br]\n\
-  textured( geometry, txt[, options: { unshaded: false, wireframe: false, opacity: 1, txtRepeatS: 1, txtRepeatT: 1} ] );#[br]\n\
-    | geometry: a THREE.Geometry object#[br]\n\
-    | txt: a material definition of some kind. It could be a:#[br]\n\
-    |   number - a solid hex color#[br]\n\
-    |   string - a path to a texture image#[br]\n\
-    |   Primrose.Text.Controls.TextBox - a text editor#[br]\n\
-    | unshaded: set to true to use constant lighting (default false)#[br]\n\
-    | opacity: 1 - opaque, 0 - transparent (default 1).#[br]\n\
-    | txtRepeatS: texture repeat in S direction (default 1).#[br]\n\
-    | txtRepeat: texture repeat in T direction (default 1).";
-
-  documentationMesh = env.appendChild(documentation);
-  documentationMesh.position.set(-2.2, env.avatarHeight, -1);
-  documentationMesh.rotation.set(0, Math.PI / 4, 0);
 
   console.log("INSTRUCTIONS:");
   console.log(" - " + cmdPre + "+E to show/hide editor");
@@ -173,8 +81,6 @@ env.addEventListener("update", function (dt) {
 env.addEventListener("keydown", function (evt) {
   if (evt[modA] && evt[modB]) {
     if (evt.keyCode === Primrose.Keys.E) {
-      documentationMesh.visible = editorFrameMesh.visible = !editorFrameMesh.visible;
-      documentationMesh.disabled = editorFrameMesh.disabled = !editorFrameMesh.disabled;
       if (!editorFrameMesh.visible && env.currentEditor && env.currentEditor.focused) {
         env.currentEditor.blur();
         env.currentEditor = null;
@@ -235,58 +141,6 @@ function updateScript() {
     else if (env.quality === Quality.NONE) {
       env.quality = Quality.MEDIUM;
     }
-  }
-}
-
-logger.setup(logger.USER, function (data) {
-  if (output) {
-    var msg = data.args.map(function(o){
-      if(typeof o === "object"){
-        if(o.type === "error"){
-          var stk = (o.stack && ("\n" + (o.stack.join && o.stack.join("\n") || o.stack))),
-            msg = o.time + (stk || (" [" + o.lineno + ", " + o.colno + "]: " + o.message + "\n" + o.source));
-          if(editor){
-            var script = editor.value,
-              lines = script.split(/\n/g),
-              line = parseFloat(o.lineno) - 3,
-              start = Math.max(0, line - 2),
-              end = Math.min(lines.length, line + 3),
-              section = lines.slice(start, end);
-            msg += "\n";
-            for(var i = start; i < end; ++i){
-              console._log(start, end, i, line);
-              msg += section[i - start] + "\n";
-              if(i === line){
-                for(var j = 0; j < o.colno - 1; ++j){
-                  msg += "\u2192";
-                }
-                msg += "\u2191\n";
-              }
-            }
-          }
-          return msg;
-        }
-        else{
-          return JSON.stringify(o);
-        }
-      }
-      return o;
-    }).join(", ");
-    output.value += data.name + ":> " + msg + "\n";
-    output.selectionStart = output.selectionEnd = output.value.length - 1;
-    output.scrollIntoView(output.frontCursor);
-    setTimeout(function() {
-      output.invalidate();
-    }, 10);
-  }
-});
-
-function clrscr() {
-  if (output) {
-    var t = output;
-    t.value = "";
-    t.selectionStart = t.selectionEnd = t.value.length;
-    t.scrollIntoView(t.frontCursor);
   }
 }
 
