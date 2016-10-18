@@ -2371,6 +2371,61 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
         update = true;
         bag.name = obj.name;
         bag.geometry = geomObj.geometry;
+
+        let verts, faces, uvs,
+          geometry = bag.geometry;
+        // it would be nice to do this the other way around, to have everything
+        // stored in ArrayBuffers, instead of regular arrays, to pass to the
+        // Worker thread. Maybe later.
+        if (geometry instanceof THREE.BufferGeometry) {
+          var attr = geometry.attributes,
+            pos = attr.position,
+            uv = attr.uv,
+            idx = attr.index;
+
+          verts = [];
+          faces = [];
+          if (uv) {
+            uvs = [];
+          }
+          for (let i = 0; i < pos.count; ++i) {
+            verts.push([pos.getX(i), pos.getY(i), pos.getZ(i)]);
+            if (uv) {
+              uvs.push([uv.getX(i), uv.getY(i)]);
+            }
+          }
+          if (idx) {
+            for (let i = 0; i < idx.count - 2; ++i) {
+              faces.push([idx.getX(i), idx.getX(i + 1), idx.getX(i + 2)]);
+            }
+          }
+          else {
+            for (let i = 0; i < pos.count; i += 3) {
+              faces.push([i, i + 1, i + 2]);
+            }
+          }
+        }
+        else {
+          verts = geometry.vertices.map((v) => v.toArray());
+          faces = [];
+          uvs = [];
+          // IDK why, but non-buffered geometry has an additional array layer
+          for (let i = 0; i < geometry.faces.length; ++i) {
+            var f = geometry.faces[i],
+              faceUVs = geometry.faceVertexUvs[0][i];
+            faces.push([f.a, f.b, f.c]);
+            uvs[f.a] = [faceUVs[0].x, faceUVs[0].y];
+            uvs[f.b] = [faceUVs[1].x, faceUVs[1].y];
+            uvs[f.c] = [faceUVs[2].x, faceUVs[2].y];
+          }
+        }
+
+        bag.geometry = {
+          uuid: geometry.uuid,
+          vertices: verts,
+          faces: faces,
+          uvs: uvs
+        };
       }
 
       if (update) {
@@ -2402,61 +2457,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
 
     this.registerPickableObject = (obj) => {
       if (obj) {
-        var bag = createPickableObject(obj, true),
-          verts, faces, uvs, i,
-          geometry = bag.geometry;
-        // it would be nice to do this the other way around, to have everything
-        // stored in ArrayBuffers, instead of regular arrays, to pass to the
-        // Worker thread. Maybe later.
-        if (geometry instanceof THREE.BufferGeometry) {
-          var attr = geometry.attributes,
-            pos = attr.position,
-            uv = attr.uv,
-            idx = attr.index;
-
-          verts = [];
-          faces = [];
-          if (uv) {
-            uvs = [];
-          }
-          for (i = 0; i < pos.count; ++i) {
-            verts.push([pos.getX(i), pos.getY(i), pos.getZ(i)]);
-            if (uv) {
-              uvs.push([uv.getX(i), uv.getY(i)]);
-            }
-          }
-          if (idx) {
-            for (i = 0; i < idx.count - 2; ++i) {
-              faces.push([idx.getX(i), idx.getX(i + 1), idx.getX(i + 2)]);
-            }
-          }
-          else {
-            for (i = 0; i < pos.count; i += 3) {
-              faces.push([i, i + 1, i + 2]);
-            }
-          }
-        }
-        else {
-          verts = geometry.vertices.map((v) => v.toArray());
-          faces = [];
-          uvs = [];
-          // IDK why, but non-buffered geometry has an additional array layer
-          for (i = 0; i < geometry.faces.length; ++i) {
-            var f = geometry.faces[i],
-              faceUVs = geometry.faceVertexUvs[0][i];
-            faces.push([f.a, f.b, f.c]);
-            uvs[f.a] = [faceUVs[0].x, faceUVs[0].y];
-            uvs[f.b] = [faceUVs[1].x, faceUVs[1].y];
-            uvs[f.c] = [faceUVs[2].x, faceUVs[2].y];
-          }
-        }
-
-        bag.geometry = {
-          uuid: geometry.uuid,
-          vertices: verts,
-          faces: faces,
-          uvs: uvs
-        };
+        var bag = createPickableObject(obj, true);
         this.pickableObjects[bag.uuid] = obj;
         this.projector.setObject(bag);
       }
