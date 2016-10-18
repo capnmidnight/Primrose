@@ -2513,29 +2513,13 @@ Projector.prototype.addEventListener = function (evt, handler) {
   this.listeners[evt].push(handler);
 };
 Projector.prototype._emit = emit;
-Projector.prototype._transform = function (obj, v) {
-  return v.clone()
-    .applyMatrix4(
-      obj.matrix);
-};
-// We have to transform the vertices of the geometry into world-space
-// coordinations, because the object they are on could be rotated or
-// positioned somewhere else.
-Projector.prototype._getVerts = function (obj) {
-  var trans = [];
-  var geometry = this.geometryCache[obj.geomID],
-    verts = geometry.vertices;
-  for (var i = 0; i < verts.length; ++i) {
-    trans[i] = this._transform(obj, verts[i]);
-  }
-  return trans;
-};
-
 Projector.prototype.setObject = function (obj) {
   this.objectIDs.push(obj.uuid);
   this.objects[obj.uuid] = obj;
   obj.matrix = new THREE.Matrix4()
     .fromArray(obj.matrix);
+  obj.invMatrix = new THREE.Matrix4()
+    .getInverse(obj.matrix);
   var uvs = obj.geometry.uvs,
     minU = Number.MAX_VALUE,
     minV = Number.MAX_VALUE,
@@ -2581,8 +2565,9 @@ Projector.prototype.updateObjects = function (objs) {
     var obj = objs[i];
     if (obj.inScene !== false) {
       var curObj = this.objects[obj.uuid];
-      if (obj.matrix !== null) {
+      if (obj.matrix !== null && obj.matrix instanceof Array) {
         curObj.matrix.fromArray(obj.matrix);
+        curObj.invMatrix.getInverse(curObj.matrix);
       }
       if (obj.visible !== null) {
         this.setProperty(obj.uuid, "visible", obj.visible);
@@ -2630,16 +2615,20 @@ Projector.prototype.projectPointers = function (args) {
       from = pack[1],
       to = pack[2],
       value = null;
-    this.from.fromArray(from);
-    this.to.fromArray(to);
 
     for (var i = 0; i < this.objectIDs.length; ++i) {
       var objID = this.objectIDs[i],
         obj = this.objects[objID];
       if (!obj.disabled) {
-        var verts = this._getVerts(obj),
+        var geometry = this.geometryCache[obj.geomID],
+          verts = geometry.vertices,
           faces = obj.geometry.faces,
           uvs = obj.geometry.uvs;
+
+        this.from.fromArray(from)
+          .applyMatrix4(obj.invMatrix);
+        this.to.fromArray(to)
+          .applyMatrix4(obj.invMatrix);
 
         for (var j = 0; j < faces.length; ++j) {
           var face = faces[j],
@@ -2663,16 +2652,10 @@ Projector.prototype.projectPointers = function (args) {
                 .add(this.from);
               var dist = Math.sign(this.d.z) * this.to.distanceTo(this.c);
               if (!value || dist < value.distance) {
-                value = {
-                  name: name,
-                  time: performance.now(),
-                  objectID: objID,
-                  object: null,
-                  distance: dist,
-                  faceIndex: j,
-                  facePoint: this.c.toArray(),
-                  faceNormal: this.d.toArray()
-                };
+                let point = null;
+
+                this.c.applyMatrix4(obj.matrix);
+                this.d.applyMatrix4(obj.matrix);
 
                 if (uvs) {
                   v0 = uvs[face[0] % uvs.length];
@@ -2681,11 +2664,22 @@ Projector.prototype.projectPointers = function (args) {
                   var u = this.d.x * (v1[0] - v0[0]) + this.d.y * (v2[0] - v0[0]) + v0[0],
                     v = this.d.x * (v1[1] - v0[1]) + this.d.y * (v2[1] - v0[1]) + v0[1];
                   if (obj.minU <= u && u <= obj.maxU && obj.minV <= v && v < obj.maxV) {
-                    value.point = [u, v];
+                    point = [u, v];
                   }
-                  else {
-                    value = null;
-                  }
+                }
+
+                if(!uvs || point) {
+                  value = {
+                    name: name,
+                    time: performance.now(),
+                    objectID: objID,
+                    object: null,
+                    distance: dist,
+                    faceIndex: j,
+                    facePoint: this.c.toArray(),
+                    faceNormal: this.d.toArray(),
+                    point: point
+                  };
                 }
               }
             }
