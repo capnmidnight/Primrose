@@ -35,35 +35,24 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
         geomObj.name = geomObj.name || obj.name;
       }
       var id = geomObj.uuid,
-        mLeft = new THREE.Matrix4(),
-        mRight = new THREE.Matrix4()
-        .identity(),
-        mSwap,
-        inScene = false,
         lastBag = objectHistory[id],
-        update = false,
+        update = !lastBag,
         disabled = !!obj.disabled,
         bag = {
           uuid: id,
           name: null,
-          inScene: null,
+          inScene: false,
           visible: null,
           disabled: null,
           matrix: null,
           geometry: null
-        },
-        head = geomObj;
+        };
 
-      while (head !== null) {
-        head.updateMatrix();
-        mLeft.copy(head.matrix);
-        mLeft.multiply(mRight);
-        mSwap = mLeft;
-        mLeft = mRight;
-        mRight = mSwap;
-        head = head.parent;
-        inScene = inScene || (head === this.scene);
+      for(let head = geomObj; head !== null; head = head.parent) {
+        bag.inScene = bag.inScene || (head === this.scene);
       }
+
+      update = update || lastBag.inScene !== bag.inScene;
 
       if (!lastBag || lastBag.visible !== obj.visible) {
         update = true;
@@ -75,16 +64,13 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
         bag.disabled = disabled;
       }
 
-      var m = mRight.elements.subarray(0, mRight.elements.length),
+      geomObj.updateMatrixWorld();
+      var elems = geomObj.matrixWorld.elements,
+        m = elems.subarray(0, elems.length),
         mStr = describeMatrix(m);
       if (!lastBag || !lastBag.matrix || describeMatrix(lastBag.matrix) !== mStr) {
         update = true;
         bag.matrix = m;
-      }
-
-      if (!lastBag || lastBag.inScene !== inScene) {
-        update = true;
-        bag.inScene = inScene;
       }
 
       if (includeGeometry === true) {
