@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\axis.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\axis.js
 (function(){pliny.function({
   name: "axis",
   description: "Creates a set of reference axes, with X as red, Y as green, and Z as blue.",
@@ -39,10 +39,10 @@ function axis(length, width) {
 }
   if(typeof window !== "undefined") window.axis = axis;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\axis.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\axis.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\box.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\box.js
 (function(){pliny.function({
   name: "box",
   description: "A shortcut function for the THREE.BoxGeometry class. Creates a \"rectilinear prism\", i.e. the general class of rectangular objects that includes cubes.",
@@ -91,10 +91,10 @@ function box(width, height, length) {
 }
   if(typeof window !== "undefined") window.box = box;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\box.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\box.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\brick.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\brick.js
 (function(){pliny.function({
   name: "brick",
   description: "Creates a textured box. See [`box()`](#box) and [`textured()`](#textured). The texture will be repeated across the box.",
@@ -146,10 +146,10 @@ function brick(txt, w, h, l) {
 }
   if(typeof window !== "undefined") window.brick = brick;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\brick.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\brick.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\cache.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\cache.js
 (function(){pliny.function({
   name: "cache",
   description: "Looks for the hashed name of the object in the object cache, and if it exists, returns it. If it doesn't exist, calls the makeObject function, using the return results to set the object in the cache, and returning it. In other words, a simple sort of memoization.",
@@ -196,10 +196,10 @@ const cache = (function () {
 })();
   if(typeof window !== "undefined") window.cache = cache;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\cache.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\cache.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\circle.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\circle.js
 (function(){pliny.function({
   name: "circle",
   description: "| [under construction]"
@@ -214,10 +214,10 @@ function circle(r, sections, start, end) {
 }
   if(typeof window !== "undefined") window.circle = circle;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\circle.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\circle.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\clone.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\clone.js
 (function(){pliny.function({
   name: "clone",
   parameters: [{
@@ -246,10 +246,10 @@ function clone(obj) {
 }
   if(typeof window !== "undefined") window.clone = clone;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\clone.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\clone.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\cloud.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\cloud.js
 (function(){pliny.function({
   name: "cloud",
   description: "Creates a point cloud with points of a fixed color and size out of an array of vertices.",
@@ -308,10 +308,10 @@ function cloud(verts, c, s) {
 }
   if(typeof window !== "undefined") window.cloud = cloud;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\cloud.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\cloud.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\colored.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\colored.js
 (function(){pliny.function({
   name: "colored",
   description: "Apply a color to a geometry, creating the intermediate material as necessary, and returning the resulting mesh",
@@ -348,10 +348,10 @@ function colored(geometry, color, options) {
 }
   if(typeof window !== "undefined") window.colored = colored;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\colored.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\colored.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\copyObject.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\copyObject.js
 (function(){pliny.function({
   name: "copyObject",
   description: "Copies properties from one object to another, essentially cloning the source object into the destination object. Uses a local stack to perform recursive copying. Overwrites any fields that already exist in the destination. For convenience, also returns the destination object.",
@@ -428,10 +428,10 @@ function copyObject(dest, source, shallow) {
 }
   if(typeof window !== "undefined") window.copyObject = copyObject;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\copyObject.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\copyObject.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\cylinder.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\cylinder.js
 (function(){pliny.function({
   name: "cylinder",
   description: "Shorthand functino for creating a new THREE.CylinderGeometry object.",
@@ -517,10 +517,10 @@ function cylinder(rT, rB, height, rS, hS, openEnded, thetaStart, thetaEnd) {
 }
   if(typeof window !== "undefined") window.cylinder = cylinder;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\cylinder.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\cylinder.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\deleteSetting.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\deleteSetting.js
 (function(){pliny.function({
   name: "deleteSetting",
   parameters: [{
@@ -549,10 +549,10 @@ function deleteSetting(name) {
 }
   if(typeof window !== "undefined") window.deleteSetting = deleteSetting;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\deleteSetting.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\deleteSetting.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\emit.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\emit.js
 (function(){pliny.function({
   name: "emit",
   description: "A shorthand function for triggering events. Can be `.call()`ed on objects that have a `listeners` property.",
@@ -600,10 +600,10 @@ function emit(evt, args) {
 }
   if(typeof window !== "undefined") window.emit = emit;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\emit.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\emit.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\findProperty.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\findProperty.js
 (function(){pliny.function({
   name: "findProperty",
   description: "Searches an object for a property that might go by different names in different browsers.",
@@ -636,10 +636,10 @@ function findProperty(elem, arr) {
 }
   if(typeof window !== "undefined") window.findProperty = findProperty;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\findProperty.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\findProperty.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\fixGeometry.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\fixGeometry.js
 (function(){function fixGeometry(geometry, options){
   const maxU = options.maxU || 1,
     maxV = options.maxV || 1,
@@ -673,10 +673,10 @@ function findProperty(elem, arr) {
 }
   if(typeof window !== "undefined") window.fixGeometry = fixGeometry;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\fixGeometry.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\fixGeometry.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\getSetting.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\getSetting.js
 (function(){pliny.function({
   name: "getSetting",
   parameters: [{
@@ -728,10 +728,10 @@ function getSetting(name, defValue) {
 }
   if(typeof window !== "undefined") window.getSetting = getSetting;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\getSetting.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\getSetting.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\hub.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\hub.js
 (function(){pliny.function({
   name: "hub",
   description: "Calling `hub()` is a short-hand for creating a new `THREE.Object3D`. This is useful in live-coding examples to keep code terse and easy to write. It also polyfills in a method for being able to add the object to a `Primrose.BrowserEnvironment` using `appendChild()` and to add other elements to the hub using `appendChild()` such that they may be pickable in the scene.",
@@ -749,19 +749,19 @@ function hub() {
 }
   if(typeof window !== "undefined") window.hub = hub;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\hub.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\hub.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\identity.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\identity.js
 (function(){function identity(obj) {
   return obj;
 }
   if(typeof window !== "undefined") window.identity = identity;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\identity.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\identity.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\InsideSphereGeometry.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\InsideSphereGeometry.js
 (function(){pliny.class({
   name: "InsideSphereGeometry",
     parameters: [{
@@ -937,10 +937,10 @@ if (typeof window.THREE !== "undefined") {
 }
   if(typeof window !== "undefined") window.InsideSphereGeometry = InsideSphereGeometry;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\InsideSphereGeometry.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\InsideSphereGeometry.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\isChrome.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\isChrome.js
 (function(){pliny.value({
   name: "isChrome",
   type: "Boolean",
@@ -951,10 +951,10 @@ features directly in the browser, thanks to the work of Brandon \"Toji\" Jones."
 const isChrome = !!window.chrome && !window.isOpera;
   if(typeof window !== "undefined") window.isChrome = isChrome;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\isChrome.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\isChrome.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\isFirefox.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\isFirefox.js
 (function(){pliny.value({
   name: "isFirefox",
   type: "Boolean",
@@ -965,10 +965,10 @@ in the browser, thanks to the work of the MozVR team."
 const isFirefox = typeof window.InstallTrigger !== 'undefined';
   if(typeof window !== "undefined") window.isFirefox = isFirefox;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\isFirefox.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\isFirefox.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\isGearVR.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\isGearVR.js
 (function(){pliny.value({
   name: "isGearVR",
   type: "Boolean",
@@ -977,10 +977,10 @@ const isFirefox = typeof window.InstallTrigger !== 'undefined';
 const isGearVR = navigator.userAgent.indexOf("Mobile VR") > -1;
   if(typeof window !== "undefined") window.isGearVR = isGearVR;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\isGearVR.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\isGearVR.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\isIE.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\isIE.js
 (function(){pliny.value({
   name: "isIE",
   type: "Boolean",
@@ -991,10 +991,10 @@ the torch on to Safari in all of its many useless incarnations."
 const isIE = /*@cc_on!@*/ false || !!document.documentMode;
   if(typeof window !== "undefined") window.isIE = isIE;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\isIE.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\isIE.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\isInIFrame.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\isInIFrame.js
 (function(){pliny.value({
   name: "isHomeScreen",
   type: "Boolean",
@@ -1003,10 +1003,10 @@ const isIE = /*@cc_on!@*/ false || !!document.documentMode;
 const isInIFrame = (window.self !== window.top);
   if(typeof window !== "undefined") window.isInIFrame = isInIFrame;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\isInIFrame.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\isInIFrame.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\isiOS.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\isiOS.js
 (function(){pliny.value({
   name: "isiOS",
   type: "Boolean",
@@ -1017,10 +1017,10 @@ paths necessary to deal with deficiencies in Apple's implementation of web stand
 const isiOS = /iP(hone|od|ad)/.test(navigator.userAgent || "");
   if(typeof window !== "undefined") window.isiOS = isiOS;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\isiOS.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\isiOS.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\isMobile.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\isMobile.js
 (function(){pliny.value({
   name: "isMobile",
   type: "Boolean",
@@ -1035,10 +1035,10 @@ const isMobile = (function (a) {
 })(navigator.userAgent || navigator.vendor || window.opera);
   if(typeof window !== "undefined") window.isMobile = isMobile;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\isMobile.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\isMobile.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\isOpera.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\isOpera.js
 (function(){pliny.value({
   name: "isOpera",
   type: "Boolean",
@@ -1051,10 +1051,10 @@ Google Chrome."
 const isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
   if(typeof window !== "undefined") window.isOpera = isOpera;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\isOpera.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\isOpera.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\isOSX.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\isOSX.js
 (function(){pliny.value({
   name: "isOSX",
   type: "Boolean",
@@ -1065,10 +1065,10 @@ idiosynchratic, concensus-defying keyboard shortcuts."
 const isOSX = /Macintosh/.test(navigator.userAgent || "");
   if(typeof window !== "undefined") window.isOSX = isOSX;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\isOSX.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\isOSX.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\isSafari.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\isSafari.js
 (function(){pliny.value({
   name: "isSafari",
   type: "Boolean",
@@ -1082,10 +1082,10 @@ const isSafari = Object.prototype.toString.call(window.HTMLElement)
   .indexOf('Constructor') > 0;
   if(typeof window !== "undefined") window.isSafari = isSafari;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\isSafari.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\isSafari.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\isWebKit.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\isWebKit.js
 (function(){pliny.value({
   name: "isWebKit",
   type: "Boolean",
@@ -1096,10 +1096,10 @@ a common basis for orientation events."
 const isWebKit = !(/iP(hone|od|ad)/.test(navigator.userAgent || "")) || isOpera || isChrome;
   if(typeof window !== "undefined") window.isWebKit = isWebKit;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\isWebKit.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\isWebKit.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\isWindows.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\isWindows.js
 (function(){pliny.value({
   name: "isWindows",
   type: "Boolean",
@@ -1109,10 +1109,10 @@ the Microsoft Windows operating systems. We have not yet found a use for this fl
 const isWindows = /Windows/.test(navigator.userAgent || "");
   if(typeof window !== "undefined") window.isWindows = isWindows;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\isWindows.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\isWindows.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\light.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\light.js
 (function(){pliny.function({
   name: "light",
   description: "Shortcut function for creating a new THREE.PointLight object.",
@@ -1154,10 +1154,10 @@ function light(color, intensity, distance, decay) {
 }
   if(typeof window !== "undefined") window.light = light;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\light.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\light.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\material.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\material.js
 (function(){function material(textureDescription, options){
   options = options || {};
 
@@ -1216,10 +1216,10 @@ function light(color, intensity, distance, decay) {
 }
   if(typeof window !== "undefined") window.material = material;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\material.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\material.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\patch.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\patch.js
 (function(){pliny.function({
   name: "patch",
   parameters: [{
@@ -1267,10 +1267,10 @@ function patch(obj1, obj2) {
 }
   if(typeof window !== "undefined") window.patch = patch;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\patch.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\patch.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\PIXEL_SCALES.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\PIXEL_SCALES.js
 (function(){pliny.value({
   name: "PIXEL_SCALES",
   description: "Scaling factors for changing the resolution of the display when the render quality level changes."
@@ -1284,10 +1284,10 @@ const PIXEL_SCALES = [
 ];
   if(typeof window !== "undefined") window.PIXEL_SCALES = PIXEL_SCALES;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\PIXEL_SCALES.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\PIXEL_SCALES.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose.js
 (function(){/*
  * Copyright (C) 2014 - 2016 Sean T. McBeth <sean@seanmcbeth.com>
  *
@@ -1311,10 +1311,10 @@ pliny.namespace({
 var Primrose = {};
   if(typeof window !== "undefined") window.Primrose = Primrose;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\priv.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\priv.js
 (function(){function priv() {
   var heap = new WeakMap();
   return function(obj, value) {
@@ -1327,10 +1327,10 @@ var Primrose = {};
 
   if(typeof window !== "undefined") window.priv = priv;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\priv.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\priv.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\put.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\put.js
 (function(){pliny.function({
   name: "put",
   description: "A literate interface for putting objects onto scenes with basic, common transformations. You call `put()` with an object, then have access to a series of methods that you can chain together, before receiving the object back again. This makes it possible to create objects in the parameter position of `put()` at the same time as declaring the variable that will hold it.\n\
@@ -1419,10 +1419,10 @@ function put(object) {
 }
   if(typeof window !== "undefined") window.put = put;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\put.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\put.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\quad.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\quad.js
 (function(){pliny.function({
   name: "quad",
   description: "| [under construction]"
@@ -1445,10 +1445,10 @@ function quad(w, h, options) {
 }
   if(typeof window !== "undefined") window.quad = quad;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\quad.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\quad.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Quality.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Quality.js
 (function(){pliny.enumeration({
   name: "Quality",
   description: "Graphics quality settings."
@@ -1463,10 +1463,10 @@ const Quality = {
 };
   if(typeof window !== "undefined") window.Quality = Quality;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Quality.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Quality.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\range.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\range.js
 (function(){pliny.function({
   name: "range",
   description: "| [under construction]"
@@ -1483,10 +1483,10 @@ function range(n, m, s, t) {
 }
   if(typeof window !== "undefined") window.range = range;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\range.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\range.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\readForm.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\readForm.js
 (function(){pliny.function({
   name: "readForm",
   parameters: [{
@@ -1543,10 +1543,10 @@ function readForm(ctrls) {
 }
   if(typeof window !== "undefined") window.readForm = readForm;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\readForm.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\readForm.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\ring.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\ring.js
 (function(){pliny.function({
   name: "ring",
   description: "| [under construction]"
@@ -1562,19 +1562,19 @@ function ring(rInner, rOuter, sectors, start, end, rings) {
 }
   if(typeof window !== "undefined") window.ring = ring;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\ring.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\ring.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\setFalse.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\setFalse.js
 (function(){function setFalse(evt) {
   evt.returnValue = false;
 }
   if(typeof window !== "undefined") window.setFalse = setFalse;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\setFalse.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\setFalse.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\setSetting.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\setSetting.js
 (function(){pliny.function({
   name: "setSetting",
   parameters: [{
@@ -1617,10 +1617,10 @@ function setSetting(name, val) {
 }
   if(typeof window !== "undefined") window.setSetting = setSetting;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\setSetting.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\setSetting.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\shell.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\shell.js
 (function(){pliny.function({
   name: "shell",
   parameters: [{
@@ -1703,10 +1703,10 @@ function shell(r, slices, rings, phi, theta, options) {
 }
   if(typeof window !== "undefined") window.shell = shell;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\shell.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\shell.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\sphere.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\sphere.js
 (function(){pliny.function({
   name: "sphere",
   description: "| [under construction]"
@@ -1719,10 +1719,10 @@ function sphere(r, slices, rings) {
 }
   if(typeof window !== "undefined") window.sphere = sphere;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\sphere.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\sphere.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\textured.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\textured.js
 (function(){pliny.function({
   name: "textured",
   description: "| [under construction]"
@@ -1843,10 +1843,10 @@ function textured(geometry, txt, options) {
 }
   if(typeof window !== "undefined") window.textured = textured;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\textured.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\textured.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\v3.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\v3.js
 (function(){pliny.function({
   name: "v3",
   description: "A shortcut function for creating a new THREE.Vector3 object.",
@@ -1880,10 +1880,10 @@ function v3(x, y, z) {
 }
   if(typeof window !== "undefined") window.v3 = v3;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\v3.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\v3.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\writeForm.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\writeForm.js
 (function(){pliny.function({
   name: "writeForm",
   parameters: [{
@@ -1943,10 +1943,10 @@ function writeForm(ctrls, state) {
 }
   if(typeof window !== "undefined") window.writeForm = writeForm;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\writeForm.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\writeForm.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\AbstractEventEmitter.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\AbstractEventEmitter.js
 (function(){class AbstractEventEmitter {
   constructor() {
     this._handlers = {};
@@ -1985,10 +1985,10 @@ function writeForm(ctrls, state) {
 }
   if(typeof window !== "undefined") window.Primrose.AbstractEventEmitter = AbstractEventEmitter;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\AbstractEventEmitter.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\AbstractEventEmitter.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Angle.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Angle.js
 (function(){var DEG2RAD = Math.PI / 180,
   RAD2DEG = 180 / Math.PI;
 pliny.class({
@@ -2120,10 +2120,10 @@ Object.defineProperty(Angle.prototype, "radians", {
 });
   if(typeof window !== "undefined") window.Primrose.Angle = Angle;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Angle.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Angle.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\BaseControl.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\BaseControl.js
 (function(){var ID = 1,
   NUMBER_PATTERN = "([+-]?(?:(?:\\d+(?:\\.\\d*)?)|(?:\\.\\d+)))",
   DELIM = "\\s*,\\s*",
@@ -2288,10 +2288,10 @@ class BaseControl extends Primrose.AbstractEventEmitter {
 }
   if(typeof window !== "undefined") window.Primrose.BaseControl = BaseControl;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\BaseControl.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\BaseControl.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\BrowserEnvironment.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\BrowserEnvironment.js
 (function(){const MILLISECONDS_TO_SECONDS = 0.001,
   MAX_MOVE_DISTANCE = 5,
   MAX_MOVE_DISTANCE_SQ = MAX_MOVE_DISTANCE * MAX_MOVE_DISTANCE,
@@ -2329,35 +2329,24 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
         geomObj.name = geomObj.name || obj.name;
       }
       var id = geomObj.uuid,
-        mLeft = new THREE.Matrix4(),
-        mRight = new THREE.Matrix4()
-        .identity(),
-        mSwap,
-        inScene = false,
         lastBag = objectHistory[id],
-        update = false,
+        update = !lastBag,
         disabled = !!obj.disabled,
         bag = {
           uuid: id,
           name: null,
-          inScene: null,
+          inScene: false,
           visible: null,
           disabled: null,
           matrix: null,
           geometry: null
-        },
-        head = geomObj;
+        };
 
-      while (head !== null) {
-        head.updateMatrix();
-        mLeft.copy(head.matrix);
-        mLeft.multiply(mRight);
-        mSwap = mLeft;
-        mLeft = mRight;
-        mRight = mSwap;
-        head = head.parent;
-        inScene = inScene || (head === this.scene);
+      for(let head = geomObj; head !== null; head = head.parent) {
+        bag.inScene = bag.inScene || (head === this.scene);
       }
+
+      update = update || lastBag.inScene !== bag.inScene;
 
       if (!lastBag || lastBag.visible !== obj.visible) {
         update = true;
@@ -2369,16 +2358,13 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
         bag.disabled = disabled;
       }
 
-      var m = mRight.elements.subarray(0, mRight.elements.length),
+      geomObj.updateMatrixWorld();
+      var elems = geomObj.matrixWorld.elements,
+        m = elems.subarray(0, elems.length),
         mStr = describeMatrix(m);
       if (!lastBag || !lastBag.matrix || describeMatrix(lastBag.matrix) !== mStr) {
         update = true;
         bag.matrix = m;
-      }
-
-      if (!lastBag || lastBag.inScene !== inScene) {
-        update = true;
-        bag.inScene = inScene;
       }
 
       if (includeGeometry === true) {
@@ -3395,10 +3381,10 @@ BrowserEnvironment.DEFAULTS = {
 };
   if(typeof window !== "undefined") window.Primrose.BrowserEnvironment = BrowserEnvironment;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\BrowserEnvironment.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\BrowserEnvironment.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\ButtonFactory.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\ButtonFactory.js
 (function(){var buttonCount = 0;
 
 pliny.class({
@@ -3454,10 +3440,10 @@ ButtonFactory.prototype.create = function (toggle) {
 };
   if(typeof window !== "undefined") window.Primrose.ButtonFactory = ButtonFactory;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\ButtonFactory.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\ButtonFactory.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\ColorifyShader.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\ColorifyShader.js
 (function(){const ColorifyShader = {
 
   uniforms: {
@@ -3489,10 +3475,10 @@ void main() {\n\
 };
   if(typeof window !== "undefined") window.Primrose.ColorifyShader = ColorifyShader;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\ColorifyShader.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\ColorifyShader.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Controls.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls.js
 (function(){pliny.namespace({
   name: "Controls",
   parent: "Primrose",
@@ -3501,10 +3487,10 @@ void main() {\n\
 const Controls = {};
   if(typeof window !== "undefined") window.Primrose.Controls = Controls;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Controls.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\DOM.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\DOM.js
 (function(){pliny.namespace({
   parent: "Primrose",
   name: "DOM",
@@ -3513,10 +3499,10 @@ const Controls = {};
 const DOM = {};
   if(typeof window !== "undefined") window.Primrose.DOM = DOM;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\DOM.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\DOM.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Entity.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Entity.js
 (function(){var entityKeys = [],
   entities = new WeakMap();
 
@@ -4119,10 +4105,10 @@ class Entity {
 }
   if(typeof window !== "undefined") window.Primrose.Entity = Entity;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Entity.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Entity.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\HTTP.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP.js
 (function(){pliny.namespace({
   parent: "Primrose",
   name: "HTTP",
@@ -4131,10 +4117,10 @@ class Entity {
 const HTTP = {};
   if(typeof window !== "undefined") window.Primrose.HTTP = HTTP;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\HTTP.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Input.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input.js
 (function(){pliny.namespace({
   parent: "Primrose",
   name: "Input",
@@ -4143,10 +4129,10 @@ const HTTP = {};
 const Input = {};
   if(typeof window !== "undefined") window.Primrose.Input = Input;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Input.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\InputProcessor.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\InputProcessor.js
 (function(){const SETTINGS_TO_ZERO = ["heading", "pitch", "roll", "pointerPitch", "headX", "headY", "headZ"];
 
 function initState(){
@@ -4648,10 +4634,10 @@ class InputProcessor {
 }
   if(typeof window !== "undefined") window.Primrose.InputProcessor = InputProcessor;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\InputProcessor.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\InputProcessor.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Keys.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Keys.js
 (function(){pliny.enumeration({
   parent: "Primrose",
   name: "Keys",
@@ -4791,10 +4777,10 @@ for (var key in Keys) {
 }
   if(typeof window !== "undefined") window.Primrose.Keys = Keys;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Keys.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Keys.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\loadTexture.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\loadTexture.js
 (function(){var objectIDs = new WeakMap(),
   counter = 0;
 
@@ -4844,10 +4830,10 @@ function loadTexture(url, resolve, progress, reject) {
 }
   if(typeof window !== "undefined") window.Primrose.loadTexture = loadTexture;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\loadTexture.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\loadTexture.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\ModelLoader.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\ModelLoader.js
 (function(){// The JSON format object loader is not always included in the Three.js distribution,
 // so we have to first check for it.
 var loaders = {
@@ -5208,10 +5194,10 @@ function loader(map, key) {
 }
   if(typeof window !== "undefined") window.Primrose.ModelLoader = ModelLoader;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\ModelLoader.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\ModelLoader.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Network.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Network.js
 (function(){pliny.namespace({
   parent: "Primrose",
   name: "Network",
@@ -5220,10 +5206,10 @@ function loader(map, key) {
 const Network = {};
   if(typeof window !== "undefined") window.Primrose.Network = Network;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Network.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Network.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Output.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Output.js
 (function(){pliny.namespace({
   parent: "Primrose",
   name: "Output",
@@ -5232,10 +5218,10 @@ const Network = {};
 const Output = {};
   if(typeof window !== "undefined") window.Primrose.Output = Output;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Output.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Output.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Pointer.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Pointer.js
 (function(){const TELEPORT_PAD_RADIUS = 0.4,
   FORWARD = new THREE.Vector3(0, 0, -1),
   LASER_WIDTH = 0.01,
@@ -5573,10 +5559,10 @@ class Pointer extends Primrose.AbstractEventEmitter {
 Pointer.EVENTS = ["pointerstart", "pointerend", "pointermove", "gazestart", "gazemove", "gazecomplete", "gazecancel", "exit", "enter"];
   if(typeof window !== "undefined") window.Primrose.Pointer = Pointer;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Pointer.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Pointer.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\PoseInputProcessor.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\PoseInputProcessor.js
 (function(){const DEFAULT_POSE = {
     position: [0, 0, 0],
     orientation: [0, 0, 0, 1]
@@ -5644,10 +5630,10 @@ class PoseInputProcessor extends Primrose.InputProcessor {
 }
   if(typeof window !== "undefined") window.Primrose.PoseInputProcessor = PoseInputProcessor;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\PoseInputProcessor.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\PoseInputProcessor.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Projector.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Projector.js
 (function(){pliny.class({
   parent: "Primrose",
     name: "Projector",
@@ -8351,10 +8337,10 @@ Projector.prototype.projectPointers = function (args) {
 };
   if(typeof window !== "undefined") window.Primrose.Projector = Projector;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Projector.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Projector.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Random.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random.js
 (function(){pliny.namespace({
   parent: "Primrose",
   name: "Random",
@@ -8363,10 +8349,10 @@ Projector.prototype.projectPointers = function (args) {
 const Random = {};
   if(typeof window !== "undefined") window.Primrose.Random = Random;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Random.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\SKINS.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\SKINS.js
 (function(){pliny.value({
   name: "SKINS",
   type: "Array of String",
@@ -8380,10 +8366,10 @@ const SKINS = ["#FFDFC4", "#F0D5BE", "#EECEB3", "#E1B899", "#E5C298", "#FFDCB2",
 ];
   if(typeof window !== "undefined") window.Primrose.SKINS = SKINS;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\SKINS.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\SKINS.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\SKINS_VALUES.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\SKINS_VALUES.js
 (function(){pliny.value({
   name: "SKIN_VALUES",
   type: "Array of Number",
@@ -8394,10 +8380,10 @@ const SKINS_VALUES = Primrose.SKINS.map(function (s) {
 });
   if(typeof window !== "undefined") window.Primrose.SKINS_VALUES = SKINS_VALUES;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\SKINS_VALUES.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\SKINS_VALUES.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Surface.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Surface.js
 (function(){var COUNTER = 0;
 
 pliny.class({
@@ -8777,10 +8763,10 @@ class Surface extends Primrose.Entity {
 }
   if(typeof window !== "undefined") window.Primrose.Surface = Surface;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Surface.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Surface.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\SYS_FONTS.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\SYS_FONTS.js
 (function(){pliny.value({
   parent: "Primrose",
   name: "SYS_FONTS",
@@ -8790,10 +8776,10 @@ class Surface extends Primrose.Entity {
 const SYS_FONTS = "-apple-system, '.SFNSText-Regular', 'San Francisco', 'Roboto', 'Segoe UI', 'Helvetica Neue', 'Lucida Grande', sans-serif";
   if(typeof window !== "undefined") window.Primrose.SYS_FONTS = SYS_FONTS;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\SYS_FONTS.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\SYS_FONTS.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text.js
 (function(){pliny.namespace({
   parent: "Primrose",
   name: "Text",
@@ -8802,10 +8788,10 @@ const SYS_FONTS = "-apple-system, '.SFNSText-Regular', 'San Francisco', 'Roboto'
 const Text = {};
   if(typeof window !== "undefined") window.Primrose.Text = Text;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Workerize.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Workerize.js
 (function(){pliny.class({
   parent: "Primrose",
     name: "Workerize",
@@ -9099,10 +9085,10 @@ Workerize.createWorker = function (script, stripFunc) {
 };
   if(typeof window !== "undefined") window.Primrose.Workerize = Workerize;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Workerize.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Workerize.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\X.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\X.js
 (function(){pliny.namespace({
   parent: "Primrose",
   name: "X",
@@ -9111,10 +9097,10 @@ Workerize.createWorker = function (script, stripFunc) {
 const X = {};
   if(typeof window !== "undefined") window.Primrose.X = X;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\X.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\X.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Controls\AbstractLabel.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\AbstractLabel.js
 (function(){var COUNTER = 0;
 
 pliny.class({
@@ -9276,10 +9262,10 @@ class AbstractLabel extends Primrose.Surface {
 }
   if(typeof window !== "undefined") window.Primrose.Controls.AbstractLabel = AbstractLabel;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Controls\AbstractLabel.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\AbstractLabel.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Controls\Button2D.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\Button2D.js
 (function(){var COUNTER = 0;
 
 pliny.class({
@@ -9347,10 +9333,10 @@ class Button2D extends Primrose.Controls.AbstractLabel {
 }
   if(typeof window !== "undefined") window.Primrose.Controls.Button2D = Button2D;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Controls\Button2D.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\Button2D.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Controls\Button3D.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\Button3D.js
 (function(){pliny.class({
   parent: "Primrose",
     name: "Button3D",
@@ -9518,10 +9504,10 @@ Button3D.DEFAULTS = {
 };
   if(typeof window !== "undefined") window.Primrose.Controls.Button3D = Button3D;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Controls\Button3D.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\Button3D.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Controls\Form.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\Form.js
 (function(){var COUNTER = 0;
 pliny.class({
   parent: "Primrose.Controls",
@@ -9606,10 +9592,10 @@ class Form extends Primrose.Surface {
 }
   if(typeof window !== "undefined") window.Primrose.Controls.Form = Form;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Controls\Form.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\Form.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Controls\Image.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\Image.js
 (function(){var COUNTER = 0,
   _ = priv();
 
@@ -9843,10 +9829,10 @@ class Image extends Primrose.Entity {
 }
   if(typeof window !== "undefined") window.Primrose.Controls.Image = Image;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Controls\Image.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\Image.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Controls\Progress.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\Progress.js
 (function(){const SIZE = 1,
   INSET = 0.8,
   PROPORTION = 10,
@@ -9938,10 +9924,10 @@ class Progress {
 }
   if(typeof window !== "undefined") window.Primrose.Controls.Progress = Progress;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Controls\Progress.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\Progress.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Controls\VUMeter.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\VUMeter.js
 (function(){var COUNTER = 0;
 
 pliny.class({
@@ -10019,10 +10005,10 @@ class VUMeter extends Primrose.Surface {
 }
   if(typeof window !== "undefined") window.Primrose.Controls.VUMeter = VUMeter;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Controls\VUMeter.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\VUMeter.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\DOM\cascadeElement.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\DOM\cascadeElement.js
 (function(){pliny.function({
   parent: "Primrose.DOM",
   name: "cascadeElement",
@@ -10142,10 +10128,10 @@ function cascadeElement(id, tag, DOMClass, add) {
 }
   if(typeof window !== "undefined") window.Primrose.DOM.cascadeElement = cascadeElement;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\DOM\cascadeElement.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\DOM\cascadeElement.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\DOM\findEverything.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\DOM\findEverything.js
 (function(){pliny.function({
   parent: "Primrose.DOM",
   name: "findEverything",
@@ -10214,10 +10200,10 @@ function findEverything(elem, obj) {
 }
   if(typeof window !== "undefined") window.Primrose.DOM.findEverything = findEverything;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\DOM\findEverything.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\DOM\findEverything.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\DOM\makeHidingContainer.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\DOM\makeHidingContainer.js
 (function(){pliny.function({
   parent: "Primrose.DOM",
   name: "makeHidingContainer",
@@ -10252,10 +10238,10 @@ function makeHidingContainer(id, obj) {
 }
   if(typeof window !== "undefined") window.Primrose.DOM.makeHidingContainer = makeHidingContainer;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\DOM\makeHidingContainer.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\DOM\makeHidingContainer.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\HTTP\del.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\del.js
 (function(){pliny.function({
   parent: "Primrose.HTTP",
   name: "del",
@@ -10287,10 +10273,10 @@ function del(type, url, options) {
 }
   if(typeof window !== "undefined") window.Primrose.HTTP.del = del;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\HTTP\del.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\del.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\HTTP\delObject.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\delObject.js
 (function(){pliny.function({
   parent: "Primrose.HTTP",
   name: "delObject",
@@ -10317,10 +10303,10 @@ function delObject(url, options) {
 }
   if(typeof window !== "undefined") window.Primrose.HTTP.delObject = delObject;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\HTTP\delObject.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\delObject.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\HTTP\get.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\get.js
 (function(){pliny.function({
   parent: "Primrose.HTTP",
   name: "get",
@@ -10363,10 +10349,10 @@ function get(type, url, options) {
 }
   if(typeof window !== "undefined") window.Primrose.HTTP.get = get;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\HTTP\get.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\get.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\HTTP\getBuffer.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\getBuffer.js
 (function(){pliny.function({
   parent: "Primrose.HTTP",
   name: "getBuffer",
@@ -10407,10 +10393,10 @@ function getBuffer(url, options) {
 }
   if(typeof window !== "undefined") window.Primrose.HTTP.getBuffer = getBuffer;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\HTTP\getBuffer.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\getBuffer.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\HTTP\getObject.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\getObject.js
 (function(){pliny.function({
   parent: "Primrose.HTTP",
   name: "getObject",
@@ -10449,10 +10435,10 @@ function getObject(url, options) {
 }
   if(typeof window !== "undefined") window.Primrose.HTTP.getObject = getObject;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\HTTP\getObject.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\getObject.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\HTTP\getText.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\getText.js
 (function(){pliny.function({
   parent: "Primrose.HTTP",
   name: "getText",
@@ -10490,10 +10476,10 @@ function getText(url, options) {
 }
   if(typeof window !== "undefined") window.Primrose.HTTP.getText = getText;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\HTTP\getText.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\getText.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\HTTP\post.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\post.js
 (function(){pliny.function({
   parent: "Primrose.HTTP",
   name: "post",
@@ -10525,10 +10511,10 @@ function post(type, url, options) {
 }
   if(typeof window !== "undefined") window.Primrose.HTTP.post = post;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\HTTP\post.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\post.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\HTTP\postObject.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\postObject.js
 (function(){pliny.function({
   parent: "Primrose.HTTP",
   name: "postObject",
@@ -10555,10 +10541,10 @@ function postObject(url, options) {
 }
   if(typeof window !== "undefined") window.Primrose.HTTP.postObject = postObject;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\HTTP\postObject.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\postObject.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\HTTP\XHR.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\XHR.js
 (function(){pliny.function({
   parent: "Primrose.HTTP",
   name: "XHR",
@@ -10655,10 +10641,10 @@ function XHR(method, type, url, options) {
 }
   if(typeof window !== "undefined") window.Primrose.HTTP.XHR = XHR;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\HTTP\XHR.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\XHR.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Input\FPSInput.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\FPSInput.js
 (function(){const DISPLACEMENT = new THREE.Vector3(),
   EULER_TEMP = new THREE.Euler(),
   QUAT_TEMP = new THREE.Quaternion(),
@@ -11138,10 +11124,10 @@ class FPSInput extends Primrose.AbstractEventEmitter {
 }
   if(typeof window !== "undefined") window.Primrose.Input.FPSInput = FPSInput;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Input\FPSInput.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\FPSInput.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Input\Gamepad.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\Gamepad.js
 (function(){navigator.getGamepads = navigator.getGamepads ||
   navigator.webkitGetGamepads;
 
@@ -11395,10 +11381,10 @@ Gamepad.VIVE_BUTTONS = {
 };
   if(typeof window !== "undefined") window.Primrose.Input.Gamepad = Gamepad;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Input\Gamepad.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\Gamepad.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Input\Keyboard.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\Keyboard.js
 (function(){pliny.class({
   parent: "Primrose.Input",
     name: "Keyboard",
@@ -11504,10 +11490,10 @@ class Keyboard extends Primrose.InputProcessor {
 }
   if(typeof window !== "undefined") window.Primrose.Input.Keyboard = Keyboard;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Input\Keyboard.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\Keyboard.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Input\LeapMotion.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\LeapMotion.js
 (function(){function processFingerParts(i) {
   return LeapMotion.FINGER_PARTS.map(function (p) {
     return "FINGER" + i + p.toUpperCase();
@@ -11672,10 +11658,10 @@ LeapMotion.FINGER_PARTS = ["tip", "dip", "pip", "mcp", "carp"];
 LeapMotion.CONNECTION_TIMEOUT = 5000;
   if(typeof window !== "undefined") window.Primrose.Input.LeapMotion = LeapMotion;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Input\LeapMotion.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\LeapMotion.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Input\Location.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\Location.js
 (function(){pliny.class({
   parent: "Primrose.Input",
     name: "Location",
@@ -11715,10 +11701,10 @@ Location.DEFAULTS = {
 };
   if(typeof window !== "undefined") window.Primrose.Input.Location = Location;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Input\Location.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\Location.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Input\Mouse.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\Mouse.js
 (function(){pliny.class({
   parent: "Primrose.Input",
     name: "Mouse",
@@ -11787,10 +11773,10 @@ class Mouse extends Primrose.InputProcessor {
 Mouse.NUM_BUTTONS = 3;
   if(typeof window !== "undefined") window.Primrose.Input.Mouse = Mouse;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Input\Mouse.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\Mouse.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Input\Speech.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\Speech.js
 (function(){////
 //   Class: SpeechInput
 //
@@ -12004,10 +11990,10 @@ class Speech extends Primrose.InputProcessor {
 }
   if(typeof window !== "undefined") window.Primrose.Input.Speech = Speech;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Input\Speech.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\Speech.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Input\Touch.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\Touch.js
 (function(){pliny.class({
   parent: "Primrose.Input",
     name: "Touch",
@@ -12062,10 +12048,10 @@ class Touch extends Primrose.InputProcessor {
 }
   if(typeof window !== "undefined") window.Primrose.Input.Touch = Touch;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Input\Touch.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\Touch.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Input\VR.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\VR.js
 (function(){const DEFAULT_POSE = {
     position: [0, 0, 0],
     orientation: [0, 0, 0, 1]
@@ -12313,10 +12299,10 @@ class VR extends Primrose.PoseInputProcessor {
 }
   if(typeof window !== "undefined") window.Primrose.Input.VR = VR;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Input\VR.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\VR.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Network\Manager.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Network\Manager.js
 (function(){pliny.class({
   parent: "Primrose.Network",
     name: "Manager",
@@ -12511,10 +12497,10 @@ class Manager extends Primrose.AbstractEventEmitter {
 
   if(typeof window !== "undefined") window.Primrose.Network.Manager = Manager;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Network\Manager.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Network\Manager.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Network\RemoteUser.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Network\RemoteUser.js
 (function(){pliny.class({
   parent: "Primrose.Network",
   name: "RemoteUser",
@@ -12779,10 +12765,10 @@ RemoteUser.NETWORK_DT = 0.10;
 RemoteUser.NETWORK_DT_INV = 1 / RemoteUser.NETWORK_DT;
   if(typeof window !== "undefined") window.Primrose.Network.RemoteUser = RemoteUser;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Network\RemoteUser.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Network\RemoteUser.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Output\Audio3D.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Output\Audio3D.js
 (function(){// polyfill
 window.AudioContext =
   window.AudioContext ||
@@ -13106,10 +13092,10 @@ class Audio3D {
 }
   if(typeof window !== "undefined") window.Primrose.Output.Audio3D = Audio3D;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Output\Audio3D.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Output\Audio3D.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Output\HapticGlove.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Output\HapticGlove.js
 (function(){pliny.class({
   parent: "Primrose.Output",
     name: "HapticGlove",
@@ -13229,10 +13215,10 @@ HapticGlove.DEFAULT_PORT = 8383;
 HapticGlove.DEFAULT_HOST = document.location.hostname;
   if(typeof window !== "undefined") window.Primrose.Output.HapticGlove = HapticGlove;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Output\HapticGlove.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Output\HapticGlove.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Output\Music.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Output\Music.js
 (function(){/* polyfill */
 Window.prototype.AudioContext =
   Window.prototype.AudioContext ||
@@ -13329,10 +13315,10 @@ Music.prototype.play = function (i, volume, duration, n) {
 };
   if(typeof window !== "undefined") window.Primrose.Output.Music = Music;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Output\Music.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Output\Music.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Output\Speech.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Output\Speech.js
 (function(){function wrap(thunk) {
   return function(evt) {
     this.speaking = false;
@@ -13387,10 +13373,10 @@ const Speech = (function(){
 })();
   if(typeof window !== "undefined") window.Primrose.Output.Speech = Speech;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Output\Speech.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Output\Speech.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Random\color.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random\color.js
 (function(){pliny.function({
   parent: "Primrose.Random",
   name: "color",
@@ -13429,10 +13415,10 @@ function color() {
 }
   if(typeof window !== "undefined") window.Primrose.Random.color = color;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Random\color.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random\color.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Random\ID.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random\ID.js
 (function(){pliny.function({
   parent: "Primrose.Random",
   name: "ID",
@@ -13470,10 +13456,10 @@ function ID() {
 }
   if(typeof window !== "undefined") window.Primrose.Random.ID = ID;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Random\ID.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random\ID.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Random\int.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random\int.js
 (function(){pliny.function({
   parent: "Primrose.Random",
   name: "int",
@@ -13553,10 +13539,10 @@ function int(min, max, power) {
 }
   if(typeof window !== "undefined") window.Primrose.Random.int = int;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Random\int.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random\int.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Random\item.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random\item.js
 (function(){pliny.function({
   parent: "Primrose.Random",
   name: "item",
@@ -13604,10 +13590,10 @@ function item(arr) {
 }
   if(typeof window !== "undefined") window.Primrose.Random.item = item;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Random\item.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random\item.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Random\number.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random\number.js
 (function(){pliny.function({
   parent: "Primrose.Random",
   name: "number",
@@ -13652,10 +13638,10 @@ function number(min, max) {
 }
   if(typeof window !== "undefined") window.Primrose.Random.number = number;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Random\number.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random\number.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Random\steps.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random\steps.js
 (function(){pliny.function({
   parent: "Primrose.Random",
   name: "steps",
@@ -13704,10 +13690,10 @@ function steps(min, max, steps) {
 }
   if(typeof window !== "undefined") window.Primrose.Random.steps = steps;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Random\steps.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random\steps.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CodePage.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CodePage.js
 (function(){pliny.class({
   parent: "Primrose.Text",
     name: "CodePage",
@@ -13838,10 +13824,10 @@ CodePage.DEAD = function (key) {
 };
   if(typeof window !== "undefined") window.Primrose.Text.CodePage = CodePage;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CodePage.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CodePage.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CodePages.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CodePages.js
 (function(){pliny.namespace({
   parent: "Primrose.Text",
   name: "CodePages",
@@ -13850,10 +13836,10 @@ CodePage.DEAD = function (key) {
 const CodePages = {};
   if(typeof window !== "undefined") window.Primrose.Text.CodePages = CodePages;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CodePages.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CodePages.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CommandPack.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CommandPack.js
 (function(){pliny.class({
   parent: "Primrose.Text",
     name: "CommandPack",
@@ -13866,10 +13852,10 @@ function CommandPack(name, commands) {
 }
   if(typeof window !== "undefined") window.Primrose.Text.CommandPack = CommandPack;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CommandPack.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CommandPack.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CommandPacks.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CommandPacks.js
 (function(){pliny.namespace({
   parent: "Primrose.Text",
   name: "CommandPacks",
@@ -13878,10 +13864,10 @@ function CommandPack(name, commands) {
 const CommandPacks = {};
   if(typeof window !== "undefined") window.Primrose.Text.CommandPacks = CommandPacks;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CommandPacks.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CommandPacks.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Controls.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Controls.js
 (function(){pliny.namespace({
   parent: "Primrose.Text",
   name: "Controls",
@@ -13890,10 +13876,10 @@ const CommandPacks = {};
 const Controls = {};
   if(typeof window !== "undefined") window.Primrose.Text.Controls = Controls;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Controls.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Controls.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Cursor.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Cursor.js
 (function(){// unicode-aware string reverse
 var reverse = (function () {
   var combiningMarks =
@@ -14145,10 +14131,10 @@ Cursor.prototype.reverseFromNewline = function (lines) {
 };
   if(typeof window !== "undefined") window.Primrose.Text.Cursor = Cursor;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Cursor.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Cursor.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Grammar.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Grammar.js
 (function(){pliny.class({
   parent: "Primrose.Text",
     name: "Grammar",
@@ -14371,10 +14357,10 @@ function Grammar(name, rules) {
 }
   if(typeof window !== "undefined") window.Primrose.Text.Grammar = Grammar;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Grammar.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Grammar.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Grammars.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Grammars.js
 (function(){pliny.namespace({
   parent: "Primrose.Text",
   name: "Grammars",
@@ -14383,10 +14369,10 @@ function Grammar(name, rules) {
 const Grammars = {};
   if(typeof window !== "undefined") window.Primrose.Text.Grammars = Grammars;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Grammars.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Grammars.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\OperatingSystem.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\OperatingSystem.js
 (function(){function setCursorCommand(obj, mod, key, func, cur) {
   var name = mod + "_" + key;
   obj[name] = function (prim, tokenRows) {
@@ -14468,10 +14454,10 @@ class OperatingSystem {
 }
   if(typeof window !== "undefined") window.Primrose.Text.OperatingSystem = OperatingSystem;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\OperatingSystem.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\OperatingSystem.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems.js
 (function(){pliny.namespace({
   parent: "Primrose.Text",
   name: "OperatingSystems",
@@ -14480,10 +14466,10 @@ class OperatingSystem {
 const OperatingSystems = {};
   if(typeof window !== "undefined") window.Primrose.Text.OperatingSystems = OperatingSystems;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Point.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Point.js
 (function(){pliny.class({
   parent: "Primrose.Text",
     name: "Point",
@@ -14515,10 +14501,10 @@ Point.prototype.toString = function () {
 };
   if(typeof window !== "undefined") window.Primrose.Text.Point = Point;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Point.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Point.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Rectangle.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Rectangle.js
 (function(){pliny.class({
   parent: "Primrose.Text",
     name: "Rectangle",
@@ -14623,10 +14609,10 @@ class Rectangle {
 }
   if(typeof window !== "undefined") window.Primrose.Text.Rectangle = Rectangle;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Rectangle.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Rectangle.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Rule.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Rule.js
 (function(){pliny.class({
   parent: "Primrose.Text",
     name: "Rule",
@@ -14675,10 +14661,10 @@ Rule.prototype.carveOutMatchedToken = function (tokens, j) {
 };
   if(typeof window !== "undefined") window.Primrose.Text.Rule = Rule;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Rule.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Rule.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Size.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Size.js
 (function(){pliny.class({
   parent: "Primrose.Text",
     name: "Size",
@@ -14710,10 +14696,10 @@ Size.prototype.toString = function () {
 };
   if(typeof window !== "undefined") window.Primrose.Text.Size = Size;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Size.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Size.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Terminal.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Terminal.js
 (function(){pliny.class({
   parent: "Primrose.Text",
     name: "Terminal",
@@ -14838,10 +14824,10 @@ class Terminal {
 }
   if(typeof window !== "undefined") window.Primrose.Text.Terminal = Terminal;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Terminal.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Terminal.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Themes.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Themes.js
 (function(){pliny.namespace({
   parent: "Primrose.Text",
   name: "Themes",
@@ -14850,10 +14836,10 @@ class Terminal {
 const Themes = {};
   if(typeof window !== "undefined") window.Primrose.Text.Themes = Themes;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Themes.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Themes.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Token.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Token.js
 (function(){pliny.class({
   parent: "Primrose.Text",
     name: "Token",
@@ -14882,10 +14868,10 @@ Token.prototype.toString = function () {
 };
   if(typeof window !== "undefined") window.Primrose.Text.Token = Token;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Token.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Token.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CodePages\DE_QWERTZ.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CodePages\DE_QWERTZ.js
 (function(){var CodePage = Primrose.Text.CodePage;
 
 pliny.record({
@@ -15012,10 +14998,10 @@ const DE_QWERTZ = new CodePage("Deutsch: QWERTZ", "de", {
 });
   if(typeof window !== "undefined") window.Primrose.Text.CodePages.DE_QWERTZ = DE_QWERTZ;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CodePages\DE_QWERTZ.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CodePages\DE_QWERTZ.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_UKX.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_UKX.js
 (function(){var CodePage = Primrose.Text.CodePage;
 
 pliny.record({
@@ -15105,10 +15091,10 @@ const EN_UKX = new CodePage("English: UK Extended", "en-GB", {
 });
   if(typeof window !== "undefined") window.Primrose.Text.CodePages.EN_UKX = EN_UKX;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_UKX.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_UKX.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_US.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_US.js
 (function(){var CodePage = Primrose.Text.CodePage;
 
 pliny.record({
@@ -15172,10 +15158,10 @@ const EN_US = new CodePage("English: USA", "en-US", {
 });
   if(typeof window !== "undefined") window.Primrose.Text.CodePages.EN_US = EN_US;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_US.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_US.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CodePages\FR_AZERTY.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CodePages\FR_AZERTY.js
 (function(){var CodePage = Primrose.Text.CodePage;
 
 pliny.record({
@@ -15273,10 +15259,10 @@ const FR_AZERTY = new CodePage("Français: AZERTY", "fr", {
 });
   if(typeof window !== "undefined") window.Primrose.Text.CodePages.FR_AZERTY = FR_AZERTY;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CodePages\FR_AZERTY.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CodePages\FR_AZERTY.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\BasicTextInput.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\BasicTextInput.js
 (function(){pliny.record({
   parent: "Primrose.Text.CommandPacks",
   name: "TextInput",
@@ -15393,10 +15379,10 @@ class BasicTextInput extends Primrose.Text.CommandPack {
 }
   if(typeof window !== "undefined") window.Primrose.Text.CommandPacks.BasicTextInput = BasicTextInput;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\BasicTextInput.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\BasicTextInput.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextEditor.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextEditor.js
 (function(){pliny.record({
   parent: "Primrose.Text.CommandPacks",
   name: "TextEditor",
@@ -15452,10 +15438,10 @@ const TextEditor = new Primrose.Text.CommandPacks.BasicTextInput(
   });
   if(typeof window !== "undefined") window.Primrose.Text.CommandPacks.TextEditor = TextEditor;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextEditor.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextEditor.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextInput.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextInput.js
 (function(){////
 // For all of these commands, the "current" cursor is:
 // If SHIFT is not held, then "front.
@@ -15469,10 +15455,10 @@ pliny.record({
 const TextInput = new Primrose.Text.CommandPacks.BasicTextInput("Text Line input commands");
   if(typeof window !== "undefined") window.Primrose.Text.CommandPacks.TextInput = TextInput;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextInput.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextInput.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Controls\PlainText.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Controls\PlainText.js
 (function(){pliny.class({
   parent: "Primrose.Text.Controls",
     name: "PlainText",
@@ -15533,10 +15519,10 @@ function PlainText(text, size, fgcolor, bgcolor, x, y, z, hAlign) {
 }
   if(typeof window !== "undefined") window.Primrose.Text.Controls.PlainText = PlainText;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Controls\PlainText.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Controls\PlainText.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Controls\TextBox.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Controls\TextBox.js
 (function(){var SCROLL_SCALE = isFirefox ? 3 : 100,
   COUNTER = 0,
   OFFSET = 0;
@@ -16512,10 +16498,10 @@ class TextBox extends Primrose.Surface {
 }
   if(typeof window !== "undefined") window.Primrose.Text.Controls.TextBox = TextBox;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Controls\TextBox.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Controls\TextBox.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Controls\TextInput.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Controls\TextInput.js
 (function(){var COUNTER = 0;
 
 pliny.class({
@@ -16585,10 +16571,10 @@ class TextInput extends Primrose.Text.Controls.TextBox {
 }
   if(typeof window !== "undefined") window.Primrose.Text.Controls.TextInput = TextInput;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Controls\TextInput.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Controls\TextInput.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Grammars\Basic.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Grammars\Basic.js
 (function(){// we don't use strict here because this grammar includes an interpreter that uses `eval()`
 
 pliny.value({
@@ -17246,10 +17232,10 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next,
 };
   if(typeof window !== "undefined") window.Primrose.Text.Grammars.Basic = Basic;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Grammars\Basic.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Grammars\Basic.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Grammars\JavaScript.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Grammars\JavaScript.js
 (function(){pliny.value({
   parent: "Primrose.Text.Grammars",
   name: "JavaScript",
@@ -17272,10 +17258,10 @@ const JavaScript = new Primrose.Text.Grammar("JavaScript", [
 ]);
   if(typeof window !== "undefined") window.Primrose.Text.Grammars.JavaScript = JavaScript;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Grammars\JavaScript.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Grammars\JavaScript.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Grammars\PlainText.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Grammars\PlainText.js
 (function(){pliny.value({
   parent: "Primrose.Text.Grammars",
   name: "PlainText",
@@ -17286,10 +17272,10 @@ const PlainText = new Primrose.Text.Grammar("PlainText", [
 ]);
   if(typeof window !== "undefined") window.Primrose.Text.Grammars.PlainText = PlainText;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Grammars\PlainText.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Grammars\PlainText.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Grammars\TestResults.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Grammars\TestResults.js
 (function(){pliny.value({
   parent: "Primrose.Text.Grammars",
   name: "TestResults",
@@ -17309,10 +17295,10 @@ const TestResults = new Primrose.Text.Grammar("TestResults", [
 ]);
   if(typeof window !== "undefined") window.Primrose.Text.Grammars.TestResults = TestResults;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Grammars\TestResults.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Grammars\TestResults.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\OSX.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\OSX.js
 (function(){pliny.value({
   parent: "Primrose.Text.OperatingSystems",
   name: "OSX",
@@ -17324,10 +17310,10 @@ const OSX = new Primrose.Text.OperatingSystem(
   "META", "UPARROW", "DOWNARROW");
   if(typeof window !== "undefined") window.Primrose.Text.OperatingSystems.OSX = OSX;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\OSX.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\OSX.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\Windows.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\Windows.js
 (function(){////
 // cut, copy, and paste commands are events that the browser manages,
 // so we don't have to include handlers for them here.
@@ -17343,10 +17329,10 @@ const Windows = new Primrose.Text.OperatingSystem(
   "CTRL", "HOME", "END");
   if(typeof window !== "undefined") window.Primrose.Text.OperatingSystems.Windows = Windows;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\Windows.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\Windows.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Themes\Dark.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Themes\Dark.js
 (function(){pliny.record({
   parent: "Primrose.Text.Themes",
   name: "Dark",
@@ -17399,10 +17385,10 @@ const Dark = {
 };
   if(typeof window !== "undefined") window.Primrose.Text.Themes.Dark = Dark;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Themes\Dark.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Themes\Dark.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Themes\Default.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Themes\Default.js
 (function(){pliny.record({
   parent: "Primrose.Text.Themes",
   name: "Default",
@@ -17455,10 +17441,10 @@ const Default = {
 };
   if(typeof window !== "undefined") window.Primrose.Text.Themes.Default = Default;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Text\Themes\Default.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Themes\Default.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\X\LoginForm.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\X\LoginForm.js
 (function(){var COUNTER = 0;
 
 const WIDTH = 512,
@@ -17545,10 +17531,10 @@ class LoginForm extends Primrose.Controls.Form {
 }
   if(typeof window !== "undefined") window.Primrose.X.LoginForm = LoginForm;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\X\LoginForm.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\X\LoginForm.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\Primrose\X\SignupForm.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\X\SignupForm.js
 (function(){const WIDTH = 512,
   HEIGHT = 200;
 
@@ -17647,10 +17633,10 @@ class SignupForm extends Primrose.Controls.Form {
 }
   if(typeof window !== "undefined") window.Primrose.X.SignupForm = SignupForm;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\X\SignupForm.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\X\SignupForm.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\THREE\CubeTextureLoader\prototype\load.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\CubeTextureLoader\prototype\load.js
 (function(){function load( urls, onLoad, onProgress, onError ) {
   var texture = new THREE.CubeTexture();
   var loader = new THREE.ImageLoader( this.manager );
@@ -17676,10 +17662,10 @@ class SignupForm extends Primrose.Controls.Form {
 }
   if(typeof window !== "undefined") window.THREE.CubeTextureLoader.prototype.load = load;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\THREE\CubeTextureLoader\prototype\load.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\CubeTextureLoader\prototype\load.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\THREE\Euler\prototype\debug.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Euler\prototype\debug.js
 (function(){function debug(label, digits) {
   var val = this.toString(digits);
   if (val !== this.lastVal) {
@@ -17689,10 +17675,10 @@ class SignupForm extends Primrose.Controls.Form {
 }
   if(typeof window !== "undefined") window.THREE.Euler.prototype.debug = debug;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\THREE\Euler\prototype\debug.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Euler\prototype\debug.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\THREE\Euler\prototype\toString.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Euler\prototype\toString.js
 (function(){pliny.method({
   parent: "THREE.Euler",
   name: "toString ",
@@ -17719,10 +17705,10 @@ function toString(digits) {
 }
   if(typeof window !== "undefined") window.THREE.Euler.prototype.toString = toString;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\THREE\Euler\prototype\toString.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Euler\prototype\toString.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\THREE\Matrix4\prototype\debug.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Matrix4\prototype\debug.js
 (function(){const cache = {};
 function debug(label, digits) {
   var val = this.toString(digits);
@@ -17733,10 +17719,10 @@ function debug(label, digits) {
 }
   if(typeof window !== "undefined") window.THREE.Matrix4.prototype.debug = debug;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\THREE\Matrix4\prototype\debug.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Matrix4\prototype\debug.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\THREE\Matrix4\prototype\toString.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Matrix4\prototype\toString.js
 (function(){pliny.method({
   parent: "THREE.Matrix4",
   name: "toString ",
@@ -17788,10 +17774,10 @@ function toString(digits) {
 }
   if(typeof window !== "undefined") window.THREE.Matrix4.prototype.toString = toString;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\THREE\Matrix4\prototype\toString.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Matrix4\prototype\toString.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\THREE\Object3D\prototype\addToBrowserEnvironment.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Object3D\prototype\addToBrowserEnvironment.js
 (function(){pliny.method({
   parent: "THREE.Object3D",
   name: "addToBrowserEnvironment",
@@ -17834,10 +17820,10 @@ function addToBrowserEnvironment(env, scene) {
 }
   if(typeof window !== "undefined") window.THREE.Object3D.prototype.addToBrowserEnvironment = addToBrowserEnvironment;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\THREE\Object3D\prototype\addToBrowserEnvironment.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Object3D\prototype\addToBrowserEnvironment.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\THREE\Quaternion\prototype\debug.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Quaternion\prototype\debug.js
 (function(){function debug(label, digits) {
   var val = this.toString(digits);
   if (val !== this.lastVal) {
@@ -17847,10 +17833,10 @@ function addToBrowserEnvironment(env, scene) {
 }
   if(typeof window !== "undefined") window.THREE.Quaternion.prototype.debug = debug;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\THREE\Quaternion\prototype\debug.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Quaternion\prototype\debug.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\THREE\Quaternion\prototype\toString.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Quaternion\prototype\toString.js
 (function(){pliny.method({
   parent: "THREE.Quaternion",
   name: "toString ",
@@ -17877,10 +17863,10 @@ function toString(digits) {
 }
   if(typeof window !== "undefined") window.THREE.Quaternion.prototype.toString = toString;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\THREE\Quaternion\prototype\toString.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Quaternion\prototype\toString.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\THREE\Vector3\prototype\debug.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Vector3\prototype\debug.js
 (function(){function debug(label, digits) {
   var val = this.toString(digits);
   if (val !== this.lastVal) {
@@ -17890,10 +17876,10 @@ function toString(digits) {
 }
   if(typeof window !== "undefined") window.THREE.Vector3.prototype.debug = debug;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\THREE\Vector3\prototype\debug.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Vector3\prototype\debug.js
   ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\sean\Documents\VR\Primrose\src\THREE\Vector3\prototype\toString.js
+  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Vector3\prototype\toString.js
 (function(){pliny.method({
   parent: "THREE.Vector3",
   name: "toString ",
@@ -17920,5 +17906,5 @@ function toString(digits) {
 }
   if(typeof window !== "undefined") window.THREE.Vector3.prototype.toString = toString;
 })();
-  // end C:\Users\sean\Documents\VR\Primrose\src\THREE\Vector3\prototype\toString.js
+  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Vector3\prototype\toString.js
   ////////////////////////////////////////////////////////////////////////////////
