@@ -1819,12 +1819,6 @@ pliny.method({
     baseClass: "Primrose.InputProcessor",
     description: "| [under construction]"
 });
-pliny.class({
-  parent: "Primrose",
-    name: "Projector",
-    description: "| [under construction]"
-});
-
 pliny.namespace({
   parent: "Primrose",
   name: "Random",

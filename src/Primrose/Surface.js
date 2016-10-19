@@ -300,10 +300,18 @@ class Surface extends Primrose.Entity {
   }
 
   mapUV(point) {
-    return {
-      x: point[0] * this.imageWidth,
-      y: (1 - point[1]) * this.imageHeight
-    };
+    if(point instanceof Array){
+      return {
+        x: point[0] * this.imageWidth,
+        y: (1 - point[1]) * this.imageHeight
+      };
+    }
+    else if(point instanceof THREE.Vector2) {
+      return {
+        x: point.x * this.imageWidth,
+        y: (1 - point.y) * this.imageHeight
+      };
+    }
   }
 
   unmapUV(point) {

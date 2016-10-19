@@ -27,163 +27,9 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       }
     };
 
-
-    var createPickableObject = (obj, includeGeometry) => {
-      var geomObj = obj;
-      if ((obj.type === "Object3D" || obj.type === "Group") && obj.children[0]) {
-        geomObj = obj.children[0];
-        geomObj.name = geomObj.name || obj.name;
-      }
-      var id = geomObj.uuid,
-        lastBag = objectHistory[id],
-        update = !lastBag,
-        disabled = !!obj.disabled,
-        bag = {
-          uuid: id,
-          name: null,
-          inScene: false,
-          visible: null,
-          disabled: null,
-          matrix: null,
-          geometry: null
-        };
-
-      for(let head = geomObj; head !== null; head = head.parent) {
-        bag.inScene = bag.inScene || (head === this.scene);
-      }
-
-      update = update || lastBag.inScene !== bag.inScene;
-
-      if (!lastBag || lastBag.visible !== obj.visible) {
-        update = true;
-        bag.visible = obj.visible;
-      }
-
-      if (!lastBag || lastBag.disabled !== disabled) {
-        update = true;
-        bag.disabled = disabled;
-      }
-
-      geomObj.updateMatrixWorld();
-      var elems = geomObj.matrixWorld.elements,
-        m = elems.subarray(0, elems.length),
-        mStr = describeMatrix(m);
-      if (!lastBag || !lastBag.matrix || describeMatrix(lastBag.matrix) !== mStr) {
-        update = true;
-        bag.matrix = m;
-      }
-
-      if (includeGeometry === true) {
-        update = true;
-        bag.name = obj.name;
-        bag.geometry = geomObj.geometry;
-
-        let verts, faces, uvs,
-          geometry = bag.geometry;
-        // it would be nice to do this the other way around, to have everything
-        // stored in ArrayBuffers, instead of regular arrays, to pass to the
-        // Worker thread. Maybe later.
-        if (geometry instanceof THREE.BufferGeometry) {
-          var attr = geometry.attributes,
-            pos = attr.position,
-            uv = attr.uv,
-            idx = attr.index;
-
-          verts = [];
-          faces = [];
-          if (uv) {
-            uvs = [];
-          }
-          for (let i = 0; i < pos.count; ++i) {
-            verts.push([pos.getX(i), pos.getY(i), pos.getZ(i)]);
-            if (uv) {
-              uvs.push([uv.getX(i), uv.getY(i)]);
-            }
-          }
-          if (idx) {
-            for (let i = 0; i < idx.count - 2; ++i) {
-              faces.push([idx.getX(i), idx.getX(i + 1), idx.getX(i + 2)]);
-            }
-          }
-          else {
-            for (let i = 0; i < pos.count; i += 3) {
-              faces.push([i, i + 1, i + 2]);
-            }
-          }
-        }
-        else {
-          verts = geometry.vertices.map((v) => v.toArray());
-          faces = [];
-          uvs = [];
-          // IDK why, but non-buffered geometry has an additional array layer
-          for (let i = 0; i < geometry.faces.length; ++i) {
-            var f = geometry.faces[i],
-              faceUVs = geometry.faceVertexUvs[0][i];
-            faces.push([f.a, f.b, f.c]);
-            uvs[f.a] = [faceUVs[0].x, faceUVs[0].y];
-            uvs[f.b] = [faceUVs[1].x, faceUVs[1].y];
-            uvs[f.c] = [faceUVs[2].x, faceUVs[2].y];
-          }
-        }
-
-        bag.geometry = {
-          uuid: geometry.uuid,
-          vertices: verts,
-          faces: faces,
-          uvs: uvs
-        };
-      }
-
-      if (update) {
-        if (!lastBag) {
-          objectHistory[id] = bag;
-        }
-        else {
-          for (var key in bag) {
-            lastBag[key] = bag[key];
-          }
-        }
-        return bag;
-      }
-    };
-
-    function describeMatrix(m) {
-      var output = "";
-      for (var i = 0; i < m.length; ++i) {
-        if (i > 0) {
-          output += ",";
-        }
-        output += m[i];
-      }
-      return output;
-    }
-
-
-    var objectHistory = {};
-
-    this.registerPickableObject = (obj) => {
-      if (obj) {
-        var bag = createPickableObject(obj, true);
-        this.pickableObjects[bag.uuid] = obj;
-        this.projector.setObject(bag);
-      }
-    };
-
-    var currentHits = {},
-      handleHit = (h) => {
-        var dt;
-        this.projector.ready = true;
-        currentHits = h;
-        for(var key in currentHits){
-          var hit = currentHits[key];
-          hit.object = this.pickableObjects[hit.objectID];
-        }
-      };
-
     var update = (dt) => {
       dt *= MILLISECONDS_TO_SECONDS;
       movePlayer(dt);
-      this.input.resolvePicking(currentHits);
       moveSky();
       moveGround();
       this.network.update(dt);
@@ -194,31 +40,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
 
     var movePlayer = (dt) => {
       this.input.update(dt);
-
-      if (this.projector.ready) {
-        this.projector.ready = false;
-        var arr = [],
-          del = [];
-        for (var key in this.pickableObjects) {
-          var obj = this.pickableObjects[key],
-            p = createPickableObject(obj);
-          if (p) {
-            arr.push(p);
-            if (p.inScene === false) {
-              del.push(key);
-            }
-          }
-        }
-
-        if (arr.length > 0) {
-          this.projector.updateObjects(arr);
-        }
-        for (var i = 0; i < del.length; ++i) {
-          delete this.pickableObjects[del[i]];
-        }
-
-        this.projector.projectPointers(this.input.segments);
-      }
+      this.input.resolvePicking(this.pickableObjects.filter((obj) => !obj.disabled));
     };
 
     var moveSky = () => {
@@ -356,7 +178,6 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
     this.appendChild = (elem) => {
       if (elem instanceof THREE.Mesh) {
         this.scene.add(elem);
-        this.registerPickableObject(elem);
       }
       else {
         return elem.addToBrowserEnvironment(this, this.scene);
@@ -471,7 +292,9 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
 
     this.music = new Primrose.Output.Music(this.audio.context);
 
-    this.pickableObjects = {};
+    this.pickableObjects = [];
+    this.registerPickableObject = this.pickableObjects.push.bind(this.pickableObjects);
+
     this.currentControl = null;
 
     const FADE_SPEED = 0.1;
@@ -544,7 +367,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       }
 
       if(evt.type !== "exit" && evt.hit && obj === this.ground) {
-        POSITION.fromArray(evt.hit.facePoint)
+        POSITION.copy(evt.hit.point)
           .sub(this.input.head.position);
 
         var distSq = POSITION.x * POSITION.x + POSITION.z * POSITION.z;
@@ -604,8 +427,6 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       }
     };
 
-    this.projector = new Primrose.Workerize(Primrose.Projector);
-
     this.options.scene = this.scene = this.options.scene || new THREE.Scene();
     if (this.options.useFog) {
       this.scene.fog = new THREE.FogExp2(this.options.backgroundColor, 2 / this.options.drawDistance);
@@ -637,7 +458,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
 
     if (this.options.groundTexture !== undefined) {
       var dim = 10,
-      gm = new THREE.PlaneGeometry(dim * 5, dim * 5, dim, dim);
+      gm = new THREE.BoxBufferGeometry(dim * 5, 0.1, dim * 5, dim, 1, dim);
       var groundFunc = (typeof this.options.groundTexture === "number") ? colored : textured;
       this.ground = groundFunc(gm, this.options.groundTexture, {
         txtRepeatS: dim * 5,
@@ -646,7 +467,6 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       if (this.options.sceneModel !== undefined) {
         this.ground.position.y = -0.02;
       }
-      this.ground.rotation.x = -Math.PI / 2;
       this.ground.name = "Ground";
       this.scene.add(this.ground);
       this.registerPickableObject(this.ground);
@@ -750,8 +570,6 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
     window.addEventListener("resize", modifyScreen, false);
     window.addEventListener("blur", this.stop, false);
     window.addEventListener("focus", this.start, false);
-
-    this.projector.addEventListener("hit", handleHit, false);
 
     documentReady = documentReady.then(() => {
       if (this.options.renderer) {

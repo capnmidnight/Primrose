@@ -25,11 +25,19 @@ class AbstractEventEmitter {
 
   emit(name, obj) {
     if (this._handlers[name]) {
-      if(typeof obj === "object" && !(obj instanceof UIEvent)){
+      if(typeof obj === "object" && !(obj instanceof Event)){
         obj.type = name;
+        if(obj.defaultPrevented === undefined){
+          obj.defaultPrevented = false;
+          obj.preventDefault = () => obj.defaultPrevented = true;
+        }
       }
-      for (var i = 0; i < this._handlers[name].length; ++i) {
-        this._handlers[name][i](obj);
+      const h = this._handlers[name];
+      for (let i = 0; h && i < h.length; ++i) {
+        h[i](obj);
+        if(obj && obj.defaultPrevented){
+          return;
+        }
       }
     }
   }

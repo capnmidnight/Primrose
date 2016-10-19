@@ -468,10 +468,10 @@ class FPSInput extends Primrose.AbstractEventEmitter {
     return segments;
   }
 
-  resolvePicking(currentHits) {
+  resolvePicking(objects) {
     for (let i = 0; i < this.pointers.length; ++i) {
       const ptr = this.pointers[i];
-      ptr.resolvePicking(currentHits[ptr.name]);
+      ptr.resolvePicking(objects);
     }
   }
 }

@@ -90,13 +90,13 @@ class Button3D extends Primrose.BaseControl {
   dispatchEvent(evt) {
     switch(evt.type){
       case "pointerstart":
-        this.startUV(evt.hit.point);
+        this.startUV(evt.hit.uv);
       break;
       case "pointerend":
         this.endPointer(evt);
       break;
       case "gazecomplete":
-        this.startUV(evt.hit.point);
+        this.startUV(evt.hit.uv);
         setTimeout(() => this.endPointer(evt), 100);
       break;
     }
