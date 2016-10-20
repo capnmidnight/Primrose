@@ -42,7 +42,7 @@ pliny.class({
     }]
 });
 class Pointer extends Primrose.AbstractEventEmitter {
-  constructor(name, color, highlight, s, devices, triggerDevices = null, options) {
+  constructor(name, color, highlight, s, devices, triggerDevices, options) {
     super();
     this.name = name;
     this.devices = devices;
