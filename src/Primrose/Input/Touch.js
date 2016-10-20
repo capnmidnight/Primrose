@@ -14,31 +14,36 @@ class Touch extends Primrose.InputProcessor {
       axes.push("LY" + i);
     }
     super("Touch", commands, axes);
+    console.log(DOMElement);
     DOMElement = DOMElement || window;
 
     var setState = (stateChange, setAxis, event) => {
-      var touches = event.changedTouches,
-        i = 0,
-        t = null;
-      for (i = 0; i < touches.length; ++i) {
-        t = touches[i];
+      let touches = event.changedTouches,
+        minIdentifier = Number.MAX_VALUE;
+      for (let i = 0; i < touches.length; ++i) {
+        minIdentifier = Math.min(minIdentifier, touches[i].identifier);
+      }
 
+      for (let i = 0; i < touches.length; ++i) {
+        const t = touches[i],
+          id = t.identifier - minIdentifier;
+        console.log(i, id);
         if (setAxis) {
-          this.setAxis("X" + t.identifier, t.pageX);
-          this.setAxis("Y" + t.identifier, t.pageY);
+          this.setAxis("X" + id, t.pageX);
+          this.setAxis("Y" + id, t.pageY);
         }
         else {
-          this.setAxis("LX" + t.identifier, t.pageX);
-          this.setAxis("LY" + t.identifier, t.pageY);
+          this.setAxis("LX" + id, t.pageX);
+          this.setAxis("LY" + id, t.pageY);
         }
 
         this.setButton("FINGER" + t.identifier, stateChange);
       }
+
       touches = event.touches;
-      var fingerState = 0,
-        before = this.getAxis("FINGERS");
-      for (i = 0; i < touches.length; ++i) {
-        t = touches[i];
+      let fingerState = 0;
+      for (let i = 0; i < touches.length; ++i) {
+        const t = touches[i];
         fingerState |= 1 << t.identifier;
       }
       this.setAxis("FINGERS", fingerState);
