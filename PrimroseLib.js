@@ -1270,6 +1270,8 @@ var BaseControl = function (_Primrose$AbstractEve) {
     // start D:\Documents\VR\Primrose\src\Primrose\BrowserEnvironment.js
 (function(){"use strict";
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -1765,17 +1767,21 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
     //
     _this.goFullScreen = function (index, evt) {
       if (evt !== "Gaze") {
-        (function () {
+        var _ret = function () {
           var elem = !_this.input.VR.isStereo || isMobile && !_this.input.VR.isNativeMobileWebVR ? _this.options.fullscreenElement : _this.renderer.domElement;
           _this.input.VR.connect(index);
-          _this.input.VR.requestPresent([{
-            source: elem
-          }]).catch(function (exp) {
-            return console.error("whaaat", exp);
-          }).then(function () {
-            return elem.focus();
-          });
-        })();
+          return {
+            v: _this.input.VR.requestPresent([{
+              source: elem
+            }]).catch(function (exp) {
+              return console.error("whaaat", exp);
+            }).then(function () {
+              return elem.focus();
+            })
+          };
+        }();
+
+        if ((typeof _ret === "undefined" ? "undefined" : _typeof(_ret)) === "object") return _ret.v;
       }
     };
 
@@ -3409,10 +3415,7 @@ var TELEPORT_PAD_RADIUS = 0.4,
 var Pointer = function (_Primrose$AbstractEve) {
   _inherits(Pointer, _Primrose$AbstractEve);
 
-  function Pointer(name, color, highlight, s, devices) {
-    var triggerDevices = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : null;
-    var options = arguments[6];
-
+  function Pointer(name, color, highlight, s, devices, triggerDevices, options) {
     _classCallCheck(this, Pointer);
 
     var _this = _possibleConstructorReturn(this, (Pointer.__proto__ || Object.getPrototypeOf(Pointer)).call(this));
@@ -4965,6 +4968,9 @@ var Image = function (_Primrose$Entity) {
           video.preload = "auto";
           video.autoplay = true;
           video.loop = true;
+          video.controls = true;
+          video.playsinline = true;
+          video.setAttribute("webkit-playsinline", true);
           video.oncanplaythrough = function () {
             var width = video.videoWidth,
                 height = video.videoHeight,
@@ -6847,31 +6853,35 @@ var Touch = function (_Primrose$InputProces) {
 
     var _this = _possibleConstructorReturn(this, (Touch.__proto__ || Object.getPrototypeOf(Touch)).call(this, "Touch", commands, axes));
 
+    console.log(DOMElement);
     DOMElement = DOMElement || window;
 
     var setState = function setState(stateChange, setAxis, event) {
       var touches = event.changedTouches,
-          i = 0,
-          t = null;
-      for (i = 0; i < touches.length; ++i) {
-        t = touches[i];
+          minIdentifier = Number.MAX_VALUE;
+      for (var _i = 0; _i < touches.length; ++_i) {
+        minIdentifier = Math.min(minIdentifier, touches[_i].identifier);
+      }
 
+      for (var _i2 = 0; _i2 < touches.length; ++_i2) {
+        var t = touches[_i2],
+            id = t.identifier - minIdentifier;
         if (setAxis) {
-          _this.setAxis("X" + t.identifier, t.pageX);
-          _this.setAxis("Y" + t.identifier, t.pageY);
+          _this.setAxis("X" + id, t.pageX);
+          _this.setAxis("Y" + id, t.pageY);
         } else {
-          _this.setAxis("LX" + t.identifier, t.pageX);
-          _this.setAxis("LY" + t.identifier, t.pageY);
+          _this.setAxis("LX" + id, t.pageX);
+          _this.setAxis("LY" + id, t.pageY);
         }
 
         _this.setButton("FINGER" + t.identifier, stateChange);
       }
+
       touches = event.touches;
-      var fingerState = 0,
-          before = _this.getAxis("FINGERS");
-      for (i = 0; i < touches.length; ++i) {
-        t = touches[i];
-        fingerState |= 1 << t.identifier;
+      var fingerState = 0;
+      for (var _i3 = 0; _i3 < touches.length; ++_i3) {
+        var _t = touches[_i3];
+        fingerState |= 1 << _t.identifier;
       }
       _this.setAxis("FINGERS", fingerState);
       event.preventDefault();
@@ -6949,8 +6959,9 @@ var VR = function (_Primrose$PoseInputPr) {
       // We skip the WebVR-Polyfill's Mouse and Keyboard display because it does not
       // play well with our interaction model.
       _this.displays.push.apply(_this.displays, displays.filter(function (display) {
-        return display.displayName !== "Mouse and Keyboard VRDisplay (webvr-polyfill)";
+        return !isiOS || VR.isStereoDisplay(display);
       }));
+      console.log("VR Displays", _this.displays);
       return _this.displays;
     });
     return _this;

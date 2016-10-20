@@ -8477,7 +8477,7 @@ var Eye = {
  * VRDisplay based on mobile device parameters and DeviceMotion APIs.
  */
 function CardboardVRDisplay() {
-  this.displayName = 'Cardboard VRDisplay (webvr-polyfill)';
+  this.displayName = 'Google Cardboard';
 
   this.capabilities.hasOrientation = true;
   this.capabilities.canPresent = true;

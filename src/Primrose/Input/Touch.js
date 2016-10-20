@@ -27,7 +27,6 @@ class Touch extends Primrose.InputProcessor {
       for (let i = 0; i < touches.length; ++i) {
         const t = touches[i],
           id = t.identifier - minIdentifier;
-        console.log(i, id);
         if (setAxis) {
           this.setAxis("X" + id, t.pageX);
           this.setAxis("Y" + id, t.pageY);

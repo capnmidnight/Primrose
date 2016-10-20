@@ -8477,7 +8477,7 @@ var Eye = {
  * VRDisplay based on mobile device parameters and DeviceMotion APIs.
  */
 function CardboardVRDisplay() {
-  this.displayName = 'Cardboard VRDisplay (webvr-polyfill)';
+  this.displayName = 'Google Cardboard';
 
   this.capabilities.hasOrientation = true;
   this.capabilities.canPresent = true;
@@ -8544,13 +8544,6 @@ CardboardVRDisplay.prototype.updateBounds_ = function () {
 };
 
 CardboardVRDisplay.prototype.beginPresent_ = function() {
-  var gl = this.layer_.source.getContext('webgl');
-  if (!gl)
-    gl = this.layer_.source.getContext('experimental-webgl');
-  if (!gl)
-    gl = this.layer_.source.getContext('webgl2');
-
-
   // Listen for orientation change events in order to show interstitial.
   this.orientationHandler = this.onOrientationChange_.bind(this);
   window.addEventListener('orientationchange', this.orientationHandler);
@@ -8579,7 +8572,6 @@ CardboardVRDisplay.prototype.onOrientationChange_ = function(e) {
 
 CardboardVRDisplay.prototype.onResize_ = function(e) {
   if (this.layer_) {
-    var gl = this.layer_.source.getContext('webgl');
     // Size the CSS canvas.
     // Added padding on right and bottom because iPhone 5 will not
     // hide the URL bar unless content is bigger than the screen.
@@ -8595,9 +8587,9 @@ CardboardVRDisplay.prototype.onResize_ = function(e) {
       'margin: 0',
       'padding: 0 10px 10px 0',
     ];
-    gl.canvas.setAttribute('style', cssProperties.join('; ') + ';');
+    this.layer_.source.setAttribute('style', cssProperties.join('; ') + ';');
 
-    Util.safariCssSizeWorkaround(gl.canvas);
+    Util.safariCssSizeWorkaround(this.layer_.source);
   }
 };
 
@@ -11335,66 +11327,6 @@ Util.getFullscreenElement = function() {
       document.webkitFullscreenElement ||
       document.mozFullScreenElement ||
       document.msFullscreenElement;
-};
-
-Util.linkProgram = function(gl, vertexSource, fragmentSource, attribLocationMap) {
-  // No error checking for brevity.
-  var vertexShader = gl.createShader(gl.VERTEX_SHADER);
-  gl.shaderSource(vertexShader, vertexSource);
-  gl.compileShader(vertexShader);
-
-  var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
-  gl.shaderSource(fragmentShader, fragmentSource);
-  gl.compileShader(fragmentShader);
-
-  var program = gl.createProgram();
-  gl.attachShader(program, vertexShader);
-  gl.attachShader(program, fragmentShader);
-
-  for (var attribName in attribLocationMap)
-    gl.bindAttribLocation(program, attribLocationMap[attribName], attribName);
-
-  gl.linkProgram(program);
-
-  gl.deleteShader(vertexShader);
-  gl.deleteShader(fragmentShader);
-
-  return program;
-};
-
-Util.getProgramUniforms = function(gl, program) {
-  var uniforms = {};
-  var uniformCount = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
-  var uniformName = '';
-  for (var i = 0; i < uniformCount; i++) {
-    var uniformInfo = gl.getActiveUniform(program, i);
-    uniformName = uniformInfo.name.replace('[0]', '');
-    uniforms[uniformName] = gl.getUniformLocation(program, uniformName);
-  }
-  return uniforms;
-};
-
-Util.orthoMatrix = function (out, left, right, bottom, top, near, far) {
-  var lr = 1 / (left - right),
-      bt = 1 / (bottom - top),
-      nf = 1 / (near - far);
-  out[0] = -2 * lr;
-  out[1] = 0;
-  out[2] = 0;
-  out[3] = 0;
-  out[4] = 0;
-  out[5] = -2 * bt;
-  out[6] = 0;
-  out[7] = 0;
-  out[8] = 0;
-  out[9] = 0;
-  out[10] = 2 * nf;
-  out[11] = 0;
-  out[12] = (left + right) * lr;
-  out[13] = (top + bottom) * bt;
-  out[14] = (far + near) * nf;
-  out[15] = 1;
-  return out;
 };
 
 Util.isMobile = function() {
@@ -55444,156 +55376,6 @@ THREE.MTLLoader.MaterialCreator.prototype = {
 
 };
 
-////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\bare-bones-logger\src\logger.js
-(function(){"use strict";
-
-var logger = {
-  setup: null,
-  DISABLED: 0,
-  HTTP: 1,
-  WEBSOCKET: 2,
-  DOM: 3,
-  USER: 4
-};
-    if(typeof window !== "undefined") window.logger = logger;
-})();
-    // end D:\Documents\VR\bare-bones-logger\src\logger.js
-    ////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\bare-bones-logger\src\logger\setup.js
-(function(){"use strict";
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-
-var send = null;
-
-function mangle(name) {
-  return "_" + name;
-}
-
-function wrap(name) {
-  var orig = name;
-  while (console[orig]) {
-    orig = mangle(orig);
-  }
-  console[orig] = console[name];
-  return function () {
-    var args = [];
-    for (var i = 0; i < arguments.length; ++i) {
-      if (_typeof(arguments[i]) === "object" && !(arguments[i] instanceof String)) {
-        var obj1 = arguments[i],
-            obj2 = {};
-        for (var key in obj1) {
-          obj2[key] = obj1[key];
-          if (obj2[key] !== null && obj2[key] !== undefined) {
-            obj2[key] = obj2[key].toString();
-          }
-        }
-        args.push(obj2);
-      } else {
-        args.push(arguments[i].toString());
-      }
-    }
-    var obj = send({
-      name: name,
-      args: args
-    });
-    if (obj) {
-      console[orig].apply(console, obj.args);
-    }
-  };
-}
-
-function onError(message, source, lineno, colno, error) {
-  colno = colno || window.event && window.event.errorCharacter;
-  var done = false,
-      name = "error",
-      stack = error && error.stack;
-
-  if (!stack) {
-    if (arguments.callee) {
-      var head = arguments.callee.caller;
-      while (head) {
-        stack.push(head.name);
-        head = head.caller;
-      }
-    } else {
-      stack = "N/A";
-    }
-  }
-
-  var data = {
-    type: "error",
-    time: new Date().toLocaleTimeString(),
-    message: message,
-    source: source,
-    lineno: lineno,
-    colno: colno,
-    error: error.message,
-    stack: stack
-  };
-
-  while (!done && console[name]) {
-    try {
-      console[name](data);
-      done = true;
-    } catch (exp) {
-      name = mangle(name);
-    }
-  }
-}
-
-function setup(type, target) {
-  if (type !== logger.DISABLED) {
-    if ((type === logger.HTTP || type === logger.WEBSOCKET) && location.protocol === "file:") {
-      console.warn("Can't perform HTTP requests from the file system. Not going to setup the error proxy, but will setup the error catch-all.");
-    } else if (type === logger.HTTP) {
-      send = function send(data) {
-        var req = new XMLHttpRequest();
-        req.open("POST", target);
-        req.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-        req.send(JSON.stringify(data));
-        return data;
-      };
-    } else if (type === logger.WEBSOCKET) {
-      var socket = new WebSocket(target);
-      send = function send(data) {
-        socket.send(JSON.stringify(data));
-        return data;
-      };
-    } else if (type === logger.DOM) {
-      var output = document.querySelector(target);
-      send = function send(data) {
-        var elem = document.createElement("pre");
-        elem.appendChild(document.createTextNode(JSON.stringify(data)));
-        output.appendChild(elem);
-        return data;
-      };
-    } else if (type === logger.USER) {
-      if (!(target instanceof Function)) {
-        console.warn("The target parameter was expected to be a function, but it was", target);
-      } else {
-        send = target;
-      }
-    }
-
-    if (send !== null) {
-      ["log", "info", "warn", "error"].forEach(function (n) {
-        console[n] = wrap(n);
-      });
-    }
-
-    window.addEventListener("error", function (evt) {
-      onError(evt.message, evt.filename, evt.lineno, evt.colno, evt.error);
-    }, false);
-  }
-}
-    if(typeof window !== "undefined") window.logger.setup = setup;
-})();
-    // end D:\Documents\VR\bare-bones-logger\src\logger\setup.js
-    ////////////////////////////////////////////////////////////////////////////////
-console.info("bare-bones-logger v2.0.7. see https://github.com/capnmidnight/logger for more information.");
 /**
  * @file A fantasy name generator library.
  * @version 1.0.0
@@ -56159,7 +55941,7 @@ NameGen.compile = function(input) {
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\axis.js
+    // start D:\Documents\VR\Primrose\src\axis.js
 (function(){"use strict";
 
 function axis(length, width) {
@@ -56169,12 +55951,12 @@ function axis(length, width) {
   put(brick(0x0000ff, width, width, length)).on(center);
   return center;
 }
-  if(typeof window !== "undefined") window.axis = axis;
+    if(typeof window !== "undefined") window.axis = axis;
 })();
-  // end D:\Documents\VR\Primrose\src\axis.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\axis.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\box.js
+    // start D:\Documents\VR\Primrose\src\box.js
 (function(){"use strict";
 
 function box(width, height, length) {
@@ -56188,12 +55970,12 @@ function box(width, height, length) {
     return new THREE.BoxBufferGeometry(width, height, length);
   });
 }
-  if(typeof window !== "undefined") window.box = box;
+    if(typeof window !== "undefined") window.box = box;
 })();
-  // end D:\Documents\VR\Primrose\src\box.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\box.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\brick.js
+    // start D:\Documents\VR\Primrose\src\brick.js
 (function(){"use strict";
 
 function brick(txt, w, h, l) {
@@ -56202,12 +55984,12 @@ function brick(txt, w, h, l) {
     txtRepeatT: l
   });
 }
-  if(typeof window !== "undefined") window.brick = brick;
+    if(typeof window !== "undefined") window.brick = brick;
 })();
-  // end D:\Documents\VR\Primrose\src\brick.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\brick.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\cache.js
+    // start D:\Documents\VR\Primrose\src\cache.js
 (function(){"use strict";
 
 var cache = function () {
@@ -56221,12 +56003,12 @@ var cache = function () {
     return _cache[hash];
   };
 }();
-  if(typeof window !== "undefined") window.cache = cache;
+    if(typeof window !== "undefined") window.cache = cache;
 })();
-  // end D:\Documents\VR\Primrose\src\cache.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\cache.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\circle.js
+    // start D:\Documents\VR\Primrose\src\circle.js
 (function(){"use strict";
 
 function circle(r, sections, start, end) {
@@ -56236,23 +56018,23 @@ function circle(r, sections, start, end) {
     return new THREE.CircleBufferGeometry(r, sections, start, end);
   });
 }
-  if(typeof window !== "undefined") window.circle = circle;
+    if(typeof window !== "undefined") window.circle = circle;
 })();
-  // end D:\Documents\VR\Primrose\src\circle.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\circle.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\clone.js
+    // start D:\Documents\VR\Primrose\src\clone.js
 (function(){"use strict";
 
 function clone(obj) {
   return JSON.parse(JSON.stringify(obj));
 }
-  if(typeof window !== "undefined") window.clone = clone;
+    if(typeof window !== "undefined") window.clone = clone;
 })();
-  // end D:\Documents\VR\Primrose\src\clone.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\clone.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\cloud.js
+    // start D:\Documents\VR\Primrose\src\cloud.js
 (function(){"use strict";
 
 function cloud(verts, c, s) {
@@ -56268,12 +56050,12 @@ function cloud(verts, c, s) {
   });
   return new THREE.Points(geom, mat);
 }
-  if(typeof window !== "undefined") window.cloud = cloud;
+    if(typeof window !== "undefined") window.cloud = cloud;
 })();
-  // end D:\Documents\VR\Primrose\src\cloud.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\cloud.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\colored.js
+    // start D:\Documents\VR\Primrose\src\colored.js
 (function(){"use strict";
 
 function colored(geometry, color, options) {
@@ -56292,15 +56074,15 @@ function colored(geometry, color, options) {
 
   return obj;
 }
-  if(typeof window !== "undefined") window.colored = colored;
+    if(typeof window !== "undefined") window.colored = colored;
 })();
-  // end D:\Documents\VR\Primrose\src\colored.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\colored.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\copyObject.js
+    // start D:\Documents\VR\Primrose\src\copyObject.js
 (function(){"use strict";
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 function copyObject(dest, source, shallow) {
   var stack = [{
@@ -56327,12 +56109,12 @@ function copyObject(dest, source, shallow) {
   }
   return dest;
 }
-  if(typeof window !== "undefined") window.copyObject = copyObject;
+    if(typeof window !== "undefined") window.copyObject = copyObject;
 })();
-  // end D:\Documents\VR\Primrose\src\copyObject.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\copyObject.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\cylinder.js
+    // start D:\Documents\VR\Primrose\src\cylinder.js
 (function(){"use strict";
 
 function cylinder(rT, rB, height, rS, hS, openEnded, thetaStart, thetaEnd) {
@@ -56349,12 +56131,12 @@ function cylinder(rT, rB, height, rS, hS, openEnded, thetaStart, thetaEnd) {
     return new THREE.CylinderBufferGeometry(rT, rB, height, rS, hS, openEnded, thetaStart, thetaEnd);
   });
 }
-  if(typeof window !== "undefined") window.cylinder = cylinder;
+    if(typeof window !== "undefined") window.cylinder = cylinder;
 })();
-  // end D:\Documents\VR\Primrose\src\cylinder.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\cylinder.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\deleteSetting.js
+    // start D:\Documents\VR\Primrose\src\deleteSetting.js
 (function(){"use strict";
 
 function deleteSetting(name) {
@@ -56362,12 +56144,12 @@ function deleteSetting(name) {
     window.localStorage.removeItem(name);
   }
 }
-  if(typeof window !== "undefined") window.deleteSetting = deleteSetting;
+    if(typeof window !== "undefined") window.deleteSetting = deleteSetting;
 })();
-  // end D:\Documents\VR\Primrose\src\deleteSetting.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\deleteSetting.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\emit.js
+    // start D:\Documents\VR\Primrose\src\emit.js
 (function(){"use strict";
 
 function emit(evt, args) {
@@ -56376,12 +56158,12 @@ function emit(evt, args) {
     handlers[i](args);
   }
 }
-  if(typeof window !== "undefined") window.emit = emit;
+    if(typeof window !== "undefined") window.emit = emit;
 })();
-  // end D:\Documents\VR\Primrose\src\emit.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\emit.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\findProperty.js
+    // start D:\Documents\VR\Primrose\src\findProperty.js
 (function(){"use strict";
 
 function findProperty(elem, arr) {
@@ -56391,12 +56173,12 @@ function findProperty(elem, arr) {
     }
   }
 }
-  if(typeof window !== "undefined") window.findProperty = findProperty;
+    if(typeof window !== "undefined") window.findProperty = findProperty;
 })();
-  // end D:\Documents\VR\Primrose\src\findProperty.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\findProperty.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\fixGeometry.js
+    // start D:\Documents\VR\Primrose\src\fixGeometry.js
 (function(){"use strict";
 
 function fixGeometry(geometry, options) {
@@ -56429,15 +56211,15 @@ function fixGeometry(geometry, options) {
 
   return geometry;
 }
-  if(typeof window !== "undefined") window.fixGeometry = fixGeometry;
+    if(typeof window !== "undefined") window.fixGeometry = fixGeometry;
 })();
-  // end D:\Documents\VR\Primrose\src\fixGeometry.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\fixGeometry.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\getSetting.js
+    // start D:\Documents\VR\Primrose\src\getSetting.js
 (function(){"use strict";
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 function getSetting(name, defValue) {
   if (window.localStorage) {
@@ -56454,34 +56236,34 @@ function getSetting(name, defValue) {
   }
   return defValue;
 }
-  if(typeof window !== "undefined") window.getSetting = getSetting;
+    if(typeof window !== "undefined") window.getSetting = getSetting;
 })();
-  // end D:\Documents\VR\Primrose\src\getSetting.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\getSetting.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\hub.js
+    // start D:\Documents\VR\Primrose\src\hub.js
 (function(){"use strict";
 
 function hub() {
   return new THREE.Object3D();
 }
-  if(typeof window !== "undefined") window.hub = hub;
+    if(typeof window !== "undefined") window.hub = hub;
 })();
-  // end D:\Documents\VR\Primrose\src\hub.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\hub.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\identity.js
+    // start D:\Documents\VR\Primrose\src\identity.js
 (function(){"use strict";
 
 function identity(obj) {
   return obj;
 }
-  if(typeof window !== "undefined") window.identity = identity;
+    if(typeof window !== "undefined") window.identity = identity;
 })();
-  // end D:\Documents\VR\Primrose\src\identity.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\identity.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\InsideSphereGeometry.js
+    // start D:\Documents\VR\Primrose\src\InsideSphereGeometry.js
 (function(){"use strict";
 
 function InsideSphereGeometry(radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength) {
@@ -56598,134 +56380,134 @@ if (typeof window.THREE !== "undefined") {
   InsideSphereGeometry.prototype = Object.create(THREE.Geometry.prototype);
   InsideSphereGeometry.prototype.constructor = InsideSphereGeometry;
 }
-  if(typeof window !== "undefined") window.InsideSphereGeometry = InsideSphereGeometry;
+    if(typeof window !== "undefined") window.InsideSphereGeometry = InsideSphereGeometry;
 })();
-  // end D:\Documents\VR\Primrose\src\InsideSphereGeometry.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\InsideSphereGeometry.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\isChrome.js
+    // start D:\Documents\VR\Primrose\src\isChrome.js
 (function(){"use strict";
 
 var isChrome = !!window.chrome && !window.isOpera;
-  if(typeof window !== "undefined") window.isChrome = isChrome;
+    if(typeof window !== "undefined") window.isChrome = isChrome;
 })();
-  // end D:\Documents\VR\Primrose\src\isChrome.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\isChrome.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\isFirefox.js
+    // start D:\Documents\VR\Primrose\src\isFirefox.js
 (function(){"use strict";
 
 var isFirefox = typeof window.InstallTrigger !== 'undefined';
-  if(typeof window !== "undefined") window.isFirefox = isFirefox;
+    if(typeof window !== "undefined") window.isFirefox = isFirefox;
 })();
-  // end D:\Documents\VR\Primrose\src\isFirefox.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\isFirefox.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\isGearVR.js
+    // start D:\Documents\VR\Primrose\src\isGearVR.js
 (function(){"use strict";
 
 var isGearVR = navigator.userAgent.indexOf("Mobile VR") > -1;
-  if(typeof window !== "undefined") window.isGearVR = isGearVR;
+    if(typeof window !== "undefined") window.isGearVR = isGearVR;
 })();
-  // end D:\Documents\VR\Primrose\src\isGearVR.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\isGearVR.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\isIE.js
+    // start D:\Documents\VR\Primrose\src\isIE.js
 (function(){"use strict";
 
 var isIE = /*@cc_on!@*/false || !!document.documentMode;
-  if(typeof window !== "undefined") window.isIE = isIE;
+    if(typeof window !== "undefined") window.isIE = isIE;
 })();
-  // end D:\Documents\VR\Primrose\src\isIE.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\isIE.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\isInIFrame.js
+    // start D:\Documents\VR\Primrose\src\isInIFrame.js
 (function(){"use strict";
 
 var isInIFrame = window.self !== window.top;
-  if(typeof window !== "undefined") window.isInIFrame = isInIFrame;
+    if(typeof window !== "undefined") window.isInIFrame = isInIFrame;
 })();
-  // end D:\Documents\VR\Primrose\src\isInIFrame.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\isInIFrame.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\isiOS.js
+    // start D:\Documents\VR\Primrose\src\isiOS.js
 (function(){"use strict";
 
 var isiOS = /iP(hone|od|ad)/.test(navigator.userAgent || "");
-  if(typeof window !== "undefined") window.isiOS = isiOS;
+    if(typeof window !== "undefined") window.isiOS = isiOS;
 })();
-  // end D:\Documents\VR\Primrose\src\isiOS.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\isiOS.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\isMobile.js
+    // start D:\Documents\VR\Primrose\src\isMobile.js
 (function(){"use strict";
 
 var isMobile = function (a) {
   return (/(android|bb\d+|meego).+|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od|ad)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(a) || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substring(0, 4))
   );
 }(navigator.userAgent || navigator.vendor || window.opera);
-  if(typeof window !== "undefined") window.isMobile = isMobile;
+    if(typeof window !== "undefined") window.isMobile = isMobile;
 })();
-  // end D:\Documents\VR\Primrose\src\isMobile.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\isMobile.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\isOpera.js
+    // start D:\Documents\VR\Primrose\src\isOpera.js
 (function(){"use strict";
 
 var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
-  if(typeof window !== "undefined") window.isOpera = isOpera;
+    if(typeof window !== "undefined") window.isOpera = isOpera;
 })();
-  // end D:\Documents\VR\Primrose\src\isOpera.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\isOpera.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\isOSX.js
+    // start D:\Documents\VR\Primrose\src\isOSX.js
 (function(){"use strict";
 
 var isOSX = /Macintosh/.test(navigator.userAgent || "");
-  if(typeof window !== "undefined") window.isOSX = isOSX;
+    if(typeof window !== "undefined") window.isOSX = isOSX;
 })();
-  // end D:\Documents\VR\Primrose\src\isOSX.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\isOSX.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\isSafari.js
+    // start D:\Documents\VR\Primrose\src\isSafari.js
 (function(){"use strict";
 
 var isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;
-  if(typeof window !== "undefined") window.isSafari = isSafari;
+    if(typeof window !== "undefined") window.isSafari = isSafari;
 })();
-  // end D:\Documents\VR\Primrose\src\isSafari.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\isSafari.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\isWebKit.js
+    // start D:\Documents\VR\Primrose\src\isWebKit.js
 (function(){"use strict";
 
 var isWebKit = !/iP(hone|od|ad)/.test(navigator.userAgent || "") || isOpera || isChrome;
-  if(typeof window !== "undefined") window.isWebKit = isWebKit;
+    if(typeof window !== "undefined") window.isWebKit = isWebKit;
 })();
-  // end D:\Documents\VR\Primrose\src\isWebKit.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\isWebKit.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\isWindows.js
+    // start D:\Documents\VR\Primrose\src\isWindows.js
 (function(){"use strict";
 
 var isWindows = /Windows/.test(navigator.userAgent || "");
-  if(typeof window !== "undefined") window.isWindows = isWindows;
+    if(typeof window !== "undefined") window.isWindows = isWindows;
 })();
-  // end D:\Documents\VR\Primrose\src\isWindows.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\isWindows.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\light.js
+    // start D:\Documents\VR\Primrose\src\light.js
 (function(){"use strict";
 
 function light(color, intensity, distance, decay) {
   return new THREE.PointLight(color, intensity, distance, decay);
 }
-  if(typeof window !== "undefined") window.light = light;
+    if(typeof window !== "undefined") window.light = light;
 })();
-  // end D:\Documents\VR\Primrose\src\light.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\light.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\material.js
+    // start D:\Documents\VR\Primrose\src\material.js
 (function(){"use strict";
 
 function material(textureDescription, options) {
@@ -56782,12 +56564,12 @@ function material(textureDescription, options) {
     return mat;
   });
 }
-  if(typeof window !== "undefined") window.material = material;
+    if(typeof window !== "undefined") window.material = material;
 })();
-  // end D:\Documents\VR\Primrose\src\material.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\material.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\patch.js
+    // start D:\Documents\VR\Primrose\src\patch.js
 (function(){"use strict";
 
 function patch(obj1, obj2) {
@@ -56799,21 +56581,21 @@ function patch(obj1, obj2) {
   }
   return obj1;
 }
-  if(typeof window !== "undefined") window.patch = patch;
+    if(typeof window !== "undefined") window.patch = patch;
 })();
-  // end D:\Documents\VR\Primrose\src\patch.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\patch.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\PIXEL_SCALES.js
+    // start D:\Documents\VR\Primrose\src\PIXEL_SCALES.js
 (function(){"use strict";
 
 var PIXEL_SCALES = [0.5, 0.25, 0.333333, 0.5, 1];
-  if(typeof window !== "undefined") window.PIXEL_SCALES = PIXEL_SCALES;
+    if(typeof window !== "undefined") window.PIXEL_SCALES = PIXEL_SCALES;
 })();
-  // end D:\Documents\VR\Primrose\src\PIXEL_SCALES.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\PIXEL_SCALES.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose.js
+    // start D:\Documents\VR\Primrose\src\Primrose.js
 (function(){"use strict";
 
 /*
@@ -56833,12 +56615,12 @@ var PIXEL_SCALES = [0.5, 0.25, 0.333333, 0.5, 1];
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 var Primrose = {};
-  if(typeof window !== "undefined") window.Primrose = Primrose;
+    if(typeof window !== "undefined") window.Primrose = Primrose;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\priv.js
+    // start D:\Documents\VR\Primrose\src\priv.js
 (function(){"use strict";
 
 function priv() {
@@ -56850,12 +56632,12 @@ function priv() {
     return heap.get(obj);
   };
 }
-  if(typeof window !== "undefined") window.priv = priv;
+    if(typeof window !== "undefined") window.priv = priv;
 })();
-  // end D:\Documents\VR\Primrose\src\priv.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\priv.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\put.js
+    // start D:\Documents\VR\Primrose\src\put.js
 (function(){"use strict";
 
 function put(object) {
@@ -56916,12 +56698,12 @@ function put(object) {
 
   return box;
 }
-  if(typeof window !== "undefined") window.put = put;
+    if(typeof window !== "undefined") window.put = put;
 })();
-  // end D:\Documents\VR\Primrose\src\put.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\put.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\quad.js
+    // start D:\Documents\VR\Primrose\src\quad.js
 (function(){"use strict";
 
 function quad(w, h, options) {
@@ -56939,12 +56721,12 @@ function quad(w, h, options) {
     return fixGeometry(new THREE.PlaneBufferGeometry(w, h, options.s, options.t), options);
   });
 }
-  if(typeof window !== "undefined") window.quad = quad;
+    if(typeof window !== "undefined") window.quad = quad;
 })();
-  // end D:\Documents\VR\Primrose\src\quad.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\quad.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Quality.js
+    // start D:\Documents\VR\Primrose\src\Quality.js
 (function(){"use strict";
 
 var Quality = {
@@ -56955,12 +56737,12 @@ var Quality = {
   HIGH: 4,
   MAXIMUM: PIXEL_SCALES.length - 1
 };
-  if(typeof window !== "undefined") window.Quality = Quality;
+    if(typeof window !== "undefined") window.Quality = Quality;
 })();
-  // end D:\Documents\VR\Primrose\src\Quality.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Quality.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\range.js
+    // start D:\Documents\VR\Primrose\src\range.js
 (function(){"use strict";
 
 function range(n, m, s, t) {
@@ -56972,12 +56754,12 @@ function range(n, m, s, t) {
     t2(i);
   }
 }
-  if(typeof window !== "undefined") window.range = range;
+    if(typeof window !== "undefined") window.range = range;
 })();
-  // end D:\Documents\VR\Primrose\src\range.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\range.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\readForm.js
+    // start D:\Documents\VR\Primrose\src\readForm.js
 (function(){"use strict";
 
 function readForm(ctrls) {
@@ -56996,12 +56778,12 @@ function readForm(ctrls) {
   }
   return state;
 }
-  if(typeof window !== "undefined") window.readForm = readForm;
+    if(typeof window !== "undefined") window.readForm = readForm;
 })();
-  // end D:\Documents\VR\Primrose\src\readForm.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\readForm.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\ring.js
+    // start D:\Documents\VR\Primrose\src\ring.js
 (function(){"use strict";
 
 function ring(rInner, rOuter, sectors, start, end, rings) {
@@ -57012,26 +56794,26 @@ function ring(rInner, rOuter, sectors, start, end, rings) {
     return new THREE.RingBufferGeometry(rInner, rOuter, sectors, start, end, rings);
   });
 }
-  if(typeof window !== "undefined") window.ring = ring;
+    if(typeof window !== "undefined") window.ring = ring;
 })();
-  // end D:\Documents\VR\Primrose\src\ring.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\ring.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\setFalse.js
+    // start D:\Documents\VR\Primrose\src\setFalse.js
 (function(){"use strict";
 
 function setFalse(evt) {
   evt.returnValue = false;
 }
-  if(typeof window !== "undefined") window.setFalse = setFalse;
+    if(typeof window !== "undefined") window.setFalse = setFalse;
 })();
-  // end D:\Documents\VR\Primrose\src\setFalse.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\setFalse.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\setSetting.js
+    // start D:\Documents\VR\Primrose\src\setSetting.js
 (function(){"use strict";
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 function setSetting(name, val) {
   if (window.localStorage && val) {
@@ -57042,12 +56824,12 @@ function setSetting(name, val) {
     }
   }
 }
-  if(typeof window !== "undefined") window.setSetting = setSetting;
+    if(typeof window !== "undefined") window.setSetting = setSetting;
 })();
-  // end D:\Documents\VR\Primrose\src\setSetting.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\setSetting.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\shell.js
+    // start D:\Documents\VR\Primrose\src\shell.js
 (function(){"use strict";
 
 function shell(r, slices, rings, phi, theta, options) {
@@ -57065,12 +56847,12 @@ function shell(r, slices, rings, phi, theta, options) {
     return fixGeometry(new InsideSphereGeometry(r, slices, rings, phiStart, phi, thetaStart, theta, true), options);
   });
 }
-  if(typeof window !== "undefined") window.shell = shell;
+    if(typeof window !== "undefined") window.shell = shell;
 })();
-  // end D:\Documents\VR\Primrose\src\shell.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\shell.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\sphere.js
+    // start D:\Documents\VR\Primrose\src\sphere.js
 (function(){"use strict";
 
 function sphere(r, slices, rings) {
@@ -57078,12 +56860,12 @@ function sphere(r, slices, rings) {
     return new THREE.SphereGeometry(r, slices, rings);
   });
 }
-  if(typeof window !== "undefined") window.sphere = sphere;
+    if(typeof window !== "undefined") window.sphere = sphere;
 })();
-  // end D:\Documents\VR\Primrose\src\sphere.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\sphere.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\textured.js
+    // start D:\Documents\VR\Primrose\src\textured.js
 (function(){"use strict";
 
 function textured(geometry, txt, options) {
@@ -57191,23 +56973,23 @@ function textured(geometry, txt, options) {
 
   return obj;
 }
-  if(typeof window !== "undefined") window.textured = textured;
+    if(typeof window !== "undefined") window.textured = textured;
 })();
-  // end D:\Documents\VR\Primrose\src\textured.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\textured.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\v3.js
+    // start D:\Documents\VR\Primrose\src\v3.js
 (function(){"use strict";
 
 function v3(x, y, z) {
   return new THREE.Vector3(x, y, z);
 }
-  if(typeof window !== "undefined") window.v3 = v3;
+    if(typeof window !== "undefined") window.v3 = v3;
 })();
-  // end D:\Documents\VR\Primrose\src\v3.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\v3.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\writeForm.js
+    // start D:\Documents\VR\Primrose\src\writeForm.js
 (function(){"use strict";
 
 function writeForm(ctrls, state) {
@@ -57224,15 +57006,15 @@ function writeForm(ctrls, state) {
     }
   }
 }
-  if(typeof window !== "undefined") window.writeForm = writeForm;
+    if(typeof window !== "undefined") window.writeForm = writeForm;
 })();
-  // end D:\Documents\VR\Primrose\src\writeForm.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\writeForm.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\AbstractEventEmitter.js
+    // start D:\Documents\VR\Primrose\src\Primrose\AbstractEventEmitter.js
 (function(){"use strict";
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -57276,11 +57058,21 @@ var AbstractEventEmitter = function () {
     key: "emit",
     value: function emit(name, obj) {
       if (this._handlers[name]) {
-        if ((typeof obj === "undefined" ? "undefined" : _typeof(obj)) === "object" && !(obj instanceof UIEvent)) {
+        if ((typeof obj === "undefined" ? "undefined" : _typeof(obj)) === "object" && !(obj instanceof Event)) {
           obj.type = name;
+          if (obj.defaultPrevented === undefined) {
+            obj.defaultPrevented = false;
+            obj.preventDefault = function () {
+              return obj.defaultPrevented = true;
+            };
+          }
         }
-        for (var i = 0; i < this._handlers[name].length; ++i) {
-          this._handlers[name][i](obj);
+        var h = this._handlers[name];
+        for (var i = 0; h && i < h.length; ++i) {
+          h[i](obj);
+          if (obj && obj.defaultPrevented) {
+            return;
+          }
         }
       }
     }
@@ -57288,12 +57080,12 @@ var AbstractEventEmitter = function () {
 
   return AbstractEventEmitter;
 }();
-  if(typeof window !== "undefined") window.Primrose.AbstractEventEmitter = AbstractEventEmitter;
+    if(typeof window !== "undefined") window.Primrose.AbstractEventEmitter = AbstractEventEmitter;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\AbstractEventEmitter.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\AbstractEventEmitter.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Angle.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Angle.js
 (function(){"use strict";
 
 var DEG2RAD = Math.PI / 180,
@@ -57340,12 +57132,12 @@ Object.defineProperty(Angle.prototype, "radians", {
     this.degrees = val * RAD2DEG;
   }
 });
-  if(typeof window !== "undefined") window.Primrose.Angle = Angle;
+    if(typeof window !== "undefined") window.Primrose.Angle = Angle;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Angle.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Angle.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\BaseControl.js
+    // start D:\Documents\VR\Primrose\src\Primrose\BaseControl.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -57412,13 +57204,15 @@ var BaseControl = function (_Primrose$AbstractEve) {
 
   return BaseControl;
 }(Primrose.AbstractEventEmitter);
-  if(typeof window !== "undefined") window.Primrose.BaseControl = BaseControl;
+    if(typeof window !== "undefined") window.Primrose.BaseControl = BaseControl;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\BaseControl.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\BaseControl.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\BrowserEnvironment.js
+    // start D:\Documents\VR\Primrose\src\Primrose\BrowserEnvironment.js
 (function(){"use strict";
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -57458,175 +57252,9 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
       }
     };
 
-    var createPickableObject = function createPickableObject(obj, includeGeometry) {
-      var geomObj = obj;
-      if ((obj.type === "Object3D" || obj.type === "Group") && obj.children[0]) {
-        geomObj = obj.children[0];
-        geomObj.name = geomObj.name || obj.name;
-      }
-      var id = geomObj.uuid,
-          mLeft = new THREE.Matrix4(),
-          mRight = new THREE.Matrix4().identity(),
-          mSwap,
-          inScene = false,
-          lastBag = objectHistory[id],
-          update = false,
-          disabled = !!obj.disabled,
-          bag = {
-        uuid: id,
-        name: null,
-        inScene: null,
-        visible: null,
-        disabled: null,
-        matrix: null,
-        geometry: null
-      },
-          head = geomObj;
-
-      while (head !== null) {
-        head.updateMatrix();
-        mLeft.copy(head.matrix);
-        mLeft.multiply(mRight);
-        mSwap = mLeft;
-        mLeft = mRight;
-        mRight = mSwap;
-        head = head.parent;
-        inScene = inScene || head === _this.scene;
-      }
-
-      if (!lastBag || lastBag.visible !== obj.visible) {
-        update = true;
-        bag.visible = obj.visible;
-      }
-
-      if (!lastBag || lastBag.disabled !== disabled) {
-        update = true;
-        bag.disabled = disabled;
-      }
-
-      var m = mRight.elements.subarray(0, mRight.elements.length),
-          mStr = describeMatrix(m);
-      if (!lastBag || !lastBag.matrix || describeMatrix(lastBag.matrix) !== mStr) {
-        update = true;
-        bag.matrix = m;
-      }
-
-      if (!lastBag || lastBag.inScene !== inScene) {
-        update = true;
-        bag.inScene = inScene;
-      }
-
-      if (includeGeometry === true) {
-        update = true;
-        bag.name = obj.name;
-        bag.geometry = geomObj.geometry;
-      }
-
-      if (update) {
-        if (!lastBag) {
-          objectHistory[id] = bag;
-        } else {
-          for (var key in bag) {
-            lastBag[key] = bag[key];
-          }
-        }
-        return bag;
-      }
-    };
-
-    function describeMatrix(m) {
-      var output = "";
-      for (var i = 0; i < m.length; ++i) {
-        if (i > 0) {
-          output += ",";
-        }
-        output += m[i];
-      }
-      return output;
-    }
-
-    var objectHistory = {};
-
-    _this.registerPickableObject = function (obj) {
-      if (obj) {
-        var bag = createPickableObject(obj, true),
-            verts,
-            faces,
-            uvs,
-            i,
-            geometry = bag.geometry;
-        // it would be nice to do this the other way around, to have everything
-        // stored in ArrayBuffers, instead of regular arrays, to pass to the
-        // Worker thread. Maybe later.
-        if (geometry instanceof THREE.BufferGeometry) {
-          var attr = geometry.attributes,
-              pos = attr.position,
-              uv = attr.uv,
-              idx = attr.index;
-
-          verts = [];
-          faces = [];
-          if (uv) {
-            uvs = [];
-          }
-          for (i = 0; i < pos.count; ++i) {
-            verts.push([pos.getX(i), pos.getY(i), pos.getZ(i)]);
-            if (uv) {
-              uvs.push([uv.getX(i), uv.getY(i)]);
-            }
-          }
-          if (idx) {
-            for (i = 0; i < idx.count - 2; ++i) {
-              faces.push([idx.getX(i), idx.getX(i + 1), idx.getX(i + 2)]);
-            }
-          } else {
-            for (i = 0; i < pos.count; i += 3) {
-              faces.push([i, i + 1, i + 2]);
-            }
-          }
-        } else {
-          verts = geometry.vertices.map(function (v) {
-            return v.toArray();
-          });
-          faces = [];
-          uvs = [];
-          // IDK why, but non-buffered geometry has an additional array layer
-          for (i = 0; i < geometry.faces.length; ++i) {
-            var f = geometry.faces[i],
-                faceUVs = geometry.faceVertexUvs[0][i];
-            faces.push([f.a, f.b, f.c]);
-            uvs[f.a] = [faceUVs[0].x, faceUVs[0].y];
-            uvs[f.b] = [faceUVs[1].x, faceUVs[1].y];
-            uvs[f.c] = [faceUVs[2].x, faceUVs[2].y];
-          }
-        }
-
-        bag.geometry = {
-          uuid: geometry.uuid,
-          vertices: verts,
-          faces: faces,
-          uvs: uvs
-        };
-        _this.pickableObjects[bag.uuid] = obj;
-        _this.projector.setObject(bag);
-      }
-    };
-
-    var currentHits = {},
-        handleHit = function handleHit(h) {
-      var dt;
-      _this.projector.ready = true;
-      currentHits = h;
-      for (var key in currentHits) {
-        var hit = currentHits[key];
-        hit.object = _this.pickableObjects[hit.objectID];
-      }
-    };
-
     var update = function update(dt) {
       dt *= MILLISECONDS_TO_SECONDS;
       movePlayer(dt);
-      _this.input.resolvePicking(currentHits);
       moveSky();
       moveGround();
       _this.network.update(dt);
@@ -57637,31 +57265,9 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
 
     var movePlayer = function movePlayer(dt) {
       _this.input.update(dt);
-
-      if (_this.projector.ready) {
-        _this.projector.ready = false;
-        var arr = [],
-            del = [];
-        for (var key in _this.pickableObjects) {
-          var obj = _this.pickableObjects[key],
-              p = createPickableObject(obj);
-          if (p) {
-            arr.push(p);
-            if (p.inScene === false) {
-              del.push(key);
-            }
-          }
-        }
-
-        if (arr.length > 0) {
-          _this.projector.updateObjects(arr);
-        }
-        for (var i = 0; i < del.length; ++i) {
-          delete _this.pickableObjects[del[i]];
-        }
-
-        _this.projector.projectPointers(_this.input.segments);
-      }
+      _this.input.resolvePicking(_this.pickableObjects.filter(function (obj) {
+        return !obj.disabled;
+      }));
     };
 
     var moveSky = function moveSky() {
@@ -57794,7 +57400,6 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
     _this.appendChild = function (elem) {
       if (elem instanceof THREE.Mesh) {
         _this.scene.add(elem);
-        _this.registerPickableObject(elem);
       } else {
         return elem.addToBrowserEnvironment(_this, _this.scene);
       }
@@ -57868,19 +57473,13 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
 
     _this.speech = new Primrose.Output.Speech(_this.options.speech);
     _this.audio = new Primrose.Output.Audio3D();
-    var audioReady = null,
-        ocean = null;
-    if (_this.options.ambientSound && !isMobile) {
-      audioReady = _this.audio.load3DSound(_this.options.ambientSound, true, -1, 1, -1).then(function (aud) {
-        ocean = aud;
-        if (!(ocean.source instanceof MediaElementAudioSourceNode)) {
-          ocean.volume.gain.value = 0.1;
-          console.log(ocean.source);
-          ocean.source.start();
+    if (_this.options.ambientSound) {
+      _this.audio.load3DSound(_this.options.ambientSound, true, -1, 1, -1).then(function (aud) {
+        if (!(aud.source instanceof MediaElementAudioSourceNode)) {
+          aud.volume.gain.value = 0.1;
+          aud.source.start();
         }
       }).catch(console.error.bind(console, "Audio3D loadSource"));
-    } else {
-      audioReady = Promise.resolve();
     }
 
     var documentReady = null;
@@ -57898,40 +57497,34 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
 
     _this.music = new Primrose.Output.Music(_this.audio.context);
 
-    _this.pickableObjects = {};
+    _this.pickableObjects = [];
+    _this.registerPickableObject = _this.pickableObjects.push.bind(_this.pickableObjects);
+
     _this.currentControl = null;
 
     var FADE_SPEED = 0.1;
     _this.fadeOut = function () {
-      if (_this.fader) {
-        return new Promise(function (resolve, reject) {
-          var timer = setInterval(function () {
-            _this.fader.material.opacity += FADE_SPEED;
-            if (_this.fader.material.opacity >= 1) {
-              clearInterval(timer);
-              resolve();
-            }
-          }, 10);
-        });
-      } else {
-        return Promise.resolve();
-      }
+      return new Promise(function (resolve, reject) {
+        var timer = setInterval(function () {
+          _this.fader.material.opacity += FADE_SPEED;
+          if (_this.fader.material.opacity >= 1) {
+            clearInterval(timer);
+            resolve();
+          }
+        }, 10);
+      });
     };
 
     _this.fadeIn = function () {
-      if (_this.fader) {
-        return new Promise(function (resolve, reject) {
-          var timer = setInterval(function () {
-            _this.fader.material.opacity -= FADE_SPEED;
-            if (_this.fader.material.opacity <= 0) {
-              clearInterval(timer);
-              resolve();
-            }
-          }, 10);
-        });
-      } else {
-        return Promise.resolve();
-      }
+      return new Promise(function (resolve, reject) {
+        var timer = setInterval(function () {
+          _this.fader.material.opacity -= FADE_SPEED;
+          if (_this.fader.material.opacity <= 0) {
+            clearInterval(timer);
+            resolve();
+          }
+        }, 10);
+      });
     };
 
     _this.teleportAvailable = true;
@@ -57969,7 +57562,7 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
       }
 
       if (evt.type !== "exit" && evt.hit && obj === _this.ground) {
-        POSITION.fromArray(evt.hit.facePoint).sub(_this.input.head.position);
+        POSITION.copy(evt.hit.point).sub(_this.input.head.position);
 
         var distSq = POSITION.x * POSITION.x + POSITION.z * POSITION.z;
         if (distSq > MAX_MOVE_DISTANCE_SQ) {
@@ -58022,8 +57615,6 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
       }
     };
 
-    _this.projector = new Primrose.Workerize(Primrose.Projector);
-
     _this.options.scene = _this.scene = _this.options.scene || new THREE.Scene();
     if (_this.options.useFog) {
       _this.scene.fog = new THREE.FogExp2(_this.options.backgroundColor, 2 / _this.options.drawDistance);
@@ -58056,7 +57647,7 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
 
     if (_this.options.groundTexture !== undefined) {
       var dim = 10,
-          gm = new THREE.PlaneGeometry(dim * 5, dim * 5, dim, dim);
+          gm = new THREE.BoxBufferGeometry(dim * 5, 0.1, dim * 5, dim, 1, dim);
       var groundFunc = typeof _this.options.groundTexture === "number" ? colored : textured;
       _this.ground = groundFunc(gm, _this.options.groundTexture, {
         txtRepeatS: dim * 5,
@@ -58065,7 +57656,6 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
       if (_this.options.sceneModel !== undefined) {
         _this.ground.position.y = -0.02;
       }
-      _this.ground.rotation.x = -Math.PI / 2;
       _this.ground.name = "Ground";
       _this.scene.add(_this.ground);
       _this.registerPickableObject(_this.ground);
@@ -58119,17 +57709,21 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
     //
     _this.goFullScreen = function (index, evt) {
       if (evt !== "Gaze") {
-        (function () {
+        var _ret = function () {
           var elem = !_this.input.VR.isStereo || isMobile && !_this.input.VR.isNativeMobileWebVR ? _this.options.fullscreenElement : _this.renderer.domElement;
           _this.input.VR.connect(index);
-          _this.input.VR.requestPresent([{
-            source: elem
-          }]).catch(function (exp) {
-            return console.error("whaaat", exp);
-          }).then(function () {
-            return elem.focus();
-          });
-        })();
+          return {
+            v: _this.input.VR.requestPresent([{
+              source: elem
+            }]).catch(function (exp) {
+              return console.error("whaaat", exp);
+            }).then(function () {
+              return elem.focus();
+            })
+          };
+        }();
+
+        if ((typeof _ret === "undefined" ? "undefined" : _typeof(_ret)) === "object") return _ret.v;
       }
     };
 
@@ -58167,8 +57761,6 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
     window.addEventListener("resize", modifyScreen, false);
     window.addEventListener("blur", _this.stop, false);
     window.addEventListener("focus", _this.start, false);
-
-    _this.projector.addEventListener("hit", handleHit, false);
 
     documentReady = documentReady.then(function () {
       if (_this.options.renderer) {
@@ -58356,7 +57948,7 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
       }
     };
 
-    var allReady = Promise.all([modelsReady, audioReady, documentReady]).then(function () {
+    var allReady = Promise.all([modelsReady, documentReady]).then(function () {
       _this.renderer.domElement.style.cursor = "default";
       _this.input.VR.displays[0].DOMElement = _this.renderer.domElement;
       _this.input.VR.connect(0);
@@ -58475,7 +58067,7 @@ BrowserEnvironment.DEFAULTS = {
   // The acceleration applied to falling objects.
   gravity: 9.8,
   // The amount of time in seconds to require gazes on objects before triggering the gaze event.
-  gazeLength: 1,
+  gazeLength: 1.5,
   // By default, what we see in the VR view will get mirrored to a regular view on the primary screen. Set to true to improve performance.
   disableMirroring: false,
   // By default, a single light is added to the scene,
@@ -58499,12 +58091,12 @@ BrowserEnvironment.DEFAULTS = {
   // THREE.js scene, if one had already been created.
   scene: null
 };
-  if(typeof window !== "undefined") window.Primrose.BrowserEnvironment = BrowserEnvironment;
+    if(typeof window !== "undefined") window.Primrose.BrowserEnvironment = BrowserEnvironment;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\BrowserEnvironment.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\BrowserEnvironment.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\ButtonFactory.js
+    // start D:\Documents\VR\Primrose\src\Primrose\ButtonFactory.js
 (function(){"use strict";
 
 var buttonCount = 0;
@@ -58520,65 +58112,30 @@ ButtonFactory.prototype.create = function (toggle) {
   var btn = new Primrose.Controls.Button3D(obj, name, this.options, toggle);
   return btn;
 };
-  if(typeof window !== "undefined") window.Primrose.ButtonFactory = ButtonFactory;
+    if(typeof window !== "undefined") window.Primrose.ButtonFactory = ButtonFactory;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\ButtonFactory.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\ButtonFactory.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\ColorifyShader.js
-(function(){"use strict";
-
-var ColorifyShader = {
-
-  uniforms: {
-    "tDiffuse": { value: null },
-    "amount": { value: 1.0 }
-  },
-
-  vertexShader: "varying vec2 vUv;\n\
-\n\
-void main() {\n\
-  vUv = uv;\n\
-  gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );\n\
-}",
-
-  fragmentShader: "uniform float amount;\n\
-uniform sampler2D tDiffuse;\n\
-\n\
-varying vec2 vUv;\n\
-\n\
-void main() {\n\
-  vec4 texel = texture2D( tDiffuse, vUv );\n\
-//  vec2 p = vUv - vec2(0.5, 0.5);\n\
-  float scale = amount; // * min(1.0, 4.0 - pow(4.0 * dot(p, p), 2.0));\n\
-  gl_FragColor = vec4(texel.xyz * scale, texel.w);\n\
-}"
-
-};
-  if(typeof window !== "undefined") window.Primrose.ColorifyShader = ColorifyShader;
-})();
-  // end D:\Documents\VR\Primrose\src\Primrose\ColorifyShader.js
-  ////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Controls.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Controls.js
 (function(){"use strict";
 
 var Controls = {};
-  if(typeof window !== "undefined") window.Primrose.Controls = Controls;
+    if(typeof window !== "undefined") window.Primrose.Controls = Controls;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Controls.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Controls.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\DOM.js
+    // start D:\Documents\VR\Primrose\src\Primrose\DOM.js
 (function(){"use strict";
 
 var DOM = {};
-  if(typeof window !== "undefined") window.Primrose.DOM = DOM;
+    if(typeof window !== "undefined") window.Primrose.DOM = DOM;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\DOM.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\DOM.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Entity.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Entity.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -58735,17 +58292,17 @@ var Entity = function () {
 
       switch (evt.type) {
         case "pointerstart":
-          this.startUV(evt.hit.point);
+          this.startUV(evt.hit.uv);
           break;
         case "pointerend":
           this.endPointer(evt);
           break;
         case "pointermove":
         case "gazemove":
-          this.moveUV(evt.hit.point);
+          this.moveUV(evt.hit.uv);
           break;
         case "gazecomplete":
-          this.startUV(evt.hit.point);
+          this.startUV(evt.hit.uv);
           setTimeout(function () {
             return _this.endPointer(evt);
           }, 100);
@@ -58840,35 +58397,35 @@ var Entity = function () {
 
   return Entity;
 }();
-  if(typeof window !== "undefined") window.Primrose.Entity = Entity;
+    if(typeof window !== "undefined") window.Primrose.Entity = Entity;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Entity.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Entity.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\HTTP.js
+    // start D:\Documents\VR\Primrose\src\Primrose\HTTP.js
 (function(){"use strict";
 
 var HTTP = {};
-  if(typeof window !== "undefined") window.Primrose.HTTP = HTTP;
+    if(typeof window !== "undefined") window.Primrose.HTTP = HTTP;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\HTTP.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\HTTP.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Input.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Input.js
 (function(){"use strict";
 
 var Input = {};
-  if(typeof window !== "undefined") window.Primrose.Input = Input;
+    if(typeof window !== "undefined") window.Primrose.Input = Input;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Input.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Input.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\InputProcessor.js
+    // start D:\Documents\VR\Primrose\src\Primrose\InputProcessor.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -59388,12 +58945,12 @@ var InputProcessor = function () {
 
   return InputProcessor;
 }();
-  if(typeof window !== "undefined") window.Primrose.InputProcessor = InputProcessor;
+    if(typeof window !== "undefined") window.Primrose.InputProcessor = InputProcessor;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\InputProcessor.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\InputProcessor.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Keys.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Keys.js
 (function(){"use strict";
 
 var Keys = {
@@ -59528,15 +59085,15 @@ for (var key in Keys) {
     Keys[val] = key;
   }
 }
-  if(typeof window !== "undefined") window.Primrose.Keys = Keys;
+    if(typeof window !== "undefined") window.Primrose.Keys = Keys;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Keys.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Keys.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\loadTexture.js
+    // start D:\Documents\VR\Primrose\src\Primrose\loadTexture.js
 (function(){"use strict";
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var objectIDs = new WeakMap(),
     counter = 0;
@@ -59579,12 +59136,12 @@ function loadTexture(url, resolve, progress, reject) {
     return txt;
   }, resolve);
 }
-  if(typeof window !== "undefined") window.Primrose.loadTexture = loadTexture;
+    if(typeof window !== "undefined") window.Primrose.loadTexture = loadTexture;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\loadTexture.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\loadTexture.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\ModelLoader.js
+    // start D:\Documents\VR\Primrose\src\Primrose\ModelLoader.js
 (function(){"use strict";
 
 // The JSON format object loader is not always included in the Three.js distribution,
@@ -59751,30 +59308,30 @@ function loader(map, key) {
     });
   };
 }
-  if(typeof window !== "undefined") window.Primrose.ModelLoader = ModelLoader;
+    if(typeof window !== "undefined") window.Primrose.ModelLoader = ModelLoader;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\ModelLoader.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\ModelLoader.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Network.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Network.js
 (function(){"use strict";
 
 var Network = {};
-  if(typeof window !== "undefined") window.Primrose.Network = Network;
+    if(typeof window !== "undefined") window.Primrose.Network = Network;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Network.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Network.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Output.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Output.js
 (function(){"use strict";
 
 var Output = {};
-  if(typeof window !== "undefined") window.Primrose.Output = Output;
+    if(typeof window !== "undefined") window.Primrose.Output = Output;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Output.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Output.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Pointer.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Pointer.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -59789,7 +59346,6 @@ var TELEPORT_PAD_RADIUS = 0.4,
     FORWARD = new THREE.Vector3(0, 0, -1),
     LASER_WIDTH = 0.01,
     LASER_LENGTH = 3 * LASER_WIDTH,
-    GAZE_TIMEOUT = 1000,
     GAZE_RING_DISTANCE = -1.25,
     GAZE_RING_INNER = 0.015,
     GAZE_RING_OUTER = 0.03,
@@ -59801,9 +59357,7 @@ var TELEPORT_PAD_RADIUS = 0.4,
 var Pointer = function (_Primrose$AbstractEve) {
   _inherits(Pointer, _Primrose$AbstractEve);
 
-  function Pointer(name, color, highlight, s, devices) {
-    var triggerDevices = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : null;
-
+  function Pointer(name, color, highlight, s, devices, triggerDevices, options) {
     _classCallCheck(this, Pointer);
 
     var _this = _possibleConstructorReturn(this, (Pointer.__proto__ || Object.getPrototypeOf(Pointer)).call(this));
@@ -59811,9 +59365,12 @@ var Pointer = function (_Primrose$AbstractEve) {
     _this.name = name;
     _this.devices = devices;
     _this.triggerDevices = triggerDevices || devices.slice();
+    _this.options = options;
+    _this.gazeTimeout = (_this.options.gazeLength || 1.5) * 1000;
 
     _this.unproject = null;
 
+    _this.picker = new THREE.Raycaster();
     _this.showPointer = true;
     _this.color = color;
     _this.highlight = highlight;
@@ -59936,7 +59493,7 @@ var Pointer = function (_Primrose$AbstractEve) {
     }
   }, {
     key: "resolvePicking",
-    value: function resolvePicking(currentHit) {
+    value: function resolvePicking(objects) {
       this.mesh.visible = false;
 
       this.mesh.material = material("", {
@@ -59945,11 +59502,16 @@ var Pointer = function (_Primrose$AbstractEve) {
       });
 
       if (this.showPointer) {
-        var _priv = _(this),
+        VECTOR_TEMP.set(0, 0, 0).applyMatrix4(this.root.matrixWorld);
+        FORWARD.set(0, 0, -1).applyMatrix4(this.root.matrixWorld).sub(VECTOR_TEMP);
+        this.picker.set(VECTOR_TEMP, FORWARD);
+        var hits = this.picker.intersectObjects(objects, true),
+            currentHit = hits[0],
+            _priv = _(this),
             lastHit = _priv.lastHit,
-            moved = lastHit && currentHit && (currentHit.facePoint[0] !== lastHit.facePoint[0] || currentHit.facePoint[1] !== lastHit.facePoint[1] || currentHit.facePoint[2] !== lastHit.facePoint[2]),
+            moved = lastHit && currentHit && (currentHit.point.x !== lastHit.point.x || currentHit.point.y !== lastHit.point.y || currentHit.point.z !== lastHit.point.z),
             dt = lastHit && lastHit.time && performance.now() - lastHit.time,
-            changed = !lastHit && currentHit || lastHit && !currentHit || lastHit && currentHit && currentHit.objectID !== lastHit.objectID,
+            changed = !lastHit && currentHit || lastHit && !currentHit || lastHit && currentHit && currentHit.object.id !== lastHit.object.id,
             evt = {
           pointer: this,
           buttons: 0,
@@ -59958,6 +59520,8 @@ var Pointer = function (_Primrose$AbstractEve) {
         };
 
         if (currentHit) {
+          currentHit.time = performance.now();
+
           this.mesh.material = material("", {
             color: this.highlight,
             unshaded: true
@@ -59965,9 +59529,7 @@ var Pointer = function (_Primrose$AbstractEve) {
         }
 
         if (moved) {
-          lastHit.facePoint[0] = currentHit.facePoint[0];
-          lastHit.facePoint[1] = currentHit.facePoint[1];
-          lastHit.facePoint[2] = currentHit.facePoint[2];
+          lastHit.point.copy(currentHit.point);
         }
 
         this.mesh.visible = !this.useGaze;
@@ -60002,7 +59564,7 @@ var Pointer = function (_Primrose$AbstractEve) {
 
         if (this.useGaze) {
           if (changed) {
-            if (dt !== null && dt < GAZE_TIMEOUT) {
+            if (dt !== null && dt < this.gazeTimeout) {
               this.gazeOuter.visible = false;
               this.emit("gazecancel", evt);
             }
@@ -60011,12 +59573,12 @@ var Pointer = function (_Primrose$AbstractEve) {
               this.emit("gazestart", evt);
             }
           } else if (dt !== null) {
-            if (dt >= GAZE_TIMEOUT) {
+            if (dt >= this.gazeTimeout) {
               this.gazeOuter.visible = false;
               this.emit("gazecomplete", evt);
               lastHit.time = null;
             } else {
-              var p = Math.round(36 * dt / GAZE_TIMEOUT),
+              var p = Math.round(36 * dt / this.gazeTimeout),
                   a = 2 * Math.PI * p / 36;
               this.gazeOuter.geometry = ring(GAZE_RING_INNER, GAZE_RING_OUTER, 36, p, 0, a);
               if (moved) {
@@ -60071,27 +59633,18 @@ var Pointer = function (_Primrose$AbstractEve) {
     get: function get() {
       return this.root.matrix;
     }
-  }, {
-    key: "segment",
-    get: function get() {
-      if (this.showPointer) {
-        VECTOR_TEMP.set(0, 0, 0).applyMatrix4(this.root.matrixWorld);
-        FORWARD.set(0, 0, -1).applyMatrix4(this.root.matrixWorld);
-        return [this.name, VECTOR_TEMP.toArray(), FORWARD.toArray()];
-      }
-    }
   }]);
 
   return Pointer;
 }(Primrose.AbstractEventEmitter);
 
 Pointer.EVENTS = ["pointerstart", "pointerend", "pointermove", "gazestart", "gazemove", "gazecomplete", "gazecancel", "exit", "enter"];
-  if(typeof window !== "undefined") window.Primrose.Pointer = Pointer;
+    if(typeof window !== "undefined") window.Primrose.Pointer = Pointer;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Pointer.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Pointer.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\PoseInputProcessor.js
+    // start D:\Documents\VR\Primrose\src\Primrose\PoseInputProcessor.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -60173,2324 +59726,44 @@ var PoseInputProcessor = function (_Primrose$InputProces) {
 
   return PoseInputProcessor;
 }(Primrose.InputProcessor);
-  if(typeof window !== "undefined") window.Primrose.PoseInputProcessor = PoseInputProcessor;
+    if(typeof window !== "undefined") window.Primrose.PoseInputProcessor = PoseInputProcessor;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\PoseInputProcessor.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\PoseInputProcessor.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Projector.js
-(function(){"use strict";
-
-function Projector(isWorker) {
-  (function () {
-    if (typeof THREE === "undefined") {
-      /* jshint ignore:start */
-      // File:src/three.js
-
-      /**
-       * This is just the THREE.Matrix4 and THREE.Vector3 classes from Three.js, to
-       * be loaded into a WebWorker so the worker can do math. - STM
-       *
-       * @author mrdoob / http://mrdoob.com/
-       */
-
-      self.THREE = {
-        REVISION: '72dev'
-      };
-      // polyfills
-
-      if (Math.sign === undefined) {
-
-        // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/sign
-
-        Math.sign = function (x) {
-
-          return x < 0 ? -1 : x > 0 ? 1 : +x;
-        };
-      }
-
-      if (Function.prototype.name === undefined && Object.defineProperty !== undefined) {
-
-        // Missing in IE9-11.
-        // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/name
-
-        Object.defineProperty(Function.prototype, 'name', {
-          get: function get() {
-
-            return this.toString().match(/^\s*function\s*(\S*)\s*\(/)[1];
-          }
-
-        });
-      }
-
-      // File:src/math/Quaternion.js
-
-      /**
-       * @author mikael emtinger / http://gomo.se/
-       * @author alteredq / http://alteredqualia.com/
-       * @author WestLangley / http://github.com/WestLangley
-       * @author bhouston / http://exocortex.com
-       *
-       * @param {Number} x
-       * @param {Number} y
-       * @param {Number} z
-       * @param {Number} w
-       */
-      THREE.Quaternion = function (x, y, z, w) {
-
-        this._x = x || 0;
-        this._y = y || 0;
-        this._z = z || 0;
-        this._w = w !== undefined ? w : 1;
-      };
-      THREE.Quaternion.prototype = {
-        constructor: THREE.Quaternion,
-        get x() {
-
-          return this._x;
-        },
-        set x(value) {
-
-          this._x = value;
-          this.onChangeCallback();
-        },
-        get y() {
-
-          return this._y;
-        },
-        set y(value) {
-
-          this._y = value;
-          this.onChangeCallback();
-        },
-        get z() {
-
-          return this._z;
-        },
-        set z(value) {
-
-          this._z = value;
-          this.onChangeCallback();
-        },
-        get w() {
-
-          return this._w;
-        },
-        set w(value) {
-
-          this._w = value;
-          this.onChangeCallback();
-        },
-        set: function set(x, y, z, w) {
-
-          this._x = x;
-          this._y = y;
-          this._z = z;
-          this._w = w;
-          this.onChangeCallback();
-          return this;
-        },
-        clone: function clone() {
-
-          return new this.constructor(this._x, this._y, this._z, this._w);
-        },
-        copy: function copy(quaternion) {
-
-          this._x = quaternion.x;
-          this._y = quaternion.y;
-          this._z = quaternion.z;
-          this._w = quaternion.w;
-          this.onChangeCallback();
-          return this;
-        },
-        setFromEuler: function setFromEuler(euler, update) {
-
-          if (euler instanceof THREE.Euler === false) {
-
-            throw new Error('THREE.Quaternion: .setFromEuler() now expects a Euler rotation rather than a Vector3 and order.');
-          }
-
-          // http://www.mathworks.com/matlabcentral/fileexchange/
-          //   20696-function-to-convert-between-dcm-euler-angles-quaternions-and-euler-vectors/
-          //  content/SpinCalc.m
-
-          var c1 = Math.cos(euler._x / 2);
-          var c2 = Math.cos(euler._y / 2);
-          var c3 = Math.cos(euler._z / 2);
-          var s1 = Math.sin(euler._x / 2);
-          var s2 = Math.sin(euler._y / 2);
-          var s3 = Math.sin(euler._z / 2);
-          if (euler.order === 'XYZ') {
-
-            this._x = s1 * c2 * c3 + c1 * s2 * s3;
-            this._y = c1 * s2 * c3 - s1 * c2 * s3;
-            this._z = c1 * c2 * s3 + s1 * s2 * c3;
-            this._w = c1 * c2 * c3 - s1 * s2 * s3;
-          } else if (euler.order === 'YXZ') {
-
-            this._x = s1 * c2 * c3 + c1 * s2 * s3;
-            this._y = c1 * s2 * c3 - s1 * c2 * s3;
-            this._z = c1 * c2 * s3 - s1 * s2 * c3;
-            this._w = c1 * c2 * c3 + s1 * s2 * s3;
-          } else if (euler.order === 'ZXY') {
-
-            this._x = s1 * c2 * c3 - c1 * s2 * s3;
-            this._y = c1 * s2 * c3 + s1 * c2 * s3;
-            this._z = c1 * c2 * s3 + s1 * s2 * c3;
-            this._w = c1 * c2 * c3 - s1 * s2 * s3;
-          } else if (euler.order === 'ZYX') {
-
-            this._x = s1 * c2 * c3 - c1 * s2 * s3;
-            this._y = c1 * s2 * c3 + s1 * c2 * s3;
-            this._z = c1 * c2 * s3 - s1 * s2 * c3;
-            this._w = c1 * c2 * c3 + s1 * s2 * s3;
-          } else if (euler.order === 'YZX') {
-
-            this._x = s1 * c2 * c3 + c1 * s2 * s3;
-            this._y = c1 * s2 * c3 + s1 * c2 * s3;
-            this._z = c1 * c2 * s3 - s1 * s2 * c3;
-            this._w = c1 * c2 * c3 - s1 * s2 * s3;
-          } else if (euler.order === 'XZY') {
-
-            this._x = s1 * c2 * c3 - c1 * s2 * s3;
-            this._y = c1 * s2 * c3 - s1 * c2 * s3;
-            this._z = c1 * c2 * s3 + s1 * s2 * c3;
-            this._w = c1 * c2 * c3 + s1 * s2 * s3;
-          }
-
-          if (update !== false) this.onChangeCallback();
-          return this;
-        },
-        setFromAxisAngle: function setFromAxisAngle(axis, angle) {
-
-          // http://www.euclideanspace.com/maths/geometry/rotations/conversions/angleToQuaternion/index.htm
-
-          // assumes axis is normalized
-
-          var halfAngle = angle / 2,
-              s = Math.sin(halfAngle);
-          this._x = axis.x * s;
-          this._y = axis.y * s;
-          this._z = axis.z * s;
-          this._w = Math.cos(halfAngle);
-          this.onChangeCallback();
-          return this;
-        },
-        setFromRotationMatrix: function setFromRotationMatrix(m) {
-
-          // http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/index.htm
-
-          // assumes the upper 3x3 of m is a pure rotation matrix (i.e, unscaled)
-
-          var te = m.elements,
-              m11 = te[0],
-              m12 = te[4],
-              m13 = te[8],
-              m21 = te[1],
-              m22 = te[5],
-              m23 = te[9],
-              m31 = te[2],
-              m32 = te[6],
-              m33 = te[10],
-              trace = m11 + m22 + m33,
-              s;
-          if (trace > 0) {
-
-            s = 0.5 / Math.sqrt(trace + 1.0);
-            this._w = 0.25 / s;
-            this._x = (m32 - m23) * s;
-            this._y = (m13 - m31) * s;
-            this._z = (m21 - m12) * s;
-          } else if (m11 > m22 && m11 > m33) {
-
-            s = 2.0 * Math.sqrt(1.0 + m11 - m22 - m33);
-            this._w = (m32 - m23) / s;
-            this._x = 0.25 * s;
-            this._y = (m12 + m21) / s;
-            this._z = (m13 + m31) / s;
-          } else if (m22 > m33) {
-
-            s = 2.0 * Math.sqrt(1.0 + m22 - m11 - m33);
-            this._w = (m13 - m31) / s;
-            this._x = (m12 + m21) / s;
-            this._y = 0.25 * s;
-            this._z = (m23 + m32) / s;
-          } else {
-
-            s = 2.0 * Math.sqrt(1.0 + m33 - m11 - m22);
-            this._w = (m21 - m12) / s;
-            this._x = (m13 + m31) / s;
-            this._y = (m23 + m32) / s;
-            this._z = 0.25 * s;
-          }
-
-          this.onChangeCallback();
-          return this;
-        },
-        setFromUnitVectors: function () {
-
-          // http://lolengine.net/blog/2014/02/24/quaternion-from-two-vectors-final
-
-          // assumes direction vectors vFrom and vTo are normalized
-
-          var v1, r;
-          var EPS = 0.000001;
-          return function (vFrom, vTo) {
-
-            if (v1 === undefined) v1 = new THREE.Vector3();
-            r = vFrom.dot(vTo) + 1;
-            if (r < EPS) {
-
-              r = 0;
-              if (Math.abs(vFrom.x) > Math.abs(vFrom.z)) {
-
-                v1.set(-vFrom.y, vFrom.x, 0);
-              } else {
-
-                v1.set(0, -vFrom.z, vFrom.y);
-              }
-            } else {
-
-              v1.crossVectors(vFrom, vTo);
-            }
-
-            this._x = v1.x;
-            this._y = v1.y;
-            this._z = v1.z;
-            this._w = r;
-            this.normalize();
-            return this;
-          };
-        }(),
-        inverse: function inverse() {
-
-          this.conjugate().normalize();
-          return this;
-        },
-        conjugate: function conjugate() {
-
-          this._x *= -1;
-          this._y *= -1;
-          this._z *= -1;
-          this.onChangeCallback();
-          return this;
-        },
-        dot: function dot(v) {
-
-          return this._x * v._x + this._y * v._y + this._z * v._z + this._w * v._w;
-        },
-        lengthSq: function lengthSq() {
-
-          return this._x * this._x + this._y * this._y + this._z * this._z + this._w * this._w;
-        },
-        length: function length() {
-
-          return Math.sqrt(this._x * this._x + this._y * this._y + this._z * this._z + this._w * this._w);
-        },
-        normalize: function normalize() {
-
-          var l = this.length();
-          if (l === 0) {
-
-            this._x = 0;
-            this._y = 0;
-            this._z = 0;
-            this._w = 1;
-          } else {
-
-            l = 1 / l;
-            this._x = this._x * l;
-            this._y = this._y * l;
-            this._z = this._z * l;
-            this._w = this._w * l;
-          }
-
-          this.onChangeCallback();
-          return this;
-        },
-        multiply: function multiply(q, p) {
-
-          if (p !== undefined) {
-
-            console.warn('THREE.Quaternion: .multiply() now only accepts one argument. Use .multiplyQuaternions( a, b ) instead.');
-            return this.multiplyQuaternions(q, p);
-          }
-
-          return this.multiplyQuaternions(this, q);
-        },
-        multiplyQuaternions: function multiplyQuaternions(a, b) {
-
-          // from http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/code/index.htm
-
-          var qax = a._x,
-              qay = a._y,
-              qaz = a._z,
-              qaw = a._w;
-          var qbx = b._x,
-              qby = b._y,
-              qbz = b._z,
-              qbw = b._w;
-          this._x = qax * qbw + qaw * qbx + qay * qbz - qaz * qby;
-          this._y = qay * qbw + qaw * qby + qaz * qbx - qax * qbz;
-          this._z = qaz * qbw + qaw * qbz + qax * qby - qay * qbx;
-          this._w = qaw * qbw - qax * qbx - qay * qby - qaz * qbz;
-          this.onChangeCallback();
-          return this;
-        },
-        multiplyVector3: function multiplyVector3(vector) {
-
-          console.warn('THREE.Quaternion: .multiplyVector3() has been removed. Use is now vector.applyQuaternion( quaternion ) instead.');
-          return vector.applyQuaternion(this);
-        },
-        slerp: function slerp(qb, t) {
-
-          if (t === 0) return this;
-          if (t === 1) return this.copy(qb);
-          var x = this._x,
-              y = this._y,
-              z = this._z,
-              w = this._w;
-          // http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/slerp/
-
-          var cosHalfTheta = w * qb._w + x * qb._x + y * qb._y + z * qb._z;
-          if (cosHalfTheta < 0) {
-
-            this._w = -qb._w;
-            this._x = -qb._x;
-            this._y = -qb._y;
-            this._z = -qb._z;
-            cosHalfTheta = -cosHalfTheta;
-          } else {
-
-            this.copy(qb);
-          }
-
-          if (cosHalfTheta >= 1.0) {
-
-            this._w = w;
-            this._x = x;
-            this._y = y;
-            this._z = z;
-            return this;
-          }
-
-          var halfTheta = Math.acos(cosHalfTheta);
-          var sinHalfTheta = Math.sqrt(1.0 - cosHalfTheta * cosHalfTheta);
-          if (Math.abs(sinHalfTheta) < 0.001) {
-
-            this._w = 0.5 * (w + this._w);
-            this._x = 0.5 * (x + this._x);
-            this._y = 0.5 * (y + this._y);
-            this._z = 0.5 * (z + this._z);
-            return this;
-          }
-
-          var ratioA = Math.sin((1 - t) * halfTheta) / sinHalfTheta,
-              ratioB = Math.sin(t * halfTheta) / sinHalfTheta;
-          this._w = w * ratioA + this._w * ratioB;
-          this._x = x * ratioA + this._x * ratioB;
-          this._y = y * ratioA + this._y * ratioB;
-          this._z = z * ratioA + this._z * ratioB;
-          this.onChangeCallback();
-          return this;
-        },
-        equals: function equals(quaternion) {
-
-          return quaternion._x === this._x && quaternion._y === this._y && quaternion._z === this._z && quaternion._w === this._w;
-        },
-        fromArray: function fromArray(array, offset) {
-
-          if (offset === undefined) offset = 0;
-          this._x = array[offset];
-          this._y = array[offset + 1];
-          this._z = array[offset + 2];
-          this._w = array[offset + 3];
-          this.onChangeCallback();
-          return this;
-        },
-        toArray: function toArray(array, offset) {
-
-          if (array === undefined) array = [];
-          if (offset === undefined) offset = 0;
-          array[offset] = this._x;
-          array[offset + 1] = this._y;
-          array[offset + 2] = this._z;
-          array[offset + 3] = this._w;
-          return array;
-        },
-        onChange: function onChange(callback) {
-
-          this.onChangeCallback = callback;
-          return this;
-        },
-        onChangeCallback: function onChangeCallback() {}
-
-      };
-      THREE.Quaternion.slerp = function (qa, qb, qm, t) {
-
-        return qm.copy(qa).slerp(qb, t);
-      };
-      // File:src/math/Vector3.js
-
-      /**
-       * @author mrdoob / http://mrdoob.com/
-       * @author *kile / http://kile.stravaganza.org/
-       * @author philogb / http://blog.thejit.org/
-       * @author mikael emtinger / http://gomo.se/
-       * @author egraether / http://egraether.com/
-       * @author WestLangley / http://github.com/WestLangley
-       *
-       * @param {Number} x
-       * @param {Number} y
-       * @param {Number} z
-       */
-      THREE.Vector3 = function (x, y, z) {
-
-        this.x = x || 0;
-        this.y = y || 0;
-        this.z = z || 0;
-      };
-      THREE.Vector3.prototype = {
-        constructor: THREE.Vector3,
-        set: function set(x, y, z) {
-
-          this.x = x;
-          this.y = y;
-          this.z = z;
-          return this;
-        },
-        setX: function setX(x) {
-
-          this.x = x;
-          return this;
-        },
-        setY: function setY(y) {
-
-          this.y = y;
-          return this;
-        },
-        setZ: function setZ(z) {
-
-          this.z = z;
-          return this;
-        },
-        setComponent: function setComponent(index, value) {
-
-          switch (index) {
-
-            case 0:
-              this.x = value;
-              break;
-            case 1:
-              this.y = value;
-              break;
-            case 2:
-              this.z = value;
-              break;
-            default:
-              throw new Error('index is out of range: ' + index);
-          }
-        },
-        getComponent: function getComponent(index) {
-
-          switch (index) {
-
-            case 0:
-              return this.x;
-            case 1:
-              return this.y;
-            case 2:
-              return this.z;
-            default:
-              throw new Error('index is out of range: ' + index);
-          }
-        },
-        clone: function clone() {
-
-          return new this.constructor(this.x, this.y, this.z);
-        },
-        copy: function copy(v) {
-
-          this.x = v.x;
-          this.y = v.y;
-          this.z = v.z;
-          return this;
-        },
-        add: function add(v, w) {
-
-          if (w !== undefined) {
-
-            console.warn('THREE.Vector3: .add() now only accepts one argument. Use .addVectors( a, b ) instead.');
-            return this.addVectors(v, w);
-          }
-
-          this.x += v.x;
-          this.y += v.y;
-          this.z += v.z;
-          return this;
-        },
-        addScalar: function addScalar(s) {
-
-          this.x += s;
-          this.y += s;
-          this.z += s;
-          return this;
-        },
-        addVectors: function addVectors(a, b) {
-
-          this.x = a.x + b.x;
-          this.y = a.y + b.y;
-          this.z = a.z + b.z;
-          return this;
-        },
-        addScaledVector: function addScaledVector(v, s) {
-
-          this.x += v.x * s;
-          this.y += v.y * s;
-          this.z += v.z * s;
-          return this;
-        },
-        sub: function sub(v, w) {
-
-          if (w !== undefined) {
-
-            console.warn('THREE.Vector3: .sub() now only accepts one argument. Use .subVectors( a, b ) instead.');
-            return this.subVectors(v, w);
-          }
-
-          this.x -= v.x;
-          this.y -= v.y;
-          this.z -= v.z;
-          return this;
-        },
-        subScalar: function subScalar(s) {
-          this.x -= s;
-          this.y -= s;
-          this.z -= s;
-          return this;
-        },
-        subVectors: function subVectors(a, b) {
-          this.x = a.x - b.x;
-          this.y = a.y - b.y;
-          this.z = a.z - b.z;
-          return this;
-        },
-        multiply: function multiply(v, w) {
-
-          if (w !== undefined) {
-
-            console.warn('THREE.Vector3: .multiply() now only accepts one argument. Use .multiplyVectors( a, b ) instead.');
-            return this.multiplyVectors(v, w);
-          }
-
-          this.x *= v.x;
-          this.y *= v.y;
-          this.z *= v.z;
-          return this;
-        },
-        multiplyScalar: function multiplyScalar(scalar) {
-
-          this.x *= scalar;
-          this.y *= scalar;
-          this.z *= scalar;
-          return this;
-        },
-        multiplyVectors: function multiplyVectors(a, b) {
-
-          this.x = a.x * b.x;
-          this.y = a.y * b.y;
-          this.z = a.z * b.z;
-          return this;
-        },
-        applyEuler: function () {
-
-          var quaternion;
-          return function applyEuler(euler) {
-
-            if (euler instanceof THREE.Euler === false) {
-
-              console.error('THREE.Vector3: .applyEuler() now expects a Euler rotation rather than a Vector3 and order.');
-            }
-
-            if (quaternion === undefined) quaternion = new THREE.Quaternion();
-            this.applyQuaternion(quaternion.setFromEuler(euler));
-            return this;
-          };
-        }(),
-        applyAxisAngle: function () {
-
-          var quaternion;
-          return function applyAxisAngle(axis, angle) {
-
-            if (quaternion === undefined) quaternion = new THREE.Quaternion();
-            this.applyQuaternion(quaternion.setFromAxisAngle(axis, angle));
-            return this;
-          };
-        }(),
-        applyMatrix3: function applyMatrix3(m) {
-
-          var x = this.x;
-          var y = this.y;
-          var z = this.z;
-          var e = m.elements;
-          this.x = e[0] * x + e[3] * y + e[6] * z;
-          this.y = e[1] * x + e[4] * y + e[7] * z;
-          this.z = e[2] * x + e[5] * y + e[8] * z;
-          return this;
-        },
-        applyMatrix4: function applyMatrix4(m) {
-
-          // input: THREE.Matrix4 affine matrix
-
-          var x = this.x,
-              y = this.y,
-              z = this.z;
-          var e = m.elements;
-          this.x = e[0] * x + e[4] * y + e[8] * z + e[12];
-          this.y = e[1] * x + e[5] * y + e[9] * z + e[13];
-          this.z = e[2] * x + e[6] * y + e[10] * z + e[14];
-          return this;
-        },
-        applyProjection: function applyProjection(m) {
-
-          // input: THREE.Matrix4 projection matrix
-
-          var x = this.x,
-              y = this.y,
-              z = this.z;
-          var e = m.elements;
-          var d = 1 / (e[3] * x + e[7] * y + e[11] * z + e[15]); // perspective divide
-
-          this.x = (e[0] * x + e[4] * y + e[8] * z + e[12]) * d;
-          this.y = (e[1] * x + e[5] * y + e[9] * z + e[13]) * d;
-          this.z = (e[2] * x + e[6] * y + e[10] * z + e[14]) * d;
-          return this;
-        },
-        applyQuaternion: function applyQuaternion(q) {
-
-          var x = this.x;
-          var y = this.y;
-          var z = this.z;
-          var qx = q.x;
-          var qy = q.y;
-          var qz = q.z;
-          var qw = q.w;
-          // calculate quat * vector
-
-          var ix = qw * x + qy * z - qz * y;
-          var iy = qw * y + qz * x - qx * z;
-          var iz = qw * z + qx * y - qy * x;
-          var iw = -qx * x - qy * y - qz * z;
-          // calculate result * inverse quat
-
-          this.x = ix * qw + iw * -qx + iy * -qz - iz * -qy;
-          this.y = iy * qw + iw * -qy + iz * -qx - ix * -qz;
-          this.z = iz * qw + iw * -qz + ix * -qy - iy * -qx;
-          return this;
-        },
-        project: function () {
-
-          var matrix;
-          return function project(camera) {
-
-            if (matrix === undefined) matrix = new THREE.Matrix4();
-            matrix.multiplyMatrices(camera.projectionMatrix, matrix.getInverse(camera.matrixWorld));
-            return this.applyProjection(matrix);
-          };
-        }(),
-        unproject: function () {
-
-          var matrix;
-          return function unproject(camera) {
-
-            if (matrix === undefined) matrix = new THREE.Matrix4();
-            matrix.multiplyMatrices(camera.matrixWorld, matrix.getInverse(camera.projectionMatrix));
-            return this.applyProjection(matrix);
-          };
-        }(),
-        transformDirection: function transformDirection(m) {
-
-          // input: THREE.Matrix4 affine matrix
-          // vector interpreted as a direction
-
-          var x = this.x,
-              y = this.y,
-              z = this.z;
-          var e = m.elements;
-          this.x = e[0] * x + e[4] * y + e[8] * z;
-          this.y = e[1] * x + e[5] * y + e[9] * z;
-          this.z = e[2] * x + e[6] * y + e[10] * z;
-          this.normalize();
-          return this;
-        },
-        divide: function divide(v) {
-
-          this.x /= v.x;
-          this.y /= v.y;
-          this.z /= v.z;
-          return this;
-        },
-        divideScalar: function divideScalar(scalar) {
-
-          if (scalar !== 0) {
-
-            var invScalar = 1 / scalar;
-            this.x *= invScalar;
-            this.y *= invScalar;
-            this.z *= invScalar;
-          } else {
-
-            this.x = 0;
-            this.y = 0;
-            this.z = 0;
-          }
-
-          return this;
-        },
-        min: function min(v) {
-
-          if (this.x > v.x) {
-
-            this.x = v.x;
-          }
-
-          if (this.y > v.y) {
-
-            this.y = v.y;
-          }
-
-          if (this.z > v.z) {
-
-            this.z = v.z;
-          }
-
-          return this;
-        },
-        max: function max(v) {
-
-          if (this.x < v.x) {
-
-            this.x = v.x;
-          }
-
-          if (this.y < v.y) {
-
-            this.y = v.y;
-          }
-
-          if (this.z < v.z) {
-
-            this.z = v.z;
-          }
-
-          return this;
-        },
-        clamp: function clamp(min, max) {
-
-          // This function assumes min < max, if this assumption isn't true it will not operate correctly
-
-          if (this.x < min.x) {
-
-            this.x = min.x;
-          } else if (this.x > max.x) {
-
-            this.x = max.x;
-          }
-
-          if (this.y < min.y) {
-
-            this.y = min.y;
-          } else if (this.y > max.y) {
-
-            this.y = max.y;
-          }
-
-          if (this.z < min.z) {
-
-            this.z = min.z;
-          } else if (this.z > max.z) {
-
-            this.z = max.z;
-          }
-
-          return this;
-        },
-        clampScalar: function () {
-
-          var min, max;
-          return function clampScalar(minVal, maxVal) {
-
-            if (min === undefined) {
-
-              min = new THREE.Vector3();
-              max = new THREE.Vector3();
-            }
-
-            min.set(minVal, minVal, minVal);
-            max.set(maxVal, maxVal, maxVal);
-            return this.clamp(min, max);
-          };
-        }(),
-        floor: function floor() {
-
-          this.x = Math.floor(this.x);
-          this.y = Math.floor(this.y);
-          this.z = Math.floor(this.z);
-          return this;
-        },
-        ceil: function ceil() {
-
-          this.x = Math.ceil(this.x);
-          this.y = Math.ceil(this.y);
-          this.z = Math.ceil(this.z);
-          return this;
-        },
-        round: function round() {
-
-          this.x = Math.round(this.x);
-          this.y = Math.round(this.y);
-          this.z = Math.round(this.z);
-          return this;
-        },
-        roundToZero: function roundToZero() {
-
-          this.x = this.x < 0 ? Math.ceil(this.x) : Math.floor(this.x);
-          this.y = this.y < 0 ? Math.ceil(this.y) : Math.floor(this.y);
-          this.z = this.z < 0 ? Math.ceil(this.z) : Math.floor(this.z);
-          return this;
-        },
-        negate: function negate() {
-
-          this.x = -this.x;
-          this.y = -this.y;
-          this.z = -this.z;
-          return this;
-        },
-        dot: function dot(v) {
-
-          return this.x * v.x + this.y * v.y + this.z * v.z;
-        },
-        lengthSq: function lengthSq() {
-
-          return this.x * this.x + this.y * this.y + this.z * this.z;
-        },
-        length: function length() {
-
-          return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
-        },
-        lengthManhattan: function lengthManhattan() {
-
-          return Math.abs(this.x) + Math.abs(this.y) + Math.abs(this.z);
-        },
-        normalize: function normalize() {
-
-          return this.divideScalar(this.length());
-        },
-        setLength: function setLength(l) {
-
-          var oldLength = this.length();
-          if (oldLength !== 0 && l !== oldLength) {
-
-            this.multiplyScalar(l / oldLength);
-          }
-
-          return this;
-        },
-        lerp: function lerp(v, alpha) {
-
-          this.x += (v.x - this.x) * alpha;
-          this.y += (v.y - this.y) * alpha;
-          this.z += (v.z - this.z) * alpha;
-          return this;
-        },
-        lerpVectors: function lerpVectors(v1, v2, alpha) {
-
-          this.subVectors(v2, v1).multiplyScalar(alpha).add(v1);
-          return this;
-        },
-        cross: function cross(v, w) {
-
-          if (w !== undefined) {
-
-            console.warn('THREE.Vector3: .cross() now only accepts one argument. Use .crossVectors( a, b ) instead.');
-            return this.crossVectors(v, w);
-          }
-
-          var x = this.x,
-              y = this.y,
-              z = this.z;
-          this.x = y * v.z - z * v.y;
-          this.y = z * v.x - x * v.z;
-          this.z = x * v.y - y * v.x;
-          return this;
-        },
-        crossVectors: function crossVectors(a, b) {
-
-          var ax = a.x,
-              ay = a.y,
-              az = a.z;
-          var bx = b.x,
-              by = b.y,
-              bz = b.z;
-          this.x = ay * bz - az * by;
-          this.y = az * bx - ax * bz;
-          this.z = ax * by - ay * bx;
-          return this;
-        },
-        projectOnVector: function () {
-
-          var v1, dot;
-          return function projectOnVector(vector) {
-
-            if (v1 === undefined) v1 = new THREE.Vector3();
-            v1.copy(vector).normalize();
-            dot = this.dot(v1);
-            return this.copy(v1).multiplyScalar(dot);
-          };
-        }(),
-        projectOnPlane: function () {
-
-          var v1;
-          return function projectOnPlane(planeNormal) {
-
-            if (v1 === undefined) v1 = new THREE.Vector3();
-            v1.copy(this).projectOnVector(planeNormal);
-            return this.sub(v1);
-          };
-        }(),
-        reflect: function () {
-
-          // reflect incident vector off plane orthogonal to normal
-          // normal is assumed to have unit length
-
-          var v1;
-          return function reflect(normal) {
-
-            if (v1 === undefined) v1 = new THREE.Vector3();
-            return this.sub(v1.copy(normal).multiplyScalar(2 * this.dot(normal)));
-          };
-        }(),
-        angleTo: function angleTo(v) {
-
-          var theta = this.dot(v) / (this.length() * v.length());
-          // clamp, to handle numerical problems
-
-          return Math.acos(THREE.Math.clamp(theta, -1, 1));
-        },
-        distanceTo: function distanceTo(v) {
-
-          return Math.sqrt(this.distanceToSquared(v));
-        },
-        distanceToSquared: function distanceToSquared(v) {
-
-          var dx = this.x - v.x;
-          var dy = this.y - v.y;
-          var dz = this.z - v.z;
-          return dx * dx + dy * dy + dz * dz;
-        },
-        setEulerFromRotationMatrix: function setEulerFromRotationMatrix(m, order) {
-
-          console.error('THREE.Vector3: .setEulerFromRotationMatrix() has been removed. Use Euler.setFromRotationMatrix() instead.');
-        },
-        setEulerFromQuaternion: function setEulerFromQuaternion(q, order) {
-
-          console.error('THREE.Vector3: .setEulerFromQuaternion() has been removed. Use Euler.setFromQuaternion() instead.');
-        },
-        getPositionFromMatrix: function getPositionFromMatrix(m) {
-
-          console.warn('THREE.Vector3: .getPositionFromMatrix() has been renamed to .setFromMatrixPosition().');
-          return this.setFromMatrixPosition(m);
-        },
-        getScaleFromMatrix: function getScaleFromMatrix(m) {
-
-          console.warn('THREE.Vector3: .getScaleFromMatrix() has been renamed to .setFromMatrixScale().');
-          return this.setFromMatrixScale(m);
-        },
-        getColumnFromMatrix: function getColumnFromMatrix(index, matrix) {
-
-          console.warn('THREE.Vector3: .getColumnFromMatrix() has been renamed to .setFromMatrixColumn().');
-          return this.setFromMatrixColumn(index, matrix);
-        },
-        setFromMatrixPosition: function setFromMatrixPosition(m) {
-
-          this.x = m.elements[12];
-          this.y = m.elements[13];
-          this.z = m.elements[14];
-          return this;
-        },
-        setFromMatrixScale: function setFromMatrixScale(m) {
-
-          var sx = this.set(m.elements[0], m.elements[1], m.elements[2]).length();
-          var sy = this.set(m.elements[4], m.elements[5], m.elements[6]).length();
-          var sz = this.set(m.elements[8], m.elements[9], m.elements[10]).length();
-          this.x = sx;
-          this.y = sy;
-          this.z = sz;
-          return this;
-        },
-        setFromMatrixColumn: function setFromMatrixColumn(index, matrix) {
-
-          var offset = index * 4;
-          var me = matrix.elements;
-          this.x = me[offset];
-          this.y = me[offset + 1];
-          this.z = me[offset + 2];
-          return this;
-        },
-        equals: function equals(v) {
-
-          return v.x === this.x && v.y === this.y && v.z === this.z;
-        },
-        fromArray: function fromArray(array, offset) {
-
-          if (offset === undefined) offset = 0;
-          this.x = array[offset];
-          this.y = array[offset + 1];
-          this.z = array[offset + 2];
-          return this;
-        },
-        toArray: function toArray(array, offset) {
-
-          if (array === undefined) array = [];
-          if (offset === undefined) offset = 0;
-          array[offset] = this.x;
-          array[offset + 1] = this.y;
-          array[offset + 2] = this.z;
-          return array;
-        },
-        fromAttribute: function fromAttribute(attribute, index, offset) {
-
-          if (offset === undefined) offset = 0;
-          index = index * attribute.itemSize + offset;
-          this.x = attribute.array[index];
-          this.y = attribute.array[index + 1];
-          this.z = attribute.array[index + 2];
-          return this;
-        }
-
-      };
-      // File:src/math/Matrix4.js
-
-      /**
-       * @author mrdoob / http://mrdoob.com/
-       * @author supereggbert / http://www.paulbrunt.co.uk/
-       * @author philogb / http://blog.thejit.org/
-       * @author jordi_ros / http://plattsoft.com
-       * @author D1plo1d / http://github.com/D1plo1d
-       * @author alteredq / http://alteredqualia.com/
-       * @author mikael emtinger / http://gomo.se/
-       * @author timknip / http://www.floorplanner.com/
-       * @author bhouston / http://exocortex.com
-       * @author WestLangley / http://github.com/WestLangley
-       */
-
-      THREE.Matrix4 = function () {
-        this.elements = new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
-      };
-      THREE.Matrix4.prototype = {
-        constructor: THREE.Matrix4,
-        set: function set(n11, n12, n13, n14, n21, n22, n23, n24, n31, n32, n33, n34, n41, n42, n43, n44) {
-
-          var te = this.elements;
-          te[0] = n11;
-          te[4] = n12;
-          te[8] = n13;
-          te[12] = n14;
-          te[1] = n21;
-          te[5] = n22;
-          te[9] = n23;
-          te[13] = n24;
-          te[2] = n31;
-          te[6] = n32;
-          te[10] = n33;
-          te[14] = n34;
-          te[3] = n41;
-          te[7] = n42;
-          te[11] = n43;
-          te[15] = n44;
-          return this;
-        },
-        identity: function identity() {
-
-          this.set(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-          return this;
-        },
-        clone: function clone() {
-
-          return new THREE.Matrix4().fromArray(this.elements);
-        },
-        copy: function copy(m) {
-
-          this.elements.set(m.elements);
-          return this;
-        },
-        extractPosition: function extractPosition(m) {
-
-          console.warn('THREE.Matrix4: .extractPosition() has been renamed to .copyPosition().');
-          return this.copyPosition(m);
-        },
-        copyPosition: function copyPosition(m) {
-
-          var te = this.elements;
-          var me = m.elements;
-          te[12] = me[12];
-          te[13] = me[13];
-          te[14] = me[14];
-          return this;
-        },
-        extractBasis: function extractBasis(xAxis, yAxis, zAxis) {
-
-          var te = this.elements;
-          xAxis.set(te[0], te[1], te[2]);
-          yAxis.set(te[4], te[5], te[6]);
-          zAxis.set(te[8], te[9], te[10]);
-          return this;
-        },
-        makeBasis: function makeBasis(xAxis, yAxis, zAxis) {
-
-          this.set(xAxis.x, yAxis.x, zAxis.x, 0, xAxis.y, yAxis.y, zAxis.y, 0, xAxis.z, yAxis.z, zAxis.z, 0, 0, 0, 0, 1);
-          return this;
-        },
-        extractRotation: function () {
-
-          var v1;
-          return function (m) {
-
-            if (v1 === undefined) v1 = new THREE.Vector3();
-            var te = this.elements;
-            var me = m.elements;
-            var scaleX = 1 / v1.set(me[0], me[1], me[2]).length();
-            var scaleY = 1 / v1.set(me[4], me[5], me[6]).length();
-            var scaleZ = 1 / v1.set(me[8], me[9], me[10]).length();
-            te[0] = me[0] * scaleX;
-            te[1] = me[1] * scaleX;
-            te[2] = me[2] * scaleX;
-            te[4] = me[4] * scaleY;
-            te[5] = me[5] * scaleY;
-            te[6] = me[6] * scaleY;
-            te[8] = me[8] * scaleZ;
-            te[9] = me[9] * scaleZ;
-            te[10] = me[10] * scaleZ;
-            return this;
-          };
-        }(),
-        makeRotationFromEuler: function makeRotationFromEuler(euler) {
-
-          if (euler instanceof THREE.Euler === false) {
-
-            console.error('THREE.Matrix: .makeRotationFromEuler() now expects a Euler rotation rather than a Vector3 and order.');
-          }
-
-          var te = this.elements;
-          var x = euler.x,
-              y = euler.y,
-              z = euler.z;
-          var a = Math.cos(x),
-              b = Math.sin(x);
-          var c = Math.cos(y),
-              d = Math.sin(y);
-          var e = Math.cos(z),
-              f = Math.sin(z);
-          if (euler.order === 'XYZ') {
-
-            var ae = a * e,
-                af = a * f,
-                be = b * e,
-                bf = b * f;
-            te[0] = c * e;
-            te[4] = -c * f;
-            te[8] = d;
-            te[1] = af + be * d;
-            te[5] = ae - bf * d;
-            te[9] = -b * c;
-            te[2] = bf - ae * d;
-            te[6] = be + af * d;
-            te[10] = a * c;
-          } else if (euler.order === 'YXZ') {
-
-            var ce = c * e,
-                cf = c * f,
-                de = d * e,
-                df = d * f;
-            te[0] = ce + df * b;
-            te[4] = de * b - cf;
-            te[8] = a * d;
-            te[1] = a * f;
-            te[5] = a * e;
-            te[9] = -b;
-            te[2] = cf * b - de;
-            te[6] = df + ce * b;
-            te[10] = a * c;
-          } else if (euler.order === 'ZXY') {
-
-            var ce = c * e,
-                cf = c * f,
-                de = d * e,
-                df = d * f;
-            te[0] = ce - df * b;
-            te[4] = -a * f;
-            te[8] = de + cf * b;
-            te[1] = cf + de * b;
-            te[5] = a * e;
-            te[9] = df - ce * b;
-            te[2] = -a * d;
-            te[6] = b;
-            te[10] = a * c;
-          } else if (euler.order === 'ZYX') {
-
-            var ae = a * e,
-                af = a * f,
-                be = b * e,
-                bf = b * f;
-            te[0] = c * e;
-            te[4] = be * d - af;
-            te[8] = ae * d + bf;
-            te[1] = c * f;
-            te[5] = bf * d + ae;
-            te[9] = af * d - be;
-            te[2] = -d;
-            te[6] = b * c;
-            te[10] = a * c;
-          } else if (euler.order === 'YZX') {
-
-            var ac = a * c,
-                ad = a * d,
-                bc = b * c,
-                bd = b * d;
-            te[0] = c * e;
-            te[4] = bd - ac * f;
-            te[8] = bc * f + ad;
-            te[1] = f;
-            te[5] = a * e;
-            te[9] = -b * e;
-            te[2] = -d * e;
-            te[6] = ad * f + bc;
-            te[10] = ac - bd * f;
-          } else if (euler.order === 'XZY') {
-
-            var ac = a * c,
-                ad = a * d,
-                bc = b * c,
-                bd = b * d;
-            te[0] = c * e;
-            te[4] = -f;
-            te[8] = d * e;
-            te[1] = ac * f + bd;
-            te[5] = a * e;
-            te[9] = ad * f - bc;
-            te[2] = bc * f - ad;
-            te[6] = b * e;
-            te[10] = bd * f + ac;
-          }
-
-          // last column
-          te[3] = 0;
-          te[7] = 0;
-          te[11] = 0;
-          // bottom row
-          te[12] = 0;
-          te[13] = 0;
-          te[14] = 0;
-          te[15] = 1;
-          return this;
-        },
-        setRotationFromQuaternion: function setRotationFromQuaternion(q) {
-
-          console.warn('THREE.Matrix4: .setRotationFromQuaternion() has been renamed to .makeRotationFromQuaternion().');
-          return this.makeRotationFromQuaternion(q);
-        },
-        makeRotationFromQuaternion: function makeRotationFromQuaternion(q) {
-
-          var te = this.elements;
-          var x = q.x,
-              y = q.y,
-              z = q.z,
-              w = q.w;
-          var x2 = x + x,
-              y2 = y + y,
-              z2 = z + z;
-          var xx = x * x2,
-              xy = x * y2,
-              xz = x * z2;
-          var yy = y * y2,
-              yz = y * z2,
-              zz = z * z2;
-          var wx = w * x2,
-              wy = w * y2,
-              wz = w * z2;
-          te[0] = 1 - (yy + zz);
-          te[4] = xy - wz;
-          te[8] = xz + wy;
-          te[1] = xy + wz;
-          te[5] = 1 - (xx + zz);
-          te[9] = yz - wx;
-          te[2] = xz - wy;
-          te[6] = yz + wx;
-          te[10] = 1 - (xx + yy);
-          // last column
-          te[3] = 0;
-          te[7] = 0;
-          te[11] = 0;
-          // bottom row
-          te[12] = 0;
-          te[13] = 0;
-          te[14] = 0;
-          te[15] = 1;
-          return this;
-        },
-        lookAt: function () {
-
-          var x, y, z;
-          return function (eye, target, up) {
-
-            if (x === undefined) x = new THREE.Vector3();
-            if (y === undefined) y = new THREE.Vector3();
-            if (z === undefined) z = new THREE.Vector3();
-            var te = this.elements;
-            z.subVectors(eye, target).normalize();
-            if (z.length() === 0) {
-
-              z.z = 1;
-            }
-
-            x.crossVectors(up, z).normalize();
-            if (x.length() === 0) {
-
-              z.x += 0.0001;
-              x.crossVectors(up, z).normalize();
-            }
-
-            y.crossVectors(z, x);
-            te[0] = x.x;
-            te[4] = y.x;
-            te[8] = z.x;
-            te[1] = x.y;
-            te[5] = y.y;
-            te[9] = z.y;
-            te[2] = x.z;
-            te[6] = y.z;
-            te[10] = z.z;
-            return this;
-          };
-        }(),
-        multiply: function multiply(m, n) {
-
-          if (n !== undefined) {
-
-            console.warn('THREE.Matrix4: .multiply() now only accepts one argument. Use .multiplyMatrices( a, b ) instead.');
-            return this.multiplyMatrices(m, n);
-          }
-
-          return this.multiplyMatrices(this, m);
-        },
-        multiplyMatrices: function multiplyMatrices(a, b) {
-
-          var ae = a.elements;
-          var be = b.elements;
-          var te = this.elements;
-          var a11 = ae[0],
-              a12 = ae[4],
-              a13 = ae[8],
-              a14 = ae[12];
-          var a21 = ae[1],
-              a22 = ae[5],
-              a23 = ae[9],
-              a24 = ae[13];
-          var a31 = ae[2],
-              a32 = ae[6],
-              a33 = ae[10],
-              a34 = ae[14];
-          var a41 = ae[3],
-              a42 = ae[7],
-              a43 = ae[11],
-              a44 = ae[15];
-          var b11 = be[0],
-              b12 = be[4],
-              b13 = be[8],
-              b14 = be[12];
-          var b21 = be[1],
-              b22 = be[5],
-              b23 = be[9],
-              b24 = be[13];
-          var b31 = be[2],
-              b32 = be[6],
-              b33 = be[10],
-              b34 = be[14];
-          var b41 = be[3],
-              b42 = be[7],
-              b43 = be[11],
-              b44 = be[15];
-          te[0] = a11 * b11 + a12 * b21 + a13 * b31 + a14 * b41;
-          te[4] = a11 * b12 + a12 * b22 + a13 * b32 + a14 * b42;
-          te[8] = a11 * b13 + a12 * b23 + a13 * b33 + a14 * b43;
-          te[12] = a11 * b14 + a12 * b24 + a13 * b34 + a14 * b44;
-          te[1] = a21 * b11 + a22 * b21 + a23 * b31 + a24 * b41;
-          te[5] = a21 * b12 + a22 * b22 + a23 * b32 + a24 * b42;
-          te[9] = a21 * b13 + a22 * b23 + a23 * b33 + a24 * b43;
-          te[13] = a21 * b14 + a22 * b24 + a23 * b34 + a24 * b44;
-          te[2] = a31 * b11 + a32 * b21 + a33 * b31 + a34 * b41;
-          te[6] = a31 * b12 + a32 * b22 + a33 * b32 + a34 * b42;
-          te[10] = a31 * b13 + a32 * b23 + a33 * b33 + a34 * b43;
-          te[14] = a31 * b14 + a32 * b24 + a33 * b34 + a34 * b44;
-          te[3] = a41 * b11 + a42 * b21 + a43 * b31 + a44 * b41;
-          te[7] = a41 * b12 + a42 * b22 + a43 * b32 + a44 * b42;
-          te[11] = a41 * b13 + a42 * b23 + a43 * b33 + a44 * b43;
-          te[15] = a41 * b14 + a42 * b24 + a43 * b34 + a44 * b44;
-          return this;
-        },
-        multiplyToArray: function multiplyToArray(a, b, r) {
-
-          var te = this.elements;
-          this.multiplyMatrices(a, b);
-          r[0] = te[0];
-          r[1] = te[1];
-          r[2] = te[2];
-          r[3] = te[3];
-          r[4] = te[4];
-          r[5] = te[5];
-          r[6] = te[6];
-          r[7] = te[7];
-          r[8] = te[8];
-          r[9] = te[9];
-          r[10] = te[10];
-          r[11] = te[11];
-          r[12] = te[12];
-          r[13] = te[13];
-          r[14] = te[14];
-          r[15] = te[15];
-          return this;
-        },
-        multiplyScalar: function multiplyScalar(s) {
-
-          var te = this.elements;
-          te[0] *= s;
-          te[4] *= s;
-          te[8] *= s;
-          te[12] *= s;
-          te[1] *= s;
-          te[5] *= s;
-          te[9] *= s;
-          te[13] *= s;
-          te[2] *= s;
-          te[6] *= s;
-          te[10] *= s;
-          te[14] *= s;
-          te[3] *= s;
-          te[7] *= s;
-          te[11] *= s;
-          te[15] *= s;
-          return this;
-        },
-        multiplyVector3: function multiplyVector3(vector) {
-
-          console.warn('THREE.Matrix4: .multiplyVector3() has been removed. Use vector.applyMatrix4( matrix ) or vector.applyProjection( matrix ) instead.');
-          return vector.applyProjection(this);
-        },
-        multiplyVector4: function multiplyVector4(vector) {
-
-          console.warn('THREE.Matrix4: .multiplyVector4() has been removed. Use vector.applyMatrix4( matrix ) instead.');
-          return vector.applyMatrix4(this);
-        },
-        multiplyVector3Array: function multiplyVector3Array(a) {
-
-          console.warn('THREE.Matrix4: .multiplyVector3Array() has been renamed. Use matrix.applyToVector3Array( array ) instead.');
-          return this.applyToVector3Array(a);
-        },
-        applyToVector3Array: function () {
-
-          var v1;
-          return function (array, offset, length) {
-
-            if (v1 === undefined) v1 = new THREE.Vector3();
-            if (offset === undefined) offset = 0;
-            if (length === undefined) length = array.length;
-            for (var i = 0, j = offset; i < length; i += 3, j += 3) {
-
-              v1.fromArray(array, j);
-              v1.applyMatrix4(this);
-              v1.toArray(array, j);
-            }
-
-            return array;
-          };
-        }(),
-        applyToBuffer: function () {
-
-          var v1;
-          return function applyToBuffer(buffer, offset, length) {
-
-            if (v1 === undefined) v1 = new THREE.Vector3();
-            if (offset === undefined) offset = 0;
-            if (length === undefined) length = buffer.length / buffer.itemSize;
-            for (var i = 0, j = offset; i < length; i++, j++) {
-
-              v1.x = buffer.getX(j);
-              v1.y = buffer.getY(j);
-              v1.z = buffer.getZ(j);
-              v1.applyMatrix4(this);
-              buffer.setXYZ(v1.x, v1.y, v1.z);
-            }
-
-            return buffer;
-          };
-        }(),
-        rotateAxis: function rotateAxis(v) {
-
-          console.warn('THREE.Matrix4: .rotateAxis() has been removed. Use Vector3.transformDirection( matrix ) instead.');
-          v.transformDirection(this);
-        },
-        crossVector: function crossVector(vector) {
-
-          console.warn('THREE.Matrix4: .crossVector() has been removed. Use vector.applyMatrix4( matrix ) instead.');
-          return vector.applyMatrix4(this);
-        },
-        determinant: function determinant() {
-
-          var te = this.elements;
-          var n11 = te[0],
-              n12 = te[4],
-              n13 = te[8],
-              n14 = te[12];
-          var n21 = te[1],
-              n22 = te[5],
-              n23 = te[9],
-              n24 = te[13];
-          var n31 = te[2],
-              n32 = te[6],
-              n33 = te[10],
-              n34 = te[14];
-          var n41 = te[3],
-              n42 = te[7],
-              n43 = te[11],
-              n44 = te[15];
-          //TODO: make this more efficient
-          //( based on http://www.euclideanspace.com/maths/algebra/matrix/functions/inverse/fourD/index.htm )
-
-          return n41 * (+n14 * n23 * n32 - n13 * n24 * n32 - n14 * n22 * n33 + n12 * n24 * n33 + n13 * n22 * n34 - n12 * n23 * n34) + n42 * (+n11 * n23 * n34 - n11 * n24 * n33 + n14 * n21 * n33 - n13 * n21 * n34 + n13 * n24 * n31 - n14 * n23 * n31) + n43 * (+n11 * n24 * n32 - n11 * n22 * n34 - n14 * n21 * n32 + n12 * n21 * n34 + n14 * n22 * n31 - n12 * n24 * n31) + n44 * (-n13 * n22 * n31 - n11 * n23 * n32 + n11 * n22 * n33 + n13 * n21 * n32 - n12 * n21 * n33 + n12 * n23 * n31);
-        },
-        transpose: function transpose() {
-
-          var te = this.elements;
-          var tmp;
-          tmp = te[1];
-          te[1] = te[4];
-          te[4] = tmp;
-          tmp = te[2];
-          te[2] = te[8];
-          te[8] = tmp;
-          tmp = te[6];
-          te[6] = te[9];
-          te[9] = tmp;
-          tmp = te[3];
-          te[3] = te[12];
-          te[12] = tmp;
-          tmp = te[7];
-          te[7] = te[13];
-          te[13] = tmp;
-          tmp = te[11];
-          te[11] = te[14];
-          te[14] = tmp;
-          return this;
-        },
-        flattenToArrayOffset: function flattenToArrayOffset(array, offset) {
-
-          var te = this.elements;
-          array[offset] = te[0];
-          array[offset + 1] = te[1];
-          array[offset + 2] = te[2];
-          array[offset + 3] = te[3];
-          array[offset + 4] = te[4];
-          array[offset + 5] = te[5];
-          array[offset + 6] = te[6];
-          array[offset + 7] = te[7];
-          array[offset + 8] = te[8];
-          array[offset + 9] = te[9];
-          array[offset + 10] = te[10];
-          array[offset + 11] = te[11];
-          array[offset + 12] = te[12];
-          array[offset + 13] = te[13];
-          array[offset + 14] = te[14];
-          array[offset + 15] = te[15];
-          return array;
-        },
-        getPosition: function () {
-
-          var v1;
-          return function () {
-
-            if (v1 === undefined) v1 = new THREE.Vector3();
-            console.warn('THREE.Matrix4: .getPosition() has been removed. Use Vector3.setFromMatrixPosition( matrix ) instead.');
-            var te = this.elements;
-            return v1.set(te[12], te[13], te[14]);
-          };
-        }(),
-        setPosition: function setPosition(v) {
-
-          var te = this.elements;
-          te[12] = v.x;
-          te[13] = v.y;
-          te[14] = v.z;
-          return this;
-        },
-        getInverse: function getInverse(m, throwOnInvertible) {
-
-          // based on http://www.euclideanspace.com/maths/algebra/matrix/functions/inverse/fourD/index.htm
-          var te = this.elements;
-          var me = m.elements;
-          var n11 = me[0],
-              n12 = me[4],
-              n13 = me[8],
-              n14 = me[12];
-          var n21 = me[1],
-              n22 = me[5],
-              n23 = me[9],
-              n24 = me[13];
-          var n31 = me[2],
-              n32 = me[6],
-              n33 = me[10],
-              n34 = me[14];
-          var n41 = me[3],
-              n42 = me[7],
-              n43 = me[11],
-              n44 = me[15];
-          te[0] = n23 * n34 * n42 - n24 * n33 * n42 + n24 * n32 * n43 - n22 * n34 * n43 - n23 * n32 * n44 + n22 * n33 * n44;
-          te[4] = n14 * n33 * n42 - n13 * n34 * n42 - n14 * n32 * n43 + n12 * n34 * n43 + n13 * n32 * n44 - n12 * n33 * n44;
-          te[8] = n13 * n24 * n42 - n14 * n23 * n42 + n14 * n22 * n43 - n12 * n24 * n43 - n13 * n22 * n44 + n12 * n23 * n44;
-          te[12] = n14 * n23 * n32 - n13 * n24 * n32 - n14 * n22 * n33 + n12 * n24 * n33 + n13 * n22 * n34 - n12 * n23 * n34;
-          te[1] = n24 * n33 * n41 - n23 * n34 * n41 - n24 * n31 * n43 + n21 * n34 * n43 + n23 * n31 * n44 - n21 * n33 * n44;
-          te[5] = n13 * n34 * n41 - n14 * n33 * n41 + n14 * n31 * n43 - n11 * n34 * n43 - n13 * n31 * n44 + n11 * n33 * n44;
-          te[9] = n14 * n23 * n41 - n13 * n24 * n41 - n14 * n21 * n43 + n11 * n24 * n43 + n13 * n21 * n44 - n11 * n23 * n44;
-          te[13] = n13 * n24 * n31 - n14 * n23 * n31 + n14 * n21 * n33 - n11 * n24 * n33 - n13 * n21 * n34 + n11 * n23 * n34;
-          te[2] = n22 * n34 * n41 - n24 * n32 * n41 + n24 * n31 * n42 - n21 * n34 * n42 - n22 * n31 * n44 + n21 * n32 * n44;
-          te[6] = n14 * n32 * n41 - n12 * n34 * n41 - n14 * n31 * n42 + n11 * n34 * n42 + n12 * n31 * n44 - n11 * n32 * n44;
-          te[10] = n12 * n24 * n41 - n14 * n22 * n41 + n14 * n21 * n42 - n11 * n24 * n42 - n12 * n21 * n44 + n11 * n22 * n44;
-          te[14] = n14 * n22 * n31 - n12 * n24 * n31 - n14 * n21 * n32 + n11 * n24 * n32 + n12 * n21 * n34 - n11 * n22 * n34;
-          te[3] = n23 * n32 * n41 - n22 * n33 * n41 - n23 * n31 * n42 + n21 * n33 * n42 + n22 * n31 * n43 - n21 * n32 * n43;
-          te[7] = n12 * n33 * n41 - n13 * n32 * n41 + n13 * n31 * n42 - n11 * n33 * n42 - n12 * n31 * n43 + n11 * n32 * n43;
-          te[11] = n13 * n22 * n41 - n12 * n23 * n41 - n13 * n21 * n42 + n11 * n23 * n42 + n12 * n21 * n43 - n11 * n22 * n43;
-          te[15] = n12 * n23 * n31 - n13 * n22 * n31 + n13 * n21 * n32 - n11 * n23 * n32 - n12 * n21 * n33 + n11 * n22 * n33;
-          var det = n11 * te[0] + n21 * te[4] + n31 * te[8] + n41 * te[12];
-          if (det === 0) {
-
-            var msg = "THREE.Matrix4.getInverse(): can't invert matrix, determinant is 0";
-            if (throwOnInvertible || false) {
-
-              throw new Error(msg);
-            } else {
-
-              console.warn(msg);
-            }
-
-            this.identity();
-            return this;
-          }
-
-          this.multiplyScalar(1 / det);
-          return this;
-        },
-        translate: function translate(v) {
-
-          console.error('THREE.Matrix4: .translate() has been removed.');
-        },
-        rotateX: function rotateX(angle) {
-
-          console.error('THREE.Matrix4: .rotateX() has been removed.');
-        },
-        rotateY: function rotateY(angle) {
-
-          console.error('THREE.Matrix4: .rotateY() has been removed.');
-        },
-        rotateZ: function rotateZ(angle) {
-
-          console.error('THREE.Matrix4: .rotateZ() has been removed.');
-        },
-        rotateByAxis: function rotateByAxis(axis, angle) {
-
-          console.error('THREE.Matrix4: .rotateByAxis() has been removed.');
-        },
-        scale: function scale(v) {
-
-          var te = this.elements;
-          var x = v.x,
-              y = v.y,
-              z = v.z;
-          te[0] *= x;
-          te[4] *= y;
-          te[8] *= z;
-          te[1] *= x;
-          te[5] *= y;
-          te[9] *= z;
-          te[2] *= x;
-          te[6] *= y;
-          te[10] *= z;
-          te[3] *= x;
-          te[7] *= y;
-          te[11] *= z;
-          return this;
-        },
-        getMaxScaleOnAxis: function getMaxScaleOnAxis() {
-
-          var te = this.elements;
-          var scaleXSq = te[0] * te[0] + te[1] * te[1] + te[2] * te[2];
-          var scaleYSq = te[4] * te[4] + te[5] * te[5] + te[6] * te[6];
-          var scaleZSq = te[8] * te[8] + te[9] * te[9] + te[10] * te[10];
-          return Math.sqrt(Math.max(scaleXSq, Math.max(scaleYSq, scaleZSq)));
-        },
-        makeTranslation: function makeTranslation(x, y, z) {
-
-          this.set(1, 0, 0, x, 0, 1, 0, y, 0, 0, 1, z, 0, 0, 0, 1);
-          return this;
-        },
-        makeRotationX: function makeRotationX(theta) {
-
-          var c = Math.cos(theta),
-              s = Math.sin(theta);
-          this.set(1, 0, 0, 0, 0, c, -s, 0, 0, s, c, 0, 0, 0, 0, 1);
-          return this;
-        },
-        makeRotationY: function makeRotationY(theta) {
-
-          var c = Math.cos(theta),
-              s = Math.sin(theta);
-          this.set(c, 0, s, 0, 0, 1, 0, 0, -s, 0, c, 0, 0, 0, 0, 1);
-          return this;
-        },
-        makeRotationZ: function makeRotationZ(theta) {
-
-          var c = Math.cos(theta),
-              s = Math.sin(theta);
-          this.set(c, -s, 0, 0, s, c, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-          return this;
-        },
-        makeRotationAxis: function makeRotationAxis(axis, angle) {
-
-          // Based on http://www.gamedev.net/reference/articles/article1199.asp
-
-          var c = Math.cos(angle);
-          var s = Math.sin(angle);
-          var t = 1 - c;
-          var x = axis.x,
-              y = axis.y,
-              z = axis.z;
-          var tx = t * x,
-              ty = t * y;
-          this.set(tx * x + c, tx * y - s * z, tx * z + s * y, 0, tx * y + s * z, ty * y + c, ty * z - s * x, 0, tx * z - s * y, ty * z + s * x, t * z * z + c, 0, 0, 0, 0, 1);
-          return this;
-        },
-        makeScale: function makeScale(x, y, z) {
-
-          this.set(x, 0, 0, 0, 0, y, 0, 0, 0, 0, z, 0, 0, 0, 0, 1);
-          return this;
-        },
-        compose: function compose(position, quaternion, scale) {
-
-          this.makeRotationFromQuaternion(quaternion);
-          this.scale(scale);
-          this.setPosition(position);
-          return this;
-        },
-        decompose: function () {
-
-          var vector, matrix;
-          return function (position, quaternion, scale) {
-
-            if (vector === undefined) vector = new THREE.Vector3();
-            if (matrix === undefined) matrix = new THREE.Matrix4();
-            var te = this.elements;
-            var sx = vector.set(te[0], te[1], te[2]).length();
-            var sy = vector.set(te[4], te[5], te[6]).length();
-            var sz = vector.set(te[8], te[9], te[10]).length();
-            // if determine is negative, we need to invert one scale
-            var det = this.determinant();
-            if (det < 0) {
-
-              sx = -sx;
-            }
-
-            position.x = te[12];
-            position.y = te[13];
-            position.z = te[14];
-            // scale the rotation part
-
-            matrix.elements.set(this.elements); // at this point matrix is incomplete so we can't use .copy()
-
-            var invSX = 1 / sx;
-            var invSY = 1 / sy;
-            var invSZ = 1 / sz;
-            matrix.elements[0] *= invSX;
-            matrix.elements[1] *= invSX;
-            matrix.elements[2] *= invSX;
-            matrix.elements[4] *= invSY;
-            matrix.elements[5] *= invSY;
-            matrix.elements[6] *= invSY;
-            matrix.elements[8] *= invSZ;
-            matrix.elements[9] *= invSZ;
-            matrix.elements[10] *= invSZ;
-            quaternion.setFromRotationMatrix(matrix);
-            scale.x = sx;
-            scale.y = sy;
-            scale.z = sz;
-            return this;
-          };
-        }(),
-        makeFrustum: function makeFrustum(left, right, bottom, top, near, far) {
-
-          var te = this.elements;
-          var x = 2 * near / (right - left);
-          var y = 2 * near / (top - bottom);
-          var a = (right + left) / (right - left);
-          var b = (top + bottom) / (top - bottom);
-          var c = -(far + near) / (far - near);
-          var d = -2 * far * near / (far - near);
-          te[0] = x;
-          te[4] = 0;
-          te[8] = a;
-          te[12] = 0;
-          te[1] = 0;
-          te[5] = y;
-          te[9] = b;
-          te[13] = 0;
-          te[2] = 0;
-          te[6] = 0;
-          te[10] = c;
-          te[14] = d;
-          te[3] = 0;
-          te[7] = 0;
-          te[11] = -1;
-          te[15] = 0;
-          return this;
-        },
-        makePerspective: function makePerspective(fov, aspect, near, far) {
-
-          var ymax = near * Math.tan(THREE.Math.degToRad(fov * 0.5));
-          var ymin = -ymax;
-          var xmin = ymin * aspect;
-          var xmax = ymax * aspect;
-          return this.makeFrustum(xmin, xmax, ymin, ymax, near, far);
-        },
-        makeOrthographic: function makeOrthographic(left, right, top, bottom, near, far) {
-
-          var te = this.elements;
-          var w = right - left;
-          var h = top - bottom;
-          var p = far - near;
-          var x = (right + left) / w;
-          var y = (top + bottom) / h;
-          var z = (far + near) / p;
-          te[0] = 2 / w;
-          te[4] = 0;
-          te[8] = 0;
-          te[12] = -x;
-          te[1] = 0;
-          te[5] = 2 / h;
-          te[9] = 0;
-          te[13] = -y;
-          te[2] = 0;
-          te[6] = 0;
-          te[10] = -2 / p;
-          te[14] = -z;
-          te[3] = 0;
-          te[7] = 0;
-          te[11] = 0;
-          te[15] = 1;
-          return this;
-        },
-        equals: function equals(matrix) {
-
-          var te = this.elements;
-          var me = matrix.elements;
-          for (var i = 0; i < 16; i++) {
-
-            if (te[i] !== me[i]) return false;
-          }
-
-          return true;
-        },
-        fromArray: function fromArray(array) {
-
-          this.elements.set(array);
-          return this;
-        },
-        toArray: function toArray() {
-
-          var te = this.elements;
-          return [te[0], te[1], te[2], te[3], te[4], te[5], te[6], te[7], te[8], te[9], te[10], te[11], te[12], te[13], te[14], te[15]];
-        }
-
-      };
-      /**
-       * @author alteredq / http://alteredqualia.com/
-       * @author mrdoob / http://mrdoob.com/
-       */
-
-      THREE.Math = {
-        generateUUID: function () {
-
-          // http://www.broofa.com/Tools/Math.uuid.htm
-
-          var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
-          var uuid = new Array(36);
-          var rnd = 0,
-              r;
-          return function () {
-
-            for (var i = 0; i < 36; i++) {
-
-              if (i === 8 || i === 13 || i === 18 || i === 23) {
-
-                uuid[i] = '-';
-              } else if (i === 14) {
-
-                uuid[i] = '4';
-              } else {
-
-                if (rnd <= 0x02) rnd = 0x2000000 + Math.random() * 0x1000000 | 0;
-                r = rnd & 0xf;
-                rnd = rnd >> 4;
-                uuid[i] = chars[i === 19 ? r & 0x3 | 0x8 : r];
-              }
-            }
-
-            return uuid.join('');
-          };
-        }(),
-        // Clamp value to range <a, b>
-
-        clamp: function clamp(x, a, b) {
-
-          return x < a ? a : x > b ? b : x;
-        },
-        // Clamp value to range <a, inf)
-
-        clampBottom: function clampBottom(x, a) {
-
-          return x < a ? a : x;
-        },
-        // compute euclidian modulo of m % n
-        // https://en.wikipedia.org/wiki/Modulo_operation
-
-        euclideanModulo: function euclideanModulo(n, m) {
-
-          return (n % m + m) % m;
-        },
-        // Linear mapping from range <a1, a2> to range <b1, b2>
-
-        mapLinear: function mapLinear(x, a1, a2, b1, b2) {
-
-          return b1 + (x - a1) * (b2 - b1) / (a2 - a1);
-        },
-        // http://en.wikipedia.org/wiki/Smoothstep
-
-        smoothstep: function smoothstep(x, min, max) {
-
-          if (x <= min) return 0;
-          if (x >= max) return 1;
-          x = (x - min) / (max - min);
-          return x * x * (3 - 2 * x);
-        },
-        smootherstep: function smootherstep(x, min, max) {
-
-          if (x <= min) return 0;
-          if (x >= max) return 1;
-          x = (x - min) / (max - min);
-          return x * x * x * (x * (x * 6 - 15) + 10);
-        },
-        // Random float from <0, 1> with 16 bits of randomness
-        // (standard Math.random() creates repetitive patterns when applied over larger space)
-
-        random16: function random16() {
-
-          return (65280 * Math.random() + 255 * Math.random()) / 65535;
-        },
-        // Random integer from <low, high> interval
-
-        randInt: function randInt(low, high) {
-
-          return low + Math.floor(Math.random() * (high - low + 1));
-        },
-        // Random float from <low, high> interval
-
-        randFloat: function randFloat(low, high) {
-
-          return low + Math.random() * (high - low);
-        },
-        // Random float from <-range/2, range/2> interval
-
-        randFloatSpread: function randFloatSpread(range) {
-
-          return range * (0.5 - Math.random());
-        },
-        degToRad: function () {
-
-          var degreeToRadiansFactor = Math.PI / 180;
-          return function (degrees) {
-
-            return degrees * degreeToRadiansFactor;
-          };
-        }(),
-        radToDeg: function () {
-
-          var radianToDegreesFactor = 180 / Math.PI;
-          return function (radians) {
-
-            return radians * radianToDegreesFactor;
-          };
-        }(),
-        isPowerOfTwo: function isPowerOfTwo(value) {
-
-          return (value & value - 1) === 0 && value !== 0;
-        },
-        nextPowerOfTwo: function nextPowerOfTwo(value) {
-
-          value--;
-          value |= value >> 1;
-          value |= value >> 2;
-          value |= value >> 4;
-          value |= value >> 8;
-          value |= value >> 16;
-          value++;
-          return value;
-        }
-
-      };
-      /* jshint ignore:end */
-    }
-  })();
-
-  this.objectIDs = [];
-  this.objects = {};
-  this.geometryCache = {};
-  this.a = new THREE.Vector3();
-  this.b = new THREE.Vector3();
-  this.c = new THREE.Vector3();
-  this.d = new THREE.Vector3();
-  this.from = new THREE.Vector3();
-  this.to = new THREE.Vector3();
-  this.m = new THREE.Matrix4();
-  this.listeners = {
-    hit: []
-  };
-  this.ready = true;
-}
-
-Projector.prototype.addEventListener = function (evt, handler) {
-  if (!this.listeners[evt]) {
-    this.listeners[evt] = [];
-  }
-  this.listeners[evt].push(handler);
-};
-Projector.prototype._emit = emit;
-Projector.prototype._transform = function (obj, v) {
-  return v.clone().applyMatrix4(obj.matrix);
-};
-// We have to transform the vertices of the geometry into world-space
-// coordinations, because the object they are on could be rotated or
-// positioned somewhere else.
-Projector.prototype._getVerts = function (obj) {
-  var trans = [];
-  var geometry = this.geometryCache[obj.geomID],
-      verts = geometry.vertices;
-  for (var i = 0; i < verts.length; ++i) {
-    trans[i] = this._transform(obj, verts[i]);
-  }
-  return trans;
-};
-
-Projector.prototype.setObject = function (obj) {
-  this.objectIDs.push(obj.uuid);
-  this.objects[obj.uuid] = obj;
-  obj.matrix = new THREE.Matrix4().fromArray(obj.matrix);
-  var uvs = obj.geometry.uvs,
-      minU = Number.MAX_VALUE,
-      minV = Number.MAX_VALUE,
-      maxU = Number.MIN_VALUE,
-      maxV = Number.MIN_VALUE;
-  if (uvs && uvs.length > 0) {
-    for (var i = 0; i < uvs.length; ++i) {
-      var uv = uvs[i];
-      if (uv) {
-        var u = uv[0],
-            v = uv[1];
-        minU = Math.min(minU, u);
-        maxU = Math.max(maxU, u);
-        minV = Math.min(minV, v);
-        maxV = Math.max(maxV, v);
-      }
-    }
-  } else {
-    minU = 0;
-    maxU = 1;
-    minV = 0;
-    maxV = 1;
-  }
-
-  this.setProperty(obj.uuid, "minU", minU);
-  this.setProperty(obj.uuid, "maxU", maxU);
-  this.setProperty(obj.uuid, "minV", minV);
-  this.setProperty(obj.uuid, "maxV", maxV);
-  this.setProperty(obj.uuid, "geomID", obj.geometry.uuid);
-  if (!this.geometryCache[obj.geometry.uuid]) {
-    this.geometryCache[obj.geometry.uuid] = obj.geometry;
-    for (var n = 0, verts = obj.geometry.vertices, l = verts.length; n < l; ++n) {
-      verts[n] = new THREE.Vector3().fromArray(verts[n]);
-    }
-  }
-  this.updateObjects([obj]);
-};
-
-Projector.prototype.updateObjects = function (objs) {
-  for (var i = 0; i < objs.length; ++i) {
-    var obj = objs[i];
-    if (obj.inScene !== false) {
-      var curObj = this.objects[obj.uuid];
-      if (obj.matrix !== null) {
-        curObj.matrix.fromArray(obj.matrix);
-      }
-      if (obj.visible !== null) {
-        this.setProperty(obj.uuid, "visible", obj.visible);
-      }
-      if (obj.disabled !== null) {
-        this.setProperty(obj.uuid, "disabled", obj.disabled);
-      }
-    } else {
-      delete this.objects[obj.uuid];
-      var found = false;
-      for (var j = 0; !found && j < this.objectIDs.length; ++j) {
-        var obj2 = this.objects[this.objectIDs[j]];
-        found = found || obj2 && obj2.geomID === obj.geomID;
-      }
-      if (!found) {
-        delete this.geometryCache[obj.geomID];
-      }
-      this.objectIDs.splice(this.objectIDs.indexOf(obj.uuid), 1);
-    }
-  }
-};
-
-Projector.prototype.setProperty = function (objID, propName, value) {
-  var obj = this.objects[objID],
-      parts = propName.split(".");
-  while (parts.length > 1) {
-    propName = parts.shift();
-    if (!obj[propName]) {
-      obj[propName] = {};
-    }
-    obj = obj[propName];
-  }
-  if (parts.length === 1) {
-    propName = parts[0];
-    obj[parts[0]] = value;
-  }
-};
-
-Projector.prototype.projectPointers = function (args) {
-  var results = {};
-  for (var n = 0; n < args.length; ++n) {
-    var pack = args[n],
-        name = pack[0],
-        from = pack[1],
-        to = pack[2],
-        value = null;
-    this.from.fromArray(from);
-    this.to.fromArray(to);
-
-    for (var i = 0; i < this.objectIDs.length; ++i) {
-      var objID = this.objectIDs[i],
-          obj = this.objects[objID];
-      if (!obj.disabled) {
-        var verts = this._getVerts(obj),
-            faces = obj.geometry.faces,
-            uvs = obj.geometry.uvs;
-
-        for (var j = 0; j < faces.length; ++j) {
-          var face = faces[j],
-              v0 = verts[face[0] % verts.length],
-              v1 = verts[face[1] % verts.length],
-              v2 = verts[face[2] % verts.length];
-          this.a.subVectors(v1, v0);
-          this.b.subVectors(v2, v0);
-          this.c.subVectors(this.to, this.from);
-          this.m.set(this.a.x, this.b.x, -this.c.x, 0, this.a.y, this.b.y, -this.c.y, 0, this.a.z, this.b.z, -this.c.z, 0, 0, 0, 0, 1);
-          if (Math.abs(this.m.determinant()) > 1e-10) {
-            this.m.getInverse(this.m);
-            this.d.subVectors(this.from, v0).applyMatrix4(this.m);
-            if (0 <= this.d.x && this.d.x <= 1 && 0 <= this.d.y && this.d.y <= 1 && this.d.z > 0) {
-              this.c.multiplyScalar(this.d.z).add(this.from);
-              var dist = Math.sign(this.d.z) * this.to.distanceTo(this.c);
-              if (!value || dist < value.distance) {
-                value = {
-                  name: name,
-                  time: performance.now(),
-                  objectID: objID,
-                  object: null,
-                  distance: dist,
-                  faceIndex: j,
-                  facePoint: this.c.toArray(),
-                  faceNormal: this.d.toArray()
-                };
-
-                if (uvs) {
-                  v0 = uvs[face[0] % uvs.length];
-                  v1 = uvs[face[1] % uvs.length];
-                  v2 = uvs[face[2] % uvs.length];
-                  var u = this.d.x * (v1[0] - v0[0]) + this.d.y * (v2[0] - v0[0]) + v0[0],
-                      v = this.d.x * (v1[1] - v0[1]) + this.d.y * (v2[1] - v0[1]) + v0[1];
-                  if (obj.minU <= u && u <= obj.maxU && obj.minV <= v && v < obj.maxV) {
-                    value.point = [u, v];
-                  } else {
-                    value = null;
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    if (value) {
-      results[name] = value;
-    }
-  }
-  this._emit("hit", results);
-};
-  if(typeof window !== "undefined") window.Primrose.Projector = Projector;
-})();
-  // end D:\Documents\VR\Primrose\src\Primrose\Projector.js
-  ////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Random.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Random.js
 (function(){"use strict";
 
 var Random = {};
-  if(typeof window !== "undefined") window.Primrose.Random = Random;
+    if(typeof window !== "undefined") window.Primrose.Random = Random;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Random.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Random.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\SKINS.js
+    // start D:\Documents\VR\Primrose\src\Primrose\SKINS.js
 (function(){"use strict";
 
 var SKINS = ["#FFDFC4", "#F0D5BE", "#EECEB3", "#E1B899", "#E5C298", "#FFDCB2", "#E5B887", "#E5A073", "#E79E6D", "#DB9065", "#CE967C", "#C67856", "#BA6C49", "#A57257", "#F0C8C9", "#DDA8A0", "#B97C6D", "#A8756C", "#AD6452", "#5C3836", "#CB8442", "#BD723C", "#704139", "#A3866A", "#870400", "#710101", "#430000", "#5B0001", "#302E2E"];
-  if(typeof window !== "undefined") window.Primrose.SKINS = SKINS;
+    if(typeof window !== "undefined") window.Primrose.SKINS = SKINS;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\SKINS.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\SKINS.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\SKINS_VALUES.js
+    // start D:\Documents\VR\Primrose\src\Primrose\SKINS_VALUES.js
 (function(){"use strict";
 
 var SKINS_VALUES = Primrose.SKINS.map(function (s) {
   return parseInt(s.substring(1), 16);
 });
-  if(typeof window !== "undefined") window.Primrose.SKINS_VALUES = SKINS_VALUES;
+    if(typeof window !== "undefined") window.Primrose.SKINS_VALUES = SKINS_VALUES;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\SKINS_VALUES.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\SKINS_VALUES.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Surface.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Surface.js
 (function(){"use strict";
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
@@ -62724,10 +59997,17 @@ var Surface = function (_Primrose$Entity) {
   }, {
     key: "mapUV",
     value: function mapUV(point) {
-      return {
-        x: point[0] * this.imageWidth,
-        y: (1 - point[1]) * this.imageHeight
-      };
+      if (point instanceof Array) {
+        return {
+          x: point[0] * this.imageWidth,
+          y: (1 - point[1]) * this.imageHeight
+        };
+      } else if (point instanceof THREE.Vector2) {
+        return {
+          x: point.x * this.imageWidth,
+          y: (1 - point.y) * this.imageHeight
+        };
+      }
     }
   }, {
     key: "unmapUV",
@@ -62882,30 +60162,30 @@ var Surface = function (_Primrose$Entity) {
 
   return Surface;
 }(Primrose.Entity);
-  if(typeof window !== "undefined") window.Primrose.Surface = Surface;
+    if(typeof window !== "undefined") window.Primrose.Surface = Surface;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Surface.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Surface.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\SYS_FONTS.js
+    // start D:\Documents\VR\Primrose\src\Primrose\SYS_FONTS.js
 (function(){"use strict";
 
 var SYS_FONTS = "-apple-system, '.SFNSText-Regular', 'San Francisco', 'Roboto', 'Segoe UI', 'Helvetica Neue', 'Lucida Grande', sans-serif";
-  if(typeof window !== "undefined") window.Primrose.SYS_FONTS = SYS_FONTS;
+    if(typeof window !== "undefined") window.Primrose.SYS_FONTS = SYS_FONTS;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\SYS_FONTS.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\SYS_FONTS.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Text.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Text.js
 (function(){"use strict";
 
 var Text = {};
-  if(typeof window !== "undefined") window.Primrose.Text = Text;
+    if(typeof window !== "undefined") window.Primrose.Text = Text;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Text.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Workerize.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Workerize.js
 (function(){"use strict";
 
 function Workerize(func) {
@@ -63007,21 +60287,21 @@ Workerize.createWorker = function (script, stripFunc) {
 
   return new Worker(dataURI);
 };
-  if(typeof window !== "undefined") window.Primrose.Workerize = Workerize;
+    if(typeof window !== "undefined") window.Primrose.Workerize = Workerize;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Workerize.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Workerize.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\X.js
+    // start D:\Documents\VR\Primrose\src\Primrose\X.js
 (function(){"use strict";
 
 var X = {};
-  if(typeof window !== "undefined") window.Primrose.X = X;
+    if(typeof window !== "undefined") window.Primrose.X = X;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\X.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\X.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Controls\AbstractLabel.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Controls\AbstractLabel.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -63185,12 +60465,12 @@ var AbstractLabel = function (_Primrose$Surface) {
 
   return AbstractLabel;
 }(Primrose.Surface);
-  if(typeof window !== "undefined") window.Primrose.Controls.AbstractLabel = AbstractLabel;
+    if(typeof window !== "undefined") window.Primrose.Controls.AbstractLabel = AbstractLabel;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Controls\AbstractLabel.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Controls\AbstractLabel.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Controls\Button2D.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Controls\Button2D.js
 (function(){"use strict";
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
@@ -63270,12 +60550,12 @@ var Button2D = function (_Primrose$Controls$Ab) {
 
   return Button2D;
 }(Primrose.Controls.AbstractLabel);
-  if(typeof window !== "undefined") window.Primrose.Controls.Button2D = Button2D;
+    if(typeof window !== "undefined") window.Primrose.Controls.Button2D = Button2D;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Controls\Button2D.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Controls\Button2D.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Controls\Button3D.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Controls\Button3D.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -63337,13 +60617,13 @@ var Button3D = function (_Primrose$BaseControl) {
 
       switch (evt.type) {
         case "pointerstart":
-          this.startUV(evt.hit.point);
+          this.startUV(evt.hit.uv);
           break;
         case "pointerend":
           this.endPointer(evt);
           break;
         case "gazecomplete":
-          this.startUV(evt.hit.point);
+          this.startUV(evt.hit.uv);
           setTimeout(function () {
             return _this2.endPointer(evt);
           }, 100);
@@ -63374,12 +60654,12 @@ Button3D.DEFAULTS = {
   colorPressed: 0x007f00,
   toggle: true
 };
-  if(typeof window !== "undefined") window.Primrose.Controls.Button3D = Button3D;
+    if(typeof window !== "undefined") window.Primrose.Controls.Button3D = Button3D;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Controls\Button3D.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Controls\Button3D.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Controls\Form.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Controls\Form.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -63487,12 +60767,12 @@ var Form = function (_Primrose$Surface) {
 
   return Form;
 }(Primrose.Surface);
-  if(typeof window !== "undefined") window.Primrose.Controls.Form = Form;
+    if(typeof window !== "undefined") window.Primrose.Controls.Form = Form;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Controls\Form.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Controls\Form.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Controls\Image.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Controls\Image.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -63630,6 +60910,9 @@ var Image = function (_Primrose$Entity) {
           video.preload = "auto";
           video.autoplay = true;
           video.loop = true;
+          video.controls = true;
+          video.playsinline = true;
+          video.setAttribute("webkit-playsinline", true);
           video.oncanplaythrough = function () {
             var width = video.videoWidth,
                 height = video.videoHeight,
@@ -63740,12 +61023,12 @@ var Image = function (_Primrose$Entity) {
 
   return Image;
 }(Primrose.Entity);
-  if(typeof window !== "undefined") window.Primrose.Controls.Image = Image;
+    if(typeof window !== "undefined") window.Primrose.Controls.Image = Image;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Controls\Image.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Controls\Image.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Controls\Progress.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Controls\Progress.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -63851,12 +61134,12 @@ var Progress = function () {
 
   return Progress;
 }();
-  if(typeof window !== "undefined") window.Primrose.Controls.Progress = Progress;
+    if(typeof window !== "undefined") window.Primrose.Controls.Progress = Progress;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Controls\Progress.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Controls\Progress.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Controls\VUMeter.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Controls\VUMeter.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -63937,12 +61220,12 @@ var VUMeter = function (_Primrose$Surface) {
 
   return VUMeter;
 }(Primrose.Surface);
-  if(typeof window !== "undefined") window.Primrose.Controls.VUMeter = VUMeter;
+    if(typeof window !== "undefined") window.Primrose.Controls.VUMeter = VUMeter;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Controls\VUMeter.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Controls\VUMeter.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\DOM\cascadeElement.js
+    // start D:\Documents\VR\Primrose\src\Primrose\DOM\cascadeElement.js
 (function(){"use strict";
 
 function cascadeElement(id, tag, DOMClass, add) {
@@ -63970,12 +61253,12 @@ function cascadeElement(id, tag, DOMClass, add) {
   }
   return elem;
 }
-  if(typeof window !== "undefined") window.Primrose.DOM.cascadeElement = cascadeElement;
+    if(typeof window !== "undefined") window.Primrose.DOM.cascadeElement = cascadeElement;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\DOM\cascadeElement.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\DOM\cascadeElement.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\DOM\findEverything.js
+    // start D:\Documents\VR\Primrose\src\Primrose\DOM\findEverything.js
 (function(){"use strict";
 
 function findEverything(elem, obj) {
@@ -63993,12 +61276,12 @@ function findEverything(elem, obj) {
   }
   return obj;
 }
-  if(typeof window !== "undefined") window.Primrose.DOM.findEverything = findEverything;
+    if(typeof window !== "undefined") window.Primrose.DOM.findEverything = findEverything;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\DOM\findEverything.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\DOM\findEverything.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\DOM\makeHidingContainer.js
+    // start D:\Documents\VR\Primrose\src\Primrose\DOM\makeHidingContainer.js
 (function(){"use strict";
 
 function makeHidingContainer(id, obj) {
@@ -64012,100 +61295,100 @@ function makeHidingContainer(id, obj) {
   elem.appendChild(obj);
   return elem;
 }
-  if(typeof window !== "undefined") window.Primrose.DOM.makeHidingContainer = makeHidingContainer;
+    if(typeof window !== "undefined") window.Primrose.DOM.makeHidingContainer = makeHidingContainer;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\DOM\makeHidingContainer.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\DOM\makeHidingContainer.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\HTTP\del.js
+    // start D:\Documents\VR\Primrose\src\Primrose\HTTP\del.js
 (function(){"use strict";
 
 function del(type, url, options) {
   return Primrose.HTTP.XHR("DELETE", type, url, options);
 }
-  if(typeof window !== "undefined") window.Primrose.HTTP.del = del;
+    if(typeof window !== "undefined") window.Primrose.HTTP.del = del;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\HTTP\del.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\HTTP\del.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\HTTP\delObject.js
+    // start D:\Documents\VR\Primrose\src\Primrose\HTTP\delObject.js
 (function(){"use strict";
 
 function delObject(url, options) {
   return Primrose.HTTP.del("json", url, options);
 }
-  if(typeof window !== "undefined") window.Primrose.HTTP.delObject = delObject;
+    if(typeof window !== "undefined") window.Primrose.HTTP.delObject = delObject;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\HTTP\delObject.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\HTTP\delObject.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\HTTP\get.js
+    // start D:\Documents\VR\Primrose\src\Primrose\HTTP\get.js
 (function(){"use strict";
 
 function get(type, url, options) {
   return Primrose.HTTP.XHR("GET", type || "text", url, options);
 }
-  if(typeof window !== "undefined") window.Primrose.HTTP.get = get;
+    if(typeof window !== "undefined") window.Primrose.HTTP.get = get;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\HTTP\get.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\HTTP\get.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\HTTP\getBuffer.js
+    // start D:\Documents\VR\Primrose\src\Primrose\HTTP\getBuffer.js
 (function(){"use strict";
 
 function getBuffer(url, options) {
   return Primrose.HTTP.get("arraybuffer", url, options);
 }
-  if(typeof window !== "undefined") window.Primrose.HTTP.getBuffer = getBuffer;
+    if(typeof window !== "undefined") window.Primrose.HTTP.getBuffer = getBuffer;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\HTTP\getBuffer.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\HTTP\getBuffer.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\HTTP\getObject.js
+    // start D:\Documents\VR\Primrose\src\Primrose\HTTP\getObject.js
 (function(){"use strict";
 
 function getObject(url, options) {
   return Primrose.HTTP.get("json", url, options);
 }
-  if(typeof window !== "undefined") window.Primrose.HTTP.getObject = getObject;
+    if(typeof window !== "undefined") window.Primrose.HTTP.getObject = getObject;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\HTTP\getObject.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\HTTP\getObject.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\HTTP\getText.js
+    // start D:\Documents\VR\Primrose\src\Primrose\HTTP\getText.js
 (function(){"use strict";
 
 function getText(url, options) {
   return Primrose.HTTP.get("text", url, options);
 }
-  if(typeof window !== "undefined") window.Primrose.HTTP.getText = getText;
+    if(typeof window !== "undefined") window.Primrose.HTTP.getText = getText;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\HTTP\getText.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\HTTP\getText.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\HTTP\post.js
+    // start D:\Documents\VR\Primrose\src\Primrose\HTTP\post.js
 (function(){"use strict";
 
 function post(type, url, options) {
   return Primrose.HTTP.XHR("POST", type, url, options);
 }
-  if(typeof window !== "undefined") window.Primrose.HTTP.post = post;
+    if(typeof window !== "undefined") window.Primrose.HTTP.post = post;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\HTTP\post.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\HTTP\post.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\HTTP\postObject.js
+    // start D:\Documents\VR\Primrose\src\Primrose\HTTP\postObject.js
 (function(){"use strict";
 
 function postObject(url, options) {
   return Primrose.HTTP.post("json", url, options);
 }
-  if(typeof window !== "undefined") window.Primrose.HTTP.postObject = postObject;
+    if(typeof window !== "undefined") window.Primrose.HTTP.postObject = postObject;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\HTTP\postObject.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\HTTP\postObject.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\HTTP\XHR.js
+    // start D:\Documents\VR\Primrose\src\Primrose\HTTP\XHR.js
 (function(){"use strict";
 
 function XHR(method, type, url, options) {
@@ -64159,12 +61442,12 @@ function XHR(method, type, url, options) {
     }
   });
 }
-  if(typeof window !== "undefined") window.Primrose.HTTP.XHR = XHR;
+    if(typeof window !== "undefined") window.Primrose.HTTP.XHR = XHR;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\HTTP\XHR.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\HTTP\XHR.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Input\FPSInput.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Input\FPSInput.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -64316,97 +61599,99 @@ var FPSInput = function (_Primrose$AbstractEve) {
     _this.add(new Primrose.Input.VR(_this.options.avatarHeight));
     _this.motionDevices.push(_this.VR);
 
-    Primrose.Input.Gamepad.addEventListener("gamepadconnected", function (pad) {
-      var padID = Primrose.Input.Gamepad.ID(pad);
-      var mgr = null;
+    if (Primrose.Input.Gamepad.isAvailable) {
+      Primrose.Input.Gamepad.addEventListener("gamepadconnected", function (pad) {
+        var padID = Primrose.Input.Gamepad.ID(pad);
+        var mgr = null;
 
-      if (padID !== "Unknown" && padID !== "Rift") {
-        if (Primrose.Input.Gamepad.isMotionController(pad)) {
-          var controllerNumber = 0;
-          for (var i = 0; i < _this.managers.length; ++i) {
-            mgr = _this.managers[i];
-            if (mgr.currentPad && mgr.currentPad.id === pad.id) {
-              ++controllerNumber;
+        if (padID !== "Unknown" && padID !== "Rift") {
+          if (Primrose.Input.Gamepad.isMotionController(pad)) {
+            var controllerNumber = 0;
+            for (var i = 0; i < _this.managers.length; ++i) {
+              mgr = _this.managers[i];
+              if (mgr.currentPad && mgr.currentPad.id === pad.id) {
+                ++controllerNumber;
+              }
             }
+
+            mgr = new Primrose.Input.Gamepad(pad, controllerNumber, {
+              buttons: {
+                axes: ["BUTTONS"]
+              },
+              dButtons: {
+                axes: ["BUTTONS"],
+                delta: true
+              },
+              zero: {
+                buttons: [Primrose.Input.Gamepad.VIVE_BUTTONS.GRIP_PRESSED],
+                commandUp: emit.bind(_this, "zero")
+              }
+            });
+
+            _this.add(mgr);
+            _this.motionDevices.push(mgr);
+
+            var shift = (_this.motionDevices.length - 2) * 8,
+                color = 0x0000ff << shift,
+                highlight = 0xff0000 >> shift,
+                ptr = new Primrose.Pointer(padID + "Pointer", color, 1, highlight, [mgr], null, _this.options);
+            ptr.add(colored(box(0.1, 0.025, 0.2), color, {
+              emissive: highlight
+            }));
+
+            _this.pointers.push(ptr);
+            ptr.addToBrowserEnvironment(null, _this.options.scene);
+            ptr.forward(_this, Primrose.Pointer.EVENTS);
+          } else {
+            mgr = new Primrose.Input.Gamepad(pad, 0, {
+              buttons: {
+                axes: ["BUTTONS"]
+              },
+              dButtons: {
+                axes: ["BUTTONS"],
+                delta: true
+              },
+              strafe: {
+                axes: ["LSX"],
+                deadzone: 0.2
+              },
+              drive: {
+                axes: ["LSY"],
+                deadzone: 0.2
+              },
+              heading: {
+                axes: ["RSX"],
+                scale: -1,
+                deadzone: 0.2,
+                integrate: true
+              },
+              dHeading: {
+                commands: ["heading"],
+                delta: true
+              },
+              pitch: {
+                axes: ["RSY"],
+                scale: -1,
+                deadzone: 0.2,
+                integrate: true
+              },
+              zero: {
+                buttons: [Primrose.Input.Gamepad.XBOX_ONE_BUTTONS.BACK],
+                commandUp: emit.bind(_this, "zero")
+              }
+            });
+            _this.add(mgr);
+            _this.mousePointer.addDevice(mgr, mgr);
           }
-
-          mgr = new Primrose.Input.Gamepad(pad, controllerNumber, {
-            buttons: {
-              axes: ["BUTTONS"]
-            },
-            dButtons: {
-              axes: ["BUTTONS"],
-              delta: true
-            },
-            zero: {
-              buttons: [Primrose.Input.Gamepad.VIVE_BUTTONS.GRIP_PRESSED],
-              commandUp: emit.bind(_this, "zero")
-            }
-          });
-
-          _this.add(mgr);
-          _this.motionDevices.push(mgr);
-
-          var shift = (_this.motionDevices.length - 2) * 8,
-              color = 0x0000ff << shift,
-              highlight = 0xff0000 >> shift,
-              ptr = new Primrose.Pointer(padID + "Pointer", color, 1, highlight, [mgr]);
-          ptr.add(colored(box(0.1, 0.025, 0.2), color, {
-            emissive: highlight
-          }));
-
-          _this.pointers.push(ptr);
-          ptr.addToBrowserEnvironment(null, _this.options.scene);
-          ptr.forward(_this, Primrose.Pointer.EVENTS);
-        } else {
-          mgr = new Primrose.Input.Gamepad(pad, 0, {
-            buttons: {
-              axes: ["BUTTONS"]
-            },
-            dButtons: {
-              axes: ["BUTTONS"],
-              delta: true
-            },
-            strafe: {
-              axes: ["LSX"],
-              deadzone: 0.2
-            },
-            drive: {
-              axes: ["LSY"],
-              deadzone: 0.2
-            },
-            heading: {
-              axes: ["RSX"],
-              scale: -1,
-              deadzone: 0.2,
-              integrate: true
-            },
-            dHeading: {
-              commands: ["heading"],
-              delta: true
-            },
-            pitch: {
-              axes: ["RSY"],
-              scale: -1,
-              deadzone: 0.2,
-              integrate: true
-            },
-            zero: {
-              buttons: [Primrose.Input.Gamepad.XBOX_ONE_BUTTONS.BACK],
-              commandUp: emit.bind(_this, "zero")
-            }
-          });
-          _this.add(mgr);
-          _this.mousePointer.addDevice(mgr, mgr);
         }
-      }
-    });
+      });
 
-    Primrose.Input.Gamepad.addEventListener("gamepaddisconnected", _this.remove.bind(_this));
+      Primrose.Input.Gamepad.addEventListener("gamepaddisconnected", _this.remove.bind(_this));
+    }
 
     _this.stage = hub();
 
-    _this.head = new Primrose.Pointer("GazePointer", 0xffff00, 0x0000ff, 0.8, [_this.VR], [_this.Mouse, _this.Touch, _this.Keyboard]);
+    _this.head = new Primrose.Pointer("GazePointer", 0xffff00, 0x0000ff, 0.8, [_this.VR], [_this.Mouse, _this.Touch, _this.Keyboard], _this.options);
 
     _this.head.rotation.order = "YXZ";
     _this.head.useGaze = _this.options.useGaze;
@@ -64414,7 +61699,7 @@ var FPSInput = function (_Primrose$AbstractEve) {
     _this.options.scene.add(_this.head.root);
     _this.options.scene.add(_this.head.disk);
 
-    _this.mousePointer = new Primrose.Pointer("MousePointer", 0xff0000, 0x00ff00, 1, [_this.Mouse]);
+    _this.mousePointer = new Primrose.Pointer("MousePointer", 0xff0000, 0x00ff00, 1, [_this.Mouse], null, _this.options);
     _this.mousePointer.unproject = new THREE.Matrix4();
     _this.pointers.push(_this.mousePointer);
     _this.head.add(_this.mousePointer.root);
@@ -64467,7 +61752,9 @@ var FPSInput = function (_Primrose$AbstractEve) {
     key: "update",
     value: function update(dt) {
       var hadGamepad = this.hasGamepad;
-      Primrose.Input.Gamepad.poll();
+      if (Primrose.Input.Gamepad.isAvailable) {
+        Primrose.Input.Gamepad.poll();
+      }
       for (var i = 0; i < this.managers.length; ++i) {
         this.managers[i].update(dt);
       }
@@ -64579,10 +61866,10 @@ var FPSInput = function (_Primrose$AbstractEve) {
     }
   }, {
     key: "resolvePicking",
-    value: function resolvePicking(currentHits) {
+    value: function resolvePicking(objects) {
       for (var i = 0; i < this.pointers.length; ++i) {
         var ptr = this.pointers[i];
-        ptr.resolvePicking(currentHits[ptr.name]);
+        ptr.resolvePicking(objects);
       }
     }
   }, {
@@ -64621,12 +61908,12 @@ var FPSInput = function (_Primrose$AbstractEve) {
 
   return FPSInput;
 }(Primrose.AbstractEventEmitter);
-  if(typeof window !== "undefined") window.Primrose.Input.FPSInput = FPSInput;
+    if(typeof window !== "undefined") window.Primrose.Input.FPSInput = FPSInput;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Input\FPSInput.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Input\FPSInput.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Input\Gamepad.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Input\Gamepad.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -64681,49 +61968,51 @@ var Gamepad = function (_Primrose$PoseInputPr) {
   }, {
     key: "poll",
     value: function poll() {
-      var maybePads = navigator.getGamepads(),
-          pads = [],
-          padIDs = [],
-          newPads = [],
-          oldPads = [],
-          i,
-          padID;
+      if (Gamepad.isAvailable) {
+        var maybePads = navigator.getGamepads(),
+            pads = [],
+            padIDs = [],
+            newPads = [],
+            oldPads = [],
+            i,
+            padID;
 
-      if (maybePads) {
-        for (i = 0; i < maybePads.length; ++i) {
-          var maybePad = maybePads[i];
-          if (maybePad) {
-            padID = Gamepad.ID(maybePad);
-            var padIdx = currentDeviceIDs.indexOf(padID);
-            pads.push(maybePad);
-            padIDs.push(padID);
-            if (padIdx === -1) {
-              newPads.push(maybePad);
-              currentDeviceIDs.push(padID);
-              currentDevices.push(maybePad);
-              delete currentManagers[padID];
-            } else {
-              currentDevices[padIdx] = maybePad;
+        if (maybePads) {
+          for (i = 0; i < maybePads.length; ++i) {
+            var maybePad = maybePads[i];
+            if (maybePad) {
+              padID = Gamepad.ID(maybePad);
+              var padIdx = currentDeviceIDs.indexOf(padID);
+              pads.push(maybePad);
+              padIDs.push(padID);
+              if (padIdx === -1) {
+                newPads.push(maybePad);
+                currentDeviceIDs.push(padID);
+                currentDevices.push(maybePad);
+                delete currentManagers[padID];
+              } else {
+                currentDevices[padIdx] = maybePad;
+              }
             }
           }
         }
-      }
 
-      for (i = currentDeviceIDs.length - 1; i >= 0; --i) {
-        padID = currentDeviceIDs[i];
-        var mgr = currentManagers[padID],
-            pad = currentDevices[i];
-        if (padIDs.indexOf(padID) === -1) {
-          oldPads.push(padID);
-          currentDevices.splice(i, 1);
-          currentDeviceIDs.splice(i, 1);
-        } else if (mgr) {
-          mgr.checkDevice(pad);
+        for (i = currentDeviceIDs.length - 1; i >= 0; --i) {
+          padID = currentDeviceIDs[i];
+          var mgr = currentManagers[padID],
+              pad = currentDevices[i];
+          if (padIDs.indexOf(padID) === -1) {
+            oldPads.push(padID);
+            currentDevices.splice(i, 1);
+            currentDeviceIDs.splice(i, 1);
+          } else if (mgr) {
+            mgr.checkDevice(pad);
+          }
         }
-      }
 
-      newPads.forEach(emit.bind(Gamepad, "gamepadconnected"));
-      oldPads.forEach(emit.bind(Gamepad, "gamepaddisconnected"));
+        newPads.forEach(emit.bind(Gamepad, "gamepadconnected"));
+        oldPads.forEach(emit.bind(Gamepad, "gamepaddisconnected"));
+      }
     }
   }, {
     key: "addEventListener",
@@ -64740,6 +62029,11 @@ var Gamepad = function (_Primrose$PoseInputPr) {
         return obj && obj.hasOrientation;
       }
       return false;
+    }
+  }, {
+    key: "isAvailable",
+    get: function get() {
+      return !!navigator.getGamepads;
     }
   }, {
     key: "pads",
@@ -64869,12 +62163,12 @@ Gamepad.VIVE_BUTTONS = {
   GRIP_TOUCHED: 6,
   MENU_TOUCHED: 7
 };
-  if(typeof window !== "undefined") window.Primrose.Input.Gamepad = Gamepad;
+    if(typeof window !== "undefined") window.Primrose.Input.Gamepad = Gamepad;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Input\Gamepad.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Input\Gamepad.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Input\Keyboard.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Input\Keyboard.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -64972,12 +62266,12 @@ var Keyboard = function (_Primrose$InputProces) {
 
   return Keyboard;
 }(Primrose.InputProcessor);
-  if(typeof window !== "undefined") window.Primrose.Input.Keyboard = Keyboard;
+    if(typeof window !== "undefined") window.Primrose.Input.Keyboard = Keyboard;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Input\Keyboard.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Input\Keyboard.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Input\LeapMotion.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Input\LeapMotion.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -65101,12 +62395,12 @@ LeapMotion.NUM_FINGERS = 10;
 LeapMotion.FINGER_PARTS = ["tip", "dip", "pip", "mcp", "carp"];
 
 LeapMotion.CONNECTION_TIMEOUT = 5000;
-  if(typeof window !== "undefined") window.Primrose.Input.LeapMotion = LeapMotion;
+    if(typeof window !== "undefined") window.Primrose.Input.LeapMotion = LeapMotion;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Input\LeapMotion.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Input\LeapMotion.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Input\Location.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Input\Location.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -65157,12 +62451,12 @@ Location.DEFAULTS = {
   maximumAge: 30000,
   timeout: 25000
 };
-  if(typeof window !== "undefined") window.Primrose.Input.Location = Location;
+    if(typeof window !== "undefined") window.Primrose.Input.Location = Location;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Input\Location.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Input\Location.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Input\Mouse.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Input\Mouse.js
 (function(){"use strict";
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -65238,12 +62532,12 @@ var Mouse = function (_Primrose$InputProces) {
 }(Primrose.InputProcessor);
 
 Mouse.NUM_BUTTONS = 3;
-  if(typeof window !== "undefined") window.Primrose.Input.Mouse = Mouse;
+    if(typeof window !== "undefined") window.Primrose.Input.Mouse = Mouse;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Input\Mouse.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Input\Mouse.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Input\Speech.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Input\Speech.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -65471,12 +62765,12 @@ var Speech = function (_Primrose$InputProces) {
 
   return Speech;
 }(Primrose.InputProcessor);
-  if(typeof window !== "undefined") window.Primrose.Input.Speech = Speech;
+    if(typeof window !== "undefined") window.Primrose.Input.Speech = Speech;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Input\Speech.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Input\Speech.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Input\Touch.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Input\Touch.js
 (function(){"use strict";
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -65501,31 +62795,36 @@ var Touch = function (_Primrose$InputProces) {
 
     var _this = _possibleConstructorReturn(this, (Touch.__proto__ || Object.getPrototypeOf(Touch)).call(this, "Touch", commands, axes));
 
+    console.log(DOMElement);
     DOMElement = DOMElement || window;
 
     var setState = function setState(stateChange, setAxis, event) {
       var touches = event.changedTouches,
-          i = 0,
-          t = null;
-      for (i = 0; i < touches.length; ++i) {
-        t = touches[i];
+          minIdentifier = Number.MAX_VALUE;
+      for (var _i = 0; _i < touches.length; ++_i) {
+        minIdentifier = Math.min(minIdentifier, touches[_i].identifier);
+      }
 
+      for (var _i2 = 0; _i2 < touches.length; ++_i2) {
+        var t = touches[_i2],
+            id = t.identifier - minIdentifier;
+        console.log(_i2, id);
         if (setAxis) {
-          _this.setAxis("X" + t.identifier, t.pageX);
-          _this.setAxis("Y" + t.identifier, t.pageY);
+          _this.setAxis("X" + id, t.pageX);
+          _this.setAxis("Y" + id, t.pageY);
         } else {
-          _this.setAxis("LX" + t.identifier, t.pageX);
-          _this.setAxis("LY" + t.identifier, t.pageY);
+          _this.setAxis("LX" + id, t.pageX);
+          _this.setAxis("LY" + id, t.pageY);
         }
 
         _this.setButton("FINGER" + t.identifier, stateChange);
       }
+
       touches = event.touches;
-      var fingerState = 0,
-          before = _this.getAxis("FINGERS");
-      for (i = 0; i < touches.length; ++i) {
-        t = touches[i];
-        fingerState |= 1 << t.identifier;
+      var fingerState = 0;
+      for (var _i3 = 0; _i3 < touches.length; ++_i3) {
+        var _t = touches[_i3];
+        fingerState |= 1 << _t.identifier;
       }
       _this.setAxis("FINGERS", fingerState);
       event.preventDefault();
@@ -65539,15 +62838,15 @@ var Touch = function (_Primrose$InputProces) {
 
   return Touch;
 }(Primrose.InputProcessor);
-  if(typeof window !== "undefined") window.Primrose.Input.Touch = Touch;
+    if(typeof window !== "undefined") window.Primrose.Input.Touch = Touch;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Input\Touch.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Input\Touch.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Input\VR.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Input\VR.js
 (function(){"use strict";
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
@@ -65563,7 +62862,6 @@ var DEFAULT_POSE = {
   position: [0, 0, 0],
   orientation: [0, 0, 0, 1]
 },
-    GAZE_LENGTH = 3000,
     _ = priv();
 
 var VR = function (_Primrose$PoseInputPr) {
@@ -65604,7 +62902,7 @@ var VR = function (_Primrose$PoseInputPr) {
       // We skip the WebVR-Polyfill's Mouse and Keyboard display because it does not
       // play well with our interaction model.
       _this.displays.push.apply(_this.displays, displays.filter(function (display) {
-        return display.displayName !== "Mouse and Keyboard VRDisplay (webvr-polyfill)";
+        return !isIOS || VR.isStereoDisplay(display);
       }));
       return _this.displays;
     });
@@ -65743,38 +63041,6 @@ var VR = function (_Primrose$PoseInputPr) {
       }
     }
   }, {
-    key: "resolvePicking",
-    value: function resolvePicking(currentHits, lastHits, objects) {
-      _get(VR.prototype.__proto__ || Object.getPrototypeOf(VR.prototype), "resolvePicking", this).call(this, currentHits, lastHits, objects);
-
-      var currentHit = currentHits.VR,
-          lastHit = lastHits && lastHits.VR,
-          dt,
-          lt;
-      if (lastHit && currentHit && lastHit.objectID === currentHit.objectID) {
-        currentHit.startTime = lastHit.startTime;
-        currentHit.gazeFired = lastHit.gazeFired;
-        dt = lt - currentHit.startTime;
-        if (dt >= GAZE_LENGTH && !currentHit.gazeFired) {
-          currentHit.gazeFired = true;
-          emit.call(this, "gazecomplete", currentHit);
-          emit.call(this.pickableObjects[currentHit.objectID], "click", "Gaze");
-        }
-      } else {
-        if (lastHit) {
-          dt = lt - lastHit.startTime;
-          if (dt < GAZE_LENGTH) {
-            emit.call(this, "gazecancel", lastHit);
-          }
-        }
-        if (currentHit) {
-          currentHit.startTime = lt;
-          currentHit.gazeFired = false;
-          emit.call(this, "gazestart", currentHit);
-        }
-      }
-    }
-  }, {
     key: "getTransforms",
     value: function getTransforms(near, far) {
       if (this.currentDevice) {
@@ -65831,12 +63097,12 @@ var VR = function (_Primrose$PoseInputPr) {
 
   return VR;
 }(Primrose.PoseInputProcessor);
-  if(typeof window !== "undefined") window.Primrose.Input.VR = VR;
+    if(typeof window !== "undefined") window.Primrose.Input.VR = VR;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Input\VR.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Input\VR.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Network\Manager.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Network\Manager.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -66046,12 +63312,12 @@ var Manager = function (_Primrose$AbstractEve) {
 
   return Manager;
 }(Primrose.AbstractEventEmitter);
-  if(typeof window !== "undefined") window.Primrose.Network.Manager = Manager;
+    if(typeof window !== "undefined") window.Primrose.Network.Manager = Manager;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Network\Manager.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Network\Manager.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Network\RemoteUser.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Network\RemoteUser.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -66273,12 +63539,12 @@ var RemoteUser = function (_Primrose$AbstractEve) {
 RemoteUser.FADE_FACTOR = 0.5;
 RemoteUser.NETWORK_DT = 0.10;
 RemoteUser.NETWORK_DT_INV = 1 / RemoteUser.NETWORK_DT;
-  if(typeof window !== "undefined") window.Primrose.Network.RemoteUser = RemoteUser;
+    if(typeof window !== "undefined") window.Primrose.Network.RemoteUser = RemoteUser;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Network\RemoteUser.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Network\RemoteUser.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Output\Audio3D.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Output\Audio3D.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -66286,235 +63552,14 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 // polyfill
-Window.prototype.AudioContext = Window.prototype.AudioContext || Window.prototype.webkitAudioContext || function () {};
+window.AudioContext = window.AudioContext || window.webkitAudioContext;
+
+var VECTOR = new THREE.Vector3(),
+    UP = new THREE.Vector3(),
+    TEMP = new THREE.Matrix4();
 
 var Audio3D = function () {
-  function Audio3D() {
-    var _this = this;
-
-    _classCallCheck(this, Audio3D);
-
-    try {
-      this.context = new AudioContext();
-      this.sampleRate = this.context.sampleRate;
-      this.mainVolume = this.context.createGain();
-
-      var vec = new THREE.Vector3(),
-          up = new THREE.Vector3(),
-          left = new THREE.Matrix4().identity(),
-          right = new THREE.Matrix4().identity(),
-          swap = null;
-
-      this.setVelocity = this.context.listener.setVelocity.bind(this.context.listener);
-      this.setPlayer = function (obj) {
-        var head = obj;
-        left.identity();
-        right.identity();
-        while (head !== null) {
-          left.fromArray(head.matrix.elements);
-          left.multiply(right);
-          swap = left;
-          left = right;
-          right = swap;
-          head = head.parent;
-        }
-        swap = left;
-        var mx = swap.elements[12],
-            my = swap.elements[13],
-            mz = swap.elements[14];
-        swap.elements[12] = swap.elements[13] = swap.elements[14] = 0;
-
-        _this.context.listener.setPosition(mx, my, mz);
-        vec.set(0, 0, 1);
-        vec.applyProjection(right);
-        vec.normalize();
-        up.set(0, -1, 0);
-        up.applyProjection(right);
-        up.normalize();
-        _this.context.listener.setOrientation(vec.x, vec.y, vec.z, up.x, up.y, up.z);
-        right.elements[12] = mx;
-        right.elements[13] = my;
-        right.elements[14] = mz;
-      };
-      this.isAvailable = true;
-      this.start();
-    } catch (exp) {
-      console.error(exp);
-      console.error("AudioContext not available.");
-      this.isAvailable = false;
-      this.setPlayer = function () {};
-      this.setVelocity = function () {};
-      this.start = function () {};
-      this.stop = function () {};
-      this.error = exp;
-    }
-  }
-
-  _createClass(Audio3D, [{
-    key: "start",
-    value: function start() {
-      this.mainVolume.connect(this.context.destination);
-    }
-  }, {
-    key: "stop",
-    value: function stop() {
-      this.mainVolume.disconnect();
-    }
-  }, {
-    key: "loadURL",
-    value: function loadURL(src) {
-      var _this2 = this;
-
-      return Primrose.HTTP.getBuffer(src).then(function (data) {
-        return new Promise(function (resolve, reject) {
-          return _this2.context.decodeAudioData(data, resolve, reject);
-        });
-      });
-    }
-  }, {
-    key: "loadURLCascadeSrcList",
-    value: function loadURLCascadeSrcList(srcs, index) {
-      var _this3 = this;
-
-      index = index || 0;
-      if (index >= srcs.length) {
-        return Promise.reject("Failed to load a file from " + srcs.length + " files.");
-      } else {
-        return this.loadURL(srcs[index]).catch(function (err) {
-          console.error(err);
-          return _this3.loadURLCascadeSrcList(srcs, index + 1);
-        });
-      }
-    }
-  }, {
-    key: "createRawSound",
-    value: function createRawSound(pcmData) {
-      if (pcmData.length !== 1 && pcmData.length !== 2) {
-        throw new Error("Incorrect number of channels. Expected 1 or 2, got " + pcmData.length);
-      }
-
-      var frameCount = pcmData[0].length;
-      if (pcmData.length > 1 && pcmData[1].length !== frameCount) {
-        throw new Error("Second channel is not the same length as the first channel. Expected " + frameCount + ", but was " + pcmData[1].length);
-      }
-
-      var buffer = this.context.createBuffer(pcmData.length, frameCount, this.sampleRate);
-      for (var c = 0; c < pcmData.length; ++c) {
-        var channel = buffer.getChannelData(c);
-        for (var i = 0; i < frameCount; ++i) {
-          channel[i] = pcmData[c][i];
-        }
-      }
-      return buffer;
-    }
-  }, {
-    key: "createSound",
-    value: function createSound(loop, buffer) {
-      var snd = {
-        volume: this.context.createGain(),
-        source: this.context.createBufferSource()
-      };
-      snd.source.buffer = buffer;
-      snd.source.loop = loop;
-      snd.source.connect(snd.volume);
-      return snd;
-    }
-  }, {
-    key: "create3DMediaStream",
-    value: function create3DMediaStream(x, y, z, stream) {
-      console.log(stream);
-      var element = document.createElement("audio"),
-          snd = {
-        audio: element,
-        source: this.context.createMediaElementSource(element)
-      };
-
-      element.srcObject = stream;
-      element.autoplay = true;
-      element.controls = false;
-      element.muted = true;
-      element.crossOrigin = "anonymous";
-      snd.source.connect(this.mainVolume);
-      //snd.source.connect(snd.volume):
-      //snd.volume.connect(snd.panner);
-      //snd.panner.connect(this.mainVolume);
-      //snd.panner.setPosition(x, y, z);
-      return snd;
-    }
-  }, {
-    key: "create3DSound",
-    value: function create3DSound(x, y, z, snd) {
-      snd.panner = this.context.createPanner();
-      snd.panner.setPosition(x, y, z);
-      snd.panner.connect(this.mainVolume);
-      snd.volume.connect(snd.panner);
-      return snd;
-    }
-  }, {
-    key: "createFixedSound",
-    value: function createFixedSound(snd) {
-      snd.volume.connect(this.mainVolume);
-      return snd;
-    }
-  }, {
-    key: "loadSource",
-    value: function loadSource(sources, loop) {
-      var _this4 = this;
-
-      return new Promise(function (resolve, reject) {
-        if (!(sources instanceof Array)) {
-          sources = [sources];
-        }
-        var audio = document.createElement("audio");
-        audio.autoplay = true;
-        audio.loop = loop;
-        audio.crossOrigin = "anonymous";
-        sources.map(function (src) {
-          var source = document.createElement("source");
-          source.src = src;
-          return source;
-        }).forEach(audio.appendChild.bind(audio));
-        audio.oncanplay = function () {
-          var snd = null;
-          if (_this4.context) {
-            audio.oncanplay = null;
-            snd = {
-              volume: _this4.context.createGain(),
-              source: _this4.context.createMediaElementSource(audio)
-            };
-            snd.source.connect(snd.volume);
-          }
-          resolve(snd);
-        };
-        audio.onerror = reject;
-        document.body.appendChild(audio);
-      });
-    }
-  }, {
-    key: "load3DSound",
-    value: function load3DSound(src, loop, x, y, z) {
-      return this.loadSource(src, loop).then(this.create3DSound.bind(this, x, y, z));
-    }
-  }, {
-    key: "loadFixedSound",
-    value: function loadFixedSound(src, loop) {
-      return this.loadSource(src, loop).then(this.createFixedSound.bind(this));
-    }
-  }, {
-    key: "playBufferImmediate",
-    value: function playBufferImmediate(buffer, volume) {
-      var _this5 = this;
-
-      var snd = this.createSound(false, buffer);
-      snd = this.createFixedSound(snd);
-      snd.volume.gain.value = volume;
-      snd.source.addEventListener("ended", function (evt) {
-        snd.volume.disconnect(_this5.mainVolume);
-      });
-      snd.source.start(0);
-      return snd;
-    }
-  }], [{
+  _createClass(Audio3D, null, [{
     key: "setAudioStream",
     value: function setAudioStream(stream, id) {
       var audioElementCount = document.querySelectorAll("audio").length,
@@ -66534,14 +63579,219 @@ var Audio3D = function () {
     }
   }]);
 
+  function Audio3D() {
+    var _this = this;
+
+    _classCallCheck(this, Audio3D);
+
+    this.ready = new Promise(function (resolve, reject) {
+      try {
+        (function () {
+          var finishSetup = function finishSetup() {
+            _this.sampleRate = _this.context.sampleRate;
+            _this.mainVolume = _this.context.createGain();
+            _this.start();
+            resolve();
+          };
+
+          if (!isiOS) {
+            _this.context = new AudioContext();
+            finishSetup();
+          } else {
+            (function () {
+              var unlock = function unlock() {
+                _this.context = _this.context || new AudioContext();
+                var source = _this.context.createBufferSource();
+                source.buffer = _this.createRawSound([[0]]);
+                source.connect(_this.context.destination);
+                source.noteOn(0);
+                setTimeout(function () {
+                  if (source.playbackState === source.PLAYING_STATE || source.playbackState === source.FINISHED_STATE) {
+                    window.removeEventListener("mouseup", unlock);
+                    window.removeEventListener("touchend", unlock);
+                    window.removeEventListener("keyup", unlock);
+                    try {
+                      finishSetup();
+                    } catch (exp) {
+                      reject(exp);
+                    }
+                  }
+                }, 0);
+              };
+
+              window.addEventListener("mouseup", unlock, false);
+              window.addEventListener("touchend", unlock, false);
+              window.addEventListener("keyup", unlock, false);
+            })();
+          }
+        })();
+      } catch (exp) {
+        reject(exp);
+      }
+    }).then(function () {
+      return console.log("Audio ready");
+    });
+  }
+
+  _createClass(Audio3D, [{
+    key: "setVelocity",
+    value: function setVelocity(x, y, z) {
+      if (this.context) {
+        this.context.listener.setVelocity(x, y, z);
+      }
+    }
+  }, {
+    key: "setPlayer",
+    value: function setPlayer(obj) {
+      if (this.context) {
+        obj.updateMatrixWorld();
+        TEMP.copy(obj.matrixWorld);
+        var mx = TEMP.elements[12],
+            my = TEMP.elements[13],
+            mz = TEMP.elements[14];
+
+        this.context.listener.setPosition(mx, my, mz);
+
+        VECTOR.set(0, 0, -1).applyMatrix4(TEMP).normalize();
+        UP.set(0, 1, 0).applyMatrix4(TEMP).normalize();
+
+        this.context.listener.setOrientation(VECTOR.x, VECTOR.y, VECTOR.z, UP.x, UP.y, UP.z);
+      }
+    }
+  }, {
+    key: "start",
+    value: function start() {
+      if (this.mainVolume) {
+        this.mainVolume.connect(this.context.destination);
+      }
+    }
+  }, {
+    key: "stop",
+    value: function stop() {
+      if (this.mainVolume) {
+        this.mainVolume.disconnect();
+      }
+    }
+  }, {
+    key: "loadURL",
+    value: function loadURL(src) {
+      var _this2 = this;
+
+      return this.ready.then(function () {
+        console.log("Loading " + src + " from URL");
+        Primrose.HTTP.getBuffer(src);
+      }).then(function (data) {
+        return new Promise(function (resolve, reject) {
+          return _this2.context.decodeAudioData(data, resolve, reject);
+        });
+      }).then(function (dat) {
+        console.log(src + " loaded");
+        return dat;
+      }).catch(function (err) {
+        console.error("Couldn't load " + src + ". Reason: " + err);
+      });
+    }
+  }, {
+    key: "createRawSound",
+    value: function createRawSound(pcmData) {
+      if (pcmData.length !== 1 && pcmData.length !== 2) {
+        throw new Error("Incorrect number of channels. Expected 1 or 2, got " + pcmData.length);
+      }
+
+      var frameCount = pcmData[0].length;
+      if (pcmData.length > 1 && pcmData[1].length !== frameCount) {
+        throw new Error("Second channel is not the same length as the first channel. Expected " + frameCount + ", but was " + pcmData[1].length);
+      }
+
+      var buffer = this.context.createBuffer(pcmData.length, frameCount, this.sampleRate || 22050);
+      for (var c = 0; c < pcmData.length; ++c) {
+        var channel = buffer.getChannelData(c);
+        for (var i = 0; i < frameCount; ++i) {
+          channel[i] = pcmData[c][i];
+        }
+      }
+      return buffer;
+    }
+  }, {
+    key: "create3DSound",
+    value: function create3DSound(x, y, z, snd) {
+      snd.panner = this.context.createPanner();
+      snd.panner.setPosition(x, y, z);
+      snd.panner.connect(this.mainVolume);
+      snd.volume.connect(snd.panner);
+      return snd;
+    }
+  }, {
+    key: "createFixedSound",
+    value: function createFixedSound(snd) {
+      snd.volume.connect(this.mainVolume);
+      return snd;
+    }
+  }, {
+    key: "loadSource",
+    value: function loadSource(sources, loop) {
+      var _this3 = this;
+
+      return this.ready.then(function () {
+        return new Promise(function (resolve, reject) {
+          console.log("Loading " + sources);
+          if (!(sources instanceof Array)) {
+            sources = [sources];
+          }
+          var audio = document.createElement("audio");
+          audio.autoplay = true;
+          audio.preload = "auto";
+          audio["webkit-playsinline"] = true;
+          audio.playsinline = true;
+          audio.loop = loop;
+          audio.crossOrigin = "anonymous";
+          sources.map(function (src) {
+            var source = document.createElement("source");
+            source.src = src;
+            return source;
+          }).forEach(audio.appendChild.bind(audio));
+          audio.onerror = reject;
+          audio.oncanplay = function () {
+            audio.oncanplay = null;
+            var snd = {
+              volume: _this3.context.createGain(),
+              source: _this3.context.createMediaElementSource(audio)
+            };
+            snd.source.connect(snd.volume);
+            resolve(snd);
+          };
+          audio.play();
+          document.body.appendChild(audio);
+        });
+      }).then(function (dat) {
+        console.log(sources + " loaded");
+        return dat;
+      }).catch(function (err) {
+        console.error("Couldn't load " + sources + ". Reason: " + err);
+      });
+    }
+  }, {
+    key: "load3DSound",
+    value: function load3DSound(src, loop, x, y, z) {
+      return this.loadSource(src, loop).then(this.create3DSound.bind(this, x, y, z));
+    }
+  }, {
+    key: "loadFixedSound",
+    value: function loadFixedSound(src, loop) {
+      return this.loadSource(src, loop).then(this.createFixedSound.bind(this));
+    }
+  }]);
+
   return Audio3D;
 }();
-  if(typeof window !== "undefined") window.Primrose.Output.Audio3D = Audio3D;
+
+Audio3D.isAvailable = !!window.AudioContext && AudioContext.prototype.createGain;
+    if(typeof window !== "undefined") window.Primrose.Output.Audio3D = Audio3D;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Output\Audio3D.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Output\Audio3D.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Output\HapticGlove.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Output\HapticGlove.js
 (function(){"use strict";
 
 function HapticGlove(options) {
@@ -66647,12 +63897,12 @@ function HapticGlove(options) {
 
 HapticGlove.DEFAULT_PORT = 8383;
 HapticGlove.DEFAULT_HOST = document.location.hostname;
-  if(typeof window !== "undefined") window.Primrose.Output.HapticGlove = HapticGlove;
+    if(typeof window !== "undefined") window.Primrose.Output.HapticGlove = HapticGlove;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Output\HapticGlove.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Output\HapticGlove.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Output\Music.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Output\Music.js
 (function(){"use strict";
 
 /* polyfill */
@@ -66738,12 +63988,12 @@ Music.prototype.play = function (i, volume, duration, n) {
     }.bind(this, n, o), duration * 1000);
   }
 };
-  if(typeof window !== "undefined") window.Primrose.Output.Music = Music;
+    if(typeof window !== "undefined") window.Primrose.Output.Music = Music;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Output\Music.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Output\Music.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Output\Speech.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Output\Speech.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -66816,12 +64066,12 @@ var Speech = function () {
     }();
   }
 }();
-  if(typeof window !== "undefined") window.Primrose.Output.Speech = Speech;
+    if(typeof window !== "undefined") window.Primrose.Output.Speech = Speech;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Output\Speech.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Output\Speech.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Random\color.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Random\color.js
 (function(){"use strict";
 
 function color() {
@@ -66830,23 +64080,23 @@ function color() {
       b = Primrose.Random.int(0, 256);
   return r << 16 | g << 8 | b;
 }
-  if(typeof window !== "undefined") window.Primrose.Random.color = color;
+    if(typeof window !== "undefined") window.Primrose.Random.color = color;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Random\color.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Random\color.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Random\ID.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Random\ID.js
 (function(){"use strict";
 
 function ID() {
   return (Math.random() * Math.log(Number.MAX_VALUE)).toString(36).replace(".", "");
 }
-  if(typeof window !== "undefined") window.Primrose.Random.ID = ID;
+    if(typeof window !== "undefined") window.Primrose.Random.ID = ID;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Random\ID.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Random\ID.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Random\int.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Random\int.js
 (function(){"use strict";
 
 function int(min, max, power) {
@@ -66859,48 +64109,48 @@ function int(min, max, power) {
       n = Math.pow(Math.random(), power);
   return Math.floor(min + n * delta);
 }
-  if(typeof window !== "undefined") window.Primrose.Random.int = int;
+    if(typeof window !== "undefined") window.Primrose.Random.int = int;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Random\int.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Random\int.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Random\item.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Random\item.js
 (function(){"use strict";
 
 function item(arr) {
   return arr[Primrose.Random.int(arr.length)];
 }
-  if(typeof window !== "undefined") window.Primrose.Random.item = item;
+    if(typeof window !== "undefined") window.Primrose.Random.item = item;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Random\item.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Random\item.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Random\number.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Random\number.js
 (function(){"use strict";
 
 function number(min, max) {
   return Math.random() * (max - min) + min;
 }
-  if(typeof window !== "undefined") window.Primrose.Random.number = number;
+    if(typeof window !== "undefined") window.Primrose.Random.number = number;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Random\number.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Random\number.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Random\steps.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Random\steps.js
 (function(){"use strict";
 
 function steps(min, max, steps) {
   return min + Primrose.Random.int(0, (1 + max - min) / steps) * steps;
 }
-  if(typeof window !== "undefined") window.Primrose.Random.steps = steps;
+    if(typeof window !== "undefined") window.Primrose.Random.steps = steps;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Random\steps.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Random\steps.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Text\CodePage.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\CodePage.js
 (function(){"use strict";
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 function CodePage(name, lang, options) {
   this.name = name;
@@ -67023,51 +64273,51 @@ CodePage.DEAD = function (key) {
     prim.setDeadKeyState("DEAD" + key);
   };
 };
-  if(typeof window !== "undefined") window.Primrose.Text.CodePage = CodePage;
+    if(typeof window !== "undefined") window.Primrose.Text.CodePage = CodePage;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Text\CodePage.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\CodePage.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Text\CodePages.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\CodePages.js
 (function(){"use strict";
 
 var CodePages = {};
-  if(typeof window !== "undefined") window.Primrose.Text.CodePages = CodePages;
+    if(typeof window !== "undefined") window.Primrose.Text.CodePages = CodePages;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Text\CodePages.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\CodePages.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Text\CommandPack.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\CommandPack.js
 (function(){"use strict";
 
 function CommandPack(name, commands) {
   this.name = name;
   copyObject(this, commands);
 }
-  if(typeof window !== "undefined") window.Primrose.Text.CommandPack = CommandPack;
+    if(typeof window !== "undefined") window.Primrose.Text.CommandPack = CommandPack;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Text\CommandPack.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\CommandPack.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks.js
 (function(){"use strict";
 
 var CommandPacks = {};
-  if(typeof window !== "undefined") window.Primrose.Text.CommandPacks = CommandPacks;
+    if(typeof window !== "undefined") window.Primrose.Text.CommandPacks = CommandPacks;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Text\Controls.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\Controls.js
 (function(){"use strict";
 
 var Controls = {};
-  if(typeof window !== "undefined") window.Primrose.Text.Controls = Controls;
+    if(typeof window !== "undefined") window.Primrose.Text.Controls = Controls;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Text\Controls.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\Controls.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Text\Cursor.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\Cursor.js
 (function(){"use strict";
 
 // unicode-aware string reverse
@@ -67308,12 +64558,12 @@ Cursor.prototype.reverseFromNewline = function (lines) {
   }
   return false;
 };
-  if(typeof window !== "undefined") window.Primrose.Text.Cursor = Cursor;
+    if(typeof window !== "undefined") window.Primrose.Text.Cursor = Cursor;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Text\Cursor.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\Cursor.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Text\Grammar.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\Grammar.js
 (function(){"use strict";
 
 function Grammar(name, rules) {
@@ -67410,21 +64660,21 @@ function Grammar(name, rules) {
     return tokens;
   };
 }
-  if(typeof window !== "undefined") window.Primrose.Text.Grammar = Grammar;
+    if(typeof window !== "undefined") window.Primrose.Text.Grammar = Grammar;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Text\Grammar.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\Grammar.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Text\Grammars.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\Grammars.js
 (function(){"use strict";
 
 var Grammars = {};
-  if(typeof window !== "undefined") window.Primrose.Text.Grammars = Grammars;
+    if(typeof window !== "undefined") window.Primrose.Text.Grammars = Grammars;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Text\Grammars.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\Grammars.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystem.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystem.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -67508,21 +64758,21 @@ var OperatingSystem = function () {
 
   return OperatingSystem;
 }();
-  if(typeof window !== "undefined") window.Primrose.Text.OperatingSystem = OperatingSystem;
+    if(typeof window !== "undefined") window.Primrose.Text.OperatingSystem = OperatingSystem;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystem.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystem.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems.js
 (function(){"use strict";
 
 var OperatingSystems = {};
-  if(typeof window !== "undefined") window.Primrose.Text.OperatingSystems = OperatingSystems;
+    if(typeof window !== "undefined") window.Primrose.Text.OperatingSystems = OperatingSystems;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Text\Point.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\Point.js
 (function(){"use strict";
 
 function Point(x, y) {
@@ -67548,12 +64798,12 @@ Point.prototype.clone = function () {
 Point.prototype.toString = function () {
   return "(x:" + this.x + ", y:" + this.y + ")";
 };
-  if(typeof window !== "undefined") window.Primrose.Text.Point = Point;
+    if(typeof window !== "undefined") window.Primrose.Text.Point = Point;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Text\Point.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\Point.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Text\Rectangle.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\Rectangle.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -67676,12 +64926,12 @@ var Rectangle = function () {
 
   return Rectangle;
 }();
-  if(typeof window !== "undefined") window.Primrose.Text.Rectangle = Rectangle;
+    if(typeof window !== "undefined") window.Primrose.Text.Rectangle = Rectangle;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Text\Rectangle.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\Rectangle.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Text\Rule.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\Rule.js
 (function(){"use strict";
 
 function Rule(name, test) {
@@ -67723,12 +64973,12 @@ Rule.prototype.carveOutMatchedToken = function (tokens, j) {
     }
   }
 };
-  if(typeof window !== "undefined") window.Primrose.Text.Rule = Rule;
+    if(typeof window !== "undefined") window.Primrose.Text.Rule = Rule;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Text\Rule.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\Rule.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Text\Size.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\Size.js
 (function(){"use strict";
 
 function Size(width, height) {
@@ -67754,12 +65004,12 @@ Size.prototype.clone = function () {
 Size.prototype.toString = function () {
   return "<w:" + this.width + ", h:" + this.height + ">";
 };
-  if(typeof window !== "undefined") window.Primrose.Text.Size = Size;
+    if(typeof window !== "undefined") window.Primrose.Text.Size = Size;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Text\Size.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\Size.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Text\Terminal.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\Terminal.js
 (function(){"use strict";
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -67878,21 +65128,21 @@ var Terminal = function Terminal(inputEditor, outputEditor) {
     }
   };
 };
-  if(typeof window !== "undefined") window.Primrose.Text.Terminal = Terminal;
+    if(typeof window !== "undefined") window.Primrose.Text.Terminal = Terminal;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Text\Terminal.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\Terminal.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Text\Themes.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\Themes.js
 (function(){"use strict";
 
 var Themes = {};
-  if(typeof window !== "undefined") window.Primrose.Text.Themes = Themes;
+    if(typeof window !== "undefined") window.Primrose.Text.Themes = Themes;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Text\Themes.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\Themes.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Text\Token.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\Token.js
 (function(){"use strict";
 
 function Token(value, type, index, line) {
@@ -67915,12 +65165,12 @@ Token.prototype.splitAt = function (i) {
 Token.prototype.toString = function () {
   return "[" + this.type + ": " + this.value + "]";
 };
-  if(typeof window !== "undefined") window.Primrose.Text.Token = Token;
+    if(typeof window !== "undefined") window.Primrose.Text.Token = Token;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Text\Token.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\Token.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\DE_QWERTZ.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\DE_QWERTZ.js
 (function(){"use strict";
 
 var CodePage = Primrose.Text.CodePage;
@@ -68042,12 +65292,12 @@ var DE_QWERTZ = new CodePage("Deutsch: QWERTZ", "de", {
     "89": "y"
   }
 });
-  if(typeof window !== "undefined") window.Primrose.Text.CodePages.DE_QWERTZ = DE_QWERTZ;
+    if(typeof window !== "undefined") window.Primrose.Text.CodePages.DE_QWERTZ = DE_QWERTZ;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\DE_QWERTZ.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\DE_QWERTZ.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_UKX.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_UKX.js
 (function(){"use strict";
 
 var CodePage = Primrose.Text.CodePage;
@@ -68132,12 +65382,12 @@ var EN_UKX = new CodePage("English: UK Extended", "en-GB", {
     "223": "¬"
   }
 });
-  if(typeof window !== "undefined") window.Primrose.Text.CodePages.EN_UKX = EN_UKX;
+    if(typeof window !== "undefined") window.Primrose.Text.CodePages.EN_UKX = EN_UKX;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_UKX.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_UKX.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_US.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_US.js
 (function(){"use strict";
 
 var CodePage = Primrose.Text.CodePage;
@@ -68196,12 +65446,12 @@ var EN_US = new CodePage("English: USA", "en-US", {
     "222": "\""
   }
 });
-  if(typeof window !== "undefined") window.Primrose.Text.CodePages.EN_US = EN_US;
+    if(typeof window !== "undefined") window.Primrose.Text.CodePages.EN_US = EN_US;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_US.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_US.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\FR_AZERTY.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\FR_AZERTY.js
 (function(){"use strict";
 
 var CodePage = Primrose.Text.CodePage;
@@ -68294,12 +65544,12 @@ var FR_AZERTY = new CodePage("Français: AZERTY", "fr", {
     "85": "ù"
   }
 });
-  if(typeof window !== "undefined") window.Primrose.Text.CodePages.FR_AZERTY = FR_AZERTY;
+    if(typeof window !== "undefined") window.Primrose.Text.CodePages.FR_AZERTY = FR_AZERTY;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\FR_AZERTY.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\FR_AZERTY.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\BasicTextInput.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\BasicTextInput.js
 (function(){"use strict";
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -68422,12 +65672,12 @@ var BasicTextInput = function (_Primrose$Text$Comman) {
 
   return BasicTextInput;
 }(Primrose.Text.CommandPack);
-  if(typeof window !== "undefined") window.Primrose.Text.CommandPacks.BasicTextInput = BasicTextInput;
+    if(typeof window !== "undefined") window.Primrose.Text.CommandPacks.BasicTextInput = BasicTextInput;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\BasicTextInput.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\BasicTextInput.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextEditor.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextEditor.js
 (function(){"use strict";
 
 var TextEditor = new Primrose.Text.CommandPacks.BasicTextInput("Text Area input commands", {
@@ -68477,12 +65727,12 @@ var TextEditor = new Primrose.Text.CommandPacks.BasicTextInput("Text Area input 
     }
   }
 });
-  if(typeof window !== "undefined") window.Primrose.Text.CommandPacks.TextEditor = TextEditor;
+    if(typeof window !== "undefined") window.Primrose.Text.CommandPacks.TextEditor = TextEditor;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextEditor.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextEditor.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextInput.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextInput.js
 (function(){"use strict";
 
 ////
@@ -68491,12 +65741,12 @@ var TextEditor = new Primrose.Text.CommandPacks.BasicTextInput("Text Area input 
 // If SHIFT is held, then "back"
 //
 var TextInput = new Primrose.Text.CommandPacks.BasicTextInput("Text Line input commands");
-  if(typeof window !== "undefined") window.Primrose.Text.CommandPacks.TextInput = TextInput;
+    if(typeof window !== "undefined") window.Primrose.Text.CommandPacks.TextInput = TextInput;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextInput.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextInput.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Text\Controls\PlainText.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\Controls\PlainText.js
 (function(){"use strict";
 
 function PlainText(text, size, fgcolor, bgcolor, x, y, z, hAlign) {
@@ -68548,12 +65798,12 @@ function PlainText(text, size, fgcolor, bgcolor, x, y, z, hAlign) {
   textMesh.position.set(x, y, z);
   return textMesh;
 }
-  if(typeof window !== "undefined") window.Primrose.Text.Controls.PlainText = PlainText;
+    if(typeof window !== "undefined") window.Primrose.Text.Controls.PlainText = PlainText;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Text\Controls\PlainText.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\Controls\PlainText.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Text\Controls\TextBox.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\Controls\TextBox.js
 (function(){"use strict";
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
@@ -69493,12 +66743,12 @@ var TextBox = function (_Primrose$Surface) {
 
   return TextBox;
 }(Primrose.Surface);
-  if(typeof window !== "undefined") window.Primrose.Text.Controls.TextBox = TextBox;
+    if(typeof window !== "undefined") window.Primrose.Text.Controls.TextBox = TextBox;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Text\Controls\TextBox.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\Controls\TextBox.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Text\Controls\TextInput.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\Controls\TextInput.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -69574,12 +66824,12 @@ var TextInput = function (_Primrose$Text$Contro) {
 
   return TextInput;
 }(Primrose.Text.Controls.TextBox);
-  if(typeof window !== "undefined") window.Primrose.Text.Controls.TextInput = TextInput;
+    if(typeof window !== "undefined") window.Primrose.Text.Controls.TextInput = TextInput;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Text\Controls\TextInput.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\Controls\TextInput.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\Basic.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\Basic.js
 (function(){"use strict";
 
 // we don't use strict here because this grammar includes an interpreter that uses `eval()`
@@ -70181,48 +67431,48 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next, clearScre
     }
   };
 };
-  if(typeof window !== "undefined") window.Primrose.Text.Grammars.Basic = Basic;
+    if(typeof window !== "undefined") window.Primrose.Text.Grammars.Basic = Basic;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\Basic.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\Basic.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\JavaScript.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\JavaScript.js
 (function(){"use strict";
 
 var JavaScript = new Primrose.Text.Grammar("JavaScript", [["newlines", /(?:\r\n|\r|\n)/], ["startBlockComments", /\/\*/], ["endBlockComments", /\*\//], ["regexes", /(?:^|,|;|\(|\[|\{)(?:\s*)(\/(?:\\\/|[^\n\/])+\/)/], ["stringDelim", /("|')/], ["startLineComments", /\/\/.*$/m], ["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/], ["keywords", /\b(?:break|case|catch|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/], ["functions", /(\w+)(?:\s*\()/], ["members", /(\w+)\./], ["members", /((\w+\.)+)(\w+)/]]);
-  if(typeof window !== "undefined") window.Primrose.Text.Grammars.JavaScript = JavaScript;
+    if(typeof window !== "undefined") window.Primrose.Text.Grammars.JavaScript = JavaScript;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\JavaScript.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\JavaScript.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\PlainText.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\PlainText.js
 (function(){"use strict";
 
 var PlainText = new Primrose.Text.Grammar("PlainText", [["newlines", /(?:\r\n|\r|\n)/]]);
-  if(typeof window !== "undefined") window.Primrose.Text.Grammars.PlainText = PlainText;
+    if(typeof window !== "undefined") window.Primrose.Text.Grammars.PlainText = PlainText;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\PlainText.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\PlainText.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\TestResults.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\TestResults.js
 (function(){"use strict";
 
 var TestResults = new Primrose.Text.Grammar("TestResults", [["newlines", /(?:\r\n|\r|\n)/, true], ["numbers", /(\[)(o+)/, true], ["numbers", /(\d+ succeeded), 0 failed/, true], ["numbers", /^    Successes:/, true], ["functions", /(x+)\]/, true], ["functions", /[1-9]\d* failed/, true], ["functions", /^    Failures:/, true], ["comments", /(\d+ms:)(.*)/, true], ["keywords", /(Test results for )(\w+):/, true], ["strings", /        \w+/, true]]);
-  if(typeof window !== "undefined") window.Primrose.Text.Grammars.TestResults = TestResults;
+    if(typeof window !== "undefined") window.Primrose.Text.Grammars.TestResults = TestResults;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\TestResults.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\TestResults.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\OSX.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\OSX.js
 (function(){"use strict";
 
 var OSX = new Primrose.Text.OperatingSystem("OS X", "META", "ALT", "METASHIFT_z", "META", "LEFTARROW", "RIGHTARROW", "META", "UPARROW", "DOWNARROW");
-  if(typeof window !== "undefined") window.Primrose.Text.OperatingSystems.OSX = OSX;
+    if(typeof window !== "undefined") window.Primrose.Text.OperatingSystems.OSX = OSX;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\OSX.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\OSX.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\Windows.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\Windows.js
 (function(){"use strict";
 
 ////
@@ -70230,12 +67480,12 @@ var OSX = new Primrose.Text.OperatingSystem("OS X", "META", "ALT", "METASHIFT_z"
 // so we don't have to include handlers for them here.
 ///
 var Windows = new Primrose.Text.OperatingSystem("Windows", "CTRL", "CTRL", "CTRL_y", "", "HOME", "END", "CTRL", "HOME", "END");
-  if(typeof window !== "undefined") window.Primrose.Text.OperatingSystems.Windows = Windows;
+    if(typeof window !== "undefined") window.Primrose.Text.OperatingSystems.Windows = Windows;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\Windows.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\Windows.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Text\Themes\Dark.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\Themes\Dark.js
 (function(){"use strict";
 
 var Dark = {
@@ -70283,12 +67533,12 @@ var Dark = {
     fontStyle: "underline italic"
   }
 };
-  if(typeof window !== "undefined") window.Primrose.Text.Themes.Dark = Dark;
+    if(typeof window !== "undefined") window.Primrose.Text.Themes.Dark = Dark;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Text\Themes\Dark.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\Themes\Dark.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\Text\Themes\Default.js
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\Themes\Default.js
 (function(){"use strict";
 
 var Default = {
@@ -70336,12 +67586,12 @@ var Default = {
     fontStyle: "underline italic"
   }
 };
-  if(typeof window !== "undefined") window.Primrose.Text.Themes.Default = Default;
+    if(typeof window !== "undefined") window.Primrose.Text.Themes.Default = Default;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\Text\Themes\Default.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\Themes\Default.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\X\LoginForm.js
+    // start D:\Documents\VR\Primrose\src\Primrose\X\LoginForm.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -70443,12 +67693,12 @@ var LoginForm = function (_Primrose$Controls$Fo) {
 
   return LoginForm;
 }(Primrose.Controls.Form);
-  if(typeof window !== "undefined") window.Primrose.X.LoginForm = LoginForm;
+    if(typeof window !== "undefined") window.Primrose.X.LoginForm = LoginForm;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\X\LoginForm.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\X\LoginForm.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\Primrose\X\SignupForm.js
+    // start D:\Documents\VR\Primrose\src\Primrose\X\SignupForm.js
 (function(){"use strict";
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -70557,12 +67807,12 @@ var SignupForm = function (_Primrose$Controls$Fo) {
 
   return SignupForm;
 }(Primrose.Controls.Form);
-  if(typeof window !== "undefined") window.Primrose.X.SignupForm = SignupForm;
+    if(typeof window !== "undefined") window.Primrose.X.SignupForm = SignupForm;
 })();
-  // end D:\Documents\VR\Primrose\src\Primrose\X\SignupForm.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\X\SignupForm.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\THREE\CubeTextureLoader\prototype\load.js
+    // start D:\Documents\VR\Primrose\src\THREE\CubeTextureLoader\prototype\load.js
 (function(){"use strict";
 
 function load(urls, onLoad, onProgress, onError) {
@@ -70588,27 +67838,28 @@ function load(urls, onLoad, onProgress, onError) {
 
   return texture;
 }
-  if(typeof window !== "undefined") window.THREE.CubeTextureLoader.prototype.load = load;
+    if(typeof window !== "undefined") window.THREE.CubeTextureLoader.prototype.load = load;
 })();
-  // end D:\Documents\VR\Primrose\src\THREE\CubeTextureLoader\prototype\load.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\THREE\CubeTextureLoader\prototype\load.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\THREE\Euler\prototype\debug.js
+    // start D:\Documents\VR\Primrose\src\THREE\Euler\prototype\debug.js
 (function(){"use strict";
 
+var cache = {};
 function debug(label, digits) {
   var val = this.toString(digits);
-  if (val !== this.lastVal) {
-    this.lastVal = val;
+  if (val !== cache[label]) {
+    cache[label] = val;
     console.log(label, val);
   }
 }
-  if(typeof window !== "undefined") window.THREE.Euler.prototype.debug = debug;
+    if(typeof window !== "undefined") window.THREE.Euler.prototype.debug = debug;
 })();
-  // end D:\Documents\VR\Primrose\src\THREE\Euler\prototype\debug.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\THREE\Euler\prototype\debug.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\THREE\Euler\prototype\toString.js
+    // start D:\Documents\VR\Primrose\src\THREE\Euler\prototype\toString.js
 (function(){"use strict";
 
 function toString(digits) {
@@ -70624,27 +67875,28 @@ function toString(digits) {
   }
   return "[" + parts.join(", ") + "]";
 }
-  if(typeof window !== "undefined") window.THREE.Euler.prototype.toString = toString;
+    if(typeof window !== "undefined") window.THREE.Euler.prototype.toString = toString;
 })();
-  // end D:\Documents\VR\Primrose\src\THREE\Euler\prototype\toString.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\THREE\Euler\prototype\toString.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\THREE\Matrix4\prototype\debug.js
+    // start D:\Documents\VR\Primrose\src\THREE\Matrix4\prototype\debug.js
 (function(){"use strict";
 
+var cache = {};
 function debug(label, digits) {
   var val = this.toString(digits);
-  if (val !== this.lastVal) {
-    this.lastVal = val;
+  if (val !== cache[label]) {
+    cache[label] = val;
     console.log(label + "\n" + val);
   }
 }
-  if(typeof window !== "undefined") window.THREE.Matrix4.prototype.debug = debug;
+    if(typeof window !== "undefined") window.THREE.Matrix4.prototype.debug = debug;
 })();
-  // end D:\Documents\VR\Primrose\src\THREE\Matrix4\prototype\debug.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\THREE\Matrix4\prototype\debug.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\THREE\Matrix4\prototype\toString.js
+    // start D:\Documents\VR\Primrose\src\THREE\Matrix4\prototype\toString.js
 (function(){"use strict";
 
 function toString(digits) {
@@ -70682,12 +67934,12 @@ function toString(digits) {
   }
   return output;
 }
-  if(typeof window !== "undefined") window.THREE.Matrix4.prototype.toString = toString;
+    if(typeof window !== "undefined") window.THREE.Matrix4.prototype.toString = toString;
 })();
-  // end D:\Documents\VR\Primrose\src\THREE\Matrix4\prototype\toString.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\THREE\Matrix4\prototype\toString.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\THREE\Object3D\prototype\addToBrowserEnvironment.js
+    // start D:\Documents\VR\Primrose\src\THREE\Object3D\prototype\addToBrowserEnvironment.js
 (function(){"use strict";
 
 function addToBrowserEnvironment(env, scene) {
@@ -70707,27 +67959,28 @@ function addToBrowserEnvironment(env, scene) {
     }
   };
 }
-  if(typeof window !== "undefined") window.THREE.Object3D.prototype.addToBrowserEnvironment = addToBrowserEnvironment;
+    if(typeof window !== "undefined") window.THREE.Object3D.prototype.addToBrowserEnvironment = addToBrowserEnvironment;
 })();
-  // end D:\Documents\VR\Primrose\src\THREE\Object3D\prototype\addToBrowserEnvironment.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\THREE\Object3D\prototype\addToBrowserEnvironment.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\THREE\Quaternion\prototype\debug.js
+    // start D:\Documents\VR\Primrose\src\THREE\Quaternion\prototype\debug.js
 (function(){"use strict";
 
+var cache = {};
 function debug(label, digits) {
   var val = this.toString(digits);
-  if (val !== this.lastVal) {
-    this.lastVal = val;
+  if (val !== cache[label]) {
+    cache[label] = val;
     console.log(label, val);
   }
 }
-  if(typeof window !== "undefined") window.THREE.Quaternion.prototype.debug = debug;
+    if(typeof window !== "undefined") window.THREE.Quaternion.prototype.debug = debug;
 })();
-  // end D:\Documents\VR\Primrose\src\THREE\Quaternion\prototype\debug.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\THREE\Quaternion\prototype\debug.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\THREE\Quaternion\prototype\toString.js
+    // start D:\Documents\VR\Primrose\src\THREE\Quaternion\prototype\toString.js
 (function(){"use strict";
 
 function toString(digits) {
@@ -70743,27 +67996,28 @@ function toString(digits) {
   }
   return "{" + parts.join(", ") + "}";
 }
-  if(typeof window !== "undefined") window.THREE.Quaternion.prototype.toString = toString;
+    if(typeof window !== "undefined") window.THREE.Quaternion.prototype.toString = toString;
 })();
-  // end D:\Documents\VR\Primrose\src\THREE\Quaternion\prototype\toString.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\THREE\Quaternion\prototype\toString.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\THREE\Vector3\prototype\debug.js
+    // start D:\Documents\VR\Primrose\src\THREE\Vector3\prototype\debug.js
 (function(){"use strict";
 
+var cache = {};
 function debug(label, digits) {
   var val = this.toString(digits);
-  if (val !== this.lastVal) {
-    this.lastVal = val;
+  if (val !== cache[label]) {
+    cache[label] = val;
     console.log(label, val);
   }
 }
-  if(typeof window !== "undefined") window.THREE.Vector3.prototype.debug = debug;
+    if(typeof window !== "undefined") window.THREE.Vector3.prototype.debug = debug;
 })();
-  // end D:\Documents\VR\Primrose\src\THREE\Vector3\prototype\debug.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\THREE\Vector3\prototype\debug.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start D:\Documents\VR\Primrose\src\THREE\Vector3\prototype\toString.js
+    // start D:\Documents\VR\Primrose\src\THREE\Vector3\prototype\toString.js
 (function(){"use strict";
 
 function toString(digits) {
@@ -70779,7 +68033,7 @@ function toString(digits) {
   }
   return "<" + parts.join(", ") + ">";
 }
-  if(typeof window !== "undefined") window.THREE.Vector3.prototype.toString = toString;
+    if(typeof window !== "undefined") window.THREE.Vector3.prototype.toString = toString;
 })();
-  // end D:\Documents\VR\Primrose\src\THREE\Vector3\prototype\toString.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\THREE\Vector3\prototype\toString.js
+    ////////////////////////////////////////////////////////////////////////////////

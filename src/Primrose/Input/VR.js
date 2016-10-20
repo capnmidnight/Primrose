@@ -45,7 +45,9 @@ class VR extends Primrose.PoseInputProcessor {
       .then((displays) => {
         // We skip the WebVR-Polyfill's Mouse and Keyboard display because it does not
         // play well with our interaction model.
-        this.displays.push.apply(this.displays, displays.filter((display) => display.displayName !== "Mouse and Keyboard VRDisplay (webvr-polyfill)"));
+        this.displays.push.apply(this.displays, displays.filter((display) =>
+          !isiOS || VR.isStereoDisplay(display)));
+        console.log("VR Displays", this.displays);
         return this.displays;
       });
   }
