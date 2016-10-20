@@ -232,99 +232,100 @@ class Pointer extends Primrose.AbstractEventEmitter {
         .applyMatrix4(this.root.matrixWorld)
         .sub(VECTOR_TEMP);
       this.picker.set(VECTOR_TEMP, FORWARD);
-      const hits = this.picker.intersectObjects(objects, true);
-      if(hits.length > 0) {
-        const currentHit = hits[0],
-          _priv = _(this),
-          lastHit = _priv.lastHit,
-          moved = lastHit && currentHit &&
-            (currentHit.point.x !== lastHit.point.x ||
-            currentHit.point.y !== lastHit.point.y ||
-            currentHit.point.z !== lastHit.point.z),
-          dt = lastHit && lastHit.time && (performance.now() - lastHit.time),
-          changed = !lastHit && currentHit ||
-            lastHit && !currentHit ||
-            lastHit && currentHit && currentHit.object.id !== lastHit.object.id,
-          evt = {
-            pointer: this,
-            buttons: 0,
-            hit: currentHit,
-            lastHit: lastHit
-          };
+      const hits = this.picker.intersectObjects(objects, true),
+        currentHit = hits[0],
+        _priv = _(this),
+        lastHit = _priv.lastHit,
+        moved = lastHit && currentHit &&
+          (currentHit.point.x !== lastHit.point.x ||
+          currentHit.point.y !== lastHit.point.y ||
+          currentHit.point.z !== lastHit.point.z),
+        dt = lastHit && lastHit.time && (performance.now() - lastHit.time),
+        changed = !lastHit && currentHit ||
+          lastHit && !currentHit ||
+          lastHit && currentHit && currentHit.object.id !== lastHit.object.id,
+        evt = {
+          pointer: this,
+          buttons: 0,
+          hit: currentHit,
+          lastHit: lastHit
+        };
 
+      if(currentHit){
         currentHit.time = performance.now();
+
         this.mesh.material = material("", {
           color: this.highlight,
           unshaded: true
         });
+      }
 
-        if(moved){
-          lastHit.point.copy(currentHit.point);
+      if(moved){
+        lastHit.point.copy(currentHit.point);
+      }
+
+      this.mesh.visible = !this.useGaze;
+
+      if(changed){
+        if(lastHit){
+          this.emit("exit", evt);
         }
+        if(currentHit){
+          this.emit("enter", evt);
+        }
+      }
 
-        this.mesh.visible = !this.useGaze;
+      var dButtons = 0;
+      for(let i = 0; i < this.triggerDevices.length; ++i) {
+        const obj = this.triggerDevices[i];
+        if(obj.enabled){
+          evt.buttons |= obj.getValue("buttons");
+          dButtons |= obj.getValue("dButtons");
+        }
+      }
 
-        if(changed){
-          if(lastHit){
-            this.emit("exit", evt);
+      if(dButtons){
+        if(evt.buttons){
+          this.emit("pointerstart", evt);
+        }
+        else{
+          this.emit("pointerend", evt);
+        }
+      }
+      else if(moved) {
+        this.emit("pointermove", evt);
+      }
+
+      if(this.useGaze){
+        if(changed) {
+          if(dt !== null && dt < GAZE_TIMEOUT){
+            this.gazeOuter.visible = false;
+            this.emit("gazecancel", evt);
           }
           if(currentHit){
-            this.emit("enter", evt);
+            this.gazeOuter.visible = true;
+            this.emit("gazestart", evt);
           }
         }
-
-        var dButtons = 0;
-        for(let i = 0; i < this.triggerDevices.length; ++i) {
-          const obj = this.triggerDevices[i];
-          if(obj.enabled){
-            evt.buttons |= obj.getValue("buttons");
-            dButtons |= obj.getValue("dButtons");
+        else if(dt !== null) {
+          if(dt >= GAZE_TIMEOUT){
+            this.gazeOuter.visible = false;
+            this.emit("gazecomplete", evt);
+            lastHit.time = null;
           }
-        }
-
-        if(dButtons){
-          if(evt.buttons){
-            this.emit("pointerstart", evt);
-          }
-          else{
-            this.emit("pointerend", evt);
-          }
-        }
-        else if(moved) {
-          this.emit("pointermove", evt);
-        }
-
-        if(this.useGaze){
-          if(changed) {
-            if(dt !== null && dt < GAZE_TIMEOUT){
-              this.gazeOuter.visible = false;
-              this.emit("gazecancel", evt);
-            }
-            if(currentHit){
-              this.gazeOuter.visible = true;
-              this.emit("gazestart", evt);
-            }
-          }
-          else if(dt !== null) {
-            if(dt >= GAZE_TIMEOUT){
-              this.gazeOuter.visible = false;
-              this.emit("gazecomplete", evt);
-              lastHit.time = null;
-            }
-            else {
-              var p = Math.round(36 * dt / GAZE_TIMEOUT),
-                a = 2 * Math.PI * p / 36;
-              this.gazeOuter.geometry = ring(GAZE_RING_INNER, GAZE_RING_OUTER, 36, p, 0, a);
-              if(moved) {
-                this.emit("gazemove", evt);
-              }
+          else {
+            var p = Math.round(36 * dt / GAZE_TIMEOUT),
+              a = 2 * Math.PI * p / 36;
+            this.gazeOuter.geometry = ring(GAZE_RING_INNER, GAZE_RING_OUTER, 36, p, 0, a);
+            if(moved) {
+              this.emit("gazemove", evt);
             }
           }
         }
+      }
 
-        if(changed){
-          _priv.lastHit = currentHit;
-        }
+      if(changed){
+        _priv.lastHit = currentHit;
       }
     }
   }
