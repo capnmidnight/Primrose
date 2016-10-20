@@ -11764,7 +11764,7 @@ module.exports.WebVRPolyfill = WebVRPolyfill;
 },{"./base.js":2,"./cardboard-vr-display.js":3,"./util.js":14}]},{},[8]);
 
 ////////////////////////////////////////////////////////////////////////////////
-    // start C:\Users\sean\Documents\VR\webvr-standard-monitor\src\AsyncLockRequest.js
+    // start D:\Documents\VR\webvr-standard-monitor\src\AsyncLockRequest.js
 (function(){"use strict";
 
 function findProperty(elem, arr) {
@@ -11883,10 +11883,10 @@ function AsyncLockRequest(name, elementOpts, changeEventOpts, errorEventOpts, re
 }
     if(typeof window !== "undefined") window.AsyncLockRequest = AsyncLockRequest;
 })();
-    // end C:\Users\sean\Documents\VR\webvr-standard-monitor\src\AsyncLockRequest.js
+    // end D:\Documents\VR\webvr-standard-monitor\src\AsyncLockRequest.js
     ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start C:\Users\sean\Documents\VR\webvr-standard-monitor\src\FullScreen.js
+    // start D:\Documents\VR\webvr-standard-monitor\src\FullScreen.js
 (function(){"use strict";
 
 var FullScreen = AsyncLockRequest("Fullscreen", ["fullscreenElement", "mozFullScreenElement", "webkitFullscreenElement", "msFullscreenElement"], ["onfullscreenchange", "onmozfullscreenchange", "onwebkitfullscreenchange", "onmsfullscreenchange"], ["onfullscreenerror", "onmozfullscreenerror", "onwebkitfullscreenerror", "onmsfullscreenerror"], ["requestFullscreen", "mozRequestFullScreen", "webkitRequestFullscreen", "webkitRequestFullScreen", "msRequestFullscreen"], ["exitFullscreen", "mozExitFullScreen", "webkitExitFullscreen", "webkitExitFullScreen", "msExitFullscreen"], function (arg) {
@@ -11894,10 +11894,10 @@ var FullScreen = AsyncLockRequest("Fullscreen", ["fullscreenElement", "mozFullSc
 });
     if(typeof window !== "undefined") window.FullScreen = FullScreen;
 })();
-    // end C:\Users\sean\Documents\VR\webvr-standard-monitor\src\FullScreen.js
+    // end D:\Documents\VR\webvr-standard-monitor\src\FullScreen.js
     ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start C:\Users\sean\Documents\VR\webvr-standard-monitor\src\Orientation.js
+    // start D:\Documents\VR\webvr-standard-monitor\src\Orientation.js
 (function(){"use strict";
 
 function lockOrientation(element) {
@@ -11931,19 +11931,19 @@ var Orientation = {
 };
     if(typeof window !== "undefined") window.Orientation = Orientation;
 })();
-    // end C:\Users\sean\Documents\VR\webvr-standard-monitor\src\Orientation.js
+    // end D:\Documents\VR\webvr-standard-monitor\src\Orientation.js
     ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start C:\Users\sean\Documents\VR\webvr-standard-monitor\src\PointerLock.js
+    // start D:\Documents\VR\webvr-standard-monitor\src\PointerLock.js
 (function(){"use strict";
 
 var PointerLock = AsyncLockRequest("Pointer Lock", ["pointerLockElement", "mozPointerLockElement", "webkitPointerLockElement"], ["onpointerlockchange", "onmozpointerlockchange", "onwebkitpointerlockchange"], ["onpointerlockerror", "onmozpointerlockerror", "onwebkitpointerlockerror"], ["requestPointerLock", "mozRequestPointerLock", "webkitRequestPointerLock", "webkitRequestPointerLock"], ["exitPointerLock", "mozExitPointerLock", "webkitExitPointerLock", "webkitExitPointerLock"]);
     if(typeof window !== "undefined") window.PointerLock = PointerLock;
 })();
-    // end C:\Users\sean\Documents\VR\webvr-standard-monitor\src\PointerLock.js
+    // end D:\Documents\VR\webvr-standard-monitor\src\PointerLock.js
     ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-    // start C:\Users\sean\Documents\VR\webvr-standard-monitor\src\WebVRStandardMonitor.js
+    // start D:\Documents\VR\webvr-standard-monitor\src\WebVRStandardMonitor.js
 (function(){"use strict";
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -11987,13 +11987,6 @@ function mutable(value, type) {
       }
       value = v;
     }
-  };
-}
-
-function log(msg) {
-  return function (elem) {
-    console.log(msg, elem);
-    return elem;
   };
 }
 
@@ -12114,12 +12107,34 @@ WebVRStandardMonitor.standardLockBehavior = function (elem) {
   }
 };
 
+WebVRStandardMonitor.standardExitFullScreenBehavior = function () {
+  return WebVRStandardMonitor.standardUnlockBehavior().then(function () {
+    return FullScreen.exit();
+  }).catch(warn("FullScreen failed"));
+};
+
+WebVRStandardMonitor.standardUnlockBehavior = function () {
+  if (isMobile) {
+    Orientation.unlock(elem);
+    return Promise.resolve();
+  } else {
+    return PointerLock.exit().catch(warn("PointerLock exit failed"));
+  }
+};
+
 WebVRStandardMonitor.prototype.requestPresent = function (layers) {
   for (var i = 0; i < this.capabilities.maxLayers && i < layers.length; ++i) {
     priv(this).currentLayers[i] = layers[i];
   }
-  FullScreen.addChangeListener(fireDisplayPresentChange);
-  return WebVRStandardMonitor.standardFullScreenBehavior(layers[0].source);
+  var elem = layers[0].source;
+  if (isMobile) {
+    return priv(this).display.requestPresent(layers).then(function () {
+      return WebVRStandardMonitor.standardLockBehavior(elem);
+    });
+  } else {
+    FullScreen.addChangeListener(fireDisplayPresentChange);
+    return WebVRStandardMonitor.standardFullScreenBehavior(elem);
+  }
 };
 
 WebVRStandardMonitor.prototype.getLayers = function () {
@@ -12127,12 +12142,16 @@ WebVRStandardMonitor.prototype.getLayers = function () {
 };
 
 WebVRStandardMonitor.prototype.exitPresent = function () {
-  priv(this).currentLayers.splice(0);
-  var promise = FullScreen.exit();
+  var _this = priv(this);
+  _this.currentLayers.splice(0);
+
   if (isMobile) {
-    promise = promise.then(Orientation.unlock);
+    return WebVRStandardMonitor.standardUnlockBehavior().then(function () {
+      return _this.display.exitPresent();
+    });
+  } else {
+    return WebVRStandardMonitor.standardExitFullScreenBehavior();
   }
-  return promise;
 };
 
 WebVRStandardMonitor.prototype.getEyeParameters = function (side) {
@@ -12159,9 +12178,8 @@ WebVRStandardMonitor.prototype.getEyeParameters = function (side) {
 };
     if(typeof window !== "undefined") window.WebVRStandardMonitor = WebVRStandardMonitor;
 })();
-    // end C:\Users\sean\Documents\VR\webvr-standard-monitor\src\WebVRStandardMonitor.js
+    // end D:\Documents\VR\webvr-standard-monitor\src\WebVRStandardMonitor.js
     ////////////////////////////////////////////////////////////////////////////////
-console.info("webvr-standard-monitor v1.0.9. see https://github.com/NotionTheory/webvr-standard-monitor for more information.");
 ////////////////////////////////////////////////////////////////////////////////
     // start D:\Documents\VR\webvr-bootstrapper\src\documentReady.js
 (function(){"use strict";
@@ -12386,7 +12404,6 @@ function WebVRBootstrapper(manifest) {
 })();
     // end D:\Documents\VR\webvr-bootstrapper\src\WebVRBootstrapper.js
     ////////////////////////////////////////////////////////////////////////////////
-console.info("webvr-bootstrapper v4.0.5. see https://github.com/capnmidnight/WebVR-Bootstrapper for more information.");
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
 	typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -55376,6 +55393,9 @@ THREE.MTLLoader.MaterialCreator.prototype = {
 
 };
 
+/*! npm.im/iphone-inline-video */
+var makeVideoPlayableInline=function(){"use strict";/*! npm.im/intervalometer */
+function e(e,r,n,i){function t(n){d=r(t,i),e(n-(a||n)),a=n}var d,a;return{start:function(){d||t(0)},stop:function(){n(d),d=null,a=0}}}function r(r){return e(r,requestAnimationFrame,cancelAnimationFrame)}function n(e,r,n,i){function t(r){Boolean(e[n])===Boolean(i)&&r.stopImmediatePropagation(),delete e[n]}return e.addEventListener(r,t,!1),t}function i(e,r,n,i){function t(){return n[r]}function d(e){n[r]=e}i&&d(e[r]),Object.defineProperty(e,r,{get:t,set:d})}function t(e,r,n){n.addEventListener(r,function(){return e.dispatchEvent(new Event(r))})}function d(e,r){Promise.resolve().then(function(){e.dispatchEvent(new Event(r))})}function a(e){var r=new Audio;return t(e,"play",r),t(e,"playing",r),t(e,"pause",r),r.crossOrigin=e.crossOrigin,r.src=e.src||e.currentSrc||"data:",r}function o(e,r,n){(m||0)+200<Date.now()&&(e[b]=!0,m=Date.now()),n||(e.currentTime=r),A[++k%3]=100*r|0}function u(e){return e.driver.currentTime>=e.video.duration}function s(e){var r=this;r.video.readyState>=r.video.HAVE_FUTURE_DATA?(r.hasAudio||(r.driver.currentTime=r.video.currentTime+e*r.video.playbackRate/1e3,r.video.loop&&u(r)&&(r.driver.currentTime=0)),o(r.video,r.driver.currentTime)):r.video.networkState!==r.video.NETWORK_IDLE||r.video.buffered.length||r.video.load(),r.video.ended&&(delete r.video[b],r.video.pause(!0))}function c(){var e=this,r=e[h];return e.webkitDisplayingFullscreen?void e[E]():("data:"!==r.driver.src&&r.driver.src!==e.src&&(o(e,0,!0),r.driver.src=e.src),void(e.paused&&(r.paused=!1,e.buffered.length||e.load(),r.driver.play(),r.updater.start(),r.hasAudio||(d(e,"play"),r.video.readyState>=r.video.HAVE_ENOUGH_DATA&&d(e,"playing")))))}function v(e){var r=this,n=r[h];n.driver.pause(),n.updater.stop(),r.webkitDisplayingFullscreen&&r[T](),n.paused&&!e||(n.paused=!0,n.hasAudio||d(r,"pause"),r.ended&&(r[b]=!0,d(r,"ended")))}function p(e,n){var i=e[h]={};i.paused=!0,i.hasAudio=n,i.video=e,i.updater=r(s.bind(i)),n?i.driver=a(e):(e.addEventListener("canplay",function(){e.paused||d(e,"playing")}),i.driver={src:e.src||e.currentSrc||"data:",muted:!0,paused:!0,pause:function(){i.driver.paused=!0},play:function(){i.driver.paused=!1,u(i)&&o(e,0)},get ended(){return u(i)}}),e.addEventListener("emptied",function(){var r=!i.driver.src||"data:"===i.driver.src;i.driver.src&&i.driver.src!==e.src&&(o(e,0,!0),i.driver.src=e.src,r?i.driver.play():i.updater.stop())},!1),e.addEventListener("webkitbeginfullscreen",function(){e.paused?n&&!i.driver.buffered.length&&i.driver.load():(e.pause(),e[E]())}),n&&(e.addEventListener("webkitendfullscreen",function(){i.driver.currentTime=e.currentTime}),e.addEventListener("seeking",function(){A.indexOf(100*e.currentTime|0)<0&&(i.driver.currentTime=e.currentTime)}))}function l(e){var r=e[h];e[E]=e.play,e[T]=e.pause,e.play=c,e.pause=v,i(e,"paused",r.driver),i(e,"muted",r.driver,!0),i(e,"playbackRate",r.driver,!0),i(e,"ended",r.driver),i(e,"loop",r.driver,!0),n(e,"seeking"),n(e,"seeked"),n(e,"timeupdate",b,!1),n(e,"ended",b,!1)}function f(e,r,n){void 0===r&&(r=!0),void 0===n&&(n=!0),n&&!g||e[h]||(p(e,r),l(e),e.classList.add("IIV"),!r&&e.autoplay&&e.play(),/iPhone|iPod|iPad/.test(navigator.platform)||console.warn("iphone-inline-video is not guaranteed to work in emulated environments"))}var m,y="undefined"==typeof Symbol?function(e){return"@"+(e||"@")+Math.random()}:Symbol,g=/iPhone|iPod/i.test(navigator.userAgent)&&!matchMedia("(-webkit-video-playable-inline)").matches,h=y(),b=y(),E=y("nativeplay"),T=y("nativepause"),A=[],k=0;return f.isWhitelisted=g,f}();
 /**
  * @file A fantasy name generator library.
  * @version 1.0.0
@@ -57255,6 +57275,8 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
     var update = function update(dt) {
       dt *= MILLISECONDS_TO_SECONDS;
       movePlayer(dt);
+      moveUI();
+      doPicking();
       moveSky();
       moveGround();
       _this.network.update(dt);
@@ -57265,6 +57287,53 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
 
     var movePlayer = function movePlayer(dt) {
       _this.input.update(dt);
+    };
+
+    var uiTurn = 0;
+    var followEuler = new THREE.Euler(),
+        maxX = -Math.PI / 4,
+        maxY = Math.PI / 6;
+
+    var moveUI = function moveUI(dt) {
+      _this.ui.position.copy(_this.input.head.position);
+      followEuler.setFromQuaternion(_this.input.head.quaternion);
+      var turn = followEuler.y,
+          deltaTurnA = turn - uiTurn,
+          deltaTurnB = deltaTurnA + Math.PI * 2,
+          deltaTurnC = deltaTurnA - Math.PI * 2,
+          deltaTurn = void 0;
+      if (Math.abs(deltaTurnA) < Math.abs(deltaTurnB)) {
+        if (Math.abs(deltaTurnA) < Math.abs(deltaTurnC)) {
+          deltaTurn = deltaTurnA;
+        } else {
+          deltaTurn = deltaTurnC;
+        }
+      } else if (Math.abs(deltaTurnB) < Math.abs(deltaTurnC)) {
+        deltaTurn = deltaTurnB;
+      } else {
+        deltaTurn = deltaTurnC;
+      }
+
+      if (Math.abs(deltaTurn) > maxY) {
+        uiTurn += deltaTurn * 0.02;
+      }
+
+      followEuler.set(maxX, uiTurn, 0, "YXZ");
+      _this.ui.quaternion.setFromEuler(followEuler);
+    };
+
+    var doPicking = function doPicking() {
+      for (var i = _this.pickableObjects.length - 1; i >= 0; --i) {
+        var inScene = false;
+        for (var head = _this.pickableObjects[i].parent; head !== null; head = head.parent) {
+          if (head === _this.scene) {
+            inScene = true;
+          }
+        }
+        if (!inScene) {
+          _this.pickableObjects.splice(i, 1);
+        }
+      }
       _this.input.resolvePicking(_this.pickableObjects.filter(function (obj) {
         return !obj.disabled;
       }));
@@ -57495,7 +57564,7 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
       });
     }
 
-    _this.music = new Primrose.Output.Music(_this.audio.context);
+    _this.music = new Primrose.Output.Music(_this.audio);
 
     _this.pickableObjects = [];
     _this.registerPickableObject = _this.pickableObjects.push.bind(_this.pickableObjects);
@@ -57555,7 +57624,8 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
         START_POINT = new THREE.Vector3();
 
     _this.selectControl = function (evt) {
-      var obj = evt.hit && evt.hit.object;
+      var hit = evt.hit || evt.lastHit,
+          obj = hit && hit.object;
 
       if (evt.type === "exit" && evt.lastHit && evt.lastHit.object === _this.ground) {
         evt.pointer.disk.visible = false;
@@ -57592,16 +57662,18 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
       }
 
       if (evt.type === "pointerstart" || evt.type === "gazecomplete") {
-        obj = obj && (obj.surface || obj.button);
-        if (obj !== _this.currentControl) {
+        var ctrl = obj && (obj.surface || obj.button);
+        if (ctrl !== _this.currentControl) {
           if (_this.currentControl) {
             _this.currentControl.blur();
             _this.input.Mouse.commands.pitch.disabled = _this.input.Mouse.commands.heading.disabled = false;
           }
-          _this.currentControl = obj;
+          _this.currentControl = ctrl;
           if (_this.currentControl) {
             _this.currentControl.focus();
-            _this.input.Mouse.commands.pitch.disabled = _this.input.Mouse.commands.heading.disabled = !_this.input.VR.isPresenting;
+            if (obj.surface) {
+              _this.input.Mouse.commands.pitch.disabled = _this.input.Mouse.commands.heading.disabled = !_this.input.VR.isPresenting;
+            }
           }
         }
       }
@@ -57611,6 +57683,11 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
           _this.currentControl.dispatchEvent(evt);
         } else {
           console.log(_this.currentControl);
+        }
+      } else {
+        var handler = obj && obj["on" + evt.type];
+        if (handler) {
+          handler(app);
         }
       }
     };
@@ -57660,6 +57737,9 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
       _this.scene.add(_this.ground);
       _this.registerPickableObject(_this.ground);
     }
+
+    _this.ui = new THREE.Object3D();
+    _this.scene.add(_this.ui);
 
     if (_this.passthrough) {
       _this.camera.add(_this.passthrough.mesh);
@@ -57795,6 +57875,22 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
 
       _this.input = new Primrose.Input.FPSInput(_this.renderer.domElement, _this.options);
       _this.input.addEventListener("zero", _this.zero, false);
+      _this.input.VR.ready.then(function (displays) {
+        return displays.forEach(function (display, i) {
+          window.addEventListener("vrdisplayactivate", function (evt) {
+            if (evt.display === display) {
+              (function () {
+                var exitVR = function exitVR() {
+                  window.removeEventListener("vrdisplaydeactivate", exitVR);
+                  _this.input.VR.cancel();
+                };
+                window.addEventListener("vrdisplaydeactivate", exitVR, false);
+                _this.goFullScreen(i);
+              })();
+            }
+          }, false);
+        });
+      });
 
       _this.fader = colored(box(1, 1, 1), 0x000000, { opacity: 0, transparent: true, unshaded: true, side: THREE.BackSide });
       _this.fader.visible = false;
@@ -59409,7 +59505,7 @@ var Pointer = function (_Primrose$AbstractEve) {
     _this.root.add(_this.mesh);
     _this.root.add(_this.gazeInner);
 
-    _this.useGaze = false;
+    _this.useGaze = _this.options.useGaze;
     _(_this, {
       lastHit: null
     });
@@ -59495,7 +59591,7 @@ var Pointer = function (_Primrose$AbstractEve) {
     key: "resolvePicking",
     value: function resolvePicking(objects) {
       this.mesh.visible = false;
-
+      this.gazeInner.visible = false;
       this.mesh.material = material("", {
         color: this.color,
         unshaded: true
@@ -59520,6 +59616,13 @@ var Pointer = function (_Primrose$AbstractEve) {
         };
 
         if (currentHit) {
+          this.gazeInner.position.z = 0.02 - currentHit.distance;
+        } else {
+          this.gazeInner.position.z = GAZE_RING_DISTANCE;
+        }
+        this.mesh.position.z = this.gazeInner.position.z - 0.02;
+
+        if (currentHit) {
           currentHit.time = performance.now();
 
           this.mesh.material = material("", {
@@ -59532,6 +59635,7 @@ var Pointer = function (_Primrose$AbstractEve) {
           lastHit.point.copy(currentHit.point);
         }
 
+        this.gazeInner.visible = this.useGaze;
         this.mesh.visible = !this.useGaze;
 
         if (changed) {
@@ -59552,10 +59656,15 @@ var Pointer = function (_Primrose$AbstractEve) {
           }
         }
 
+        var selected = false;
         if (dButtons) {
           if (evt.buttons) {
             this.emit("pointerstart", evt);
+            if (lastHit) {
+              lastHit.time = performance.now();
+            }
           } else {
+            selected = !!currentHit;
             this.emit("pointerend", evt);
           }
         } else if (moved) {
@@ -59575,6 +59684,7 @@ var Pointer = function (_Primrose$AbstractEve) {
           } else if (dt !== null) {
             if (dt >= this.gazeTimeout) {
               this.gazeOuter.visible = false;
+              selected = !!currentHit;
               this.emit("gazecomplete", evt);
               lastHit.time = null;
             } else {
@@ -59588,19 +59698,14 @@ var Pointer = function (_Primrose$AbstractEve) {
           }
         }
 
+        if (selected) {
+          this.emit("select", evt);
+        }
+
         if (changed) {
           _priv.lastHit = currentHit;
         }
       }
-    }
-  }, {
-    key: "useGaze",
-    get: function get() {
-      return this.gazeInner.visible;
-    },
-    set: function set(v) {
-      this.gazeInner.visible = !!v;
-      this.mesh.visible = !v;
     }
   }, {
     key: "material",
@@ -59638,7 +59743,7 @@ var Pointer = function (_Primrose$AbstractEve) {
   return Pointer;
 }(Primrose.AbstractEventEmitter);
 
-Pointer.EVENTS = ["pointerstart", "pointerend", "pointermove", "gazestart", "gazemove", "gazecomplete", "gazecancel", "exit", "enter"];
+Pointer.EVENTS = ["pointerstart", "pointerend", "pointermove", "gazestart", "gazemove", "gazecomplete", "gazecancel", "exit", "enter", "select"];
     if(typeof window !== "undefined") window.Primrose.Pointer = Pointer;
 })();
     // end D:\Documents\VR\Primrose\src\Primrose\Pointer.js
@@ -60617,13 +60722,13 @@ var Button3D = function (_Primrose$BaseControl) {
 
       switch (evt.type) {
         case "pointerstart":
-          this.startUV(evt.hit.uv);
+          this.startUV();
           break;
         case "pointerend":
           this.endPointer(evt);
           break;
         case "gazecomplete":
-          this.startUV(evt.hit.uv);
+          this.startUV();
           setTimeout(function () {
             return _this2.endPointer(evt);
           }, 100);
@@ -60786,6 +60891,31 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var COUNTER = 0,
     _ = priv();
 
+// Videos don't auto-play on mobile devices, so let's make them all play whenever
+// we tap the screen.
+var processedVideos = [];
+function findAndFixVideo(evt) {
+  var vids = document.querySelectorAll("video");
+  for (var i = 0; i < vids.length; ++i) {
+    fixVideo(vids[i]);
+  }
+  window.removeEventListener("touchend", findAndFixVideo);
+  window.removeEventListener("mouseup", findAndFixVideo);
+  window.removeEventListener("keyup", findAndFixVideo);
+}
+
+function fixVideo(vid) {
+  if (processedVideos.indexOf(vid) === -1) {
+    makeVideoPlayableInline(vid, false);
+    processedVideos.push(vid);
+    vid.play();
+  }
+}
+
+window.addEventListener("touchend", findAndFixVideo, false);
+window.addEventListener("mouseup", findAndFixVideo, false);
+window.addEventListener("keyup", findAndFixVideo, false);
+
 var Image = function (_Primrose$Entity) {
   _inherits(Image, _Primrose$Entity);
 
@@ -60891,6 +61021,11 @@ var Image = function (_Primrose$Entity) {
     value: function loadVideos(videos, progress) {
       var _this4 = this;
 
+      this._elements.splice(0);
+      this._canvases.splice(0);
+      this._contexts.splice(0);
+      this._textures.splice(0);
+
       return Promise.all(Array.prototype.map.call(videos, function (spec, i) {
         return new Promise(function (resolve, reject) {
           var video = null;
@@ -60911,42 +61046,42 @@ var Image = function (_Primrose$Entity) {
           video.autoplay = true;
           video.loop = true;
           video.controls = true;
-          video.playsinline = true;
-          video.setAttribute("webkit-playsinline", true);
-          video.oncanplaythrough = function () {
+          video.setAttribute("playsinline", "");
+          video.setAttribute("webkit-playsinline", "");
+          video.oncanplay = function () {
+            video.oncanplay = null;
+            video.onerror = null;
+
             var width = video.videoWidth,
                 height = video.videoHeight,
                 p2Width = Math.pow(2, Math.ceil(Math.log2(width))),
                 p2Height = Math.pow(2, Math.ceil(Math.log2(height)));
 
-            if (width === p2Width && height === p2Height) {
-              _this4._meshes[i] = textured(_this4.options.geometry, elem, _this4.options);
-            } else {
-              _this4._elements[i] = video;
+            _this4._elements[i] = video;
 
+            _this4._setGeometry({
+              maxU: width / p2Width,
+              maxV: height / p2Height
+            });
+
+            if ((width !== p2Width || height !== p2Height) && !_this4.options.disableVideoCopying) {
               _this4._canvases[i] = document.createElement("canvas");
               _this4._canvases[i].id = (video.id || _this4.id) + "-canvas";
               _this4._canvases[i].width = p2Width;
               _this4._canvases[i].height = p2Height;
 
               _this4._contexts[i] = _this4._canvases[i].getContext("2d");
-
-              _this4._setGeometry({
-                maxU: width / p2Width,
-                maxV: height / p2Height
-              });
-
-              _this4._meshes[i] = textured(_this4.options.geometry, _this4._canvases[i], _this4.options);
             }
 
+            _this4._meshes[i] = textured(_this4.options.geometry, _this4._canvases[i] || _this4._elements[i], _this4.options);
+
             _this4._textures[i] = _this4._meshes[i].material.map;
-            video.oncanplaythrough = null;
             resolve();
           };
           if (!video.parentElement) {
             document.body.insertBefore(video, document.body.children[0]);
           }
-          video.play();
+          fixVideo(video);
         });
       })).then(function () {
         return _this4.isVideo = true;
@@ -61471,7 +61606,7 @@ var FPSInput = function (_Primrose$AbstractEve) {
 
     var _this = _possibleConstructorReturn(this, (FPSInput.__proto__ || Object.getPrototypeOf(FPSInput)).call(this));
 
-    DOMElement = DOMElement || document.documentElement;
+    DOMElement = window || DOMElement || document.documentElement;
     _this.options = options;
     _this._handlers.zero = [];
     _this._handlers.motioncontroller = [];
@@ -61765,7 +61900,6 @@ var FPSInput = function (_Primrose$AbstractEve) {
 
       this.head.showPointer = this.VR.hasOrientation;
       this.mousePointer.showPointer = (this.hasMouse || this.hasGamepad) && !this.hasMotionControllers;
-      this.mousePointer.root.visible = this.VR.isPresenting;
       this.Keyboard.enabled = this.Touch.enabled = this.Mouse.enabled = !this.hasMotionControllers;
       if (this.Gamepad_0) {
         this.Gamepad_0.enabled = !this.hasMotionControllers;
@@ -62795,7 +62929,6 @@ var Touch = function (_Primrose$InputProces) {
 
     var _this = _possibleConstructorReturn(this, (Touch.__proto__ || Object.getPrototypeOf(Touch)).call(this, "Touch", commands, axes));
 
-    console.log(DOMElement);
     DOMElement = DOMElement || window;
 
     var setState = function setState(stateChange, setAxis, event) {
@@ -62826,7 +62959,6 @@ var Touch = function (_Primrose$InputProces) {
         fingerState |= 1 << _t.identifier;
       }
       _this.setAxis("FINGERS", fingerState);
-      event.preventDefault();
     };
 
     DOMElement.addEventListener("touchstart", setState.bind(_this, true, false), false);
@@ -62897,13 +63029,14 @@ var VR = function (_Primrose$PoseInputPr) {
     _this.lastStageWidth = null;
     _this.lastStageDepth = null;
     _this.isStereo = false;
+
+    WebVRStandardMonitor();
     _this.ready = navigator.getVRDisplays().then(function (displays) {
-      // We skip the WebVR-Polyfill's Mouse and Keyboard display because it does not
-      // play well with our interaction model.
+      // We skip the Standard Monitor and Magic Window on iOS because we can't
+      // go fullscreen on those systems.
       _this.displays.push.apply(_this.displays, displays.filter(function (display) {
         return !isiOS || VR.isStereoDisplay(display);
       }));
-      console.log("VR Displays", _this.displays);
       return _this.displays;
     });
     return _this;
@@ -62987,7 +63120,9 @@ var VR = function (_Primrose$PoseInputPr) {
         promise = promise.then(Orientation.unlock);
       }
 
-      return promise.then(PointerLock.exit).then(function () {
+      return promise.then(PointerLock.exit).catch(function (exp) {
+        return console.warn(exp);
+      }).then(function () {
         return _this3.connect(0);
       });
     }
@@ -63905,6 +64040,10 @@ HapticGlove.DEFAULT_HOST = document.location.hostname;
     // start D:\Documents\VR\Primrose\src\Primrose\Output\Music.js
 (function(){"use strict";
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 /* polyfill */
 Window.prototype.AudioContext = Window.prototype.AudioContext || Window.prototype.webkitAudioContext || function () {};
 
@@ -63915,79 +64054,108 @@ function piano(n) {
   return 440 * Math.pow(PIANO_BASE, n - 49);
 }
 
-function Music(context, type, numNotes) {
-  this.audio = context || new AudioContext();
-  if (this.audio && this.audio.createGain) {
+var Music = function () {
+  function Music(audio, type, numNotes) {
+    var _this = this;
+
+    _classCallCheck(this, Music);
+
     if (numNotes === undefined) {
       numNotes = MAX_NOTE_COUNT;
     }
-    if (type === undefined) {
-      type = "sawtooth";
-    }
-    this.available = true;
-    this.mainVolume = this.audio.createGain();
-    this.mainVolume.connect(this.audio.destination);
-    this.numNotes = numNotes;
-    this.oscillators = [];
+    this._type = type || "sawtooth";
+    this.isAvailable = false;
+    this.audio = audio;
+    this.audio.ready.then(function () {
+      var ctx = _this.audio.context;
+      _this.mainVolume = ctx.createGain();
+      _this.mainVolume.connect(_this.audio.mainVolume);
+      _this.mainVolume.gain.value = 1;
+      _this.numNotes = numNotes;
+      _this.oscillators = [];
 
-    for (var i = 0; i < this.numNotes; ++i) {
-      var o = this.audio.createOscillator(),
-          g = this.audio.createGain();
-      o.type = type;
-      o.frequency.value = 0;
-      o.connect(g);
-      o.start();
-      g.connect(this.mainVolume);
-      this.oscillators.push({
-        osc: o,
-        gn: g,
-        timeout: null
-      });
-    }
-  } else {
-    this.available = false;
+      for (var i = 0; i < _this.numNotes; ++i) {
+        var g = ctx.createGain(),
+            o = ctx.createOscillator();
+        g.connect(_this.mainVolume);
+        g.gain.value = 0;
+        o.type = _this.type;
+        o.frequency.value = 0;
+        o.connect(g);
+        o.start();
+        _this.oscillators.push({
+          osc: o,
+          gn: g,
+          timeout: null
+        });
+      }
+      _this.isAvailable = true;
+    });
   }
-}
 
-Music.prototype.noteOn = function (volume, i, n) {
-  if (this.available) {
-    if (n === undefined) {
-      n = 0;
+  _createClass(Music, [{
+    key: "noteOn",
+    value: function noteOn(volume, i, n) {
+      if (this.isAvailable) {
+        if (n === undefined) {
+          n = 0;
+        }
+        var o = this.oscillators[n % this.numNotes],
+            f = piano(parseFloat(i) + 1);
+        o.gn.gain.value = volume;
+        o.osc.frequency.setValueAtTime(f, this.audio.context.currentTime);
+        return o;
+      }
     }
-    var o = this.oscillators[n % this.numNotes],
-        f = piano(parseFloat(i) + 1);
-    o.gn.gain.value = volume;
-    o.osc.frequency.setValueAtTime(f, 0);
-    return o;
-  }
-};
+  }, {
+    key: "noteOff",
+    value: function noteOff(n) {
+      if (this.isAvailable) {
+        if (n === undefined) {
+          n = 0;
+        }
+        var o = this.oscillators[n % this.numNotes];
+        o.osc.frequency.setValueAtTime(0, this.audio.context.currentTime);
+        o.gn.gain.value = 0;
+      }
+    }
+  }, {
+    key: "play",
+    value: function play(i, volume, duration, n) {
+      if (this.isAvailable) {
+        if (typeof n !== "number") {
+          n = 0;
+        }
+        var o = this.noteOn(volume, i, n);
+        if (o.timeout) {
+          clearTimeout(o.timeout);
+          o.timeout = null;
+        }
+        o.timeout = setTimeout(function (n, o) {
+          this.noteOff(n);
+          o.timeout = null;
+        }.bind(this, n, o), duration * 1000);
+      }
+    }
+  }, {
+    key: "type",
+    get: function get() {
+      return this._type;
+    },
+    set: function set(v) {
+      var _this2 = this;
 
-Music.prototype.noteOff = function (n) {
-  if (this.available) {
-    if (n === undefined) {
-      n = 0;
+      if (this.isAvailable) {
+        this._type = v;
+        this.oscillators.forEach(function (o) {
+          return o.osc.type = _this2._type;
+        });
+      }
     }
-    var o = this.oscillators[n % this.numNotes];
-    o.osc.frequency.setValueAtTime(0, 0);
-  }
-};
+  }]);
 
-Music.prototype.play = function (i, volume, duration, n) {
-  if (this.available) {
-    if (typeof n !== "number") {
-      n = 0;
-    }
-    var o = this.noteOn(volume, i, n);
-    if (o.timeout) {
-      clearTimeout(o.timeout);
-      o.timeout = null;
-    }
-    o.timeout = setTimeout(function (n, o) {
-      this.noteOff(n);
-      o.timeout = null;
-    }.bind(this, n, o), duration * 1000);
-  }
-};
+  return Music;
+}();
     if(typeof window !== "undefined") window.Primrose.Output.Music = Music;
 })();
     // end D:\Documents\VR\Primrose\src\Primrose\Output\Music.js
