@@ -49,7 +49,6 @@ class VR extends Primrose.PoseInputProcessor {
         // go fullscreen on those systems.
         this.displays.push.apply(this.displays, displays.filter((display) =>
           !isiOS || VR.isStereoDisplay(display)));
-        console.log("VR Displays", this.displays);
         return this.displays;
       });
   }
