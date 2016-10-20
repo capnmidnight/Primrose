@@ -258,22 +258,15 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
 
     this.speech = new Primrose.Output.Speech(this.options.speech);
     this.audio = new Primrose.Output.Audio3D();
-    var audioReady = null,
-      ocean = null;
-    if (this.options.ambientSound && !isMobile) {
-      audioReady = this.audio.load3DSound(this.options.ambientSound, true, -1, 1, -1)
+    if (this.options.ambientSound) {
+      this.audio.load3DSound(this.options.ambientSound, true, -1, 1, -1)
         .then((aud) => {
-          ocean = aud;
-          if (!(ocean.source instanceof MediaElementAudioSourceNode)) {
-            ocean.volume.gain.value = 0.1;
-            console.log(ocean.source);
-            ocean.source.start();
+          if (!(aud.source instanceof MediaElementAudioSourceNode)) {
+            aud.volume.gain.value = 0.1;
+            aud.source.start();
           }
         })
         .catch(console.error.bind(console, "Audio3D loadSource"));
-    }
-    else {
-      audioReady = Promise.resolve();
     }
 
     var documentReady = null;
@@ -299,37 +292,27 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
 
     const FADE_SPEED = 0.1;
     this.fadeOut = () => {
-      if(this.fader) {
-        return new Promise((resolve, reject) => {
-          var timer = setInterval(() => {
-            this.fader.material.opacity += FADE_SPEED;
-            if(this.fader.material.opacity >= 1){
-              clearInterval(timer);
-              resolve();
-            }
-          }, 10);
-        });
-      }
-      else{
-        return Promise.resolve();
-      }
+      return new Promise((resolve, reject) => {
+        var timer = setInterval(() => {
+          this.fader.material.opacity += FADE_SPEED;
+          if(this.fader.material.opacity >= 1){
+            clearInterval(timer);
+            resolve();
+          }
+        }, 10);
+      });
     };
 
     this.fadeIn = () => {
-      if(this.fader) {
-        return new Promise((resolve, reject) => {
-          var timer = setInterval(() => {
-            this.fader.material.opacity -= FADE_SPEED;
-            if(this.fader.material.opacity <= 0){
-              clearInterval(timer);
-              resolve();
-            }
-          }, 10);
-        });
-      }
-      else{
-        return Promise.resolve();
-      }
+      return new Promise((resolve, reject) => {
+        var timer = setInterval(() => {
+          this.fader.material.opacity -= FADE_SPEED;
+          if(this.fader.material.opacity <= 0){
+            clearInterval(timer);
+            resolve();
+          }
+        }, 10);
+      });
     };
 
     this.teleportAvailable = true;
@@ -768,7 +751,6 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
 
     var allReady = Promise.all([
         modelsReady,
-        audioReady,
         documentReady
       ])
       .then(() => {

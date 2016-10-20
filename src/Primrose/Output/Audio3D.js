@@ -3,92 +3,18 @@ window.AudioContext =
   window.AudioContext ||
   window.webkitAudioContext;
 
+
+
+let VECTOR = new THREE.Vector3(),
+  UP = new THREE.Vector3(),
+  TEMP = new THREE.Matrix4();
+
 pliny.class({
   parent: "Primrose.Output",
     name: "Audio3D",
     description: "| [under construction]"
 });
 class Audio3D {
-  static get isAvailable() {
-    return !!window.AudioContext;
-  }
-
-  constructor() {
-    if(Audio3D.isAvailable){
-      this.context = new AudioContext();
-      this.sampleRate = this.context.sampleRate;
-      this.mainVolume = this.context.createGain();
-
-      if(isiOS){
-        const unlock = () => {
-          const buffer = this.context.createBuffer(1, 1, 22050),
-            source = this.context.createBufferSource();
-          source.buffer = buffer;
-          source.connect(this.context.destination);
-          source.noteOn(0);
-          setTimeout(() => {
-            console.log("Playback State", source.playbackState);
-            if((source.playbackState === source.PLAYING_STATE || source.playbackState === source.FINISHED_STATE)) {
-              window.removeEventListener("mouseup", unlock);
-              window.removeEventListener("touchend", unlock);
-              window.removeEventListener("keyup", unlock);
-            }
-          }, 0);
-        };
-
-        window.addEventListener("mouseup", unlock, false);
-        window.addEventListener("touchend", unlock, false);
-        window.addEventListener("keyup", unlock, false);
-        unlock();
-      }
-
-      let vec = new THREE.Vector3(),
-        up = new THREE.Vector3(),
-        left = new THREE.Matrix4()
-        .identity(),
-        right = new THREE.Matrix4()
-        .identity(),
-        swap = null;
-
-      this.setVelocity = this.context.listener.setVelocity.bind(this.context.listener);
-      this.setPlayer = (obj) => {
-        var head = obj;
-        left.identity();
-        right.identity();
-        while (head !== null) {
-          left.fromArray(head.matrix.elements);
-          left.multiply(right);
-          swap = left;
-          left = right;
-          right = swap;
-          head = head.parent;
-        }
-        swap = left;
-        var mx = swap.elements[12],
-          my = swap.elements[13],
-          mz = swap.elements[14];
-        swap.elements[12] = swap.elements[13] = swap.elements[14] = 0;
-
-        this.context.listener.setPosition(mx, my, mz);
-        vec.set(0, 0, 1);
-        vec.applyProjection(right);
-        vec.normalize();
-        up.set(0, -1, 0);
-        up.applyProjection(right);
-        up.normalize();
-        this.context.listener.setOrientation(vec.x, vec.y, vec.z, up.x, up.y, up.z);
-        right.elements[12] = mx;
-        right.elements[13] = my;
-        right.elements[14] = mz;
-      };
-      this.start();
-    }
-    else {
-      console.warn("Audio is not available.");
-      this.setVelocity = function () {};
-      this.setPlayer = function () {};
-    }
-  }
 
   static setAudioStream(stream, id) {
     const audioElementCount = document.querySelectorAll("audio")
@@ -107,6 +33,80 @@ class Audio3D {
     element.setAttribute("muted", "");
   }
 
+  constructor() {
+    this.ready = new Promise((resolve, reject) => {
+      try{
+        const finishSetup = () => {
+          this.sampleRate = this.context.sampleRate;
+          this.mainVolume = this.context.createGain();
+          this.start();
+          resolve();
+        };
+
+        if(!isiOS) {
+          this.context = new AudioContext();
+          finishSetup();
+        }
+        else {
+          const unlock = () => {
+            this.context = this.context || new AudioContext();
+            const source = this.context.createBufferSource();
+            source.buffer = this.createRawSound([[0]]);
+            source.connect(this.context.destination);
+            source.noteOn(0);
+            setTimeout(() => {
+              if((source.playbackState === source.PLAYING_STATE || source.playbackState === source.FINISHED_STATE)) {
+                window.removeEventListener("mouseup", unlock);
+                window.removeEventListener("touchend", unlock);
+                window.removeEventListener("keyup", unlock);
+                try{
+                  finishSetup();
+                }
+                catch(exp){
+                  reject(exp);
+                }
+              }
+            }, 0);
+          };
+
+          window.addEventListener("mouseup", unlock, false);
+          window.addEventListener("touchend", unlock, false);
+          window.addEventListener("keyup", unlock, false);
+        }
+      }
+      catch(exp){
+        reject(exp);
+      }
+    }).then(() => console.log("Audio ready"));
+  }
+
+  setVelocity(x, y, z) {
+    if(this.context){
+      this.context.listener.setVelocity(x, y, z);
+    }
+  }
+
+  setPlayer(obj) {
+    if(this.context){
+      obj.updateMatrixWorld();
+      TEMP.copy(obj.matrixWorld);
+      var mx = TEMP.elements[12],
+        my = TEMP.elements[13],
+        mz = TEMP.elements[14];
+
+      this.context.listener.setPosition(mx, my, mz);
+
+      VECTOR.set(0, 0, 1)
+        .applyMatrix4(TEMP)
+        .normalize();
+      UP.set(0, -1, 0)
+        .applyMatrix4(TEMP)
+        .normalize();
+
+      this.context.listener.setOrientation(VECTOR.x, VECTOR.y, VECTOR.z, UP.x, UP.y, UP.z);
+    }
+  }
+
   start() {
     if(this.mainVolume){
       this.mainVolume.connect(this.context.destination);
@@ -120,28 +120,19 @@ class Audio3D {
   }
 
   loadURL(src) {
-    if(this.context){
-      return Primrose.HTTP.getBuffer(src)
-        .then((data) => new Promise((resolve, reject) =>
-          this.context.decodeAudioData(data, resolve, reject)));
-    }
-    else{
-      return Promise.reject("No audio context.");
-    }
-  }
-
-  loadURLCascadeSrcList(srcs, index) {
-    index = index || 0;
-    if (index >= srcs.length) {
-      return Promise.reject("Failed to load a file from " + srcs.length + " files.");
-    }
-    else {
-      return this.loadURL(srcs[index])
-        .catch((err) => {
-          console.error(err);
-          return this.loadURLCascadeSrcList(srcs, index + 1);
-        });
-    }
+    return this.ready.then(() => {
+      console.log("Loading " + src + " from URL");
+      Primrose.HTTP.getBuffer(src);
+    })
+      .then((data) => new Promise((resolve, reject) =>
+        this.context.decodeAudioData(data, resolve, reject)))
+      .then((dat) => {
+        console.log(src + " loaded");
+        return dat;
+      })
+      .catch((err) => {
+        console.error("Couldn't load " + src + ". Reason: " + err);
+      });
   }
 
   createRawSound(pcmData) {
@@ -155,7 +146,7 @@ class Audio3D {
         "Second channel is not the same length as the first channel. Expected " + frameCount + ", but was " + pcmData[1].length);
     }
 
-    var buffer = this.context.createBuffer(pcmData.length, frameCount, this.sampleRate);
+    var buffer = this.context.createBuffer(pcmData.length, frameCount, this.sampleRate || 22050);
     for (var c = 0; c < pcmData.length; ++c) {
       var channel = buffer.getChannelData(c);
       for (var i = 0; i < frameCount; ++i) {
@@ -163,40 +154,6 @@ class Audio3D {
       }
     }
     return buffer;
-  }
-
-  createSound(loop, buffer) {
-    var snd = {
-      volume: this.context.createGain(),
-      source: this.context.createBufferSource()
-    };
-    snd.source.buffer = buffer;
-    snd.source.loop = loop;
-    snd.source.connect(snd.volume);
-    return snd;
-  }
-
-  create3DMediaStream(x, y, z, stream) {
-    console.log(stream);
-    var element = document.createElement("audio"),
-      snd = {
-        audio: element,
-        source: this.context.createMediaElementSource(element),
-        //volume: this.context.createGain(),
-        //panner: this.context.createPanner()
-      };
-
-    element.srcObject = stream;
-    element.autoplay = true;
-    element.controls = false;
-    element.muted = true;
-    element.crossOrigin = "anonymous";
-    snd.source.connect(this.mainVolume);
-    //snd.source.connect(snd.volume):
-    //snd.volume.connect(snd.panner);
-    //snd.panner.connect(this.mainVolume);
-    //snd.panner.setPosition(x, y, z);
-    return snd;
   }
 
   create3DSound(x, y, z, snd) {
@@ -267,12 +224,16 @@ class Audio3D {
       }]
     });
 
-    return new Promise((resolve, reject) => {
+    return this.ready.then(() => new Promise((resolve, reject) => {
+      console.log("Loading " + sources);
       if (!(sources instanceof Array)) {
         sources = [sources];
       }
       var audio = document.createElement("audio");
       audio.autoplay = true;
+      audio.preload = "auto";
+      audio["webkit-playsinline"] = true;
+      audio.playsinline = true;
       audio.loop = loop;
       audio.crossOrigin = "anonymous";
       sources.map((src) => {
@@ -281,21 +242,26 @@ class Audio3D {
           return source;
         })
         .forEach(audio.appendChild.bind(audio));
+      audio.onerror = reject;
       audio.oncanplay = () => {
-        var snd = null;
-        if (this.context) {
-          audio.oncanplay = null;
-          snd = {
-            volume: this.context.createGain(),
-            source: this.context.createMediaElementSource(audio)
-          };
-          snd.source.connect(snd.volume);
-        }
+        audio.oncanplay = null;
+        const snd = {
+          volume: this.context.createGain(),
+          source: this.context.createMediaElementSource(audio)
+        };
+        snd.source.connect(snd.volume);
         resolve(snd);
       };
-      audio.onerror = reject;
+      audio.play();
       document.body.appendChild(audio);
-    });
+    }))
+      .then((dat) => {
+        console.log(sources + " loaded");
+        return dat;
+      })
+      .catch((err) => {
+        console.error("Couldn't load " + sources + ". Reason: " + err);
+      });
   }
 
   load3DSound(src, loop, x, y, z) {
@@ -307,15 +273,6 @@ class Audio3D {
     return this.loadSource(src, loop)
       .then(this.createFixedSound.bind(this));
   }
-
-  playBufferImmediate(buffer, volume) {
-    var snd = this.createSound(false, buffer);
-    snd = this.createFixedSound(snd);
-    snd.volume.gain.value = volume;
-    snd.source.addEventListener("ended", (evt) => {
-      snd.volume.disconnect(this.mainVolume);
-    });
-    snd.source.start(0);
-    return snd;
-  }
 }
+
+Audio3D.isAvailable = !!window.AudioContext && AudioContext.prototype.createGain;

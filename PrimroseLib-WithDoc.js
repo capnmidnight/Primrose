@@ -2639,19 +2639,13 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
 
     _this.speech = new Primrose.Output.Speech(_this.options.speech);
     _this.audio = new Primrose.Output.Audio3D();
-    var audioReady = null,
-        ocean = null;
-    if (_this.options.ambientSound && !isMobile) {
-      audioReady = _this.audio.load3DSound(_this.options.ambientSound, true, -1, 1, -1).then(function (aud) {
-        ocean = aud;
-        if (!(ocean.source instanceof MediaElementAudioSourceNode)) {
-          ocean.volume.gain.value = 0.1;
-          console.log(ocean.source);
-          ocean.source.start();
+    if (_this.options.ambientSound) {
+      _this.audio.load3DSound(_this.options.ambientSound, true, -1, 1, -1).then(function (aud) {
+        if (!(aud.source instanceof MediaElementAudioSourceNode)) {
+          aud.volume.gain.value = 0.1;
+          aud.source.start();
         }
       }).catch(console.error.bind(console, "Audio3D loadSource"));
-    } else {
-      audioReady = Promise.resolve();
     }
 
     var documentReady = null;
@@ -2676,35 +2670,27 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
 
     var FADE_SPEED = 0.1;
     _this.fadeOut = function () {
-      if (_this.fader) {
-        return new Promise(function (resolve, reject) {
-          var timer = setInterval(function () {
-            _this.fader.material.opacity += FADE_SPEED;
-            if (_this.fader.material.opacity >= 1) {
-              clearInterval(timer);
-              resolve();
-            }
-          }, 10);
-        });
-      } else {
-        return Promise.resolve();
-      }
+      return new Promise(function (resolve, reject) {
+        var timer = setInterval(function () {
+          _this.fader.material.opacity += FADE_SPEED;
+          if (_this.fader.material.opacity >= 1) {
+            clearInterval(timer);
+            resolve();
+          }
+        }, 10);
+      });
     };
 
     _this.fadeIn = function () {
-      if (_this.fader) {
-        return new Promise(function (resolve, reject) {
-          var timer = setInterval(function () {
-            _this.fader.material.opacity -= FADE_SPEED;
-            if (_this.fader.material.opacity <= 0) {
-              clearInterval(timer);
-              resolve();
-            }
-          }, 10);
-        });
-      } else {
-        return Promise.resolve();
-      }
+      return new Promise(function (resolve, reject) {
+        var timer = setInterval(function () {
+          _this.fader.material.opacity -= FADE_SPEED;
+          if (_this.fader.material.opacity <= 0) {
+            clearInterval(timer);
+            resolve();
+          }
+        }, 10);
+      });
     };
 
     _this.teleportAvailable = true;
@@ -3124,7 +3110,7 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
       }
     };
 
-    var allReady = Promise.all([modelsReady, audioReady, documentReady]).then(function () {
+    var allReady = Promise.all([modelsReady, documentReady]).then(function () {
       _this.renderer.domElement.style.cursor = "default";
       _this.input.VR.displays[0].DOMElement = _this.renderer.domElement;
       _this.input.VR.connect(0);
@@ -10511,18 +10497,39 @@ pliny.class({
 });
 
 var Audio3D = function () {
+  _createClass(Audio3D, null, [{
+    key: "setAudioStream",
+    value: function setAudioStream(stream, id) {
+      var audioElementCount = document.querySelectorAll("audio").length,
+          element = Primrose.DOM.cascadeElement(id || "audioStream" + audioElementCount, "audio", HTMLAudioElement, true);
+      setAudioProperties(element);
+      element.srcObject = stream;
+      return element;
+    }
+  }, {
+    key: "setAudioProperties",
+    value: function setAudioProperties(element) {
+      element.autoplay = true;
+      element.controls = false;
+      element.crossOrigin = "anonymous";
+      element.muted = true;
+      element.setAttribute("muted", "");
+    }
+  }]);
+
   function Audio3D() {
     var _this = this;
 
     _classCallCheck(this, Audio3D);
 
-    if (Audio3D.isAvailable) {
+    this.ready = new Promise(function (resolve, reject) {
       try {
         (function () {
           var finishSetup = function finishSetup() {
             _this.sampleRate = _this.context.sampleRate;
             _this.mainVolume = _this.context.createGain();
             _this.start();
+            resolve();
           };
 
           if (!isiOS) {
@@ -10532,17 +10539,20 @@ var Audio3D = function () {
             (function () {
               var unlock = function unlock() {
                 _this.context = _this.context || new AudioContext();
-                var buffer = _this.context.createBuffer(1, 1, 22050),
-                    source = _this.context.createBufferSource();
-                source.buffer = buffer;
+                var source = _this.context.createBufferSource();
+                source.buffer = _this.createRawSound([[0]]);
                 source.connect(_this.context.destination);
                 source.noteOn(0);
                 setTimeout(function () {
                   if (source.playbackState === source.PLAYING_STATE || source.playbackState === source.FINISHED_STATE) {
-                    finishSetup();
                     window.removeEventListener("mouseup", unlock);
                     window.removeEventListener("touchend", unlock);
                     window.removeEventListener("keyup", unlock);
+                    try {
+                      finishSetup();
+                    } catch (exp) {
+                      reject(exp);
+                    }
                   }
                 }, 0);
               };
@@ -10550,15 +10560,15 @@ var Audio3D = function () {
               window.addEventListener("mouseup", unlock, false);
               window.addEventListener("touchend", unlock, false);
               window.addEventListener("keyup", unlock, false);
-              unlock();
             })();
           }
         })();
       } catch (exp) {
-        console.warn("Error while setting up audio", exp.message);
-        Audio3D.isAvailable = false;
+        reject(exp);
       }
-    }
+    }).then(function () {
+      return console.log("Audio ready");
+    });
   }
 
   _createClass(Audio3D, [{
@@ -10605,30 +10615,19 @@ var Audio3D = function () {
     value: function loadURL(src) {
       var _this2 = this;
 
-      if (this.context) {
-        return Primrose.HTTP.getBuffer(src).then(function (data) {
-          return new Promise(function (resolve, reject) {
-            return _this2.context.decodeAudioData(data, resolve, reject);
-          });
+      return this.ready.then(function () {
+        console.log("Loading " + src + " from URL");
+        Primrose.HTTP.getBuffer(src);
+      }).then(function (data) {
+        return new Promise(function (resolve, reject) {
+          return _this2.context.decodeAudioData(data, resolve, reject);
         });
-      } else {
-        return Promise.reject("No audio context.");
-      }
-    }
-  }, {
-    key: "loadURLCascadeSrcList",
-    value: function loadURLCascadeSrcList(srcs, index) {
-      var _this3 = this;
-
-      index = index || 0;
-      if (index >= srcs.length) {
-        return Promise.reject("Failed to load a file from " + srcs.length + " files.");
-      } else {
-        return this.loadURL(srcs[index]).catch(function (err) {
-          console.error(err);
-          return _this3.loadURLCascadeSrcList(srcs, index + 1);
-        });
-      }
+      }).then(function (dat) {
+        console.log(src + " loaded");
+        return dat;
+      }).catch(function (err) {
+        console.error("Couldn't load " + src + ". Reason: " + err);
+      });
     }
   }, {
     key: "createRawSound",
@@ -10642,7 +10641,7 @@ var Audio3D = function () {
         throw new Error("Second channel is not the same length as the first channel. Expected " + frameCount + ", but was " + pcmData[1].length);
       }
 
-      var buffer = this.context.createBuffer(pcmData.length, frameCount, this.sampleRate);
+      var buffer = this.context.createBuffer(pcmData.length, frameCount, this.sampleRate || 22050);
       for (var c = 0; c < pcmData.length; ++c) {
         var channel = buffer.getChannelData(c);
         for (var i = 0; i < frameCount; ++i) {
@@ -10650,40 +10649,6 @@ var Audio3D = function () {
         }
       }
       return buffer;
-    }
-  }, {
-    key: "createSound",
-    value: function createSound(loop, buffer) {
-      var snd = {
-        volume: this.context.createGain(),
-        source: this.context.createBufferSource()
-      };
-      snd.source.buffer = buffer;
-      snd.source.loop = loop;
-      snd.source.connect(snd.volume);
-      return snd;
-    }
-  }, {
-    key: "create3DMediaStream",
-    value: function create3DMediaStream(x, y, z, stream) {
-      console.log(stream);
-      var element = document.createElement("audio"),
-          snd = {
-        audio: element,
-        source: this.context.createMediaElementSource(element)
-      };
-
-      element.srcObject = stream;
-      element.autoplay = true;
-      element.controls = false;
-      element.muted = true;
-      element.crossOrigin = "anonymous";
-      snd.source.connect(this.mainVolume);
-      //snd.source.connect(snd.volume):
-      //snd.volume.connect(snd.panner);
-      //snd.panner.connect(this.mainVolume);
-      //snd.panner.setPosition(x, y, z);
-      return snd;
     }
   }, {
     key: "create3DSound",
@@ -10703,7 +10668,7 @@ var Audio3D = function () {
   }, {
     key: "loadSource",
     value: function loadSource(sources, loop) {
-      var _this4 = this;
+      var _this3 = this;
 
       pliny.method({
         parent: "Primrose.Output.Audio3D",
@@ -10758,33 +10723,42 @@ var Audio3D = function () {
         }]
       });
 
-      return new Promise(function (resolve, reject) {
-        if (!(sources instanceof Array)) {
-          sources = [sources];
-        }
-        var audio = document.createElement("audio");
-        audio.autoplay = true;
-        audio.loop = loop;
-        audio.crossOrigin = "anonymous";
-        sources.map(function (src) {
-          var source = document.createElement("source");
-          source.src = src;
-          return source;
-        }).forEach(audio.appendChild.bind(audio));
-        audio.oncanplay = function () {
-          var snd = null;
-          if (_this4.context) {
+      return this.ready.then(function () {
+        return new Promise(function (resolve, reject) {
+          console.log("Loading " + sources);
+          if (!(sources instanceof Array)) {
+            sources = [sources];
+          }
+          var audio = document.createElement("audio");
+          audio.autoplay = true;
+          audio.preload = "auto";
+          audio["webkit-playsinline"] = true;
+          audio.playsinline = true;
+          audio.loop = loop;
+          audio.crossOrigin = "anonymous";
+          sources.map(function (src) {
+            var source = document.createElement("source");
+            source.src = src;
+            return source;
+          }).forEach(audio.appendChild.bind(audio));
+          audio.onerror = reject;
+          audio.oncanplay = function () {
             audio.oncanplay = null;
-            snd = {
-              volume: _this4.context.createGain(),
-              source: _this4.context.createMediaElementSource(audio)
+            var snd = {
+              volume: _this3.context.createGain(),
+              source: _this3.context.createMediaElementSource(audio)
             };
             snd.source.connect(snd.volume);
-          }
-          resolve(snd);
-        };
-        audio.onerror = reject;
-        document.body.appendChild(audio);
+            resolve(snd);
+          };
+          audio.play();
+          document.body.appendChild(audio);
+        });
+      }).then(function (dat) {
+        console.log(sources + " loaded");
+        return dat;
+      }).catch(function (err) {
+        console.error("Couldn't load " + sources + ". Reason: " + err);
       });
     }
   }, {
@@ -10796,38 +10770,6 @@ var Audio3D = function () {
     key: "loadFixedSound",
     value: function loadFixedSound(src, loop) {
       return this.loadSource(src, loop).then(this.createFixedSound.bind(this));
-    }
-  }, {
-    key: "playBufferImmediate",
-    value: function playBufferImmediate(buffer, volume) {
-      var _this5 = this;
-
-      var snd = this.createSound(false, buffer);
-      snd = this.createFixedSound(snd);
-      snd.volume.gain.value = volume;
-      snd.source.addEventListener("ended", function (evt) {
-        snd.volume.disconnect(_this5.mainVolume);
-      });
-      snd.source.start(0);
-      return snd;
-    }
-  }], [{
-    key: "setAudioStream",
-    value: function setAudioStream(stream, id) {
-      var audioElementCount = document.querySelectorAll("audio").length,
-          element = Primrose.DOM.cascadeElement(id || "audioStream" + audioElementCount, "audio", HTMLAudioElement, true);
-      setAudioProperties(element);
-      element.srcObject = stream;
-      return element;
-    }
-  }, {
-    key: "setAudioProperties",
-    value: function setAudioProperties(element) {
-      element.autoplay = true;
-      element.controls = false;
-      element.crossOrigin = "anonymous";
-      element.muted = true;
-      element.setAttribute("muted", "");
     }
   }]);
 
