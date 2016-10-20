@@ -14,7 +14,7 @@ class Touch extends Primrose.InputProcessor {
       axes.push("LY" + i);
     }
     super("Touch", commands, axes);
-    console.log(DOMElement);
+
     DOMElement = DOMElement || window;
 
     var setState = (stateChange, setAxis, event) => {
