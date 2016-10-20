@@ -46,7 +46,6 @@ class Touch extends Primrose.InputProcessor {
         fingerState |= 1 << t.identifier;
       }
       this.setAxis("FINGERS", fingerState);
-      event.preventDefault();
     };
 
     DOMElement.addEventListener("touchstart", setState.bind(this, true, false), false);
