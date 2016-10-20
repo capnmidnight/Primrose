@@ -283,7 +283,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       });
     }
 
-    this.music = new Primrose.Output.Music(this.audio.context);
+    this.music = new Primrose.Output.Music(this.audio);
 
     this.pickableObjects = [];
     this.registerPickableObject = this.pickableObjects.push.bind(this.pickableObjects);
