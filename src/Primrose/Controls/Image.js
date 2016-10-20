@@ -162,6 +162,11 @@ class Image extends Primrose.Entity {
   }
 
   loadVideos(videos, progress){
+    this._elements.splice(0);
+    this._canvases.splice(0);
+    this._contexts.splice(0);
+    this._textures.splice(0);
+
     return Promise.all(Array.prototype.map.call(videos, (spec, i) => new Promise((resolve, reject) => {
       var video = null;
       if(typeof spec === "string"){
@@ -182,43 +187,39 @@ class Image extends Primrose.Entity {
       video.autoplay = true;
       video.loop = true;
       video.controls = true;
-      video.playsinline = true;
-      video.setAttribute("webkit-playsinline", true);
-      video.oncanplaythrough = () => {
+      video.setAttribute("playsinline", "");
+      video.setAttribute("webkit-playsinline", "");
+      video.oncanplay = () => {
+        video.oncanplay = null;
+        video.onerror = null;
+
         const width = video.videoWidth,
           height = video.videoHeight,
           p2Width = Math.pow(2, Math.ceil(Math.log2(width))),
           p2Height = Math.pow(2, Math.ceil(Math.log2(height)));
 
-        if(width === p2Width && height === p2Height){
-          this._meshes[i] = textured(
-            this.options.geometry,
-            elem,
-            this.options);
-        }
-        else{
-          this._elements[i] = video;
+        this._elements[i] = video;
 
+        this._setGeometry({
+          maxU: width / p2Width,
+          maxV: height / p2Height
+        });
+
+        if((width !== p2Width || height !== p2Height) && !this.options.disableVideoCopying){
           this._canvases[i] = document.createElement("canvas");
           this._canvases[i].id = (video.id || this.id) + "-canvas";
           this._canvases[i].width = p2Width;
           this._canvases[i].height = p2Height;
 
           this._contexts[i] = this._canvases[i].getContext("2d");
-
-          this._setGeometry({
-            maxU: width / p2Width,
-            maxV: height / p2Height
-          });
-
-          this._meshes[i] = textured(
-            this.options.geometry,
-            this._canvases[i],
-            this.options);
         }
 
+        this._meshes[i] = textured(
+          this.options.geometry,
+          this._canvases[i] || this._elements[i],
+          this.options);
+
         this._textures[i] = this._meshes[i].material.map;
-        video.oncanplaythrough = null;
         resolve();
       };
       if(!video.parentElement){
