@@ -243,6 +243,15 @@ class Pointer extends Primrose.AbstractEventEmitter {
           lastHit: lastHit
         };
 
+
+      if(currentHit){
+        this.gazeInner.position.z = 0.02 - currentHit.distance;
+      }
+      else{
+         this.gazeInner.position.z = GAZE_RING_DISTANCE;
+      }
+      this.mesh.position.z = this.gazeInner.position.z - 0.02;
+
       if(currentHit){
         currentHit.time = performance.now();
 
