@@ -597,6 +597,18 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
 
       this.input = new Primrose.Input.FPSInput(this.renderer.domElement, this.options);
       this.input.addEventListener("zero", this.zero, false);
+      this.input.VR.ready.then((displays) => displays.forEach((display, i) => {
+        window.addEventListener("vrdisplayactivate", (evt) => {
+          if(evt.display === display) {
+            const exitVR = () => {
+              window.removeEventListener("vrdisplaydeactivate", exitVR);
+              this.input.VR.cancel();
+            };
+            window.addEventListener("vrdisplaydeactivate", exitVR, false);
+            this.goFullScreen(i);
+          }
+        }, false);
+      }));
 
       this.fader = colored(box(1, 1, 1), 0x000000, {opacity: 0, transparent: true, unshaded: true, side: THREE.BackSide});
       this.fader.visible = false;
