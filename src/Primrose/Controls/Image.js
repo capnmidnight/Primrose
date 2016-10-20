@@ -156,6 +156,9 @@ class Image extends Primrose.Entity {
       video.preload = "auto";
       video.autoplay = true;
       video.loop = true;
+      video.controls = true;
+      video.playsinline = true;
+      video.setAttribute("webkit-playsinline", true);
       video.oncanplaythrough = () => {
         const width = video.videoWidth,
           height = video.videoHeight,
