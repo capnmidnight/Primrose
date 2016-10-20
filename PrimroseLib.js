@@ -2119,7 +2119,7 @@ BrowserEnvironment.DEFAULTS = {
   // The acceleration applied to falling objects.
   gravity: 9.8,
   // The amount of time in seconds to require gazes on objects before triggering the gaze event.
-  gazeLength: 1,
+  gazeLength: 1.5,
   // By default, what we see in the VR view will get mirrored to a regular view on the primary screen. Set to true to improve performance.
   disableMirroring: false,
   // By default, a single light is added to the scene,
@@ -3398,7 +3398,6 @@ var TELEPORT_PAD_RADIUS = 0.4,
     FORWARD = new THREE.Vector3(0, 0, -1),
     LASER_WIDTH = 0.01,
     LASER_LENGTH = 3 * LASER_WIDTH,
-    GAZE_TIMEOUT = 1000,
     GAZE_RING_DISTANCE = -1.25,
     GAZE_RING_INNER = 0.015,
     GAZE_RING_OUTER = 0.03,
@@ -3412,6 +3411,7 @@ var Pointer = function (_Primrose$AbstractEve) {
 
   function Pointer(name, color, highlight, s, devices) {
     var triggerDevices = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : null;
+    var options = arguments[6];
 
     _classCallCheck(this, Pointer);
 
@@ -3420,6 +3420,8 @@ var Pointer = function (_Primrose$AbstractEve) {
     _this.name = name;
     _this.devices = devices;
     _this.triggerDevices = triggerDevices || devices.slice();
+    _this.options = options;
+    _this.gazeTimeout = (_this.options.gazeLength || 1.5) * 1000;
 
     _this.unproject = null;
 
@@ -3617,7 +3619,7 @@ var Pointer = function (_Primrose$AbstractEve) {
 
         if (this.useGaze) {
           if (changed) {
-            if (dt !== null && dt < GAZE_TIMEOUT) {
+            if (dt !== null && dt < this.gazeTimeout) {
               this.gazeOuter.visible = false;
               this.emit("gazecancel", evt);
             }
@@ -3626,12 +3628,12 @@ var Pointer = function (_Primrose$AbstractEve) {
               this.emit("gazestart", evt);
             }
           } else if (dt !== null) {
-            if (dt >= GAZE_TIMEOUT) {
+            if (dt >= this.gazeTimeout) {
               this.gazeOuter.visible = false;
               this.emit("gazecomplete", evt);
               lastHit.time = null;
             } else {
-              var p = Math.round(36 * dt / GAZE_TIMEOUT),
+              var p = Math.round(36 * dt / this.gazeTimeout),
                   a = 2 * Math.PI * p / 36;
               this.gazeOuter.geometry = ring(GAZE_RING_INNER, GAZE_RING_OUTER, 36, p, 0, a);
               if (moved) {
@@ -5684,7 +5686,7 @@ var FPSInput = function (_Primrose$AbstractEve) {
             var shift = (_this.motionDevices.length - 2) * 8,
                 color = 0x0000ff << shift,
                 highlight = 0xff0000 >> shift,
-                ptr = new Primrose.Pointer(padID + "Pointer", color, 1, highlight, [mgr]);
+                ptr = new Primrose.Pointer(padID + "Pointer", color, 1, highlight, [mgr], null, _this.options);
             ptr.add(colored(box(0.1, 0.025, 0.2), color, {
               emissive: highlight
             }));
@@ -5741,7 +5743,7 @@ var FPSInput = function (_Primrose$AbstractEve) {
 
     _this.stage = hub();
 
-    _this.head = new Primrose.Pointer("GazePointer", 0xffff00, 0x0000ff, 0.8, [_this.VR], [_this.Mouse, _this.Touch, _this.Keyboard]);
+    _this.head = new Primrose.Pointer("GazePointer", 0xffff00, 0x0000ff, 0.8, [_this.VR], [_this.Mouse, _this.Touch, _this.Keyboard], _this.options);
 
     _this.head.rotation.order = "YXZ";
     _this.head.useGaze = _this.options.useGaze;
@@ -5749,7 +5751,7 @@ var FPSInput = function (_Primrose$AbstractEve) {
     _this.options.scene.add(_this.head.root);
     _this.options.scene.add(_this.head.disk);
 
-    _this.mousePointer = new Primrose.Pointer("MousePointer", 0xff0000, 0x00ff00, 1, [_this.Mouse]);
+    _this.mousePointer = new Primrose.Pointer("MousePointer", 0xff0000, 0x00ff00, 1, [_this.Mouse], null, _this.options);
     _this.mousePointer.unproject = new THREE.Matrix4();
     _this.pointers.push(_this.mousePointer);
     _this.head.add(_this.mousePointer.root);
@@ -6907,7 +6909,6 @@ var DEFAULT_POSE = {
   position: [0, 0, 0],
   orientation: [0, 0, 0, 1]
 },
-    GAZE_LENGTH = 3000,
     _ = priv();
 
 var VR = function (_Primrose$PoseInputPr) {
@@ -7084,38 +7085,6 @@ var VR = function (_Primrose$PoseInputPr) {
     value: function submitFrame() {
       if (this.currentDevice) {
         this.currentDevice.submitFrame(this.currentPose);
-      }
-    }
-  }, {
-    key: "resolvePicking",
-    value: function resolvePicking(currentHits, lastHits, objects) {
-      _get(VR.prototype.__proto__ || Object.getPrototypeOf(VR.prototype), "resolvePicking", this).call(this, currentHits, lastHits, objects);
-
-      var currentHit = currentHits.VR,
-          lastHit = lastHits && lastHits.VR,
-          dt,
-          lt;
-      if (lastHit && currentHit && lastHit.objectID === currentHit.objectID) {
-        currentHit.startTime = lastHit.startTime;
-        currentHit.gazeFired = lastHit.gazeFired;
-        dt = lt - currentHit.startTime;
-        if (dt >= GAZE_LENGTH && !currentHit.gazeFired) {
-          currentHit.gazeFired = true;
-          emit.call(this, "gazecomplete", currentHit);
-          emit.call(this.pickableObjects[currentHit.objectID], "click", "Gaze");
-        }
-      } else {
-        if (lastHit) {
-          dt = lt - lastHit.startTime;
-          if (dt < GAZE_LENGTH) {
-            emit.call(this, "gazecancel", lastHit);
-          }
-        }
-        if (currentHit) {
-          currentHit.startTime = lt;
-          currentHit.gazeFired = false;
-          emit.call(this, "gazestart", currentHit);
-        }
       }
     }
   }, {

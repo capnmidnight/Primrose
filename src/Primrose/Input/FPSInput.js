@@ -203,7 +203,7 @@ class FPSInput extends Primrose.AbstractEventEmitter {
             const shift = (this.motionDevices.length - 2) * 8,
               color = 0x0000ff << shift,
               highlight = 0xff0000 >> shift,
-              ptr = new Primrose.Pointer(padID + "Pointer", color, 1, highlight, [mgr]);
+              ptr = new Primrose.Pointer(padID + "Pointer", color, 1, highlight, [mgr], null, this.options);
             ptr.add(colored(box(0.1, 0.025, 0.2), color, {
               emissive: highlight
             }));
@@ -267,7 +267,7 @@ class FPSInput extends Primrose.AbstractEventEmitter {
       this.Mouse,
       this.Touch,
       this.Keyboard
-    ]);
+    ], this.options);
 
     this.head.rotation.order = "YXZ";
     this.head.useGaze = this.options.useGaze;
@@ -277,7 +277,7 @@ class FPSInput extends Primrose.AbstractEventEmitter {
 
     this.mousePointer = new Primrose.Pointer("MousePointer", 0xff0000, 0x00ff00, 1, [
       this.Mouse
-    ]);
+    ], null, this.options);
     this.mousePointer.unproject = new THREE.Matrix4();
     this.pointers.push(this.mousePointer);
     this.head.add(this.mousePointer.root);

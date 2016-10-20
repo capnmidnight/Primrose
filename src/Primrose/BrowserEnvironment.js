@@ -862,7 +862,7 @@ BrowserEnvironment.DEFAULTS = {
   // The acceleration applied to falling objects.
   gravity: 9.8,
   // The amount of time in seconds to require gazes on objects before triggering the gaze event.
-  gazeLength: 1,
+  gazeLength: 1.5,
   // By default, what we see in the VR view will get mirrored to a regular view on the primary screen. Set to true to improve performance.
   disableMirroring: false,
   // By default, a single light is added to the scene,

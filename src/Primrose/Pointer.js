@@ -2,7 +2,6 @@ const TELEPORT_PAD_RADIUS = 0.4,
   FORWARD = new THREE.Vector3(0, 0, -1),
   LASER_WIDTH = 0.01,
   LASER_LENGTH = 3 * LASER_WIDTH,
-  GAZE_TIMEOUT = 1000,
   GAZE_RING_DISTANCE  = -1.25,
   GAZE_RING_INNER = 0.015,
   GAZE_RING_OUTER = 0.03,
@@ -43,11 +42,13 @@ pliny.class({
     }]
 });
 class Pointer extends Primrose.AbstractEventEmitter {
-  constructor(name, color, highlight, s, devices, triggerDevices = null) {
+  constructor(name, color, highlight, s, devices, triggerDevices = null, options) {
     super();
     this.name = name;
     this.devices = devices;
     this.triggerDevices = triggerDevices || devices.slice();
+    this.options = options;
+    this.gazeTimeout = (this.options.gazeLength || 1.5) * 1000;
 
     this.unproject = null;
 
@@ -298,7 +299,7 @@ class Pointer extends Primrose.AbstractEventEmitter {
 
       if(this.useGaze){
         if(changed) {
-          if(dt !== null && dt < GAZE_TIMEOUT){
+          if(dt !== null && dt < this.gazeTimeout){
             this.gazeOuter.visible = false;
             this.emit("gazecancel", evt);
           }
@@ -308,13 +309,13 @@ class Pointer extends Primrose.AbstractEventEmitter {
           }
         }
         else if(dt !== null) {
-          if(dt >= GAZE_TIMEOUT){
+          if(dt >= this.gazeTimeout){
             this.gazeOuter.visible = false;
             this.emit("gazecomplete", evt);
             lastHit.time = null;
           }
           else {
-            var p = Math.round(36 * dt / GAZE_TIMEOUT),
+            var p = Math.round(36 * dt / this.gazeTimeout),
               a = 2 * Math.PI * p / 36;
             this.gazeOuter.geometry = ring(GAZE_RING_INNER, GAZE_RING_OUTER, 36, p, 0, a);
             if(moved) {
