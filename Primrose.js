@@ -62808,7 +62808,6 @@ var Touch = function (_Primrose$InputProces) {
       for (var _i2 = 0; _i2 < touches.length; ++_i2) {
         var t = touches[_i2],
             id = t.identifier - minIdentifier;
-        console.log(_i2, id);
         if (setAxis) {
           _this.setAxis("X" + id, t.pageX);
           _this.setAxis("Y" + id, t.pageY);
@@ -62902,8 +62901,9 @@ var VR = function (_Primrose$PoseInputPr) {
       // We skip the WebVR-Polyfill's Mouse and Keyboard display because it does not
       // play well with our interaction model.
       _this.displays.push.apply(_this.displays, displays.filter(function (display) {
-        return !isIOS || VR.isStereoDisplay(display);
+        return !isiOS || VR.isStereoDisplay(display);
       }));
+      console.log("VR Displays", _this.displays);
       return _this.displays;
     });
     return _this;
