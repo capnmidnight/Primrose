@@ -1,6 +1,8 @@
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\axis.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\axis.js
+(function(){"use strict";
+
+pliny.function({
   name: "axis",
   description: "Creates a set of reference axes, with X as red, Y as green, and Z as blue.",
   parameters: [{
@@ -31,19 +33,21 @@ The result should appear as:\n\
 });
 
 function axis(length, width) {
-  const center = hub();
+  var center = hub();
   put(brick(0xff0000, length, width, width)).on(center);
   put(brick(0x00ff00, width, length, width)).on(center);
   put(brick(0x0000ff, width, width, length)).on(center);
   return center;
 }
-  if(typeof window !== "undefined") window.axis = axis;
+    if(typeof window !== "undefined") window.axis = axis;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\axis.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\axis.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\box.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\box.js
+(function(){"use strict";
+
+pliny.function({
   name: "box",
   description: "A shortcut function for the THREE.BoxGeometry class. Creates a \"rectilinear prism\", i.e. the general class of rectangular objects that includes cubes.",
   parameters: [{
@@ -85,17 +89,19 @@ function box(width, height, length) {
   if (length === undefined) {
     length = width;
   }
-  return cache(
-    `BoxBufferGeometry(${width}, ${height}, ${length})`,
-    () => new THREE.BoxBufferGeometry(width, height, length));
+  return cache("BoxBufferGeometry(" + width + ", " + height + ", " + length + ")", function () {
+    return new THREE.BoxBufferGeometry(width, height, length);
+  });
 }
-  if(typeof window !== "undefined") window.box = box;
+    if(typeof window !== "undefined") window.box = box;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\box.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\box.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\brick.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\brick.js
+(function(){"use strict";
+
+pliny.function({
   name: "brick",
   description: "Creates a textured box. See [`box()`](#box) and [`textured()`](#textured). The texture will be repeated across the box.",
   parameters: [{
@@ -144,13 +150,15 @@ function brick(txt, w, h, l) {
     txtRepeatT: l
   });
 }
-  if(typeof window !== "undefined") window.brick = brick;
+    if(typeof window !== "undefined") window.brick = brick;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\brick.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\brick.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\cache.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\cache.js
+(function(){"use strict";
+
+pliny.function({
   name: "cache",
   description: "Looks for the hashed name of the object in the object cache, and if it exists, returns it. If it doesn't exist, calls the makeObject function, using the return results to set the object in the cache, and returning it. In other words, a simple sort of memoization.",
   parameters: [{
@@ -182,25 +190,26 @@ function brick(txt, w, h, l) {
     console.assert(a === c);"
   }]
 });
-const cache = (function () {
-  const _cache = {};
-  return (hash, makeObject, onCacheHit) => {
+var cache = function () {
+  var _cache = {};
+  return function (hash, makeObject, onCacheHit) {
     if (!_cache[hash]) {
       _cache[hash] = makeObject();
-    }
-    else if(onCacheHit) {
+    } else if (onCacheHit) {
       onCacheHit();
     }
     return _cache[hash];
   };
+}();
+    if(typeof window !== "undefined") window.cache = cache;
 })();
-  if(typeof window !== "undefined") window.cache = cache;
-})();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\cache.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\cache.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\circle.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\circle.js
+(function(){"use strict";
+
+pliny.function({
   name: "circle",
   description: "| [under construction]"
 });
@@ -208,17 +217,19 @@ const cache = (function () {
 function circle(r, sections, start, end) {
   r = r || 1;
   sections = sections || 18;
-  return cache(
-    `CircleBufferGeometry(${r}, ${sections}, ${start}, ${end})`,
-    () => new THREE.CircleBufferGeometry(r, sections, start, end));
+  return cache("CircleBufferGeometry(" + r + ", " + sections + ", " + start + ", " + end + ")", function () {
+    return new THREE.CircleBufferGeometry(r, sections, start, end);
+  });
 }
-  if(typeof window !== "undefined") window.circle = circle;
+    if(typeof window !== "undefined") window.circle = circle;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\circle.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\circle.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\clone.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\clone.js
+(function(){"use strict";
+
+pliny.function({
   name: "clone",
   parameters: [{
     name: "obj",
@@ -244,13 +255,15 @@ function circle(r, sections, start, end) {
 function clone(obj) {
   return JSON.parse(JSON.stringify(obj));
 }
-  if(typeof window !== "undefined") window.clone = clone;
+    if(typeof window !== "undefined") window.clone = clone;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\clone.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\clone.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\cloud.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\cloud.js
+(function(){"use strict";
+
+pliny.function({
   name: "cloud",
   description: "Creates a point cloud with points of a fixed color and size out of an array of vertices.",
   parameters: [{
@@ -298,35 +311,27 @@ function cloud(verts, c, s) {
   for (var i = 0; i < verts.length; ++i) {
     geom.vertices.push(verts[i]);
   }
-  var mat = cache(
-    `PointsMaterial(${c}, ${s})`,
-    () => new THREE.PointsMaterial({
+  var mat = cache("PointsMaterial(" + c + ", " + s + ")", function () {
+    return new THREE.PointsMaterial({
       color: c,
       size: s
-    }));
+    });
+  });
   return new THREE.Points(geom, mat);
 }
-  if(typeof window !== "undefined") window.cloud = cloud;
+    if(typeof window !== "undefined") window.cloud = cloud;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\cloud.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\cloud.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\colored.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\colored.js
+(function(){"use strict";
+
+pliny.function({
   name: "colored",
   description: "Apply a color to a geometry, creating the intermediate material as necessary, and returning the resulting mesh",
   returns: "THREE.Mesh",
-  parameters: [
-    { name: "geometry", type: "THREE.Geometry", description: "The geometry to which to apply the color." },
-    { name: "color", type: "Number", description: "A hexadecimal color value in RGB format." },
-    { name: "options", type: "Object", optional: true, description: "Optional settings for material properties."},
-    { name: "options.side", type: "Number", optional: true, defaultValue: "THREE.FrontSide", description: "Either THREE.FontSide, THREE.BackSide, or THREE.Both, for which side of the polygon should be shaded."},
-    { name: "options.opacity", type: "Number", optional: true, defaultValue: 1, description: "Make objects semi-transparent. Note: this usually doesn't work like you'd expect."},
-    { name: "options.roughness", type: "Number", optional: true, defaultValue: 0.5, description: "A value indicating the degree of light scattering the material causes."},
-    { name: "options.metalness", type: "Number", optional: true, defaultValue: 0, description: "A value indicating the degree of shininess the material causes."},
-    { name: "options.unshaded", type: "Boolean", optional: true, defaultValue: false, description: "Make objects not respond to lighting."},
-    { name: "options.wireframe", type: "Boolean", optional: true, defaultValue: false, description: "Draw objects as basic wireframes. Note: there's no control over the wire thickness. This should be considered a debugging feature, not a graphical feature."}
-  ]
+  parameters: [{ name: "geometry", type: "THREE.Geometry", description: "The geometry to which to apply the color." }, { name: "color", type: "Number", description: "A hexadecimal color value in RGB format." }, { name: "options", type: "Object", optional: true, description: "Optional settings for material properties." }, { name: "options.side", type: "Number", optional: true, defaultValue: "THREE.FrontSide", description: "Either THREE.FontSide, THREE.BackSide, or THREE.Both, for which side of the polygon should be shaded." }, { name: "options.opacity", type: "Number", optional: true, defaultValue: 1, description: "Make objects semi-transparent. Note: this usually doesn't work like you'd expect." }, { name: "options.roughness", type: "Number", optional: true, defaultValue: 0.5, description: "A value indicating the degree of light scattering the material causes." }, { name: "options.metalness", type: "Number", optional: true, defaultValue: 0, description: "A value indicating the degree of shininess the material causes." }, { name: "options.unshaded", type: "Boolean", optional: true, defaultValue: false, description: "Make objects not respond to lighting." }, { name: "options.wireframe", type: "Boolean", optional: true, defaultValue: false, description: "Draw objects as basic wireframes. Note: there's no control over the wire thickness. This should be considered a debugging feature, not a graphical feature." }]
 });
 
 function colored(geometry, color, options) {
@@ -334,25 +339,28 @@ function colored(geometry, color, options) {
   options.color = color;
 
   var mat = material("", options),
-    obj = null;
+      obj = null;
 
   if (geometry.type.indexOf("Geometry") > -1) {
     obj = new THREE.Mesh(geometry, mat);
-  }
-  else if (geometry instanceof THREE.Object3D) {
+  } else if (geometry instanceof THREE.Object3D) {
     obj = geometry;
     obj.material = mat;
   }
 
   return obj;
 }
-  if(typeof window !== "undefined") window.colored = colored;
+    if(typeof window !== "undefined") window.colored = colored;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\colored.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\colored.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\copyObject.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\copyObject.js
+(function(){"use strict";
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+pliny.function({
   name: "copyObject",
   description: "Copies properties from one object to another, essentially cloning the source object into the destination object. Uses a local stack to perform recursive copying. Overwrites any fields that already exist in the destination. For convenience, also returns the destination object.",
   parameters: [{
@@ -410,10 +418,9 @@ function copyObject(dest, source, shallow) {
     source = frame.source;
     dest = frame.dest;
     for (var key in source) {
-      if (shallow || typeof (source[key]) !== "object" || source[key] instanceof String) {
+      if (shallow || _typeof(source[key]) !== "object" || source[key] instanceof String) {
         dest[key] = source[key];
-      }
-      else {
+      } else {
         if (!dest[key]) {
           dest[key] = {};
         }
@@ -426,13 +433,15 @@ function copyObject(dest, source, shallow) {
   }
   return dest;
 }
-  if(typeof window !== "undefined") window.copyObject = copyObject;
+    if(typeof window !== "undefined") window.copyObject = copyObject;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\copyObject.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\copyObject.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\cylinder.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\cylinder.js
+(function(){"use strict";
+
+pliny.function({
   name: "cylinder",
   description: "Shorthand functino for creating a new THREE.CylinderGeometry object.",
   parameters: [{
@@ -511,17 +520,19 @@ function cylinder(rT, rB, height, rS, hS, openEnded, thetaStart, thetaEnd) {
   if (height === undefined) {
     height = 1;
   }
-  return cache(
-    `CylinderBufferGeometry(${rT}, ${rB}, ${height}, ${rS}, ${hS}, ${openEnded}, ${thetaStart}, ${thetaEnd})`,
-    () => new THREE.CylinderBufferGeometry(rT, rB, height, rS, hS, openEnded, thetaStart, thetaEnd));
+  return cache("CylinderBufferGeometry(" + rT + ", " + rB + ", " + height + ", " + rS + ", " + hS + ", " + openEnded + ", " + thetaStart + ", " + thetaEnd + ")", function () {
+    return new THREE.CylinderBufferGeometry(rT, rB, height, rS, hS, openEnded, thetaStart, thetaEnd);
+  });
 }
-  if(typeof window !== "undefined") window.cylinder = cylinder;
+    if(typeof window !== "undefined") window.cylinder = cylinder;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\cylinder.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\cylinder.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\deleteSetting.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\deleteSetting.js
+(function(){"use strict";
+
+pliny.function({
   name: "deleteSetting",
   parameters: [{
     name: " name",
@@ -547,13 +558,15 @@ function deleteSetting(name) {
     window.localStorage.removeItem(name);
   }
 }
-  if(typeof window !== "undefined") window.deleteSetting = deleteSetting;
+    if(typeof window !== "undefined") window.deleteSetting = deleteSetting;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\deleteSetting.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\deleteSetting.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\emit.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\emit.js
+(function(){"use strict";
+
+pliny.function({
   name: "emit",
   description: "A shorthand function for triggering events. Can be `.call()`ed on objects that have a `listeners` property.",
   parameters: [{
@@ -598,13 +611,15 @@ function emit(evt, args) {
     handlers[i](args);
   }
 }
-  if(typeof window !== "undefined") window.emit = emit;
+    if(typeof window !== "undefined") window.emit = emit;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\emit.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\emit.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\findProperty.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\findProperty.js
+(function(){"use strict";
+
+pliny.function({
   name: "findProperty",
   description: "Searches an object for a property that might go by different names in different browsers.",
   parameters: [{
@@ -634,36 +649,37 @@ function findProperty(elem, arr) {
     }
   }
 }
-  if(typeof window !== "undefined") window.findProperty = findProperty;
+    if(typeof window !== "undefined") window.findProperty = findProperty;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\findProperty.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\findProperty.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\fixGeometry.js
-(function(){function fixGeometry(geometry, options){
-  const maxU = options.maxU || 1,
-    maxV = options.maxV || 1,
-    attrs = geometry.attributes || (geometry._bufferGeometry && geometry._bufferGeometry.attributes);
+    // start D:\Documents\VR\Primrose\src\fixGeometry.js
+(function(){"use strict";
+
+function fixGeometry(geometry, options) {
+  var maxU = options.maxU || 1,
+      maxV = options.maxV || 1,
+      attrs = geometry.attributes || geometry._bufferGeometry && geometry._bufferGeometry.attributes;
   if (attrs && attrs.uv && attrs.uv.array) {
-    const uv = attrs.uv,
-      arr = uv.array;
-    for (let j = 0; j < arr.length; j += uv.itemSize) {
+    var uv = attrs.uv,
+        arr = uv.array;
+    for (var j = 0; j < arr.length; j += uv.itemSize) {
       arr[j] *= maxU;
     }
-    for (let j = 1; j < arr.length; j += uv.itemSize) {
-      arr[j] = 1 - (1 - arr[j]) * maxV;
+    for (var _j = 1; _j < arr.length; _j += uv.itemSize) {
+      arr[_j] = 1 - (1 - arr[_j]) * maxV;
     }
-  }
-  else if(geometry.faceVertexUvs) {
-    const faces = geometry.faceVertexUvs;
-    for(let i = 0; i < faces.length; ++i){
-      const face = faces[i];
-      for(let j = 0; j < face.length; ++j){
-        const uvs = face[j];
-        for(let k = 0; k < uvs.length; ++k){
-          const uv = uvs[k];
-          uv.x *= maxU;
-          uv.y = 1 - (1 - uv.y) * maxV;
+  } else if (geometry.faceVertexUvs) {
+    var faces = geometry.faceVertexUvs;
+    for (var i = 0; i < faces.length; ++i) {
+      var face = faces[i];
+      for (var _j2 = 0; _j2 < face.length; ++_j2) {
+        var uvs = face[_j2];
+        for (var k = 0; k < uvs.length; ++k) {
+          var _uv = uvs[k];
+          _uv.x *= maxU;
+          _uv.y = 1 - (1 - _uv.y) * maxV;
         }
       }
     }
@@ -671,13 +687,17 @@ function findProperty(elem, arr) {
 
   return geometry;
 }
-  if(typeof window !== "undefined") window.fixGeometry = fixGeometry;
+    if(typeof window !== "undefined") window.fixGeometry = fixGeometry;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\fixGeometry.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\fixGeometry.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\getSetting.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\getSetting.js
+(function(){"use strict";
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+pliny.function({
   name: "getSetting",
   parameters: [{
     name: " name",
@@ -716,23 +736,24 @@ function getSetting(name, defValue) {
     if (val) {
       try {
         return JSON.parse(val);
-      }
-      catch (exp) {
-        console.error("getSetting", name, val, typeof (val), exp);
+      } catch (exp) {
+        console.error("getSetting", name, val, typeof val === "undefined" ? "undefined" : _typeof(val), exp);
         console.error(exp);
-        console.error("getSetting", name, val, typeof (val));
+        console.error("getSetting", name, val, typeof val === "undefined" ? "undefined" : _typeof(val));
       }
     }
   }
   return defValue;
 }
-  if(typeof window !== "undefined") window.getSetting = getSetting;
+    if(typeof window !== "undefined") window.getSetting = getSetting;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\getSetting.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\getSetting.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\hub.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\hub.js
+(function(){"use strict";
+
+pliny.function({
   name: "hub",
   description: "Calling `hub()` is a short-hand for creating a new `THREE.Object3D`. This is useful in live-coding examples to keep code terse and easy to write. It also polyfills in a method for being able to add the object to a `Primrose.BrowserEnvironment` using `appendChild()` and to add other elements to the hub using `appendChild()` such that they may be pickable in the scene.",
   examples: [{
@@ -747,53 +768,57 @@ function getSetting(name, defValue) {
 function hub() {
   return new THREE.Object3D();
 }
-  if(typeof window !== "undefined") window.hub = hub;
+    if(typeof window !== "undefined") window.hub = hub;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\hub.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\hub.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\identity.js
-(function(){function identity(obj) {
+    // start D:\Documents\VR\Primrose\src\identity.js
+(function(){"use strict";
+
+function identity(obj) {
   return obj;
 }
-  if(typeof window !== "undefined") window.identity = identity;
+    if(typeof window !== "undefined") window.identity = identity;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\identity.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\identity.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\InsideSphereGeometry.js
-(function(){pliny.class({
+    // start D:\Documents\VR\Primrose\src\InsideSphereGeometry.js
+(function(){"use strict";
+
+pliny.class({
   name: "InsideSphereGeometry",
-    parameters: [{
-      name: "radius",
-      type: "Number",
-      description: "How far the sphere should extend away from a center point."
-    }, {
-      name: "widthSegments",
-      type: "Number",
-      description: "The number of faces wide in which to slice the geometry."
-    }, {
-      name: "heightSegments",
-      type: "Number",
-      description: "The number of faces tall in which to slice the geometry."
-    }, {
-      name: "phiStart",
-      type: "Number",
-      description: "The angle in radians around the Y-axis at which the sphere starts."
-    }, {
-      name: "phiLength",
-      type: "Number",
-      description: "The change of angle in radians around the Y-axis to which the sphere ends."
-    }, {
-      name: "thetaStart",
-      type: "Number",
-      description: "The angle in radians around the Z-axis at which the sphere starts."
-    }, {
-      name: "thetaLength",
-      type: "Number",
-      description: "The change of angle in radians around the Z-axis to which the sphere ends."
-    }],
-    description: "The InsideSphereGeometry is basically an inside-out Sphere. Or\n\
+  parameters: [{
+    name: "radius",
+    type: "Number",
+    description: "How far the sphere should extend away from a center point."
+  }, {
+    name: "widthSegments",
+    type: "Number",
+    description: "The number of faces wide in which to slice the geometry."
+  }, {
+    name: "heightSegments",
+    type: "Number",
+    description: "The number of faces tall in which to slice the geometry."
+  }, {
+    name: "phiStart",
+    type: "Number",
+    description: "The angle in radians around the Y-axis at which the sphere starts."
+  }, {
+    name: "phiLength",
+    type: "Number",
+    description: "The change of angle in radians around the Y-axis to which the sphere ends."
+  }, {
+    name: "thetaStart",
+    type: "Number",
+    description: "The angle in radians around the Z-axis at which the sphere starts."
+  }, {
+    name: "thetaLength",
+    type: "Number",
+    description: "The change of angle in radians around the Z-axis to which the sphere ends."
+  }],
+  description: "The InsideSphereGeometry is basically an inside-out Sphere. Or\n\
 more accurately, it's a Sphere where the face winding order is reversed, so that\n\
 textures appear on the inside of the sphere, rather than the outside. I know, that's\n\
 note exactly helpful.\n\
@@ -830,9 +855,9 @@ function InsideSphereGeometry(radius, widthSegments, heightSegments, phiStart, p
   thetaLength = thetaLength !== undefined ? thetaLength : Math.PI;
 
   var x,
-    y,
-    vertices = [],
-    uvs = [];
+      y,
+      vertices = [],
+      uvs = [];
 
   for (y = 0; y <= heightSegments; y++) {
 
@@ -846,22 +871,18 @@ function InsideSphereGeometry(radius, widthSegments, heightSegments, phiStart, p
       var v = y / heightSegments;
 
       var vertex = new THREE.Vector3();
-      vertex.x = -radius * Math.cos(phiStart + u * phiLength) * Math.sin(
-        thetaStart + v * thetaLength);
+      vertex.x = -radius * Math.cos(phiStart + u * phiLength) * Math.sin(thetaStart + v * thetaLength);
       vertex.y = radius * Math.cos(thetaStart + v * thetaLength);
-      vertex.z = radius * Math.sin(phiStart + u * phiLength) * Math.sin(
-        thetaStart + v * thetaLength);
+      vertex.z = radius * Math.sin(phiStart + u * phiLength) * Math.sin(thetaStart + v * thetaLength);
 
       this.vertices.push(vertex);
 
       verticesRow.push(this.vertices.length - 1);
       uvsRow.push(new THREE.Vector2(1 - u, 1 - v));
-
     }
 
     vertices.push(verticesRow);
     uvs.push(uvsRow);
-
   }
 
   for (y = 0; y < heightSegments; y++) {
@@ -873,14 +894,10 @@ function InsideSphereGeometry(radius, widthSegments, heightSegments, phiStart, p
       var v3 = vertices[y + 1][x];
       var v4 = vertices[y + 1][x + 1];
 
-      var n1 = this.vertices[v1].clone()
-        .normalize();
-      var n2 = this.vertices[v2].clone()
-        .normalize();
-      var n3 = this.vertices[v3].clone()
-        .normalize();
-      var n4 = this.vertices[v4].clone()
-        .normalize();
+      var n1 = this.vertices[v1].clone().normalize();
+      var n2 = this.vertices[v2].clone().normalize();
+      var n3 = this.vertices[v3].clone().normalize();
+      var n4 = this.vertices[v4].clone().normalize();
 
       var uv1 = uvs[y][x + 1].clone();
       var uv2 = uvs[y][x].clone();
@@ -892,29 +909,20 @@ function InsideSphereGeometry(radius, widthSegments, heightSegments, phiStart, p
         uv1.x = (uv1.x + uv2.x) / 2;
         this.faces.push(new THREE.Face3(v1, v3, v4, [n1, n3, n4]));
         this.faceVertexUvs[0].push([uv1, uv3, uv4]);
-
-      }
-      else if (Math.abs(this.vertices[v3].y) === radius) {
+      } else if (Math.abs(this.vertices[v3].y) === radius) {
 
         uv3.x = (uv3.x + uv4.x) / 2;
         this.faces.push(new THREE.Face3(v1, v2, v3, [n1, n2, n3]));
         this.faceVertexUvs[0].push([uv1, uv2, uv3]);
-
-      }
-      else {
+      } else {
 
         this.faces.push(new THREE.Face3(v1, v2, v4, [n1, n2, n4]));
         this.faceVertexUvs[0].push([uv1, uv2, uv4]);
 
-        this.faces.push(new THREE.Face3(v2, v3, v4, [n2.clone(), n3,
-          n4.clone()
-        ]));
+        this.faces.push(new THREE.Face3(v2, v3, v4, [n2.clone(), n3, n4.clone()]));
         this.faceVertexUvs[0].push([uv2.clone(), uv3, uv4.clone()]);
-
       }
-
     }
-
   }
 
   this.computeFaceNormals();
@@ -928,118 +936,131 @@ function InsideSphereGeometry(radius, widthSegments, heightSegments, phiStart, p
   }
 
   this.boundingSphere = new THREE.Sphere(new THREE.Vector3(), radius);
-
 }
 if (typeof window.THREE !== "undefined") {
 
   InsideSphereGeometry.prototype = Object.create(THREE.Geometry.prototype);
   InsideSphereGeometry.prototype.constructor = InsideSphereGeometry;
 }
-  if(typeof window !== "undefined") window.InsideSphereGeometry = InsideSphereGeometry;
+    if(typeof window !== "undefined") window.InsideSphereGeometry = InsideSphereGeometry;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\InsideSphereGeometry.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\InsideSphereGeometry.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\isChrome.js
-(function(){pliny.value({
+    // start D:\Documents\VR\Primrose\src\isChrome.js
+(function(){"use strict";
+
+pliny.value({
   name: "isChrome",
   type: "Boolean",
   description: "Flag indicating the browser is currently calling itself Chrome\n\
 or Chromium. Chromium was one of the first browsers to implement virtual reality\n\
 features directly in the browser, thanks to the work of Brandon \"Toji\" Jones."
 });
-const isChrome = !!window.chrome && !window.isOpera;
-  if(typeof window !== "undefined") window.isChrome = isChrome;
+var isChrome = !!window.chrome && !window.isOpera;
+    if(typeof window !== "undefined") window.isChrome = isChrome;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\isChrome.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\isChrome.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\isFirefox.js
-(function(){pliny.value({
+    // start D:\Documents\VR\Primrose\src\isFirefox.js
+(function(){"use strict";
+
+pliny.value({
   name: "isFirefox",
   type: "Boolean",
   description: "Flag indicating the browser is currently calling itself Firefox.\n\
 Firefox was one of the first browsers to implement virtual reality features directly\n\
 in the browser, thanks to the work of the MozVR team."
 });
-const isFirefox = typeof window.InstallTrigger !== 'undefined';
-  if(typeof window !== "undefined") window.isFirefox = isFirefox;
+var isFirefox = typeof window.InstallTrigger !== 'undefined';
+    if(typeof window !== "undefined") window.isFirefox = isFirefox;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\isFirefox.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\isFirefox.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\isGearVR.js
-(function(){pliny.value({
+    // start D:\Documents\VR\Primrose\src\isGearVR.js
+(function(){"use strict";
+
+pliny.value({
   name: "isGearVR",
   type: "Boolean",
   description: "Flag indicating the application is running on the Samsung Gear VR in the Samsung Internet app."
 });
-const isGearVR = navigator.userAgent.indexOf("Mobile VR") > -1;
-  if(typeof window !== "undefined") window.isGearVR = isGearVR;
+var isGearVR = navigator.userAgent.indexOf("Mobile VR") > -1;
+    if(typeof window !== "undefined") window.isGearVR = isGearVR;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\isGearVR.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\isGearVR.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\isIE.js
-(function(){pliny.value({
+    // start D:\Documents\VR\Primrose\src\isIE.js
+(function(){"use strict";
+
+pliny.value({
   name: "isIE",
   type: "Boolean",
   description: "Flag indicating the browser is currently calling itself Internet\n\
 Explorer. Once the bane of every web developer's existence, it has since passed\n\
 the torch on to Safari in all of its many useless incarnations."
 });
-const isIE = /*@cc_on!@*/ false || !!document.documentMode;
-  if(typeof window !== "undefined") window.isIE = isIE;
+var isIE = /*@cc_on!@*/false || !!document.documentMode;
+    if(typeof window !== "undefined") window.isIE = isIE;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\isIE.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\isIE.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\isInIFrame.js
-(function(){pliny.value({
+    // start D:\Documents\VR\Primrose\src\isInIFrame.js
+(function(){"use strict";
+
+pliny.value({
   name: "isHomeScreen",
   type: "Boolean",
   description: "Flag indicating the script is currently running in an IFRAME or not."
 });
-const isInIFrame = (window.self !== window.top);
-  if(typeof window !== "undefined") window.isInIFrame = isInIFrame;
+var isInIFrame = window.self !== window.top;
+    if(typeof window !== "undefined") window.isInIFrame = isInIFrame;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\isInIFrame.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\isInIFrame.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\isiOS.js
-(function(){pliny.value({
+    // start D:\Documents\VR\Primrose\src\isiOS.js
+(function(){"use strict";
+
+pliny.value({
   name: "isiOS",
   type: "Boolean",
   description: "Flag indicating the current system is a device running the Apple\n\
 iOS operating system: iPad, iPod Touch, iPhone. Useful for invoking optional code\n\
 paths necessary to deal with deficiencies in Apple's implementation of web standards."
 });
-const isiOS = /iP(hone|od|ad)/.test(navigator.userAgent || "");
-  if(typeof window !== "undefined") window.isiOS = isiOS;
+var isiOS = /iP(hone|od|ad)/.test(navigator.userAgent || "");
+    if(typeof window !== "undefined") window.isiOS = isiOS;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\isiOS.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\isiOS.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\isMobile.js
-(function(){pliny.value({
+    // start D:\Documents\VR\Primrose\src\isMobile.js
+(function(){"use strict";
+
+pliny.value({
   name: "isMobile",
   type: "Boolean",
   description: "Flag indicating the current system is a recognized \"mobile\"\n\
 device, usually possessing a motion sensor."
 });
-const isMobile = (function (a) {
-  return /(android|bb\d+|meego).+|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od|ad)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(
-      a) ||
-    /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(
-      a.substring(0, 4));
-})(navigator.userAgent || navigator.vendor || window.opera);
-  if(typeof window !== "undefined") window.isMobile = isMobile;
+var isMobile = function (a) {
+  return (/(android|bb\d+|meego).+|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od|ad)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(a) || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substring(0, 4))
+  );
+}(navigator.userAgent || navigator.vendor || window.opera);
+    if(typeof window !== "undefined") window.isMobile = isMobile;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\isMobile.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\isMobile.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\isOpera.js
-(function(){pliny.value({
+    // start D:\Documents\VR\Primrose\src\isOpera.js
+(function(){"use strict";
+
+pliny.value({
   name: "isOpera",
   type: "Boolean",
   description: "Flag indicating the browser is currently calling itself Opera.\n\
@@ -1048,28 +1069,32 @@ so you are not likely to need this flag if you are using Primrose, other than to
 cajole users into downloading a more advanced browser such as Mozilla Firefox or\n\
 Google Chrome."
 });
-const isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
-  if(typeof window !== "undefined") window.isOpera = isOpera;
+var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
+    if(typeof window !== "undefined") window.isOpera = isOpera;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\isOpera.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\isOpera.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\isOSX.js
-(function(){pliny.value({
+    // start D:\Documents\VR\Primrose\src\isOSX.js
+(function(){"use strict";
+
+pliny.value({
   name: "isOSX",
   type: "Boolean",
   description: "Flag indicating the current system is a computer running the Apple\n\
 OSX operating system. Useful for changing keyboard shortcuts to support Apple's\n\
 idiosynchratic, concensus-defying keyboard shortcuts."
 });
-const isOSX = /Macintosh/.test(navigator.userAgent || "");
-  if(typeof window !== "undefined") window.isOSX = isOSX;
+var isOSX = /Macintosh/.test(navigator.userAgent || "");
+    if(typeof window !== "undefined") window.isOSX = isOSX;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\isOSX.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\isOSX.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\isSafari.js
-(function(){pliny.value({
+    // start D:\Documents\VR\Primrose\src\isSafari.js
+(function(){"use strict";
+
+pliny.value({
   name: "isSafari",
   type: "Boolean",
   description: "Flag indicating the browser is currently calling itself Safari.\n\
@@ -1078,42 +1103,47 @@ themselves in such a way as to prevent users from gaining access to the latest i
 cutting-edge web technologies. Essentially, it was replaced Microsoft Internet\n\
 Explorer as the Internet Explorer of the web."
 });
-const isSafari = Object.prototype.toString.call(window.HTMLElement)
-  .indexOf('Constructor') > 0;
-  if(typeof window !== "undefined") window.isSafari = isSafari;
+var isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;
+    if(typeof window !== "undefined") window.isSafari = isSafari;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\isSafari.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\isSafari.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\isWebKit.js
-(function(){pliny.value({
+    // start D:\Documents\VR\Primrose\src\isWebKit.js
+(function(){"use strict";
+
+pliny.value({
   name: "isWebKit",
   type: "Boolean",
   description: "Flag indicating the browser is one of Chrome, Safari, or Opera.\n\
 WebKit browsers have certain issues in common that can be treated together, like\n\
 a common basis for orientation events."
 });
-const isWebKit = !(/iP(hone|od|ad)/.test(navigator.userAgent || "")) || isOpera || isChrome;
-  if(typeof window !== "undefined") window.isWebKit = isWebKit;
+var isWebKit = !/iP(hone|od|ad)/.test(navigator.userAgent || "") || isOpera || isChrome;
+    if(typeof window !== "undefined") window.isWebKit = isWebKit;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\isWebKit.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\isWebKit.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\isWindows.js
-(function(){pliny.value({
+    // start D:\Documents\VR\Primrose\src\isWindows.js
+(function(){"use strict";
+
+pliny.value({
   name: "isWindows",
   type: "Boolean",
   description: "Flag indicating the current system is a computer running one of\n\
 the Microsoft Windows operating systems. We have not yet found a use for this flag."
 });
-const isWindows = /Windows/.test(navigator.userAgent || "");
-  if(typeof window !== "undefined") window.isWindows = isWindows;
+var isWindows = /Windows/.test(navigator.userAgent || "");
+    if(typeof window !== "undefined") window.isWindows = isWindows;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\isWindows.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\isWindows.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\light.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\light.js
+(function(){"use strict";
+
+pliny.function({
   name: "light",
   description: "Shortcut function for creating a new THREE.PointLight object.",
   parameters: [{
@@ -1152,13 +1182,15 @@ const isWindows = /Windows/.test(navigator.userAgent || "");
 function light(color, intensity, distance, decay) {
   return new THREE.PointLight(color, intensity, distance, decay);
 }
-  if(typeof window !== "undefined") window.light = light;
+    if(typeof window !== "undefined") window.light = light;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\light.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\light.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\material.js
-(function(){function material(textureDescription, options){
+    // start D:\Documents\VR\Primrose\src\material.js
+(function(){"use strict";
+
+function material(textureDescription, options) {
   options = options || {};
 
   if (options.opacity === undefined) {
@@ -1170,27 +1202,26 @@ function light(color, intensity, distance, decay) {
   if (options.metalness === undefined) {
     options.metalness = 0;
   }
-  if(options.color === undefined){
+  if (options.color === undefined) {
     options.color = 0xffffff;
   }
 
   options.unshaded = !!options.unshaded;
   options.wireframe = !!options.wireframe;
 
-  var materialDescription = `Primrose.material(${textureDescription}, ${options.color}, ${options.unshaded}, ${options.side}, ${options.opacity}, ${options.roughness}, ${options.metalness}, ${options.color}, ${options.emissive}, ${options.wireframe})`;
-  return cache(materialDescription, () => {
+  var materialDescription = "Primrose.material(" + textureDescription + ", " + options.color + ", " + options.unshaded + ", " + options.side + ", " + options.opacity + ", " + options.roughness + ", " + options.metalness + ", " + options.color + ", " + options.emissive + ", " + options.wireframe + ")";
+  return cache(materialDescription, function () {
     var materialOptions = {
-        transparent: options.transparent || options.opacity < 1,
-        opacity: options.opacity,
-        side: options.side || THREE.FrontSide
-      },
-      MaterialType = THREE.MeshStandardMaterial;
+      transparent: options.transparent || options.opacity < 1,
+      opacity: options.opacity,
+      side: options.side || THREE.FrontSide
+    },
+        MaterialType = THREE.MeshStandardMaterial;
 
     if (options.unshaded) {
       materialOptions.shading = THREE.FlatShading;
       MaterialType = THREE.MeshBasicMaterial;
-    }
-    else {
+    } else {
       materialOptions.roughness = options.roughness;
       materialOptions.metalness = options.metalness;
 
@@ -1199,10 +1230,9 @@ function light(color, intensity, distance, decay) {
       }
     }
 
-    if(options.texture instanceof THREE.CubeTexture){
+    if (options.texture instanceof THREE.CubeTexture) {
       materialOptions.envMap = options.texture;
-    }
-    else if(options.texture instanceof THREE.Texture){
+    } else if (options.texture instanceof THREE.Texture) {
       materialOptions.map = options.texture;
     }
 
@@ -1214,13 +1244,15 @@ function light(color, intensity, distance, decay) {
     return mat;
   });
 }
-  if(typeof window !== "undefined") window.material = material;
+    if(typeof window !== "undefined") window.material = material;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\material.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\material.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\patch.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\patch.js
+(function(){"use strict";
+
+pliny.function({
   name: "patch",
   parameters: [{
     name: "obj1",
@@ -1265,30 +1297,28 @@ function patch(obj1, obj2) {
   }
   return obj1;
 }
-  if(typeof window !== "undefined") window.patch = patch;
+    if(typeof window !== "undefined") window.patch = patch;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\patch.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\patch.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\PIXEL_SCALES.js
-(function(){pliny.value({
+    // start D:\Documents\VR\Primrose\src\PIXEL_SCALES.js
+(function(){"use strict";
+
+pliny.value({
   name: "PIXEL_SCALES",
   description: "Scaling factors for changing the resolution of the display when the render quality level changes."
 });
-const PIXEL_SCALES = [
-  0.5,
-  0.25,
-  0.333333,
-  0.5,
-  1
-];
-  if(typeof window !== "undefined") window.PIXEL_SCALES = PIXEL_SCALES;
+var PIXEL_SCALES = [0.5, 0.25, 0.333333, 0.5, 1];
+    if(typeof window !== "undefined") window.PIXEL_SCALES = PIXEL_SCALES;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\PIXEL_SCALES.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\PIXEL_SCALES.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose.js
-(function(){/*
+    // start D:\Documents\VR\Primrose\src\Primrose.js
+(function(){"use strict";
+
+/*
  * Copyright (C) 2014 - 2016 Sean T. McBeth <sean@seanmcbeth.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -1309,29 +1339,32 @@ pliny.namespace({
   description: "Primrose helps you make VR applications for web browsers as easy as making other types of interactive web pages.\n\nThis top-level namespace contains classes for manipulating and viewing 3D environments."
 });
 var Primrose = {};
-  if(typeof window !== "undefined") window.Primrose = Primrose;
+    if(typeof window !== "undefined") window.Primrose = Primrose;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\priv.js
-(function(){function priv() {
+    // start D:\Documents\VR\Primrose\src\priv.js
+(function(){"use strict";
+
+function priv() {
   var heap = new WeakMap();
-  return function(obj, value) {
-    if(!heap.has(obj)) {
+  return function (obj, value) {
+    if (!heap.has(obj)) {
       heap.set(obj, value || {});
     }
     return heap.get(obj);
   };
 }
-
-  if(typeof window !== "undefined") window.priv = priv;
+    if(typeof window !== "undefined") window.priv = priv;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\priv.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\priv.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\put.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\put.js
+(function(){"use strict";
+
+pliny.function({
   name: "put",
   description: "A literate interface for putting objects onto scenes with basic, common transformations. You call `put()` with an object, then have access to a series of methods that you can chain together, before receiving the object back again. This makes it possible to create objects in the parameter position of `put()` at the same time as declaring the variable that will hold it.\n\
 \n\
@@ -1358,57 +1391,54 @@ var Primrose = {};
 
 function put(object) {
   var box = {
-      on: null,
-      at: null,
-      rot: null,
-      scale: null,
-      obj: () => object
-    },
-    on = function (scene) {
-      if (scene.appendChild) {
-        scene.appendChild(object);
-      }
-      else {
-        scene.add(object);
-      }
-      box.on = null;
-      if (box.at || box.rot || box.scale) {
-        return box;
-      }
-      else {
-        return object;
-      }
-    },
-    at = function (x, y, z) {
-      object.position.set(x, y, z);
-      box.at = null;
-      if (box.on || box.rot || box.scale) {
-        return box;
-      }
-      else {
-        return object;
-      }
-    },
-    rot = function (x, y, z) {
-      object.rotation.set(x, y, z);
-      box.rot = null;
-      if (box.on || box.at || box.scale) {
-        return box;
-      }
-      else {
-        return object;
-      }
-    },
-    scale = function (x, y, z) {
-      object.scale.set(x, y, z);
-      box.scale = null;
-      if (box.on || box.at || box.rot) {
-        return box;
-      }
-      else {
-        return object;
-      }
-    };
+    on: null,
+    at: null,
+    rot: null,
+    scale: null,
+    obj: function obj() {
+      return object;
+    }
+  },
+      on = function on(scene) {
+    if (scene.appendChild) {
+      scene.appendChild(object);
+    } else {
+      scene.add(object);
+    }
+    box.on = null;
+    if (box.at || box.rot || box.scale) {
+      return box;
+    } else {
+      return object;
+    }
+  },
+      at = function at(x, y, z) {
+    object.position.set(x, y, z);
+    box.at = null;
+    if (box.on || box.rot || box.scale) {
+      return box;
+    } else {
+      return object;
+    }
+  },
+      rot = function rot(x, y, z) {
+    object.rotation.set(x, y, z);
+    box.rot = null;
+    if (box.on || box.at || box.scale) {
+      return box;
+    } else {
+      return object;
+    }
+  },
+      scale = function scale(x, y, z) {
+    object.scale.set(x, y, z);
+    box.scale = null;
+    if (box.on || box.at || box.rot) {
+      return box;
+    } else {
+      return object;
+    }
+  };
 
   box.on = on;
   box.at = at;
@@ -1417,13 +1447,15 @@ function put(object) {
 
   return box;
 }
-  if(typeof window !== "undefined") window.put = put;
+    if(typeof window !== "undefined") window.put = put;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\put.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\put.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\quad.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\quad.js
+(function(){"use strict";
+
+pliny.function({
   name: "quad",
   description: "| [under construction]"
 });
@@ -1433,27 +1465,29 @@ function quad(w, h, options) {
     h = w;
   }
   options = options || {};
-  if(options.s === undefined){
+  if (options.s === undefined) {
     options.s = 1;
   }
-  if(options.t === undefined){
+  if (options.t === undefined) {
     options.t = 1;
   }
-  return cache(
-    `PlaneBufferGeometry(${w}, ${h}, ${options.s}, ${options.t}, ${options.maxU}, $options.maxV)`,
-    () => fixGeometry(new THREE.PlaneBufferGeometry(w, h, options.s, options.t), options));
+  return cache("PlaneBufferGeometry(" + w + ", " + h + ", " + options.s + ", " + options.t + ", " + options.maxU + ", $options.maxV)", function () {
+    return fixGeometry(new THREE.PlaneBufferGeometry(w, h, options.s, options.t), options);
+  });
 }
-  if(typeof window !== "undefined") window.quad = quad;
+    if(typeof window !== "undefined") window.quad = quad;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\quad.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\quad.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Quality.js
-(function(){pliny.enumeration({
+    // start D:\Documents\VR\Primrose\src\Quality.js
+(function(){"use strict";
+
+pliny.enumeration({
   name: "Quality",
   description: "Graphics quality settings."
 });
-const Quality = {
+var Quality = {
   NONE: 0,
   VERYLOW: 1,
   LOW: 2,
@@ -1461,33 +1495,37 @@ const Quality = {
   HIGH: 4,
   MAXIMUM: PIXEL_SCALES.length - 1
 };
-  if(typeof window !== "undefined") window.Quality = Quality;
+    if(typeof window !== "undefined") window.Quality = Quality;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Quality.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Quality.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\range.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\range.js
+(function(){"use strict";
+
+pliny.function({
   name: "range",
   description: "| [under construction]"
 });
 
 function range(n, m, s, t) {
   var n2 = s && n || 0,
-    m2 = s && m || n,
-    s2 = t && s || 1,
-    t2 = t || s || m;
+      m2 = s && m || n,
+      s2 = t && s || 1,
+      t2 = t || s || m;
   for (var i = n2; i < m2; i += s2) {
     t2(i);
   }
 }
-  if(typeof window !== "undefined") window.range = range;
+    if(typeof window !== "undefined") window.range = range;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\range.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\range.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\readForm.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\readForm.js
+(function(){"use strict";
+
+pliny.function({
   name: "readForm",
   parameters: [{
     name: "ctrls",
@@ -1528,12 +1566,10 @@ function readForm(ctrls) {
   if (ctrls) {
     for (var name in ctrls) {
       var c = ctrls[name];
-      if ((c.tagName === "INPUT" || c.tagName === "SELECT") &&
-        (!c.dataset || !c.dataset.skipcache)) {
+      if ((c.tagName === "INPUT" || c.tagName === "SELECT") && (!c.dataset || !c.dataset.skipcache)) {
         if (c.type === "text" || c.type === "password" || c.tagName === "SELECT") {
           state[name] = c.value;
-        }
-        else if (c.type === "checkbox" || c.type === "radio") {
+        } else if (c.type === "checkbox" || c.type === "radio") {
           state[name] = c.checked;
         }
       }
@@ -1541,13 +1577,15 @@ function readForm(ctrls) {
   }
   return state;
 }
-  if(typeof window !== "undefined") window.readForm = readForm;
+    if(typeof window !== "undefined") window.readForm = readForm;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\readForm.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\readForm.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\ring.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\ring.js
+(function(){"use strict";
+
+pliny.function({
   name: "ring",
   description: "| [under construction]"
 });
@@ -1556,26 +1594,32 @@ function ring(rInner, rOuter, sectors, start, end, rings) {
   start = start || 0;
   end = end || 2 * Math.PI;
   rings = rings || 1;
-  return cache(
-    `RingBufferGeometry(${rInner}, ${rOuter}, ${sectors}, ${start}, ${end}, ${rings})`,
-    () => new THREE.RingBufferGeometry(rInner, rOuter, sectors, start, end, rings));
+  return cache("RingBufferGeometry(" + rInner + ", " + rOuter + ", " + sectors + ", " + start + ", " + end + ", " + rings + ")", function () {
+    return new THREE.RingBufferGeometry(rInner, rOuter, sectors, start, end, rings);
+  });
 }
-  if(typeof window !== "undefined") window.ring = ring;
+    if(typeof window !== "undefined") window.ring = ring;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\ring.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\ring.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\setFalse.js
-(function(){function setFalse(evt) {
+    // start D:\Documents\VR\Primrose\src\setFalse.js
+(function(){"use strict";
+
+function setFalse(evt) {
   evt.returnValue = false;
 }
-  if(typeof window !== "undefined") window.setFalse = setFalse;
+    if(typeof window !== "undefined") window.setFalse = setFalse;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\setFalse.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\setFalse.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\setSetting.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\setSetting.js
+(function(){"use strict";
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+pliny.function({
   name: "setSetting",
   parameters: [{
     name: " name",
@@ -1609,19 +1653,20 @@ function setSetting(name, val) {
   if (window.localStorage && val) {
     try {
       window.localStorage.setItem(name, JSON.stringify(val));
-    }
-    catch (exp) {
-      console.error("setSetting", name, val, typeof (val), exp);
+    } catch (exp) {
+      console.error("setSetting", name, val, typeof val === "undefined" ? "undefined" : _typeof(val), exp);
     }
   }
 }
-  if(typeof window !== "undefined") window.setSetting = setSetting;
+    if(typeof window !== "undefined") window.setSetting = setSetting;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\setSetting.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\setSetting.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\shell.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\shell.js
+(function(){"use strict";
+
+pliny.function({
   name: "shell",
   parameters: [{
     name: "radius",
@@ -1695,35 +1740,39 @@ function shell(r, slices, rings, phi, theta, options) {
     theta = Math.PI * SLICE * 0.6;
   }
   var phiStart = 1.5 * Math.PI - phi * 0.5,
-    thetaStart = (Math.PI - theta) * 0.5;
+      thetaStart = (Math.PI - theta) * 0.5;
   options = options || {};
-  return cache(
-    `InsideSphereGeometry(${r}, ${slices}, ${rings}, ${phi}, ${theta})`,
-    () => fixGeometry(new InsideSphereGeometry(r, slices, rings, phiStart, phi, thetaStart, theta, true), options));
+  return cache("InsideSphereGeometry(" + r + ", " + slices + ", " + rings + ", " + phi + ", " + theta + ")", function () {
+    return fixGeometry(new InsideSphereGeometry(r, slices, rings, phiStart, phi, thetaStart, theta, true), options);
+  });
 }
-  if(typeof window !== "undefined") window.shell = shell;
+    if(typeof window !== "undefined") window.shell = shell;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\shell.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\shell.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\sphere.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\sphere.js
+(function(){"use strict";
+
+pliny.function({
   name: "sphere",
   description: "| [under construction]"
 });
 
 function sphere(r, slices, rings) {
-  return cache(
-    `SphereGeometry(${r}, ${slices}, ${rings})`,
-    () => new THREE.SphereGeometry(r, slices, rings));
+  return cache("SphereGeometry(" + r + ", " + slices + ", " + rings + ")", function () {
+    return new THREE.SphereGeometry(r, slices, rings);
+  });
 }
-  if(typeof window !== "undefined") window.sphere = sphere;
+    if(typeof window !== "undefined") window.sphere = sphere;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\sphere.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\sphere.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\textured.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\textured.js
+(function(){"use strict";
+
+pliny.function({
   name: "textured",
   description: "| [under construction]"
 });
@@ -1738,73 +1787,66 @@ function textured(geometry, txt, options) {
   }
 
   var txtID = (txt.id || txt).toString(),
-    textureDescription = `Primrose.textured(${txtID}, ${options.txtRepeatS}, ${options.txtRepeatT})`,
-    texture = cache(textureDescription, () => {
-      if (txt instanceof Primrose.Surface) {
-        if (!options.scaleTextureWidth || !options.scaleTextureHeight) {
-          var imgWidth = txt.imageWidth,
+      textureDescription = "Primrose.textured(" + txtID + ", " + options.txtRepeatS + ", " + options.txtRepeatT + ")",
+      texture = cache(textureDescription, function () {
+    if (txt instanceof Primrose.Surface) {
+      if (!options.scaleTextureWidth || !options.scaleTextureHeight) {
+        var imgWidth = txt.imageWidth,
             imgHeight = txt.imageHeight,
             dimX = Math.ceil(Math.log(imgWidth) / Math.LN2),
             dimY = Math.ceil(Math.log(imgHeight) / Math.LN2),
             newWidth = Math.pow(2, dimX),
             newHeight = Math.pow(2, dimY);
 
-          if(options.scaleTexture){
-            newWidth *= options.scaleTexture;
-            newHeight *= options.scaleTexture;
-          }
+        if (options.scaleTexture) {
+          newWidth *= options.scaleTexture;
+          newHeight *= options.scaleTexture;
+        }
 
-          var scaleX = imgWidth / newWidth,
+        var scaleX = imgWidth / newWidth,
             scaleY = imgHeight / newHeight;
 
-          if (scaleX !== 1 || scaleY !== 1) {
-            if (scaleX !== 1) {
-              options.scaleTextureWidth = scaleX;
-            }
-
-            if (scaleY !== 1) {
-              options.scaleTextureHeight = scaleY;
-            }
-
-            txt.bounds.width = newWidth;
-            txt.bounds.height = newHeight;
-            txt.resize();
-            txt.render(true);
+        if (scaleX !== 1 || scaleY !== 1) {
+          if (scaleX !== 1) {
+            options.scaleTextureWidth = scaleX;
           }
+
+          if (scaleY !== 1) {
+            options.scaleTextureHeight = scaleY;
+          }
+
+          txt.bounds.width = newWidth;
+          txt.bounds.height = newHeight;
+          txt.resize();
+          txt.render(true);
         }
-        txt._material = mat;
-        return txt.texture;
       }
-      else if (typeof txt === "string" || (txt instanceof Array || txt.length === 6)) {
-        return Primrose.loadTexture(txt, options.resolve, options.progress, options.reject);
-      }
-      else if (txt instanceof Primrose.Text.Controls.TextBox) {
-        return txt.renderer.texture;
-      }
-      else if (txt instanceof HTMLCanvasElement || txt instanceof HTMLVideoElement) {
-        return new THREE.Texture(txt);
-      }
-      else if(txt instanceof THREE.Texture) {
-        return txt;
-      }
-      else {
-        throw new Error("Texture description couldn't be converted to a THREE.Texture object");
-      }
-    });
+      txt._material = mat;
+      return txt.texture;
+    } else if (typeof txt === "string" || txt instanceof Array || txt.length === 6) {
+      return Primrose.loadTexture(txt, options.resolve, options.progress, options.reject);
+    } else if (txt instanceof Primrose.Text.Controls.TextBox) {
+      return txt.renderer.texture;
+    } else if (txt instanceof HTMLCanvasElement || txt instanceof HTMLVideoElement) {
+      return new THREE.Texture(txt);
+    } else if (txt instanceof THREE.Texture) {
+      return txt;
+    } else {
+      throw new Error("Texture description couldn't be converted to a THREE.Texture object");
+    }
+  });
 
   options.texture = texture;
 
   var mat = material(textureDescription, options),
-    obj = null;
+      obj = null;
   if (geometry.type.indexOf("Geometry") > -1) {
     obj = new THREE.Mesh(geometry, mat);
-  }
-  else if (geometry instanceof THREE.Mesh) {
+  } else if (geometry instanceof THREE.Mesh) {
     obj = geometry;
     obj.material = mat;
     geometry = obj.geometry;
   }
-
 
   if (txt instanceof Primrose.Surface) {
     obj.surface = txt;
@@ -1815,11 +1857,11 @@ function textured(geometry, txt, options) {
     texture.repeat.set(options.txtRepeatS, options.txtRepeatT);
   }
 
-  if ((options.scaleTextureWidth || options.scaleTextureHeight)) {
+  if (options.scaleTextureWidth || options.scaleTextureHeight) {
     if (geometry.attributes && geometry.attributes.uv && geometry.attributes.uv.array) {
       var uv = geometry.attributes.uv,
-        arr = uv.array,
-        i;
+          arr = uv.array,
+          i;
       if (options.scaleTextureWidth) {
         for (i = 0; i < arr.length; i += uv.itemSize) {
           arr[i] *= options.scaleTextureWidth;
@@ -1830,8 +1872,7 @@ function textured(geometry, txt, options) {
           arr[i] = 1 - (1 - arr[i]) * options.scaleTextureHeight;
         }
       }
-    }
-    else {
+    } else {
       console.trace(geometry, options);
     }
   }
@@ -1841,13 +1882,15 @@ function textured(geometry, txt, options) {
 
   return obj;
 }
-  if(typeof window !== "undefined") window.textured = textured;
+    if(typeof window !== "undefined") window.textured = textured;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\textured.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\textured.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\v3.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\v3.js
+(function(){"use strict";
+
+pliny.function({
   name: "v3",
   description: "A shortcut function for creating a new THREE.Vector3 object.",
   parameters: [{
@@ -1878,13 +1921,15 @@ function textured(geometry, txt, options) {
 function v3(x, y, z) {
   return new THREE.Vector3(x, y, z);
 }
-  if(typeof window !== "undefined") window.v3 = v3;
+    if(typeof window !== "undefined") window.v3 = v3;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\v3.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\v3.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\writeForm.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\writeForm.js
+(function(){"use strict";
+
+pliny.function({
   name: "writeForm",
   parameters: [{
     name: "ctrls",
@@ -1927,82 +1972,104 @@ function writeForm(ctrls, state) {
   if (state) {
     for (var name in ctrls) {
       var c = ctrls[name];
-      if (state[name] !== null && state[name] !== undefined &&
-        (c.tagName ===
-          "INPUT" || c.tagName === "SELECT") && (!c.dataset ||
-          !c.dataset.skipcache)) {
+      if (state[name] !== null && state[name] !== undefined && (c.tagName === "INPUT" || c.tagName === "SELECT") && (!c.dataset || !c.dataset.skipcache)) {
         if (c.type === "text" || c.type === "password" || c.tagName === "SELECT") {
           c.value = state[name];
-        }
-        else if (c.type === "checkbox" || c.type === "radio") {
+        } else if (c.type === "checkbox" || c.type === "radio") {
           c.checked = state[name];
         }
       }
     }
   }
 }
-  if(typeof window !== "undefined") window.writeForm = writeForm;
+    if(typeof window !== "undefined") window.writeForm = writeForm;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\writeForm.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\writeForm.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\AbstractEventEmitter.js
-(function(){class AbstractEventEmitter {
-  constructor() {
+    // start D:\Documents\VR\Primrose\src\Primrose\AbstractEventEmitter.js
+(function(){"use strict";
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var AbstractEventEmitter = function () {
+  function AbstractEventEmitter() {
+    _classCallCheck(this, AbstractEventEmitter);
+
     this._handlers = {};
   }
 
-  addEventListener(name, thunk) {
-    if (!this._handlers[name]) {
-      this._handlers[name] = [];
-    }
-    this._handlers[name].push(thunk);
-  }
-
-  removeEventListener(name, thunk) {
-    if (this._handlers[name]) {
-      var idx = this._handlers[name].indexOf(thunk);
-      if (idx > -1) {
-        this._handlers[name].splice(idx, 1);
+  _createClass(AbstractEventEmitter, [{
+    key: "addEventListener",
+    value: function addEventListener(name, thunk) {
+      if (!this._handlers[name]) {
+        this._handlers[name] = [];
       }
+      this._handlers[name].push(thunk);
     }
-  }
-
-  forward(obj, evts){
-    evts.forEach((evt) => this.addEventListener(evt, obj.emit.bind(obj, evt)));
-  }
-
-  emit(name, obj) {
-    if (this._handlers[name]) {
-      if(typeof obj === "object" && !(obj instanceof Event)){
-        obj.type = name;
-        if(obj.defaultPrevented === undefined){
-          obj.defaultPrevented = false;
-          obj.preventDefault = () => obj.defaultPrevented = true;
-        }
-      }
-      const h = this._handlers[name];
-      for (let i = 0; h && i < h.length; ++i) {
-        h[i](obj);
-        if(obj && obj.defaultPrevented){
-          return;
+  }, {
+    key: "removeEventListener",
+    value: function removeEventListener(name, thunk) {
+      if (this._handlers[name]) {
+        var idx = this._handlers[name].indexOf(thunk);
+        if (idx > -1) {
+          this._handlers[name].splice(idx, 1);
         }
       }
     }
-  }
-}
-  if(typeof window !== "undefined") window.Primrose.AbstractEventEmitter = AbstractEventEmitter;
+  }, {
+    key: "forward",
+    value: function forward(obj, evts) {
+      var _this = this;
+
+      evts.forEach(function (evt) {
+        return _this.addEventListener(evt, obj.emit.bind(obj, evt));
+      });
+    }
+  }, {
+    key: "emit",
+    value: function emit(name, obj) {
+      if (this._handlers[name]) {
+        if ((typeof obj === "undefined" ? "undefined" : _typeof(obj)) === "object" && !(obj instanceof Event)) {
+          obj.type = name;
+          if (obj.defaultPrevented === undefined) {
+            obj.defaultPrevented = false;
+            obj.preventDefault = function () {
+              return obj.defaultPrevented = true;
+            };
+          }
+        }
+        var h = this._handlers[name];
+        for (var i = 0; h && i < h.length; ++i) {
+          h[i](obj);
+          if (obj && obj.defaultPrevented) {
+            return;
+          }
+        }
+      }
+    }
+  }]);
+
+  return AbstractEventEmitter;
+}();
+    if(typeof window !== "undefined") window.Primrose.AbstractEventEmitter = AbstractEventEmitter;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\AbstractEventEmitter.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\AbstractEventEmitter.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Angle.js
-(function(){var DEG2RAD = Math.PI / 180,
-  RAD2DEG = 180 / Math.PI;
+    // start D:\Documents\VR\Primrose\src\Primrose\Angle.js
+(function(){"use strict";
+
+var DEG2RAD = Math.PI / 180,
+    RAD2DEG = 180 / Math.PI;
 pliny.class({
   parent: "Primrose",
-    name: "Angle",
-    description: "The Angle class smooths out the jump from 360 to 0 degrees. It\n\
+  name: "Angle",
+  description: "The Angle class smooths out the jump from 360 to 0 degrees. It\n\
 keeps track of the previous state of angle values and keeps the change between\n\
 angle values to a maximum magnitude of 180 degrees, plus or minus. This allows for\n\
 smoother opperation as rotating past 360 degrees will not reset to 0, but continue\n\
@@ -2024,14 +2091,14 @@ It also automatically performs degree-to-radian and radian-to-degree conversions
 For more information, see [Radian - Wikipedia, the free encyclopedia](https://en.wikipedia.org/wiki/Radian).\n\
 \n\
 ![Radians](https://upload.wikimedia.org/wikipedia/commons/4/4e/Circle_radians.gif)",
-    parameters: [{
-      name: "initialAngleInDegrees",
-      type: "Number",
-      description: "(Required) Specifies the initial context of the angle. Zero is not always the correct value."
-    }],
-    examples: [{
-      name: "Basic usage",
-      description: "To use the Angle class, create an instance of it with `new`, and modify the `degrees` property.\n\
+  parameters: [{
+    name: "initialAngleInDegrees",
+    type: "Number",
+    description: "(Required) Specifies the initial context of the angle. Zero is not always the correct value."
+  }],
+  examples: [{
+    name: "Basic usage",
+    description: "To use the Angle class, create an instance of it with `new`, and modify the `degrees` property.\n\
 \n\
 ## Code:\n\
 \n\
@@ -2042,9 +2109,9 @@ For more information, see [Radian - Wikipedia, the free encyclopedia](https://en
 \n\
 ## Results:\n\
 > 361"
-    }, {
-      name: "Convert degrees to radians",
-      description: "Create an instance of Primrose.Angle, modify the `degrees` property, and read the `radians` property.\n\
+  }, {
+    name: "Convert degrees to radians",
+    description: "Create an instance of Primrose.Angle, modify the `degrees` property, and read the `radians` property.\n\
 \n\
 ## Code:\n\
 \n\
@@ -2055,9 +2122,9 @@ For more information, see [Radian - Wikipedia, the free encyclopedia](https://en
 \n\
 ## Results:\n\
 > 0.08726646259971647"
-    }, {
-      name: "Convert radians to degress",
-      description: "Create an instance of Primrose.Angle, modify the `radians` property, and read the `degrees` property.\n\
+  }, {
+    name: "Convert radians to degress",
+    description: "Create an instance of Primrose.Angle, modify the `radians` property, and read the `degrees` property.\n\
 \n\
 ## Code:\n\
 \n\
@@ -2068,19 +2135,19 @@ For more information, see [Radian - Wikipedia, the free encyclopedia](https://en
 \n\
 ## Results:\n\
 > 90"
-    }]
+  }]
 });
 
 function Angle(v) {
-  if (typeof (v) !== "number") {
+  if (typeof v !== "number") {
     throw new Error("Angle must be initialized with a number. Initial value was: " + v);
   }
 
   var value = v,
-    delta = 0,
-    d1,
-    d2,
-    d3;
+      delta = 0,
+      d1,
+      d2,
+      d3;
   pliny.property({
     parent: "Primrose.Angle",
     name: "degrees",
@@ -2088,7 +2155,7 @@ function Angle(v) {
     description: "Get/set the current value of the angle in degrees."
   });
   Object.defineProperty(this, "degrees", {
-    set: function (newValue) {
+    set: function set(newValue) {
       do {
         // figure out if it is adding the raw value, or whole
         // rotations of the value, that results in a smaller
@@ -2099,14 +2166,13 @@ function Angle(v) {
         d1 = Math.abs(d1);
         if (d2 < d1 && d2 < d3) {
           delta += 360;
-        }
-        else if (d3 < d1) {
+        } else if (d3 < d1) {
           delta -= 360;
         }
       } while (d1 > d2 || d1 > d3);
       value = newValue + delta;
     },
-    get: function () {
+    get: function get() {
       return value;
     }
   });
@@ -2119,37 +2185,40 @@ pliny.property({
   description: "Get/set the current value of the angle in radians."
 });
 Object.defineProperty(Angle.prototype, "radians", {
-  get: function () {
+  get: function get() {
     return this.degrees * DEG2RAD;
   },
-  set: function (val) {
+  set: function set(val) {
     this.degrees = val * RAD2DEG;
   }
 });
-  if(typeof window !== "undefined") window.Primrose.Angle = Angle;
+    if(typeof window !== "undefined") window.Primrose.Angle = Angle;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Angle.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Angle.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\BaseControl.js
-(function(){var ID = 1,
-  NUMBER_PATTERN = "([+-]?(?:(?:\\d+(?:\\.\\d*)?)|(?:\\.\\d+)))",
-  DELIM = "\\s*,\\s*",
-  UNITS = "(?:em|px)",
-  TRANSLATE_PATTERN = new RegExp("translate3d\\s*\\(\\s*" +
-    NUMBER_PATTERN + UNITS + DELIM +
-    NUMBER_PATTERN + UNITS + DELIM +
-    NUMBER_PATTERN + UNITS + "\\s*\\)", "i"),
-  ROTATE_PATTERN = new RegExp("rotate3d\\s*\\(\\s*" +
-    NUMBER_PATTERN + DELIM +
-    NUMBER_PATTERN + DELIM +
-    NUMBER_PATTERN + DELIM +
-    NUMBER_PATTERN + "rad\\s*\\)", "i");
+    // start D:\Documents\VR\Primrose\src\Primrose\BaseControl.js
+(function(){"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var ID = 1,
+    NUMBER_PATTERN = "([+-]?(?:(?:\\d+(?:\\.\\d*)?)|(?:\\.\\d+)))",
+    DELIM = "\\s*,\\s*",
+    UNITS = "(?:em|px)",
+    TRANSLATE_PATTERN = new RegExp("translate3d\\s*\\(\\s*" + NUMBER_PATTERN + UNITS + DELIM + NUMBER_PATTERN + UNITS + DELIM + NUMBER_PATTERN + UNITS + "\\s*\\)", "i"),
+    ROTATE_PATTERN = new RegExp("rotate3d\\s*\\(\\s*" + NUMBER_PATTERN + DELIM + NUMBER_PATTERN + DELIM + NUMBER_PATTERN + DELIM + NUMBER_PATTERN + "rad\\s*\\)", "i");
 
 pliny.class({
   parent: "Primrose",
-    name: "BaseControl",
-    description: "The BaseControl class is the parent class for all 3D controls.\n\
+  name: "BaseControl",
+  description: "The BaseControl class is the parent class for all 3D controls.\n\
 It manages a unique ID for every new control, the focus state of the control, and\n\
 performs basic conversions from DOM elements to the internal Control format."
 });
@@ -2238,201 +2307,216 @@ to a 3D element on-the-fly.\n\
   }]
 });
 
-class BaseControl extends Primrose.AbstractEventEmitter {
-  constructor() {
-    super();
+var BaseControl = function (_Primrose$AbstractEve) {
+  _inherits(BaseControl, _Primrose$AbstractEve);
+
+  function BaseControl() {
+    _classCallCheck(this, BaseControl);
+
+    var _this = _possibleConstructorReturn(this, (BaseControl.__proto__ || Object.getPrototypeOf(BaseControl)).call(this));
 
     pliny.property({
       name: "controlID",
       type: "Number",
       description: "Automatically incrementing counter for controls, to make sure there is a distinct differentiator between them all."
     });
-    this.controlID = ID++;
+    _this.controlID = ID++;
 
     pliny.property({
       name: "focused",
       type: "Boolean",
       description: "Flag indicating this control has received focus. You should theoretically only read it."
     });
-    this.focused = false;
+    _this.focused = false;
+    return _this;
   }
 
-  focus() {
-    this.focused = true;
-    this.emit("focus", {
-      target: this
-    });
-  }
-
-  blur() {
-    this.focused = false;
-    emit.call(this, "blur", {
-      target: this
-    });
-  }
-
-  copyElement(elem) {
-    this.element = elem;
-    if (elem.style.transform) {
-      var match = TRANSLATE_PATTERN.exec(elem.style.transform);
-      if (match) {
-        this.position.set(
-          parseFloat(match[1]),
-          parseFloat(match[2]),
-          parseFloat(match[3]));
-      }
-      match = ROTATE_PATTERN.exec(elem.style.transform);
-      if (match) {
-        this.quaternion.setFromAxisAngle(
-          new THREE.Vector3()
-          .set(
-            parseFloat(match[1]),
-            parseFloat(match[2]),
-            parseFloat(match[3])),
-          parseFloat(match[4]));
+  _createClass(BaseControl, [{
+    key: "focus",
+    value: function focus() {
+      this.focused = true;
+      this.emit("focus", {
+        target: this
+      });
+    }
+  }, {
+    key: "blur",
+    value: function blur() {
+      this.focused = false;
+      emit.call(this, "blur", {
+        target: this
+      });
+    }
+  }, {
+    key: "copyElement",
+    value: function copyElement(elem) {
+      this.element = elem;
+      if (elem.style.transform) {
+        var match = TRANSLATE_PATTERN.exec(elem.style.transform);
+        if (match) {
+          this.position.set(parseFloat(match[1]), parseFloat(match[2]), parseFloat(match[3]));
+        }
+        match = ROTATE_PATTERN.exec(elem.style.transform);
+        if (match) {
+          this.quaternion.setFromAxisAngle(new THREE.Vector3().set(parseFloat(match[1]), parseFloat(match[2]), parseFloat(match[3])), parseFloat(match[4]));
+        }
       }
     }
-  }
-}
-  if(typeof window !== "undefined") window.Primrose.BaseControl = BaseControl;
+  }]);
+
+  return BaseControl;
+}(Primrose.AbstractEventEmitter);
+    if(typeof window !== "undefined") window.Primrose.BaseControl = BaseControl;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\BaseControl.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\BaseControl.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\BrowserEnvironment.js
-(function(){const MILLISECONDS_TO_SECONDS = 0.001,
-  MAX_MOVE_DISTANCE = 5,
-  MAX_MOVE_DISTANCE_SQ = MAX_MOVE_DISTANCE * MAX_MOVE_DISTANCE,
-  TELEPORT_COOLDOWN = 250,
-  TELEPORT_DISPLACEMENT = new THREE.Vector3();
+    // start D:\Documents\VR\Primrose\src\Primrose\BrowserEnvironment.js
+(function(){"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var MILLISECONDS_TO_SECONDS = 0.001,
+    MAX_MOVE_DISTANCE = 5,
+    MAX_MOVE_DISTANCE_SQ = MAX_MOVE_DISTANCE * MAX_MOVE_DISTANCE,
+    TELEPORT_COOLDOWN = 250,
+    TELEPORT_DISPLACEMENT = new THREE.Vector3();
 
 pliny.class({
   parent: "Primrose",
-    name: "BrowserEnvironment",
-    description: "Make a Virtual Reality app in your web browser!"
+  name: "BrowserEnvironment",
+  description: "Make a Virtual Reality app in your web browser!"
 });
-class BrowserEnvironment extends Primrose.AbstractEventEmitter {
-  constructor(options) {
-    super();
-    this.options = patch(options, BrowserEnvironment.DEFAULTS);
-    this.options.foregroundColor = this.options.foregroundColor || complementColor(new THREE.Color(this.options.backgroundColor))
-      .getHex();
 
-    this.audioQueue = [];
+var BrowserEnvironment = function (_Primrose$AbstractEve) {
+  _inherits(BrowserEnvironment, _Primrose$AbstractEve);
 
-    this.zero = () => {
-      if (!this.lockMovement) {
-        this.input.zero();
-        if (this.quality === Quality.NONE) {
-          this.quality = Quality.HIGH;
+  function BrowserEnvironment(options) {
+    var _arguments = arguments;
+
+    _classCallCheck(this, BrowserEnvironment);
+
+    var _this = _possibleConstructorReturn(this, (BrowserEnvironment.__proto__ || Object.getPrototypeOf(BrowserEnvironment)).call(this));
+
+    _this.options = patch(options, BrowserEnvironment.DEFAULTS);
+    _this.options.foregroundColor = _this.options.foregroundColor || complementColor(new THREE.Color(_this.options.backgroundColor)).getHex();
+
+    _this.audioQueue = [];
+
+    _this.zero = function () {
+      if (!_this.lockMovement) {
+        _this.input.zero();
+        if (_this.quality === Quality.NONE) {
+          _this.quality = Quality.HIGH;
         }
       }
     };
 
-    var update = (dt) => {
+    var update = function update(dt) {
       dt *= MILLISECONDS_TO_SECONDS;
       movePlayer(dt);
       moveSky();
       moveGround();
-      this.network.update(dt);
+      _this.network.update(dt);
       checkQuality();
 
-      this.emit("update", dt);
+      _this.emit("update", dt);
     };
 
-    var movePlayer = (dt) => {
-      this.input.update(dt);
-      this.input.resolvePicking(this.pickableObjects.filter((obj) => !obj.disabled));
+    var movePlayer = function movePlayer(dt) {
+      _this.input.update(dt);
+      _this.input.resolvePicking(_this.pickableObjects.filter(function (obj) {
+        return !obj.disabled;
+      }));
     };
 
-    var moveSky = () => {
-      this.sky.position.copy(this.input.head.position);
+    var moveSky = function moveSky() {
+      _this.sky.position.copy(_this.input.head.position);
     };
 
-    var moveGround = () => {
-      if (this.ground) {
-        this.ground.position.set(
-          Math.floor(this.input.head.position.x), -0.02,
-          Math.floor(this.input.head.position.z));
-        this.ground.material.needsUpdate = true;
+    var moveGround = function moveGround() {
+      if (_this.ground) {
+        _this.ground.position.set(Math.floor(_this.input.head.position.x), -0.02, Math.floor(_this.input.head.position.z));
+        _this.ground.material.needsUpdate = true;
       }
     };
 
-    var animate = (t) => {
+    var animate = function animate(t) {
       var dt = t - lt,
-        i, j;
+          i,
+          j;
       lt = t;
       update(dt);
       render(dt);
       RAF(animate);
     };
 
-    var render = (dt) => {
-      this.camera.position.set(0, 0, 0);
-      this.camera.quaternion.set(0, 0, 0, 1);
-      this.audio.setPlayer(this.input.head.mesh);
-      if (this.input.VR.isPresenting) {
-        this.renderer.clear(true, true, true);
+    var render = function render(dt) {
+      _this.camera.position.set(0, 0, 0);
+      _this.camera.quaternion.set(0, 0, 0, 1);
+      _this.audio.setPlayer(_this.input.head.mesh);
+      if (_this.input.VR.isPresenting) {
+        _this.renderer.clear(true, true, true);
 
-        var trans = this.input.VR.getTransforms(
-          this.options.nearPlane,
-          this.options.nearPlane + this.options.drawDistance);
+        var trans = _this.input.VR.getTransforms(_this.options.nearPlane, _this.options.nearPlane + _this.options.drawDistance);
         for (var i = 0; trans && i < trans.length; ++i) {
           var st = trans[i],
-            v = st.viewport,
-            side = (2 * i) - 1;
+              v = st.viewport,
+              side = 2 * i - 1;
           Primrose.Entity.eyeBlankAll(i);
-          this.camera.projectionMatrix.copy(st.projection);
-          this.camera.translateOnAxis(st.translation, 1);
-          this.renderer.setViewport(
-            v.left * resolutionScale,
-            v.top * resolutionScale,
-            v.width * resolutionScale,
-            v.height * resolutionScale);
-          this.renderer.render(this.scene, this.camera);
-          this.camera.translateOnAxis(st.translation, -1);
+          _this.camera.projectionMatrix.copy(st.projection);
+          _this.camera.translateOnAxis(st.translation, 1);
+          _this.renderer.setViewport(v.left * resolutionScale, v.top * resolutionScale, v.width * resolutionScale, v.height * resolutionScale);
+          _this.renderer.render(_this.scene, _this.camera);
+          _this.camera.translateOnAxis(st.translation, -1);
         }
-        this.input.submitFrame();
+        _this.input.submitFrame();
       }
 
-      if (!this.input.VR.isPresenting || (this.input.VR.canMirror && !this.options.disableMirroring)) {
-        this.camera.fov = this.options.defaultFOV;
-        this.camera.aspect = this.renderer.domElement.width / this.renderer.domElement.height;
-        this.camera.updateProjectionMatrix();
-        this.renderer.clear(true, true, true);
-        if(this.input.mousePointer.unproject){
-          this.input.mousePointer.unproject.getInverse(this.camera.projectionMatrix);
+      if (!_this.input.VR.isPresenting || _this.input.VR.canMirror && !_this.options.disableMirroring) {
+        _this.camera.fov = _this.options.defaultFOV;
+        _this.camera.aspect = _this.renderer.domElement.width / _this.renderer.domElement.height;
+        _this.camera.updateProjectionMatrix();
+        _this.renderer.clear(true, true, true);
+        if (_this.input.mousePointer.unproject) {
+          _this.input.mousePointer.unproject.getInverse(_this.camera.projectionMatrix);
         }
-        this.renderer.setViewport(0, 0, this.renderer.domElement.width, this.renderer.domElement.height);
-        this.renderer.render(this.scene, this.camera);
+        _this.renderer.setViewport(0, 0, _this.renderer.domElement.width, _this.renderer.domElement.height);
+        _this.renderer.render(_this.scene, _this.camera);
       }
     };
 
-    var modifyScreen = () => {
-      var near = this.options.nearPlane,
-        far = near + this.options.drawDistance,
-        p = this.input.VR.getTransforms(near, far);
+    var modifyScreen = function modifyScreen() {
+      var near = _this.options.nearPlane,
+          far = near + _this.options.drawDistance,
+          p = _this.input.VR.getTransforms(near, far);
 
       if (p) {
         var canvasWidth = 0,
-          canvasHeight = 0;
+            canvasHeight = 0;
 
         for (var i = 0; i < p.length; ++i) {
           canvasWidth += p[i].viewport.width;
           canvasHeight = Math.max(canvasHeight, p[i].viewport.height);
         }
 
-        this.input.Mouse.commands.U.scale = 2/canvasWidth;
-        this.input.Mouse.commands.U.offset = -1;
-        this.input.Mouse.commands.V.scale = 2/canvasHeight;
-        this.input.Mouse.commands.V.offset = -1;
+        _this.input.Mouse.commands.U.scale = 2 / canvasWidth;
+        _this.input.Mouse.commands.U.offset = -1;
+        _this.input.Mouse.commands.V.scale = 2 / canvasHeight;
+        _this.input.Mouse.commands.V.offset = -1;
 
         canvasWidth = Math.floor(canvasWidth * resolutionScale);
         canvasHeight = Math.floor(canvasHeight * resolutionScale);
 
-        this.renderer.domElement.width = canvasWidth;
-        this.renderer.domElement.height = canvasHeight;
-        if (!this.timer) {
+        _this.renderer.domElement.width = canvasWidth;
+        _this.renderer.domElement.height = canvasHeight;
+        if (!_this.timer) {
           render();
         }
       }
@@ -2443,46 +2527,47 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
     //
 
     var lt = 0,
-      currentHeading = 0,
-      qPitch = new THREE.Quaternion(),
-      vEye = new THREE.Vector3(),
-      vBody = new THREE.Vector3(),
-      modelFiles = {
-        scene: this.options.sceneModel,
-        avatar: this.options.avatarModel,
-        button: this.options.button && typeof this.options.button.model === "string" && this.options.button.model,
-        font: this.options.font
-      },
-      resolutionScale = 1,
-      factories = {
-        button: Primrose.Controls.Button2D,
-        img: Primrose.Controls.Image,
-        section: Primrose.Surface,
-        textarea: Primrose.Text.Controls.TextBox,
-        avatar: null,
-        pre: {
-          create: () => new Primrose.Text.Controls.TextBox({
+        currentHeading = 0,
+        qPitch = new THREE.Quaternion(),
+        vEye = new THREE.Vector3(),
+        vBody = new THREE.Vector3(),
+        modelFiles = {
+      scene: _this.options.sceneModel,
+      avatar: _this.options.avatarModel,
+      button: _this.options.button && typeof _this.options.button.model === "string" && _this.options.button.model,
+      font: _this.options.font
+    },
+        resolutionScale = 1,
+        factories = {
+      button: Primrose.Controls.Button2D,
+      img: Primrose.Controls.Image,
+      section: Primrose.Surface,
+      textarea: Primrose.Text.Controls.TextBox,
+      avatar: null,
+      pre: {
+        create: function create() {
+          return new Primrose.Text.Controls.TextBox({
             tokenizer: Primrose.Text.Grammars.PlainText,
             hideLineNumbers: true,
             readOnly: true
-          })
+          });
         }
-      };
+      }
+    };
 
-    this.factories = factories;
+    _this.factories = factories;
 
-    this.createElement = (type) => {
+    _this.createElement = function (type) {
       if (factories[type]) {
         return factories[type].create();
       }
     };
 
-    this.appendChild = (elem) => {
+    _this.appendChild = function (elem) {
       if (elem instanceof THREE.Mesh) {
-        this.scene.add(elem);
-      }
-      else {
-        return elem.addToBrowserEnvironment(this, this.scene);
+        _this.scene.add(elem);
+      } else {
+        return elem.addToBrowserEnvironment(_this, _this.scene);
       }
     };
 
@@ -2495,96 +2580,86 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       var hsl = rgb.getHSL();
       hsl.h = hsl.h + 0.5;
       hsl.l = 1 - hsl.l;
-      while (hsl.h > 1) hsl.h -= 1;
-      rgb.setHSL(hsl.h, hsl.s, hsl.l);
+      while (hsl.h > 1) {
+        hsl.h -= 1;
+      }rgb.setHSL(hsl.h, hsl.s, hsl.l);
       return rgb;
     }
 
-    var modelsReady = Primrose.ModelLoader.loadObjects(modelFiles)
-      .then((models) => {
-        window.text3D = function (font, size, text) {
-          var geom = new THREE.TextGeometry(text, {
-            font: font,
-            size: size,
-            height: size / 5,
-            curveSegments: 2
-          });
-          geom.computeBoundingSphere();
-          geom.computeBoundingBox();
-          return geom;
-        }.bind(window, models.font);
+    var modelsReady = Primrose.ModelLoader.loadObjects(modelFiles).then(function (models) {
+      window.text3D = function (font, size, text) {
+        var geom = new THREE.TextGeometry(text, {
+          font: font,
+          size: size,
+          height: size / 5,
+          curveSegments: 2
+        });
+        geom.computeBoundingSphere();
+        geom.computeBoundingBox();
+        return geom;
+      }.bind(window, models.font);
 
-        if (models.scene) {
-          buildScene(models.scene);
-        }
+      if (models.scene) {
+        buildScene(models.scene);
+      }
 
-        if (models.avatar) {
-          factories.avatar = new Primrose.ModelLoader(models.avatar);
-        }
+      if (models.avatar) {
+        factories.avatar = new Primrose.ModelLoader(models.avatar);
+      }
 
-        if (models.button) {
-          this.buttonFactory = new Primrose.ButtonFactory(
-            models.button,
-            this.options.button.options);
-        }
-        else {
-          this.buttonFactory = new Primrose.ButtonFactory(
-            colored(box(1, 1, 1), 0xff0000), {
-              maxThrow: 0.1,
-              minDeflection: 10,
-              colorUnpressed: 0x7f0000,
-              colorPressed: 0x007f00,
-              toggle: true
-            });
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-        if (!this.buttonFactory) {
-          this.buttonFactory = new Primrose.ButtonFactory(
-            colored(box(1, 1, 1), 0xff0000), {
-              maxThrow: 0.1,
-              minDeflection: 10,
-              colorUnpressed: 0x7f0000,
-              colorPressed: 0x007f00,
-              toggle: true
-            });
-        }
-      });
+      if (models.button) {
+        _this.buttonFactory = new Primrose.ButtonFactory(models.button, _this.options.button.options);
+      } else {
+        _this.buttonFactory = new Primrose.ButtonFactory(colored(box(1, 1, 1), 0xff0000), {
+          maxThrow: 0.1,
+          minDeflection: 10,
+          colorUnpressed: 0x7f0000,
+          colorPressed: 0x007f00,
+          toggle: true
+        });
+      }
+    }).catch(function (err) {
+      console.error(err);
+      if (!_this.buttonFactory) {
+        _this.buttonFactory = new Primrose.ButtonFactory(colored(box(1, 1, 1), 0xff0000), {
+          maxThrow: 0.1,
+          minDeflection: 10,
+          colorUnpressed: 0x7f0000,
+          colorPressed: 0x007f00,
+          toggle: true
+        });
+      }
+    });
 
     //
     // Initialize public properties
     //
-    this.avatarHeight = this.options.avatarHeight;
-    this.walkSpeed = this.options.walkSpeed;
+    _this.avatarHeight = _this.options.avatarHeight;
+    _this.walkSpeed = _this.options.walkSpeed;
 
-    this.speech = new Primrose.Output.Speech(this.options.speech);
-    this.audio = new Primrose.Output.Audio3D();
+    _this.speech = new Primrose.Output.Speech(_this.options.speech);
+    _this.audio = new Primrose.Output.Audio3D();
     var audioReady = null,
-      ocean = null;
-    if (this.options.ambientSound && !isMobile) {
-      audioReady = this.audio.load3DSound(this.options.ambientSound, true, -1, 1, -1)
-        .then((aud) => {
-          ocean = aud;
-          if (!(ocean.source instanceof MediaElementAudioSourceNode)) {
-            ocean.volume.gain.value = 0.1;
-            console.log(ocean.source);
-            ocean.source.start();
-          }
-        })
-        .catch(console.error.bind(console, "Audio3D loadSource"));
-    }
-    else {
+        ocean = null;
+    if (_this.options.ambientSound && !isMobile) {
+      audioReady = _this.audio.load3DSound(_this.options.ambientSound, true, -1, 1, -1).then(function (aud) {
+        ocean = aud;
+        if (!(ocean.source instanceof MediaElementAudioSourceNode)) {
+          ocean.volume.gain.value = 0.1;
+          console.log(ocean.source);
+          ocean.source.start();
+        }
+      }).catch(console.error.bind(console, "Audio3D loadSource"));
+    } else {
       audioReady = Promise.resolve();
     }
 
     var documentReady = null;
     if (document.readyState === "complete") {
       documentReady = Promise.resolve("already");
-    }
-    else {
-      documentReady = new Promise((resolve, reject) => {
-        document.addEventListener("readystatechange", (evt) => {
+    } else {
+      documentReady = new Promise(function (resolve, reject) {
+        document.addEventListener("readystatechange", function (evt) {
           if (document.readyState === "complete") {
             resolve("had to wait for it");
           }
@@ -2592,380 +2667,364 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       });
     }
 
-    this.music = new Primrose.Output.Music(this.audio.context);
+    _this.music = new Primrose.Output.Music(_this.audio.context);
 
-    this.pickableObjects = [];
-    this.registerPickableObject = this.pickableObjects.push.bind(this.pickableObjects);
+    _this.pickableObjects = [];
+    _this.registerPickableObject = _this.pickableObjects.push.bind(_this.pickableObjects);
 
-    this.currentControl = null;
+    _this.currentControl = null;
 
-    const FADE_SPEED = 0.1;
-    this.fadeOut = () => {
-      if(this.fader) {
-        return new Promise((resolve, reject) => {
-          var timer = setInterval(() => {
-            this.fader.material.opacity += FADE_SPEED;
-            if(this.fader.material.opacity >= 1){
+    var FADE_SPEED = 0.1;
+    _this.fadeOut = function () {
+      if (_this.fader) {
+        return new Promise(function (resolve, reject) {
+          var timer = setInterval(function () {
+            _this.fader.material.opacity += FADE_SPEED;
+            if (_this.fader.material.opacity >= 1) {
               clearInterval(timer);
               resolve();
             }
           }, 10);
         });
-      }
-      else{
+      } else {
         return Promise.resolve();
       }
     };
 
-    this.fadeIn = () => {
-      if(this.fader) {
-        return new Promise((resolve, reject) => {
-          var timer = setInterval(() => {
-            this.fader.material.opacity -= FADE_SPEED;
-            if(this.fader.material.opacity <= 0){
+    _this.fadeIn = function () {
+      if (_this.fader) {
+        return new Promise(function (resolve, reject) {
+          var timer = setInterval(function () {
+            _this.fader.material.opacity -= FADE_SPEED;
+            if (_this.fader.material.opacity <= 0) {
               clearInterval(timer);
               resolve();
             }
           }, 10);
         });
-      }
-      else{
+      } else {
         return Promise.resolve();
       }
     };
 
-    this.teleportAvailable = true;
+    _this.teleportAvailable = true;
 
-    this.transition = (thunk, check, immediate) => {
-      if(immediate) {
+    _this.transition = function (thunk, check, immediate) {
+      if (immediate) {
         thunk();
         return Promise.resolve();
-      }
-      else if(!check || check()){
-        this.fader.visible = true;
-        return this.fadeOut()
-          .then(thunk)
-          .then(() => this.fadeIn())
-          .catch(console.warn.bind(console, "Error while transitioning"))
-          .then(() => this.fader.visible = false);
+      } else if (!check || check()) {
+        _this.fader.visible = true;
+        return _this.fadeOut().then(thunk).then(function () {
+          return _this.fadeIn();
+        }).catch(console.warn.bind(console, "Error while transitioning")).then(function () {
+          return _this.fader.visible = false;
+        });
       }
     };
 
-    this.teleport = (pos, immediate) => this.transition(
-      () => this.input.moveStage(pos),
-      () => this.teleportAvailable && TELEPORT_DISPLACEMENT.copy(pos)
-        .sub(this.input.head.position)
-        .length() > 0.2,
-      immediate);
+    _this.teleport = function (pos, immediate) {
+      return _this.transition(function () {
+        return _this.input.moveStage(pos);
+      }, function () {
+        return _this.teleportAvailable && TELEPORT_DISPLACEMENT.copy(pos).sub(_this.input.head.position).length() > 0.2;
+      }, immediate);
+    };
 
-    const POSITION = new THREE.Vector3(),
-      START_POINT = new THREE.Vector3();
+    var POSITION = new THREE.Vector3(),
+        START_POINT = new THREE.Vector3();
 
-    this.selectControl = (evt) => {
+    _this.selectControl = function (evt) {
       var obj = evt.hit && evt.hit.object;
 
-      if(evt.type === "exit" && evt.lastHit && evt.lastHit.object === this.ground){
+      if (evt.type === "exit" && evt.lastHit && evt.lastHit.object === _this.ground) {
         evt.pointer.disk.visible = false;
       }
 
-      if(evt.type !== "exit" && evt.hit && obj === this.ground) {
-        POSITION.copy(evt.hit.point)
-          .sub(this.input.head.position);
+      if (evt.type !== "exit" && evt.hit && obj === _this.ground) {
+        POSITION.copy(evt.hit.point).sub(_this.input.head.position);
 
         var distSq = POSITION.x * POSITION.x + POSITION.z * POSITION.z;
         if (distSq > MAX_MOVE_DISTANCE_SQ) {
           var dist = Math.sqrt(distSq),
-            factor = MAX_MOVE_DISTANCE / dist,
-            y = POSITION.y;
+              factor = MAX_MOVE_DISTANCE / dist,
+              y = POSITION.y;
           POSITION.y = 0;
           POSITION.multiplyScalar(factor);
           POSITION.y = y;
         }
 
-        POSITION.add(this.input.head.position);
+        POSITION.add(_this.input.head.position);
 
-        if(evt.type === "enter") {
+        if (evt.type === "enter") {
           evt.pointer.disk.visible = true;
-        }
-        else if(evt.type === "pointerstart" || evt.type === "gazestart") {
+        } else if (evt.type === "pointerstart" || evt.type === "gazestart") {
           START_POINT.copy(POSITION);
-        }
-        else if(evt.type === "pointermove" || evt.type === "gazemove"){
+        } else if (evt.type === "pointermove" || evt.type === "gazemove") {
           evt.pointer.moveTeleportPad(POSITION);
-        }
-        else if(evt.type === "pointerend" || evt.type === "gazecomplete") {
+        } else if (evt.type === "pointerend" || evt.type === "gazecomplete") {
           START_POINT.sub(POSITION);
-          const len = START_POINT.lengthSq();
-          if(len < 0.01){
-            this.teleport(POSITION);
+          var len = START_POINT.lengthSq();
+          if (len < 0.01) {
+            _this.teleport(POSITION);
           }
         }
       }
 
-      if(evt.type === "pointerstart" || evt.type === "gazecomplete") {
+      if (evt.type === "pointerstart" || evt.type === "gazecomplete") {
         obj = obj && (obj.surface || obj.button);
-        if(obj !== this.currentControl){
-          if(this.currentControl){
-            this.currentControl.blur();
-            this.input.Mouse.commands.pitch.disabled =
-            this.input.Mouse.commands.heading.disabled = false;
+        if (obj !== _this.currentControl) {
+          if (_this.currentControl) {
+            _this.currentControl.blur();
+            _this.input.Mouse.commands.pitch.disabled = _this.input.Mouse.commands.heading.disabled = false;
           }
-          this.currentControl = obj;
-          if(this.currentControl){
-            this.currentControl.focus();
-            this.input.Mouse.commands.pitch.disabled =
-            this.input.Mouse.commands.heading.disabled = !this.input.VR.isPresenting;
+          _this.currentControl = obj;
+          if (_this.currentControl) {
+            _this.currentControl.focus();
+            _this.input.Mouse.commands.pitch.disabled = _this.input.Mouse.commands.heading.disabled = !_this.input.VR.isPresenting;
           }
         }
       }
 
-      if(this.currentControl){
-        if(this.currentControl.dispatchEvent){
-          this.currentControl.dispatchEvent(evt);
-        }
-        else{
-          console.log(this.currentControl);
+      if (_this.currentControl) {
+        if (_this.currentControl.dispatchEvent) {
+          _this.currentControl.dispatchEvent(evt);
+        } else {
+          console.log(_this.currentControl);
         }
       }
     };
 
-    this.options.scene = this.scene = this.options.scene || new THREE.Scene();
-    if (this.options.useFog) {
-      this.scene.fog = new THREE.FogExp2(this.options.backgroundColor, 2 / this.options.drawDistance);
+    _this.options.scene = _this.scene = _this.options.scene || new THREE.Scene();
+    if (_this.options.useFog) {
+      _this.scene.fog = new THREE.FogExp2(_this.options.backgroundColor, 2 / _this.options.drawDistance);
     }
 
-    this.camera = new THREE.PerspectiveCamera(75, 1, this.options.nearPlane, this.options.nearPlane + this.options.drawDistance);
-    if (this.options.skyTexture === undefined) {
-      this.options.skyTexture = this.options.backgroundColor;
+    _this.camera = new THREE.PerspectiveCamera(75, 1, _this.options.nearPlane, _this.options.nearPlane + _this.options.drawDistance);
+    if (_this.options.skyTexture === undefined) {
+      _this.options.skyTexture = _this.options.backgroundColor;
     }
-    var skyFunc = (typeof this.options.skyTexture === "number") ? colored : textured,
-      skyDim = this.options.drawDistance * 0.9,
-      skyGeom = null,
-      onSkyDone = () => this.scene.add(this.sky);
-    if(typeof this.options.skyTexture === "string"){
+    var skyFunc = typeof _this.options.skyTexture === "number" ? colored : textured,
+        skyDim = _this.options.drawDistance * 0.9,
+        skyGeom = null,
+        onSkyDone = function onSkyDone() {
+      return _this.scene.add(_this.sky);
+    };
+    if (typeof _this.options.skyTexture === "string") {
       skyGeom = sphere(skyDim, 18, 9);
-    }
-    else {
+    } else {
       skyGeom = box(skyDim, skyDim, skyDim);
     }
-    this.sky = skyFunc(skyGeom, this.options.skyTexture, {
+    _this.sky = skyFunc(skyGeom, _this.options.skyTexture, {
       side: THREE.BackSide,
       unshaded: true,
       transparent: true,
       opacity: 1,
       resolve: onSkyDone,
-      progress: this.options.progress
+      progress: _this.options.progress
     });
-    this.sky.name = "Sky";
+    _this.sky.name = "Sky";
 
-    if (this.options.groundTexture !== undefined) {
+    if (_this.options.groundTexture !== undefined) {
       var dim = 10,
-      gm = new THREE.BoxBufferGeometry(dim * 5, 0.1, dim * 5, dim, 1, dim);
-      var groundFunc = (typeof this.options.groundTexture === "number") ? colored : textured;
-      this.ground = groundFunc(gm, this.options.groundTexture, {
+          gm = new THREE.BoxBufferGeometry(dim * 5, 0.1, dim * 5, dim, 1, dim);
+      var groundFunc = typeof _this.options.groundTexture === "number" ? colored : textured;
+      _this.ground = groundFunc(gm, _this.options.groundTexture, {
         txtRepeatS: dim * 5,
         txtRepeatT: dim * 5
       });
-      if (this.options.sceneModel !== undefined) {
-        this.ground.position.y = -0.02;
+      if (_this.options.sceneModel !== undefined) {
+        _this.ground.position.y = -0.02;
       }
-      this.ground.name = "Ground";
-      this.scene.add(this.ground);
-      this.registerPickableObject(this.ground);
+      _this.ground.name = "Ground";
+      _this.scene.add(_this.ground);
+      _this.registerPickableObject(_this.ground);
     }
 
-    if (this.passthrough) {
-      this.camera.add(this.passthrough.mesh);
+    if (_this.passthrough) {
+      _this.camera.add(_this.passthrough.mesh);
     }
 
-    var buildScene = (sceneGraph) => {
+    var buildScene = function buildScene(sceneGraph) {
       sceneGraph.buttons = [];
       sceneGraph.traverse(function (child) {
         if (child.isButton) {
-          sceneGraph.buttons.push(
-            new Primrose.Controls.Button3D(child.parent, child.name));
+          sceneGraph.buttons.push(new Primrose.Controls.Button3D(child.parent, child.name));
         }
         if (child.name) {
           sceneGraph[child.name] = child;
         }
       });
-      this.scene.add.apply(this.scene, sceneGraph.children);
-      this.scene.traverse((obj) => {
-        if (this.options.disableDefaultLighting && obj.material && obj.material.map) {
+      _this.scene.add.apply(_this.scene, sceneGraph.children);
+      _this.scene.traverse(function (obj) {
+        if (_this.options.disableDefaultLighting && obj.material && obj.material.map) {
           textured(obj, obj.material.map, {
             unshaded: true
           });
         }
         if (obj.name) {
-          this.scene[obj.name] = obj;
+          _this.scene[obj.name] = obj;
         }
       });
       if (sceneGraph.Camera) {
-        this.camera.position.copy(sceneGraph.Camera.position);
-        this.camera.quaternion.copy(sceneGraph.Camera.quaternion);
+        _this.camera.position.copy(sceneGraph.Camera.position);
+        _this.camera.quaternion.copy(sceneGraph.Camera.quaternion);
       }
       return sceneGraph;
     };
 
-    put(light(0xffffff, 1.5, 50))
-      .on(this.scene)
-      .at(0, 10, 10);
+    put(light(0xffffff, 1.5, 50)).on(_this.scene).at(0, 10, 10);
 
     var currentTimerObject = null;
-    this.timer = 0;
-    var RAF = (callback) => {
-      currentTimerObject = this.input.VR.currentDevice || window;
-      if (this.timer !== null) {
-        this.timer = currentTimerObject.requestAnimationFrame(callback);
+    _this.timer = 0;
+    var RAF = function RAF(callback) {
+      currentTimerObject = _this.input.VR.currentDevice || window;
+      if (_this.timer !== null) {
+        _this.timer = currentTimerObject.requestAnimationFrame(callback);
       }
     };
 
     //
     // Manage full-screen state
     //
-    this.goFullScreen = (index, evt) => {
+    _this.goFullScreen = function (index, evt) {
       if (evt !== "Gaze") {
-        const elem = !this.input.VR.isStereo || isMobile && !this.input.VR.isNativeMobileWebVR ?
-              this.options.fullscreenElement :
-              this.renderer.domElement;
-        this.input.VR.connect(index);
-        this.input.VR.requestPresent([{
+        (function () {
+          var elem = !_this.input.VR.isStereo || isMobile && !_this.input.VR.isNativeMobileWebVR ? _this.options.fullscreenElement : _this.renderer.domElement;
+          _this.input.VR.connect(index);
+          _this.input.VR.requestPresent([{
             source: elem
-          }])
-          .catch((exp) => console.error("whaaat", exp))
-          .then(() => elem.focus());
+          }]).catch(function (exp) {
+            return console.error("whaaat", exp);
+          }).then(function () {
+            return elem.focus();
+          });
+        })();
       }
     };
 
-    var addAvatar = (user) => {
-      this.scene.add(user.stage);
-      this.scene.add(user.head);
+    var addAvatar = function addAvatar(user) {
+      _this.scene.add(user.stage);
+      _this.scene.add(user.head);
     };
 
-    var removeAvatar = (user) => {
-      this.scene.remove(user.stage);
-      this.scene.remove(user.head);
+    var removeAvatar = function removeAvatar(user) {
+      _this.scene.remove(user.stage);
+      _this.scene.remove(user.head);
     };
 
-    PointerLock.addChangeListener((evt) => {
-      if (this.input.VR.isPresenting && !PointerLock.isActive) {
-        this.input.VR.cancel();
+    PointerLock.addChangeListener(function (evt) {
+      if (_this.input.VR.isPresenting && !PointerLock.isActive) {
+        _this.input.VR.cancel();
       }
     });
 
-    const fullScreenChange = (evt) => {
-      const presenting = !!this.input.VR.isPresenting,
-        cmd = (presenting ? "remove" : "add") + "Button";
-      this.input.Mouse[cmd]("dx", 0);
-      this.input.Mouse[cmd]("dy", 0);
-      this.input.Mouse.commands.U.disabled =
-        this.input.Mouse.commands.V.disabled = presenting && !this.input.VR.isStereo;
-      this.input.Mouse.commands.heading.scale = presenting ? -1 : 1;
-      this.input.Mouse.commands.pitch.scale = presenting ? -1 : 1;
+    var fullScreenChange = function fullScreenChange(evt) {
+      var presenting = !!_this.input.VR.isPresenting,
+          cmd = (presenting ? "remove" : "add") + "Button";
+      _this.input.Mouse[cmd]("dx", 0);
+      _this.input.Mouse[cmd]("dy", 0);
+      _this.input.Mouse.commands.U.disabled = _this.input.Mouse.commands.V.disabled = presenting && !_this.input.VR.isStereo;
+      _this.input.Mouse.commands.heading.scale = presenting ? -1 : 1;
+      _this.input.Mouse.commands.pitch.scale = presenting ? -1 : 1;
       if (!presenting) {
-        this.input.VR.cancel();
+        _this.input.VR.cancel();
       }
       modifyScreen();
     };
 
     window.addEventListener("vrdisplaypresentchange", fullScreenChange, false);
     window.addEventListener("resize", modifyScreen, false);
-    window.addEventListener("blur", this.stop, false);
-    window.addEventListener("focus", this.start, false);
+    window.addEventListener("blur", _this.stop, false);
+    window.addEventListener("focus", _this.start, false);
 
-    documentReady = documentReady.then(() => {
-      if (this.options.renderer) {
-        this.renderer = this.options.renderer;
-      }
-      else {
-        this.renderer = new THREE.WebGLRenderer({
-          canvas: Primrose.DOM.cascadeElement(this.options.canvasElement, "canvas", HTMLCanvasElement),
-          context: this.options.context,
-          antialias: this.options.antialias,
+    documentReady = documentReady.then(function () {
+      if (_this.options.renderer) {
+        _this.renderer = _this.options.renderer;
+      } else {
+        _this.renderer = new THREE.WebGLRenderer({
+          canvas: Primrose.DOM.cascadeElement(_this.options.canvasElement, "canvas", HTMLCanvasElement),
+          context: _this.options.context,
+          antialias: _this.options.antialias,
           alpha: true,
           logarithmicDepthBuffer: false
         });
-        this.renderer.autoClear = false;
-        this.renderer.sortObjects = true;
-        this.renderer.setClearColor(this.options.backgroundColor);
-        if (!this.renderer.domElement.parentElement) {
-          document.body.appendChild(this.renderer.domElement);
+        _this.renderer.autoClear = false;
+        _this.renderer.sortObjects = true;
+        _this.renderer.setClearColor(_this.options.backgroundColor);
+        if (!_this.renderer.domElement.parentElement) {
+          document.body.appendChild(_this.renderer.domElement);
         }
       }
 
-      this.options.fullscreenElement = document.querySelector(this.options.fullscreenElement) || this.renderer.domElement;
+      _this.options.fullscreenElement = document.querySelector(_this.options.fullscreenElement) || _this.renderer.domElement;
 
       var maxTabIndex = 0,
-        elementsWithTabIndex = document.querySelectorAll("[tabIndex]");
-      for(var i = 0; i < elementsWithTabIndex.length; ++i){
+          elementsWithTabIndex = document.querySelectorAll("[tabIndex]");
+      for (var i = 0; i < elementsWithTabIndex.length; ++i) {
         maxTabIndex = Math.max(maxTabIndex, elementsWithTabIndex[i].tabIndex);
       }
 
-      this.renderer.domElement.tabIndex = maxTabIndex + 1;
-      this.renderer.domElement.addEventListener('webglcontextlost', this.stop, false);
-      this.renderer.domElement.addEventListener('webglcontextrestored', this.start, false);
+      _this.renderer.domElement.tabIndex = maxTabIndex + 1;
+      _this.renderer.domElement.addEventListener('webglcontextlost', _this.stop, false);
+      _this.renderer.domElement.addEventListener('webglcontextrestored', _this.start, false);
 
-      this.input = new Primrose.Input.FPSInput(this.renderer.domElement, this.options);
-      this.input.addEventListener("zero", this.zero, false);
+      _this.input = new Primrose.Input.FPSInput(_this.renderer.domElement, _this.options);
+      _this.input.addEventListener("zero", _this.zero, false);
 
-      this.fader = colored(box(1, 1, 1), 0x000000, {opacity: 0, transparent: true, unshaded: true, side: THREE.BackSide});
-      this.fader.visible = false;
-      this.input.head.root.add(this.fader);
+      _this.fader = colored(box(1, 1, 1), 0x000000, { opacity: 0, transparent: true, unshaded: true, side: THREE.BackSide });
+      _this.fader.visible = false;
+      _this.input.head.root.add(_this.fader);
 
-      Primrose.Pointer.EVENTS.forEach((evt) => this.input.addEventListener(evt, this.selectControl.bind(this), false));
-      this.input.forward(this, Primrose.Pointer.EVENTS);
+      Primrose.Pointer.EVENTS.forEach(function (evt) {
+        return _this.input.addEventListener(evt, _this.selectControl.bind(_this), false);
+      });
+      _this.input.forward(_this, Primrose.Pointer.EVENTS);
 
-      const keyDown =  (evt) => {
-          if (this.input.VR.isPresenting) {
-            if (evt.keyCode === Primrose.Keys.ESCAPE && !this.input.VR.isPolyfilled) {
-              this.input.VR.cancel();
+      var keyDown = function keyDown(evt) {
+        if (_this.input.VR.isPresenting) {
+          if (evt.keyCode === Primrose.Keys.ESCAPE && !_this.input.VR.isPolyfilled) {
+            _this.input.VR.cancel();
+          }
+        }
+
+        if (!_this.lockMovement) {
+          _this.input.Keyboard.dispatchEvent(evt);
+        } else if (_this.currentControl) {
+          _this.currentControl.keyDown(evt);
+        }
+        _this.emit("keydown", evt);
+      },
+          keyUp = function keyUp(evt) {
+        if (!_this.lockMovement) {
+          _this.input.Keyboard.dispatchEvent(evt);
+        } else if (_this.currentControl) {
+          _this.currentControl.keyUp(evt);
+        }
+        _this.emit("keyup", evt);
+      },
+          withCurrentControl = function withCurrentControl(name) {
+        return function (evt) {
+          if (_this.currentControl) {
+            if (_this.currentControl[name]) {
+              _this.currentControl[name](evt);
+            } else {
+              console.warn("Couldn't find %s on %o", name, _this.currentControl);
             }
           }
-
-          if(!this.lockMovement){
-            this.input.Keyboard.dispatchEvent(evt);
-          }
-          else if(this.currentControl){
-            this.currentControl.keyDown(evt);
-          }
-          this.emit("keydown", evt);
-        },
-
-        keyUp = (evt) => {
-          if(!this.lockMovement){
-            this.input.Keyboard.dispatchEvent(evt);
-          }
-          else if(this.currentControl){
-            this.currentControl.keyUp(evt);
-          }
-          this.emit("keyup", evt);
-        },
-
-        withCurrentControl = (name) => {
-          return (evt) => {
-            if (this.currentControl) {
-              if (this.currentControl[name]) {
-                this.currentControl[name](evt);
-              }
-              else {
-                console.warn("Couldn't find %s on %o", name, this.currentControl);
-              }
-            }
-          };
         };
+      };
 
       window.addEventListener("keydown", keyDown, false);
 
       window.addEventListener("keyup", keyUp, false);
 
-
       window.addEventListener("paste", withCurrentControl("readClipboard"), false);
       window.addEventListener("wheel", withCurrentControl("readWheel"), false);
 
-
-      const focusClipboard = (evt) => {
-        if (this.lockMovement) {
-          var cmdName = this.input.Keyboard.operatingSystem.makeCommandName(evt, this.input.Keyboard.codePage);
+      var focusClipboard = function focusClipboard(evt) {
+        if (_this.lockMovement) {
+          var cmdName = _this.input.Keyboard.operatingSystem.makeCommandName(evt, _this.input.Keyboard.codePage);
           if (cmdName === "CUT" || cmdName === "COPY") {
             surrogate.style.display = "block";
             surrogate.focus();
@@ -2973,20 +3032,20 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
         }
       };
 
-      const clipboardOperation = (evt) => {
-        if (this.currentControl) {
-          this.currentControl[evt.type + "SelectedText"](evt);
+      var clipboardOperation = function clipboardOperation(evt) {
+        if (_this.currentControl) {
+          _this.currentControl[evt.type + "SelectedText"](evt);
           if (!evt.returnValue) {
             evt.preventDefault();
           }
           surrogate.style.display = "none";
-          this.currentControl.focus();
+          _this.currentControl.focus();
         }
       };
 
       // the `surrogate` textarea makes clipboard events possible
       var surrogate = Primrose.DOM.cascadeElement("primrose-surrogate-textarea", "textarea", HTMLTextAreaElement),
-        surrogateContainer = Primrose.DOM.makeHidingContainer("primrose-surrogate-textarea-container", surrogate);
+          surrogateContainer = Primrose.DOM.makeHidingContainer("primrose-surrogate-textarea-container", surrogate);
 
       surrogateContainer.style.position = "absolute";
       surrogateContainer.style.overflow = "hidden";
@@ -3001,39 +3060,38 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       window.addEventListener("beforepaste", setFalse, false);
       window.addEventListener("keydown", focusClipboard, true);
 
+      _this.input.head.add(_this.camera);
 
-      this.input.head.add(this.camera);
+      _this.network = new Primrose.Network.Manager(_this.input, _this.audio, factories, _this.options);
+      _this.network.addEventListener("addavatar", addAvatar);
+      _this.network.addEventListener("removeavatar", removeAvatar);
 
-      this.network = new Primrose.Network.Manager(this.input, this.audio, factories, this.options);
-      this.network.addEventListener("addavatar", addAvatar);
-      this.network.addEventListener("removeavatar", removeAvatar);
-
-      return this.input.ready;
+      return _this.input.ready;
     });
 
     var frameCount = 0,
-      frameTime = 0,
-      NUM_FRAMES = 10,
-      LEAD_TIME = 2000,
-      // skip testing quality during first 5 seconds to avoid testing startup
-      lastQualityChange = 5000,
-      dq1 = 0,
-      dq2 = 0;
+        frameTime = 0,
+        NUM_FRAMES = 10,
+        LEAD_TIME = 2000,
 
-    var checkQuality = () => {
-      if (this.options.autoScaleQuality &&
-        // don't check quality if we've already hit the bottom of the barrel.
-        this.quality !== Quality.NONE) {
+    // skip testing quality during first 5 seconds to avoid testing startup
+    lastQualityChange = 5000,
+        dq1 = 0,
+        dq2 = 0;
+
+    var checkQuality = function checkQuality() {
+      if (_this.options.autoScaleQuality &&
+      // don't check quality if we've already hit the bottom of the barrel.
+      _this.quality !== Quality.NONE) {
         if (frameTime < lastQualityChange + LEAD_TIME) {
           // wait a few seconds before testing quality
           frameTime = performance.now();
-        }
-        else {
+        } else {
           ++frameCount;
           if (frameCount === NUM_FRAMES) {
             var now = performance.now(),
-              dt = (now - frameTime) * 0.001,
-              fps = Math.round(NUM_FRAMES / dt);
+                dt = (now - frameTime) * 0.001,
+                fps = Math.round(NUM_FRAMES / dt);
             frameTime = now;
             frameCount = 0;
             // save the last change
@@ -3042,25 +3100,23 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
             // if we drop low, decrease quality
             if (fps < 45) {
               dq1 = -1;
-            }
-            else if (
-              // don't upgrade on mobile devices
-              !isMobile &&
-              // don't upgrade if the user says not to
-              this.options.autoRescaleQuality &&
-              //good speed
-              fps >= 60 &&
-              // still room to grow
-              this.quality < Quality.MAXIMUM &&
-              // and the last change wasn't a downgrade
-              dq2 !== -1) {
+            } else if (
+            // don't upgrade on mobile devices
+            !isMobile &&
+            // don't upgrade if the user says not to
+            _this.options.autoRescaleQuality &&
+            //good speed
+            fps >= 60 &&
+            // still room to grow
+            _this.quality < Quality.MAXIMUM &&
+            // and the last change wasn't a downgrade
+            dq2 !== -1) {
               dq1 = 1;
-            }
-            else {
+            } else {
               dq1 = 0;
             }
             if (dq1 !== 0) {
-              this.quality += dq1;
+              _this.quality += dq1;
             }
             lastQualityChange = now;
           }
@@ -3068,44 +3124,40 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       }
     };
 
-    var allReady = Promise.all([
-        modelsReady,
-        audioReady,
-        documentReady
-      ])
-      .then(() => {
-        this.renderer.domElement.style.cursor = "default";
-        this.input.VR.displays[0].DOMElement = this.renderer.domElement;
-        this.input.VR.connect(0);
-        this.emit("ready");
-        window.dispatchEvent(new CustomEvent("vrbrowserenvironmentready", {
-          detail: this
-        }));
-      });
+    var allReady = Promise.all([modelsReady, audioReady, documentReady]).then(function () {
+      _this.renderer.domElement.style.cursor = "default";
+      _this.input.VR.displays[0].DOMElement = _this.renderer.domElement;
+      _this.input.VR.connect(0);
+      _this.emit("ready");
+      window.dispatchEvent(new CustomEvent("vrbrowserenvironmentready", {
+        detail: _this
+      }));
+    });
 
-    this.start = () => {
-      allReady
-        .then(() => {
-          this.audio.start();
-          lt = performance.now() * MILLISECONDS_TO_SECONDS;
-          RAF(animate);
-        });
+    _this.start = function () {
+      allReady.then(function () {
+        _this.audio.start();
+        lt = performance.now() * MILLISECONDS_TO_SECONDS;
+        RAF(animate);
+      });
     };
 
-    this.stop = () => {
+    _this.stop = function () {
       if (currentTimerObject) {
-        currentTimerObject.cancelAnimationFrame(this.timer);
-        this.audio.stop();
-        this.timer = null;
+        currentTimerObject.cancelAnimationFrame(_this.timer);
+        _this.audio.stop();
+        _this.timer = null;
       }
     };
 
-    Object.defineProperties(this, {
+    Object.defineProperties(_this, {
       quality: {
-        get: () => this.options.quality,
-        set: (v) => {
+        get: function get() {
+          return _this.options.quality;
+        },
+        set: function set(v) {
           if (0 <= v && v < PIXEL_SCALES.length) {
-            this.options.quality = v;
+            _this.options.quality = v;
             resolutionScale = PIXEL_SCALES[v];
             if ("WebVRConfig" in window) {
               WebVRConfig.BUFFER_SCALE = resolutionScale;
@@ -3116,22 +3168,21 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       }
     });
 
-    this.quality = this.options.quality;
+    _this.quality = _this.options.quality;
 
     if (window.alert.toString().indexOf("native code") > -1) {
       // overwrite the native alert functions so they can't be called while in
       // fullscreen VR mode.
 
-      var rerouteDialog = (oldFunction, newFunction) => {
+      var rerouteDialog = function rerouteDialog(oldFunction, newFunction) {
         if (!newFunction) {
-          newFunction = function () {};
+          newFunction = function newFunction() {};
         }
-        return () => {
-          if (this.input.VR.isPresenting) {
+        return function () {
+          if (_this.input.VR.isPresenting) {
             newFunction();
-          }
-          else {
-            oldFunction.apply(window, arguments);
+          } else {
+            oldFunction.apply(window, _arguments);
           }
         };
       };
@@ -3141,34 +3192,44 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       window.prompt = rerouteDialog(window.prompt);
     }
 
-    this.start();
+    _this.start();
+    return _this;
   }
 
-  get lockMovement(){
-    return this.currentControl && this.currentControl.lockMovement;
-  }
-
-  connect(socket, userName) {
-    return this.network && this.network.connect(socket, userName);
-  }
-
-  disconnect() {
-    return this.network && this.network.disconnect();
-  }
-
-  get displays() {
-    return this.input.VR.displays;
-  }
-
-  setAudioFromUser(userName, audioElement){
-    this.audioQueue.push([userName, audioElement]);
-    if(this.network){
-      while(this.audioQueue.length > 0){
-        this.network.setAudioFromUser.apply(this.network, this.audioQueue.shift());
+  _createClass(BrowserEnvironment, [{
+    key: "connect",
+    value: function connect(socket, userName) {
+      return this.network && this.network.connect(socket, userName);
+    }
+  }, {
+    key: "disconnect",
+    value: function disconnect() {
+      return this.network && this.network.disconnect();
+    }
+  }, {
+    key: "setAudioFromUser",
+    value: function setAudioFromUser(userName, audioElement) {
+      this.audioQueue.push([userName, audioElement]);
+      if (this.network) {
+        while (this.audioQueue.length > 0) {
+          this.network.setAudioFromUser.apply(this.network, this.audioQueue.shift());
+        }
       }
     }
-  }
-}
+  }, {
+    key: "lockMovement",
+    get: function get() {
+      return this.currentControl && this.currentControl.lockMovement;
+    }
+  }, {
+    key: "displays",
+    get: function get() {
+      return this.input.VR.displays;
+    }
+  }]);
+
+  return BrowserEnvironment;
+}(Primrose.AbstractEventEmitter);
 
 BrowserEnvironment.DEFAULTS = {
   antialias: true,
@@ -3206,31 +3267,33 @@ BrowserEnvironment.DEFAULTS = {
   // THREE.js scene, if one had already been created.
   scene: null
 };
-  if(typeof window !== "undefined") window.Primrose.BrowserEnvironment = BrowserEnvironment;
+    if(typeof window !== "undefined") window.Primrose.BrowserEnvironment = BrowserEnvironment;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\BrowserEnvironment.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\BrowserEnvironment.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\ButtonFactory.js
-(function(){var buttonCount = 0;
+    // start D:\Documents\VR\Primrose\src\Primrose\ButtonFactory.js
+(function(){"use strict";
+
+var buttonCount = 0;
 
 pliny.class({
   parent: "Primrose",
-    name: "ButtonFactory",
-    description: "Loads a model file and holds the data, creating clones of the data whenever a new button is desired.",
-    parameters: [{
-      name: "template",
-      type: "THREE.Object3D",
-      description: "A THREE.Object3D that specifies a 3D model for a button, to be used as a template."
-    }, {
-      name: "options",
-      type: "Object",
-      description: "The options to apply to all buttons that get created by the factory."
-    }, {
-      name: "complete",
-      type: "Function",
-      description: "A callback function to indicate when the loading process has completed, if `templateFile` was a String path."
-    }]
+  name: "ButtonFactory",
+  description: "Loads a model file and holds the data, creating clones of the data whenever a new button is desired.",
+  parameters: [{
+    name: "template",
+    type: "THREE.Object3D",
+    description: "A THREE.Object3D that specifies a 3D model for a button, to be used as a template."
+  }, {
+    name: "options",
+    type: "Object",
+    description: "The options to apply to all buttons that get created by the factory."
+  }, {
+    name: "complete",
+    type: "Function",
+    description: "A callback function to indicate when the loading process has completed, if `templateFile` was a String path."
+  }]
 });
 
 function ButtonFactory(templateFile, options) {
@@ -3260,90 +3323,105 @@ pliny.method({
   return: "The cloned button that which we so desired."
 });
 ButtonFactory.prototype.create = function (toggle) {
-  var name = "button" + (++buttonCount);
+  var name = "button" + ++buttonCount;
   var obj = this.template.clone();
   var btn = new Primrose.Controls.Button3D(obj, name, this.options, toggle);
   return btn;
 };
-  if(typeof window !== "undefined") window.Primrose.ButtonFactory = ButtonFactory;
+    if(typeof window !== "undefined") window.Primrose.ButtonFactory = ButtonFactory;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\ButtonFactory.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\ButtonFactory.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls.js
-(function(){pliny.namespace({
+    // start D:\Documents\VR\Primrose\src\Primrose\Controls.js
+(function(){"use strict";
+
+pliny.namespace({
   name: "Controls",
   parent: "Primrose",
   description: "Various 3D control objects."
 });
-const Controls = {};
-  if(typeof window !== "undefined") window.Primrose.Controls = Controls;
+var Controls = {};
+    if(typeof window !== "undefined") window.Primrose.Controls = Controls;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Controls.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\DOM.js
-(function(){pliny.namespace({
+    // start D:\Documents\VR\Primrose\src\Primrose\DOM.js
+(function(){"use strict";
+
+pliny.namespace({
   parent: "Primrose",
   name: "DOM",
   description: "A few functions for manipulating DOM."
 });
-const DOM = {};
-  if(typeof window !== "undefined") window.Primrose.DOM = DOM;
+var DOM = {};
+    if(typeof window !== "undefined") window.Primrose.DOM = DOM;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\DOM.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\DOM.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Entity.js
-(function(){var entityKeys = [],
-  entities = new WeakMap();
+    // start D:\Documents\VR\Primrose\src\Primrose\Entity.js
+(function(){"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var entityKeys = [],
+    entities = new WeakMap();
 
 pliny.class({
   parent: "Primrose",
-    name: "Entity",
-    description: "The Entity class is the parent class for all 3D controls. It manages a unique ID for every new control, the focus state of the control, and performs basic conversions from DOM elements to the internal Control format."
+  name: "Entity",
+  description: "The Entity class is the parent class for all 3D controls. It manages a unique ID for every new control, the focus state of the control, and performs basic conversions from DOM elements to the internal Control format."
 });
-class Entity {
 
-  static registerEntity(e) {
-    pliny.function({
-      parent: "Primrose.Entity",
-      name: "registerEntity",
-      description: "Register an entity to be able to receive eyeBlank events.",
-      parameters: [{
-        name: "e",
-        type: "Primrose.Entity",
-        description: "The entity to register."
-      }]
-    });
-    entities.set(e._idObj, e);
-    entityKeys.push(e._idObj);
-    e.addEventListener("_idchanged", (evt) => {
-      entityKeys.splice(entityKeys.indexOf(evt.oldID), 1);
-      entities.delete(evt.oldID);
-      entities.set(evt.entity._idObj, evt.entity);
-      entityKeys.push(evt.entity._idObj);
-    }, false);
-  }
+var Entity = function () {
+  _createClass(Entity, null, [{
+    key: "registerEntity",
+    value: function registerEntity(e) {
+      pliny.function({
+        parent: "Primrose.Entity",
+        name: "registerEntity",
+        description: "Register an entity to be able to receive eyeBlank events.",
+        parameters: [{
+          name: "e",
+          type: "Primrose.Entity",
+          description: "The entity to register."
+        }]
+      });
+      entities.set(e._idObj, e);
+      entityKeys.push(e._idObj);
+      e.addEventListener("_idchanged", function (evt) {
+        entityKeys.splice(entityKeys.indexOf(evt.oldID), 1);
+        entities.delete(evt.oldID);
+        entities.set(evt.entity._idObj, evt.entity);
+        entityKeys.push(evt.entity._idObj);
+      }, false);
+    }
+  }, {
+    key: "eyeBlankAll",
+    value: function eyeBlankAll(eye) {
+      pliny.function({
+        parent: "Primrose.Entity",
+        name: "eyeBlankAll",
+        description: "Trigger the eyeBlank event for all registered entities.",
+        parameters: [{
+          name: "eye",
+          type: "Number",
+          description: "The eye to switch to: -1 for left, +1 for right."
+        }]
+      });
+      entityKeys.forEach(function (id) {
+        entities.get(id).eyeBlank(eye);
+      });
+    }
+  }]);
 
-  static eyeBlankAll(eye) {
-    pliny.function({
-      parent: "Primrose.Entity",
-      name: "eyeBlankAll",
-      description: "Trigger the eyeBlank event for all registered entities.",
-      parameters: [{
-        name: "eye",
-        type: "Number",
-        description: "The eye to switch to: -1 for left, +1 for right."
-      }]
-    });
-    entityKeys.forEach((id) => {
-      entities.get(id)
-        .eyeBlank(eye);
-    });
-  }
+  function Entity(id) {
+    _classCallCheck(this, Entity);
 
-  constructor(id) {
     this.id = id;
 
     pliny.property({
@@ -3452,184 +3530,167 @@ class Entity {
     });
   }
 
-  get id() {
-    pliny.property({
-      parent: "Primrose.Entity",
-      name: "id ",
-      type: "String",
-      description: "Get or set the id for the control."
-    });
-    return this._id;
-  }
-
-  set id(v) {
-    if(this._id !== v){
-      var oldID = this._idObj;
-      this._id = v;
-      this._idObj = new Object(v);
-      // this `_idchanged` event is necessary to update the related ID in the WeakMap of entities for eye-blanking.
-      emit.call(this, "_idchanged", {
-        oldID: oldID,
-        entity: this
-      });
-    }
-  }
-
-  addEventListener(event, func) {
-    pliny.method({
-      parent: "Primrose.Entity",
-      name: "addEventListener",
-      description: "Adding an event listener registers a function as being ready to receive events.",
-      parameters: [{
-        name: "evt",
-        type: "String",
-        description: "The name of the event for which we are listening."
-      }, {
-        name: "thunk",
-        type: "Function",
-        description: "The callback to fire when the event occurs."
-      }],
-      examples: [{
-        name: "Add an event listener.",
-        description: "The `addEventListener()` method operates nearly identically to the method of the same name on DOM elements.\n\
+  _createClass(Entity, [{
+    key: "addEventListener",
+    value: function addEventListener(event, func) {
+      pliny.method({
+        parent: "Primrose.Entity",
+        name: "addEventListener",
+        description: "Adding an event listener registers a function as being ready to receive events.",
+        parameters: [{
+          name: "evt",
+          type: "String",
+          description: "The name of the event for which we are listening."
+        }, {
+          name: "thunk",
+          type: "Function",
+          description: "The callback to fire when the event occurs."
+        }],
+        examples: [{
+          name: "Add an event listener.",
+          description: "The `addEventListener()` method operates nearly identically to the method of the same name on DOM elements.\n\
 \n\
   grammar(\"JavaScript\");\n\
   var txt = new Primrose.Text.Controls.TextBox();\n\
   txt.addEventListener(\"mousemove\", console.log.bind(console, \"mouse move\"));\n\
   txt.addEventListener(\"keydown\", console.log.bind(console, \"key down\"));"
-      }]
-    });
-    if (this.listeners[event]) {
-      this.listeners[event].push(func);
+        }]
+      });
+      if (this.listeners[event]) {
+        this.listeners[event].push(func);
+      }
     }
-  }
-
-  removeEventListener(event, func) {
-    pliny.method({
-      parent: "Primrose.Entity",
-      name: "removeEventListener",
-      description: "Removing an event listener so that it no longer receives events from this object. Note that it must be the same function instance that was used when the event listener was added.",
-      parameters: [{
-        name: "evt",
-        type: "String",
-        description: "The name of the event from which we are removing."
-      }, {
-        name: "thunk",
-        type: "Function",
-        description: "The callback to remove."
-      }],
-      examples: [{
-        name: "Remove an event listener.",
-        description: "The `removeEventListener()` method operates nearly identically to the method of the same name on DOM elements.\n\
+  }, {
+    key: "removeEventListener",
+    value: function removeEventListener(event, func) {
+      pliny.method({
+        parent: "Primrose.Entity",
+        name: "removeEventListener",
+        description: "Removing an event listener so that it no longer receives events from this object. Note that it must be the same function instance that was used when the event listener was added.",
+        parameters: [{
+          name: "evt",
+          type: "String",
+          description: "The name of the event from which we are removing."
+        }, {
+          name: "thunk",
+          type: "Function",
+          description: "The callback to remove."
+        }],
+        examples: [{
+          name: "Remove an event listener.",
+          description: "The `removeEventListener()` method operates nearly identically to the method of the same name on DOM elements.\n\
 \n\
   grammar(\"JavaScript\");\n\
   var txt = new Primrose.Text.Controls.TextBox(),\n\
   func = console.log.bind(console, \"mouse move\");\n\
   txt.addEventListener(\"mousemove\", func);\n\
   txt.removeEventListener(\"mousemove\", func);"
-      }]
-    });
-    const evts = this.listeners[event];
-    if (evt) {
-      const i = evts.indexOf(func);
-      if (0 <= i && i < evts.length) {
-        evts.splice(i, 1);
-      }
-    }
-  }
-
-  focus() {
-    pliny.method({
-      parent: "Primrose.Entity",
-      name: "focus",
-      description: "If the control is focusable, sets the focus property of the control, does not change the focus property of any other control.",
-      examples: [{
-        name: "Focus on one control, blur all the rest",
-        description: "When we have a list of controls and we are trying to track focus between them all, we must coordinate calls between `focus()` and `blur()`.\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  var ctrls = [\n\
-  new Primrose.Text.Controls.TextBox(),\n\
-  new Primrose.Text.Controls.TextBox(),\n\
-  new Primrose.Text.Button()\n\
-  ];\n\
-  \n\
-  function focusOn(id){\n\
-    for(var i = 0; i < ctrls.length; ++i){\n\
-      var c = ctrls[i];\n\
-      if(c.controlID === id){\n\
-        c.focus();\n\
-      }\n\
-      else{\n\
-        c.blur();\n\
-      }\n\
-    }\n\
-  }"
-      }]
-    });
-    if (this.focusable) {
-      this.focused = true;
-      emit.call(this, "focus", {
-        target: this
+        }]
       });
-    }
-  }
-
-  blur() {
-    pliny.method({
-      parent: "Primrose.Entity",
-      name: "blur",
-      description: "If the element is focused, unsets the focus property of the control and all child controls. Does not change the focus property of any parent or sibling controls.",
-      examples: [{
-        name: "Focus on one control, blur all the rest",
-        description: "When we have a list of controls and we are trying to track focus between them all, we must coordinate calls between `focus()` and `blur()`.\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  var ctrls = [\n\
-  new Primrose.Text.Controls.TextBox(),\n\
-  new Primrose.Text.Controls.TextBox(),\n\
-  new Primrose.Text.Button()\n\
-  ];\n\
-  \n\
-  function focusOn(id){\n\
-    for(var i = 0; i < ctrls.length; ++i){\n\
-      var c = ctrls[i];\n\
-      if(c.controlID === id){\n\
-        c.focus();\n\
-      }\n\
-      else{\n\
-        c.blur();\n\
-      }\n\
-    }\n\
-  }"
-      }]
-    });
-    if (this.focused) {
-      this.focused = false;
-      for (var i = 0; i < this.children.length; ++i) {
-        if (this.children[i].focused) {
-          this.children[i].blur();
+      var evts = this.listeners[event];
+      if (evt) {
+        var i = evts.indexOf(func);
+        if (0 <= i && i < evts.length) {
+          evts.splice(i, 1);
         }
       }
-      emit.call(this, "blur", {
-        target: this
-      });
     }
-  }
-
-  appendChild(child) {
-    pliny.method({
-      parent: "Primrose.Entity",
-      name: "appendChild",
-      description: "Adds an Entity as a child entity of this entity.",
-      parameters: [{
-        name: "child",
-        type: "Primrose.Entity",
-        description: "The object to add. Will only succeed if `child.parent` is not set to a value."
-      }],
-      examples: [{
-        name: "Add an entity to another entity",
-        description: "Entities can be arranged in parent-child relationships.\n\
+  }, {
+    key: "focus",
+    value: function focus() {
+      pliny.method({
+        parent: "Primrose.Entity",
+        name: "focus",
+        description: "If the control is focusable, sets the focus property of the control, does not change the focus property of any other control.",
+        examples: [{
+          name: "Focus on one control, blur all the rest",
+          description: "When we have a list of controls and we are trying to track focus between them all, we must coordinate calls between `focus()` and `blur()`.\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var ctrls = [\n\
+  new Primrose.Text.Controls.TextBox(),\n\
+  new Primrose.Text.Controls.TextBox(),\n\
+  new Primrose.Text.Button()\n\
+  ];\n\
+  \n\
+  function focusOn(id){\n\
+    for(var i = 0; i < ctrls.length; ++i){\n\
+      var c = ctrls[i];\n\
+      if(c.controlID === id){\n\
+        c.focus();\n\
+      }\n\
+      else{\n\
+        c.blur();\n\
+      }\n\
+    }\n\
+  }"
+        }]
+      });
+      if (this.focusable) {
+        this.focused = true;
+        emit.call(this, "focus", {
+          target: this
+        });
+      }
+    }
+  }, {
+    key: "blur",
+    value: function blur() {
+      pliny.method({
+        parent: "Primrose.Entity",
+        name: "blur",
+        description: "If the element is focused, unsets the focus property of the control and all child controls. Does not change the focus property of any parent or sibling controls.",
+        examples: [{
+          name: "Focus on one control, blur all the rest",
+          description: "When we have a list of controls and we are trying to track focus between them all, we must coordinate calls between `focus()` and `blur()`.\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var ctrls = [\n\
+  new Primrose.Text.Controls.TextBox(),\n\
+  new Primrose.Text.Controls.TextBox(),\n\
+  new Primrose.Text.Button()\n\
+  ];\n\
+  \n\
+  function focusOn(id){\n\
+    for(var i = 0; i < ctrls.length; ++i){\n\
+      var c = ctrls[i];\n\
+      if(c.controlID === id){\n\
+        c.focus();\n\
+      }\n\
+      else{\n\
+        c.blur();\n\
+      }\n\
+    }\n\
+  }"
+        }]
+      });
+      if (this.focused) {
+        this.focused = false;
+        for (var i = 0; i < this.children.length; ++i) {
+          if (this.children[i].focused) {
+            this.children[i].blur();
+          }
+        }
+        emit.call(this, "blur", {
+          target: this
+        });
+      }
+    }
+  }, {
+    key: "appendChild",
+    value: function appendChild(child) {
+      pliny.method({
+        parent: "Primrose.Entity",
+        name: "appendChild",
+        description: "Adds an Entity as a child entity of this entity.",
+        parameters: [{
+          name: "child",
+          type: "Primrose.Entity",
+          description: "The object to add. Will only succeed if `child.parent` is not set to a value."
+        }],
+        examples: [{
+          name: "Add an entity to another entity",
+          description: "Entities can be arranged in parent-child relationships.\n\
 \n\
   grammar(\"JavaScript\");\n\
   var a = new Primrose.Entity(),\n\
@@ -3638,27 +3699,28 @@ class Entity {
   console.assert(a.children.length === 1);\n\
   console.assert(a.children[0] === b);\n\
   console.assert(b.parent === a);"
-      }]
-    });
-    if (child && !child.parent) {
-      child.parent = this;
-      this.children.push(child);
+        }]
+      });
+      if (child && !child.parent) {
+        child.parent = this;
+        this.children.push(child);
+      }
     }
-  }
-
-  removeChild(child) {
-    pliny.method({
-      parent: "Primrose.Entity",
-      name: "removeChild",
-      description: "Removes an Entity from another Entity of this entity.",
-      parameters: [{
-        name: "child",
-        type: "Primrose.Entity",
-        description: "The object to remove. Will only succeed if `child.parent` is this object."
-      }],
-      examples: [{
-        name: "Remove an entity from another entity",
-        description: "Entities can be arranged in parent-child relationships.\n\
+  }, {
+    key: "removeChild",
+    value: function removeChild(child) {
+      pliny.method({
+        parent: "Primrose.Entity",
+        name: "removeChild",
+        description: "Removes an Entity from another Entity of this entity.",
+        parameters: [{
+          name: "child",
+          type: "Primrose.Entity",
+          description: "The object to remove. Will only succeed if `child.parent` is this object."
+        }],
+        examples: [{
+          name: "Remove an entity from another entity",
+          description: "Entities can be arranged in parent-child relationships.\n\
 \n\
   grammar(\"JavaScript\");\n\
   var a = new Primrose.Entity(),\n\
@@ -3670,264 +3732,320 @@ class Entity {
   a.removeChild(b);\n\
   console.assert(a.children.length === 0)\n\
   console.assert(b.parent === null);"
-      }]
-    });
-    const i = this.children.indexOf(child);
-    if (0 <= i && i < this.children.length) {
-      this.children.splice(i, 1);
-      child.parent = null;
-    }
-  }
-
-  get theme() {
-    pliny.property({
-      parent: "Primrose.Entity",
-      name: "theme",
-      type: "Primrose.Text.Themes.*",
-      description: "Get or set the theme used for rendering text on any controls in the control tree."
-    });
-    return null;
-  }
-
-  set theme(v) {
-    for (var i = 0; i < this.children.length; ++i) {
-      this.children[i].theme = v;
-    }
-  }
-
-  get lockMovement() {
-    pliny.property({
-      parent: "Primrose.Entity",
-      name: "lockMovement",
-      type: "Boolean",
-      description: "Recursively searches the deepest leaf-node of the control graph for a control that has its `lockMovement` property set to `true`, indicating that key events should not be used to navigate the user, because they are being interpreted as typing commands."
-    });
-    var lock = false;
-    for (var i = 0; i < this.children.length && !lock; ++i) {
-      lock = lock || this.children[i].lockMovement;
-    }
-    return lock;
-  }
-
-  get focusedElement() {
-    pliny.property({
-      parent: "Primrose.Entity",
-      name: "focusedElement",
-      type: "Primrose.Entity",
-      description: "Searches the deepest leaf-node of the control graph for a control that has its `focused` property set to `true`."
-    });
-    var result = null,
-      head = this;
-    while (head && head.focused) {
-      result = head;
-      var children = head.children;
-      head = null;
-      for (var i = 0; i < children.length; ++i) {
-        var child = children[i];
-        if (child.focused) {
-          head = child;
-        }
+        }]
+      });
+      var i = this.children.indexOf(child);
+      if (0 <= i && i < this.children.length) {
+        this.children.splice(i, 1);
+        child.parent = null;
       }
     }
-    return result;
-  }
-
-  eyeBlank(eye) {
-    pliny.method({
-      parent: "Primrose.Entity",
-      name: "eyeBlank",
-      parameters: [{
-        name: "eye",
-        type: "Number",
-        description: "The eye to switch to: -1 for left, +1 for right."
-      }],
-      description: "Instructs any stereoscopically rendered surfaces to change their rendering offset."
-    });
-    for (var i = 0; i < this.children.length; ++i) {
-      this.children[i].eyeBlank(eye);
+  }, {
+    key: "eyeBlank",
+    value: function eyeBlank(eye) {
+      pliny.method({
+        parent: "Primrose.Entity",
+        name: "eyeBlank",
+        parameters: [{
+          name: "eye",
+          type: "Number",
+          description: "The eye to switch to: -1 for left, +1 for right."
+        }],
+        description: "Instructs any stereoscopically rendered surfaces to change their rendering offset."
+      });
+      for (var i = 0; i < this.children.length; ++i) {
+        this.children[i].eyeBlank(eye);
+      }
     }
-  }
-
-  _forFocusedChild(name, evt) {
-    var elem = this.focusedElement;
-    if (elem && elem !== this) {
-      elem[name](evt);
+  }, {
+    key: "_forFocusedChild",
+    value: function _forFocusedChild(name, evt) {
+      var elem = this.focusedElement;
+      if (elem && elem !== this) {
+        elem[name](evt);
+      }
     }
-  }
-
-  startUV(evt) {
-    pliny.method({
-      parent: "Primrose.Entity",
-      name: "startUV",
-      parameters: [{
-        name: "evt",
-        type: "Event",
-        description: "The pointer event to read"
-      }],
-      description: "Hooks up to the window's `mouseDown` and `touchStart` events, with coordinates translated to tangent-space UV coordinates, and propagates it to any of its focused children."
-    });
-    this._forFocusedChild("startUV", evt);
-  }
-
-  moveUV(evt) {
-    pliny.method({
-      parent: "Primrose.Entity",
-      name: "moveUV",
-      parameters: [{
-        name: "evt",
-        type: "Event",
-        description: "The pointer event to read"
-      }],
-      description: "Hooks up to the window's `mouseMove` and `touchMove` events, with coordinates translated to tangent-space UV coordinates, and propagates it to any of its focused children."
-    });
-    this._forFocusedChild("moveUV", evt);
-  }
-
-  endPointer(evt) {
-    pliny.method({
-      parent: "Primrose.Entity",
-      name: "endPointer",
-      description: "Hooks up to the window's `mouseUp` and `toucheEnd` events and propagates it to any of its focused children."
-    });
-    this._forFocusedChild("endPointer", evt);
-  }
-
-  dispatchEvent(evt) {
-    switch(evt.type){
-      case "pointerstart":
-        this.startUV(evt.hit.uv);
-      break;
-      case "pointerend":
-        this.endPointer(evt);
-      break;
-      case "pointermove":
-      case "gazemove":
-        this.moveUV(evt.hit.uv);
-      break;
-      case "gazecomplete":
-        this.startUV(evt.hit.uv);
-        setTimeout(() => this.endPointer(evt), 100);
-      break;
+  }, {
+    key: "startUV",
+    value: function startUV(evt) {
+      pliny.method({
+        parent: "Primrose.Entity",
+        name: "startUV",
+        parameters: [{
+          name: "evt",
+          type: "Event",
+          description: "The pointer event to read"
+        }],
+        description: "Hooks up to the window's `mouseDown` and `touchStart` events, with coordinates translated to tangent-space UV coordinates, and propagates it to any of its focused children."
+      });
+      this._forFocusedChild("startUV", evt);
     }
-  }
+  }, {
+    key: "moveUV",
+    value: function moveUV(evt) {
+      pliny.method({
+        parent: "Primrose.Entity",
+        name: "moveUV",
+        parameters: [{
+          name: "evt",
+          type: "Event",
+          description: "The pointer event to read"
+        }],
+        description: "Hooks up to the window's `mouseMove` and `touchMove` events, with coordinates translated to tangent-space UV coordinates, and propagates it to any of its focused children."
+      });
+      this._forFocusedChild("moveUV", evt);
+    }
+  }, {
+    key: "endPointer",
+    value: function endPointer(evt) {
+      pliny.method({
+        parent: "Primrose.Entity",
+        name: "endPointer",
+        description: "Hooks up to the window's `mouseUp` and `toucheEnd` events and propagates it to any of its focused children."
+      });
+      this._forFocusedChild("endPointer", evt);
+    }
+  }, {
+    key: "dispatchEvent",
+    value: function dispatchEvent(evt) {
+      var _this = this;
 
-  keyDown(evt) {
-    pliny.method({
-      parent: "Primrose.Entity",
-      name: "keyDown",
-      parameters: [{
-        name: "evt",
-        type: "Event",
-        description: "The key event to read"
-      }],
-      description: "Hooks up to the window's `keyDown` event and propagates it to any of its focused children."
-    });
-    this._forFocusedChild("keyDown", evt);
-  }
+      switch (evt.type) {
+        case "pointerstart":
+          this.startUV(evt.hit.uv);
+          break;
+        case "pointerend":
+          this.endPointer(evt);
+          break;
+        case "pointermove":
+        case "gazemove":
+          this.moveUV(evt.hit.uv);
+          break;
+        case "gazecomplete":
+          this.startUV(evt.hit.uv);
+          setTimeout(function () {
+            return _this.endPointer(evt);
+          }, 100);
+          break;
+      }
+    }
+  }, {
+    key: "keyDown",
+    value: function keyDown(evt) {
+      pliny.method({
+        parent: "Primrose.Entity",
+        name: "keyDown",
+        parameters: [{
+          name: "evt",
+          type: "Event",
+          description: "The key event to read"
+        }],
+        description: "Hooks up to the window's `keyDown` event and propagates it to any of its focused children."
+      });
+      this._forFocusedChild("keyDown", evt);
+    }
+  }, {
+    key: "keyUp",
+    value: function keyUp(evt) {
+      pliny.method({
+        parent: "Primrose.Entity",
+        name: "keyUp",
+        parameters: [{
+          name: "evt",
+          type: "Event",
+          description: "The key event to read"
+        }],
+        description: "Hooks up to the window's `keyUp` event and propagates it to any of its focused children."
+      });
+      this._forFocusedChild("keyUp", evt);
+    }
+  }, {
+    key: "readClipboard",
+    value: function readClipboard(evt) {
+      pliny.method({
+        parent: "Primrose.Entity",
+        name: "readClipboard",
+        parameters: [{
+          name: "evt",
+          type: "Event",
+          description: "The clipboard event to read"
+        }],
+        description: "Hooks up to the clipboard's `paste` event and propagates it to any of its focused children."
+      });
+      this._forFocusedChild("readClipboard", evt);
+    }
+  }, {
+    key: "copySelectedText",
+    value: function copySelectedText(evt) {
+      pliny.method({
+        parent: "Primrose.Entity",
+        name: "copySelectedText",
+        parameters: [{
+          name: "evt",
+          type: "Event",
+          description: "The clipboard event to read"
+        }],
+        description: "Hooks up to the clipboard's `copy` event and propagates it to any of its focused children."
+      });
+      this._forFocusedChild("copySelectedText", evt);
+    }
+  }, {
+    key: "cutSelectedText",
+    value: function cutSelectedText(evt) {
+      pliny.method({
+        parent: "Primrose.Entity",
+        name: "cutSelectedText",
+        parameters: [{
+          name: "evt",
+          type: "Event",
+          description: "The clipboard event to read"
+        }],
+        description: "Hooks up to the clipboard's `cut` event and propagates it to any of its focused children."
+      });
+      this._forFocusedChild("cutSelectedText", evt);
+    }
+  }, {
+    key: "readWheel",
+    value: function readWheel(evt) {
+      pliny.method({
+        parent: "Primrose.Entity",
+        name: "readWheel",
+        parameters: [{
+          name: "evt",
+          type: "Event",
+          description: "The wheel event to read"
+        }],
+        description: "Hooks up to the window's `wheel` event and propagates it to any of its focused children."
+      });
+      this._forFocusedChild("readWheel", evt);
+    }
+  }, {
+    key: "id",
+    get: function get() {
+      pliny.property({
+        parent: "Primrose.Entity",
+        name: "id ",
+        type: "String",
+        description: "Get or set the id for the control."
+      });
+      return this._id;
+    },
+    set: function set(v) {
+      if (this._id !== v) {
+        var oldID = this._idObj;
+        this._id = v;
+        this._idObj = new Object(v);
+        // this `_idchanged` event is necessary to update the related ID in the WeakMap of entities for eye-blanking.
+        emit.call(this, "_idchanged", {
+          oldID: oldID,
+          entity: this
+        });
+      }
+    }
+  }, {
+    key: "theme",
+    get: function get() {
+      pliny.property({
+        parent: "Primrose.Entity",
+        name: "theme",
+        type: "Primrose.Text.Themes.*",
+        description: "Get or set the theme used for rendering text on any controls in the control tree."
+      });
+      return null;
+    },
+    set: function set(v) {
+      for (var i = 0; i < this.children.length; ++i) {
+        this.children[i].theme = v;
+      }
+    }
+  }, {
+    key: "lockMovement",
+    get: function get() {
+      pliny.property({
+        parent: "Primrose.Entity",
+        name: "lockMovement",
+        type: "Boolean",
+        description: "Recursively searches the deepest leaf-node of the control graph for a control that has its `lockMovement` property set to `true`, indicating that key events should not be used to navigate the user, because they are being interpreted as typing commands."
+      });
+      var lock = false;
+      for (var i = 0; i < this.children.length && !lock; ++i) {
+        lock = lock || this.children[i].lockMovement;
+      }
+      return lock;
+    }
+  }, {
+    key: "focusedElement",
+    get: function get() {
+      pliny.property({
+        parent: "Primrose.Entity",
+        name: "focusedElement",
+        type: "Primrose.Entity",
+        description: "Searches the deepest leaf-node of the control graph for a control that has its `focused` property set to `true`."
+      });
+      var result = null,
+          head = this;
+      while (head && head.focused) {
+        result = head;
+        var children = head.children;
+        head = null;
+        for (var i = 0; i < children.length; ++i) {
+          var child = children[i];
+          if (child.focused) {
+            head = child;
+          }
+        }
+      }
+      return result;
+    }
+  }]);
 
-  keyUp(evt) {
-    pliny.method({
-      parent: "Primrose.Entity",
-      name: "keyUp",
-      parameters: [{
-        name: "evt",
-        type: "Event",
-        description: "The key event to read"
-      }],
-      description: "Hooks up to the window's `keyUp` event and propagates it to any of its focused children."
-    });
-    this._forFocusedChild("keyUp", evt);
-  }
-
-  readClipboard(evt) {
-    pliny.method({
-      parent: "Primrose.Entity",
-      name: "readClipboard",
-      parameters: [{
-        name: "evt",
-        type: "Event",
-        description: "The clipboard event to read"
-      }],
-      description: "Hooks up to the clipboard's `paste` event and propagates it to any of its focused children."
-    });
-    this._forFocusedChild("readClipboard", evt);
-  }
-
-  copySelectedText(evt) {
-    pliny.method({
-      parent: "Primrose.Entity",
-      name: "copySelectedText",
-      parameters: [{
-        name: "evt",
-        type: "Event",
-        description: "The clipboard event to read"
-      }],
-      description: "Hooks up to the clipboard's `copy` event and propagates it to any of its focused children."
-    });
-    this._forFocusedChild("copySelectedText", evt);
-  }
-
-  cutSelectedText(evt) {
-    pliny.method({
-      parent: "Primrose.Entity",
-      name: "cutSelectedText",
-      parameters: [{
-        name: "evt",
-        type: "Event",
-        description: "The clipboard event to read"
-      }],
-      description: "Hooks up to the clipboard's `cut` event and propagates it to any of its focused children."
-    });
-    this._forFocusedChild("cutSelectedText", evt);
-  }
-
-  readWheel(evt) {
-    pliny.method({
-      parent: "Primrose.Entity",
-      name: "readWheel",
-      parameters: [{
-        name: "evt",
-        type: "Event",
-        description: "The wheel event to read"
-      }],
-      description: "Hooks up to the window's `wheel` event and propagates it to any of its focused children."
-    });
-    this._forFocusedChild("readWheel", evt);
-  }
-}
-  if(typeof window !== "undefined") window.Primrose.Entity = Entity;
+  return Entity;
+}();
+    if(typeof window !== "undefined") window.Primrose.Entity = Entity;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Entity.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Entity.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP.js
-(function(){pliny.namespace({
+    // start D:\Documents\VR\Primrose\src\Primrose\HTTP.js
+(function(){"use strict";
+
+pliny.namespace({
   parent: "Primrose",
   name: "HTTP",
   description: "A collection of basic XMLHttpRequest wrappers."
 });
-const HTTP = {};
-  if(typeof window !== "undefined") window.Primrose.HTTP = HTTP;
+var HTTP = {};
+    if(typeof window !== "undefined") window.Primrose.HTTP = HTTP;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\HTTP.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input.js
-(function(){pliny.namespace({
+    // start D:\Documents\VR\Primrose\src\Primrose\Input.js
+(function(){"use strict";
+
+pliny.namespace({
   parent: "Primrose",
   name: "Input",
   description: "The Input namespace contains classes that handle user input, for use in navigating the 3D environment."
 });
-const Input = {};
-  if(typeof window !== "undefined") window.Primrose.Input = Input;
+var Input = {};
+    if(typeof window !== "undefined") window.Primrose.Input = Input;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Input.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\InputProcessor.js
-(function(){const SETTINGS_TO_ZERO = ["heading", "pitch", "roll", "pointerPitch", "headX", "headY", "headZ"];
+    // start D:\Documents\VR\Primrose\src\Primrose\InputProcessor.js
+(function(){"use strict";
 
-function initState(){
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var SETTINGS_TO_ZERO = ["heading", "pitch", "roll", "pointerPitch", "headX", "headY", "headZ"];
+
+function initState() {
   this.inputState = {
     buttons: [],
     axes: [],
@@ -3947,29 +4065,27 @@ function initState(){
 }
 
 function filterMetaKey(k) {
-  for (let i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
-    const m = Primrose.Keys.MODIFIER_KEYS[i];
+  for (var i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
+    var m = Primrose.Keys.MODIFIER_KEYS[i];
     if (Math.abs(k) === Primrose.Keys[m.toLocaleUpperCase()]) {
       return Math.sign(k) * (i + 1);
     }
   }
 }
 
-function filterValue(elem){
-  const t = typeof elem;
-  let index = 0,
-    toggle = false,
-    sign = 1;
+function filterValue(elem) {
+  var t = typeof elem === "undefined" ? "undefined" : _typeof(elem);
+  var index = 0,
+      toggle = false,
+      sign = 1;
 
-  if(t === "number"){
+  if (t === "number") {
     index = Math.abs(elem) - 1;
     toggle = elem < 0;
-    sign = (elem < 0) ? -1 : 1;
-  }
-  else if(t === "string") {
+    sign = elem < 0 ? -1 : 1;
+  } else if (t === "string") {
     index = this.axisNames.indexOf(elem);
-  }
-  else {
+  } else {
     throw new Error("Cannot clone command spec. Element was type: " + t, elem);
   }
 
@@ -3980,47 +4096,51 @@ function filterValue(elem){
   };
 }
 
-function swap(a, b){
-  for(let i = 0; i < this.inputState.buttons.length; ++i){
+function swap(a, b) {
+  for (var i = 0; i < this.inputState.buttons.length; ++i) {
     this[a].buttons[i] = this[b].buttons[i];
   }
-  for(let i = 0; i < this.inputState.axes.length; ++i){
-    this[a].axes[i] = this[b].axes[i];
+  for (var _i = 0; _i < this.inputState.axes.length; ++_i) {
+    this[a].axes[_i] = this[b].axes[_i];
   }
-  for (let i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
-    const m = Primrose.Keys.MODIFIER_KEYS[i];
+  for (var _i2 = 0; _i2 < Primrose.Keys.MODIFIER_KEYS.length; ++_i2) {
+    var m = Primrose.Keys.MODIFIER_KEYS[_i2];
     this[a][m] = this[b][m];
   }
 }
 
-function resetInputState(){
+function resetInputState() {
   swap.call(this, "inputState", "lastInputState");
 }
 
-function recordLastState(){
+function recordLastState() {
   swap.call(this, "lastInputState", "inputState");
 }
 
-class CommandState{
-  constructor(){
-    this.value = null;
-    this.pressed = false;
-    this.wasPressed = false;
-    this.fireAgain = false;
-    this.lt = 0;
-    this.ct = 0;
-    this.repeatCount = 0;
-  }
-}
+var CommandState = function CommandState() {
+  _classCallCheck(this, CommandState);
+
+  this.value = null;
+  this.pressed = false;
+  this.wasPressed = false;
+  this.fireAgain = false;
+  this.lt = 0;
+  this.ct = 0;
+  this.repeatCount = 0;
+};
 
 pliny.class({
   parent: "Primrose",
-    name: "InputProcessor",
-    description: "| [under construction]"
+  name: "InputProcessor",
+  description: "| [under construction]"
 });
-class InputProcessor {
 
-  constructor(name, commands, axisNames) {
+var InputProcessor = function () {
+  function InputProcessor(name, commands, axisNames) {
+    var _this = this;
+
+    _classCallCheck(this, InputProcessor);
+
     this.name = name;
     this.commands = {};
     this.commandNames = [];
@@ -4030,10 +4150,10 @@ class InputProcessor {
     this.inPhysicalUse = false;
     initState.call(this);
 
-    const readMetaKeys = (event) => {
-      for (let i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
-        const m = Primrose.Keys.MODIFIER_KEYS[i];
-        this.inputState[m] = event[m + "Key"];
+    var readMetaKeys = function readMetaKeys(event) {
+      for (var i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
+        var m = Primrose.Keys.MODIFIER_KEYS[i];
+        _this.inputState[m] = event[m + "Key"];
       }
     };
 
@@ -4043,394 +4163,417 @@ class InputProcessor {
 
     this.axisNames = axisNames || [];
 
-    for (let i = 0; i < this.axisNames.length; ++i) {
+    for (var i = 0; i < this.axisNames.length; ++i) {
       this.inputState.axes[i] = 0;
     }
 
-    for (const cmdName in commands) {
+    for (var cmdName in commands) {
       this.addCommand(cmdName, commands[cmdName]);
     }
 
-    for (let i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
-      this.inputState[Primrose.Keys.MODIFIER_KEYS[i]] = false;
+    for (var _i3 = 0; _i3 < Primrose.Keys.MODIFIER_KEYS.length; ++_i3) {
+      this.inputState[Primrose.Keys.MODIFIER_KEYS[_i3]] = false;
     }
   }
 
-  addCommand(name, cmd) {
-    cmd.name = name;
-    cmd = this.cloneCommand(cmd);
-    if (typeof cmd.repetitions === "undefined") {
-      cmd.repetitions = 1;
-    }
-    cmd.state = new CommandState();
-    this.commands[name] = cmd;
-    this.commandNames.push(name);
-  }
-
-  cloneCommand(cmd) {
-    return {
-      name: cmd.name,
-      disabled: !!cmd.disabled,
-      dt: cmd.dt || 0,
-      deadzone: cmd.deadzone || 0,
-      threshold: cmd.threshold || 0,
-      repetitions: cmd.repetitions,
-      scale: cmd.scale,
-      offset: cmd.offset,
-      min: cmd.min,
-      max: cmd.max,
-      integrate: !!cmd.integrate,
-      delta: !!cmd.delta,
-      axes: this.maybeClone(cmd.axes),
-      commands: cmd.commands && cmd.commands.slice() || [],
-      buttons: this.maybeClone(cmd.buttons),
-      metaKeys: this.maybeClone(cmd.metaKeys && cmd.metaKeys.map(filterMetaKey)),
-      commandDown: cmd.commandDown,
-      commandUp: cmd.commandUp
-    };
-  }
-
-  maybeClone(arr) {
-    var output = [];
-    if (arr) {
-      for (var i = 0; i < arr.length; ++i) {
-        output[i] = filterValue.call(this, arr[i]);
+  _createClass(InputProcessor, [{
+    key: "addCommand",
+    value: function addCommand(name, cmd) {
+      cmd.name = name;
+      cmd = this.cloneCommand(cmd);
+      if (typeof cmd.repetitions === "undefined") {
+        cmd.repetitions = 1;
       }
+      cmd.state = new CommandState();
+      this.commands[name] = cmd;
+      this.commandNames.push(name);
     }
-    return output;
-  }
-
-  update(dt) {
-    if (this.enabled && this.ready && this.inPhysicalUse && !this.paused && dt > 0) {
-
-      this.inputState.buttons[Primrose.Keys.ANY] = false;
-      for (const n in this.inputState.buttons) {
-        if (this.inputState.buttons[n]) {
-          this.inputState.buttons[Primrose.Keys.ANY] = true;
-          break;
+  }, {
+    key: "cloneCommand",
+    value: function cloneCommand(cmd) {
+      return {
+        name: cmd.name,
+        disabled: !!cmd.disabled,
+        dt: cmd.dt || 0,
+        deadzone: cmd.deadzone || 0,
+        threshold: cmd.threshold || 0,
+        repetitions: cmd.repetitions,
+        scale: cmd.scale,
+        offset: cmd.offset,
+        min: cmd.min,
+        max: cmd.max,
+        integrate: !!cmd.integrate,
+        delta: !!cmd.delta,
+        axes: this.maybeClone(cmd.axes),
+        commands: cmd.commands && cmd.commands.slice() || [],
+        buttons: this.maybeClone(cmd.buttons),
+        metaKeys: this.maybeClone(cmd.metaKeys && cmd.metaKeys.map(filterMetaKey)),
+        commandDown: cmd.commandDown,
+        commandUp: cmd.commandUp
+      };
+    }
+  }, {
+    key: "maybeClone",
+    value: function maybeClone(arr) {
+      var output = [];
+      if (arr) {
+        for (var i = 0; i < arr.length; ++i) {
+          output[i] = filterValue.call(this, arr[i]);
         }
       }
+      return output;
+    }
+  }, {
+    key: "update",
+    value: function update(dt) {
+      if (this.enabled && this.ready && this.inPhysicalUse && !this.paused && dt > 0) {
 
-      let stateMod = recordLastState;
-      for (var name in this.commands) {
-        var cmd = this.commands[name];
-        cmd.state.wasPressed = cmd.state.pressed;
-        cmd.state.pressed = false;
-        if (!cmd.disabled) {
-          let pressed = true,
-            value = 0;
-          if (cmd.metaKeys) {
-            for (let n = 0; n < cmd.metaKeys.length && pressed; ++n) {
-              var m = cmd.metaKeys[n];
-              pressed = pressed &&
-                (this.inputState[Primrose.Keys.MODIFIER_KEYS[m.index]] &&
-                  !m.toggle ||
-                  !this.inputState[Primrose.Keys.MODIFIER_KEYS[m.index]] &&
-                  m.toggle);
-            }
+        this.inputState.buttons[Primrose.Keys.ANY] = false;
+        for (var n in this.inputState.buttons) {
+          if (this.inputState.buttons[n]) {
+            this.inputState.buttons[Primrose.Keys.ANY] = true;
+            break;
           }
+        }
 
-          if (pressed) {
-            if (cmd.buttons.length > 0) {
-              for (let n = 0; n < cmd.buttons.length; ++n) {
-                var btn = cmd.buttons[n],
-                  code = btn.index + 1,
-                  p = !!this.inputState.buttons[code];
-
-                const temp = p ? btn.sign : 0;
-                pressed = pressed && (p && !btn.toggle || !p && btn.toggle);
-                if (Math.abs(temp) > Math.abs(value)) {
-                  value = temp;
-                }
+        var stateMod = recordLastState;
+        for (var name in this.commands) {
+          var cmd = this.commands[name];
+          cmd.state.wasPressed = cmd.state.pressed;
+          cmd.state.pressed = false;
+          if (!cmd.disabled) {
+            var pressed = true,
+                value = 0;
+            if (cmd.metaKeys) {
+              for (var _n = 0; _n < cmd.metaKeys.length && pressed; ++_n) {
+                var m = cmd.metaKeys[_n];
+                pressed = pressed && (this.inputState[Primrose.Keys.MODIFIER_KEYS[m.index]] && !m.toggle || !this.inputState[Primrose.Keys.MODIFIER_KEYS[m.index]] && m.toggle);
               }
             }
 
-            if (cmd.buttons.length === 0 || value !== 0) {
-              if (cmd.axes.length > 0) {
-                value = 0;
-                for (let n = 0; n < cmd.axes.length; ++n) {
-                  var a = cmd.axes[n];
-                  const temp = a.sign * this.inputState.axes[a.index];
-                  if (Math.abs(temp) > Math.abs(value)) {
-                    value = temp;
-                  }
-                }
-              }
-              else if(cmd.commands.length > 0){
-                value = 0;
-                for (let n = 0; n < cmd.commands.length; ++n) {
-                  const temp = this.getValue(cmd.commands[n]);
+            if (pressed) {
+              if (cmd.buttons.length > 0) {
+                for (var _n2 = 0; _n2 < cmd.buttons.length; ++_n2) {
+                  var btn = cmd.buttons[_n2],
+                      code = btn.index + 1,
+                      p = !!this.inputState.buttons[code];
+
+                  var temp = p ? btn.sign : 0;
+                  pressed = pressed && (p && !btn.toggle || !p && btn.toggle);
                   if (Math.abs(temp) > Math.abs(value)) {
                     value = temp;
                   }
                 }
               }
 
-              if (cmd.scale !== undefined) {
-                value *= cmd.scale;
-              }
-
-              if (cmd.offset !== undefined) {
-                value += cmd.offset;
-              }
-
-              if (cmd.deadzone && Math.abs(value) < cmd.deadzone) {
-                value = 0;
-              }
-
-              if (cmd.integrate) {
-                value = this.getValue(cmd.name) + value * dt;
-              }
-              else if (cmd.delta) {
-                var ov = value;
-                if (cmd.state.lv !== undefined) {
-                  value = (value - cmd.state.lv);
+              if (cmd.buttons.length === 0 || value !== 0) {
+                if (cmd.axes.length > 0) {
+                  value = 0;
+                  for (var _n3 = 0; _n3 < cmd.axes.length; ++_n3) {
+                    var a = cmd.axes[_n3];
+                    var _temp = a.sign * this.inputState.axes[a.index];
+                    if (Math.abs(_temp) > Math.abs(value)) {
+                      value = _temp;
+                    }
+                  }
+                } else if (cmd.commands.length > 0) {
+                  value = 0;
+                  for (var _n4 = 0; _n4 < cmd.commands.length; ++_n4) {
+                    var _temp2 = this.getValue(cmd.commands[_n4]);
+                    if (Math.abs(_temp2) > Math.abs(value)) {
+                      value = _temp2;
+                    }
+                  }
                 }
-                cmd.state.lv = ov;
-              }
 
-              if (cmd.min !== undefined && value < cmd.min){
-                value = cmd.min;
-                stateMod = resetInputState;
-              }
+                if (cmd.scale !== undefined) {
+                  value *= cmd.scale;
+                }
 
-              if (cmd.max !== undefined && value > cmd.max) {
-                value = cmd.max;
-                stateMod = resetInputState;
-              }
+                if (cmd.offset !== undefined) {
+                  value += cmd.offset;
+                }
 
-              if (cmd.threshold) {
-                pressed = pressed && (value > cmd.threshold);
+                if (cmd.deadzone && Math.abs(value) < cmd.deadzone) {
+                  value = 0;
+                }
+
+                if (cmd.integrate) {
+                  value = this.getValue(cmd.name) + value * dt;
+                } else if (cmd.delta) {
+                  var ov = value;
+                  if (cmd.state.lv !== undefined) {
+                    value = value - cmd.state.lv;
+                  }
+                  cmd.state.lv = ov;
+                }
+
+                if (cmd.min !== undefined && value < cmd.min) {
+                  value = cmd.min;
+                  stateMod = resetInputState;
+                }
+
+                if (cmd.max !== undefined && value > cmd.max) {
+                  value = cmd.max;
+                  stateMod = resetInputState;
+                }
+
+                if (cmd.threshold) {
+                  pressed = pressed && value > cmd.threshold;
+                }
               }
             }
-          }
 
-          cmd.state.pressed = pressed;
-          cmd.state.value = value;
-          cmd.state.lt += dt;
+            cmd.state.pressed = pressed;
+            cmd.state.value = value;
+            cmd.state.lt += dt;
 
-          cmd.state.fireAgain = cmd.state.pressed &&
-            cmd.state.lt >= cmd.dt &&
-            (cmd.repetitions === -1 || cmd.state.repeatCount < cmd.repetitions);
+            cmd.state.fireAgain = cmd.state.pressed && cmd.state.lt >= cmd.dt && (cmd.repetitions === -1 || cmd.state.repeatCount < cmd.repetitions);
 
-          if (cmd.state.fireAgain) {
-            cmd.state.lt = 0;
-            ++cmd.state.repeatCount;
-          }
-          else if (!cmd.state.pressed) {
-            cmd.state.repeatCount = 0;
+            if (cmd.state.fireAgain) {
+              cmd.state.lt = 0;
+              ++cmd.state.repeatCount;
+            } else if (!cmd.state.pressed) {
+              cmd.state.repeatCount = 0;
+            }
           }
         }
-      }
-      stateMod.call(this);
+        stateMod.call(this);
 
-      this.fireCommands();
-    }
-  }
-
-  zero() {
-    initState.call(this);
-    for(const key in this.commands){
-      this.commands[key].state = new CommandState();
-    }
-  }
-
-  fireCommands() {
-    if (this.ready && !this.paused) {
-      for (var name in this.commands) {
-        var cmd = this.commands[name];
-        if (cmd.state.fireAgain && cmd.commandDown) {
-          cmd.commandDown(this.name);
-        }
-
-        if (!cmd.state.pressed && cmd.state.wasPressed && cmd.commandUp) {
-          cmd.commandUp(this.name);
-        }
+        this.fireCommands();
       }
     }
-  }
-
-  setProperty(key, name, value) {
-    if (this.commands[name]) {
-      this.commands[name][key] = value;
+  }, {
+    key: "zero",
+    value: function zero() {
+      initState.call(this);
+      for (var key in this.commands) {
+        this.commands[key].state = new CommandState();
+      }
     }
-  }
+  }, {
+    key: "fireCommands",
+    value: function fireCommands() {
+      if (this.ready && !this.paused) {
+        for (var name in this.commands) {
+          var cmd = this.commands[name];
+          if (cmd.state.fireAgain && cmd.commandDown) {
+            cmd.commandDown(this.name);
+          }
 
-  setDeadzone(name, value) {
-    this.setProperty("deadzone", name, value);
-  }
-
-  setScale(name, value) {
-    this.setProperty("scale", name, value);
-  }
-
-  setDT(name, value) {
-    this.setProperty("dt", name, value);
-  }
-
-  setMin(name, value) {
-    this.setProperty("min", name, value);
-  }
-
-  setMax(name, value) {
-    this.setProperty("max", name, value);
-  }
-
-  addMetaKey(name, value) {
-    this.addToArray("metaKeys", name, filterMetaKey(value));
-  }
-
-  addAxis(name, value) {
-    this.addToArray("axes", name, value);
-  }
-
-  addButton(name, value) {
-    this.addToArray("buttons", name, value);
-  }
-
-  removeMetaKey(name, value) {
-    this.removeFromArray("metaKeys", name, value);
-  }
-
-  removeAxis(name, value) {
-    this.removeFromArray("axes", name, value);
-  }
-
-  removeButton(name, value) {
-    this.removeFromArray("buttons", name, value);
-  }
-
-  invertAxis(name, value) {
-    this.invertInArray("axes", name, value);
-  }
-
-  invertButton(name, value) {
-    this.invertInArray("buttons", name, value);
-  }
-
-  invertMetaKey(name, value) {
-    this.invertInArray("metaKeys", name, value);
-  }
-
-  addToArray(key, name, value) {
-    if (this.commands[name] && this.commands[name][key]) {
-      this.commands[name][key].push(filterValue(value));
-    }
-  }
-
-  removeFromArray(key, name, value) {
-    if (this.commands[name] && this.commands[name][key]) {
-      --value;
-      const arr = this.commands[name][key];
-      for(let i = 0; i < arr.length; ++i){
-        const elem = arr[i];
-        if(elem.index === value){
-          return arr.splice(i, 1);
+          if (!cmd.state.pressed && cmd.state.wasPressed && cmd.commandUp) {
+            cmd.commandUp(this.name);
+          }
         }
       }
     }
-  }
-
-  invertInArray(key, name, value) {
-    if (this.commands[name] && this.commands[name][key]) {
-      var arr = this.commands[name][key],
-        n = arr.indexOf(value);
-      for(let i = 0; i < arr.length; ++i){
-        const elem = arr[i];
-        if(elem.index === value){
-          elem.sign *= -1;
-          return;
+  }, {
+    key: "setProperty",
+    value: function setProperty(key, name, value) {
+      if (this.commands[name]) {
+        this.commands[name][key] = value;
+      }
+    }
+  }, {
+    key: "setDeadzone",
+    value: function setDeadzone(name, value) {
+      this.setProperty("deadzone", name, value);
+    }
+  }, {
+    key: "setScale",
+    value: function setScale(name, value) {
+      this.setProperty("scale", name, value);
+    }
+  }, {
+    key: "setDT",
+    value: function setDT(name, value) {
+      this.setProperty("dt", name, value);
+    }
+  }, {
+    key: "setMin",
+    value: function setMin(name, value) {
+      this.setProperty("min", name, value);
+    }
+  }, {
+    key: "setMax",
+    value: function setMax(name, value) {
+      this.setProperty("max", name, value);
+    }
+  }, {
+    key: "addMetaKey",
+    value: function addMetaKey(name, value) {
+      this.addToArray("metaKeys", name, filterMetaKey(value));
+    }
+  }, {
+    key: "addAxis",
+    value: function addAxis(name, value) {
+      this.addToArray("axes", name, value);
+    }
+  }, {
+    key: "addButton",
+    value: function addButton(name, value) {
+      this.addToArray("buttons", name, value);
+    }
+  }, {
+    key: "removeMetaKey",
+    value: function removeMetaKey(name, value) {
+      this.removeFromArray("metaKeys", name, value);
+    }
+  }, {
+    key: "removeAxis",
+    value: function removeAxis(name, value) {
+      this.removeFromArray("axes", name, value);
+    }
+  }, {
+    key: "removeButton",
+    value: function removeButton(name, value) {
+      this.removeFromArray("buttons", name, value);
+    }
+  }, {
+    key: "invertAxis",
+    value: function invertAxis(name, value) {
+      this.invertInArray("axes", name, value);
+    }
+  }, {
+    key: "invertButton",
+    value: function invertButton(name, value) {
+      this.invertInArray("buttons", name, value);
+    }
+  }, {
+    key: "invertMetaKey",
+    value: function invertMetaKey(name, value) {
+      this.invertInArray("metaKeys", name, value);
+    }
+  }, {
+    key: "addToArray",
+    value: function addToArray(key, name, value) {
+      if (this.commands[name] && this.commands[name][key]) {
+        this.commands[name][key].push(filterValue(value));
+      }
+    }
+  }, {
+    key: "removeFromArray",
+    value: function removeFromArray(key, name, value) {
+      if (this.commands[name] && this.commands[name][key]) {
+        --value;
+        var arr = this.commands[name][key];
+        for (var i = 0; i < arr.length; ++i) {
+          var elem = arr[i];
+          if (elem.index === value) {
+            return arr.splice(i, 1);
+          }
         }
       }
     }
-  }
-
-  pause(v) {
-    this.paused = v;
-  }
-
-  isPaused() {
-    return this.paused;
-  }
-
-  enable(k, v) {
-    if (v === undefined || v === null) {
-      v = k;
-      k = null;
+  }, {
+    key: "invertInArray",
+    value: function invertInArray(key, name, value) {
+      if (this.commands[name] && this.commands[name][key]) {
+        var arr = this.commands[name][key],
+            n = arr.indexOf(value);
+        for (var i = 0; i < arr.length; ++i) {
+          var elem = arr[i];
+          if (elem.index === value) {
+            elem.sign *= -1;
+            return;
+          }
+        }
+      }
     }
-
-    if (k) {
-      this.setProperty("disabled", k, !v);
+  }, {
+    key: "pause",
+    value: function pause(v) {
+      this.paused = v;
     }
-    else {
-      this.enabled = v;
+  }, {
+    key: "isPaused",
+    value: function isPaused() {
+      return this.paused;
     }
-  }
+  }, {
+    key: "enable",
+    value: function enable(k, v) {
+      if (v === undefined || v === null) {
+        v = k;
+        k = null;
+      }
 
-  isEnabled(name) {
-    return name && this.commands[name] && !this.commands[name].disabled;
-  }
-
-  getAxis(name) {
-    var i = this.axisNames.indexOf(name);
-    if (i > -1) {
-      var value = this.inputState.axes[i] || 0;
-      return value;
+      if (k) {
+        this.setProperty("disabled", k, !v);
+      } else {
+        this.enabled = v;
+      }
     }
-    return null;
-  }
-
-  setAxis(name, value) {
-    var i = this.axisNames.indexOf(name);
-    if (i > -1 && (this.inPhysicalUse || value !== 0)) {
-      this.inPhysicalUse = true;
-      this.inputState.axes[i] = value;
+  }, {
+    key: "isEnabled",
+    value: function isEnabled(name) {
+      return name && this.commands[name] && !this.commands[name].disabled;
     }
-  }
-
-  setButton(index, pressed) {
-    if(this.inPhysicalUse || pressed){
-      this.inPhysicalUse = true;
-      this.inputState.buttons[index] = pressed;
+  }, {
+    key: "getAxis",
+    value: function getAxis(name) {
+      var i = this.axisNames.indexOf(name);
+      if (i > -1) {
+        var value = this.inputState.axes[i] || 0;
+        return value;
+      }
+      return null;
     }
-  }
-
-  isDown(name) {
-    return this.enabled &&
-      this.isEnabled(name) &&
-      this.commands[name].state.pressed;
-  }
-
-  isUp(name) {
-    return this.enabled &&
-      this.isEnabled(name) &&
-      this.commands[name].state.pressed;
-  }
-
-  getValue(name) {
-    return this.enabled &&
-        this.isEnabled(name) &&
-        (this.commands[name].state.value || this.getAxis(name)) ||
-        0;
-  }
-
-  setValue(name, value) {
-    var j = this.axisNames.indexOf(name);
-    if (!this.commands[name] && j > -1) {
-      this.setAxis(name, value);
+  }, {
+    key: "setAxis",
+    value: function setAxis(name, value) {
+      var i = this.axisNames.indexOf(name);
+      if (i > -1 && (this.inPhysicalUse || value !== 0)) {
+        this.inPhysicalUse = true;
+        this.inputState.axes[i] = value;
+      }
     }
-    else if (this.commands[name] && !this.commands[name].disabled) {
-      this.commands[name].state.value = value;
+  }, {
+    key: "setButton",
+    value: function setButton(index, pressed) {
+      if (this.inPhysicalUse || pressed) {
+        this.inPhysicalUse = true;
+        this.inputState.buttons[index] = pressed;
+      }
     }
-  }
-}
-  if(typeof window !== "undefined") window.Primrose.InputProcessor = InputProcessor;
+  }, {
+    key: "isDown",
+    value: function isDown(name) {
+      return this.enabled && this.isEnabled(name) && this.commands[name].state.pressed;
+    }
+  }, {
+    key: "isUp",
+    value: function isUp(name) {
+      return this.enabled && this.isEnabled(name) && this.commands[name].state.pressed;
+    }
+  }, {
+    key: "getValue",
+    value: function getValue(name) {
+      return this.enabled && this.isEnabled(name) && (this.commands[name].state.value || this.getAxis(name)) || 0;
+    }
+  }, {
+    key: "setValue",
+    value: function setValue(name, value) {
+      var j = this.axisNames.indexOf(name);
+      if (!this.commands[name] && j > -1) {
+        this.setAxis(name, value);
+      } else if (this.commands[name] && !this.commands[name].disabled) {
+        this.commands[name].state.value = value;
+      }
+    }
+  }]);
+
+  return InputProcessor;
+}();
+    if(typeof window !== "undefined") window.Primrose.InputProcessor = InputProcessor;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\InputProcessor.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\InputProcessor.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Keys.js
-(function(){pliny.enumeration({
+    // start D:\Documents\VR\Primrose\src\Primrose\Keys.js
+(function(){"use strict";
+
+pliny.enumeration({
   parent: "Primrose",
   name: "Keys",
   description: "Keycode values for system keys that are the same across all international standards"
@@ -4563,86 +4706,86 @@ var Keys = {
 // create a reverse mapping from keyCode to name.
 for (var key in Keys) {
   var val = Keys[key];
-  if (Keys.hasOwnProperty(key) && typeof (val) === "number") {
+  if (Keys.hasOwnProperty(key) && typeof val === "number") {
     Keys[val] = key;
   }
 }
-  if(typeof window !== "undefined") window.Primrose.Keys = Keys;
+    if(typeof window !== "undefined") window.Primrose.Keys = Keys;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Keys.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Keys.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\loadTexture.js
-(function(){var objectIDs = new WeakMap(),
-  counter = 0;
+    // start D:\Documents\VR\Primrose\src\Primrose\loadTexture.js
+(function(){"use strict";
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+var objectIDs = new WeakMap(),
+    counter = 0;
 
 function loadTexture(url, resolve, progress, reject) {
   var textureLoader = null,
-    txtName = null;
-  if(url instanceof Array && url.length === 6) {
+      txtName = null;
+  if (url instanceof Array && url.length === 6) {
     textureLoader = new THREE.CubeTextureLoader();
     txtName = url.join(",");
-  }
-  else {
-    if(url instanceof HTMLImageElement){
+  } else {
+    if (url instanceof HTMLImageElement) {
       txtName = url.src;
       url = url.src;
-    }
-    else if(typeof url === "object"){
-      if(!objectIDs.has(url)) {
-        objectIDs.set(url, `object-${counter++}`);
+    } else if ((typeof url === "undefined" ? "undefined" : _typeof(url)) === "object") {
+      if (!objectIDs.has(url)) {
+        objectIDs.set(url, "object-" + counter++);
       }
       txtName = objectIDs.get(url);
     }
 
-    if(typeof url === "string") {
+    if (typeof url === "string") {
       txtName = url;
       textureLoader = new THREE.TextureLoader();
     }
   }
 
-  if(textureLoader){
+  if (textureLoader) {
     textureLoader.setCrossOrigin(THREE.ImageUtils.crossOrigin);
   }
 
-  return cache(
-    `Texture(${txtName})`,
-    () => {
-      var txt = null;
-      if(textureLoader){
-        txt = textureLoader.load(url, resolve, progress, reject);
-      }
-      else{
-        txt = new THREE.Texture(url);
-        resolve();
-      }
-      return txt;
-    },
-    resolve);
+  return cache("Texture(" + txtName + ")", function () {
+    var txt = null;
+    if (textureLoader) {
+      txt = textureLoader.load(url, resolve, progress, reject);
+    } else {
+      txt = new THREE.Texture(url);
+      resolve();
+    }
+    return txt;
+  }, resolve);
 }
-  if(typeof window !== "undefined") window.Primrose.loadTexture = loadTexture;
+    if(typeof window !== "undefined") window.Primrose.loadTexture = loadTexture;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\loadTexture.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\loadTexture.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\ModelLoader.js
-(function(){// The JSON format object loader is not always included in the Three.js distribution,
+    // start D:\Documents\VR\Primrose\src\Primrose\ModelLoader.js
+(function(){"use strict";
+
+// The JSON format object loader is not always included in the Three.js distribution,
 // so we have to first check for it.
 var loaders = {
-    ".json": THREE.ObjectLoader,
-    ".fbx": THREE.FBXLoader,
-    ".mtl": THREE.MTLLoader,
-    ".obj": THREE.OBJLoader,
-    ".stl": THREE.STLLoader,
-    ".typeface.json": THREE.FontLoader
-  },
-  mime = {
-    "text/prs.wavefront-obj": "obj",
-    "text/prs.wavefront-mtl": "mtl"
-  },
-  PATH_PATTERN = /((?:[^/]+\/)+)(\w+)(\.(?:\w+))$/,
-  EXTENSION_PATTERN = /(\.(?:\w+))+$/,
-  NAME_PATTERN = /([^/]+)\.\w+$/;
+  ".json": THREE.ObjectLoader,
+  ".fbx": THREE.FBXLoader,
+  ".mtl": THREE.MTLLoader,
+  ".obj": THREE.OBJLoader,
+  ".stl": THREE.STLLoader,
+  ".typeface.json": THREE.FontLoader
+},
+    mime = {
+  "text/prs.wavefront-obj": "obj",
+  "text/prs.wavefront-mtl": "mtl"
+},
+    PATH_PATTERN = /((?:[^/]+\/)+)(\w+)(\.(?:\w+))$/,
+    EXTENSION_PATTERN = /(\.(?:\w+))+$/,
+    NAME_PATTERN = /([^/]+)\.\w+$/;
 
 // Sometimes, the properties that export out of Blender and into Three.js don't
 // come out correctly, so we need to do a correction.
@@ -4657,13 +4800,13 @@ function fixJSONScene(json) {
 }
 
 var propertyTests = {
-  isButton: function (obj) {
+  isButton: function isButton(obj) {
     return obj.material && obj.material.name.match(/^button\d+$/);
   },
-  isSolid: function (obj) {
+  isSolid: function isSolid(obj) {
     return !obj.name.match(/^(water|sky)/);
   },
-  isGround: function (obj) {
+  isGround: function isGround(obj) {
     return obj.material && obj.material.name && obj.material.name.match(/\bground\b/);
   }
 };
@@ -4681,18 +4824,18 @@ function setProperties(object) {
 
 pliny.class({
   parent: "Primrose",
-    name: "ModelLoader",
-    description: "Creates an interface for cloning 3D models loaded from files, to instance those objects.\n\
+  name: "ModelLoader",
+  description: "Creates an interface for cloning 3D models loaded from files, to instance those objects.\n\
 \n\
 > NOTE: You don't instantiate this class directly. Call `ModelLoader.loadModel`.",
-    parameters: [{
-      name: "template",
-      type: "THREE.Object3D",
-      description: "The 3D model to make clonable."
-    }],
-    examples: [{
-      name: "Load a basic model.",
-      description: "When Blender exports the Three.js JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
+  parameters: [{
+    name: "template",
+    type: "THREE.Object3D",
+    description: "The 3D model to make clonable."
+  }],
+  examples: [{
+    name: "Load a basic model.",
+    description: "When Blender exports the Three.js JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
 \n\
 ## Code:\n\
 \n\
@@ -4716,7 +4859,7 @@ pliny.class({
     });\n\
   })\n\
   .catch(console.error.bind(console));"
-    }]
+  }]
 });
 
 function ModelLoader(template) {
@@ -4728,8 +4871,9 @@ function ModelLoader(template) {
   this.template = template;
 }
 ModelLoader.loadModel = function (src, type, progress) {
-  return ModelLoader.loadObject(src, type, progress)
-    .then((scene) => new ModelLoader(scene));
+  return ModelLoader.loadObject(src, type, progress).then(function (scene) {
+    return new ModelLoader(scene);
+  });
 };
 
 pliny.method({
@@ -4764,16 +4908,18 @@ pliny.method({
   }]
 });
 ModelLoader.prototype.clone = function () {
+  var _this = this;
+
   var obj = this.template.clone();
 
-  obj.traverse((child) => {
+  obj.traverse(function (child) {
     if (child instanceof THREE.SkinnedMesh) {
       obj.animation = new THREE.Animation(child, child.geometry.animation);
-      if (!this.template.originalAnimationData && obj.animation.data) {
-        this.template.originalAnimationData = obj.animation.data;
+      if (!_this.template.originalAnimationData && obj.animation.data) {
+        _this.template.originalAnimationData = obj.animation.data;
       }
       if (!obj.animation.data) {
-        obj.animation.data = this.template.originalAnimationData;
+        obj.animation.data = _this.template.originalAnimationData;
       }
     }
   });
@@ -4838,52 +4984,51 @@ Useful for one-time use models.\n\
 });
 ModelLoader.loadObject = function (src, type, progress) {
   var extMatch = src.match(EXTENSION_PATTERN),
-    extension = type && ("." + type) || extMatch[0];
+      extension = type && "." + type || extMatch[0];
   if (!extension) {
     return Promise.reject("File path `" + src + "` does not have a file extension, and a type was not provided as a parameter, so we can't determine the type.");
-  }
-  else {
+  } else {
     extension = extension.toLowerCase();
     var Loader = new loaders[extension]();
     if (!Loader) {
       return Promise.reject("There is no loader type for the file extension: " + extension);
-    }
-    else {
+    } else {
       var name = src.substring(0, extMatch.index),
-        elemID = name + "_" + extension.toLowerCase(),
-        elem = document.getElementById(elemID),
-        promise = Promise.resolve();
+          elemID = name + "_" + extension.toLowerCase(),
+          elem = document.getElementById(elemID),
+          promise = Promise.resolve();
       if (extension === ".obj") {
         var newPath = src.replace(EXTENSION_PATTERN, ".mtl");
-        promise = promise
-          .then(() => ModelLoader.loadObject(newPath, "mtl", progress))
-          .then((materials) => {
-            materials.preload();
-            Loader.setMaterials(materials);
-          });
-      }
-      else if (extension === ".mtl") {
+        promise = promise.then(function () {
+          return ModelLoader.loadObject(newPath, "mtl", progress);
+        }).then(function (materials) {
+          materials.preload();
+          Loader.setMaterials(materials);
+        });
+      } else if (extension === ".mtl") {
         var match = src.match(PATH_PATTERN),
-          dir = match[1];
+            dir = match[1];
         src = match[2] + match[3];
         Loader.setTexturePath(dir);
         Loader.setPath(dir);
       }
 
       if (elem) {
-        var elemSource = elem.innerHTML
-          .split(/\r?\n/g)
-          .map(function (s) {
-            return s.trim();
-          })
-          .join("\n");
-        promise = promise.then(() => Loader.parse(elemSource));
-      }
-      else {
+        var elemSource = elem.innerHTML.split(/\r?\n/g).map(function (s) {
+          return s.trim();
+        }).join("\n");
+        promise = promise.then(function () {
+          return Loader.parse(elemSource);
+        });
+      } else {
         if (Loader.setCrossOrigin) {
           Loader.setCrossOrigin(THREE.ImageUtils.crossOrigin);
         }
-        promise = promise.then(() => new Promise((resolve, reject) => Loader.load(src, resolve, progress, reject)));
+        promise = promise.then(function () {
+          return new Promise(function (resolve, reject) {
+            return Loader.load(src, resolve, progress, reject);
+          });
+        });
       }
 
       if (extension === ".json") {
@@ -4898,7 +5043,6 @@ ModelLoader.loadObject = function (src, type, progress) {
     }
   }
 };
-
 
 pliny.function({
   parent: "Primrose.ModelLoader",
@@ -4968,7 +5112,7 @@ We can load a bunch of models in one go using the following code.\n\
 });
 ModelLoader.loadObjects = function (map) {
   var output = {},
-    promise = Promise.resolve(output);
+      promise = Promise.resolve(output);
   for (var key in map) {
     if (map[key]) {
       promise = promise.then(loader(map, key));
@@ -4978,925 +5122,1016 @@ ModelLoader.loadObjects = function (map) {
 };
 
 function loader(map, key) {
-  return (obj) => ModelLoader.loadObject(map[key])
-    .then((model) => {
+  return function (obj) {
+    return ModelLoader.loadObject(map[key]).then(function (model) {
       obj[key] = model;
       return obj;
     });
+  };
 }
-  if(typeof window !== "undefined") window.Primrose.ModelLoader = ModelLoader;
+    if(typeof window !== "undefined") window.Primrose.ModelLoader = ModelLoader;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\ModelLoader.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\ModelLoader.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Network.js
-(function(){pliny.namespace({
+    // start D:\Documents\VR\Primrose\src\Primrose\Network.js
+(function(){"use strict";
+
+pliny.namespace({
   parent: "Primrose",
   name: "Network",
   description: "The Network namespace contains classes for communicating events between entities in a graph relationship across different types of communication boundaries: in-thread, cross-thread, cross-WAN, and cross-LAN."
 });
-const Network = {};
-  if(typeof window !== "undefined") window.Primrose.Network = Network;
+var Network = {};
+    if(typeof window !== "undefined") window.Primrose.Network = Network;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Network.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Network.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Output.js
-(function(){pliny.namespace({
+    // start D:\Documents\VR\Primrose\src\Primrose\Output.js
+(function(){"use strict";
+
+pliny.namespace({
   parent: "Primrose",
   name: "Output",
   description: "The Output namespace contains classes that handle output to devices other than the screen (e.g. Audio, Music, etc.)."
 });
-const Output = {};
-  if(typeof window !== "undefined") window.Primrose.Output = Output;
+var Output = {};
+    if(typeof window !== "undefined") window.Primrose.Output = Output;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Output.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Output.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Pointer.js
-(function(){const TELEPORT_PAD_RADIUS = 0.4,
-  FORWARD = new THREE.Vector3(0, 0, -1),
-  LASER_WIDTH = 0.01,
-  LASER_LENGTH = 3 * LASER_WIDTH,
-  GAZE_TIMEOUT = 1000,
-  GAZE_RING_DISTANCE  = -1.25,
-  GAZE_RING_INNER = 0.015,
-  GAZE_RING_OUTER = 0.03,
-  VECTOR_TEMP = new THREE.Vector3(),
-  EULER_TEMP = new THREE.Euler(),
-  QUAT_TEMP = new THREE.Quaternion(),
+    // start D:\Documents\VR\Primrose\src\Primrose\Pointer.js
+(function(){"use strict";
 
-  _ = priv();
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var TELEPORT_PAD_RADIUS = 0.4,
+    FORWARD = new THREE.Vector3(0, 0, -1),
+    LASER_WIDTH = 0.01,
+    LASER_LENGTH = 3 * LASER_WIDTH,
+    GAZE_TIMEOUT = 1000,
+    GAZE_RING_DISTANCE = -1.25,
+    GAZE_RING_INNER = 0.015,
+    GAZE_RING_OUTER = 0.03,
+    VECTOR_TEMP = new THREE.Vector3(),
+    EULER_TEMP = new THREE.Euler(),
+    QUAT_TEMP = new THREE.Quaternion(),
+    _ = priv();
 
 pliny.class({
   parent: "Primrose",
-    name: "Pointer",
-    baseClass: "Primrose.AbstractEventEmitter",
-    description: "An object that points into the scene somewhere, casting a ray at objects for picking operations.",
-    parameters: [{
-      name: "name ",
-      type: "String",
-      description: "A friendly name for this pointer object, to make debugging easier."
-    }, {
-      name: "color",
-      type: "Number",
-      description: "The color to use to render the teleport pad and 3D pointer cursor."
-    }, {
-      name: "highlight",
-      type: "Number",
-      description: "The color to use to highlight the teleport pad and 3D pointer cursor when it's pointing at a real thing."
-    }, {
-      name: "devices",
-      type: "Array",
-      description: "An Array of `Primrose.InputProcessor` objects that define the orientation for this pointer."
-    }, {
-      name: "triggerDevices",
-      type: "Array",
-      description: "An Array of `Primrose.InputProcessor` objects that define the button trigger for this pointer.",
-      optional: true,
-      defaultValue: null
-    }]
+  name: "Pointer",
+  baseClass: "Primrose.AbstractEventEmitter",
+  description: "An object that points into the scene somewhere, casting a ray at objects for picking operations.",
+  parameters: [{
+    name: "name ",
+    type: "String",
+    description: "A friendly name for this pointer object, to make debugging easier."
+  }, {
+    name: "color",
+    type: "Number",
+    description: "The color to use to render the teleport pad and 3D pointer cursor."
+  }, {
+    name: "highlight",
+    type: "Number",
+    description: "The color to use to highlight the teleport pad and 3D pointer cursor when it's pointing at a real thing."
+  }, {
+    name: "devices",
+    type: "Array",
+    description: "An Array of `Primrose.InputProcessor` objects that define the orientation for this pointer."
+  }, {
+    name: "triggerDevices",
+    type: "Array",
+    description: "An Array of `Primrose.InputProcessor` objects that define the button trigger for this pointer.",
+    optional: true,
+    defaultValue: null
+  }]
 });
-class Pointer extends Primrose.AbstractEventEmitter {
-  constructor(name, color, highlight, s, devices, triggerDevices = null) {
-    super();
-    this.name = name;
-    this.devices = devices;
-    this.triggerDevices = triggerDevices || devices.slice();
 
-    this.unproject = null;
+var Pointer = function (_Primrose$AbstractEve) {
+  _inherits(Pointer, _Primrose$AbstractEve);
 
-    this.picker = new THREE.Raycaster();
-    this.showPointer = true;
-    this.color = color;
-    this.highlight = highlight;
-    this.velocity = new THREE.Vector3();
-    this.mesh = colored(box(LASER_WIDTH / s, LASER_WIDTH / s, LASER_LENGTH * s), this.color, {
+  function Pointer(name, color, highlight, s, devices) {
+    var triggerDevices = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : null;
+
+    _classCallCheck(this, Pointer);
+
+    var _this = _possibleConstructorReturn(this, (Pointer.__proto__ || Object.getPrototypeOf(Pointer)).call(this));
+
+    _this.name = name;
+    _this.devices = devices;
+    _this.triggerDevices = triggerDevices || devices.slice();
+
+    _this.unproject = null;
+
+    _this.picker = new THREE.Raycaster();
+    _this.showPointer = true;
+    _this.color = color;
+    _this.highlight = highlight;
+    _this.velocity = new THREE.Vector3();
+    _this.mesh = colored(box(LASER_WIDTH / s, LASER_WIDTH / s, LASER_LENGTH * s), _this.color, {
       unshaded: true
     });
-    this.mesh.position.z = -1.5;
+    _this.mesh.position.z = -1.5;
 
-    this.disk = colored(sphere(TELEPORT_PAD_RADIUS, 128, 3), this.color, {
+    _this.disk = colored(sphere(TELEPORT_PAD_RADIUS, 128, 3), _this.color, {
       unshaded: true
     });
-    this.disk.geometry.computeBoundingBox();
-    this.disk.geometry.vertices.forEach((v) => {
-      v.y = 0.1 * (v.y - this.disk.geometry.boundingBox.min.y);
+    _this.disk.geometry.computeBoundingBox();
+    _this.disk.geometry.vertices.forEach(function (v) {
+      v.y = 0.1 * (v.y - _this.disk.geometry.boundingBox.min.y);
     });
-    this.disk.visible = false;
-    this.disk.geometry.computeBoundingBox();
+    _this.disk.visible = false;
+    _this.disk.geometry.computeBoundingBox();
 
-    this.gazeInner = colored(circle(GAZE_RING_INNER / 2, 10), 0xc0c0c0, {
+    _this.gazeInner = colored(circle(GAZE_RING_INNER / 2, 10), 0xc0c0c0, {
       unshaded: true
     });
-    this.gazeInner.position.set(0, 0, GAZE_RING_DISTANCE);
+    _this.gazeInner.position.set(0, 0, GAZE_RING_DISTANCE);
 
-    this.gazeInner.add(colored(ring(GAZE_RING_INNER * 0.5, GAZE_RING_INNER * 0.75, 10, 36, 0, 2 * Math.PI), 0xffffff, {
+    _this.gazeInner.add(colored(ring(GAZE_RING_INNER * 0.5, GAZE_RING_INNER * 0.75, 10, 36, 0, 2 * Math.PI), 0xffffff, {
       unshaded: true
     }));
 
-    this.gazeOuter = colored(ring(GAZE_RING_INNER, GAZE_RING_OUTER, 10, 36, 0, 2 * Math.PI), 0xffffff, {
+    _this.gazeOuter = colored(ring(GAZE_RING_INNER, GAZE_RING_OUTER, 10, 36, 0, 2 * Math.PI), 0xffffff, {
       unshaded: true
     });
-    this.gazeOuter.visible = false;
-    this.gazeInner.add(this.gazeOuter);
+    _this.gazeOuter.visible = false;
+    _this.gazeInner.add(_this.gazeOuter);
 
-    this.root = new THREE.Object3D();
-    this.root.add(this.mesh);
-    this.root.add(this.gazeInner);
+    _this.root = new THREE.Object3D();
+    _this.root.add(_this.mesh);
+    _this.root.add(_this.gazeInner);
 
-    this.useGaze = false;
-    _(this, {
+    _this.useGaze = false;
+    _(_this, {
       lastHit: null
     });
+    return _this;
   }
 
-  get useGaze() {
-    return this.gazeInner.visible;
-  }
-
-  set useGaze(v) {
-    this.gazeInner.visible = !!v;
-    this.mesh.visible = !v;
-  }
-
-  get material(){
-    return this.mesh.material;
-  }
-
-  set material(v){
-    this.mesh.material = v;
-    this.disk.material = v;
-    this.gazeInner.material = v;
-    this.gazeOuter.material = v;
-  }
-
-  add(obj) {
-    this.root.add(obj);
-  }
-
-  addDevice(orientation, trigger){
-    if(orientation){
-      this.devices.push(orientation);
+  _createClass(Pointer, [{
+    key: "add",
+    value: function add(obj) {
+      this.root.add(obj);
     }
-
-    if(trigger){
-      this.triggerDevices.push(trigger);
-    }
-  }
-
-  addToBrowserEnvironment(env, scene) {
-    pliny.method({
-      parent: "Primrose.Pointer",
-      name: "addToBrowserEnvironment",
-      description: "Add this meshes that give the visual representation of the pointer, to the scene.",
-      parameters: [{
-        name: "env",
-        type: "Primrose.BrowserEnvironment",
-        description: "Not used, just here to fulfill a common interface in the framework."
-      }, {
-        name: "scene",
-        type: "THREE.Scene",
-        description: "The scene to which to add the 3D cursor."
-      }]
-    });
-    scene.add(this.root);
-    scene.add(this.disk);
-  }
-
-  get position() {
-    return this.root.position;
-  }
-
-  get quaternion() {
-    return this.root.quaternion;
-  }
-
-  get rotation(){
-    return this.root.rotation;
-  }
-
-  get matrix() {
-    return this.root.matrix;
-  }
-
-  updateMatrix() {
-    return this.root.updateMatrix();
-  }
-
-  applyMatrix(m) {
-    return this.root.applyMatrix(m);
-  }
-
-  update() {
-    this.position.set(0, 0, 0);
-
-    if(this.unproject) {
-      QUAT_TEMP.set(0, 1, 0, 0);
-      VECTOR_TEMP.set(0, 0, 0);
-      for(let i = 0; i < this.devices.length; ++i) {
-        const obj = this.devices[i];
-        if(obj.enabled) {
-          VECTOR_TEMP.x += obj.getValue("U");
-          VECTOR_TEMP.y += obj.getValue("V");
-        }
+  }, {
+    key: "addDevice",
+    value: function addDevice(orientation, trigger) {
+      if (orientation) {
+        this.devices.push(orientation);
       }
 
-      VECTOR_TEMP.applyMatrix4(this.unproject)
-        .applyQuaternion(QUAT_TEMP);
-      this.root.lookAt(VECTOR_TEMP);
+      if (trigger) {
+        this.triggerDevices.push(trigger);
+      }
     }
-    else {
-      this.quaternion.set(0, 0, 0, 1);
-      EULER_TEMP.set(0, 0, 0, "YXZ");
-      for(let i = 0; i < this.devices.length; ++i) {
-        const obj = this.devices[i];
-        if(obj.enabled) {
-          if(obj.quaternion) {
-            this.quaternion.multiply(obj.quaternion);
-          }
-          if(obj.position) {
-            this.position.add(obj.position);
+  }, {
+    key: "addToBrowserEnvironment",
+    value: function addToBrowserEnvironment(env, scene) {
+      pliny.method({
+        parent: "Primrose.Pointer",
+        name: "addToBrowserEnvironment",
+        description: "Add this meshes that give the visual representation of the pointer, to the scene.",
+        parameters: [{
+          name: "env",
+          type: "Primrose.BrowserEnvironment",
+          description: "Not used, just here to fulfill a common interface in the framework."
+        }, {
+          name: "scene",
+          type: "THREE.Scene",
+          description: "The scene to which to add the 3D cursor."
+        }]
+      });
+      scene.add(this.root);
+      scene.add(this.disk);
+    }
+  }, {
+    key: "updateMatrix",
+    value: function updateMatrix() {
+      return this.root.updateMatrix();
+    }
+  }, {
+    key: "applyMatrix",
+    value: function applyMatrix(m) {
+      return this.root.applyMatrix(m);
+    }
+  }, {
+    key: "update",
+    value: function update() {
+      this.position.set(0, 0, 0);
+
+      if (this.unproject) {
+        QUAT_TEMP.set(0, 1, 0, 0);
+        VECTOR_TEMP.set(0, 0, 0);
+        for (var i = 0; i < this.devices.length; ++i) {
+          var obj = this.devices[i];
+          if (obj.enabled) {
+            VECTOR_TEMP.x += obj.getValue("U");
+            VECTOR_TEMP.y += obj.getValue("V");
           }
         }
+
+        VECTOR_TEMP.applyMatrix4(this.unproject).applyQuaternion(QUAT_TEMP);
+        this.root.lookAt(VECTOR_TEMP);
+      } else {
+        this.quaternion.set(0, 0, 0, 1);
+        EULER_TEMP.set(0, 0, 0, "YXZ");
+        for (var _i = 0; _i < this.devices.length; ++_i) {
+          var _obj = this.devices[_i];
+          if (_obj.enabled) {
+            if (_obj.quaternion) {
+              this.quaternion.multiply(_obj.quaternion);
+            }
+            if (_obj.position) {
+              this.position.add(_obj.position);
+            }
+          }
+        }
+
+        QUAT_TEMP.setFromEuler(EULER_TEMP);
+        this.quaternion.multiply(QUAT_TEMP);
       }
-
-      QUAT_TEMP.setFromEuler(EULER_TEMP);
-      this.quaternion.multiply(QUAT_TEMP);
+      this.root.updateMatrixWorld();
     }
-    this.root.updateMatrixWorld();
-  }
+  }, {
+    key: "moveTeleportPad",
+    value: function moveTeleportPad(point) {
+      this.disk.position.copy(point);
+    }
+  }, {
+    key: "resolvePicking",
+    value: function resolvePicking(objects) {
+      this.mesh.visible = false;
 
-  moveTeleportPad(point){
-    this.disk.position
-      .copy(point);
-  }
+      this.mesh.material = material("", {
+        color: this.color,
+        unshaded: true
+      });
 
-  resolvePicking(objects) {
-    this.mesh.visible = false;
+      if (this.showPointer) {
+        VECTOR_TEMP.set(0, 0, 0).applyMatrix4(this.root.matrixWorld);
+        FORWARD.set(0, 0, -1).applyMatrix4(this.root.matrixWorld).sub(VECTOR_TEMP);
+        this.picker.set(VECTOR_TEMP, FORWARD);
+        var hits = this.picker.intersectObjects(objects, true),
+            currentHit = hits[0],
+            _priv = _(this),
+            lastHit = _priv.lastHit,
+            moved = lastHit && currentHit && (currentHit.point.x !== lastHit.point.x || currentHit.point.y !== lastHit.point.y || currentHit.point.z !== lastHit.point.z),
+            dt = lastHit && lastHit.time && performance.now() - lastHit.time,
+            changed = !lastHit && currentHit || lastHit && !currentHit || lastHit && currentHit && currentHit.object.id !== lastHit.object.id,
+            evt = {
+          pointer: this,
+          buttons: 0,
+          hit: currentHit,
+          lastHit: lastHit
+        };
 
-    this.mesh.material = material("", {
-      color: this.color,
-      unshaded: true
-    });
+        if (currentHit) {
+          currentHit.time = performance.now();
 
-    if(this.showPointer){
-      VECTOR_TEMP.set(0, 0, 0)
-        .applyMatrix4(this.root.matrixWorld);
-      FORWARD.set(0, 0, -1)
-        .applyMatrix4(this.root.matrixWorld)
-        .sub(VECTOR_TEMP);
-      this.picker.set(VECTOR_TEMP, FORWARD);
-      const hits = this.picker.intersectObjects(objects, true);
-      if(hits.length > 0) {
-        const currentHit = hits[0],
-          _priv = _(this),
-          lastHit = _priv.lastHit,
-          moved = lastHit && currentHit &&
-            (currentHit.point.x !== lastHit.point.x ||
-            currentHit.point.y !== lastHit.point.y ||
-            currentHit.point.z !== lastHit.point.z),
-          dt = lastHit && lastHit.time && (performance.now() - lastHit.time),
-          changed = !lastHit && currentHit ||
-            lastHit && !currentHit ||
-            lastHit && currentHit && currentHit.object.id !== lastHit.object.id,
-          evt = {
-            pointer: this,
-            buttons: 0,
-            hit: currentHit,
-            lastHit: lastHit
-          };
+          this.mesh.material = material("", {
+            color: this.highlight,
+            unshaded: true
+          });
+        }
 
-        currentHit.time = performance.now();
-        this.mesh.material = material("", {
-          color: this.highlight,
-          unshaded: true
-        });
-
-        if(moved){
+        if (moved) {
           lastHit.point.copy(currentHit.point);
         }
 
         this.mesh.visible = !this.useGaze;
 
-        if(changed){
-          if(lastHit){
+        if (changed) {
+          if (lastHit) {
             this.emit("exit", evt);
           }
-          if(currentHit){
+          if (currentHit) {
             this.emit("enter", evt);
           }
         }
 
         var dButtons = 0;
-        for(let i = 0; i < this.triggerDevices.length; ++i) {
-          const obj = this.triggerDevices[i];
-          if(obj.enabled){
+        for (var i = 0; i < this.triggerDevices.length; ++i) {
+          var obj = this.triggerDevices[i];
+          if (obj.enabled) {
             evt.buttons |= obj.getValue("buttons");
             dButtons |= obj.getValue("dButtons");
           }
         }
 
-        if(dButtons){
-          if(evt.buttons){
+        if (dButtons) {
+          if (evt.buttons) {
             this.emit("pointerstart", evt);
-          }
-          else{
+          } else {
             this.emit("pointerend", evt);
           }
-        }
-        else if(moved) {
+        } else if (moved) {
           this.emit("pointermove", evt);
         }
 
-        if(this.useGaze){
-          if(changed) {
-            if(dt !== null && dt < GAZE_TIMEOUT){
+        if (this.useGaze) {
+          if (changed) {
+            if (dt !== null && dt < GAZE_TIMEOUT) {
               this.gazeOuter.visible = false;
               this.emit("gazecancel", evt);
             }
-            if(currentHit){
+            if (currentHit) {
               this.gazeOuter.visible = true;
               this.emit("gazestart", evt);
             }
-          }
-          else if(dt !== null) {
-            if(dt >= GAZE_TIMEOUT){
+          } else if (dt !== null) {
+            if (dt >= GAZE_TIMEOUT) {
               this.gazeOuter.visible = false;
               this.emit("gazecomplete", evt);
               lastHit.time = null;
-            }
-            else {
+            } else {
               var p = Math.round(36 * dt / GAZE_TIMEOUT),
-                a = 2 * Math.PI * p / 36;
+                  a = 2 * Math.PI * p / 36;
               this.gazeOuter.geometry = ring(GAZE_RING_INNER, GAZE_RING_OUTER, 36, p, 0, a);
-              if(moved) {
+              if (moved) {
                 this.emit("gazemove", evt);
               }
             }
           }
         }
 
-        if(changed){
+        if (changed) {
           _priv.lastHit = currentHit;
         }
       }
     }
-  }
-}
+  }, {
+    key: "useGaze",
+    get: function get() {
+      return this.gazeInner.visible;
+    },
+    set: function set(v) {
+      this.gazeInner.visible = !!v;
+      this.mesh.visible = !v;
+    }
+  }, {
+    key: "material",
+    get: function get() {
+      return this.mesh.material;
+    },
+    set: function set(v) {
+      this.mesh.material = v;
+      this.disk.material = v;
+      this.gazeInner.material = v;
+      this.gazeOuter.material = v;
+    }
+  }, {
+    key: "position",
+    get: function get() {
+      return this.root.position;
+    }
+  }, {
+    key: "quaternion",
+    get: function get() {
+      return this.root.quaternion;
+    }
+  }, {
+    key: "rotation",
+    get: function get() {
+      return this.root.rotation;
+    }
+  }, {
+    key: "matrix",
+    get: function get() {
+      return this.root.matrix;
+    }
+  }]);
+
+  return Pointer;
+}(Primrose.AbstractEventEmitter);
 
 Pointer.EVENTS = ["pointerstart", "pointerend", "pointermove", "gazestart", "gazemove", "gazecomplete", "gazecancel", "exit", "enter"];
-  if(typeof window !== "undefined") window.Primrose.Pointer = Pointer;
+    if(typeof window !== "undefined") window.Primrose.Pointer = Pointer;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Pointer.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Pointer.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\PoseInputProcessor.js
-(function(){const DEFAULT_POSE = {
-    position: [0, 0, 0],
-    orientation: [0, 0, 0, 1]
-  },
-  EMPTY_SCALE = new THREE.Vector3(),
-  IE_CORRECTION = new THREE.Quaternion(1, 0, 0, 0);
+    // start D:\Documents\VR\Primrose\src\Primrose\PoseInputProcessor.js
+(function(){"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var DEFAULT_POSE = {
+  position: [0, 0, 0],
+  orientation: [0, 0, 0, 1]
+},
+    EMPTY_SCALE = new THREE.Vector3(),
+    IE_CORRECTION = new THREE.Quaternion(1, 0, 0, 0);
 
 pliny.class({
   parent: "Primrose",
-    name: "PoseInputProcessor",
-    baseClass: "Primrose.InputProcessor",
-    description: "| [under construction]"
+  name: "PoseInputProcessor",
+  baseClass: "Primrose.InputProcessor",
+  description: "| [under construction]"
 });
-class PoseInputProcessor extends Primrose.InputProcessor {
-  constructor(name, commands, axisNames) {
-    super(name, commands, axisNames);
 
-    this.currentDevice = null;
-    this.lastPose = null;
-    this.currentPose = null;
-    this.posePosition = new THREE.Vector3();
-    this.poseQuaternion = new THREE.Quaternion();
-    this.position = new THREE.Vector3();
-    this.quaternion = new THREE.Quaternion();
-    this.matrix = new THREE.Matrix4();
+var PoseInputProcessor = function (_Primrose$InputProces) {
+  _inherits(PoseInputProcessor, _Primrose$InputProces);
+
+  function PoseInputProcessor(name, commands, axisNames) {
+    _classCallCheck(this, PoseInputProcessor);
+
+    var _this = _possibleConstructorReturn(this, (PoseInputProcessor.__proto__ || Object.getPrototypeOf(PoseInputProcessor)).call(this, name, commands, axisNames));
+
+    _this.currentDevice = null;
+    _this.lastPose = null;
+    _this.currentPose = null;
+    _this.posePosition = new THREE.Vector3();
+    _this.poseQuaternion = new THREE.Quaternion();
+    _this.position = new THREE.Vector3();
+    _this.quaternion = new THREE.Quaternion();
+    _this.matrix = new THREE.Matrix4();
+    return _this;
   }
 
-  get hasPose() {
-    return !!this.currentPose;
-  }
+  _createClass(PoseInputProcessor, [{
+    key: "update",
+    value: function update(dt) {
+      _get(PoseInputProcessor.prototype.__proto__ || Object.getPrototypeOf(PoseInputProcessor.prototype), "update", this).call(this, dt);
 
-  update(dt) {
-    super.update(dt);
-
-    if (this.currentDevice) {
-      var pose = this.currentPose || this.lastPose || DEFAULT_POSE;
-      this.lastPose = pose;
-      this.inPhysicalUse = this.hasOrientation || this.inPhysicalUse;
-      var orient = this.currentPose && this.currentPose.orientation,
-        pos = this.currentPose && this.currentPose.position;
-      if (orient) {
-        this.poseQuaternion.fromArray(orient);
-        if(isMobile && isIE){
-          this.poseQuaternion.multiply(IE_CORRECTION);
+      if (this.currentDevice) {
+        var pose = this.currentPose || this.lastPose || DEFAULT_POSE;
+        this.lastPose = pose;
+        this.inPhysicalUse = this.hasOrientation || this.inPhysicalUse;
+        var orient = this.currentPose && this.currentPose.orientation,
+            pos = this.currentPose && this.currentPose.position;
+        if (orient) {
+          this.poseQuaternion.fromArray(orient);
+          if (isMobile && isIE) {
+            this.poseQuaternion.multiply(IE_CORRECTION);
+          }
+        } else {
+          this.poseQuaternion.set(0, 0, 0, 1);
+        }
+        if (pos) {
+          this.posePosition.fromArray(pos);
+        } else {
+          this.posePosition.set(0, 0, 0);
         }
       }
-      else {
-        this.poseQuaternion.set(0, 0, 0, 1);
-      }
-      if (pos) {
-        this.posePosition.fromArray(pos);
-      }
-      else {
-        this.posePosition.set(0, 0, 0);
-      }
     }
-  }
+  }, {
+    key: "updateStage",
+    value: function updateStage(stageMatrix) {
+      this.matrix.makeRotationFromQuaternion(this.poseQuaternion);
+      this.matrix.setPosition(this.posePosition);
+      this.matrix.multiplyMatrices(stageMatrix, this.matrix);
+      this.matrix.decompose(this.position, this.quaternion, EMPTY_SCALE);
+    }
+  }, {
+    key: "hasPose",
+    get: function get() {
+      return !!this.currentPose;
+    }
+  }]);
 
-  updateStage(stageMatrix) {
-    this.matrix.makeRotationFromQuaternion(this.poseQuaternion);
-    this.matrix.setPosition(this.posePosition);
-    this.matrix.multiplyMatrices(stageMatrix, this.matrix);
-    this.matrix.decompose(this.position, this.quaternion, EMPTY_SCALE);
-  }
-}
-  if(typeof window !== "undefined") window.Primrose.PoseInputProcessor = PoseInputProcessor;
+  return PoseInputProcessor;
+}(Primrose.InputProcessor);
+    if(typeof window !== "undefined") window.Primrose.PoseInputProcessor = PoseInputProcessor;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\PoseInputProcessor.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\PoseInputProcessor.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random.js
-(function(){pliny.namespace({
+    // start D:\Documents\VR\Primrose\src\Primrose\Random.js
+(function(){"use strict";
+
+pliny.namespace({
   parent: "Primrose",
   name: "Random",
   description: "Functions for handling random numbers of different criteria, or selecting random elements of arrays."
 });
-const Random = {};
-  if(typeof window !== "undefined") window.Primrose.Random = Random;
+var Random = {};
+    if(typeof window !== "undefined") window.Primrose.Random = Random;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Random.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\SKINS.js
-(function(){pliny.value({
+    // start D:\Documents\VR\Primrose\src\Primrose\SKINS.js
+(function(){"use strict";
+
+pliny.value({
   name: "SKINS",
   type: "Array of String",
   description: "A selection of color values that closely match skin colors of people."
 });
-const SKINS = ["#FFDFC4", "#F0D5BE", "#EECEB3", "#E1B899", "#E5C298", "#FFDCB2",
-  "#E5B887", "#E5A073", "#E79E6D", "#DB9065", "#CE967C", "#C67856", "#BA6C49",
-  "#A57257", "#F0C8C9", "#DDA8A0", "#B97C6D", "#A8756C", "#AD6452", "#5C3836",
-  "#CB8442", "#BD723C", "#704139", "#A3866A", "#870400", "#710101", "#430000",
-  "#5B0001", "#302E2E"
-];
-  if(typeof window !== "undefined") window.Primrose.SKINS = SKINS;
+var SKINS = ["#FFDFC4", "#F0D5BE", "#EECEB3", "#E1B899", "#E5C298", "#FFDCB2", "#E5B887", "#E5A073", "#E79E6D", "#DB9065", "#CE967C", "#C67856", "#BA6C49", "#A57257", "#F0C8C9", "#DDA8A0", "#B97C6D", "#A8756C", "#AD6452", "#5C3836", "#CB8442", "#BD723C", "#704139", "#A3866A", "#870400", "#710101", "#430000", "#5B0001", "#302E2E"];
+    if(typeof window !== "undefined") window.Primrose.SKINS = SKINS;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\SKINS.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\SKINS.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\SKINS_VALUES.js
-(function(){pliny.value({
+    // start D:\Documents\VR\Primrose\src\Primrose\SKINS_VALUES.js
+(function(){"use strict";
+
+pliny.value({
   name: "SKIN_VALUES",
   type: "Array of Number",
   description: "A selection of color values that closely match skin colors of people."
 });
-const SKINS_VALUES = Primrose.SKINS.map(function (s) {
+var SKINS_VALUES = Primrose.SKINS.map(function (s) {
   return parseInt(s.substring(1), 16);
 });
-  if(typeof window !== "undefined") window.Primrose.SKINS_VALUES = SKINS_VALUES;
+    if(typeof window !== "undefined") window.Primrose.SKINS_VALUES = SKINS_VALUES;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\SKINS_VALUES.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\SKINS_VALUES.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Surface.js
-(function(){var COUNTER = 0;
+    // start D:\Documents\VR\Primrose\src\Primrose\Surface.js
+(function(){"use strict";
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var COUNTER = 0;
 
 pliny.class({
   parent: "Primrose",
-    name: "Surface",
-    description: "Cascades through a number of options to eventually return a CanvasRenderingContext2D object on which one will perform drawing operations.",
-    baseClass: "Primrose.Entity",
-    parameters: [{
-      name: "options.id",
-      type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
-      description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
-    }, {
-      name: "options.bounds",
-      type: "Primrose.Text.Rectangle",
-      description: "The size and location of the surface to create."
-    }]
+  name: "Surface",
+  description: "Cascades through a number of options to eventually return a CanvasRenderingContext2D object on which one will perform drawing operations.",
+  baseClass: "Primrose.Entity",
+  parameters: [{
+    name: "options.id",
+    type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
+    description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
+  }, {
+    name: "options.bounds",
+    type: "Primrose.Text.Rectangle",
+    description: "The size and location of the surface to create."
+  }]
 });
-class Surface extends Primrose.Entity {
 
-  static create() {
-    return new Surface();
-  }
+var Surface = function (_Primrose$Entity) {
+  _inherits(Surface, _Primrose$Entity);
 
-  constructor(options) {
-    super();
-    this.options = patch(options, {
-      id: "Primrose.Surface[" + (COUNTER++) + "]",
+  _createClass(Surface, null, [{
+    key: "create",
+    value: function create() {
+      return new Surface();
+    }
+  }]);
+
+  function Surface(options) {
+    _classCallCheck(this, Surface);
+
+    var _this = _possibleConstructorReturn(this, (Surface.__proto__ || Object.getPrototypeOf(Surface)).call(this));
+
+    _this.options = patch(options, {
+      id: "Primrose.Surface[" + COUNTER++ + "]",
       bounds: new Primrose.Text.Rectangle()
     });
-    this.listeners.move = [];
-    this.bounds = this.options.bounds;
-    this.canvas = null;
-    this.context = null;
-    this._opacity = 1;
+    _this.listeners.move = [];
+    _this.bounds = _this.options.bounds;
+    _this.canvas = null;
+    _this.context = null;
+    _this._opacity = 1;
 
-    this.style = {};
+    _this.style = {};
 
-    Object.defineProperties(this.style, {
+    Object.defineProperties(_this.style, {
       width: {
-        get: () => {
-          return this.bounds.width;
+        get: function get() {
+          return _this.bounds.width;
         },
-        set: (v) => {
-          this.bounds.width = v;
-          this.resize();
+        set: function set(v) {
+          _this.bounds.width = v;
+          _this.resize();
         }
       },
       height: {
-        get: () => {
-          return this.bounds.height;
+        get: function get() {
+          return _this.bounds.height;
         },
-        set: (v) => {
-          this.bounds.height = v;
-          this.resize();
+        set: function set(v) {
+          _this.bounds.height = v;
+          _this.resize();
         }
       },
       left: {
-        get: () => {
-          return this.bounds.left;
+        get: function get() {
+          return _this.bounds.left;
         },
-        set: (v) => {
-          this.bounds.left = v;
+        set: function set(v) {
+          _this.bounds.left = v;
         }
       },
       top: {
-        get: () => {
-          return this.bounds.top;
+        get: function get() {
+          return _this.bounds.top;
         },
-        set: (v) => {
-          this.bounds.top = v;
+        set: function set(v) {
+          _this.bounds.top = v;
         }
       },
       opacity: {
-        get: () => {
-          return this._opacity;
+        get: function get() {
+          return _this._opacity;
         },
-        set: (v) => {
-          this._opacity = v;
+        set: function set(v) {
+          _this._opacity = v;
         }
       },
       fontSize: {
-        get: () => {
-          return this.fontSize;
+        get: function get() {
+          return _this.fontSize;
         },
-        set: (v) => {
-          this.fontSize = v;
+        set: function set(v) {
+          _this.fontSize = v;
         }
       },
       backgroundColor: {
-        get: () => {
-          return this.backgroundColor;
+        get: function get() {
+          return _this.backgroundColor;
         },
-        set: (v) => {
-          this.backgroundColor = v;
+        set: function set(v) {
+          _this.backgroundColor = v;
         }
       },
       color: {
-        get: () => {
-          return this.color;
+        get: function get() {
+          return _this.color;
         },
-        set: (v) => {
-          this.color = v;
+        set: function set(v) {
+          _this.color = v;
         }
       }
     });
 
-
-    if (this.options.id instanceof Surface) {
+    if (_this.options.id instanceof Surface) {
       throw new Error("Object is already a Surface. Please don't try to wrap them.");
-    }
-    else if (this.options.id instanceof CanvasRenderingContext2D) {
-      this.context = this.options.id;
-      this.canvas = this.context.canvas;
-    }
-    else if (this.options.id instanceof HTMLCanvasElement) {
-      this.canvas = this.options.id;
-    }
-    else if (typeof (this.options.id) === "string" || this.options.id instanceof String) {
-      this.canvas = document.getElementById(this.options.id);
-      if (this.canvas === null) {
-        this.canvas = document.createElement("canvas");
-        this.canvas.id = this.options.id;
-      }
-      else if (this.canvas.tagName !== "CANVAS") {
-        this.canvas = null;
+    } else if (_this.options.id instanceof CanvasRenderingContext2D) {
+      _this.context = _this.options.id;
+      _this.canvas = _this.context.canvas;
+    } else if (_this.options.id instanceof HTMLCanvasElement) {
+      _this.canvas = _this.options.id;
+    } else if (typeof _this.options.id === "string" || _this.options.id instanceof String) {
+      _this.canvas = document.getElementById(_this.options.id);
+      if (_this.canvas === null) {
+        _this.canvas = document.createElement("canvas");
+        _this.canvas.id = _this.options.id;
+      } else if (_this.canvas.tagName !== "CANVAS") {
+        _this.canvas = null;
       }
     }
 
-    if (this.canvas === null) {
+    if (_this.canvas === null) {
       pliny.error({
         name: "Invalid element",
         type: "Error",
         description: "If the element could not be found, could not be created, or one of the appropriate ID was found but did not match the expected type, an error is thrown to halt operation."
       });
-      console.error(typeof (this.options.id));
-      console.error(this.options.id);
-      throw new Error(this.options.id + " does not refer to a valid canvas element.");
+      console.error(_typeof(_this.options.id));
+      console.error(_this.options.id);
+      throw new Error(_this.options.id + " does not refer to a valid canvas element.");
     }
 
-    this.id = this.canvas.id;
+    _this.id = _this.canvas.id;
 
-    if (this.bounds.width === 0) {
-      this.bounds.width = this.imageWidth;
-      this.bounds.height = this.imageHeight;
+    if (_this.bounds.width === 0) {
+      _this.bounds.width = _this.imageWidth;
+      _this.bounds.height = _this.imageHeight;
     }
 
-    this.imageWidth = this.bounds.width;
-    this.imageHeight = this.bounds.height;
+    _this.imageWidth = _this.bounds.width;
+    _this.imageHeight = _this.bounds.height;
 
-    if (this.context === null) {
-      this.context = this.canvas.getContext("2d");
+    if (_this.context === null) {
+      _this.context = _this.canvas.getContext("2d");
     }
 
-    this.canvas.style.imageRendering = isChrome ? "pixelated" : "optimizespeed";
-    this.context.imageSmoothingEnabled = false;
-    this.context.textBaseline = "top";
+    _this.canvas.style.imageRendering = isChrome ? "pixelated" : "optimizespeed";
+    _this.context.imageSmoothingEnabled = false;
+    _this.context.textBaseline = "top";
 
-    this._texture = null;
-    this._material = null;
-    this._environment = null;
+    _this._texture = null;
+    _this._material = null;
+    _this._environment = null;
+    return _this;
   }
 
-  addToBrowserEnvironment(env, scene) {
-    this._environment = env;
-    var geom = this.className === "shell" ? shell(3, 10, 10) : quad(2, 2),
-      mesh = textured(geom, this, {
+  _createClass(Surface, [{
+    key: "addToBrowserEnvironment",
+    value: function addToBrowserEnvironment(env, scene) {
+      this._environment = env;
+      var geom = this.className === "shell" ? shell(3, 10, 10) : quad(2, 2),
+          mesh = textured(geom, this, {
         opacity: this._opacity
       });
-    scene.add(mesh);
-    env.registerPickableObject(mesh);
-    return mesh;
-  }
-
-  invalidate(bounds) {
-    var useDefault = !bounds;
-    if (!bounds) {
-      bounds = this.bounds.clone();
-      bounds.left = 0;
-      bounds.top = 0;
+      scene.add(mesh);
+      env.registerPickableObject(mesh);
+      return mesh;
     }
-    else if (bounds instanceof Primrose.Text.Rectangle) {
-      bounds = bounds.clone();
-    }
-    for (var i = 0; i < this.children.length; ++i) {
-      var child = this.children[i],
-        overlap = bounds.overlap(child.bounds);
-      if (overlap) {
-        var x = overlap.left - child.bounds.left,
-          y = overlap.top - child.bounds.top;
-        this.context.drawImage(
-          child.canvas,
-          x, y, overlap.width, overlap.height,
-          overlap.x, overlap.y, overlap.width, overlap.height);
+  }, {
+    key: "invalidate",
+    value: function invalidate(bounds) {
+      var useDefault = !bounds;
+      if (!bounds) {
+        bounds = this.bounds.clone();
+        bounds.left = 0;
+        bounds.top = 0;
+      } else if (bounds instanceof Primrose.Text.Rectangle) {
+        bounds = bounds.clone();
       }
-    }
-    if (this._texture) {
-      this._texture.needsUpdate = true;
-    }
-    if (this._material) {
-      this._material.needsUpdate = true;
-    }
-    if (this.parent && this.parent.invalidate) {
-      bounds.left += this.bounds.left;
-      bounds.top += this.bounds.top;
-      this.parent.invalidate(bounds);
-    }
-  }
-
-  render() {
-    this.invalidate();
-  }
-
-  get imageWidth() {
-    return this.canvas.width;
-  }
-
-  set imageWidth(v) {
-    this.canvas.width = v;
-    this.bounds.width = v;
-  }
-
-  get imageHeight() {
-    return this.canvas.height;
-  }
-
-  set imageHeight(v) {
-    this.canvas.height = v;
-    this.bounds.height = v;
-  }
-
-  get elementWidth() {
-    return this.canvas.clientWidth * devicePixelRatio;
-  }
-
-  set elementWidth(v) {
-    this.canvas.style.width = (v / devicePixelRatio) + "px";
-  }
-
-  get elementHeight() {
-    return this.canvas.clientHeight * devicePixelRatio;
-  }
-
-  set elementHeight(v) {
-    this.canvas.style.height = (v / devicePixelRatio) + "px";
-  }
-
-  get surfaceWidth() {
-    return this.canvas.parentElement ? this.elementWidth : this.bounds.width;
-  }
-
-  get surfaceHeight() {
-    return this.canvas.parentElement ? this.elementHeight : this.bounds.height;
-  }
-
-  get resized() {
-    return this.imageWidth !== this.surfaceWidth ||
-      this.imageHeight !== this.surfaceHeight;
-  }
-
-  resize() {
-    this.setSize(this.surfaceWidth, this.surfaceHeight);
-  }
-
-  setSize(width, height) {
-    const oldTextBaseline = this.context.textBaseline,
-      oldTextAlign = this.context.textAlign;
-    this.imageWidth = width;
-    this.imageHeight = height;
-
-    this.context.textBaseline = oldTextBaseline;
-    this.context.textAlign = oldTextAlign;
-  }
-
-  get texture() {
-    if (!this._texture) {
-      this._texture = new THREE.Texture(this.canvas);
-    }
-    return this._texture;
-  }
-
-  get environment() {
-    var head = this;
-    while(head){
-      if(head._environment){
-        if(head !== this){
-          this._environment = head._environment;
+      for (var i = 0; i < this.children.length; ++i) {
+        var child = this.children[i],
+            overlap = bounds.overlap(child.bounds);
+        if (overlap) {
+          var x = overlap.left - child.bounds.left,
+              y = overlap.top - child.bounds.top;
+          this.context.drawImage(child.canvas, x, y, overlap.width, overlap.height, overlap.x, overlap.y, overlap.width, overlap.height);
         }
-        return this._environment;
       }
-      head = head.parent;
-    }
-  }
-
-  appendChild(child) {
-    if (!(child instanceof Surface)) {
-      throw new Error("Can only append other Surfaces to a Surface. You gave: " + child);
-    }
-    super.appendChild(child);
-    this.invalidate();
-  }
-
-  mapUV(point) {
-    if(point instanceof Array){
-      return {
-        x: point[0] * this.imageWidth,
-        y: (1 - point[1]) * this.imageHeight
-      };
-    }
-    else if(point instanceof THREE.Vector2) {
-      return {
-        x: point.x * this.imageWidth,
-        y: (1 - point.y) * this.imageHeight
-      };
-    }
-  }
-
-  unmapUV(point) {
-    return [point.x / this.imageWidth, (1 - point.y / this.imageHeight)];
-  }
-
-  _findChild(x, y, thunk) {
-    var here = this.inBounds(x, y),
-      found = null;
-    for (var i = this.children.length - 1; i >= 0; --i) {
-      var child = this.children[i];
-      if (!found && child.inBounds(x - this.bounds.left, y - this.bounds.top)) {
-        found = child;
+      if (this._texture) {
+        this._texture.needsUpdate = true;
       }
-      else if (child.focused) {
-        child.blur();
+      if (this._material) {
+        this._material.needsUpdate = true;
+      }
+      if (this.parent && this.parent.invalidate) {
+        bounds.left += this.bounds.left;
+        bounds.top += this.bounds.top;
+        this.parent.invalidate(bounds);
       }
     }
-    return found || here && this;
-  }
+  }, {
+    key: "render",
+    value: function render() {
+      this.invalidate();
+    }
+  }, {
+    key: "resize",
+    value: function resize() {
+      this.setSize(this.surfaceWidth, this.surfaceHeight);
+    }
+  }, {
+    key: "setSize",
+    value: function setSize(width, height) {
+      var oldTextBaseline = this.context.textBaseline,
+          oldTextAlign = this.context.textAlign;
+      this.imageWidth = width;
+      this.imageHeight = height;
 
-  inBounds(x, y) {
-    return this.bounds.left <= x && x < this.bounds.right && this.bounds.top <= y && y < this.bounds.bottom;
-  }
-
-  startPointer(x, y) {
-    if (this.inBounds(x, y)) {
-      var target = this._findChild(x, y, (child, x2, y2) => child.startPointer(x2, y2));
+      this.context.textBaseline = oldTextBaseline;
+      this.context.textAlign = oldTextAlign;
+    }
+  }, {
+    key: "appendChild",
+    value: function appendChild(child) {
+      if (!(child instanceof Surface)) {
+        throw new Error("Can only append other Surfaces to a Surface. You gave: " + child);
+      }
+      _get(Surface.prototype.__proto__ || Object.getPrototypeOf(Surface.prototype), "appendChild", this).call(this, child);
+      this.invalidate();
+    }
+  }, {
+    key: "mapUV",
+    value: function mapUV(point) {
+      if (point instanceof Array) {
+        return {
+          x: point[0] * this.imageWidth,
+          y: (1 - point[1]) * this.imageHeight
+        };
+      } else if (point instanceof THREE.Vector2) {
+        return {
+          x: point.x * this.imageWidth,
+          y: (1 - point.y) * this.imageHeight
+        };
+      }
+    }
+  }, {
+    key: "unmapUV",
+    value: function unmapUV(point) {
+      return [point.x / this.imageWidth, 1 - point.y / this.imageHeight];
+    }
+  }, {
+    key: "_findChild",
+    value: function _findChild(x, y, thunk) {
+      var here = this.inBounds(x, y),
+          found = null;
+      for (var i = this.children.length - 1; i >= 0; --i) {
+        var child = this.children[i];
+        if (!found && child.inBounds(x - this.bounds.left, y - this.bounds.top)) {
+          found = child;
+        } else if (child.focused) {
+          child.blur();
+        }
+      }
+      return found || here && this;
+    }
+  }, {
+    key: "inBounds",
+    value: function inBounds(x, y) {
+      return this.bounds.left <= x && x < this.bounds.right && this.bounds.top <= y && y < this.bounds.bottom;
+    }
+  }, {
+    key: "startPointer",
+    value: function startPointer(x, y) {
+      if (this.inBounds(x, y)) {
+        var target = this._findChild(x, y, function (child, x2, y2) {
+          return child.startPointer(x2, y2);
+        });
+        if (target) {
+          if (!this.focused) {
+            this.focus();
+          }
+          emit.call(this, "click", {
+            target: target,
+            x: x,
+            y: y
+          });
+          if (target !== this) {
+            target.startPointer(x - this.bounds.left, y - this.bounds.top);
+          }
+        } else if (this.focused) {
+          this.blur();
+        }
+      }
+    }
+  }, {
+    key: "movePointer",
+    value: function movePointer(x, y) {
+      var target = this._findChild(x, y, function (child, x2, y2) {
+        return child.startPointer(x2, y2);
+      });
       if (target) {
-        if (!this.focused) {
-          this.focus();
-        }
-        emit.call(this, "click", {
-          target,
-          x,
-          y
+        emit.call(this, "move", {
+          target: target,
+          x: x,
+          y: y
         });
         if (target !== this) {
-          target.startPointer(x - this.bounds.left, y - this.bounds.top);
+          target.movePointer(x - this.bounds.left, y - this.bounds.top);
         }
       }
-      else if (this.focused) {
-        this.blur();
+    }
+  }, {
+    key: "startUV",
+    value: function startUV(point) {
+      var p = this.mapUV(point);
+      this.startPointer(p.x, p.y);
+    }
+  }, {
+    key: "moveUV",
+    value: function moveUV(point) {
+      var p = this.mapUV(point);
+      this.movePointer(p.x, p.y);
+    }
+  }, {
+    key: "imageWidth",
+    get: function get() {
+      return this.canvas.width;
+    },
+    set: function set(v) {
+      this.canvas.width = v;
+      this.bounds.width = v;
+    }
+  }, {
+    key: "imageHeight",
+    get: function get() {
+      return this.canvas.height;
+    },
+    set: function set(v) {
+      this.canvas.height = v;
+      this.bounds.height = v;
+    }
+  }, {
+    key: "elementWidth",
+    get: function get() {
+      return this.canvas.clientWidth * devicePixelRatio;
+    },
+    set: function set(v) {
+      this.canvas.style.width = v / devicePixelRatio + "px";
+    }
+  }, {
+    key: "elementHeight",
+    get: function get() {
+      return this.canvas.clientHeight * devicePixelRatio;
+    },
+    set: function set(v) {
+      this.canvas.style.height = v / devicePixelRatio + "px";
+    }
+  }, {
+    key: "surfaceWidth",
+    get: function get() {
+      return this.canvas.parentElement ? this.elementWidth : this.bounds.width;
+    }
+  }, {
+    key: "surfaceHeight",
+    get: function get() {
+      return this.canvas.parentElement ? this.elementHeight : this.bounds.height;
+    }
+  }, {
+    key: "resized",
+    get: function get() {
+      return this.imageWidth !== this.surfaceWidth || this.imageHeight !== this.surfaceHeight;
+    }
+  }, {
+    key: "texture",
+    get: function get() {
+      if (!this._texture) {
+        this._texture = new THREE.Texture(this.canvas);
+      }
+      return this._texture;
+    }
+  }, {
+    key: "environment",
+    get: function get() {
+      var head = this;
+      while (head) {
+        if (head._environment) {
+          if (head !== this) {
+            this._environment = head._environment;
+          }
+          return this._environment;
+        }
+        head = head.parent;
       }
     }
-  }
+  }]);
 
-  movePointer(x, y) {
-    var target = this._findChild(x, y, (child, x2, y2) => child.startPointer(x2, y2));
-    if (target) {
-      emit.call(this, "move", {
-        target,
-        x,
-        y
-      });
-      if (target !== this) {
-        target.movePointer(x - this.bounds.left, y - this.bounds.top);
-      }
-    }
-  }
-
-  startUV(point) {
-    var p = this.mapUV(point);
-    this.startPointer(p.x, p.y);
-  }
-
-  moveUV(point) {
-    var p = this.mapUV(point);
-    this.movePointer(p.x, p.y);
-  }
-}
-  if(typeof window !== "undefined") window.Primrose.Surface = Surface;
+  return Surface;
+}(Primrose.Entity);
+    if(typeof window !== "undefined") window.Primrose.Surface = Surface;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Surface.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Surface.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\SYS_FONTS.js
-(function(){pliny.value({
+    // start D:\Documents\VR\Primrose\src\Primrose\SYS_FONTS.js
+(function(){"use strict";
+
+pliny.value({
   parent: "Primrose",
   name: "SYS_FONTS",
   type: "String",
   description: "A selection of fonts that will match whatever the user's operating system normally uses."
 });
-const SYS_FONTS = "-apple-system, '.SFNSText-Regular', 'San Francisco', 'Roboto', 'Segoe UI', 'Helvetica Neue', 'Lucida Grande', sans-serif";
-  if(typeof window !== "undefined") window.Primrose.SYS_FONTS = SYS_FONTS;
+var SYS_FONTS = "-apple-system, '.SFNSText-Regular', 'San Francisco', 'Roboto', 'Segoe UI', 'Helvetica Neue', 'Lucida Grande', sans-serif";
+    if(typeof window !== "undefined") window.Primrose.SYS_FONTS = SYS_FONTS;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\SYS_FONTS.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\SYS_FONTS.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text.js
-(function(){pliny.namespace({
+    // start D:\Documents\VR\Primrose\src\Primrose\Text.js
+(function(){"use strict";
+
+pliny.namespace({
   parent: "Primrose",
   name: "Text",
   description: "The Text namespace contains classes everything regarding the Primrose source code editor."
 });
-const Text = {};
-  if(typeof window !== "undefined") window.Primrose.Text = Text;
+var Text = {};
+    if(typeof window !== "undefined") window.Primrose.Text = Text;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Workerize.js
-(function(){pliny.class({
+    // start D:\Documents\VR\Primrose\src\Primrose\Workerize.js
+(function(){"use strict";
+
+pliny.class({
   parent: "Primrose",
-    name: "Workerize",
-    description: "Builds a WebWorker thread out of a JavaScript class's source code, and attempts to create a message interface that matches the message-passing interface that the class already uses.\n\
+  name: "Workerize",
+  description: "Builds a WebWorker thread out of a JavaScript class's source code, and attempts to create a message interface that matches the message-passing interface that the class already uses.\n\
 \n\
 Automatically workerized classes should have methods that take a single array for any parameters and return no values. All return results should come through an Event that the class emits.",
-    parameters: [{
-      name: "func",
-      type: "Function",
-      description: "The class function to workerize"
-    }],
-    examples: [{
-      name: "Create a basic workerized class.",
-      description: "Classes in JavaScript are created by adding new functions to the `prototype` of another function, then instantiating objects from that class with `new`. When creating such a class for automatic workerization, a few restrictions are required:\n\
+  parameters: [{
+    name: "func",
+    type: "Function",
+    description: "The class function to workerize"
+  }],
+  examples: [{
+    name: "Create a basic workerized class.",
+    description: "Classes in JavaScript are created by adding new functions to the `prototype` of another function, then instantiating objects from that class with `new`. When creating such a class for automatic workerization, a few restrictions are required:\n\
 * All methods in the class must be on the prototype. Any methods created and assigned in the constructor will not be available to the message passing interface.\n\
 * All interaction with objects of the class must be through these publicly accessible methods. This includes initialization.\n\
 * All methods should take at most a single argument. If you need multiple arguments, pack them into an array.\n\
@@ -5997,22 +6232,25 @@ Then we can create and use an automatically workerized version of it as follows.
     }\n\
   }\n\
   requestAnimationFrame(paint);"
-    }]
+  }]
 });
 
 function Workerize(func) {
+  var _this = this;
+
   // First, rebuild the script that defines the class. Since we're dealing
   // with pre-ES6 browsers, we have to use ES5 syntax in the script, or invoke
   // a conversion at a point post-script reconstruction, pre-workerization.
 
   // start with the constructor function
   var script = func.toString(),
-    // strip out the name in a way that Internet Explorer also undrestands
-    // (IE doesn't have the Function.name property supported by Chrome and
-    // Firefox)
-    matches = script.match(/function\s+(\w+)\s*\(/),
-    name = matches[1],
-    k;
+
+  // strip out the name in a way that Internet Explorer also undrestands
+  // (IE doesn't have the Function.name property supported by Chrome and
+  // Firefox)
+  matches = script.match(/function\s+(\w+)\s*\(/),
+      name = matches[1],
+      k;
 
   // then rebuild the member methods
   for (k in func.prototype) {
@@ -6029,27 +6267,11 @@ function Workerize(func) {
   // Create a mapper from the events that the class defines to the worker-side
   // postMessage method, to send message to the UI thread that one of the
   // events occured.
-  script += "\n  if(instance.addEventListener){\n" +
-    "    self.args = [null, null];\n" +
-    "    for(var k in instance.listeners) {\n" +
-    "      instance.addEventListener(k, function(eventName, args){\n" +
-    "        self.args[0] = eventName;\n" +
-    "        self.args[1] = args;\n" +
-    "        postMessage(self.args);\n" +
-    "      }.bind(this, k));\n" +
-    "    }\n" +
-    "  }";
+  script += "\n  if(instance.addEventListener){\n" + "    self.args = [null, null];\n" + "    for(var k in instance.listeners) {\n" + "      instance.addEventListener(k, function(eventName, args){\n" + "        self.args[0] = eventName;\n" + "        self.args[1] = args;\n" + "        postMessage(self.args);\n" + "      }.bind(this, k));\n" + "    }\n" + "  }";
 
   // Create a mapper from the worker-side onmessage event, to receive messages
   // from the UI thread that methods were called on the object.
-  script += "\n\n  onmessage = function(evt){\n" +
-    "    var f = evt.data[0],\n" +
-    "        t = instance[f];\n" +
-    "    if(t){\n" +
-    "      t.call(instance, evt.data[1]);\n" +
-    "    }\n" +
-    "  };\n\n" +
-    "})();";
+  script += "\n\n  onmessage = function(evt){\n" + "    var f = evt.data[0],\n" + "        t = instance[f];\n" + "    if(t){\n" + "      t.call(instance, evt.data[1]);\n" + "    }\n" + "  };\n\n" + "})();";
 
   // The binary-large-object can be used to convert the script from text to a
   // data URI, because workers can only be created from same-origin URIs.
@@ -6077,7 +6299,9 @@ function Workerize(func) {
   });
   this.listeners = {};
 
-  this.worker.onmessage = (e) => emit.call(this, e.data[0], e.data[1]);
+  this.worker.onmessage = function (e) {
+    return emit.call(_this, e.data[0], e.data[1]);
+  };
 
   // create mappers from the UI-thread side method calls to the UI-thread side
   // postMessage method, to inform the worker thread that methods were called,
@@ -6140,7 +6364,6 @@ Workerize.prototype.addEventListener = function (evt, thunk) {
   this.listeners[evt].push(thunk);
 };
 
-
 pliny.function({
   parent: "Primrose.Workerize",
   name: "createWorker",
@@ -6168,288 +6391,355 @@ Workerize.createWorker = function (script, stripFunc) {
   }
 
   var blob = new Blob([script], {
-      type: "text/javascript"
-    }),
-    dataURI = URL.createObjectURL(blob);
+    type: "text/javascript"
+  }),
+      dataURI = URL.createObjectURL(blob);
 
   return new Worker(dataURI);
 };
-  if(typeof window !== "undefined") window.Primrose.Workerize = Workerize;
+    if(typeof window !== "undefined") window.Primrose.Workerize = Workerize;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Workerize.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Workerize.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\X.js
-(function(){pliny.namespace({
+    // start D:\Documents\VR\Primrose\src\Primrose\X.js
+(function(){"use strict";
+
+pliny.namespace({
   parent: "Primrose",
   name: "X",
   description: "Extensions and components that combine other Primrose elements."
 });
-const X = {};
-  if(typeof window !== "undefined") window.Primrose.X = X;
+var X = {};
+    if(typeof window !== "undefined") window.Primrose.X = X;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\X.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\X.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\AbstractLabel.js
-(function(){var COUNTER = 0;
+    // start D:\Documents\VR\Primrose\src\Primrose\Controls\AbstractLabel.js
+(function(){"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var COUNTER = 0;
 
 pliny.class({
   parent: "Primrose.Controls",
-    name: "AbstractLabel",
-    description: "A simple label of text to put on a Surface.",
-    baseClass: "Primrose.Surface",
-    parameters: [{
-      name: "idOrCanvasOrContext",
-      type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
-      description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
-    }, {
-      name: "options",
-      type: "Object",
-      description: "Named parameters for creating the Button."
-    }]
+  name: "AbstractLabel",
+  description: "A simple label of text to put on a Surface.",
+  baseClass: "Primrose.Surface",
+  parameters: [{
+    name: "idOrCanvasOrContext",
+    type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
+    description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
+  }, {
+    name: "options",
+    type: "Object",
+    description: "Named parameters for creating the Button."
+  }]
 });
-class AbstractLabel extends Primrose.Surface {
-  constructor(options) {
-    ////////////////////////////////////////////////////////////////////////
-    // normalize input parameters
-    ////////////////////////////////////////////////////////////////////////
-    super(patch(options, {
-      id: "Primrose.Controls.AbstractLabel[" + (COUNTER++) + "]"
-    }));
+
+var AbstractLabel = function (_Primrose$Surface) {
+  _inherits(AbstractLabel, _Primrose$Surface);
+
+  function AbstractLabel(options) {
+    _classCallCheck(this, AbstractLabel);
 
     ////////////////////////////////////////////////////////////////////////
     // initialization
     ///////////////////////////////////////////////////////////////////////
 
-    this._lastFont = null;
-    this._lastText = null;
-    this._lastCharacterWidth = null;
-    this._lastCharacterHeight = null;
-    this._lastPadding = null;
-    this._lastWidth = -1;
-    this._lastHeight = -1;
-    this._lastTextAlign = null;
+    var _this = _possibleConstructorReturn(this, (AbstractLabel.__proto__ || Object.getPrototypeOf(AbstractLabel)).call(this, patch(options, {
+      id: "Primrose.Controls.AbstractLabel[" + COUNTER++ + "]"
+    })));
+    ////////////////////////////////////////////////////////////////////////
+    // normalize input parameters
+    ////////////////////////////////////////////////////////////////////////
 
-    this.textAlign = this.options.textAlign;
-    this.character = new Primrose.Text.Size();
-    this.theme = this.options.theme;
-    this.fontSize = this.options.fontSize || 16;
-    this.refreshCharacter();
-    this.backgroundColor = this.options.backgroundColor || this.theme.regular.backColor;
-    this.color = this.options.color || this.theme.regular.foreColor;
-    this.value = this.options.value;
+
+    _this._lastFont = null;
+    _this._lastText = null;
+    _this._lastCharacterWidth = null;
+    _this._lastCharacterHeight = null;
+    _this._lastPadding = null;
+    _this._lastWidth = -1;
+    _this._lastHeight = -1;
+    _this._lastTextAlign = null;
+
+    _this.textAlign = _this.options.textAlign;
+    _this.character = new Primrose.Text.Size();
+    _this.theme = _this.options.theme;
+    _this.fontSize = _this.options.fontSize || 16;
+    _this.refreshCharacter();
+    _this.backgroundColor = _this.options.backgroundColor || _this.theme.regular.backColor;
+    _this.color = _this.options.color || _this.theme.regular.foreColor;
+    _this.value = _this.options.value;
+    return _this;
   }
 
-  get textAlign() {
-    return this.context.textAlign;
-  }
-
-  set textAlign(v) {
-    this.context.textAlign = v;
-    this.render();
-  }
-
-  get value() {
-    return this._value;
-  }
-
-  set value(txt) {
-    txt = txt || "";
-    this._value = txt.replace(/\r\n/g, "\n");
-    this.render();
-  }
-
-  get theme() {
-    return this._theme;
-  }
-
-  set theme(t) {
-    this._theme = clone(t || Primrose.Text.Themes.Default);
-    this._theme.fontSize = this.fontSize;
-    this.refreshCharacter();
-    this.render();
-  }
-
-  refreshCharacter() {
-    this.character.height = this.fontSize;
-    this.context.font = this.character.height + "px " + this.theme.fontFamily;
-    // measure 100 letter M's, then divide by 100, to get the width of an M
-    // to two decimal places on systems that return integer values from
-    // measureText.
-    this.character.width = this.context.measureText(
-        "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM")
-      .width /
-      100;
-  }
-
-  _isChanged() {
-    var textChanged = this._lastText !== this.value,
-      characterWidthChanged = this.character.width !== this._lastCharacterWidth,
-      characterHeightChanged = this.character.height !== this._lastCharacterHeight,
-      fontChanged = this.context.font !== this._lastFont,
-      alignChanged = this.textAlign !== this._lastTextAlign,
-      changed = this.resized || textChanged || characterWidthChanged || characterHeightChanged || this.resized || fontChanged || alignChanged;
-    return changed;
-  }
-
-  render() {
-    if (this.resized) {
-      this.resize();
+  _createClass(AbstractLabel, [{
+    key: "refreshCharacter",
+    value: function refreshCharacter() {
+      this.character.height = this.fontSize;
+      this.context.font = this.character.height + "px " + this.theme.fontFamily;
+      // measure 100 letter M's, then divide by 100, to get the width of an M
+      // to two decimal places on systems that return integer values from
+      // measureText.
+      this.character.width = this.context.measureText("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM").width / 100;
     }
-
-    if (this.theme && this._isChanged) {
-      this._lastText = this.value;
-      this._lastCharacterWidth = this.character.width;
-      this._lastCharacterHeight = this.character.height;
-      this._lastWidth = this.imageWidth;
-      this._lastHeight = this.imageHeight;
-      this._lastFont = this.context.font;
-      this._lastTextAlign = this.textAlign;
-
-      this.context.textAlign = this.textAlign || "left";
-
-      var clearFunc = this.backgroundColor ? "fillRect" : "clearRect";
-      if (this.theme.regular.backColor) {
-        this.context.fillStyle = this.backgroundColor;
+  }, {
+    key: "_isChanged",
+    value: function _isChanged() {
+      var textChanged = this._lastText !== this.value,
+          characterWidthChanged = this.character.width !== this._lastCharacterWidth,
+          characterHeightChanged = this.character.height !== this._lastCharacterHeight,
+          fontChanged = this.context.font !== this._lastFont,
+          alignChanged = this.textAlign !== this._lastTextAlign,
+          changed = this.resized || textChanged || characterWidthChanged || characterHeightChanged || this.resized || fontChanged || alignChanged;
+      return changed;
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      if (this.resized) {
+        this.resize();
       }
 
-      this.context[clearFunc](0, 0, this.imageWidth, this.imageHeight);
+      if (this.theme && this._isChanged) {
+        this._lastText = this.value;
+        this._lastCharacterWidth = this.character.width;
+        this._lastCharacterHeight = this.character.height;
+        this._lastWidth = this.imageWidth;
+        this._lastHeight = this.imageHeight;
+        this._lastFont = this.context.font;
+        this._lastTextAlign = this.textAlign;
 
-      if (this.value) {
-        var lines = this.value.split("\n");
-        for (var y = 0; y < lines.length; ++y) {
-          var line = lines[y],
-            textY = (this.imageHeight - lines.length * this.character.height) / 2 + y * this.character.height;
+        this.context.textAlign = this.textAlign || "left";
 
-          var textX = null;
-          switch (this.textAlign) {
-            case "right":
-              textX = this.imageWidth;
-              break;
-            case "center":
-              textX = this.imageWidth / 2;
-              break;
-            default:
-              textX = 0;
-          }
-
-          var font = (this.theme.regular.fontWeight || "") +
-            " " + (this.theme.regular.fontStyle || "") +
-            " " + this.character.height + "px " + this.theme.fontFamily;
-          this.context.font = font.trim();
-          this.context.fillStyle = this.color;
-          this.context.fillText(line, textX, textY);
+        var clearFunc = this.backgroundColor ? "fillRect" : "clearRect";
+        if (this.theme.regular.backColor) {
+          this.context.fillStyle = this.backgroundColor;
         }
+
+        this.context[clearFunc](0, 0, this.imageWidth, this.imageHeight);
+
+        if (this.value) {
+          var lines = this.value.split("\n");
+          for (var y = 0; y < lines.length; ++y) {
+            var line = lines[y],
+                textY = (this.imageHeight - lines.length * this.character.height) / 2 + y * this.character.height;
+
+            var textX = null;
+            switch (this.textAlign) {
+              case "right":
+                textX = this.imageWidth;
+                break;
+              case "center":
+                textX = this.imageWidth / 2;
+                break;
+              default:
+                textX = 0;
+            }
+
+            var font = (this.theme.regular.fontWeight || "") + " " + (this.theme.regular.fontStyle || "") + " " + this.character.height + "px " + this.theme.fontFamily;
+            this.context.font = font.trim();
+            this.context.fillStyle = this.color;
+            this.context.fillText(line, textX, textY);
+          }
+        }
+
+        this.renderCanvasTrim();
+
+        this.invalidate();
       }
-
-      this.renderCanvasTrim();
-
-      this.invalidate();
     }
-  }
+  }, {
+    key: "renderCanvasTrim",
+    value: function renderCanvasTrim() {}
+  }, {
+    key: "textAlign",
+    get: function get() {
+      return this.context.textAlign;
+    },
+    set: function set(v) {
+      this.context.textAlign = v;
+      this.render();
+    }
+  }, {
+    key: "value",
+    get: function get() {
+      return this._value;
+    },
+    set: function set(txt) {
+      txt = txt || "";
+      this._value = txt.replace(/\r\n/g, "\n");
+      this.render();
+    }
+  }, {
+    key: "theme",
+    get: function get() {
+      return this._theme;
+    },
+    set: function set(t) {
+      this._theme = clone(t || Primrose.Text.Themes.Default);
+      this._theme.fontSize = this.fontSize;
+      this.refreshCharacter();
+      this.render();
+    }
+  }]);
 
-  renderCanvasTrim() {}
-}
-  if(typeof window !== "undefined") window.Primrose.Controls.AbstractLabel = AbstractLabel;
+  return AbstractLabel;
+}(Primrose.Surface);
+    if(typeof window !== "undefined") window.Primrose.Controls.AbstractLabel = AbstractLabel;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\AbstractLabel.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Controls\AbstractLabel.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\Button2D.js
-(function(){var COUNTER = 0;
+    // start D:\Documents\VR\Primrose\src\Primrose\Controls\Button2D.js
+(function(){"use strict";
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var COUNTER = 0;
 
 pliny.class({
   parent: "Primrose.Controls",
-    name: "Button2D",
-    description: "A simple button to put on a Surface.",
-    baseClass: "Primrose.Controls.AbstractLabel",
-    parameters: [{
-      name: "idOrCanvasOrContext",
-      type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
-      description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
-    }, {
-      name: "options",
-      type: "Object",
-      description: "Named parameters for creating the Button."
-    }]
+  name: "Button2D",
+  description: "A simple button to put on a Surface.",
+  baseClass: "Primrose.Controls.AbstractLabel",
+  parameters: [{
+    name: "idOrCanvasOrContext",
+    type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
+    description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
+  }, {
+    name: "options",
+    type: "Object",
+    description: "Named parameters for creating the Button."
+  }]
 });
-class Button2D extends Primrose.Controls.AbstractLabel {
 
-  static create() {
-    return new Button2D();
-  }
+var Button2D = function (_Primrose$Controls$Ab) {
+  _inherits(Button2D, _Primrose$Controls$Ab);
 
-  constructor(options) {
-    super(patch(options, {
-      id: "Primrose.Controls.Button2D[" + (COUNTER++) + "]",
+  _createClass(Button2D, null, [{
+    key: "create",
+    value: function create() {
+      return new Button2D();
+    }
+  }]);
+
+  function Button2D(options) {
+    _classCallCheck(this, Button2D);
+
+    var _this = _possibleConstructorReturn(this, (Button2D.__proto__ || Object.getPrototypeOf(Button2D)).call(this, patch(options, {
+      id: "Primrose.Controls.Button2D[" + COUNTER++ + "]",
       textAlign: "center"
-    }));
-    this._lastActivated = null;
+    })));
+
+    _this._lastActivated = null;
+    return _this;
   }
 
-  addToBrowserEnvironment(env, scene) {
-    var btn3d = env.buttonFactory.create();
-    btn3d._handlers = this.listeners;
-    return env.appendChild(btn3d);
-  }
-
-  startPointer(x, y) {
-    this.focus();
-    this._activated = true;
-    this.render();
-  }
-
-  endPointer() {
-    if (this._activated) {
-      this._activated = false;
-      emit.call(this, "click", {
-        target: this
-      });
+  _createClass(Button2D, [{
+    key: "addToBrowserEnvironment",
+    value: function addToBrowserEnvironment(env, scene) {
+      var btn3d = env.buttonFactory.create();
+      btn3d._handlers = this.listeners;
+      return env.appendChild(btn3d);
+    }
+  }, {
+    key: "startPointer",
+    value: function startPointer(x, y) {
+      this.focus();
+      this._activated = true;
       this.render();
     }
-  }
+  }, {
+    key: "endPointer",
+    value: function endPointer() {
+      if (this._activated) {
+        this._activated = false;
+        emit.call(this, "click", {
+          target: this
+        });
+        this.render();
+      }
+    }
+  }, {
+    key: "_isChanged",
+    value: function _isChanged() {
+      var activatedChanged = this._activated !== this._lastActivated,
+          changed = _get(Button2D.prototype.__proto__ || Object.getPrototypeOf(Button2D.prototype), "_isChanged", this) || activatedChanged;
+      return changed;
+    }
+  }, {
+    key: "renderCanvasTrim",
+    value: function renderCanvasTrim() {
+      this.context.lineWidth = this._activated ? 4 : 2;
+      this.context.strokeStyle = this.theme.regular.foreColor || Primrose.Text.Themes.Default.regular.foreColor;
+      this.context.strokeRect(0, 0, this.imageWidth, this.imageHeight);
+    }
+  }]);
 
-  _isChanged() {
-    var activatedChanged = this._activated !== this._lastActivated,
-      changed = super._isChanged || activatedChanged;
-    return changed;
-  }
-
-  renderCanvasTrim() {
-    this.context.lineWidth = this._activated ? 4 : 2;
-    this.context.strokeStyle = this.theme.regular.foreColor || Primrose.Text.Themes.Default.regular.foreColor;
-    this.context.strokeRect(0, 0, this.imageWidth, this.imageHeight);
-  }
-}
-  if(typeof window !== "undefined") window.Primrose.Controls.Button2D = Button2D;
+  return Button2D;
+}(Primrose.Controls.AbstractLabel);
+    if(typeof window !== "undefined") window.Primrose.Controls.Button2D = Button2D;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\Button2D.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Controls\Button2D.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\Button3D.js
-(function(){pliny.class({
+    // start D:\Documents\VR\Primrose\src\Primrose\Controls\Button3D.js
+(function(){"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+pliny.class({
   parent: "Primrose",
-    name: "Button3D",
-    baseClass: "Primrose.BaseControl",
-    parameters: [{
-      name: "model",
-      type: "THREE.Object3D",
-      description: "A 3D model to use as the graphics for this button."
-    }, {
-      name: "name",
-      type: "String",
-      description: "A name for the button, to make it distinct from other buttons."
-    }, {
-      name: "options",
-      type: "Object",
-      description: "A hash of options:\n\t\t\tmaxThrow - The limit for how far the button can be depressed.\n\t\t\tminDeflection - The minimum distance the button must be depressed before it is activated.\n\t\t\tcolorPressed - The color to change the button cap to when the button is activated.\n\t\t\tcolorUnpressed - The color to change the button cap to when the button is deactivated.\n\t\t\ttoggle - True if deactivating the button should require a second click. False if the button should deactivate when it is released."
-    }],
-    description: "A 3D button control, with a separate cap from a stand that it sits on. You click and depress the cap on top of the stand to actuate."
+  name: "Button3D",
+  baseClass: "Primrose.BaseControl",
+  parameters: [{
+    name: "model",
+    type: "THREE.Object3D",
+    description: "A 3D model to use as the graphics for this button."
+  }, {
+    name: "name",
+    type: "String",
+    description: "A name for the button, to make it distinct from other buttons."
+  }, {
+    name: "options",
+    type: "Object",
+    description: "A hash of options:\n\t\t\tmaxThrow - The limit for how far the button can be depressed.\n\t\t\tminDeflection - The minimum distance the button must be depressed before it is activated.\n\t\t\tcolorPressed - The color to change the button cap to when the button is activated.\n\t\t\tcolorUnpressed - The color to change the button cap to when the button is deactivated.\n\t\t\ttoggle - True if deactivating the button should require a second click. False if the button should deactivate when it is released."
+  }],
+  description: "A 3D button control, with a separate cap from a stand that it sits on. You click and depress the cap on top of the stand to actuate."
 });
-class Button3D extends Primrose.BaseControl {
-  constructor(model, name, options) {
-    super();
+
+var Button3D = function (_Primrose$BaseControl) {
+  _inherits(Button3D, _Primrose$BaseControl);
+
+  function Button3D(model, name, options) {
+    _classCallCheck(this, Button3D);
+
+    var _this = _possibleConstructorReturn(this, (Button3D.__proto__ || Object.getPrototypeOf(Button3D)).call(this));
 
     options = patch(options, Button3D);
     options.minDeflection = Math.cos(options.minDeflection);
@@ -6471,84 +6761,94 @@ class Button3D extends Primrose.BaseControl {
       type: "THREE.Object3D",
       description: "The stand the button cap sits on."
     });
-    this.base = model.children[1];
+    _this.base = model.children[1];
 
     pliny.property({
       name: "base",
       type: "THREE.Object3D",
       description: "The moveable part of the button, that triggers the click event."
     });
-    this.cap = model.children[0];
-    this.cap.name = name;
-    this.cap.material = this.cap.material.clone();
-    this.cap.button = this;
-    this.cap.base = this.base;
+    _this.cap = model.children[0];
+    _this.cap.name = name;
+    _this.cap.material = _this.cap.material.clone();
+    _this.cap.button = _this;
+    _this.cap.base = _this.base;
 
     pliny.property({
       name: "container",
       type: "THREE.Object3D",
       description: "A grouping collection for the base and cap."
     });
-    this.container = new THREE.Object3D();
-    this.container.add(this.base);
-    this.container.add(this.cap);
+    _this.container = new THREE.Object3D();
+    _this.container.add(_this.base);
+    _this.container.add(_this.cap);
 
     pliny.property({
       name: "color",
       type: "Number",
       description: "The current color of the button cap."
     });
-    this.color = this.cap.material.color;
-    this.name = name;
-    this.element = null;
-    this.startUV = function (point) {
+    _this.color = _this.cap.material.color;
+    _this.name = name;
+    _this.element = null;
+    _this.startUV = function (point) {
       this.color.copy(options.colorPressed);
       if (this.element) {
         this.element.click();
-      }
-      else {
+      } else {
         this.emit("click", { source: this });
       }
     };
 
-    this.endPointer = function (evt) {
+    _this.endPointer = function (evt) {
       this.color.copy(options.colorUnpressed);
       this.emit("release", { source: this });
     };
+    return _this;
   }
 
-  dispatchEvent(evt) {
-    switch(evt.type){
-      case "pointerstart":
-        this.startUV(evt.hit.uv);
-      break;
-      case "pointerend":
-        this.endPointer(evt);
-      break;
-      case "gazecomplete":
-        this.startUV(evt.hit.uv);
-        setTimeout(() => this.endPointer(evt), 100);
-      break;
+  _createClass(Button3D, [{
+    key: "dispatchEvent",
+    value: function dispatchEvent(evt) {
+      var _this2 = this;
+
+      switch (evt.type) {
+        case "pointerstart":
+          this.startUV(evt.hit.uv);
+          break;
+        case "pointerend":
+          this.endPointer(evt);
+          break;
+        case "gazecomplete":
+          this.startUV(evt.hit.uv);
+          setTimeout(function () {
+            return _this2.endPointer(evt);
+          }, 100);
+          break;
+      }
     }
-  }
+  }, {
+    key: "addToBrowserEnvironment",
+    value: function addToBrowserEnvironment(env, scene) {
+      scene.add(this.container);
+      env.registerPickableObject(this.cap);
+      return this.container;
+    }
+  }, {
+    key: "position",
+    get: function get() {
+      return this.container.position;
+    }
+  }]);
 
-  get position() {
-    return this.container.position;
-  }
-
-  addToBrowserEnvironment(env, scene) {
-    scene.add(this.container);
-    env.registerPickableObject(this.cap);
-    return this.container;
-  }
-}
+  return Button3D;
+}(Primrose.BaseControl);
 
 pliny.record({
   parent: "Primrose.Controls.Button3D",
   name: "DEFAULTS",
   description: "Default option values that override undefined options passed to the Button3D class."
 });
-
 
 pliny.property({
   parent: "Primrose.Controls.Button3D",
@@ -6593,121 +6893,170 @@ Button3D.DEFAULTS = {
   colorPressed: 0x007f00,
   toggle: true
 };
-  if(typeof window !== "undefined") window.Primrose.Controls.Button3D = Button3D;
+    if(typeof window !== "undefined") window.Primrose.Controls.Button3D = Button3D;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\Button3D.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Controls\Button3D.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\Form.js
-(function(){var COUNTER = 0;
+    // start D:\Documents\VR\Primrose\src\Primrose\Controls\Form.js
+(function(){"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var COUNTER = 0;
 pliny.class({
   parent: "Primrose.Controls",
-    name: "Form",
-    baseClass: "Primrose.Entity",
-    description: "A basic 2D form control, with its own mesh to use as a frame."
+  name: "Form",
+  baseClass: "Primrose.Entity",
+  description: "A basic 2D form control, with its own mesh to use as a frame."
 });
-class Form extends Primrose.Surface {
 
-  static create() {
-    return new Form();
-  }
+var Form = function (_Primrose$Surface) {
+  _inherits(Form, _Primrose$Surface);
 
-  constructor(options) {
-    super(patch(options, {
-      id: `Primrose.Controls.Form[${COUNTER++}]`
-    }));
-    this._mesh = textured(quad(1, this.bounds.height / this.bounds.width), this);
-    this._mesh.name = this.id + "-mesh";
-    Object.defineProperties(this.style, {
+  _createClass(Form, null, [{
+    key: "create",
+    value: function create() {
+      return new Form();
+    }
+  }]);
+
+  function Form(options) {
+    _classCallCheck(this, Form);
+
+    var _this = _possibleConstructorReturn(this, (Form.__proto__ || Object.getPrototypeOf(Form)).call(this, patch(options, {
+      id: "Primrose.Controls.Form[" + COUNTER++ + "]"
+    })));
+
+    _this._mesh = textured(quad(1, _this.bounds.height / _this.bounds.width), _this);
+    _this._mesh.name = _this.id + "-mesh";
+    Object.defineProperties(_this.style, {
       display: {
-        get: () => this._mesh.visible ? "" : "none",
-        set: (v) => {
+        get: function get() {
+          return _this._mesh.visible ? "" : "none";
+        },
+        set: function set(v) {
           if (v === "none") {
-            this.hide();
-          }
-          else {
-            this.show();
+            _this.hide();
+          } else {
+            _this.show();
           }
         }
       },
       visible: {
-        get: () => this._mesh.visible ? "" : "hidden",
-        set: (v) => this.visible = v !== "hidden"
+        get: function get() {
+          return _this._mesh.visible ? "" : "hidden";
+        },
+        set: function set(v) {
+          return _this.visible = v !== "hidden";
+        }
       }
     });
+    return _this;
   }
 
-  addToBrowserEnvironment(env, scene) {
-    scene.add(this._mesh);
-    env.registerPickableObject(this._mesh);
-    return this._mesh;
-  }
+  _createClass(Form, [{
+    key: "addToBrowserEnvironment",
+    value: function addToBrowserEnvironment(env, scene) {
+      scene.add(this._mesh);
+      env.registerPickableObject(this._mesh);
+      return this._mesh;
+    }
+  }, {
+    key: "hide",
+    value: function hide() {
+      this.visible = false;
+      this.disabled = true;
+    }
+  }, {
+    key: "show",
+    value: function show() {
+      this.visible = true;
+      this.disabled = false;
+    }
+  }, {
+    key: "position",
+    get: function get() {
+      return this._mesh.position;
+    }
+  }, {
+    key: "visible",
+    get: function get() {
+      return this._mesh.visible;
+    },
+    set: function set(v) {
+      this._mesh.visible = v;
+    }
+  }, {
+    key: "disabled",
+    get: function get() {
+      return this._mesh.disabled;
+    },
+    set: function set(v) {
+      this._mesh.disabled = v;
+    }
+  }, {
+    key: "enabled",
+    get: function get() {
+      return !this.disabled;
+    },
+    set: function set(v) {
+      this.disabled = !v;
+    }
+  }]);
 
-  get position() {
-    return this._mesh.position;
-  }
-
-  get visible() {
-    return this._mesh.visible;
-  }
-
-  set visible(v) {
-    this._mesh.visible = v;
-  }
-
-  get disabled() {
-    return this._mesh.disabled;
-  }
-
-  set disabled(v) {
-    this._mesh.disabled = v;
-  }
-
-  get enabled() {
-    return !this.disabled;
-  }
-
-  set enabled(v) {
-    this.disabled = !v;
-  }
-
-  hide() {
-    this.visible = false;
-    this.disabled = true;
-  }
-
-  show() {
-    this.visible = true;
-    this.disabled = false;
-  }
-}
-  if(typeof window !== "undefined") window.Primrose.Controls.Form = Form;
+  return Form;
+}(Primrose.Surface);
+    if(typeof window !== "undefined") window.Primrose.Controls.Form = Form;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\Form.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Controls\Form.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\Image.js
-(function(){var COUNTER = 0,
-  _ = priv();
+    // start D:\Documents\VR\Primrose\src\Primrose\Controls\Image.js
+(function(){"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var COUNTER = 0,
+    _ = priv();
 
 pliny.class({
   parent: "Primrose.Controls",
-    name: "Image",
-    baseClass: "Primrose.Surface",
-    description: "A simple 2D image to put on a Surface.",
-    parameters: [{
-      name: "options",
-      type: "Object",
-      description: "Named parameters for creating the Image."
-    }]
+  name: "Image",
+  baseClass: "Primrose.Surface",
+  description: "A simple 2D image to put on a Surface.",
+  parameters: [{
+    name: "options",
+    type: "Object",
+    description: "Named parameters for creating the Image."
+  }]
 });
-class Image extends Primrose.Entity {
 
-  static create() {
-    return new Image();
-  }
+var Image = function (_Primrose$Entity) {
+  _inherits(Image, _Primrose$Entity);
 
-  constructor(options) {
+  _createClass(Image, null, [{
+    key: "create",
+    value: function create() {
+      return new Image();
+    }
+  }]);
+
+  function Image(options) {
+    _classCallCheck(this, Image);
+
     ////////////////////////////////////////////////////////////////////////
     // normalize input parameters
     ////////////////////////////////////////////////////////////////////////
@@ -6720,219 +7069,237 @@ class Image extends Primrose.Entity {
     }
 
     options = patch(options, {
-      id: "Primrose.Controls.Image[" + (COUNTER++) + "]"
+      id: "Primrose.Controls.Image[" + COUNTER++ + "]"
     });
 
-    super(options.id);
+    var _this = _possibleConstructorReturn(this, (Image.__proto__ || Object.getPrototypeOf(Image)).call(this, options.id));
 
-    this.options = options;
+    _this.options = options;
 
-    Primrose.Entity.registerEntity(this);
+    Primrose.Entity.registerEntity(_this);
 
     ////////////////////////////////////////////////////////////////////////
     // initialization
     ///////////////////////////////////////////////////////////////////////
-    this._canvases = [];
-    this._contexts = [];
-    this._elements = [];
-    this._meshes = [];
-    this._textures = [];
-    this._currentImageIndex = 0;
-    this.isVideo = false;
+    _this._canvases = [];
+    _this._contexts = [];
+    _this._elements = [];
+    _this._meshes = [];
+    _this._textures = [];
+    _this._currentImageIndex = 0;
+    _this.isVideo = false;
+    return _this;
   }
 
-  add(child){
-    this._meshes[0].add(child);
-  }
-
-  get matrixWorld() {
-    return this._meshes[0].matrixWorld;
-  }
-
-  get position(){
-    return this._meshes[0].position;
-  }
-
-  get quaternion(){
-    return this._meshes[0].quaternion;
-  }
-
-  get scale(){
-    return this._meshes[0].scale;
-  }
-
-  get visible(){
-    for(var i = 0; i < this._meshes.length; ++i){
-      if(this._meshes[i].visible){
-        return true;
-      }
+  _createClass(Image, [{
+    key: "add",
+    value: function add(child) {
+      this._meshes[0].add(child);
     }
-    return false;
-  }
+  }, {
+    key: "addToBrowserEnvironment",
+    value: function addToBrowserEnvironment(env, scene) {
+      var _this2 = this;
 
-  set visible(v){
-    var img = this._meshes[this._currentImageIndex];
-    if(img){
-      img.visible = v;
-    }
-  }
-
-  addToBrowserEnvironment(env, scene) {
-    this._meshes.forEach((mesh, i) => {
-      scene.add(mesh);
-      mesh.name = this.id + "-" + i;
-      if(i > 0){
-        mesh.visible = false;
-      }
-      else if(this.options.pickable) {
-        env.registerPickableObject(mesh);
-      }
-    });
-  }
-
-  _setGeometry(options) {
-    if(this.options.radius){
-      this.options.geometry = shell(
-        this.options.radius,
-        72,
-        36,
-        Math.PI * 2,
-        Math.PI,
-        options);
-    }
-    else if(!this.options.geometry){
-      if(!this.options.width){
-        this.options.width = 0.5;
-      }
-      if(!this.options.height){
-        this.options.height = 0.5;
-      }
-      this.options.geometry = quad(this.options.width, this.options.height, options);
-    }
-  }
-
-  loadImages(images, progress) {
-    return Promise.all(Array.prototype.map.call(images, (src, i) => new Promise((resolve, reject) => {
-      const txt = Primrose.loadTexture(src, resolve, progress, reject);
-      this._textures[i] = txt;
-      this._setGeometry();
-      this._meshes[i] = textured(
-          this.options.geometry,
-          txt,
-          this.options);
-    })))
-    .then(() => this.isVideo = false)
-    .then(() => this);
-  }
-
-  loadVideos(videos, progress){
-    return Promise.all(Array.prototype.map.call(videos, (spec, i) => new Promise((resolve, reject) => {
-      var video = null;
-      if(typeof spec === "string"){
-        video = document.querySelector(`video[src='${spec}']`);
-        if(!video) {
-          video = document.createElement("video");
-          video.src = spec;
+      this._meshes.forEach(function (mesh, i) {
+        scene.add(mesh);
+        mesh.name = _this2.id + "-" + i;
+        if (i > 0) {
+          mesh.visible = false;
+        } else if (_this2.options.pickable) {
+          env.registerPickableObject(mesh);
         }
-      }
-      else if(spec instanceof HTMLVideoElement){
-        video = spec;
-      }
-      video.onprogress = progress;
-      video.onloadedmetadata = progress;
-      video.onerror = reject;
-      video.muted = true;
-      video.preload = "auto";
-      video.autoplay = true;
-      video.loop = true;
-      video.oncanplaythrough = () => {
-        const width = video.videoWidth,
-          height = video.videoHeight,
-          p2Width = Math.pow(2, Math.ceil(Math.log2(width))),
-          p2Height = Math.pow(2, Math.ceil(Math.log2(height)));
-
-        if(width === p2Width && height === p2Height){
-          this._meshes[i] = textured(
-            this.options.geometry,
-            elem,
-            this.options);
+      });
+    }
+  }, {
+    key: "_setGeometry",
+    value: function _setGeometry(options) {
+      if (this.options.radius) {
+        this.options.geometry = shell(this.options.radius, 72, 36, Math.PI * 2, Math.PI, options);
+      } else if (!this.options.geometry) {
+        if (!this.options.width) {
+          this.options.width = 0.5;
         }
-        else{
-          this._elements[i] = video;
-
-          this._canvases[i] = document.createElement("canvas");
-          this._canvases[i].id = (video.id || this.id) + "-canvas";
-          this._canvases[i].width = p2Width;
-          this._canvases[i].height = p2Height;
-
-          this._contexts[i] = this._canvases[i].getContext("2d");
-
-          this._setGeometry({
-            maxU: width / p2Width,
-            maxV: height / p2Height
-          });
-
-          this._meshes[i] = textured(
-            this.options.geometry,
-            this._canvases[i],
-            this.options);
+        if (!this.options.height) {
+          this.options.height = 0.5;
         }
-
-        this._textures[i] = this._meshes[i].material.map;
-        video.oncanplaythrough = null;
-        resolve();
-      };
-      if(!video.parentElement){
-        document.body.insertBefore(video, document.body.children[0]);
+        this.options.geometry = quad(this.options.width, this.options.height, options);
       }
-      video.play();
-    })))
-    .then(() => this.isVideo = true)
-    .then(() => this);
-  }
+    }
+  }, {
+    key: "loadImages",
+    value: function loadImages(images, progress) {
+      var _this3 = this;
 
-  eyeBlank(eye) {
-    if(this._meshes) {
-      this._currentImageIndex = eye % this._meshes.length;
-      var isVisible = this.visible;
-      for(var i = 0; i < this._meshes.length; ++i){
-        var m = this._meshes[i];
-        m.visible = isVisible && (i === this._currentImageIndex);
-        if(i > 0) {
-          m.position.copy(this.position);
-          m.quaternion.copy(this.quaternion);
-          m.scale.copy(this.scale);
+      return Promise.all(Array.prototype.map.call(images, function (src, i) {
+        return new Promise(function (resolve, reject) {
+          var txt = Primrose.loadTexture(src, resolve, progress, reject);
+          _this3._textures[i] = txt;
+          _this3._setGeometry();
+          _this3._meshes[i] = textured(_this3.options.geometry, txt, _this3.options);
+        });
+      })).then(function () {
+        return _this3.isVideo = false;
+      }).then(function () {
+        return _this3;
+      });
+    }
+  }, {
+    key: "loadVideos",
+    value: function loadVideos(videos, progress) {
+      var _this4 = this;
+
+      return Promise.all(Array.prototype.map.call(videos, function (spec, i) {
+        return new Promise(function (resolve, reject) {
+          var video = null;
+          if (typeof spec === "string") {
+            video = document.querySelector("video[src='" + spec + "']");
+            if (!video) {
+              video = document.createElement("video");
+              video.src = spec;
+            }
+          } else if (spec instanceof HTMLVideoElement) {
+            video = spec;
+          }
+          video.onprogress = progress;
+          video.onloadedmetadata = progress;
+          video.onerror = reject;
+          video.muted = true;
+          video.preload = "auto";
+          video.autoplay = true;
+          video.loop = true;
+          video.oncanplaythrough = function () {
+            var width = video.videoWidth,
+                height = video.videoHeight,
+                p2Width = Math.pow(2, Math.ceil(Math.log2(width))),
+                p2Height = Math.pow(2, Math.ceil(Math.log2(height)));
+
+            if (width === p2Width && height === p2Height) {
+              _this4._meshes[i] = textured(_this4.options.geometry, elem, _this4.options);
+            } else {
+              _this4._elements[i] = video;
+
+              _this4._canvases[i] = document.createElement("canvas");
+              _this4._canvases[i].id = (video.id || _this4.id) + "-canvas";
+              _this4._canvases[i].width = p2Width;
+              _this4._canvases[i].height = p2Height;
+
+              _this4._contexts[i] = _this4._canvases[i].getContext("2d");
+
+              _this4._setGeometry({
+                maxU: width / p2Width,
+                maxV: height / p2Height
+              });
+
+              _this4._meshes[i] = textured(_this4.options.geometry, _this4._canvases[i], _this4.options);
+            }
+
+            _this4._textures[i] = _this4._meshes[i].material.map;
+            video.oncanplaythrough = null;
+            resolve();
+          };
+          if (!video.parentElement) {
+            document.body.insertBefore(video, document.body.children[0]);
+          }
+          video.play();
+        });
+      })).then(function () {
+        return _this4.isVideo = true;
+      }).then(function () {
+        return _this4;
+      });
+    }
+  }, {
+    key: "eyeBlank",
+    value: function eyeBlank(eye) {
+      if (this._meshes) {
+        this._currentImageIndex = eye % this._meshes.length;
+        var isVisible = this.visible;
+        for (var i = 0; i < this._meshes.length; ++i) {
+          var m = this._meshes[i];
+          m.visible = isVisible && i === this._currentImageIndex;
+          if (i > 0) {
+            m.position.copy(this.position);
+            m.quaternion.copy(this.quaternion);
+            m.scale.copy(this.scale);
+          }
         }
       }
     }
-  }
-
-  update(){
-    if(this.isVideo){
-      for(var i = 0; i < this._textures.length; ++i) {
-        if(i < this._contexts.length) {
-          this._contexts[i].drawImage(this._elements[i], 0, 0);
+  }, {
+    key: "update",
+    value: function update() {
+      if (this.isVideo) {
+        for (var i = 0; i < this._textures.length; ++i) {
+          if (i < this._contexts.length) {
+            this._contexts[i].drawImage(this._elements[i], 0, 0);
+          }
+          this._textures[i].needsUpdate = true;
         }
-        this._textures[i].needsUpdate = true;
       }
     }
-  }
-}
-  if(typeof window !== "undefined") window.Primrose.Controls.Image = Image;
+  }, {
+    key: "matrixWorld",
+    get: function get() {
+      return this._meshes[0].matrixWorld;
+    }
+  }, {
+    key: "position",
+    get: function get() {
+      return this._meshes[0].position;
+    }
+  }, {
+    key: "quaternion",
+    get: function get() {
+      return this._meshes[0].quaternion;
+    }
+  }, {
+    key: "scale",
+    get: function get() {
+      return this._meshes[0].scale;
+    }
+  }, {
+    key: "visible",
+    get: function get() {
+      for (var i = 0; i < this._meshes.length; ++i) {
+        if (this._meshes[i].visible) {
+          return true;
+        }
+      }
+      return false;
+    },
+    set: function set(v) {
+      var img = this._meshes[this._currentImageIndex];
+      if (img) {
+        img.visible = v;
+      }
+    }
+  }]);
+
+  return Image;
+}(Primrose.Entity);
+    if(typeof window !== "undefined") window.Primrose.Controls.Image = Image;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\Image.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Controls\Image.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\Progress.js
-(function(){const SIZE = 1,
-  INSET = 0.8,
-  PROPORTION = 10,
-  SIZE_SMALL = SIZE / PROPORTION,
-  INSET_LARGE = (1 - (1 - INSET) / PROPORTION);
+    // start D:\Documents\VR\Primrose\src\Primrose\Controls\Progress.js
+(function(){"use strict";
 
-class Progress {
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-  constructor(majorColor, minorColor) {
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var SIZE = 1,
+    INSET = 0.8,
+    PROPORTION = 10,
+    SIZE_SMALL = SIZE / PROPORTION,
+    INSET_LARGE = 1 - (1 - INSET) / PROPORTION;
+
+var Progress = function () {
+  function Progress(majorColor, minorColor) {
+    _classCallCheck(this, Progress);
+
     majorColor = majorColor || 0xffffff;
     minorColor = minorColor || 0x000000;
     var geom = box(SIZE, SIZE_SMALL, SIZE_SMALL);
@@ -6953,92 +7320,115 @@ class Progress {
     this.reset();
   }
 
-  addToBrowserEnvironment(env, scene){
-    scene.add(this.totalBar);
-  }
-
-  reset(){
-    this.fileState = {};
-    this.value = 0;
-  }
-
-  get visible(){
-    return this.totalBar.visible;
-  }
-
-  set visible(v){
-    this.totalBar.visible = v;
-  }
-
-  get position(){
-    return this.totalBar.position;
-  }
-
-  get quaternion(){
-    return this.totalBar.quaternion;
-  }
-
-  get value(){
-    return this.valueBar.scale.x / INSET_LARGE;
-  }
-
-  set value(v){
-    this.valueBar.scale.x = v * INSET_LARGE;
-    this.valueBar.position.x = -SIZE * (1 - v) * INSET_LARGE / 2;
-  }
-
-  onProgress(evt){
-    const file = evt.target.responseURL || evt.target.currentSrc;
-    if(file && evt.loaded !== undefined){
-      if(!this.fileState[file]){
-        this.fileState[file] = {};
-      }
-      const f = this.fileState[file];
-      f.loaded = evt.loaded;
-      f.total = evt.total;
+  _createClass(Progress, [{
+    key: "addToBrowserEnvironment",
+    value: function addToBrowserEnvironment(env, scene) {
+      scene.add(this.totalBar);
     }
-
-    let total = 0, loaded = 0;
-    for(let key in this.fileState){
-      const f = this.fileState[key];
-      total += f.total;
-      loaded += f.loaded;
-    }
-
-    if(total > 0){
-      this.value = loaded / total;
-    }
-    else{
+  }, {
+    key: "reset",
+    value: function reset() {
+      this.fileState = {};
       this.value = 0;
     }
-  }
-}
-  if(typeof window !== "undefined") window.Primrose.Controls.Progress = Progress;
+  }, {
+    key: "onProgress",
+    value: function onProgress(evt) {
+      var file = evt.target.responseURL || evt.target.currentSrc;
+      if (file && evt.loaded !== undefined) {
+        if (!this.fileState[file]) {
+          this.fileState[file] = {};
+        }
+        var f = this.fileState[file];
+        f.loaded = evt.loaded;
+        f.total = evt.total;
+      }
+
+      var total = 0,
+          loaded = 0;
+      for (var key in this.fileState) {
+        var _f = this.fileState[key];
+        total += _f.total;
+        loaded += _f.loaded;
+      }
+
+      if (total > 0) {
+        this.value = loaded / total;
+      } else {
+        this.value = 0;
+      }
+    }
+  }, {
+    key: "visible",
+    get: function get() {
+      return this.totalBar.visible;
+    },
+    set: function set(v) {
+      this.totalBar.visible = v;
+    }
+  }, {
+    key: "position",
+    get: function get() {
+      return this.totalBar.position;
+    }
+  }, {
+    key: "quaternion",
+    get: function get() {
+      return this.totalBar.quaternion;
+    }
+  }, {
+    key: "value",
+    get: function get() {
+      return this.valueBar.scale.x / INSET_LARGE;
+    },
+    set: function set(v) {
+      this.valueBar.scale.x = v * INSET_LARGE;
+      this.valueBar.position.x = -SIZE * (1 - v) * INSET_LARGE / 2;
+    }
+  }]);
+
+  return Progress;
+}();
+    if(typeof window !== "undefined") window.Primrose.Controls.Progress = Progress;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\Progress.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Controls\Progress.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\VUMeter.js
-(function(){var COUNTER = 0;
+    // start D:\Documents\VR\Primrose\src\Primrose\Controls\VUMeter.js
+(function(){"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var COUNTER = 0;
 
 pliny.class({
   parent: "Primrose.Controls",
-    name: "VUMeter",
-    baseClass: "Primrose.Surface",
-    description: "A visualization of audio data.",
-    parameters: [{
-      name: "analyzer",
-      type: "MediaStream",
-      description: "The audio stream to analyze."
-    }, {
-      name: "options",
-      type: "Object",
-      description: "Named parameters for creating the Button."
-    }]
+  name: "VUMeter",
+  baseClass: "Primrose.Surface",
+  description: "A visualization of audio data.",
+  parameters: [{
+    name: "analyzer",
+    type: "MediaStream",
+    description: "The audio stream to analyze."
+  }, {
+    name: "options",
+    type: "Object",
+    description: "Named parameters for creating the Button."
+  }]
 });
-class VUMeter extends Primrose.Surface {
 
-  constructor(analyzer, options) {
+var VUMeter = function (_Primrose$Surface) {
+  _inherits(VUMeter, _Primrose$Surface);
+
+  function VUMeter(analyzer, options) {
+    _classCallCheck(this, VUMeter);
+
     ////////////////////////////////////////////////////////////////////////
     // normalize input parameters
     ////////////////////////////////////////////////////////////////////////
@@ -7050,57 +7440,66 @@ class VUMeter extends Primrose.Surface {
       };
     }
 
-    super(patch(options, {
-      id: "Primrose.Controls.VUMeter[" + (COUNTER++) + "]",
-      bounds: new Primrose.Text.Rectangle(0, 0, 512, 256),
-      backgroundColor: 0x000000,
-      foregroundColor: 0xffffff
-    }));
-
     ////////////////////////////////////////////////////////////////////////
     // initialization
     ///////////////////////////////////////////////////////////////////////
 
-    this.analyzer = analyzer;
-    this.analyzer.fftSize = this.bounds.width;
-    this.buffer = new Uint8Array(this.analyzer.frequencyBinCount);
+    var _this = _possibleConstructorReturn(this, (VUMeter.__proto__ || Object.getPrototypeOf(VUMeter)).call(this, patch(options, {
+      id: "Primrose.Controls.VUMeter[" + COUNTER++ + "]",
+      bounds: new Primrose.Text.Rectangle(0, 0, 512, 256),
+      backgroundColor: 0x000000,
+      foregroundColor: 0xffffff
+    })));
+
+    _this.analyzer = analyzer;
+    _this.analyzer.fftSize = _this.bounds.width;
+    _this.buffer = new Uint8Array(_this.analyzer.frequencyBinCount);
+    return _this;
   }
 
-  addToBrowserEnvironment(env, scene) {
-    var imageMesh = textured(quad(0.5, 0.5 * this.imageHeight / this.imageWidth), this);
-    scene.add(imageMesh);
-    env.registerPickableObject(imageMesh);
-    return imageMesh;
-  }
-
-  render() {
-    if (this.resized) {
-      this.resize();
+  _createClass(VUMeter, [{
+    key: "addToBrowserEnvironment",
+    value: function addToBrowserEnvironment(env, scene) {
+      var imageMesh = textured(quad(0.5, 0.5 * this.imageHeight / this.imageWidth), this);
+      scene.add(imageMesh);
+      env.registerPickableObject(imageMesh);
+      return imageMesh;
     }
+  }, {
+    key: "render",
+    value: function render() {
+      if (this.resized) {
+        this.resize();
+      }
 
-    this.analyzer.getByteTimeDomainData(this.buffer);
-    this.context.fillStyle = this.options.backgroundColor;
-    this.context.fillRect(0, 0, this.bounds.width, this.bounds.height);
-    this.context.lineWidth = 2;
-    this.context.strokeStyle = this.options.foregroundColor;
-    this.context.beginPath();
-    for (var i = 0; i < this.buffer.length; ++i) {
-      var x = i * this.bounds.width / this.buffer.length,
-        y = this.buffer[i] * this.bounds.height / 256,
-        func = i > 0 ? "lineTo" : "moveTo";
-      this.context[func](x, y);
+      this.analyzer.getByteTimeDomainData(this.buffer);
+      this.context.fillStyle = this.options.backgroundColor;
+      this.context.fillRect(0, 0, this.bounds.width, this.bounds.height);
+      this.context.lineWidth = 2;
+      this.context.strokeStyle = this.options.foregroundColor;
+      this.context.beginPath();
+      for (var i = 0; i < this.buffer.length; ++i) {
+        var x = i * this.bounds.width / this.buffer.length,
+            y = this.buffer[i] * this.bounds.height / 256,
+            func = i > 0 ? "lineTo" : "moveTo";
+        this.context[func](x, y);
+      }
+      this.context.stroke();
+      this.invalidate();
     }
-    this.context.stroke();
-    this.invalidate();
-  }
-}
-  if(typeof window !== "undefined") window.Primrose.Controls.VUMeter = VUMeter;
+  }]);
+
+  return VUMeter;
+}(Primrose.Surface);
+    if(typeof window !== "undefined") window.Primrose.Controls.VUMeter = VUMeter;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\VUMeter.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Controls\VUMeter.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\DOM\cascadeElement.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\Primrose\DOM\cascadeElement.js
+(function(){"use strict";
+
+pliny.function({
   parent: "Primrose.DOM",
   name: "cascadeElement",
   returns: "Element",
@@ -7189,11 +7588,9 @@ function cascadeElement(id, tag, DOMClass, add) {
   if (id === null) {
     elem = document.createElement(tag);
     elem.id = id = "auto_" + tag + Date.now();
-  }
-  else if (DOMClass === undefined || id instanceof DOMClass) {
+  } else if (DOMClass === undefined || id instanceof DOMClass) {
     elem = id;
-  }
-  else if (typeof (id) === "string") {
+  } else if (typeof id === "string") {
     elem = document.getElementById(id);
     if (elem === null) {
       elem = document.createElement(tag);
@@ -7201,8 +7598,7 @@ function cascadeElement(id, tag, DOMClass, add) {
       if (add) {
         document.body.appendChild(elem);
       }
-    }
-    else if (elem.tagName !== tag.toUpperCase()) {
+    } else if (elem.tagName !== tag.toUpperCase()) {
       elem = null;
     }
   }
@@ -7217,13 +7613,15 @@ function cascadeElement(id, tag, DOMClass, add) {
   }
   return elem;
 }
-  if(typeof window !== "undefined") window.Primrose.DOM.cascadeElement = cascadeElement;
+    if(typeof window !== "undefined") window.Primrose.DOM.cascadeElement = cascadeElement;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\DOM\cascadeElement.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\DOM\cascadeElement.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\DOM\findEverything.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\Primrose\DOM\findEverything.js
+(function(){"use strict";
+
+pliny.function({
   parent: "Primrose.DOM",
   name: "findEverything",
   description: "Searches an element for all sub elements that have a named ID,\n\
@@ -7289,13 +7687,15 @@ function findEverything(elem, obj) {
   }
   return obj;
 }
-  if(typeof window !== "undefined") window.Primrose.DOM.findEverything = findEverything;
+    if(typeof window !== "undefined") window.Primrose.DOM.findEverything = findEverything;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\DOM\findEverything.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\DOM\findEverything.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\DOM\makeHidingContainer.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\Primrose\DOM\makeHidingContainer.js
+(function(){"use strict";
+
+pliny.function({
   parent: "Primrose.DOM",
   name: "makeHidingContainer",
   description: "Takes an element and shoves it into a containing element that\n\
@@ -7327,13 +7727,15 @@ function makeHidingContainer(id, obj) {
   elem.appendChild(obj);
   return elem;
 }
-  if(typeof window !== "undefined") window.Primrose.DOM.makeHidingContainer = makeHidingContainer;
+    if(typeof window !== "undefined") window.Primrose.DOM.makeHidingContainer = makeHidingContainer;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\DOM\makeHidingContainer.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\DOM\makeHidingContainer.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\del.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\Primrose\HTTP\del.js
+(function(){"use strict";
+
+pliny.function({
   parent: "Primrose.HTTP",
   name: "del",
   description: "Process an HTTP DELETE request.",
@@ -7362,13 +7764,15 @@ function makeHidingContainer(id, obj) {
 function del(type, url, options) {
   return Primrose.HTTP.XHR("DELETE", type, url, options);
 }
-  if(typeof window !== "undefined") window.Primrose.HTTP.del = del;
+    if(typeof window !== "undefined") window.Primrose.HTTP.del = del;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\del.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\HTTP\del.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\delObject.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\Primrose\HTTP\delObject.js
+(function(){"use strict";
+
+pliny.function({
   parent: "Primrose.HTTP",
   name: "delObject",
   description: "Delete something on the server, and receive JSON in response.",
@@ -7392,13 +7796,15 @@ function del(type, url, options) {
 function delObject(url, options) {
   return Primrose.HTTP.del("json", url, options);
 }
-  if(typeof window !== "undefined") window.Primrose.HTTP.delObject = delObject;
+    if(typeof window !== "undefined") window.Primrose.HTTP.delObject = delObject;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\delObject.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\HTTP\delObject.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\get.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\Primrose\HTTP\get.js
+(function(){"use strict";
+
+pliny.function({
   parent: "Primrose.HTTP",
   name: "get",
   description: "Process an HTTP GET request.",
@@ -7438,13 +7844,15 @@ function delObject(url, options) {
 function get(type, url, options) {
   return Primrose.HTTP.XHR("GET", type || "text", url, options);
 }
-  if(typeof window !== "undefined") window.Primrose.HTTP.get = get;
+    if(typeof window !== "undefined") window.Primrose.HTTP.get = get;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\get.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\HTTP\get.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\getBuffer.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\Primrose\HTTP\getBuffer.js
+(function(){"use strict";
+
+pliny.function({
   parent: "Primrose.HTTP",
   name: "getBuffer",
   description: "Get an ArrayBuffer from a server.",
@@ -7482,13 +7890,15 @@ function get(type, url, options) {
 function getBuffer(url, options) {
   return Primrose.HTTP.get("arraybuffer", url, options);
 }
-  if(typeof window !== "undefined") window.Primrose.HTTP.getBuffer = getBuffer;
+    if(typeof window !== "undefined") window.Primrose.HTTP.getBuffer = getBuffer;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\getBuffer.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\HTTP\getBuffer.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\getObject.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\Primrose\HTTP\getObject.js
+(function(){"use strict";
+
+pliny.function({
   parent: "Primrose.HTTP",
   name: "getObject",
   description: "Get a JSON object from a server.",
@@ -7524,13 +7934,15 @@ function getBuffer(url, options) {
 function getObject(url, options) {
   return Primrose.HTTP.get("json", url, options);
 }
-  if(typeof window !== "undefined") window.Primrose.HTTP.getObject = getObject;
+    if(typeof window !== "undefined") window.Primrose.HTTP.getObject = getObject;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\getObject.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\HTTP\getObject.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\getText.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\Primrose\HTTP\getText.js
+(function(){"use strict";
+
+pliny.function({
   parent: "Primrose.HTTP",
   name: "getText",
   description: "Get plain text from a server. Returns a promise that will be resolve with the text retrieved from the server.",
@@ -7565,13 +7977,15 @@ function getObject(url, options) {
 function getText(url, options) {
   return Primrose.HTTP.get("text", url, options);
 }
-  if(typeof window !== "undefined") window.Primrose.HTTP.getText = getText;
+    if(typeof window !== "undefined") window.Primrose.HTTP.getText = getText;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\getText.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\HTTP\getText.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\post.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\Primrose\HTTP\post.js
+(function(){"use strict";
+
+pliny.function({
   parent: "Primrose.HTTP",
   name: "post",
   description: "Process an HTTP POST request.",
@@ -7600,13 +8014,15 @@ function getText(url, options) {
 function post(type, url, options) {
   return Primrose.HTTP.XHR("POST", type, url, options);
 }
-  if(typeof window !== "undefined") window.Primrose.HTTP.post = post;
+    if(typeof window !== "undefined") window.Primrose.HTTP.post = post;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\post.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\HTTP\post.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\postObject.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\Primrose\HTTP\postObject.js
+(function(){"use strict";
+
+pliny.function({
   parent: "Primrose.HTTP",
   name: "postObject",
   description: "Send a JSON object to a server.",
@@ -7630,13 +8046,15 @@ function post(type, url, options) {
 function postObject(url, options) {
   return Primrose.HTTP.post("json", url, options);
 }
-  if(typeof window !== "undefined") window.Primrose.HTTP.postObject = postObject;
+    if(typeof window !== "undefined") window.Primrose.HTTP.postObject = postObject;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\postObject.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\HTTP\postObject.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\XHR.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\Primrose\HTTP\XHR.js
+(function(){"use strict";
+
+pliny.function({
   parent: "Primrose.HTTP",
   name: "XHR",
   description: "Wraps up the XMLHttpRequest object into a workflow that is easier for me to handle: a single function call. Can handle both GETs and POSTs, with or  without a payload.",
@@ -7690,8 +8108,12 @@ function XHR(method, type, url, options) {
     }
 
     var req = new XMLHttpRequest();
-    req.onerror = (evt) => reject(new Error("Request error: " + evt.message));
-    req.onabort = (evt) => reject(new Error("Request abort: " + evt.message));
+    req.onerror = function (evt) {
+      return reject(new Error("Request error: " + evt.message));
+    };
+    req.onabort = function (evt) {
+      return reject(new Error("Request abort: " + evt.message));
+    };
     req.onload = function () {
       // The other error events are client-errors. If there was a server error,
       // we'd find out about it during this event. We need to only respond to
@@ -7699,8 +8121,7 @@ function XHR(method, type, url, options) {
       // range.
       if (req.status < 400) {
         resolve(req.response);
-      }
-      else {
+      } else {
         reject(req);
       }
     };
@@ -7724,68 +8145,77 @@ function XHR(method, type, url, options) {
 
     if (options.data) {
       req.send(JSON.stringify(options.data));
-    }
-    else {
+    } else {
       req.send();
     }
   });
 }
-  if(typeof window !== "undefined") window.Primrose.HTTP.XHR = XHR;
+    if(typeof window !== "undefined") window.Primrose.HTTP.XHR = XHR;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\XHR.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\HTTP\XHR.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\FPSInput.js
-(function(){const DISPLACEMENT = new THREE.Vector3(),
-  EULER_TEMP = new THREE.Euler(),
-  QUAT_TEMP = new THREE.Quaternion(),
-  WEDGE = Math.PI / 3;
+    // start D:\Documents\VR\Primrose\src\Primrose\Input\FPSInput.js
+(function(){"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var DISPLACEMENT = new THREE.Vector3(),
+    EULER_TEMP = new THREE.Euler(),
+    QUAT_TEMP = new THREE.Quaternion(),
+    WEDGE = Math.PI / 3;
 
 pliny.class({
   parent: "Primrose.Input",
-    name: "FPSInput",
-    baseClass: "Primrose.AbstractEventEmitter",
-    description: "A massive hairball of a class that handles all of the input abstraction.",
-    parameters: [{
-      name: "DOMElement",
-      type: "Element",
-      description: "The DOM element on which to add most events.",
-      optional: true,
-      defaultValue: "window"
-    }, {
-      name: "options",
-      type: "Object",
-      description: "Optional setup: avatarHeight, gravity, and scene."
-    }]
+  name: "FPSInput",
+  baseClass: "Primrose.AbstractEventEmitter",
+  description: "A massive hairball of a class that handles all of the input abstraction.",
+  parameters: [{
+    name: "DOMElement",
+    type: "Element",
+    description: "The DOM element on which to add most events.",
+    optional: true,
+    defaultValue: "window"
+  }, {
+    name: "options",
+    type: "Object",
+    description: "Optional setup: avatarHeight, gravity, and scene."
+  }]
 });
-class FPSInput extends Primrose.AbstractEventEmitter {
-  constructor(DOMElement, options) {
-    super();
+
+var FPSInput = function (_Primrose$AbstractEve) {
+  _inherits(FPSInput, _Primrose$AbstractEve);
+
+  function FPSInput(DOMElement, options) {
+    _classCallCheck(this, FPSInput);
+
+    var _this = _possibleConstructorReturn(this, (FPSInput.__proto__ || Object.getPrototypeOf(FPSInput)).call(this));
+
     DOMElement = DOMElement || document.documentElement;
-    this.options = options;
-    this._handlers.zero = [];
-    this._handlers.motioncontroller = [];
-    this._handlers.gamepad = [];
+    _this.options = options;
+    _this._handlers.zero = [];
+    _this._handlers.motioncontroller = [];
+    _this._handlers.gamepad = [];
 
-    this.managers = [];
-    this.newState = [];
-    this.pointers = [];
-    this.motionDevices = [];
-    this.velocity = new THREE.Vector3();
-    this.matrix = new THREE.Matrix4();
+    _this.managers = [];
+    _this.newState = [];
+    _this.pointers = [];
+    _this.motionDevices = [];
+    _this.velocity = new THREE.Vector3();
+    _this.matrix = new THREE.Matrix4();
 
-    this.add(new Primrose.Input.Keyboard(this, {
+    _this.add(new Primrose.Input.Keyboard(_this, {
       strafeLeft: {
-        buttons: [
-          -Primrose.Keys.A,
-          -Primrose.Keys.LEFTARROW
-        ]
+        buttons: [-Primrose.Keys.A, -Primrose.Keys.LEFTARROW]
       },
       strafeRight: {
-        buttons: [
-          Primrose.Keys.D,
-          Primrose.Keys.RIGHTARROW
-        ]
+        buttons: [Primrose.Keys.D, Primrose.Keys.RIGHTARROW]
       },
       strafe: {
         commands: ["strafeLeft", "strafeRight"]
@@ -7795,16 +8225,10 @@ class FPSInput extends Primrose.AbstractEventEmitter {
         scale: 12
       },
       driveForward: {
-        buttons: [
-          -Primrose.Keys.W,
-          -Primrose.Keys.UPARROW
-        ]
+        buttons: [-Primrose.Keys.W, -Primrose.Keys.UPARROW]
       },
       driveBack: {
-        buttons: [
-          Primrose.Keys.S,
-          Primrose.Keys.DOWNARROW
-        ]
+        buttons: [Primrose.Keys.S, Primrose.Keys.DOWNARROW]
       },
       drive: {
         commands: ["driveForward", "driveBack"]
@@ -7818,20 +8242,15 @@ class FPSInput extends Primrose.AbstractEventEmitter {
       },
       zero: {
         buttons: [Primrose.Keys.Z],
-        metaKeys: [
-          -Primrose.Keys.CTRL,
-          -Primrose.Keys.ALT,
-          -Primrose.Keys.SHIFT,
-          -Primrose.Keys.META
-        ],
-        commandUp: this.emit.bind(this, "zero")
+        metaKeys: [-Primrose.Keys.CTRL, -Primrose.Keys.ALT, -Primrose.Keys.SHIFT, -Primrose.Keys.META],
+        commandUp: _this.emit.bind(_this, "zero")
       }
     }));
 
-    this.Keyboard.operatingSystem = this.options.os;
-    this.Keyboard.codePage = this.options.language;
+    _this.Keyboard.operatingSystem = _this.options.os;
+    _this.Keyboard.codePage = _this.options.language;
 
-    this.add(new Primrose.Input.Touch(DOMElement, {
+    _this.add(new Primrose.Input.Touch(DOMElement, {
       buttons: {
         axes: ["FINGERS"]
       },
@@ -7863,7 +8282,7 @@ class FPSInput extends Primrose.AbstractEventEmitter {
       }
     }));
 
-    this.add(new Primrose.Input.Mouse(DOMElement, {
+    _this.add(new Primrose.Input.Mouse(DOMElement, {
       U: { axes: ["X"], min: -1, max: 1 },
       V: { axes: ["Y"], min: -1, max: 1 },
       buttons: {
@@ -7903,19 +8322,19 @@ class FPSInput extends Primrose.AbstractEventEmitter {
       }
     }));
 
-    this.add(new Primrose.Input.VR(this.options.avatarHeight));
-    this.motionDevices.push(this.VR);
+    _this.add(new Primrose.Input.VR(_this.options.avatarHeight));
+    _this.motionDevices.push(_this.VR);
 
-    if(Primrose.Input.Gamepad.isAvailable){
-      Primrose.Input.Gamepad.addEventListener("gamepadconnected", (pad) => {
-        const padID = Primrose.Input.Gamepad.ID(pad);
-        let mgr = null;
+    if (Primrose.Input.Gamepad.isAvailable) {
+      Primrose.Input.Gamepad.addEventListener("gamepadconnected", function (pad) {
+        var padID = Primrose.Input.Gamepad.ID(pad);
+        var mgr = null;
 
         if (padID !== "Unknown" && padID !== "Rift") {
           if (Primrose.Input.Gamepad.isMotionController(pad)) {
-            let controllerNumber = 0;
-            for (let i = 0; i < this.managers.length; ++i) {
-              mgr = this.managers[i];
+            var controllerNumber = 0;
+            for (var i = 0; i < _this.managers.length; ++i) {
+              mgr = _this.managers[i];
               if (mgr.currentPad && mgr.currentPad.id === pad.id) {
                 ++controllerNumber;
               }
@@ -7931,26 +8350,25 @@ class FPSInput extends Primrose.AbstractEventEmitter {
               },
               zero: {
                 buttons: [Primrose.Input.Gamepad.VIVE_BUTTONS.GRIP_PRESSED],
-                commandUp: emit.bind(this, "zero")
+                commandUp: emit.bind(_this, "zero")
               }
             });
 
-            this.add(mgr);
-            this.motionDevices.push(mgr);
+            _this.add(mgr);
+            _this.motionDevices.push(mgr);
 
-            const shift = (this.motionDevices.length - 2) * 8,
-              color = 0x0000ff << shift,
-              highlight = 0xff0000 >> shift,
-              ptr = new Primrose.Pointer(padID + "Pointer", color, 1, highlight, [mgr]);
+            var shift = (_this.motionDevices.length - 2) * 8,
+                color = 0x0000ff << shift,
+                highlight = 0xff0000 >> shift,
+                ptr = new Primrose.Pointer(padID + "Pointer", color, 1, highlight, [mgr]);
             ptr.add(colored(box(0.1, 0.025, 0.2), color, {
               emissive: highlight
             }));
 
-            this.pointers.push(ptr);
-            ptr.addToBrowserEnvironment(null, this.options.scene);
-            ptr.forward(this, Primrose.Pointer.EVENTS);
-          }
-          else {
+            _this.pointers.push(ptr);
+            ptr.addToBrowserEnvironment(null, _this.options.scene);
+            ptr.forward(_this, Primrose.Pointer.EVENTS);
+          } else {
             mgr = new Primrose.Input.Gamepad(pad, 0, {
               buttons: {
                 axes: ["BUTTONS"]
@@ -7985,248 +8403,260 @@ class FPSInput extends Primrose.AbstractEventEmitter {
               },
               zero: {
                 buttons: [Primrose.Input.Gamepad.XBOX_ONE_BUTTONS.BACK],
-                commandUp: emit.bind(this, "zero")
+                commandUp: emit.bind(_this, "zero")
               }
             });
-            this.add(mgr);
-            this.mousePointer.addDevice(mgr, mgr);
+            _this.add(mgr);
+            _this.mousePointer.addDevice(mgr, mgr);
           }
         }
       });
 
-      Primrose.Input.Gamepad.addEventListener("gamepaddisconnected", this.remove.bind(this));
+      Primrose.Input.Gamepad.addEventListener("gamepaddisconnected", _this.remove.bind(_this));
     }
 
-    this.stage = hub();
+    _this.stage = hub();
 
-    this.head = new Primrose.Pointer("GazePointer", 0xffff00, 0x0000ff, 0.8, [
-      this.VR
-    ], [
-      this.Mouse,
-      this.Touch,
-      this.Keyboard
-    ]);
+    _this.head = new Primrose.Pointer("GazePointer", 0xffff00, 0x0000ff, 0.8, [_this.VR], [_this.Mouse, _this.Touch, _this.Keyboard]);
 
-    this.head.rotation.order = "YXZ";
-    this.head.useGaze = this.options.useGaze;
-    this.pointers.push(this.head);
-    this.options.scene.add(this.head.root);
-    this.options.scene.add(this.head.disk);
+    _this.head.rotation.order = "YXZ";
+    _this.head.useGaze = _this.options.useGaze;
+    _this.pointers.push(_this.head);
+    _this.options.scene.add(_this.head.root);
+    _this.options.scene.add(_this.head.disk);
 
-    this.mousePointer = new Primrose.Pointer("MousePointer", 0xff0000, 0x00ff00, 1, [
-      this.Mouse
-    ]);
-    this.mousePointer.unproject = new THREE.Matrix4();
-    this.pointers.push(this.mousePointer);
-    this.head.add(this.mousePointer.root);
-    this.options.scene.add(this.mousePointer.disk);
+    _this.mousePointer = new Primrose.Pointer("MousePointer", 0xff0000, 0x00ff00, 1, [_this.Mouse]);
+    _this.mousePointer.unproject = new THREE.Matrix4();
+    _this.pointers.push(_this.mousePointer);
+    _this.head.add(_this.mousePointer.root);
+    _this.options.scene.add(_this.mousePointer.disk);
 
-
-    this.pointers.forEach((ptr) => ptr.forward(this, Primrose.Pointer.EVENTS));
-    this.ready = Promise.all(this.managers
-      .map((mgr) => mgr.ready)
-      .filter(identity));
+    _this.pointers.forEach(function (ptr) {
+      return ptr.forward(_this, Primrose.Pointer.EVENTS);
+    });
+    _this.ready = Promise.all(_this.managers.map(function (mgr) {
+      return mgr.ready;
+    }).filter(identity));
+    return _this;
   }
 
-  remove(id) {
-    const mgr = this[id],
-      mgrIdx = this.managers.indexOf(mgr);
-    if (mgrIdx > -1) {
-      this.managers.splice(mgrIdx, 1);
-      delete this[id];
-    }
-    console.log("removed", mgr);
-  }
-
-  add(mgr) {
-    for (let i = this.managers.length - 1; i >= 0; --i) {
-      if (this.managers[i].name === mgr.name) {
-        this.managers.splice(i, 1);
+  _createClass(FPSInput, [{
+    key: "remove",
+    value: function remove(id) {
+      var mgr = this[id],
+          mgrIdx = this.managers.indexOf(mgr);
+      if (mgrIdx > -1) {
+        this.managers.splice(mgrIdx, 1);
+        delete this[id];
       }
+      console.log("removed", mgr);
     }
-    this.managers.push(mgr);
-    this[mgr.name] = mgr;
-  }
-
-  zero() {
-    for (let i = 0; i < this.managers.length; ++i) {
-      this.managers[i].zero();
-    }
-  }
-
-  get hasMotionControllers() {
-    return !!(this.Vive_0 && this.Vive_0.enabled && this.Vive_0.inPhysicalUse ||
-      this.Vive_1 && this.Vive_1.enabled && this.Vive_1.inPhysicalUse);
-  }
-
-  get hasGamepad() {
-    return !!(this.Gamepad_0 && this.Gamepad_0.enabled && this.Gamepad_0.inPhysicalUse);
-  }
-
-  get hasMouse() {
-    return !!(this.Mouse && this.Mouse.enabled && this.Mouse.inPhysicalUse);
-  }
-
-  get hasTouch() {
-    return !!(this.Touch && this.Touch.enabled && this.Touch.inPhysicalUse);
-  }
-
-  submitFrame() {
-    this.VR.submitFrame();
-  }
-
-  update(dt) {
-    const hadGamepad = this.hasGamepad;
-    if(Primrose.Input.Gamepad.isAvailable){
-      Primrose.Input.Gamepad.poll();
-    }
-    for (let i = 0; i < this.managers.length; ++i) {
-      this.managers[i].update(dt);
-    }
-
-    if (!hadGamepad && this.hasGamepad) {
-      this.Mouse.inPhysicalUse = false;
-    }
-
-    this.head.showPointer = this.VR.hasOrientation;
-    this.mousePointer.showPointer = (this.hasMouse || this.hasGamepad) && !this.hasMotionControllers;
-    this.mousePointer.root.visible = this.VR.isPresenting;
-    this.Keyboard.enabled = this.Touch.enabled = this.Mouse.enabled = !this.hasMotionControllers;
-    if (this.Gamepad_0) {
-      this.Gamepad_0.enabled = !this.hasMotionControllers;
-    }
-
-    this.updateStage(dt);
-    this.stage.position.y = this.options.avatarHeight;
-    for (let i = 0; i < this.motionDevices.length; ++i) {
-      this.motionDevices[i].posePosition.y -= this.options.avatarHeight;
-    }
-
-    // update the motionDevices
-    this.stage.updateMatrix();
-    this.matrix.multiplyMatrices(this.stage.matrix, this.VR.stage.matrix);
-    for (let i = 0; i < this.motionDevices.length; ++i) {
-      this.motionDevices[i].updateStage(this.matrix);
-    }
-
-    for (let i = 0; i < this.pointers.length; ++i) {
-      this.pointers[i].update();
-    }
-
-    // record the position and orientation of the user
-    this.newState = [];
-    this.head.updateMatrix();
-    this.stage.rotation.x = 0;
-    this.stage.rotation.z = 0;
-    this.stage.quaternion.setFromEuler(this.stage.rotation);
-    this.stage.updateMatrix();
-    this.head.position.toArray(this.newState, 0);
-    this.head.quaternion.toArray(this.newState, 3);
-  }
-
-  updateStage(dt) {
-    // get the linear movement from the mouse/keyboard/gamepad
-    let heading = 0,
-      pitch = 0,
-      strafe = 0,
-      drive = 0,
-      lift = 0,
-      mouseHeading = 0;
-    for (let i = 0; i < this.managers.length; ++i) {
-      const mgr = this.managers[i];
-      if(mgr.enabled){
-        if(mgr.name === "Mouse"){
-          mouseHeading += mgr.getValue("heading");
+  }, {
+    key: "add",
+    value: function add(mgr) {
+      for (var i = this.managers.length - 1; i >= 0; --i) {
+        if (this.managers[i].name === mgr.name) {
+          this.managers.splice(i, 1);
         }
-        else{
-          heading += mgr.getValue("heading");
+      }
+      this.managers.push(mgr);
+      this[mgr.name] = mgr;
+    }
+  }, {
+    key: "zero",
+    value: function zero() {
+      for (var i = 0; i < this.managers.length; ++i) {
+        this.managers[i].zero();
+      }
+    }
+  }, {
+    key: "submitFrame",
+    value: function submitFrame() {
+      this.VR.submitFrame();
+    }
+  }, {
+    key: "update",
+    value: function update(dt) {
+      var hadGamepad = this.hasGamepad;
+      if (Primrose.Input.Gamepad.isAvailable) {
+        Primrose.Input.Gamepad.poll();
+      }
+      for (var i = 0; i < this.managers.length; ++i) {
+        this.managers[i].update(dt);
+      }
+
+      if (!hadGamepad && this.hasGamepad) {
+        this.Mouse.inPhysicalUse = false;
+      }
+
+      this.head.showPointer = this.VR.hasOrientation;
+      this.mousePointer.showPointer = (this.hasMouse || this.hasGamepad) && !this.hasMotionControllers;
+      this.mousePointer.root.visible = this.VR.isPresenting;
+      this.Keyboard.enabled = this.Touch.enabled = this.Mouse.enabled = !this.hasMotionControllers;
+      if (this.Gamepad_0) {
+        this.Gamepad_0.enabled = !this.hasMotionControllers;
+      }
+
+      this.updateStage(dt);
+      this.stage.position.y = this.options.avatarHeight;
+      for (var _i = 0; _i < this.motionDevices.length; ++_i) {
+        this.motionDevices[_i].posePosition.y -= this.options.avatarHeight;
+      }
+
+      // update the motionDevices
+      this.stage.updateMatrix();
+      this.matrix.multiplyMatrices(this.stage.matrix, this.VR.stage.matrix);
+      for (var _i2 = 0; _i2 < this.motionDevices.length; ++_i2) {
+        this.motionDevices[_i2].updateStage(this.matrix);
+      }
+
+      for (var _i3 = 0; _i3 < this.pointers.length; ++_i3) {
+        this.pointers[_i3].update();
+      }
+
+      // record the position and orientation of the user
+      this.newState = [];
+      this.head.updateMatrix();
+      this.stage.rotation.x = 0;
+      this.stage.rotation.z = 0;
+      this.stage.quaternion.setFromEuler(this.stage.rotation);
+      this.stage.updateMatrix();
+      this.head.position.toArray(this.newState, 0);
+      this.head.quaternion.toArray(this.newState, 3);
+    }
+  }, {
+    key: "updateStage",
+    value: function updateStage(dt) {
+      // get the linear movement from the mouse/keyboard/gamepad
+      var heading = 0,
+          pitch = 0,
+          strafe = 0,
+          drive = 0,
+          lift = 0,
+          mouseHeading = 0;
+      for (var i = 0; i < this.managers.length; ++i) {
+        var mgr = this.managers[i];
+        if (mgr.enabled) {
+          if (mgr.name === "Mouse") {
+            mouseHeading += mgr.getValue("heading");
+          } else {
+            heading += mgr.getValue("heading");
+          }
+          pitch += mgr.getValue("pitch");
+          strafe += mgr.getValue("strafe");
+          drive += mgr.getValue("drive");
+          lift += mgr.getValue("lift");
         }
-        pitch += mgr.getValue("pitch");
-        strafe += mgr.getValue("strafe");
-        drive += mgr.getValue("drive");
-        lift += mgr.getValue("lift");
+      }
+
+      if (this.VR.hasOrientation) {
+        mouseHeading = WEDGE * Math.floor(mouseHeading / WEDGE + 0.5);
+        pitch = 0;
+      }
+
+      heading += mouseHeading;
+
+      // move stage according to heading and thrust
+      EULER_TEMP.set(pitch, heading, 0, "YXZ");
+      this.stage.quaternion.setFromEuler(EULER_TEMP);
+
+      // update the stage's velocity
+      this.velocity.set(strafe, lift, drive);
+
+      if (this.stage.isOnGround) {
+        if (this.velocity.y > 0) {
+          this.stage.isOnGround = false;
+        }
+      } else {
+        this.velocity.y -= this.options.gravity;
+        if (this.stage.position.y < 0) {
+          this.velocity.y = 0;
+          this.stage.position.y = 0;
+          this.stage.isOnGround = true;
+        }
+      }
+
+      QUAT_TEMP.copy(this.head.quaternion);
+      EULER_TEMP.setFromQuaternion(QUAT_TEMP);
+      EULER_TEMP.x = 0;
+      EULER_TEMP.z = 0;
+      QUAT_TEMP.setFromEuler(EULER_TEMP);
+
+      this.moveStage(DISPLACEMENT.copy(this.velocity).multiplyScalar(dt).applyQuaternion(QUAT_TEMP).add(this.head.position));
+    }
+  }, {
+    key: "moveStage",
+    value: function moveStage(position) {
+      DISPLACEMENT.copy(position).sub(this.head.position);
+      this.stage.position.add(DISPLACEMENT);
+    }
+  }, {
+    key: "resolvePicking",
+    value: function resolvePicking(objects) {
+      for (var i = 0; i < this.pointers.length; ++i) {
+        var ptr = this.pointers[i];
+        ptr.resolvePicking(objects);
       }
     }
-
-    if (this.VR.hasOrientation) {
-      mouseHeading = WEDGE * Math.floor((mouseHeading / WEDGE) + 0.5);
-      pitch = 0;
+  }, {
+    key: "hasMotionControllers",
+    get: function get() {
+      return !!(this.Vive_0 && this.Vive_0.enabled && this.Vive_0.inPhysicalUse || this.Vive_1 && this.Vive_1.enabled && this.Vive_1.inPhysicalUse);
     }
-
-    heading += mouseHeading;
-
-    // move stage according to heading and thrust
-    EULER_TEMP.set(pitch, heading, 0, "YXZ");
-    this.stage.quaternion.setFromEuler(EULER_TEMP);
-
-    // update the stage's velocity
-    this.velocity.set(strafe, lift, drive);
-
-    if (this.stage.isOnGround) {
-      if(this.velocity.y > 0){
-        this.stage.isOnGround = false;
+  }, {
+    key: "hasGamepad",
+    get: function get() {
+      return !!(this.Gamepad_0 && this.Gamepad_0.enabled && this.Gamepad_0.inPhysicalUse);
+    }
+  }, {
+    key: "hasMouse",
+    get: function get() {
+      return !!(this.Mouse && this.Mouse.enabled && this.Mouse.inPhysicalUse);
+    }
+  }, {
+    key: "hasTouch",
+    get: function get() {
+      return !!(this.Touch && this.Touch.enabled && this.Touch.inPhysicalUse);
+    }
+  }, {
+    key: "segments",
+    get: function get() {
+      var segments = [];
+      for (var i = 0; i < this.pointers.length; ++i) {
+        var seg = this.pointers[i].segment;
+        if (seg) {
+          segments.push(seg);
+        }
       }
+      return segments;
     }
-    else {
-      this.velocity.y -= this.options.gravity;
-      if (this.stage.position.y < 0) {
-        this.velocity.y = 0;
-        this.stage.position.y = 0;
-        this.stage.isOnGround = true;
-      }
-    }
+  }]);
 
-    QUAT_TEMP.copy(this.head.quaternion);
-    EULER_TEMP.setFromQuaternion(QUAT_TEMP);
-    EULER_TEMP.x = 0;
-    EULER_TEMP.z = 0;
-    QUAT_TEMP.setFromEuler(EULER_TEMP);
-
-    this.moveStage(DISPLACEMENT
-      .copy(this.velocity)
-      .multiplyScalar(dt)
-      .applyQuaternion(QUAT_TEMP)
-      .add(this.head.position));
-  }
-
-  moveStage(position) {
-    DISPLACEMENT.copy(position)
-      .sub(this.head.position);
-    this.stage.position.add(DISPLACEMENT);
-  }
-
-  get segments() {
-    const segments = [];
-    for (let i = 0; i < this.pointers.length; ++i) {
-      const seg = this.pointers[i].segment;
-      if (seg) {
-        segments.push(seg);
-      }
-    }
-    return segments;
-  }
-
-  resolvePicking(objects) {
-    for (let i = 0; i < this.pointers.length; ++i) {
-      const ptr = this.pointers[i];
-      ptr.resolvePicking(objects);
-    }
-  }
-}
-  if(typeof window !== "undefined") window.Primrose.Input.FPSInput = FPSInput;
+  return FPSInput;
+}(Primrose.AbstractEventEmitter);
+    if(typeof window !== "undefined") window.Primrose.Input.FPSInput = FPSInput;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\FPSInput.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Input\FPSInput.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\Gamepad.js
-(function(){navigator.getGamepads = navigator.getGamepads ||
-  navigator.webkitGetGamepads;
+    // start D:\Documents\VR\Primrose\src\Primrose\Input\Gamepad.js
+(function(){"use strict";
 
-function playPattern(devices, pattern, pause){
-  if(pattern.length > 0){
-    const length = pattern.shift();
-    if(!pause){
-      for(var i = 0; i < devices.length; ++i){
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+navigator.getGamepads = navigator.getGamepads || navigator.webkitGetGamepads;
+
+function playPattern(devices, pattern, pause) {
+  if (pattern.length > 0) {
+    var length = pattern.shift();
+    if (!pause) {
+      for (var i = 0; i < devices.length; ++i) {
         devices[0].vibrate(1, length);
       }
     }
@@ -8234,177 +8664,198 @@ function playPattern(devices, pattern, pause){
   }
 }
 
-const listeners = {
-    gamepadconnected: [],
-    gamepaddisconnected: []
-  },
-  currentDeviceIDs = [],
-  currentDevices = [],
-  currentManagers = {};
+var listeners = {
+  gamepadconnected: [],
+  gamepaddisconnected: []
+},
+    currentDeviceIDs = [],
+    currentDevices = [],
+    currentManagers = {};
 
 pliny.class({
   parent: "Primrose.Input",
-    name: "Gamepad",
-    baseClass: "Primrose.PoseInputProcessor",
-    parameters: [{
-      name: "name",
-      type: "string",
-      description: "An unique name for this input manager. Note that systems with motion controllers will often have two controllers with the same ID, but different indexes. The name should take that into account."
-    }, {
-      name: "commands",
-      type: "Array",
-      optional: true,
-      description: "An array of input command descriptions."
-    }],
-    description: "An input processor for Gamepads, including those with positional data."
+  name: "Gamepad",
+  baseClass: "Primrose.PoseInputProcessor",
+  parameters: [{
+    name: "name",
+    type: "string",
+    description: "An unique name for this input manager. Note that systems with motion controllers will often have two controllers with the same ID, but different indexes. The name should take that into account."
+  }, {
+    name: "commands",
+    type: "Array",
+    optional: true,
+    description: "An array of input command descriptions."
+  }],
+  description: "An input processor for Gamepads, including those with positional data."
 });
-class Gamepad extends Primrose.PoseInputProcessor {
-  static get isAvailable() {
-    return !!navigator.getGamepads;
-  }
 
-  static ID(pad) {
-    var id = pad.id;
-    if (id === "OpenVR Gamepad") {
-      id = "Vive";
-    }
-    else if (id.indexOf("Rift") === 0) {
-      id = "Rift";
-    }
-    else if (id.indexOf("Unknown") === 0) {
-      id = "Unknown";
-    }
-    else {
-      id = "Gamepad";
-    }
-    id = (id + "_" + (pad.index || 0))
-      .replace(/\s+/g, "_");
-    return id;
-  }
+var Gamepad = function (_Primrose$PoseInputPr) {
+  _inherits(Gamepad, _Primrose$PoseInputPr);
 
-  static poll() {
-    if(Gamepad.isAvailable){
-      var maybePads = navigator.getGamepads(),
-        pads = [],
-        padIDs = [],
-        newPads = [],
-        oldPads = [],
-        i, padID;
+  _createClass(Gamepad, null, [{
+    key: "ID",
+    value: function ID(pad) {
+      var id = pad.id;
+      if (id === "OpenVR Gamepad") {
+        id = "Vive";
+      } else if (id.indexOf("Rift") === 0) {
+        id = "Rift";
+      } else if (id.indexOf("Unknown") === 0) {
+        id = "Unknown";
+      } else {
+        id = "Gamepad";
+      }
+      id = (id + "_" + (pad.index || 0)).replace(/\s+/g, "_");
+      return id;
+    }
+  }, {
+    key: "poll",
+    value: function poll() {
+      if (Gamepad.isAvailable) {
+        var maybePads = navigator.getGamepads(),
+            pads = [],
+            padIDs = [],
+            newPads = [],
+            oldPads = [],
+            i,
+            padID;
 
-      if (maybePads) {
-        for (i = 0; i < maybePads.length; ++i) {
-          var maybePad = maybePads[i];
-          if (maybePad) {
-            padID = Gamepad.ID(maybePad);
-            var padIdx = currentDeviceIDs.indexOf(padID);
-            pads.push(maybePad);
-            padIDs.push(padID);
-            if (padIdx === -1) {
-              newPads.push(maybePad);
-              currentDeviceIDs.push(padID);
-              currentDevices.push(maybePad);
-              delete currentManagers[padID];
-            }
-            else {
-              currentDevices[padIdx] = maybePad;
+        if (maybePads) {
+          for (i = 0; i < maybePads.length; ++i) {
+            var maybePad = maybePads[i];
+            if (maybePad) {
+              padID = Gamepad.ID(maybePad);
+              var padIdx = currentDeviceIDs.indexOf(padID);
+              pads.push(maybePad);
+              padIDs.push(padID);
+              if (padIdx === -1) {
+                newPads.push(maybePad);
+                currentDeviceIDs.push(padID);
+                currentDevices.push(maybePad);
+                delete currentManagers[padID];
+              } else {
+                currentDevices[padIdx] = maybePad;
+              }
             }
           }
         }
-      }
 
-      for (i = currentDeviceIDs.length - 1; i >= 0; --i) {
-        padID = currentDeviceIDs[i];
-        var mgr = currentManagers[padID],
-          pad = currentDevices[i];
-        if (padIDs.indexOf(padID) === -1) {
-          oldPads.push(padID);
-          currentDevices.splice(i, 1);
-          currentDeviceIDs.splice(i, 1);
+        for (i = currentDeviceIDs.length - 1; i >= 0; --i) {
+          padID = currentDeviceIDs[i];
+          var mgr = currentManagers[padID],
+              pad = currentDevices[i];
+          if (padIDs.indexOf(padID) === -1) {
+            oldPads.push(padID);
+            currentDevices.splice(i, 1);
+            currentDeviceIDs.splice(i, 1);
+          } else if (mgr) {
+            mgr.checkDevice(pad);
+          }
         }
-        else if (mgr) {
-          mgr.checkDevice(pad);
-        }
+
+        newPads.forEach(emit.bind(Gamepad, "gamepadconnected"));
+        oldPads.forEach(emit.bind(Gamepad, "gamepaddisconnected"));
       }
-
-      newPads.forEach(emit.bind(Gamepad, "gamepadconnected"));
-      oldPads.forEach(emit.bind(Gamepad, "gamepaddisconnected"));
     }
-  }
-
-  static get pads() {
-    return currentDevices;
-  }
-
-  static get listeners() {
-    return listeners;
-  }
-
-  static addEventListener(evt, thunk) {
-    if (listeners[evt]) {
-      listeners[evt].push(thunk);
+  }, {
+    key: "addEventListener",
+    value: function addEventListener(evt, thunk) {
+      if (listeners[evt]) {
+        listeners[evt].push(thunk);
+      }
     }
-  }
-
-  static isMotionController(pad){
-    if(pad) {
-      const obj = pad.capabilities || pad.pose;
-      return obj && obj.hasOrientation;
+  }, {
+    key: "isMotionController",
+    value: function isMotionController(pad) {
+      if (pad) {
+        var obj = pad.capabilities || pad.pose;
+        return obj && obj.hasOrientation;
+      }
+      return false;
     }
-    return false;
-  }
+  }, {
+    key: "isAvailable",
+    get: function get() {
+      return !!navigator.getGamepads;
+    }
+  }, {
+    key: "pads",
+    get: function get() {
+      return currentDevices;
+    }
+  }, {
+    key: "listeners",
+    get: function get() {
+      return listeners;
+    }
+  }]);
 
-  constructor(pad, axisOffset, commands) {
+  function Gamepad(pad, axisOffset, commands) {
+    _classCallCheck(this, Gamepad);
+
     var padID = Gamepad.ID(pad);
-    super(padID, commands, ["LSX", "LSY", "RSX", "RSY", "IDK1", "IDK2", "Z", "BUTTONS"]);
-    currentManagers[padID] = this;
 
-    this.currentDevice = pad;
-    this.axisOffset = axisOffset;
+    var _this = _possibleConstructorReturn(this, (Gamepad.__proto__ || Object.getPrototypeOf(Gamepad)).call(this, padID, commands, ["LSX", "LSY", "RSX", "RSY", "IDK1", "IDK2", "Z", "BUTTONS"]));
+
+    currentManagers[padID] = _this;
+
+    _this.currentDevice = pad;
+    _this.axisOffset = axisOffset;
+    return _this;
   }
 
-  get hasOrientation() {
-    return Gamepad.isMotionController(this.currentDevice);
-  }
+  _createClass(Gamepad, [{
+    key: "checkDevice",
+    value: function checkDevice(pad) {
+      var i,
+          j,
+          buttonMap = 0;
+      this.currentDevice = pad;
+      this.currentPose = this.hasOrientation && this.currentDevice.pose;
+      for (i = 0, j = pad.buttons.length; i < pad.buttons.length; ++i, ++j) {
+        var btn = pad.buttons[i];
+        this.setButton(i, btn.pressed);
+        if (btn.pressed) {
+          buttonMap |= 0x1 << i;
+        }
 
-  checkDevice(pad) {
-    var i, j, buttonMap = 0;
-    this.currentDevice = pad;
-    this.currentPose = this.hasOrientation && this.currentDevice.pose;
-    for (i = 0, j = pad.buttons.length; i < pad.buttons.length; ++i, ++j) {
-      var btn = pad.buttons[i];
-      this.setButton(i, btn.pressed);
-      if (btn.pressed) {
-        buttonMap |= 0x1 << i;
+        this.setButton(j, btn.touched);
+        if (btn.touched) {
+          buttonMap |= 0x1 << j;
+        }
       }
-
-      this.setButton(j, btn.touched);
-      if(btn.touched){
-        buttonMap |= 0x1 << j;
-      }
-    }
-    this.setAxis("BUTTONS", buttonMap);
-    for (i = 0; i < pad.axes.length; ++i) {
-      var axisName = this.axisNames[this.axisOffset * pad.axes.length + i],
-        axisValue = pad.axes[i];
-      this.setAxis(axisName, axisValue);
-    }
-  }
-
-  vibratePattern(pattern) {
-    if(this.currentDevice){
-      if (this.currentDevice.vibrate) {
-        this.currentDevice.vibrate(pattern);
-      }
-      else if(this.currentDevice.haptics && this.currentDevice.haptics.length > 0) {
-        playPattern(this.currentDevice.haptics, pattern);
+      this.setAxis("BUTTONS", buttonMap);
+      for (i = 0; i < pad.axes.length; ++i) {
+        var axisName = this.axisNames[this.axisOffset * pad.axes.length + i],
+            axisValue = pad.axes[i];
+        this.setAxis(axisName, axisValue);
       }
     }
-  }
+  }, {
+    key: "vibratePattern",
+    value: function vibratePattern(pattern) {
+      if (this.currentDevice) {
+        if (this.currentDevice.vibrate) {
+          this.currentDevice.vibrate(pattern);
+        } else if (this.currentDevice.haptics && this.currentDevice.haptics.length > 0) {
+          playPattern(this.currentDevice.haptics, pattern);
+        }
+      }
+    }
+  }, {
+    key: "hasOrientation",
+    get: function get() {
+      return Gamepad.isMotionController(this.currentDevice);
+    }
+  }, {
+    key: "haptics",
+    get: function get() {
+      return this.currentDevice && this.currentDevice.haptics;
+    }
+  }]);
 
-  get haptics() {
-    return this.currentDevice && this.currentDevice.haptics;
-  }
-}
+  return Gamepad;
+}(Primrose.PoseInputProcessor);
 
 pliny.enumeration({
   parent: "Primrose.Input.Gamepad",
@@ -8470,273 +8921,259 @@ Gamepad.VIVE_BUTTONS = {
   GRIP_TOUCHED: 6,
   MENU_TOUCHED: 7
 };
-  if(typeof window !== "undefined") window.Primrose.Input.Gamepad = Gamepad;
+    if(typeof window !== "undefined") window.Primrose.Input.Gamepad = Gamepad;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\Gamepad.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Input\Gamepad.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\Keyboard.js
-(function(){pliny.class({
+    // start D:\Documents\VR\Primrose\src\Primrose\Input\Keyboard.js
+(function(){"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+pliny.class({
   parent: "Primrose.Input",
-    name: "Keyboard",
-    baseClass: "Primrose.InputProcessor",
-    description: "| [under construction]",
-    parameters: [{
-      name: "",
-      type: "",
-      description: ""
-    }, {
-      name: "",
-      type: "",
-      description: ""
-    }, {
-      name: "",
-      type: "",
-      description: ""
-    }, {
-      name: "",
-      type: "",
-      description: ""
-    }]
+  name: "Keyboard",
+  baseClass: "Primrose.InputProcessor",
+  description: "| [under construction]",
+  parameters: [{
+    name: "",
+    type: "",
+    description: ""
+  }, {
+    name: "",
+    type: "",
+    description: ""
+  }, {
+    name: "",
+    type: "",
+    description: ""
+  }, {
+    name: "",
+    type: "",
+    description: ""
+  }]
 });
-class Keyboard extends Primrose.InputProcessor {
-  constructor(input, commands) {
-    super("Keyboard", commands);
-    this.listeners = {
+
+var Keyboard = function (_Primrose$InputProces) {
+  _inherits(Keyboard, _Primrose$InputProces);
+
+  function Keyboard(input, commands) {
+    _classCallCheck(this, Keyboard);
+
+    var _this = _possibleConstructorReturn(this, (Keyboard.__proto__ || Object.getPrototypeOf(Keyboard)).call(this, "Keyboard", commands));
+
+    _this.listeners = {
       clipboard: [],
       keydown: [],
       keyup: []
     };
 
-    this._operatingSystem = null;
-    this.browser = isChrome ? "CHROMIUM" : (isFirefox ? "FIREFOX" : (isIE ? "IE" : (isOpera ? "OPERA" : (isSafari ? "SAFARI" : "UNKNOWN"))));
-    this._codePage = null;
+    _this._operatingSystem = null;
+    _this.browser = isChrome ? "CHROMIUM" : isFirefox ? "FIREFOX" : isIE ? "IE" : isOpera ? "OPERA" : isSafari ? "SAFARI" : "UNKNOWN";
+    _this._codePage = null;
+    return _this;
   }
 
-  dispatchEvent(evt) {
-    this.setButton(evt.keyCode, evt.type === "keydown");
-  }
-
-  addEventListener(name, thunk){
-    if(this.listeners[name]){
-      this.listeners[name].push(thunk);
+  _createClass(Keyboard, [{
+    key: "dispatchEvent",
+    value: function dispatchEvent(evt) {
+      this.setButton(evt.keyCode, evt.type === "keydown");
     }
-  }
-
-  doTyping(elem, evt) {
-    if (elem && elem.execCommand && this.operatingSystem && this.browser && this.codePage) {
-      var oldDeadKeyState = this.operatingSystem._deadKeyState,
-        cmdName = this.operatingSystem.makeCommandName(evt, this.codePage);
-
-      if (elem.execCommand(this.browser, this.codePage, cmdName)) {
-        evt.preventDefault();
-      }
-      if (this.operatingSystem._deadKeyState === oldDeadKeyState) {
-        this.operatingSystem._deadKeyState = "";
+  }, {
+    key: "addEventListener",
+    value: function addEventListener(name, thunk) {
+      if (this.listeners[name]) {
+        this.listeners[name].push(thunk);
       }
     }
-  }
+  }, {
+    key: "doTyping",
+    value: function doTyping(elem, evt) {
+      if (elem && elem.execCommand && this.operatingSystem && this.browser && this.codePage) {
+        var oldDeadKeyState = this.operatingSystem._deadKeyState,
+            cmdName = this.operatingSystem.makeCommandName(evt, this.codePage);
 
-  get operatingSystem() {
-    return this._operatingSystem;
-  }
-
-  set operatingSystem(os) {
-    this._operatingSystem = os || (isOSX ? Primrose.Text.OperatingSystems.OSX : Primrose.Text.OperatingSystems.Windows);
-  }
-
-  get codePage() {
-    return this._codePage;
-  }
-
-  set codePage(cp) {
-    var key,
-      code,
-      char,
-      name;
-    this._codePage = cp;
-    if (!this._codePage) {
-      var lang = (navigator.languages && navigator.languages[0]) ||
-        navigator.language ||
-        navigator.userLanguage ||
-        navigator.browserLanguage;
-
-      if (!lang || lang === "en") {
-        lang = "en-US";
-      }
-
-      for (key in Primrose.Text.CodePages) {
-        cp = Primrose.Text.CodePages[key];
-        if (cp.language === lang) {
-          this._codePage = cp;
-          break;
+        if (elem.execCommand(this.browser, this.codePage, cmdName)) {
+          evt.preventDefault();
+        }
+        if (this.operatingSystem._deadKeyState === oldDeadKeyState) {
+          this.operatingSystem._deadKeyState = "";
         }
       }
-
+    }
+  }, {
+    key: "operatingSystem",
+    get: function get() {
+      return this._operatingSystem;
+    },
+    set: function set(os) {
+      this._operatingSystem = os || (isOSX ? Primrose.Text.OperatingSystems.OSX : Primrose.Text.OperatingSystems.Windows);
+    }
+  }, {
+    key: "codePage",
+    get: function get() {
+      return this._codePage;
+    },
+    set: function set(cp) {
+      var key, code, char, name;
+      this._codePage = cp;
       if (!this._codePage) {
-        this._codePage = Primrose.Text.CodePages.EN_US;
+        var lang = navigator.languages && navigator.languages[0] || navigator.language || navigator.userLanguage || navigator.browserLanguage;
+
+        if (!lang || lang === "en") {
+          lang = "en-US";
+        }
+
+        for (key in Primrose.Text.CodePages) {
+          cp = Primrose.Text.CodePages[key];
+          if (cp.language === lang) {
+            this._codePage = cp;
+            break;
+          }
+        }
+
+        if (!this._codePage) {
+          this._codePage = Primrose.Text.CodePages.EN_US;
+        }
       }
     }
-  }
-}
-  if(typeof window !== "undefined") window.Primrose.Input.Keyboard = Keyboard;
+  }]);
+
+  return Keyboard;
+}(Primrose.InputProcessor);
+    if(typeof window !== "undefined") window.Primrose.Input.Keyboard = Keyboard;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\Keyboard.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Input\Keyboard.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\LeapMotion.js
-(function(){function processFingerParts(i) {
+    // start D:\Documents\VR\Primrose\src\Primrose\Input\LeapMotion.js
+(function(){"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function processFingerParts(i) {
   return LeapMotion.FINGER_PARTS.map(function (p) {
     return "FINGER" + i + p.toUpperCase();
   });
 }
 
-
 pliny.class({
   parent: "Primrose.Input",
-    name: "LeapMotionInput",
-    baseClass: "Primrose.InputProcessor",
-    description: "| [under construction]"
+  name: "LeapMotionInput",
+  baseClass: "Primrose.InputProcessor",
+  description: "| [under construction]"
 });
-class LeapMotion extends Primrose.InputProcessor {
-  constructor(commands) {
-    super("LeapMotion", commands, ["X0", "Y0", "Z0",
-      "X1", "Y1", "Z1",
-      "FINGER0TIPX", "FINGER0TIPY",
-      "FINGER0DIPX", "FINGER0DIPY",
-      "FINGER0PIPX", "FINGER0PIPY",
-      "FINGER0MCPX", "FINGER0MCPY",
-      "FINGER0CARPX", "FINGER0CARPY",
-      "FINGER1TIPX", "FINGER1TIPY",
-      "FINGER1DIPX", "FINGER1DIPY",
-      "FINGER1PIPX", "FINGER1PIPY",
-      "FINGER1MCPX", "FINGER1MCPY",
-      "FINGER1CARPX", "FINGER1CARPY",
-      "FINGER2TIPX", "FINGER2TIPY",
-      "FINGER2DIPX", "FINGER2DIPY",
-      "FINGER2PIPX", "FINGER2PIPY",
-      "FINGER2MCPX", "FINGER2MCPY",
-      "FINGER2CARPX", "FINGER2CARPY",
-      "FINGER3TIPX", "FINGER3TIPY",
-      "FINGER3DIPX", "FINGER3DIPY",
-      "FINGER3PIPX", "FINGER3PIPY",
-      "FINGER3MCPX", "FINGER3MCPY",
-      "FINGER3CARPX", "FINGER3CARPY",
-      "FINGER4TIPX", "FINGER4TIPY",
-      "FINGER4DIPX", "FINGER4DIPY",
-      "FINGER4PIPX", "FINGER4PIPY",
-      "FINGER4MCPX", "FINGER4MCPY",
-      "FINGER4CARPX", "FINGER4CARPY",
-      "FINGER5TIPX", "FINGER5TIPY",
-      "FINGER5DIPX", "FINGER5DIPY",
-      "FINGER5PIPX", "FINGER5PIPY",
-      "FINGER5MCPX", "FINGER5MCPY",
-      "FINGER5CARPX", "FINGER5CARPY",
-      "FINGER6TIPX", "FINGER6TIPY",
-      "FINGER6DIPX", "FINGER6DIPY",
-      "FINGER6PIPX", "FINGER6PIPY",
-      "FINGER6MCPX", "FINGER6MCPY",
-      "FINGER6CARPX", "FINGER6CARPY",
-      "FINGER7TIPX", "FINGER7TIPY",
-      "FINGER7DIPX", "FINGER7DIPY",
-      "FINGER7PIPX", "FINGER7PIPY",
-      "FINGER7MCPX", "FINGER7MCPY",
-      "FINGER7CARPX", "FINGER7CARPY",
-      "FINGER8TIPX", "FINGER8TIPY",
-      "FINGER8DIPX", "FINGER8DIPY",
-      "FINGER8PIPX", "FINGER8PIPY",
-      "FINGER8MCPX", "FINGER8MCPY",
-      "FINGER8CARPX", "FINGER8CARPY",
-      "FINGER9TIPX", "FINGER9TIPY",
-      "FINGER9DIPX", "FINGER9DIPY",
-      "FINGER9PIPX", "FINGER9PIPY",
-      "FINGER9MCPX", "FINGER9MCPY",
-      "FINGER9CARPX", "FINGER9CARPY"
-    ]);
 
-    this.isStreaming = false;
-    this.controller = new Leap.Controller({
+var LeapMotion = function (_Primrose$InputProces) {
+  _inherits(LeapMotion, _Primrose$InputProces);
+
+  function LeapMotion(commands) {
+    _classCallCheck(this, LeapMotion);
+
+    var _this = _possibleConstructorReturn(this, (LeapMotion.__proto__ || Object.getPrototypeOf(LeapMotion)).call(this, "LeapMotion", commands, ["X0", "Y0", "Z0", "X1", "Y1", "Z1", "FINGER0TIPX", "FINGER0TIPY", "FINGER0DIPX", "FINGER0DIPY", "FINGER0PIPX", "FINGER0PIPY", "FINGER0MCPX", "FINGER0MCPY", "FINGER0CARPX", "FINGER0CARPY", "FINGER1TIPX", "FINGER1TIPY", "FINGER1DIPX", "FINGER1DIPY", "FINGER1PIPX", "FINGER1PIPY", "FINGER1MCPX", "FINGER1MCPY", "FINGER1CARPX", "FINGER1CARPY", "FINGER2TIPX", "FINGER2TIPY", "FINGER2DIPX", "FINGER2DIPY", "FINGER2PIPX", "FINGER2PIPY", "FINGER2MCPX", "FINGER2MCPY", "FINGER2CARPX", "FINGER2CARPY", "FINGER3TIPX", "FINGER3TIPY", "FINGER3DIPX", "FINGER3DIPY", "FINGER3PIPX", "FINGER3PIPY", "FINGER3MCPX", "FINGER3MCPY", "FINGER3CARPX", "FINGER3CARPY", "FINGER4TIPX", "FINGER4TIPY", "FINGER4DIPX", "FINGER4DIPY", "FINGER4PIPX", "FINGER4PIPY", "FINGER4MCPX", "FINGER4MCPY", "FINGER4CARPX", "FINGER4CARPY", "FINGER5TIPX", "FINGER5TIPY", "FINGER5DIPX", "FINGER5DIPY", "FINGER5PIPX", "FINGER5PIPY", "FINGER5MCPX", "FINGER5MCPY", "FINGER5CARPX", "FINGER5CARPY", "FINGER6TIPX", "FINGER6TIPY", "FINGER6DIPX", "FINGER6DIPY", "FINGER6PIPX", "FINGER6PIPY", "FINGER6MCPX", "FINGER6MCPY", "FINGER6CARPX", "FINGER6CARPY", "FINGER7TIPX", "FINGER7TIPY", "FINGER7DIPX", "FINGER7DIPY", "FINGER7PIPX", "FINGER7PIPY", "FINGER7MCPX", "FINGER7MCPY", "FINGER7CARPX", "FINGER7CARPY", "FINGER8TIPX", "FINGER8TIPY", "FINGER8DIPX", "FINGER8DIPY", "FINGER8PIPX", "FINGER8PIPY", "FINGER8MCPX", "FINGER8MCPY", "FINGER8CARPX", "FINGER8CARPY", "FINGER9TIPX", "FINGER9TIPY", "FINGER9DIPX", "FINGER9DIPY", "FINGER9PIPX", "FINGER9PIPY", "FINGER9MCPX", "FINGER9MCPY", "FINGER9CARPX", "FINGER9CARPY"]));
+
+    _this.isStreaming = false;
+    _this.controller = new Leap.Controller({
       enableGestures: true
     });
+    return _this;
   }
 
-  E(e, f) {
-    if (f) {
-      this.controller.on(e, f);
-    }
-    else {
-      this.controller.on(e, console.log.bind(console,
-        "Leap Motion Event: " + e));
-    }
-  }
-
-  start(gameUpdateLoop) {
-    if (this.isEnabled()) {
-      var canceller = null,
-        startAlternate = null;
-      if (gameUpdateLoop) {
-        var alternateLooper = (t) => {
-          requestAnimationFrame(alternateLooper);
-          gameUpdateLoop(t);
-        };
-        startAlternate = requestAnimationFrame.bind(window, alternateLooper);
-        var timeout = setTimeout(startAlternate, LeapMotion.CONNECTION_TIMEOUT);
-        canceller = () => {
-          clearTimeout(timeout);
-          this.isStreaming = true;
-        };
-        this.E("deviceStreaming", canceller);
-        this.E("streamingStarted", canceller);
-        this.E("streamingStopped", startAlternate);
-      }
-      this.E("connect");
-      //this.E("protocol");
-      this.E("deviceStopped");
-      this.E("disconnect");
-      this.E("frame", this.setState.bind(this, gameUpdateLoop));
-      this.controller.connect();
-    }
-  }
-
-  setState(gameUpdateLoop, frame) {
-    var prevFrame = this.controller.history.get(1),
-      i,
-      j;
-    if (!prevFrame || frame.hands.length !== prevFrame.hands.length) {
-      for (i = 0; i < this.commands.length; ++i) {
-        this.enable(this.commands[i].name, frame.hands.length > 0);
+  _createClass(LeapMotion, [{
+    key: "E",
+    value: function E(e, f) {
+      if (f) {
+        this.controller.on(e, f);
+      } else {
+        this.controller.on(e, console.log.bind(console, "Leap Motion Event: " + e));
       }
     }
+  }, {
+    key: "start",
+    value: function start(gameUpdateLoop) {
+      var _this2 = this;
 
-    for (i = 0; i < frame.hands.length; ++i) {
-      var hand = frame.hands[i].palmPosition;
-      var handName = "HAND" + i;
-      for (j = 0; j < LeapMotion.COMPONENTS.length; ++j) {
-        this.setAxis(handName + LeapMotion.COMPONENTS[j], hand[j]);
+      if (this.isEnabled()) {
+        var canceller = null,
+            startAlternate = null;
+        if (gameUpdateLoop) {
+          var alternateLooper = function alternateLooper(t) {
+            requestAnimationFrame(alternateLooper);
+            gameUpdateLoop(t);
+          };
+          startAlternate = requestAnimationFrame.bind(window, alternateLooper);
+          var timeout = setTimeout(startAlternate, LeapMotion.CONNECTION_TIMEOUT);
+          canceller = function canceller() {
+            clearTimeout(timeout);
+            _this2.isStreaming = true;
+          };
+          this.E("deviceStreaming", canceller);
+          this.E("streamingStarted", canceller);
+          this.E("streamingStopped", startAlternate);
+        }
+        this.E("connect");
+        //this.E("protocol");
+        this.E("deviceStopped");
+        this.E("disconnect");
+        this.E("frame", this.setState.bind(this, gameUpdateLoop));
+        this.controller.connect();
       }
     }
-
-    for (i = 0; i < frame.fingers.length; ++i) {
-      var finger = frame.fingers[i];
-      var fingerName = "FINGER" + i;
-      for (j = 0; j < LeapMotion.FINGER_PARTS.length; ++j) {
-        var joint = finger[LeapMotion.FINGER_PARTS[j] + "Position"];
-        var jointName = fingerName +
-          LeapMotion.FINGER_PARTS[j].toUpperCase();
-        for (var k = 0; k < LeapMotion.COMPONENTS.length; ++k) {
-          this.setAxis(jointName + LeapMotion.COMPONENTS[k],
-            joint[k]);
+  }, {
+    key: "setState",
+    value: function setState(gameUpdateLoop, frame) {
+      var prevFrame = this.controller.history.get(1),
+          i,
+          j;
+      if (!prevFrame || frame.hands.length !== prevFrame.hands.length) {
+        for (i = 0; i < this.commands.length; ++i) {
+          this.enable(this.commands[i].name, frame.hands.length > 0);
         }
       }
-    }
 
-    if (gameUpdateLoop) {
-      gameUpdateLoop(frame.timestamp * 0.001);
-    }
+      for (i = 0; i < frame.hands.length; ++i) {
+        var hand = frame.hands[i].palmPosition;
+        var handName = "HAND" + i;
+        for (j = 0; j < LeapMotion.COMPONENTS.length; ++j) {
+          this.setAxis(handName + LeapMotion.COMPONENTS[j], hand[j]);
+        }
+      }
 
-    this.update();
-  }
-}
+      for (i = 0; i < frame.fingers.length; ++i) {
+        var finger = frame.fingers[i];
+        var fingerName = "FINGER" + i;
+        for (j = 0; j < LeapMotion.FINGER_PARTS.length; ++j) {
+          var joint = finger[LeapMotion.FINGER_PARTS[j] + "Position"];
+          var jointName = fingerName + LeapMotion.FINGER_PARTS[j].toUpperCase();
+          for (var k = 0; k < LeapMotion.COMPONENTS.length; ++k) {
+            this.setAxis(jointName + LeapMotion.COMPONENTS[k], joint[k]);
+          }
+        }
+      }
+
+      if (gameUpdateLoop) {
+        gameUpdateLoop(frame.timestamp * 0.001);
+      }
+
+      this.update();
+    }
+  }]);
+
+  return LeapMotion;
+}(Primrose.InputProcessor);
 
 LeapMotion.COMPONENTS = ["X", "Y", "Z"];
 
@@ -8747,128 +9184,176 @@ LeapMotion.NUM_FINGERS = 10;
 LeapMotion.FINGER_PARTS = ["tip", "dip", "pip", "mcp", "carp"];
 
 LeapMotion.CONNECTION_TIMEOUT = 5000;
-  if(typeof window !== "undefined") window.Primrose.Input.LeapMotion = LeapMotion;
+    if(typeof window !== "undefined") window.Primrose.Input.LeapMotion = LeapMotion;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\LeapMotion.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Input\LeapMotion.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\Location.js
-(function(){pliny.class({
+    // start D:\Documents\VR\Primrose\src\Primrose\Input\Location.js
+(function(){"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+pliny.class({
   parent: "Primrose.Input",
-    name: "Location",
-    baseClass: "Primrose.InputProcessor",
-    description: "| [under construction]"
+  name: "Location",
+  baseClass: "Primrose.InputProcessor",
+  description: "| [under construction]"
 });
-class Location extends Primrose.InputProcessor {
-  constructor(commands, options) {
-    super("Location", commands, ["LONGITUDE", "LATITUDE", "ALTITUDE", "HEADING", "SPEED"]);
 
-    this.options = patch(options, Location.DEFAULTS);
+var Location = function (_Primrose$InputProces) {
+  _inherits(Location, _Primrose$InputProces);
 
-    this.available = !!navigator.geolocation;
-    if (this.available) {
-      navigator.geolocation.watchPosition(
-        this.setState.bind(this),
-        () => this.available = false,
-        this.options);
+  function Location(commands, options) {
+    _classCallCheck(this, Location);
+
+    var _this = _possibleConstructorReturn(this, (Location.__proto__ || Object.getPrototypeOf(Location)).call(this, "Location", commands, ["LONGITUDE", "LATITUDE", "ALTITUDE", "HEADING", "SPEED"]));
+
+    _this.options = patch(options, Location.DEFAULTS);
+
+    _this.available = !!navigator.geolocation;
+    if (_this.available) {
+      navigator.geolocation.watchPosition(_this.setState.bind(_this), function () {
+        return _this.available = false;
+      }, _this.options);
     }
+    return _this;
   }
 
-  setState(location) {
-    for (var p in location.coords) {
-      var k = p.toUpperCase();
-      if (this.axisNames.indexOf(k) > -1) {
-        this.setAxis(k, location.coords[p]);
+  _createClass(Location, [{
+    key: "setState",
+    value: function setState(location) {
+      for (var p in location.coords) {
+        var k = p.toUpperCase();
+        if (this.axisNames.indexOf(k) > -1) {
+          this.setAxis(k, location.coords[p]);
+        }
       }
+      this.update();
     }
-    this.update();
-  }
-}
+  }]);
+
+  return Location;
+}(Primrose.InputProcessor);
 
 Location.DEFAULTS = {
   enableHighAccuracy: true,
   maximumAge: 30000,
   timeout: 25000
 };
-  if(typeof window !== "undefined") window.Primrose.Input.Location = Location;
+    if(typeof window !== "undefined") window.Primrose.Input.Location = Location;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\Location.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Input\Location.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\Mouse.js
-(function(){pliny.class({
+    // start D:\Documents\VR\Primrose\src\Primrose\Input\Mouse.js
+(function(){"use strict";
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+pliny.class({
   parent: "Primrose.Input",
-    name: "Mouse",
-    baseClass: "Primrose.InputProcessor",
-    description: "| [under construction]"
+  name: "Mouse",
+  baseClass: "Primrose.InputProcessor",
+  description: "| [under construction]"
 });
-class Mouse extends Primrose.InputProcessor {
-  constructor(DOMElement, commands) {
-    super("Mouse", commands, ["BUTTONS", "X", "Y", "Z", "W"]);
-    this.timer = null;
+
+var Mouse = function (_Primrose$InputProces) {
+  _inherits(Mouse, _Primrose$InputProces);
+
+  function Mouse(DOMElement, commands) {
+    _classCallCheck(this, Mouse);
+
+    var _this = _possibleConstructorReturn(this, (Mouse.__proto__ || Object.getPrototypeOf(Mouse)).call(this, "Mouse", commands, ["BUTTONS", "X", "Y", "Z", "W"]));
+
+    _this.timer = null;
 
     DOMElement = DOMElement || window;
 
-    var setState = (stateChange, event) => {
+    var setState = function setState(stateChange, event) {
       var state = event.buttons;
-      for(let button = 0; button < Mouse.NUM_BUTTONS; ++button) {
+      for (var button = 0; button < Mouse.NUM_BUTTONS; ++button) {
         var isDown = state & 0x1 !== 0;
-        if(isDown && stateChange || !isDown && !stateChange){
-          this.setButton(button, stateChange);
+        if (isDown && stateChange || !isDown && !stateChange) {
+          _this.setButton(button, stateChange);
         }
         state >>= 1;
       }
-      this.setAxis("BUTTONS", event.buttons << 10);
+      _this.setAxis("BUTTONS", event.buttons << 10);
       event.preventDefault();
     };
 
-    DOMElement.addEventListener("mousedown", setState.bind(this, true), false);
-    DOMElement.addEventListener("mouseup", setState.bind(this, false), false);
-    DOMElement.addEventListener("contextmenu", (event) => !(event.ctrlKey && event.shiftKey) && event.preventDefault(), false);
-    DOMElement.addEventListener("mousemove", (event) => {
+    DOMElement.addEventListener("mousedown", setState.bind(_this, true), false);
+    DOMElement.addEventListener("mouseup", setState.bind(_this, false), false);
+    DOMElement.addEventListener("contextmenu", function (event) {
+      return !(event.ctrlKey && event.shiftKey) && event.preventDefault();
+    }, false);
+    DOMElement.addEventListener("mousemove", function (event) {
       setState(true, event);
 
       if (PointerLock.isActive) {
         var mx = event.movementX,
-          my = event.movementY;
+            my = event.movementY;
 
         if (mx === undefined) {
           mx = event.webkitMovementX || event.mozMovementX || 0;
           my = event.webkitMovementY || event.mozMovementY || 0;
         }
-        this.setAxis("X", this.getAxis("X") + mx);
-        this.setAxis("Y", this.getAxis("Y") + my);
-      }
-      else {
-        this.setAxis("X", event.layerX);
-        this.setAxis("Y", event.layerY);
+        _this.setAxis("X", _this.getAxis("X") + mx);
+        _this.setAxis("Y", _this.getAxis("Y") + my);
+      } else {
+        _this.setAxis("X", event.layerX);
+        _this.setAxis("Y", event.layerY);
       }
     }, false);
 
-    DOMElement.addEventListener("wheel", (event) => {
+    DOMElement.addEventListener("wheel", function (event) {
       if (isChrome) {
-        this.W += event.deltaX;
-        this.Z += event.deltaY;
-      }
-      else if (event.shiftKey) {
-        this.W += event.deltaY;
-      }
-      else {
-        this.Z += event.deltaY;
+        _this.W += event.deltaX;
+        _this.Z += event.deltaY;
+      } else if (event.shiftKey) {
+        _this.W += event.deltaY;
+      } else {
+        _this.Z += event.deltaY;
       }
       event.preventDefault();
     }, false);
+    return _this;
   }
-}
+
+  return Mouse;
+}(Primrose.InputProcessor);
 
 Mouse.NUM_BUTTONS = 3;
-  if(typeof window !== "undefined") window.Primrose.Input.Mouse = Mouse;
+    if(typeof window !== "undefined") window.Primrose.Input.Mouse = Mouse;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\Mouse.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Input\Mouse.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\Speech.js
-(function(){////
+    // start D:\Documents\VR\Primrose\src\Primrose\Input\Speech.js
+(function(){"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+////
 //   Class: SpeechInput
 //
 //   Connects to a the webkitSpeechRecognition API and manages callbacks based on
@@ -8918,16 +9403,22 @@ Mouse.NUM_BUTTONS = 3;
 
 pliny.class({
   parent: "Primrose.Input",
-    name: "Speech",
-    baseClass: "Primrose.InputProcessor",
-    description: "| [under construction]"
+  name: "Speech",
+  baseClass: "Primrose.InputProcessor",
+  description: "| [under construction]"
 });
-class Speech extends Primrose.InputProcessor {
-  constructor(commands) {
-    super("Speech", commands);
+
+var Speech = function (_Primrose$InputProces) {
+  _inherits(Speech, _Primrose$InputProces);
+
+  function Speech(commands) {
+    _classCallCheck(this, Speech);
+
+    var _this = _possibleConstructorReturn(this, (Speech.__proto__ || Object.getPrototypeOf(Speech)).call(this, "Speech", commands));
+
     var running = false,
-      recognition = null,
-      errorMessage = null;
+        recognition = null,
+        errorMessage = null;
 
     function warn() {
       var msg = "Failed to initialize speech engine. Reason: " + errorMessage.message;
@@ -8938,8 +9429,7 @@ class Speech extends Primrose.InputProcessor {
     function start() {
       if (!available) {
         return warn();
-      }
-      else if (!running) {
+      } else if (!running) {
         running = true;
         recognition.start();
         return true;
@@ -8958,16 +9448,15 @@ class Speech extends Primrose.InputProcessor {
       return false;
     }
 
-    this.check = function () {
+    _this.check = function () {
       if (this.enabled && !running) {
         start();
-      }
-      else if (!this.enabled && running) {
+      } else if (!this.enabled && running) {
         stop();
       }
     };
 
-    this.getErrorMessage = function () {
+    _this.getErrorMessage = function () {
       return errorMessage;
     };
 
@@ -8975,8 +9464,7 @@ class Speech extends Primrose.InputProcessor {
       if (window.SpeechRecognition) {
         // just in case this ever gets standardized
         recognition = new SpeechRecognition();
-      }
-      else {
+      } else {
         // purposefully don't check the existance so it errors out and setup fails.
         recognition = new webkitSpeechRecognition();
       }
@@ -8987,14 +9475,14 @@ class Speech extends Primrose.InputProcessor {
       recognition.addEventListener("start", function () {
         console.log("speech started");
         command = "";
-      }.bind(this), true);
+      }.bind(_this), true);
 
       recognition.addEventListener("error", function (evt) {
         restart = true;
         console.log("speech error", evt);
         running = false;
         command = "speech error";
-      }.bind(this), true);
+      }.bind(_this), true);
 
       recognition.addEventListener("end", function (evt) {
         console.log("speech ended", evt);
@@ -9004,7 +9492,7 @@ class Speech extends Primrose.InputProcessor {
           restart = false;
           this.enable(true);
         }
-      }.bind(this), true);
+      }.bind(_this), true);
 
       recognition.addEventListener("result", function (evt) {
         var newCommand = [];
@@ -9031,68 +9519,89 @@ class Speech extends Primrose.InputProcessor {
           this.inputState.text = newCommand;
         }
         this.update();
-      }.bind(this), true);
+      }.bind(_this), true);
 
       available = true;
-    }
-    catch (exp) {
+    } catch (exp) {
       console.error(exp);
       errorMessage = exp;
       available = false;
     }
+    return _this;
   }
 
-  static maybeClone(arr) {
-    return (arr && arr.slice()) || [];
-  }
-
-  cloneCommand(cmd) {
-    return {
-      name: cmd.name,
-      preamble: cmd.preamble,
-      keywords: Speech.maybeClone(cmd.keywords),
-      commandUp: cmd.commandUp,
-      disabled: cmd.disabled
-    };
-  }
-
-  evalCommand(cmd, cmdState, metaKeysSet, dt) {
-    if (metaKeysSet && this.inputState.text) {
-      for (var i = 0; i < cmd.keywords.length; ++i) {
-        if (this.inputState.text.indexOf(cmd.keywords[i]) === 0 && (cmd.preamble || cmd.keywords[i].length === this.inputState.text.length)) {
-          cmdState.pressed = true;
-          cmdState.value = this.inputState.text.substring(cmd.keywords[i].length)
-            .trim();
-          this.inputState.text = null;
+  _createClass(Speech, [{
+    key: "cloneCommand",
+    value: function cloneCommand(cmd) {
+      return {
+        name: cmd.name,
+        preamble: cmd.preamble,
+        keywords: Speech.maybeClone(cmd.keywords),
+        commandUp: cmd.commandUp,
+        disabled: cmd.disabled
+      };
+    }
+  }, {
+    key: "evalCommand",
+    value: function evalCommand(cmd, cmdState, metaKeysSet, dt) {
+      if (metaKeysSet && this.inputState.text) {
+        for (var i = 0; i < cmd.keywords.length; ++i) {
+          if (this.inputState.text.indexOf(cmd.keywords[i]) === 0 && (cmd.preamble || cmd.keywords[i].length === this.inputState.text.length)) {
+            cmdState.pressed = true;
+            cmdState.value = this.inputState.text.substring(cmd.keywords[i].length).trim();
+            this.inputState.text = null;
+          }
         }
       }
     }
-  }
+  }, {
+    key: "enable",
+    value: function enable(k, v) {
+      _get(Speech.prototype.__proto__ || Object.getPrototypeOf(Speech.prototype), "enable", this).call(this, k, v);
+      this.check();
+    }
+  }, {
+    key: "transmit",
+    value: function transmit(v) {
+      _get(Speech.prototype.__proto__ || Object.getPrototypeOf(Speech.prototype), "transmit", this).call(this, v);
+      this.check();
+    }
+  }], [{
+    key: "maybeClone",
+    value: function maybeClone(arr) {
+      return arr && arr.slice() || [];
+    }
+  }]);
 
-  enable(k, v) {
-    super.enable(k, v);
-    this.check();
-  }
-
-  transmit(v) {
-    super.transmit(v);
-    this.check();
-  }
-}
-  if(typeof window !== "undefined") window.Primrose.Input.Speech = Speech;
+  return Speech;
+}(Primrose.InputProcessor);
+    if(typeof window !== "undefined") window.Primrose.Input.Speech = Speech;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\Speech.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Input\Speech.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\Touch.js
-(function(){pliny.class({
+    // start D:\Documents\VR\Primrose\src\Primrose\Input\Touch.js
+(function(){"use strict";
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+pliny.class({
   parent: "Primrose.Input",
-    name: "Touch",
-    baseClass: "Primrose.InputProcessor",
-    description: "| [under construction]"
+  name: "Touch",
+  baseClass: "Primrose.InputProcessor",
+  description: "| [under construction]"
 });
-class Touch extends Primrose.InputProcessor {
-  constructor(DOMElement, commands) {
+
+var Touch = function (_Primrose$InputProces) {
+  _inherits(Touch, _Primrose$InputProces);
+
+  function Touch(DOMElement, commands) {
+    _classCallCheck(this, Touch);
+
     var axes = ["FINGERS"];
     for (var i = 0; i < 10; ++i) {
       axes.push("X" + i);
@@ -9100,499 +9609,603 @@ class Touch extends Primrose.InputProcessor {
       axes.push("LX" + i);
       axes.push("LY" + i);
     }
-    super("Touch", commands, axes);
+
+    var _this = _possibleConstructorReturn(this, (Touch.__proto__ || Object.getPrototypeOf(Touch)).call(this, "Touch", commands, axes));
+
     DOMElement = DOMElement || window;
 
-    var setState = (stateChange, setAxis, event) => {
+    var setState = function setState(stateChange, setAxis, event) {
       var touches = event.changedTouches,
-        i = 0,
-        t = null;
+          i = 0,
+          t = null;
       for (i = 0; i < touches.length; ++i) {
         t = touches[i];
 
         if (setAxis) {
-          this.setAxis("X" + t.identifier, t.pageX);
-          this.setAxis("Y" + t.identifier, t.pageY);
-        }
-        else {
-          this.setAxis("LX" + t.identifier, t.pageX);
-          this.setAxis("LY" + t.identifier, t.pageY);
+          _this.setAxis("X" + t.identifier, t.pageX);
+          _this.setAxis("Y" + t.identifier, t.pageY);
+        } else {
+          _this.setAxis("LX" + t.identifier, t.pageX);
+          _this.setAxis("LY" + t.identifier, t.pageY);
         }
 
-        this.setButton("FINGER" + t.identifier, stateChange);
+        _this.setButton("FINGER" + t.identifier, stateChange);
       }
       touches = event.touches;
       var fingerState = 0,
-        before = this.getAxis("FINGERS");
+          before = _this.getAxis("FINGERS");
       for (i = 0; i < touches.length; ++i) {
         t = touches[i];
         fingerState |= 1 << t.identifier;
       }
-      this.setAxis("FINGERS", fingerState);
+      _this.setAxis("FINGERS", fingerState);
       event.preventDefault();
     };
 
-    DOMElement.addEventListener("touchstart", setState.bind(this, true, false), false);
-    DOMElement.addEventListener("touchend", setState.bind(this, false, true), false);
-    DOMElement.addEventListener("touchmove", setState.bind(this, true, true), false);
+    DOMElement.addEventListener("touchstart", setState.bind(_this, true, false), false);
+    DOMElement.addEventListener("touchend", setState.bind(_this, false, true), false);
+    DOMElement.addEventListener("touchmove", setState.bind(_this, true, true), false);
+    return _this;
   }
-}
-  if(typeof window !== "undefined") window.Primrose.Input.Touch = Touch;
-})();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\Touch.js
-  ////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\VR.js
-(function(){const DEFAULT_POSE = {
-    position: [0, 0, 0],
-    orientation: [0, 0, 0, 1]
-  },
-  GAZE_LENGTH = 3000,
 
-  _ = priv();
+  return Touch;
+}(Primrose.InputProcessor);
+    if(typeof window !== "undefined") window.Primrose.Input.Touch = Touch;
+})();
+    // end D:\Documents\VR\Primrose\src\Primrose\Input\Touch.js
+    ////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+    // start D:\Documents\VR\Primrose\src\Primrose\Input\VR.js
+(function(){"use strict";
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var DEFAULT_POSE = {
+  position: [0, 0, 0],
+  orientation: [0, 0, 0, 1]
+},
+    GAZE_LENGTH = 3000,
+    _ = priv();
 
 pliny.class({
   parent: "Primrose.Input",
-    name: "VR",
-    baseClass: "Primrose.PoseInputProcessor",
-    parameters: [{
-      name: "avatarHeight",
-      type: "Number",
-      description: "The default height to use for the user, if the HMD doesn't provide a stage transform."
-    }],
-    description: "An input manager for gamepad devices."
+  name: "VR",
+  baseClass: "Primrose.PoseInputProcessor",
+  parameters: [{
+    name: "avatarHeight",
+    type: "Number",
+    description: "The default height to use for the user, if the HMD doesn't provide a stage transform."
+  }],
+  description: "An input manager for gamepad devices."
 });
-class VR extends Primrose.PoseInputProcessor {
 
-  static isStereoDisplay(display) {
-    const leftParams = display.getEyeParameters("left"),
-        rightParams = display.getEyeParameters("right");
-    return !!(leftParams && rightParams);
-  }
+var VR = function (_Primrose$PoseInputPr) {
+  _inherits(VR, _Primrose$PoseInputPr);
 
-  constructor(avatarHeight) {
-    super("VR");
+  _createClass(VR, null, [{
+    key: "isStereoDisplay",
+    value: function isStereoDisplay(display) {
+      var leftParams = display.getEyeParameters("left"),
+          rightParams = display.getEyeParameters("right");
+      return !!(leftParams && rightParams);
+    }
+  }]);
 
-    _(this, {
-      requestPresent: (layers) => this.currentDevice.requestPresent(layers)
-          .catch((exp) => console.warn("requstPresent", exp))
+  function VR(avatarHeight) {
+    _classCallCheck(this, VR);
+
+    var _this = _possibleConstructorReturn(this, (VR.__proto__ || Object.getPrototypeOf(VR)).call(this, "VR"));
+
+    _(_this, {
+      requestPresent: function requestPresent(layers) {
+        return _this.currentDevice.requestPresent(layers).catch(function (exp) {
+          return console.warn("requstPresent", exp);
+        });
+      }
     });
 
-    this.displays = [];
-    this._transformers = [];
-    this.currentDeviceIndex = -1;
-    this.movePlayer = new THREE.Matrix4();
-    this.defaultAvatarHeight = avatarHeight;
-    this.stage = null;
-    this.lastStageWidth = null;
-    this.lastStageDepth = null;
-    this.isStereo = false;
-    this.ready = navigator.getVRDisplays()
-      .then((displays) => {
-        // We skip the WebVR-Polyfill's Mouse and Keyboard display because it does not
-        // play well with our interaction model.
-        this.displays.push.apply(this.displays, displays.filter((display) => display.displayName !== "Mouse and Keyboard VRDisplay (webvr-polyfill)"));
-        return this.displays;
-      });
+    _this.displays = [];
+    _this._transformers = [];
+    _this.currentDeviceIndex = -1;
+    _this.movePlayer = new THREE.Matrix4();
+    _this.defaultAvatarHeight = avatarHeight;
+    _this.stage = null;
+    _this.lastStageWidth = null;
+    _this.lastStageDepth = null;
+    _this.isStereo = false;
+    _this.ready = navigator.getVRDisplays().then(function (displays) {
+      // We skip the WebVR-Polyfill's Mouse and Keyboard display because it does not
+      // play well with our interaction model.
+      _this.displays.push.apply(_this.displays, displays.filter(function (display) {
+        return display.displayName !== "Mouse and Keyboard VRDisplay (webvr-polyfill)";
+      }));
+      return _this.displays;
+    });
+    return _this;
   }
 
-  get isNativeMobileWebVR() {
-    return !(this.currentDevice && this.currentDevice.isPolyfilled) && isChrome && isMobile;
-  }
-
-  connect(selectedIndex) {
-    this.currentDevice = null;
-    this.currentDeviceIndex = selectedIndex;
-    this.currentPose = null;
-    if (0 <= selectedIndex && selectedIndex <= this.displays.length) {
-      this.currentDevice = this.displays[selectedIndex];
-      this.currentPose = this.currentDevice.getPose();
-      var leftParams = this.currentDevice.getEyeParameters("left"),
-        fov = leftParams.fieldOfView;
-      this.rotationAngle = Math.PI * (fov.leftDegrees + fov.rightDegrees) / 360;
-      this.isStereo = VR.isStereoDisplay(this.currentDevice);
-    }
-  }
-
-  requestPresent(opts) {
-    if (!this.currentDevice) {
-      return Promise.reject("No display");
-    }
-    else {
-      let layers = opts,
-        elem = opts[0].source;
-
-      if (!(layers instanceof Array)) {
-        layers = [layers];
-      }
-
-      // A hack to deal with a bug in the current build of Chromium
-      if (this.isNativeMobileWebVR && this.isStereo) {
-        layers = layers[0];
-      }
-
-      var promise = null,
-        rp = _(this).requestPresent;
-      // If we're using WebVR-Polyfill, just let it do its job.
-      if(this.currentDevice.capabilities.hasExternalDisplay){
-        // PCs with HMD should also make the browser window on the main
-        // display full-screen, so we can then also lock pointer.
-        promise = WebVRStandardMonitor.standardFullScreenBehavior(elem)
-          .then(() => rp(layers));
-      }
-      else {
-        promise = rp(layers).then(WebVRStandardMonitor.standardLockBehavior);
-      }
-      return promise;
-    }
-  }
-
-  cancel() {
-    let promise = null;
-    if (this.isPresenting) {
-      promise = this.currentDevice.exitPresent();
+  _createClass(VR, [{
+    key: "connect",
+    value: function connect(selectedIndex) {
       this.currentDevice = null;
-      this.currentDeviceIndex = -1;
+      this.currentDeviceIndex = selectedIndex;
       this.currentPose = null;
-    }
-    else {
-      promise = Promise.resolve();
-    }
-
-    if (this.isNativeMobileWebVR) {
-      promise = promise.then(Orientation.unlock);
-    }
-
-    return promise
-      .then(PointerLock.exit)
-      .then(() => this.connect(0));
-  }
-
-  zero() {
-    super.zero();
-    if (this.currentDevice) {
-      this.currentDevice.resetPose();
-    }
-  }
-
-  update(dt) {
-    var x, z, stage;
-
-    if (this.currentDevice) {
-      this.currentPose = this.currentDevice.getPose();
-      stage = this.currentDevice.stageParameters;
-    }
-    else{
-      stage = null;
-    }
-
-    super.update(dt);
-
-    if (stage) {
-      this.movePlayer.fromArray(stage.sittingToStandingTransform);
-      x = stage.sizeX;
-      z = stage.sizeZ;
-    }
-    else {
-      this.movePlayer.makeTranslation(0, this.defaultAvatarHeight, 0);
-      x = 0;
-      z = 0;
-    }
-
-    var s = {
-      matrix: this.movePlayer,
-      sizeX: x,
-      sizeZ: z
-    };
-
-    if (!this.stage || s.sizeX !== this.stage.sizeX || s.sizeZ !== this.stage.sizeZ) {
-      this.stage = s;
-    }
-  }
-
-  get hasStage() {
-    return this.stage && this.stage.sizeX * this.stage.sizeZ > 0;
-  }
-
-  submitFrame() {
-    if (this.currentDevice) {
-      this.currentDevice.submitFrame(this.currentPose);
-    }
-  }
-
-  resolvePicking(currentHits, lastHits, objects) {
-    super.resolvePicking(currentHits, lastHits, objects);
-
-    var currentHit = currentHits.VR,
-      lastHit = lastHits && lastHits.VR,
-      dt, lt;
-    if (lastHit && currentHit && lastHit.objectID === currentHit.objectID) {
-      currentHit.startTime = lastHit.startTime;
-      currentHit.gazeFired = lastHit.gazeFired;
-      dt = lt - currentHit.startTime;
-      if (dt >= GAZE_LENGTH && !currentHit.gazeFired) {
-        currentHit.gazeFired = true;
-        emit.call(this, "gazecomplete", currentHit);
-        emit.call(this.pickableObjects[currentHit.objectID], "click", "Gaze");
+      if (0 <= selectedIndex && selectedIndex <= this.displays.length) {
+        this.currentDevice = this.displays[selectedIndex];
+        this.currentPose = this.currentDevice.getPose();
+        var leftParams = this.currentDevice.getEyeParameters("left"),
+            fov = leftParams.fieldOfView;
+        this.rotationAngle = Math.PI * (fov.leftDegrees + fov.rightDegrees) / 360;
+        this.isStereo = VR.isStereoDisplay(this.currentDevice);
       }
     }
-    else {
-      if (lastHit) {
-        dt = lt - lastHit.startTime;
-        if (dt < GAZE_LENGTH) {
-          emit.call(this, "gazecancel", lastHit);
+  }, {
+    key: "requestPresent",
+    value: function requestPresent(opts) {
+      var _this2 = this;
+
+      if (!this.currentDevice) {
+        return Promise.reject("No display");
+      } else {
+        var promise, rp;
+
+        var _ret = function () {
+          var layers = opts,
+              elem = opts[0].source;
+
+          if (!(layers instanceof Array)) {
+            layers = [layers];
+          }
+
+          // A hack to deal with a bug in the current build of Chromium
+          if (_this2.isNativeMobileWebVR && _this2.isStereo) {
+            layers = layers[0];
+          }
+
+          promise = null;
+          rp = _(_this2).requestPresent;
+          // If we're using WebVR-Polyfill, just let it do its job.
+
+          if (_this2.currentDevice.capabilities.hasExternalDisplay) {
+            // PCs with HMD should also make the browser window on the main
+            // display full-screen, so we can then also lock pointer.
+            promise = WebVRStandardMonitor.standardFullScreenBehavior(elem).then(function () {
+              return rp(layers);
+            });
+          } else {
+            promise = rp(layers).then(WebVRStandardMonitor.standardLockBehavior);
+          }
+          return {
+            v: promise
+          };
+        }();
+
+        if ((typeof _ret === "undefined" ? "undefined" : _typeof(_ret)) === "object") return _ret.v;
+      }
+    }
+  }, {
+    key: "cancel",
+    value: function cancel() {
+      var _this3 = this;
+
+      var promise = null;
+      if (this.isPresenting) {
+        promise = this.currentDevice.exitPresent();
+        this.currentDevice = null;
+        this.currentDeviceIndex = -1;
+        this.currentPose = null;
+      } else {
+        promise = Promise.resolve();
+      }
+
+      if (this.isNativeMobileWebVR) {
+        promise = promise.then(Orientation.unlock);
+      }
+
+      return promise.then(PointerLock.exit).then(function () {
+        return _this3.connect(0);
+      });
+    }
+  }, {
+    key: "zero",
+    value: function zero() {
+      _get(VR.prototype.__proto__ || Object.getPrototypeOf(VR.prototype), "zero", this).call(this);
+      if (this.currentDevice) {
+        this.currentDevice.resetPose();
+      }
+    }
+  }, {
+    key: "update",
+    value: function update(dt) {
+      var x, z, stage;
+
+      if (this.currentDevice) {
+        this.currentPose = this.currentDevice.getPose();
+        stage = this.currentDevice.stageParameters;
+      } else {
+        stage = null;
+      }
+
+      _get(VR.prototype.__proto__ || Object.getPrototypeOf(VR.prototype), "update", this).call(this, dt);
+
+      if (stage) {
+        this.movePlayer.fromArray(stage.sittingToStandingTransform);
+        x = stage.sizeX;
+        z = stage.sizeZ;
+      } else {
+        this.movePlayer.makeTranslation(0, this.defaultAvatarHeight, 0);
+        x = 0;
+        z = 0;
+      }
+
+      var s = {
+        matrix: this.movePlayer,
+        sizeX: x,
+        sizeZ: z
+      };
+
+      if (!this.stage || s.sizeX !== this.stage.sizeX || s.sizeZ !== this.stage.sizeZ) {
+        this.stage = s;
+      }
+    }
+  }, {
+    key: "submitFrame",
+    value: function submitFrame() {
+      if (this.currentDevice) {
+        this.currentDevice.submitFrame(this.currentPose);
+      }
+    }
+  }, {
+    key: "resolvePicking",
+    value: function resolvePicking(currentHits, lastHits, objects) {
+      _get(VR.prototype.__proto__ || Object.getPrototypeOf(VR.prototype), "resolvePicking", this).call(this, currentHits, lastHits, objects);
+
+      var currentHit = currentHits.VR,
+          lastHit = lastHits && lastHits.VR,
+          dt,
+          lt;
+      if (lastHit && currentHit && lastHit.objectID === currentHit.objectID) {
+        currentHit.startTime = lastHit.startTime;
+        currentHit.gazeFired = lastHit.gazeFired;
+        dt = lt - currentHit.startTime;
+        if (dt >= GAZE_LENGTH && !currentHit.gazeFired) {
+          currentHit.gazeFired = true;
+          emit.call(this, "gazecomplete", currentHit);
+          emit.call(this.pickableObjects[currentHit.objectID], "click", "Gaze");
+        }
+      } else {
+        if (lastHit) {
+          dt = lt - lastHit.startTime;
+          if (dt < GAZE_LENGTH) {
+            emit.call(this, "gazecancel", lastHit);
+          }
+        }
+        if (currentHit) {
+          currentHit.startTime = lt;
+          currentHit.gazeFired = false;
+          emit.call(this, "gazestart", currentHit);
         }
       }
-      if (currentHit) {
-        currentHit.startTime = lt;
-        currentHit.gazeFired = false;
-        emit.call(this, "gazestart", currentHit);
+    }
+  }, {
+    key: "getTransforms",
+    value: function getTransforms(near, far) {
+      if (this.currentDevice) {
+        if (!this._transformers[this.currentDeviceIndex]) {
+          this._transformers[this.currentDeviceIndex] = new ViewCameraTransform(this.currentDevice);
+        }
+        this.currentDevice.depthNear = near;
+        this.currentDevice.depthFar = far;
+        return this._transformers[this.currentDeviceIndex].getTransforms(near, far);
       }
     }
-  }
-
-  getTransforms(near, far) {
-    if (this.currentDevice) {
-      if (!this._transformers[this.currentDeviceIndex]) {
-        this._transformers[this.currentDeviceIndex] = new ViewCameraTransform(this.currentDevice);
-      }
-      this.currentDevice.depthNear = near;
-      this.currentDevice.depthFar = far;
-      return this._transformers[this.currentDeviceIndex].getTransforms(near, far);
+  }, {
+    key: "isNativeMobileWebVR",
+    get: function get() {
+      return !(this.currentDevice && this.currentDevice.isPolyfilled) && isChrome && isMobile;
     }
-  }
-
-  get canMirror() {
-    return this.currentDevice && this.currentDevice.capabilities.hasExternalDisplay;
-  }
-
-  get isPolyfilled() {
-    return this.currentDevice && this.currentDevice.isPolyfilled;
-  }
-
-  get isPresenting() {
-    return this.currentDevice && this.currentDevice.isPresenting;
-  }
-
-  get hasOrientation() {
-    return this.currentDevice && this.currentDevice.capabilities.hasOrientation;
-  }
-
-  get currentCanvas() {
-    if(this.isPresenting) {
-      var layers = this.currentDevice.getLayers();
-      if(layers.length > 0){
-        return layers[0].source;
-      }
+  }, {
+    key: "hasStage",
+    get: function get() {
+      return this.stage && this.stage.sizeX * this.stage.sizeZ > 0;
     }
-    return null;
-  }
-}
-  if(typeof window !== "undefined") window.Primrose.Input.VR = VR;
+  }, {
+    key: "canMirror",
+    get: function get() {
+      return this.currentDevice && this.currentDevice.capabilities.hasExternalDisplay;
+    }
+  }, {
+    key: "isPolyfilled",
+    get: function get() {
+      return this.currentDevice && this.currentDevice.isPolyfilled;
+    }
+  }, {
+    key: "isPresenting",
+    get: function get() {
+      return this.currentDevice && this.currentDevice.isPresenting;
+    }
+  }, {
+    key: "hasOrientation",
+    get: function get() {
+      return this.currentDevice && this.currentDevice.capabilities.hasOrientation;
+    }
+  }, {
+    key: "currentCanvas",
+    get: function get() {
+      if (this.isPresenting) {
+        var layers = this.currentDevice.getLayers();
+        if (layers.length > 0) {
+          return layers[0].source;
+        }
+      }
+      return null;
+    }
+  }]);
+
+  return VR;
+}(Primrose.PoseInputProcessor);
+    if(typeof window !== "undefined") window.Primrose.Input.VR = VR;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\VR.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Input\VR.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Network\Manager.js
-(function(){pliny.class({
+    // start D:\Documents\VR\Primrose\src\Primrose\Network\Manager.js
+(function(){"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+pliny.class({
   parent: "Primrose.Network",
-    name: "Manager",
-    parameters: [{
-      name: "localUser",
-      type: "Primrose.Input.FPSInput",
-      description: "The object that represents the player's location in the scene."
-    }, {
-      name: "audio",
-      type: "Primrose.Output.Audio3D",
-      description: "The audio manager being used in the current Environment."
-    }, {
-      name: "factories",
-      type: "Primrose.ModelLoader",
-      description: "Model factory for creating avatars for new remote users."
-    }]
+  name: "Manager",
+  parameters: [{
+    name: "localUser",
+    type: "Primrose.Input.FPSInput",
+    description: "The object that represents the player's location in the scene."
+  }, {
+    name: "audio",
+    type: "Primrose.Output.Audio3D",
+    description: "The audio manager being used in the current Environment."
+  }, {
+    name: "factories",
+    type: "Primrose.ModelLoader",
+    description: "Model factory for creating avatars for new remote users."
+  }]
 });
-class Manager extends Primrose.AbstractEventEmitter {
-  constructor(localUser, audio, factories, options) {
-    super();
-    this.localUser = localUser;
-    this.audio = audio;
-    this.factories = factories;
-    this.options = options;
-    this.lastNetworkUpdate = 0;
-    this.oldState = [];
-    this.users = {};
-    this.waitForLastUser = Promise.resolve();
-    this._socket = null;
-    this.userName = null;
-    this.microphone = null;
-    this.audioHeap = {};
+
+var Manager = function (_Primrose$AbstractEve) {
+  _inherits(Manager, _Primrose$AbstractEve);
+
+  function Manager(localUser, audio, factories, options) {
+    _classCallCheck(this, Manager);
+
+    var _this = _possibleConstructorReturn(this, (Manager.__proto__ || Object.getPrototypeOf(Manager)).call(this));
+
+    _this.localUser = localUser;
+    _this.audio = audio;
+    _this.factories = factories;
+    _this.options = options;
+    _this.lastNetworkUpdate = 0;
+    _this.oldState = [];
+    _this.users = {};
+    _this.waitForLastUser = Promise.resolve();
+    _this._socket = null;
+    _this.userName = null;
+    _this.microphone = null;
+    _this.audioHeap = {};
+    return _this;
   }
 
-  update(dt) {
-    if (this._socket && this.deviceIndex === 0) {
-      this.lastNetworkUpdate += dt;
-      if (this.lastNetworkUpdate >= Primrose.Network.RemoteUser.NETWORK_DT) {
-        this.lastNetworkUpdate -= Primrose.Network.RemoteUser.NETWORK_DT;
-        for (var i = 0; i < this.localUser.newState.length; ++i) {
-          if (this.oldState[i] !== this.localUser.newState[i]) {
-            this._socket.emit("userState", this.localUser.newState);
-            this.oldState = this.localUser.newState;
-            break;
+  _createClass(Manager, [{
+    key: "update",
+    value: function update(dt) {
+      if (this._socket && this.deviceIndex === 0) {
+        this.lastNetworkUpdate += dt;
+        if (this.lastNetworkUpdate >= Primrose.Network.RemoteUser.NETWORK_DT) {
+          this.lastNetworkUpdate -= Primrose.Network.RemoteUser.NETWORK_DT;
+          for (var i = 0; i < this.localUser.newState.length; ++i) {
+            if (this.oldState[i] !== this.localUser.newState[i]) {
+              this._socket.emit("userState", this.localUser.newState);
+              this.oldState = this.localUser.newState;
+              break;
+            }
           }
         }
       }
-    }
-    for (const key in this.users) {
-      const user = this.users[key];
-      user.update(dt);
-      if(this.audioHeap[key]){
-        user.setAudio(this.audio, this.audioHeap[key]);
-        delete this.audioHeap[key];
+      for (var key in this.users) {
+        var user = this.users[key];
+        user.update(dt);
+        if (this.audioHeap[key]) {
+          user.setAudio(this.audio, this.audioHeap[key]);
+          delete this.audioHeap[key];
+        }
       }
     }
-  }
-
-  updateUser(state) {
-    const key = state[0];
-    if (key !== this.userName) {
-      const user = this.users[key];
-      if (user) {
-        user.setState(state);
+  }, {
+    key: "updateUser",
+    value: function updateUser(state) {
+      var key = state[0];
+      if (key !== this.userName) {
+        var user = this.users[key];
+        if (user) {
+          user.setState(state);
+        }
+      } else if (this.deviceIndex > 0) {
+        this.localUser.stage.mesh.position.fromArray(state, 1);
+        this.localUser.stage.mesh.quaternion.fromArray(state, 4);
+        this.localUser.head.mesh.position.fromArray(state, 8);
+        this.localUser.head.mesh.quaternion.fromArray(state, 11);
       }
     }
-    else if (this.deviceIndex > 0) {
-      this.localUser.stage.mesh.position.fromArray(state, 1);
-      this.localUser.stage.mesh.quaternion.fromArray(state, 4);
-      this.localUser.head.mesh.position.fromArray(state, 8);
-      this.localUser.head.mesh.quaternion.fromArray(state, 11);
-    }
-  }
+  }, {
+    key: "connect",
+    value: function connect(socket, userName) {
+      var _this2 = this;
 
-  connect(socket, userName) {
-    this.userName = userName.toLocaleUpperCase();
-    if (!this.microphone) {
-      this.microphone = navigator.mediaDevices.getUserMedia({
+      this.userName = userName.toLocaleUpperCase();
+      if (!this.microphone) {
+        this.microphone = navigator.mediaDevices.getUserMedia({
           audio: true,
           video: false
-        })
-        .catch(console.warn.bind(console, "Can't get audio"));
-    }
-    if (!this._socket) {
-      this._socket = socket;
-      this._socket.on("userList", this.listUsers.bind(this));
-      this._socket.on("userJoin", this.addUser.bind(this));
-      this._socket.on("deviceAdded", this.addDevice.bind(this));
-      this._socket.on("deviceIndex", this.setDeviceIndex.bind(this));
-      this._socket.on("chat", this.receiveChat.bind(this));
-      this._socket.on("userState", this.updateUser.bind(this));
-      this._socket.on("userLeft", this.removeUser.bind(this));
-      this._socket.on("connection_lost", this.lostConnection.bind(this));
-
-      if(!this.options.disableWebRTC && "WebRTCSocket" in Primrose) {
-        Primrose.WebRTCSocket.PEERING_EVENTS.forEach((name) => this._socket.on(name, (evt) => {
-          console.log("-->", evt.type, evt);
-          if(evt.toUserName === this.userName){
-            const user = this.users[evt.fromUserName],
-              methodName = "peering_" + name,
-              method = user && user[methodName];
-            if((user.peered || user.peering) && method){
-              method.call(user, evt);
-            }
-            else{
-              console.warn("NO METHOD %s ON USER %s", methodName, user);
-            }
-          }
-          else{
-            console.warn("MESSAGE SENT TO %s FROM %s BUT WE ARE %s", evt.toUserName, evt.fromUserName, this.userName);
-          }
-        }));
+        }).catch(console.warn.bind(console, "Can't get audio"));
       }
+      if (!this._socket) {
+        this._socket = socket;
+        this._socket.on("userList", this.listUsers.bind(this));
+        this._socket.on("userJoin", this.addUser.bind(this));
+        this._socket.on("deviceAdded", this.addDevice.bind(this));
+        this._socket.on("deviceIndex", this.setDeviceIndex.bind(this));
+        this._socket.on("chat", this.receiveChat.bind(this));
+        this._socket.on("userState", this.updateUser.bind(this));
+        this._socket.on("userLeft", this.removeUser.bind(this));
+        this._socket.on("connection_lost", this.lostConnection.bind(this));
 
-      this._socket.emit("listUsers");
-      this._socket.emit("getDeviceIndex");
+        if (!this.options.disableWebRTC && "WebRTCSocket" in Primrose) {
+          Primrose.WebRTCSocket.PEERING_EVENTS.forEach(function (name) {
+            return _this2._socket.on(name, function (evt) {
+              console.log("-->", evt.type, evt);
+              if (evt.toUserName === _this2.userName) {
+                var user = _this2.users[evt.fromUserName],
+                    methodName = "peering_" + name,
+                    method = user && user[methodName];
+                if ((user.peered || user.peering) && method) {
+                  method.call(user, evt);
+                } else {
+                  console.warn("NO METHOD %s ON USER %s", methodName, user);
+                }
+              } else {
+                console.warn("MESSAGE SENT TO %s FROM %s BUT WE ARE %s", evt.toUserName, evt.fromUserName, _this2.userName);
+              }
+            });
+          });
+        }
+
+        this._socket.emit("listUsers");
+        this._socket.emit("getDeviceIndex");
+      }
     }
-  }
+  }, {
+    key: "disconnect",
+    value: function disconnect() {
+      this.userName = null;
+      this._socket.close();
+      this._socket = null;
+    }
+  }, {
+    key: "addUser",
+    value: function addUser(state, goSecond) {
+      var _this3 = this;
 
-  disconnect() {
-    this.userName = null;
-    this._socket.close();
-    this._socket = null;
-  }
+      console.log("User %s logging on.", state[0]);
+      var toUserName = state[0],
+          user = new Primrose.Network.RemoteUser(toUserName, this.factories.avatar, this.options.foregroundColor, this.options.disableWebRTC, this.options.webRTC, this.microphone, this.userName, goSecond);
+      this.users[toUserName] = user;
+      this.updateUser(state);
+      this.emit("addavatar", user);
 
-  addUser(state, goSecond) {
-    console.log("User %s logging on.", state[0]);
-    var toUserName = state[0],
-      user = new Primrose.Network.RemoteUser(toUserName, this.factories.avatar, this.options.foregroundColor, this.options.disableWebRTC, this.options.webRTC, this.microphone, this.userName, goSecond);
-    this.users[toUserName] = user;
-    this.updateUser(state);
-    this.emit("addavatar", user);
-
-    if(!this.options.disableWebRTC && "WebRTCSocket" in Primrose) {
-      Primrose.WebRTCSocket.PEERING_EVENTS.forEach((name) =>
-        user.addEventListener(name, (evt) => {
-          console.log("<--", name, evt);
-          this._socket.emit(name, evt);
-        }));
-      this.waitForLastUser = this.waitForLastUser
-        .then(() => user.peer(this.audio))
-        .then(() => console.log("%s is peered (%s) with %s", this.userName, user.peered, toUserName))
-        .then(() => {
-          if(user.peeringError) {
+      if (!this.options.disableWebRTC && "WebRTCSocket" in Primrose) {
+        Primrose.WebRTCSocket.PEERING_EVENTS.forEach(function (name) {
+          return user.addEventListener(name, function (evt) {
+            console.log("<--", name, evt);
+            _this3._socket.emit(name, evt);
+          });
+        });
+        this.waitForLastUser = this.waitForLastUser.then(function () {
+          return user.peer(_this3.audio);
+        }).then(function () {
+          return console.log("%s is peered (%s) with %s", _this3.userName, user.peered, toUserName);
+        }).then(function () {
+          if (user.peeringError) {
             console.error("Couldn't load user: " + name, user.peeringError);
           }
         });
-    }
-  }
-
-  removeUser(key) {
-    console.log("User %s logging off.", key);
-    var user = this.users[key];
-    if (user) {
-      if(user.peered){
-        user.unpeer();
       }
-      delete this.users[key];
-      this.emit("removeavatar", user);
     }
-  }
-
-  listUsers(newUsers) {
-    Object.keys(this.users)
-      .forEach(this.removeUser.bind(this));
-    while (newUsers.length > 0) {
-      this.addUser(newUsers.shift(), true);
+  }, {
+    key: "removeUser",
+    value: function removeUser(key) {
+      console.log("User %s logging off.", key);
+      var user = this.users[key];
+      if (user) {
+        if (user.peered) {
+          user.unpeer();
+        }
+        delete this.users[key];
+        this.emit("removeavatar", user);
+      }
     }
-    this.emit("authorizationsucceeded");
-  }
+  }, {
+    key: "listUsers",
+    value: function listUsers(newUsers) {
+      Object.keys(this.users).forEach(this.removeUser.bind(this));
+      while (newUsers.length > 0) {
+        this.addUser(newUsers.shift(), true);
+      }
+      this.emit("authorizationsucceeded");
+    }
+  }, {
+    key: "receiveChat",
+    value: function receiveChat(evt) {
+      console.log("chat", evt);
+    }
+  }, {
+    key: "lostConnection",
+    value: function lostConnection() {
+      this.deviceIndex = null;
+    }
+  }, {
+    key: "addDevice",
+    value: function addDevice(index) {
+      console.log("addDevice", index);
+    }
+  }, {
+    key: "setDeviceIndex",
+    value: function setDeviceIndex(index) {
+      this.deviceIndex = index;
+    }
+  }, {
+    key: "setAudioFromUser",
+    value: function setAudioFromUser(userName, audioElement) {
+      this.audioHeap[userName] = audioElement;
+    }
+  }]);
 
-  receiveChat(evt) {
-    console.log("chat", evt);
-  }
-
-  lostConnection() {
-    this.deviceIndex = null;
-  }
-
-  addDevice(index) {
-    console.log("addDevice", index);
-  }
-
-  setDeviceIndex(index) {
-    this.deviceIndex = index;
-  }
-
-  setAudioFromUser(userName, audioElement){
-    this.audioHeap[userName] = audioElement;
-  }
-}
-
-  if(typeof window !== "undefined") window.Primrose.Network.Manager = Manager;
+  return Manager;
+}(Primrose.AbstractEventEmitter);
+    if(typeof window !== "undefined") window.Primrose.Network.Manager = Manager;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Network\Manager.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Network\Manager.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Network\RemoteUser.js
-(function(){pliny.class({
+    // start D:\Documents\VR\Primrose\src\Primrose\Network\RemoteUser.js
+(function(){"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+pliny.class({
   parent: "Primrose.Network",
   name: "RemoteUser",
   baseClass: "Primrose.AbstractEventEmitter",
@@ -9623,486 +10236,502 @@ class Manager extends Primrose.AbstractEventEmitter {
     description: "The name of the user initiating the peer connection."
   }]
 });
-class RemoteUser extends Primrose.AbstractEventEmitter {
 
-  constructor(userName, modelFactory, nameMaterial, disableWebRTC, requestICEPath, microphone, localUserName, goSecond) {
-    super();
-    this.time = 0;
+var RemoteUser = function (_Primrose$AbstractEve) {
+  _inherits(RemoteUser, _Primrose$AbstractEve);
 
-    this.userName = userName;
-    this.peeringError = null;
-    this.peering = false;
-    this.peered = false;
-    this.stage = modelFactory.clone();
-    this.stage.traverse((obj) => {
+  function RemoteUser(userName, modelFactory, nameMaterial, disableWebRTC, requestICEPath, microphone, localUserName, goSecond) {
+    _classCallCheck(this, RemoteUser);
+
+    var _this = _possibleConstructorReturn(this, (RemoteUser.__proto__ || Object.getPrototypeOf(RemoteUser)).call(this));
+
+    _this.time = 0;
+
+    _this.userName = userName;
+    _this.peeringError = null;
+    _this.peering = false;
+    _this.peered = false;
+    _this.stage = modelFactory.clone();
+    _this.stage.traverse(function (obj) {
       if (obj.name === "AvatarBelt") {
         colored(obj, Primrose.Random.color());
-      }
-      else if (obj.name === "AvatarHead") {
-        this.head = obj;
+      } else if (obj.name === "AvatarHead") {
+        _this.head = obj;
       }
     });
 
-    this.nameObject = colored(text3D(0.1, userName), nameMaterial);
-    var bounds = this.nameObject.geometry.boundingBox.max;
-    this.nameObject.rotation.set(0, Math.PI, 0);
-    this.nameObject.position.set(bounds.x / 2, bounds.y, 0);
-    this.head.add(this.nameObject);
+    _this.nameObject = colored(text3D(0.1, userName), nameMaterial);
+    var bounds = _this.nameObject.geometry.boundingBox.max;
+    _this.nameObject.rotation.set(0, Math.PI, 0);
+    _this.nameObject.position.set(bounds.x / 2, bounds.y, 0);
+    _this.head.add(_this.nameObject);
 
-    this.dStageQuaternion = new THREE.Quaternion();
-    this.dHeadPosition = new THREE.Vector3();
-    this.dHeadQuaternion = new THREE.Quaternion();
+    _this.dStageQuaternion = new THREE.Quaternion();
+    _this.dHeadPosition = new THREE.Vector3();
+    _this.dHeadQuaternion = new THREE.Quaternion();
 
-    this.lastStageQuaternion = new THREE.Quaternion();
-    this.lastHeadPosition = new THREE.Vector3();
-    this.lastHeadQuaternion = new THREE.Quaternion();
+    _this.lastStageQuaternion = new THREE.Quaternion();
+    _this.lastHeadPosition = new THREE.Vector3();
+    _this.lastHeadQuaternion = new THREE.Quaternion();
 
-    this.headPosition = {
+    _this.headPosition = {
       arr1: [],
       arr2: [],
-      last: this.lastHeadPosition,
-      delta: this.dHeadPosition,
-      curr: this.head.position
+      last: _this.lastHeadPosition,
+      delta: _this.dHeadPosition,
+      curr: _this.head.position
     };
-    this.headQuaternion = {
+    _this.headQuaternion = {
       arr1: [],
       arr2: [],
-      last: this.lastHeadQuaternion,
-      delta: this.dHeadQuaternion,
-      curr: this.head.quaternion
+      last: _this.lastHeadQuaternion,
+      delta: _this.dHeadQuaternion,
+      curr: _this.head.quaternion
     };
 
-    this.audioChannel = null;
-    this.audioElement = null;
-    this.audioStream = null;
-    this.gain = null;
-    this.panner = null;
-    this.analyzer = null;
+    _this.audioChannel = null;
+    _this.audioElement = null;
+    _this.audioStream = null;
+    _this.gain = null;
+    _this.panner = null;
+    _this.analyzer = null;
 
-    if(!disableWebRTC && "WebRTCSocket" in Primrose) {
+    if (!disableWebRTC && "WebRTCSocket" in Primrose) {
 
-      Primrose.WebRTCSocket.PEERING_EVENTS
-        .map((name) => "peering_" + name)
-        .forEach((name) => this[name] = (evt) => {
-          if(this.audioChannel[name]){
-            this.audioChannel[name](evt);
+      Primrose.WebRTCSocket.PEERING_EVENTS.map(function (name) {
+        return "peering_" + name;
+      }).forEach(function (name) {
+        return _this[name] = function (evt) {
+          if (_this.audioChannel[name]) {
+            _this.audioChannel[name](evt);
+          } else {
+            console.warn(_this, "does not have method", name);
           }
-          else{
-            console.warn(this, "does not have method", name);
+        };
+      });
+
+      _this.audioChannel = new Primrose.Network.AudioChannel(requestICEPath, localUserName, userName, microphone, goSecond);
+      _this.audioChannel.forward(_this, Primrose.WebRTCSocket.PEERING_EVENTS);
+    }
+    return _this;
+  }
+
+  _createClass(RemoteUser, [{
+    key: "peer",
+    value: function peer(audio) {
+      var _this2 = this;
+
+      pliny.method({
+        parent: "Pliny.RemoteUser",
+        name: "peer",
+        returns: "Promise",
+        description: "Makes a WebRTCPeerConnection between the local user and this remote user and wires up the audio channel.",
+        parameters: [{
+          name: "audio",
+          type: "Primrose.Output.Audio3D",
+          description: "The audio context form which audio spatialization objects will be created, and to which the remote user's voice chat will be piped."
+        }]
+      });
+      if ("WebRTCSocket" in Primrose && !this.peered && !this.peering && !this.peeringError) {
+        this.peering = true;
+        return this.audioChannel.ready.then(function () {
+          if (_this2.audioChannel.inAudio) {
+            _this2.setAudio(audio, _this2.audioChannel.inAudio);
+            _this2.peered = true;
           }
+        }).catch(function (exp) {
+          _this2.peered = false;
+          _this2.peeringError = exp;
+        }).then(function () {
+          return _this2.peering = false;
         });
-
-      this.audioChannel = new Primrose.Network.AudioChannel(requestICEPath, localUserName, userName, microphone, goSecond);
-      this.audioChannel.forward(this, Primrose.WebRTCSocket.PEERING_EVENTS);
+      }
     }
-  }
+  }, {
+    key: "setAudio",
+    value: function setAudio(audio, audioSource) {
+      if (audioSource instanceof Element) {
+        this.audioElement = audioSource;
+        Primrose.Output.Audio3D.setAudioProperties(this.audioElement);
+        this.audioStream = audio.context.createMediaElementSource(this.audioElement);
+      } else {
+        this.audioElement = Primrose.Output.Audio3D.setAudioStream(audioSource, "audio" + this.userName);
+        this.audioStream = audio.context.createMediaStreamSource(audioSource);
+      }
+      this.gain = audio.context.createGain();
+      this.panner = audio.context.createPanner();
 
-  peer(audio) {
-    pliny.method({
-      parent: "Pliny.RemoteUser",
-      name: "peer",
-      returns: "Promise",
-      description: "Makes a WebRTCPeerConnection between the local user and this remote user and wires up the audio channel.",
-      parameters: [{
-        name: "audio",
-        type: "Primrose.Output.Audio3D",
-        description: "The audio context form which audio spatialization objects will be created, and to which the remote user's voice chat will be piped."
-      }]
-    });
-    if("WebRTCSocket" in Primrose && !this.peered && !this.peering && !this.peeringError){
-      this.peering = true;
-      return this.audioChannel.ready
-        .then(() => {
-          if (this.audioChannel.inAudio) {
-            this.setAudio(audio, this.audioChannel.inAudio);
-            this.peered = true;
+      this.audioStream.connect(this.gain);
+      this.gain.connect(this.panner);
+      this.panner.connect(audio.mainVolume);
+      this.panner.coneInnerAngle = 180;
+      this.panner.coneOuterAngle = 360;
+      this.panner.coneOuterGain = 0.1;
+      this.panner.panningModel = "HRTF";
+      this.panner.distanceModel = "exponential";
+    }
+  }, {
+    key: "addEventListener",
+    value: function addEventListener(type, thunk) {
+      if (Primrose.WebRTCSocket.PEERING_EVENTS.indexOf(type) >= 0) {
+        this.audioChannel.addEventListener(type, thunk);
+      } else {
+        _get(RemoteUser.prototype.__proto__ || Object.getPrototypeOf(RemoteUser.prototype), "addEventListener", this).call(this, type, thunk);
+      }
+    }
+  }, {
+    key: "unpeer",
+    value: function unpeer() {
+      pliny.method({
+        parent: "Pliny.RemoteUser",
+        name: "unpeer",
+        description: "Cleans up after a user has left the room, removing the audio channels that were created for the user."
+      });
+
+      if (this.audioChannel) {
+        this.audioChannel.close();
+        if (this.audioElement) {
+          document.body.removeChild(this.audioElement);
+          if (this.panner) {
+            this.panner.disconnect();
+            this.gain.disconnect();
+            this.audioStream.disconnect();
           }
-        })
-        .catch((exp) => {
-          this.peered = false;
-          this.peeringError = exp;
-        })
-        .then(() => this.peering = false);
-    }
-  }
-
-  setAudio(audio, audioSource){
-    if(audioSource instanceof Element){
-      this.audioElement = audioSource;
-      Primrose.Output.Audio3D.setAudioProperties(this.audioElement);
-      this.audioStream = audio.context.createMediaElementSource(this.audioElement);
-    }
-    else {
-      this.audioElement = Primrose.Output.Audio3D.setAudioStream(audioSource, "audio" + this.userName);
-      this.audioStream = audio.context.createMediaStreamSource(audioSource);
-    }
-    this.gain = audio.context.createGain();
-    this.panner = audio.context.createPanner();
-
-    this.audioStream.connect(this.gain);
-    this.gain.connect(this.panner);
-    this.panner.connect(audio.mainVolume);
-    this.panner.coneInnerAngle = 180;
-    this.panner.coneOuterAngle = 360;
-    this.panner.coneOuterGain = 0.1;
-    this.panner.panningModel = "HRTF";
-    this.panner.distanceModel = "exponential";
-  }
-
-  addEventListener(type, thunk){
-    if(Primrose.WebRTCSocket.PEERING_EVENTS.indexOf(type) >= 0){
-      this.audioChannel.addEventListener(type, thunk);
-    }
-    else {
-      super.addEventListener(type, thunk);
-    }
-  }
-
-  unpeer() {
-    pliny.method({
-      parent: "Pliny.RemoteUser",
-      name: "unpeer",
-      description: "Cleans up after a user has left the room, removing the audio channels that were created for the user."
-    });
-
-    if (this.audioChannel) {
-      this.audioChannel.close();
-      if (this.audioElement) {
-        document.body.removeChild(this.audioElement);
-        if (this.panner) {
-          this.panner.disconnect();
-          this.gain.disconnect();
-          this.audioStream.disconnect();
         }
       }
     }
-  }
-
-  _updateV(v, dt, fade) {
-    v.curr.toArray(v.arr1);
-    v.delta.toArray(v.arr2);
-    for (var i = 0; i < v.arr1.length; ++i) {
-      if (fade) {
-        v.arr2[i] *= RemoteUser.FADE_FACTOR;
+  }, {
+    key: "_updateV",
+    value: function _updateV(v, dt, fade) {
+      v.curr.toArray(v.arr1);
+      v.delta.toArray(v.arr2);
+      for (var i = 0; i < v.arr1.length; ++i) {
+        if (fade) {
+          v.arr2[i] *= RemoteUser.FADE_FACTOR;
+        }
+        v.arr1[i] += v.arr2[i] * dt;
       }
-      v.arr1[i] += v.arr2[i] * dt;
+
+      v.curr.fromArray(v.arr1);
+      v.delta.fromArray(v.arr2);
     }
-
-    v.curr.fromArray(v.arr1);
-    v.delta.fromArray(v.arr2);
-  }
-
-  _predict(v, state, off) {
-    v.delta.fromArray(state, off);
-    v.delta.toArray(v.arr1);
-    v.curr.toArray(v.arr2);
-    for (var i = 0; i < v.arr1.length; ++i) {
-      v.arr1[i] = (v.arr1[i] - v.arr2[i]) * RemoteUser.NETWORK_DT_INV;
+  }, {
+    key: "_predict",
+    value: function _predict(v, state, off) {
+      v.delta.fromArray(state, off);
+      v.delta.toArray(v.arr1);
+      v.curr.toArray(v.arr2);
+      for (var i = 0; i < v.arr1.length; ++i) {
+        v.arr1[i] = (v.arr1[i] - v.arr2[i]) * RemoteUser.NETWORK_DT_INV;
+      }
+      v.delta.fromArray(v.arr1);
     }
-    v.delta.fromArray(v.arr1);
-  }
+  }, {
+    key: "update",
+    value: function update(dt) {
+      pliny.method({
+        parent: "Pliny.RemoteUser",
+        name: "update",
+        description: "Moves the avatar by its velocity for a set amount of time. Updates the audio panner information.",
+        parameters: [{
+          name: "dt",
+          type: "Number",
+          description: "The amount of time since the last update to the user."
+        }]
+      });
 
-  update(dt) {
-    pliny.method({
-      parent: "Pliny.RemoteUser",
-      name: "update",
-      description: "Moves the avatar by its velocity for a set amount of time. Updates the audio panner information.",
-      parameters: [{
-        name: "dt",
-        type: "Number",
-        description: "The amount of time since the last update to the user."
-      }]
-    });
-
-    this.time += dt;
-    var fade = this.time >= RemoteUser.NETWORK_DT;
-    this._updateV(this.headPosition, dt, fade);
-    this._updateV(this.headQuaternion, dt, fade);
-    this.stage.rotation.setFromQuaternion(this.headQuaternion.curr);
-    this.stage.rotation.x = 0;
-    this.stage.rotation.z = 0;
-    this.stage.position.copy(this.headPosition.curr);
-    this.stage.position.y = 0;
-    if (this.panner) {
-      this.panner.setPosition(this.stage.position.x, this.stage.position.y, this.stage.position.z);
-      this.panner.setOrientation(Math.sin(this.stage.rotation.y), 0, Math.cos(this.stage.rotation.y));
+      this.time += dt;
+      var fade = this.time >= RemoteUser.NETWORK_DT;
+      this._updateV(this.headPosition, dt, fade);
+      this._updateV(this.headQuaternion, dt, fade);
+      this.stage.rotation.setFromQuaternion(this.headQuaternion.curr);
+      this.stage.rotation.x = 0;
+      this.stage.rotation.z = 0;
+      this.stage.position.copy(this.headPosition.curr);
+      this.stage.position.y = 0;
+      if (this.panner) {
+        this.panner.setPosition(this.stage.position.x, this.stage.position.y, this.stage.position.z);
+        this.panner.setOrientation(Math.sin(this.stage.rotation.y), 0, Math.cos(this.stage.rotation.y));
+      }
     }
-  }
+  }, {
+    key: "setState",
+    value: function setState(v) {
+      pliny.property({
+        parent: "Pliny.RemoteUser",
+        name: "state",
+        description: "After receiving a network update, sets the current state of the remote user so that, by the time the next network update comes around, the user will be where it is predicted to be.",
+        parameters: [{
+          name: "v",
+          type: "Array",
+          description: "The raw state array from the network (includes the un-read first username field)."
+        }]
+      });
 
-  setState(v) {
-    pliny.property({
-      parent: "Pliny.RemoteUser",
-      name: "state",
-      description: "After receiving a network update, sets the current state of the remote user so that, by the time the next network update comes around, the user will be where it is predicted to be.",
-      parameters: [{
-        name: "v",
-        type: "Array",
-        description: "The raw state array from the network (includes the un-read first username field)."
-      }]
-    });
+      this.time = 0;
+      this._predict(this.headPosition, v, 1);
+      this._predict(this.headQuaternion, v, 4);
+    }
+  }, {
+    key: "toString",
+    value: function toString(digits) {
+      return this.stage.position.curr.toString(digits) + " " + this.headPosition.curr.toString(digits);
+    }
+  }]);
 
-    this.time = 0;
-    this._predict(this.headPosition, v, 1);
-    this._predict(this.headQuaternion, v, 4);
-  }
-
-  toString(digits) {
-    return this.stage.position.curr.toString(digits) + " " + this.headPosition.curr.toString(digits);
-  }
-}
+  return RemoteUser;
+}(Primrose.AbstractEventEmitter);
 
 RemoteUser.FADE_FACTOR = 0.5;
 RemoteUser.NETWORK_DT = 0.10;
 RemoteUser.NETWORK_DT_INV = 1 / RemoteUser.NETWORK_DT;
-  if(typeof window !== "undefined") window.Primrose.Network.RemoteUser = RemoteUser;
+    if(typeof window !== "undefined") window.Primrose.Network.RemoteUser = RemoteUser;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Network\RemoteUser.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Network\RemoteUser.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Output\Audio3D.js
-(function(){// polyfill
-window.AudioContext =
-  window.AudioContext ||
-  window.webkitAudioContext;
+    // start D:\Documents\VR\Primrose\src\Primrose\Output\Audio3D.js
+(function(){"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+// polyfill
+window.AudioContext = window.AudioContext || window.webkitAudioContext;
+
+var VECTOR = new THREE.Vector3(),
+    UP = new THREE.Vector3(),
+    TEMP = new THREE.Matrix4();
 
 pliny.class({
   parent: "Primrose.Output",
-    name: "Audio3D",
-    description: "| [under construction]"
+  name: "Audio3D",
+  description: "| [under construction]"
 });
-class Audio3D {
-  static get isAvailable() {
-    return !!window.AudioContext;
+
+var Audio3D = function () {
+  function Audio3D() {
+    var _this = this;
+
+    _classCallCheck(this, Audio3D);
+
+    if (Audio3D.isAvailable) {
+      try {
+        (function () {
+          var finishSetup = function finishSetup() {
+            _this.sampleRate = _this.context.sampleRate;
+            _this.mainVolume = _this.context.createGain();
+            _this.start();
+          };
+
+          if (!isiOS) {
+            _this.context = new AudioContext();
+            finishSetup();
+          } else {
+            (function () {
+              var unlock = function unlock() {
+                _this.context = _this.context || new AudioContext();
+                var buffer = _this.context.createBuffer(1, 1, 22050),
+                    source = _this.context.createBufferSource();
+                source.buffer = buffer;
+                source.connect(_this.context.destination);
+                source.noteOn(0);
+                setTimeout(function () {
+                  if (source.playbackState === source.PLAYING_STATE || source.playbackState === source.FINISHED_STATE) {
+                    finishSetup();
+                    window.removeEventListener("mouseup", unlock);
+                    window.removeEventListener("touchend", unlock);
+                    window.removeEventListener("keyup", unlock);
+                  }
+                }, 0);
+              };
+
+              window.addEventListener("mouseup", unlock, false);
+              window.addEventListener("touchend", unlock, false);
+              window.addEventListener("keyup", unlock, false);
+              unlock();
+            })();
+          }
+        })();
+      } catch (exp) {
+        console.warn("Error while setting up audio", exp.message);
+        Audio3D.isAvailable = false;
+      }
+    }
   }
 
-  constructor() {
-    if(Audio3D.isAvailable){
-      this.context = new AudioContext();
-      this.sampleRate = this.context.sampleRate;
-      this.mainVolume = this.context.createGain();
-
-      if(isiOS){
-        const unlock = () => {
-          const buffer = this.context.createBuffer(1, 1, 22050),
-            source = this.context.createBufferSource();
-          source.buffer = buffer;
-          source.connect(this.context.destination);
-          source.noteOn(0);
-          setTimeout(() => {
-            console.log("Playback State", source.playbackState);
-            if((source.playbackState === source.PLAYING_STATE || source.playbackState === source.FINISHED_STATE)) {
-              window.removeEventListener("mouseup", unlock);
-              window.removeEventListener("touchend", unlock);
-              window.removeEventListener("keyup", unlock);
-            }
-          }, 0);
-        };
-
-        window.addEventListener("mouseup", unlock, false);
-        window.addEventListener("touchend", unlock, false);
-        window.addEventListener("keyup", unlock, false);
-        unlock();
+  _createClass(Audio3D, [{
+    key: "setVelocity",
+    value: function setVelocity(x, y, z) {
+      if (this.context) {
+        this.context.listener.setVelocity(x, y, z);
       }
-
-      let vec = new THREE.Vector3(),
-        up = new THREE.Vector3(),
-        left = new THREE.Matrix4()
-        .identity(),
-        right = new THREE.Matrix4()
-        .identity(),
-        swap = null;
-
-      this.setVelocity = this.context.listener.setVelocity.bind(this.context.listener);
-      this.setPlayer = (obj) => {
-        var head = obj;
-        left.identity();
-        right.identity();
-        while (head !== null) {
-          left.fromArray(head.matrix.elements);
-          left.multiply(right);
-          swap = left;
-          left = right;
-          right = swap;
-          head = head.parent;
-        }
-        swap = left;
-        var mx = swap.elements[12],
-          my = swap.elements[13],
-          mz = swap.elements[14];
-        swap.elements[12] = swap.elements[13] = swap.elements[14] = 0;
+    }
+  }, {
+    key: "setPlayer",
+    value: function setPlayer(obj) {
+      if (this.context) {
+        obj.updateMatrixWorld();
+        TEMP.copy(obj.matrixWorld);
+        var mx = TEMP.elements[12],
+            my = TEMP.elements[13],
+            mz = TEMP.elements[14];
 
         this.context.listener.setPosition(mx, my, mz);
-        vec.set(0, 0, 1);
-        vec.applyProjection(right);
-        vec.normalize();
-        up.set(0, -1, 0);
-        up.applyProjection(right);
-        up.normalize();
-        this.context.listener.setOrientation(vec.x, vec.y, vec.z, up.x, up.y, up.z);
-        right.elements[12] = mx;
-        right.elements[13] = my;
-        right.elements[14] = mz;
-      };
-      this.start();
-    }
-    else {
-      console.warn("Audio is not available.");
-      this.setVelocity = function () {};
-      this.setPlayer = function () {};
-    }
-  }
 
-  static setAudioStream(stream, id) {
-    const audioElementCount = document.querySelectorAll("audio")
-      .length,
-      element = Primrose.DOM.cascadeElement(id || ("audioStream" + audioElementCount), "audio", HTMLAudioElement, true);
-    setAudioProperties(element);
-    element.srcObject = stream;
-    return element;
-  }
+        VECTOR.set(0, 0, 1).applyMatrix4(TEMP).normalize();
+        UP.set(0, -1, 0).applyMatrix4(TEMP).normalize();
 
-  static setAudioProperties(element){
-    element.autoplay = true;
-    element.controls = false;
-    element.crossOrigin = "anonymous";
-    element.muted = true;
-    element.setAttribute("muted", "");
-  }
-
-  start() {
-    if(this.mainVolume){
-      this.mainVolume.connect(this.context.destination);
-    }
-  }
-
-  stop() {
-    if(this.mainVolume){
-      this.mainVolume.disconnect();
-    }
-  }
-
-  loadURL(src) {
-    if(this.context){
-      return Primrose.HTTP.getBuffer(src)
-        .then((data) => new Promise((resolve, reject) =>
-          this.context.decodeAudioData(data, resolve, reject)));
-    }
-    else{
-      return Promise.reject("No audio context.");
-    }
-  }
-
-  loadURLCascadeSrcList(srcs, index) {
-    index = index || 0;
-    if (index >= srcs.length) {
-      return Promise.reject("Failed to load a file from " + srcs.length + " files.");
-    }
-    else {
-      return this.loadURL(srcs[index])
-        .catch((err) => {
-          console.error(err);
-          return this.loadURLCascadeSrcList(srcs, index + 1);
-        });
-    }
-  }
-
-  createRawSound(pcmData) {
-    if (pcmData.length !== 1 && pcmData.length !== 2) {
-      throw new Error("Incorrect number of channels. Expected 1 or 2, got " + pcmData.length);
-    }
-
-    var frameCount = pcmData[0].length;
-    if (pcmData.length > 1 && pcmData[1].length !== frameCount) {
-      throw new Error(
-        "Second channel is not the same length as the first channel. Expected " + frameCount + ", but was " + pcmData[1].length);
-    }
-
-    var buffer = this.context.createBuffer(pcmData.length, frameCount, this.sampleRate);
-    for (var c = 0; c < pcmData.length; ++c) {
-      var channel = buffer.getChannelData(c);
-      for (var i = 0; i < frameCount; ++i) {
-        channel[i] = pcmData[c][i];
+        this.context.listener.setOrientation(VECTOR.x, VECTOR.y, VECTOR.z, UP.x, UP.y, UP.z);
       }
     }
-    return buffer;
-  }
+  }, {
+    key: "start",
+    value: function start() {
+      if (this.mainVolume) {
+        this.mainVolume.connect(this.context.destination);
+      }
+    }
+  }, {
+    key: "stop",
+    value: function stop() {
+      if (this.mainVolume) {
+        this.mainVolume.disconnect();
+      }
+    }
+  }, {
+    key: "loadURL",
+    value: function loadURL(src) {
+      var _this2 = this;
 
-  createSound(loop, buffer) {
-    var snd = {
-      volume: this.context.createGain(),
-      source: this.context.createBufferSource()
-    };
-    snd.source.buffer = buffer;
-    snd.source.loop = loop;
-    snd.source.connect(snd.volume);
-    return snd;
-  }
+      if (this.context) {
+        return Primrose.HTTP.getBuffer(src).then(function (data) {
+          return new Promise(function (resolve, reject) {
+            return _this2.context.decodeAudioData(data, resolve, reject);
+          });
+        });
+      } else {
+        return Promise.reject("No audio context.");
+      }
+    }
+  }, {
+    key: "loadURLCascadeSrcList",
+    value: function loadURLCascadeSrcList(srcs, index) {
+      var _this3 = this;
 
-  create3DMediaStream(x, y, z, stream) {
-    console.log(stream);
-    var element = document.createElement("audio"),
-      snd = {
+      index = index || 0;
+      if (index >= srcs.length) {
+        return Promise.reject("Failed to load a file from " + srcs.length + " files.");
+      } else {
+        return this.loadURL(srcs[index]).catch(function (err) {
+          console.error(err);
+          return _this3.loadURLCascadeSrcList(srcs, index + 1);
+        });
+      }
+    }
+  }, {
+    key: "createRawSound",
+    value: function createRawSound(pcmData) {
+      if (pcmData.length !== 1 && pcmData.length !== 2) {
+        throw new Error("Incorrect number of channels. Expected 1 or 2, got " + pcmData.length);
+      }
+
+      var frameCount = pcmData[0].length;
+      if (pcmData.length > 1 && pcmData[1].length !== frameCount) {
+        throw new Error("Second channel is not the same length as the first channel. Expected " + frameCount + ", but was " + pcmData[1].length);
+      }
+
+      var buffer = this.context.createBuffer(pcmData.length, frameCount, this.sampleRate);
+      for (var c = 0; c < pcmData.length; ++c) {
+        var channel = buffer.getChannelData(c);
+        for (var i = 0; i < frameCount; ++i) {
+          channel[i] = pcmData[c][i];
+        }
+      }
+      return buffer;
+    }
+  }, {
+    key: "createSound",
+    value: function createSound(loop, buffer) {
+      var snd = {
+        volume: this.context.createGain(),
+        source: this.context.createBufferSource()
+      };
+      snd.source.buffer = buffer;
+      snd.source.loop = loop;
+      snd.source.connect(snd.volume);
+      return snd;
+    }
+  }, {
+    key: "create3DMediaStream",
+    value: function create3DMediaStream(x, y, z, stream) {
+      console.log(stream);
+      var element = document.createElement("audio"),
+          snd = {
         audio: element,
-        source: this.context.createMediaElementSource(element),
-        //volume: this.context.createGain(),
-        //panner: this.context.createPanner()
+        source: this.context.createMediaElementSource(element)
       };
 
-    element.srcObject = stream;
-    element.autoplay = true;
-    element.controls = false;
-    element.muted = true;
-    element.crossOrigin = "anonymous";
-    snd.source.connect(this.mainVolume);
-    //snd.source.connect(snd.volume):
-    //snd.volume.connect(snd.panner);
-    //snd.panner.connect(this.mainVolume);
-    //snd.panner.setPosition(x, y, z);
-    return snd;
-  }
+      element.srcObject = stream;
+      element.autoplay = true;
+      element.controls = false;
+      element.muted = true;
+      element.crossOrigin = "anonymous";
+      snd.source.connect(this.mainVolume);
+      //snd.source.connect(snd.volume):
+      //snd.volume.connect(snd.panner);
+      //snd.panner.connect(this.mainVolume);
+      //snd.panner.setPosition(x, y, z);
+      return snd;
+    }
+  }, {
+    key: "create3DSound",
+    value: function create3DSound(x, y, z, snd) {
+      snd.panner = this.context.createPanner();
+      snd.panner.setPosition(x, y, z);
+      snd.panner.connect(this.mainVolume);
+      snd.volume.connect(snd.panner);
+      return snd;
+    }
+  }, {
+    key: "createFixedSound",
+    value: function createFixedSound(snd) {
+      snd.volume.connect(this.mainVolume);
+      return snd;
+    }
+  }, {
+    key: "loadSource",
+    value: function loadSource(sources, loop) {
+      var _this4 = this;
 
-  create3DSound(x, y, z, snd) {
-    snd.panner = this.context.createPanner();
-    snd.panner.setPosition(x, y, z);
-    snd.panner.connect(this.mainVolume);
-    snd.volume.connect(snd.panner);
-    return snd;
-  }
-
-  createFixedSound(snd) {
-    snd.volume.connect(this.mainVolume);
-    return snd;
-  }
-
-  loadSource(sources, loop) {
-
-    pliny.method({
-      parent: "Primrose.Output.Audio3D",
-      name: "loadSound",
-      returns: "Promise<MediaElementAudioSourceNode>",
-      parameters: [{
-        name: "sources",
-        type: "String|Array<String>",
-        description: "A string URI to an audio source, or an array of string URIs to audio sources. Will be used as a collection of HTML5 &lt;source> tags as children of an HTML5 &lt;audio> tag."
-      }, {
-        name: "loop",
-        type: "Boolean",
-        optional: true,
-        description: "indicate that the sound should be played on loop."
-      }],
-      description: "Loads the first element of the `sources` array for which the browser supports the file format as an HTML5 &lt;audio> tag to use as an `AudioSourceNode` attached to the current `AudioContext`. This does not load all of the audio files. It only loads the first one of a list of options that could work, because all browsers do not support the same audio formats.",
-      examples: [{
-        name: "Load a single audio file.",
-        description: "There is no one, good, compressed audio format supported in all browsers, but they do all support uncompressed WAV. You shouldn't use this on the Internet, but it might be okay for a local solution.\n\
+      pliny.method({
+        parent: "Primrose.Output.Audio3D",
+        name: "loadSound",
+        returns: "Promise<MediaElementAudioSourceNode>",
+        parameters: [{
+          name: "sources",
+          type: "String|Array<String>",
+          description: "A string URI to an audio source, or an array of string URIs to audio sources. Will be used as a collection of HTML5 &lt;source> tags as children of an HTML5 &lt;audio> tag."
+        }, {
+          name: "loop",
+          type: "Boolean",
+          optional: true,
+          description: "indicate that the sound should be played on loop."
+        }],
+        description: "Loads the first element of the `sources` array for which the browser supports the file format as an HTML5 &lt;audio> tag to use as an `AudioSourceNode` attached to the current `AudioContext`. This does not load all of the audio files. It only loads the first one of a list of options that could work, because all browsers do not support the same audio formats.",
+        examples: [{
+          name: "Load a single audio file.",
+          description: "There is no one, good, compressed audio format supported in all browsers, but they do all support uncompressed WAV. You shouldn't use this on the Internet, but it might be okay for a local solution.\n\
 \n\
   grammar(\"JavaScript\");\n\
   var audio = new Primrose.Output.Audio3D();\n\
   audio.loadSource(\"mySong.wav\").then(function(node){\n\
     node.connect(audio.context.destination);\n\
   });"
-      }, {
-        name: "Load a single audio file from a list of options.",
-        description: "There is no one, good, compressed audio format supported in all browsers. As a hack around the problem, HTML5 media tags may include one or more &lt;source> tags as children to specify a cascading list of media sources. The browser will select the first one that it can successfully decode.\n\
+        }, {
+          name: "Load a single audio file from a list of options.",
+          description: "There is no one, good, compressed audio format supported in all browsers. As a hack around the problem, HTML5 media tags may include one or more &lt;source> tags as children to specify a cascading list of media sources. The browser will select the first one that it can successfully decode.\n\
 \n\
   grammar(\"JavaScript\");\n\
   var audio = new Primrose.Output.Audio3D();\n\
@@ -10113,9 +10742,9 @@ class Audio3D {
   ]).then(function(node){\n\
     node.connect(audio.context.destination);\n\
   });"
-      }, {
-        name: "Load an ambient audio file that should be looped.",
-        description: "The only audio option that is available is whether or not the audio file should be looped. You specify this with the second parameter to the `loadSource()` method, a `Boolean` value to indicate that looping is desired.\n\
+        }, {
+          name: "Load an ambient audio file that should be looped.",
+          description: "The only audio option that is available is whether or not the audio file should be looped. You specify this with the second parameter to the `loadSource()` method, a `Boolean` value to indicate that looping is desired.\n\
 \n\
   grammar(\"JavaScript\");\n\
   var audio = new Primrose.Output.Audio3D();\n\
@@ -10126,71 +10755,98 @@ class Audio3D {
   ], true).then(function(node){\n\
     node.connect(audio.context.destination);\n\
   });"
-      }]
-    });
+        }]
+      });
 
-    return new Promise((resolve, reject) => {
-      if (!(sources instanceof Array)) {
-        sources = [sources];
-      }
-      var audio = document.createElement("audio");
-      audio.autoplay = true;
-      audio.loop = loop;
-      audio.crossOrigin = "anonymous";
-      sources.map((src) => {
+      return new Promise(function (resolve, reject) {
+        if (!(sources instanceof Array)) {
+          sources = [sources];
+        }
+        var audio = document.createElement("audio");
+        audio.autoplay = true;
+        audio.loop = loop;
+        audio.crossOrigin = "anonymous";
+        sources.map(function (src) {
           var source = document.createElement("source");
           source.src = src;
           return source;
-        })
-        .forEach(audio.appendChild.bind(audio));
-      audio.oncanplay = () => {
-        var snd = null;
-        if (this.context) {
-          audio.oncanplay = null;
-          snd = {
-            volume: this.context.createGain(),
-            source: this.context.createMediaElementSource(audio)
-          };
-          snd.source.connect(snd.volume);
-        }
-        resolve(snd);
-      };
-      audio.onerror = reject;
-      document.body.appendChild(audio);
-    });
-  }
+        }).forEach(audio.appendChild.bind(audio));
+        audio.oncanplay = function () {
+          var snd = null;
+          if (_this4.context) {
+            audio.oncanplay = null;
+            snd = {
+              volume: _this4.context.createGain(),
+              source: _this4.context.createMediaElementSource(audio)
+            };
+            snd.source.connect(snd.volume);
+          }
+          resolve(snd);
+        };
+        audio.onerror = reject;
+        document.body.appendChild(audio);
+      });
+    }
+  }, {
+    key: "load3DSound",
+    value: function load3DSound(src, loop, x, y, z) {
+      return this.loadSource(src, loop).then(this.create3DSound.bind(this, x, y, z));
+    }
+  }, {
+    key: "loadFixedSound",
+    value: function loadFixedSound(src, loop) {
+      return this.loadSource(src, loop).then(this.createFixedSound.bind(this));
+    }
+  }, {
+    key: "playBufferImmediate",
+    value: function playBufferImmediate(buffer, volume) {
+      var _this5 = this;
 
-  load3DSound(src, loop, x, y, z) {
-    return this.loadSource(src, loop)
-      .then(this.create3DSound.bind(this, x, y, z));
-  }
+      var snd = this.createSound(false, buffer);
+      snd = this.createFixedSound(snd);
+      snd.volume.gain.value = volume;
+      snd.source.addEventListener("ended", function (evt) {
+        snd.volume.disconnect(_this5.mainVolume);
+      });
+      snd.source.start(0);
+      return snd;
+    }
+  }], [{
+    key: "setAudioStream",
+    value: function setAudioStream(stream, id) {
+      var audioElementCount = document.querySelectorAll("audio").length,
+          element = Primrose.DOM.cascadeElement(id || "audioStream" + audioElementCount, "audio", HTMLAudioElement, true);
+      setAudioProperties(element);
+      element.srcObject = stream;
+      return element;
+    }
+  }, {
+    key: "setAudioProperties",
+    value: function setAudioProperties(element) {
+      element.autoplay = true;
+      element.controls = false;
+      element.crossOrigin = "anonymous";
+      element.muted = true;
+      element.setAttribute("muted", "");
+    }
+  }]);
 
-  loadFixedSound(src, loop) {
-    return this.loadSource(src, loop)
-      .then(this.createFixedSound.bind(this));
-  }
+  return Audio3D;
+}();
 
-  playBufferImmediate(buffer, volume) {
-    var snd = this.createSound(false, buffer);
-    snd = this.createFixedSound(snd);
-    snd.volume.gain.value = volume;
-    snd.source.addEventListener("ended", (evt) => {
-      snd.volume.disconnect(this.mainVolume);
-    });
-    snd.source.start(0);
-    return snd;
-  }
-}
-  if(typeof window !== "undefined") window.Primrose.Output.Audio3D = Audio3D;
+Audio3D.isAvailable = !!window.AudioContext && AudioContext.prototype.createGain;
+    if(typeof window !== "undefined") window.Primrose.Output.Audio3D = Audio3D;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Output\Audio3D.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Output\Audio3D.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Output\HapticGlove.js
-(function(){pliny.class({
+    // start D:\Documents\VR\Primrose\src\Primrose\Output\HapticGlove.js
+(function(){"use strict";
+
+pliny.class({
   parent: "Primrose.Output",
-    name: "HapticGlove",
-    description: "| [under construction]"
+  name: "HapticGlove",
+  description: "| [under construction]"
 });
 
 function HapticGlove(options) {
@@ -10201,7 +10857,7 @@ function HapticGlove(options) {
   this.numJoints = options.hands * options.fingers * options.joints;
 
   var enabled = false,
-    connected = false;
+      connected = false;
 
   Leap.loop();
 
@@ -10211,16 +10867,9 @@ function HapticGlove(options) {
     options.camera = opts.camera;
 
     Leap.loopController.on("frame", readFrame.bind(this));
-
   };
 
-  var tipNames = [
-    "tipPosition",
-    "dipPosition",
-    "pipPosition",
-    "mcpPosition",
-    "carpPosition"
-  ];
+  var tipNames = ["tipPosition", "dipPosition", "pipPosition", "mcpPosition", "carpPosition"];
 
   function readFrame(frame) {
     if (frame.valid) {
@@ -10243,7 +10892,7 @@ function HapticGlove(options) {
   }
 
   var socket,
-    fingerState = 0;
+      fingerState = 0;
 
   if (options.port !== 80) {
     options.addr += ":" + options.port;
@@ -10292,8 +10941,7 @@ function HapticGlove(options) {
     var mask = 0x1 << i;
     if (value) {
       fingerState = fingerState | mask;
-    }
-    else {
+    } else {
       fingerState = fingerState & ~mask & 0x1f;
     }
     if (connected) {
@@ -10304,20 +10952,19 @@ function HapticGlove(options) {
 
 HapticGlove.DEFAULT_PORT = 8383;
 HapticGlove.DEFAULT_HOST = document.location.hostname;
-  if(typeof window !== "undefined") window.Primrose.Output.HapticGlove = HapticGlove;
+    if(typeof window !== "undefined") window.Primrose.Output.HapticGlove = HapticGlove;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Output\HapticGlove.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Output\HapticGlove.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Output\Music.js
-(function(){/* polyfill */
-Window.prototype.AudioContext =
-  Window.prototype.AudioContext ||
-  Window.prototype.webkitAudioContext ||
-  function () {};
+    // start D:\Documents\VR\Primrose\src\Primrose\Output\Music.js
+(function(){"use strict";
+
+/* polyfill */
+Window.prototype.AudioContext = Window.prototype.AudioContext || Window.prototype.webkitAudioContext || function () {};
 
 var PIANO_BASE = Math.pow(2, 1 / 12),
-  MAX_NOTE_COUNT = (navigator.maxTouchPoints || 10) + 1;
+    MAX_NOTE_COUNT = (navigator.maxTouchPoints || 10) + 1;
 
 function piano(n) {
   return 440 * Math.pow(PIANO_BASE, n - 49);
@@ -10325,8 +10972,8 @@ function piano(n) {
 
 pliny.class({
   parent: "Primrose.Output",
-    name: "Music",
-    description: "| [under construction]"
+  name: "Music",
+  description: "| [under construction]"
 });
 
 function Music(context, type, numNotes) {
@@ -10346,7 +10993,7 @@ function Music(context, type, numNotes) {
 
     for (var i = 0; i < this.numNotes; ++i) {
       var o = this.audio.createOscillator(),
-        g = this.audio.createGain();
+          g = this.audio.createGain();
       o.type = type;
       o.frequency.value = 0;
       o.connect(g);
@@ -10358,8 +11005,7 @@ function Music(context, type, numNotes) {
         timeout: null
       });
     }
-  }
-  else {
+  } else {
     this.available = false;
   }
 }
@@ -10370,7 +11016,7 @@ Music.prototype.noteOn = function (volume, i, n) {
       n = 0;
     }
     var o = this.oscillators[n % this.numNotes],
-      f = piano(parseFloat(i) + 1);
+        f = piano(parseFloat(i) + 1);
     o.gn.gain.value = volume;
     o.osc.frequency.setValueAtTime(f, 0);
     return o;
@@ -10397,21 +11043,26 @@ Music.prototype.play = function (i, volume, duration, n) {
       clearTimeout(o.timeout);
       o.timeout = null;
     }
-    o.timeout = setTimeout((function (n, o) {
-        this.noteOff(n);
-        o.timeout = null;
-      })
-      .bind(this, n, o), duration * 1000);
+    o.timeout = setTimeout(function (n, o) {
+      this.noteOff(n);
+      o.timeout = null;
+    }.bind(this, n, o), duration * 1000);
   }
 };
-  if(typeof window !== "undefined") window.Primrose.Output.Music = Music;
+    if(typeof window !== "undefined") window.Primrose.Output.Music = Music;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Output\Music.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Output\Music.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Output\Speech.js
-(function(){function wrap(thunk) {
-  return function(evt) {
+    // start D:\Documents\VR\Primrose\src\Primrose\Output\Speech.js
+(function(){"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function wrap(thunk) {
+  return function (evt) {
     this.speaking = false;
     thunk(evt);
   };
@@ -10419,13 +11070,17 @@ Music.prototype.play = function (i, volume, duration, n) {
 
 pliny.class({
   parent: "Primrose.Output",
-    name: "Speech",
-    description: "| [under construction]"
+  name: "Speech",
+  description: "| [under construction]"
 });
-const Speech = (function(){
-  if(window.speechSynthesis !== undefined) {
-    return class {
-      constructor (options) {
+var Speech = function () {
+  if (window.speechSynthesis !== undefined) {
+    return function () {
+      function _class(options) {
+        var _this = this;
+
+        _classCallCheck(this, _class);
+
         this.options = patch(options, {
           remoteVoices: false,
           volume: 1,
@@ -10433,42 +11088,59 @@ const Speech = (function(){
           pitch: 2,
           voice: 0
         });
-        this.voices = speechSynthesis
-          .getVoices()
-          .filter((v) => this.options.remoteVoices || v.default || v.localService);
+        this.voices = speechSynthesis.getVoices().filter(function (v) {
+          return _this.options.remoteVoices || v.default || v.localService;
+        });
         this.speaking = false;
       }
 
-      speak(txt, opts) {
-        return new Promise((resolve, reject) => {
-          this.speaking = true;
-          var msg = new SpeechSynthesisUtterance();
-          msg.voice = this.voices[opts && opts.voice || this.options.voice];
-          msg.volume = opts && opts.volume || this.options.volume;
-          msg.rate = opts && opts.rate || this.options.rate;
-          msg.pitch = opts && opts.pitch || this.options.pitch;
-          msg.text = txt;
-          msg.onend = wrap(resolve).bind(this);
-          msg.onerror = wrap(reject).bind(this);
-          speechSynthesis.speak(msg);
-        });
-      }
-    };
-  }
-  else {
+      _createClass(_class, [{
+        key: "speak",
+        value: function speak(txt, opts) {
+          var _this2 = this;
+
+          return new Promise(function (resolve, reject) {
+            _this2.speaking = true;
+            var msg = new SpeechSynthesisUtterance();
+            msg.voice = _this2.voices[opts && opts.voice || _this2.options.voice];
+            msg.volume = opts && opts.volume || _this2.options.volume;
+            msg.rate = opts && opts.rate || _this2.options.rate;
+            msg.pitch = opts && opts.pitch || _this2.options.pitch;
+            msg.text = txt;
+            msg.onend = wrap(resolve).bind(_this2);
+            msg.onerror = wrap(reject).bind(_this2);
+            speechSynthesis.speak(msg);
+          });
+        }
+      }]);
+
+      return _class;
+    }();
+  } else {
     // in case of error, return a shim that lets us continue unabated
-    return class {
-      speak() {}
-    };
+    return function () {
+      function _class2() {
+        _classCallCheck(this, _class2);
+      }
+
+      _createClass(_class2, [{
+        key: "speak",
+        value: function speak() {}
+      }]);
+
+      return _class2;
+    }();
   }
+}();
+    if(typeof window !== "undefined") window.Primrose.Output.Speech = Speech;
 })();
-  if(typeof window !== "undefined") window.Primrose.Output.Speech = Speech;
-})();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Output\Speech.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Output\Speech.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random\color.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\Primrose\Random\color.js
+(function(){"use strict";
+
+pliny.function({
   parent: "Primrose.Random",
   name: "color",
   description: "Returns a random hex RGB number to be used as a color.",
@@ -10500,17 +11172,19 @@ const Speech = (function(){
 
 function color() {
   var r = Primrose.Random.int(0, 256),
-    g = Primrose.Random.int(0, 256),
-    b = Primrose.Random.int(0, 256);
+      g = Primrose.Random.int(0, 256),
+      b = Primrose.Random.int(0, 256);
   return r << 16 | g << 8 | b;
 }
-  if(typeof window !== "undefined") window.Primrose.Random.color = color;
+    if(typeof window !== "undefined") window.Primrose.Random.color = color;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random\color.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Random\color.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random\ID.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\Primrose\Random\ID.js
+(function(){"use strict";
+
+pliny.function({
   parent: "Primrose.Random",
   name: "ID",
   description: "Returns a randomized string to be used as a general purpose identifier. Collisions are possible, but should be rare.",
@@ -10541,17 +11215,17 @@ function color() {
 });
 
 function ID() {
-  return (Math.random() * Math.log(Number.MAX_VALUE))
-    .toString(36)
-    .replace(".", "");
+  return (Math.random() * Math.log(Number.MAX_VALUE)).toString(36).replace(".", "");
 }
-  if(typeof window !== "undefined") window.Primrose.Random.ID = ID;
+    if(typeof window !== "undefined") window.Primrose.Random.ID = ID;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random\ID.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Random\ID.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random\int.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\Primrose\Random\int.js
+(function(){"use strict";
+
+pliny.function({
   parent: "Primrose.Random",
   name: "int",
   description: "Returns a random integer number on a given range [min, max), i.e. min is inclusive, max is exclusive. Includes a means to skew the results in one direction or another. The number is as good as your JavaScript engine supports with Math.random(), which is not good enough for crypto, but is certainly good enough for games.",
@@ -10625,16 +11299,18 @@ function int(min, max, power) {
     min = 0;
   }
   var delta = max - min,
-    n = Math.pow(Math.random(), power);
+      n = Math.pow(Math.random(), power);
   return Math.floor(min + n * delta);
 }
-  if(typeof window !== "undefined") window.Primrose.Random.int = int;
+    if(typeof window !== "undefined") window.Primrose.Random.int = int;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random\int.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Random\int.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random\item.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\Primrose\Random\item.js
+(function(){"use strict";
+
+pliny.function({
   parent: "Primrose.Random",
   name: "item",
   description: "Returns a random element from an array.",
@@ -10679,13 +11355,15 @@ function int(min, max, power) {
 function item(arr) {
   return arr[Primrose.Random.int(arr.length)];
 }
-  if(typeof window !== "undefined") window.Primrose.Random.item = item;
+    if(typeof window !== "undefined") window.Primrose.Random.item = item;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random\item.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Random\item.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random\number.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\Primrose\Random\number.js
+(function(){"use strict";
+
+pliny.function({
   parent: "Primrose.Random",
   name: "number",
   description: "Returns a random floating-point number on a given range [min, max), i.e. min is inclusive, max is exclusive. As random as your JavaScript engine supports with Math.random(), which is not good enough for crypto, but is certainly good enough for games.",
@@ -10727,13 +11405,15 @@ function item(arr) {
 function number(min, max) {
   return Math.random() * (max - min) + min;
 }
-  if(typeof window !== "undefined") window.Primrose.Random.number = number;
+    if(typeof window !== "undefined") window.Primrose.Random.number = number;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random\number.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Random\number.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random\steps.js
-(function(){pliny.function({
+    // start D:\Documents\VR\Primrose\src\Primrose\Random\steps.js
+(function(){"use strict";
+
+pliny.function({
   parent: "Primrose.Random",
   name: "steps",
   description: "Returns a random integer number on a given range [min, max), i.e. min is inclusive, max is exclusive, sticking to a number of steps in between. Useful for randomly generating music note values on pentatonic scales. As random as your JavaScript engine supports with Math.random(), which is not good enough for crypto, but is certainly good enough for games.",
@@ -10779,16 +11459,20 @@ function number(min, max) {
 function steps(min, max, steps) {
   return min + Primrose.Random.int(0, (1 + max - min) / steps) * steps;
 }
-  if(typeof window !== "undefined") window.Primrose.Random.steps = steps;
+    if(typeof window !== "undefined") window.Primrose.Random.steps = steps;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random\steps.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Random\steps.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CodePage.js
-(function(){pliny.class({
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\CodePage.js
+(function(){"use strict";
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+pliny.class({
   parent: "Primrose.Text",
-    name: "CodePage",
-    description: "| [under construction]"
+  name: "CodePage",
+  description: "| [under construction]"
 });
 
 function CodePage(name, lang, options) {
@@ -10883,16 +11567,15 @@ function CodePage(name, lang, options) {
 
   for (var type in commands) {
     var codes = commands[type];
-    if (typeof (codes) === "object") {
+    if ((typeof codes === "undefined" ? "undefined" : _typeof(codes)) === "object") {
       for (code in codes) {
         if (code.indexOf("_") > -1) {
           var parts = code.split(' '),
-            browser = parts[0];
+              browser = parts[0];
           code = parts[1];
           char = commands.NORMAL[code];
           cmdName = browser + "_" + type + " " + char;
-        }
-        else {
+        } else {
           char = commands.NORMAL[code];
           cmdName = type + "_" + char;
         }
@@ -10913,76 +11596,83 @@ CodePage.DEAD = function (key) {
     prim.setDeadKeyState("DEAD" + key);
   };
 };
-  if(typeof window !== "undefined") window.Primrose.Text.CodePage = CodePage;
+    if(typeof window !== "undefined") window.Primrose.Text.CodePage = CodePage;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CodePage.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\CodePage.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CodePages.js
-(function(){pliny.namespace({
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\CodePages.js
+(function(){"use strict";
+
+pliny.namespace({
   parent: "Primrose.Text",
   name: "CodePages",
   description: "The CodePages namespace contains international keyboard parameters."
 });
-const CodePages = {};
-  if(typeof window !== "undefined") window.Primrose.Text.CodePages = CodePages;
+var CodePages = {};
+    if(typeof window !== "undefined") window.Primrose.Text.CodePages = CodePages;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CodePages.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\CodePages.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CommandPack.js
-(function(){pliny.class({
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\CommandPack.js
+(function(){"use strict";
+
+pliny.class({
   parent: "Primrose.Text",
-    name: "CommandPack",
-    description: "| [under construction]"
+  name: "CommandPack",
+  description: "| [under construction]"
 });
 
 function CommandPack(name, commands) {
   this.name = name;
   copyObject(this, commands);
 }
-  if(typeof window !== "undefined") window.Primrose.Text.CommandPack = CommandPack;
+    if(typeof window !== "undefined") window.Primrose.Text.CommandPack = CommandPack;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CommandPack.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\CommandPack.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CommandPacks.js
-(function(){pliny.namespace({
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks.js
+(function(){"use strict";
+
+pliny.namespace({
   parent: "Primrose.Text",
   name: "CommandPacks",
   description: "The CommandPacks namespace contains sets of keyboard shortcuts for different types of text-oriented controls."
 });
-const CommandPacks = {};
-  if(typeof window !== "undefined") window.Primrose.Text.CommandPacks = CommandPacks;
+var CommandPacks = {};
+    if(typeof window !== "undefined") window.Primrose.Text.CommandPacks = CommandPacks;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CommandPacks.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Controls.js
-(function(){pliny.namespace({
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\Controls.js
+(function(){"use strict";
+
+pliny.namespace({
   parent: "Primrose.Text",
   name: "Controls",
   description: "The Controls namespace contains different types of text-oriented controls."
 });
-const Controls = {};
-  if(typeof window !== "undefined") window.Primrose.Text.Controls = Controls;
+var Controls = {};
+    if(typeof window !== "undefined") window.Primrose.Text.Controls = Controls;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Controls.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\Controls.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Cursor.js
-(function(){// unicode-aware string reverse
-var reverse = (function () {
-  var combiningMarks =
-    /(<%= allExceptCombiningMarks %>)(<%= combiningMarks %>+)/g,
-    surrogatePair = /(<%= highSurrogates %>)(<%= lowSurrogates %>)/g;
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\Cursor.js
+(function(){"use strict";
+
+// unicode-aware string reverse
+var reverse = function () {
+  var combiningMarks = /(<%= allExceptCombiningMarks %>)(<%= combiningMarks %>+)/g,
+      surrogatePair = /(<%= highSurrogates %>)(<%= lowSurrogates %>)/g;
 
   function reverse(str) {
-    str = str.replace(combiningMarks, function (match, capture1,
-        capture2) {
-        return reverse(capture2) + capture1;
-      })
-      .replace(surrogatePair, "$2$1");
+    str = str.replace(combiningMarks, function (match, capture1, capture2) {
+      return reverse(capture2) + capture1;
+    }).replace(surrogatePair, "$2$1");
     var res = "";
     for (var i = str.length - 1; i >= 0; --i) {
       res += str[i];
@@ -10990,12 +11680,12 @@ var reverse = (function () {
     return res;
   }
   return reverse;
-})();
+}();
 
 pliny.class({
   parent: "Primrose.Text",
-    name: "Cursor",
-    description: "| [under construction]"
+  name: "Cursor",
+  description: "| [under construction]"
 });
 
 function Cursor(i, x, y) {
@@ -11057,13 +11747,12 @@ Cursor.prototype.fullend = function (lines) {
 Cursor.prototype.skipleft = function (lines) {
   if (this.x === 0) {
     this.left(lines);
-  }
-  else {
+  } else {
     var x = this.x - 1;
     var line = lines[this.y];
     var word = reverse(line.substring(0, x));
     var m = word.match(/(\s|\W)+/);
-    var dx = m ? (m.index + m[0].length + 1) : word.length;
+    var dx = m ? m.index + m[0].length + 1 : word.length;
     this.i -= dx;
     this.x -= dx;
   }
@@ -11090,12 +11779,11 @@ Cursor.prototype.skipright = function (lines) {
   var line = lines[this.y];
   if (this.x === line.length || line[this.x] === '\n') {
     this.right(lines);
-  }
-  else {
+  } else {
     var x = this.x + 1;
     line = line.substring(x);
     var m = line.match(/(\s|\W)+/);
-    var dx = m ? (m.index + m[0].length + 1) : (line.length - this.x);
+    var dx = m ? m.index + m[0].length + 1 : line.length - this.x;
     this.i += dx;
     this.x += dx;
     this.reverseFromNewline(lines);
@@ -11220,32 +11908,34 @@ Cursor.prototype.reverseFromNewline = function (lines) {
   }
   return false;
 };
-  if(typeof window !== "undefined") window.Primrose.Text.Cursor = Cursor;
+    if(typeof window !== "undefined") window.Primrose.Text.Cursor = Cursor;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Cursor.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\Cursor.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Grammar.js
-(function(){pliny.class({
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\Grammar.js
+(function(){"use strict";
+
+pliny.class({
   parent: "Primrose.Text",
-    name: "Grammar",
-    parameters: [{
-      name: "name",
-      type: "String",
-      description: "A user-friendly name for the grammar, to be able to include it in an options listing."
-    }, {
-      name: "rules",
-      type: "Array",
-      description: "A collection of rules to apply to tokenize text. The rules should be an array of two-element arrays. The first element should be a token name (see [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names), followed by a regular expression that selects the token out of the source code."
-    }],
-    description: "A Grammar is a collection of rules for processing text into tokens. Tokens are special characters that tell us about the structure of the text, things like keywords, curly braces, numbers, etc. After the text is tokenized, the tokens get a rough processing pass that groups them into larger elements that can be rendered in color on the screen.\n\
+  name: "Grammar",
+  parameters: [{
+    name: "name",
+    type: "String",
+    description: "A user-friendly name for the grammar, to be able to include it in an options listing."
+  }, {
+    name: "rules",
+    type: "Array",
+    description: "A collection of rules to apply to tokenize text. The rules should be an array of two-element arrays. The first element should be a token name (see [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names), followed by a regular expression that selects the token out of the source code."
+  }],
+  description: "A Grammar is a collection of rules for processing text into tokens. Tokens are special characters that tell us about the structure of the text, things like keywords, curly braces, numbers, etc. After the text is tokenized, the tokens get a rough processing pass that groups them into larger elements that can be rendered in color on the screen.\n\
 \n\
 As tokens are discovered, they are removed from the text being processed, so order is important. Grammar rules are applied in the order they are specified, and more than one rule can produce the same token type.\n\
 \n\
 See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.",
-    examples: [{
-      name: "A plain-text \"grammar\".",
-      description: "Plain text does not actually have a grammar that needs to be processed. However, to get the text to work with the rendering system, a basic grammar is necessary to be able to break the text up into lines and prepare it for rendering.\n\
+  examples: [{
+    name: "A plain-text \"grammar\".",
+    description: "Plain text does not actually have a grammar that needs to be processed. However, to get the text to work with the rendering system, a basic grammar is necessary to be able to break the text up into lines and prepare it for rendering.\n\
 \n\
 ## Code:\n\
 \n\
@@ -11256,9 +11946,9 @@ See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.
     // Text needs at least the newlines token, or else every line will attempt to render as a single line and the line count won't work.\n\
     [\"newlines\", /(?:\\r\\n|\\r|\\n)/] \n\
   ] );"
-    }, {
-      name: "A grammar for BASIC",
-      description: "The BASIC programming language is now defunct, but a grammar for it to display in Primrose is quite easy to build.\n\
+  }, {
+    name: "A grammar for BASIC",
+    description: "The BASIC programming language is now defunct, but a grammar for it to display in Primrose is quite easy to build.\n\
 \n\
 ## Code:\n\
 \n\
@@ -11290,7 +11980,7 @@ See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.
       // Once everything else has been matched, the left over blocks of words are treated as variable and function names.\n\
       [ \"identifiers\", /\\w+\\$?/ ]\n\
     ] );"
-    }]
+  }]
 });
 
 function Grammar(name, rules) {
@@ -11315,9 +12005,10 @@ function Grammar(name, rules) {
 
   function crudeParsing(tokens) {
     var commentDelim = null,
-      stringDelim = null,
-      line = 0,
-      i, t;
+        stringDelim = null,
+        line = 0,
+        i,
+        t;
     for (i = 0; i < tokens.length; ++i) {
       t = tokens[i];
       t.line = line;
@@ -11332,21 +12023,17 @@ function Grammar(name, rules) {
         if (t.type !== "newlines") {
           t.type = "strings";
         }
-      }
-      else if (commentDelim) {
-        if (commentDelim === "startBlockComments" && t.type === "endBlockComments" ||
-          commentDelim === "startLineComments" && t.type === "newlines") {
+      } else if (commentDelim) {
+        if (commentDelim === "startBlockComments" && t.type === "endBlockComments" || commentDelim === "startLineComments" && t.type === "newlines") {
           commentDelim = null;
         }
         if (t.type !== "newlines") {
           t.type = "comments";
         }
-      }
-      else if (t.type === "stringDelim") {
+      } else if (t.type === "stringDelim") {
         stringDelim = t.value;
         t.type = "strings";
-      }
-      else if (t.type === "startBlockComments" || t.type === "startLineComments") {
+      } else if (t.type === "startBlockComments" || t.type === "startLineComments") {
         commentDelim = t.type;
         t.type = "comments";
       }
@@ -11366,16 +12053,15 @@ function Grammar(name, rules) {
   Grammar.prototype.toHTML = function (txt, theme) {
     theme = theme || Primrose.Text.Themes.Default;
     var tokenRows = this.tokenize(txt),
-      temp = document.createElement("div");
+        temp = document.createElement("div");
     for (var y = 0; y < tokenRows.length; ++y) {
       // draw the tokens on this row
       var t = tokenRows[y];
       if (t.type === "newlines") {
         temp.appendChild(document.createElement("br"));
-      }
-      else {
+      } else {
         var style = theme[t.type] || {},
-          elem = document.createElement("span");
+            elem = document.createElement("span");
         elem.style.fontWeight = style.fontWeight || theme.regular.fontWeight;
         elem.style.fontStyle = style.fontStyle || theme.regular.fontStyle || "";
         elem.style.color = style.foreColor || theme.regular.foreColor;
@@ -11446,25 +12132,33 @@ function Grammar(name, rules) {
     return tokens;
   };
 }
-  if(typeof window !== "undefined") window.Primrose.Text.Grammar = Grammar;
+    if(typeof window !== "undefined") window.Primrose.Text.Grammar = Grammar;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Grammar.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\Grammar.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Grammars.js
-(function(){pliny.namespace({
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\Grammars.js
+(function(){"use strict";
+
+pliny.namespace({
   parent: "Primrose.Text",
   name: "Grammars",
   description: "The Grammars namespace contains grammar parsers for different types of programming languages, to enable syntax highlighting."
 });
-const Grammars = {};
-  if(typeof window !== "undefined") window.Primrose.Text.Grammars = Grammars;
+var Grammars = {};
+    if(typeof window !== "undefined") window.Primrose.Text.Grammars = Grammars;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Grammars.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\Grammars.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\OperatingSystem.js
-(function(){function setCursorCommand(obj, mod, key, func, cur) {
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystem.js
+(function(){"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function setCursorCommand(obj, mod, key, func, cur) {
   var name = mod + "_" + key;
   obj[name] = function (prim, tokenRows) {
     prim["cursor" + func](tokenRows, prim[cur + "Cursor"]);
@@ -11478,11 +12172,14 @@ function makeCursorCommand(obj, baseMod, key, func) {
 
 pliny.class({
   parent: "Primrose.Text",
-    name: "OperatingSystem",
-    description: "| [under construction]"
+  name: "OperatingSystem",
+  description: "| [under construction]"
 });
-class OperatingSystem {
-  constructor(name, pre1, pre2, redo, pre3, home, end, pre5, fullHome, fullEnd) {
+
+var OperatingSystem = function () {
+  function OperatingSystem(name, pre1, pre2, redo, pre3, home, end, pre5, fullHome, fullEnd) {
+    _classCallCheck(this, OperatingSystem);
+
     var pre4 = pre3;
     pre3 = pre3.length > 0 ? pre3 : "NORMAL";
 
@@ -11510,61 +12207,66 @@ class OperatingSystem {
     this._deadKeyState = "";
   }
 
-  makeCommandName(evt, codePage) {
-    var key = evt.keyCode;
-    if (key !== Primrose.Keys.CTRL &&
-      key !== Primrose.Keys.ALT &&
-      key !== Primrose.Keys.META_L &&
-      key !== Primrose.Keys.META_R &&
-      key !== Primrose.Keys.SHIFT) {
+  _createClass(OperatingSystem, [{
+    key: "makeCommandName",
+    value: function makeCommandName(evt, codePage) {
+      var key = evt.keyCode;
+      if (key !== Primrose.Keys.CTRL && key !== Primrose.Keys.ALT && key !== Primrose.Keys.META_L && key !== Primrose.Keys.META_R && key !== Primrose.Keys.SHIFT) {
 
-      var oldDeadKeyState = this._deadKeyState,
-        commandName = this._deadKeyState;
+        var oldDeadKeyState = this._deadKeyState,
+            commandName = this._deadKeyState;
 
-      if (evt.ctrlKey) {
-        commandName += "CTRL";
-      }
-      if (evt.altKey) {
-        commandName += "ALT";
-      }
-      if (evt.metaKey) {
-        commandName += "META";
-      }
-      if (evt.shiftKey) {
-        commandName += "SHIFT";
-      }
-      if (commandName === this._deadKeyState) {
-        commandName += "NORMAL";
-      }
+        if (evt.ctrlKey) {
+          commandName += "CTRL";
+        }
+        if (evt.altKey) {
+          commandName += "ALT";
+        }
+        if (evt.metaKey) {
+          commandName += "META";
+        }
+        if (evt.shiftKey) {
+          commandName += "SHIFT";
+        }
+        if (commandName === this._deadKeyState) {
+          commandName += "NORMAL";
+        }
 
-      commandName += "_" + codePage.keyNames[key];
+        commandName += "_" + codePage.keyNames[key];
 
-      return this[commandName] || commandName;
+        return this[commandName] || commandName;
+      }
     }
-  }
-}
-  if(typeof window !== "undefined") window.Primrose.Text.OperatingSystem = OperatingSystem;
+  }]);
+
+  return OperatingSystem;
+}();
+    if(typeof window !== "undefined") window.Primrose.Text.OperatingSystem = OperatingSystem;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\OperatingSystem.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystem.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems.js
-(function(){pliny.namespace({
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems.js
+(function(){"use strict";
+
+pliny.namespace({
   parent: "Primrose.Text",
   name: "OperatingSystems",
   description: "The OperatingSystems namespace contains sets of keyboard shortcuts for different operating systems."
 });
-const OperatingSystems = {};
-  if(typeof window !== "undefined") window.Primrose.Text.OperatingSystems = OperatingSystems;
+var OperatingSystems = {};
+    if(typeof window !== "undefined") window.Primrose.Text.OperatingSystems = OperatingSystems;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Point.js
-(function(){pliny.class({
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\Point.js
+(function(){"use strict";
+
+pliny.class({
   parent: "Primrose.Text",
-    name: "Point",
-    description: "| [under construction]"
+  name: "Point",
+  description: "| [under construction]"
 });
 
 function Point(x, y) {
@@ -11590,124 +12292,152 @@ Point.prototype.clone = function () {
 Point.prototype.toString = function () {
   return "(x:" + this.x + ", y:" + this.y + ")";
 };
-  if(typeof window !== "undefined") window.Primrose.Text.Point = Point;
+    if(typeof window !== "undefined") window.Primrose.Text.Point = Point;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Point.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\Point.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Rectangle.js
-(function(){pliny.class({
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\Rectangle.js
+(function(){"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+pliny.class({
   parent: "Primrose.Text",
-    name: "Rectangle",
-    description: "| [under construction]"
+  name: "Rectangle",
+  description: "| [under construction]"
 });
-class Rectangle {
-  constructor(x, y, width, height) {
+
+var Rectangle = function () {
+  function Rectangle(x, y, width, height) {
+    _classCallCheck(this, Rectangle);
+
     this.point = new Primrose.Text.Point(x, y);
     this.size = new Primrose.Text.Size(width, height);
   }
 
-  get x() {
-    return this.point.x;
-  }
-
-  set x(x) {
-    this.point.x = x;
-  }
-
-  get left() {
-    return this.point.x;
-  }
-  set left(x) {
-    this.point.x = x;
-  }
-
-  get width() {
-    return this.size.width;
-  }
-  set width(width) {
-    this.size.width = width;
-  }
-
-  get right() {
-    return this.point.x + this.size.width;
-  }
-  set right(right) {
-    this.point.x = right - this.size.width;
-  }
-
-  get y() {
-    return this.point.y;
-  }
-  set y(y) {
-    this.point.y = y;
-  }
-
-  get top() {
-    return this.point.y;
-  }
-  set top(y) {
-    this.point.y = y;
-  }
-
-  get height() {
-    return this.size.height;
-  }
-  set height(height) {
-    this.size.height = height;
-  }
-
-  get bottom() {
-    return this.point.y + this.size.height;
-  }
-  set bottom(bottom) {
-    this.point.y = bottom - this.size.height;
-  }
-
-  get area() {
-    return this.width * this.height;
-  }
-
-  set(x, y, width, height) {
-    this.point.set(x, y);
-    this.size.set(width, height);
-  }
-
-  copy(r) {
-    if (r) {
-      this.point.copy(r.point);
-      this.size.copy(r.size);
+  _createClass(Rectangle, [{
+    key: "set",
+    value: function set(x, y, width, height) {
+      this.point.set(x, y);
+      this.size.set(width, height);
     }
-  }
-
-  clone() {
-    return new Rectangle(this.point.x, this.point.y, this.size.width, this.size.height);
-  }
-
-  toString() {
-    return `[${this.point.toString()} x ${this.size.toString()}]`;
-  }
-
-  overlap(r) {
-    var left = Math.max(this.left, r.left),
-      top = Math.max(this.top, r.top),
-      right = Math.min(this.right, r.right),
-      bottom = Math.min(this.bottom, r.bottom);
-    if (right > left && bottom > top) {
-      return new Rectangle(left, top, right - left, bottom - top);
+  }, {
+    key: "copy",
+    value: function copy(r) {
+      if (r) {
+        this.point.copy(r.point);
+        this.size.copy(r.size);
+      }
     }
-  }
-}
-  if(typeof window !== "undefined") window.Primrose.Text.Rectangle = Rectangle;
+  }, {
+    key: "clone",
+    value: function clone() {
+      return new Rectangle(this.point.x, this.point.y, this.size.width, this.size.height);
+    }
+  }, {
+    key: "toString",
+    value: function toString() {
+      return "[" + this.point.toString() + " x " + this.size.toString() + "]";
+    }
+  }, {
+    key: "overlap",
+    value: function overlap(r) {
+      var left = Math.max(this.left, r.left),
+          top = Math.max(this.top, r.top),
+          right = Math.min(this.right, r.right),
+          bottom = Math.min(this.bottom, r.bottom);
+      if (right > left && bottom > top) {
+        return new Rectangle(left, top, right - left, bottom - top);
+      }
+    }
+  }, {
+    key: "x",
+    get: function get() {
+      return this.point.x;
+    },
+    set: function set(x) {
+      this.point.x = x;
+    }
+  }, {
+    key: "left",
+    get: function get() {
+      return this.point.x;
+    },
+    set: function set(x) {
+      this.point.x = x;
+    }
+  }, {
+    key: "width",
+    get: function get() {
+      return this.size.width;
+    },
+    set: function set(width) {
+      this.size.width = width;
+    }
+  }, {
+    key: "right",
+    get: function get() {
+      return this.point.x + this.size.width;
+    },
+    set: function set(right) {
+      this.point.x = right - this.size.width;
+    }
+  }, {
+    key: "y",
+    get: function get() {
+      return this.point.y;
+    },
+    set: function set(y) {
+      this.point.y = y;
+    }
+  }, {
+    key: "top",
+    get: function get() {
+      return this.point.y;
+    },
+    set: function set(y) {
+      this.point.y = y;
+    }
+  }, {
+    key: "height",
+    get: function get() {
+      return this.size.height;
+    },
+    set: function set(height) {
+      this.size.height = height;
+    }
+  }, {
+    key: "bottom",
+    get: function get() {
+      return this.point.y + this.size.height;
+    },
+    set: function set(bottom) {
+      this.point.y = bottom - this.size.height;
+    }
+  }, {
+    key: "area",
+    get: function get() {
+      return this.width * this.height;
+    }
+  }]);
+
+  return Rectangle;
+}();
+    if(typeof window !== "undefined") window.Primrose.Text.Rectangle = Rectangle;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Rectangle.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\Rectangle.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Rule.js
-(function(){pliny.class({
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\Rule.js
+(function(){"use strict";
+
+pliny.class({
   parent: "Primrose.Text",
-    name: "Rule",
-    description: "| [under construction]"
+  name: "Rule",
+  description: "| [under construction]"
 });
 
 function Rule(name, test) {
@@ -11724,8 +12454,8 @@ Rule.prototype.carveOutMatchedToken = function (tokens, j) {
       // complex regexes that can match in special contexts, but not make
       // the context part of the token.
       var midx = res[res.length - 1],
-        start = res.input.indexOf(midx),
-        end = start + midx.length;
+          start = res.input.indexOf(midx),
+          end = start + midx.length;
       if (start === 0) {
         // the rule matches the start of the token
         token.type = this.name;
@@ -11735,8 +12465,7 @@ Rule.prototype.carveOutMatchedToken = function (tokens, j) {
           next.type = "regular";
           tokens.splice(j + 1, 0, next);
         }
-      }
-      else {
+      } else {
         // the rule matches from the middle of the token
         var mid = token.splitAt(start);
         if (midx.length < mid.value.length) {
@@ -11750,16 +12479,18 @@ Rule.prototype.carveOutMatchedToken = function (tokens, j) {
     }
   }
 };
-  if(typeof window !== "undefined") window.Primrose.Text.Rule = Rule;
+    if(typeof window !== "undefined") window.Primrose.Text.Rule = Rule;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Rule.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\Rule.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Size.js
-(function(){pliny.class({
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\Size.js
+(function(){"use strict";
+
+pliny.class({
   parent: "Primrose.Text",
-    name: "Size",
-    description: "| [under construction]"
+  name: "Size",
+  description: "| [under construction]"
 });
 
 function Size(width, height) {
@@ -11785,22 +12516,28 @@ Size.prototype.clone = function () {
 Size.prototype.toString = function () {
   return "<w:" + this.width + ", h:" + this.height + ">";
 };
-  if(typeof window !== "undefined") window.Primrose.Text.Size = Size;
+    if(typeof window !== "undefined") window.Primrose.Text.Size = Size;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Size.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\Size.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Terminal.js
-(function(){pliny.class({
-  parent: "Primrose.Text",
-    name: "Terminal",
-    description: "| [under construction]"
-});
-class Terminal {
-  constructor(inputEditor, outputEditor) {
-    outputEditor = outputEditor || inputEditor;
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\Terminal.js
+(function(){"use strict";
 
-    var inputCallback = null,
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+pliny.class({
+  parent: "Primrose.Text",
+  name: "Terminal",
+  description: "| [under construction]"
+});
+
+var Terminal = function Terminal(inputEditor, outputEditor) {
+  _classCallCheck(this, Terminal);
+
+  outputEditor = outputEditor || inputEditor;
+
+  var inputCallback = null,
       currentProgram = null,
       originalGrammar = null,
       currentEditIndex = 0,
@@ -11810,131 +12547,131 @@ class Terminal {
       restoreInput = inputEditor === outputEditor,
       self = this;
 
-    this.running = false;
-    this.waitingForInput = false;
+  this.running = false;
+  this.waitingForInput = false;
 
-    function toEnd(editor) {
-      editor.selectionStart = editor.selectionEnd = editor.value.length;
-      editor.scrollIntoView(editor.frontCursor);
-    }
-
-    function done() {
-      if (self.running) {
-        flush();
-        self.running = false;
-        if (restoreInput) {
-          inputEditor.tokenizer = originalGrammar;
-          inputEditor.value = currentProgram;
-        }
-        toEnd(inputEditor);
-      }
-    }
-
-    function clearScreen() {
-      outputEditor.selectionStart = outputEditor.selectionEnd = 0;
-      outputEditor.value = "";
-      return true;
-    }
-
-    function flush() {
-      if (buffer.length > 0) {
-        var lines = buffer.split("\n");
-        for (var i = 0; i < pageSize && lines.length > 0; ++i) {
-          outputQueue.push(lines.shift());
-        }
-        if (lines.length > 0) {
-          outputQueue.push(" ----- more -----");
-        }
-        buffer = lines.join("\n");
-      }
-    }
-
-    function input(callback) {
-      inputCallback = callback;
-      self.waitingForInput = true;
-      flush();
-    }
-
-    function stdout(str) {
-      buffer += str;
-    }
-
-    this.sendInput = function (evt) {
-      if (buffer.length > 0) {
-        flush();
-      }
-      else {
-        outputEditor.keyDown(evt);
-        var str = outputEditor.value.substring(currentEditIndex);
-        inputCallback(str.trim());
-        inputCallback = null;
-        this.waitingForInput = false;
-      }
-    };
-
-    this.execute = function () {
-      pageSize = 10;
-      originalGrammar = inputEditor.tokenizer;
-      if (originalGrammar && originalGrammar.interpret) {
-        this.running = true;
-        var looper,
-          next = function () {
-            if (self.running) {
-              setTimeout(looper, 1);
-            }
-          };
-
-        currentProgram = inputEditor.value;
-        looper = originalGrammar.interpret(currentProgram, input, stdout,
-          stdout, next, clearScreen, this.loadFile.bind(this), done);
-        outputEditor.tokenizer = Primrose.Text.Grammars.PlainText;
-        clearScreen();
-        next();
-      }
-    };
-
-    this.loadFile = function (fileName) {
-      return Primrose.HTTP.getText(fileName.toLowerCase())
-        .then(function (file) {
-          if (isOSX) {
-            file = file.replace("CTRL+SHIFT+SPACE", "CMD+OPT+E");
-          }
-          inputEditor.value = currentProgram = file;
-          return file;
-        });
-    };
-
-    this.update = function () {
-      if (outputQueue.length > 0) {
-        outputEditor.value += outputQueue.shift() + "\n";
-        toEnd(outputEditor);
-        currentEditIndex = outputEditor.selectionStart;
-      }
-    };
+  function toEnd(editor) {
+    editor.selectionStart = editor.selectionEnd = editor.value.length;
+    editor.scrollIntoView(editor.frontCursor);
   }
-}
-  if(typeof window !== "undefined") window.Primrose.Text.Terminal = Terminal;
+
+  function done() {
+    if (self.running) {
+      flush();
+      self.running = false;
+      if (restoreInput) {
+        inputEditor.tokenizer = originalGrammar;
+        inputEditor.value = currentProgram;
+      }
+      toEnd(inputEditor);
+    }
+  }
+
+  function clearScreen() {
+    outputEditor.selectionStart = outputEditor.selectionEnd = 0;
+    outputEditor.value = "";
+    return true;
+  }
+
+  function flush() {
+    if (buffer.length > 0) {
+      var lines = buffer.split("\n");
+      for (var i = 0; i < pageSize && lines.length > 0; ++i) {
+        outputQueue.push(lines.shift());
+      }
+      if (lines.length > 0) {
+        outputQueue.push(" ----- more -----");
+      }
+      buffer = lines.join("\n");
+    }
+  }
+
+  function input(callback) {
+    inputCallback = callback;
+    self.waitingForInput = true;
+    flush();
+  }
+
+  function stdout(str) {
+    buffer += str;
+  }
+
+  this.sendInput = function (evt) {
+    if (buffer.length > 0) {
+      flush();
+    } else {
+      outputEditor.keyDown(evt);
+      var str = outputEditor.value.substring(currentEditIndex);
+      inputCallback(str.trim());
+      inputCallback = null;
+      this.waitingForInput = false;
+    }
+  };
+
+  this.execute = function () {
+    pageSize = 10;
+    originalGrammar = inputEditor.tokenizer;
+    if (originalGrammar && originalGrammar.interpret) {
+      this.running = true;
+      var looper,
+          next = function next() {
+        if (self.running) {
+          setTimeout(looper, 1);
+        }
+      };
+
+      currentProgram = inputEditor.value;
+      looper = originalGrammar.interpret(currentProgram, input, stdout, stdout, next, clearScreen, this.loadFile.bind(this), done);
+      outputEditor.tokenizer = Primrose.Text.Grammars.PlainText;
+      clearScreen();
+      next();
+    }
+  };
+
+  this.loadFile = function (fileName) {
+    return Primrose.HTTP.getText(fileName.toLowerCase()).then(function (file) {
+      if (isOSX) {
+        file = file.replace("CTRL+SHIFT+SPACE", "CMD+OPT+E");
+      }
+      inputEditor.value = currentProgram = file;
+      return file;
+    });
+  };
+
+  this.update = function () {
+    if (outputQueue.length > 0) {
+      outputEditor.value += outputQueue.shift() + "\n";
+      toEnd(outputEditor);
+      currentEditIndex = outputEditor.selectionStart;
+    }
+  };
+};
+    if(typeof window !== "undefined") window.Primrose.Text.Terminal = Terminal;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Terminal.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\Terminal.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Themes.js
-(function(){pliny.namespace({
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\Themes.js
+(function(){"use strict";
+
+pliny.namespace({
   parent: "Primrose.Text",
   name: "Themes",
   description: "The Themes namespace contains color themes for text-oriented controls, for use when coupled with a parsing grammar."
 });
-const Themes = {};
-  if(typeof window !== "undefined") window.Primrose.Text.Themes = Themes;
+var Themes = {};
+    if(typeof window !== "undefined") window.Primrose.Text.Themes = Themes;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Themes.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\Themes.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Token.js
-(function(){pliny.class({
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\Token.js
+(function(){"use strict";
+
+pliny.class({
   parent: "Primrose.Text",
-    name: "Token",
-    description: "| [under construction]"
+  name: "Token",
+  description: "| [under construction]"
 });
 
 function Token(value, type, index, line) {
@@ -11957,20 +12694,22 @@ Token.prototype.splitAt = function (i) {
 Token.prototype.toString = function () {
   return "[" + this.type + ": " + this.value + "]";
 };
-  if(typeof window !== "undefined") window.Primrose.Text.Token = Token;
+    if(typeof window !== "undefined") window.Primrose.Text.Token = Token;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Token.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\Token.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CodePages\DE_QWERTZ.js
-(function(){var CodePage = Primrose.Text.CodePage;
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\DE_QWERTZ.js
+(function(){"use strict";
+
+var CodePage = Primrose.Text.CodePage;
 
 pliny.record({
   parent: "Primrose.Text.CodePages",
   name: "DE_QWERTZ",
   description: "| [under construction]"
 });
-const DE_QWERTZ = new CodePage("Deutsch: QWERTZ", "de", {
+var DE_QWERTZ = new CodePage("Deutsch: QWERTZ", "de", {
   deadKeys: [220, 221, 160, 192],
   NORMAL: {
     "32": " ",
@@ -12087,20 +12826,22 @@ const DE_QWERTZ = new CodePage("Deutsch: QWERTZ", "de", {
     "89": "y"
   }
 });
-  if(typeof window !== "undefined") window.Primrose.Text.CodePages.DE_QWERTZ = DE_QWERTZ;
+    if(typeof window !== "undefined") window.Primrose.Text.CodePages.DE_QWERTZ = DE_QWERTZ;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CodePages\DE_QWERTZ.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\DE_QWERTZ.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_UKX.js
-(function(){var CodePage = Primrose.Text.CodePage;
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_UKX.js
+(function(){"use strict";
+
+var CodePage = Primrose.Text.CodePage;
 
 pliny.record({
   parent: "Primrose.Text.CodePages",
   name: "EN_UKX",
   description: "| [under construction]"
 });
-const EN_UKX = new CodePage("English: UK Extended", "en-GB", {
+var EN_UKX = new CodePage("English: UK Extended", "en-GB", {
   CTRLALT: {
     "52": "€",
     "65": "á",
@@ -12180,20 +12921,22 @@ const EN_UKX = new CodePage("English: UK Extended", "en-GB", {
     "223": "¬"
   }
 });
-  if(typeof window !== "undefined") window.Primrose.Text.CodePages.EN_UKX = EN_UKX;
+    if(typeof window !== "undefined") window.Primrose.Text.CodePages.EN_UKX = EN_UKX;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_UKX.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_UKX.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_US.js
-(function(){var CodePage = Primrose.Text.CodePage;
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_US.js
+(function(){"use strict";
+
+var CodePage = Primrose.Text.CodePage;
 
 pliny.record({
   parent: "Primrose.Text.CodePages",
   name: "EN_US",
   description: "| [under construction]"
 });
-const EN_US = new CodePage("English: USA", "en-US", {
+var EN_US = new CodePage("English: USA", "en-US", {
   NORMAL: {
     "32": " ",
     "48": "0",
@@ -12247,20 +12990,22 @@ const EN_US = new CodePage("English: USA", "en-US", {
     "222": "\""
   }
 });
-  if(typeof window !== "undefined") window.Primrose.Text.CodePages.EN_US = EN_US;
+    if(typeof window !== "undefined") window.Primrose.Text.CodePages.EN_US = EN_US;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_US.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_US.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CodePages\FR_AZERTY.js
-(function(){var CodePage = Primrose.Text.CodePage;
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\FR_AZERTY.js
+(function(){"use strict";
+
+var CodePage = Primrose.Text.CodePage;
 
 pliny.record({
   parent: "Primrose.Text.CodePages",
   name: "FR_AZERTY",
   description: "| [under construction]"
 });
-const FR_AZERTY = new CodePage("Français: AZERTY", "fr", {
+var FR_AZERTY = new CodePage("Français: AZERTY", "fr", {
   deadKeys: [221, 50, 55],
   NORMAL: {
     "32": " ",
@@ -12348,81 +13093,94 @@ const FR_AZERTY = new CodePage("Français: AZERTY", "fr", {
     "85": "ù"
   }
 });
-  if(typeof window !== "undefined") window.Primrose.Text.CodePages.FR_AZERTY = FR_AZERTY;
+    if(typeof window !== "undefined") window.Primrose.Text.CodePages.FR_AZERTY = FR_AZERTY;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CodePages\FR_AZERTY.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\FR_AZERTY.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\BasicTextInput.js
-(function(){pliny.record({
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\BasicTextInput.js
+(function(){"use strict";
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+pliny.record({
   parent: "Primrose.Text.CommandPacks",
   name: "TextInput",
   baseClass: "Primrose.Text.CommandPack",
   description: "| [under construction]"
 });
-class BasicTextInput extends Primrose.Text.CommandPack {
-  constructor(additionalName, additionalCommands) {
+
+var BasicTextInput = function (_Primrose$Text$Comman) {
+  _inherits(BasicTextInput, _Primrose$Text$Comman);
+
+  function BasicTextInput(additionalName, additionalCommands) {
+    _classCallCheck(this, BasicTextInput);
+
     var commands = {
-      NORMAL_LEFTARROW: function (prim, tokenRows) {
+      NORMAL_LEFTARROW: function NORMAL_LEFTARROW(prim, tokenRows) {
         prim.cursorLeft(tokenRows, prim.frontCursor);
       },
-      NORMAL_SKIPLEFT: function (prim, tokenRows) {
+      NORMAL_SKIPLEFT: function NORMAL_SKIPLEFT(prim, tokenRows) {
         prim.cursorSkipLeft(tokenRows, prim.frontCursor);
       },
-      NORMAL_RIGHTARROW: function (prim, tokenRows) {
+      NORMAL_RIGHTARROW: function NORMAL_RIGHTARROW(prim, tokenRows) {
         prim.cursorRight(tokenRows, prim.frontCursor);
       },
-      NORMAL_SKIPRIGHT: function (prim, tokenRows) {
+      NORMAL_SKIPRIGHT: function NORMAL_SKIPRIGHT(prim, tokenRows) {
         prim.cursorSkipRight(tokenRows, prim.frontCursor);
       },
-      NORMAL_HOME: function (prim, tokenRows) {
+      NORMAL_HOME: function NORMAL_HOME(prim, tokenRows) {
         prim.cursorHome(tokenRows, prim.frontCursor);
       },
-      NORMAL_END: function (prim, tokenRows) {
+      NORMAL_END: function NORMAL_END(prim, tokenRows) {
         prim.cursorEnd(tokenRows, prim.frontCursor);
       },
-      NORMAL_BACKSPACE: function (prim, tokenRows) {
+      NORMAL_BACKSPACE: function NORMAL_BACKSPACE(prim, tokenRows) {
         if (prim.frontCursor.i === prim.backCursor.i) {
           prim.frontCursor.left(tokenRows);
         }
         prim.selectedText = "";
         prim.scrollIntoView(prim.frontCursor);
       },
-      NORMAL_ENTER: function (prim, tokenRows, currentToken) {
+      NORMAL_ENTER: function NORMAL_ENTER(prim, tokenRows, currentToken) {
         emit.call(prim, "change", {
           target: prim
         });
       },
-      NORMAL_DELETE: function (prim, tokenRows) {
+      NORMAL_DELETE: function NORMAL_DELETE(prim, tokenRows) {
         if (prim.frontCursor.i === prim.backCursor.i) {
           prim.backCursor.right(tokenRows);
         }
         prim.selectedText = "";
         prim.scrollIntoView(prim.frontCursor);
       },
-      NORMAL_TAB: function (prim, tokenRows) {
+      NORMAL_TAB: function NORMAL_TAB(prim, tokenRows) {
         prim.selectedText = prim.tabString;
       },
 
-      SHIFT_LEFTARROW: function (prim, tokenRows) {
+      SHIFT_LEFTARROW: function SHIFT_LEFTARROW(prim, tokenRows) {
         prim.cursorLeft(tokenRows, prim.backCursor);
       },
-      SHIFT_SKIPLEFT: function (prim, tokenRows) {
+      SHIFT_SKIPLEFT: function SHIFT_SKIPLEFT(prim, tokenRows) {
         prim.cursorSkipLeft(tokenRows, prim.backCursor);
       },
-      SHIFT_RIGHTARROW: function (prim, tokenRows) {
+      SHIFT_RIGHTARROW: function SHIFT_RIGHTARROW(prim, tokenRows) {
         prim.cursorRight(tokenRows, prim.backCursor);
       },
-      SHIFT_SKIPRIGHT: function (prim, tokenRows) {
+      SHIFT_SKIPRIGHT: function SHIFT_SKIPRIGHT(prim, tokenRows) {
         prim.cursorSkipRight(tokenRows, prim.backCursor);
       },
-      SHIFT_HOME: function (prim, tokenRows) {
+      SHIFT_HOME: function SHIFT_HOME(prim, tokenRows) {
         prim.cursorHome(tokenRows, prim.backCursor);
       },
-      SHIFT_END: function (prim, tokenRows) {
+      SHIFT_END: function SHIFT_END(prim, tokenRows) {
         prim.cursorEnd(tokenRows, prim.backCursor);
       },
-      SHIFT_DELETE: function (prim, tokenRows) {
+      SHIFT_DELETE: function SHIFT_DELETE(prim, tokenRows) {
         if (prim.frontCursor.i === prim.backCursor.i) {
           prim.frontCursor.home(tokenRows);
           prim.backCursor.end(tokenRows);
@@ -12430,30 +13188,30 @@ class BasicTextInput extends Primrose.Text.CommandPack {
         prim.selectedText = "";
         prim.scrollIntoView(prim.frontCursor);
       },
-      CTRL_HOME: function (prim, tokenRows) {
+      CTRL_HOME: function CTRL_HOME(prim, tokenRows) {
         prim.cursorFullHome(tokenRows, prim.frontCursor);
       },
-      CTRL_END: function (prim, tokenRows) {
+      CTRL_END: function CTRL_END(prim, tokenRows) {
         prim.cursorFullEnd(tokenRows, prim.frontCursor);
       },
 
-      CTRLSHIFT_HOME: function (prim, tokenRows) {
+      CTRLSHIFT_HOME: function CTRLSHIFT_HOME(prim, tokenRows) {
         prim.cursorFullHome(tokenRows, prim.backCursor);
       },
-      CTRLSHIFT_END: function (prim, tokenRows) {
+      CTRLSHIFT_END: function CTRLSHIFT_END(prim, tokenRows) {
         prim.cursorFullEnd(tokenRows, prim.backCursor);
       },
 
-      SELECT_ALL: function (prim, tokenRows) {
+      SELECT_ALL: function SELECT_ALL(prim, tokenRows) {
         prim.frontCursor.fullhome(tokenRows);
         prim.backCursor.fullend(tokenRows);
       },
 
-      REDO: function (prim, tokenRows) {
+      REDO: function REDO(prim, tokenRows) {
         prim.redo();
         prim.scrollIntoView(prim.frontCursor);
       },
-      UNDO: function (prim, tokenRows) {
+      UNDO: function UNDO(prim, tokenRows) {
         prim.undo();
         prim.scrollIntoView(prim.frontCursor);
       }
@@ -12465,75 +13223,80 @@ class BasicTextInput extends Primrose.Text.CommandPack {
       }
     }
 
-    super(additionalName || "Text editor commands", commands);
+    return _possibleConstructorReturn(this, (BasicTextInput.__proto__ || Object.getPrototypeOf(BasicTextInput)).call(this, additionalName || "Text editor commands", commands));
   }
-}
-  if(typeof window !== "undefined") window.Primrose.Text.CommandPacks.BasicTextInput = BasicTextInput;
+
+  return BasicTextInput;
+}(Primrose.Text.CommandPack);
+    if(typeof window !== "undefined") window.Primrose.Text.CommandPacks.BasicTextInput = BasicTextInput;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\BasicTextInput.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\BasicTextInput.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextEditor.js
-(function(){pliny.record({
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextEditor.js
+(function(){"use strict";
+
+pliny.record({
   parent: "Primrose.Text.CommandPacks",
   name: "TextEditor",
   description: "| [under construction]"
 });
-const TextEditor = new Primrose.Text.CommandPacks.BasicTextInput(
-  "Text Area input commands", {
-    NORMAL_UPARROW: function (prim, tokenRows) {
-      prim.cursorUp(tokenRows, prim.frontCursor);
-    },
-    NORMAL_DOWNARROW: function (prim, tokenRows) {
-      prim.cursorDown(tokenRows, prim.frontCursor);
-    },
-    NORMAL_PAGEUP: function (prim, tokenRows) {
-      prim.cursorPageUp(tokenRows, prim.frontCursor);
-    },
-    NORMAL_PAGEDOWN: function (prim, tokenRows) {
-      prim.cursorPageDown(tokenRows, prim.frontCursor);
-    },
-    NORMAL_ENTER: function (prim, tokenRows, currentToken) {
-      var indent = "";
-      var tokenRow = tokenRows[prim.frontCursor.y];
-      if (tokenRow.length > 0 && tokenRow[0].type === "whitespace") {
-        indent = tokenRow[0].value;
-      }
-      prim.selectedText = "\n" + indent;
-      prim.scrollIntoView(prim.frontCursor);
-    },
-
-    SHIFT_UPARROW: function (prim, tokenRows) {
-      prim.cursorUp(tokenRows, prim.backCursor);
-    },
-    SHIFT_DOWNARROW: function (prim, tokenRows) {
-      prim.cursorDown(tokenRows, prim.backCursor);
-    },
-    SHIFT_PAGEUP: function (prim, tokenRows) {
-      prim.cursorPageUp(tokenRows, prim.backCursor);
-    },
-    SHIFT_PAGEDOWN: function (prim, tokenRows) {
-      prim.cursorPageDown(tokenRows, prim.backCursor);
-    },
-
-    WINDOW_SCROLL_DOWN: function (prim, tokenRows) {
-      if (prim.scroll.y < tokenRows.length) {
-        ++prim.scroll.y;
-      }
-    },
-    WINDOW_SCROLL_UP: function (prim, tokenRows) {
-      if (prim.scroll.y > 0) {
-        --prim.scroll.y;
-      }
+var TextEditor = new Primrose.Text.CommandPacks.BasicTextInput("Text Area input commands", {
+  NORMAL_UPARROW: function NORMAL_UPARROW(prim, tokenRows) {
+    prim.cursorUp(tokenRows, prim.frontCursor);
+  },
+  NORMAL_DOWNARROW: function NORMAL_DOWNARROW(prim, tokenRows) {
+    prim.cursorDown(tokenRows, prim.frontCursor);
+  },
+  NORMAL_PAGEUP: function NORMAL_PAGEUP(prim, tokenRows) {
+    prim.cursorPageUp(tokenRows, prim.frontCursor);
+  },
+  NORMAL_PAGEDOWN: function NORMAL_PAGEDOWN(prim, tokenRows) {
+    prim.cursorPageDown(tokenRows, prim.frontCursor);
+  },
+  NORMAL_ENTER: function NORMAL_ENTER(prim, tokenRows, currentToken) {
+    var indent = "";
+    var tokenRow = tokenRows[prim.frontCursor.y];
+    if (tokenRow.length > 0 && tokenRow[0].type === "whitespace") {
+      indent = tokenRow[0].value;
     }
-  });
-  if(typeof window !== "undefined") window.Primrose.Text.CommandPacks.TextEditor = TextEditor;
+    prim.selectedText = "\n" + indent;
+    prim.scrollIntoView(prim.frontCursor);
+  },
+
+  SHIFT_UPARROW: function SHIFT_UPARROW(prim, tokenRows) {
+    prim.cursorUp(tokenRows, prim.backCursor);
+  },
+  SHIFT_DOWNARROW: function SHIFT_DOWNARROW(prim, tokenRows) {
+    prim.cursorDown(tokenRows, prim.backCursor);
+  },
+  SHIFT_PAGEUP: function SHIFT_PAGEUP(prim, tokenRows) {
+    prim.cursorPageUp(tokenRows, prim.backCursor);
+  },
+  SHIFT_PAGEDOWN: function SHIFT_PAGEDOWN(prim, tokenRows) {
+    prim.cursorPageDown(tokenRows, prim.backCursor);
+  },
+
+  WINDOW_SCROLL_DOWN: function WINDOW_SCROLL_DOWN(prim, tokenRows) {
+    if (prim.scroll.y < tokenRows.length) {
+      ++prim.scroll.y;
+    }
+  },
+  WINDOW_SCROLL_UP: function WINDOW_SCROLL_UP(prim, tokenRows) {
+    if (prim.scroll.y > 0) {
+      --prim.scroll.y;
+    }
+  }
+});
+    if(typeof window !== "undefined") window.Primrose.Text.CommandPacks.TextEditor = TextEditor;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextEditor.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextEditor.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextInput.js
-(function(){////
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextInput.js
+(function(){"use strict";
+
+////
 // For all of these commands, the "current" cursor is:
 // If SHIFT is not held, then "front.
 // If SHIFT is held, then "back"
@@ -12543,31 +13306,32 @@ pliny.record({
   name: "TextInput",
   description: "| [under construction]"
 });
-const TextInput = new Primrose.Text.CommandPacks.BasicTextInput("Text Line input commands");
-  if(typeof window !== "undefined") window.Primrose.Text.CommandPacks.TextInput = TextInput;
+var TextInput = new Primrose.Text.CommandPacks.BasicTextInput("Text Line input commands");
+    if(typeof window !== "undefined") window.Primrose.Text.CommandPacks.TextInput = TextInput;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextInput.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextInput.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Controls\PlainText.js
-(function(){pliny.class({
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\Controls\PlainText.js
+(function(){"use strict";
+
+pliny.class({
   parent: "Primrose.Text.Controls",
-    name: "PlainText",
-    description: "| [under construction]"
+  name: "PlainText",
+  description: "| [under construction]"
 });
 
 function PlainText(text, size, fgcolor, bgcolor, x, y, z, hAlign) {
   text = text.replace(/\r\n/g, "\n");
   var lines = text.split("\n");
   hAlign = hAlign || "center";
-  var lineHeight = (size * 1000);
+  var lineHeight = size * 1000;
   var boxHeight = lineHeight * lines.length;
 
   var textCanvas = document.createElement("canvas");
   var textContext = textCanvas.getContext("2d");
   textContext.font = lineHeight + "px Arial";
-  var width = textContext.measureText(text)
-    .width;
+  var width = textContext.measureText(text).width;
 
   textCanvas.width = width;
   textCanvas.height = boxHeight;
@@ -12593,73 +13357,90 @@ function PlainText(text, size, fgcolor, bgcolor, x, y, z, hAlign) {
     shading: THREE.FlatShading
   });
 
-  var textGeometry = new THREE.PlaneGeometry(size * width / lineHeight,
-    size * lines.length);
+  var textGeometry = new THREE.PlaneGeometry(size * width / lineHeight, size * lines.length);
   textGeometry.computeBoundingBox();
   textGeometry.computeVertexNormals();
 
   var textMesh = new THREE.Mesh(textGeometry, material);
   if (hAlign === "left") {
     x -= textGeometry.boundingBox.min.x;
-  }
-  else if (hAlign === "right") {
+  } else if (hAlign === "right") {
     x += textGeometry.boundingBox.min.x;
   }
   textMesh.position.set(x, y, z);
   return textMesh;
 }
-  if(typeof window !== "undefined") window.Primrose.Text.Controls.PlainText = PlainText;
+    if(typeof window !== "undefined") window.Primrose.Text.Controls.PlainText = PlainText;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Controls\PlainText.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\Controls\PlainText.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Controls\TextBox.js
-(function(){var SCROLL_SCALE = isFirefox ? 3 : 100,
-  COUNTER = 0,
-  OFFSET = 0;
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\Controls\TextBox.js
+(function(){"use strict";
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var SCROLL_SCALE = isFirefox ? 3 : 100,
+    COUNTER = 0,
+    OFFSET = 0;
 
 pliny.class({
   parent: "Primrose.Text.Controls",
-    name: "TextBox",
-    description: "Syntax highlighting textbox control.",
-    baseClass: "Primrose.Surface",
-    parameters: [{
-      name: "idOrCanvasOrContext",
-      type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
-      description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
-    }, {
-      name: "options",
-      type: "Object",
-      description: "Named parameters for creating the TextBox."
-    }]
+  name: "TextBox",
+  description: "Syntax highlighting textbox control.",
+  baseClass: "Primrose.Surface",
+  parameters: [{
+    name: "idOrCanvasOrContext",
+    type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
+    description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
+  }, {
+    name: "options",
+    type: "Object",
+    description: "Named parameters for creating the TextBox."
+  }]
 });
-class TextBox extends Primrose.Surface {
 
-  static create() {
-    return new TextBox();
-  }
+var TextBox = function (_Primrose$Surface) {
+  _inherits(TextBox, _Primrose$Surface);
 
-  constructor(options) {
-    super(patch(options, {
-      id: "Primrose.Text.Controls.TextBox[" + (COUNTER++) + "]"
-    }));
-    this.listeners.change = [];
+  _createClass(TextBox, null, [{
+    key: "create",
+    value: function create() {
+      return new TextBox();
+    }
+  }]);
+
+  function TextBox(options) {
+    _classCallCheck(this, TextBox);
+
+    var _this = _possibleConstructorReturn(this, (TextBox.__proto__ || Object.getPrototypeOf(TextBox)).call(this, patch(options, {
+      id: "Primrose.Text.Controls.TextBox[" + COUNTER++ + "]"
+    })));
+
+    _this.listeners.change = [];
     ////////////////////////////////////////////////////////////////////////
     // normalize input parameters
     ////////////////////////////////////////////////////////////////////////
 
     if (typeof options === "string") {
-      this.options = {
-        value: this.options
+      _this.options = {
+        value: _this.options
       };
-    }
-    else {
-      this.options = options || {};
+    } else {
+      _this.options = options || {};
     }
 
-    this.useCaching = !isFirefox || !isMobile;
+    _this.useCaching = !isFirefox || !isMobile;
 
-    var makeCursorCommand = function (name) {
+    var makeCursorCommand = function makeCursorCommand(name) {
       var method = name.toLowerCase();
       this["cursor" + name] = function (lines, cursor) {
         cursor[method](lines);
@@ -12667,1006 +13448,995 @@ class TextBox extends Primrose.Surface {
       };
     };
 
-    ["Left", "Right",
-      "SkipLeft", "SkipRight",
-      "Up", "Down",
-      "Home", "End",
-      "FullHome", "FullEnd"
-    ].map(makeCursorCommand.bind(this));
+    ["Left", "Right", "SkipLeft", "SkipRight", "Up", "Down", "Home", "End", "FullHome", "FullEnd"].map(makeCursorCommand.bind(_this));
 
     ////////////////////////////////////////////////////////////////////////
     // initialization
     ///////////////////////////////////////////////////////////////////////
-    this.tokens = null;
-    this.lines = null;
-    this._commandPack = null;
-    this._tokenRows = null;
-    this._tokenHashes = null;
-    this._tabString = null;
-    this._currentTouchID = null;
-    this._lineCountWidth = null;
+    _this.tokens = null;
+    _this.lines = null;
+    _this._commandPack = null;
+    _this._tokenRows = null;
+    _this._tokenHashes = null;
+    _this._tabString = null;
+    _this._currentTouchID = null;
+    _this._lineCountWidth = null;
 
-    this._lastFont = null;
-    this._lastText = null;
-    this._lastCharacterWidth = null;
-    this._lastCharacterHeight = null;
-    this._lastGridBounds = null;
-    this._lastPadding = null;
-    this._lastFrontCursor = null;
-    this._lastBackCursor = null;
-    this._lastWidth = -1;
-    this._lastHeight = -1;
-    this._lastScrollX = -1;
-    this._lastScrollY = -1;
-    this._lastFocused = false;
-    this._lastThemeName = null;
-    this._lastPointer = new Primrose.Text.Point();
+    _this._lastFont = null;
+    _this._lastText = null;
+    _this._lastCharacterWidth = null;
+    _this._lastCharacterHeight = null;
+    _this._lastGridBounds = null;
+    _this._lastPadding = null;
+    _this._lastFrontCursor = null;
+    _this._lastBackCursor = null;
+    _this._lastWidth = -1;
+    _this._lastHeight = -1;
+    _this._lastScrollX = -1;
+    _this._lastScrollY = -1;
+    _this._lastFocused = false;
+    _this._lastThemeName = null;
+    _this._lastPointer = new Primrose.Text.Point();
 
     // different browsers have different sets of keycodes for less-frequently
     // used keys like curly brackets.
-    this._browser = isChrome ? "CHROMIUM" : (isFirefox ? "FIREFOX" : (isIE ? "IE" : (isOpera ? "OPERA" : (isSafari ? "SAFARI" : "UNKNOWN"))));
-    this._pointer = new Primrose.Text.Point();
-    this._deadKeyState = "";
-    this._history = [];
-    this._historyFrame = -1;
-    this._topLeftGutter = new Primrose.Text.Size();
-    this._bottomRightGutter = new Primrose.Text.Size();
-    this._dragging = false;
-    this._scrolling = false;
-    this._wheelScrollSpeed = 4;
-    var subBounds = new Primrose.Text.Rectangle(0, 0, this.bounds.width, this.bounds.height);
-    this._fg = new Primrose.Surface({
-      id: this.id + "-fore",
+    _this._browser = isChrome ? "CHROMIUM" : isFirefox ? "FIREFOX" : isIE ? "IE" : isOpera ? "OPERA" : isSafari ? "SAFARI" : "UNKNOWN";
+    _this._pointer = new Primrose.Text.Point();
+    _this._deadKeyState = "";
+    _this._history = [];
+    _this._historyFrame = -1;
+    _this._topLeftGutter = new Primrose.Text.Size();
+    _this._bottomRightGutter = new Primrose.Text.Size();
+    _this._dragging = false;
+    _this._scrolling = false;
+    _this._wheelScrollSpeed = 4;
+    var subBounds = new Primrose.Text.Rectangle(0, 0, _this.bounds.width, _this.bounds.height);
+    _this._fg = new Primrose.Surface({
+      id: _this.id + "-fore",
       bounds: subBounds
     });
-    this._fgCanvas = this._fg.canvas;
-    this._fgfx = this._fg.context;
-    this._bg = new Primrose.Surface({
-      id: this.id + "-back",
+    _this._fgCanvas = _this._fg.canvas;
+    _this._fgfx = _this._fg.context;
+    _this._bg = new Primrose.Surface({
+      id: _this.id + "-back",
       bounds: subBounds
     });
-    this._bgCanvas = this._bg.canvas;
-    this._bgfx = this._bg.context;
-    this._trim = new Primrose.Surface({
-      id: this.id + "-trim",
+    _this._bgCanvas = _this._bg.canvas;
+    _this._bgfx = _this._bg.context;
+    _this._trim = new Primrose.Surface({
+      id: _this.id + "-trim",
       bounds: subBounds
     });
-    this._trimCanvas = this._trim.canvas;
-    this._tgfx = this._trim.context;
-    this._rowCache = {};
-    this._VSCROLL_WIDTH = 2;
+    _this._trimCanvas = _this._trim.canvas;
+    _this._tgfx = _this._trim.context;
+    _this._rowCache = {};
+    _this._VSCROLL_WIDTH = 2;
 
-    this.tabWidth = this.options.tabWidth;
-    this.showLineNumbers = !this.options.hideLineNumbers;
-    this.showScrollBars = !this.options.hideScrollBars;
-    this.wordWrap = !this.options.disableWordWrap;
-    this.readOnly = !!this.options.readOnly;
-    this.multiline = !this.options.singleLine;
-    this.gridBounds = new Primrose.Text.Rectangle();
-    this.frontCursor = new Primrose.Text.Cursor();
-    this.backCursor = new Primrose.Text.Cursor();
-    this.scroll = new Primrose.Text.Point();
-    this.character = new Primrose.Text.Size();
-    this.theme = this.options.theme;
-    this.fontSize = this.options.fontSize;
-    this.tokenizer = this.options.tokenizer;
-    this.commandPack = this.options.commands || Primrose.Text.CommandPacks.TextEditor;
-    this.value = this.options.value;
-    this.padding = this.options.padding || 1;
+    _this.tabWidth = _this.options.tabWidth;
+    _this.showLineNumbers = !_this.options.hideLineNumbers;
+    _this.showScrollBars = !_this.options.hideScrollBars;
+    _this.wordWrap = !_this.options.disableWordWrap;
+    _this.readOnly = !!_this.options.readOnly;
+    _this.multiline = !_this.options.singleLine;
+    _this.gridBounds = new Primrose.Text.Rectangle();
+    _this.frontCursor = new Primrose.Text.Cursor();
+    _this.backCursor = new Primrose.Text.Cursor();
+    _this.scroll = new Primrose.Text.Point();
+    _this.character = new Primrose.Text.Size();
+    _this.theme = _this.options.theme;
+    _this.fontSize = _this.options.fontSize;
+    _this.tokenizer = _this.options.tokenizer;
+    _this.commandPack = _this.options.commands || Primrose.Text.CommandPacks.TextEditor;
+    _this.value = _this.options.value;
+    _this.padding = _this.options.padding || 1;
 
-    this.addEventListener("focus", this.render.bind(this), false);
-    this.addEventListener("blur", this.render.bind(this), false);
+    _this.addEventListener("focus", _this.render.bind(_this), false);
+    _this.addEventListener("blur", _this.render.bind(_this), false);
+    return _this;
   }
 
-  cursorPageUp(lines, cursor) {
-    cursor.incY(-this.gridBounds.height, lines);
-    this.scrollIntoView(cursor);
-  }
-
-  cursorPageDown(lines, cursor) {
-    cursor.incY(this.gridBounds.height, lines);
-    this.scrollIntoView(cursor);
-  }
-
-  setDeadKeyState(st) {
-    this._deadKeyState = st || "";
-  }
-
-  get value() {
-    return this._history[this._historyFrame].join("\n");
-  }
-
-  set value(txt) {
-    txt = txt || "";
-    txt = txt.replace(/\r\n/g, "\n");
-    if (!this.multiline) {
-      txt = txt.replace(/\n/g, "");
+  _createClass(TextBox, [{
+    key: "cursorPageUp",
+    value: function cursorPageUp(lines, cursor) {
+      cursor.incY(-this.gridBounds.height, lines);
+      this.scrollIntoView(cursor);
     }
-    var lines = txt.split("\n");
-    this.pushUndo(lines);
-    this.render();
-    emit.call(this, "change", {
-      target: this
-    });
-  }
-
-  get selectedText() {
-    var minCursor = Primrose.Text.Cursor.min(this.frontCursor, this.backCursor),
-      maxCursor = Primrose.Text.Cursor.max(this.frontCursor, this.backCursor);
-    return this.value.substring(minCursor.i, maxCursor.i);
-  }
-
-  set selectedText(str) {
-    str = str || "";
-    str = str.replace(/\r\n/g, "\n");
-
-    if (this.frontCursor.i !== this.backCursor.i || str.length > 0) {
-      var minCursor = Primrose.Text.Cursor.min(this.frontCursor, this.backCursor),
-        maxCursor = Primrose.Text.Cursor.max(this.frontCursor, this.backCursor),
-        // TODO: don't recalc the string first.
-        text = this.value,
-        left = text.substring(0, minCursor.i),
-        right = text.substring(maxCursor.i);
-
-      var v = left + str + right;
-      this.value = v;
-      this.refreshGridBounds();
-      this.performLayout();
-      minCursor.advanceN(this.lines, Math.max(0, str.length));
-      this.scrollIntoView(maxCursor);
-      this.clampScroll();
-      maxCursor.copy(minCursor);
-      this.render();
+  }, {
+    key: "cursorPageDown",
+    value: function cursorPageDown(lines, cursor) {
+      cursor.incY(this.gridBounds.height, lines);
+      this.scrollIntoView(cursor);
     }
-  }
-
-  get padding() {
-    return this._padding;
-  }
-
-  set padding(v) {
-    this._padding = v;
-    this.render();
-  }
-
-  get wordWrap() {
-    return this._wordWrap;
-  }
-
-  set wordWrap(v) {
-    this._wordWrap = v || false;
-    this.setGutter();
-  }
-
-  get showLineNumbers() {
-    return this._showLineNumbers;
-  }
-
-  set showLineNumbers(v) {
-    this._showLineNumbers = v;
-    this.setGutter();
-  }
-
-  get showScrollBars() {
-    return this._showScrollBars;
-  }
-
-  set showScrollBars(v) {
-    this._showScrollBars = v;
-    this.setGutter();
-  }
-
-  get theme() {
-    return this._theme;
-  }
-
-  set theme(t) {
-    this._theme = clone(t || Primrose.Text.Themes.Default);
-    this._theme.fontSize = this.fontSize;
-    this._rowCache = {};
-    this.render();
-  }
-
-  get commandPack() {
-    return this._commandPack;
-  }
-
-  set commandPack(v) {
-    this._commandPack = v;
-  }
-
-  get selectionStart() {
-    return this.frontCursor.i;
-  }
-
-  set selectionStart(i) {
-    this.frontCursor.setI(i, this.lines);
-  }
-
-  get selectionEnd() {
-    return this.backCursor.i;
-  }
-
-  set selectionEnd(i) {
-    this.backCursor.setI(i, this.lines);
-  }
-
-  get selectionDirection() {
-    return this.frontCursor.i <= this.backCursor.i ? "forward" : "backward";
-  }
-
-  get tokenizer() {
-    return this._tokenizer;
-  }
-
-  set tokenizer(tk) {
-    this._tokenizer = tk || Primrose.Text.Grammars.JavaScript;
-    if (this._history && this._history.length > 0) {
+  }, {
+    key: "setDeadKeyState",
+    value: function setDeadKeyState(st) {
+      this._deadKeyState = st || "";
+    }
+  }, {
+    key: "pushUndo",
+    value: function pushUndo(lines) {
+      if (this._historyFrame < this._history.length - 1) {
+        this._history.splice(this._historyFrame + 1);
+      }
+      this._history.push(lines);
+      this._historyFrame = this._history.length - 1;
       this.refreshTokens();
       this.render();
     }
-  }
-
-  get tabWidth() {
-    return this._tabWidth;
-  }
-
-  set tabWidth(tw) {
-    this._tabWidth = tw || 2;
-    this._tabString = "";
-    for (var i = 0; i < this._tabWidth; ++i) {
-      this._tabString += " ";
-    }
-  }
-
-  get tabString() {
-    return this._tabString;
-  }
-
-  get fontSize() {
-    return this._fontSize || 16;
-  }
-
-  set fontSize(v) {
-    v = v || 16;
-    this._fontSize = v;
-    if (this.theme) {
-      this.theme.fontSize = this._fontSize;
-      this.resize();
+  }, {
+    key: "redo",
+    value: function redo() {
+      if (this._historyFrame < this._history.length - 1) {
+        ++this._historyFrame;
+      }
+      this.refreshTokens();
+      this.fixCursor();
       this.render();
     }
-  }
-
-  get lockMovement() {
-    return this.focused && !this.readOnly;
-  }
-
-  pushUndo(lines) {
-    if (this._historyFrame < this._history.length - 1) {
-      this._history.splice(this._historyFrame + 1);
-    }
-    this._history.push(lines);
-    this._historyFrame = this._history.length - 1;
-    this.refreshTokens();
-    this.render();
-  }
-
-  redo() {
-    if (this._historyFrame < this._history.length - 1) {
-      ++this._historyFrame;
-    }
-    this.refreshTokens();
-    this.fixCursor();
-    this.render();
-  }
-
-  undo() {
-    if (this._historyFrame > 0) {
-      --this._historyFrame;
-    }
-    this.refreshTokens();
-    this.fixCursor();
-    this.render();
-  }
-
-  scrollIntoView(currentCursor) {
-    this.scroll.y += this.minDelta(currentCursor.y, this.scroll.y, this.scroll.y + this.gridBounds.height);
-    if (!this.wordWrap) {
-      this.scroll.x += this.minDelta(currentCursor.x, this.scroll.x, this.scroll.x + this.gridBounds.width);
-    }
-    this.clampScroll();
-  }
-
-  readWheel(evt) {
-    if (this.focused) {
-      if (evt.shiftKey || isChrome) {
-        this.fontSize += -evt.deltaX / SCROLL_SCALE;
+  }, {
+    key: "undo",
+    value: function undo() {
+      if (this._historyFrame > 0) {
+        --this._historyFrame;
       }
-      if (!evt.shiftKey || isChrome) {
-        this.scroll.y += Math.floor(evt.deltaY * this._wheelScrollSpeed / SCROLL_SCALE);
+      this.refreshTokens();
+      this.fixCursor();
+      this.render();
+    }
+  }, {
+    key: "scrollIntoView",
+    value: function scrollIntoView(currentCursor) {
+      this.scroll.y += this.minDelta(currentCursor.y, this.scroll.y, this.scroll.y + this.gridBounds.height);
+      if (!this.wordWrap) {
+        this.scroll.x += this.minDelta(currentCursor.x, this.scroll.x, this.scroll.x + this.gridBounds.width);
       }
       this.clampScroll();
-      this.render();
-      evt.preventDefault();
     }
-  }
-
-  startPointer(x, y) {
-    if (!super.startPointer(x, y)) {
-      this._dragging = true;
-      this.setCursorXY(this.frontCursor, x, y);
-    }
-  }
-
-  movePointer(x, y) {
-    if (this._dragging) {
-      this.setCursorXY(this.backCursor, x, y);
-    }
-  }
-
-  endPointer() {
-    super.endPointer();
-    this._dragging = false;
-    this._scrolling = false;
-  }
-
-  copySelectedText(evt) {
-    if (this.focused && this.frontCursor.i !== this.backCursor.i) {
-      var clipboard = evt.clipboardData || window.clipboardData;
-      clipboard.setData(
-        window.clipboardData ? "Text" : "text/plain", this.selectedText);
-      evt.returnValue = false;
-    }
-  }
-
-  cutSelectedText(evt) {
-    if (this.focused) {
-      this.copySelectedText(evt);
-      if (!this.readOnly) {
-        this.selectedText = "";
-      }
-    }
-  }
-
-  keyDown(evt){
-    this.environment.input.Keyboard.doTyping(this, evt);
-  }
-
-  execCommand(browser, codePage, commandName) {
-    if (commandName && this.focused && !this.readOnly) {
-      var altCommandName = browser + "_" + commandName,
-        func = this.commandPack[altCommandName] ||
-        this.commandPack[commandName] ||
-        codePage[altCommandName] ||
-        codePage[commandName];
-
-      if (func instanceof String || typeof func === "string") {
-        console.log("okay");
-        func = this.commandPack[func] ||
-          this.commandPack[func] ||
-          func;
-      }
-
-      if (func === undefined) {
-        return false;
-      }
-      else {
-        this.frontCursor.moved = false;
-        this.backCursor.moved = false;
-        if (func instanceof Function) {
-          func(this, this.lines);
+  }, {
+    key: "readWheel",
+    value: function readWheel(evt) {
+      if (this.focused) {
+        if (evt.shiftKey || isChrome) {
+          this.fontSize += -evt.deltaX / SCROLL_SCALE;
         }
-        else if (func instanceof String || typeof func === "string") {
-          console.log(func);
-          this.selectedText = func;
-        }
-        if (this.frontCursor.moved && !this.backCursor.moved) {
-          this.backCursor.copy(this.frontCursor);
+        if (!evt.shiftKey || isChrome) {
+          this.scroll.y += Math.floor(evt.deltaY * this._wheelScrollSpeed / SCROLL_SCALE);
         }
         this.clampScroll();
         this.render();
-        return true;
+        evt.preventDefault();
       }
     }
-  }
-
-  readClipboard(evt) {
-    if (this.focused && !this.readOnly) {
-      evt.returnValue = false;
-      var clipboard = evt.clipboardData || window.clipboardData,
-        str = clipboard.getData(window.clipboardData ? "Text" : "text/plain");
-      if (str) {
-        this.selectedText = str;
+  }, {
+    key: "startPointer",
+    value: function startPointer(x, y) {
+      if (!_get(TextBox.prototype.__proto__ || Object.getPrototypeOf(TextBox.prototype), "startPointer", this).call(this, x, y)) {
+        this._dragging = true;
+        this.setCursorXY(this.frontCursor, x, y);
       }
     }
-  }
-
-  resize() {
-    super.resize();
-    this._bg.setSize(this.surfaceWidth, this.surfaceHeight);
-    this._fg.setSize(this.surfaceWidth, this.surfaceHeight);
-    this._trim.setSize(this.surfaceWidth, this.surfaceHeight);
-    if (this.theme) {
-      this.character.height = this.fontSize;
-      this.context.font = this.character.height + "px " + this.theme.fontFamily;
-      // measure 100 letter M's, then divide by 100, to get the width of an M
-      // to two decimal places on systems that return integer values from
-      // measureText.
-      this.character.width = this.context.measureText(
-          "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM")
-        .width /
-        100;
-    }
-    this.render();
-  }
-
-  pixel2cell(point) {
-    const x = point.x * this.imageWidth / this.surfaceWidth,
-      y = point.y * this.imageHeight / this.surfaceHeight;
-    point.set(
-      Math.round(point.x / this.character.width) + this.scroll.x - this.gridBounds.x,
-      Math.floor((point.y / this.character.height) - 0.25) + this.scroll.y);
-  }
-
-  clampScroll() {
-    if (this.scroll.y < 0) {
-      this.scroll.y = 0;
-    }
-    else {
-      while (0 < this.scroll.y &&
-        this.scroll.y > this.lines.length - this.gridBounds.height) {
-        --this.scroll.y;
+  }, {
+    key: "movePointer",
+    value: function movePointer(x, y) {
+      if (this._dragging) {
+        this.setCursorXY(this.backCursor, x, y);
       }
     }
-  }
+  }, {
+    key: "endPointer",
+    value: function endPointer() {
+      _get(TextBox.prototype.__proto__ || Object.getPrototypeOf(TextBox.prototype), "endPointer", this).call(this);
+      this._dragging = false;
+      this._scrolling = false;
+    }
+  }, {
+    key: "copySelectedText",
+    value: function copySelectedText(evt) {
+      if (this.focused && this.frontCursor.i !== this.backCursor.i) {
+        var clipboard = evt.clipboardData || window.clipboardData;
+        clipboard.setData(window.clipboardData ? "Text" : "text/plain", this.selectedText);
+        evt.returnValue = false;
+      }
+    }
+  }, {
+    key: "cutSelectedText",
+    value: function cutSelectedText(evt) {
+      if (this.focused) {
+        this.copySelectedText(evt);
+        if (!this.readOnly) {
+          this.selectedText = "";
+        }
+      }
+    }
+  }, {
+    key: "keyDown",
+    value: function keyDown(evt) {
+      this.environment.input.Keyboard.doTyping(this, evt);
+    }
+  }, {
+    key: "execCommand",
+    value: function execCommand(browser, codePage, commandName) {
+      if (commandName && this.focused && !this.readOnly) {
+        var altCommandName = browser + "_" + commandName,
+            func = this.commandPack[altCommandName] || this.commandPack[commandName] || codePage[altCommandName] || codePage[commandName];
 
-  refreshTokens() {
-    this.tokens = this.tokenizer.tokenize(this.value);
-  }
+        if (func instanceof String || typeof func === "string") {
+          console.log("okay");
+          func = this.commandPack[func] || this.commandPack[func] || func;
+        }
 
-  fixCursor() {
-    var moved = this.frontCursor.fixCursor(this.lines) ||
-      this.backCursor.fixCursor(this.lines);
-    if (moved) {
+        if (func === undefined) {
+          return false;
+        } else {
+          this.frontCursor.moved = false;
+          this.backCursor.moved = false;
+          if (func instanceof Function) {
+            func(this, this.lines);
+          } else if (func instanceof String || typeof func === "string") {
+            console.log(func);
+            this.selectedText = func;
+          }
+          if (this.frontCursor.moved && !this.backCursor.moved) {
+            this.backCursor.copy(this.frontCursor);
+          }
+          this.clampScroll();
+          this.render();
+          return true;
+        }
+      }
+    }
+  }, {
+    key: "readClipboard",
+    value: function readClipboard(evt) {
+      if (this.focused && !this.readOnly) {
+        evt.returnValue = false;
+        var clipboard = evt.clipboardData || window.clipboardData,
+            str = clipboard.getData(window.clipboardData ? "Text" : "text/plain");
+        if (str) {
+          this.selectedText = str;
+        }
+      }
+    }
+  }, {
+    key: "resize",
+    value: function resize() {
+      _get(TextBox.prototype.__proto__ || Object.getPrototypeOf(TextBox.prototype), "resize", this).call(this);
+      this._bg.setSize(this.surfaceWidth, this.surfaceHeight);
+      this._fg.setSize(this.surfaceWidth, this.surfaceHeight);
+      this._trim.setSize(this.surfaceWidth, this.surfaceHeight);
+      if (this.theme) {
+        this.character.height = this.fontSize;
+        this.context.font = this.character.height + "px " + this.theme.fontFamily;
+        // measure 100 letter M's, then divide by 100, to get the width of an M
+        // to two decimal places on systems that return integer values from
+        // measureText.
+        this.character.width = this.context.measureText("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM").width / 100;
+      }
       this.render();
     }
-  }
-
-  setCursorXY(cursor, x, y) {
-    x = Math.round(x);
-    y = Math.round(y);
-    this._pointer.set(x, y);
-    this.pixel2cell(this._pointer, this.scroll, this.gridBounds);
-    var gx = this._pointer.x - this.scroll.x,
-      gy = this._pointer.y - this.scroll.y,
-      onBottom = gy >= this.gridBounds.height,
-      onLeft = gx < 0,
-      onRight = this._pointer.x >= this.gridBounds.width;
-    if (!this._scrolling && !onBottom && !onLeft && !onRight) {
-      cursor.setXY(this._pointer.x, this._pointer.y, this.lines);
-      this.backCursor.copy(cursor);
+  }, {
+    key: "pixel2cell",
+    value: function pixel2cell(point) {
+      var x = point.x * this.imageWidth / this.surfaceWidth,
+          y = point.y * this.imageHeight / this.surfaceHeight;
+      point.set(Math.round(point.x / this.character.width) + this.scroll.x - this.gridBounds.x, Math.floor(point.y / this.character.height - 0.25) + this.scroll.y);
     }
-    else if (this._scrolling || onRight && !onBottom) {
-      this._scrolling = true;
-      var scrollHeight = this.lines.length - this.gridBounds.height;
-      if (gy >= 0 && scrollHeight >= 0) {
-        var sy = gy * scrollHeight / this.gridBounds.height;
-        this.scroll.y = Math.floor(sy);
+  }, {
+    key: "clampScroll",
+    value: function clampScroll() {
+      if (this.scroll.y < 0) {
+        this.scroll.y = 0;
+      } else {
+        while (0 < this.scroll.y && this.scroll.y > this.lines.length - this.gridBounds.height) {
+          --this.scroll.y;
+        }
       }
     }
-    else if (onBottom && !onLeft) {
-      var maxWidth = 0;
-      for (var dy = 0; dy < this.lines.length; ++dy) {
-        maxWidth = Math.max(maxWidth, this.lines[dy].length);
-      }
-      var scrollWidth = maxWidth - this.gridBounds.width;
-      if (gx >= 0 && scrollWidth >= 0) {
-        var sx = gx * scrollWidth / this.gridBounds.width;
-        this.scroll.x = Math.floor(sx);
-      }
+  }, {
+    key: "refreshTokens",
+    value: function refreshTokens() {
+      this.tokens = this.tokenizer.tokenize(this.value);
     }
-    else if (onLeft && !onBottom) {
-      // clicked in number-line gutter
-    }
-    else {
-      // clicked in the lower-left corner
-    }
-    this._lastPointer.copy(this._pointer);
-    this.render();
-  }
-
-  setGutter() {
-    if (this.showLineNumbers) {
-      this._topLeftGutter.width = 1;
-    }
-    else {
-      this._topLeftGutter.width = 0;
-    }
-
-    if (!this.showScrollBars) {
-      this._bottomRightGutter.set(0, 0);
-    }
-    else if (this.wordWrap) {
-      this._bottomRightGutter.set(this._VSCROLL_WIDTH, 0);
-    }
-    else {
-      this._bottomRightGutter.set(this._VSCROLL_WIDTH, 1);
-    }
-  }
-
-  refreshGridBounds() {
-    this._lineCountWidth = 0;
-    if (this.showLineNumbers) {
-      this._lineCountWidth = Math.max(1, Math.ceil(Math.log(this._history[this._historyFrame].length) / Math.LN10));
-    }
-
-    var x = Math.floor(this._topLeftGutter.width + this._lineCountWidth + this.padding / this.character.width),
-      y = Math.floor(this.padding / this.character.height),
-      w = Math.floor((this.imageWidth - 2 * this.padding) / this.character.width) - x - this._bottomRightGutter.width,
-      h = Math.floor((this.imageHeight - 2 * this.padding) / this.character.height) - y - this._bottomRightGutter.height;
-    this.gridBounds.set(x, y, w, h);
-  }
-
-  performLayout() {
-
-    // group the tokens into rows
-    this._tokenRows = [
-      []
-    ];
-    this._tokenHashes = [""];
-    this.lines = [""];
-    var currentRowWidth = 0;
-    var tokenQueue = this.tokens.slice();
-    for (var i = 0; i < tokenQueue.length; ++i) {
-      var t = tokenQueue[i].clone();
-      var widthLeft = this.gridBounds.width - currentRowWidth;
-      var wrap = this.wordWrap && t.type !== "newlines" && t.value.length > widthLeft;
-      var breakLine = t.type === "newlines" || wrap;
-      if (wrap) {
-        var split = t.value.length > this.gridBounds.width ? widthLeft : 0;
-        tokenQueue.splice(i + 1, 0, t.splitAt(split));
-      }
-
-      if (t.value.length > 0) {
-        this._tokenRows[this._tokenRows.length - 1].push(t);
-        this._tokenHashes[this._tokenHashes.length - 1] += JSON.stringify(t);
-        this.lines[this.lines.length - 1] += t.value;
-        currentRowWidth += t.value.length;
-      }
-
-      if (breakLine) {
-        this._tokenRows.push([]);
-        this._tokenHashes.push("");
-        this.lines.push("");
-        currentRowWidth = 0;
+  }, {
+    key: "fixCursor",
+    value: function fixCursor() {
+      var moved = this.frontCursor.fixCursor(this.lines) || this.backCursor.fixCursor(this.lines);
+      if (moved) {
+        this.render();
       }
     }
-  }
-
-  minDelta(v, minV, maxV) {
-    var dvMinV = v - minV,
-      dvMaxV = v - maxV + 5,
-      dv = 0;
-    if (dvMinV < 0 || dvMaxV >= 0) {
-      // compare the absolute values, so we get the smallest change
-      // regardless of direction.
-      dv = Math.abs(dvMinV) < Math.abs(dvMaxV) ? dvMinV : dvMaxV;
+  }, {
+    key: "setCursorXY",
+    value: function setCursorXY(cursor, x, y) {
+      x = Math.round(x);
+      y = Math.round(y);
+      this._pointer.set(x, y);
+      this.pixel2cell(this._pointer, this.scroll, this.gridBounds);
+      var gx = this._pointer.x - this.scroll.x,
+          gy = this._pointer.y - this.scroll.y,
+          onBottom = gy >= this.gridBounds.height,
+          onLeft = gx < 0,
+          onRight = this._pointer.x >= this.gridBounds.width;
+      if (!this._scrolling && !onBottom && !onLeft && !onRight) {
+        cursor.setXY(this._pointer.x, this._pointer.y, this.lines);
+        this.backCursor.copy(cursor);
+      } else if (this._scrolling || onRight && !onBottom) {
+        this._scrolling = true;
+        var scrollHeight = this.lines.length - this.gridBounds.height;
+        if (gy >= 0 && scrollHeight >= 0) {
+          var sy = gy * scrollHeight / this.gridBounds.height;
+          this.scroll.y = Math.floor(sy);
+        }
+      } else if (onBottom && !onLeft) {
+        var maxWidth = 0;
+        for (var dy = 0; dy < this.lines.length; ++dy) {
+          maxWidth = Math.max(maxWidth, this.lines[dy].length);
+        }
+        var scrollWidth = maxWidth - this.gridBounds.width;
+        if (gx >= 0 && scrollWidth >= 0) {
+          var sx = gx * scrollWidth / this.gridBounds.width;
+          this.scroll.x = Math.floor(sx);
+        }
+      } else if (onLeft && !onBottom) {
+        // clicked in number-line gutter
+      } else {
+          // clicked in the lower-left corner
+        }
+      this._lastPointer.copy(this._pointer);
+      this.render();
     }
+  }, {
+    key: "setGutter",
+    value: function setGutter() {
+      if (this.showLineNumbers) {
+        this._topLeftGutter.width = 1;
+      } else {
+        this._topLeftGutter.width = 0;
+      }
 
-    return dv;
-  }
-
-  fillRect(gfx, fill, x, y, w, h) {
-    gfx.fillStyle = fill;
-    gfx.fillRect(
-      x * this.character.width,
-      y * this.character.height,
-      w * this.character.width + 1,
-      h * this.character.height + 1);
-  }
-
-  strokeRect(gfx, stroke, x, y, w, h) {
-    gfx.strokeStyle = stroke;
-    gfx.strokeRect(
-      x * this.character.width,
-      y * this.character.height,
-      w * this.character.width + 1,
-      h * this.character.height + 1);
-  }
-
-  renderCanvasBackground() {
-    var minCursor = Primrose.Text.Cursor.min(this.frontCursor, this.backCursor),
-      maxCursor = Primrose.Text.Cursor.max(this.frontCursor, this.backCursor),
-      tokenFront = new Primrose.Text.Cursor(),
-      tokenBack = new Primrose.Text.Cursor(),
-      clearFunc = this.theme.regular.backColor ? "fillRect" : "clearRect",
-      OFFSETY = OFFSET / this.character.height;
-
-    if (this.theme.regular.backColor) {
-      this._bgfx.fillStyle = this.theme.regular.backColor;
+      if (!this.showScrollBars) {
+        this._bottomRightGutter.set(0, 0);
+      } else if (this.wordWrap) {
+        this._bottomRightGutter.set(this._VSCROLL_WIDTH, 0);
+      } else {
+        this._bottomRightGutter.set(this._VSCROLL_WIDTH, 1);
+      }
     }
+  }, {
+    key: "refreshGridBounds",
+    value: function refreshGridBounds() {
+      this._lineCountWidth = 0;
+      if (this.showLineNumbers) {
+        this._lineCountWidth = Math.max(1, Math.ceil(Math.log(this._history[this._historyFrame].length) / Math.LN10));
+      }
 
-    this._bgfx[clearFunc](0, 0, this.imageWidth, this.imageHeight);
-    this._bgfx.save();
-    this._bgfx.translate(
-      (this.gridBounds.x - this.scroll.x) * this.character.width + this.padding, -this.scroll.y * this.character.height + this.padding);
-
-
-    // draw the current row highlighter
-    if (this.focused) {
-      this.fillRect(this._bgfx, this.theme.regular.currentRowBackColor ||
-        Primrose.Text.Themes.Default.regular.currentRowBackColor,
-        0, minCursor.y + OFFSETY,
-        this.gridBounds.width,
-        maxCursor.y - minCursor.y + 1);
+      var x = Math.floor(this._topLeftGutter.width + this._lineCountWidth + this.padding / this.character.width),
+          y = Math.floor(this.padding / this.character.height),
+          w = Math.floor((this.imageWidth - 2 * this.padding) / this.character.width) - x - this._bottomRightGutter.width,
+          h = Math.floor((this.imageHeight - 2 * this.padding) / this.character.height) - y - this._bottomRightGutter.height;
+      this.gridBounds.set(x, y, w, h);
     }
+  }, {
+    key: "performLayout",
+    value: function performLayout() {
 
-    for (var y = 0; y < this._tokenRows.length; ++y) {
-      // draw the tokens on this row
-      var row = this._tokenRows[y];
-
-      for (var i = 0; i < row.length; ++i) {
-        var t = row[i];
-        tokenBack.x += t.value.length;
-        tokenBack.i += t.value.length;
-
-        // skip drawing tokens that aren't in view
-        if (this.scroll.y <= y && y < this.scroll.y + this.gridBounds.height &&
-          this.scroll.x <= tokenBack.x && tokenFront.x < this.scroll.x +
-          this.gridBounds.width) {
-          // draw the selection box
-          var inSelection = minCursor.i <= tokenBack.i && tokenFront.i <
-            maxCursor.i;
-          if (inSelection) {
-            var selectionFront = Primrose.Text.Cursor.max(minCursor,
-              tokenFront);
-            var selectionBack = Primrose.Text.Cursor.min(maxCursor, tokenBack);
-            var cw = selectionBack.i - selectionFront.i;
-            this.fillRect(this._bgfx, this.theme.regular.selectedBackColor ||
-              Primrose.Text.Themes.Default.regular.selectedBackColor,
-              selectionFront.x, selectionFront.y + OFFSETY,
-              cw, 1);
-          }
+      // group the tokens into rows
+      this._tokenRows = [[]];
+      this._tokenHashes = [""];
+      this.lines = [""];
+      var currentRowWidth = 0;
+      var tokenQueue = this.tokens.slice();
+      for (var i = 0; i < tokenQueue.length; ++i) {
+        var t = tokenQueue[i].clone();
+        var widthLeft = this.gridBounds.width - currentRowWidth;
+        var wrap = this.wordWrap && t.type !== "newlines" && t.value.length > widthLeft;
+        var breakLine = t.type === "newlines" || wrap;
+        if (wrap) {
+          var split = t.value.length > this.gridBounds.width ? widthLeft : 0;
+          tokenQueue.splice(i + 1, 0, t.splitAt(split));
         }
 
-        tokenFront.copy(tokenBack);
+        if (t.value.length > 0) {
+          this._tokenRows[this._tokenRows.length - 1].push(t);
+          this._tokenHashes[this._tokenHashes.length - 1] += JSON.stringify(t);
+          this.lines[this.lines.length - 1] += t.value;
+          currentRowWidth += t.value.length;
+        }
+
+        if (breakLine) {
+          this._tokenRows.push([]);
+          this._tokenHashes.push("");
+          this.lines.push("");
+          currentRowWidth = 0;
+        }
+      }
+    }
+  }, {
+    key: "minDelta",
+    value: function minDelta(v, minV, maxV) {
+      var dvMinV = v - minV,
+          dvMaxV = v - maxV + 5,
+          dv = 0;
+      if (dvMinV < 0 || dvMaxV >= 0) {
+        // compare the absolute values, so we get the smallest change
+        // regardless of direction.
+        dv = Math.abs(dvMinV) < Math.abs(dvMaxV) ? dvMinV : dvMaxV;
       }
 
-      tokenFront.x = 0;
-      ++tokenFront.y;
-      tokenBack.copy(tokenFront);
+      return dv;
     }
-
-    // draw the cursor caret
-    if (this.focused) {
-      var cc = this.theme.cursorColor || "black";
-      var w = 1 / this.character.width;
-      this.fillRect(this._bgfx, cc, minCursor.x, minCursor.y + OFFSETY, w, 1);
-      this.fillRect(this._bgfx, cc, maxCursor.x, maxCursor.y + OFFSETY, w, 1);
+  }, {
+    key: "fillRect",
+    value: function fillRect(gfx, fill, x, y, w, h) {
+      gfx.fillStyle = fill;
+      gfx.fillRect(x * this.character.width, y * this.character.height, w * this.character.width + 1, h * this.character.height + 1);
     }
-    this._bgfx.restore();
-  }
+  }, {
+    key: "strokeRect",
+    value: function strokeRect(gfx, stroke, x, y, w, h) {
+      gfx.strokeStyle = stroke;
+      gfx.strokeRect(x * this.character.width, y * this.character.height, w * this.character.width + 1, h * this.character.height + 1);
+    }
+  }, {
+    key: "renderCanvasBackground",
+    value: function renderCanvasBackground() {
+      var minCursor = Primrose.Text.Cursor.min(this.frontCursor, this.backCursor),
+          maxCursor = Primrose.Text.Cursor.max(this.frontCursor, this.backCursor),
+          tokenFront = new Primrose.Text.Cursor(),
+          tokenBack = new Primrose.Text.Cursor(),
+          clearFunc = this.theme.regular.backColor ? "fillRect" : "clearRect",
+          OFFSETY = OFFSET / this.character.height;
 
-  renderCanvasForeground() {
-    var tokenFront = new Primrose.Text.Cursor(),
-      tokenBack = new Primrose.Text.Cursor();
+      if (this.theme.regular.backColor) {
+        this._bgfx.fillStyle = this.theme.regular.backColor;
+      }
 
-    this._fgfx.clearRect(0, 0, this.imageWidth, this.imageHeight);
-    this._fgfx.save();
-    this._fgfx.translate((this.gridBounds.x - this.scroll.x) * this.character.width + this.padding, this.padding);
-    for (var y = 0; y < this._tokenRows.length; ++y) {
-      // draw the tokens on this row
-      var line = this.lines[y] + this.padding,
-        row = this._tokenRows[y],
-        drawn = false,
-        textY = (y - this.scroll.y) * this.character.height;
+      this._bgfx[clearFunc](0, 0, this.imageWidth, this.imageHeight);
+      this._bgfx.save();
+      this._bgfx.translate((this.gridBounds.x - this.scroll.x) * this.character.width + this.padding, -this.scroll.y * this.character.height + this.padding);
 
-      for (var i = 0; i < row.length; ++i) {
-        var t = row[i];
-        tokenBack.x += t.value.length;
-        tokenBack.i += t.value.length;
+      // draw the current row highlighter
+      if (this.focused) {
+        this.fillRect(this._bgfx, this.theme.regular.currentRowBackColor || Primrose.Text.Themes.Default.regular.currentRowBackColor, 0, minCursor.y + OFFSETY, this.gridBounds.width, maxCursor.y - minCursor.y + 1);
+      }
 
-        // skip drawing tokens that aren't in view
-        if (this.scroll.y <= y && y < this.scroll.y + this.gridBounds.height &&
-          this.scroll.x <= tokenBack.x && tokenFront.x < this.scroll.x +
-          this.gridBounds.width) {
+      for (var y = 0; y < this._tokenRows.length; ++y) {
+        // draw the tokens on this row
+        var row = this._tokenRows[y];
 
-          // draw the text
-          if (this.useCaching && this._rowCache[line] !== undefined) {
-            if (i === 0) {
-              this._fgfx.putImageData(this._rowCache[line], this.padding, textY + this.padding + OFFSET);
+        for (var i = 0; i < row.length; ++i) {
+          var t = row[i];
+          tokenBack.x += t.value.length;
+          tokenBack.i += t.value.length;
+
+          // skip drawing tokens that aren't in view
+          if (this.scroll.y <= y && y < this.scroll.y + this.gridBounds.height && this.scroll.x <= tokenBack.x && tokenFront.x < this.scroll.x + this.gridBounds.width) {
+            // draw the selection box
+            var inSelection = minCursor.i <= tokenBack.i && tokenFront.i < maxCursor.i;
+            if (inSelection) {
+              var selectionFront = Primrose.Text.Cursor.max(minCursor, tokenFront);
+              var selectionBack = Primrose.Text.Cursor.min(maxCursor, tokenBack);
+              var cw = selectionBack.i - selectionFront.i;
+              this.fillRect(this._bgfx, this.theme.regular.selectedBackColor || Primrose.Text.Themes.Default.regular.selectedBackColor, selectionFront.x, selectionFront.y + OFFSETY, cw, 1);
             }
           }
-          else {
-            var style = this.theme[t.type] || {};
-            var font = (style.fontWeight || this.theme.regular.fontWeight || "") +
-              " " + (style.fontStyle || this.theme.regular.fontStyle || "") +
-              " " + this.character.height + "px " + this.theme.fontFamily;
-            this._fgfx.font = font.trim();
-            this._fgfx.fillStyle = style.foreColor || this.theme.regular.foreColor;
-            this.drawText(this._fgfx, t.value,
-              tokenFront.x * this.character.width,
-              textY);
-            drawn = true;
+
+          tokenFront.copy(tokenBack);
+        }
+
+        tokenFront.x = 0;
+        ++tokenFront.y;
+        tokenBack.copy(tokenFront);
+      }
+
+      // draw the cursor caret
+      if (this.focused) {
+        var cc = this.theme.cursorColor || "black";
+        var w = 1 / this.character.width;
+        this.fillRect(this._bgfx, cc, minCursor.x, minCursor.y + OFFSETY, w, 1);
+        this.fillRect(this._bgfx, cc, maxCursor.x, maxCursor.y + OFFSETY, w, 1);
+      }
+      this._bgfx.restore();
+    }
+  }, {
+    key: "renderCanvasForeground",
+    value: function renderCanvasForeground() {
+      var tokenFront = new Primrose.Text.Cursor(),
+          tokenBack = new Primrose.Text.Cursor();
+
+      this._fgfx.clearRect(0, 0, this.imageWidth, this.imageHeight);
+      this._fgfx.save();
+      this._fgfx.translate((this.gridBounds.x - this.scroll.x) * this.character.width + this.padding, this.padding);
+      for (var y = 0; y < this._tokenRows.length; ++y) {
+        // draw the tokens on this row
+        var line = this.lines[y] + this.padding,
+            row = this._tokenRows[y],
+            drawn = false,
+            textY = (y - this.scroll.y) * this.character.height;
+
+        for (var i = 0; i < row.length; ++i) {
+          var t = row[i];
+          tokenBack.x += t.value.length;
+          tokenBack.i += t.value.length;
+
+          // skip drawing tokens that aren't in view
+          if (this.scroll.y <= y && y < this.scroll.y + this.gridBounds.height && this.scroll.x <= tokenBack.x && tokenFront.x < this.scroll.x + this.gridBounds.width) {
+
+            // draw the text
+            if (this.useCaching && this._rowCache[line] !== undefined) {
+              if (i === 0) {
+                this._fgfx.putImageData(this._rowCache[line], this.padding, textY + this.padding + OFFSET);
+              }
+            } else {
+              var style = this.theme[t.type] || {};
+              var font = (style.fontWeight || this.theme.regular.fontWeight || "") + " " + (style.fontStyle || this.theme.regular.fontStyle || "") + " " + this.character.height + "px " + this.theme.fontFamily;
+              this._fgfx.font = font.trim();
+              this._fgfx.fillStyle = style.foreColor || this.theme.regular.foreColor;
+              this.drawText(this._fgfx, t.value, tokenFront.x * this.character.width, textY);
+              drawn = true;
+            }
           }
+
+          tokenFront.copy(tokenBack);
         }
 
-        tokenFront.copy(tokenBack);
+        tokenFront.x = 0;
+        ++tokenFront.y;
+        tokenBack.copy(tokenFront);
+        if (this.useCaching && drawn && this._rowCache[line] === undefined) {
+          this._rowCache[line] = this._fgfx.getImageData(this.padding, textY + this.padding + OFFSET, this.imageWidth - 2 * this.padding, this.character.height);
+        }
       }
 
-      tokenFront.x = 0;
-      ++tokenFront.y;
-      tokenBack.copy(tokenFront);
-      if (this.useCaching && drawn && this._rowCache[line] === undefined) {
-        this._rowCache[line] = this._fgfx.getImageData(
-          this.padding,
-          textY + this.padding + OFFSET,
-          this.imageWidth - 2 * this.padding,
-          this.character.height);
-      }
+      this._fgfx.restore();
     }
 
-    this._fgfx.restore();
-  }
+    // provides a hook for TextInput to be able to override text drawing and spit out password blanking characters
 
-  // provides a hook for TextInput to be able to override text drawing and spit out password blanking characters
-  drawText(ctx, txt, x, y) {
-    ctx.fillText(txt, x, y);
-  }
+  }, {
+    key: "drawText",
+    value: function drawText(ctx, txt, x, y) {
+      ctx.fillText(txt, x, y);
+    }
+  }, {
+    key: "renderCanvasTrim",
+    value: function renderCanvasTrim() {
+      var tokenFront = new Primrose.Text.Cursor(),
+          tokenBack = new Primrose.Text.Cursor(),
+          maxLineWidth = 0;
 
+      this._tgfx.clearRect(0, 0, this.imageWidth, this.imageHeight);
+      this._tgfx.save();
+      this._tgfx.translate(this.padding, this.padding);
+      this._tgfx.save();
+      this._tgfx.lineWidth = 2;
+      this._tgfx.translate(0, -this.scroll.y * this.character.height);
+      for (var y = 0, lastLine = -1; y < this._tokenRows.length; ++y) {
+        var row = this._tokenRows[y];
 
-  renderCanvasTrim() {
-    var tokenFront = new Primrose.Text.Cursor(),
-      tokenBack = new Primrose.Text.Cursor(),
-      maxLineWidth = 0;
+        for (var i = 0; i < row.length; ++i) {
+          var t = row[i];
+          tokenBack.x += t.value.length;
+          tokenBack.i += t.value.length;
+          tokenFront.copy(tokenBack);
+        }
 
-    this._tgfx.clearRect(0, 0, this.imageWidth, this.imageHeight);
-    this._tgfx.save();
-    this._tgfx.translate(this.padding, this.padding);
-    this._tgfx.save();
-    this._tgfx.lineWidth = 2;
-    this._tgfx.translate(0, -this.scroll.y * this.character.height);
-    for (var y = 0, lastLine = -1; y < this._tokenRows.length; ++y) {
-      var row = this._tokenRows[y];
+        maxLineWidth = Math.max(maxLineWidth, tokenBack.x);
+        tokenFront.x = 0;
+        ++tokenFront.y;
+        tokenBack.copy(tokenFront);
 
-      for (var i = 0; i < row.length; ++i) {
-        var t = row[i];
-        tokenBack.x += t.value.length;
-        tokenBack.i += t.value.length;
-        tokenFront.copy(tokenBack);
+        if (this.showLineNumbers && this.scroll.y <= y && y < this.scroll.y + this.gridBounds.height) {
+          var currentLine = row.length > 0 ? row[0].line : lastLine + 1;
+          // draw the left gutter
+          var lineNumber = currentLine.toString();
+          while (lineNumber.length < this._lineCountWidth) {
+            lineNumber = " " + lineNumber;
+          }
+          this.fillRect(this._tgfx, this.theme.regular.selectedBackColor || Primrose.Text.Themes.Default.regular.selectedBackColor, 0, y, this.gridBounds.x, 1);
+          this._tgfx.font = "bold " + this.character.height + "px " + this.theme.fontFamily;
+
+          if (currentLine > lastLine) {
+            this._tgfx.fillStyle = this.theme.regular.foreColor;
+            this._tgfx.fillText(lineNumber, 0, y * this.character.height);
+          }
+          lastLine = currentLine;
+        }
       }
 
-      maxLineWidth = Math.max(maxLineWidth, tokenBack.x);
-      tokenFront.x = 0;
-      ++tokenFront.y;
-      tokenBack.copy(tokenFront);
+      this._tgfx.restore();
 
-      if (this.showLineNumbers && this.scroll.y <= y && y < this.scroll.y + this.gridBounds.height) {
-        var currentLine = row.length > 0 ? row[0].line : lastLine + 1;
-        // draw the left gutter
-        var lineNumber = currentLine.toString();
-        while (lineNumber.length < this._lineCountWidth) {
-          lineNumber = " " + lineNumber;
-        }
-        this.fillRect(this._tgfx,
-          this.theme.regular.selectedBackColor ||
-          Primrose.Text.Themes.Default.regular.selectedBackColor,
-          0, y,
-          this.gridBounds.x, 1);
-        this._tgfx.font = "bold " + this.character.height + "px " +
-          this.theme.fontFamily;
+      if (this.showLineNumbers) {
+        this.strokeRect(this._tgfx, this.theme.regular.foreColor || Primrose.Text.Themes.Default.regular.foreColor, 0, 0, this.gridBounds.x, this.gridBounds.height);
+      }
 
-        if (currentLine > lastLine) {
-          this._tgfx.fillStyle = this.theme.regular.foreColor;
-          this._tgfx.fillText(
-            lineNumber,
-            0, y * this.character.height);
+      // draw the scrollbars
+      if (this.showScrollBars) {
+        var drawWidth = this.gridBounds.width * this.character.width - this.padding,
+            drawHeight = this.gridBounds.height * this.character.height,
+            scrollX = this.scroll.x * drawWidth / maxLineWidth + this.gridBounds.x * this.character.width,
+            scrollY = this.scroll.y * drawHeight / this._tokenRows.length;
+
+        this._tgfx.fillStyle = this.theme.regular.selectedBackColor || Primrose.Text.Themes.Default.regular.selectedBackColor;
+        // horizontal
+        var bw;
+        if (!this.wordWrap && maxLineWidth > this.gridBounds.width) {
+          var scrollBarWidth = drawWidth * (this.gridBounds.width / maxLineWidth),
+              by = this.gridBounds.height * this.character.height;
+          bw = Math.max(this.character.width, scrollBarWidth);
+          this._tgfx.fillRect(scrollX, by, bw, this.character.height);
+          this._tgfx.strokeRect(scrollX, by, bw, this.character.height);
         }
-        lastLine = currentLine;
+
+        //vertical
+        if (this._tokenRows.length > this.gridBounds.height) {
+          var scrollBarHeight = drawHeight * (this.gridBounds.height / this._tokenRows.length),
+              bx = this.image - this._VSCROLL_WIDTH * this.character.width - 2 * this.padding,
+              bh = Math.max(this.character.height, scrollBarHeight);
+          bw = this._VSCROLL_WIDTH * this.character.width;
+          this._tgfx.fillRect(bx, scrollY, bw, bh);
+          this._tgfx.strokeRect(bx, scrollY, bw, bh);
+        }
+      }
+
+      this._tgfx.lineWidth = 2;
+      this._tgfx.restore();
+      this._tgfx.strokeRect(1, 1, this.imageWidth - 2, this.imageHeight - 2);
+      if (!this.focused) {
+        this._tgfx.fillStyle = this.theme.regular.unfocused || Primrose.Text.Themes.Default.regular.unfocused;
+        this._tgfx.fillRect(0, 0, this.imageWidth, this.imageHeight);
       }
     }
+  }, {
+    key: "render",
+    value: function render() {
+      if (this.tokens && this.theme) {
+        this.refreshGridBounds();
+        var boundsChanged = this.gridBounds.toString() !== this._lastGridBounds,
+            textChanged = this._lastText !== this.value,
+            characterWidthChanged = this.character.width !== this._lastCharacterWidth,
+            characterHeightChanged = this.character.height !== this._lastCharacterHeight,
+            paddingChanged = this.padding !== this._lastPadding,
+            cursorChanged = !this._lastFrontCursor || !this._lastBackCursor || this.frontCursor.i !== this._lastFrontCursor.i || this._lastBackCursor.i !== this.backCursor.i,
+            scrollChanged = this.scroll.x !== this._lastScrollX || this.scroll.y !== this._lastScrollY,
+            fontChanged = this.context.font !== this._lastFont,
+            themeChanged = this.theme.name !== this._lastThemeName,
+            focusChanged = this.focused !== this._lastFocused,
+            changeBounds = null,
+            layoutChanged = this.resized || boundsChanged || textChanged || characterWidthChanged || characterHeightChanged || paddingChanged,
+            backgroundChanged = layoutChanged || cursorChanged || scrollChanged || themeChanged,
+            foregroundChanged = backgroundChanged || textChanged,
+            trimChanged = backgroundChanged || focusChanged,
+            imageChanged = foregroundChanged || backgroundChanged || trimChanged;
 
-    this._tgfx.restore();
-
-    if (this.showLineNumbers) {
-      this.strokeRect(this._tgfx,
-        this.theme.regular.foreColor ||
-        Primrose.Text.Themes.Default.regular.foreColor,
-        0, 0,
-        this.gridBounds.x, this.gridBounds.height);
-    }
-
-    // draw the scrollbars
-    if (this.showScrollBars) {
-      var drawWidth = this.gridBounds.width * this.character.width - this.padding,
-        drawHeight = this.gridBounds.height * this.character.height,
-        scrollX = (this.scroll.x * drawWidth) / maxLineWidth + this.gridBounds.x * this.character.width,
-        scrollY = (this.scroll.y * drawHeight) / this._tokenRows.length;
-
-      this._tgfx.fillStyle = this.theme.regular.selectedBackColor ||
-        Primrose.Text.Themes.Default.regular.selectedBackColor;
-      // horizontal
-      var bw;
-      if (!this.wordWrap && maxLineWidth > this.gridBounds.width) {
-        var scrollBarWidth = drawWidth * (this.gridBounds.width / maxLineWidth),
-          by = this.gridBounds.height * this.character.height;
-        bw = Math.max(this.character.width, scrollBarWidth);
-        this._tgfx.fillRect(scrollX, by, bw, this.character.height);
-        this._tgfx.strokeRect(scrollX, by, bw, this.character.height);
-      }
-
-      //vertical
-      if (this._tokenRows.length > this.gridBounds.height) {
-        var scrollBarHeight = drawHeight * (this.gridBounds.height / this._tokenRows.length),
-          bx = this.image - this._VSCROLL_WIDTH * this.character.width - 2 * this.padding,
-          bh = Math.max(this.character.height, scrollBarHeight);
-        bw = this._VSCROLL_WIDTH * this.character.width;
-        this._tgfx.fillRect(bx, scrollY, bw, bh);
-        this._tgfx.strokeRect(bx, scrollY, bw, bh);
-      }
-    }
-
-    this._tgfx.lineWidth = 2;
-    this._tgfx.restore();
-    this._tgfx.strokeRect(1, 1, this.imageWidth - 2, this.imageHeight - 2);
-    if (!this.focused) {
-      this._tgfx.fillStyle = this.theme.regular.unfocused || Primrose.Text.Themes.Default.regular.unfocused;
-      this._tgfx.fillRect(0, 0, this.imageWidth, this.imageHeight);
-    }
-  }
-
-  render() {
-    if (this.tokens && this.theme) {
-      this.refreshGridBounds();
-      var boundsChanged = this.gridBounds.toString() !== this._lastGridBounds,
-        textChanged = this._lastText !== this.value,
-        characterWidthChanged = this.character.width !== this._lastCharacterWidth,
-        characterHeightChanged = this.character.height !== this._lastCharacterHeight,
-        paddingChanged = this.padding !== this._lastPadding,
-        cursorChanged = !this._lastFrontCursor || !this._lastBackCursor || this.frontCursor.i !== this._lastFrontCursor.i || this._lastBackCursor.i !== this.backCursor.i,
-        scrollChanged = this.scroll.x !== this._lastScrollX || this.scroll.y !== this._lastScrollY,
-        fontChanged = this.context.font !== this._lastFont,
-        themeChanged = this.theme.name !== this._lastThemeName,
-        focusChanged = this.focused !== this._lastFocused,
-
-        changeBounds = null,
-
-        layoutChanged = this.resized || boundsChanged || textChanged || characterWidthChanged || characterHeightChanged || paddingChanged,
-        backgroundChanged = layoutChanged || cursorChanged || scrollChanged || themeChanged,
-        foregroundChanged = backgroundChanged || textChanged,
-        trimChanged = backgroundChanged || focusChanged,
-        imageChanged = foregroundChanged || backgroundChanged || trimChanged;
-
-      if (layoutChanged) {
-        this.performLayout(this.gridBounds);
-        this._rowCache = {};
-      }
-
-      if (imageChanged) {
-        if (cursorChanged && !(layoutChanged || scrollChanged || themeChanged || focusChanged)) {
-          var top = Math.min(this.frontCursor.y, this._lastFrontCursor.y, this.backCursor.y, this._lastBackCursor.y) - this.scroll.y + this.gridBounds.y,
-            bottom = Math.max(this.frontCursor.y, this._lastFrontCursor.y, this.backCursor.y, this._lastBackCursor.y) - this.scroll.y + 1;
-          changeBounds = new Primrose.Text.Rectangle(
-            0,
-            top * this.character.height,
-            this.bounds.width,
-            (bottom - top) * this.character.height + 2);
+        if (layoutChanged) {
+          this.performLayout(this.gridBounds);
+          this._rowCache = {};
         }
 
-        if (backgroundChanged) {
-          this.renderCanvasBackground();
-        }
-        if (foregroundChanged) {
-          this.renderCanvasForeground();
-        }
-        if (trimChanged) {
-          this.renderCanvasTrim();
+        if (imageChanged) {
+          if (cursorChanged && !(layoutChanged || scrollChanged || themeChanged || focusChanged)) {
+            var top = Math.min(this.frontCursor.y, this._lastFrontCursor.y, this.backCursor.y, this._lastBackCursor.y) - this.scroll.y + this.gridBounds.y,
+                bottom = Math.max(this.frontCursor.y, this._lastFrontCursor.y, this.backCursor.y, this._lastBackCursor.y) - this.scroll.y + 1;
+            changeBounds = new Primrose.Text.Rectangle(0, top * this.character.height, this.bounds.width, (bottom - top) * this.character.height + 2);
+          }
+
+          if (backgroundChanged) {
+            this.renderCanvasBackground();
+          }
+          if (foregroundChanged) {
+            this.renderCanvasForeground();
+          }
+          if (trimChanged) {
+            this.renderCanvasTrim();
+          }
+
+          this.context.clearRect(0, 0, this.imageWidth, this.imageHeight);
+          this.context.drawImage(this._bgCanvas, 0, 0);
+          this.context.drawImage(this._fgCanvas, 0, 0);
+          this.context.drawImage(this._trimCanvas, 0, 0);
+          this.invalidate(changeBounds);
         }
 
-        this.context.clearRect(0, 0, this.imageWidth, this.imageHeight);
-        this.context.drawImage(this._bgCanvas, 0, 0);
-        this.context.drawImage(this._fgCanvas, 0, 0);
-        this.context.drawImage(this._trimCanvas, 0, 0);
-        this.invalidate(changeBounds);
+        this._lastGridBounds = this.gridBounds.toString();
+        this._lastText = this.value;
+        this._lastCharacterWidth = this.character.width;
+        this._lastCharacterHeight = this.character.height;
+        this._lastWidth = this.imageWidth;
+        this._lastHeight = this.imageHeight;
+        this._lastPadding = this.padding;
+        this._lastFrontCursor = this.frontCursor.clone();
+        this._lastBackCursor = this.backCursor.clone();
+        this._lastFocused = this.focused;
+        this._lastFont = this.context.font;
+        this._lastThemeName = this.theme.name;
+        this._lastScrollX = this.scroll.x;
+        this._lastScrollY = this.scroll.y;
       }
-
-      this._lastGridBounds = this.gridBounds.toString();
-      this._lastText = this.value;
-      this._lastCharacterWidth = this.character.width;
-      this._lastCharacterHeight = this.character.height;
-      this._lastWidth = this.imageWidth;
-      this._lastHeight = this.imageHeight;
-      this._lastPadding = this.padding;
-      this._lastFrontCursor = this.frontCursor.clone();
-      this._lastBackCursor = this.backCursor.clone();
-      this._lastFocused = this.focused;
-      this._lastFont = this.context.font;
-      this._lastThemeName = this.theme.name;
-      this._lastScrollX = this.scroll.x;
-      this._lastScrollY = this.scroll.y;
     }
-  }
-}
-  if(typeof window !== "undefined") window.Primrose.Text.Controls.TextBox = TextBox;
+  }, {
+    key: "value",
+    get: function get() {
+      return this._history[this._historyFrame].join("\n");
+    },
+    set: function set(txt) {
+      txt = txt || "";
+      txt = txt.replace(/\r\n/g, "\n");
+      if (!this.multiline) {
+        txt = txt.replace(/\n/g, "");
+      }
+      var lines = txt.split("\n");
+      this.pushUndo(lines);
+      this.render();
+      emit.call(this, "change", {
+        target: this
+      });
+    }
+  }, {
+    key: "selectedText",
+    get: function get() {
+      var minCursor = Primrose.Text.Cursor.min(this.frontCursor, this.backCursor),
+          maxCursor = Primrose.Text.Cursor.max(this.frontCursor, this.backCursor);
+      return this.value.substring(minCursor.i, maxCursor.i);
+    },
+    set: function set(str) {
+      str = str || "";
+      str = str.replace(/\r\n/g, "\n");
+
+      if (this.frontCursor.i !== this.backCursor.i || str.length > 0) {
+        var minCursor = Primrose.Text.Cursor.min(this.frontCursor, this.backCursor),
+            maxCursor = Primrose.Text.Cursor.max(this.frontCursor, this.backCursor),
+
+        // TODO: don't recalc the string first.
+        text = this.value,
+            left = text.substring(0, minCursor.i),
+            right = text.substring(maxCursor.i);
+
+        var v = left + str + right;
+        this.value = v;
+        this.refreshGridBounds();
+        this.performLayout();
+        minCursor.advanceN(this.lines, Math.max(0, str.length));
+        this.scrollIntoView(maxCursor);
+        this.clampScroll();
+        maxCursor.copy(minCursor);
+        this.render();
+      }
+    }
+  }, {
+    key: "padding",
+    get: function get() {
+      return this._padding;
+    },
+    set: function set(v) {
+      this._padding = v;
+      this.render();
+    }
+  }, {
+    key: "wordWrap",
+    get: function get() {
+      return this._wordWrap;
+    },
+    set: function set(v) {
+      this._wordWrap = v || false;
+      this.setGutter();
+    }
+  }, {
+    key: "showLineNumbers",
+    get: function get() {
+      return this._showLineNumbers;
+    },
+    set: function set(v) {
+      this._showLineNumbers = v;
+      this.setGutter();
+    }
+  }, {
+    key: "showScrollBars",
+    get: function get() {
+      return this._showScrollBars;
+    },
+    set: function set(v) {
+      this._showScrollBars = v;
+      this.setGutter();
+    }
+  }, {
+    key: "theme",
+    get: function get() {
+      return this._theme;
+    },
+    set: function set(t) {
+      this._theme = clone(t || Primrose.Text.Themes.Default);
+      this._theme.fontSize = this.fontSize;
+      this._rowCache = {};
+      this.render();
+    }
+  }, {
+    key: "commandPack",
+    get: function get() {
+      return this._commandPack;
+    },
+    set: function set(v) {
+      this._commandPack = v;
+    }
+  }, {
+    key: "selectionStart",
+    get: function get() {
+      return this.frontCursor.i;
+    },
+    set: function set(i) {
+      this.frontCursor.setI(i, this.lines);
+    }
+  }, {
+    key: "selectionEnd",
+    get: function get() {
+      return this.backCursor.i;
+    },
+    set: function set(i) {
+      this.backCursor.setI(i, this.lines);
+    }
+  }, {
+    key: "selectionDirection",
+    get: function get() {
+      return this.frontCursor.i <= this.backCursor.i ? "forward" : "backward";
+    }
+  }, {
+    key: "tokenizer",
+    get: function get() {
+      return this._tokenizer;
+    },
+    set: function set(tk) {
+      this._tokenizer = tk || Primrose.Text.Grammars.JavaScript;
+      if (this._history && this._history.length > 0) {
+        this.refreshTokens();
+        this.render();
+      }
+    }
+  }, {
+    key: "tabWidth",
+    get: function get() {
+      return this._tabWidth;
+    },
+    set: function set(tw) {
+      this._tabWidth = tw || 2;
+      this._tabString = "";
+      for (var i = 0; i < this._tabWidth; ++i) {
+        this._tabString += " ";
+      }
+    }
+  }, {
+    key: "tabString",
+    get: function get() {
+      return this._tabString;
+    }
+  }, {
+    key: "fontSize",
+    get: function get() {
+      return this._fontSize || 16;
+    },
+    set: function set(v) {
+      v = v || 16;
+      this._fontSize = v;
+      if (this.theme) {
+        this.theme.fontSize = this._fontSize;
+        this.resize();
+        this.render();
+      }
+    }
+  }, {
+    key: "lockMovement",
+    get: function get() {
+      return this.focused && !this.readOnly;
+    }
+  }]);
+
+  return TextBox;
+}(Primrose.Surface);
+    if(typeof window !== "undefined") window.Primrose.Text.Controls.TextBox = TextBox;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Controls\TextBox.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\Controls\TextBox.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Controls\TextInput.js
-(function(){var COUNTER = 0;
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\Controls\TextInput.js
+(function(){"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _set = function set(object, property, value, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent !== null) { set(parent, property, value, receiver); } } else if ("value" in desc && desc.writable) { desc.value = value; } else { var setter = desc.set; if (setter !== undefined) { setter.call(receiver, value); } } return value; };
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var COUNTER = 0;
 
 pliny.class({
   parent: "Primrose.Text.Controls",
-    name: "TextInput",
-    description: "plain text input box.",
-    baseClass: "Primrose.Text.Controls.TextBox",
-    parameters: [{
-      name: "idOrCanvasOrContext",
-      type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
-      description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
-    }, {
-      name: "options",
-      type: "Object",
-      description: "Named parameters for creating the TextInput."
-    }]
+  name: "TextInput",
+  description: "plain text input box.",
+  baseClass: "Primrose.Text.Controls.TextBox",
+  parameters: [{
+    name: "idOrCanvasOrContext",
+    type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
+    description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
+  }, {
+    name: "options",
+    type: "Object",
+    description: "Named parameters for creating the TextInput."
+  }]
 });
-class TextInput extends Primrose.Text.Controls.TextBox {
-  constructor(options) {
-    super(copyObject(
-      patch(options, {
-        id: "Primrose.Text.Controls.TextInput[" + (COUNTER++) + "]",
-        padding: 5
-      }), {
-        singleLine: true,
-        disableWordWrap: true,
-        hideLineNumbers: true,
-        hideScrollBars: true,
-        tabWidth: 1,
-        tokenizer: Primrose.Text.Grammars.PlainText,
-        commands: Primrose.Text.CommandPacks.TextInput
-      }, true));
 
-    this.passwordCharacter = this.options.passwordCharacter;
+var TextInput = function (_Primrose$Text$Contro) {
+  _inherits(TextInput, _Primrose$Text$Contro);
+
+  function TextInput(options) {
+    _classCallCheck(this, TextInput);
+
+    var _this = _possibleConstructorReturn(this, (TextInput.__proto__ || Object.getPrototypeOf(TextInput)).call(this, copyObject(patch(options, {
+      id: "Primrose.Text.Controls.TextInput[" + COUNTER++ + "]",
+      padding: 5
+    }), {
+      singleLine: true,
+      disableWordWrap: true,
+      hideLineNumbers: true,
+      hideScrollBars: true,
+      tabWidth: 1,
+      tokenizer: Primrose.Text.Grammars.PlainText,
+      commands: Primrose.Text.CommandPacks.TextInput
+    }, true)));
+
+    _this.passwordCharacter = _this.options.passwordCharacter;
+    return _this;
   }
 
-  get value() {
-    return super.value;
-  }
-
-  set value(v) {
-    v = v || "";
-    v = v.replace(/\r?\n/g, "");
-    super.value = v;
-  }
-
-  get selectedText() {
-    return super.selectedText;
-  }
-
-  set selectedText(v) {
-    v = v || "";
-    v = v.replace(/\r?\n/g, "");
-    super.selectedText = v;
-  }
-
-  drawText(ctx, txt, x, y) {
-    if (this.passwordCharacter) {
-      var val = "";
-      for (var i = 0; i < txt.length; ++i) {
-        val += this.passwordCharacter;
+  _createClass(TextInput, [{
+    key: "drawText",
+    value: function drawText(ctx, txt, x, y) {
+      if (this.passwordCharacter) {
+        var val = "";
+        for (var i = 0; i < txt.length; ++i) {
+          val += this.passwordCharacter;
+        }
+        txt = val;
       }
-      txt = val;
+      _get(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "drawText", this).call(this, ctx, txt, x, y);
     }
-    super.drawText(ctx, txt, x, y);
-  }
-}
-  if(typeof window !== "undefined") window.Primrose.Text.Controls.TextInput = TextInput;
+  }, {
+    key: "value",
+    get: function get() {
+      return _get(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "value", this);
+    },
+    set: function set(v) {
+      v = v || "";
+      v = v.replace(/\r?\n/g, "");
+      _set(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "value", v, this);
+    }
+  }, {
+    key: "selectedText",
+    get: function get() {
+      return _get(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "selectedText", this);
+    },
+    set: function set(v) {
+      v = v || "";
+      v = v.replace(/\r?\n/g, "");
+      _set(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "selectedText", v, this);
+    }
+  }]);
+
+  return TextInput;
+}(Primrose.Text.Controls.TextBox);
+    if(typeof window !== "undefined") window.Primrose.Text.Controls.TextInput = TextInput;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Controls\TextInput.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\Controls\TextInput.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Grammars\Basic.js
-(function(){// we don't use strict here because this grammar includes an interpreter that uses `eval()`
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\Basic.js
+(function(){"use strict";
+
+// we don't use strict here because this grammar includes an interpreter that uses `eval()`
 
 pliny.value({
   parent: "Primrose.Text.Grammars",
@@ -13674,87 +14444,79 @@ pliny.value({
   description: "| [under construction]"
 });
 var Basic = new Primrose.Text.Grammar("BASIC",
-  // Grammar rules are applied in the order they are specified.
-  [
-    // Text needs at least the newlines token, or else every line will attempt to render as a single line and the line count won't work.
-    ["newlines", /(?:\r\n|\r|\n)/],
-    // BASIC programs used to require the programmer type in her own line numbers. The start at the beginning of the line.
-    ["lineNumbers", /^\d+\s+/],
-    // Comments were lines that started with the keyword "REM" (for REMARK) and ran to the end of the line. They did not have to be numbered, because they were not executable and were stripped out by the interpreter.
-    ["startLineComments", /^REM\s/],
-    // Both double-quoted and single-quoted strings were not always supported, but in this case, I'm just demonstrating how it would be done for both.
-    ["strings", /"(?:\\"|[^"])*"/],
-    ["strings", /'(?:\\'|[^'])*'/],
-    // Numbers are an optional dash, followed by a optional digits, followed by optional period, followed by 1 or more required digits. This allows us to match both integers and decimal numbers, both positive and negative, with or without leading zeroes for decimal numbers between (-1, 1).
-    ["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/],
-    // Keywords are really just a list of different words we want to match, surrounded by the "word boundary" selector "\b".
-    ["keywords",
-      /\b(?:RESTORE|REPEAT|RETURN|LOAD|LABEL|DATA|READ|THEN|ELSE|FOR|DIM|LET|IF|TO|STEP|NEXT|WHILE|WEND|UNTIL|GOTO|GOSUB|ON|TAB|AT|END|STOP|PRINT|INPUT|RND|INT|CLS|CLK|LEN)\b/
-    ],
-    // Sometimes things we want to treat as keywords have different meanings in different locations. We can specify rules for tokens more than once.
-    ["keywords", /^DEF FN/],
-    // These are all treated as mathematical operations.
-    ["operators",
-      /(?:\+|;|,|-|\*\*|\*|\/|>=|<=|=|<>|<|>|OR|AND|NOT|MOD|\(|\)|\[|\])/
-    ],
-    // Once everything else has been matched, the left over blocks of words are treated as variable and function names.
-    ["identifiers", /\w+\$?/]
-  ]);
+// Grammar rules are applied in the order they are specified.
+[
+// Text needs at least the newlines token, or else every line will attempt to render as a single line and the line count won't work.
+["newlines", /(?:\r\n|\r|\n)/],
+// BASIC programs used to require the programmer type in her own line numbers. The start at the beginning of the line.
+["lineNumbers", /^\d+\s+/],
+// Comments were lines that started with the keyword "REM" (for REMARK) and ran to the end of the line. They did not have to be numbered, because they were not executable and were stripped out by the interpreter.
+["startLineComments", /^REM\s/],
+// Both double-quoted and single-quoted strings were not always supported, but in this case, I'm just demonstrating how it would be done for both.
+["strings", /"(?:\\"|[^"])*"/], ["strings", /'(?:\\'|[^'])*'/],
+// Numbers are an optional dash, followed by a optional digits, followed by optional period, followed by 1 or more required digits. This allows us to match both integers and decimal numbers, both positive and negative, with or without leading zeroes for decimal numbers between (-1, 1).
+["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/],
+// Keywords are really just a list of different words we want to match, surrounded by the "word boundary" selector "\b".
+["keywords", /\b(?:RESTORE|REPEAT|RETURN|LOAD|LABEL|DATA|READ|THEN|ELSE|FOR|DIM|LET|IF|TO|STEP|NEXT|WHILE|WEND|UNTIL|GOTO|GOSUB|ON|TAB|AT|END|STOP|PRINT|INPUT|RND|INT|CLS|CLK|LEN)\b/],
+// Sometimes things we want to treat as keywords have different meanings in different locations. We can specify rules for tokens more than once.
+["keywords", /^DEF FN/],
+// These are all treated as mathematical operations.
+["operators", /(?:\+|;|,|-|\*\*|\*|\/|>=|<=|=|<>|<|>|OR|AND|NOT|MOD|\(|\)|\[|\])/],
+// Once everything else has been matched, the left over blocks of words are treated as variable and function names.
+["identifiers", /\w+\$?/]]);
 
 var oldTokenize = Basic.tokenize;
 Basic.tokenize = function (code) {
   return oldTokenize.call(this, code.toUpperCase());
 };
 
-Basic.interpret = function (sourceCode, input, output, errorOut, next,
-  clearScreen, loadFile, done) {
+Basic.interpret = function (sourceCode, input, output, errorOut, next, clearScreen, loadFile, done) {
   var tokens = this.tokenize(sourceCode),
-    EQUAL_SIGN = new Primrose.Text.Token("=", "operators"),
-    counter = 0,
-    isDone = false,
-    program = {},
-    lineNumbers = [],
-    currentLine = [],
-    lines = [currentLine],
-    data = [],
-    returnStack = [],
-    forLoopCounters = {},
-    dataCounter = 0,
-    state = {
-      INT: function (v) {
-        return v | 0;
-      },
-      RND: function () {
-        return Math.random();
-      },
-      CLK: function () {
-        return Date.now() / 3600000;
-      },
-      LEN: function (id) {
-        return id.length;
-      },
-      LINE: function () {
-        return lineNumbers[counter];
-      },
-      TAB: function (v) {
-        var str = "";
-        for (var i = 0; i < v; ++i) {
-          str += " ";
-        }
-        return str;
-      },
-      POW: function (a, b) {
-        return Math.pow(a, b);
+      EQUAL_SIGN = new Primrose.Text.Token("=", "operators"),
+      counter = 0,
+      isDone = false,
+      program = {},
+      lineNumbers = [],
+      currentLine = [],
+      lines = [currentLine],
+      data = [],
+      returnStack = [],
+      forLoopCounters = {},
+      dataCounter = 0,
+      state = {
+    INT: function INT(v) {
+      return v | 0;
+    },
+    RND: function RND() {
+      return Math.random();
+    },
+    CLK: function CLK() {
+      return Date.now() / 3600000;
+    },
+    LEN: function LEN(id) {
+      return id.length;
+    },
+    LINE: function LINE() {
+      return lineNumbers[counter];
+    },
+    TAB: function TAB(v) {
+      var str = "";
+      for (var i = 0; i < v; ++i) {
+        str += " ";
       }
-    };
+      return str;
+    },
+    POW: function POW(a, b) {
+      return Math.pow(a, b);
+    }
+  };
 
   function toNum(ln) {
     return new Primrose.Text.Token(ln.toString(), "numbers");
   }
 
   function toStr(str) {
-    return new Primrose.Text.Token("\"" + str.replace("\n", "\\n")
-      .replace("\"", "\\\"") + "\"", "strings");
+    return new Primrose.Text.Token("\"" + str.replace("\n", "\\n").replace("\"", "\\\"") + "\"", "strings");
   }
 
   var tokenMap = {
@@ -13770,8 +14532,7 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next,
     if (token.type === "newlines") {
       currentLine = [];
       lines.push(currentLine);
-    }
-    else if (token.type !== "regular" && token.type !== "comments") {
+    } else if (token.type !== "regular" && token.type !== "comments") {
       token.value = tokenMap[token.value] || token.value;
       currentLine.push(token);
     }
@@ -13795,16 +14556,13 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next,
 
       lineNumber = parseFloat(lineNumber.value);
       if (lastLine && lineNumber <= lastLine) {
-        throw new Error("expected line number greater than " + lastLine +
-          ", but received " + lineNumber + ".");
-      }
-      else if (line.length > 0) {
+        throw new Error("expected line number greater than " + lastLine + ", but received " + lineNumber + ".");
+      } else if (line.length > 0) {
         lineNumbers.push(lineNumber);
         program[lineNumber] = line;
       }
     }
   }
-
 
   function process(line) {
     if (line && line.length > 0) {
@@ -13812,17 +14570,12 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next,
       if (op) {
         if (commands.hasOwnProperty(op.value)) {
           return commands[op.value](line);
-        }
-        else if (!isNaN(op.value)) {
+        } else if (!isNaN(op.value)) {
           return setProgramCounter([op]);
-        }
-        else if (state[op.value] ||
-          (line.length > 0 && line[0].type === "operators" &&
-            line[0].value === "=")) {
+        } else if (state[op.value] || line.length > 0 && line[0].type === "operators" && line[0].value === "=") {
           line.unshift(op);
           return translate(line);
-        }
-        else {
+        } else {
           error("Unknown command. >>> " + op.value);
         }
       }
@@ -13845,10 +14598,7 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next,
     for (var i = 0; i < line.length; ++i) {
       var t = line[i];
       var nest = 0;
-      if (t.type === "identifiers" &&
-        typeof state[t.value] !== "function" &&
-        i < line.length - 1 &&
-        line[i + 1].value === "(") {
+      if (t.type === "identifiers" && typeof state[t.value] !== "function" && i < line.length - 1 && line[i + 1].value === "(") {
         for (var j = i + 1; j < line.length; ++j) {
           var t2 = line[j];
           if (t2.value === "(") {
@@ -13856,14 +14606,12 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next,
               t2.value = "[";
             }
             ++nest;
-          }
-          else if (t2.value === ")") {
+          } else if (t2.value === ")") {
             --nest;
             if (nest === 0) {
               t2.value = "]";
             }
-          }
-          else if (t2.value === "," && nest === 1) {
+          } else if (t2.value === "," && nest === 1) {
             t2.value = "][";
           }
 
@@ -13877,8 +14625,7 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next,
     //with ( state ) { // jshint ignore:line
     try {
       return eval(script); // jshint ignore:line
-    }
-    catch (exp) {
+    } catch (exp) {
       console.error(exp);
       console.debug(line.join(", "));
       console.error(script);
@@ -13889,22 +14636,20 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next,
 
   function declareVariable(line) {
     var decl = [],
-      decls = [decl],
-      nest = 0,
-      i;
+        decls = [decl],
+        nest = 0,
+        i;
     for (i = 0; i < line.length; ++i) {
       var t = line[i];
       if (t.value === "(") {
         ++nest;
-      }
-      else if (t.value === ")") {
+      } else if (t.value === ")") {
         --nest;
       }
       if (nest === 0 && t.value === ",") {
         decl = [];
         decls.push(decl);
-      }
-      else {
+      } else {
         decl.push(t);
       }
     }
@@ -13913,10 +14658,9 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next,
       var id = decl.shift();
       if (id.type !== "identifiers") {
         error("Identifier expected: " + id.value);
-      }
-      else {
+      } else {
         var val = null,
-          j;
+            j;
         id = id.value;
         if (decl[0].value === "(" && decl[decl.length - 1].value === ")") {
           var sizes = [];
@@ -13927,14 +14671,12 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next,
           }
           if (sizes.length === 0) {
             val = [];
-          }
-          else {
+          } else {
             val = new Array(sizes[0]);
             var queue = [val];
             for (j = 1; j < sizes.length; ++j) {
               var size = sizes[j];
-              for (var k = 0,
-                  l = queue.length; k < l; ++k) {
+              for (var k = 0, l = queue.length; k < l; ++k) {
                 var arr = queue.shift();
                 for (var m = 0; m < arr.length; ++m) {
                   arr[m] = new Array(size);
@@ -13962,20 +14704,16 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next,
           if (nest === 0) {
             t.value = "+ \", \" + ";
           }
-        }
-        else if (t.value === ";") {
+        } else if (t.value === ";") {
           t.value = "+ \" \"";
           if (i < line.length - 1) {
             t.value += " + ";
-          }
-          else {
+          } else {
             endLine = "";
           }
-        }
-        else if (t.value === "(") {
+        } else if (t.value === "(") {
           ++nest;
-        }
-        else if (t.value === ")") {
+        } else if (t.value === ")") {
           --nest;
         }
       }
@@ -13992,8 +14730,7 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next,
   function setProgramCounter(line) {
     var lineNumber = parseFloat(evaluate(line));
     counter = -1;
-    while (counter < lineNumbers.length - 1 &&
-      lineNumbers[counter + 1] < lineNumber) {
+    while (counter < lineNumbers.length - 1 && lineNumbers[counter + 1] < lineNumber) {
       ++counter;
     }
 
@@ -14002,20 +14739,18 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next,
 
   function checkConditional(line) {
     var thenIndex = -1,
-      elseIndex = -1,
-      i;
+        elseIndex = -1,
+        i;
     for (i = 0; i < line.length; ++i) {
       if (line[i].type === "keywords" && line[i].value === "THEN") {
         thenIndex = i;
-      }
-      else if (line[i].type === "keywords" && line[i].value === "ELSE") {
+      } else if (line[i].type === "keywords" && line[i].value === "ELSE") {
         elseIndex = i;
       }
     }
     if (thenIndex === -1) {
       error("Expected THEN clause.");
-    }
-    else {
+    } else {
       var condition = line.slice(0, thenIndex);
       for (i = 0; i < condition.length; ++i) {
         var t = condition[i];
@@ -14023,19 +14758,16 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next,
           t.value = "==";
         }
       }
-      var thenClause,
-        elseClause;
+      var thenClause, elseClause;
       if (elseIndex === -1) {
         thenClause = line.slice(thenIndex + 1);
-      }
-      else {
+      } else {
         thenClause = line.slice(thenIndex + 1, elseIndex);
         elseClause = line.slice(elseIndex + 1);
       }
       if (evaluate(condition)) {
         return process(thenClause);
-      }
-      else if (elseClause) {
+      } else if (elseClause) {
         return process(elseClause);
       }
     }
@@ -14070,8 +14802,7 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next,
       var valueToken = null;
       if (!isNaN(str)) {
         valueToken = toNum(str);
-      }
-      else {
+      } else {
         valueToken = toStr(str);
       }
       evaluate([toVar, EQUAL_SIGN, valueToken]);
@@ -14084,12 +14815,10 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next,
 
   function onStatement(line) {
     var idxExpr = [],
-      idx = null,
-      targets = [];
+        idx = null,
+        targets = [];
     try {
-      while (line.length > 0 &&
-        (line[0].type !== "keywords" ||
-          line[0].value !== "GOTO")) {
+      while (line.length > 0 && (line[0].type !== "keywords" || line[0].value !== "GOTO")) {
         idxExpr.push(line.shift());
       }
 
@@ -14098,8 +14827,7 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next,
 
         for (var i = 0; i < line.length; ++i) {
           var t = line[i];
-          if (t.type !== "operators" ||
-            t.value !== ",") {
+          if (t.type !== "operators" || t.value !== ",") {
             targets.push(t);
           }
         }
@@ -14110,8 +14838,7 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next,
           return setProgramCounter([targets[idx]]);
         }
       }
-    }
-    catch (exp) {
+    } catch (exp) {
       console.error(exp);
     }
     return true;
@@ -14155,8 +14882,7 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next,
     var cond = evaluate(line);
     if (!cond) {
       counter = findNext("WEND");
-    }
-    else {
+    } else {
       returnStack.push(toNum(lineNumbers[counter]));
     }
     return true;
@@ -14180,8 +14906,7 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next,
           varExpr.push(t);
         }
         ++a;
-      }
-      else {
+      } else {
         arrs[a].push(t);
       }
     }
@@ -14200,8 +14925,7 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next,
     if (!cond) {
       delete forLoopCounters[n];
       counter = findNext("NEXT");
-    }
-    else {
+    } else {
       varExpr.push(toNum(forLoopCounters[n]));
       process(varExpr);
       forLoopCounters[n] += skip;
@@ -14215,8 +14939,7 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next,
   }
 
   function loadCodeFile(line) {
-    loadFile(evaluate(line))
-      .then(next);
+    loadFile(evaluate(line)).then(next);
     return false;
   }
 
@@ -14252,8 +14975,7 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next,
   }
 
   function defineFunction(line) {
-    var name = line.shift()
-      .value;
+    var name = line.shift().value;
     var signature = "";
     var body = "";
     var fillSig = true;
@@ -14261,17 +14983,14 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next,
       var t = line[i];
       if (t.type === "operators" && t.value === "=") {
         fillSig = false;
-      }
-      else if (fillSig) {
+      } else if (fillSig) {
         signature += t.value;
-      }
-      else {
+      } else {
         body += t.value;
       }
     }
     name = "FN" + name;
-    var script = "(function " + name + signature + "{ return " + body +
-      "; })";
+    var script = "(function " + name + signature + "{ return " + body + "; })";
     state[name] = eval(script); // jshint ignore:line
     return true;
   }
@@ -14321,91 +15040,71 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next,
     }
   };
 };
-  if(typeof window !== "undefined") window.Primrose.Text.Grammars.Basic = Basic;
+    if(typeof window !== "undefined") window.Primrose.Text.Grammars.Basic = Basic;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Grammars\Basic.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\Basic.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Grammars\JavaScript.js
-(function(){pliny.value({
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\JavaScript.js
+(function(){"use strict";
+
+pliny.value({
   parent: "Primrose.Text.Grammars",
   name: "JavaScript",
   description: "| [under construction]"
 });
-const JavaScript = new Primrose.Text.Grammar("JavaScript", [
-  ["newlines", /(?:\r\n|\r|\n)/],
-  ["startBlockComments", /\/\*/],
-  ["endBlockComments", /\*\//],
-  ["regexes", /(?:^|,|;|\(|\[|\{)(?:\s*)(\/(?:\\\/|[^\n\/])+\/)/],
-  ["stringDelim", /("|')/],
-  ["startLineComments", /\/\/.*$/m],
-  ["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/],
-  ["keywords",
-    /\b(?:break|case|catch|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/
-  ],
-  ["functions", /(\w+)(?:\s*\()/],
-  ["members", /(\w+)\./],
-  ["members", /((\w+\.)+)(\w+)/]
-]);
-  if(typeof window !== "undefined") window.Primrose.Text.Grammars.JavaScript = JavaScript;
+var JavaScript = new Primrose.Text.Grammar("JavaScript", [["newlines", /(?:\r\n|\r|\n)/], ["startBlockComments", /\/\*/], ["endBlockComments", /\*\//], ["regexes", /(?:^|,|;|\(|\[|\{)(?:\s*)(\/(?:\\\/|[^\n\/])+\/)/], ["stringDelim", /("|')/], ["startLineComments", /\/\/.*$/m], ["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/], ["keywords", /\b(?:break|case|catch|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/], ["functions", /(\w+)(?:\s*\()/], ["members", /(\w+)\./], ["members", /((\w+\.)+)(\w+)/]]);
+    if(typeof window !== "undefined") window.Primrose.Text.Grammars.JavaScript = JavaScript;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Grammars\JavaScript.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\JavaScript.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Grammars\PlainText.js
-(function(){pliny.value({
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\PlainText.js
+(function(){"use strict";
+
+pliny.value({
   parent: "Primrose.Text.Grammars",
   name: "PlainText",
   description: "| [under construction]"
 });
-const PlainText = new Primrose.Text.Grammar("PlainText", [
-  ["newlines", /(?:\r\n|\r|\n)/]
-]);
-  if(typeof window !== "undefined") window.Primrose.Text.Grammars.PlainText = PlainText;
+var PlainText = new Primrose.Text.Grammar("PlainText", [["newlines", /(?:\r\n|\r|\n)/]]);
+    if(typeof window !== "undefined") window.Primrose.Text.Grammars.PlainText = PlainText;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Grammars\PlainText.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\PlainText.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Grammars\TestResults.js
-(function(){pliny.value({
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\TestResults.js
+(function(){"use strict";
+
+pliny.value({
   parent: "Primrose.Text.Grammars",
   name: "TestResults",
   description: "| [under construction]"
 });
-const TestResults = new Primrose.Text.Grammar("TestResults", [
-  ["newlines", /(?:\r\n|\r|\n)/, true],
-  ["numbers", /(\[)(o+)/, true],
-  ["numbers", /(\d+ succeeded), 0 failed/, true],
-  ["numbers", /^    Successes:/, true],
-  ["functions", /(x+)\]/, true],
-  ["functions", /[1-9]\d* failed/, true],
-  ["functions", /^    Failures:/, true],
-  ["comments", /(\d+ms:)(.*)/, true],
-  ["keywords", /(Test results for )(\w+):/, true],
-  ["strings", /        \w+/, true]
-]);
-  if(typeof window !== "undefined") window.Primrose.Text.Grammars.TestResults = TestResults;
+var TestResults = new Primrose.Text.Grammar("TestResults", [["newlines", /(?:\r\n|\r|\n)/, true], ["numbers", /(\[)(o+)/, true], ["numbers", /(\d+ succeeded), 0 failed/, true], ["numbers", /^    Successes:/, true], ["functions", /(x+)\]/, true], ["functions", /[1-9]\d* failed/, true], ["functions", /^    Failures:/, true], ["comments", /(\d+ms:)(.*)/, true], ["keywords", /(Test results for )(\w+):/, true], ["strings", /        \w+/, true]]);
+    if(typeof window !== "undefined") window.Primrose.Text.Grammars.TestResults = TestResults;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Grammars\TestResults.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\TestResults.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\OSX.js
-(function(){pliny.value({
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\OSX.js
+(function(){"use strict";
+
+pliny.value({
   parent: "Primrose.Text.OperatingSystems",
   name: "OSX",
   description: "| [under construction]"
 });
-const OSX = new Primrose.Text.OperatingSystem(
-  "OS X", "META", "ALT", "METASHIFT_z",
-  "META", "LEFTARROW", "RIGHTARROW",
-  "META", "UPARROW", "DOWNARROW");
-  if(typeof window !== "undefined") window.Primrose.Text.OperatingSystems.OSX = OSX;
+var OSX = new Primrose.Text.OperatingSystem("OS X", "META", "ALT", "METASHIFT_z", "META", "LEFTARROW", "RIGHTARROW", "META", "UPARROW", "DOWNARROW");
+    if(typeof window !== "undefined") window.Primrose.Text.OperatingSystems.OSX = OSX;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\OSX.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\OSX.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\Windows.js
-(function(){////
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\Windows.js
+(function(){"use strict";
+
+////
 // cut, copy, and paste commands are events that the browser manages,
 // so we don't have to include handlers for them here.
 ///
@@ -14414,22 +15113,21 @@ pliny.value({
   name: "OSX",
   description: "| [under construction]"
 });
-const Windows = new Primrose.Text.OperatingSystem(
-  "Windows", "CTRL", "CTRL", "CTRL_y",
-  "", "HOME", "END",
-  "CTRL", "HOME", "END");
-  if(typeof window !== "undefined") window.Primrose.Text.OperatingSystems.Windows = Windows;
+var Windows = new Primrose.Text.OperatingSystem("Windows", "CTRL", "CTRL", "CTRL_y", "", "HOME", "END", "CTRL", "HOME", "END");
+    if(typeof window !== "undefined") window.Primrose.Text.OperatingSystems.Windows = Windows;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\Windows.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\Windows.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Themes\Dark.js
-(function(){pliny.record({
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\Themes\Dark.js
+(function(){"use strict";
+
+pliny.record({
   parent: "Primrose.Text.Themes",
   name: "Dark",
   description: "| [under construction]"
 });
-const Dark = {
+var Dark = {
   name: "Dark",
   fontFamily: "'Droid Sans Mono', 'Consolas', 'Lucida Console', 'Courier New', 'Courier', monospace",
   cursorColor: "white",
@@ -14474,18 +15172,20 @@ const Dark = {
     fontStyle: "underline italic"
   }
 };
-  if(typeof window !== "undefined") window.Primrose.Text.Themes.Dark = Dark;
+    if(typeof window !== "undefined") window.Primrose.Text.Themes.Dark = Dark;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Themes\Dark.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\Themes\Dark.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Themes\Default.js
-(function(){pliny.record({
+    // start D:\Documents\VR\Primrose\src\Primrose\Text\Themes\Default.js
+(function(){"use strict";
+
+pliny.record({
   parent: "Primrose.Text.Themes",
   name: "Default",
   description: "| [under construction]"
 });
-const Default = {
+var Default = {
   name: "Light",
   fontFamily: "'Droid Sans Mono', 'Consolas', 'Lucida Console', 'Courier New', 'Courier', monospace",
   cursorColor: "black",
@@ -14530,234 +15230,281 @@ const Default = {
     fontStyle: "underline italic"
   }
 };
-  if(typeof window !== "undefined") window.Primrose.Text.Themes.Default = Default;
+    if(typeof window !== "undefined") window.Primrose.Text.Themes.Default = Default;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Themes\Default.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\Text\Themes\Default.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\X\LoginForm.js
-(function(){var COUNTER = 0;
+    // start D:\Documents\VR\Primrose\src\Primrose\X\LoginForm.js
+(function(){"use strict";
 
-const WIDTH = 512,
-  HEIGHT = 150;
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var COUNTER = 0;
+
+var WIDTH = 512,
+    HEIGHT = 150;
 
 pliny.class({
   parent: "Primrose.X",
-    name: "LoginForm",
-    baseClass: "Primrose.Controls.Form",
-    description: "A basic authentication form."
+  name: "LoginForm",
+  baseClass: "Primrose.Controls.Form",
+  description: "A basic authentication form."
 });
-class LoginForm extends Primrose.Controls.Form {
 
-  static create() {
-    return new LoginForm();
-  }
+var LoginForm = function (_Primrose$Controls$Fo) {
+  _inherits(LoginForm, _Primrose$Controls$Fo);
 
-  constructor() {
-    super({
-      id: `Primrose.X.LoginForm[${COUNTER++}]`,
+  _createClass(LoginForm, null, [{
+    key: "create",
+    value: function create() {
+      return new LoginForm();
+    }
+  }]);
+
+  function LoginForm() {
+    _classCallCheck(this, LoginForm);
+
+    var _this = _possibleConstructorReturn(this, (LoginForm.__proto__ || Object.getPrototypeOf(LoginForm)).call(this, {
+      id: "Primrose.X.LoginForm[" + COUNTER++ + "]",
       bounds: new Primrose.Text.Rectangle(0, 0, WIDTH, HEIGHT)
-    });
+    }));
 
-    this.listeners.login = [];
-    this.listeners.signup = [];
+    _this.listeners.login = [];
+    _this.listeners.signup = [];
 
-    this.labelUserName = new Primrose.Controls.AbstractLabel({
-      id: this.id + "-labelUserName",
+    _this.labelUserName = new Primrose.Controls.AbstractLabel({
+      id: _this.id + "-labelUserName",
       bounds: new Primrose.Text.Rectangle(0, 0, WIDTH / 2, HEIGHT / 3),
       fontSize: 32,
       value: "User name:",
       textAlign: "right"
     });
 
-    this.userName = new Primrose.Text.Controls.TextInput({
-      id: this.id + "-userName",
+    _this.userName = new Primrose.Text.Controls.TextInput({
+      id: _this.id + "-userName",
       bounds: new Primrose.Text.Rectangle(WIDTH / 2, 0, WIDTH / 2, HEIGHT / 3),
       fontSize: 32
     });
 
-    this.labelPassword = new Primrose.Controls.AbstractLabel({
-      id: this.id + "-labelPassword",
+    _this.labelPassword = new Primrose.Controls.AbstractLabel({
+      id: _this.id + "-labelPassword",
       bounds: new Primrose.Text.Rectangle(0, HEIGHT / 3, WIDTH / 2, HEIGHT / 3),
       fontSize: 32,
       value: "Password:",
       textAlign: "right"
     });
 
-    this.password = new Primrose.Text.Controls.TextInput({
-      id: this.id + "-password",
+    _this.password = new Primrose.Text.Controls.TextInput({
+      id: _this.id + "-password",
       bounds: new Primrose.Text.Rectangle(WIDTH / 2, HEIGHT / 3, WIDTH / 2, HEIGHT / 3),
       fontSize: 32,
       passwordCharacter: "*"
     });
 
-    this.signupButton = new Primrose.Controls.Button2D({
-      id: this.id + "-signupButton",
+    _this.signupButton = new Primrose.Controls.Button2D({
+      id: _this.id + "-signupButton",
       bounds: new Primrose.Text.Rectangle(0, 2 * HEIGHT / 3, WIDTH / 2, HEIGHT / 3),
       fontSize: 32,
       value: "Sign up"
     });
 
-    this.loginButton = new Primrose.Controls.Button2D({
-      id: this.id + "-loginButton",
+    _this.loginButton = new Primrose.Controls.Button2D({
+      id: _this.id + "-loginButton",
       bounds: new Primrose.Text.Rectangle(WIDTH / 2, 2 * HEIGHT / 3, WIDTH / 2, HEIGHT / 3),
       fontSize: 32,
       value: "Login"
     });
 
-    this.loginButton.addEventListener("click", (evt) => emit.call(this, "login", {
-      target: this
-    }), false);
-    this.signupButton.addEventListener("click", (evt) => emit.call(this, "signup", {
-      target: this
-    }), false);
+    _this.loginButton.addEventListener("click", function (evt) {
+      return emit.call(_this, "login", {
+        target: _this
+      });
+    }, false);
+    _this.signupButton.addEventListener("click", function (evt) {
+      return emit.call(_this, "signup", {
+        target: _this
+      });
+    }, false);
 
-    this.appendChild(this.labelUserName);
-    this.appendChild(this.userName);
-    this.appendChild(this.labelPassword);
-    this.appendChild(this.password);
-    this.appendChild(this.signupButton);
-    this.appendChild(this.loginButton);
+    _this.appendChild(_this.labelUserName);
+    _this.appendChild(_this.userName);
+    _this.appendChild(_this.labelPassword);
+    _this.appendChild(_this.password);
+    _this.appendChild(_this.signupButton);
+    _this.appendChild(_this.loginButton);
+    return _this;
   }
-}
-  if(typeof window !== "undefined") window.Primrose.X.LoginForm = LoginForm;
-})();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\X\LoginForm.js
-  ////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\X\SignupForm.js
-(function(){const WIDTH = 512,
-  HEIGHT = 200;
 
-let COUNTER = 0;
+  return LoginForm;
+}(Primrose.Controls.Form);
+    if(typeof window !== "undefined") window.Primrose.X.LoginForm = LoginForm;
+})();
+    // end D:\Documents\VR\Primrose\src\Primrose\X\LoginForm.js
+    ////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+    // start D:\Documents\VR\Primrose\src\Primrose\X\SignupForm.js
+(function(){"use strict";
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var WIDTH = 512,
+    HEIGHT = 200;
+
+var COUNTER = 0;
 
 pliny.class({
   parent: "Primrose.X",
-    name: "SignupForm",
-    baseClass: "Primrose.Controls.Form",
-    description: "A basic registration form."
+  name: "SignupForm",
+  baseClass: "Primrose.Controls.Form",
+  description: "A basic registration form."
 });
-class SignupForm extends Primrose.Controls.Form {
-  constructor() {
 
-    super({
-      id: `Primrose.X.SignupForm[${COUNTER++}]`,
+var SignupForm = function (_Primrose$Controls$Fo) {
+  _inherits(SignupForm, _Primrose$Controls$Fo);
+
+  function SignupForm() {
+    _classCallCheck(this, SignupForm);
+
+    var _this = _possibleConstructorReturn(this, (SignupForm.__proto__ || Object.getPrototypeOf(SignupForm)).call(this, {
+      id: "Primrose.X.SignupForm[" + COUNTER++ + "]",
       bounds: new Primrose.Text.Rectangle(0, 0, WIDTH, HEIGHT)
-    });
+    }));
 
-    this.listeners.login = [];
-    this.listeners.signup = [];
+    _this.listeners.login = [];
+    _this.listeners.signup = [];
 
-    this.labelEmail = new Primrose.Controls.AbstractLabel({
-      id: this.id + "-labelEmail",
+    _this.labelEmail = new Primrose.Controls.AbstractLabel({
+      id: _this.id + "-labelEmail",
       bounds: new Primrose.Text.Rectangle(0, 0, WIDTH / 2, HEIGHT / 4),
       fontSize: 32,
       value: "Email:",
       textAlign: "right"
     });
 
-    this.email = new Primrose.Text.Controls.TextInput({
-      id: this.id + "-email",
+    _this.email = new Primrose.Text.Controls.TextInput({
+      id: _this.id + "-email",
       bounds: new Primrose.Text.Rectangle(WIDTH / 2, 0, WIDTH / 2, HEIGHT / 4),
       fontSize: 32
     });
 
-    this.labelUserName = new Primrose.Controls.AbstractLabel({
-      id: this.id + "-labelUserName",
+    _this.labelUserName = new Primrose.Controls.AbstractLabel({
+      id: _this.id + "-labelUserName",
       bounds: new Primrose.Text.Rectangle(0, HEIGHT / 4, WIDTH / 2, HEIGHT / 4),
       fontSize: 32,
       value: "User name:",
       textAlign: "right"
     });
 
-    this.userName = new Primrose.Text.Controls.TextInput({
-      id: this.id + "-userName",
+    _this.userName = new Primrose.Text.Controls.TextInput({
+      id: _this.id + "-userName",
       bounds: new Primrose.Text.Rectangle(WIDTH / 2, HEIGHT / 4, WIDTH / 2, HEIGHT / 4),
       fontSize: 32
     });
 
-    this.labelPassword = new Primrose.Controls.AbstractLabel({
-      id: this.id + "-labelPassword",
+    _this.labelPassword = new Primrose.Controls.AbstractLabel({
+      id: _this.id + "-labelPassword",
       bounds: new Primrose.Text.Rectangle(0, HEIGHT / 2, WIDTH / 2, HEIGHT / 4),
       fontSize: 32,
       value: "Password:",
       textAlign: "right"
     });
 
-    this.password = new Primrose.Text.Controls.TextInput({
-      id: this.id + "-password",
+    _this.password = new Primrose.Text.Controls.TextInput({
+      id: _this.id + "-password",
       bounds: new Primrose.Text.Rectangle(WIDTH / 2, HEIGHT / 2, WIDTH / 2, HEIGHT / 4),
       fontSize: 32,
       passwordCharacter: "*"
     });
 
-    this.loginButton = new Primrose.Controls.Button2D({
-      id: this.id + "-loginButton",
+    _this.loginButton = new Primrose.Controls.Button2D({
+      id: _this.id + "-loginButton",
       bounds: new Primrose.Text.Rectangle(0, 3 * HEIGHT / 4, WIDTH / 2, HEIGHT / 4),
       fontSize: 32,
       value: "Log in"
     });
 
-    this.signupButton = new Primrose.Controls.Button2D({
-      id: this.id + "-signupButton",
+    _this.signupButton = new Primrose.Controls.Button2D({
+      id: _this.id + "-signupButton",
       bounds: new Primrose.Text.Rectangle(WIDTH / 2, 3 * HEIGHT / 4, WIDTH / 2, HEIGHT / 4),
       fontSize: 32,
       value: "Sign up"
     });
 
-    this.loginButton.addEventListener("click", (evt) => emit.call(this, "login", {
-      target: this
-    }), false);
-    this.signupButton.addEventListener("click", (evt) => emit.call(this, "signup", {
-      target: this
-    }), false);
+    _this.loginButton.addEventListener("click", function (evt) {
+      return emit.call(_this, "login", {
+        target: _this
+      });
+    }, false);
+    _this.signupButton.addEventListener("click", function (evt) {
+      return emit.call(_this, "signup", {
+        target: _this
+      });
+    }, false);
 
-    this.appendChild(this.labelUserName);
-    this.appendChild(this.userName);
-    this.appendChild(this.labelEmail);
-    this.appendChild(this.email);
-    this.appendChild(this.labelPassword);
-    this.appendChild(this.password);
-    this.appendChild(this.loginButton);
-    this.appendChild(this.signupButton);
+    _this.appendChild(_this.labelUserName);
+    _this.appendChild(_this.userName);
+    _this.appendChild(_this.labelEmail);
+    _this.appendChild(_this.email);
+    _this.appendChild(_this.labelPassword);
+    _this.appendChild(_this.password);
+    _this.appendChild(_this.loginButton);
+    _this.appendChild(_this.signupButton);
+    return _this;
   }
-}
-  if(typeof window !== "undefined") window.Primrose.X.SignupForm = SignupForm;
+
+  return SignupForm;
+}(Primrose.Controls.Form);
+    if(typeof window !== "undefined") window.Primrose.X.SignupForm = SignupForm;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\X\SignupForm.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\Primrose\X\SignupForm.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\CubeTextureLoader\prototype\load.js
-(function(){function load( urls, onLoad, onProgress, onError ) {
+    // start D:\Documents\VR\Primrose\src\THREE\CubeTextureLoader\prototype\load.js
+(function(){"use strict";
+
+function load(urls, onLoad, onProgress, onError) {
   var texture = new THREE.CubeTexture();
-  var loader = new THREE.ImageLoader( this.manager );
-  loader.setCrossOrigin( this.crossOrigin );
-  loader.setPath( this.path );
+  var loader = new THREE.ImageLoader(this.manager);
+  loader.setCrossOrigin(this.crossOrigin);
+  loader.setPath(this.path);
   var loaded = 0;
-  function loadTexture( i ) {
-    loader.load( urls[ i ], function ( image ) {
-      texture.images[ i ] = image;
-      loaded ++;
-      if ( loaded === 6 ) {
+  function loadTexture(i) {
+    loader.load(urls[i], function (image) {
+      texture.images[i] = image;
+      loaded++;
+      if (loaded === 6) {
         texture.needsUpdate = true;
-        if ( onLoad ) onLoad( texture );
+        if (onLoad) onLoad(texture);
       }
-    }, onProgress, onError );
+    }, onProgress, onError);
   }
 
-  for ( var i = 0; i < urls.length; ++ i ) {
-    loadTexture( i );
+  for (var i = 0; i < urls.length; ++i) {
+    loadTexture(i);
   }
 
   return texture;
 }
-  if(typeof window !== "undefined") window.THREE.CubeTextureLoader.prototype.load = load;
+    if(typeof window !== "undefined") window.THREE.CubeTextureLoader.prototype.load = load;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\CubeTextureLoader\prototype\load.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\THREE\CubeTextureLoader\prototype\load.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Euler\prototype\debug.js
-(function(){const cache = {};
+    // start D:\Documents\VR\Primrose\src\THREE\Euler\prototype\debug.js
+(function(){"use strict";
+
+var cache = {};
 function debug(label, digits) {
   var val = this.toString(digits);
   if (val !== cache[label]) {
@@ -14765,13 +15512,15 @@ function debug(label, digits) {
     console.log(label, val);
   }
 }
-  if(typeof window !== "undefined") window.THREE.Euler.prototype.debug = debug;
+    if(typeof window !== "undefined") window.THREE.Euler.prototype.debug = debug;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Euler\prototype\debug.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\THREE\Euler\prototype\debug.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Euler\prototype\toString.js
-(function(){pliny.method({
+    // start D:\Documents\VR\Primrose\src\THREE\Euler\prototype\toString.js
+(function(){"use strict";
+
+pliny.method({
   parent: "THREE.Euler",
   name: "toString ",
   description: "A polyfill method for printing objects.",
@@ -14787,21 +15536,22 @@ function toString(digits) {
     for (var i = 0; i < parts.length; ++i) {
       if (parts[i] === null && parts[i] === undefined) {
         parts[i] = "undefined";
-      }
-      else if(typeof parts[i] !== "string") {
+      } else if (typeof parts[i] !== "string") {
         parts[i] = parts[i].toFixed(digits);
       }
     }
   }
   return "[" + parts.join(", ") + "]";
 }
-  if(typeof window !== "undefined") window.THREE.Euler.prototype.toString = toString;
+    if(typeof window !== "undefined") window.THREE.Euler.prototype.toString = toString;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Euler\prototype\toString.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\THREE\Euler\prototype\toString.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Matrix4\prototype\debug.js
-(function(){const cache = {};
+    // start D:\Documents\VR\Primrose\src\THREE\Matrix4\prototype\debug.js
+(function(){"use strict";
+
+var cache = {};
 function debug(label, digits) {
   var val = this.toString(digits);
   if (val !== cache[label]) {
@@ -14809,13 +15559,15 @@ function debug(label, digits) {
     console.log(label + "\n" + val);
   }
 }
-  if(typeof window !== "undefined") window.THREE.Matrix4.prototype.debug = debug;
+    if(typeof window !== "undefined") window.THREE.Matrix4.prototype.debug = debug;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Matrix4\prototype\debug.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\THREE\Matrix4\prototype\debug.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Matrix4\prototype\toString.js
-(function(){pliny.method({
+    // start D:\Documents\VR\Primrose\src\THREE\Matrix4\prototype\toString.js
+(function(){"use strict";
+
+pliny.method({
   parent: "THREE.Matrix4",
   name: "toString ",
   description: "A polyfill method for printing objects.",
@@ -14826,51 +15578,49 @@ function debug(label, digits) {
   }]
 });
 function toString(digits) {
-  if(digits === undefined){
+  if (digits === undefined) {
     digits = 10;
   }
   this.transpose();
   var parts = this.toArray();
   this.transpose();
   if (digits !== undefined) {
-    for (let i = 0; i < parts.length; ++i) {
-    }
+    for (var i = 0; i < parts.length; ++i) {}
   }
   var output = "";
-  for (let i = 0; i < parts.length; ++i) {
-    if ((i % 4) === 0) {
+  for (var _i = 0; _i < parts.length; ++_i) {
+    if (_i % 4 === 0) {
       output += "| ";
     }
-    if(Math.sign(parts[i]) === -1){
+    if (Math.sign(parts[_i]) === -1) {
       output += "-";
-    }
-    else{
+    } else {
       output += " ";
     }
 
-    if (parts[i] !== null && parts[i] !== undefined) {
-      output += Math.abs(parts[i]).toFixed(digits);
-    }
-    else {
+    if (parts[_i] !== null && parts[_i] !== undefined) {
+      output += Math.abs(parts[_i]).toFixed(digits);
+    } else {
       output += "undefined".substring(0, digits);
     }
 
-    if ((i % 4) === 3) {
+    if (_i % 4 === 3) {
       output += " |\n";
-    }
-    else {
+    } else {
       output += ", ";
     }
   }
   return output;
 }
-  if(typeof window !== "undefined") window.THREE.Matrix4.prototype.toString = toString;
+    if(typeof window !== "undefined") window.THREE.Matrix4.prototype.toString = toString;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Matrix4\prototype\toString.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\THREE\Matrix4\prototype\toString.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Object3D\prototype\addToBrowserEnvironment.js
-(function(){pliny.method({
+    // start D:\Documents\VR\Primrose\src\THREE\Object3D\prototype\addToBrowserEnvironment.js
+(function(){"use strict";
+
+pliny.method({
   parent: "THREE.Object3D",
   name: "addToBrowserEnvironment",
   description: "A polyfill method for being able to add the object to a `Primrose.BrowserEnvironment` using `appendChild()` and to add other elements to the Object3D using `appendChild()` such that they may be pickable in the scene. This half of the polyfill implements the visitor pattern, so that individual objects can define their own processing for this action.",
@@ -14885,6 +15635,8 @@ function toString(digits) {
   }]
 });
 function addToBrowserEnvironment(env, scene) {
+  var _this = this;
+
   scene.add(this);
   // this has to be done as a lambda expression because it needs to capture the
   // env variable provided in the addToBrowserEnvironment call;
@@ -14899,24 +15651,25 @@ function addToBrowserEnvironment(env, scene) {
       description: "Any Primrose.Entity or THREE.Object3D to add to this object."
     }]
   });
-  this.appendChild = (child) => {
+  this.appendChild = function (child) {
     if (child.addToBrowserEnvironment) {
-      return child.addToBrowserEnvironment(env, this);
-    }
-    else {
-      this.add(child);
+      return child.addToBrowserEnvironment(env, _this);
+    } else {
+      _this.add(child);
       env.registerPickableObject(child);
       return child;
     }
   };
 }
-  if(typeof window !== "undefined") window.THREE.Object3D.prototype.addToBrowserEnvironment = addToBrowserEnvironment;
+    if(typeof window !== "undefined") window.THREE.Object3D.prototype.addToBrowserEnvironment = addToBrowserEnvironment;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Object3D\prototype\addToBrowserEnvironment.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\THREE\Object3D\prototype\addToBrowserEnvironment.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Quaternion\prototype\debug.js
-(function(){const cache = {};
+    // start D:\Documents\VR\Primrose\src\THREE\Quaternion\prototype\debug.js
+(function(){"use strict";
+
+var cache = {};
 function debug(label, digits) {
   var val = this.toString(digits);
   if (val !== cache[label]) {
@@ -14924,13 +15677,15 @@ function debug(label, digits) {
     console.log(label, val);
   }
 }
-  if(typeof window !== "undefined") window.THREE.Quaternion.prototype.debug = debug;
+    if(typeof window !== "undefined") window.THREE.Quaternion.prototype.debug = debug;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Quaternion\prototype\debug.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\THREE\Quaternion\prototype\debug.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Quaternion\prototype\toString.js
-(function(){pliny.method({
+    // start D:\Documents\VR\Primrose\src\THREE\Quaternion\prototype\toString.js
+(function(){"use strict";
+
+pliny.method({
   parent: "THREE.Quaternion",
   name: "toString ",
   description: "A polyfill method for printing objects.",
@@ -14946,21 +15701,22 @@ function toString(digits) {
     for (var i = 0; i < parts.length; ++i) {
       if (parts[i] !== null && parts[i] !== undefined) {
         parts[i] = parts[i].toFixed(digits);
-      }
-      else {
+      } else {
         parts[i] = "undefined";
       }
     }
   }
   return "{" + parts.join(", ") + "}";
 }
-  if(typeof window !== "undefined") window.THREE.Quaternion.prototype.toString = toString;
+    if(typeof window !== "undefined") window.THREE.Quaternion.prototype.toString = toString;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Quaternion\prototype\toString.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\THREE\Quaternion\prototype\toString.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Vector3\prototype\debug.js
-(function(){const cache = {};
+    // start D:\Documents\VR\Primrose\src\THREE\Vector3\prototype\debug.js
+(function(){"use strict";
+
+var cache = {};
 function debug(label, digits) {
   var val = this.toString(digits);
   if (val !== cache[label]) {
@@ -14968,13 +15724,15 @@ function debug(label, digits) {
     console.log(label, val);
   }
 }
-  if(typeof window !== "undefined") window.THREE.Vector3.prototype.debug = debug;
+    if(typeof window !== "undefined") window.THREE.Vector3.prototype.debug = debug;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Vector3\prototype\debug.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\THREE\Vector3\prototype\debug.js
+    ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-  // start C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Vector3\prototype\toString.js
-(function(){pliny.method({
+    // start D:\Documents\VR\Primrose\src\THREE\Vector3\prototype\toString.js
+(function(){"use strict";
+
+pliny.method({
   parent: "THREE.Vector3",
   name: "toString ",
   description: "A polyfill method for printing objects.",
@@ -14990,15 +15748,14 @@ function toString(digits) {
     for (var i = 0; i < parts.length; ++i) {
       if (parts[i] !== null && parts[i] !== undefined) {
         parts[i] = parts[i].toFixed(digits);
-      }
-      else {
+      } else {
         parts[i] = "undefined";
       }
     }
   }
   return "<" + parts.join(", ") + ">";
 }
-  if(typeof window !== "undefined") window.THREE.Vector3.prototype.toString = toString;
+    if(typeof window !== "undefined") window.THREE.Vector3.prototype.toString = toString;
 })();
-  // end C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Vector3\prototype\toString.js
-  ////////////////////////////////////////////////////////////////////////////////
+    // end D:\Documents\VR\Primrose\src\THREE\Vector3\prototype\toString.js
+    ////////////////////////////////////////////////////////////////////////////////

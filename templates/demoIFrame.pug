@@ -38,9 +38,10 @@ html
       link(type="text/css", rel="stylesheet", href=fileRoot + "doc/demoUI" + cssExt)
       style #frontBuffer { background-image:url(screenshot.jpg); }
       if debug
-        script(src=fileRoot + "node_modules/pliny/pliny" + jsExt)
+        script(src=fileRoot + "node_modules/bare-bones-logger/bare-bones-logger" + jsExt)
+        script logger.setup(logger.HTTP, "/logger");
         script(src=fileRoot + "PrimroseDependencies" + jsExt)
-        script(src=fileRoot + "PrimroseLib-WithDoc" + jsExt)
+        script(src=fileRoot + "PrimroseLib" + jsExt)
       else
         script(src=fileRoot + "Primrose" + jsExt)
   body

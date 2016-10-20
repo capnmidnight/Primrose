@@ -12,42 +12,40 @@ var gulp = require("gulp"),
     "node_modules/three/build/three.js",
     "node_modules/three/examples/js/loaders/OBJLoader.js",
     "node_modules/three/examples/js/loaders/MTLLoader.js",
-    "../bare-bones-logger/bare-bones-logger.js",
     "namegen.js"
   ], null, null, true),
   js = nt.js("PrimroseLib-WithDoc", "src", ["format"], pliny.carve.bind(pliny, "PrimroseLib-WithDoc.js", "PrimroseLib.js", "PrimroseDocumentation.js")),
-  jsDev = nt.js("PrimroseLib-WithDoc", "src", ["format"], pliny.carve.bind(pliny, "PrimroseLib-WithDoc.js", "PrimroseLib.js", "PrimroseDocumentation.js"), true),
-  min = nt.min("PrimroseDocumentation", ["PrimroseDocumentation.js"], [js.build]),
-  tot = nt.cat("Primrose", ["PrimroseDependencies.js", "PrimroseLib.js"], [deps.build, min.build]),
+  min = nt.min("PrimroseDocumentation", ["PrimroseDocumentation.js"], [js.debug]),
+  tot = nt.cat("Primrose", ["PrimroseDependencies.js", "PrimroseLib.js"], [deps.debug, min.debug]),
   html = nt.html("Primrose", ["*.pug", "doc/**/*.pug", "templates/**/*.pug"]),
   css = nt.css("Primrose", ["*.styl", "doc/**/*.styl"]);
 
 gulp.task("format", [js.format]);
-gulp.task("js", [jsDev.default]);
+gulp.task("js", [js.default]);
 gulp.task("html", [html.debug]);
-gulp.task("css", [css.build]);
+gulp.task("css", [css.debug]);
 
 gulp.task("default", [
   deps.default,
-  jsDev.default,
+  js.default,
   html.default,
   css.default
 ]);
 
 gulp.task("debug", [
-  tot.build,
+  tot.debug,
   html.debug,
-  css.build
+  css.debug
 ]);
 
 gulp.task("test", [
-  tot.build,
+  tot.release,
   html.test,
-  css.build
+  css.release
 ]);
 
 gulp.task("release",  [
-  tot.build,
+  tot.release,
   html.release,
-  css.build
+  css.release
 ]);

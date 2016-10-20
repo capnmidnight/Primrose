@@ -22,9 +22,10 @@
     <title>Primrose VR: WebVR Application Framework</title><!-- end main.pug title block -->
     <link type="text/css" rel="stylesheet" href="../../doc/demoUI.css">
     <style>#frontBuffer { background-image:url(screenshot.jpg); }</style>
-    <script src="../../node_modules/pliny/pliny.js"></script>
+    <script src="../../node_modules/bare-bones-logger/bare-bones-logger.js"></script>
+    <script>logger.setup(logger.HTTP, "/logger");</script>
     <script src="../../PrimroseDependencies.js"></script>
-    <script src="../../PrimroseLib-WithDoc.js"></script>
+    <script src="../../PrimroseLib.js"></script>
   </head>
   <body><!-- start main.pug main block -->
     <h1>Example: Pacman</h1>
