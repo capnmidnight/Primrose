@@ -122,6 +122,7 @@ class VR extends Primrose.PoseInputProcessor {
 
     return promise
       .then(PointerLock.exit)
+      .catch((exp) => console.warn(exp))
       .then(() => this.connect(0));
   }
 
