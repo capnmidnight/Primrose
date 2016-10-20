@@ -265,8 +265,8 @@ class Pointer extends Primrose.AbstractEventEmitter {
         lastHit.point.copy(currentHit.point);
       }
 
-      this.mesh.visible = !this.useGaze;
       this.gazeInner.visible = this.useGaze;
+      this.mesh.visible = !this.useGaze;
 
       if(changed){
         if(lastHit){
@@ -291,7 +291,7 @@ class Pointer extends Primrose.AbstractEventEmitter {
         if(evt.buttons){
           this.emit("pointerstart", evt);
           if(lastHit){
-            lastHit.time = currentHit.time;
+            lastHit.time = performance.now();
           }
         }
         else{

@@ -352,7 +352,6 @@ class FPSInput extends Primrose.AbstractEventEmitter {
 
     this.head.showPointer = this.VR.hasOrientation;
     this.mousePointer.showPointer = (this.hasMouse || this.hasGamepad) && !this.hasMotionControllers;
-    this.mousePointer.root.visible = this.VR.isPresenting;
     this.Keyboard.enabled = this.Touch.enabled = this.Mouse.enabled = !this.hasMotionControllers;
     if (this.Gamepad_0) {
       this.Gamepad_0.enabled = !this.hasMotionControllers;
