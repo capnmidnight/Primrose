@@ -1313,6 +1313,8 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
     var update = function update(dt) {
       dt *= MILLISECONDS_TO_SECONDS;
       movePlayer(dt);
+      moveUI();
+      doPicking();
       moveSky();
       moveGround();
       _this.network.update(dt);
@@ -1323,6 +1325,53 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
 
     var movePlayer = function movePlayer(dt) {
       _this.input.update(dt);
+    };
+
+    var uiTurn = 0;
+    var followEuler = new THREE.Euler(),
+        maxX = -Math.PI / 4,
+        maxY = Math.PI / 6;
+
+    var moveUI = function moveUI(dt) {
+      _this.ui.position.copy(app.input.head.position);
+      followEuler.setFromQuaternion(app.input.head.quaternion);
+      var turn = followEuler.y,
+          deltaTurnA = turn - uiTurn,
+          deltaTurnB = deltaTurnA + Math.PI * 2,
+          deltaTurnC = deltaTurnA - Math.PI * 2,
+          deltaTurn = void 0;
+      if (Math.abs(deltaTurnA) < Math.abs(deltaTurnB)) {
+        if (Math.abs(deltaTurnA) < Math.abs(deltaTurnC)) {
+          deltaTurn = deltaTurnA;
+        } else {
+          deltaTurn = deltaTurnC;
+        }
+      } else if (Math.abs(deltaTurnB) < Math.abs(deltaTurnC)) {
+        deltaTurn = deltaTurnB;
+      } else {
+        deltaTurn = deltaTurnC;
+      }
+
+      if (Math.abs(deltaTurn) > maxY) {
+        uiTurn += deltaTurn * 0.02;
+      }
+
+      followEuler.set(maxX, uiTurn, 0, "YXZ");
+      _this.ui.quaternion.setFromEuler(followEuler);
+    };
+
+    var doPicking = function doPicking() {
+      for (var i = _this.pickableObjects.length - 1; i >= 0; --i) {
+        var inScene = false;
+        for (var head = _this.pickableObjects[i].parent; head !== null; head = head.parent) {
+          if (head === _this.scene) {
+            inScene = true;
+          }
+        }
+        if (!inScene) {
+          _this.pickableObjects.splice(i, 1);
+        }
+      }
       _this.input.resolvePicking(_this.pickableObjects.filter(function (obj) {
         return !obj.disabled;
       }));
@@ -1613,7 +1662,8 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
         START_POINT = new THREE.Vector3();
 
     _this.selectControl = function (evt) {
-      var obj = evt.hit && evt.hit.object;
+      var hit = evt.hit || evt.lastHit,
+          obj = hit && hit.object;
 
       if (evt.type === "exit" && evt.lastHit && evt.lastHit.object === _this.ground) {
         evt.pointer.disk.visible = false;
@@ -1650,13 +1700,13 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
       }
 
       if (evt.type === "pointerstart" || evt.type === "gazecomplete") {
-        obj = obj && (obj.surface || obj.button);
-        if (obj !== _this.currentControl) {
+        var ctrl = obj && (obj.surface || obj.button);
+        if (ctrl !== _this.currentControl) {
           if (_this.currentControl) {
             _this.currentControl.blur();
             _this.input.Mouse.commands.pitch.disabled = _this.input.Mouse.commands.heading.disabled = false;
           }
-          _this.currentControl = obj;
+          _this.currentControl = ctrl;
           if (_this.currentControl) {
             _this.currentControl.focus();
             _this.input.Mouse.commands.pitch.disabled = _this.input.Mouse.commands.heading.disabled = !_this.input.VR.isPresenting;
@@ -1669,6 +1719,11 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
           _this.currentControl.dispatchEvent(evt);
         } else {
           console.log(_this.currentControl);
+        }
+      } else {
+        var handler = obj && obj["on" + evt.type];
+        if (handler) {
+          handler(app);
         }
       }
     };
@@ -1718,6 +1773,9 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
       _this.scene.add(_this.ground);
       _this.registerPickableObject(_this.ground);
     }
+
+    _this.ui = new THREE.Object3D();
+    _this.scene.add(_this.ui);
 
     if (_this.passthrough) {
       _this.camera.add(_this.passthrough.mesh);
@@ -1853,6 +1911,22 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
 
       _this.input = new Primrose.Input.FPSInput(_this.renderer.domElement, _this.options);
       _this.input.addEventListener("zero", _this.zero, false);
+      _this.input.VR.ready.then(function (displays) {
+        return displays.forEach(function (display, i) {
+          window.addEventListener("vrdisplayactivate", function (evt) {
+            if (evt.display === display) {
+              (function () {
+                var exitVR = function exitVR() {
+                  window.removeEventListener("vrdisplaydeactivate", exitVR);
+                  _this.input.VR.cancel();
+                };
+                window.addEventListener("vrdisplaydeactivate", exitVR, false);
+                _this.goFullScreen(i);
+              })();
+            }
+          }, false);
+        });
+      });
 
       _this.fader = colored(box(1, 1, 1), 0x000000, { opacity: 0, transparent: true, unshaded: true, side: THREE.BackSide });
       _this.fader.visible = false;
@@ -3610,10 +3684,12 @@ var Pointer = function (_Primrose$AbstractEve) {
           }
         }
 
+        var selected = false;
         if (dButtons) {
           if (evt.buttons) {
             this.emit("pointerstart", evt);
           } else {
+            selected = !!currentHit;
             this.emit("pointerend", evt);
           }
         } else if (moved) {
@@ -3633,6 +3709,7 @@ var Pointer = function (_Primrose$AbstractEve) {
           } else if (dt !== null) {
             if (dt >= this.gazeTimeout) {
               this.gazeOuter.visible = false;
+              selected = !!currentHit;
               this.emit("gazecomplete", evt);
               lastHit.time = null;
             } else {
@@ -3644,6 +3721,10 @@ var Pointer = function (_Primrose$AbstractEve) {
               }
             }
           }
+        }
+
+        if (selected) {
+          this.emit("select", evt);
         }
 
         if (changed) {
@@ -3696,7 +3777,7 @@ var Pointer = function (_Primrose$AbstractEve) {
   return Pointer;
 }(Primrose.AbstractEventEmitter);
 
-Pointer.EVENTS = ["pointerstart", "pointerend", "pointermove", "gazestart", "gazemove", "gazecomplete", "gazecancel", "exit", "enter"];
+Pointer.EVENTS = ["pointerstart", "pointerend", "pointermove", "gazestart", "gazemove", "gazecomplete", "gazecancel", "exit", "enter", "select"];
     if(typeof window !== "undefined") window.Primrose.Pointer = Pointer;
 })();
     // end D:\Documents\VR\Primrose\src\Primrose\Pointer.js
@@ -4844,6 +4925,31 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var COUNTER = 0,
     _ = priv();
 
+// Videos don't auto-play on mobile devices, so let's make them all play whenever
+// we tap the screen.
+var processedVideos = [];
+function findAndFixVideo(evt) {
+  var vids = document.querySelectorAll("video");
+  for (var i = 0; i < vids.length; ++i) {
+    fixVideo(vids[i]);
+  }
+  window.removeEventListener("touchend", findAndFixVideo);
+  window.removeEventListener("mouseup", findAndFixVideo);
+  window.removeEventListener("keyup", findAndFixVideo);
+}
+
+function fixVideo(vid) {
+  if (processedVideos.indexOf(vid) === -1) {
+    makeVideoPlayableInline(vid, false);
+    processedVideos.push(vid);
+    vid.play();
+  }
+}
+
+window.addEventListener("touchend", findAndFixVideo, false);
+window.addEventListener("mouseup", findAndFixVideo, false);
+window.addEventListener("keyup", findAndFixVideo, false);
+
 var Image = function (_Primrose$Entity) {
   _inherits(Image, _Primrose$Entity);
 
@@ -4949,6 +5055,11 @@ var Image = function (_Primrose$Entity) {
     value: function loadVideos(videos, progress) {
       var _this4 = this;
 
+      this._elements.splice(0);
+      this._canvases.splice(0);
+      this._contexts.splice(0);
+      this._textures.splice(0);
+
       return Promise.all(Array.prototype.map.call(videos, function (spec, i) {
         return new Promise(function (resolve, reject) {
           var video = null;
@@ -4969,42 +5080,42 @@ var Image = function (_Primrose$Entity) {
           video.autoplay = true;
           video.loop = true;
           video.controls = true;
-          video.playsinline = true;
-          video.setAttribute("webkit-playsinline", true);
-          video.oncanplaythrough = function () {
+          video.setAttribute("playsinline", "");
+          video.setAttribute("webkit-playsinline", "");
+          video.oncanplay = function () {
+            video.oncanplay = null;
+            video.onerror = null;
+
             var width = video.videoWidth,
                 height = video.videoHeight,
                 p2Width = Math.pow(2, Math.ceil(Math.log2(width))),
                 p2Height = Math.pow(2, Math.ceil(Math.log2(height)));
 
-            if (width === p2Width && height === p2Height) {
-              _this4._meshes[i] = textured(_this4.options.geometry, elem, _this4.options);
-            } else {
-              _this4._elements[i] = video;
+            _this4._elements[i] = video;
 
+            _this4._setGeometry({
+              maxU: width / p2Width,
+              maxV: height / p2Height
+            });
+
+            if ((width !== p2Width || height !== p2Height) && !_this4.options.disableVideoCopying) {
               _this4._canvases[i] = document.createElement("canvas");
               _this4._canvases[i].id = (video.id || _this4.id) + "-canvas";
               _this4._canvases[i].width = p2Width;
               _this4._canvases[i].height = p2Height;
 
               _this4._contexts[i] = _this4._canvases[i].getContext("2d");
-
-              _this4._setGeometry({
-                maxU: width / p2Width,
-                maxV: height / p2Height
-              });
-
-              _this4._meshes[i] = textured(_this4.options.geometry, _this4._canvases[i], _this4.options);
             }
 
+            _this4._meshes[i] = textured(_this4.options.geometry, _this4._canvases[i] || _this4._elements[i], _this4.options);
+
             _this4._textures[i] = _this4._meshes[i].material.map;
-            video.oncanplaythrough = null;
             resolve();
           };
           if (!video.parentElement) {
             document.body.insertBefore(video, document.body.children[0]);
           }
-          video.play();
+          fixVideo(video);
         });
       })).then(function () {
         return _this4.isVideo = true;
@@ -5529,7 +5640,7 @@ var FPSInput = function (_Primrose$AbstractEve) {
 
     var _this = _possibleConstructorReturn(this, (FPSInput.__proto__ || Object.getPrototypeOf(FPSInput)).call(this));
 
-    DOMElement = DOMElement || document.documentElement;
+    DOMElement = window || DOMElement || document.documentElement;
     _this.options = options;
     _this._handlers.zero = [];
     _this._handlers.motioncontroller = [];
@@ -6853,7 +6964,6 @@ var Touch = function (_Primrose$InputProces) {
 
     var _this = _possibleConstructorReturn(this, (Touch.__proto__ || Object.getPrototypeOf(Touch)).call(this, "Touch", commands, axes));
 
-    console.log(DOMElement);
     DOMElement = DOMElement || window;
 
     var setState = function setState(stateChange, setAxis, event) {
@@ -6884,7 +6994,6 @@ var Touch = function (_Primrose$InputProces) {
         fingerState |= 1 << _t.identifier;
       }
       _this.setAxis("FINGERS", fingerState);
-      event.preventDefault();
     };
 
     DOMElement.addEventListener("touchstart", setState.bind(_this, true, false), false);
@@ -6955,13 +7064,14 @@ var VR = function (_Primrose$PoseInputPr) {
     _this.lastStageWidth = null;
     _this.lastStageDepth = null;
     _this.isStereo = false;
+
+    WebVRStandardMonitor();
     _this.ready = navigator.getVRDisplays().then(function (displays) {
-      // We skip the WebVR-Polyfill's Mouse and Keyboard display because it does not
-      // play well with our interaction model.
+      // We skip the Standard Monitor and Magic Window on iOS because we can't
+      // go fullscreen on those systems.
       _this.displays.push.apply(_this.displays, displays.filter(function (display) {
         return !isiOS || VR.isStereoDisplay(display);
       }));
-      console.log("VR Displays", _this.displays);
       return _this.displays;
     });
     return _this;
@@ -7045,7 +7155,9 @@ var VR = function (_Primrose$PoseInputPr) {
         promise = promise.then(Orientation.unlock);
       }
 
-      return promise.then(PointerLock.exit).then(function () {
+      return promise.then(PointerLock.exit).catch(function (exp) {
+        return console.warn(exp);
+      }).then(function () {
         return _this3.connect(0);
       });
     }
