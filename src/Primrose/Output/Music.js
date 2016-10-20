@@ -16,79 +16,91 @@ pliny.class({
     name: "Music",
     description: "| [under construction]"
 });
-
-function Music(context, type, numNotes) {
-  this.audio = context || new AudioContext();
-  if (this.audio && this.audio.createGain) {
+class Music {
+  constructor(audio, type, numNotes) {
     if (numNotes === undefined) {
       numNotes = MAX_NOTE_COUNT;
     }
-    if (type === undefined) {
-      type = "sawtooth";
-    }
-    this.available = true;
-    this.mainVolume = this.audio.createGain();
-    this.mainVolume.connect(this.audio.destination);
-    this.numNotes = numNotes;
-    this.oscillators = [];
+    this._type = type || "sawtooth";
+    this.isAvailable = false;
+    this.audio = audio;
+    this.audio.ready.then(() => {
+      const ctx = this.audio.context;
+      this.mainVolume = ctx.createGain();
+      this.mainVolume.connect(this.audio.mainVolume);
+      this.mainVolume.gain.value = 1;
+      this.numNotes = numNotes;
+      this.oscillators = [];
 
-    for (var i = 0; i < this.numNotes; ++i) {
-      var o = this.audio.createOscillator(),
-        g = this.audio.createGain();
-      o.type = type;
-      o.frequency.value = 0;
-      o.connect(g);
-      o.start();
-      g.connect(this.mainVolume);
-      this.oscillators.push({
-        osc: o,
-        gn: g,
-        timeout: null
-      });
+      for (var i = 0; i < this.numNotes; ++i) {
+        var g = ctx.createGain(),
+          o = ctx.createOscillator();
+        g.connect(this.mainVolume);
+        g.gain.value = 0;
+        o.type = this.type;
+        o.frequency.value = 0;
+        o.connect(g);
+        o.start();
+        this.oscillators.push({
+          osc: o,
+          gn: g,
+          timeout: null
+        });
+      }
+      this.isAvailable = true;
+    });
+  }
+
+  get type() {
+    return this._type;
+  }
+
+  set type(v){
+    if(this.isAvailable){
+      this._type = v;
+      this.oscillators.forEach((o) => o.osc.type = this._type);
     }
   }
-  else {
-    this.available = false;
+
+  noteOn (volume, i, n) {
+    if (this.isAvailable) {
+      if (n === undefined) {
+        n = 0;
+      }
+      var o = this.oscillators[n % this.numNotes],
+        f = piano(parseFloat(i) + 1);
+      o.gn.gain.value = volume;
+      o.osc.frequency.setValueAtTime(f, this.audio.context.currentTime);
+      return o;
+    }
+  }
+
+  noteOff (n) {
+    if (this.isAvailable) {
+      if (n === undefined) {
+        n = 0;
+      }
+      var o = this.oscillators[n % this.numNotes];
+      o.osc.frequency.setValueAtTime(0, this.audio.context.currentTime);
+      o.gn.gain.value = 0;
+    }
+  }
+
+  play (i, volume, duration, n) {
+    if (this.isAvailable) {
+      if (typeof n !== "number") {
+        n = 0;
+      }
+      var o = this.noteOn(volume, i, n);
+      if (o.timeout) {
+        clearTimeout(o.timeout);
+        o.timeout = null;
+      }
+      o.timeout = setTimeout((function (n, o) {
+          this.noteOff(n);
+          o.timeout = null;
+        })
+        .bind(this, n, o), duration * 1000);
+    }
   }
 }
-
-Music.prototype.noteOn = function (volume, i, n) {
-  if (this.available) {
-    if (n === undefined) {
-      n = 0;
-    }
-    var o = this.oscillators[n % this.numNotes],
-      f = piano(parseFloat(i) + 1);
-    o.gn.gain.value = volume;
-    o.osc.frequency.setValueAtTime(f, 0);
-    return o;
-  }
-};
-
-Music.prototype.noteOff = function (n) {
-  if (this.available) {
-    if (n === undefined) {
-      n = 0;
-    }
-    var o = this.oscillators[n % this.numNotes];
-    o.osc.frequency.setValueAtTime(0, 0);
-  }
-};
-
-Music.prototype.play = function (i, volume, duration, n) {
-  if (this.available) {
-    if (typeof n !== "number") {
-      n = 0;
-    }
-    var o = this.noteOn(volume, i, n);
-    if (o.timeout) {
-      clearTimeout(o.timeout);
-      o.timeout = null;
-    }
-    o.timeout = setTimeout((function (n, o) {
-        this.noteOff(n);
-        o.timeout = null;
-      })
-      .bind(this, n, o), duration * 1000);
-  }
-};
