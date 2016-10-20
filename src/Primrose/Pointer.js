@@ -289,6 +289,9 @@ class Pointer extends Primrose.AbstractEventEmitter {
       if(dButtons){
         if(evt.buttons){
           this.emit("pointerstart", evt);
+          if(lastHit){
+            lastHit.time = currentHit.time;
+          }
         }
         else{
           selected = !!currentHit;
