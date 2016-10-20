@@ -2443,8 +2443,8 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
         maxY = Math.PI / 6;
 
     var moveUI = function moveUI(dt) {
-      _this.ui.position.copy(app.input.head.position);
-      followEuler.setFromQuaternion(app.input.head.quaternion);
+      _this.ui.position.copy(_this.input.head.position);
+      followEuler.setFromQuaternion(_this.input.head.quaternion);
       var turn = followEuler.y,
           deltaTurnA = turn - uiTurn,
           deltaTurnB = deltaTurnA + Math.PI * 2,
@@ -2712,7 +2712,7 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
       });
     }
 
-    _this.music = new Primrose.Output.Music(_this.audio.context);
+    _this.music = new Primrose.Output.Music(_this.audio);
 
     _this.pickableObjects = [];
     _this.registerPickableObject = _this.pickableObjects.push.bind(_this.pickableObjects);
@@ -2819,7 +2819,9 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
           _this.currentControl = ctrl;
           if (_this.currentControl) {
             _this.currentControl.focus();
-            _this.input.Mouse.commands.pitch.disabled = _this.input.Mouse.commands.heading.disabled = !_this.input.VR.isPresenting;
+            if (obj.surface) {
+              _this.input.Mouse.commands.pitch.disabled = _this.input.Mouse.commands.heading.disabled = !_this.input.VR.isPresenting;
+            }
           }
         }
       }
@@ -5336,7 +5338,7 @@ var Pointer = function (_Primrose$AbstractEve) {
     _this.root.add(_this.mesh);
     _this.root.add(_this.gazeInner);
 
-    _this.useGaze = false;
+    _this.useGaze = _this.options.useGaze;
     _(_this, {
       lastHit: null
     });
@@ -5436,7 +5438,7 @@ var Pointer = function (_Primrose$AbstractEve) {
     key: "resolvePicking",
     value: function resolvePicking(objects) {
       this.mesh.visible = false;
-
+      this.gazeInner.visible = false;
       this.mesh.material = material("", {
         color: this.color,
         unshaded: true
@@ -5461,6 +5463,13 @@ var Pointer = function (_Primrose$AbstractEve) {
         };
 
         if (currentHit) {
+          this.gazeInner.position.z = 0.02 - currentHit.distance;
+        } else {
+          this.gazeInner.position.z = GAZE_RING_DISTANCE;
+        }
+        this.mesh.position.z = this.gazeInner.position.z - 0.02;
+
+        if (currentHit) {
           currentHit.time = performance.now();
 
           this.mesh.material = material("", {
@@ -5473,6 +5482,7 @@ var Pointer = function (_Primrose$AbstractEve) {
           lastHit.point.copy(currentHit.point);
         }
 
+        this.gazeInner.visible = this.useGaze;
         this.mesh.visible = !this.useGaze;
 
         if (changed) {
@@ -5497,6 +5507,9 @@ var Pointer = function (_Primrose$AbstractEve) {
         if (dButtons) {
           if (evt.buttons) {
             this.emit("pointerstart", evt);
+            if (lastHit) {
+              lastHit.time = performance.now();
+            }
           } else {
             selected = !!currentHit;
             this.emit("pointerend", evt);
@@ -5540,15 +5553,6 @@ var Pointer = function (_Primrose$AbstractEve) {
           _priv.lastHit = currentHit;
         }
       }
-    }
-  }, {
-    key: "useGaze",
-    get: function get() {
-      return this.gazeInner.visible;
-    },
-    set: function set(v) {
-      this.gazeInner.visible = !!v;
-      this.mesh.visible = !v;
     }
   }, {
     key: "material",
@@ -6886,13 +6890,13 @@ var Button3D = function (_Primrose$BaseControl) {
 
       switch (evt.type) {
         case "pointerstart":
-          this.startUV(evt.hit.uv);
+          this.startUV();
           break;
         case "pointerend":
           this.endPointer(evt);
           break;
         case "gazecomplete":
-          this.startUV(evt.hit.uv);
+          this.startUV();
           setTimeout(function () {
             return _this2.endPointer(evt);
           }, 100);
@@ -8596,7 +8600,6 @@ var FPSInput = function (_Primrose$AbstractEve) {
 
       this.head.showPointer = this.VR.hasOrientation;
       this.mousePointer.showPointer = (this.hasMouse || this.hasGamepad) && !this.hasMotionControllers;
-      this.mousePointer.root.visible = this.VR.isPresenting;
       this.Keyboard.enabled = this.Touch.enabled = this.Mouse.enabled = !this.hasMotionControllers;
       if (this.Gamepad_0) {
         this.Gamepad_0.enabled = !this.hasMotionControllers;
@@ -10994,6 +10997,10 @@ HapticGlove.DEFAULT_HOST = document.location.hostname;
     // start D:\Documents\VR\Primrose\src\Primrose\Output\Music.js
 (function(){"use strict";
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 /* polyfill */
 Window.prototype.AudioContext = Window.prototype.AudioContext || Window.prototype.webkitAudioContext || function () {};
 
@@ -11010,79 +11017,108 @@ pliny.class({
   description: "| [under construction]"
 });
 
-function Music(context, type, numNotes) {
-  this.audio = context || new AudioContext();
-  if (this.audio && this.audio.createGain) {
+var Music = function () {
+  function Music(audio, type, numNotes) {
+    var _this = this;
+
+    _classCallCheck(this, Music);
+
     if (numNotes === undefined) {
       numNotes = MAX_NOTE_COUNT;
     }
-    if (type === undefined) {
-      type = "sawtooth";
-    }
-    this.available = true;
-    this.mainVolume = this.audio.createGain();
-    this.mainVolume.connect(this.audio.destination);
-    this.numNotes = numNotes;
-    this.oscillators = [];
+    this._type = type || "sawtooth";
+    this.isAvailable = false;
+    this.audio = audio;
+    this.audio.ready.then(function () {
+      var ctx = _this.audio.context;
+      _this.mainVolume = ctx.createGain();
+      _this.mainVolume.connect(_this.audio.mainVolume);
+      _this.mainVolume.gain.value = 1;
+      _this.numNotes = numNotes;
+      _this.oscillators = [];
 
-    for (var i = 0; i < this.numNotes; ++i) {
-      var o = this.audio.createOscillator(),
-          g = this.audio.createGain();
-      o.type = type;
-      o.frequency.value = 0;
-      o.connect(g);
-      o.start();
-      g.connect(this.mainVolume);
-      this.oscillators.push({
-        osc: o,
-        gn: g,
-        timeout: null
-      });
-    }
-  } else {
-    this.available = false;
+      for (var i = 0; i < _this.numNotes; ++i) {
+        var g = ctx.createGain(),
+            o = ctx.createOscillator();
+        g.connect(_this.mainVolume);
+        g.gain.value = 0;
+        o.type = _this.type;
+        o.frequency.value = 0;
+        o.connect(g);
+        o.start();
+        _this.oscillators.push({
+          osc: o,
+          gn: g,
+          timeout: null
+        });
+      }
+      _this.isAvailable = true;
+    });
   }
-}
 
-Music.prototype.noteOn = function (volume, i, n) {
-  if (this.available) {
-    if (n === undefined) {
-      n = 0;
+  _createClass(Music, [{
+    key: "noteOn",
+    value: function noteOn(volume, i, n) {
+      if (this.isAvailable) {
+        if (n === undefined) {
+          n = 0;
+        }
+        var o = this.oscillators[n % this.numNotes],
+            f = piano(parseFloat(i) + 1);
+        o.gn.gain.value = volume;
+        o.osc.frequency.setValueAtTime(f, this.audio.context.currentTime);
+        return o;
+      }
     }
-    var o = this.oscillators[n % this.numNotes],
-        f = piano(parseFloat(i) + 1);
-    o.gn.gain.value = volume;
-    o.osc.frequency.setValueAtTime(f, 0);
-    return o;
-  }
-};
+  }, {
+    key: "noteOff",
+    value: function noteOff(n) {
+      if (this.isAvailable) {
+        if (n === undefined) {
+          n = 0;
+        }
+        var o = this.oscillators[n % this.numNotes];
+        o.osc.frequency.setValueAtTime(0, this.audio.context.currentTime);
+        o.gn.gain.value = 0;
+      }
+    }
+  }, {
+    key: "play",
+    value: function play(i, volume, duration, n) {
+      if (this.isAvailable) {
+        if (typeof n !== "number") {
+          n = 0;
+        }
+        var o = this.noteOn(volume, i, n);
+        if (o.timeout) {
+          clearTimeout(o.timeout);
+          o.timeout = null;
+        }
+        o.timeout = setTimeout(function (n, o) {
+          this.noteOff(n);
+          o.timeout = null;
+        }.bind(this, n, o), duration * 1000);
+      }
+    }
+  }, {
+    key: "type",
+    get: function get() {
+      return this._type;
+    },
+    set: function set(v) {
+      var _this2 = this;
 
-Music.prototype.noteOff = function (n) {
-  if (this.available) {
-    if (n === undefined) {
-      n = 0;
+      if (this.isAvailable) {
+        this._type = v;
+        this.oscillators.forEach(function (o) {
+          return o.osc.type = _this2._type;
+        });
+      }
     }
-    var o = this.oscillators[n % this.numNotes];
-    o.osc.frequency.setValueAtTime(0, 0);
-  }
-};
+  }]);
 
-Music.prototype.play = function (i, volume, duration, n) {
-  if (this.available) {
-    if (typeof n !== "number") {
-      n = 0;
-    }
-    var o = this.noteOn(volume, i, n);
-    if (o.timeout) {
-      clearTimeout(o.timeout);
-      o.timeout = null;
-    }
-    o.timeout = setTimeout(function (n, o) {
-      this.noteOff(n);
-      o.timeout = null;
-    }.bind(this, n, o), duration * 1000);
-  }
-};
+  return Music;
+}();
     if(typeof window !== "undefined") window.Primrose.Output.Music = Music;
 })();
     // end D:\Documents\VR\Primrose\src\Primrose\Output\Music.js
