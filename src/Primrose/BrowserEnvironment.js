@@ -510,7 +510,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
               this.options.fullscreenElement :
               this.renderer.domElement;
         this.input.VR.connect(index);
-        this.input.VR.requestPresent([{
+        return this.input.VR.requestPresent([{
             source: elem
           }])
           .catch((exp) => console.error("whaaat", exp))
