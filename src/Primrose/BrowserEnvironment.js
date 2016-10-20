@@ -27,9 +27,11 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       }
     };
 
-    var update = (dt) => {
+    const update = (dt) => {
       dt *= MILLISECONDS_TO_SECONDS;
       movePlayer(dt);
+      moveUI();
+      doPicking();
       moveSky();
       moveGround();
       this.network.update(dt);
@@ -38,16 +40,66 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       this.emit("update", dt);
     };
 
-    var movePlayer = (dt) => {
+    const movePlayer = (dt) => {
       this.input.update(dt);
+    };
+
+    let uiTurn = 0;
+    const followEuler = new THREE.Euler(),
+      maxX = -Math.PI / 4,
+      maxY = Math.PI / 6;
+
+    const moveUI = (dt) => {
+      this.ui.position.copy(this.input.head.position);
+      followEuler.setFromQuaternion(this.input.head.quaternion);
+      let turn = followEuler.y,
+        deltaTurnA = turn - uiTurn,
+        deltaTurnB = deltaTurnA + Math.PI * 2,
+        deltaTurnC = deltaTurnA - Math.PI * 2,
+        deltaTurn;
+      if(Math.abs(deltaTurnA) < Math.abs(deltaTurnB)) {
+        if(Math.abs(deltaTurnA) < Math.abs(deltaTurnC)) {
+          deltaTurn = deltaTurnA;
+        }
+        else {
+          deltaTurn = deltaTurnC;
+        }
+      }
+      else if(Math.abs(deltaTurnB) < Math.abs(deltaTurnC)) {
+        deltaTurn = deltaTurnB;
+      }
+      else {
+        deltaTurn = deltaTurnC;
+      }
+
+      if(Math.abs(deltaTurn) > maxY) {
+        uiTurn += deltaTurn * 0.02;
+      }
+
+      followEuler.set(maxX, uiTurn, 0, "YXZ");
+      this.ui.quaternion.setFromEuler(followEuler);
+    };
+
+    const doPicking = () => {
+      for(let i = this.pickableObjects.length - 1; i >= 0; --i){
+        let inScene = false;
+        for(let head = this.pickableObjects[i].parent; head !== null; head = head.parent){
+          if(head === this.scene){
+            inScene = true;
+          }
+        }
+        if(!inScene) {
+          this.pickableObjects.splice(i, 1);
+        }
+      }
       this.input.resolvePicking(this.pickableObjects.filter((obj) => !obj.disabled));
     };
 
-    var moveSky = () => {
+    const moveSky = () => {
       this.sky.position.copy(this.input.head.position);
     };
 
-    var moveGround = () => {
+    const moveGround = () => {
       if (this.ground) {
         this.ground.position.set(
           Math.floor(this.input.head.position.x), -0.02,
@@ -463,6 +515,9 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       this.scene.add(this.ground);
       this.registerPickableObject(this.ground);
     }
+
+    this.ui = new THREE.Object3D();
+    this.scene.add(this.ui);
 
     if (this.passthrough) {
       this.camera.add(this.passthrough.mesh);
