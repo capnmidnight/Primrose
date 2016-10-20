@@ -1,4 +1,6 @@
 var env = new Primrose.BrowserEnvironment({
+  // we want gaze-based interaction turned on
+  useGaze: true,
   // This file references a Three.js JSON-formatted scene
   // file, which basically describes a room or level in
   // which the user will walk around, on which we can
@@ -19,6 +21,22 @@ var env = new Primrose.BrowserEnvironment({
   }
 });
 
+
+// Primrose already has a basic sound API setup, so you
+// can hook directly into it to create basic, procedurally
+// generated music.
+function playNote(i) {
+  env.music.play(
+    // The play method understands Piano key indices, so
+    // we just need to calculate the note we want to play,
+    // understanding Middle C to be note 44.
+    35 + i * 4,
+    // Volume, on the range [0, 1]. Full volume is quite loud.
+    0.30,
+    // Duration to play, in seconds.
+    0.2);
+}
+
 // Once Primrose has setup the WebGL context, setup Three.js,
 // downloaded and validated all of model files, and constructed
 // the basic scene hierarchy out of it, the "ready" event is fired,
@@ -27,27 +45,12 @@ env.addEventListener("ready", function () {
   var numButtons = 8,
     middle = (numButtons - 1) / 2;
 
-  for (var i = 0; i < numButtons; ++i) {
-
+  range(numButtons, function(i){
     var btn = env.createElement("button");
 
     // We can wire up event handlers on the button just like it was
     // a DOM element.
-    btn.addEventListener(
-      "click",
-      // Primrose already has a basic sound API setup, so you
-      // can hook directly into it to create basic, procedurally
-      // generated music.
-      env.music.play.bind(
-        env.music,
-        // The play method understands Piano key indices, so
-        // we just need to calculate the note we want to play,
-        // understanding Middle C to be note 44.
-        35 + i * 4,
-        // Volume, on the range [0, 1]. Full volume is quite loud.
-        0.30,
-        // Duration to play, in seconds.
-        0.2));
+    btn.addEventListener("click", playNote.bind(null, i));
 
     // Spacing the buttons out in a rough arc around the origin.
     var x = (i - middle) * 0.25,
@@ -55,5 +58,5 @@ env.addEventListener("ready", function () {
       // Put the element into the scene
       btnBase = env.appendChild(btn);
     btnBase.position.set(x, 0, z);
-  }
+  });
 });
