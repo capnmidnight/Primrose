@@ -343,7 +343,8 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       START_POINT = new THREE.Vector3();
 
     this.selectControl = (evt) => {
-      var obj = evt.hit && evt.hit.object;
+      const hit = evt.hit || evt.lastHit,
+        obj = hit && hit.object;
 
       if(evt.type === "exit" && evt.lastHit && evt.lastHit.object === this.ground){
         evt.pointer.disk.visible = false;
@@ -383,15 +384,15 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
         }
       }
 
-      if(evt.type === "pointerstart" || evt.type === "gazecomplete") {
-        obj = obj && (obj.surface || obj.button);
-        if(obj !== this.currentControl){
+      if(evt.type === "pointerstart" || evt.type === "gazecomplete"){
+        const ctrl = obj && (obj.surface || obj.button);
+        if(ctrl !== this.currentControl){
           if(this.currentControl){
             this.currentControl.blur();
             this.input.Mouse.commands.pitch.disabled =
             this.input.Mouse.commands.heading.disabled = false;
           }
-          this.currentControl = obj;
+          this.currentControl = ctrl;
           if(this.currentControl){
             this.currentControl.focus();
             this.input.Mouse.commands.pitch.disabled =
@@ -406,6 +407,12 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
         }
         else{
           console.log(this.currentControl);
+        }
+      }
+      else{
+        const handler = obj && obj["on" + evt.type];
+        if(handler){
+          handler(app);
         }
       }
     };

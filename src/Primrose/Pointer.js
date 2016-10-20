@@ -285,11 +285,13 @@ class Pointer extends Primrose.AbstractEventEmitter {
         }
       }
 
+      let selected = false;
       if(dButtons){
         if(evt.buttons){
           this.emit("pointerstart", evt);
         }
         else{
+          selected = !!currentHit;
           this.emit("pointerend", evt);
         }
       }
@@ -311,6 +313,7 @@ class Pointer extends Primrose.AbstractEventEmitter {
         else if(dt !== null) {
           if(dt >= this.gazeTimeout){
             this.gazeOuter.visible = false;
+            selected = !!currentHit;
             this.emit("gazecomplete", evt);
             lastHit.time = null;
           }
@@ -325,6 +328,10 @@ class Pointer extends Primrose.AbstractEventEmitter {
         }
       }
 
+      if(selected){
+        this.emit("select", evt);
+      }
+
       if(changed){
         _priv.lastHit = currentHit;
       }
@@ -332,4 +339,4 @@ class Pointer extends Primrose.AbstractEventEmitter {
   }
 }
 
-Pointer.EVENTS = ["pointerstart", "pointerend", "pointermove", "gazestart", "gazemove", "gazecomplete", "gazecancel", "exit", "enter"];
+Pointer.EVENTS = ["pointerstart", "pointerend", "pointermove", "gazestart", "gazemove", "gazecomplete", "gazecancel", "exit", "enter", "select"];
