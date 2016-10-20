@@ -91,19 +91,10 @@ class Pointer extends Primrose.AbstractEventEmitter {
     this.root.add(this.mesh);
     this.root.add(this.gazeInner);
 
-    this.useGaze = false;
+    this.useGaze = this.options.useGaze;
     _(this, {
       lastHit: null
     });
-  }
-
-  get useGaze() {
-    return this.gazeInner.visible;
-  }
-
-  set useGaze(v) {
-    this.gazeInner.visible = !!v;
-    this.mesh.visible = !v;
   }
 
   get material(){
@@ -220,7 +211,7 @@ class Pointer extends Primrose.AbstractEventEmitter {
 
   resolvePicking(objects) {
     this.mesh.visible = false;
-
+    this.gazeInner.visible = false;
     this.mesh.material = material("", {
       color: this.color,
       unshaded: true
@@ -266,6 +257,7 @@ class Pointer extends Primrose.AbstractEventEmitter {
       }
 
       this.mesh.visible = !this.useGaze;
+      this.gazeInner.visible = this.useGaze;
 
       if(changed){
         if(lastHit){
