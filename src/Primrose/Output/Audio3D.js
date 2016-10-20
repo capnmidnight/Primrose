@@ -96,10 +96,10 @@ class Audio3D {
 
       this.context.listener.setPosition(mx, my, mz);
 
-      VECTOR.set(0, 0, 1)
+      VECTOR.set(0, 0, -1)
         .applyMatrix4(TEMP)
         .normalize();
-      UP.set(0, -1, 0)
+      UP.set(0, 1, 0)
         .applyMatrix4(TEMP)
         .normalize();
 

@@ -10590,8 +10590,8 @@ var Audio3D = function () {
 
         this.context.listener.setPosition(mx, my, mz);
 
-        VECTOR.set(0, 0, 1).applyMatrix4(TEMP).normalize();
-        UP.set(0, -1, 0).applyMatrix4(TEMP).normalize();
+        VECTOR.set(0, 0, -1).applyMatrix4(TEMP).normalize();
+        UP.set(0, 1, 0).applyMatrix4(TEMP).normalize();
 
         this.context.listener.setOrientation(VECTOR.x, VECTOR.y, VECTOR.z, UP.x, UP.y, UP.z);
       }
