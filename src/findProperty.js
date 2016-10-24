@@ -23,7 +23,7 @@ pliny.function({
 
 function findProperty(elem, arr) {
   for (var i = 0; i < arr.length; ++i) {
-    if (elem[arr[i]] !== undefined) {
+    if (arr[i] in elem) {
       return arr[i];
     }
   }
