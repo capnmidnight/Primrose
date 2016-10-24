@@ -37330,7 +37330,7 @@ function WebVRBootstrapper(manifest) {
 
 					}
 
-				}, null, onError );
+				}, undefined, onError );
 
 			}
 
@@ -52891,7 +52891,7 @@ function WebVRBootstrapper(manifest) {
 
 		function ( t ) {
 
-			var b2 = exports.ShapeUtils.b2;
+			var b2 = exports.ShapeUtils.b2;		
 
 			return new Vector3(
 				b2( t, this.v0.x, this.v1.x, this.v2.x ),
