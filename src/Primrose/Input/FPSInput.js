@@ -36,62 +36,64 @@ class FPSInput extends Primrose.AbstractEventEmitter {
     this.velocity = new THREE.Vector3();
     this.matrix = new THREE.Matrix4();
 
-    this.add(new Primrose.Input.Keyboard(this, {
-      strafeLeft: {
-        buttons: [
-          -Primrose.Keys.A,
-          -Primrose.Keys.LEFTARROW
-        ]
-      },
-      strafeRight: {
-        buttons: [
-          Primrose.Keys.D,
-          Primrose.Keys.RIGHTARROW
-        ]
-      },
-      strafe: {
-        commands: ["strafeLeft", "strafeRight"]
-      },
-      lift: {
-        buttons: [Primrose.Keys.E],
-        scale: 12
-      },
-      driveForward: {
-        buttons: [
-          -Primrose.Keys.W,
-          -Primrose.Keys.UPARROW
-        ]
-      },
-      driveBack: {
-        buttons: [
-          Primrose.Keys.S,
-          Primrose.Keys.DOWNARROW
-        ]
-      },
-      drive: {
-        commands: ["driveForward", "driveBack"]
-      },
-      select: {
-        buttons: [Primrose.Keys.ENTER]
-      },
-      dSelect: {
-        buttons: [Primrose.Keys.ENTER],
-        delta: true
-      },
-      zero: {
-        buttons: [Primrose.Keys.Z],
-        metaKeys: [
-          -Primrose.Keys.CTRL,
-          -Primrose.Keys.ALT,
-          -Primrose.Keys.SHIFT,
-          -Primrose.Keys.META
-        ],
-        commandUp: this.emit.bind(this, "zero")
-      }
-    }));
+    if(!this.options.disableKeyboard) {
+      this.add(new Primrose.Input.Keyboard(this, {
+        strafeLeft: {
+          buttons: [
+            -Primrose.Keys.A,
+            -Primrose.Keys.LEFTARROW
+          ]
+        },
+        strafeRight: {
+          buttons: [
+            Primrose.Keys.D,
+            Primrose.Keys.RIGHTARROW
+          ]
+        },
+        strafe: {
+          commands: ["strafeLeft", "strafeRight"]
+        },
+        lift: {
+          buttons: [Primrose.Keys.E],
+          scale: 12
+        },
+        driveForward: {
+          buttons: [
+            -Primrose.Keys.W,
+            -Primrose.Keys.UPARROW
+          ]
+        },
+        driveBack: {
+          buttons: [
+            Primrose.Keys.S,
+            Primrose.Keys.DOWNARROW
+          ]
+        },
+        drive: {
+          commands: ["driveForward", "driveBack"]
+        },
+        select: {
+          buttons: [Primrose.Keys.ENTER]
+        },
+        dSelect: {
+          buttons: [Primrose.Keys.ENTER],
+          delta: true
+        },
+        zero: {
+          buttons: [Primrose.Keys.Z],
+          metaKeys: [
+            -Primrose.Keys.CTRL,
+            -Primrose.Keys.ALT,
+            -Primrose.Keys.SHIFT,
+            -Primrose.Keys.META
+          ],
+          commandUp: this.emit.bind(this, "zero")
+        }
+      }));
 
-    this.Keyboard.operatingSystem = this.options.os;
-    this.Keyboard.codePage = this.options.language;
+      this.Keyboard.operatingSystem = this.options.os;
+      this.Keyboard.codePage = this.options.language;
+    }
 
     this.add(new Primrose.Input.Touch(DOMElement, {
       buttons: {
@@ -168,7 +170,7 @@ class FPSInput extends Primrose.AbstractEventEmitter {
     this.add(new Primrose.Input.VR(this.options.avatarHeight));
     this.motionDevices.push(this.VR);
 
-    if(Primrose.Input.Gamepad.isAvailable){
+    if(!this.options.disableGamepad && Primrose.Input.Gamepad.isAvailable){
       Primrose.Input.Gamepad.addEventListener("gamepadconnected", (pad) => {
         const padID = Primrose.Input.Gamepad.ID(pad);
         let mgr = null;
@@ -352,7 +354,11 @@ class FPSInput extends Primrose.AbstractEventEmitter {
 
     this.head.showPointer = this.VR.hasOrientation;
     this.mousePointer.showPointer = (this.hasMouse || this.hasGamepad) && !this.hasMotionControllers;
-    this.Keyboard.enabled = this.Touch.enabled = this.Mouse.enabled = !this.hasMotionControllers;
+
+    if(this.Keyboard) {
+      this.Keyboard.enabled = this.Touch.enabled = this.Mouse.enabled = !this.hasMotionControllers;
+    }
+
     if (this.Gamepad_0) {
       this.Gamepad_0.enabled = !this.hasMotionControllers;
     }

@@ -2374,9 +2374,13 @@ if(typeof window !== "undefined") window.Primrose.BaseControl = BaseControl;
 // start D:\Documents\VR\Primrose\src\Primrose\BrowserEnvironment.js
 (function(){"use strict";
 
+var _BrowserEnvironment$D;
+
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -3011,8 +3015,8 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
 
       _this.options.fullscreenElement = document.querySelector(_this.options.fullscreenElement) || _this.renderer.domElement;
 
-      var maxTabIndex = 0,
-          elementsWithTabIndex = document.querySelectorAll("[tabIndex]");
+      var maxTabIndex = 0;
+      var elementsWithTabIndex = document.querySelectorAll("[tabIndex]");
       for (var i = 0; i < elementsWithTabIndex.length; ++i) {
         maxTabIndex = Math.max(maxTabIndex, elementsWithTabIndex[i].tabIndex);
       }
@@ -3049,84 +3053,86 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
       });
       _this.input.forward(_this, Primrose.Pointer.EVENTS);
 
-      var keyDown = function keyDown(evt) {
-        if (_this.input.VR.isPresenting) {
-          if (evt.keyCode === Primrose.Keys.ESCAPE && !_this.input.VR.isPolyfilled) {
-            _this.input.VR.cancel();
+      if (!_this.options.disableKeyboard) {
+        var keyDown = function keyDown(evt) {
+          if (_this.input.VR.isPresenting) {
+            if (evt.keyCode === Primrose.Keys.ESCAPE && !_this.input.VR.isPolyfilled) {
+              _this.input.VR.cancel();
+            }
           }
-        }
 
-        if (!_this.lockMovement) {
-          _this.input.Keyboard.dispatchEvent(evt);
-        } else if (_this.currentControl) {
-          _this.currentControl.keyDown(evt);
-        }
-        _this.emit("keydown", evt);
-      },
-          keyUp = function keyUp(evt) {
-        if (!_this.lockMovement) {
-          _this.input.Keyboard.dispatchEvent(evt);
-        } else if (_this.currentControl) {
-          _this.currentControl.keyUp(evt);
-        }
-        _this.emit("keyup", evt);
-      },
-          withCurrentControl = function withCurrentControl(name) {
-        return function (evt) {
-          if (_this.currentControl) {
-            if (_this.currentControl[name]) {
-              _this.currentControl[name](evt);
-            } else {
-              console.warn("Couldn't find %s on %o", name, _this.currentControl);
+          if (!_this.lockMovement) {
+            _this.input.Keyboard.dispatchEvent(evt);
+          } else if (_this.currentControl) {
+            _this.currentControl.keyDown(evt);
+          }
+          _this.emit("keydown", evt);
+        },
+            keyUp = function keyUp(evt) {
+          if (!_this.lockMovement) {
+            _this.input.Keyboard.dispatchEvent(evt);
+          } else if (_this.currentControl) {
+            _this.currentControl.keyUp(evt);
+          }
+          _this.emit("keyup", evt);
+        },
+            withCurrentControl = function withCurrentControl(name) {
+          return function (evt) {
+            if (_this.currentControl) {
+              if (_this.currentControl[name]) {
+                _this.currentControl[name](evt);
+              } else {
+                console.warn("Couldn't find %s on %o", name, _this.currentControl);
+              }
+            }
+          };
+        };
+
+        window.addEventListener("keydown", keyDown, false);
+
+        window.addEventListener("keyup", keyUp, false);
+
+        window.addEventListener("paste", withCurrentControl("readClipboard"), false);
+        window.addEventListener("wheel", withCurrentControl("readWheel"), false);
+
+        var focusClipboard = function focusClipboard(evt) {
+          if (_this.lockMovement) {
+            var cmdName = _this.input.Keyboard.operatingSystem.makeCommandName(evt, _this.input.Keyboard.codePage);
+            if (cmdName === "CUT" || cmdName === "COPY") {
+              surrogate.style.display = "block";
+              surrogate.focus();
             }
           }
         };
-      };
 
-      window.addEventListener("keydown", keyDown, false);
-
-      window.addEventListener("keyup", keyUp, false);
-
-      window.addEventListener("paste", withCurrentControl("readClipboard"), false);
-      window.addEventListener("wheel", withCurrentControl("readWheel"), false);
-
-      var focusClipboard = function focusClipboard(evt) {
-        if (_this.lockMovement) {
-          var cmdName = _this.input.Keyboard.operatingSystem.makeCommandName(evt, _this.input.Keyboard.codePage);
-          if (cmdName === "CUT" || cmdName === "COPY") {
-            surrogate.style.display = "block";
-            surrogate.focus();
+        var clipboardOperation = function clipboardOperation(evt) {
+          if (_this.currentControl) {
+            _this.currentControl[evt.type + "SelectedText"](evt);
+            if (!evt.returnValue) {
+              evt.preventDefault();
+            }
+            surrogate.style.display = "none";
+            _this.currentControl.focus();
           }
-        }
-      };
+        };
 
-      var clipboardOperation = function clipboardOperation(evt) {
-        if (_this.currentControl) {
-          _this.currentControl[evt.type + "SelectedText"](evt);
-          if (!evt.returnValue) {
-            evt.preventDefault();
-          }
-          surrogate.style.display = "none";
-          _this.currentControl.focus();
-        }
-      };
+        // the `surrogate` textarea makes clipboard events possible
+        var surrogate = Primrose.DOM.cascadeElement("primrose-surrogate-textarea", "textarea", HTMLTextAreaElement),
+            surrogateContainer = Primrose.DOM.makeHidingContainer("primrose-surrogate-textarea-container", surrogate);
 
-      // the `surrogate` textarea makes clipboard events possible
-      var surrogate = Primrose.DOM.cascadeElement("primrose-surrogate-textarea", "textarea", HTMLTextAreaElement),
-          surrogateContainer = Primrose.DOM.makeHidingContainer("primrose-surrogate-textarea-container", surrogate);
+        surrogateContainer.style.position = "absolute";
+        surrogateContainer.style.overflow = "hidden";
+        surrogateContainer.style.width = 0;
+        surrogateContainer.style.height = 0;
+        surrogate.addEventListener("beforecopy", setFalse, false);
+        surrogate.addEventListener("copy", clipboardOperation, false);
+        surrogate.addEventListener("beforecut", setFalse, false);
+        surrogate.addEventListener("cut", clipboardOperation, false);
+        document.body.insertBefore(surrogateContainer, document.body.children[0]);
 
-      surrogateContainer.style.position = "absolute";
-      surrogateContainer.style.overflow = "hidden";
-      surrogateContainer.style.width = 0;
-      surrogateContainer.style.height = 0;
-      surrogate.addEventListener("beforecopy", setFalse, false);
-      surrogate.addEventListener("copy", clipboardOperation, false);
-      surrogate.addEventListener("beforecut", setFalse, false);
-      surrogate.addEventListener("cut", clipboardOperation, false);
-      document.body.insertBefore(surrogateContainer, document.body.children[0]);
-
-      window.addEventListener("beforepaste", setFalse, false);
-      window.addEventListener("keydown", focusClipboard, true);
+        window.addEventListener("beforepaste", setFalse, false);
+        window.addEventListener("keydown", focusClipboard, true);
+      }
 
       _this.input.head.add(_this.camera);
 
@@ -3299,15 +3305,18 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
   return BrowserEnvironment;
 }(Primrose.AbstractEventEmitter);
 
-BrowserEnvironment.DEFAULTS = {
+BrowserEnvironment.DEFAULTS = (_BrowserEnvironment$D = {
   antialias: true,
   autoScaleQuality: true,
   autoRescaleQuality: false,
   quality: Quality.MAXIMUM,
   useLeap: false,
+  useGaze: false,
   useFog: false,
   avatarHeight: 1.65,
+  backgroundColor: null,
   walkSpeed: 2,
+  disableKeyboard: false,
   // The acceleration applied to falling objects.
   gravity: 9.8,
   // The amount of time in seconds to require gazes on objects before triggering the gaze event.
@@ -3315,26 +3324,8 @@ BrowserEnvironment.DEFAULTS = {
   // By default, what we see in the VR view will get mirrored to a regular view on the primary screen. Set to true to improve performance.
   disableMirroring: false,
   // By default, a single light is added to the scene,
-  disableDefaultLighting: false,
-  // The color that WebGL clears the background with before drawing.
-  backgroundColor: 0xafbfff,
-  // the near plane of the camera.
-  nearPlane: 0.01,
-  // the far plane of the camera.
-  drawDistance: 100,
-  // the field of view to use in non-VR settings.
-  defaultFOV: 75,
-  // The sound to play on loop in the background.
-  ambientSound: null,
-  // HTML5 canvas element, if one had already been created.
-  canvasElement: "frontBuffer",
-  // THREE.js renderer, if one had already been created.
-  renderer: null,
-  // A WebGL context to use, if one had already been created.
-  context: null,
-  // THREE.js scene, if one had already been created.
-  scene: null
-};
+  disableDefaultLighting: false
+}, _defineProperty(_BrowserEnvironment$D, "backgroundColor", 0xafbfff), _defineProperty(_BrowserEnvironment$D, "nearPlane", 0.01), _defineProperty(_BrowserEnvironment$D, "drawDistance", 100), _defineProperty(_BrowserEnvironment$D, "defaultFOV", 75), _defineProperty(_BrowserEnvironment$D, "ambientSound", null), _defineProperty(_BrowserEnvironment$D, "canvasElement", "frontBuffer"), _defineProperty(_BrowserEnvironment$D, "renderer", null), _defineProperty(_BrowserEnvironment$D, "context", null), _defineProperty(_BrowserEnvironment$D, "scene", null), _BrowserEnvironment$D);
 if(typeof window !== "undefined") window.Primrose.BrowserEnvironment = BrowserEnvironment;
 })();
 // end D:\Documents\VR\Primrose\src\Primrose\BrowserEnvironment.js
@@ -8319,45 +8310,47 @@ var FPSInput = function (_Primrose$AbstractEve) {
     _this.velocity = new THREE.Vector3();
     _this.matrix = new THREE.Matrix4();
 
-    _this.add(new Primrose.Input.Keyboard(_this, {
-      strafeLeft: {
-        buttons: [-Primrose.Keys.A, -Primrose.Keys.LEFTARROW]
-      },
-      strafeRight: {
-        buttons: [Primrose.Keys.D, Primrose.Keys.RIGHTARROW]
-      },
-      strafe: {
-        commands: ["strafeLeft", "strafeRight"]
-      },
-      lift: {
-        buttons: [Primrose.Keys.E],
-        scale: 12
-      },
-      driveForward: {
-        buttons: [-Primrose.Keys.W, -Primrose.Keys.UPARROW]
-      },
-      driveBack: {
-        buttons: [Primrose.Keys.S, Primrose.Keys.DOWNARROW]
-      },
-      drive: {
-        commands: ["driveForward", "driveBack"]
-      },
-      select: {
-        buttons: [Primrose.Keys.ENTER]
-      },
-      dSelect: {
-        buttons: [Primrose.Keys.ENTER],
-        delta: true
-      },
-      zero: {
-        buttons: [Primrose.Keys.Z],
-        metaKeys: [-Primrose.Keys.CTRL, -Primrose.Keys.ALT, -Primrose.Keys.SHIFT, -Primrose.Keys.META],
-        commandUp: _this.emit.bind(_this, "zero")
-      }
-    }));
+    if (!_this.options.disableKeyboard) {
+      _this.add(new Primrose.Input.Keyboard(_this, {
+        strafeLeft: {
+          buttons: [-Primrose.Keys.A, -Primrose.Keys.LEFTARROW]
+        },
+        strafeRight: {
+          buttons: [Primrose.Keys.D, Primrose.Keys.RIGHTARROW]
+        },
+        strafe: {
+          commands: ["strafeLeft", "strafeRight"]
+        },
+        lift: {
+          buttons: [Primrose.Keys.E],
+          scale: 12
+        },
+        driveForward: {
+          buttons: [-Primrose.Keys.W, -Primrose.Keys.UPARROW]
+        },
+        driveBack: {
+          buttons: [Primrose.Keys.S, Primrose.Keys.DOWNARROW]
+        },
+        drive: {
+          commands: ["driveForward", "driveBack"]
+        },
+        select: {
+          buttons: [Primrose.Keys.ENTER]
+        },
+        dSelect: {
+          buttons: [Primrose.Keys.ENTER],
+          delta: true
+        },
+        zero: {
+          buttons: [Primrose.Keys.Z],
+          metaKeys: [-Primrose.Keys.CTRL, -Primrose.Keys.ALT, -Primrose.Keys.SHIFT, -Primrose.Keys.META],
+          commandUp: _this.emit.bind(_this, "zero")
+        }
+      }));
 
-    _this.Keyboard.operatingSystem = _this.options.os;
-    _this.Keyboard.codePage = _this.options.language;
+      _this.Keyboard.operatingSystem = _this.options.os;
+      _this.Keyboard.codePage = _this.options.language;
+    }
 
     _this.add(new Primrose.Input.Touch(DOMElement, {
       buttons: {
@@ -8434,7 +8427,7 @@ var FPSInput = function (_Primrose$AbstractEve) {
     _this.add(new Primrose.Input.VR(_this.options.avatarHeight));
     _this.motionDevices.push(_this.VR);
 
-    if (Primrose.Input.Gamepad.isAvailable) {
+    if (!_this.options.disableGamepad && Primrose.Input.Gamepad.isAvailable) {
       Primrose.Input.Gamepad.addEventListener("gamepadconnected", function (pad) {
         var padID = Primrose.Input.Gamepad.ID(pad);
         var mgr = null;
@@ -8600,7 +8593,11 @@ var FPSInput = function (_Primrose$AbstractEve) {
 
       this.head.showPointer = this.VR.hasOrientation;
       this.mousePointer.showPointer = (this.hasMouse || this.hasGamepad) && !this.hasMotionControllers;
-      this.Keyboard.enabled = this.Touch.enabled = this.Mouse.enabled = !this.hasMotionControllers;
+
+      if (this.Keyboard) {
+        this.Keyboard.enabled = this.Touch.enabled = this.Mouse.enabled = !this.hasMotionControllers;
+      }
+
       if (this.Gamepad_0) {
         this.Gamepad_0.enabled = !this.hasMotionControllers;
       }

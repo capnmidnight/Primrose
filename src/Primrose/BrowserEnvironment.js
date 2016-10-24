@@ -640,9 +640,9 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
 
       this.options.fullscreenElement = document.querySelector(this.options.fullscreenElement) || this.renderer.domElement;
 
-      var maxTabIndex = 0,
-        elementsWithTabIndex = document.querySelectorAll("[tabIndex]");
-      for(var i = 0; i < elementsWithTabIndex.length; ++i){
+      let maxTabIndex = 0;
+      const elementsWithTabIndex = document.querySelectorAll("[tabIndex]");
+      for(let i = 0; i < elementsWithTabIndex.length; ++i){
         maxTabIndex = Math.max(maxTabIndex, elementsWithTabIndex[i].tabIndex);
       }
 
@@ -672,91 +672,93 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       Primrose.Pointer.EVENTS.forEach((evt) => this.input.addEventListener(evt, this.selectControl.bind(this), false));
       this.input.forward(this, Primrose.Pointer.EVENTS);
 
-      const keyDown =  (evt) => {
-          if (this.input.VR.isPresenting) {
-            if (evt.keyCode === Primrose.Keys.ESCAPE && !this.input.VR.isPolyfilled) {
-              this.input.VR.cancel();
-            }
-          }
-
-          if(!this.lockMovement){
-            this.input.Keyboard.dispatchEvent(evt);
-          }
-          else if(this.currentControl){
-            this.currentControl.keyDown(evt);
-          }
-          this.emit("keydown", evt);
-        },
-
-        keyUp = (evt) => {
-          if(!this.lockMovement){
-            this.input.Keyboard.dispatchEvent(evt);
-          }
-          else if(this.currentControl){
-            this.currentControl.keyUp(evt);
-          }
-          this.emit("keyup", evt);
-        },
-
-        withCurrentControl = (name) => {
-          return (evt) => {
-            if (this.currentControl) {
-              if (this.currentControl[name]) {
-                this.currentControl[name](evt);
-              }
-              else {
-                console.warn("Couldn't find %s on %o", name, this.currentControl);
+      if(!this.options.disableKeyboard) {
+        const keyDown =  (evt) => {
+            if (this.input.VR.isPresenting) {
+              if (evt.keyCode === Primrose.Keys.ESCAPE && !this.input.VR.isPolyfilled) {
+                this.input.VR.cancel();
               }
             }
+
+            if(!this.lockMovement){
+              this.input.Keyboard.dispatchEvent(evt);
+            }
+            else if(this.currentControl){
+              this.currentControl.keyDown(evt);
+            }
+            this.emit("keydown", evt);
+          },
+
+          keyUp = (evt) => {
+            if(!this.lockMovement){
+              this.input.Keyboard.dispatchEvent(evt);
+            }
+            else if(this.currentControl){
+              this.currentControl.keyUp(evt);
+            }
+            this.emit("keyup", evt);
+          },
+
+          withCurrentControl = (name) => {
+            return (evt) => {
+              if (this.currentControl) {
+                if (this.currentControl[name]) {
+                  this.currentControl[name](evt);
+                }
+                else {
+                  console.warn("Couldn't find %s on %o", name, this.currentControl);
+                }
+              }
+            };
           };
+
+        window.addEventListener("keydown", keyDown, false);
+
+        window.addEventListener("keyup", keyUp, false);
+
+
+        window.addEventListener("paste", withCurrentControl("readClipboard"), false);
+        window.addEventListener("wheel", withCurrentControl("readWheel"), false);
+
+
+        const focusClipboard = (evt) => {
+          if (this.lockMovement) {
+            var cmdName = this.input.Keyboard.operatingSystem.makeCommandName(evt, this.input.Keyboard.codePage);
+            if (cmdName === "CUT" || cmdName === "COPY") {
+              surrogate.style.display = "block";
+              surrogate.focus();
+            }
+          }
         };
 
-      window.addEventListener("keydown", keyDown, false);
-
-      window.addEventListener("keyup", keyUp, false);
-
-
-      window.addEventListener("paste", withCurrentControl("readClipboard"), false);
-      window.addEventListener("wheel", withCurrentControl("readWheel"), false);
-
-
-      const focusClipboard = (evt) => {
-        if (this.lockMovement) {
-          var cmdName = this.input.Keyboard.operatingSystem.makeCommandName(evt, this.input.Keyboard.codePage);
-          if (cmdName === "CUT" || cmdName === "COPY") {
-            surrogate.style.display = "block";
-            surrogate.focus();
+        const clipboardOperation = (evt) => {
+          if (this.currentControl) {
+            this.currentControl[evt.type + "SelectedText"](evt);
+            if (!evt.returnValue) {
+              evt.preventDefault();
+            }
+            surrogate.style.display = "none";
+            this.currentControl.focus();
           }
-        }
-      };
+        };
 
-      const clipboardOperation = (evt) => {
-        if (this.currentControl) {
-          this.currentControl[evt.type + "SelectedText"](evt);
-          if (!evt.returnValue) {
-            evt.preventDefault();
-          }
-          surrogate.style.display = "none";
-          this.currentControl.focus();
-        }
-      };
+        // the `surrogate` textarea makes clipboard events possible
+        var surrogate = Primrose.DOM.cascadeElement("primrose-surrogate-textarea", "textarea", HTMLTextAreaElement),
+          surrogateContainer = Primrose.DOM.makeHidingContainer("primrose-surrogate-textarea-container", surrogate);
 
-      // the `surrogate` textarea makes clipboard events possible
-      var surrogate = Primrose.DOM.cascadeElement("primrose-surrogate-textarea", "textarea", HTMLTextAreaElement),
-        surrogateContainer = Primrose.DOM.makeHidingContainer("primrose-surrogate-textarea-container", surrogate);
+        surrogateContainer.style.position = "absolute";
+        surrogateContainer.style.overflow = "hidden";
+        surrogateContainer.style.width = 0;
+        surrogateContainer.style.height = 0;
+        surrogate.addEventListener("beforecopy", setFalse, false);
+        surrogate.addEventListener("copy", clipboardOperation, false);
+        surrogate.addEventListener("beforecut", setFalse, false);
+        surrogate.addEventListener("cut", clipboardOperation, false);
+        document.body.insertBefore(surrogateContainer, document.body.children[0]);
 
-      surrogateContainer.style.position = "absolute";
-      surrogateContainer.style.overflow = "hidden";
-      surrogateContainer.style.width = 0;
-      surrogateContainer.style.height = 0;
-      surrogate.addEventListener("beforecopy", setFalse, false);
-      surrogate.addEventListener("copy", clipboardOperation, false);
-      surrogate.addEventListener("beforecut", setFalse, false);
-      surrogate.addEventListener("cut", clipboardOperation, false);
-      document.body.insertBefore(surrogateContainer, document.body.children[0]);
-
-      window.addEventListener("beforepaste", setFalse, false);
-      window.addEventListener("keydown", focusClipboard, true);
+        window.addEventListener("beforepaste", setFalse, false);
+        window.addEventListener("keydown", focusClipboard, true);
+      }
 
 
       this.input.head.add(this.camera);
@@ -932,9 +934,12 @@ BrowserEnvironment.DEFAULTS = {
   autoRescaleQuality: false,
   quality: Quality.MAXIMUM,
   useLeap: false,
+  useGaze: false,
   useFog: false,
   avatarHeight: 1.65,
+  backgroundColor: null,
   walkSpeed: 2,
+  disableKeyboard: false,
   // The acceleration applied to falling objects.
   gravity: 9.8,
   // The amount of time in seconds to require gazes on objects before triggering the gaze event.
