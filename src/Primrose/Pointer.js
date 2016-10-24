@@ -45,8 +45,8 @@ class Pointer extends Primrose.AbstractEventEmitter {
   constructor(name, color, highlight, s, devices, triggerDevices, options) {
     super();
     this.name = name;
-    this.devices = devices;
-    this.triggerDevices = triggerDevices || devices.slice();
+    this.devices = devices.filter(identity);
+    this.triggerDevices = triggerDevices && triggerDevices.filter(identity) || this.devices.slice();
     this.options = options;
     this.gazeTimeout = (this.options.gazeLength || 1.5) * 1000;
 
