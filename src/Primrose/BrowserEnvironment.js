@@ -937,7 +937,6 @@ BrowserEnvironment.DEFAULTS = {
   useGaze: false,
   useFog: false,
   avatarHeight: 1.65,
-  backgroundColor: null,
   walkSpeed: 2,
   disableKeyboard: false,
   // The acceleration applied to falling objects.
