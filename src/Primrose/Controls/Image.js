@@ -74,6 +74,7 @@ class Image extends Primrose.Entity {
     this._meshes = [];
     this._textures = [];
     this._currentImageIndex = 0;
+    this._lastTime = null;
     this.isVideo = false;
   }
 
@@ -250,10 +251,14 @@ class Image extends Primrose.Entity {
   update(){
     if(this.isVideo){
       for(var i = 0; i < this._textures.length; ++i) {
-        if(i < this._contexts.length) {
-          this._contexts[i].drawImage(this._elements[i], 0, 0);
+        const elem = this._elements[i];
+        if(elem.currentTime !== this._lastTime){
+          if(i < this._contexts.length) {
+            this._contexts[i].drawImage(elem, 0, 0);
+          }
+          this._textures[i].needsUpdate = true;
+          this._lastTime = elem.currentTime;
         }
-        this._textures[i].needsUpdate = true;
       }
     }
   }
