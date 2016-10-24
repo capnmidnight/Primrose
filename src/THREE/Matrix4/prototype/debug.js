@@ -5,4 +5,5 @@ function debug(label, digits) {
     cache[label] = val;
     console.log(label + "\n" + val);
   }
+  return this;
 }
