@@ -9,8 +9,6 @@ class Mouse extends Primrose.InputProcessor {
     super("Mouse", commands, ["BUTTONS", "X", "Y", "Z", "W"]);
     this.timer = null;
 
-    DOMElement = DOMElement || window;
-
     var setState = (stateChange, event) => {
       var state = event.buttons;
       for(let button = 0; button < Mouse.NUM_BUTTONS; ++button) {
@@ -21,13 +19,15 @@ class Mouse extends Primrose.InputProcessor {
         state >>= 1;
       }
       this.setAxis("BUTTONS", event.buttons << 10);
-      event.preventDefault();
+      if(event.target === DOMElement){
+        event.preventDefault();
+      }
     };
 
-    DOMElement.addEventListener("mousedown", setState.bind(this, true), false);
-    DOMElement.addEventListener("mouseup", setState.bind(this, false), false);
-    DOMElement.addEventListener("contextmenu", (event) => !(event.ctrlKey && event.shiftKey) && event.preventDefault(), false);
-    DOMElement.addEventListener("mousemove", (event) => {
+    window.addEventListener("mousedown", setState.bind(this, true), false);
+    window.addEventListener("mouseup", setState.bind(this, false), false);
+    window.addEventListener("contextmenu", (event) => !(event.ctrlKey && event.shiftKey) && event.preventDefault(), false);
+    window.addEventListener("mousemove", (event) => {
       setState(true, event);
 
       if (PointerLock.isActive) {
@@ -47,7 +47,7 @@ class Mouse extends Primrose.InputProcessor {
       }
     }, false);
 
-    DOMElement.addEventListener("wheel", (event) => {
+    window.addEventListener("wheel", (event) => {
       if (isChrome) {
         this.W += event.deltaX;
         this.Z += event.deltaY;
@@ -58,7 +58,9 @@ class Mouse extends Primrose.InputProcessor {
       else {
         this.Z += event.deltaY;
       }
-      event.preventDefault();
+      if(event.target === DOMElement){
+        event.preventDefault();
+      }
     }, false);
   }
 }

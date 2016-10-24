@@ -23,7 +23,7 @@ pliny.class({
 class FPSInput extends Primrose.AbstractEventEmitter {
   constructor(DOMElement, options) {
     super();
-    DOMElement = window || DOMElement || document.documentElement;
+
     this.options = options;
     this._handlers.zero = [];
     this._handlers.motioncontroller = [];
@@ -316,7 +316,7 @@ class FPSInput extends Primrose.AbstractEventEmitter {
   }
 
   get hasMouse() {
-    return !!(this.Mouse && this.Mouse.enabled && this.Mouse.inPhysicalUse);
+    return !this.hasTouch && !!(this.Mouse && this.Mouse.enabled && this.Mouse.inPhysicalUse);
   }
 
   get hasTouch() {

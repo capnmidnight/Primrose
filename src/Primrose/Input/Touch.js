@@ -19,8 +19,6 @@ class Touch extends Primrose.InputProcessor {
     }
     super("Touch", commands, axes);
 
-    DOMElement = DOMElement || window;
-
     var setState = (stateChange, setAxis, event) => {
       // We have to find the minimum identifier value because iOS uses a very
       // large number that changes after every gesture. Every other platform
@@ -59,19 +57,27 @@ class Touch extends Primrose.InputProcessor {
       }
       this.setAxis("FINGERS", fingerState);
 
-      event.preventDefault();
+      if(event.target === DOMElement){
+        event.preventDefault();
+      }
     };
 
-    DOMElement.addEventListener("touchstart", setState.bind(this, true, false), false);
-    DOMElement.addEventListener("touchend", setState.bind(this, false, true), false);
-    DOMElement.addEventListener("touchmove", setState.bind(this, true, true), false);
+    window.addEventListener("touchstart", setState.bind(this, true, false), false);
+    window.addEventListener("touchend", setState.bind(this, false, true), false);
+    window.addEventListener("touchmove", setState.bind(this, true, true), false);
   }
 
   update(dt) {
     super.update(dt);
-    TEMP.set(this.getAxis("DX0"), this.getAxis("DY0"));
-    if(TEMP.debug){
-      TEMP.debug("delta", 2);
+    for (let id = 0; id < 10; ++id) {
+      const x = this.getAxis("X" + id),
+        y = this.getAxis("Y" + id),
+        lx = this.getAxis("LX" + id),
+        ly = this.getAxis("LY" + id);
+      this.setAxis("DX" + id, x - lx);
+      this.setAxis("DY" + id, y - ly);
+      this.setAxis("LX" + id, x);
+      this.setAxis("LY" + id, y);
     }
   }
 }
