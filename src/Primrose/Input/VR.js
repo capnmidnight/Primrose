@@ -88,10 +88,12 @@ class VR extends Primrose.PoseInputProcessor {
         layers = layers[0];
       }
 
-      var promise = null,
-        rp = _(this).requestPresent;
-      // If we're using WebVR-Polyfill, just let it do its job.
-      if(this.currentDevice.capabilities.hasExternalDisplay){
+      const rp = _(this).requestPresent;
+      var promise = null;
+      if(isiOS){
+        promise = rp(layers);
+      }
+      else if(this.currentDevice.capabilities.hasExternalDisplay){
         // PCs with HMD should also make the browser window on the main
         // display full-screen, so we can then also lock pointer.
         promise = WebVRStandardMonitor.standardFullScreenBehavior(elem)

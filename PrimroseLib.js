@@ -1270,8 +1270,6 @@ if(typeof window !== "undefined") window.Primrose.BaseControl = BaseControl;
 // start D:\Documents\VR\Primrose\src\Primrose\BrowserEnvironment.js
 (function(){"use strict";
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -1827,21 +1825,13 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
     //
     _this.goFullScreen = function (index, evt) {
       if (evt !== "Gaze") {
-        var _ret = function () {
-          var elem = !_this.input.VR.isStereo || isMobile && !_this.input.VR.isNativeMobileWebVR ? _this.options.fullscreenElement : _this.renderer.domElement;
-          _this.input.VR.connect(index);
-          return {
-            v: _this.input.VR.requestPresent([{
-              source: elem
-            }]).catch(function (exp) {
-              return console.error("whaaat", exp);
-            }).then(function () {
-              return elem.focus();
-            })
-          };
-        }();
-
-        if ((typeof _ret === "undefined" ? "undefined" : _typeof(_ret)) === "object") return _ret.v;
+        var elem = !_this.input.VR.isStereo || isMobile && !_this.input.VR.isNativeMobileWebVR ? _this.options.fullscreenElement : _this.renderer.domElement;
+        _this.input.VR.connect(index);
+        return _this.input.VR.requestPresent([{
+          source: elem
+        }]).catch(function (exp) {
+          return console.error("whaaat", exp);
+        });
       }
     };
 
@@ -4954,9 +4944,8 @@ function findAndFixVideo(evt) {
 
 function fixVideo(vid) {
   if (processedVideos.indexOf(vid) === -1) {
-    makeVideoPlayableInline(vid, false);
     processedVideos.push(vid);
-    vid.play();
+    makeVideoPlayableInline(vid, false);
   }
 }
 
@@ -5130,7 +5119,8 @@ var Image = function (_Primrose$Entity) {
           if (!video.parentElement) {
             document.body.insertBefore(video, document.body.children[0]);
           }
-          fixVideo(video);
+          video.play();
+          //fixVideo(video);
         });
       })).then(function () {
         return _this4.isVideo = true;
@@ -7149,7 +7139,7 @@ var VR = function (_Primrose$PoseInputPr) {
       if (!this.currentDevice) {
         return Promise.reject("No display");
       } else {
-        var promise, rp;
+        var promise;
 
         var _ret = function () {
           var layers = opts,
@@ -7164,11 +7154,12 @@ var VR = function (_Primrose$PoseInputPr) {
             layers = layers[0];
           }
 
+          var rp = _(_this2).requestPresent;
           promise = null;
-          rp = _(_this2).requestPresent;
-          // If we're using WebVR-Polyfill, just let it do its job.
 
-          if (_this2.currentDevice.capabilities.hasExternalDisplay) {
+          if (isiOS) {
+            promise = rp(layers);
+          } else if (_this2.currentDevice.capabilities.hasExternalDisplay) {
             // PCs with HMD should also make the browser window on the main
             // display full-screen, so we can then also lock pointer.
             promise = WebVRStandardMonitor.standardFullScreenBehavior(elem).then(function () {

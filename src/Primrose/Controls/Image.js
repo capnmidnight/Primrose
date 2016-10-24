@@ -16,9 +16,8 @@ function findAndFixVideo(evt){
 
 function fixVideo(vid) {
   if(processedVideos.indexOf(vid) === -1){
-    makeVideoPlayableInline(vid, false);
     processedVideos.push(vid);
-    vid.play();
+    makeVideoPlayableInline(vid, false);
   }
 }
 
@@ -226,7 +225,7 @@ class Image extends Primrose.Entity {
       if(!video.parentElement){
         document.body.insertBefore(video, document.body.children[0]);
       }
-      fixVideo(video);
+      video.play();
     })))
     .then(() => this.isVideo = true)
     .then(() => this);
