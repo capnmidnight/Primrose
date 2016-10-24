@@ -321,13 +321,16 @@ class Pointer extends Primrose.AbstractEventEmitter {
             this.emit("gazecomplete", evt);
             lastHit.time = null;
           }
-          else {
+          else if(currentHit && currentHit.object && (currentHit.object.ongazecomplete || currentHit.object.onselect)){
             var p = Math.round(36 * dt / this.gazeTimeout),
               a = 2 * Math.PI * p / 36;
             this.gazeOuter.geometry = ring(GAZE_RING_INNER, GAZE_RING_OUTER, 36, p, 0, a);
             if(moved) {
               this.emit("gazemove", evt);
             }
+          }
+          else{
+            this.gazeOuter.visible = false;
           }
         }
       }
