@@ -11756,7 +11756,7 @@ module.exports.WebVRPolyfill = WebVRPolyfill;
 },{"./base.js":2,"./cardboard-vr-display.js":3,"./util.js":14}]},{},[8]);
 
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\webvr-standard-monitor\src\AsyncLockRequest.js
+// start C:\Users\sean\Documents\VR\webvr-standard-monitor\src\AsyncLockRequest.js
 (function(){"use strict";
 
 function findProperty(elem, arr) {
@@ -11873,23 +11873,23 @@ function AsyncLockRequest(name, elementOpts, changeEventOpts, errorEventOpts, re
 
   return ns;
 }
-    if(typeof window !== "undefined") window.AsyncLockRequest = AsyncLockRequest;
+if(typeof window !== "undefined") window.AsyncLockRequest = AsyncLockRequest;
 })();
-    // end D:\Documents\VR\webvr-standard-monitor\src\AsyncLockRequest.js
-    ////////////////////////////////////////////////////////////////////////////////
+// end C:\Users\sean\Documents\VR\webvr-standard-monitor\src\AsyncLockRequest.js
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\webvr-standard-monitor\src\FullScreen.js
+////////////////////////////////////////////////////////////////////////////////
+// start C:\Users\sean\Documents\VR\webvr-standard-monitor\src\FullScreen.js
 (function(){"use strict";
 
 var FullScreen = AsyncLockRequest("Fullscreen", ["fullscreenElement", "mozFullScreenElement", "webkitFullscreenElement", "msFullscreenElement"], ["onfullscreenchange", "onmozfullscreenchange", "onwebkitfullscreenchange", "onmsfullscreenchange"], ["onfullscreenerror", "onmozfullscreenerror", "onwebkitfullscreenerror", "onmsfullscreenerror"], ["requestFullscreen", "mozRequestFullScreen", "webkitRequestFullscreen", "webkitRequestFullScreen", "msRequestFullscreen"], ["exitFullscreen", "mozExitFullScreen", "webkitExitFullscreen", "webkitExitFullScreen", "msExitFullscreen"], function (arg) {
   return arg || window.Element && window.Element.ALLOW_KEYBOARD_INPUT || undefined;
 });
-    if(typeof window !== "undefined") window.FullScreen = FullScreen;
+if(typeof window !== "undefined") window.FullScreen = FullScreen;
 })();
-    // end D:\Documents\VR\webvr-standard-monitor\src\FullScreen.js
-    ////////////////////////////////////////////////////////////////////////////////
+// end C:\Users\sean\Documents\VR\webvr-standard-monitor\src\FullScreen.js
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\webvr-standard-monitor\src\Orientation.js
+////////////////////////////////////////////////////////////////////////////////
+// start C:\Users\sean\Documents\VR\webvr-standard-monitor\src\Orientation.js
 (function(){"use strict";
 
 function lockOrientation(element) {
@@ -11921,21 +11921,21 @@ var Orientation = {
   lock: lockOrientation,
   unlock: unlockOrientation
 };
-    if(typeof window !== "undefined") window.Orientation = Orientation;
+if(typeof window !== "undefined") window.Orientation = Orientation;
 })();
-    // end D:\Documents\VR\webvr-standard-monitor\src\Orientation.js
-    ////////////////////////////////////////////////////////////////////////////////
+// end C:\Users\sean\Documents\VR\webvr-standard-monitor\src\Orientation.js
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\webvr-standard-monitor\src\PointerLock.js
+////////////////////////////////////////////////////////////////////////////////
+// start C:\Users\sean\Documents\VR\webvr-standard-monitor\src\PointerLock.js
 (function(){"use strict";
 
 var PointerLock = AsyncLockRequest("Pointer Lock", ["pointerLockElement", "mozPointerLockElement", "webkitPointerLockElement"], ["onpointerlockchange", "onmozpointerlockchange", "onwebkitpointerlockchange"], ["onpointerlockerror", "onmozpointerlockerror", "onwebkitpointerlockerror"], ["requestPointerLock", "mozRequestPointerLock", "webkitRequestPointerLock", "webkitRequestPointerLock"], ["exitPointerLock", "mozExitPointerLock", "webkitExitPointerLock", "webkitExitPointerLock"]);
-    if(typeof window !== "undefined") window.PointerLock = PointerLock;
+if(typeof window !== "undefined") window.PointerLock = PointerLock;
 })();
-    // end D:\Documents\VR\webvr-standard-monitor\src\PointerLock.js
-    ////////////////////////////////////////////////////////////////////////////////
+// end C:\Users\sean\Documents\VR\webvr-standard-monitor\src\PointerLock.js
 ////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\webvr-standard-monitor\src\WebVRStandardMonitor.js
+////////////////////////////////////////////////////////////////////////////////
+// start C:\Users\sean\Documents\VR\webvr-standard-monitor\src\WebVRStandardMonitor.js
 (function(){"use strict";
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -12107,7 +12107,7 @@ WebVRStandardMonitor.standardExitFullScreenBehavior = function () {
 
 WebVRStandardMonitor.standardUnlockBehavior = function () {
   if (isMobile) {
-    Orientation.unlock(elem);
+    Orientation.unlock();
     return Promise.resolve();
   } else {
     return PointerLock.exit().catch(warn("PointerLock exit failed"));
@@ -12168,10 +12168,10 @@ WebVRStandardMonitor.prototype.getEyeParameters = function (side) {
     };
   }
 };
-    if(typeof window !== "undefined") window.WebVRStandardMonitor = WebVRStandardMonitor;
+if(typeof window !== "undefined") window.WebVRStandardMonitor = WebVRStandardMonitor;
 })();
-    // end D:\Documents\VR\webvr-standard-monitor\src\WebVRStandardMonitor.js
-    ////////////////////////////////////////////////////////////////////////////////
+// end C:\Users\sean\Documents\VR\webvr-standard-monitor\src\WebVRStandardMonitor.js
+////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
     // start D:\Documents\VR\webvr-bootstrapper\src\documentReady.js
 (function(){"use strict";
@@ -56180,7 +56180,7 @@ if(typeof window !== "undefined") window.emit = emit;
 
 function findProperty(elem, arr) {
   for (var i = 0; i < arr.length; ++i) {
-    if (elem[arr[i]] !== undefined) {
+    if (arr[i] in elem) {
       return arr[i];
     }
   }
@@ -57224,13 +57224,9 @@ if(typeof window !== "undefined") window.Primrose.BaseControl = BaseControl;
 // start D:\Documents\VR\Primrose\src\Primrose\BrowserEnvironment.js
 (function(){"use strict";
 
-var _BrowserEnvironment$D;
-
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -58149,7 +58145,7 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
   return BrowserEnvironment;
 }(Primrose.AbstractEventEmitter);
 
-BrowserEnvironment.DEFAULTS = (_BrowserEnvironment$D = {
+BrowserEnvironment.DEFAULTS = {
   antialias: true,
   autoScaleQuality: true,
   autoRescaleQuality: false,
@@ -58158,7 +58154,6 @@ BrowserEnvironment.DEFAULTS = (_BrowserEnvironment$D = {
   useGaze: false,
   useFog: false,
   avatarHeight: 1.65,
-  backgroundColor: null,
   walkSpeed: 2,
   disableKeyboard: false,
   // The acceleration applied to falling objects.
@@ -58168,8 +58163,26 @@ BrowserEnvironment.DEFAULTS = (_BrowserEnvironment$D = {
   // By default, what we see in the VR view will get mirrored to a regular view on the primary screen. Set to true to improve performance.
   disableMirroring: false,
   // By default, a single light is added to the scene,
-  disableDefaultLighting: false
-}, _defineProperty(_BrowserEnvironment$D, "backgroundColor", 0xafbfff), _defineProperty(_BrowserEnvironment$D, "nearPlane", 0.01), _defineProperty(_BrowserEnvironment$D, "drawDistance", 100), _defineProperty(_BrowserEnvironment$D, "defaultFOV", 75), _defineProperty(_BrowserEnvironment$D, "ambientSound", null), _defineProperty(_BrowserEnvironment$D, "canvasElement", "frontBuffer"), _defineProperty(_BrowserEnvironment$D, "renderer", null), _defineProperty(_BrowserEnvironment$D, "context", null), _defineProperty(_BrowserEnvironment$D, "scene", null), _BrowserEnvironment$D);
+  disableDefaultLighting: false,
+  // The color that WebGL clears the background with before drawing.
+  backgroundColor: 0xafbfff,
+  // the near plane of the camera.
+  nearPlane: 0.01,
+  // the far plane of the camera.
+  drawDistance: 100,
+  // the field of view to use in non-VR settings.
+  defaultFOV: 75,
+  // The sound to play on loop in the background.
+  ambientSound: null,
+  // HTML5 canvas element, if one had already been created.
+  canvasElement: "frontBuffer",
+  // THREE.js renderer, if one had already been created.
+  renderer: null,
+  // A WebGL context to use, if one had already been created.
+  context: null,
+  // THREE.js scene, if one had already been created.
+  scene: null
+};
 if(typeof window !== "undefined") window.Primrose.BrowserEnvironment = BrowserEnvironment;
 })();
 // end D:\Documents\VR\Primrose\src\Primrose\BrowserEnvironment.js
@@ -58549,6 +58562,10 @@ function filterValue(elem) {
     toggle = elem < 0;
     sign = elem < 0 ? -1 : 1;
   } else if (t === "string") {
+    if (elem[0] === "-") {
+      sign = -1;
+      elem = elem.substring(1);
+    }
     index = this.axisNames.indexOf(elem);
   } else {
     throw new Error("Cannot clone command spec. Element was type: " + t, elem);
@@ -59442,8 +59459,8 @@ var Pointer = function (_Primrose$AbstractEve) {
     var _this = _possibleConstructorReturn(this, (Pointer.__proto__ || Object.getPrototypeOf(Pointer)).call(this));
 
     _this.name = name;
-    _this.devices = devices;
-    _this.triggerDevices = triggerDevices || devices.slice();
+    _this.devices = devices.filter(identity);
+    _this.triggerDevices = triggerDevices && triggerDevices.filter(identity) || _this.devices.slice();
     _this.options = options;
     _this.gazeTimeout = (_this.options.gazeLength || 1.5) * 1000;
 
@@ -61589,7 +61606,6 @@ var FPSInput = function (_Primrose$AbstractEve) {
 
     var _this = _possibleConstructorReturn(this, (FPSInput.__proto__ || Object.getPrototypeOf(FPSInput)).call(this));
 
-    DOMElement = window || DOMElement || document.documentElement;
     _this.options = options;
     _this._handlers.zero = [];
     _this._handlers.motioncontroller = [];
@@ -61652,24 +61668,12 @@ var FPSInput = function (_Primrose$AbstractEve) {
         axes: ["FINGERS"],
         delta: true
       },
-      dx: {
-        axes: ["X0"],
-        delta: true,
-        min: -5,
-        max: 5
-      },
       heading: {
-        commands: ["dx"],
+        axes: ["DX0"],
         integrate: true
       },
-      dy: {
-        axes: ["Y0"],
-        delta: true,
-        min: -5,
-        max: 5
-      },
       pitch: {
-        commands: ["dy"],
+        axes: ["DY0"],
         integrate: true,
         min: -Math.PI * 0.5,
         max: Math.PI * 0.5
@@ -62008,7 +62012,7 @@ var FPSInput = function (_Primrose$AbstractEve) {
   }, {
     key: "hasMouse",
     get: function get() {
-      return !!(this.Mouse && this.Mouse.enabled && this.Mouse.inPhysicalUse);
+      return !this.hasTouch && !!(this.Mouse && this.Mouse.enabled && this.Mouse.inPhysicalUse);
     }
   }, {
     key: "hasTouch",
@@ -62598,8 +62602,6 @@ var Mouse = function (_Primrose$InputProces) {
 
     _this.timer = null;
 
-    DOMElement = DOMElement || window;
-
     var setState = function setState(stateChange, event) {
       var state = event.buttons;
       for (var button = 0; button < Mouse.NUM_BUTTONS; ++button) {
@@ -62610,15 +62612,17 @@ var Mouse = function (_Primrose$InputProces) {
         state >>= 1;
       }
       _this.setAxis("BUTTONS", event.buttons << 10);
-      event.preventDefault();
+      if (event.target === DOMElement) {
+        event.preventDefault();
+      }
     };
 
-    DOMElement.addEventListener("mousedown", setState.bind(_this, true), false);
-    DOMElement.addEventListener("mouseup", setState.bind(_this, false), false);
-    DOMElement.addEventListener("contextmenu", function (event) {
+    window.addEventListener("mousedown", setState.bind(_this, true), false);
+    window.addEventListener("mouseup", setState.bind(_this, false), false);
+    window.addEventListener("contextmenu", function (event) {
       return !(event.ctrlKey && event.shiftKey) && event.preventDefault();
     }, false);
-    DOMElement.addEventListener("mousemove", function (event) {
+    window.addEventListener("mousemove", function (event) {
       setState(true, event);
 
       if (PointerLock.isActive) {
@@ -62637,7 +62641,7 @@ var Mouse = function (_Primrose$InputProces) {
       }
     }, false);
 
-    DOMElement.addEventListener("wheel", function (event) {
+    window.addEventListener("wheel", function (event) {
       if (isChrome) {
         _this.W += event.deltaX;
         _this.Z += event.deltaY;
@@ -62646,7 +62650,9 @@ var Mouse = function (_Primrose$InputProces) {
       } else {
         _this.Z += event.deltaY;
       }
-      event.preventDefault();
+      if (event.target === DOMElement) {
+        event.preventDefault();
+      }
     }, false);
     return _this;
   }
@@ -62896,11 +62902,17 @@ if(typeof window !== "undefined") window.Primrose.Input.Speech = Speech;
 // start D:\Documents\VR\Primrose\src\Primrose\Input\Touch.js
 (function(){"use strict";
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var TEMP = new THREE.Vector2();
 
 var Touch = function (_Primrose$InputProces) {
   _inherits(Touch, _Primrose$InputProces);
@@ -62914,13 +62926,16 @@ var Touch = function (_Primrose$InputProces) {
       axes.push("Y" + i);
       axes.push("LX" + i);
       axes.push("LY" + i);
+      axes.push("DX" + i);
+      axes.push("DY" + i);
     }
 
     var _this = _possibleConstructorReturn(this, (Touch.__proto__ || Object.getPrototypeOf(Touch)).call(this, "Touch", commands, axes));
 
-    DOMElement = DOMElement || window;
-
     var setState = function setState(stateChange, setAxis, event) {
+      // We have to find the minimum identifier value because iOS uses a very
+      // large number that changes after every gesture. Every other platform
+      // just numbers them 0 through 9.
       var touches = event.changedTouches,
           minIdentifier = Number.MAX_VALUE;
       for (var _i = 0; _i < touches.length; ++_i) {
@@ -62929,16 +62944,22 @@ var Touch = function (_Primrose$InputProces) {
 
       for (var _i2 = 0; _i2 < touches.length; ++_i2) {
         var t = touches[_i2],
-            id = t.identifier - minIdentifier;
+            id = t.identifier - minIdentifier,
+            x = t.pageX,
+            y = t.pageY;
+        _this.setAxis("X" + id, x);
+        _this.setAxis("Y" + id, y);
+        _this.setButton("FINGER" + t.identifier, stateChange);
+
         if (setAxis) {
-          _this.setAxis("X" + id, t.pageX);
-          _this.setAxis("Y" + id, t.pageY);
-        } else {
-          _this.setAxis("LX" + id, t.pageX);
-          _this.setAxis("LY" + id, t.pageY);
+          var lx = _this.getAxis("LX" + id),
+              ly = _this.getAxis("LY" + id);
+          _this.setAxis("DX" + id, x - lx);
+          _this.setAxis("DY" + id, y - ly);
         }
 
-        _this.setButton("FINGER" + t.identifier, stateChange);
+        _this.setAxis("LX" + id, x);
+        _this.setAxis("LY" + id, y);
       }
 
       touches = event.touches;
@@ -62948,13 +62969,34 @@ var Touch = function (_Primrose$InputProces) {
         fingerState |= 1 << _t.identifier;
       }
       _this.setAxis("FINGERS", fingerState);
+
+      if (event.target === DOMElement) {
+        event.preventDefault();
+      }
     };
 
-    DOMElement.addEventListener("touchstart", setState.bind(_this, true, false), false);
-    DOMElement.addEventListener("touchend", setState.bind(_this, false, true), false);
-    DOMElement.addEventListener("touchmove", setState.bind(_this, true, true), false);
+    window.addEventListener("touchstart", setState.bind(_this, true, false), false);
+    window.addEventListener("touchend", setState.bind(_this, false, true), false);
+    window.addEventListener("touchmove", setState.bind(_this, true, true), false);
     return _this;
   }
+
+  _createClass(Touch, [{
+    key: "update",
+    value: function update(dt) {
+      _get(Touch.prototype.__proto__ || Object.getPrototypeOf(Touch.prototype), "update", this).call(this, dt);
+      for (var id = 0; id < 10; ++id) {
+        var x = this.getAxis("X" + id),
+            y = this.getAxis("Y" + id),
+            lx = this.getAxis("LX" + id),
+            ly = this.getAxis("LY" + id);
+        this.setAxis("DX" + id, x - lx);
+        this.setAxis("DY" + id, y - ly);
+        this.setAxis("LX" + id, x);
+        this.setAxis("LY" + id, y);
+      }
+    }
+  }]);
 
   return Touch;
 }(Primrose.InputProcessor);
@@ -68010,6 +68052,7 @@ function debug(label, digits) {
     cache[label] = val;
     console.log(label, val);
   }
+  return this;
 }
 if(typeof window !== "undefined") window.THREE.Euler.prototype.debug = debug;
 })();
@@ -68047,6 +68090,7 @@ function debug(label, digits) {
     cache[label] = val;
     console.log(label + "\n" + val);
   }
+  return this;
 }
 if(typeof window !== "undefined") window.THREE.Matrix4.prototype.debug = debug;
 })();
@@ -68131,6 +68175,7 @@ function debug(label, digits) {
     cache[label] = val;
     console.log(label, val);
   }
+  return this;
 }
 if(typeof window !== "undefined") window.THREE.Quaternion.prototype.debug = debug;
 })();
@@ -68158,6 +68203,44 @@ if(typeof window !== "undefined") window.THREE.Quaternion.prototype.toString = t
 // end D:\Documents\VR\Primrose\src\THREE\Quaternion\prototype\toString.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+// start D:\Documents\VR\Primrose\src\THREE\Vector2\prototype\debug.js
+(function(){"use strict";
+
+var cache = {};
+function debug(label, digits) {
+  var val = this.toString(digits);
+  if (val !== cache[label]) {
+    cache[label] = val;
+    console.log(label, val);
+  }
+  return this;
+}
+if(typeof window !== "undefined") window.THREE.Vector2.prototype.debug = debug;
+})();
+// end D:\Documents\VR\Primrose\src\THREE\Vector2\prototype\debug.js
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// start D:\Documents\VR\Primrose\src\THREE\Vector2\prototype\toString.js
+(function(){"use strict";
+
+function toString(digits) {
+  var parts = this.toArray();
+  if (digits !== undefined) {
+    for (var i = 0; i < parts.length; ++i) {
+      if (parts[i] !== null && parts[i] !== undefined) {
+        parts[i] = parts[i].toFixed(digits);
+      } else {
+        parts[i] = "undefined";
+      }
+    }
+  }
+  return "<" + parts.join(", ") + ">";
+}
+if(typeof window !== "undefined") window.THREE.Vector2.prototype.toString = toString;
+})();
+// end D:\Documents\VR\Primrose\src\THREE\Vector2\prototype\toString.js
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 // start D:\Documents\VR\Primrose\src\THREE\Vector3\prototype\debug.js
 (function(){"use strict";
 
@@ -68168,6 +68251,7 @@ function debug(label, digits) {
     cache[label] = val;
     console.log(label, val);
   }
+  return this;
 }
 if(typeof window !== "undefined") window.THREE.Vector3.prototype.debug = debug;
 })();
@@ -68193,4 +68277,42 @@ function toString(digits) {
 if(typeof window !== "undefined") window.THREE.Vector3.prototype.toString = toString;
 })();
 // end D:\Documents\VR\Primrose\src\THREE\Vector3\prototype\toString.js
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// start D:\Documents\VR\Primrose\src\THREE\Vector4\prototype\debug.js
+(function(){"use strict";
+
+var cache = {};
+function debug(label, digits) {
+  var val = this.toString(digits);
+  if (val !== cache[label]) {
+    cache[label] = val;
+    console.log(label, val);
+  }
+  return this;
+}
+if(typeof window !== "undefined") window.THREE.Vector4.prototype.debug = debug;
+})();
+// end D:\Documents\VR\Primrose\src\THREE\Vector4\prototype\debug.js
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// start D:\Documents\VR\Primrose\src\THREE\Vector4\prototype\toString.js
+(function(){"use strict";
+
+function toString(digits) {
+  var parts = this.toArray();
+  if (digits !== undefined) {
+    for (var i = 0; i < parts.length; ++i) {
+      if (parts[i] !== null && parts[i] !== undefined) {
+        parts[i] = parts[i].toFixed(digits);
+      } else {
+        parts[i] = "undefined";
+      }
+    }
+  }
+  return "<" + parts.join(", ") + ">";
+}
+if(typeof window !== "undefined") window.THREE.Vector4.prototype.toString = toString;
+})();
+// end D:\Documents\VR\Primrose\src\THREE\Vector4\prototype\toString.js
 ////////////////////////////////////////////////////////////////////////////////
