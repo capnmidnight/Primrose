@@ -103,24 +103,12 @@ class FPSInput extends Primrose.AbstractEventEmitter {
         axes: ["FINGERS"],
         delta: true
       },
-      dx: {
-        axes: ["X0"],
-        delta: true,
-        min: -5,
-        max: 5
-      },
       heading: {
-        commands: ["dx"],
+        axes: ["DX0"],
         integrate: true
       },
-      dy: {
-        axes: ["Y0"],
-        delta: true,
-        min: -5,
-        max: 5
-      },
       pitch: {
-        commands: ["dy"],
+        axes: ["DY0"],
         integrate: true,
         min: -Math.PI * 0.5,
         max: Math.PI * 0.5

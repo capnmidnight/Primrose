@@ -40,6 +40,10 @@ function filterValue(elem){
     sign = (elem < 0) ? -1 : 1;
   }
   else if(t === "string") {
+    if(elem[0] === "-") {
+      sign = -1;
+      elem = elem.substring(1);
+    }
     index = this.axisNames.indexOf(elem);
   }
   else {
