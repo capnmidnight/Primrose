@@ -3733,13 +3733,15 @@ var Pointer = function (_Primrose$AbstractEve) {
               selected = !!currentHit;
               this.emit("gazecomplete", evt);
               lastHit.time = null;
-            } else {
+            } else if (currentHit && currentHit.object && (currentHit.object.ongazecomplete || currentHit.object.onselect)) {
               var p = Math.round(36 * dt / this.gazeTimeout),
                   a = 2 * Math.PI * p / 36;
               this.gazeOuter.geometry = ring(GAZE_RING_INNER, GAZE_RING_OUTER, 36, p, 0, a);
               if (moved) {
                 this.emit("gazemove", evt);
               }
+            } else {
+              this.gazeOuter.visible = false;
             }
           }
         }
@@ -5005,6 +5007,7 @@ var Image = function (_Primrose$Entity) {
     _this._meshes = [];
     _this._textures = [];
     _this._currentImageIndex = 0;
+    _this._lastTime = null;
     _this.isVideo = false;
     return _this;
   }
@@ -5157,10 +5160,14 @@ var Image = function (_Primrose$Entity) {
     value: function update() {
       if (this.isVideo) {
         for (var i = 0; i < this._textures.length; ++i) {
-          if (i < this._contexts.length) {
-            this._contexts[i].drawImage(this._elements[i], 0, 0);
+          var elem = this._elements[i];
+          if (elem.currentTime !== this._lastTime) {
+            if (i < this._contexts.length) {
+              this._contexts[i].drawImage(elem, 0, 0);
+            }
+            this._textures[i].needsUpdate = true;
+            this._lastTime = elem.currentTime;
           }
-          this._textures[i].needsUpdate = true;
         }
       }
     }
