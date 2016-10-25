@@ -35,7 +35,6 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       moveSky();
       moveGround();
       this.network.update(dt);
-      checkQuality();
 
       this.emit("update", dt);
     };
@@ -770,63 +769,6 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       return this.input.ready;
     });
 
-    var frameCount = 0,
-      frameTime = 0,
-      NUM_FRAMES = 10,
-      LEAD_TIME = 2000,
-      // skip testing quality during first 5 seconds to avoid testing startup
-      lastQualityChange = 5000,
-      dq1 = 0,
-      dq2 = 0;
-
-    var checkQuality = () => {
-      if (this.options.autoScaleQuality &&
-        // don't check quality if we've already hit the bottom of the barrel.
-        this.quality !== Quality.NONE) {
-        if (frameTime < lastQualityChange + LEAD_TIME) {
-          // wait a few seconds before testing quality
-          frameTime = performance.now();
-        }
-        else {
-          ++frameCount;
-          if (frameCount === NUM_FRAMES) {
-            var now = performance.now(),
-              dt = (now - frameTime) * 0.001,
-              fps = Math.round(NUM_FRAMES / dt);
-            frameTime = now;
-            frameCount = 0;
-            // save the last change
-            dq2 = dq1;
-
-            // if we drop low, decrease quality
-            if (fps < 45) {
-              dq1 = -1;
-            }
-            else if (
-              // don't upgrade on mobile devices
-              !isMobile &&
-              // don't upgrade if the user says not to
-              this.options.autoRescaleQuality &&
-              //good speed
-              fps >= 60 &&
-              // still room to grow
-              this.quality < Quality.MAXIMUM &&
-              // and the last change wasn't a downgrade
-              dq2 !== -1) {
-              dq1 = 1;
-            }
-            else {
-              dq1 = 0;
-            }
-            if (dq1 !== 0) {
-              this.quality += dq1;
-            }
-            lastQualityChange = now;
-          }
-        }
-      }
-    };
-
     var allReady = Promise.all([
         modelsReady,
         documentReady
@@ -865,9 +807,6 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
           if (0 <= v && v < PIXEL_SCALES.length) {
             this.options.quality = v;
             resolutionScale = PIXEL_SCALES[v];
-            if ("WebVRConfig" in window) {
-              WebVRConfig.BUFFER_SCALE = resolutionScale;
-            }
           }
           allReady.then(modifyScreen);
         }
@@ -930,8 +869,6 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
 
 BrowserEnvironment.DEFAULTS = {
   antialias: true,
-  autoScaleQuality: true,
-  autoRescaleQuality: false,
   quality: Quality.MAXIMUM,
   useLeap: false,
   useGaze: false,
