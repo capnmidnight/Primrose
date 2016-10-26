@@ -2918,7 +2918,13 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
       return sceneGraph;
     };
 
-    put(light(0xffffff, 1.5, 50)).on(_this.scene).at(0, 10, 10);
+    if (!_this.options.disableDefaultLighting) {
+      _this.ambient = new THREE.AmbientLight(0xffffff, 0.5);
+      _this.scene.add(_this.ambient);
+
+      _this.sun = light(0xffffff, 1, 50);
+      put(_this.sun).on(_this.scene).at(0, 10, 10);
+    }
 
     var currentTimerObject = null;
     _this.timer = 0;
@@ -5198,6 +5204,10 @@ var TELEPORT_PAD_RADIUS = 0.4,
     QUAT_TEMP = new THREE.Quaternion(),
     _ = priv();
 
+function hasGazeEvent(obj) {
+  return !!obj.ongazecomplete || !!obj.onselect || !!obj.onclick || obj._handlers && (obj._handlers.gazecomplete && obj._handlers.gazecomplete.length > 0 || obj._handlers.select && obj._handlers.select.length > 0 || obj._handlers.click && obj._handlers.click.length > 0) || obj.button && hasGazeEvent(obj.button);
+}
+
 pliny.class({
   parent: "Primrose",
   name: "Pointer",
@@ -5479,7 +5489,7 @@ var Pointer = function (_Primrose$AbstractEve) {
               selected = !!currentHit;
               this.emit("gazecomplete", evt);
               lastHit.time = null;
-            } else if (currentHit && currentHit.object && (currentHit.object.ongazecomplete || currentHit.object.onselect)) {
+            } else if (currentHit && currentHit.object && hasGazeEvent(currentHit.object)) {
               var p = Math.round(36 * dt / this.gazeTimeout),
                   a = 2 * Math.PI * p / 36;
               this.gazeOuter.geometry = ring(GAZE_RING_INNER, GAZE_RING_OUTER, 36, p, 0, a);
@@ -5487,6 +5497,9 @@ var Pointer = function (_Primrose$AbstractEve) {
                 this.emit("gazemove", evt);
               }
             } else {
+              if (currentHit && currentHit.object) {
+                hasGazeEvent(currentHit.object);
+              }
               this.gazeOuter.visible = false;
             }
           }
