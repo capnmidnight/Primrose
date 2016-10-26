@@ -114,11 +114,11 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
         i, j;
       lt = t;
       update(dt);
-      render(dt);
+      render();
       RAF(animate);
     };
 
-    var render = (dt) => {
+    var render = () => {
       this.camera.position.set(0, 0, 0);
       this.camera.quaternion.set(0, 0, 0, 1);
       this.audio.setPlayer(this.input.head.mesh);
