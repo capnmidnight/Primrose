@@ -550,9 +550,15 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       return sceneGraph;
     };
 
-    put(light(0xffffff, 1.5, 50))
-      .on(this.scene)
-      .at(0, 10, 10);
+    if(!this.options.disableDefaultLighting) {
+      this.ambient = new THREE.AmbientLight(0xffffff, 0.5);
+      this.scene.add(this.ambient);
+
+      this.sun = light(0xffffff, 1, 50);
+      put(this.sun)
+        .on(this.scene)
+        .at(0, 10, 10);
+    }
 
     var currentTimerObject = null;
     this.timer = 0;
