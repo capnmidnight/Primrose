@@ -57265,11 +57265,11 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
           j;
       lt = t;
       update(dt);
-      render(dt);
+      render();
       RAF(animate);
     };
 
-    var render = function render(dt) {
+    var render = function render() {
       _this.camera.position.set(0, 0, 0);
       _this.camera.quaternion.set(0, 0, 0, 1);
       _this.audio.setPlayer(_this.input.head.mesh);
