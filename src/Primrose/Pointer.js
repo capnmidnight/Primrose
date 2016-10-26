@@ -12,6 +12,15 @@ const TELEPORT_PAD_RADIUS = 0.4,
   _ = priv();
 
 
+function hasGazeEvent(obj){
+  return !!obj.ongazecomplete || !!obj.onselect || !!obj.onclick ||
+     obj._handlers && (
+      (obj._handlers.gazecomplete && obj._handlers.gazecomplete.length > 0) ||
+      (obj._handlers.select && obj._handlers.select.length > 0) ||
+      (obj._handlers.click && obj._handlers.click.length > 0)) ||
+    obj.button && hasGazeEvent(obj.button);
+}
+
 pliny.class({
   parent: "Primrose",
     name: "Pointer",
@@ -321,7 +330,7 @@ class Pointer extends Primrose.AbstractEventEmitter {
             this.emit("gazecomplete", evt);
             lastHit.time = null;
           }
-          else if(currentHit && currentHit.object && (currentHit.object.ongazecomplete || currentHit.object.onselect)){
+          else if(currentHit && currentHit.object && hasGazeEvent(currentHit.object)){
             var p = Math.round(36 * dt / this.gazeTimeout),
               a = 2 * Math.PI * p / 36;
             this.gazeOuter.geometry = ring(GAZE_RING_INNER, GAZE_RING_OUTER, 36, p, 0, a);
@@ -330,6 +339,9 @@ class Pointer extends Primrose.AbstractEventEmitter {
             }
           }
           else{
+            if(currentHit && currentHit.object) {
+              hasGazeEvent(currentHit.object);
+            }
             this.gazeOuter.visible = false;
           }
         }
