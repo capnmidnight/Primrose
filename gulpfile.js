@@ -13,7 +13,6 @@ var gulp = require("gulp"),
     "node_modules/three/build/three.js",
     "node_modules/three/examples/js/loaders/OBJLoader.js",
     "node_modules/three/examples/js/loaders/MTLLoader.js",
-    "node_modules/iphone-inline-video/dist/iphone-inline-video.browser.js",
     "namegen.js"
   ]),
   js = nt.js("PrimroseLib-WithDoc", "src", ["format"], pliny.carve.bind(pliny, "PrimroseLib-WithDoc.js", "PrimroseLib.js", "PrimroseDocumentation.js"), true),

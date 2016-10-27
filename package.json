@@ -50,7 +50,6 @@
   ],
   "dependencies": {
     "bare-bones-logger": "^2.0.0",
-    "iphone-inline-video": "^1.9.3",
     "jshashes": "^1.0.5",
     "lavu-details-polyfill": "^0.1.0",
     "leapjs": "^0.6.4",
