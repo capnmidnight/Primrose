@@ -7068,6 +7068,30 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var COUNTER = 0,
     _ = priv();
 
+// Videos don't auto-play on mobile devices, so let's make them all play whenever
+// we tap the screen.
+var processedVideos = [];
+function findAndFixVideo(evt) {
+  var vids = document.querySelectorAll("video");
+  for (var i = 0; i < vids.length; ++i) {
+    fixVideo(vids[i]);
+  }
+  window.removeEventListener("touchend", findAndFixVideo);
+  window.removeEventListener("mouseup", findAndFixVideo);
+  window.removeEventListener("keyup", findAndFixVideo);
+}
+
+function fixVideo(vid) {
+  if (processedVideos.indexOf(vid) === -1) {
+    processedVideos.push(vid);
+    makeVideoPlayableInline(vid, false);
+  }
+}
+
+window.addEventListener("touchend", findAndFixVideo, false);
+window.addEventListener("mouseup", findAndFixVideo, false);
+window.addEventListener("keyup", findAndFixVideo, false);
+
 pliny.class({
   parent: "Primrose.Controls",
   name: "Image",
