@@ -8430,7 +8430,7 @@ module.exports.VRFrameData = VRFrameData;
 module.exports.VRDisplay = VRDisplay;
 module.exports.VRDevice = VRDevice;
 
-},{"./util.js":14}],3:[function(_dereq_,module,exports){
+},{"./util.js":10}],3:[function(_dereq_,module,exports){
 /*
  * Copyright 2016 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -8446,8 +8446,6 @@ module.exports.VRDevice = VRDevice;
  * limitations under the License.
  */
 
-var DeviceInfo = _dereq_('./device-info.js');
-var Dpdb = _dereq_('./dpdb/dpdb.js');
 var FusionPoseSensor = _dereq_('./sensor-fusion/fusion-pose-sensor.js');
 var VRDisplay = _dereq_('./base.js').VRDisplay;
 var Util = _dereq_('./util.js');
@@ -8467,11 +8465,7 @@ function CardboardVRDisplay() {
   this.capabilities.canPresent = true;
 
   // "Private" members.
-  this.bufferScale_ = WebVRConfig.BUFFER_SCALE;
   this.poseSensor_ = new FusionPoseSensor();
-
-  this.dpdb_ = new Dpdb(true, this.onDeviceParamsUpdated_.bind(this));
-  this.deviceInfo_ = new DeviceInfo(this.dpdb_.getDeviceParams());
 
   if (Util.isIOS()) {
     // Listen for resize events to workaround this awful Safari bug.
@@ -8496,54 +8490,29 @@ CardboardVRDisplay.prototype.resetPose = function() {
 };
 
 CardboardVRDisplay.prototype.getEyeParameters = function(whichEye) {
-  var offset = [this.deviceInfo_.viewer.interLensDistance * 0.5, 0.0, 0.0];
+  var offset = [0.03, 0.0, 0.0];
   var fieldOfView;
 
-  // TODO: FoV can be a little expensive to compute. Cache when device params change.
   if (whichEye == Eye.LEFT) {
     offset[0] *= -1.0;
-    fieldOfView = this.deviceInfo_.getFieldOfViewLeftEye();
-  } else if (whichEye == Eye.RIGHT) {
-    fieldOfView = this.deviceInfo_.getFieldOfViewRightEye();
-  } else {
-    console.error('Invalid eye provided: %s', whichEye);
-    return null;
   }
 
   return {
-    fieldOfView: fieldOfView,
+    fieldOfView: {upDegrees: 40, leftDegrees: 40, rightDegrees: 40, downDegrees: 40},
     offset: offset,
-    // TODO: Should be able to provide better values than these.
-    renderWidth: this.deviceInfo_.device.width * 0.5 * this.bufferScale_,
-    renderHeight: this.deviceInfo_.device.height * this.bufferScale_,
+    renderWidth: devicePixelRatio * 0.5 * screen.width,
+    renderHeight: devicePixelRatio * screen.height,
   };
-};
-
-CardboardVRDisplay.prototype.onDeviceParamsUpdated_ = function(newParams) {
-  console.log('DPDB reported that device params were updated.');
-  this.deviceInfo_.updateDeviceParams(newParams);
-};
-
-CardboardVRDisplay.prototype.updateBounds_ = function () {
 };
 
 CardboardVRDisplay.prototype.beginPresent_ = function() {
   // Listen for orientation change events in order to show interstitial.
   this.orientationHandler = this.onOrientationChange_.bind(this);
   window.addEventListener('orientationchange', this.orientationHandler);
-
-  // Listen for present display change events in order to update distorter dimensions
-  this.vrdisplaypresentchangeHandler = this.updateBounds_.bind(this);
-  window.addEventListener('vrdisplaypresentchange', this.vrdisplaypresentchangeHandler);
-
-  // Fire this event initially, to give geometry-distortion clients the chance
-  // to do something custom.
-  this.fireVRDisplayDeviceParamsChange_();
 };
 
 CardboardVRDisplay.prototype.endPresent_ = function() {
   window.removeEventListener('orientationchange', this.orientationHandler);
-  window.removeEventListener('vrdisplaypresentchange', this.vrdisplaypresentchangeHandler);
 };
 
 CardboardVRDisplay.prototype.submitFrame = function(pose) {
@@ -8577,1738 +8546,9 @@ CardboardVRDisplay.prototype.onResize_ = function(e) {
   }
 };
 
-CardboardVRDisplay.prototype.onViewerChanged_ = function(viewer) {
-  this.deviceInfo_.setViewer(viewer);
-
-  // Fire a new event containing viewer and device parameters for clients that
-  // want to implement their own geometry-based distortion.
-  this.fireVRDisplayDeviceParamsChange_();
-};
-
-CardboardVRDisplay.prototype.fireVRDisplayDeviceParamsChange_ = function() {
-  var event = new CustomEvent('vrdisplaydeviceparamschange', {
-    detail: {
-      vrdisplay: this,
-      deviceInfo: this.deviceInfo_,
-    }
-  });
-  window.dispatchEvent(event);
-};
-
 module.exports = CardboardVRDisplay;
 
-},{"./base.js":2,"./device-info.js":4,"./dpdb/dpdb.js":7,"./sensor-fusion/fusion-pose-sensor.js":11,"./util.js":14}],4:[function(_dereq_,module,exports){
-/*
- * Copyright 2015 Google Inc. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-var Distortion = _dereq_('./distortion/distortion.js');
-var MathUtil = _dereq_('./math-util.js');
-var Util = _dereq_('./util.js');
-
-function Device(params) {
-  this.width = params.width || Util.getScreenWidth();
-  this.height = params.height || Util.getScreenHeight();
-  this.widthMeters = params.widthMeters;
-  this.heightMeters = params.heightMeters;
-  this.bevelMeters = params.bevelMeters;
-}
-
-
-// Fallback Android device (based on Nexus 5 measurements) for use when
-// we can't recognize an Android device.
-var DEFAULT_ANDROID = new Device({
-  widthMeters: 0.110,
-  heightMeters: 0.062,
-  bevelMeters: 0.004
-});
-
-// Fallback iOS device (based on iPhone6) for use when
-// we can't recognize an Android device.
-var DEFAULT_IOS = new Device({
-  widthMeters: 0.1038,
-  heightMeters: 0.0584,
-  bevelMeters: 0.004
-});
-
-
-var Viewers = {
-  CardboardV1: new CardboardViewer({
-    id: 'CardboardV1',
-    label: 'Cardboard I/O 2014',
-    fov: 40,
-    interLensDistance: 0.060,
-    baselineLensDistance: 0.035,
-    screenLensDistance: 0.042,
-    distortionCoefficients: [0.441, 0.156],
-    inverseCoefficients: [-0.4410035, 0.42756155, -0.4804439, 0.5460139,
-      -0.58821183, 0.5733938, -0.48303202, 0.33299083, -0.17573841,
-      0.0651772, -0.01488963, 0.001559834]
-  }),
-  CardboardV2: new CardboardViewer({
-    id: 'CardboardV2',
-    label: 'Cardboard I/O 2015',
-    fov: 60,
-    interLensDistance: 0.064,
-    baselineLensDistance: 0.035,
-    screenLensDistance: 0.039,
-    distortionCoefficients: [0.34, 0.55],
-    inverseCoefficients: [-0.33836704, -0.18162185, 0.862655, -1.2462051,
-      1.0560602, -0.58208317, 0.21609078, -0.05444823, 0.009177956,
-      -9.904169E-4, 6.183535E-5, -1.6981803E-6]
-  })
-};
-
-
-var DEFAULT_LEFT_CENTER = {x: 0.5, y: 0.5};
-var DEFAULT_RIGHT_CENTER = {x: 0.5, y: 0.5};
-
-/**
- * Manages information about the device and the viewer.
- *
- * deviceParams indicates the parameters of the device to use (generally
- * obtained from dpdb.getDeviceParams()). Can be null to mean no device
- * params were found.
- */
-function DeviceInfo(deviceParams) {
-  this.viewer = Viewers.CardboardV2;
-  this.updateDeviceParams(deviceParams);
-  this.distortion = new Distortion(this.viewer.distortionCoefficients);
-}
-
-DeviceInfo.prototype.updateDeviceParams = function(deviceParams) {
-  this.device = this.determineDevice_(deviceParams) || this.device;
-};
-
-DeviceInfo.prototype.getDevice = function() {
-  return this.device;
-};
-
-DeviceInfo.prototype.setViewer = function(viewer) {
-  this.viewer = viewer;
-  this.distortion = new Distortion(this.viewer.distortionCoefficients);
-};
-
-DeviceInfo.prototype.determineDevice_ = function(deviceParams) {
-  if (!deviceParams) {
-    // No parameters, so use a default.
-    if (Util.isIOS()) {
-      console.warn('Using fallback iOS device measurements.');
-      return DEFAULT_IOS;
-    } else {
-      console.warn('Using fallback Android device measurements.');
-      return DEFAULT_ANDROID;
-    }
-  }
-
-  // Compute device screen dimensions based on deviceParams.
-  var METERS_PER_INCH = 0.0254;
-  var metersPerPixelX = METERS_PER_INCH / deviceParams.xdpi;
-  var metersPerPixelY = METERS_PER_INCH / deviceParams.ydpi;
-  var width = Util.getScreenWidth();
-  var height = Util.getScreenHeight();
-  return new Device({
-    widthMeters: metersPerPixelX * width,
-    heightMeters: metersPerPixelY * height,
-    bevelMeters: deviceParams.bevelMm * 0.001,
-  });
-};
-
-/**
- * Calculates field of view for the left eye.
- */
-DeviceInfo.prototype.getDistortedFieldOfViewLeftEye = function() {
-  var viewer = this.viewer;
-  var device = this.device;
-  var distortion = this.distortion;
-
-  // Device.height and device.width for device in portrait mode, so transpose.
-  var eyeToScreenDistance = viewer.screenLensDistance;
-
-  var outerDist = (device.widthMeters - viewer.interLensDistance) / 2;
-  var innerDist = viewer.interLensDistance / 2;
-  var bottomDist = viewer.baselineLensDistance - device.bevelMeters;
-  var topDist = device.heightMeters - bottomDist;
-
-  var outerAngle = MathUtil.radToDeg * Math.atan(
-      distortion.distort(outerDist / eyeToScreenDistance));
-  var innerAngle = MathUtil.radToDeg * Math.atan(
-      distortion.distort(innerDist / eyeToScreenDistance));
-  var bottomAngle = MathUtil.radToDeg * Math.atan(
-      distortion.distort(bottomDist / eyeToScreenDistance));
-  var topAngle = MathUtil.radToDeg * Math.atan(
-      distortion.distort(topDist / eyeToScreenDistance));
-
-  return {
-    leftDegrees: Math.min(outerAngle, viewer.fov),
-    rightDegrees: Math.min(innerAngle, viewer.fov),
-    downDegrees: Math.min(bottomAngle, viewer.fov),
-    upDegrees: Math.min(topAngle, viewer.fov)
-  };
-};
-
-/**
- * Calculates the tan-angles from the maximum FOV for the left eye for the
- * current device and screen parameters.
- */
-DeviceInfo.prototype.getLeftEyeVisibleTanAngles = function() {
-  var viewer = this.viewer;
-  var device = this.device;
-  var distortion = this.distortion;
-
-  // Tan-angles from the max FOV.
-  var fovLeft = Math.tan(-MathUtil.degToRad * viewer.fov);
-  var fovTop = Math.tan(MathUtil.degToRad * viewer.fov);
-  var fovRight = Math.tan(MathUtil.degToRad * viewer.fov);
-  var fovBottom = Math.tan(-MathUtil.degToRad * viewer.fov);
-  // Viewport size.
-  var halfWidth = device.widthMeters / 4;
-  var halfHeight = device.heightMeters / 2;
-  // Viewport center, measured from left lens position.
-  var verticalLensOffset = (viewer.baselineLensDistance - device.bevelMeters - halfHeight);
-  var centerX = viewer.interLensDistance / 2 - halfWidth;
-  var centerY = -verticalLensOffset;
-  var centerZ = viewer.screenLensDistance;
-  // Tan-angles of the viewport edges, as seen through the lens.
-  var screenLeft = distortion.distort((centerX - halfWidth) / centerZ);
-  var screenTop = distortion.distort((centerY + halfHeight) / centerZ);
-  var screenRight = distortion.distort((centerX + halfWidth) / centerZ);
-  var screenBottom = distortion.distort((centerY - halfHeight) / centerZ);
-  // Compare the two sets of tan-angles and take the value closer to zero on each side.
-  var result = new Float32Array(4);
-  result[0] = Math.max(fovLeft, screenLeft);
-  result[1] = Math.min(fovTop, screenTop);
-  result[2] = Math.min(fovRight, screenRight);
-  result[3] = Math.max(fovBottom, screenBottom);
-  return result;
-};
-
-/**
- * Calculates the tan-angles from the maximum FOV for the left eye for the
- * current device and screen parameters, assuming no lenses.
- */
-DeviceInfo.prototype.getLeftEyeNoLensTanAngles = function() {
-  var viewer = this.viewer;
-  var device = this.device;
-  var distortion = this.distortion;
-
-  var result = new Float32Array(4);
-  // Tan-angles from the max FOV.
-  var fovLeft = distortion.distortInverse(Math.tan(-MathUtil.degToRad * viewer.fov));
-  var fovTop = distortion.distortInverse(Math.tan(MathUtil.degToRad * viewer.fov));
-  var fovRight = distortion.distortInverse(Math.tan(MathUtil.degToRad * viewer.fov));
-  var fovBottom = distortion.distortInverse(Math.tan(-MathUtil.degToRad * viewer.fov));
-  // Viewport size.
-  var halfWidth = device.widthMeters / 4;
-  var halfHeight = device.heightMeters / 2;
-  // Viewport center, measured from left lens position.
-  var verticalLensOffset = (viewer.baselineLensDistance - device.bevelMeters - halfHeight);
-  var centerX = viewer.interLensDistance / 2 - halfWidth;
-  var centerY = -verticalLensOffset;
-  var centerZ = viewer.screenLensDistance;
-  // Tan-angles of the viewport edges, as seen through the lens.
-  var screenLeft = (centerX - halfWidth) / centerZ;
-  var screenTop = (centerY + halfHeight) / centerZ;
-  var screenRight = (centerX + halfWidth) / centerZ;
-  var screenBottom = (centerY - halfHeight) / centerZ;
-  // Compare the two sets of tan-angles and take the value closer to zero on each side.
-  result[0] = Math.max(fovLeft, screenLeft);
-  result[1] = Math.min(fovTop, screenTop);
-  result[2] = Math.min(fovRight, screenRight);
-  result[3] = Math.max(fovBottom, screenBottom);
-  return result;
-};
-
-/**
- * Calculates the screen rectangle visible from the left eye for the
- * current device and screen parameters.
- */
-DeviceInfo.prototype.getLeftEyeVisibleScreenRect = function(undistortedFrustum) {
-  var viewer = this.viewer;
-  var device = this.device;
-
-  var dist = viewer.screenLensDistance;
-  var eyeX = (device.widthMeters - viewer.interLensDistance) / 2;
-  var eyeY = viewer.baselineLensDistance - device.bevelMeters;
-  var left = (undistortedFrustum[0] * dist + eyeX) / device.widthMeters;
-  var top = (undistortedFrustum[1] * dist + eyeY) / device.heightMeters;
-  var right = (undistortedFrustum[2] * dist + eyeX) / device.widthMeters;
-  var bottom = (undistortedFrustum[3] * dist + eyeY) / device.heightMeters;
-  return {
-    x: left,
-    y: bottom,
-    width: right - left,
-    height: top - bottom
-  };
-};
-
-DeviceInfo.prototype.getFieldOfViewLeftEye = function(opt_isUndistorted) {
-  return opt_isUndistorted ? this.getUndistortedFieldOfViewLeftEye() :
-      this.getDistortedFieldOfViewLeftEye();
-};
-
-DeviceInfo.prototype.getFieldOfViewRightEye = function(opt_isUndistorted) {
-  var fov = this.getFieldOfViewLeftEye(opt_isUndistorted);
-  return {
-    leftDegrees: fov.rightDegrees,
-    rightDegrees: fov.leftDegrees,
-    upDegrees: fov.upDegrees,
-    downDegrees: fov.downDegrees
-  };
-};
-
-/**
- * Calculates undistorted field of view for the left eye.
- */
-DeviceInfo.prototype.getUndistortedFieldOfViewLeftEye = function() {
-  var p = this.getUndistortedParams_();
-
-  return {
-    leftDegrees: MathUtil.radToDeg * Math.atan(p.outerDist),
-    rightDegrees: MathUtil.radToDeg * Math.atan(p.innerDist),
-    downDegrees: MathUtil.radToDeg * Math.atan(p.bottomDist),
-    upDegrees: MathUtil.radToDeg * Math.atan(p.topDist)
-  };
-};
-
-DeviceInfo.prototype.getUndistortedViewportLeftEye = function() {
-  var p = this.getUndistortedParams_();
-  var viewer = this.viewer;
-  var device = this.device;
-
-  // Distances stored in local variables are in tan-angle units unless otherwise
-  // noted.
-  var eyeToScreenDistance = viewer.screenLensDistance;
-  var screenWidth = device.widthMeters / eyeToScreenDistance;
-  var screenHeight = device.heightMeters / eyeToScreenDistance;
-  var xPxPerTanAngle = device.width / screenWidth;
-  var yPxPerTanAngle = device.height / screenHeight;
-
-  var x = Math.round((p.eyePosX - p.outerDist) * xPxPerTanAngle);
-  var y = Math.round((p.eyePosY - p.bottomDist) * yPxPerTanAngle);
-  return {
-    x: x,
-    y: y,
-    width: Math.round((p.eyePosX + p.innerDist) * xPxPerTanAngle) - x,
-    height: Math.round((p.eyePosY + p.topDist) * yPxPerTanAngle) - y
-  };
-};
-
-DeviceInfo.prototype.getUndistortedParams_ = function() {
-  var viewer = this.viewer;
-  var device = this.device;
-  var distortion = this.distortion;
-
-  // Most of these variables in tan-angle units.
-  var eyeToScreenDistance = viewer.screenLensDistance;
-  var halfLensDistance = viewer.interLensDistance / 2 / eyeToScreenDistance;
-  var screenWidth = device.widthMeters / eyeToScreenDistance;
-  var screenHeight = device.heightMeters / eyeToScreenDistance;
-
-  var eyePosX = screenWidth / 2 - halfLensDistance;
-  var eyePosY = (viewer.baselineLensDistance - device.bevelMeters) / eyeToScreenDistance;
-
-  var maxFov = viewer.fov;
-  var viewerMax = distortion.distortInverse(Math.tan(MathUtil.degToRad * maxFov));
-  var outerDist = Math.min(eyePosX, viewerMax);
-  var innerDist = Math.min(halfLensDistance, viewerMax);
-  var bottomDist = Math.min(eyePosY, viewerMax);
-  var topDist = Math.min(screenHeight - eyePosY, viewerMax);
-
-  return {
-    outerDist: outerDist,
-    innerDist: innerDist,
-    topDist: topDist,
-    bottomDist: bottomDist,
-    eyePosX: eyePosX,
-    eyePosY: eyePosY
-  };
-};
-
-
-function CardboardViewer(params) {
-  // A machine readable ID.
-  this.id = params.id;
-  // A human readable label.
-  this.label = params.label;
-
-  // Field of view in degrees (per side).
-  this.fov = params.fov;
-
-  // Distance between lens centers in meters.
-  this.interLensDistance = params.interLensDistance;
-  // Distance between viewer baseline and lens center in meters.
-  this.baselineLensDistance = params.baselineLensDistance;
-  // Screen-to-lens distance in meters.
-  this.screenLensDistance = params.screenLensDistance;
-
-  // Distortion coefficients.
-  this.distortionCoefficients = params.distortionCoefficients;
-  // Inverse distortion coefficients.
-  // TODO: Calculate these from distortionCoefficients in the future.
-  this.inverseCoefficients = params.inverseCoefficients;
-}
-
-// Export viewer information.
-DeviceInfo.Viewers = Viewers;
-module.exports = DeviceInfo;
-
-},{"./distortion/distortion.js":5,"./math-util.js":9,"./util.js":14}],5:[function(_dereq_,module,exports){
-/**
- * TODO(smus): Implement coefficient inversion.
- */
-function Distortion(coefficients) {
-  this.coefficients = coefficients;
-}
-
-/**
- * Calculates the inverse distortion for a radius.
- * </p><p>
- * Allows to compute the original undistorted radius from a distorted one.
- * See also getApproximateInverseDistortion() for a faster but potentially
- * less accurate method.
- *
- * @param {Number} radius Distorted radius from the lens center in tan-angle units.
- * @return {Number} The undistorted radius in tan-angle units.
- */
-Distortion.prototype.distortInverse = function(radius) {
-  // Secant method.
-  var r0 = 0;
-  var r1 = 1;
-  var dr0 = radius - this.distort(r0);
-  while (Math.abs(r1 - r0) > 0.0001 /** 0.1mm */) {
-    var dr1 = radius - this.distort(r1);
-    var r2 = r1 - dr1 * ((r1 - r0) / (dr1 - dr0));
-    r0 = r1;
-    r1 = r2;
-    dr0 = dr1;
-  }
-  return r1;
-};
-
-/**
- * Distorts a radius by its distortion factor from the center of the lenses.
- *
- * @param {Number} radius Radius from the lens center in tan-angle units.
- * @return {Number} The distorted radius in tan-angle units.
- */
-Distortion.prototype.distort = function(radius) {
-  var r2 = radius * radius;
-  var ret = 0;
-  for (var i = 0; i < this.coefficients.length; i++) {
-    ret = r2 * (ret + this.coefficients[i]);
-  }
-  return (ret + 1) * radius;
-};
-
-// Functions below roughly ported from
-// https://github.com/googlesamples/cardboard-unity/blob/master/Cardboard/Scripts/CardboardProfile.cs#L412
-
-// Solves a small linear equation via destructive gaussian
-// elimination and back substitution.  This isn't generic numeric
-// code, it's just a quick hack to work with the generally
-// well-behaved symmetric matrices for least-squares fitting.
-// Not intended for reuse.
-//
-// @param a Input positive definite symmetrical matrix. Destroyed
-//     during calculation.
-// @param y Input right-hand-side values. Destroyed during calculation.
-// @return Resulting x value vector.
-//
-Distortion.prototype.solveLinear_ = function(a, y) {
-  var n = a.length;
-
-  // Gaussian elimination (no row exchange) to triangular matrix.
-  // The input matrix is a A^T A product which should be a positive
-  // definite symmetrical matrix, and if I remember my linear
-  // algebra right this implies that the pivots will be nonzero and
-  // calculations sufficiently accurate without needing row
-  // exchange.
-  for (var j = 0; j < n - 1; ++j) {
-    for (var k = j + 1; k < n; ++k) {
-      var p = a[j][k] / a[j][j];
-      for (var i = j + 1; i < n; ++i) {
-        a[i][k] -= p * a[i][j];
-      }
-      y[k] -= p * y[j];
-    }
-  }
-  // From this point on, only the matrix elements a[j][i] with i>=j are
-  // valid. The elimination doesn't fill in eliminated 0 values.
-
-  var x = new Array(n);
-
-  // Back substitution.
-  for (var j = n - 1; j >= 0; --j) {
-    var v = y[j];
-    for (var i = j + 1; i < n; ++i) {
-      v -= a[i][j] * x[i];
-    }
-    x[j] = v / a[j][j];
-  }
-
-  return x;
-};
-
-// Solves a least-squares matrix equation.  Given the equation A * x = y, calculate the
-// least-square fit x = inverse(A * transpose(A)) * transpose(A) * y.  The way this works
-// is that, while A is typically not a square matrix (and hence not invertible), A * transpose(A)
-// is always square.  That is:
-//   A * x = y
-//   transpose(A) * (A * x) = transpose(A) * y   <- multiply both sides by transpose(A)
-//   (transpose(A) * A) * x = transpose(A) * y   <- associativity
-//   x = inverse(transpose(A) * A) * transpose(A) * y  <- solve for x
-// Matrix A's row count (first index) must match y's value count.  A's column count (second index)
-// determines the length of the result vector x.
-Distortion.prototype.solveLeastSquares_ = function(matA, vecY) {
-  var i, j, k, sum;
-  var numSamples = matA.length;
-  var numCoefficients = matA[0].length;
-  if (numSamples != vecY.Length) {
-    throw new Error("Matrix / vector dimension mismatch");
-  }
-
-  // Calculate transpose(A) * A
-  var matATA = new Array(numCoefficients);
-  for (k = 0; k < numCoefficients; ++k) {
-    matATA[k] = new Array(numCoefficients);
-    for (j = 0; j < numCoefficients; ++j) {
-      sum = 0;
-      for (i = 0; i < numSamples; ++i) {
-        sum += matA[j][i] * matA[k][i];
-      }
-      matATA[k][j] = sum;
-    }
-  }
-
-  // Calculate transpose(A) * y
-  var vecATY = new Array(numCoefficients);
-  for (j = 0; j < numCoefficients; ++j) {
-    sum = 0;
-    for (i = 0; i < numSamples; ++i) {
-      sum += matA[j][i] * vecY[i];
-    }
-    vecATY[j] = sum;
-  }
-
-  // Now solve (A * transpose(A)) * x = transpose(A) * y.
-  return this.solveLinear_(matATA, vecATY);
-};
-
-/// Calculates an approximate inverse to the given radial distortion parameters.
-Distortion.prototype.approximateInverse = function(maxRadius, numSamples) {
-  maxRadius = maxRadius || 1;
-  numSamples = numSamples || 100;
-  var numCoefficients = 6;
-  var i, j;
-
-  // R + K1*R^3 + K2*R^5 = r, with R = rp = distort(r)
-  // Repeating for numSamples:
-  //   [ R0^3, R0^5 ] * [ K1 ] = [ r0 - R0 ]
-  //   [ R1^3, R1^5 ]   [ K2 ]   [ r1 - R1 ]
-  //   [ R2^3, R2^5 ]            [ r2 - R2 ]
-  //   [ etc... ]                [ etc... ]
-  // That is:
-  //   matA * [K1, K2] = y
-  // Solve:
-  //   [K1, K2] = inverse(transpose(matA) * matA) * transpose(matA) * y
-  var matA = new Array(numCoefficients);
-  for (j = 0; j < numCoefficients; ++j) {
-    matA[j] = new Array(numSamples);
-  }
-  var vecY = new Array(numSamples);
-
-  for (i = 0; i < numSamples; ++i) {
-    var r = maxRadius * (i + 1) / numSamples;
-    var rp = this.distort(r);
-    var v = rp;
-    for (j = 0; j < numCoefficients; ++j) {
-      v *= rp * rp;
-      matA[j][i] = v;
-    }
-    vecY[i] = r - rp;
-  }
-
-  var inverseCoefficients = this.solveLeastSquares_(matA, vecY);
-
-  return new Distortion(inverseCoefficients);
-};
-
-module.exports = Distortion;
-
-},{}],6:[function(_dereq_,module,exports){
-/*
- * Copyright 2015 Google Inc. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * DPDB cache.
- */
-var DPDB_CACHE = {
-  "format": 1,
-  "last_updated": "2016-01-20T00:18:35Z",
-  "devices": [
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "asus/*/Nexus 7/*" },
-      { "ua": "Nexus 7" }
-    ],
-    "dpi": [ 320.8, 323.0 ],
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "asus/*/ASUS_Z00AD/*" },
-      { "ua": "ASUS_Z00AD" }
-    ],
-    "dpi": [ 403.0, 404.6 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "HTC/*/HTC6435LVW/*" },
-      { "ua": "HTC6435LVW" }
-    ],
-    "dpi": [ 449.7, 443.3 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "HTC/*/HTC One XL/*" },
-      { "ua": "HTC One XL" }
-    ],
-    "dpi": [ 315.3, 314.6 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "htc/*/Nexus 9/*" },
-      { "ua": "Nexus 9" }
-    ],
-    "dpi": 289.0,
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "HTC/*/HTC One M9/*" },
-      { "ua": "HTC One M9" }
-    ],
-    "dpi": [ 442.5, 443.3 ],
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "HTC/*/HTC One_M8/*" },
-      { "ua": "HTC One_M8" }
-    ],
-    "dpi": [ 449.7, 447.4 ],
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "HTC/*/HTC One/*" },
-      { "ua": "HTC One" }
-    ],
-    "dpi": 472.8,
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "Huawei/*/Nexus 6P/*" },
-      { "ua": "Nexus 6P" }
-    ],
-    "dpi": [ 515.1, 518.0 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "LGE/*/Nexus 5X/*" },
-      { "ua": "Nexus 5X" }
-    ],
-    "dpi": [ 422.0, 419.9 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "LGE/*/LGMS345/*" },
-      { "ua": "LGMS345" }
-    ],
-    "dpi": [ 221.7, 219.1 ],
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "LGE/*/LG-D800/*" },
-      { "ua": "LG-D800" }
-    ],
-    "dpi": [ 422.0, 424.1 ],
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "LGE/*/LG-D850/*" },
-      { "ua": "LG-D850" }
-    ],
-    "dpi": [ 537.9, 541.9 ],
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "LGE/*/VS985 4G/*" },
-      { "ua": "VS985 4G" }
-    ],
-    "dpi": [ 537.9, 535.6 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "LGE/*/Nexus 5/*" },
-      { "ua": "Nexus 5 " }
-    ],
-    "dpi": [ 442.4, 444.8 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "LGE/*/Nexus 4/*" },
-      { "ua": "Nexus 4" }
-    ],
-    "dpi": [ 319.8, 318.4 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "LGE/*/LG-P769/*" },
-      { "ua": "LG-P769" }
-    ],
-    "dpi": [ 240.6, 247.5 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "LGE/*/LGMS323/*" },
-      { "ua": "LGMS323" }
-    ],
-    "dpi": [ 206.6, 204.6 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "LGE/*/LGLS996/*" },
-      { "ua": "LGLS996" }
-    ],
-    "dpi": [ 403.4, 401.5 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "Micromax/*/4560MMX/*" },
-      { "ua": "4560MMX" }
-    ],
-    "dpi": [ 240.0, 219.4 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "Micromax/*/A250/*" },
-      { "ua": "Micromax A250" }
-    ],
-    "dpi": [ 480.0, 446.4 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "Micromax/*/Micromax AQ4501/*" },
-      { "ua": "Micromax AQ4501" }
-    ],
-    "dpi": 240.0,
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "motorola/*/DROID RAZR/*" },
-      { "ua": "DROID RAZR" }
-    ],
-    "dpi": [ 368.1, 256.7 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "motorola/*/XT830C/*" },
-      { "ua": "XT830C" }
-    ],
-    "dpi": [ 254.0, 255.9 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "motorola/*/XT1021/*" },
-      { "ua": "XT1021" }
-    ],
-    "dpi": [ 254.0, 256.7 ],
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "motorola/*/XT1023/*" },
-      { "ua": "XT1023" }
-    ],
-    "dpi": [ 254.0, 256.7 ],
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "motorola/*/XT1028/*" },
-      { "ua": "XT1028" }
-    ],
-    "dpi": [ 326.6, 327.6 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "motorola/*/XT1034/*" },
-      { "ua": "XT1034" }
-    ],
-    "dpi": [ 326.6, 328.4 ],
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "motorola/*/XT1053/*" },
-      { "ua": "XT1053" }
-    ],
-    "dpi": [ 315.3, 316.1 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "motorola/*/XT1562/*" },
-      { "ua": "XT1562" }
-    ],
-    "dpi": [ 403.4, 402.7 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "motorola/*/Nexus 6/*" },
-      { "ua": "Nexus 6 " }
-    ],
-    "dpi": [ 494.3, 489.7 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "motorola/*/XT1063/*" },
-      { "ua": "XT1063" }
-    ],
-    "dpi": [ 295.0, 296.6 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "motorola/*/XT1064/*" },
-      { "ua": "XT1064" }
-    ],
-    "dpi": [ 295.0, 295.6 ],
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "motorola/*/XT1092/*" },
-      { "ua": "XT1092" }
-    ],
-    "dpi": [ 422.0, 424.1 ],
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "motorola/*/XT1095/*" },
-      { "ua": "XT1095" }
-    ],
-    "dpi": [ 422.0, 423.4 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "OnePlus/*/A0001/*" },
-      { "ua": "A0001" }
-    ],
-    "dpi": [ 403.4, 401.0 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "OnePlus/*/ONE E1005/*" },
-      { "ua": "ONE E1005" }
-    ],
-    "dpi": [ 442.4, 441.4 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "OnePlus/*/ONE A2005/*" },
-      { "ua": "ONE A2005" }
-    ],
-    "dpi": [ 391.9, 405.4 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "OPPO/*/X909/*" },
-      { "ua": "X909" }
-    ],
-    "dpi": [ 442.4, 444.1 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/GT-I9082/*" },
-      { "ua": "GT-I9082" }
-    ],
-    "dpi": [ 184.7, 185.4 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SM-G360P/*" },
-      { "ua": "SM-G360P" }
-    ],
-    "dpi": [ 196.7, 205.4 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/Nexus S/*" },
-      { "ua": "Nexus S" }
-    ],
-    "dpi": [ 234.5, 229.8 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/GT-I9300/*" },
-      { "ua": "GT-I9300" }
-    ],
-    "dpi": [ 304.8, 303.9 ],
-    "bw": 5,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SM-T230NU/*" },
-      { "ua": "SM-T230NU" }
-    ],
-    "dpi": 216.0,
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SGH-T399/*" },
-      { "ua": "SGH-T399" }
-    ],
-    "dpi": [ 217.7, 231.4 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SM-N9005/*" },
-      { "ua": "SM-N9005" }
-    ],
-    "dpi": [ 386.4, 387.0 ],
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SAMSUNG-SM-N900A/*" },
-      { "ua": "SAMSUNG-SM-N900A" }
-    ],
-    "dpi": [ 386.4, 387.7 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/GT-I9500/*" },
-      { "ua": "GT-I9500" }
-    ],
-    "dpi": [ 442.5, 443.3 ],
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/GT-I9505/*" },
-      { "ua": "GT-I9505" }
-    ],
-    "dpi": 439.4,
-    "bw": 4,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SM-G900F/*" },
-      { "ua": "SM-G900F" }
-    ],
-    "dpi": [ 415.6, 431.6 ],
-    "bw": 5,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SM-G900M/*" },
-      { "ua": "SM-G900M" }
-    ],
-    "dpi": [ 415.6, 431.6 ],
-    "bw": 5,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SM-G800F/*" },
-      { "ua": "SM-G800F" }
-    ],
-    "dpi": 326.8,
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SM-G906S/*" },
-      { "ua": "SM-G906S" }
-    ],
-    "dpi": [ 562.7, 572.4 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/GT-I9300/*" },
-      { "ua": "GT-I9300" }
-    ],
-    "dpi": [ 306.7, 304.8 ],
-    "bw": 5,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SM-T535/*" },
-      { "ua": "SM-T535" }
-    ],
-    "dpi": [ 142.6, 136.4 ],
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SM-N920C/*" },
-      { "ua": "SM-N920C" }
-    ],
-    "dpi": [ 515.1, 518.4 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/GT-I9300I/*" },
-      { "ua": "GT-I9300I" }
-    ],
-    "dpi": [ 304.8, 305.8 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/GT-I9195/*" },
-      { "ua": "GT-I9195" }
-    ],
-    "dpi": [ 249.4, 256.7 ],
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SPH-L520/*" },
-      { "ua": "SPH-L520" }
-    ],
-    "dpi": [ 249.4, 255.9 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SAMSUNG-SGH-I717/*" },
-      { "ua": "SAMSUNG-SGH-I717" }
-    ],
-    "dpi": 285.8,
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SPH-D710/*" },
-      { "ua": "SPH-D710" }
-    ],
-    "dpi": [ 217.7, 204.2 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/GT-N7100/*" },
-      { "ua": "GT-N7100" }
-    ],
-    "dpi": 265.1,
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SCH-I605/*" },
-      { "ua": "SCH-I605" }
-    ],
-    "dpi": 265.1,
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/Galaxy Nexus/*" },
-      { "ua": "Galaxy Nexus" }
-    ],
-    "dpi": [ 315.3, 314.2 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SM-N910H/*" },
-      { "ua": "SM-N910H" }
-    ],
-    "dpi": [ 515.1, 518.0 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SM-N910C/*" },
-      { "ua": "SM-N910C" }
-    ],
-    "dpi": [ 515.2, 520.2 ],
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SM-G130M/*" },
-      { "ua": "SM-G130M" }
-    ],
-    "dpi": [ 165.9, 164.8 ],
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SM-G928I/*" },
-      { "ua": "SM-G928I" }
-    ],
-    "dpi": [ 515.1, 518.4 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SM-G920F/*" },
-      { "ua": "SM-G920F" }
-    ],
-    "dpi": 580.6,
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SM-G920P/*" },
-      { "ua": "SM-G920P" }
-    ],
-    "dpi": [ 522.5, 577.0 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SM-G925F/*" },
-      { "ua": "SM-G925F" }
-    ],
-    "dpi": 580.6,
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SM-G925V/*" },
-      { "ua": "SM-G925V" }
-    ],
-    "dpi": [ 522.5, 576.6 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "Sony/*/C6903/*" },
-      { "ua": "C6903" }
-    ],
-    "dpi": [ 442.5, 443.3 ],
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "Sony/*/D6653/*" },
-      { "ua": "D6653" }
-    ],
-    "dpi": [ 428.6, 427.6 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "Sony/*/E6653/*" },
-      { "ua": "E6653" }
-    ],
-    "dpi": [ 428.6, 425.7 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "Sony/*/E6853/*" },
-      { "ua": "E6853" }
-    ],
-    "dpi": [ 403.4, 401.9 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "Sony/*/SGP321/*" },
-      { "ua": "SGP321" }
-    ],
-    "dpi": [ 224.7, 224.1 ],
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "TCT/*/ALCATEL ONE TOUCH Fierce/*" },
-      { "ua": "ALCATEL ONE TOUCH Fierce" }
-    ],
-    "dpi": [ 240.0, 247.5 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "THL/*/thl 5000/*" },
-      { "ua": "thl 5000" }
-    ],
-    "dpi": [ 480.0, 443.3 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "ZTE/*/ZTE Blade L2/*" },
-      { "ua": "ZTE Blade L2" }
-    ],
-    "dpi": 240.0,
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "ios",
-    "rules": [ { "res": [ 640, 960 ] } ],
-    "dpi": [ 325.1, 328.4 ],
-    "bw": 4,
-    "ac": 1000
-  },
-
-  {
-    "type": "ios",
-    "rules": [ { "res": [ 640, 960 ] } ],
-    "dpi": [ 325.1, 328.4 ],
-    "bw": 4,
-    "ac": 1000
-  },
-
-  {
-    "type": "ios",
-    "rules": [ { "res": [ 640, 1136 ] } ],
-    "dpi": [ 317.1, 320.2 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "ios",
-    "rules": [ { "res": [ 640, 1136 ] } ],
-    "dpi": [ 317.1, 320.2 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "ios",
-    "rules": [ { "res": [ 750, 1334 ] } ],
-    "dpi": 326.4,
-    "bw": 4,
-    "ac": 1000
-  },
-
-  {
-    "type": "ios",
-    "rules": [ { "res": [ 750, 1334 ] } ],
-    "dpi": 326.4,
-    "bw": 4,
-    "ac": 1000
-  },
-
-  {
-    "type": "ios",
-    "rules": [ { "res": [ 1242, 2208 ] } ],
-    "dpi": [ 453.6, 458.4 ],
-    "bw": 4,
-    "ac": 1000
-  },
-
-  {
-    "type": "ios",
-    "rules": [ { "res": [ 1242, 2208 ] } ],
-    "dpi": [ 453.6, 458.4 ],
-    "bw": 4,
-    "ac": 1000
-  }
-]};
-
-module.exports = DPDB_CACHE;
-
-},{}],7:[function(_dereq_,module,exports){
-/*
- * Copyright 2015 Google Inc. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-// Offline cache of the DPDB, to be used until we load the online one (and
-// as a fallback in case we can't load the online one).
-var DPDB_CACHE = _dereq_('./dpdb-cache.js');
-var Util = _dereq_('../util.js');
-
-// Online DPDB URL.
-var ONLINE_DPDB_URL = 'https://storage.googleapis.com/cardboard-dpdb/dpdb.json';
-
-/**
- * Calculates device parameters based on the DPDB (Device Parameter Database).
- * Initially, uses the cached DPDB values.
- *
- * If fetchOnline == true, then this object tries to fetch the online version
- * of the DPDB and updates the device info if a better match is found.
- * Calls the onDeviceParamsUpdated callback when there is an update to the
- * device information.
- */
-function Dpdb(fetchOnline, onDeviceParamsUpdated) {
-  // Start with the offline DPDB cache while we are loading the real one.
-  this.dpdb = DPDB_CACHE;
-
-  // Calculate device params based on the offline version of the DPDB.
-  this.recalculateDeviceParams_();
-
-  // XHR to fetch online DPDB file, if requested.
-  if (fetchOnline) {
-    // Set the callback.
-    this.onDeviceParamsUpdated = onDeviceParamsUpdated;
-
-    console.log('Fetching DPDB...');
-    var xhr = new XMLHttpRequest();
-    var obj = this;
-    xhr.open('GET', ONLINE_DPDB_URL, true);
-    xhr.addEventListener('load', function() {
-      obj.loading = false;
-      if (xhr.status >= 200 && xhr.status <= 299) {
-        // Success.
-        console.log('Successfully loaded online DPDB.');
-        obj.dpdb = JSON.parse(xhr.response);
-        obj.recalculateDeviceParams_();
-      } else {
-        // Error loading the DPDB.
-        console.error('Error loading online DPDB!');
-      }
-    });
-    xhr.send();
-  }
-}
-
-// Returns the current device parameters.
-Dpdb.prototype.getDeviceParams = function() {
-  return this.deviceParams;
-};
-
-// Recalculates this device's parameters based on the DPDB.
-Dpdb.prototype.recalculateDeviceParams_ = function() {
-  console.log('Recalculating device params.');
-  var newDeviceParams = this.calcDeviceParams_();
-  console.log('New device parameters:');
-  console.log(newDeviceParams);
-  if (newDeviceParams) {
-    this.deviceParams = newDeviceParams;
-    // Invoke callback, if it is set.
-    if (this.onDeviceParamsUpdated) {
-      this.onDeviceParamsUpdated(this.deviceParams);
-    }
-  } else {
-    console.error('Failed to recalculate device parameters.');
-  }
-};
-
-// Returns a DeviceParams object that represents the best guess as to this
-// device's parameters. Can return null if the device does not match any
-// known devices.
-Dpdb.prototype.calcDeviceParams_ = function() {
-  var db = this.dpdb; // shorthand
-  if (!db) {
-    console.error('DPDB not available.');
-    return null;
-  }
-  if (db.format != 1) {
-    console.error('DPDB has unexpected format version.');
-    return null;
-  }
-  if (!db.devices || !db.devices.length) {
-    console.error('DPDB does not have a devices section.');
-    return null;
-  }
-
-  // Get the actual user agent and screen dimensions in pixels.
-  var userAgent = navigator.userAgent || navigator.vendor || window.opera;
-  var width = Util.getScreenWidth();
-  var height = Util.getScreenHeight();
-  console.log('User agent: ' + userAgent);
-  console.log('Pixel width: ' + width);
-  console.log('Pixel height: ' + height);
-
-  if (!db.devices) {
-    console.error('DPDB has no devices section.');
-    return null;
-  }
-
-  for (var i = 0; i < db.devices.length; i++) {
-    var device = db.devices[i];
-    if (!device.rules) {
-      console.warn('Device[' + i + '] has no rules section.');
-      continue;
-    }
-
-    if (device.type != 'ios' && device.type != 'android') {
-      console.warn('Device[' + i + '] has invalid type.');
-      continue;
-    }
-
-    // See if this device is of the appropriate type.
-    if (Util.isIOS() != (device.type == 'ios')) continue;
-
-    // See if this device matches any of the rules:
-    var matched = false;
-    for (var j = 0; j < device.rules.length; j++) {
-      var rule = device.rules[j];
-      if (this.matchRule_(rule, userAgent, width, height)) {
-        console.log('Rule matched:');
-        console.log(rule);
-        matched = true;
-        break;
-      }
-    }
-    if (!matched) continue;
-
-    // device.dpi might be an array of [ xdpi, ydpi] or just a scalar.
-    var xdpi = device.dpi[0] || device.dpi;
-    var ydpi = device.dpi[1] || device.dpi;
-
-    return new DeviceParams({ xdpi: xdpi, ydpi: ydpi, bevelMm: device.bw });
-  }
-
-  console.warn('No DPDB device match.');
-  return null;
-};
-
-Dpdb.prototype.matchRule_ = function(rule, ua, screenWidth, screenHeight) {
-  // We can only match 'ua' and 'res' rules, not other types like 'mdmh'
-  // (which are meant for native platforms).
-  if (!rule.ua && !rule.res) return false;
-
-  // If our user agent string doesn't contain the indicated user agent string,
-  // the match fails.
-  if (rule.ua && ua.indexOf(rule.ua) < 0) return false;
-
-  // If the rule specifies screen dimensions that don't correspond to ours,
-  // the match fails.
-  if (rule.res) {
-    if (!rule.res[0] || !rule.res[1]) return false;
-    var resX = rule.res[0];
-    var resY = rule.res[1];
-    // Compare min and max so as to make the order not matter, i.e., it should
-    // be true that 640x480 == 480x640.
-    if (Math.min(screenWidth, screenHeight) != Math.min(resX, resY) ||
-        (Math.max(screenWidth, screenHeight) != Math.max(resX, resY))) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-function DeviceParams(params) {
-  this.xdpi = params.xdpi;
-  this.ydpi = params.ydpi;
-  this.bevelMm = params.bevelMm;
-}
-
-module.exports = Dpdb;
-},{"../util.js":14,"./dpdb-cache.js":6}],8:[function(_dereq_,module,exports){
+},{"./base.js":2,"./sensor-fusion/fusion-pose-sensor.js":7,"./util.js":10}],4:[function(_dereq_,module,exports){
 /*
  * Copyright 2015 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -10385,7 +8625,7 @@ if (!window.WebVRConfig.DEFER_INITIALIZATION) {
   }
 }
 
-},{"./util.js":14,"./webvr-polyfill.js":15}],9:[function(_dereq_,module,exports){
+},{"./util.js":10,"./webvr-polyfill.js":11}],5:[function(_dereq_,module,exports){
 /*
  * Copyright 2016 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -10744,7 +8984,7 @@ MathUtil.Quaternion.prototype = {
 
 module.exports = MathUtil;
 
-},{}],10:[function(_dereq_,module,exports){
+},{}],6:[function(_dereq_,module,exports){
 /*
  * Copyright 2015 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -10914,7 +9154,7 @@ ComplementaryFilter.prototype.gyroToQuaternionDelta_ = function(gyro, dt) {
 
 module.exports = ComplementaryFilter;
 
-},{"../math-util.js":9,"../util.js":14,"./sensor-sample.js":13}],11:[function(_dereq_,module,exports){
+},{"../math-util.js":5,"../util.js":10,"./sensor-sample.js":9}],7:[function(_dereq_,module,exports){
 /*
  * Copyright 2015 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -11090,7 +9330,7 @@ FusionPoseSensor.prototype.setScreenTransform_ = function() {
 
 module.exports = FusionPoseSensor;
 
-},{"../math-util.js":9,"../util.js":14,"./complementary-filter.js":10,"./pose-predictor.js":12}],12:[function(_dereq_,module,exports){
+},{"../math-util.js":5,"../util.js":10,"./complementary-filter.js":6,"./pose-predictor.js":8}],8:[function(_dereq_,module,exports){
 /*
  * Copyright 2015 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -11173,7 +9413,7 @@ PosePredictor.prototype.getPrediction = function(currentQ, gyro, timestampS) {
 
 module.exports = PosePredictor;
 
-},{"../math-util.js":9}],13:[function(_dereq_,module,exports){
+},{"../math-util.js":5}],9:[function(_dereq_,module,exports){
 function SensorSample(sample, timestampS) {
   this.set(sample, timestampS);
 };
@@ -11189,7 +9429,7 @@ SensorSample.prototype.copy = function(sensorSample) {
 
 module.exports = SensorSample;
 
-},{}],14:[function(_dereq_,module,exports){
+},{}],10:[function(_dereq_,module,exports){
 /*
  * Copyright 2015 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -11527,7 +9767,7 @@ Util.frameDataFromPose = (function() {
 
 module.exports = Util;
 
-},{"object-assign":1}],15:[function(_dereq_,module,exports){
+},{"object-assign":1}],11:[function(_dereq_,module,exports){
 /*
  * Copyright 2015 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -11670,7 +9910,7 @@ function InstallWebVRSpecShim() {
 
 module.exports.WebVRPolyfill = WebVRPolyfill;
 
-},{"./base.js":2,"./cardboard-vr-display.js":3,"./util.js":14}]},{},[8]);
+},{"./base.js":2,"./cardboard-vr-display.js":3,"./util.js":10}]},{},[4]);
 
 ////////////////////////////////////////////////////////////////////////////////
 // start C:\Users\sean\Documents\VR\webvr-standard-monitor\src\AsyncLockRequest.js
@@ -12089,230 +10329,6 @@ if(typeof window !== "undefined") window.WebVRStandardMonitor = WebVRStandardMon
 })();
 // end C:\Users\sean\Documents\VR\webvr-standard-monitor\src\WebVRStandardMonitor.js
 ////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\webvr-bootstrapper\src\documentReady.js
-(function(){"use strict";
-
-var documentReady = new Promise(function (resolve, reject) {
-  function setup() {
-    var ready = document.readyState === "complete";
-    if (ready) {
-      document.removeEventListener("readystatechange", setup);
-      resolve();
-    }
-    return ready;
-  }
-
-  if (!setup()) {
-    document.addEventListener("readystatechange", setup);
-  }
-});
-    if(typeof window !== "undefined") window.documentReady = documentReady;
-})();
-    // end D:\Documents\VR\webvr-bootstrapper\src\documentReady.js
-    ////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\webvr-bootstrapper\src\loadFiles.js
-(function(){"use strict";
-
-function get(url, done, progress) {
-  var req = new XMLHttpRequest();
-  req.onload = function () {
-    if (req.status < 400) {
-      done(req.response);
-    } else {
-      done(new Error(req.status));
-    }
-  };
-
-  req.open("GET", url);
-  req.onprogress = progress;
-  req.send();
-}
-
-function __loadFiles(files, done, progress, index, total, loaded) {
-  if (index < files.length) {
-    var file = files[index][0],
-        size = files[index][1],
-        shortExt = file.match(/\.\w+$/)[0] || "none",
-        longExt = file.match(/(\.\w+)+$/)[0] || "none",
-        lastLoaded = loaded;
-    get(file, function (content) {
-      if (content instanceof Error) {
-        console.error("Failed to load " + file + ": " + content.message);
-      } else if (shortExt === ".js" && longExt !== ".typeface.js") {
-        var s = document.createElement("script");
-        s.type = "text/javascript";
-        s.src = file;
-        s.defer = false;
-        s.async = false;
-        document.head.appendChild(s);
-      }
-
-      __loadFiles(files, done, progress, index + 1, total, loaded);
-    }, function (evt) {
-      return progress(loaded = lastLoaded + evt.loaded, total);
-    });
-  } else {
-    done();
-  }
-}
-
-/* syntax:
-loadFiles([
-    // filename,  size
-    ["script1.js", 456],
-    ["script3.js", 8762],
-    ["script2.js", 12368]
-], function(objects){
-    // the thing to do when done.
-    console.assert(objects.name1 !== undefined);
-    console.assert(objects.name2 !== undefined);
-}, function(n, m, size, total){
-    // track progress
-    console.log("loaded file %d of %d, loaded %d bytes of %d bytes total.", n, m, size, total);
-});
-*/
-function _loadFiles(manifestSpec, progress, done) {
-  function readManifest(manifest) {
-    var total = 0;
-    for (var i = 0; i < manifest.length; ++i) {
-      if (manifest[i] instanceof Array && manifest[i].length > 1) {
-        total += manifest[i][1];
-      }
-    }
-    progress = progress || console.log.bind(console, "File load progress");
-    __loadFiles(manifest, done, progress, 0, total, 0);
-  }
-
-  if (manifestSpec instanceof String || typeof manifestSpec === "string") {
-    get(manifestSpec, function (manifestText) {
-      readManifest(JSON.parse(manifestText));
-    });
-  } else if (manifestSpec instanceof Array) {
-    readManifest(manifestSpec);
-  }
-}
-
-function loadFiles(manifestSpec, progress) {
-  return new Promise(function (resolve, reject) {
-    return _loadFiles(manifestSpec, progress, resolve);
-  });
-}
-    if(typeof window !== "undefined") window.loadFiles = loadFiles;
-})();
-    // end D:\Documents\VR\webvr-bootstrapper\src\loadFiles.js
-    ////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\webvr-bootstrapper\src\ViewCameraTransform.js
-(function(){"use strict";
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var heap = new WeakMap();
-
-function priv(obj, value) {
-  if (!heap.has(obj)) {
-    heap.set(obj, value || {});
-  }
-  return heap.get(obj);
-}
-
-var ViewCameraTransform = function () {
-  _createClass(ViewCameraTransform, null, [{
-    key: "makeTransform",
-    value: function makeTransform(eye, near, far) {
-      return {
-        translation: new THREE.Vector3().fromArray(eye.offset),
-        projection: ViewCameraTransform.fieldOfViewToProjectionMatrix(eye.fieldOfView, near, far),
-        viewport: {
-          left: 0,
-          top: 0,
-          width: eye.renderWidth,
-          height: eye.renderHeight
-        }
-      };
-    }
-  }, {
-    key: "fieldOfViewToProjectionMatrix",
-    value: function fieldOfViewToProjectionMatrix(fov, zNear, zFar) {
-      var upTan = Math.tan(fov.upDegrees * Math.PI / 180.0),
-          downTan = Math.tan(fov.downDegrees * Math.PI / 180.0),
-          leftTan = Math.tan(fov.leftDegrees * Math.PI / 180.0),
-          rightTan = Math.tan(fov.rightDegrees * Math.PI / 180.0),
-          xScale = 2.0 / (leftTan + rightTan),
-          yScale = 2.0 / (upTan + downTan),
-          matrix = new THREE.Matrix4();
-
-      matrix.elements[0] = xScale;
-      matrix.elements[1] = 0.0;
-      matrix.elements[2] = 0.0;
-      matrix.elements[3] = 0.0;
-      matrix.elements[4] = 0.0;
-      matrix.elements[5] = yScale;
-      matrix.elements[6] = 0.0;
-      matrix.elements[7] = 0.0;
-      matrix.elements[8] = -((leftTan - rightTan) * xScale * 0.5);
-      matrix.elements[9] = (upTan - downTan) * yScale * 0.5;
-      matrix.elements[10] = -(zNear + zFar) / (zFar - zNear);
-      matrix.elements[11] = -1.0;
-      matrix.elements[12] = 0.0;
-      matrix.elements[13] = 0.0;
-      matrix.elements[14] = -(2.0 * zFar * zNear) / (zFar - zNear);
-      matrix.elements[15] = 0.0;
-
-      return matrix;
-    }
-  }]);
-
-  function ViewCameraTransform(display) {
-    _classCallCheck(this, ViewCameraTransform);
-
-    priv(this, {
-      display: display
-    });
-  }
-
-  _createClass(ViewCameraTransform, [{
-    key: "getTransforms",
-    value: function getTransforms(near, far) {
-      var d = priv(this).display,
-          l = d.getEyeParameters("left"),
-          r = d.getEyeParameters("right"),
-          params = [ViewCameraTransform.makeTransform(l, near, far)];
-      if (r) {
-        params.push(ViewCameraTransform.makeTransform(r, near, far));
-      }
-      for (var i = 1; i < params.length; ++i) {
-        params[i].viewport.left = params[i - 1].viewport.left + params[i - 1].viewport.width;
-      }
-      return params;
-    }
-  }]);
-
-  return ViewCameraTransform;
-}();
-    if(typeof window !== "undefined") window.ViewCameraTransform = ViewCameraTransform;
-})();
-    // end D:\Documents\VR\webvr-bootstrapper\src\ViewCameraTransform.js
-    ////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-    // start D:\Documents\VR\webvr-bootstrapper\src\WebVRBootstrapper.js
-(function(){"use strict";
-
-function WebVRBootstrapper(manifest) {
-  return documentReady.then(function () {
-    return manifest && function (progress) {
-      return loadFiles(manifest, progress);
-    };
-  });
-}
-    if(typeof window !== "undefined") window.WebVRBootstrapper = WebVRBootstrapper;
-})();
-    // end D:\Documents\VR\webvr-bootstrapper\src\WebVRBootstrapper.js
-    ////////////////////////////////////////////////////////////////////////////////
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
 	typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -55302,9 +53318,6 @@ THREE.MTLLoader.MaterialCreator.prototype = {
 
 };
 
-/*! npm.im/iphone-inline-video */
-var makeVideoPlayableInline=function(){"use strict";/*! npm.im/intervalometer */
-function e(e,r,n,i){function t(n){d=r(t,i),e(n-(a||n)),a=n}var d,a;return{start:function(){d||t(0)},stop:function(){n(d),d=null,a=0}}}function r(r){return e(r,requestAnimationFrame,cancelAnimationFrame)}function n(e,r,n,i){function t(r){Boolean(e[n])===Boolean(i)&&r.stopImmediatePropagation(),delete e[n]}return e.addEventListener(r,t,!1),t}function i(e,r,n,i){function t(){return n[r]}function d(e){n[r]=e}i&&d(e[r]),Object.defineProperty(e,r,{get:t,set:d})}function t(e,r,n){n.addEventListener(r,function(){return e.dispatchEvent(new Event(r))})}function d(e,r){Promise.resolve().then(function(){e.dispatchEvent(new Event(r))})}function a(e){var r=new Audio;return t(e,"play",r),t(e,"playing",r),t(e,"pause",r),r.crossOrigin=e.crossOrigin,r.src=e.src||e.currentSrc||"data:",r}function o(e,r,n){(m||0)+200<Date.now()&&(e[b]=!0,m=Date.now()),n||(e.currentTime=r),A[++k%3]=100*r|0}function u(e){return e.driver.currentTime>=e.video.duration}function s(e){var r=this;r.video.readyState>=r.video.HAVE_FUTURE_DATA?(r.hasAudio||(r.driver.currentTime=r.video.currentTime+e*r.video.playbackRate/1e3,r.video.loop&&u(r)&&(r.driver.currentTime=0)),o(r.video,r.driver.currentTime)):r.video.networkState!==r.video.NETWORK_IDLE||r.video.buffered.length||r.video.load(),r.video.ended&&(delete r.video[b],r.video.pause(!0))}function c(){var e=this,r=e[h];return e.webkitDisplayingFullscreen?void e[E]():("data:"!==r.driver.src&&r.driver.src!==e.src&&(o(e,0,!0),r.driver.src=e.src),void(e.paused&&(r.paused=!1,e.buffered.length||e.load(),r.driver.play(),r.updater.start(),r.hasAudio||(d(e,"play"),r.video.readyState>=r.video.HAVE_ENOUGH_DATA&&d(e,"playing")))))}function v(e){var r=this,n=r[h];n.driver.pause(),n.updater.stop(),r.webkitDisplayingFullscreen&&r[T](),n.paused&&!e||(n.paused=!0,n.hasAudio||d(r,"pause"),r.ended&&(r[b]=!0,d(r,"ended")))}function p(e,n){var i=e[h]={};i.paused=!0,i.hasAudio=n,i.video=e,i.updater=r(s.bind(i)),n?i.driver=a(e):(e.addEventListener("canplay",function(){e.paused||d(e,"playing")}),i.driver={src:e.src||e.currentSrc||"data:",muted:!0,paused:!0,pause:function(){i.driver.paused=!0},play:function(){i.driver.paused=!1,u(i)&&o(e,0)},get ended(){return u(i)}}),e.addEventListener("emptied",function(){var r=!i.driver.src||"data:"===i.driver.src;i.driver.src&&i.driver.src!==e.src&&(o(e,0,!0),i.driver.src=e.src,r?i.driver.play():i.updater.stop())},!1),e.addEventListener("webkitbeginfullscreen",function(){e.paused?n&&!i.driver.buffered.length&&i.driver.load():(e.pause(),e[E]())}),n&&(e.addEventListener("webkitendfullscreen",function(){i.driver.currentTime=e.currentTime}),e.addEventListener("seeking",function(){A.indexOf(100*e.currentTime|0)<0&&(i.driver.currentTime=e.currentTime)}))}function l(e){var r=e[h];e[E]=e.play,e[T]=e.pause,e.play=c,e.pause=v,i(e,"paused",r.driver),i(e,"muted",r.driver,!0),i(e,"playbackRate",r.driver,!0),i(e,"ended",r.driver),i(e,"loop",r.driver,!0),n(e,"seeking"),n(e,"seeked"),n(e,"timeupdate",b,!1),n(e,"ended",b,!1)}function f(e,r,n){void 0===r&&(r=!0),void 0===n&&(n=!0),n&&!g||e[h]||(p(e,r),l(e),e.classList.add("IIV"),!r&&e.autoplay&&e.play(),/iPhone|iPod|iPad/.test(navigator.platform)||console.warn("iphone-inline-video is not guaranteed to work in emulated environments"))}var m,y="undefined"==typeof Symbol?function(e){return"@"+(e||"@")+Math.random()}:Symbol,g=/iPhone|iPod/i.test(navigator.userAgent)&&!matchMedia("(-webkit-video-playable-inline)").matches,h=y(),b=y(),E=y("nativeplay"),T=y("nativepause"),A=[],k=0;return f.isWhitelisted=g,f}();
 /**
  * @file A fantasy name generator library.
  * @version 1.0.0
@@ -60760,30 +58773,6 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var COUNTER = 0,
     _ = priv();
 
-// Videos don't auto-play on mobile devices, so let's make them all play whenever
-// we tap the screen.
-var processedVideos = [];
-function findAndFixVideo(evt) {
-  var vids = document.querySelectorAll("video");
-  for (var i = 0; i < vids.length; ++i) {
-    fixVideo(vids[i]);
-  }
-  window.removeEventListener("touchend", findAndFixVideo);
-  window.removeEventListener("mouseup", findAndFixVideo);
-  window.removeEventListener("keyup", findAndFixVideo);
-}
-
-function fixVideo(vid) {
-  if (processedVideos.indexOf(vid) === -1) {
-    processedVideos.push(vid);
-    makeVideoPlayableInline(vid, false);
-  }
-}
-
-window.addEventListener("touchend", findAndFixVideo, false);
-window.addEventListener("mouseup", findAndFixVideo, false);
-window.addEventListener("keyup", findAndFixVideo, false);
-
 var Image = function (_Primrose$Entity) {
   _inherits(Image, _Primrose$Entity);
 
@@ -62955,9 +60944,6 @@ var VR = function (_Primrose$PoseInputPr) {
       if (0 <= selectedIndex && selectedIndex <= this.displays.length) {
         this.currentDevice = this.displays[selectedIndex];
         this.currentPose = this.currentDevice.getPose();
-        var leftParams = this.currentDevice.getEyeParameters("left"),
-            fov = leftParams.fieldOfView;
-        this.rotationAngle = Math.PI * (fov.leftDegrees + fov.rightDegrees) / 360;
         this.isStereo = VR.isStereoDisplay(this.currentDevice);
       }
     }
@@ -63137,6 +61123,78 @@ var VR = function (_Primrose$PoseInputPr) {
 
   return VR;
 }(Primrose.PoseInputProcessor);
+
+var ViewCameraTransform = function () {
+  _createClass(ViewCameraTransform, null, [{
+    key: "makeTransform",
+    value: function makeTransform(eye, near, far) {
+      return {
+        translation: new THREE.Vector3().fromArray(eye.offset),
+        projection: ViewCameraTransform.fieldOfViewToProjectionMatrix(eye.fieldOfView, near, far),
+        viewport: {
+          left: 0,
+          top: 0,
+          width: eye.renderWidth,
+          height: eye.renderHeight
+        }
+      };
+    }
+  }, {
+    key: "fieldOfViewToProjectionMatrix",
+    value: function fieldOfViewToProjectionMatrix(fov, zNear, zFar) {
+      var upTan = Math.tan(fov.upDegrees * Math.PI / 180.0),
+          downTan = Math.tan(fov.downDegrees * Math.PI / 180.0),
+          leftTan = Math.tan(fov.leftDegrees * Math.PI / 180.0),
+          rightTan = Math.tan(fov.rightDegrees * Math.PI / 180.0),
+          xScale = 2.0 / (leftTan + rightTan),
+          yScale = 2.0 / (upTan + downTan),
+          matrix = new THREE.Matrix4();
+
+      matrix.elements[0] = xScale;
+      matrix.elements[1] = 0.0;
+      matrix.elements[2] = 0.0;
+      matrix.elements[3] = 0.0;
+      matrix.elements[4] = 0.0;
+      matrix.elements[5] = yScale;
+      matrix.elements[6] = 0.0;
+      matrix.elements[7] = 0.0;
+      matrix.elements[8] = -((leftTan - rightTan) * xScale * 0.5);
+      matrix.elements[9] = (upTan - downTan) * yScale * 0.5;
+      matrix.elements[10] = -(zNear + zFar) / (zFar - zNear);
+      matrix.elements[11] = -1.0;
+      matrix.elements[12] = 0.0;
+      matrix.elements[13] = 0.0;
+      matrix.elements[14] = -(2.0 * zFar * zNear) / (zFar - zNear);
+      matrix.elements[15] = 0.0;
+
+      return matrix;
+    }
+  }]);
+
+  function ViewCameraTransform(display) {
+    _classCallCheck(this, ViewCameraTransform);
+
+    this.display = display;
+  }
+
+  _createClass(ViewCameraTransform, [{
+    key: "getTransforms",
+    value: function getTransforms(near, far) {
+      var l = this.display.getEyeParameters("left"),
+          r = this.display.getEyeParameters("right"),
+          params = [ViewCameraTransform.makeTransform(l, near, far)];
+      if (r) {
+        params.push(ViewCameraTransform.makeTransform(r, near, far));
+      }
+      for (var i = 1; i < params.length; ++i) {
+        params[i].viewport.left = params[i - 1].viewport.left + params[i - 1].viewport.width;
+      }
+      return params;
+    }
+  }]);
+
+  return ViewCameraTransform;
+}();
 if(typeof window !== "undefined") window.Primrose.Input.VR = VR;
 })();
 // end D:\Documents\VR\Primrose\src\Primrose\Input\VR.js

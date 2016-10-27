@@ -7068,30 +7068,6 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var COUNTER = 0,
     _ = priv();
 
-// Videos don't auto-play on mobile devices, so let's make them all play whenever
-// we tap the screen.
-var processedVideos = [];
-function findAndFixVideo(evt) {
-  var vids = document.querySelectorAll("video");
-  for (var i = 0; i < vids.length; ++i) {
-    fixVideo(vids[i]);
-  }
-  window.removeEventListener("touchend", findAndFixVideo);
-  window.removeEventListener("mouseup", findAndFixVideo);
-  window.removeEventListener("keyup", findAndFixVideo);
-}
-
-function fixVideo(vid) {
-  if (processedVideos.indexOf(vid) === -1) {
-    processedVideos.push(vid);
-    makeVideoPlayableInline(vid, false);
-  }
-}
-
-window.addEventListener("touchend", findAndFixVideo, false);
-window.addEventListener("mouseup", findAndFixVideo, false);
-window.addEventListener("keyup", findAndFixVideo, false);
-
 pliny.class({
   parent: "Primrose.Controls",
   name: "Image",
@@ -9849,9 +9825,6 @@ var VR = function (_Primrose$PoseInputPr) {
       if (0 <= selectedIndex && selectedIndex <= this.displays.length) {
         this.currentDevice = this.displays[selectedIndex];
         this.currentPose = this.currentDevice.getPose();
-        var leftParams = this.currentDevice.getEyeParameters("left"),
-            fov = leftParams.fieldOfView;
-        this.rotationAngle = Math.PI * (fov.leftDegrees + fov.rightDegrees) / 360;
         this.isStereo = VR.isStereoDisplay(this.currentDevice);
       }
     }
@@ -10031,6 +10004,78 @@ var VR = function (_Primrose$PoseInputPr) {
 
   return VR;
 }(Primrose.PoseInputProcessor);
+
+var ViewCameraTransform = function () {
+  _createClass(ViewCameraTransform, null, [{
+    key: "makeTransform",
+    value: function makeTransform(eye, near, far) {
+      return {
+        translation: new THREE.Vector3().fromArray(eye.offset),
+        projection: ViewCameraTransform.fieldOfViewToProjectionMatrix(eye.fieldOfView, near, far),
+        viewport: {
+          left: 0,
+          top: 0,
+          width: eye.renderWidth,
+          height: eye.renderHeight
+        }
+      };
+    }
+  }, {
+    key: "fieldOfViewToProjectionMatrix",
+    value: function fieldOfViewToProjectionMatrix(fov, zNear, zFar) {
+      var upTan = Math.tan(fov.upDegrees * Math.PI / 180.0),
+          downTan = Math.tan(fov.downDegrees * Math.PI / 180.0),
+          leftTan = Math.tan(fov.leftDegrees * Math.PI / 180.0),
+          rightTan = Math.tan(fov.rightDegrees * Math.PI / 180.0),
+          xScale = 2.0 / (leftTan + rightTan),
+          yScale = 2.0 / (upTan + downTan),
+          matrix = new THREE.Matrix4();
+
+      matrix.elements[0] = xScale;
+      matrix.elements[1] = 0.0;
+      matrix.elements[2] = 0.0;
+      matrix.elements[3] = 0.0;
+      matrix.elements[4] = 0.0;
+      matrix.elements[5] = yScale;
+      matrix.elements[6] = 0.0;
+      matrix.elements[7] = 0.0;
+      matrix.elements[8] = -((leftTan - rightTan) * xScale * 0.5);
+      matrix.elements[9] = (upTan - downTan) * yScale * 0.5;
+      matrix.elements[10] = -(zNear + zFar) / (zFar - zNear);
+      matrix.elements[11] = -1.0;
+      matrix.elements[12] = 0.0;
+      matrix.elements[13] = 0.0;
+      matrix.elements[14] = -(2.0 * zFar * zNear) / (zFar - zNear);
+      matrix.elements[15] = 0.0;
+
+      return matrix;
+    }
+  }]);
+
+  function ViewCameraTransform(display) {
+    _classCallCheck(this, ViewCameraTransform);
+
+    this.display = display;
+  }
+
+  _createClass(ViewCameraTransform, [{
+    key: "getTransforms",
+    value: function getTransforms(near, far) {
+      var l = this.display.getEyeParameters("left"),
+          r = this.display.getEyeParameters("right"),
+          params = [ViewCameraTransform.makeTransform(l, near, far)];
+      if (r) {
+        params.push(ViewCameraTransform.makeTransform(r, near, far));
+      }
+      for (var i = 1; i < params.length; ++i) {
+        params[i].viewport.left = params[i - 1].viewport.left + params[i - 1].viewport.width;
+      }
+      return params;
+    }
+  }]);
+
+  return ViewCameraTransform;
+}();
 if(typeof window !== "undefined") window.Primrose.Input.VR = VR;
 })();
 // end D:\Documents\VR\Primrose\src\Primrose\Input\VR.js

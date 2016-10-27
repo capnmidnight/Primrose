@@ -49,3 +49,5 @@ gulp.task("release",  [
   html.release,
   css.release
 ]);
+
+gulp.task("kablamo", build.exec("gulp bump && gulp yolo && gulp trololo && npm publish"));
