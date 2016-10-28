@@ -8459,6 +8459,7 @@ var Eye = {
  * VRDisplay based on mobile device parameters and DeviceMotion APIs.
  */
 function CardboardVRDisplay() {
+  this.DOMElement = null;
   this.displayName = 'Google Cardboard';
 
   this.capabilities.hasOrientation = true;
@@ -8491,17 +8492,37 @@ CardboardVRDisplay.prototype.resetPose = function() {
 
 CardboardVRDisplay.prototype.getEyeParameters = function(whichEye) {
   var offset = [0.03, 0.0, 0.0];
-  var fieldOfView;
 
   if (whichEye == Eye.LEFT) {
     offset[0] *= -1.0;
   }
 
+  var width = screen.width,
+    height = screen.height;
+
+  if(this.DOMElement){
+    width = this.DOMElement.clientWidth;
+    height = this.DOMElement.clientHeight;
+  }
+  else if(Util.isIOS() && Util.isLandscapeMode()) {
+    var temp = width;
+    width = height;
+    height = temp;
+  }
+
+  width *= devicePixelRatio;
+  height *= devicePixelRatio;
+
   return {
-    fieldOfView: {upDegrees: 40, leftDegrees: 40, rightDegrees: 40, downDegrees: 40},
+    fieldOfView: {
+      upDegrees: 40,
+      leftDegrees: 40,
+      rightDegrees: 40,
+      downDegrees: 40
+    },
     offset: offset,
-    renderWidth: devicePixelRatio * 0.5 * screen.width,
-    renderHeight: devicePixelRatio * screen.height,
+    renderWidth: 0.5 * width,
+    renderHeight: height,
   };
 };
 
@@ -8537,9 +8558,11 @@ CardboardVRDisplay.prototype.onResize_ = function(e) {
       'width: ' + Math.max(screen.width, screen.height) + 'px',
       'height: ' + Math.min(screen.height, screen.width) + 'px',
       'border: 0',
-      'margin: 0',
-      'padding: 0 10px 10px 0',
+      'margin: 0'
     ];
+    if(Util.isIOS()) {
+      cssProperties.push('padding: 0 10px 10px 0');
+    }
     this.layer_.source.setAttribute('style', cssProperties.join('; ') + ';');
 
     Util.safariCssSizeWorkaround(this.layer_.source);
