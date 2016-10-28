@@ -1,13 +1,6 @@
 // The JSON format object loader is not always included in the Three.js distribution,
 // so we have to first check for it.
-var loaders = {
-    ".json": THREE.ObjectLoader,
-    ".fbx": THREE.FBXLoader,
-    ".mtl": THREE.MTLLoader,
-    ".obj": THREE.OBJLoader,
-    ".stl": THREE.STLLoader,
-    ".typeface.json": THREE.FontLoader
-  },
+var loaders = null,
   mime = {
     "text/prs.wavefront-obj": "obj",
     "text/prs.wavefront-mtl": "mtl"
@@ -216,6 +209,16 @@ ModelLoader.loadObject = function (src, type, progress) {
   }
   else {
     extension = extension.toLowerCase();
+    if(loaders === null){
+      loaders = {
+        ".json": THREE.ObjectLoader,
+        ".fbx": THREE.FBXLoader,
+        ".mtl": THREE.MTLLoader,
+        ".obj": THREE.OBJLoader,
+        ".stl": THREE.STLLoader,
+        ".typeface.json": THREE.FontLoader
+      };
+    }
     var Loader = new loaders[extension]();
     if (!Loader) {
       return Promise.reject("There is no loader type for the file extension: " + extension);
