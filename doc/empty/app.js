@@ -1,6 +1,5 @@
 "use strict";
 var env = new Primrose.BrowserEnvironment({
-  autoScaleQuality: false,
   skyTexture: "../images/bg.jpg",
   groundTexture: "../images/deck.png",
   font: "../fonts/helvetiker_regular.typeface.json"

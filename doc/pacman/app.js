@@ -7,8 +7,6 @@ var GRASS = "../images/grass.png",
 
   env = new Primrose.BrowserEnvironment({
     quality: Quality.HIGH,
-    autoScaleQuality: false,
-    autoRescaleQuality: false,
     backgroundColor: 0x000000,
     skyTexture: DECK,
     groundTexture: DECK,
