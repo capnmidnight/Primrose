@@ -1,0 +1,33 @@
+extends ./templates/main.pug
+
+block head
+  style(type="text/css").
+    @media (min-width: 641px) {
+      #logo { margin-bottom: 5em; }
+      #cta { margin-bottom: 5em; }
+    }
+
+block header
+  h1 Rapidly prototype VR #[br] applications in your browser
+  #cta
+    button(onclick="document.location='doc/'") get started
+    button(onclick="document.location='https://plumevr.azurewebsites.net/?room=demo'") try the demo
+
+block main
+  section#intro
+    #dev
+      h1
+        span.large.icon.geom1 &nbsp;
+        | For Development
+
+      p Primrose VR democratizes access to what experts and enthusiasts alike are calling "The Last Medium", aka Virtual Reality. The Primrose Framework helps web developers create virtual reality experiences within standard web browsers, on desktop and mobile devices alike, using the free, open source web development tools with which they are most familiar
+
+    #collab
+      h1
+        span.large.icon.geom2 &nbsp;
+        | For Collaboration
+
+      p Meet with people in virtual reality and voice-chat with them in life-like, face-to-face conversations. See their body language. Hear them from across the room. Through Primrose's common interaction space, design tools, and interface objects, users and developers can work together to create interactive multimedia and productivity applications.
+
+  section#demo
+    iframe#frontBuffer(src="https://plumevr.azurewebsites.net/?room=demo", role="application", allowfullscreen, allowvr)

@@ -1,0 +1,28 @@
+﻿extends main.pug
+
+append head
+  <!-- start documentation.pug head append -->
+  script(src= fileRoot + "node_modules/lavu-details-polyfill/lib/index" + jsExt)
+  script(src= fileRoot + "node_modules/pliny/pliny" + jsExt)
+  script(src= fileRoot + "Primrose" + jsExt)
+  script(src= fileRoot + "PrimroseDocumentation" + jsExt)
+  <!-- end documentation.pug head append -->
+
+append header
+  h1 Documentation
+
+block main
+  <!-- start documentation.pug main block -->
+  #top
+  #contents
+    nav
+      ul
+        li: a(href=fileRoot + "doc/setup.html") Installation &amp; Setup
+  #documentation: section: article
+    <!-- start documentation.pug documentation block -->
+    block document
+    <!-- end documentation.pug documentation block -->
+  <!-- end documentation.pug main block -->
+
+append footer
+  script(type="text/javascript", async, defer, src="app.js")

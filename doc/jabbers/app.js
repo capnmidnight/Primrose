@@ -7,12 +7,10 @@ var WIDTH = 100,
   t = 0,
   jabs = {},
   R = Primrose.Random,
-  env = new Primrose.BrowserEnvironment("Jabber Yabs", {
+  env = new Primrose.BrowserEnvironment({
     skyTexture: "../images/bg2.jpg",
     groundTexture: "../images/grass.png",
-    fullScreenIcon: "../models/monitor.obj",
-    VRIcon: "../models/cardboard.obj",
-    font: "../fonts/helvetiker_regular.typeface.js"
+    font: "../fonts/helvetiker_regular.typeface.json"
   });
 
 // and clicking on the objects in the scene
@@ -25,19 +23,19 @@ env.addEventListener("gazecomplete", makeJabJump);
 env.addEventListener("pointerend", makeJabJump);
 
 function eye(side, body) {
-  var ball = put(textured(sphere(0.05, 6, 3), 0xffffff))
+  var ball = put(colored(sphere(0.05, 6, 3), 0xffffff))
     .on(body)
     .at(side * 0.07, 0.05, 0.16)
     .obj();
-  put(textured(sphere(0.01, 3, 2), 0))
+  put(colored(sphere(0.01, 3, 2), 0))
     .on(ball)
     .at(0, 0, 0.045);
   return ball;
 }
 
 function Jabber(w, h, s) {
-  var skin = R.item(Primrose.SKIN_VALUES),
-    body = textured(sphere(0.2, 14, 7), skin),
+  var skin = R.item(Primrose.SKINS_VALUES),
+    body = colored(sphere(0.2, 14, 7), skin),
     velocity = v3(
       R.number(-s, s),
       0,
@@ -70,10 +68,10 @@ function Jabber(w, h, s) {
       body.position.y = 1;
     }
     v.copy(body.position)
-      .sub(env.player.position);
+      .sub(env.input.head.position);
     var d = v.length();
     if (d < 3) {
-      body.lookAt(env.player.position);
+      body.lookAt(env.input.head.position);
       body.position.set(
         R.number(-0.01, 0.01),
         R.number(-0.01, 0.01),
@@ -88,6 +86,7 @@ function Jabber(w, h, s) {
     }
   };
   body.jump = function (normal) {
+    console.log(normal);
     v.fromArray(normal);
     v.y = env.options.gravity / 2;
     velocity.add(v);
@@ -95,7 +94,7 @@ function Jabber(w, h, s) {
   return body;
 }
 
-// Once Primrose has setup the WebGL context, setup Three.js, 
+// Once Primrose has setup the WebGL context, setup Three.js,
 // downloaded and validated all of model files, and constructed
 // the basic scene hierarchy out of it, the "ready" event is fired,
 // indicating that we may make additional changes to the scene now.

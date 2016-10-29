@@ -1,0 +1,7 @@
+extends ../templates/documentationBase.pug
+
+append header
+  h1 Change Log
+
+block main
+  include:marked ../CHANGELOG.md

@@ -1,0 +1,7 @@
+extends ../templates/documentationBase.pug
+
+append header
+  h1 README
+
+block main
+  include:marked ../README.md

@@ -1,0 +1,134 @@
+extends ../templates/documentation.pug
+block document
+  h1 Installation and Setup
+
+  blockquote: p NOTE: The easiest way to get up and running with Primrose is to download the Quick Start template. Head over to the #[a(href="index.html") Getting Started page] to download it.
+
+  p There are several ways to acquire, install, and use Primrose, depending on your needs. In general, there are two versions of the Primrose package, one that has been "minified", and one that has not. Minification is a process of removing comments and unnecessary whitespace characters, as well as renaming some internal, inaccessible variables and functions to be short, one- or two-character long names.
+
+  p Versions that have been minified have the file extension #[code .min.js], whereas versions that are not minified just have the #[code .js] file extension. Wherever you see a reference to #[code Primrose.js], it may be replaced with #[code Primrose.min.js]. The choice between the two is easy:
+  ol
+    li While you are developing your application, use the version that is not minified. If any errors or warnings occur while you are developing your application, it will be easier to debug the cause with the full, expanded version.
+    li Before you deploy your application to your website, switch to using the minified version. Minification can save significant amounts of bandwidth usage for your users. WebGL applications tend to be large, so any amount of savings will get your users into your application faster and use less of their energy and data resources.
+
+  ul
+    li: a(href= fileRoot + "Primrose.min.js", target="_blank") Download the latest version of the Primrose WebVR framework, with dependencies included.
+    li: a(href= fileRoot + "doc/index.html") Read the Quick Start instructions.
+
+  p Additionally, you may wish to:
+  ul
+    li: a(href="https://github.com/capnmidnight/pliny/blob/master/README.md", target="_blank") Read about how the Pliny documentation system works with Primrose
+    li: a(href="https://www.github.com/NotionTheory/Primrose", target="_blank") Check out the GitHub repository
+    li: a(href="https://trello.com/b/NVZsaC1P/primrose-development-tasks", target="_blank") File an issue report
+    li: a(href="http://threejs.org/", target="_blank") Learn more about Three.js
+    li: a(href="http://webvr.info/", target="_blank") Learn more about WebVR
+    li: a(href="https://developer.mozilla.org/en-US/docs/Web/API/WebVR_API", target="_blank") Read the WebVR documentation on MDN
+
+  h2 Automatic Installation
+  p If you have #[a(href="http://www.nodejs.org") Node.js] installed, cloning the Primrose repository from GitHub gives you direct access to the source code to automatically install all dependencies and generate the necessary distribution package to use Primrose. From your command line or terminal, start by changing directory to your favorite projects folder and then running the commands:
+
+  tt.
+    git clone https://github.com/NotionTheory/Primrose.git
+    cd Primrose
+    npm install
+    gulp release
+
+  p From there, you may copy the #[code Primrose.min.js] file into your private project directory, or run the command #[kbd npm start] to run a copy of this website and try Primrose out right away.
+
+  h2 Manual Installation
+  p Manual installation is a bit more difficult than automatic installation, but does not require you to keep a copy of the entire Primrose repository or build new packages. Manual installation will require you to install the dependencies on your own. See the final section "Dependencies" in this document.
+
+  h3 Direct Link to Latest Version of Primrose
+  p If you opt for manually installing Primrose, you will also have to manually install its dependencies. This will require visiting each of the links in the "Dependencies" section above and download their associated files manually.
+
+  p The latest version of Primrose will always reside at:
+  ul
+    li
+      a(href="http://www.primrosevr.com/Primrose.js") http://www.primrosevr.com/Primrose.js
+      | - expanded version.
+    li
+      a(href="http://www.primrosevr.com/Primrose.min.js") http://www.primrosevr.com/Primrose.min.js
+      | - minified version.
+
+  blockquote NOTE: this file is volatile. Whenever new versions are released, this file will get updated automatically. Major-version releases may result in breaking, backwards-incompatible changes. If you're excited to use only the latest-and-greatest code and are regularly testing and keeping up with changes, use this "Latest" version of the file. If, on the other hand, you need more stability, read further on this page to see how you can use a static version of the package.
+
+  p Link to the file by including a #[code &lt;script>] tag in your page HTML:
+  pre: code.
+    grammar("HTML");
+    &lt;!DOCTYPE html>
+    &lt;html>
+      &lt;head>
+        &lt;meta charset="utf-8">
+        &lt;meta name="viewport" content="width=device-width, initial-scale=1.0">
+        &lt;title>My Primrose VR Application&lt;/title>
+        &lt;script type="text/javascript" src="http://www.threejs.org/build/three.min.js">&lt;/script>
+
+        &lt;!-- START: INCLUDE PRIMROSE LIBRARY -->
+        &lt;script type="text/javascript" src="http://www.primrosevr.com/Primrose.min.js">&lt;/script>
+        &lt;!-- END: INCLUDE PRIMROSE LIBRARY -->
+
+        &lt;link type="text/css" rel="stylesheet" href="style.css">
+      &lt;/head>
+      &lt;body>
+        &lt;canvas id="frontBuffer" tabindex="1">&lt;/canvas>
+        &lt;script type="text/javascript" src="app.js">&lt;/script>
+      &lt;/body>
+    &lt;/html>
+
+  h3 Linking to a Static Version of Primrose
+  p Each versioned release of Primrose gets copied to the Archive directory on the Primrose website. You can find any past version of Primrose here:
+  ul: li
+    a(href="http://www.primrosevr.com/archive/") http://www.primrosevr.com/archive/
+    | - for both expanded and minified versions.
+
+  p For example, to link to the minified version of v0.26.0 of the Primrose package, you would use the link:
+  ul: li: a(href="http://www.primrosevr.com/archive/Primrose-0.26.0.min.js") http://www.primrosevr.com/archive/Primrose-0.26.0.min.js
+
+  p If you have locally saved a copy of #[code Primrose.js] or #[code Primrose.min.js] without a version number in its name, you can find the version number in the JavaScript Developer Console of your favorite browser with the library loaded. It will appear as:
+
+  tt Using Primrose v0.26.0. Find out more at http://www.primrosevr.com
+
+  p You can then copy that version number into a filename of the Archive directory to retrieve any historical version you may need.
+
+  blockquote NOTE: because of bandwidth limitations with the Primrose website hosting provider, it is advised that you copy the necessary files to your own project directory and host them with your own provider.
+
+  h2 Dependencies
+  p There are also a number of libraries on which Primrose depends. The file #[code PrimroseDependencies.js] contains both the required and optional dependencies. The file #[code Primrose.js] contains the dependencies, plus the Primrose library. The file #[code PrimroseLib.js] contains only the Primrose library, without the dependencies.
+
+  p If you are only using Primrose as a client-side library, then there are only two external dependencies.
+  ul
+    li
+      a(href="http://www.threejs.org") Three.js
+      | - an abstraction layer and scene graph implementation for WebGL.
+    li
+      a(href="https://html2canvas.hertzen.com/") Html2Canvas
+      | - a tool for taking screenshots of HTML sub-documents, which is necessary for the #[code Primrose.Contrls.HtmlDoc] component.
+
+  p There are a few optional dependencies:
+  ul
+    li
+      a(href="https://github.com/taylorhakes/promise-polyfill") Promise Polyfill
+      | - an ES6 Promise polyfill library for browsers that do not yet have native Promises (i.e. Microsoft Edge).
+    li
+      a(href="https://https://github.com/borismus/webvr-polyfill") WebVR Polyfill
+      | - a polyfill library for making WebVR apps work on smartphones that have Device Orientation API but don't yet have WebVR API (i.e. iOS devices).
+    li
+      a(href="https://github.com/capnmidnight/WebVR-Bootstrapper") WebVR Booststrapper
+      | - a minimal set of code to get an image into a VR HMD as soon as possible. Also abstracts a regular full screen view as a mock #[code VRDisplay] to be able to include it as a display option along side VR devices easily.
+    li
+      a(href="https://raw.githubusercontent.com/KhronosGroup/WebGLDeveloperTools/master/src/debug/webgl-debug.js") WebGL-Debug.js
+      | - a wrapper for WebGL contexts that can help debug WebGL-specific issues.
+    li
+      a(href="http://www.github.com/capnmidnight/pliny") Pliny
+      | - Pliny provides the documentation for all of the namespaces, classes, functions, etc., in an online database that is accessible during Primrose live-coding sessions.
+
+  p Additionally, if you will be using Primrose with the provided multiplayer server, you will need:
+  ul
+    li
+      a(href="http://socket.io/") Socket.IO
+      | - an abstraction layer for WebSockets. It provides a polyfill for communicating with WebSocket servers using Socket.IO over AJAX requests or long-polled HTTP POST requests, as well as features for reconnecting dropped connections in case of intermittent network outage.
+    li
+      a(href="https://github.com/broofa/node-mime") node-mime
+      | - a comprehensive MIME type mapping API based on mime-db module.
+
+  p Each of these dependencies has their own installation and setup instructions. However, when cloning Primrose from GitHub and using the build tools, NPM (Node Package Manager) can automatically manage these for you.

@@ -5,17 +5,12 @@ var GRASS = "../images/grass.png",
   DECK = "../images/deck.png",
   CODE_KEY = "Pacman code",
 
-  env = new Primrose.BrowserEnvironment("Pacman", {
-    quality: Primrose.Quality.HIGH,
-    autoScaleQuality: false,
-    autoRescaleQuality: false,
+  env = new Primrose.BrowserEnvironment({
+    quality: Quality.HIGH,
     backgroundColor: 0x000000,
     skyTexture: DECK,
-    ambientSound: "../audio/menu.ogg",
     groundTexture: DECK,
-    fullScreenIcon: "../models/monitor.obj",
-    VRIcon: "../models/cardboard.obj",
-    font: "../fonts/helvetiker_regular.typeface.js"
+    font: "../fonts/helvetiker_regular.typeface.json"
   }),
 
   editor = null,
@@ -61,7 +56,7 @@ env.addEventListener("ready", function () {
 
   editorFrameMesh = editorCenter.appendChild(editorFrame);
   editorFrameMesh.name = "EditorFrameMesh";
-  editorFrameMesh.position.set(0, 0, 0);
+  editorFrameMesh.position.set(0, env.avatarHeight, 0);
   editorFrameMesh.visible = false;
   editorFrameMesh.disabled = true;
 }, false);
@@ -84,12 +79,10 @@ env.addEventListener("update", function (dt) {
     scriptUpdateTimeout = setTimeout(updateScript, 500);
   }
 
-  editorCenter.position.copy(env.vehicle.position);
-
   if (scriptAnimate) {
     // If quality has degraded, it's likely because the user bombed on a script.
     // Let's help them not lose their lunch.
-    if (env.quality === Primrose.Quality.NONE) {
+    if (env.quality === Quality.NONE) {
       scriptAnimate = null;
       wipeScene();
     }
@@ -151,7 +144,7 @@ function pacman() {
 
   function C(n, x, y) {
     if (n !== 0) {
-      put(textured(cylinder(0.5, 0.5, T), 0x0000ff))
+      put(colored(cylinder(0.5, 0.5, T), 0x0000ff))
         .on(scene)
         .rot(0, n * Math.PI / 2, Math.PI / 2)
         .at(T * x - W / 2, env.avatarHeight, T * y - H / 2);
@@ -167,10 +160,11 @@ function pacman() {
   console.log("Here we go");
   L("../models/ghost.obj")
     .then(function (ghost) {
+      console.log("ghost", ghost);
       ghosts = colors.map(function (color, i) {
         var g = ghost.clone(),
           body = g.children[0];
-        textured(body, color);
+        colored(body, color);
         scene.appendChild(g);
         g.position.set(i * 3 - 4, 0, -5);
         g.velocity = v3(0, 0, 0);
@@ -207,14 +201,14 @@ function pacman() {
       ghosts.forEach(function (g) {
         g.position.add(g.velocity.clone()
           .multiplyScalar(dt));
-        collisionCheck(dt, g, env.vehicle);
+        collisionCheck(dt, g, env.input.head);
       });
     }
-    collisionCheck(dt, env.vehicle, null);
+    collisionCheck(dt, env.input.head, null);
   }
 }
 
-env.addEventListener("keydown", function (evt) {
+window.addEventListener("keydown", function (evt) {
   if (evt[modA] && evt[modB]) {
     if (evt.keyCode === Primrose.Keys.E) {
       if (editorFrameMesh.visible && env.currentControl && env.currentControl.focused) {
@@ -225,7 +219,7 @@ env.addEventListener("keydown", function (evt) {
       editorFrameMesh.disabled = !editorFrameMesh.disabled;
     }
     else if (evt.keyCode === Primrose.Keys.E && editor) {
-      Primrose.HTTP.sendObject("saveScript", {
+      Primrose.HTTP.postObject("saveScript", {
         "Content-Type": "application/json",
         data: {
           fileName: "pacman",
@@ -272,8 +266,8 @@ function updateScript() {
       if (!scriptAnimate) {
         console.log("----- No update script provided -----");
       }
-      else if (env.quality === Primrose.Quality.NONE) {
-        env.quality = Primrose.Quality.MEDIUM;
+      else if (env.quality === Quality.NONE) {
+        env.quality = Quality.MEDIUM;
       }
     }
     catch (exp) {

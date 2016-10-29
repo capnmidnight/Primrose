@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2015 Sean T. McBeth <sean@seanmcbeth.com>
+ * Copyright (C) 2014 - 2016 Sean T. McBeth <sean@seanmcbeth.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,8 +27,8 @@ var Assert = (function () {
   }
 
   function errr(op, expected, actual, msg) {
-    return fmt("$3(expected value) $1 $4 $2 (actual value)", expected, actual,
-      msg ? "[" + msg + "] " : "", op);
+    msg = msg ? `[${msg}] ` : ""
+    return `${msg}(expected value) ${expected} ${op} ${actual} (actual value)`;
   }
 
   function test(func) {
@@ -83,16 +83,13 @@ var Assert = (function () {
           "x";
       }
 
-      log(fmt("Test results for $1: [$2]\n\n$3 succeeded, $4 failed",
-        name,
-        beam, result.succeeded, result.failed));
+      log(`Test results for ${name}: [${beam}]\n\n${result.succeeded} succeeded, ${result.failed} failed`);
 
       if (result.succeeded > 0) {
         log("\n    Successes:");
         for (var key in result.success) {
           if (result.success[key]) {
-            log(fmt("        $1 succeeded after $2ms", key,
-              result.success[key].dt));
+            log(`        ${key} succeeded after ${result.sucess[key].dt}ms`);
           }
         }
       }
@@ -102,11 +99,10 @@ var Assert = (function () {
         for (var key in result.failure) {
           if (result.failure[key]) {
             var val = result.failure[key];
-            log(fmt("        $1 FAILED after $2ms: $3", key, val.dt,
-              val.msg));
+            log(`        ${key} FAILED after ${val.dt}ms: ${val.msg}`);
             if (val.stack && val.stack.indexOf("at Object.Assert") ===
               -1) {
-              log(fmt("        $1", val.stack));
+              log("        " + val.stack);
             }
           }
         }

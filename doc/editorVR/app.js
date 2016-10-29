@@ -4,26 +4,18 @@ var GRASS = "../images/grass.png",
   WATER = "../images/water.png",
   DECK = "../images/deck.png",
 
-  env = new Primrose.BrowserEnvironment("Editor3D", {
+  env = new Primrose.BrowserEnvironment({
     skyTexture: "../images/bg2.jpg",
     ambientSound: "../audio/wind.ogg",
     groundTexture: GRASS,
-    fullScreenIcon: "../models/monitor.obj",
-    VRIcon: "../models/cardboard.obj",
-    font: "../fonts/helvetiker_regular.typeface.js"
+    font: "../fonts/helvetiker_regular.typeface.json"
   }),
 
   subScene = new THREE.Object3D(),
 
   editor = null,
-  output = null,
-  button1 = null,
   editorFrame = null,
   editorFrameMesh = null,
-  documentation = null,
-  documentationMesh = null,
-  stereoImage = null,
-  stereoImageMesh = null,
 
   modA = isOSX ? "metaKey" : "ctrlKey",
   modB = isOSX ? "altKey" : "shiftKey",
@@ -33,23 +25,10 @@ var GRASS = "../images/grass.png",
 
   scriptUpdateTimeout,
   lastScript = null,
-  scriptAnimate = null,
-
-  editorCenter = hub();
+  scriptAnimate = null;
 
 env.addEventListener("ready", function () {
-  env.appendChild(editorCenter);
   env.scene.add(subScene);
-
-  stereoImage = env.createElement("img");
-  stereoImage.id = "StereoImage";
-  stereoImage.className = "stereo";
-  stereoImage.addEventListener("load", function (evt) {
-    stereoImageMesh = env.appendChild(stereoImage);
-    stereoImageMesh.rotation.set(0, 75 * Math.PI / 180, 0);
-    stereoImageMesh.position.set(-4, env.avatarHeight, -1);
-  }, false);
-  stereoImage.src = "../images/prong.stereo.jpg";
 
   var editorSize = isMobile ? 512 : 1024,
     fontSize = isMobile ? 10 : 20;
@@ -63,57 +42,16 @@ env.addEventListener("ready", function () {
   editor = env.createElement("textarea");
   editor.id = "Editor";
   editor.style.width = editorFrame.surfaceWidth;
-  editor.style.height = Math.floor(editorFrame.surfaceHeight * 2 / 3);
+  editor.style.height = editorFrame.surfaceHeight;
   editor.style.fontSize = fontSize;
   editor.tokenizer = Primrose.Text.Grammars.JavaScript;
   editor.value = getSourceCode(isInIFrame);
 
-  output = env.createElement("pre");
-  output.id = "Output";
-  output.style.top = editor.surfaceHeight + 25;
-  output.style.width = editorFrame.surfaceWidth;
-  output.style.height = editorFrame.surfaceHeight - editor.surfaceHeight - 25;
-  output.style.fontSize = fontSize;
-
-  button1 = env.createElement("button");
-  button1.id = "ThemeButton";
-  button1.style.backgroundColor = "#ffff00";
-  button1.style.color = "#0000ff";
-  button1.style.left = editorFrame.surfaceWidth - 400;
-  button1.style.top = output.bounds.top;
-  button1.style.width = 400;
-  button1.style.height = 45;
-  button1.value = "Switch to dark theme";
-
-  button1.addEventListener("click", function () {
-    var nextTheme = Primrose.Text.Themes.Default,
-      nextString = "Switch to dark theme";
-    if (editor.theme.name === nextTheme.name) {
-      nextTheme = Primrose.Text.Themes.Dark;
-      nextString = "Switch to light theme";
-    }
-    console.log("Switching to theme: " + nextTheme.name);
-    documentation.theme = output.theme = editor.theme = nextTheme;
-    button1.value = nextString;
-  }, false);
-
-  editorFrame.appendChild(output);
   editorFrame.appendChild(editor);
-  editorFrame.appendChild(button1);
 
-  editorFrameMesh = editorCenter.appendChild(editorFrame);
+  editorFrameMesh = env.appendChild(editorFrame);
   editorFrameMesh.name = "MyWindow";
-  editorFrameMesh.position.set(0, 0, 0);
-
-  documentation = env.createElement("div");
-  documentation.id = "Documentation";
-  documentation.style.width = editorSize;
-  documentation.style.height = editorSize;
-  documentation.element = "docPage";
-
-  documentationMesh = env.appendChild(documentation);
-  documentationMesh.position.set(-2.2, env.avatarHeight, -1);
-  documentationMesh.rotation.set(0, Math.PI / 4, 0);
+  editorFrameMesh.position.set(0, env.avatarHeight, 0);
 
   console.log("INSTRUCTIONS:");
   console.log(" - " + cmdPre + "+E to show/hide editor");
@@ -127,12 +65,10 @@ env.addEventListener("update", function (dt) {
     scriptUpdateTimeout = setTimeout(updateScript, 500);
   }
 
-  editorCenter.position.copy(env.player.position);
-
   if (scriptAnimate) {
     // If quality has degraded, it's likely because the user bombed on a script.
     // Let's help them not lose their lunch.
-    if (env.quality === Primrose.Quality.NONE) {
+    if (env.quality === Quality.NONE) {
       scriptAnimate = null;
       wipeScene();
     }
@@ -145,8 +81,6 @@ env.addEventListener("update", function (dt) {
 env.addEventListener("keydown", function (evt) {
   if (evt[modA] && evt[modB]) {
     if (evt.keyCode === Primrose.Keys.E) {
-      documentationMesh.visible = editorFrameMesh.visible = !editorFrameMesh.visible;
-      documentationMesh.disabled = editorFrameMesh.disabled = !editorFrameMesh.disabled;
       if (!editorFrameMesh.visible && env.currentEditor && env.currentEditor.focused) {
         env.currentEditor.blur();
         env.currentEditor = null;
@@ -192,46 +126,21 @@ function updateScript() {
       newScript.indexOf("return update") < 0) {
       newScript += "\nreturn update;";
     }
-    try {
-      console.log("----- loading new script -----");
-      var scriptUpdate = new Function("scene", newScript);
-      wipeScene();
-      scriptAnimate = scriptUpdate.call(env, subScene);
-      if (scriptAnimate) {
-        scriptAnimate(0);
-      }
-      console.log("----- script loaded -----");
-      if (!scriptAnimate) {
-        console.log("----- No update script provided -----");
-      }
-      else if (env.quality === Primrose.Quality.NONE) {
-        env.quality = Primrose.Quality.MEDIUM;
-      }
+    console.log("----- loading new script -----");
+    scriptAnimate = null;
+    var scriptUpdate = new Function("scene", newScript);
+    wipeScene();
+    scriptAnimate = scriptUpdate.call(env, subScene);
+    if (scriptAnimate) {
+      scriptAnimate(0);
     }
-    catch (exp) {
-      console.error(exp);
-      scriptAnimate = null;
-      throw exp;
+    console.log("----- script loaded -----");
+    if (!scriptAnimate) {
+      console.log("----- No update script provided -----");
     }
-  }
-}
-
-logger.setup(logger.USER, function (msg) {
-  if (output) {
-    var data = JSON.parse(msg),
-      t = output;
-    t.value += data.name + ":> " + data.args[0] + "\n";
-    t.selectionStart = t.selectionEnd = t.value.length;
-    t.scrollIntoView(t.frontCursor);
-  }
-});
-
-function clrscr() {
-  if (output) {
-    var t = output;
-    t.value = "";
-    t.selectionStart = t.selectionEnd = t.value.length;
-    t.scrollIntoView(t.frontCursor);
+    else if (env.quality === Quality.NONE) {
+      env.quality = Quality.MEDIUM;
+    }
   }
 }
 

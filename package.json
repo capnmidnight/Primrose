@@ -1,18 +1,18 @@
 {
   "name": "primrose",
-  "description": "Primrose is a for Virtual Reality applications in Web browsers. It includes a basic syntax highlighting text editor.",
-  "version": "0.25.4",
+  "description": "Primrose is a framework for building Virtual Reality applications in Web browsers.",
+  "version": "0.28.18",
   "engines": {
     "node": ">=4.0.0"
   },
   "author": "Sean T. McBeth <sean@seanmcbeth.com> (https://www.seanmcbeth.com)",
   "license": "GPL-3.0",
-  "homepage": "http://www.primrosevr.com",
+  "homepage": "https://www.primrosevr.com",
   "repository": {
     "type": "git",
-    "url": "https://github.com/capnmidnight/Primrose.git"
+    "url": "https://github.com/NotionTheory/Primrose.git"
   },
-  "bugs": "https://github.com/capnmidnight/Primrose/issues",
+  "bugs": "https://trello.com/b/NVZsaC1P/primrose-development-tasks",
   "files": [
     "LICENSE.md",
     "README.md",
@@ -20,6 +20,8 @@
     "CHANGELOG.md",
     "Primrose.js",
     "Primrose.min.js",
+    "PrimroseLib.js",
+    "PrimroseLib.min.js",
     "PrimroseDependencies.js",
     "PrimroseDependencies.min.js",
     "PrimroseDocumentation.js",
@@ -27,11 +29,10 @@
     "StartHere-WINDOWS.exe",
     "StartHere-LINUX.sh",
     "StartHere-OS-X.sh",
-    "archive/",
+    "index.html",
     "quickstart/",
     "src/",
-    "doc/",
-    "meeting/"
+    "doc/"
   ],
   "scripts": {
     "start": "node StartHere.js --url doc/"
@@ -48,32 +49,21 @@
     "highlighting"
   ],
   "dependencies": {
-    "html2canvas": "^0.5.0-beta4",
+    "bare-bones-logger": "^2.0.0",
+    "iphone-inline-video": "^1.9.3",
     "jshashes": "^1.0.5",
     "lavu-details-polyfill": "^0.1.0",
     "leapjs": "^0.6.4",
-    "logger": "git+https://github.com/capnmidnight/logger.git",
-    "pliny": "git+https://github.com/capnmidnight/pliny.git",
-    "promise-polyfill": "^5.1.0",
-    "socket.io-client": "^1.4.4",
-    "three": "^0.76.1",
-    "webvr-bootstrapper": "git+https://github.com/capnmidnight/WebVR-Bootstrapper.git"
+    "pliny": "^3.2.6",
+    "promise-polyfill": "^5.2.1",
+    "replay-telemetry-webvr": "^1.0.6",
+    "socket.io-client": "^1.4.8",
+    "three": "^0.80.0",
+    "webvr-polyfill": "github:notiontheory/webvr-polyfill",
+    "webvr-standard-monitor": "^1.0.1"
   },
   "devDependencies": {
-    "babel-preset-es2015": "^6.6.0",
-    "gulp": "^3.9.1",
-    "gulp-babel": "^6.1.2",
-    "gulp-beautify": "^2.0.0",
-    "gulp-concat": "^2.6.0",
-    "gulp-cssmin": "^0.1.7",
-    "gulp-data": "^1.2.1",
-    "gulp-footer": "^1.0.5",
-    "gulp-jshint": "^2.0.0",
-    "gulp-pug": "^2.0.0",
-    "gulp-rename": "^1.2.2",
-    "gulp-stylus": "^2.5.0",
-    "gulp-uglify": "^1.5.3",
-    "jshint": "^2.9.2",
-    "pug": "^2.0.0-alpha6"
+    "jstransformer-marked": "^1.0.1",
+    "notiontheory-basic-build": "^2.7.0"
   }
 }

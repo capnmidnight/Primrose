@@ -1,0 +1,82 @@
+﻿doctype html
+html
+  head
+    meta(charset="utf-8")
+    block viewport
+      meta(name="viewport", content="width=device-width, shrink-to-fit=0, initial-scale=1.0")
+
+    meta(name="apple-touch-fullscreen", content="yes")
+    meta(name="web-app-capable", content="yes")
+    meta(name="apple-mobile-web-app-capable", content="yes")
+    meta(name="apple-mobile-web-app-status-bar-style", content="black")
+    meta(name="theme-color", content="black")
+
+    meta(name="description", content="A WebVR application framework.")
+    meta(name="keywords", content="WebGL, WebVR, HTML5, JavaScript, text editor, source code editor, virtual reality, Primrose")
+
+    meta(property="og:type", content="website")
+    meta(name="twitter:card", content="summary_large_image")
+    meta(name="twitter:site", content="@Primrose_VR")
+
+    meta(property="og:site_name", content="Primrose VR")
+
+    meta(property="og:description", content="Primrose: Framework for WebVR Applications")
+    meta(name="twitter:description", content="Primrose: Framework for WebVR Applications")
+    meta(property="og:url", content="http://www.primrosevr.com/" + filePath)
+
+    <!-- start main.pug meta block -->
+    block meta
+      meta(name="twitter:image", content="http://www.primrosevr.com/images/screenshot.jpg")
+      meta(property="og:image", content="http://www.primrosevr.com/images/screenshot.jpg" )
+    <!-- end main.pug meta block -->
+
+    <!-- start main.pug title block -->
+    block title
+      meta(property="og:title", content="Primrose VR: WebVR Application Framework")
+      meta(name="twitter:title", content="Primrose VR: WebVR Application Framework")
+      title Primrose VR: WebVR Application Framework
+    <!-- end main.pug title block -->
+
+    link(type="text/css", rel="stylesheet", href= fileRoot + "doc/style" + cssExt)
+
+    block head
+
+    script(type="text/javascript", src= fileRoot + "ga.js")
+  body
+
+    header(role="banner")
+      a#logo(href= fileRoot)
+        img(src= fileRoot + "doc/images/primrose40.png", alt="logo", title="Primrose logo")
+        span.version-number v#{version}
+
+
+      nav(role="navigation")
+        ul
+          li: a(href= fileRoot + "doc/") Docs
+          li: a(href= fileRoot + "doc/faq.html") FAQ
+          li: a(href= fileRoot + "doc/community.html") Community
+          li: a(href="https://github.com/NotionTheory/Primrose/", target="_blank") Github
+
+      block header
+
+    <!-- start main.pug banner block -->
+    block banner
+    <!-- end main.pug banner block -->
+
+    <!-- start main.pug main block -->
+    main
+      block main
+    <!-- end main.pug main block -->
+
+    <!-- start main.pug footer block -->
+    footer
+      #footerWrapper
+        a(href= fileRoot + "doc/readme.html") About
+        a(href= fileRoot + "doc/license.html") License
+        a(href= fileRoot + "doc/changelog.html") Changelog
+        a(href="https://notiontheory.typeform.com/to/QzZmAD", target="_blank") Slack
+        a.small.icon.github(href="https://www.github.com/NotionTheory/Primrose", target="_blank") &nbsp;
+        a.small.icon.twitter(href="https://www.twitter.com/Primrose_VR", target="_blank") &nbsp;
+        a(href="http://www.notiontheory.com/team", target="_blank", style="color:#ec2471") Made (with love) by NotionTheory
+      block footer
+    <!-- end main.pug footer block -->
