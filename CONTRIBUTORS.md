@@ -1,4 +1,5 @@
 # CONTRIBUTORS
 
-* Sean T. McBeth <sean@primroseeditor.com>
-* Jeffrey Zitelli <jeffrey.zitelli@gmail.com>
+* Sean T. McBeth - @capnmidnight
+* Kristian Bouw - @kbouw
+* Jeffrey Zitelli - @jzitelli
