@@ -7,6 +7,10 @@ webVR is an [experimental Javascript API](https://developer.mozilla.org/en-US/do
 
 # Getting started with Primrose
 
+### Contributing
+
+If you're interested in contributing to the framework, we'd love to have you involved. Please [read the guidelines](https://github.com/NotionTheory/Primrose/blob/master/CONTRIBUTING.md) for contributing before doing so.
+
 ### Project Setup
 
 1. You first want to setup a new project using `npm init`, and then follow the prompts.
