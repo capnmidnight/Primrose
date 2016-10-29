@@ -11,7 +11,6 @@ var gulp = require("gulp"),
     "../webvr-standard-monitor/webvr-standard-monitor.js",
     "node_modules/three/build/three.js",
     "node_modules/three/examples/js/loaders/OBJLoader.js",
-    "node_modules/three/examples/js/loaders/MTLLoader.js",
     "node_modules/iphone-inline-video/dist/iphone-inline-video.browser.js",
     "namegen.js"
   ]),
