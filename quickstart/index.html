@@ -2,33 +2,8 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>My Primrose VR Application</title>
-    <script type="text/javascript" src="webvr-bootstrapper.min.js"></script>
-    <script>
-      WebVRBootstrapper( "manifest.json" ).then(function ( startDownload ) {
-        var progressBar = document.querySelector( "progress" );
-        return startDownload( function ( n, m ) {
-          progressBar.max = m;
-          progressBar.value = n;
-        });
-      }).then(function () {
-        var progressBar = document.querySelector( "progress" );
-        progressBar.style.display = "none";
-        navigator.getVRDisplays().then(function( displays ) {
-          displays.forEach(function( display, i ) {
-            var btn = document.createElement( "button" );
-            btn.type = "button";
-            btn.appendChild( document.createTextNode( display.displayName ) );
-            btn.addEventListener( "click", function() {
-              console.log("OK");
-              env.goFullScreen(i);
-            });
-            document.getElementById( "fsb" ).appendChild( btn );
-          });
-        });
-      });
-    </script>
     <style type="text/css">
       html, body, canvas, progress, #fsb {
         position: fixed;
@@ -48,10 +23,40 @@
         padding: 1em;
       }
     </style>
+    <script type="text/javascript" src="Primrose.min.js"></script>
+    <script type="text/javascript">
+      var env = new Primrose.BrowserEnvironment({
+        skyTexture: "bg.jpg",
+        groundTexture: "deck.png"
+      });
+
+      env.addEventListener("ready", function () {
+        // Perform any post-initialization setup. Once this event fires, the Primrose
+        // framework is ready and will start animation as soon as this function returns.
+
+        env.insertFullScreenButtons("#fsb");
+      });
+
+      env.addEventListener("gazecomplete", function (evt) {
+        // You can respond to "intended stare" events here, i.e. when the user gazes
+        // at a particular object for an extended period of time. Usually, about three
+        // seconds.
+      });
+
+      env.addEventListener("pointerend", function (evt) {
+        // You can respond to the user "clicking" an object here. This could be by using
+        // a mouse on their desktop PC or by touching the screen while looking at an
+        // object on a mobile device.
+      });
+
+      env.addEventListener("update", function (dt) {
+        // Perform per-frame updates here, like moving objects around according to your
+        // own rules.
+      });
+    </script>
   </head>
   <body>
     <canvas id="frontBuffer" tabindex="1"></canvas>
-    <progress></progress>
     <div id="fsb"></div>
   </body>
 </html>

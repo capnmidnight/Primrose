@@ -878,6 +878,20 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       }
     }
   }
+
+  insertFullScreenButtons(containerSpec){
+    const container = document.querySelector(containerSpec);
+    return this.displays.map((display, i) => {
+      const btn = document.createElement("button"),
+        isStereo = Primrose.Input.VR.isStereoDisplay(display),
+        enterVR = this.goFullScreen.bind(this, i);
+      btn.type = "button";
+      btn.appendChild(document.createTextNode(display.displayName));
+      btn.addEventListener("click", enterVR, false);
+      container.appendChild(btn);
+      return btn;
+    });
+  }
 }
 
 BrowserEnvironment.DEFAULTS = {
