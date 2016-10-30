@@ -41,17 +41,40 @@
     "highlighting"
   ],
   "dependencies": {
+    // This package is used in the doc pages to be able to support details/summary
+    // view for browsers that don't yet have this useful HTML element.
     "lavu-details-polyfill": "^0.1.0"
   },
   "devDependencies": {
+    // Use to perform debugging on iOS and to forward logging
+    // output to a texture.
     "bare-bones-logger": "^2.0.0",
+
+    // Fixes a critical bug on iOS 9
     "iphone-inline-video": "^1.9.3",
+
+    // Include Markdown file contents in HTML files via Pug templates.
     "jstransformer-marked": "^1.0.1",
+
+    // Remove the documentation objects from the source files and render
+    // documentation objects into documentation pages.
     "pliny": "^3.2.6",
+
+    // Provide Promises for IE.
     "promise-polyfill": "^5.2.1",
+
+    // Manage the build process and drastically simplify it.
     "notiontheory-basic-build": "^2.7.0",
+
+    // WebGL scene-graph library.
     "three": "^0.80.0",
+
+    // Provide WebVR API on systems that support Device Motion API but don't yet
+    // have WebVR API.
     "webvr-polyfill": "github:notiontheory/webvr-polyfill",
+
+    // Represent the regular monitor through the WebVR API to simplify handling
+    // multiple types of displays.
     "webvr-standard-monitor": "^1.0.1"
   }
 }
