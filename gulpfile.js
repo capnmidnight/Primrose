@@ -16,17 +16,27 @@ var gulp = require("gulp"),
     "../webvr-polyfill/build/webvr-polyfill.js",
     "../webvr-standard-monitor/webvr-standard-monitor.js"
   ]),
-  js = nt.js("PrimroseLib-WithDoc", "src", ["format"], pliny.carve.bind(pliny, "PrimroseLib-WithDoc.js", "PrimroseLib.js", "doc/PrimroseDocumentation.js"), true),
+  js = nt.js("PrimroseLib-WithDoc", "src", ["format"], (fileName) =>
+    // removes the documentation objects from the concatenated library.
+    pliny.carve("PrimroseLib-WithDoc.js", fileName, "doc/PrimroseDocumentation.js"), true),
+
+  // Pliny doesn't perform minification of the the output documentation file, so
+  // we do it here.
   min = nt.min("PrimroseDocumentation", ["doc/PrimroseDocumentation.js"], [js]),
+
+  // Combine the dependencies and the library into a single, easy to use package.
   tot = nt.cat("Primrose", ["PrimroseDependencies.js", "PrimroseLib.js"], [deps, min]),
-  html = nt.html("Primrose", ["*.pug", "doc/**/*.pug", "templates/**/*.pug"]),
-  css = nt.css("Primrose", ["*.styl", "doc/**/*.styl"]),
+
+  // Delete some intermediate files that aren't needed.
   clean = nt.clean("Primrose", [
     "Primrose.js",
     "PrimroseLib-WithDoc*.js",
     "PrimroseDependencies*.js",
     "PrimroseLib*.js"
-  ], [tot.release]);
+  ], [tot.release]),
+
+  html = nt.html("Primrose", ["*.pug", "doc/**/*.pug", "templates/**/*.pug"]),
+  css = nt.css("Primrose", ["*.styl", "doc/**/*.styl"]);
 
 gulp.task("format", [js.format]);
 gulp.task("js", [js.default]);
