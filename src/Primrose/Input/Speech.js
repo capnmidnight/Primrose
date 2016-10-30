@@ -6,7 +6,7 @@
 //   API requires a network connection, as the processing is done on an external
 //   server.
 //
-//   Constructor: new SpeechInput(name, commands, socket);
+//   Constructor: new SpeechInput(name, commands);
 //
 //   The `name` parameter is used when transmitting the commands through the command
 //   proxy server.
@@ -29,9 +29,6 @@
 //
 //  The `command` property is the callback function that will be executed. It takes no
 //  parameters.
-//
-//  The `socket` (optional) parameter is a WebSocket connecting back to the command
-//  proxy server.
 //
 //  Methods:
 //  `start()`: starts the command unrecognition, unless it's not available, in which
