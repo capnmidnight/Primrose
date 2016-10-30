@@ -13,6 +13,8 @@ pliny.class({
 class BrowserEnvironment extends Primrose.AbstractEventEmitter {
   constructor(options) {
     super();
+
+    this.network = null;
     this.options = patch(options, BrowserEnvironment.DEFAULTS);
     this.options.foregroundColor = this.options.foregroundColor || complementColor(new THREE.Color(this.options.backgroundColor))
       .getHex();
@@ -35,7 +37,9 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       doPicking();
       moveSky();
       moveGround();
-      this.network.update(dt);
+      if(this.network){
+        this.network.update(dt);
+      }
 
       this.emit("update", dt);
     };
@@ -764,12 +768,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
         window.addEventListener("keydown", focusClipboard, true);
       }
 
-
       this.input.head.add(this.camera);
-
-      this.network = new Primrose.Network.Manager(this.input, this.audio, factories, this.options);
-      this.network.addEventListener("addavatar", addAvatar);
-      this.network.addEventListener("removeavatar", removeAvatar);
 
       return this.input.ready;
     });
@@ -855,6 +854,11 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
   }
 
   connect(socket, userName) {
+    if(!this.network){
+      this.network = new Primrose.Network.Manager(this.input, this.audio, factories, this.options);
+      this.network.addEventListener("addavatar", addAvatar);
+      this.network.addEventListener("removeavatar", removeAvatar);
+    }
     return this.network && this.network.connect(socket, userName);
   }
 
