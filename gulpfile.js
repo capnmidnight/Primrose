@@ -12,7 +12,7 @@ var gulp = require("gulp"),
     "node_modules/three/build/three.js",
     "node_modules/three/examples/js/loaders/OBJLoader.js",
     "node_modules/iphone-inline-video/dist/iphone-inline-video.browser.js",
-    "namegen.js"
+    "lib/namegen.js"
   ]),
   js = nt.js("PrimroseLib-WithDoc", "src", ["format"], pliny.carve.bind(pliny, "PrimroseLib-WithDoc.js", "PrimroseLib.js", "PrimroseDocumentation.js"), true),
   min = nt.min("PrimroseDocumentation", ["PrimroseDocumentation.js"], [js]),

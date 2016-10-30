@@ -1,0 +1,1 @@
+This directory just holds third-party libraries we couldn't install through NPM.
