@@ -49,21 +49,17 @@
     "highlighting"
   ],
   "dependencies": {
+    "lavu-details-polyfill": "^0.1.0"
+  },
+  "devDependencies": {
     "bare-bones-logger": "^2.0.0",
     "iphone-inline-video": "^1.9.3",
-    "jshashes": "^1.0.5",
-    "lavu-details-polyfill": "^0.1.0",
-    "leapjs": "^0.6.4",
+    "jstransformer-marked": "^1.0.1",
     "pliny": "^3.2.6",
     "promise-polyfill": "^5.2.1",
-    "replay-telemetry-webvr": "^1.0.6",
-    "socket.io-client": "^1.4.8",
+    "notiontheory-basic-build": "^2.7.0",
     "three": "^0.80.0",
     "webvr-polyfill": "github:notiontheory/webvr-polyfill",
     "webvr-standard-monitor": "^1.0.1"
-  },
-  "devDependencies": {
-    "jstransformer-marked": "^1.0.1",
-    "notiontheory-basic-build": "^2.7.0"
   }
 }
