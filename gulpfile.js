@@ -9,7 +9,6 @@ var gulp = require("gulp"),
   // No need to constantly be re-concatenating files that haven't changed.
   deps = nt.cat("PrimroseDependencies", [
     "node_modules/promise-polyfill/promise.js",
-    "node_modules/socket.io-client/socket.io.js",
     "node_modules/three/build/three.js",
     "node_modules/three/examples/js/loaders/OBJLoader.js",
     "node_modules/iphone-inline-video/dist/iphone-inline-video.browser.js",
