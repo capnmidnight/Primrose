@@ -36,6 +36,9 @@ gulp.task("js:release", [js.release]);
 gulp.task("html", [html.debug]);
 gulp.task("css", [css.debug]);
 
+gulp.task("copy", [tot.release], () => gulp.src(["Primrose.min.js"])
+    .pipe(gulp.dest("quickstart")));
+
 gulp.task("default", [
   deps.default,
   js.default,
