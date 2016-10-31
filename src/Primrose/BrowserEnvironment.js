@@ -54,7 +54,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       maxY = Math.PI / 6;
 
     const moveUI = (dt) => {
-      this.ui.position.copy(this.input.head.position);
+      this.ui.position.copy(this.input.stage.position);
       followEuler.setFromQuaternion(this.input.head.quaternion);
       let turn = followEuler.y,
         deltaTurnA = turn - uiTurn,
