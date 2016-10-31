@@ -2,7 +2,7 @@ var gulp = require("gulp"),
   exec = require("child_process").exec,
   pliny = require("pliny"),
   pkg = require("./package.json"),
-  build = require("../notiontheory-basic-build"),
+  build = require("notiontheory-basic-build"),
   nt = build.setup(gulp, pkg),
 
   // The separate dependencies file exists to make the development build faster.
@@ -22,7 +22,10 @@ var gulp = require("gulp"),
 
   // Pliny doesn't perform minification of the the output documentation file, so
   // we do it here.
-  min = nt.min("PrimroseDocumentation", ["doc/PrimroseDocumentation.js"], [js]),
+  min = nt.min("PrimroseDocumentation", ["doc/PrimroseDocumentation.js"], [{
+    debug: js.debug,
+    release: js.debug
+  }]),
 
   // Combine the dependencies and the library into a single, easy to use package.
   tot = nt.cat("Primrose", ["PrimroseDependencies.js", "PrimroseLib.js"], [deps, min]),
