@@ -65,10 +65,10 @@ class Manager extends Primrose.AbstractEventEmitter {
       }
     }
     else if (this.deviceIndex > 0) {
-      this.localUser.stage.mesh.position.fromArray(state, 1);
-      this.localUser.stage.mesh.quaternion.fromArray(state, 4);
-      this.localUser.head.mesh.position.fromArray(state, 8);
-      this.localUser.head.mesh.quaternion.fromArray(state, 11);
+      this.localUser.stage.position.fromArray(state, 1);
+      this.localUser.stage.quaternion.fromArray(state, 4);
+      this.localUser.head.position.fromArray(state, 8);
+      this.localUser.head.quaternion.fromArray(state, 11);
     }
   }
 

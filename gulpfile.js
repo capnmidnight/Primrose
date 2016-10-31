@@ -35,7 +35,6 @@ var gulp = require("gulp"),
 
   // Delete some intermediate files that aren't needed.
   clean = nt.clean("Primrose", [
-    "Primrose.js",
     "PrimroseLib-WithDoc*.js",
     "PrimroseDependencies*.js",
     "PrimroseLib*.js"
