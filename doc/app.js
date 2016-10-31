@@ -1,92 +1,35 @@
-function scroller(id) {
-  document.getElementById(id)
-    .scrollIntoView({
-      block: "top",
-      behavior: "smooth"
-    });
-}
-
-var GRAMMAR_TEST = /^grammar\("(\w+)"\);\r?\n/;
-
-function replacePreBlocks() {
-  var doc = document.querySelector("#documentation"),
-    codeBlocks = doc.querySelectorAll("pre");
-  for (var i = 0; i < codeBlocks.length; ++i) {
-    var b = codeBlocks[i],
-      txt = (b.textContent || b.innerText)
-      .trim(),
-      grammarSpec = txt.match(GRAMMAR_TEST),
-      tokenizer = Primrose.Text.Grammars.PlainText;
-    if (grammarSpec) {
-      var grammarName = grammarSpec[1];
-      tokenizer = Primrose.Text.Grammars[grammarName] || tokenizer;
-      txt = txt.replace(GRAMMAR_TEST, "");
-    }
-    if (Primrose.Text.Themes.Default.regular.backColor) {
-      delete Primrose.Text.Themes.Default.regular.backColor;
-    }
-    b.innerHTML = tokenizer.toHTML(txt);
-    b.className = "code-listing";
-  }
-}
-
 (function () {
   "use strict";
 
-  var nav = document.querySelector("#contents nav > ul"),
-    doc = document.querySelector("#documentation"),
-    main = document.querySelector("main"),
-    docoCache = {
-      "": {
-        obj: null,
-        doc: doc.innerHTML
-      },
-      "#Global": {
-        obj: pliny.database,
-        doc: pliny.formats.html.format(pliny.database)
+  function scroller(id) {
+    document.getElementById(id)
+      .scrollIntoView({
+        block: "top",
+        behavior: "smooth"
+      });
+  }
+
+  function replacePreBlocks() {
+    var doc = document.querySelector("#documentation"),
+      codeBlocks = doc.querySelectorAll("pre");
+    for (var i = 0; i < codeBlocks.length; ++i) {
+      var b = codeBlocks[i],
+        txt = (b.textContent || b.innerText)
+        .trim(),
+        grammarSpec = txt.match(GRAMMAR_TEST),
+        tokenizer = Primrose.Text.Grammars.PlainText;
+      if (grammarSpec) {
+        var grammarName = grammarSpec[1];
+        tokenizer = Primrose.Text.Grammars[grammarName] || tokenizer;
+        txt = txt.replace(GRAMMAR_TEST, "");
       }
-    };
-
-  var groupings = {
-    namespaces: {
-      label: "Namespaces",
-      fieldType: "namespace",
-      items: [pliny.database]
-    },
-    classes: {
-      label: "Classes",
-      fieldType: "class",
-      items: []
-    },
-    functions: {
-      label: "Functions",
-      fieldType: "functions",
-      items: []
-    },
-    examples: {
-      items: []
-    },
-    methods: {
-      items: []
-    },
-    properties: {
-      items: []
-    },
-    events: {
-      items: []
-    },
-    records: {
-      items: []
-    },
-    enumerations: {
-      items: []
-    },
-    values: {
-      items: []
+      if (Primrose.Text.Themes.Default.regular.backColor) {
+        delete Primrose.Text.Themes.Default.regular.backColor;
+      }
+      b.innerHTML = tokenizer.toHTML(txt);
+      b.className = "code-listing";
     }
-  };
-
-  var editors = [];
+  }
 
   function editorFocused(evt) {
     for (var i = 0; i < editors.length; ++i) {
@@ -235,8 +178,64 @@ function replacePreBlocks() {
     showHash();
   }
 
-  // Setup the navigation events
-  window.addEventListener("hashchange", showHash, false);
+var GRAMMAR_TEST = /^grammar\("(\w+)"\);\r?\n/,
+  editors = [],
+  groupings = {
+    namespaces: {
+      label: "Namespaces",
+      fieldType: "namespace",
+      items: [pliny.database]
+    },
+    classes: {
+      label: "Classes",
+      fieldType: "class",
+      items: []
+    },
+    functions: {
+      label: "Functions",
+      fieldType: "functions",
+      items: []
+    },
+    examples: {
+      items: []
+    },
+    methods: {
+      items: []
+    },
+    properties: {
+      items: []
+    },
+    events: {
+      items: []
+    },
+    records: {
+      items: []
+    },
+    enumerations: {
+      items: []
+    },
+    values: {
+      items: []
+    }
+  };
 
-  renderDocs();
+  var nav, doc, main, docoCache;
+
+  window.addEventListener("hashchange", showHash, false);
+  window.addEventListener("load", function() {
+    nav = document.querySelector("#contents nav > ul");
+    doc = document.querySelector("#documentation");
+    main = document.querySelector("main");
+    docoCache = {
+      "": {
+        obj: null,
+        doc: doc.innerHTML
+      },
+      "#Global": {
+        obj: pliny.database,
+        doc: pliny.formats.html.format(pliny.database)
+      }
+    };
+    renderDocs();
+  });
 })();
