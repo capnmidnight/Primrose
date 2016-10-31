@@ -590,12 +590,13 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       }
     };
 
-    var addAvatar = (user) => {
+    this.addAvatar = (user) => {
+      console.log(user);
       this.scene.add(user.stage);
       this.scene.add(user.head);
     };
 
-    var removeAvatar = (user) => {
+    this.removeAvatar = (user) => {
       this.scene.remove(user.stage);
       this.scene.remove(user.head);
     };
@@ -855,9 +856,9 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
 
   connect(socket, userName) {
     if(!this.network){
-      this.network = new Primrose.Network.Manager(this.input, this.audio, factories, this.options);
-      this.network.addEventListener("addavatar", addAvatar);
-      this.network.addEventListener("removeavatar", removeAvatar);
+      this.network = new Primrose.Network.Manager(this.input, this.audio, this.factories, this.options);
+      this.network.addEventListener("addavatar", this.addAvatar);
+      this.network.addEventListener("removeavatar", this.removeAvatar);
     }
     return this.network && this.network.connect(socket, userName);
   }
