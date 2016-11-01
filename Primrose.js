@@ -48389,7 +48389,7 @@ var loaders = null,
   "text/prs.wavefront-obj": "obj",
   "text/prs.wavefront-mtl": "mtl"
 },
-    PATH_PATTERN = /((?:[^/]+\/)+)(\w+)(\.(?:\w+))$/,
+    PATH_PATTERN = /((?:https?:\/\/)?(?:[^/]+\/)+)(\w+)(\.(?:\w+))$/,
     EXTENSION_PATTERN = /(\.(?:\w+))+$/,
     NAME_PATTERN = /([^/]+)\.\w+$/;
 
