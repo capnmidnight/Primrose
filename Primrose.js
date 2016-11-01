@@ -46508,7 +46508,9 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
     };
 
     var moveSky = function moveSky() {
-      _this.sky.position.copy(_this.input.head.position);
+      if (_this.sky) {
+        _this.sky.position.copy(_this.input.head.position);
+      }
     };
 
     var moveGround = function moveGround() {
@@ -46869,29 +46871,32 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
     if (_this.options.skyTexture === undefined) {
       _this.options.skyTexture = _this.options.backgroundColor;
     }
-    var skyFunc = typeof _this.options.skyTexture === "number" ? colored : textured,
-        skyDim = _this.options.drawDistance * 0.9,
-        skyGeom = null,
-        onSkyDone = function onSkyDone() {
-      return _this.scene.add(_this.sky);
-    };
-    if (typeof _this.options.skyTexture === "string") {
-      skyGeom = sphere(skyDim, 18, 9);
-    } else {
-      skyGeom = box(skyDim, skyDim, skyDim);
+
+    if (!_this.options.useFog) {
+      var skyFunc = typeof _this.options.skyTexture === "number" ? colored : textured,
+          skyDim = _this.options.drawDistance * 0.9,
+          skyGeom = null,
+          onSkyDone = function onSkyDone() {
+        return _this.scene.add(_this.sky);
+      };
+      if (typeof _this.options.skyTexture === "string") {
+        skyGeom = sphere(skyDim, 18, 9);
+      } else {
+        skyGeom = box(skyDim, skyDim, skyDim);
+      }
+      _this.sky = skyFunc(skyGeom, _this.options.skyTexture, {
+        side: THREE.BackSide,
+        unshaded: true,
+        transparent: true,
+        opacity: 1,
+        resolve: onSkyDone,
+        progress: _this.options.progress
+      });
+      _this.sky.name = "Sky";
     }
-    _this.sky = skyFunc(skyGeom, _this.options.skyTexture, {
-      side: THREE.BackSide,
-      unshaded: true,
-      transparent: true,
-      opacity: 1,
-      resolve: onSkyDone,
-      progress: _this.options.progress
-    });
-    _this.sky.name = "Sky";
 
     if (_this.options.groundTexture !== undefined) {
-      var dim = 10,
+      var dim = _this.options.drawDistance / Math.sqrt(2),
           gm = new THREE.BoxBufferGeometry(dim * 5, 0.1, dim * 5, dim, 1, dim);
       var groundFunc = typeof _this.options.groundTexture === "number" ? colored : textured;
       _this.ground = groundFunc(gm, _this.options.groundTexture, {
@@ -47307,7 +47312,7 @@ BrowserEnvironment.DEFAULTS = {
   // By default, a single light is added to the scene,
   disableDefaultLighting: false,
   // The color that WebGL clears the background with before drawing.
-  backgroundColor: 0xafbffe,
+  backgroundColor: 0xafbfff,
   // the near plane of the camera.
   nearPlane: 0.01,
   // the far plane of the camera.
