@@ -100,7 +100,9 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
     };
 
     const moveSky = () => {
-      this.sky.position.copy(this.input.head.position);
+      if(this.sky){
+        this.sky.position.copy(this.input.head.position);
+      }
     };
 
     const moveGround = () => {
@@ -485,28 +487,31 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
     if (this.options.skyTexture === undefined) {
       this.options.skyTexture = this.options.backgroundColor;
     }
-    var skyFunc = (typeof this.options.skyTexture === "number") ? colored : textured,
-      skyDim = this.options.drawDistance * 0.9,
-      skyGeom = null,
-      onSkyDone = () => this.scene.add(this.sky);
-    if(typeof this.options.skyTexture === "string"){
-      skyGeom = sphere(skyDim, 18, 9);
+
+    if(!this.options.useFog){
+      var skyFunc = (typeof this.options.skyTexture === "number") ? colored : textured,
+        skyDim = this.options.drawDistance * 0.9,
+        skyGeom = null,
+        onSkyDone = () => this.scene.add(this.sky);
+      if(typeof this.options.skyTexture === "string"){
+        skyGeom = sphere(skyDim, 18, 9);
+      }
+      else {
+        skyGeom = box(skyDim, skyDim, skyDim);
+      }
+      this.sky = skyFunc(skyGeom, this.options.skyTexture, {
+        side: THREE.BackSide,
+        unshaded: true,
+        transparent: true,
+        opacity: 1,
+        resolve: onSkyDone,
+        progress: this.options.progress
+      });
+      this.sky.name = "Sky";
     }
-    else {
-      skyGeom = box(skyDim, skyDim, skyDim);
-    }
-    this.sky = skyFunc(skyGeom, this.options.skyTexture, {
-      side: THREE.BackSide,
-      unshaded: true,
-      transparent: true,
-      opacity: 1,
-      resolve: onSkyDone,
-      progress: this.options.progress
-    });
-    this.sky.name = "Sky";
 
     if (this.options.groundTexture !== undefined) {
-      var dim = 10,
+      var dim = this.options.drawDistance / Math.sqrt(2),
       gm = new THREE.BoxBufferGeometry(dim * 5, 0.1, dim * 5, dim, 1, dim);
       var groundFunc = (typeof this.options.groundTexture === "number") ? colored : textured;
       this.ground = groundFunc(gm, this.options.groundTexture, {
