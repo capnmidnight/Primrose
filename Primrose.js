@@ -46457,7 +46457,7 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
       _this.input.update(dt);
     };
 
-    var uiTurn = 0;
+    _this.turns = 0;
     var followEuler = new THREE.Euler(),
         maxX = -Math.PI / 4,
         maxY = Math.PI / 6;
@@ -46466,7 +46466,7 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
       _this.ui.position.copy(_this.input.stage.position);
       followEuler.setFromQuaternion(_this.input.head.quaternion);
       var turn = followEuler.y,
-          deltaTurnA = turn - uiTurn,
+          deltaTurnA = turn - _this.turns,
           deltaTurnB = deltaTurnA + Math.PI * 2,
           deltaTurnC = deltaTurnA - Math.PI * 2,
           deltaTurn = void 0;
@@ -46483,10 +46483,10 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
       }
 
       if (Math.abs(deltaTurn) > maxY) {
-        uiTurn += deltaTurn * 0.02;
+        _this.turns += deltaTurn * 0.02;
       }
 
-      followEuler.set(maxX, uiTurn, 0, "YXZ");
+      followEuler.set(maxX, _this.turns, 0, "YXZ");
       _this.ui.quaternion.setFromEuler(followEuler);
     };
 
