@@ -473,7 +473,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       else{
         const handler = obj && obj["on" + evt.type];
         if(handler){
-          handler(app);
+          handler(this);
         }
       }
     };
