@@ -87,7 +87,7 @@ class Audio3D {
   }
 
   setPlayer(obj) {
-    if(this.context){
+    if(this.context && this.context.listener){
       obj.updateMatrixWorld();
       TEMP.copy(obj.matrixWorld);
       var mx = TEMP.elements[12],
