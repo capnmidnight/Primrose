@@ -80,9 +80,10 @@ class Audio3D {
             window.addEventListener("keyup", unlock, false);
           }
         }
-        catch(exp){
-          reject(exp);
-        }
+      }
+      catch(exp){
+        reject(exp);
+      }
     }
     }).then(() => console.log("Audio ready"));
   }
