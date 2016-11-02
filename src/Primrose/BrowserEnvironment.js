@@ -48,7 +48,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       this.input.update(dt);
     };
 
-    let uiTurn = 0;
+    this.turns = 0;
     const followEuler = new THREE.Euler(),
       maxX = -Math.PI / 4,
       maxY = Math.PI / 6;
@@ -57,7 +57,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       this.ui.position.copy(this.input.stage.position);
       followEuler.setFromQuaternion(this.input.head.quaternion);
       let turn = followEuler.y,
-        deltaTurnA = turn - uiTurn,
+        deltaTurnA = turn - this.turns,
         deltaTurnB = deltaTurnA + Math.PI * 2,
         deltaTurnC = deltaTurnA - Math.PI * 2,
         deltaTurn;
@@ -77,10 +77,10 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       }
 
       if(Math.abs(deltaTurn) > maxY) {
-        uiTurn += deltaTurn * 0.02;
+        this.turns += deltaTurn * 0.02;
       }
 
-      followEuler.set(maxX, uiTurn, 0, "YXZ");
+      followEuler.set(maxX, this.turns, 0, "YXZ");
       this.ui.quaternion.setFromEuler(followEuler);
     };
 
