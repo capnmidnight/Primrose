@@ -52982,45 +52982,53 @@ var Audio3D = function () {
 
     this.ready = new Promise(function (resolve, reject) {
       try {
-        (function () {
-          var finishSetup = function finishSetup() {
-            _this.sampleRate = _this.context.sampleRate;
-            _this.mainVolume = _this.context.createGain();
-            _this.start();
-            resolve();
-          };
+        if (Audio3D.isAvailable) {
+          (function () {
+            var finishSetup = function finishSetup() {
+              try {
+                _this.sampleRate = _this.context.sampleRate;
+                _this.mainVolume = _this.context.createGain();
+                _this.start();
+                resolve();
+              } catch (exp) {
+                reject(exp);
+              }
+            };
 
-          if (!isiOS) {
-            _this.context = new AudioContext();
-            finishSetup();
-          } else {
-            (function () {
-              var unlock = function unlock() {
-                _this.context = _this.context || new AudioContext();
-                var source = _this.context.createBufferSource();
-                source.buffer = _this.createRawSound([[0]]);
-                source.connect(_this.context.destination);
-                source.noteOn(0);
-                setTimeout(function () {
-                  if (source.playbackState === source.PLAYING_STATE || source.playbackState === source.FINISHED_STATE) {
-                    window.removeEventListener("mouseup", unlock);
-                    window.removeEventListener("touchend", unlock);
-                    window.removeEventListener("keyup", unlock);
-                    try {
-                      finishSetup();
-                    } catch (exp) {
-                      reject(exp);
-                    }
+            if (!isiOS) {
+              _this.context = new AudioContext();
+              finishSetup();
+            } else {
+              (function () {
+                var unlock = function unlock() {
+                  try {
+                    (function () {
+                      _this.context = _this.context || new AudioContext();
+                      var source = _this.context.createBufferSource();
+                      source.buffer = _this.createRawSound([[0]]);
+                      source.connect(_this.context.destination);
+                      source.noteOn(0);
+                      setTimeout(function () {
+                        if (source.playbackState === source.PLAYING_STATE || source.playbackState === source.FINISHED_STATE) {
+                          window.removeEventListener("mouseup", unlock);
+                          window.removeEventListener("touchend", unlock);
+                          window.removeEventListener("keyup", unlock);
+                          finishSetup();
+                        }
+                      }, 0);
+                    })();
+                  } catch (exp) {
+                    reject(exp);
                   }
-                }, 0);
-              };
+                };
 
-              window.addEventListener("mouseup", unlock, false);
-              window.addEventListener("touchend", unlock, false);
-              window.addEventListener("keyup", unlock, false);
-            })();
-          }
-        })();
+                window.addEventListener("mouseup", unlock, false);
+                window.addEventListener("touchend", unlock, false);
+                window.addEventListener("keyup", unlock, false);
+              })();
+            }
+          })();
+        }
       } catch (exp) {
         reject(exp);
       }
@@ -53181,7 +53189,7 @@ var Audio3D = function () {
   return Audio3D;
 }();
 
-Audio3D.isAvailable = !!window.AudioContext && AudioContext.prototype.createGain;
+Audio3D.isAvailable = !!window.AudioContext && !!AudioContext.prototype.createGain;
 if(typeof window !== "undefined") window.Primrose.Output.Audio3D = Audio3D;
 })();
 // end C:\Users\sean\Documents\VR\Primrose\src\Primrose\Output\Audio3D.js
