@@ -36,47 +36,54 @@ class Audio3D {
   constructor() {
     this.ready = new Promise((resolve, reject) => {
       try{
-        const finishSetup = () => {
-          this.sampleRate = this.context.sampleRate;
-          this.mainVolume = this.context.createGain();
-          this.start();
-          resolve();
-        };
-
-        if(!isiOS) {
-          this.context = new AudioContext();
-          finishSetup();
-        }
-        else {
-          const unlock = () => {
-            this.context = this.context || new AudioContext();
-            const source = this.context.createBufferSource();
-            source.buffer = this.createRawSound([[0]]);
-            source.connect(this.context.destination);
-            source.noteOn(0);
-            setTimeout(() => {
-              if((source.playbackState === source.PLAYING_STATE || source.playbackState === source.FINISHED_STATE)) {
-                window.removeEventListener("mouseup", unlock);
-                window.removeEventListener("touchend", unlock);
-                window.removeEventListener("keyup", unlock);
-                try{
-                  finishSetup();
-                }
-                catch(exp){
-                  reject(exp);
-                }
-              }
-            }, 0);
+        if(Audio3D.isAvailable) {
+          const finishSetup = () => {
+            try{
+              this.sampleRate = this.context.sampleRate;
+              this.mainVolume = this.context.createGain();
+              this.start();
+              resolve();
+            }
+            catch(exp){
+              reject(exp);
+            }
           };
 
-          window.addEventListener("mouseup", unlock, false);
-          window.addEventListener("touchend", unlock, false);
-          window.addEventListener("keyup", unlock, false);
+          if(!isiOS) {
+            this.context = new AudioContext();
+            finishSetup();
+          }
+          else {
+            const unlock = () => {
+              try{
+                this.context = this.context || new AudioContext();
+                const source = this.context.createBufferSource();
+                source.buffer = this.createRawSound([[0]]);
+                source.connect(this.context.destination);
+                source.noteOn(0);
+                setTimeout(() => {
+                  if((source.playbackState === source.PLAYING_STATE || source.playbackState === source.FINISHED_STATE)) {
+                    window.removeEventListener("mouseup", unlock);
+                    window.removeEventListener("touchend", unlock);
+                    window.removeEventListener("keyup", unlock);
+                      finishSetup();
+                  }
+                }, 0);
+              }
+              catch(exp){
+                reject(exp);
+              }
+            };
+
+            window.addEventListener("mouseup", unlock, false);
+            window.addEventListener("touchend", unlock, false);
+            window.addEventListener("keyup", unlock, false);
+          }
         }
-      }
-      catch(exp){
-        reject(exp);
-      }
+        catch(exp){
+          reject(exp);
+        }
+    }
     }).then(() => console.log("Audio ready"));
   }
 
@@ -275,4 +282,4 @@ class Audio3D {
   }
 }
 
-Audio3D.isAvailable = !!window.AudioContext && AudioContext.prototype.createGain;
+Audio3D.isAvailable = !!window.AudioContext && !!AudioContext.prototype.createGain;
