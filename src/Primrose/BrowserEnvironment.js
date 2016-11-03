@@ -18,6 +18,9 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
     this.options = patch(options, BrowserEnvironment.DEFAULTS);
     this.options.foregroundColor = this.options.foregroundColor || complementColor(new THREE.Color(this.options.backgroundColor))
       .getHex();
+    if(this.options.nonstandardIPD !== null){
+      this.options.nonstandardIPD *= 0.5;
+    }
 
     this.audioQueue = [];
 
@@ -138,6 +141,15 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
           var st = trans[i],
             v = st.viewport,
             side = (2 * i) - 1;
+          if(this.options.nonstandardIPD !== null){
+            st.translation.x = Math.sign(st.translation.x) * this.options.nonstandardIPD;
+          }
+          if(this.options.nonstandardNeckLength !== null){
+            st.translation.y = this.options.nonstandardNeckLength;
+          }
+          if(this.options.nonstandardNeckDepth !== null){
+            st.translation.z = this.options.nonstandardNeckDepth;
+          }
           Primrose.Entity.eyeBlankAll(i);
           this.camera.projectionMatrix.copy(st.projection);
           this.camera.translateOnAxis(st.translation, 1);
@@ -934,5 +946,10 @@ BrowserEnvironment.DEFAULTS = {
   // A WebGL context to use, if one had already been created.
   context: null,
   // THREE.js scene, if one had already been created.
-  scene: null
+  scene: null,
+  // I highly suggest you don't go down the road that requires setting this. I will not help you understand what it does, because I would rather you just not use it.
+  nonstandardIPD: null,
+  // This is an experimental feature for setting the height of a user's "neck" on orientation-only systems (such as Google Cardboard and Samsung Gear VR) to create a more realistic feel.
+  nonstandardNeckLength: null,
+  nonstandardNeckDepth: null
 };
