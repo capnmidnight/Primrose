@@ -407,7 +407,7 @@ pliny.function({
   }],
   returns: "String",
   examples: [{
-    name: "Find the right name of the fullScree element.",
+    name: "Find the right name of the full screen element.",
     description: "    grammar(\"JavaScript\");\n\
     var elementName = findProperty(document, [\"fullscreenElement\", \"mozFullScreenElement\", \"webkitFullscreenElement\", \"msFullscreenElement\"]);\n\
     console.assert(!isFirefox || elementName === \"mozFullScreenElement\");\n\

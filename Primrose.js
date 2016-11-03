@@ -46427,6 +46427,9 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
     _this.network = null;
     _this.options = patch(options, BrowserEnvironment.DEFAULTS);
     _this.options.foregroundColor = _this.options.foregroundColor || complementColor(new THREE.Color(_this.options.backgroundColor)).getHex();
+    if (_this.options.nonstandardIPD !== null) {
+      _this.options.nonstandardIPD *= 0.5;
+    }
 
     _this.audioQueue = [];
 
@@ -46542,6 +46545,15 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
           var st = trans[i],
               v = st.viewport,
               side = 2 * i - 1;
+          if (_this.options.nonstandardIPD !== null) {
+            st.translation.x = Math.sign(st.translation.x) * _this.options.nonstandardIPD;
+          }
+          if (_this.options.nonstandardNeckLength !== null) {
+            st.translation.y = _this.options.nonstandardNeckLength;
+          }
+          if (_this.options.nonstandardNeckDepth !== null) {
+            st.translation.z = _this.options.nonstandardNeckDepth;
+          }
           Primrose.Entity.eyeBlankAll(i);
           _this.camera.projectionMatrix.copy(st.projection);
           _this.camera.translateOnAxis(st.translation, 1);
@@ -46966,7 +46978,7 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
     _this.goFullScreen = function (index, evt) {
       if (evt !== "Gaze") {
         var _ret = function () {
-          var elem = !_this.input.VR.isStereo || isMobile && !_this.input.VR.isNativeMobileWebVR ? _this.options.fullscreenElement : _this.renderer.domElement;
+          var elem = !_this.input.VR.isStereo || isMobile && !_this.input.VR.isNativeMobileWebVR ? _this.options.fullScreenElement : _this.renderer.domElement;
           _this.input.VR.connect(index);
           return {
             v: _this.input.VR.requestPresent([{
@@ -47038,7 +47050,7 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
         }
       }
 
-      _this.options.fullscreenElement = document.querySelector(_this.options.fullscreenElement) || _this.renderer.domElement;
+      _this.options.fullScreenElement = document.querySelector(_this.options.fullScreenElement) || _this.renderer.domElement;
 
       var maxTabIndex = 0;
       var elementsWithTabIndex = document.querySelectorAll("[tabIndex]");
@@ -47213,7 +47225,7 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
 
     if (window.alert.toString().indexOf("native code") > -1) {
       // overwrite the native alert functions so they can't be called while in
-      // fullscreen VR mode.
+      // full screen VR mode.
 
       var rerouteDialog = function rerouteDialog(oldFunction, newFunction) {
         if (!newFunction) {
@@ -47328,7 +47340,12 @@ BrowserEnvironment.DEFAULTS = {
   // A WebGL context to use, if one had already been created.
   context: null,
   // THREE.js scene, if one had already been created.
-  scene: null
+  scene: null,
+  // I highly suggest you don't go down the road that requires setting this. I will not help you understand what it does, because I would rather you just not use it.
+  nonstandardIPD: null,
+  // This is an experimental feature for setting the height of a user's "neck" on orientation-only systems (such as Google Cardboard and Samsung Gear VR) to create a more realistic feel.
+  nonstandardNeckLength: null,
+  nonstandardNeckDepth: null
 };
 if(typeof window !== "undefined") window.Primrose.BrowserEnvironment = BrowserEnvironment;
 })();
@@ -52224,7 +52241,7 @@ var VR = function (_Primrose$PoseInputPr) {
     WebVRStandardMonitor();
     _this.ready = navigator.getVRDisplays().then(function (displays) {
       // We skip the Standard Monitor and Magic Window on iOS because we can't
-      // go fullscreen on those systems.
+      // go full screen on those systems.
       _this.displays.push.apply(_this.displays, displays.filter(function (display) {
         return !isiOS || VR.isStereoDisplay(display);
       }));
