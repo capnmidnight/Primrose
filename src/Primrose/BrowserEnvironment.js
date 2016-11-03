@@ -584,7 +584,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
     this.goFullScreen = (index, evt) => {
       if (evt !== "Gaze") {
         const elem = !this.input.VR.isStereo || isMobile && !this.input.VR.isNativeMobileWebVR ?
-              this.options.fullscreenElement :
+              this.options.fullScreenElement :
               this.renderer.domElement;
         this.input.VR.connect(index);
         return this.input.VR.requestPresent([{
@@ -652,7 +652,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
         }
       }
 
-      this.options.fullscreenElement = document.querySelector(this.options.fullscreenElement) || this.renderer.domElement;
+      this.options.fullScreenElement = document.querySelector(this.options.fullScreenElement) || this.renderer.domElement;
 
       let maxTabIndex = 0;
       const elementsWithTabIndex = document.querySelectorAll("[tabIndex]");
@@ -831,7 +831,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
 
     if (window.alert.toString().indexOf("native code") > -1) {
       // overwrite the native alert functions so they can't be called while in
-      // fullscreen VR mode.
+      // full screen VR mode.
 
       var rerouteDialog = (oldFunction, newFunction) => {
         if (!newFunction) {
