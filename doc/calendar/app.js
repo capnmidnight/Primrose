@@ -52,17 +52,9 @@ function setColor(){
   });
 }
 
-function text(text, size = 1) {
-  const txt = text3D(size * textSize, text),
-        b = txt.boundingBox,
-        dx = (b.max.x - b.min.x) / 2,
-        dy = (b.max.y - b.min.y) / 2,
-        verts = txt.vertices;
-  for(let i = 0; i < verts.length; ++i){
-    verts[i].x -= dx;
-    verts[i].y -= dy;
-  }
-  return txt;
+function text(text, size) {
+  size = size || 1;
+  return text3D(size * textSize, text).center();
 }
 
 function hitDate(month, date){
