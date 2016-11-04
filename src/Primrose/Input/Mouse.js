@@ -24,10 +24,10 @@ class Mouse extends Primrose.InputProcessor {
       }
     };
 
-    window.addEventListener("mousedown", setState.bind(this, true), false);
-    window.addEventListener("mouseup", setState.bind(this, false), false);
-    window.addEventListener("contextmenu", (event) => !(event.ctrlKey && event.shiftKey) && event.preventDefault(), false);
-    window.addEventListener("mousemove", (event) => {
+    DOMElement.addEventListener("mousedown", setState.bind(this, true), false);
+    DOMElement.addEventListener("mouseup", setState.bind(this, false), false);
+    DOMElement.addEventListener("contextmenu", (event) => !(event.ctrlKey && event.shiftKey) && event.preventDefault(), false);
+    DOMElement.addEventListener("mousemove", (event) => {
       setState(true, event);
 
       if (PointerLock.isActive) {
@@ -47,7 +47,7 @@ class Mouse extends Primrose.InputProcessor {
       }
     }, false);
 
-    window.addEventListener("wheel", (event) => {
+    DOMElement.addEventListener("wheel", (event) => {
       if (isChrome) {
         this.W += event.deltaX;
         this.Z += event.deltaY;

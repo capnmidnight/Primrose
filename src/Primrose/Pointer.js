@@ -244,11 +244,15 @@ class Pointer extends Primrose.AbstractEventEmitter {
         changed = !lastHit && currentHit ||
           lastHit && !currentHit ||
           lastHit && currentHit && currentHit.object.id !== lastHit.object.id,
-        evt = {
+        enterEvt = {
           pointer: this,
           buttons: 0,
-          hit: currentHit,
-          lastHit: lastHit
+          hit: currentHit
+        },
+        leaveEvt = {
+          pointer: this,
+          buttons: 0,
+          hit: lastHit
         };
 
 
@@ -276,57 +280,59 @@ class Pointer extends Primrose.AbstractEventEmitter {
       this.gazeInner.visible = this.useGaze;
       this.mesh.visible = !this.useGaze;
 
-      if(changed){
-        if(lastHit){
-          this.emit("exit", evt);
-        }
-        if(currentHit){
-          this.emit("enter", evt);
-        }
-      }
-
       var dButtons = 0;
       for(let i = 0; i < this.triggerDevices.length; ++i) {
         const obj = this.triggerDevices[i];
         if(obj.enabled){
-          evt.buttons |= obj.getValue("buttons");
+          enterEvt.buttons |= obj.getValue("buttons");
           dButtons |= obj.getValue("dButtons");
+        }
+      }
+
+      leaveEvt.buttons = enterEvt.buttons;
+
+      if(changed){
+        if(lastHit){
+          this.emit("exit", leaveEvt);
+        }
+        if(currentHit){
+          this.emit("enter", enterEvt);
         }
       }
 
       let selected = false;
       if(dButtons){
-        if(evt.buttons){
-          this.emit("pointerstart", evt);
+        if(enterEvt.buttons){
+          this.emit("pointerstart", enterEvt);
           if(lastHit){
             lastHit.time = performance.now();
           }
         }
         else{
           selected = !!currentHit;
-          this.emit("pointerend", evt);
+          this.emit("pointerend", enterEvt);
         }
       }
       else if(moved) {
-        this.emit("pointermove", evt);
+        this.emit("pointermove", enterEvt);
       }
 
       if(this.useGaze){
         if(changed) {
           if(dt !== null && dt < this.gazeTimeout){
             this.gazeOuter.visible = false;
-            this.emit("gazecancel", evt);
+            this.emit("gazecancel", leaveEvt);
           }
           if(currentHit){
             this.gazeOuter.visible = true;
-            this.emit("gazestart", evt);
+            this.emit("gazestart", enterEvt);
           }
         }
         else if(dt !== null) {
           if(dt >= this.gazeTimeout){
             this.gazeOuter.visible = false;
             selected = !!currentHit;
-            this.emit("gazecomplete", evt);
+            this.emit("gazecomplete", enterEvt);
             lastHit.time = null;
           }
           else if(currentHit && currentHit.object && hasGazeEvent(currentHit.object)){
@@ -334,7 +340,7 @@ class Pointer extends Primrose.AbstractEventEmitter {
               a = 2 * Math.PI * p / 36;
             this.gazeOuter.geometry = ring(GAZE_RING_INNER, GAZE_RING_OUTER, 36, p, 0, a);
             if(moved) {
-              this.emit("gazemove", evt);
+              this.emit("gazemove", enterEvt);
             }
           }
           else{
@@ -347,7 +353,7 @@ class Pointer extends Primrose.AbstractEventEmitter {
       }
 
       if(selected){
-        this.emit("select", evt);
+        this.emit("select", enterEvt);
       }
 
       if(changed){

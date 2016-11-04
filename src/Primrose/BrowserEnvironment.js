@@ -412,43 +412,44 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       START_POINT = new THREE.Vector3();
 
     this.selectControl = (evt) => {
-      const hit = evt.hit || evt.lastHit,
+      const hit = evt.hit,
         obj = hit && hit.object;
 
-      if(evt.type === "exit" && evt.lastHit && evt.lastHit.object === this.ground){
-        evt.pointer.disk.visible = false;
-      }
-
-      if(evt.type !== "exit" && evt.hit && obj === this.ground) {
-        POSITION.copy(evt.hit.point)
-          .sub(this.input.head.position);
-
-        var distSq = POSITION.x * POSITION.x + POSITION.z * POSITION.z;
-        if (distSq > MAX_MOVE_DISTANCE_SQ) {
-          var dist = Math.sqrt(distSq),
-            factor = MAX_MOVE_DISTANCE / dist,
-            y = POSITION.y;
-          POSITION.y = 0;
-          POSITION.multiplyScalar(factor);
-          POSITION.y = y;
+      if(this.ground && obj === this.ground) {
+        if(evt.type === "exit"){
+          evt.pointer.disk.visible = false;
         }
+        else if(evt.type !== "exit") {
+          POSITION.copy(evt.hit.point)
+            .sub(this.input.head.position);
 
-        POSITION.add(this.input.head.position);
+          var distSq = POSITION.x * POSITION.x + POSITION.z * POSITION.z;
+          if (distSq > MAX_MOVE_DISTANCE_SQ) {
+            var dist = Math.sqrt(distSq),
+              factor = MAX_MOVE_DISTANCE / dist,
+              y = POSITION.y;
+            POSITION.y = 0;
+            POSITION.multiplyScalar(factor);
+            POSITION.y = y;
+          }
 
-        if(evt.type === "enter") {
-          evt.pointer.disk.visible = true;
-        }
-        else if(evt.type === "pointerstart" || evt.type === "gazestart") {
-          START_POINT.copy(POSITION);
-        }
-        else if(evt.type === "pointermove" || evt.type === "gazemove"){
-          evt.pointer.moveTeleportPad(POSITION);
-        }
-        else if(evt.type === "pointerend" || evt.type === "gazecomplete") {
-          START_POINT.sub(POSITION);
-          const len = START_POINT.lengthSq();
-          if(len < 0.01){
-            this.teleport(POSITION);
+          POSITION.add(this.input.head.position);
+
+          if(evt.type === "enter") {
+            evt.pointer.disk.visible = true;
+          }
+          else if(evt.type === "pointerstart" || evt.type === "gazestart") {
+            START_POINT.copy(POSITION);
+          }
+          else if(evt.type === "pointermove" || evt.type === "gazemove"){
+            evt.pointer.moveTeleportPad(POSITION);
+          }
+          else if(evt.type === "pointerend" || evt.type === "gazecomplete") {
+            START_POINT.sub(POSITION);
+            const len = START_POINT.lengthSq();
+            if(len < 0.01){
+              this.teleport(POSITION);
+            }
           }
         }
       }
@@ -480,10 +481,10 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
           console.log(this.currentControl);
         }
       }
-      else{
-        const handler = obj && obj["on" + evt.type];
+      else if(obj) {
+        const handler = obj["on" + evt.type];
         if(handler){
-          handler(this);
+          handler(evt);
         }
       }
     };
@@ -674,7 +675,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       this.renderer.domElement.addEventListener('webglcontextlost', this.stop, false);
       this.renderer.domElement.addEventListener('webglcontextrestored', this.start, false);
 
-      this.input = new Primrose.Input.FPSInput(this.renderer.domElement, this.options);
+      this.input = new Primrose.Input.FPSInput(this.options.fullScreenElement, this.options);
       this.input.addEventListener("zero", this.zero, false);
       this.input.VR.ready.then((displays) => displays.forEach((display, i) => {
         window.addEventListener("vrdisplayactivate", (evt) => {

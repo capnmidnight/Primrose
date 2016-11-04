@@ -62,9 +62,9 @@ class Touch extends Primrose.InputProcessor {
       }
     };
 
-    window.addEventListener("touchstart", setState.bind(this, true, false), false);
-    window.addEventListener("touchend", setState.bind(this, false, true), false);
-    window.addEventListener("touchmove", setState.bind(this, true, true), false);
+    DOMElement.addEventListener("touchstart", setState.bind(this, true, false), false);
+    DOMElement.addEventListener("touchend", setState.bind(this, false, true), false);
+    DOMElement.addEventListener("touchmove", setState.bind(this, true, true), false);
   }
 
   update(dt) {
