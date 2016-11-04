@@ -57695,7 +57695,7 @@ if(typeof window !== "undefined") window.THREE.MTLLoader = MTLLoader;
 (function(){"use strict";
 
 function colored(name, color, options) {
-  var mesh = colored(this, color, options);
+  var mesh = window.colored(this, color, options);
   mesh.name = name;
   return mesh;
 }
@@ -57708,7 +57708,7 @@ if(typeof window !== "undefined") window.THREE.BufferGeometry.prototype.colored 
 (function(){"use strict";
 
 function textured(texture, options) {
-  return textured(this, texture, options);
+  return window.textured(this, texture, options);
 }
 if(typeof window !== "undefined") window.THREE.BufferGeometry.prototype.textured = textured;
 })();
@@ -57788,7 +57788,7 @@ if(typeof window !== "undefined") window.THREE.Euler.prototype.toString = toStri
 (function(){"use strict";
 
 function colored(name, color, options) {
-  var mesh = colored(this, color, options);
+  var mesh = window.colored(this, color, options);
   mesh.name = name;
   return mesh;
 }
@@ -57801,7 +57801,7 @@ if(typeof window !== "undefined") window.THREE.Geometry.prototype.colored = colo
 (function(){"use strict";
 
 function textured(texture, options) {
-  return textured(this, texture, options);
+  return window.textured(this, texture, options);
 }
 if(typeof window !== "undefined") window.THREE.Geometry.prototype.textured = textured;
 })();
@@ -57872,13 +57872,24 @@ if(typeof window !== "undefined") window.THREE.Matrix4.prototype.toString = toSt
 (function(){"use strict";
 
 function colored(name, color, options) {
-  var mesh = colored(this, color, options);
+  var mesh = window.colored(this, color, options);
   mesh.name = name;
   return mesh;
 }
 if(typeof window !== "undefined") window.THREE.Mesh.prototype.colored = colored;
 })();
 // end D:\Documents\VR\Primrose\src\THREE\Mesh\prototype\colored.js
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// start D:\Documents\VR\Primrose\src\THREE\Mesh\prototype\textured.js
+(function(){"use strict";
+
+function textured(texture, options) {
+  return window.textured(this, texture, options);
+}
+if(typeof window !== "undefined") window.THREE.Mesh.prototype.textured = textured;
+})();
+// end D:\Documents\VR\Primrose\src\THREE\Mesh\prototype\textured.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 // start D:\Documents\VR\Primrose\src\THREE\Object3D\prototype\addToBrowserEnvironment.js

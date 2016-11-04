@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, shrink-to-fit=0, initial-scale=1.0"><meta name="apple-touch-fullscreen" content="yes"><meta name="web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="theme-color" content="black"><meta name="description" content="A WebVR application framework."><meta name="keywords" content="WebGL, WebVR, HTML5, JavaScript, text editor, source code editor, virtual reality, Primrose"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@Primrose_VR"><meta property="og:site_name" content="Primrose VR"><meta property="og:description" content="Primrose: Framework for WebVR Applications"><meta name="twitter:description" content="Primrose: Framework for WebVR Applications"><meta property="og:url" content="http://www.primrosevr.com/undefined"><!-- start main.pug meta block --><meta name="twitter:image" content="http://www.primrosevr.com/images/screenshot.jpg"><meta property="og:image" content="http://www.primrosevr.com/images/screenshot.jpg"><!-- end main.pug meta block -->
-<!-- start main.pug title block --><!-- start detailPage.pug title block --><meta property="og:title" content="Primrose VR: WebVR Application Framework Documentation"><meta name="twitter:title" content="Primrose VR: WebVR Application Framework Documentation"><title>Primrose VR: WebVR Application Framework Documentation</title><!-- end detailPage.pug title block --><!-- end main.pug title block --><link type="text/css" rel="stylesheet" href="../doc/style.min.css"><script src="../ga.js"></script></head><body><header role="banner"><a id="logo" href="../"><img src="../doc/images/primrose40.png" alt="logo" title="Primrose logo"><span class="version-number">v0.28.27</span></a><nav role="navigation"><ul><li><a href="../doc/">Docs</a></li><li><a href="../doc/faq.html">FAQ</a></li><li><a href="../doc/community.html">Community</a></li><li><a href="https://github.com/NotionTheory/Primrose/" target="_blank">Github</a></li></ul></nav><h1>README</h1></header><!-- start main.pug banner block --><!-- end main.pug banner block -->
+<!-- start main.pug title block --><!-- start detailPage.pug title block --><meta property="og:title" content="Primrose VR: WebVR Application Framework Documentation"><meta name="twitter:title" content="Primrose VR: WebVR Application Framework Documentation"><title>Primrose VR: WebVR Application Framework Documentation</title><!-- end detailPage.pug title block --><!-- end main.pug title block --><link type="text/css" rel="stylesheet" href="../doc/style.min.css"><script src="../ga.js"></script></head><body><header role="banner"><a id="logo" href="../"><img src="../doc/images/primrose40.png" alt="logo" title="Primrose logo"><span class="version-number">v0.28.28</span></a><nav role="navigation"><ul><li><a href="../doc/">Docs</a></li><li><a href="../doc/faq.html">FAQ</a></li><li><a href="../doc/community.html">Community</a></li><li><a href="https://github.com/NotionTheory/Primrose/" target="_blank">Github</a></li></ul></nav><h1>README</h1></header><!-- start main.pug banner block --><!-- end main.pug banner block -->
 <!-- start main.pug main block --><main><h1 id="primrose">Primrose</h1>
 <p>Primrose is a webVR framework that allows web developers to create virtual reality experiences for standard web browsers on desktop and mobile devices alike.</p>
 <p>webVR is an <a href="https://developer.mozilla.org/en-US/docs/Web/API/WebVR_API">experimental Javascript API</a> that provides access to Virtual Reality devices and peripherals in the browser. See <a href="https://webvr.info/">webVR.info</a> for more information and resources.</p>
@@ -13,62 +13,65 @@
 <li><p>Once you have created your new project, install Primrose using the following command: <code>npm install --save primrose</code></p>
 </li>
 <li><p>Next create a basic <code>index.html</code> file in your project directory and include the <code>node_modules/primrose/Primrose.min.js</code> script, like so:</p>
-<pre><code> // index.html
- &lt;!DOCTYPE html&gt;
- &lt;html&gt;
-   &lt;head&gt;
-     &lt;meta charset=&quot;utf-8&quot;&gt;
-     &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
-     &lt;script type=&quot;text/javascript&quot; src=&quot;node_modules/primrose/Primrose.min.js&quot;&gt;&lt;/script&gt;
-     &lt;title&gt;My Primrose VR Application&lt;/title&gt;
-   &lt;body&gt;
-     &lt;h2&gt;hello world&lt;/h2&gt;
-   &lt;/body&gt;
- &lt;/html&gt;
-</code></pre></li>
-<li><p>Then create an <code>app.js</code> script page that creates a new <code>Primrose.BrowserEnvironment</code>, like so:</p>
-<pre><code> // app.js
- &quot;use strict&quot;;
- var env = new Primrose.BrowserEnvironment({
-   autoScaleQuality: false,
-   skyTexture: &quot;../images/bg.jpg&quot;,
-   groundTexture: &quot;../images/deck.png&quot;,
-   font: &quot;../fonts/helvetiker_regular.typeface.json&quot;
- });
-
- env.addEventListener(&quot;ready&quot;, function () {
-   // Perform any post-initialization setup. Once this event fires, the Primrose
-   // framework is ready and will start animation as soon as this function returns.
- });
-
- env.addEventListener(&quot;gazecomplete&quot;, function (evt) {
-   // You can respond to &quot;intended stare&quot; events here, i.e. when the user gazes
-   // at a particular object for an extended period of time. Usually, about three
-   // seconds.
- });
-
- env.addEventListener(&quot;pointerend&quot;, function (evt) {
-   // You can respond to the user &quot;clicking&quot; an object here. This could be by using
-   // a mouse on their desktop PC or by touching the screen while looking at an
-   // object on a mobile device.
- });
-
- env.addEventListener(&quot;update&quot;, function (dt) {
-   // Perform per-frame updates here, like moving objects around according to your
-   // own rules.
- });
-</code></pre></li>
+</li>
 </ol>
+<pre><code class="lang-html">// index.html
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset=&quot;utf-8&quot;&gt;
+    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
+    &lt;script type=&quot;text/javascript&quot; src=&quot;node_modules/primrose/Primrose.min.js&quot;&gt;&lt;/script&gt;
+    &lt;title&gt;My Primrose VR Application&lt;/title&gt;
+  &lt;body&gt;
+    &lt;h2&gt;hello world&lt;/h2&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
 <ol>
-<li><p>Finally, to get our project up and running live in the browser, we need to set up a server. For the purposes of this basic demo, we&#39;re going to be using a <a href="https://github.com/NotionTheory/notion-node">static HTML server</a> which can be included by running the command <code>npm install --save notion-node</code> (you can replace with Express or equivalent). Then make a <code>server.js</code> file and include the following:</p>
-<pre><code> // server.js
- var startServer = require(&quot;notion-node&quot;);
- startServer();
-</code></pre></li>
+<li>Then create an <code>app.js</code> script page that creates a new <code>Primrose.BrowserEnvironment</code>, like so:</li>
 </ol>
+<pre><code class="lang-javascript">// app.js
+&quot;use strict&quot;;
+var env = new Primrose.BrowserEnvironment({
+  autoScaleQuality: false,
+  skyTexture: &quot;../images/bg.jpg&quot;,
+  groundTexture: &quot;../images/deck.png&quot;,
+  font: &quot;../fonts/helvetiker_regular.typeface.json&quot;
+});
+
+env.addEventListener(&quot;ready&quot;, function () {
+  // Perform any post-initialization setup. Once this event fires, the Primrose
+  // framework is ready and will start animation as soon as this function returns.
+});
+
+env.addEventListener(&quot;gazecomplete&quot;, function (evt) {
+  // You can respond to &quot;intended stare&quot; events here, i.e. when the user gazes
+  // at a particular object for an extended period of time. Usually, about three
+  // seconds.
+});
+
+env.addEventListener(&quot;pointerend&quot;, function (evt) {
+  // You can respond to the user &quot;clicking&quot; an object here. This could be by using
+  // a mouse on their desktop PC or by touching the screen while looking at an
+  // object on a mobile device.
+});
+
+env.addEventListener(&quot;update&quot;, function (dt) {
+  // Perform per-frame updates here, like moving objects around according to your
+  // own rules.
+});
+</code></pre>
+<ol>
+<li>Finally, to get our project up and running live in the browser, we need to set up a server. For the purposes of this basic demo, we&#39;re going to be using a <a href="https://github.com/NotionTheory/notion-node">static HTML server</a> which can be included by running the command <code>npm install --save notion-node</code> (you can replace with Express or equivalent). Then make a <code>server.js</code> file and include the following:</li>
+</ol>
+<pre><code class="lang-javascript">// server.js
+var startServer = require(&quot;notion-node&quot;);
+startServer();
+</code></pre>
 <p>Run <code>node server.js --mode=dev</code> in your terminal to see your application live. If your browser doesn&#39;t automatically open, just navigate to <a href="http://localhost/">localhost</a> and you should see your page.</p>
 <h2 id="example">Example</h2>
-<pre><code>// different operating systems have different keyboard shortcuts.
+<pre><code class="lang-javascript">// different operating systems have different keyboard shortcuts.
 var modA = isOSX ? &quot;metaKey&quot; : &quot;ctrlKey&quot;,
     modB = isOSX ? &quot;altKey&quot; : &quot;shiftKey&quot;,
     execKey = isOSX ? &quot;E&quot; : &quot;SPACE&quot;,
@@ -115,7 +118,8 @@ app.addEventListener( &quot;ready&quot;, function () {
   terminal = new Primrose.Text.Terminal( app.scene.Screen.textarea );
   terminal.loadFile( &quot;oregon.bas&quot; );
 } );
-</code></pre><h2 id="issues">Issues</h2>
+</code></pre>
+<h2 id="issues">Issues</h2>
 <p>The issues list is not here on Github, it&#39;s on <a href="https://trello.com/b/NVZsaC1P/primrosevr">Trello</a>.</p>
 <h2 id="licensing">Licensing</h2>
 <p>Primrose is free, open source software (GPLv3) and may readily bewith other FOSS projects.</p>
