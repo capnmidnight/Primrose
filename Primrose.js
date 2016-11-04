@@ -46580,7 +46580,7 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
     var modifyScreen = function modifyScreen() {
       var near = _this.options.nearPlane,
           far = near + _this.options.drawDistance,
-          p = _this.input.VR.getTransforms(near, far);
+          p = _this.input && _this.input.VR && _this.input.VR.getTransforms(near, far);
 
       if (p) {
         var canvasWidth = 0,
@@ -46592,9 +46592,7 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
         }
 
         _this.input.Mouse.commands.U.scale = 2 / canvasWidth;
-        _this.input.Mouse.commands.U.offset = -1;
         _this.input.Mouse.commands.V.scale = 2 / canvasHeight;
-        _this.input.Mouse.commands.V.offset = -1;
 
         canvasWidth = Math.floor(canvasWidth * resolutionScale);
         canvasHeight = Math.floor(canvasHeight * resolutionScale);
@@ -46806,39 +46804,39 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
         START_POINT = new THREE.Vector3();
 
     _this.selectControl = function (evt) {
-      var hit = evt.hit || evt.lastHit,
+      var hit = evt.hit,
           obj = hit && hit.object;
 
-      if (evt.type === "exit" && evt.lastHit && evt.lastHit.object === _this.ground) {
-        evt.pointer.disk.visible = false;
-      }
+      if (_this.ground && obj === _this.ground) {
+        if (evt.type === "exit") {
+          evt.pointer.disk.visible = false;
+        } else if (evt.type !== "exit") {
+          POSITION.copy(evt.hit.point).sub(_this.input.head.position);
 
-      if (evt.type !== "exit" && evt.hit && obj === _this.ground) {
-        POSITION.copy(evt.hit.point).sub(_this.input.head.position);
+          var distSq = POSITION.x * POSITION.x + POSITION.z * POSITION.z;
+          if (distSq > MAX_MOVE_DISTANCE_SQ) {
+            var dist = Math.sqrt(distSq),
+                factor = MAX_MOVE_DISTANCE / dist,
+                y = POSITION.y;
+            POSITION.y = 0;
+            POSITION.multiplyScalar(factor);
+            POSITION.y = y;
+          }
 
-        var distSq = POSITION.x * POSITION.x + POSITION.z * POSITION.z;
-        if (distSq > MAX_MOVE_DISTANCE_SQ) {
-          var dist = Math.sqrt(distSq),
-              factor = MAX_MOVE_DISTANCE / dist,
-              y = POSITION.y;
-          POSITION.y = 0;
-          POSITION.multiplyScalar(factor);
-          POSITION.y = y;
-        }
+          POSITION.add(_this.input.head.position);
 
-        POSITION.add(_this.input.head.position);
-
-        if (evt.type === "enter") {
-          evt.pointer.disk.visible = true;
-        } else if (evt.type === "pointerstart" || evt.type === "gazestart") {
-          START_POINT.copy(POSITION);
-        } else if (evt.type === "pointermove" || evt.type === "gazemove") {
-          evt.pointer.moveTeleportPad(POSITION);
-        } else if (evt.type === "pointerend" || evt.type === "gazecomplete") {
-          START_POINT.sub(POSITION);
-          var len = START_POINT.lengthSq();
-          if (len < 0.01) {
-            _this.teleport(POSITION);
+          if (evt.type === "enter") {
+            evt.pointer.disk.visible = true;
+          } else if (evt.type === "pointerstart" || evt.type === "gazestart") {
+            START_POINT.copy(POSITION);
+          } else if (evt.type === "pointermove" || evt.type === "gazemove") {
+            evt.pointer.moveTeleportPad(POSITION);
+          } else if (evt.type === "pointerend" || evt.type === "gazecomplete") {
+            START_POINT.sub(POSITION);
+            var len = START_POINT.lengthSq();
+            if (len < 0.01) {
+              _this.teleport(POSITION);
+            }
           }
         }
       }
@@ -46866,10 +46864,10 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
         } else {
           console.log(_this.currentControl);
         }
-      } else {
-        var handler = obj && obj["on" + evt.type];
+      } else if (obj) {
+        var handler = obj["on" + evt.type];
         if (handler) {
-          handler(_this);
+          handler(evt);
         }
       }
     };
@@ -47008,7 +47006,7 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
 
     PointerLock.addChangeListener(function (evt) {
       if (_this.input.VR.isPresenting && !PointerLock.isActive) {
-        _this.input.VR.cancel();
+        _this.input.cancelVR();
       }
     });
 
@@ -47021,7 +47019,7 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
       _this.input.Mouse.commands.heading.scale = presenting ? -1 : 1;
       _this.input.Mouse.commands.pitch.scale = presenting ? -1 : 1;
       if (!presenting) {
-        _this.input.VR.cancel();
+        _this.input.cancelVR();
       }
       modifyScreen();
     };
@@ -47062,7 +47060,7 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
       _this.renderer.domElement.addEventListener('webglcontextlost', _this.stop, false);
       _this.renderer.domElement.addEventListener('webglcontextrestored', _this.start, false);
 
-      _this.input = new Primrose.Input.FPSInput(_this.renderer.domElement, _this.options);
+      _this.input = new Primrose.Input.FPSInput(_this.options.fullScreenElement, _this.options);
       _this.input.addEventListener("zero", _this.zero, false);
       _this.input.VR.ready.then(function (displays) {
         return displays.forEach(function (display, i) {
@@ -47071,7 +47069,7 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
               (function () {
                 var exitVR = function exitVR() {
                   window.removeEventListener("vrdisplaydeactivate", exitVR);
-                  _this.input.VR.cancel();
+                  _this.input.cancelVR();
                 };
                 window.addEventListener("vrdisplaydeactivate", exitVR, false);
                 _this.goFullScreen(i);
@@ -47094,7 +47092,7 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
         var keyDown = function keyDown(evt) {
           if (_this.input.VR.isPresenting) {
             if (evt.keyCode === Primrose.Keys.ESCAPE && !_this.input.VR.isPolyfilled) {
-              _this.input.VR.cancel();
+              _this.input.cancelVR();
             }
           }
 
@@ -47285,6 +47283,8 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
             isStereo = Primrose.Input.VR.isStereoDisplay(display),
             enterVR = _this2.goFullScreen.bind(_this2, i);
         btn.type = "button";
+        btn.className = isStereo ? "stereo" : "mono";
+        btn.title = display.displayName;
         btn.appendChild(document.createTextNode(display.displayName));
         btn.addEventListener("click", enterVR, false);
         container.appendChild(btn);
@@ -48725,12 +48725,11 @@ var Pointer = function (_Primrose$AbstractEve) {
         VECTOR_TEMP.set(0, 0, 0);
         for (var i = 0; i < this.devices.length; ++i) {
           var obj = this.devices[i];
-          if (obj.enabled) {
-            VECTOR_TEMP.x += obj.getValue("U");
-            VECTOR_TEMP.y += obj.getValue("V");
+          if (obj.enabled && !obj.commands.U.disabled && !obj.commands.V.disabled) {
+            VECTOR_TEMP.x += obj.getValue("U") - 1;
+            VECTOR_TEMP.y += obj.getValue("V") - 1;
           }
         }
-
         VECTOR_TEMP.applyMatrix4(this.unproject).applyQuaternion(QUAT_TEMP);
         this.root.lookAt(VECTOR_TEMP);
       } else {
@@ -48779,11 +48778,15 @@ var Pointer = function (_Primrose$AbstractEve) {
             moved = lastHit && currentHit && (currentHit.point.x !== lastHit.point.x || currentHit.point.y !== lastHit.point.y || currentHit.point.z !== lastHit.point.z),
             dt = lastHit && lastHit.time && performance.now() - lastHit.time,
             changed = !lastHit && currentHit || lastHit && !currentHit || lastHit && currentHit && currentHit.object.id !== lastHit.object.id,
-            evt = {
+            enterEvt = {
           pointer: this,
           buttons: 0,
-          hit: currentHit,
-          lastHit: lastHit
+          hit: currentHit
+        },
+            leaveEvt = {
+          pointer: this,
+          buttons: 0,
+          hit: lastHit
         };
 
         if (currentHit) {
@@ -48809,61 +48812,63 @@ var Pointer = function (_Primrose$AbstractEve) {
         this.gazeInner.visible = this.useGaze;
         this.mesh.visible = !this.useGaze;
 
-        if (changed) {
-          if (lastHit) {
-            this.emit("exit", evt);
-          }
-          if (currentHit) {
-            this.emit("enter", evt);
-          }
-        }
-
         var dButtons = 0;
         for (var i = 0; i < this.triggerDevices.length; ++i) {
           var obj = this.triggerDevices[i];
           if (obj.enabled) {
-            evt.buttons |= obj.getValue("buttons");
+            enterEvt.buttons |= obj.getValue("buttons");
             dButtons |= obj.getValue("dButtons");
+          }
+        }
+
+        leaveEvt.buttons = enterEvt.buttons;
+
+        if (changed) {
+          if (lastHit) {
+            this.emit("exit", leaveEvt);
+          }
+          if (currentHit) {
+            this.emit("enter", enterEvt);
           }
         }
 
         var selected = false;
         if (dButtons) {
-          if (evt.buttons) {
-            this.emit("pointerstart", evt);
+          if (enterEvt.buttons) {
+            this.emit("pointerstart", enterEvt);
             if (lastHit) {
               lastHit.time = performance.now();
             }
           } else {
             selected = !!currentHit;
-            this.emit("pointerend", evt);
+            this.emit("pointerend", enterEvt);
           }
         } else if (moved) {
-          this.emit("pointermove", evt);
+          this.emit("pointermove", enterEvt);
         }
 
         if (this.useGaze) {
           if (changed) {
             if (dt !== null && dt < this.gazeTimeout) {
               this.gazeOuter.visible = false;
-              this.emit("gazecancel", evt);
+              this.emit("gazecancel", leaveEvt);
             }
             if (currentHit) {
               this.gazeOuter.visible = true;
-              this.emit("gazestart", evt);
+              this.emit("gazestart", enterEvt);
             }
           } else if (dt !== null) {
             if (dt >= this.gazeTimeout) {
               this.gazeOuter.visible = false;
               selected = !!currentHit;
-              this.emit("gazecomplete", evt);
+              this.emit("gazecomplete", enterEvt);
               lastHit.time = null;
             } else if (currentHit && currentHit.object && hasGazeEvent(currentHit.object)) {
               var p = Math.round(36 * dt / this.gazeTimeout),
                   a = 2 * Math.PI * p / 36;
               this.gazeOuter.geometry = ring(GAZE_RING_INNER, GAZE_RING_OUTER, 36, p, 0, a);
               if (moved) {
-                this.emit("gazemove", evt);
+                this.emit("gazemove", enterEvt);
               }
             } else {
               if (currentHit && currentHit.object) {
@@ -48875,7 +48880,7 @@ var Pointer = function (_Primrose$AbstractEve) {
         }
 
         if (selected) {
-          this.emit("select", evt);
+          this.emit("select", enterEvt);
         }
 
         if (changed) {
@@ -50861,8 +50866,8 @@ var FPSInput = function (_Primrose$AbstractEve) {
     }));
 
     _this.add(new Primrose.Input.Mouse(DOMElement, {
-      U: { axes: ["X"], min: -1, max: 1 },
-      V: { axes: ["Y"], min: -1, max: 1 },
+      U: { axes: ["X"], min: 0, max: 2, offset: 0 },
+      V: { axes: ["Y"], min: 0, max: 2 },
       buttons: {
         axes: ["BUTTONS"]
       },
@@ -51113,14 +51118,11 @@ var FPSInput = function (_Primrose$AbstractEve) {
           pitch = 0,
           strafe = 0,
           drive = 0,
-          lift = 0,
-          mouseHeading = 0;
+          lift = 0;
       for (var i = 0; i < this.managers.length; ++i) {
         var mgr = this.managers[i];
         if (mgr.enabled) {
-          if (mgr.name === "Mouse") {
-            mouseHeading += mgr.getValue("heading");
-          } else {
+          if (mgr.name !== "Mouse") {
             heading += mgr.getValue("heading");
           }
           pitch += mgr.getValue("pitch");
@@ -51130,12 +51132,21 @@ var FPSInput = function (_Primrose$AbstractEve) {
         }
       }
 
-      if (this.VR.hasOrientation) {
-        mouseHeading = WEDGE * Math.floor(mouseHeading / WEDGE + 0.5);
-        pitch = 0;
+      if (this.hasMouse) {
+        var mouseHeading = null;
+        if (this.VR.hasOrientation) {
+          mouseHeading = this.mousePointer.root.rotation.y;
+          var newMouseHeading = WEDGE * Math.floor(mouseHeading / WEDGE + 0.5);
+          if (newMouseHeading !== 0) {
+            this.Mouse.commands.U.offset -= this.Mouse.getValue("U") - 1;
+          }
+          mouseHeading = newMouseHeading + this.Mouse.commands.U.offset * 2;
+          pitch = 0;
+        } else {
+          mouseHeading = this.Mouse.getValue("heading");
+        }
+        heading += mouseHeading;
       }
-
-      heading += mouseHeading;
 
       // move stage according to heading and thrust
       EULER_TEMP.set(pitch, heading, 0, "YXZ");
@@ -51164,6 +51175,12 @@ var FPSInput = function (_Primrose$AbstractEve) {
       QUAT_TEMP.setFromEuler(EULER_TEMP);
 
       this.moveStage(DISPLACEMENT.copy(this.velocity).multiplyScalar(dt).applyQuaternion(QUAT_TEMP).add(this.head.position));
+    }
+  }, {
+    key: "cancelVR",
+    value: function cancelVR() {
+      this.VR.cancel();
+      this.Mouse.commands.U.offset = 0;
     }
   }, {
     key: "moveStage",
@@ -51797,12 +51814,12 @@ var Mouse = function (_Primrose$InputProces) {
       }
     };
 
-    window.addEventListener("mousedown", setState.bind(_this, true), false);
-    window.addEventListener("mouseup", setState.bind(_this, false), false);
-    window.addEventListener("contextmenu", function (event) {
+    DOMElement.addEventListener("mousedown", setState.bind(_this, true), false);
+    DOMElement.addEventListener("mouseup", setState.bind(_this, false), false);
+    DOMElement.addEventListener("contextmenu", function (event) {
       return !(event.ctrlKey && event.shiftKey) && event.preventDefault();
     }, false);
-    window.addEventListener("mousemove", function (event) {
+    DOMElement.addEventListener("mousemove", function (event) {
       setState(true, event);
 
       if (PointerLock.isActive) {
@@ -51821,7 +51838,7 @@ var Mouse = function (_Primrose$InputProces) {
       }
     }, false);
 
-    window.addEventListener("wheel", function (event) {
+    DOMElement.addEventListener("wheel", function (event) {
       if (isChrome) {
         _this.W += event.deltaX;
         _this.Z += event.deltaY;
@@ -52152,9 +52169,9 @@ var Touch = function (_Primrose$InputProces) {
       }
     };
 
-    window.addEventListener("touchstart", setState.bind(_this, true, false), false);
-    window.addEventListener("touchend", setState.bind(_this, false, true), false);
-    window.addEventListener("touchmove", setState.bind(_this, true, true), false);
+    DOMElement.addEventListener("touchstart", setState.bind(_this, true, false), false);
+    DOMElement.addEventListener("touchend", setState.bind(_this, false, true), false);
+    DOMElement.addEventListener("touchmove", setState.bind(_this, true, true), false);
     return _this;
   }
 
@@ -53223,14 +53240,15 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 Window.prototype.AudioContext = Window.prototype.AudioContext || Window.prototype.webkitAudioContext || function () {};
 
 var PIANO_BASE = Math.pow(2, 1 / 12),
-    MAX_NOTE_COUNT = (navigator.maxTouchPoints || 10) + 1;
+    MAX_NOTE_COUNT = (navigator.maxTouchPoints || 10) + 1,
+    TYPES = ["sine", "square", "sawtooth", "triangle"];
 
 function piano(n) {
   return 440 * Math.pow(PIANO_BASE, n - 49);
 }
 
 var Music = function () {
-  function Music(audio, type, numNotes) {
+  function Music(audio, numNotes) {
     var _this = this;
 
     _classCallCheck(this, Music);
@@ -53238,7 +53256,8 @@ var Music = function () {
     if (numNotes === undefined) {
       numNotes = MAX_NOTE_COUNT;
     }
-    this._type = type || "sawtooth";
+
+    this.oscillators = {};
     this.isAvailable = false;
     this.audio = audio;
     this.audio.ready.then(function () {
@@ -53247,69 +53266,96 @@ var Music = function () {
       _this.mainVolume.connect(_this.audio.mainVolume);
       _this.mainVolume.gain.value = 1;
       _this.numNotes = numNotes;
-      _this.oscillators = [];
-
-      for (var i = 0; i < _this.numNotes; ++i) {
-        var g = ctx.createGain(),
-            o = ctx.createOscillator();
-        g.connect(_this.mainVolume);
-        g.gain.value = 0;
-        o.type = _this.type;
-        o.frequency.value = 0;
-        o.connect(g);
-        o.start();
-        _this.oscillators.push({
-          osc: o,
-          gn: g,
-          timeout: null
-        });
-      }
+      TYPES.forEach(function (type) {
+        var oscs = _this.oscillators[type] = [];
+        _this[type] = _this.play.bind(_this, type);
+        for (var i = 0; i < _this.numNotes; ++i) {
+          var g = ctx.createGain(),
+              o = ctx.createOscillator(),
+              p = ctx.createPanner();
+          g.connect(p);
+          p.connect(_this.mainVolume);
+          g.gain.value = 0;
+          o.type = type;
+          o.frequency.value = 0;
+          o.connect(g);
+          o.start();
+          oscs.push({
+            osc: o,
+            gn: g,
+            pnr: p,
+            timeout: null,
+            index: oscs.length
+          });
+        }
+      });
       _this.isAvailable = true;
     });
   }
 
   _createClass(Music, [{
     key: "noteOn",
-    value: function noteOn(volume, i, n) {
+    value: function noteOn(type, volume, i, x, y, z, dx, dy, dz, n) {
       if (this.isAvailable) {
-        if (n === undefined) {
-          n = 0;
+        var osc = this.oscillators[type];
+        if (n === undefined || n === null) {
+          for (n = 0; n < osc.length; ++n) {
+            if (!osc[n].timeout) {
+              break;
+            }
+          }
         }
-        var o = this.oscillators[n % this.numNotes],
+
+        var o = osc[n % this.numNotes],
             f = piano(parseFloat(i) + 1);
         o.gn.gain.value = volume;
         o.osc.frequency.setValueAtTime(f, this.audio.context.currentTime);
+        o.pnr.setPosition(x, y, z);
+        o.pnr.setOrientation(dx, dy, dz);
         return o;
       }
     }
   }, {
     key: "noteOff",
-    value: function noteOff(n) {
+    value: function noteOff(type, n) {
       if (this.isAvailable) {
         if (n === undefined) {
           n = 0;
         }
-        var o = this.oscillators[n % this.numNotes];
+        var o = this.oscillators[type][n % this.numNotes];
         o.osc.frequency.setValueAtTime(0, this.audio.context.currentTime);
         o.gn.gain.value = 0;
       }
     }
   }, {
     key: "play",
-    value: function play(i, volume, duration, n) {
+    value: function play(type, i, volume, duration, x, y, z, dx, dy, dz, n) {
+      var _this2 = this;
+
       if (this.isAvailable) {
-        if (typeof n !== "number") {
-          n = 0;
-        }
-        var o = this.noteOn(volume, i, n);
-        if (o.timeout) {
-          clearTimeout(o.timeout);
-          o.timeout = null;
-        }
-        o.timeout = setTimeout(function (n, o) {
-          this.noteOff(n);
-          o.timeout = null;
-        }.bind(this, n, o), duration * 1000);
+        return new Promise(function (resolve, reject) {
+          x = x || 0;
+          y = y || 0;
+          z = z || 0;
+          if (dx === undefined || dx === null) {
+            dx = 0;
+          }
+          dy = dy || 0;
+          dz = dz || 0;
+          var o = _this2.noteOn(type, volume, i, x, y, z, dx, dy, dz, n);
+          if (o.timeout) {
+            clearTimeout(o.timeout);
+            o.timeout = null;
+            resolve();
+          }
+          o.timeout = setTimeout(function (o) {
+            this.noteOff(type, o.index);
+            o.timeout = null;
+            resolve();
+          }.bind(_this2, o), duration * 1000);
+        });
+      } else {
+        return Promise.reject("No audio");
       }
     }
   }, {
@@ -53318,12 +53364,12 @@ var Music = function () {
       return this._type;
     },
     set: function set(v) {
-      var _this2 = this;
+      var _this3 = this;
 
       if (this.isAvailable) {
         this._type = v;
         this.oscillators.forEach(function (o) {
-          return o.osc.type = _this2._type;
+          return o.osc.type = _this3._type;
         });
       }
     }
@@ -53331,6 +53377,8 @@ var Music = function () {
 
   return Music;
 }();
+
+Music.TYPES = TYPES;
 if(typeof window !== "undefined") window.Primrose.Output.Music = Music;
 })();
 // end D:\Documents\VR\Primrose\src\Primrose\Output\Music.js
@@ -57784,6 +57832,28 @@ if(typeof window !== "undefined") window.THREE.Euler.prototype.toString = toStri
 // end D:\Documents\VR\Primrose\src\THREE\Euler\prototype\toString.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+// start D:\Documents\VR\Primrose\src\THREE\Geometry\prototype\center.js
+(function(){"use strict";
+
+function center() {
+  this.computeBoundingBox();
+  var b = this.boundingBox,
+      dx = (b.max.x + b.min.x) / 2,
+      dy = (b.max.y + b.min.y) / 2,
+      dz = (b.max.z + b.min.z) / 2,
+      verts = this.vertices;
+  for (var i = 0; i < verts.length; ++i) {
+    verts[i].x -= dx;
+    verts[i].y -= dy;
+    verts[i].z -= dz;
+  }
+  return this;
+}
+if(typeof window !== "undefined") window.THREE.Geometry.prototype.center = center;
+})();
+// end D:\Documents\VR\Primrose\src\THREE\Geometry\prototype\center.js
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 // start D:\Documents\VR\Primrose\src\THREE\Geometry\prototype\colored.js
 (function(){"use strict";
 
@@ -57924,7 +57994,7 @@ function latLon(lat, lon, r) {
   lat = -Math.PI * (lat || 0) / 180;
   lon = Math.PI * (lon || 0) / 180;
   r = r || 1.5;
-  this.rotation.set(lon, lat, 0, "XYZ");
+  this.rotation.set(lat, lon, 0, "XYZ");
   this.position.set(0, 0, -r);
   this.position.applyQuaternion(this.quaternion);
   return this;

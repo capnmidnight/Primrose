@@ -903,6 +903,8 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
         isStereo = Primrose.Input.VR.isStereoDisplay(display),
         enterVR = this.goFullScreen.bind(this, i);
       btn.type = "button";
+      btn.className = isStereo ? "stereo" : "mono";
+      btn.title = display.displayName;
       btn.appendChild(document.createTextNode(display.displayName));
       btn.addEventListener("click", enterVR, false);
       container.appendChild(btn);
