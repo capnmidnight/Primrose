@@ -5,7 +5,12 @@ Window.prototype.AudioContext =
   function () {};
 
 var PIANO_BASE = Math.pow(2, 1 / 12),
-  MAX_NOTE_COUNT = (navigator.maxTouchPoints || 10) + 1;
+  MAX_NOTE_COUNT = (navigator.maxTouchPoints || 10) + 1,
+  TYPES = ["sine",
+    "square",
+    "sawtooth",
+    "triangle"
+  ];
 
 function piano(n) {
   return 440 * Math.pow(PIANO_BASE, n - 49);
@@ -17,11 +22,12 @@ pliny.class({
     description: "| [under construction]"
 });
 class Music {
-  constructor(audio, type, numNotes) {
+  constructor(audio, numNotes) {
     if (numNotes === undefined) {
       numNotes = MAX_NOTE_COUNT;
     }
-    this._type = type || "sawtooth";
+
+    this.oscillators = {};
     this.isAvailable = false;
     this.audio = audio;
     this.audio.ready.then(() => {
@@ -30,23 +36,29 @@ class Music {
       this.mainVolume.connect(this.audio.mainVolume);
       this.mainVolume.gain.value = 1;
       this.numNotes = numNotes;
-      this.oscillators = [];
-
-      for (var i = 0; i < this.numNotes; ++i) {
-        var g = ctx.createGain(),
-          o = ctx.createOscillator();
-        g.connect(this.mainVolume);
-        g.gain.value = 0;
-        o.type = this.type;
-        o.frequency.value = 0;
-        o.connect(g);
-        o.start();
-        this.oscillators.push({
-          osc: o,
-          gn: g,
-          timeout: null
-        });
-      }
+      TYPES.forEach((type) => {
+        const oscs = this.oscillators[type] = [];
+        this[type] = this.play.bind(this, type);
+        for (var i = 0; i < this.numNotes; ++i) {
+          var g = ctx.createGain(),
+            o = ctx.createOscillator(),
+            p = ctx.createPanner();
+          g.connect(p);
+          p.connect(this.mainVolume);
+          g.gain.value = 0;
+          o.type = type;
+          o.frequency.value = 0;
+          o.connect(g);
+          o.start();
+          oscs.push({
+            osc: o,
+            gn: g,
+            pnr: p,
+            timeout: null,
+            index: oscs.length
+          });
+        }
+      });
       this.isAvailable = true;
     });
   }
@@ -62,45 +74,67 @@ class Music {
     }
   }
 
-  noteOn (volume, i, n) {
+  noteOn (type, volume, i, x, y, z, dx, dy, dz, n) {
     if (this.isAvailable) {
-      if (n === undefined) {
-        n = 0;
+      const osc = this.oscillators[type];
+      if(n === undefined || n === null){
+        for(n = 0; n < osc.length; ++n){
+          if(!osc[n].timeout){
+            break;
+          }
+        }
       }
-      var o = this.oscillators[n % this.numNotes],
+
+      const o = osc[n % this.numNotes],
         f = piano(parseFloat(i) + 1);
       o.gn.gain.value = volume;
       o.osc.frequency.setValueAtTime(f, this.audio.context.currentTime);
+      o.pnr.setPosition(x, y, z);
+      o.pnr.setOrientation(dx, dy, dz);
       return o;
     }
   }
 
-  noteOff (n) {
+  noteOff (type, n) {
     if (this.isAvailable) {
       if (n === undefined) {
         n = 0;
       }
-      var o = this.oscillators[n % this.numNotes];
+      var o = this.oscillators[type][n % this.numNotes];
       o.osc.frequency.setValueAtTime(0, this.audio.context.currentTime);
       o.gn.gain.value = 0;
     }
   }
 
-  play (i, volume, duration, n) {
+  play (type, i, volume, duration, x, y, z, dx, dy, dz, n) {
     if (this.isAvailable) {
-      if (typeof n !== "number") {
-        n = 0;
-      }
-      var o = this.noteOn(volume, i, n);
-      if (o.timeout) {
-        clearTimeout(o.timeout);
-        o.timeout = null;
-      }
-      o.timeout = setTimeout((function (n, o) {
-          this.noteOff(n);
+      return new Promise((resolve, reject) => {
+        x = x || 0;
+        y = y || 0;
+        z = z || 0;
+        if(dx === undefined || dx === null) {
+          dx = 0;
+        }
+        dy = dy || 0;
+        dz = dz || 0;
+        var o = this.noteOn(type, volume, i, x, y, z, dx, dy, dz, n);
+        if (o.timeout) {
+          clearTimeout(o.timeout);
           o.timeout = null;
-        })
-        .bind(this, n, o), duration * 1000);
+          resolve();
+        }
+        o.timeout = setTimeout((function (o) {
+            this.noteOff(type, o.index);
+            o.timeout = null;
+            resolve();
+          })
+          .bind(this, o), duration * 1000);
+      });
+    }
+    else{
+      return Promise.reject("No audio");
     }
   }
 }
+
+Music.TYPES = TYPES;
