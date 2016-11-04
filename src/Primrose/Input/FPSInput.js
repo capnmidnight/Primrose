@@ -116,8 +116,8 @@ class FPSInput extends Primrose.AbstractEventEmitter {
     }));
 
     this.add(new Primrose.Input.Mouse(DOMElement, {
-      U: { axes: ["X"], min: -1, max: 1 },
-      V: { axes: ["Y"], min: -1, max: 1 },
+      U: { axes: ["X"], min: 0, max: 2, offset: 0 },
+      V: { axes: ["Y"], min: 0, max: 2 },
       buttons: {
         axes: ["BUTTONS"]
       },
@@ -385,15 +385,11 @@ class FPSInput extends Primrose.AbstractEventEmitter {
       pitch = 0,
       strafe = 0,
       drive = 0,
-      lift = 0,
-      mouseHeading = 0;
+      lift = 0;
     for (let i = 0; i < this.managers.length; ++i) {
       const mgr = this.managers[i];
       if(mgr.enabled){
-        if(mgr.name === "Mouse"){
-          mouseHeading += mgr.getValue("heading");
-        }
-        else{
+        if(mgr.name !== "Mouse"){
           heading += mgr.getValue("heading");
         }
         pitch += mgr.getValue("pitch");
@@ -403,12 +399,22 @@ class FPSInput extends Primrose.AbstractEventEmitter {
       }
     }
 
-    if (this.VR.hasOrientation) {
-      mouseHeading = WEDGE * Math.floor((mouseHeading / WEDGE) + 0.5);
-      pitch = 0;
+    if(this.hasMouse) {
+      let mouseHeading = null;
+      if (this.VR.hasOrientation) {
+        mouseHeading = this.mousePointer.root.rotation.y;
+        const newMouseHeading = WEDGE * Math.floor((mouseHeading / WEDGE) + 0.5);
+        if(newMouseHeading !== 0){
+          this.Mouse.commands.U.offset -= this.Mouse.getValue("U") - 1;
+        }
+        mouseHeading = newMouseHeading + this.Mouse.commands.U.offset * 2;
+        pitch = 0;
+      }
+      else{
+        mouseHeading = this.Mouse.getValue("heading");
+      }
+      heading += mouseHeading;
     }
-
-    heading += mouseHeading;
 
     // move stage according to heading and thrust
     EULER_TEMP.set(pitch, heading, 0, "YXZ");
@@ -442,6 +448,11 @@ class FPSInput extends Primrose.AbstractEventEmitter {
       .multiplyScalar(dt)
       .applyQuaternion(QUAT_TEMP)
       .add(this.head.position));
+  }
+
+  cancelVR() {
+    this.VR.cancel();
+    this.Mouse.commands.U.offset = 0;
   }
 
   moveStage(position) {

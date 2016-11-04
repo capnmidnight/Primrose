@@ -182,12 +182,11 @@ class Pointer extends Primrose.AbstractEventEmitter {
       VECTOR_TEMP.set(0, 0, 0);
       for(let i = 0; i < this.devices.length; ++i) {
         const obj = this.devices[i];
-        if(obj.enabled) {
-          VECTOR_TEMP.x += obj.getValue("U");
-          VECTOR_TEMP.y += obj.getValue("V");
+        if(obj.enabled && !obj.commands.U.disabled && !obj.commands.V.disabled) {
+          VECTOR_TEMP.x += obj.getValue("U") - 1;
+          VECTOR_TEMP.y += obj.getValue("V") - 1;
         }
       }
-
       VECTOR_TEMP.applyMatrix4(this.unproject)
         .applyQuaternion(QUAT_TEMP);
       this.root.lookAt(VECTOR_TEMP);

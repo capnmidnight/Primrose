@@ -192,9 +192,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
         }
 
         this.input.Mouse.commands.U.scale = 2/canvasWidth;
-        this.input.Mouse.commands.U.offset = -1;
         this.input.Mouse.commands.V.scale = 2/canvasHeight;
-        this.input.Mouse.commands.V.offset = -1;
 
         canvasWidth = Math.floor(canvasWidth * resolutionScale);
         canvasHeight = Math.floor(canvasHeight * resolutionScale);
@@ -620,7 +618,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
 
     PointerLock.addChangeListener((evt) => {
       if (this.input.VR.isPresenting && !PointerLock.isActive) {
-        this.input.VR.cancel();
+        this.input.cancelVR();
       }
     });
 
@@ -634,7 +632,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       this.input.Mouse.commands.heading.scale = presenting ? -1 : 1;
       this.input.Mouse.commands.pitch.scale = presenting ? -1 : 1;
       if (!presenting) {
-        this.input.VR.cancel();
+        this.input.cancelVR();
       }
       modifyScreen();
     };
@@ -683,7 +681,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
           if(evt.display === display) {
             const exitVR = () => {
               window.removeEventListener("vrdisplaydeactivate", exitVR);
-              this.input.VR.cancel();
+              this.input.cancelVR();
             };
             window.addEventListener("vrdisplaydeactivate", exitVR, false);
             this.goFullScreen(i);
@@ -702,7 +700,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
         const keyDown =  (evt) => {
             if (this.input.VR.isPresenting) {
               if (evt.keyCode === Primrose.Keys.ESCAPE && !this.input.VR.isPolyfilled) {
-                this.input.VR.cancel();
+                this.input.cancelVR();
               }
             }
 
