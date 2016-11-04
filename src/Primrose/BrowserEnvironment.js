@@ -180,7 +180,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
     var modifyScreen = () => {
       var near = this.options.nearPlane,
         far = near + this.options.drawDistance,
-        p = this.input.VR.getTransforms(near, far);
+        p = this.input && this.input.VR && this.input.VR.getTransforms(near, far);
 
       if (p) {
         var canvasWidth = 0,
