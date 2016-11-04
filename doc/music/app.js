@@ -13,6 +13,7 @@ var numButtons = 16,
     padSize = 0.22,
     padDepth = 0.02,
     textSize = 0.05,
+    skipOne = false,
     perMeasure = 1 / width,
     DIST = new THREE.Vector3(),
     env = new Primrose.BrowserEnvironment({
@@ -108,13 +109,20 @@ env.addEventListener("ready", function () {
 });
 
 env.addEventListener("update", function(dt){
-  t += dt;
-  if(t > perMeasure){
-    t -= perMeasure;
-    measure = (measure + 1) % width;
+  if(!skipOne){
+    t += dt;
+    if(t > perMeasure){
+      t -= perMeasure;
+      measure = (measure + 1) % width;
+    }
+    boards.forEach(function(board) {
+      board.update();
+    });
+    lastMeasure = measure;
   }
-  boards.forEach(function(board) {
-    board.update();
-  });
-  lastMeasure = measure;
+  skipOne = false;
+});
+
+window.addEventListener("focus", function(){
+  skipOne = true;
 });
