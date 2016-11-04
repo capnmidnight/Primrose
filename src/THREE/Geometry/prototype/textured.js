@@ -1,3 +1,3 @@
 function textured(texture, options) {
-  return textured(this, texture, options);
+  return window.textured(this, texture, options);
 }
