@@ -6,4 +6,5 @@ function offset(x, y, z){
     vert.y += y;
     vert.z += z;
   }
+  return this;
 }

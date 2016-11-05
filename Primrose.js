@@ -57806,6 +57806,7 @@ function offset(x, y, z) {
     arr[i + 1] += y;
     arr[i + 2] += z;
   }
+  return this;
 }
 if(typeof window !== "undefined") window.THREE.BufferGeometry.prototype.offset = offset;
 })();
@@ -57932,6 +57933,7 @@ function offset(x, y, z) {
     vert.y += y;
     vert.z += z;
   }
+  return this;
 }
 if(typeof window !== "undefined") window.THREE.Geometry.prototype.offset = offset;
 })();

@@ -6,4 +6,5 @@ function offset(x, y, z){
     arr[i + 1] += y;
     arr[i + 2] += z;
   }
+  return this;
 }

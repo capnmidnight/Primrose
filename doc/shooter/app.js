@@ -5,7 +5,7 @@ var cube = range(0, 6, function(i) { return "../images/space" + i + ".jpg"; }),
     backgroundColor: 0x000000,
     drawDistance: 100,
     gazeLength: 0.25,
-    showHeadPointer: false,
+    showHeadPointer: isMobile,
     ambientSound: "../audio/space.ogg"
   }),
   blocks = [],
@@ -37,7 +37,25 @@ for(var s = 1; s <= 2; ++s){
   }
 }
 
+function fixAudio(){
+  var auds = document.querySelectorAll("audio");
+  for(var i = 0; i < audio.length; ++i){
+    auds[i].play();
+  }
+
+  if(auds.length > 0){
+    env.options.fullScreenElement.removeEventListener("mousedown", fixAudio);
+    env.options.fullScreenElement.removeEventListener("touchstart", fixAudio);
+    env.options.fullScreenElement.removeEventListener("keydown", fixAudio);
+  }
+}
+
 env.addEventListener("ready", function(){
+  if(isMobile){
+    env.options.fullScreenElement.addEventListener("mousedown", fixAudio);
+    env.options.fullScreenElement.addEventListener("touchstart", fixAudio);
+    env.options.fullScreenElement.addEventListener("keydown", fixAudio);
+  }
   env.insertFullScreenButtons("body");
   Promise.all(range(0, 10, () => env.audio.loadSource("../audio/exp.ogg")))
     .then(function(snds) {
