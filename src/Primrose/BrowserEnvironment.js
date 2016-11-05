@@ -495,15 +495,15 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
     }
 
     this.camera = new THREE.PerspectiveCamera(75, 1, this.options.nearPlane, this.options.nearPlane + this.options.drawDistance);
-    if (this.options.skyTexture === undefined) {
-      this.options.skyTexture = this.options.backgroundColor;
-    }
 
     if(!this.options.useFog){
-      var skyFunc = (typeof this.options.skyTexture === "number") ? colored : textured,
+      if (this.options.skyTexture === null) {
+        this.options.skyTexture = this.options.backgroundColor;
+      }
+      const skyFunc = (typeof this.options.skyTexture === "number") ? colored : textured,
         skyDim = this.options.drawDistance * 0.9,
-        skyGeom = null,
         onSkyDone = () => this.scene.add(this.sky);
+      let skyGeom = null;
       if(typeof this.options.skyTexture === "string"){
         skyGeom = sphere(skyDim, 18, 9);
       }
@@ -519,6 +519,9 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
         progress: this.options.progress
       });
       this.sky.name = "Sky";
+    }
+    else if(this.options.skyTexture){
+      console.warn("You can't use sky textures and fog together. We're going to go with fog.");
     }
 
     if (this.options.groundTexture !== undefined) {
