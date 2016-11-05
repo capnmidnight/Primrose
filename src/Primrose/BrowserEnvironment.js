@@ -939,6 +939,8 @@ BrowserEnvironment.DEFAULTS = {
   disableDefaultLighting: false,
   // The color that WebGL clears the background with before drawing.
   backgroundColor: 0xafbfff,
+  // the texture to use for the sky
+  skyTexture: null,
   // the near plane of the camera.
   nearPlane: 0.01,
   // the far plane of the camera.
