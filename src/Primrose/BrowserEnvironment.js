@@ -525,15 +525,19 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
     }
 
     if (this.options.groundTexture !== undefined) {
-      var dim = this.options.drawDistance / Math.sqrt(2),
-      gm = new THREE.BoxBufferGeometry(dim * 5, 0.1, dim * 5, dim, 1, dim);
-      var groundFunc = (typeof this.options.groundTexture === "number") ? colored : textured;
+      const dim = this.options.drawDistance / Math.sqrt(2),
+        gm = new THREE.BoxBufferGeometry(dim * 5, 0.1, dim * 5, dim, 1, dim),
+        groundFunc = (typeof this.options.groundTexture === "number") ? colored : textured,
+        onGroundDone = () => this.scene.add(this.ground);
       this.ground = groundFunc(gm, this.options.groundTexture, {
         txtRepeatS: dim * 5,
-        txtRepeatT: dim * 5
+        txtRepeatT: dim * 5,
+        transparent: true,
+        opacity: 1,
+        resolve: onGroundDone,
+        progress: this.options.progress
       });
       this.ground.name = "Ground";
-      this.scene.add(this.ground);
       this.registerPickableObject(this.ground);
     }
 
