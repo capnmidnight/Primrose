@@ -12,16 +12,16 @@ var PIANO_BASE = Math.pow(2, 1 / 12),
     "triangle"
   ];
 
-function piano(n) {
-  return 440 * Math.pow(PIANO_BASE, n - 49);
-}
-
 pliny.class({
   parent: "Primrose.Output",
     name: "Music",
     description: "| [under construction]"
 });
 class Music {
+  static piano(n) {
+    return 440 * Math.pow(PIANO_BASE, n - 49);
+  }
+
   constructor(audio, numNotes) {
     if (numNotes === undefined) {
       numNotes = MAX_NOTE_COUNT;
@@ -76,6 +76,14 @@ class Music {
 
   noteOn (type, volume, i, x, y, z, dx, dy, dz, n) {
     if (this.isAvailable) {
+      x = x || 0;
+      y = y || 0;
+      z = z || 0;
+      if(dx === undefined || dx === null) {
+        dx = 0;
+      }
+      dy = dy || 0;
+      dz = dz || 0;
       const osc = this.oscillators[type];
       if(n === undefined || n === null){
         for(n = 0; n < osc.length; ++n){
@@ -86,7 +94,7 @@ class Music {
       }
 
       const o = osc[n % this.numNotes],
-        f = piano(parseFloat(i) + 1);
+        f = Music.piano(parseFloat(i) + 1);
       o.gn.gain.value = volume;
       o.osc.frequency.setValueAtTime(f, this.audio.context.currentTime);
       o.pnr.setPosition(x, y, z);
@@ -109,14 +117,6 @@ class Music {
   play (type, i, volume, duration, x, y, z, dx, dy, dz, n) {
     if (this.isAvailable) {
       return new Promise((resolve, reject) => {
-        x = x || 0;
-        y = y || 0;
-        z = z || 0;
-        if(dx === undefined || dx === null) {
-          dx = 0;
-        }
-        dy = dy || 0;
-        dz = dz || 0;
         var o = this.noteOn(type, volume, i, x, y, z, dx, dy, dz, n);
         if (o.timeout) {
           clearTimeout(o.timeout);
