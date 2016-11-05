@@ -45934,10 +45934,12 @@ function range(n, m, s, t) {
   var n2 = s && n || 0,
       m2 = s && m || n,
       s2 = t && s || 1,
-      t2 = t || s || m;
+      t2 = t || s || m,
+      output = [];
   for (var i = n2; i < m2; i += s2) {
-    t2(i);
+    output.push(t2(i));
   }
+  return output;
 }
 if(typeof window !== "undefined") window.range = range;
 })();
@@ -46878,17 +46880,17 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
     }
 
     _this.camera = new THREE.PerspectiveCamera(75, 1, _this.options.nearPlane, _this.options.nearPlane + _this.options.drawDistance);
-    if (_this.options.skyTexture === undefined) {
-      _this.options.skyTexture = _this.options.backgroundColor;
-    }
 
     if (!_this.options.useFog) {
+      if (_this.options.skyTexture === null) {
+        _this.options.skyTexture = _this.options.backgroundColor;
+      }
       var skyFunc = typeof _this.options.skyTexture === "number" ? colored : textured,
           skyDim = _this.options.drawDistance * 0.9,
-          skyGeom = null,
           onSkyDone = function onSkyDone() {
         return _this.scene.add(_this.sky);
       };
+      var skyGeom = null;
       if (typeof _this.options.skyTexture === "string") {
         skyGeom = sphere(skyDim, 18, 9);
       } else {
@@ -46903,18 +46905,26 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
         progress: _this.options.progress
       });
       _this.sky.name = "Sky";
+    } else if (_this.options.skyTexture) {
+      console.warn("You can't use sky textures and fog together. We're going to go with fog.");
     }
 
     if (_this.options.groundTexture !== undefined) {
       var dim = _this.options.drawDistance / Math.sqrt(2),
-          gm = new THREE.BoxBufferGeometry(dim * 5, 0.1, dim * 5, dim, 1, dim);
-      var groundFunc = typeof _this.options.groundTexture === "number" ? colored : textured;
+          gm = new THREE.BoxBufferGeometry(dim * 5, 0.1, dim * 5, dim, 1, dim),
+          groundFunc = typeof _this.options.groundTexture === "number" ? colored : textured,
+          onGroundDone = function onGroundDone() {
+        return _this.scene.add(_this.ground);
+      };
       _this.ground = groundFunc(gm, _this.options.groundTexture, {
         txtRepeatS: dim * 5,
-        txtRepeatT: dim * 5
+        txtRepeatT: dim * 5,
+        transparent: true,
+        opacity: 1,
+        resolve: onGroundDone,
+        progress: _this.options.progress
       });
       _this.ground.name = "Ground";
-      _this.scene.add(_this.ground);
       _this.registerPickableObject(_this.ground);
     }
 
@@ -47325,6 +47335,8 @@ BrowserEnvironment.DEFAULTS = {
   disableDefaultLighting: false,
   // The color that WebGL clears the background with before drawing.
   backgroundColor: 0xafbfff,
+  // the texture to use for the sky
+  skyTexture: null,
   // the near plane of the camera.
   nearPlane: 0.01,
   // the far plane of the camera.
@@ -47345,7 +47357,8 @@ BrowserEnvironment.DEFAULTS = {
   nonstandardIPD: null,
   // This is an experimental feature for setting the height of a user's "neck" on orientation-only systems (such as Google Cardboard and Samsung Gear VR) to create a more realistic feel.
   nonstandardNeckLength: null,
-  nonstandardNeckDepth: null
+  nonstandardNeckDepth: null,
+  showHeadPointer: true
 };
 if(typeof window !== "undefined") window.Primrose.BrowserEnvironment = BrowserEnvironment;
 })();
@@ -51072,7 +51085,7 @@ var FPSInput = function (_Primrose$AbstractEve) {
         this.Mouse.inPhysicalUse = false;
       }
 
-      this.head.showPointer = this.VR.hasOrientation;
+      this.head.showPointer = this.VR.hasOrientation && this.options.showHeadPointer;
       this.mousePointer.showPointer = (this.hasMouse || this.hasGamepad) && !this.hasMotionControllers;
 
       if (this.Keyboard) {
@@ -53243,11 +53256,14 @@ var PIANO_BASE = Math.pow(2, 1 / 12),
     MAX_NOTE_COUNT = (navigator.maxTouchPoints || 10) + 1,
     TYPES = ["sine", "square", "sawtooth", "triangle"];
 
-function piano(n) {
-  return 440 * Math.pow(PIANO_BASE, n - 49);
-}
-
 var Music = function () {
+  _createClass(Music, null, [{
+    key: "piano",
+    value: function piano(n) {
+      return 440 * Math.pow(PIANO_BASE, n - 49);
+    }
+  }]);
+
   function Music(audio, numNotes) {
     var _this = this;
 
@@ -53297,6 +53313,14 @@ var Music = function () {
     key: "noteOn",
     value: function noteOn(type, volume, i, x, y, z, dx, dy, dz, n) {
       if (this.isAvailable) {
+        x = x || 0;
+        y = y || 0;
+        z = z || 0;
+        if (dx === undefined || dx === null) {
+          dx = 0;
+        }
+        dy = dy || 0;
+        dz = dz || 0;
         var osc = this.oscillators[type];
         if (n === undefined || n === null) {
           for (n = 0; n < osc.length; ++n) {
@@ -53307,7 +53331,7 @@ var Music = function () {
         }
 
         var o = osc[n % this.numNotes],
-            f = piano(parseFloat(i) + 1);
+            f = Music.piano(parseFloat(i) + 1);
         o.gn.gain.value = volume;
         o.osc.frequency.setValueAtTime(f, this.audio.context.currentTime);
         o.pnr.setPosition(x, y, z);
@@ -53334,14 +53358,6 @@ var Music = function () {
 
       if (this.isAvailable) {
         return new Promise(function (resolve, reject) {
-          x = x || 0;
-          y = y || 0;
-          z = z || 0;
-          if (dx === undefined || dx === null) {
-            dx = 0;
-          }
-          dy = dy || 0;
-          dz = dz || 0;
           var o = _this2.noteOn(type, volume, i, x, y, z, dx, dy, dz, n);
           if (o.timeout) {
             clearTimeout(o.timeout);
@@ -53536,6 +53552,17 @@ function steps(min, max, steps) {
 if(typeof window !== "undefined") window.Primrose.Random.steps = steps;
 })();
 // end D:\Documents\VR\Primrose\src\Primrose\Random\steps.js
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// start D:\Documents\VR\Primrose\src\Primrose\Random\vector.js
+(function(){"use strict";
+
+function vector(min, max) {
+  return new THREE.Vector3().set(Primrose.Random.number(min, max), Primrose.Random.number(min, max), Primrose.Random.number(min, max));
+}
+if(typeof window !== "undefined") window.Primrose.Random.vector = vector;
+})();
+// end D:\Documents\VR\Primrose\src\Primrose\Random\vector.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 // start D:\Documents\VR\Primrose\src\Primrose\Text\CodePage.js
@@ -57739,6 +57766,22 @@ if(typeof window !== "undefined") window.THREE.MTLLoader = MTLLoader;
 // end D:\Documents\VR\Primrose\src\THREE\MTLLoader.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+// start D:\Documents\VR\Primrose\src\THREE\BufferGeometry\prototype\center.js
+(function(){"use strict";
+
+function center() {
+      this.computeBoundingBox();
+      var b = this.boundingBox,
+          dx = (b.max.x + b.min.x) / 2,
+          dy = (b.max.y + b.min.y) / 2,
+          dz = (b.max.z + b.min.z) / 2;
+      return this.offset(-dx, -dy, -dz);
+}
+if(typeof window !== "undefined") window.THREE.BufferGeometry.prototype.center = center;
+})();
+// end D:\Documents\VR\Primrose\src\THREE\BufferGeometry\prototype\center.js
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 // start D:\Documents\VR\Primrose\src\THREE\BufferGeometry\prototype\colored.js
 (function(){"use strict";
 
@@ -57750,6 +57793,23 @@ function colored(name, color, options) {
 if(typeof window !== "undefined") window.THREE.BufferGeometry.prototype.colored = colored;
 })();
 // end D:\Documents\VR\Primrose\src\THREE\BufferGeometry\prototype\colored.js
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// start D:\Documents\VR\Primrose\src\THREE\BufferGeometry\prototype\offset.js
+(function(){"use strict";
+
+function offset(x, y, z) {
+  var arr = this.attributes.position.array,
+      l = this.attributes.position.itemSize;
+  for (var i = 0; i < arr.length; i += l) {
+    arr[i] += x;
+    arr[i + 1] += y;
+    arr[i + 2] += z;
+  }
+}
+if(typeof window !== "undefined") window.THREE.BufferGeometry.prototype.offset = offset;
+})();
+// end D:\Documents\VR\Primrose\src\THREE\BufferGeometry\prototype\offset.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 // start D:\Documents\VR\Primrose\src\THREE\BufferGeometry\prototype\textured.js
@@ -57836,18 +57896,12 @@ if(typeof window !== "undefined") window.THREE.Euler.prototype.toString = toStri
 (function(){"use strict";
 
 function center() {
-  this.computeBoundingBox();
-  var b = this.boundingBox,
-      dx = (b.max.x + b.min.x) / 2,
-      dy = (b.max.y + b.min.y) / 2,
-      dz = (b.max.z + b.min.z) / 2,
-      verts = this.vertices;
-  for (var i = 0; i < verts.length; ++i) {
-    verts[i].x -= dx;
-    verts[i].y -= dy;
-    verts[i].z -= dz;
-  }
-  return this;
+      this.computeBoundingBox();
+      var b = this.boundingBox,
+          dx = (b.max.x + b.min.x) / 2,
+          dy = (b.max.y + b.min.y) / 2,
+          dz = (b.max.z + b.min.z) / 2;
+      return this.offset(-dx, -dy, -dz);
 }
 if(typeof window !== "undefined") window.THREE.Geometry.prototype.center = center;
 })();
@@ -57865,6 +57919,23 @@ function colored(name, color, options) {
 if(typeof window !== "undefined") window.THREE.Geometry.prototype.colored = colored;
 })();
 // end D:\Documents\VR\Primrose\src\THREE\Geometry\prototype\colored.js
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// start D:\Documents\VR\Primrose\src\THREE\Geometry\prototype\offset.js
+(function(){"use strict";
+
+function offset(x, y, z) {
+  var arr = this.vertices;
+  for (var i = 0; i < arr.length; ++i) {
+    var vert = arr[i];
+    vert.x += x;
+    vert.y += y;
+    vert.z += z;
+  }
+}
+if(typeof window !== "undefined") window.THREE.Geometry.prototype.offset = offset;
+})();
+// end D:\Documents\VR\Primrose\src\THREE\Geometry\prototype\offset.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 // start D:\Documents\VR\Primrose\src\THREE\Geometry\prototype\textured.js
