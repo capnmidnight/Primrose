@@ -961,5 +961,6 @@ BrowserEnvironment.DEFAULTS = {
   nonstandardIPD: null,
   // This is an experimental feature for setting the height of a user's "neck" on orientation-only systems (such as Google Cardboard and Samsung Gear VR) to create a more realistic feel.
   nonstandardNeckLength: null,
-  nonstandardNeckDepth: null
+  nonstandardNeckDepth: null,
+  showHeadPointer: true
 };
