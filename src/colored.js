@@ -30,5 +30,8 @@ function colored(geometry, color, options) {
     obj.material = mat;
   }
 
+  if(options.resolve){
+    options.resolve();
+  }
   return obj;
 }
