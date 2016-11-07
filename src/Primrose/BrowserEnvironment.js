@@ -114,7 +114,9 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
           Math.floor(this.input.head.position.x),
           GROUND_HEIGHT,
           Math.floor(this.input.head.position.z));
-        this.ground.material.needsUpdate = true;
+        if(this.ground.material){
+          this.ground.material.needsUpdate = true;
+        }
       }
     };
 
