@@ -499,17 +499,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
     this.camera = new THREE.PerspectiveCamera(75, 1, this.options.nearPlane, this.options.nearPlane + this.options.drawDistance);
 
     let skyReady = null;
-    if(this.options.useFog){
-      if(this.options.skyTexture){
-        console.warn("You can't use sky textures and fog together. We're going to go with fog.");
-      }
-      this.sky = hub();
-      skyReady = Promise.resolve();
-    }
-    else{
-      if (this.options.skyTexture === null) {
-        this.options.skyTexture = this.options.backgroundColor;
-      }
+    if (this.options.skyTexture !== null) {
       skyReady = new Promise((resolve, reject) => {
         const skyFunc = (typeof this.options.skyTexture === "number") ? colored : textured,
           skyDim = this.options.drawDistance * 0.9;
@@ -531,12 +521,16 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
         });
       });
     }
+    else {
+      this.sky = hub();
+      skyReady = Promise.resolve();
+    }
 
     this.sky.name = "Sky";
     this.scene.add(this.sky);
 
     let groundReady = null;
-    if (this.options.groundTexture) {
+    if (this.options.groundTexture !== null) {
       groundReady = new Promise((resolve, reject) => {
         const dim = this.options.drawDistance / Math.sqrt(2),
           gm = new THREE.BoxBufferGeometry(dim * 5, 0.1, dim * 5, dim, 1, dim),
