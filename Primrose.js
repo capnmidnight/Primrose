@@ -46895,6 +46895,7 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
         } else {
           skyGeom = box(skyDim, skyDim, skyDim);
         }
+
         _this.sky = skyFunc(skyGeom, _this.options.skyTexture, {
           side: THREE.BackSide,
           unshaded: true,
@@ -46909,8 +46910,11 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
       skyReady = Promise.resolve();
     }
 
-    _this.sky.name = "Sky";
-    _this.scene.add(_this.sky);
+    skyReady = skyReady.then(function () {
+      console.log(_this.sky);
+      _this.sky.name = "Sky";
+      _this.scene.add(_this.sky);
+    });
 
     var groundReady = null;
     if (_this.options.groundTexture !== null) {
@@ -46933,15 +46937,13 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
       groundReady = Promise.resolve();
     }
 
-    _this.ground.name = "Ground";
-    _this.scene.add(_this.ground);
+    groundReady = groundReady.then(function () {
+      _this.ground.name = "Ground";
+      _this.scene.add(_this.ground);
+    });
 
     _this.ui = new THREE.Object3D();
     _this.scene.add(_this.ui);
-
-    if (_this.passthrough) {
-      _this.camera.add(_this.passthrough.mesh);
-    }
 
     var buildScene = function buildScene(sceneGraph) {
       sceneGraph.buttons = [];
@@ -46955,10 +46957,16 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
       });
       _this.scene.add.apply(_this.scene, sceneGraph.children);
       _this.scene.traverse(function (obj) {
-        if (_this.options.disableDefaultLighting && obj.material && obj.material.map) {
-          textured(obj, obj.material.map, {
-            unshaded: true
-          });
+        if (_this.options.disableDefaultLighting && obj.material) {
+          if (obj.material.map) {
+            textured(obj, obj.material.map, {
+              unshaded: true
+            });
+          } else {
+            colored(obj, obj.material.color.getHex(), {
+              unshaded: true
+            });
+          }
         }
         if (obj.name) {
           _this.scene[obj.name] = obj;
@@ -47346,8 +47354,9 @@ BrowserEnvironment.DEFAULTS = {
   disableDefaultLighting: false,
   // The color that WebGL clears the background with before drawing.
   backgroundColor: 0xafbfff,
-  // the texture to use for the sky
+  // the textures to use for the sky and ground
   skyTexture: null,
+  groundTexture: null,
   // the near plane of the camera.
   nearPlane: 0.01,
   // the far plane of the camera.
