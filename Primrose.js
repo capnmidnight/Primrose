@@ -45257,6 +45257,9 @@ function colored(geometry, color, options) {
     obj.material = mat;
   }
 
+  if (options.resolve) {
+    options.resolve();
+  }
   return obj;
 }
 if(typeof window !== "undefined") window.colored = colored;
@@ -46449,7 +46452,6 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
       movePlayer(dt);
       moveUI();
       doPicking();
-      moveSky();
       moveGround();
       if (_this.network) {
         _this.network.update(dt);
@@ -46512,13 +46514,11 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
       }));
     };
 
-    var moveSky = function moveSky() {
-      if (_this.sky) {
-        _this.sky.position.copy(_this.input.head.position);
-      }
-    };
-
     var moveGround = function moveGround() {
+      if (_this.sky) {
+        _this.sky.position.set(_this.input.head.position.x, 0, _this.input.head.position.z);
+      }
+
       if (_this.ground) {
         _this.ground.position.set(Math.floor(_this.input.head.position.x), GROUND_HEIGHT, Math.floor(_this.input.head.position.z));
         _this.ground.material.needsUpdate = true;
@@ -46881,52 +46881,64 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
 
     _this.camera = new THREE.PerspectiveCamera(75, 1, _this.options.nearPlane, _this.options.nearPlane + _this.options.drawDistance);
 
-    if (!_this.options.useFog) {
+    var skyReady = null;
+    if (_this.options.useFog) {
+      if (_this.options.skyTexture) {
+        console.warn("You can't use sky textures and fog together. We're going to go with fog.");
+      }
+      _this.sky = hub();
+      skyReady = Promise.resolve();
+    } else {
       if (_this.options.skyTexture === null) {
         _this.options.skyTexture = _this.options.backgroundColor;
       }
-      var skyFunc = typeof _this.options.skyTexture === "number" ? colored : textured,
-          skyDim = _this.options.drawDistance * 0.9,
-          onSkyDone = function onSkyDone() {
-        return _this.scene.add(_this.sky);
-      };
-      var skyGeom = null;
-      if (typeof _this.options.skyTexture === "string") {
-        skyGeom = sphere(skyDim, 18, 9);
-      } else {
-        skyGeom = box(skyDim, skyDim, skyDim);
-      }
-      _this.sky = skyFunc(skyGeom, _this.options.skyTexture, {
-        side: THREE.BackSide,
-        unshaded: true,
-        transparent: true,
-        opacity: 1,
-        resolve: onSkyDone,
-        progress: _this.options.progress
+      skyReady = new Promise(function (resolve, reject) {
+        var skyFunc = typeof _this.options.skyTexture === "number" ? colored : textured,
+            skyDim = _this.options.drawDistance * 0.9;
+
+        var skyGeom = null;
+        if (typeof _this.options.skyTexture === "string") {
+          skyGeom = sphere(skyDim, 18, 9);
+        } else {
+          skyGeom = box(skyDim, skyDim, skyDim);
+        }
+        _this.sky = skyFunc(skyGeom, _this.options.skyTexture, {
+          side: THREE.BackSide,
+          unshaded: true,
+          transparent: true,
+          opacity: 1,
+          resolve: resolve,
+          progress: _this.options.progress
+        });
       });
-      _this.sky.name = "Sky";
-    } else if (_this.options.skyTexture) {
-      console.warn("You can't use sky textures and fog together. We're going to go with fog.");
     }
 
-    if (_this.options.groundTexture !== undefined) {
-      var dim = _this.options.drawDistance / Math.sqrt(2),
-          gm = new THREE.BoxBufferGeometry(dim * 5, 0.1, dim * 5, dim, 1, dim),
-          groundFunc = typeof _this.options.groundTexture === "number" ? colored : textured,
-          onGroundDone = function onGroundDone() {
-        return _this.scene.add(_this.ground);
-      };
-      _this.ground = groundFunc(gm, _this.options.groundTexture, {
-        txtRepeatS: dim * 5,
-        txtRepeatT: dim * 5,
-        transparent: true,
-        opacity: 1,
-        resolve: onGroundDone,
-        progress: _this.options.progress
+    _this.sky.name = "Sky";
+    _this.scene.add(_this.sky);
+
+    var groundReady = null;
+    if (_this.options.groundTexture) {
+      groundReady = new Promise(function (resolve, reject) {
+        var dim = _this.options.drawDistance / Math.sqrt(2),
+            gm = new THREE.BoxBufferGeometry(dim * 5, 0.1, dim * 5, dim, 1, dim),
+            groundFunc = typeof _this.options.groundTexture === "number" ? colored : textured;
+        _this.ground = groundFunc(gm, _this.options.groundTexture, {
+          txtRepeatS: dim * 5,
+          txtRepeatT: dim * 5,
+          transparent: true,
+          opacity: 1,
+          resolve: resolve,
+          progress: _this.options.progress
+        });
+        _this.registerPickableObject(_this.ground);
       });
-      _this.ground.name = "Ground";
-      _this.registerPickableObject(_this.ground);
+    } else {
+      _this.ground = hub();
+      groundReady = Promise.resolve();
     }
+
+    _this.ground.name = "Ground";
+    _this.scene.add(_this.ground);
 
     _this.ui = new THREE.Object3D();
     _this.scene.add(_this.ui);
@@ -47059,6 +47071,9 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
       }
 
       _this.options.fullScreenElement = document.querySelector(_this.options.fullScreenElement) || _this.renderer.domElement;
+      if (_this.options.fullScreenButtonContainer) {
+        _this.insertFullScreenButtons(_this.options.fullScreenButtonContainer);
+      }
 
       var maxTabIndex = 0;
       var elementsWithTabIndex = document.querySelectorAll("[tabIndex]");
@@ -47184,7 +47199,7 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
       return _this.input.ready;
     });
 
-    var allReady = Promise.all([modelsReady, documentReady]).then(function () {
+    var allReady = Promise.all([skyReady, groundReady, modelsReady, documentReady]).then(function () {
       _this.renderer.domElement.style.cursor = "default";
       _this.input.VR.displays.forEach(function (display) {
         if (display.DOMElement !== undefined) {
