@@ -47071,10 +47071,6 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
       }
 
       _this.options.fullScreenElement = document.querySelector(_this.options.fullScreenElement) || _this.renderer.domElement;
-      if (_this.options.fullScreenButtonContainer) {
-        _this.insertFullScreenButtons(_this.options.fullScreenButtonContainer);
-      }
-
       var maxTabIndex = 0;
       var elementsWithTabIndex = document.querySelectorAll("[tabIndex]");
       for (var i = 0; i < elementsWithTabIndex.length; ++i) {
@@ -47196,7 +47192,11 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
 
       _this.input.head.add(_this.camera);
 
-      return _this.input.ready;
+      return _this.input.ready.then(function () {
+        if (_this.options.fullScreenButtonContainer) {
+          _this.insertFullScreenButtons(_this.options.fullScreenButtonContainer);
+        }
+      });
     });
 
     var allReady = Promise.all([skyReady, groundReady, modelsReady, documentReady]).then(function () {
