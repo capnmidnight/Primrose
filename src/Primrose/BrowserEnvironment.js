@@ -511,6 +511,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
         else {
           skyGeom = box(skyDim, skyDim, skyDim);
         }
+
         this.sky = skyFunc(skyGeom, this.options.skyTexture, {
           side: THREE.BackSide,
           unshaded: true,
@@ -526,8 +527,11 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       skyReady = Promise.resolve();
     }
 
-    this.sky.name = "Sky";
-    this.scene.add(this.sky);
+    skyReady = skyReady.then(() => {
+      console.log(this.sky);
+      this.sky.name = "Sky";
+      this.scene.add(this.sky);
+    });
 
     let groundReady = null;
     if (this.options.groundTexture !== null) {
@@ -551,15 +555,13 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       groundReady = Promise.resolve();
     }
 
-    this.ground.name = "Ground";
-    this.scene.add(this.ground);
+    groundReady = groundReady.then(() => {
+      this.ground.name = "Ground";
+      this.scene.add(this.ground);
+    });
 
     this.ui = new THREE.Object3D();
     this.scene.add(this.ui);
-
-    if (this.passthrough) {
-      this.camera.add(this.passthrough.mesh);
-    }
 
     var buildScene = (sceneGraph) => {
       sceneGraph.buttons = [];
@@ -574,10 +576,17 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       });
       this.scene.add.apply(this.scene, sceneGraph.children);
       this.scene.traverse((obj) => {
-        if (this.options.disableDefaultLighting && obj.material && obj.material.map) {
-          textured(obj, obj.material.map, {
-            unshaded: true
-          });
+        if (this.options.disableDefaultLighting && obj.material) {
+          if(obj.material.map){
+            textured(obj, obj.material.map, {
+              unshaded: true
+            });
+          }
+          else{
+            colored(obj, obj.material.color.getHex(), {
+              unshaded: true
+            });
+          }
         }
         if (obj.name) {
           this.scene[obj.name] = obj;
@@ -957,8 +966,9 @@ BrowserEnvironment.DEFAULTS = {
   disableDefaultLighting: false,
   // The color that WebGL clears the background with before drawing.
   backgroundColor: 0xafbfff,
-  // the texture to use for the sky
+  // the textures to use for the sky and ground
   skyTexture: null,
+  groundTexture: null,
   // the near plane of the camera.
   nearPlane: 0.01,
   // the far plane of the camera.
