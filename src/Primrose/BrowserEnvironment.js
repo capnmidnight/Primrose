@@ -38,7 +38,6 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       movePlayer(dt);
       moveUI();
       doPicking();
-      moveSky();
       moveGround();
       if(this.network){
         this.network.update(dt);
@@ -102,13 +101,14 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       this.input.resolvePicking(this.pickableObjects.filter((obj) => !obj.disabled));
     };
 
-    const moveSky = () => {
-      if(this.sky){
-        this.sky.position.copy(this.input.head.position);
-      }
-    };
-
     const moveGround = () => {
+      if(this.sky) {
+        this.sky.position.set(
+          this.input.head.position.x,
+          0,
+          this.input.head.position.z);
+      }
+
       if (this.ground) {
         this.ground.position.set(
           Math.floor(this.input.head.position.x),
@@ -496,50 +496,67 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
 
     this.camera = new THREE.PerspectiveCamera(75, 1, this.options.nearPlane, this.options.nearPlane + this.options.drawDistance);
 
-    if(!this.options.useFog){
+    let skyReady = null;
+    if(this.options.useFog){
+      if(this.options.skyTexture){
+        console.warn("You can't use sky textures and fog together. We're going to go with fog.");
+      }
+      this.sky = hub();
+      skyReady = Promise.resolve();
+    }
+    else{
       if (this.options.skyTexture === null) {
         this.options.skyTexture = this.options.backgroundColor;
       }
-      const skyFunc = (typeof this.options.skyTexture === "number") ? colored : textured,
-        skyDim = this.options.drawDistance * 0.9,
-        onSkyDone = () => this.scene.add(this.sky);
-      let skyGeom = null;
-      if(typeof this.options.skyTexture === "string"){
-        skyGeom = sphere(skyDim, 18, 9);
-      }
-      else {
-        skyGeom = box(skyDim, skyDim, skyDim);
-      }
-      this.sky = skyFunc(skyGeom, this.options.skyTexture, {
-        side: THREE.BackSide,
-        unshaded: true,
-        transparent: true,
-        opacity: 1,
-        resolve: onSkyDone,
-        progress: this.options.progress
+      skyReady = new Promise((resolve, reject) => {
+        const skyFunc = (typeof this.options.skyTexture === "number") ? colored : textured,
+          skyDim = this.options.drawDistance * 0.9;
+
+        let skyGeom = null;
+        if(typeof this.options.skyTexture === "string"){
+          skyGeom = sphere(skyDim, 18, 9);
+        }
+        else {
+          skyGeom = box(skyDim, skyDim, skyDim);
+        }
+        this.sky = skyFunc(skyGeom, this.options.skyTexture, {
+          side: THREE.BackSide,
+          unshaded: true,
+          transparent: true,
+          opacity: 1,
+          resolve: resolve,
+          progress: this.options.progress
+        });
       });
-      this.sky.name = "Sky";
-    }
-    else if(this.options.skyTexture){
-      console.warn("You can't use sky textures and fog together. We're going to go with fog.");
     }
 
-    if (this.options.groundTexture !== undefined) {
-      const dim = this.options.drawDistance / Math.sqrt(2),
-        gm = new THREE.BoxBufferGeometry(dim * 5, 0.1, dim * 5, dim, 1, dim),
-        groundFunc = (typeof this.options.groundTexture === "number") ? colored : textured,
-        onGroundDone = () => this.scene.add(this.ground);
-      this.ground = groundFunc(gm, this.options.groundTexture, {
-        txtRepeatS: dim * 5,
-        txtRepeatT: dim * 5,
-        transparent: true,
-        opacity: 1,
-        resolve: onGroundDone,
-        progress: this.options.progress
+    this.sky.name = "Sky";
+    this.scene.add(this.sky);
+
+    let groundReady = null;
+    if (this.options.groundTexture) {
+      groundReady = new Promise((resolve, reject) => {
+        const dim = this.options.drawDistance / Math.sqrt(2),
+          gm = new THREE.BoxBufferGeometry(dim * 5, 0.1, dim * 5, dim, 1, dim),
+          groundFunc = (typeof this.options.groundTexture === "number") ? colored : textured;
+        this.ground = groundFunc(gm, this.options.groundTexture, {
+          txtRepeatS: dim * 5,
+          txtRepeatT: dim * 5,
+          transparent: true,
+          opacity: 1,
+          resolve: resolve,
+          progress: this.options.progress
+        });
+        this.registerPickableObject(this.ground);
       });
-      this.ground.name = "Ground";
-      this.registerPickableObject(this.ground);
     }
+    else{
+      this.ground = hub();
+      groundReady = Promise.resolve();
+    }
+
+    this.ground.name = "Ground";
+    this.scene.add(this.ground);
 
     this.ui = new THREE.Object3D();
     this.scene.add(this.ui);
@@ -798,6 +815,8 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
     });
 
     var allReady = Promise.all([
+        skyReady,
+        groundReady,
         modelsReady,
         documentReady
       ])
