@@ -46521,7 +46521,9 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
 
       if (_this.ground) {
         _this.ground.position.set(Math.floor(_this.input.head.position.x), GROUND_HEIGHT, Math.floor(_this.input.head.position.z));
-        _this.ground.material.needsUpdate = true;
+        if (_this.ground.material) {
+          _this.ground.material.needsUpdate = true;
+        }
       }
     };
 

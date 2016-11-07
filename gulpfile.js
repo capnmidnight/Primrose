@@ -77,4 +77,4 @@ gulp.task("release",  [
   css.release
 ]);
 
-gulp.task("kablamo", build.exec("gulp bump && gulp yolo && cd ../Primrose-Site && gulp kablamo && cd ../Primrose && npm publish && gulp trololo"));
+gulp.task("kablamo", build.exec("gulp bump && gulp yolo && cd ../Primrose-Site && gulp kablamo && cd ../Primrose && gulp trololo && npm publish"));
