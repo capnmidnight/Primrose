@@ -46884,16 +46884,7 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
     _this.camera = new THREE.PerspectiveCamera(75, 1, _this.options.nearPlane, _this.options.nearPlane + _this.options.drawDistance);
 
     var skyReady = null;
-    if (_this.options.useFog) {
-      if (_this.options.skyTexture) {
-        console.warn("You can't use sky textures and fog together. We're going to go with fog.");
-      }
-      _this.sky = hub();
-      skyReady = Promise.resolve();
-    } else {
-      if (_this.options.skyTexture === null) {
-        _this.options.skyTexture = _this.options.backgroundColor;
-      }
+    if (_this.options.skyTexture !== null) {
       skyReady = new Promise(function (resolve, reject) {
         var skyFunc = typeof _this.options.skyTexture === "number" ? colored : textured,
             skyDim = _this.options.drawDistance * 0.9;
@@ -46913,13 +46904,16 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
           progress: _this.options.progress
         });
       });
+    } else {
+      _this.sky = hub();
+      skyReady = Promise.resolve();
     }
 
     _this.sky.name = "Sky";
     _this.scene.add(_this.sky);
 
     var groundReady = null;
-    if (_this.options.groundTexture) {
+    if (_this.options.groundTexture !== null) {
       groundReady = new Promise(function (resolve, reject) {
         var dim = _this.options.drawDistance / Math.sqrt(2),
             gm = new THREE.BoxBufferGeometry(dim * 5, 0.1, dim * 5, dim, 1, dim),
