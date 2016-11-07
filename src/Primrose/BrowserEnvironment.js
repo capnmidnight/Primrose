@@ -688,10 +688,6 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       }
 
       this.options.fullScreenElement = document.querySelector(this.options.fullScreenElement) || this.renderer.domElement;
-      if(this.options.fullScreenButtonContainer){
-        this.insertFullScreenButtons(this.options.fullScreenButtonContainer);
-      }
-
       let maxTabIndex = 0;
       const elementsWithTabIndex = document.querySelectorAll("[tabIndex]");
       for(let i = 0; i < elementsWithTabIndex.length; ++i){
@@ -814,7 +810,11 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
 
       this.input.head.add(this.camera);
 
-      return this.input.ready;
+      return this.input.ready.then(() => {
+        if(this.options.fullScreenButtonContainer){
+          this.insertFullScreenButtons(this.options.fullScreenButtonContainer);
+        }
+      });
     });
 
     var allReady = Promise.all([
