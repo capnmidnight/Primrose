@@ -6,7 +6,7 @@ var env = new Primrose.BrowserEnvironment({
   drawDistance: 25,
   gazeLength: 0.25,
   showHeadPointer: isMobile,
-  fullscreenButtonContainer: "body"
+  fullScreenButtonContainer: "body"
 }),
 
   moon = textured(new THREE.CircleBufferGeometry(1, 45), "moon.jpg", {
