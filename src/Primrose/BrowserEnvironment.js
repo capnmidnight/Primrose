@@ -688,6 +688,9 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       }
 
       this.options.fullScreenElement = document.querySelector(this.options.fullScreenElement) || this.renderer.domElement;
+      if(this.options.fullScreenButtonContainer){
+        this.insertFullScreenButtons(this.options.fullScreenButtonContainer);
+      }
 
       let maxTabIndex = 0;
       const elementsWithTabIndex = document.querySelectorAll("[tabIndex]");
