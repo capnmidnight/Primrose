@@ -30,6 +30,11 @@ function colored(geometry, color, options) {
     obj.material = mat;
   }
 
+  if(options.shadow){
+    obj.receiveShadow = true;
+    obj.castShadow = true;
+  }
+
   if(options.resolve){
     options.resolve();
   }

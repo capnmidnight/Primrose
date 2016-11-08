@@ -45257,6 +45257,11 @@ function colored(geometry, color, options) {
     obj.material = mat;
   }
 
+  if (options.shadow) {
+    obj.receiveShadow = true;
+    obj.castShadow = true;
+  }
+
   if (options.resolve) {
     options.resolve();
   }
@@ -46131,6 +46136,11 @@ function textured(geometry, txt, options) {
 
   if (txt instanceof Primrose.Surface) {
     obj.surface = txt;
+  }
+
+  if (options.shadow) {
+    obj.receiveShadow = true;
+    obj.castShadow = true;
   }
 
   if (options.txtRepeatS * options.txtRepeatT > 1) {
@@ -47205,6 +47215,16 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
 
     var allReady = Promise.all([skyReady, groundReady, modelsReady, documentReady]).then(function () {
       _this.renderer.domElement.style.cursor = "default";
+      if (_this.options.enableShadows && _this.sun) {
+        _this.renderer.shadowMap.enabled = true;
+        _this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        _this.sun.castShadow = true;
+        _this.sun.shadow.mapSize.width = _this.sun.shadow.mapSize.height = _this.options.shadowMapSize;
+        if (_this.ground.material) {
+          _this.ground.receiveShadow = true;
+          _this.ground.castShadow = true;
+        }
+      }
       _this.input.VR.displays.forEach(function (display) {
         if (display.DOMElement !== undefined) {
           display.DOMElement = _this.renderer.domElement;
@@ -47344,6 +47364,8 @@ BrowserEnvironment.DEFAULTS = {
   avatarHeight: 1.65,
   walkSpeed: 2,
   disableKeyboard: false,
+  enableShadows: false,
+  shadowMapSize: 1024,
   // The acceleration applied to falling objects.
   gravity: 9.8,
   // The amount of time in seconds to require gazes on objects before triggering the gaze event.
@@ -57836,8 +57858,10 @@ if(typeof window !== "undefined") window.THREE.BufferGeometry.prototype.offset =
 // start D:\Documents\VR\Primrose\src\THREE\BufferGeometry\prototype\textured.js
 (function(){"use strict";
 
-function textured(texture, options) {
-  return window.textured(this, texture, options);
+function textured(name, texture, options) {
+  var obj = window.textured(this, texture, options);
+  obj.name = name;
+  return obj;
 }
 if(typeof window !== "undefined") window.THREE.BufferGeometry.prototype.textured = textured;
 })();
@@ -57963,8 +57987,10 @@ if(typeof window !== "undefined") window.THREE.Geometry.prototype.offset = offse
 // start D:\Documents\VR\Primrose\src\THREE\Geometry\prototype\textured.js
 (function(){"use strict";
 
-function textured(texture, options) {
-  return window.textured(this, texture, options);
+function textured(name, texture, options) {
+  var obj = window.textured(this, texture, options);
+  obj.name = name;
+  return obj;
 }
 if(typeof window !== "undefined") window.THREE.Geometry.prototype.textured = textured;
 })();

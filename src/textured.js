@@ -85,6 +85,11 @@ function textured(geometry, txt, options) {
     obj.surface = txt;
   }
 
+  if(options.shadow){
+    obj.receiveShadow = true;
+    obj.castShadow = true;
+  }
+
   if (options.txtRepeatS * options.txtRepeatT > 1) {
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
     texture.repeat.set(options.txtRepeatS, options.txtRepeatT);

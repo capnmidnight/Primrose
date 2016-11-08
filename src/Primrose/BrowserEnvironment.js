@@ -830,6 +830,17 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       ])
       .then(() => {
         this.renderer.domElement.style.cursor = "default";
+        if(this.options.enableShadows && this.sun) {
+          this.renderer.shadowMap.enabled = true;
+          this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+          this.sun.castShadow = true;
+          this.sun.shadow.mapSize.width =
+          this.sun.shadow.mapSize.height = this.options.shadowMapSize;
+          if(this.ground.material){
+            this.ground.receiveShadow = true;
+            this.ground.castShadow = true;
+          }
+        }
         this.input.VR.displays.forEach((display) => {
           if(display.DOMElement !== undefined) {
             display.DOMElement = this.renderer.domElement;
@@ -956,6 +967,8 @@ BrowserEnvironment.DEFAULTS = {
   avatarHeight: 1.65,
   walkSpeed: 2,
   disableKeyboard: false,
+  enableShadows: false,
+  shadowMapSize: 1024,
   // The acceleration applied to falling objects.
   gravity: 9.8,
   // The amount of time in seconds to require gazes on objects before triggering the gaze event.
