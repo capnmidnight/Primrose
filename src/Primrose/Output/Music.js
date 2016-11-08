@@ -74,7 +74,7 @@ class Music {
     }
   }
 
-  noteOn (type, volume, i, x, y, z, dx, dy, dz, n) {
+  play (type, i, volume, duration, x, y, z, dx, dy, dz, dt, n) {
     if (this.isAvailable) {
       x = x || 0;
       y = y || 0;
@@ -84,6 +84,8 @@ class Music {
       }
       dy = dy || 0;
       dz = dz || 0;
+      dt = dt || 0;
+
       const osc = this.oscillators[type];
       if(n === undefined || n === null){
         for(n = 0; n < osc.length; ++n){
@@ -95,44 +97,16 @@ class Music {
 
       const o = osc[n % this.numNotes],
         f = Music.piano(parseFloat(i) + 1);
-      o.gn.gain.value = volume;
-      o.osc.frequency.setValueAtTime(f, this.audio.context.currentTime);
+      let t = this.audio.context.currentTime + dt;
+      o.gn.gain.setValueAtTime(volume, t);
+      o.osc.frequency.setValueAtTime(f, t);
       o.pnr.setPosition(x, y, z);
       o.pnr.setOrientation(dx, dy, dz);
-      return o;
-    }
-  }
-
-  noteOff (type, n) {
-    if (this.isAvailable) {
-      if (n === undefined) {
-        n = 0;
-      }
-      var o = this.oscillators[type][n % this.numNotes];
-      o.osc.frequency.setValueAtTime(0, this.audio.context.currentTime);
-      o.gn.gain.value = 0;
-    }
-  }
-
-  play (type, i, volume, duration, x, y, z, dx, dy, dz, n) {
-    if (this.isAvailable) {
-      return new Promise((resolve, reject) => {
-        var o = this.noteOn(type, volume, i, x, y, z, dx, dy, dz, n);
-        if (o.timeout) {
-          clearTimeout(o.timeout);
-          o.timeout = null;
-          resolve();
-        }
-        o.timeout = setTimeout((function (o) {
-            this.noteOff(type, o.index);
-            o.timeout = null;
-            resolve();
-          })
-          .bind(this, o), duration * 1000);
-      });
-    }
-    else{
-      return Promise.reject("No audio");
+      t += duration;
+      o.gn.gain.setValueAtTime(0, t);
+      o.osc.frequency.setValueAtTime(0, t);
+      dt = t - performance.now() / 1000;
+      return new Promise((resolve, reject) => setTimeout(resolve, dt * 1000));
     }
   }
 }

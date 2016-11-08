@@ -17,12 +17,13 @@ var numButtons = 16,
     perMeasure = 1 / width,
     DIST = new THREE.Vector3(),
     env = new Primrose.BrowserEnvironment({
-      groundTexture: "../images/deck.png",
-      font: "../fonts/helvetiker_regular.typeface.json",
+      groundTexture: "https://www.primrosevr.com/doc/images/deck.png",
+      font: "https://primrosevr.com/doc/fonts/helvetiker_regular.typeface.json",
       backgroundColor: 0x000000,
       useFog: true,
       useGaze: isMobile,
-      drawDistance: 10
+      drawDistance: 10,
+      fullScreenButtonContainer: "body"
     });
 
 function text(size, text) {
@@ -54,35 +55,37 @@ function Board(type){
       .on(btn);
     env.registerPickableObject(btn);
     btn.onselect = this.select.bind(this, i);
-    btn.onenter = this.play.bind(this, i);
+    btn.onenter = this.play.bind(this, i, 0);
     this.object.add(btn);
     this.btns.push(btn);
   }.bind(this));
 }
 
-Board.prototype.play = function(i) {
+Board.prototype.play = function(i, dt) {
   this.highlight(i, colorPlay);
   this.object.getWorldDirection(DIST);
-  env.music.play(this.type, 25 - numButtons + i * 4, 0.25, perMeasure * 0.85,
+  env.music.play(this.type, 25 - numButtons + i * 5, 0.25, perMeasure * 0.85,
     this.object.x, this.object.y, this.object.z,
-    DIST.x, DIST.y, DIST.z)
-    .then(function(){
-      this.highlight(i);
-    }.bind(this));
+    DIST.x, DIST.y, DIST.z, dt)
+    .then(() => this.highlight(i));
 }
 
 Board.prototype.update = function() {
   if(measure !== lastMeasure){
+    const time = env.audio.context.currentTime,
+          measureTime = perMeasure * Math.ceil(time / perMeasure),
+          dt = measureTime - time;
     for(var y = 0; y < height; ++y){
       var i = y * width + measure;
       if(this.btnState[i]){
-        this.play(i);
+        this.play(i, dt);
       }
     }
   }
   DIST.set(this.object.position.x, env.input.head.position.y, this.object.position.z);
   this.object.position.lerp(DIST, 0.01);
 };
+
 
 Board.prototype.highlight = function(i, color) {
   color = color || this.btnState[i] && colorOn || colorOff;
@@ -115,14 +118,10 @@ env.addEventListener("update", function(dt){
       t -= perMeasure;
       measure = (measure + 1) % width;
     }
-    boards.forEach(function(board) {
-      board.update();
-    });
+    boards.forEach((board) => board.update());
     lastMeasure = measure;
   }
   skipOne = false;
 });
 
-window.addEventListener("focus", function(){
-  skipOne = true;
-});
+window.addEventListener("focus", () =>  skipOne = true);
