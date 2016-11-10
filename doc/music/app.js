@@ -1,6 +1,6 @@
-var numButtons = 16,
-    height = Math.floor(Math.sqrt(numButtons)),
-    width = Math.ceil(numButtons/height),
+var height = 8,
+    width = 4,
+    numButtons = width * height,
     midWidth = (width - 1) / 2,
     midHeight = (height - 1) / 2,
     colorOn = 0xffffff,
@@ -14,7 +14,7 @@ var numButtons = 16,
     padDepth = 0.02,
     textSize = 0.05,
     skipOne = false,
-    perMeasure = 1 / width,
+    perMeasure = 2 / height,
     DIST = new THREE.Vector3(),
     env = new Primrose.BrowserEnvironment({
       groundTexture: "https://www.primrosevr.com/doc/images/deck.png",
@@ -64,7 +64,7 @@ function Board(type){
 Board.prototype.play = function(i, dt) {
   this.highlight(i, colorPlay);
   this.object.getWorldDirection(DIST);
-  env.music.play(this.type, 25 - numButtons + i * 5, 0.25, perMeasure * 0.85,
+  env.music.play(this.type, 25 - numButtons + i * 3, 0.25, perMeasure * 0.85,
     this.object.x, this.object.y, this.object.z,
     DIST.x, DIST.y, DIST.z, dt)
     .then(() => this.highlight(i));
@@ -75,8 +75,8 @@ Board.prototype.update = function() {
     const time = env.audio.context.currentTime,
           measureTime = perMeasure * Math.ceil(time / perMeasure),
           dt = measureTime - time;
-    for(var y = 0; y < height; ++y){
-      var i = y * width + measure;
+    for(var y = 0; y < width; ++y){
+      var i = y * height + measure;
       if(this.btnState[i]){
         this.play(i, dt);
       }
@@ -116,7 +116,7 @@ env.addEventListener("update", function(dt){
     t += dt;
     if(t > perMeasure){
       t -= perMeasure;
-      measure = (measure + 1) % width;
+      measure = (measure + 1) % height;
     }
     boards.forEach((board) => board.update());
     lastMeasure = measure;
