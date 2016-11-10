@@ -408,12 +408,14 @@ class FPSInput extends Primrose.AbstractEventEmitter {
           this.Mouse.commands.U.offset -= this.Mouse.getValue("U") - 1;
         }
         mouseHeading = newMouseHeading + this.Mouse.commands.U.offset * 2;
-        pitch = 0;
       }
       else{
         mouseHeading = this.Mouse.getValue("heading");
       }
       heading += mouseHeading;
+    }
+    if (this.VR.hasOrientation) {
+      pitch = 0;
     }
 
     // move stage according to heading and thrust
