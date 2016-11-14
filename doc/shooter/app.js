@@ -1,4 +1,4 @@
-var cube = range(0, 6, function(i) { return "../images/space" + i + ".jpg"; }),
+var cube = range(6, function(i) { return "../images/space" + i + ".jpg"; }),
   env = new Primrose.BrowserEnvironment({
     font: "../fonts/helvetiker_regular.typeface.json",
     skyTexture: cube,
@@ -57,7 +57,7 @@ env.addEventListener("ready", function(){
     env.options.fullScreenElement.addEventListener("keydown", fixAudio);
   }
   env.insertFullScreenButtons("body");
-  Promise.all(range(0, 10, () => env.audio.loadSource("../audio/exp.ogg")))
+  Promise.all(range(10, () => env.audio.loadSource("../audio/exp.ogg")))
     .then(function(snds) {
       sounds = snds;
       for(var i = 0; i < sounds.length; ++i){
@@ -65,14 +65,14 @@ env.addEventListener("ready", function(){
         snd.volume.gain.setValueAtTime(0, env.audio.context.currentTime);
         snd.volume.connect(env.audio.mainVolume);
       }
-      for(var i = 0; i < 10; ++i){
+      range(10, () => {
         var b = asteroid[0].clone();
         b.nextSize = 1;
         b.position.copy(Primrose.Random.vector(-15, 15));
         b.velocity = Primrose.Random.vector(-1, 1);
         blocks.push(b);
         env.scene.add(b);
-      }
+      });
     });
 });
 
