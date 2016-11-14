@@ -2,7 +2,7 @@ var gulp = require("gulp"),
   exec = require("child_process").exec,
   pliny = require("pliny"),
   pkg = require("./package.json"),
-  build = require("notiontheory-basic-build"),
+  build = require("../notiontheory-basic-build"),
   nt = build.setup(gulp, pkg),
 
   js = nt.js("PrimroseLib-WithDoc", "src", ["format"], (inFile) => {

@@ -132,7 +132,7 @@ class BaseControl extends Primrose.AbstractEventEmitter {
 
   blur() {
     this.focused = false;
-    emit.call(this, "blur", {
+    this.emit("blur", {
       target: this
     });
   }

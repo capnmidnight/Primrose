@@ -30,15 +30,13 @@ pliny.function({
     console.assert(a === c);"
   }]
 });
-const cache = (function () {
-  const _cache = {};
-  return (hash, makeObject, onCacheHit) => {
-    if (!_cache[hash]) {
-      _cache[hash] = makeObject();
-    }
-    else if(onCacheHit) {
-      onCacheHit();
-    }
-    return _cache[hash];
-  };
-})();
+const _cache = {};
+export default function cache(hash, makeObject, onCacheHit) {
+  if (!_cache[hash]) {
+    _cache[hash] = makeObject();
+  }
+  else if(onCacheHit) {
+    onCacheHit();
+  }
+  return _cache[hash];
+};

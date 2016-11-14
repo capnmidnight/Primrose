@@ -3,4 +3,4 @@ pliny.value({
   type: "Boolean",
   description: "Flag indicating the script is currently running in an IFRAME or not."
 });
-const isInIFrame = (window.self !== window.top);
+export default isInIFrame = (window.self !== window.top);

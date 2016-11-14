@@ -5,4 +5,4 @@ pliny.value({
 OSX operating system. Useful for changing keyboard shortcuts to support Apple's\n\
 idiosynchratic, concensus-defying keyboard shortcuts."
 });
-const isOSX = /Macintosh/.test(navigator.userAgent || "");
+export default isOSX = /Macintosh/.test(navigator.userAgent || "");

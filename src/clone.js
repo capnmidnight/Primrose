@@ -21,6 +21,6 @@ pliny.function({
   }]
 });
 
-function clone(obj) {
+export default function clone(obj) {
   return JSON.parse(JSON.stringify(obj));
 }

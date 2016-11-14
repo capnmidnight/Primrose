@@ -1,7 +1,6 @@
 pliny.value({
   name: "isWindows",
   type: "Boolean",
-  description: "Flag indicating the current system is a computer running one of\n\
-the Microsoft Windows operating systems. We have not yet found a use for this flag."
+  description: "Flag indicating the current system is a computer running one of the Microsoft Windows operating systems."
 });
-const isWindows = /Windows/.test(navigator.userAgent || "");
+export default isWindows = /Windows/.test(navigator.userAgent || "");

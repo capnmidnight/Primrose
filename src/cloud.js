@@ -41,16 +41,20 @@ The results should look like this:\n\
   }]
 });
 
-function cloud(verts, c, s) {
-  var geom = new THREE.Geometry();
+import cache from "./cache";
+import { Geometry } from "three/src/core/Geometry";
+import { PointsMaterial } from "three/src/materials/PointsMaterial";
+import { Points } from "three/src/objects/Points";
+default export function cloud(verts, c, s) {
+  var geom = new Geometry();
   for (var i = 0; i < verts.length; ++i) {
     geom.vertices.push(verts[i]);
   }
   var mat = cache(
     `PointsMaterial(${c}, ${s})`,
-    () => new THREE.PointsMaterial({
+    () => new PointsMaterial({
       color: c,
       size: s
     }));
-  return new THREE.Points(geom, mat);
+  return new Points(geom, mat);
 }

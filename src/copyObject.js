@@ -46,7 +46,7 @@ pliny.function({
   }]
 });
 
-function copyObject(dest, source, shallow) {
+export default function copyObject(dest, source, shallow) {
   var stack = [{
     dest: dest,
     source: source

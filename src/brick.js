@@ -41,7 +41,9 @@ The result should appear as:\n\
   }]
 });
 
-function brick(txt, w, h, l) {
+import textured from "./textured";
+import box from "./box";
+export default function brick(txt, w, h, l) {
   return textured(box(w || 1, h || 1, l || 1), txt, {
     txtRepeatS: w,
     txtRepeatT: l

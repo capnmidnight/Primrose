@@ -15,7 +15,9 @@ pliny.function({
   ]
 });
 
-function colored(geometry, color, options) {
+import { Mesh } from "three/src/objects/Mesh";
+import { Object3D } from "three/src/core/Object3D";
+export default function colored(geometry, color, options) {
   options = options || {};
   options.color = color;
 
@@ -23,9 +25,9 @@ function colored(geometry, color, options) {
     obj = null;
 
   if (geometry.type.indexOf("Geometry") > -1) {
-    obj = new THREE.Mesh(geometry, mat);
+    obj = new Mesh(geometry, mat);
   }
-  else if (geometry instanceof THREE.Object3D) {
+  else if (geometry instanceof Object3D) {
     obj = geometry;
     obj.material = mat;
   }

@@ -1,4 +1,4 @@
-function fixGeometry(geometry, options){
+export default function fixGeometry(geometry, options){
   const maxU = options.maxU || 1,
     maxV = options.maxV || 1,
     attrs = geometry.attributes || (geometry._bufferGeometry && geometry._bufferGeometry.attributes);

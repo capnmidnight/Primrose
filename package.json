@@ -39,17 +39,17 @@
     "highlighting"
   ],
   "dependencies": {
-    "lavu-details-polyfill": "^0.1.0"
+    "lavu-details-polyfill": "^0.1.0",
+    "three": "^0.82.0",
+    "webvr-polyfill": "github:notiontheory/webvr-polyfill",
+    "webvr-standard-monitor": "^2.0.0"
   },
   "devDependencies": {
-    "bare-bones-logger": "^2.0.0",
+    "bare-bones-logger": "^4.0.0",
     "iphone-inline-video": "^1.9.3",
     "jstransformer-marked": "^1.0.1",
     "pliny": "^3.2.6",
     "promise-polyfill": "^5.2.1",
-    "notiontheory-basic-build": "^2.7.0",
-    "three": "^0.80.0",
-    "webvr-polyfill": "github:notiontheory/webvr-polyfill",
-    "webvr-standard-monitor": "^1.0.1"
+    "notiontheory-basic-build": "^3.0.0"
   }
 }

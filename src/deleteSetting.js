@@ -19,7 +19,7 @@ pliny.function({
   }]
 });
 
-function deleteSetting(name) {
+default export function deleteSetting(name) {
   if (window.localStorage) {
     window.localStorage.removeItem(name);
   }

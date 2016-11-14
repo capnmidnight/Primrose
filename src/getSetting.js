@@ -31,7 +31,7 @@ code should persist between reloads whatever the user writes in the text area:\n
   }]
 });
 
-function getSetting(name, defValue) {
+export default function getSetting(name, defValue) {
   if (window.localStorage) {
     var val = window.localStorage.getItem(name);
     if (val) {

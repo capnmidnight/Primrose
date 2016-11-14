@@ -33,7 +33,9 @@ It should look something like this:\n\
   }]
 });
 
-function box(width, height, length) {
+import cache from "./cache";
+import { BoxBufferGeometry } from "three/src/geometries/BoxBufferGeometry";
+export default function box(width, height, length) {
   if (height === undefined) {
     height = width;
   }
@@ -42,5 +44,5 @@ function box(width, height, length) {
   }
   return cache(
     `BoxBufferGeometry(${width}, ${height}, ${length})`,
-    () => new THREE.BoxBufferGeometry(width, height, length));
-}
+    () => new BoxBufferGeometry(width, height, length));
+};

@@ -67,6 +67,8 @@ It should look something like this:\n\
   }]
 });
 
+import cache from "./cache";
+import { CylinderBufferGeometry } from "three/src/geometries/CylinderBufferGeometry";
 function cylinder(rT, rB, height, rS, hS, openEnded, thetaStart, thetaEnd) {
   if (rT === undefined) {
     rT = 0.5;
@@ -79,5 +81,5 @@ function cylinder(rT, rB, height, rS, hS, openEnded, thetaStart, thetaEnd) {
   }
   return cache(
     `CylinderBufferGeometry(${rT}, ${rB}, ${height}, ${rS}, ${hS}, ${openEnded}, ${thetaStart}, ${thetaEnd})`,
-    () => new THREE.CylinderBufferGeometry(rT, rB, height, rS, hS, openEnded, thetaStart, thetaEnd));
+    () => new CylinderBufferGeometry(rT, rB, height, rS, hS, openEnded, thetaStart, thetaEnd));
 }
