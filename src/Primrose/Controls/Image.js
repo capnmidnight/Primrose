@@ -36,7 +36,10 @@ pliny.class({
       description: "Named parameters for creating the Image."
     }]
 });
-class Image extends Primrose.Entity {
+import Entity from "./Entity";
+import { textured, quad, shell } from "../../live-api";
+import loadTexture from "../loadTexture";
+default exports class Image extends Entity {
 
   static create() {
     return new Image();
@@ -54,15 +57,15 @@ class Image extends Primrose.Entity {
       };
     }
 
-    options = patch(options, {
+    options = Object.assign({}, {
       id: "Primrose.Controls.Image[" + (COUNTER++) + "]"
-    });
+    }, options);
 
     super(options.id);
 
     this.options = options;
 
-    Primrose.Entity.registerEntity(this);
+    Entity.registerEntity(this);
 
     ////////////////////////////////////////////////////////////////////////
     // initialization
@@ -149,7 +152,7 @@ class Image extends Primrose.Entity {
 
   loadImages(images, progress) {
     return Promise.all(Array.prototype.map.call(images, (src, i) => new Promise((resolve, reject) => {
-      const txt = Primrose.loadTexture(src, resolve, progress, reject);
+      const txt = loadTexture(src, resolve, progress, reject);
       this._textures[i] = txt;
       this._setGeometry();
       this._meshes[i] = textured(

@@ -5,16 +5,18 @@ pliny.class({
     baseClass: "Primrose.Entity",
     description: "A basic 2D form control, with its own mesh to use as a frame."
 });
-class Form extends Primrose.Surface {
+import Surface from "./Surface";
+import { textured, quad } from "../../live-api";
+export default class Form extends Surface {
 
   static create() {
     return new Form();
   }
 
   constructor(options) {
-    super(patch(options, {
+    super(Object.assign({}, {
       id: `Primrose.Controls.Form[${COUNTER++}]`
-    }));
+    }, options));
     this._mesh = textured(quad(1, this.bounds.height / this.bounds.width), this);
     this._mesh.name = this.id + "-mesh";
     Object.defineProperties(this.style, {

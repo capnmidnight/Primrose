@@ -5,6 +5,14 @@ function wrap(thunk) {
   };
 }
 
+const DEFAULT_SPEECH_SETTINGS = {
+  remoteVoices: false,
+  volume: 1,
+  rate: 2,
+  pitch: 2,
+  voice: 0
+};
+
 pliny.class({
   parent: "Primrose.Output",
     name: "Speech",
@@ -14,13 +22,7 @@ const Speech = (function(){
   if(window.speechSynthesis !== undefined) {
     return class {
       constructor (options) {
-        this.options = patch(options, {
-          remoteVoices: false,
-          volume: 1,
-          rate: 2,
-          pitch: 2,
-          voice: 0
-        });
+        this.options = Object.assign({}, DEFAULT_SPEECH_SETTINGS, options);
         this.voices = speechSynthesis
           .getVoices()
           .filter((v) => this.options.remoteVoices || v.default || v.localService);
@@ -46,7 +48,9 @@ const Speech = (function(){
   else {
     // in case of error, return a shim that lets us continue unabated
     return class {
-      speak() {}
+      speak() {
+        return Promise.reject();
+      }
     };
   }
 })();

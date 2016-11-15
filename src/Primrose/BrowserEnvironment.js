@@ -17,7 +17,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
     super();
 
     this.network = null;
-    this.options = patch(options, BrowserEnvironment.DEFAULTS);
+    this.options = Object.assign({}, BrowserEnvironment.DEFAULTS, options);
     this.options.foregroundColor = this.options.foregroundColor || complementColor(new THREE.Color(this.options.backgroundColor))
       .getHex();
     if(this.options.nonstandardIPD !== null){

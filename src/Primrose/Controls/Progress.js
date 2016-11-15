@@ -4,7 +4,8 @@ const SIZE = 1,
   SIZE_SMALL = SIZE / PROPORTION,
   INSET_LARGE = (1 - (1 - INSET) / PROPORTION);
 
-class Progress {
+import { colored, box } from "../../live-api";
+export default class Progress {
 
   constructor(majorColor, minorColor) {
     majorColor = majorColor || 0xffffff;

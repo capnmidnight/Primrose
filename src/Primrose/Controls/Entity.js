@@ -83,59 +83,15 @@ export default class Entity extends AbstractEventEmmiter {
     });
     this.focusable = true;
 
-    pliny.event({
-      parent: "Primrose.Entity",
-      name: "focus",
-      description: "If the element is focusable, occurs when the user clicks on an element for the first time, or when a program calls the `focus()` method."
-    });
-
-    pliny.event({
-      parent: "Primrose.Entity",
-      name: "blur",
-      description: "If the element is focused (which implies it is also focusable), occurs when the user clicks off of an element, or when a program calls the `blur()` method."
-    });
-
-    pliny.event({
-      parent: "Primrose.Entity",
-      name: "click",
-      description: "Occurs whenever the user clicks on an element."
-    });
-
-    pliny.event({
-      parent: "Primrose.Entity",
-      name: "keydown",
-      description: "Occurs when the user pushes a key down while focused on the element."
-    });
-
-    pliny.event({
-      parent: "Primrose.Entity",
-      name: "keyup",
-      description: "Occurs when the user releases a key while focused on the element."
-    });
-
-    pliny.event({
-      parent: "Primrose.Entity",
-      name: "paste",
-      description: "Occurs when the user activates the clipboard's `paste` command while focused on the element."
-    });
-
-    pliny.event({
-      parent: "Primrose.Entity",
-      name: "cut",
-      description: "Occurs when the user activates the clipboard's `cut` command while focused on the element."
-    });
-
-    pliny.event({
-      parent: "Primrose.Entity",
-      name: "copy",
-      description: "Occurs when the user activates the clipboard's `copy` command while focused on the element."
-    });
-
-    pliny.event({
-      parent: "Primrose.Entity",
-      name: "wheel",
-      description: "Occurs when the user scrolls the mouse wheel while focused on the element."
-    });
+    pliny.event({ parent: "Primrose.Entity", name: "focus", description: "If the element is focusable, occurs when the user clicks on an element for the first time, or when a program calls the `focus()` method." });
+    pliny.event({ parent: "Primrose.Entity", name: "blur", description: "If the element is focused (which implies it is also focusable), occurs when the user clicks off of an element, or when a program calls the `blur()` method." });
+    pliny.event({ parent: "Primrose.Entity", name: "click", description: "Occurs whenever the user clicks on an element." });
+    pliny.event({ parent: "Primrose.Entity", name: "keydown", description: "Occurs when the user pushes a key down while focused on the element." });
+    pliny.event({ parent: "Primrose.Entity", name: "keyup", description: "Occurs when the user releases a key while focused on the element." });
+    pliny.event({ parent: "Primrose.Entity", name: "paste", description: "Occurs when the user activates the clipboard's `paste` command while focused on the element." });
+    pliny.event({ parent: "Primrose.Entity", name: "cut", description: "Occurs when the user activates the clipboard's `cut` command while focused on the element." });
+    pliny.event({ parent: "Primrose.Entity", name: "copy", description: "Occurs when the user activates the clipboard's `copy` command while focused on the element." });
+    pliny.event({ parent: "Primrose.Entity", name: "wheel", description: "Occurs when the user scrolls the mouse wheel while focused on the element." });
   }
 
   get id() {

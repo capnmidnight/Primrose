@@ -49,7 +49,7 @@ of element references, with fields named by the ID of the elements that were fou
   }]
 });
 
-function findEverything(elem, obj) {
+export default function findEverything(elem, obj) {
   elem = elem || document;
   obj = obj || {};
   var arr = elem.querySelectorAll("*");

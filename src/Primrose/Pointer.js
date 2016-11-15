@@ -50,7 +50,8 @@ pliny.class({
       defaultValue: null
     }]
 });
-class Pointer extends Primrose.AbstractEventEmitter {
+import AbstractEventEmitter from "./AbstractEventEmitter"
+export default class Pointer extends AbstractEventEmitter {
   constructor(name, color, highlight, s, devices, triggerDevices, options) {
     super();
     this.name = name;

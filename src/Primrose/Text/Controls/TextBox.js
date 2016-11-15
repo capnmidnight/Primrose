@@ -17,6 +17,7 @@ pliny.class({
       description: "Named parameters for creating the TextBox."
     }]
 });
+
 class TextBox extends Primrose.Surface {
 
   static create() {
@@ -24,9 +25,9 @@ class TextBox extends Primrose.Surface {
   }
 
   constructor(options) {
-    super(patch(options, {
+    super(Object.assign({}, {
       id: "Primrose.Text.Controls.TextBox[" + (COUNTER++) + "]"
-    }));
+    }, options));
     this.listeners.change = [];
     ////////////////////////////////////////////////////////////////////////
     // normalize input parameters

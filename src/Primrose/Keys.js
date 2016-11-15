@@ -135,3 +135,5 @@ for (var key in Keys) {
     Keys[val] = key;
   }
 }
+
+export default Keys;

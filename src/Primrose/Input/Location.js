@@ -4,11 +4,12 @@ pliny.class({
     baseClass: "Primrose.InputProcessor",
     description: "| [under construction]"
 });
+
 class Location extends Primrose.InputProcessor {
   constructor(commands, options) {
     super("Location", commands, ["LONGITUDE", "LATITUDE", "ALTITUDE", "HEADING", "SPEED"]);
 
-    this.options = patch(options, Location.DEFAULTS);
+    this.options = Object.assign({}, Location.DEFAULTS, options);
 
     this.available = !!navigator.geolocation;
     if (this.available) {

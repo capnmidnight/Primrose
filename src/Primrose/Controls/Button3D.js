@@ -20,14 +20,14 @@ pliny.class({
 
 import BaseControl from "./BaseControl";
 import { Color, Object3D } from "three/Three";
-class Button3D extends BaseControl {
+export default class Button3D extends BaseControl {
   constructor(model, name, options) {
     super();
 
-    options = patch(options, Button3D);
-    options.minDeflection = Math.cos(options.minDeflection);
-    options.colorUnpressed = new Color(options.colorUnpressed);
-    options.colorPressed = new Color(options.colorPressed);
+    this.options = Object.assign({}, Button3D, options);
+    this.options.minDeflection = Math.cos(this.options.minDeflection);
+    this.options.colorUnpressed = new Color(this.options.colorUnpressed);
+    this.options.colorPressed = new Color(this.options.colorPressed);
 
     pliny.event({
       name: "click",
@@ -74,20 +74,21 @@ class Button3D extends BaseControl {
     this.color = this.cap.material.color;
     this.name = name;
     this.element = null;
-    this.startUV = function (point) {
-      this.color.copy(options.colorPressed);
-      if (this.element) {
-        this.element.click();
-      }
-      else {
-        this.emit("click", { source: this });
-      }
-    };
+  }
 
-    this.endPointer = function (evt) {
-      this.color.copy(options.colorUnpressed);
-      this.emit("release", { source: this });
-    };
+  startUV(point) {
+    this.color.copy(this.options.colorPressed);
+    if (this.element) {
+      this.element.click();
+    }
+    else {
+      this.emit("click", { source: this });
+    }
+  }
+
+  endPointer(evt) {
+    this.color.copy(this.options.colorUnpressed);
+    this.emit("release", { source: this });
   }
 
   dispatchEvent(evt) {

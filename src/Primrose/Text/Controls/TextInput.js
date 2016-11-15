@@ -17,11 +17,9 @@ pliny.class({
 });
 class TextInput extends Primrose.Text.Controls.TextBox {
   constructor(options) {
-    super(copyObject(
-      patch(options, {
+    super(Object.assign({}, {
         id: "Primrose.Text.Controls.TextInput[" + (COUNTER++) + "]",
-        padding: 5
-      }), {
+        padding: 5,
         singleLine: true,
         disableWordWrap: true,
         hideLineNumbers: true,
@@ -29,7 +27,7 @@ class TextInput extends Primrose.Text.Controls.TextBox {
         tabWidth: 1,
         tokenizer: Primrose.Text.Grammars.PlainText,
         commands: Primrose.Text.CommandPacks.TextInput
-      }, true));
+      }, options);
 
     this.passwordCharacter = this.options.passwordCharacter;
   }

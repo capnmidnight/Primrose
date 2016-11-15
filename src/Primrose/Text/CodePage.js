@@ -67,7 +67,7 @@ function CodePage(name, lang, options) {
     }
   };
 
-  copyObject(commands, options);
+  Object.assign(commands, options);
 
   var char, code, cmdName;
   for (var i = 0; i <= 9; ++i) {

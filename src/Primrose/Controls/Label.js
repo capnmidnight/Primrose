@@ -15,14 +15,16 @@ pliny.class({
       description: "Named parameters for creating the Button."
     }]
 });
-class Label extends Primrose.Surface {
+import Surface from "./Surface";
+import Size from "../Text/Size";
+export default class Label extends Surface {
   constructor(options) {
     ////////////////////////////////////////////////////////////////////////
     // normalize input parameters
     ////////////////////////////////////////////////////////////////////////
-    super(patch(options, {
+    super(Object.assign({}, {
       id: "Primrose.Controls.Label[" + (COUNTER++) + "]"
-    }));
+    }, options));
 
     ////////////////////////////////////////////////////////////////////////
     // initialization
@@ -38,7 +40,7 @@ class Label extends Primrose.Surface {
     this._lastTextAlign = null;
 
     this.textAlign = this.options.textAlign;
-    this.character = new Primrose.Text.Size();
+    this.character = new Size();
     this.theme = this.options.theme;
     this.fontSize = this.options.fontSize || 16;
     this.refreshCharacter();

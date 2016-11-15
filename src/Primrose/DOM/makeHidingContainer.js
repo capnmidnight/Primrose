@@ -19,8 +19,9 @@ a newly created element if it does not exist, or an Element to manipulate and va
   returns: "The hiding container element, not yet inserted into the DOM."
 });
 
-function makeHidingContainer(id, obj) {
-  var elem = Primrose.DOM.cascadeElement(id, "div", window.HTMLDivElement);
+import cascadeElement from "./cascadeElement";
+export default function makeHidingContainer(id, obj) {
+  var elem = cascadeElement(id, "div", window.HTMLDivElement);
   elem.style.position = "absolute";
   elem.style.left = 0;
   elem.style.top = 0;

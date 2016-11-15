@@ -15,7 +15,8 @@ pliny.class({
       description: "The size and location of the surface to create."
     }]
 });
-class Surface extends Primrose.Entity {
+import Entity from "./Entity";
+export default class Surface extends Entity {
 
   static create() {
     return new Surface();
@@ -23,10 +24,10 @@ class Surface extends Primrose.Entity {
 
   constructor(options) {
     super();
-    this.options = patch(options, {
+    this.options = Object.assign({}, {
       id: "Primrose.Surface[" + (COUNTER++) + "]",
       bounds: new Primrose.Text.Rectangle()
-    });
+    }, options);
     this.listeners.move = [];
     this.bounds = this.options.bounds;
     this.canvas = null;

@@ -15,7 +15,8 @@ pliny.class({
       description: "Model factory for creating avatars for new remote users."
     }]
 });
-class Manager extends Primrose.AbstractEventEmitter {
+import AbstractEventEmitter from "../AbstractEventEmitter";
+export default class Manager extends AbstractEventEmitter {
   constructor(localUser, audio, factories, options) {
     super();
     this.localUser = localUser;
@@ -91,27 +92,6 @@ class Manager extends Primrose.AbstractEventEmitter {
       this._socket.on("userState", this.updateUser.bind(this));
       this._socket.on("userLeft", this.removeUser.bind(this));
       this._socket.on("connection_lost", this.lostConnection.bind(this));
-
-      if(!this.options.disableWebRTC && "WebRTCSocket" in Primrose) {
-        Primrose.WebRTCSocket.PEERING_EVENTS.forEach((name) => this._socket.on(name, (evt) => {
-          console.log("-->", evt.type, evt);
-          if(evt.toUserName === this.userName){
-            const user = this.users[evt.fromUserName],
-              methodName = "peering_" + name,
-              method = user && user[methodName];
-            if((user.peered || user.peering) && method){
-              method.call(user, evt);
-            }
-            else{
-              console.warn("NO METHOD %s ON USER %s", methodName, user);
-            }
-          }
-          else{
-            console.warn("MESSAGE SENT TO %s FROM %s BUT WE ARE %s", evt.toUserName, evt.fromUserName, this.userName);
-          }
-        }));
-      }
-
       this._socket.emit("listUsers");
       this._socket.emit("getDeviceIndex");
     }
@@ -130,22 +110,6 @@ class Manager extends Primrose.AbstractEventEmitter {
     this.users[toUserName] = user;
     this.updateUser(state);
     this.emit("addavatar", user);
-
-    if(!this.options.disableWebRTC && "WebRTCSocket" in Primrose) {
-      Primrose.WebRTCSocket.PEERING_EVENTS.forEach((name) =>
-        user.addEventListener(name, (evt) => {
-          console.log("<--", name, evt);
-          this._socket.emit(name, evt);
-        }));
-      this.waitForLastUser = this.waitForLastUser
-        .then(() => user.peer(this.audio))
-        .then(() => console.log("%s is peered (%s) with %s", this.userName, user.peered, toUserName))
-        .then(() => {
-          if(user.peeringError) {
-            console.error("Couldn't load user: " + name, user.peeringError);
-          }
-        });
-    }
   }
 
   removeUser(key) {

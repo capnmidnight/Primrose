@@ -82,7 +82,7 @@ pliny.function({
   }]
 });
 
-function cascadeElement(id, tag, DOMClass, add) {
+export default function cascadeElement(id, tag, DOMClass, add) {
   var elem = null;
   if (id === null) {
     elem = document.createElement(tag);

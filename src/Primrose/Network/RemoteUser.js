@@ -29,7 +29,11 @@ pliny.class({
     description: "The name of the user initiating the peer connection."
   }]
 });
-class RemoteUser extends Primrose.AbstractEventEmitter {
+import AbstractEventEmitter from "../AbstractEventEmitter";
+import randColor from "../Random/color";
+import colored from "../../live-api/colored";
+import { Quaternion, Vector3 } from "three/Three";
+export default class RemoteUser extends AbstractEventEmitter {
 
   constructor(userName, modelFactory, nameMaterial, disableWebRTC, requestICEPath, microphone, localUserName, goSecond) {
     super();
@@ -42,7 +46,7 @@ class RemoteUser extends Primrose.AbstractEventEmitter {
     this.stage = modelFactory.clone();
     this.stage.traverse((obj) => {
       if (obj.name === "AvatarBelt") {
-        colored(obj, Primrose.Random.color());
+        colored(obj, randColor());
       }
       else if (obj.name === "AvatarHead") {
         this.head = obj;
@@ -55,13 +59,13 @@ class RemoteUser extends Primrose.AbstractEventEmitter {
     this.nameObject.position.set(bounds.x / 2, bounds.y, 0);
     this.head.add(this.nameObject);
 
-    this.dStageQuaternion = new THREE.Quaternion();
-    this.dHeadPosition = new THREE.Vector3();
-    this.dHeadQuaternion = new THREE.Quaternion();
+    this.dStageQuaternion = new Quaternion();
+    this.dHeadPosition = new Vector3();
+    this.dHeadQuaternion = new Quaternion();
 
-    this.lastStageQuaternion = new THREE.Quaternion();
-    this.lastHeadPosition = new THREE.Vector3();
-    this.lastHeadQuaternion = new THREE.Quaternion();
+    this.lastStageQuaternion = new Quaternion();
+    this.lastHeadPosition = new Vector3();
+    this.lastHeadQuaternion = new Quaternion();
 
     this.headPosition = {
       arr1: [],
@@ -84,52 +88,6 @@ class RemoteUser extends Primrose.AbstractEventEmitter {
     this.gain = null;
     this.panner = null;
     this.analyzer = null;
-
-    if(!disableWebRTC && "WebRTCSocket" in Primrose) {
-
-      Primrose.WebRTCSocket.PEERING_EVENTS
-        .map((name) => "peering_" + name)
-        .forEach((name) => this[name] = (evt) => {
-          if(this.audioChannel[name]){
-            this.audioChannel[name](evt);
-          }
-          else{
-            console.warn(this, "does not have method", name);
-          }
-        });
-
-      this.audioChannel = new Primrose.Network.AudioChannel(requestICEPath, localUserName, userName, microphone, goSecond);
-      this.audioChannel.forward(this, Primrose.WebRTCSocket.PEERING_EVENTS);
-    }
-  }
-
-  peer(audio) {
-    pliny.method({
-      parent: "Pliny.RemoteUser",
-      name: "peer",
-      returns: "Promise",
-      description: "Makes a WebRTCPeerConnection between the local user and this remote user and wires up the audio channel.",
-      parameters: [{
-        name: "audio",
-        type: "Primrose.Output.Audio3D",
-        description: "The audio context form which audio spatialization objects will be created, and to which the remote user's voice chat will be piped."
-      }]
-    });
-    if("WebRTCSocket" in Primrose && !this.peered && !this.peering && !this.peeringError){
-      this.peering = true;
-      return this.audioChannel.ready
-        .then(() => {
-          if (this.audioChannel.inAudio) {
-            this.setAudio(audio, this.audioChannel.inAudio);
-            this.peered = true;
-          }
-        })
-        .catch((exp) => {
-          this.peered = false;
-          this.peeringError = exp;
-        })
-        .then(() => this.peering = false);
-    }
   }
 
   setAudio(audio, audioSource){
@@ -153,15 +111,6 @@ class RemoteUser extends Primrose.AbstractEventEmitter {
     this.panner.coneOuterGain = 0.1;
     this.panner.panningModel = "HRTF";
     this.panner.distanceModel = "exponential";
-  }
-
-  addEventListener(type, thunk){
-    if(Primrose.WebRTCSocket.PEERING_EVENTS.indexOf(type) >= 0){
-      this.audioChannel.addEventListener(type, thunk);
-    }
-    else {
-      super.addEventListener(type, thunk);
-    }
   }
 
   unpeer() {
