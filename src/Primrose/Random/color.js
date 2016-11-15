@@ -28,9 +28,10 @@ pliny.function({
   }]
 });
 
-function color() {
-  var r = Primrose.Random.int(0, 256),
-    g = Primrose.Random.int(0, 256),
-    b = Primrose.Random.int(0, 256);
+import randInt from "./int";
+export default function color() {
+  var r = randInt(0, 256),
+    g = randInt(0, 256),
+    b = randInt(0, 256);
   return r << 16 | g << 8 | b;
-}
+};

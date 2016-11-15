@@ -17,14 +17,17 @@ pliny.class({
     }],
     description: "A 3D button control, with a separate cap from a stand that it sits on. You click and depress the cap on top of the stand to actuate."
 });
-class Button3D extends Primrose.BaseControl {
+
+import BaseControl from "./BaseControl";
+import { Color, Object3D } from "three/Three";
+class Button3D extends BaseControl {
   constructor(model, name, options) {
     super();
 
     options = patch(options, Button3D);
     options.minDeflection = Math.cos(options.minDeflection);
-    options.colorUnpressed = new THREE.Color(options.colorUnpressed);
-    options.colorPressed = new THREE.Color(options.colorPressed);
+    options.colorUnpressed = new Color(options.colorUnpressed);
+    options.colorPressed = new Color(options.colorPressed);
 
     pliny.event({
       name: "click",
@@ -59,7 +62,7 @@ class Button3D extends Primrose.BaseControl {
       type: "THREE.Object3D",
       description: "A grouping collection for the base and cap."
     });
-    this.container = new THREE.Object3D();
+    this.container = new Object3D();
     this.container.add(this.base);
     this.container.add(this.cap);
 

@@ -41,6 +41,7 @@ pliny.function({
   }]
 });
 
-function steps(min, max, steps) {
-  return min + Primrose.Random.int(0, (1 + max - min) / steps) * steps;
-}
+import randInt from "./int";
+export default function steps(min, max, steps) {
+  return min + randInt(0, (1 + max - min) / steps) * steps;
+};

@@ -33,7 +33,7 @@ class BasicTextInput extends Primrose.Text.CommandPack {
         prim.scrollIntoView(prim.frontCursor);
       },
       NORMAL_ENTER: function (prim, tokenRows, currentToken) {
-        emit.call(prim, "change", {
+        prim.emit("change", {
           target: prim
         });
       },

@@ -4,7 +4,7 @@ pliny.class({
   parent: "Primrose.Controls",
     name: "Button2D",
     description: "A simple button to put on a Surface.",
-    baseClass: "Primrose.Controls.AbstractLabel",
+    baseClass: "Primrose.Controls.Label",
     parameters: [{
       name: "idOrCanvasOrContext",
       type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
@@ -15,7 +15,8 @@ pliny.class({
       description: "Named parameters for creating the Button."
     }]
 });
-class Button2D extends Primrose.Controls.AbstractLabel {
+import Label from "./Label";
+export default class Button2D extends Label {
 
   static create() {
     return new Button2D();
@@ -44,7 +45,7 @@ class Button2D extends Primrose.Controls.AbstractLabel {
   endPointer() {
     if (this._activated) {
       this._activated = false;
-      emit.call(this, "click", {
+      this.emit("click", {
         target: this
       });
       this.render();

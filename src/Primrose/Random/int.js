@@ -65,13 +65,7 @@ pliny.function({
   }]
 });
 
-function int(min, max, power) {
-  power = power || 1;
-  if (max === undefined) {
-    max = min;
-    min = 0;
-  }
-  var delta = max - min,
-    n = Math.pow(Math.random(), power);
-  return Math.floor(min + n * delta);
-}
+import randNum from "./number";
+export default function int(min, max, power) {
+  return Math.floor(randNum(min, max, power));
+};

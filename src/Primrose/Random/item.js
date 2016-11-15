@@ -40,6 +40,7 @@ pliny.function({
   }]
 });
 
-function item(arr) {
-  return arr[Primrose.Random.int(arr.length)];
-}
+import randInt from "./int";
+export default function item(arr) {
+  return arr[randInt(arr.length)];
+};

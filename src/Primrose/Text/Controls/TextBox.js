@@ -169,7 +169,7 @@ class TextBox extends Primrose.Surface {
     var lines = txt.split("\n");
     this.pushUndo(lines);
     this.render();
-    emit.call(this, "change", {
+    this.emit("change", {
       target: this
     });
   }

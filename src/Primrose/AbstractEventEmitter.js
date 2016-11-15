@@ -1,4 +1,4 @@
-class AbstractEventEmitter {
+export default class AbstractEventEmitter {
   constructor() {
     this._handlers = {};
   }
@@ -41,4 +41,4 @@ class AbstractEventEmitter {
       }
     }
   }
-}
+};

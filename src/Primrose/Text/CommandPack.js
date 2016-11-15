@@ -3,8 +3,10 @@ pliny.class({
     name: "CommandPack",
     description: "| [under construction]"
 });
-
-function CommandPack(name, commands) {
-  this.name = name;
-  copyObject(this, commands);
-}
+import copyObject from "../../util/copyObject";
+export default class CommandPack {
+  constructor (name, commands) {
+    this.name = name;
+    copyObject(this, commands);
+  }
+};

@@ -151,7 +151,7 @@ env.addEventListener("ready", function(){
 
 let lt = 0;
 env.addEventListener("update", function(){
-  const dt = rad2deg(env.turns - lt);
+  const dt = env.turns.degrees - lt;
   if(Math.abs(dt) > angleThreshold){
     currentMonth = currentMonth + (dt < 0 ? 1 : -1);
     if(currentMonth < 0) {
@@ -161,6 +161,6 @@ env.addEventListener("update", function(){
       currentMonth -= 12;
     }
     showMonth(currentMonth);
-    lt = env.turns;
+    lt = env.turns.degrees;
   }
 });

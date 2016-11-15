@@ -28,8 +28,8 @@ pliny.function({
   }]
 });
 
-function ID() {
+export default function ID() {
   return (Math.random() * Math.log(Number.MAX_VALUE))
     .toString(36)
     .replace(".", "");
-}
+};

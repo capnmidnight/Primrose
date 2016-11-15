@@ -1,3 +1,5 @@
+import Angle from "./Angle";
+
 const MILLISECONDS_TO_SECONDS = 0.001,
   MAX_MOVE_DISTANCE = 5,
   MAX_MOVE_DISTANCE_SQ = MAX_MOVE_DISTANCE * MAX_MOVE_DISTANCE,
@@ -50,7 +52,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       this.input.update(dt);
     };
 
-    this.turns = 0;
+    this.turns = new Angle(0);
     const followEuler = new THREE.Euler(),
       maxX = -Math.PI / 4,
       maxY = Math.PI / 6;
@@ -58,31 +60,8 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
     const moveUI = (dt) => {
       this.ui.position.copy(this.input.stage.position);
       followEuler.setFromQuaternion(this.input.head.quaternion);
-      let turn = followEuler.y,
-        deltaTurnA = turn - this.turns,
-        deltaTurnB = deltaTurnA + Math.PI * 2,
-        deltaTurnC = deltaTurnA - Math.PI * 2,
-        deltaTurn;
-      if(Math.abs(deltaTurnA) < Math.abs(deltaTurnB)) {
-        if(Math.abs(deltaTurnA) < Math.abs(deltaTurnC)) {
-          deltaTurn = deltaTurnA;
-        }
-        else {
-          deltaTurn = deltaTurnC;
-        }
-      }
-      else if(Math.abs(deltaTurnB) < Math.abs(deltaTurnC)) {
-        deltaTurn = deltaTurnB;
-      }
-      else {
-        deltaTurn = deltaTurnC;
-      }
-
-      if(Math.abs(deltaTurn) > maxY) {
-        this.turns += deltaTurn * 0.02;
-      }
-
-      followEuler.set(maxX, this.turns, 0, "YXZ");
+      this.turns.radians = followEuler.y;
+      followEuler.set(maxX, this.turns.radians, 0, "YXZ");
       this.ui.quaternion.setFromEuler(followEuler);
     };
 

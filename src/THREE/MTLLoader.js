@@ -4,11 +4,11 @@
  * @author angelxuanchang
  */
 
-function MTLLoader( manager ) {
+window.THREE.MTLLoader = function MTLLoader( manager ) {
 
   this.manager = ( manager !== undefined ) ? manager : THREE.DefaultLoadingManager;
 
-}
+};
 
 // http://paulbourke.net/dataformats/mtl/
 Object.assign( MTLLoader, {

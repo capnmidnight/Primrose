@@ -79,7 +79,7 @@ pliny.function({
   }]
 });
 
-import identity from "../identity";
+import identity from "../util/identity";
 export default function range(n, m, s, t) {
   const n2 = s && n || 0,
     m2 = s && m || n,

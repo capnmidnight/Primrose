@@ -3,7 +3,7 @@ pliny.function({
   description: "| [under construction]"
 });
 
-import cache from "../cache";
+import cache from "../util/cache";
 import material from "./material";
 import { Texture, Mesh, RepeatWrapping } from "three/Three";
 import { Surface, loadTexture } from "../Primrose";

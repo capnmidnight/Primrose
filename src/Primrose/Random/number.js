@@ -10,6 +10,12 @@ pliny.function({
     name: "max",
     type: "Number",
     description: "The excluded maximum side of the range of numbers."
+  }, {
+    name: "power",
+    type: "Number",
+    optional: true,
+    description: "The power to which to raise the random number before scaling and translating into the desired range. Values greater than 1 skew output values to the minimum of the range. Values less than 1 skew output values to the maximum of the range.",
+    default: 1
   }],
   returns: "Number",
   examples: [{
@@ -37,6 +43,13 @@ pliny.function({
   }]
 });
 
-function number(min, max) {
-  return Math.random() * (max - min) + min;
-}
+export default function number(min, max, power) {
+  power = power || 1;
+  if (max === undefined) {
+    max = min;
+    min = 0;
+  }
+  const delta = max - min,
+    n = Math.pow(Math.random(), power);
+  return min + n * delta;
+};
