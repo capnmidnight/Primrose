@@ -546,7 +546,8 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
           transparent: true,
           opacity: 1,
           resolve: resolve,
-          progress: this.options.progress
+          progress: this.options.progress,
+          anisotropy: 8
         });
         this.registerPickableObject(this.ground);
       });

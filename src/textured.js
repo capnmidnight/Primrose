@@ -13,7 +13,7 @@ function textured(geometry, txt, options) {
   }
 
   var txtID = (txt.id || txt).toString(),
-    textureDescription = `Primrose.textured(${txtID}, ${options.txtRepeatS}, ${options.txtRepeatT})`,
+    textureDescription = `Primrose.textured(${txtID}, ${options.txtRepeatS}, ${options.txtRepeatT}, ${options.anisotropy})`,
     texture = cache(textureDescription, () => {
       if (txt instanceof Primrose.Surface) {
         if (!options.scaleTextureWidth || !options.scaleTextureHeight) {
@@ -93,6 +93,10 @@ function textured(geometry, txt, options) {
   if (options.txtRepeatS * options.txtRepeatT > 1) {
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
     texture.repeat.set(options.txtRepeatS, options.txtRepeatT);
+  }
+
+  if(options.anisotropy){
+    texture.anisotropy = options.anisotropy;
   }
 
   if ((options.scaleTextureWidth || options.scaleTextureHeight)) {
