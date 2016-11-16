@@ -19,3 +19,5 @@ pliny.namespace({
   description: "Primrose helps you make VR applications for web browsers as easy as making other types of interactive web pages.\n\nThis top-level namespace contains classes for manipulating and viewing 3D environments."
 });
 var Primrose = {};
+
+Object.assign(window, webvrStandardMonitor);
