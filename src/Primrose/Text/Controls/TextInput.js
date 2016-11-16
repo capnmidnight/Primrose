@@ -1,3 +1,7 @@
+import TextBox from "./TextBox";
+import PlainText from "../Grammars/PlainText";
+import TextInputCommands from "../CommandPacks/TextInput";
+
 var COUNTER = 0;
 
 pliny.class({
@@ -15,7 +19,7 @@ pliny.class({
       description: "Named parameters for creating the TextInput."
     }]
 });
-class TextInput extends Primrose.Text.Controls.TextBox {
+export default class TextInput extends TextBox {
   constructor(options) {
     super(Object.assign({}, {
         id: "Primrose.Text.Controls.TextInput[" + (COUNTER++) + "]",
@@ -25,8 +29,8 @@ class TextInput extends Primrose.Text.Controls.TextBox {
         hideLineNumbers: true,
         hideScrollBars: true,
         tabWidth: 1,
-        tokenizer: Primrose.Text.Grammars.PlainText,
-        commands: Primrose.Text.CommandPacks.TextInput
+        tokenizer: PlainText,
+        commands: TextInputCommands
       }, options);
 
     this.passwordCharacter = this.options.passwordCharacter;
@@ -62,4 +66,4 @@ class TextInput extends Primrose.Text.Controls.TextBox {
     }
     super.drawText(ctx, txt, x, y);
   }
-}
+};

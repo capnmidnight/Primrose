@@ -1,10 +1,13 @@
+import InputProcessor from "./InputProcessor";
+import isChrome from "../../flags/isChrome";
+
 pliny.class({
   parent: "Primrose.Input",
     name: "Mouse",
     baseClass: "Primrose.InputProcessor",
     description: "| [under construction]"
 });
-class Mouse extends Primrose.InputProcessor {
+export default class Mouse extends InputProcessor {
   constructor(DOMElement, commands) {
     super("Mouse", commands, ["BUTTONS", "X", "Y", "Z", "W"]);
     this.timer = null;
@@ -63,6 +66,6 @@ class Mouse extends Primrose.InputProcessor {
       }
     }, false);
   }
-}
+};
 
 Mouse.NUM_BUTTONS = 3;

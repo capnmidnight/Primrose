@@ -1,10 +1,12 @@
+import CommandPack from "./CommandPack";
+
 pliny.record({
   parent: "Primrose.Text.CommandPacks",
-  name: "TextInput",
-  baseClass: "Primrose.Text.CommandPack",
-  description: "| [under construction]"
+  name: "BasicTextInput",
+  baseClass: "Primrose.Text.CommandPacks.CommandPack",
+  description: "A set of commands for editing a single line of text in a text editor. This is the same set of commands for both single-line text elements and multi-line text elements."
 });
-class BasicTextInput extends Primrose.Text.CommandPack {
+export default class BasicTextInput extends CommandPack {
   constructor(additionalName, additionalCommands) {
     var commands = {
       NORMAL_LEFTARROW: function (prim, tokenRows) {
@@ -111,4 +113,4 @@ class BasicTextInput extends Primrose.Text.CommandPack {
 
     super(additionalName || "Text editor commands", commands);
   }
-}
+};

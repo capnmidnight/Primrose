@@ -1,3 +1,6 @@
+import { Vector3, Matrix4 } from "three/Three";
+import PoseInputProcessor from "./PoseInputProcessor";
+
 const DEFAULT_POSE = {
     position: [0, 0, 0],
     orientation: [0, 0, 0, 1]
@@ -16,7 +19,7 @@ pliny.class({
     }],
     description: "An input manager for gamepad devices."
 });
-class VR extends Primrose.PoseInputProcessor {
+export default class VR extends PoseInputProcessor {
 
   static isStereoDisplay(display) {
     const leftParams = display.getEyeParameters("left"),
@@ -35,7 +38,7 @@ class VR extends Primrose.PoseInputProcessor {
     this.displays = [];
     this._transformers = [];
     this.currentDeviceIndex = -1;
-    this.movePlayer = new THREE.Matrix4();
+    this.movePlayer = new Matrix4();
     this.defaultAvatarHeight = avatarHeight;
     this.stage = null;
     this.lastStageWidth = null;
@@ -218,7 +221,7 @@ class VR extends Primrose.PoseInputProcessor {
 class ViewCameraTransform {
   static makeTransform(eye, near, far) {
     return {
-      translation: new THREE.Vector3().fromArray(eye.offset),
+      translation: new Vector3().fromArray(eye.offset),
       projection: ViewCameraTransform.fieldOfViewToProjectionMatrix(eye.fieldOfView, near, far),
       viewport: {
         left: 0,
@@ -236,7 +239,7 @@ class ViewCameraTransform {
       rightTan = Math.tan(fov.rightDegrees * Math.PI / 180.0),
       xScale = 2.0 / (leftTan + rightTan),
       yScale = 2.0 / (upTan + downTan),
-      matrix = new THREE.Matrix4();
+      matrix = new Matrix4();
 
     matrix.elements[0] = xScale;
     matrix.elements[1] = 0.0;

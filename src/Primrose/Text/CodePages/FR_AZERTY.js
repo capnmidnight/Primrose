@@ -1,11 +1,11 @@
-var CodePage = Primrose.Text.CodePage;
+import CodePage from "./CodePage";
 
 pliny.record({
   parent: "Primrose.Text.CodePages",
   name: "FR_AZERTY",
-  description: "| [under construction]"
+  description: "CodePage for the `Français: AZERTY` locale."
 });
-const FR_AZERTY = new CodePage("Français: AZERTY", "fr", {
+export default FR_AZERTY = new CodePage("Français: AZERTY", "fr", {
   deadKeys: [221, 50, 55],
   NORMAL: {
     "32": " ",

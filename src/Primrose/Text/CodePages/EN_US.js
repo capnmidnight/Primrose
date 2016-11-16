@@ -1,11 +1,11 @@
-var CodePage = Primrose.Text.CodePage;
+import CodePage from "./CodePage";
 
 pliny.record({
   parent: "Primrose.Text.CodePages",
   name: "EN_US",
-  description: "| [under construction]"
+  description: "CodePage for the `English: USA` locale."
 });
-const EN_US = new CodePage("English: USA", "en-US", {
+export default EN_US = new CodePage("English: USA", "en-US", {
   NORMAL: {
     "32": " ",
     "48": "0",

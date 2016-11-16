@@ -6,7 +6,7 @@ export { default as isInIFrame } from "./isInIFrame";
 export { default as isiOS } from "./isiOS";
 export { default as isMobile } from "./isMobile";
 export { default as isOpera } from "./isOpera";
-export { default as isOSX } from "./isOSC";
+export { default as isMacOS } from "./isMacOS";
 export { default as isSafari } from "./isSafari";
 export { default as isWebKit } from "./isWebKit";
 export { default as isWindows } from "./isWindows";

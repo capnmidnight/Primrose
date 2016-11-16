@@ -1,9 +1,11 @@
+import Grammar from "./Grammar";
+
 pliny.value({
   parent: "Primrose.Text.Grammars",
   name: "TestResults",
-  description: "| [under construction]"
+  description: "A grammar for displaying the results of Unit Tests."
 });
-const TestResults = new Primrose.Text.Grammar("TestResults", [
+export default TestResults = new Grammar("TestResults", [
   ["newlines", /(?:\r\n|\r|\n)/, true],
   ["numbers", /(\[)(o+)/, true],
   ["numbers", /(\d+ succeeded), 0 failed/, true],

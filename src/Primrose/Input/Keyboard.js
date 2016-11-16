@@ -1,3 +1,7 @@
+import InputProcessor from "./InputProcessor";
+import { Windows, macOS } from "../Text/OperatingSystems"
+import CodePages from "../Text/CodePages";
+
 pliny.class({
   parent: "Primrose.Input",
     name: "Keyboard",
@@ -21,7 +25,7 @@ pliny.class({
       description: ""
     }]
 });
-class Keyboard extends Primrose.InputProcessor {
+export default class Keyboard extends InputProcessor {
   constructor(input, commands) {
     super("Keyboard", commands);
     this.listeners = {
@@ -64,7 +68,7 @@ class Keyboard extends Primrose.InputProcessor {
   }
 
   set operatingSystem(os) {
-    this._operatingSystem = os || (isOSX ? Primrose.Text.OperatingSystems.OSX : Primrose.Text.OperatingSystems.Windows);
+    this._operatingSystem = os || (isMacOS ? macOS : Windows);
   }
 
   get codePage() {
@@ -87,8 +91,8 @@ class Keyboard extends Primrose.InputProcessor {
         lang = "en-US";
       }
 
-      for (key in Primrose.Text.CodePages) {
-        cp = Primrose.Text.CodePages[key];
+      for (key in CodePages) {
+        cp = CodePages[key];
         if (cp.language === lang) {
           this._codePage = cp;
           break;
@@ -96,7 +100,7 @@ class Keyboard extends Primrose.InputProcessor {
       }
 
       if (!this._codePage) {
-        this._codePage = Primrose.Text.CodePages.EN_US;
+        this._codePage = CodePages.EN_US;
       }
     }
   }

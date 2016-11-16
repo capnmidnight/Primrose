@@ -103,7 +103,7 @@ class Terminal {
     this.loadFile = function (fileName) {
       return Primrose.HTTP.getText(fileName.toLowerCase())
         .then(function (file) {
-          if (isOSX) {
+          if (isMacOS) {
             file = file.replace("CTRL+SHIFT+SPACE", "CMD+OPT+E");
           }
           inputEditor.value = currentProgram = file;

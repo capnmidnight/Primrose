@@ -1,3 +1,5 @@
+import Keys from "../../Keys";
+
 function setCursorCommand(obj, mod, key, func, cur) {
   var name = mod + "_" + key;
   obj[name] = function (prim, tokenRows) {
@@ -13,10 +15,43 @@ function makeCursorCommand(obj, baseMod, key, func) {
 pliny.class({
   parent: "Primrose.Text",
     name: "OperatingSystem",
-    description: "| [under construction]"
+    description: "A description of how a specific operating system handles keyboard shortcuts.",
+    parameters: [{
+      name: "name ",
+      type: "String",
+      description: "A friendly name for the operating system."
+    }, {
+      name: "pre1",
+      type: "String",
+      description: "Standard keyboard modifier."
+    }, {
+      name: "pre2",
+      type: "String",
+      description: "Key modifier for moving the cursor by whole words."
+    }, {
+      name: "redo",
+      type: "String",
+      description: "Key sequence to redo changes in text that were undone."
+    }, {
+      name: "pre3",
+      type: "String",
+      description: "Key modifier for home and end."
+    }, {
+      name: "home",
+      type: "String",
+      description: "Key sequence to send cursor to the beginning of the current line."
+    }, {
+      name: "end",
+      type: "String",
+      description: "Key sequence to send cursor to the end of the current line."
+    }, {
+      name: "pre5",
+      type: "String",
+      description: "Modifiers for the fullHome and fullEnd commands."
+    }]
 });
-class OperatingSystem {
-  constructor(name, pre1, pre2, redo, pre3, home, end, pre5, fullHome, fullEnd) {
+export default class OperatingSystem {
+  constructor(name, pre1, pre2, redo, pre3, home, end, pre5) {
     var pre4 = pre3;
     pre3 = pre3.length > 0 ? pre3 : "NORMAL";
 
@@ -46,11 +81,11 @@ class OperatingSystem {
 
   makeCommandName(evt, codePage) {
     var key = evt.keyCode;
-    if (key !== Primrose.Keys.CTRL &&
-      key !== Primrose.Keys.ALT &&
-      key !== Primrose.Keys.META_L &&
-      key !== Primrose.Keys.META_R &&
-      key !== Primrose.Keys.SHIFT) {
+    if (key !== Keys.CTRL &&
+      key !== Keys.ALT &&
+      key !== Keys.META_L &&
+      key !== Keys.META_R &&
+      key !== Keys.SHIFT) {
 
       var oldDeadKeyState = this._deadKeyState,
         commandName = this._deadKeyState;
@@ -76,4 +111,4 @@ class OperatingSystem {
       return this[commandName] || commandName;
     }
   }
-}
+};

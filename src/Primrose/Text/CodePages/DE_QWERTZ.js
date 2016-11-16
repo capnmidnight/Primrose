@@ -1,11 +1,11 @@
-var CodePage = Primrose.Text.CodePage;
+import CodePage from "./CodePage";
 
 pliny.record({
   parent: "Primrose.Text.CodePages",
   name: "DE_QWERTZ",
-  description: "| [under construction]"
+  description: "CodePage for `Deutsch: QWERTZ` locale."
 });
-const DE_QWERTZ = new CodePage("Deutsch: QWERTZ", "de", {
+export default DE_QWERTZ = new CodePage("Deutsch: QWERTZ", "de", {
   deadKeys: [220, 221, 160, 192],
   NORMAL: {
     "32": " ",

@@ -1,3 +1,5 @@
+import Keys from "../Keys";
+
 const SETTINGS_TO_ZERO = ["heading", "pitch", "roll", "pointerPitch", "headX", "headY", "headZ"];
 
 function initState(){
@@ -20,9 +22,9 @@ function initState(){
 }
 
 function filterMetaKey(k) {
-  for (let i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
-    const m = Primrose.Keys.MODIFIER_KEYS[i];
-    if (Math.abs(k) === Primrose.Keys[m.toLocaleUpperCase()]) {
+  for (let i = 0; i < Keys.MODIFIER_KEYS.length; ++i) {
+    const m = Keys.MODIFIER_KEYS[i];
+    if (Math.abs(k) === Keys[m.toLocaleUpperCase()]) {
       return Math.sign(k) * (i + 1);
     }
   }
@@ -64,8 +66,8 @@ function swap(a, b){
   for(let i = 0; i < this.inputState.axes.length; ++i){
     this[a].axes[i] = this[b].axes[i];
   }
-  for (let i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
-    const m = Primrose.Keys.MODIFIER_KEYS[i];
+  for (let i = 0; i < Keys.MODIFIER_KEYS.length; ++i) {
+    const m = Keys.MODIFIER_KEYS[i];
     this[a][m] = this[b][m];
   }
 }
@@ -95,7 +97,7 @@ pliny.class({
     name: "InputProcessor",
     description: "| [under construction]"
 });
-class InputProcessor {
+export default class InputProcessor {
 
   constructor(name, commands, axisNames) {
     this.name = name;
@@ -108,8 +110,8 @@ class InputProcessor {
     initState.call(this);
 
     const readMetaKeys = (event) => {
-      for (let i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
-        const m = Primrose.Keys.MODIFIER_KEYS[i];
+      for (let i = 0; i < Keys.MODIFIER_KEYS.length; ++i) {
+        const m = Keys.MODIFIER_KEYS[i];
         this.inputState[m] = event[m + "Key"];
       }
     };
@@ -128,8 +130,8 @@ class InputProcessor {
       this.addCommand(cmdName, commands[cmdName]);
     }
 
-    for (let i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
-      this.inputState[Primrose.Keys.MODIFIER_KEYS[i]] = false;
+    for (let i = 0; i < Keys.MODIFIER_KEYS.length; ++i) {
+      this.inputState[Keys.MODIFIER_KEYS[i]] = false;
     }
   }
 
@@ -180,10 +182,10 @@ class InputProcessor {
   update(dt) {
     if (this.enabled && this.ready && this.inPhysicalUse && !this.paused && dt > 0) {
 
-      this.inputState.buttons[Primrose.Keys.ANY] = false;
+      this.inputState.buttons[Keys.ANY] = false;
       for (const n in this.inputState.buttons) {
         if (this.inputState.buttons[n]) {
-          this.inputState.buttons[Primrose.Keys.ANY] = true;
+          this.inputState.buttons[Keys.ANY] = true;
           break;
         }
       }
@@ -200,9 +202,9 @@ class InputProcessor {
             for (let n = 0; n < cmd.metaKeys.length && pressed; ++n) {
               var m = cmd.metaKeys[n];
               pressed = pressed &&
-                (this.inputState[Primrose.Keys.MODIFIER_KEYS[m.index]] &&
+                (this.inputState[Keys.MODIFIER_KEYS[m.index]] &&
                   !m.toggle ||
-                  !this.inputState[Primrose.Keys.MODIFIER_KEYS[m.index]] &&
+                  !this.inputState[Keys.MODIFIER_KEYS[m.index]] &&
                   m.toggle);
             }
           }

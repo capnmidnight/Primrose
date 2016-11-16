@@ -1,9 +1,10 @@
+import Grammar from "./Grammar";
 pliny.value({
   parent: "Primrose.Text.Grammars",
   name: "JavaScript",
-  description: "| [under construction]"
+  description: "A grammar for the JavaScript programming language."
 });
-const JavaScript = new Primrose.Text.Grammar("JavaScript", [
+export default JavaScript = new Grammar("JavaScript", [
   ["newlines", /(?:\r\n|\r|\n)/],
   ["startBlockComments", /\/\*/],
   ["endBlockComments", /\*\//],
@@ -12,7 +13,7 @@ const JavaScript = new Primrose.Text.Grammar("JavaScript", [
   ["startLineComments", /\/\/.*$/m],
   ["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/],
   ["keywords",
-    /\b(?:break|case|catch|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/
+    /\b(?:break|case|catch|class|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/
   ],
   ["functions", /(\w+)(?:\s*\()/],
   ["members", /(\w+)\./],

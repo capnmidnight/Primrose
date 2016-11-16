@@ -1,9 +1,12 @@
+import { Vector3, Quaternion, Matrix4 } from "three/Three";
+import InputProcessor from "./InputProcessor";
+
 const DEFAULT_POSE = {
     position: [0, 0, 0],
     orientation: [0, 0, 0, 1]
   },
-  EMPTY_SCALE = new THREE.Vector3(),
-  IE_CORRECTION = new THREE.Quaternion(1, 0, 0, 0);
+  EMPTY_SCALE = new Vector3(),
+  IE_CORRECTION = new Quaternion(1, 0, 0, 0);
 
 pliny.class({
   parent: "Primrose",
@@ -11,18 +14,18 @@ pliny.class({
     baseClass: "Primrose.InputProcessor",
     description: "| [under construction]"
 });
-class PoseInputProcessor extends Primrose.InputProcessor {
+export default class PoseInputProcessor extends InputProcessor {
   constructor(name, commands, axisNames) {
     super(name, commands, axisNames);
 
     this.currentDevice = null;
     this.lastPose = null;
     this.currentPose = null;
-    this.posePosition = new THREE.Vector3();
-    this.poseQuaternion = new THREE.Quaternion();
-    this.position = new THREE.Vector3();
-    this.quaternion = new THREE.Quaternion();
-    this.matrix = new THREE.Matrix4();
+    this.posePosition = new Vector3();
+    this.poseQuaternion = new Quaternion();
+    this.position = new Vector3();
+    this.quaternion = new Quaternion();
+    this.matrix = new Matrix4();
   }
 
   get hasPose() {
@@ -62,4 +65,4 @@ class PoseInputProcessor extends Primrose.InputProcessor {
     this.matrix.multiplyMatrices(stageMatrix, this.matrix);
     this.matrix.decompose(this.position, this.quaternion, EMPTY_SCALE);
   }
-}
+};

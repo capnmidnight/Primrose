@@ -1,11 +1,12 @@
 // we don't use strict here because this grammar includes an interpreter that uses `eval()`
+import Grammar from "./Grammar";
 
 pliny.value({
   parent: "Primrose.Text.Grammars",
   name: "Basic",
-  description: "| [under construction]"
+  description: "A grammar and an interpreter for a BASIC-like language."
 });
-var Basic = new Primrose.Text.Grammar("BASIC",
+export default Basic = new Grammar("BASIC",
   // Grammar rules are applied in the order they are specified.
   [
     // Text needs at least the newlines token, or else every line will attempt to render as a single line and the line count won't work.

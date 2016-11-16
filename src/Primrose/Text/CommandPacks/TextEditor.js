@@ -1,9 +1,11 @@
+import BasicTextInput from "./BasicTextInput";
+
 pliny.record({
   parent: "Primrose.Text.CommandPacks",
   name: "TextEditor",
-  description: "| [under construction]"
+  description: "A set of commands for a multi-line text editing, extending single-line text editing."
 });
-const TextEditor = new Primrose.Text.CommandPacks.BasicTextInput(
+export default TextEditor = new BasicTextInput(
   "Text Area input commands", {
     NORMAL_UPARROW: function (prim, tokenRows) {
       prim.cursorUp(tokenRows, prim.frontCursor);

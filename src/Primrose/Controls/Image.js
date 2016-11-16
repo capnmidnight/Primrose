@@ -39,7 +39,7 @@ pliny.class({
 import Entity from "./Entity";
 import { textured, quad, shell } from "../../live-api";
 import loadTexture from "../loadTexture";
-default exports class Image extends Entity {
+export default class Image extends Entity {
 
   static create() {
     return new Image();

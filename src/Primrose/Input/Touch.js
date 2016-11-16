@@ -1,4 +1,7 @@
-const TEMP = new THREE.Vector2();
+import { Vector2 } from "three/Three";
+import InputProcessor from "./InputProcessor";
+
+const TEMP = new Vector2();
 
 pliny.class({
   parent: "Primrose.Input",
@@ -6,7 +9,7 @@ pliny.class({
     baseClass: "Primrose.InputProcessor",
     description: "| [under construction]"
 });
-class Touch extends Primrose.InputProcessor {
+export default class Touch extends InputProcessor {
   constructor(DOMElement, commands) {
     var axes = ["FINGERS"];
     for (var i = 0; i < 10; ++i) {
@@ -80,4 +83,4 @@ class Touch extends Primrose.InputProcessor {
       this.setAxis("LY" + id, y);
     }
   }
-}
+};

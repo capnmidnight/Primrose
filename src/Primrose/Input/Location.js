@@ -1,3 +1,5 @@
+import InputProcessor from "./InputProcessor";
+
 pliny.class({
   parent: "Primrose.Input",
     name: "Location",
@@ -5,7 +7,7 @@ pliny.class({
     description: "| [under construction]"
 });
 
-class Location extends Primrose.InputProcessor {
+export default class Location extends InputProcessor {
   constructor(commands, options) {
     super("Location", commands, ["LONGITUDE", "LATITUDE", "ALTITUDE", "HEADING", "SPEED"]);
 
@@ -29,7 +31,7 @@ class Location extends Primrose.InputProcessor {
     }
     this.update();
   }
-}
+};
 
 Location.DEFAULTS = {
   enableHighAccuracy: true,

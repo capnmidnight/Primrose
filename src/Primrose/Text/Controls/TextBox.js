@@ -1,3 +1,12 @@
+import Surface from "../../Controls/Surface";
+import Cursor from "../Cursor";
+import Point from "../Point";
+import Size from "../Size";
+import Rectangle from "../Rectangle";
+import TextEditor from "../CommandPacks/TextEditor";
+import DefaultTheme from "../Themes/Default";
+import JavaScript from "../Grammars/JavaScript";
+
 var SCROLL_SCALE = isFirefox ? 3 : 100,
   COUNTER = 0,
   OFFSET = 0;
@@ -18,7 +27,7 @@ pliny.class({
     }]
 });
 
-class TextBox extends Primrose.Surface {
+export default class TextBox extends Surface {
 
   static create() {
     return new TextBox();
@@ -85,34 +94,34 @@ class TextBox extends Primrose.Surface {
     this._lastScrollY = -1;
     this._lastFocused = false;
     this._lastThemeName = null;
-    this._lastPointer = new Primrose.Text.Point();
+    this._lastPointer = new Point();
 
     // different browsers have different sets of keycodes for less-frequently
     // used keys like curly brackets.
     this._browser = isChrome ? "CHROMIUM" : (isFirefox ? "FIREFOX" : (isIE ? "IE" : (isOpera ? "OPERA" : (isSafari ? "SAFARI" : "UNKNOWN"))));
-    this._pointer = new Primrose.Text.Point();
+    this._pointer = new Point();
     this._deadKeyState = "";
     this._history = [];
     this._historyFrame = -1;
-    this._topLeftGutter = new Primrose.Text.Size();
-    this._bottomRightGutter = new Primrose.Text.Size();
+    this._topLeftGutter = new Size();
+    this._bottomRightGutter = new Size();
     this._dragging = false;
     this._scrolling = false;
     this._wheelScrollSpeed = 4;
-    var subBounds = new Primrose.Text.Rectangle(0, 0, this.bounds.width, this.bounds.height);
-    this._fg = new Primrose.Surface({
+    var subBounds = new Rectangle(0, 0, this.bounds.width, this.bounds.height);
+    this._fg = new Surface({
       id: this.id + "-fore",
       bounds: subBounds
     });
     this._fgCanvas = this._fg.canvas;
     this._fgfx = this._fg.context;
-    this._bg = new Primrose.Surface({
+    this._bg = new Surface({
       id: this.id + "-back",
       bounds: subBounds
     });
     this._bgCanvas = this._bg.canvas;
     this._bgfx = this._bg.context;
-    this._trim = new Primrose.Surface({
+    this._trim = new Surface({
       id: this.id + "-trim",
       bounds: subBounds
     });
@@ -127,15 +136,15 @@ class TextBox extends Primrose.Surface {
     this.wordWrap = !this.options.disableWordWrap;
     this.readOnly = !!this.options.readOnly;
     this.multiline = !this.options.singleLine;
-    this.gridBounds = new Primrose.Text.Rectangle();
-    this.frontCursor = new Primrose.Text.Cursor();
-    this.backCursor = new Primrose.Text.Cursor();
-    this.scroll = new Primrose.Text.Point();
-    this.character = new Primrose.Text.Size();
+    this.gridBounds = new Rectangle();
+    this.frontCursor = new Cursor();
+    this.backCursor = new Cursor();
+    this.scroll = new Point();
+    this.character = new Size();
     this.theme = this.options.theme;
     this.fontSize = this.options.fontSize;
     this.tokenizer = this.options.tokenizer;
-    this.commandPack = this.options.commands || Primrose.Text.CommandPacks.TextEditor;
+    this.commandPack = this.options.commands || TextEditor;
     this.value = this.options.value;
     this.padding = this.options.padding || 1;
 
@@ -176,8 +185,8 @@ class TextBox extends Primrose.Surface {
   }
 
   get selectedText() {
-    var minCursor = Primrose.Text.Cursor.min(this.frontCursor, this.backCursor),
-      maxCursor = Primrose.Text.Cursor.max(this.frontCursor, this.backCursor);
+    var minCursor = Cursor.min(this.frontCursor, this.backCursor),
+      maxCursor = Cursor.max(this.frontCursor, this.backCursor);
     return this.value.substring(minCursor.i, maxCursor.i);
   }
 
@@ -186,8 +195,8 @@ class TextBox extends Primrose.Surface {
     str = str.replace(/\r\n/g, "\n");
 
     if (this.frontCursor.i !== this.backCursor.i || str.length > 0) {
-      var minCursor = Primrose.Text.Cursor.min(this.frontCursor, this.backCursor),
-        maxCursor = Primrose.Text.Cursor.max(this.frontCursor, this.backCursor),
+      var minCursor = Cursor.min(this.frontCursor, this.backCursor),
+        maxCursor = Cursor.max(this.frontCursor, this.backCursor),
         // TODO: don't recalc the string first.
         text = this.value,
         left = text.substring(0, minCursor.i),
@@ -246,7 +255,7 @@ class TextBox extends Primrose.Surface {
   }
 
   set theme(t) {
-    this._theme = clone(t || Primrose.Text.Themes.Default);
+    this._theme = clone(t || DefaultTheme);
     this._theme.fontSize = this.fontSize;
     this._rowCache = {};
     this.render();
@@ -285,7 +294,7 @@ class TextBox extends Primrose.Surface {
   }
 
   set tokenizer(tk) {
-    this._tokenizer = tk || Primrose.Text.Grammars.JavaScript;
+    this._tokenizer = tk || JavaScript;
     if (this._history && this._history.length > 0) {
       this.refreshTokens();
       this.render();
@@ -660,10 +669,10 @@ class TextBox extends Primrose.Surface {
   }
 
   renderCanvasBackground() {
-    var minCursor = Primrose.Text.Cursor.min(this.frontCursor, this.backCursor),
-      maxCursor = Primrose.Text.Cursor.max(this.frontCursor, this.backCursor),
-      tokenFront = new Primrose.Text.Cursor(),
-      tokenBack = new Primrose.Text.Cursor(),
+    var minCursor = Cursor.min(this.frontCursor, this.backCursor),
+      maxCursor = Cursor.max(this.frontCursor, this.backCursor),
+      tokenFront = new Cursor(),
+      tokenBack = new Cursor(),
       clearFunc = this.theme.regular.backColor ? "fillRect" : "clearRect",
       OFFSETY = OFFSET / this.character.height;
 
@@ -680,7 +689,7 @@ class TextBox extends Primrose.Surface {
     // draw the current row highlighter
     if (this.focused) {
       this.fillRect(this._bgfx, this.theme.regular.currentRowBackColor ||
-        Primrose.Text.Themes.Default.regular.currentRowBackColor,
+        DefaultTheme.regular.currentRowBackColor,
         0, minCursor.y + OFFSETY,
         this.gridBounds.width,
         maxCursor.y - minCursor.y + 1);
@@ -703,12 +712,12 @@ class TextBox extends Primrose.Surface {
           var inSelection = minCursor.i <= tokenBack.i && tokenFront.i <
             maxCursor.i;
           if (inSelection) {
-            var selectionFront = Primrose.Text.Cursor.max(minCursor,
+            var selectionFront = Cursor.max(minCursor,
               tokenFront);
-            var selectionBack = Primrose.Text.Cursor.min(maxCursor, tokenBack);
+            var selectionBack = Cursor.min(maxCursor, tokenBack);
             var cw = selectionBack.i - selectionFront.i;
             this.fillRect(this._bgfx, this.theme.regular.selectedBackColor ||
-              Primrose.Text.Themes.Default.regular.selectedBackColor,
+              DefaultTheme.regular.selectedBackColor,
               selectionFront.x, selectionFront.y + OFFSETY,
               cw, 1);
           }
@@ -733,8 +742,8 @@ class TextBox extends Primrose.Surface {
   }
 
   renderCanvasForeground() {
-    var tokenFront = new Primrose.Text.Cursor(),
-      tokenBack = new Primrose.Text.Cursor();
+    var tokenFront = new Cursor(),
+      tokenBack = new Cursor();
 
     this._fgfx.clearRect(0, 0, this.imageWidth, this.imageHeight);
     this._fgfx.save();
@@ -801,8 +810,8 @@ class TextBox extends Primrose.Surface {
 
 
   renderCanvasTrim() {
-    var tokenFront = new Primrose.Text.Cursor(),
-      tokenBack = new Primrose.Text.Cursor(),
+    var tokenFront = new Cursor(),
+      tokenBack = new Cursor(),
       maxLineWidth = 0;
 
     this._tgfx.clearRect(0, 0, this.imageWidth, this.imageHeight);
@@ -835,7 +844,7 @@ class TextBox extends Primrose.Surface {
         }
         this.fillRect(this._tgfx,
           this.theme.regular.selectedBackColor ||
-          Primrose.Text.Themes.Default.regular.selectedBackColor,
+          DefaultTheme.regular.selectedBackColor,
           0, y,
           this.gridBounds.x, 1);
         this._tgfx.font = "bold " + this.character.height + "px " +
@@ -856,7 +865,7 @@ class TextBox extends Primrose.Surface {
     if (this.showLineNumbers) {
       this.strokeRect(this._tgfx,
         this.theme.regular.foreColor ||
-        Primrose.Text.Themes.Default.regular.foreColor,
+        DefaultTheme.regular.foreColor,
         0, 0,
         this.gridBounds.x, this.gridBounds.height);
     }
@@ -869,7 +878,7 @@ class TextBox extends Primrose.Surface {
         scrollY = (this.scroll.y * drawHeight) / this._tokenRows.length;
 
       this._tgfx.fillStyle = this.theme.regular.selectedBackColor ||
-        Primrose.Text.Themes.Default.regular.selectedBackColor;
+        DefaultTheme.regular.selectedBackColor;
       // horizontal
       var bw;
       if (!this.wordWrap && maxLineWidth > this.gridBounds.width) {
@@ -895,7 +904,7 @@ class TextBox extends Primrose.Surface {
     this._tgfx.restore();
     this._tgfx.strokeRect(1, 1, this.imageWidth - 2, this.imageHeight - 2);
     if (!this.focused) {
-      this._tgfx.fillStyle = this.theme.regular.unfocused || Primrose.Text.Themes.Default.regular.unfocused;
+      this._tgfx.fillStyle = this.theme.regular.unfocused || DefaultTheme.regular.unfocused;
       this._tgfx.fillRect(0, 0, this.imageWidth, this.imageHeight);
     }
   }
@@ -931,7 +940,7 @@ class TextBox extends Primrose.Surface {
         if (cursorChanged && !(layoutChanged || scrollChanged || themeChanged || focusChanged)) {
           var top = Math.min(this.frontCursor.y, this._lastFrontCursor.y, this.backCursor.y, this._lastBackCursor.y) - this.scroll.y + this.gridBounds.y,
             bottom = Math.max(this.frontCursor.y, this._lastFrontCursor.y, this.backCursor.y, this._lastBackCursor.y) - this.scroll.y + 1;
-          changeBounds = new Primrose.Text.Rectangle(
+          changeBounds = new Rectangle(
             0,
             top * this.character.height,
             this.bounds.width,

@@ -1,3 +1,5 @@
+import PoseInputProcessor from "./PoseInputProcessor"
+
 navigator.getGamepads = navigator.getGamepads ||
   navigator.webkitGetGamepads;
 
@@ -37,7 +39,8 @@ pliny.class({
     }],
     description: "An input processor for Gamepads, including those with positional data."
 });
-class Gamepad extends Primrose.PoseInputProcessor {
+export default class Gamepad extends PoseInputProcessor {
+
   static get isAvailable() {
     return !!navigator.getGamepads;
   }

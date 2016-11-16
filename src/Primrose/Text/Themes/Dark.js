@@ -1,9 +1,9 @@
 pliny.record({
   parent: "Primrose.Text.Themes",
   name: "Dark",
-  description: "| [under construction]"
+  description: "A dark background with a light foreground for text."
 });
-const Dark = {
+export default Dark = {
   name: "Dark",
   fontFamily: "'Droid Sans Mono', 'Consolas', 'Lucida Console', 'Courier New', 'Courier', monospace",
   cursorColor: "white",

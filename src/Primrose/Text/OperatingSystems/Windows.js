@@ -1,13 +1,10 @@
-////
-// cut, copy, and paste commands are events that the browser manages,
-// so we don't have to include handlers for them here.
-///
+import OperatingSystem from "./OperatingSystem";
 pliny.value({
   parent: "Primrose.Text.OperatingSystems",
-  name: "OSX",
-  description: "| [under construction]"
+  name: "Windows",
+  description: "Keyboard shortcuts for the Windows operating system."
 });
-const Windows = new Primrose.Text.OperatingSystem(
+export default Windows = new OperatingSystem(
   "Windows", "CTRL", "CTRL", "CTRL_y",
   "", "HOME", "END",
   "CTRL", "HOME", "END");
