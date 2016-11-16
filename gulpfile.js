@@ -1,5 +1,6 @@
 var gulp = require("gulp"),
   exec = require("child_process").exec,
+  fs = require("fs"),
   pliny = require("pliny"),
   pkg = require("./package.json"),
   build = require("notiontheory-basic-build"),
@@ -24,10 +25,15 @@ var gulp = require("gulp"),
     "node_modules/three/build/three.js",
     "node_modules/three/examples/js/loaders/OBJLoader.js",
     "node_modules/iphone-inline-video/dist/iphone-inline-video.browser.js",
-    "../webvr-polyfill/build/webvr-polyfill.js",
-    "../webvr-standard-monitor/webvr-standard-monitor.js",
+    "../webvr-polyfill/webvrMinPolyfill.js",
+    "../webvr-standard-monitor/webvrStandardMonitor.js",
     "PrimroseLib.js"
-  ], [{
+  ].map((file) => {
+    if(!fs.existsSync(file)){
+      throw new Error("file doesn't exist: " + file);
+    }
+    return file;
+  }), [{
     debug: min.debug,
     release: min.debug
   }]),
