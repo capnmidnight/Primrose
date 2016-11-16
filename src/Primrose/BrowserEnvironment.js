@@ -514,6 +514,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
 
         this.sky = skyFunc(skyGeom, this.options.skyTexture, {
           side: THREE.BackSide,
+          fog: false,
           unshaded: true,
           transparent: true,
           opacity: 1,
