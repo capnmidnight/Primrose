@@ -45,7 +45,7 @@ export default class VR extends PoseInputProcessor {
     this.lastStageDepth = null;
     this.isStereo = false;
 
-    WebVRStandardMonitor();
+    installWebVRStandardMonitor();
     this.ready = navigator.getVRDisplays()
       .then((displays) => {
         // We skip the Standard Monitor and Magic Window on iOS because we can't

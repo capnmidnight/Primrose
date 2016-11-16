@@ -14,13 +14,17 @@ export default function material(textureDescription, options){
   if(options.color === undefined){
     options.color = 0xffffff;
   }
+  if(options.fog === undefined){
+    options.fog = true;
+  }
 
   options.unshaded = !!options.unshaded;
   options.wireframe = !!options.wireframe;
 
-  var materialDescription = `Primrose.material(${textureDescription}, ${options.color}, ${options.unshaded}, ${options.side}, ${options.opacity}, ${options.roughness}, ${options.metalness}, ${options.color}, ${options.emissive}, ${options.wireframe})`;
+  var materialDescription = `Primrose.material(${textureDescription}, ${options.color}, ${options.unshaded}, ${options.side}, ${options.opacity}, ${options.roughness}, ${options.metalness}, ${options.color}, ${options.emissive}, ${options.wireframe}, ${options.fog})`;
   return cache(materialDescription, () => {
     var materialOptions = {
+        fog: options.fog,
         transparent: options.transparent || options.opacity < 1,
         opacity: options.opacity,
         side: options.side || FrontSide

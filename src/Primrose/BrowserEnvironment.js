@@ -493,6 +493,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
 
         this.sky = skyFunc(skyGeom, this.options.skyTexture, {
           side: THREE.BackSide,
+          fog: false,
           unshaded: true,
           transparent: true,
           opacity: 1,
@@ -524,7 +525,8 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
           transparent: true,
           opacity: 1,
           resolve: resolve,
-          progress: this.options.progress
+          progress: this.options.progress,
+          anisotropy: 8
         });
         this.registerPickableObject(this.ground);
       });
@@ -697,7 +699,13 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
         }, false);
       }));
 
-      this.fader = colored(box(1, 1, 1), 0x000000, {opacity: 0, transparent: true, unshaded: true, side: THREE.BackSide});
+      this.fader = colored(box(1, 1, 1), this.options.backgroundColor, {
+        opacity: 0,
+        fog: false,
+        transparent: true,
+        unshaded: true,
+        side: THREE.BackSide
+      });
       this.fader.visible = false;
       this.input.head.root.add(this.fader);
 
