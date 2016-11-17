@@ -3,7 +3,7 @@ pliny.class({
     name: "Rectangle",
     description: "| [under construction]"
 });
-class Rectangle {
+export default class Rectangle {
   constructor(x, y, width, height) {
     this.point = new Primrose.Text.Point(x, y);
     this.size = new Primrose.Text.Size(width, height);
@@ -99,4 +99,4 @@ class Rectangle {
       return new Rectangle(left, top, right - left, bottom - top);
     }
   }
-}
+};

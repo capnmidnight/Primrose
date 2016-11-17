@@ -10,4 +10,4 @@ pliny.record({
   name: "TextInput",
   description: "A concrete instantiation of the single-line text editor commands provided by BasicTextInput."
 });
-export default TextInput = new BasicTextInput("Text Line input commands");
+export default new BasicTextInput("Text Line input commands");

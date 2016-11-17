@@ -1,7 +1,7 @@
 var objectIDs = new WeakMap(),
   counter = 0;
 
-function loadTexture(url, resolve, progress, reject) {
+export default function loadTexture(url, resolve, progress, reject) {
   var textureLoader = null,
     txtName = null;
   if(url instanceof Array && url.length === 6) {

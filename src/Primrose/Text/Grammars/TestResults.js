@@ -5,7 +5,7 @@ pliny.value({
   name: "TestResults",
   description: "A grammar for displaying the results of Unit Tests."
 });
-export default TestResults = new Grammar("TestResults", [
+export default new Grammar("TestResults", [
   ["newlines", /(?:\r\n|\r|\n)/, true],
   ["numbers", /(\[)(o+)/, true],
   ["numbers", /(\d+ succeeded), 0 failed/, true],

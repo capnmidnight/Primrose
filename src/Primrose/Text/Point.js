@@ -4,26 +4,28 @@ pliny.class({
     description: "| [under construction]"
 });
 
-function Point(x, y) {
-  this.set(x || 0, y || 0);
-}
-
-Point.prototype.set = function (x, y) {
-  this.x = x;
-  this.y = y;
-};
-
-Point.prototype.copy = function (p) {
-  if (p) {
-    this.x = p.x;
-    this.y = p.y;
+export default class Point {
+  constructor (x, y) {
+    this.set(x || 0, y || 0);
   }
-};
 
-Point.prototype.clone = function () {
-  return new Point(this.x, this.y);
-};
+  set(x, y) {
+    this.x = x;
+    this.y = y;
+  }
 
-Point.prototype.toString = function () {
-  return "(x:" + this.x + ", y:" + this.y + ")";
+  copy(p) {
+    if (p) {
+      this.x = p.x;
+      this.y = p.y;
+    }
+  }
+
+  clone() {
+    return new Point(this.x, this.y);
+  }
+
+  toString() {
+    return "(x:" + this.x + ", y:" + this.y + ")";
+  }
 };

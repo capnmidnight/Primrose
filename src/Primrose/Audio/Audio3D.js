@@ -14,7 +14,7 @@ pliny.class({
     name: "Audio3D",
     description: "| [under construction]"
 });
-class Audio3D {
+export default class Audio3D {
 
   static setAudioStream(stream, id) {
     const audioElementCount = document.querySelectorAll("audio")

@@ -17,7 +17,7 @@ pliny.class({
     name: "Music",
     description: "| [under construction]"
 });
-class Music {
+export default class Music {
   static piano(n) {
     return 440 * Math.pow(PIANO_BASE, n - 49);
   }

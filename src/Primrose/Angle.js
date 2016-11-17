@@ -116,11 +116,11 @@ export default class Angle {
     this._value = newValue + this._delta;
   }
 
-  get radians {
+  get radians() {
     return this.degrees * DEG2RAD;
   }
 
-  set radians (val) {
+  set radians(val) {
 
     pliny.property({
       parent: "Primrose.Angle",

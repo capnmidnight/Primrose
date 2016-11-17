@@ -1,3 +1,5 @@
+import AbstractEventEmitter from "../AbstractEventEmitter"
+
 var entityKeys = [],
   entities = new WeakMap();
 
@@ -6,8 +8,7 @@ pliny.class({
     name: "Entity",
     description: "The Entity class is the parent class for all 3D controls. It manages a unique ID for every new control, the focus state of the control, and performs basic conversions from DOM elements to the internal Control format."
 });
-import AbstractEventEmmiter from "../AbstractEventEmmiter"
-export default class Entity extends AbstractEventEmmiter {
+export default class Entity extends AbstractEventEmitter {
 
   static registerEntity(e) {
     pliny.function({

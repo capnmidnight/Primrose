@@ -5,4 +5,4 @@ pliny.value({
 iOS operating system: iPad, iPod Touch, iPhone. Useful for invoking optional code\n\
 paths necessary to deal with deficiencies in Apple's implementation of web standards."
 });
-export default isiOS = /iP(hone|od|ad)/.test(navigator.userAgent || "");
+export default /iP(hone|od|ad)/.test(navigator.userAgent || "");

@@ -4,26 +4,28 @@ pliny.class({
     description: "| [under construction]"
 });
 
-function Size(width, height) {
-  this.set(width || 0, height || 0);
-}
-
-Size.prototype.set = function (width, height) {
-  this.width = width;
-  this.height = height;
-};
-
-Size.prototype.copy = function (s) {
-  if (s) {
-    this.width = s.width;
-    this.height = s.height;
+export default class Size {
+  constructor(width, height) {
+    this.set(width || 0, height || 0);
   }
-};
 
-Size.prototype.clone = function () {
-  return new Size(this.width, this.height);
-};
+  set(width, height) {
+    this.width = width;
+    this.height = height;
+  }
 
-Size.prototype.toString = function () {
-  return "<w:" + this.width + ", h:" + this.height + ">";
+  copy(s) {
+    if (s) {
+      this.width = s.width;
+      this.height = s.height;
+    }
+  }
+
+  clone() {
+    return new Size(this.width, this.height);
+  }
+
+  toString() {
+    return "<w:" + this.width + ", h:" + this.height + ">";
+  }
 };

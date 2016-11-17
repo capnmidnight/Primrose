@@ -3,4 +3,4 @@ pliny.value({
   type: "Boolean",
   description: "Flag indicating the application is running on the Samsung Gear VR in the Samsung Internet app."
 });
-export default isGearVR = navigator.userAgent.indexOf("Mobile VR") > -1;
+export default navigator.userAgent.indexOf("Mobile VR") > -1;

@@ -3,7 +3,7 @@ pliny.class({
     name: "Terminal",
     description: "| [under construction]"
 });
-class Terminal {
+export default class Terminal {
   constructor(inputEditor, outputEditor) {
     outputEditor = outputEditor || inputEditor;
 

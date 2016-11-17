@@ -5,7 +5,7 @@ pliny.record({
   name: "EN_UKX",
   description: "CodePage for the `English: UK Extended` locale."
 });
-export default EN_UKX = new CodePage("English: UK Extended", "en-GB", {
+export default new CodePage("English: UK Extended", "en-GB", {
   CTRLALT: {
     "52": "€",
     "65": "á",

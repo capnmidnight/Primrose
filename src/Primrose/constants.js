@@ -27,9 +27,7 @@ pliny.value({
   type: "Array of Number",
   description: "A selection of color values that closely match skin colors of people."
 });
-export const SKINS_VALUES = Primrose.SKINS.map(function (s) {
-  return parseInt(s.substring(1), 16);
-});
+export const SKINS_VALUES = SKINS.map((s) => parseInt(s.substring(1), 16));
 
 pliny.value({
   parent: "Primrose",
@@ -52,5 +50,11 @@ export const Quality = {
   MAXIMUM: PIXEL_SCALES.length - 1
 };
 
-import * as constants from ".";
+const constants = {
+  PIXEL_SCALES,
+  SKINS,
+  SKINS_VALUES,
+  SYS_FONTS,
+  Quality
+};
 export default constants;

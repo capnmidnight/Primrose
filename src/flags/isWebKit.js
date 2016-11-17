@@ -6,4 +6,4 @@ pliny.value({
 import isOpera from "./isOpera";
 import isChrome from "./isChrome";
 import isSafari from "./isSafari";
-export default isWebKit = isOpera || isChrome || isSafari;
+export default isOpera || isChrome || isSafari;

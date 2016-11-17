@@ -5,4 +5,4 @@ pliny.value({
 or Chromium."
 });
 import isOpera from "./isOpera";
-export default isChrome = !!window.chrome && !isOpera;
+export default !!window.chrome && !isOpera;

@@ -6,19 +6,19 @@ pliny.namespace({
 
 import Linux from "./Linux";
 import macOS from "./macOS";
-import Windows from "./Windows";
 import OperatingSystem from "./OperatingSystem";
+import Windows from "./Windows";
 
 export {
   Linux,
   macOS,
-  Windows,
-  OperatingSystem
+  OperatingSystem,
+  Windows
 };
 
 export default {
   Linux,
   macOS,
-  Windows,
-  OperatingSystem
+  OperatingSystem,
+  Windows
 };

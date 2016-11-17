@@ -1,4 +1,6 @@
 import Angle from "./Angle";
+import AbstractEventEmitter from "./AbstractEventEmitter";
+import { Quality, PIXEL_SCALES } from "./constants";
 
 const MILLISECONDS_TO_SECONDS = 0.001,
   MAX_MOVE_DISTANCE = 5,
@@ -12,7 +14,7 @@ pliny.class({
     name: "BrowserEnvironment",
     description: "Make a Virtual Reality app in your web browser!"
 });
-class BrowserEnvironment extends Primrose.AbstractEventEmitter {
+export default class BrowserEnvironment extends AbstractEventEmitter {
   constructor(options) {
     super();
 
@@ -790,6 +792,10 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
         surrogateContainer.style.overflow = "hidden";
         surrogateContainer.style.width = 0;
         surrogateContainer.style.height = 0;
+
+        function setFalse(evt) {
+          evt.returnValue = false;
+        }
         surrogate.addEventListener("beforecopy", setFalse, false);
         surrogate.addEventListener("copy", clipboardOperation, false);
         surrogate.addEventListener("beforecut", setFalse, false);

@@ -16,7 +16,7 @@ export {
   TextInput
 };
 
- export default {
+export default {
   BasicTextInput,
   CommandPack,
   TextEditor,

@@ -1,14 +1,14 @@
 var gulp = require("gulp"),
   exec = require("child_process").exec,
   fs = require("fs"),
-  pliny = require("pliny"),
+  pliny = require("../pliny/src/pliny"),
   pkg = require("./package.json"),
   build = require("../notiontheory-basic-build"),
   nt = build.setup(gulp, pkg),
 
-  js = nt.js("PrimroseLib-WithDoc", "src", ["format"], (inFile) => {
+  js = nt.js("PrimroseLibWithDoc", "src", ["format"], (inFile) => {
     // removes the documentation objects from the concatenated library.
-    var outFile = inFile.replace("-WithDoc", "");
+    var outFile = inFile.replace("WithDoc", "");
     pliny.carve(inFile, outFile, "doc/PrimroseDocumentation.js");
   }, true),
 
@@ -40,7 +40,7 @@ var gulp = require("gulp"),
 
   // Delete some intermediate files that aren't needed.
   clean = nt.clean("Primrose", [
-    "PrimroseLib-WithDoc*.js",
+    "PrimroseLibWithDoc*.js",
     "PrimroseDependencies*.js",
     "PrimroseLib*.js"
   ], [tot.release]),

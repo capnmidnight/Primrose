@@ -6,10 +6,11 @@ pliny.function({
 import cache from "../util/cache";
 import material from "./material";
 import { Texture, Mesh, RepeatWrapping } from "three";
-import { Surface, loadTexture } from "../Primrose";
+import Surface from "../Primrose/Controls/Surface";
+import loadTexture from "../Primrose/Graphics/loadTexture";
 import TextBox from "../Primrose/Text/Controls/TextBox";
 
-function textured(geometry, txt, options) {
+export default function textured(geometry, txt, options) {
   options = options || {};
   if (options.txtRepeatS === undefined) {
     options.txtRepeatS = 1;

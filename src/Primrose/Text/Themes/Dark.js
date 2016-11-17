@@ -3,7 +3,7 @@ pliny.record({
   name: "Dark",
   description: "A dark background with a light foreground for text."
 });
-export default Dark = {
+export default {
   name: "Dark",
   fontFamily: "'Droid Sans Mono', 'Consolas', 'Lucida Console', 'Courier New', 'Courier', monospace",
   cursorColor: "white",

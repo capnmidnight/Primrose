@@ -6,7 +6,6 @@ import cloud from "./cloud";
 import colored from "./colored";
 import cylinder from "./cylinder";
 import hub from "./hub";
-import index from "./index";
 import light from "./light";
 import material from "./material";
 import put from "./put";
@@ -27,7 +26,6 @@ export {
   colored,
   cylinder,
   hub,
-  index,
   light,
   material,
   put,
@@ -49,7 +47,6 @@ export default {
   colored,
   cylinder,
   hub,
-  index,
   light,
   material,
   put,

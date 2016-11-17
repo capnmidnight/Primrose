@@ -7,7 +7,7 @@ pliny.class({
 \n\
 As we work in the browser and not at the operating system level, we do not receive these virtual key codes. The browser does yet another translation into \"key events\" that are nominally standardized. Unfortunately, the standard is incomplete with regards to the full breadth of cultural locales in the world, and the current state of browser support for the standard is subopitmal. So we have to reinterpret what the browser tells us to get a better idea of what the user actually meant. And that reinterpretation is this CodePage class.",
   parameters: [{
-    name: "name "
+    name: "name ",
     type: "String",
     description: "A readable name for the CodePage, to be used in options UIs.",
   }, {

@@ -6,6 +6,7 @@ import Rectangle from "../Rectangle";
 import TextEditor from "../CommandPacks/TextEditor";
 import DefaultTheme from "../Themes/Default";
 import JavaScript from "../Grammars/JavaScript";
+import isFirefox from "../../../flags/isFirefox";
 
 var SCROLL_SCALE = isFirefox ? 3 : 100,
   COUNTER = 0,

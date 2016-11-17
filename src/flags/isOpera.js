@@ -7,4 +7,4 @@ so you are not likely to need this flag if you are using Primrose, other than to
 cajole users into downloading a more advanced browser such as Mozilla Firefox or\n\
 Google Chrome."
 });
-export default isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
+export default !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;

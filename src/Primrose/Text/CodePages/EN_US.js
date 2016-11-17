@@ -5,7 +5,7 @@ pliny.record({
   name: "EN_US",
   description: "CodePage for the `English: USA` locale."
 });
-export default EN_US = new CodePage("English: USA", "en-US", {
+export default new CodePage("English: USA", "en-US", {
   NORMAL: {
     "32": " ",
     "48": "0",

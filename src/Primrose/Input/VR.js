@@ -4,9 +4,7 @@ import PoseInputProcessor from "./PoseInputProcessor";
 const DEFAULT_POSE = {
     position: [0, 0, 0],
     orientation: [0, 0, 0, 1]
-  },
-
-  _ = priv();
+  };
 
 pliny.class({
   parent: "Primrose.Input",
@@ -30,10 +28,8 @@ export default class VR extends PoseInputProcessor {
   constructor(avatarHeight) {
     super("VR");
 
-    _(this, {
-      requestPresent: (layers) => this.currentDevice.requestPresent(layers)
-          .catch((exp) => console.warn("requstPresent", exp))
-    });
+    this._requestPresent = (layers) => this.currentDevice.requestPresent(layers)
+          .catch((exp) => console.warn("requstPresent", exp));
 
     this.displays = [];
     this._transformers = [];
@@ -88,7 +84,7 @@ export default class VR extends PoseInputProcessor {
         layers = layers[0];
       }
 
-      const rp = _(this).requestPresent;
+      const rp = this._requestPresent;
       var promise = null;
       if(isiOS){
         promise = rp(layers);

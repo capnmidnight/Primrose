@@ -64,8 +64,8 @@ file to use as the texture, execute code as such:\n\
 });
 
 import cache from "../util/cache";
-import InsideSphereGeometry from "../InsideSphereGeometry";
-import fixGeometry from "../Primrose/fixGeometry";
+import InsideSphereGeometry from "../Primrose/Graphics/InsideSphereGeometry";
+import fixGeometry from "../Primrose/Graphics/fixGeometry";
 export default function shell(r, slices, rings, phi, theta, options) {
   var SLICE = 0.45;
   if (phi === undefined) {

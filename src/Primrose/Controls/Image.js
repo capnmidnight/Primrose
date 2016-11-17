@@ -1,5 +1,8 @@
-var COUNTER = 0,
-  _ = priv();
+import Entity from "./Entity";
+import { textured, quad, shell } from "../../live-api";
+import loadTexture from "../Graphics/loadTexture";
+
+var COUNTER = 0;
 
 // Videos don't auto-play on mobile devices, so let's make them all play whenever
 // we tap the screen.
@@ -36,9 +39,6 @@ pliny.class({
       description: "Named parameters for creating the Image."
     }]
 });
-import Entity from "./Entity";
-import { textured, quad, shell } from "../../live-api";
-import loadTexture from "../loadTexture";
 export default class Image extends Entity {
 
   static create() {

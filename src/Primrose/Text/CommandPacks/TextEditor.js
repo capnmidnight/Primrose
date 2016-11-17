@@ -5,7 +5,7 @@ pliny.record({
   name: "TextEditor",
   description: "A set of commands for a multi-line text editing, extending single-line text editing."
 });
-export default TextEditor = new BasicTextInput(
+export default new BasicTextInput(
   "Text Area input commands", {
     NORMAL_UPARROW: function (prim, tokenRows) {
       prim.cursorUp(tokenRows, prim.frontCursor);

@@ -4,7 +4,7 @@ pliny.value({
   name: "Windows",
   description: "Keyboard shortcuts for the Windows operating system."
 });
-export default Windows = new OperatingSystem(
+export default new OperatingSystem(
   "Windows", "CTRL", "CTRL", "CTRL_y",
   "", "HOME", "END",
   "CTRL", "HOME", "END");

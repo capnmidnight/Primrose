@@ -5,7 +5,7 @@ pliny.record({
   name: "DE_QWERTZ",
   description: "CodePage for `Deutsch: QWERTZ` locale."
 });
-export default DE_QWERTZ = new CodePage("Deutsch: QWERTZ", "de", {
+export default new CodePage("Deutsch: QWERTZ", "de", {
   deadKeys: [220, 221, 160, 192],
   NORMAL: {
     "32": " ",

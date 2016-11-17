@@ -1,7 +1,7 @@
 import fixGeometry from "./fixGeometry";
 import InsideSphereGeometry from "./InsideSphereGeometry";
 import loadTexture from "./loadTexture";
-import ModelLoader from "./ModelLoade";
+import ModelLoader from "./ModelLoader";
 
 export {
   fixGeometry,

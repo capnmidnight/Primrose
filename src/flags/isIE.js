@@ -5,4 +5,4 @@ pliny.value({
 Explorer. Once the bane of every web developer's existence, it has since passed\n\
 the torch on to Safari in all of its many useless incarnations."
 });
-export default isIE = /*@cc_on!@*/ false || !!document.documentMode;
+export default /*@cc_on!@*/ false || !!document.documentMode;

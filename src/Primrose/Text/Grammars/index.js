@@ -18,7 +18,7 @@ export {
   TestResults
 };
 
- export default {
+export default {
   Basic,
   Grammar,
   JavaScript,

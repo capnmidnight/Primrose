@@ -4,9 +4,9 @@ import isGearVR from "./isGearVR";
 import isIE from "./isIE";
 import isInIFrame from "./isInIFrame";
 import isiOS from "./isiOS";
+import isMacOS from "./isMacOS";
 import isMobile from "./isMobile";
 import isOpera from "./isOpera";
-import isMacOS from "./isMacOS";
 import isSafari from "./isSafari";
 import isWebKit from "./isWebKit";
 import isWindows from "./isWindows";
@@ -18,9 +18,9 @@ export {
   isIE,
   isInIFrame,
   isiOS,
+  isMacOS,
   isMobile,
   isOpera,
-  isMacOS,
   isSafari,
   isWebKit,
   isWindows
@@ -33,9 +33,9 @@ export default {
   isIE,
   isInIFrame,
   isiOS,
+  isMacOS,
   isMobile,
   isOpera,
-  isMacOS,
   isSafari,
   isWebKit,
   isWindows

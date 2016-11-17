@@ -6,7 +6,7 @@ pliny.value({
   name: "Basic",
   description: "A grammar and an interpreter for a BASIC-like language."
 });
-export default Basic = new Grammar("BASIC",
+const Basic = new Grammar("BASIC",
   // Grammar rules are applied in the order they are specified.
   [
     // Text needs at least the newlines token, or else every line will attempt to render as a single line and the line count won't work.
@@ -33,7 +33,6 @@ export default Basic = new Grammar("BASIC",
     // Once everything else has been matched, the left over blocks of words are treated as variable and function names.
     ["identifiers", /\w+\$?/]
   ]);
-
 var oldTokenize = Basic.tokenize;
 Basic.tokenize = function (code) {
   return oldTokenize.call(this, code.toUpperCase());
@@ -654,3 +653,6 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next,
     }
   };
 };
+
+
+export default Basic;

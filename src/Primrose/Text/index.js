@@ -7,30 +7,30 @@ pliny.namespace({
 import CodePages from "./CodePages";
 import CommandPacks from "./CommandPacks";
 import Controls from "./Controls";
+import Cursor from "./Cursor";
 import Grammars from "./Grammars";
 import OperatingSystems from "./OperatingSystems";
-import Themes from "./Themes";
-import Cursor from "./Cursor";
 import Point from "./Point";
 import Rectangle from "./Rectangle";
 import Rule from "./Rule";
 import Size from "./Size";
 import Terminal from "./Terminal";
+import Themes from "./Themes";
 import Token from "./Token";
 
 export {
   CodePages,
   CommandPacks,
   Controls,
+  Cursor,
   Grammars,
   OperatingSystems,
-  Themes,
-  Cursor,
   Point,
   Rectangle,
   Rule,
   Size,
   Terminal,
+  Themes,
   Token
 };
 
@@ -38,14 +38,14 @@ export default {
   CodePages,
   CommandPacks,
   Controls,
+  Cursor,
   Grammars,
   OperatingSystems,
-  Themes,
-  Cursor,
   Point,
   Rectangle,
   Rule,
   Size,
   Terminal,
+  Themes,
   Token
 };

@@ -5,7 +5,7 @@ pliny.record({
   name: "FR_AZERTY",
   description: "CodePage for the `Français: AZERTY` locale."
 });
-export default FR_AZERTY = new CodePage("Français: AZERTY", "fr", {
+export default new CodePage("Français: AZERTY", "fr", {
   deadKeys: [221, 50, 55],
   NORMAL: {
     "32": " ",

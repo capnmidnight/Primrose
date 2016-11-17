@@ -19,54 +19,54 @@ pliny.namespace({
   description: "Primrose helps you make VR applications for web browsers as easy as making other types of interactive web pages.\n\nThis top-level namespace contains classes for manipulating and viewing 3D environments."
 });
 
-import Audio from "./Audio";
-import Controls from "./Controls";
-import DOM from "./DOM";
-import Geometry from "./Geometry";
-import Input from "./Input";
-import Network from "./Network";
-import Random from "./Random";
-import Text from "./Text";
 import AbstractEventEmitter from "./AbstractEventEmitter";
 import Angle from "./Angle";
+import Audio from "./Audio";
 import BrowserEnvironment from "./BrowserEnvironment";
 import constants from "./constants";
+import Controls from "./Controls";
+import DOM from "./DOM";
+import Graphics from "./Graphics";
 import HTTP from "./HTTP";
+import Input from "./Input";
 import Keys from "./Keys";
+import Network from "./Network";
 import Pointer from "./Pointer";
+import Random from "./Random";
+import Text from "./Text";
 
 export {
-  Audio,
-  Controls,
-  DOM,
-  Geometry,
-  Input,
-  Network,
-  Random,
-  Text,
   AbstractEventEmitter,
   Angle,
+  Audio,
   BrowserEnvironment,
   constants,
+  Controls,
+  DOM,
+  Graphics,
   HTTP,
+  Input,
   Keys,
-  Pointer
+  Network,
+  Pointer,
+  Random,
+  Text
 };
 
 export default {
-  Audio,
-  Controls,
-  DOM,
-  Geometry,
-  Input,
-  Network,
-  Random,
-  Text,
   AbstractEventEmitter,
   Angle,
+  Audio,
   BrowserEnvironment,
   constants,
+  Controls,
+  DOM,
+  Graphics,
   HTTP,
+  Input,
   Keys,
-  Pointer
+  Network,
+  Pointer,
+  Random,
+  Text
 };

@@ -31,7 +31,7 @@ export default class TextInput extends TextBox {
         tabWidth: 1,
         tokenizer: PlainText,
         commands: TextInputCommands
-      }, options);
+      }), options);
 
     this.passwordCharacter = this.options.passwordCharacter;
   }

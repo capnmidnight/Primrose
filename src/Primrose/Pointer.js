@@ -7,9 +7,7 @@ const TELEPORT_PAD_RADIUS = 0.4,
   GAZE_RING_OUTER = 0.03,
   VECTOR_TEMP = new THREE.Vector3(),
   EULER_TEMP = new THREE.Euler(),
-  QUAT_TEMP = new THREE.Quaternion(),
-
-  _ = priv();
+  QUAT_TEMP = new THREE.Quaternion();
 
 
 function hasGazeEvent(obj){
@@ -102,9 +100,7 @@ export default class Pointer extends AbstractEventEmitter {
     this.root.add(this.gazeInner);
 
     this.useGaze = this.options.useGaze;
-    _(this, {
-      lastHit: null
-    });
+    this.lastHit = null;
   }
 
   get material(){
@@ -235,8 +231,7 @@ export default class Pointer extends AbstractEventEmitter {
       this.picker.set(VECTOR_TEMP, FORWARD);
       const hits = this.picker.intersectObjects(objects, true),
         currentHit = hits[0],
-        _priv = _(this),
-        lastHit = _priv.lastHit,
+        lastHit = this.lastHit,
         moved = lastHit && currentHit &&
           (currentHit.point.x !== lastHit.point.x ||
           currentHit.point.y !== lastHit.point.y ||

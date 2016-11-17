@@ -3,4 +3,4 @@ pliny.value({
   type: "Boolean",
   description: "Flag indicating the browser is currently calling itself Firefox."
 });
-export default isFirefox = typeof window.InstallTrigger !== 'undefined';
+export default typeof window.InstallTrigger !== 'undefined';

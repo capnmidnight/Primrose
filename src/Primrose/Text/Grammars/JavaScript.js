@@ -4,7 +4,7 @@ pliny.value({
   name: "JavaScript",
   description: "A grammar for the JavaScript programming language."
 });
-export default JavaScript = new Grammar("JavaScript", [
+export default new Grammar("JavaScript", [
   ["newlines", /(?:\r\n|\r|\n)/],
   ["startBlockComments", /\/\*/],
   ["endBlockComments", /\*\//],
