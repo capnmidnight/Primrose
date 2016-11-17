@@ -60,7 +60,7 @@ It should look something like this:\n\
 
 import cache from "../util/cache";
 import fixGeometry from "../Primrose/fixGeometry";
-import { PlaneBufferGeometry } from "three/Three";
+import { PlaneBufferGeometry } from "three";
 export default function quad(width, height, options) {
   if (height === undefined) {
     height = width;

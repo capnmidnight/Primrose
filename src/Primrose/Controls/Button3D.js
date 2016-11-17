@@ -19,7 +19,7 @@ pliny.class({
 });
 
 import BaseControl from "./BaseControl";
-import { Color, Object3D } from "three/Three";
+import { Color, Object3D } from "three";
 export default class Button3D extends BaseControl {
   constructor(model, name, options) {
     super();

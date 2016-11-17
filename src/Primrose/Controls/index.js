@@ -4,17 +4,39 @@ pliny.namespace({
   description: "Various 3D control objects."
 });
 
-import { default as BaseControl } from "./BaseControl";
-import { default as Button2D } from "./Button2D";
-import { default as Button3D } from "./Button3D";
-import { default as ButtonFactory } from "./ButtonFactory";
-import { default as Entity } from "./Entity";
-import { default as Form } from "./Form";
-import { default as Image } from "./Image";
-import { default as Label } from "./Label";
-import { default as Progress } from "./Progress";
-import { default as Surface } from "./Surface";
-import { default as VUMeter } from "./VUMeter";
+import BaseControl from "./BaseControl";
+import Button2D from "./Button2D";
+import Button3D from "./Button3D";
+import ButtonFactory from "./ButtonFactory";
+import Entity from "./Entity";
+import Form from "./Form";
+import Image from "./Image";
+import Label from "./Label";
+import Progress from "./Progress";
+import Surface from "./Surface";
 
-import * as Controls from ".";
-export default Controls;
+export {
+  BaseControl,
+  Button2D,
+  Button3D,
+  ButtonFactory,
+  Entity,
+  Form,
+  Image,
+  Label,
+  Progress,
+  Surface
+};
+
+export default {
+  BaseControl,
+  Button2D,
+  Button3D,
+  ButtonFactory,
+  Entity,
+  Form,
+  Image,
+  Label,
+  Progress,
+  Surface
+};

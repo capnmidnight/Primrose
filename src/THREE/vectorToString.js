@@ -1,4 +1,4 @@
-import { Euler, Quaternion, Vector2, Vector3, Vector4 } from "three/Three";
+import { Euler, Quaternion, Vector2, Vector3, Vector4 } from "three";
 
 Euler.prototype.toString =
 Quaternion.prototype.toString =

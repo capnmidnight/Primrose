@@ -39,7 +39,7 @@ care anything about the outside of this sphere, only the inside. You would use\n
 InsideSphereGeometry in this case. Or its alias, [`shell()`](#shell)."
 });
 
-import { Geometry } from "three/Three";
+import { Geometry } from "three";
 export default function InsideSphereGeometry(radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength) {
   Geometry.call(this);
 

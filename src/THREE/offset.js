@@ -1,4 +1,4 @@
-import { Geometry, BufferGeometry } from "three/Three";
+import { Geometry, BufferGeometry } from "three";
 
 Geometry.prototype.offset = function(x, y, z){
   const arr = this.vertices;

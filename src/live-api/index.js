@@ -1,22 +1,63 @@
-export { default as axis } from "./axis";
-export { default as box } from "./box";
-export { default as brick } from "./brick";
-export { default as circle } from "./circle";
-export { default as cloud } from "./cloud";
-export { default as colored } from "./colored";
-export { default as cylinder } from "./cylinder";
-export { default as hub } from "./hub";
-export { default as index } from "./index";
-export { default as light } from "./light";
-export { default as material } from "./material";
-export { default as put } from "./put";
-export { default as quad } from "./quad";
-export { default as range } from "./range";
-export { default as ring } from "./ring";
-export { default as shell } from "./shell";
-export { default as sphere } from "./sphere";
-export { default as textured } from "./textured";
-export { default as v3 } from "./v3";
+import axis from "./axis";
+import box from "./box";
+import brick from "./brick";
+import circle from "./circle";
+import cloud from "./cloud";
+import colored from "./colored";
+import cylinder from "./cylinder";
+import hub from "./hub";
+import index from "./index";
+import light from "./light";
+import material from "./material";
+import put from "./put";
+import quad from "./quad";
+import range from "./range";
+import ring from "./ring";
+import shell from "./shell";
+import sphere from "./sphere";
+import textured from "./textured";
+import v3 from "./v3";
 
-import * as LiveAPI from ".";
-export default LiveAPI;
+export {
+  axis,
+  box,
+  brick,
+  circle,
+  cloud,
+  colored,
+  cylinder,
+  hub,
+  index,
+  light,
+  material,
+  put,
+  quad,
+  range,
+  ring,
+  shell,
+  sphere,
+  textured,
+  v3
+};
+
+export default {
+  axis,
+  box,
+  brick,
+  circle,
+  cloud,
+  colored,
+  cylinder,
+  hub,
+  index,
+  light,
+  material,
+  put,
+  quad,
+  range,
+  ring,
+  shell,
+  sphere,
+  textured,
+  v3
+};

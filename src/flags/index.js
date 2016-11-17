@@ -1,15 +1,42 @@
-export { default as isChrome } from "./isChrome";
-export { default as isFirefox } from "./isFirefox";
-export { default as isGearVR } from "./isGearVR";
-export { default as isIE } from "./isIE";
-export { default as isInIFrame } from "./isInIFrame";
-export { default as isiOS } from "./isiOS";
-export { default as isMobile } from "./isMobile";
-export { default as isOpera } from "./isOpera";
-export { default as isMacOS } from "./isMacOS";
-export { default as isSafari } from "./isSafari";
-export { default as isWebKit } from "./isWebKit";
-export { default as isWindows } from "./isWindows";
+import isChrome from "./isChrome";
+import isFirefox from "./isFirefox";
+import isGearVR from "./isGearVR";
+import isIE from "./isIE";
+import isInIFrame from "./isInIFrame";
+import isiOS from "./isiOS";
+import isMobile from "./isMobile";
+import isOpera from "./isOpera";
+import isMacOS from "./isMacOS";
+import isSafari from "./isSafari";
+import isWebKit from "./isWebKit";
+import isWindows from "./isWindows";
 
-import * as Flags from ".";
-export default Flags;
+export {
+  isChrome,
+  isFirefox,
+  isGearVR,
+  isIE,
+  isInIFrame,
+  isiOS,
+  isMobile,
+  isOpera,
+  isMacOS,
+  isSafari,
+  isWebKit,
+  isWindows
+};
+
+export default {
+  isChrome,
+  isFirefox,
+  isGearVR,
+  isIE,
+  isInIFrame,
+  isiOS,
+  isMobile,
+  isOpera,
+  isMacOS,
+  isSafari,
+  isWebKit,
+  isWindows
+};

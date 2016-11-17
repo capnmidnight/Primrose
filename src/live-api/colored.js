@@ -15,7 +15,7 @@ pliny.function({
   ]
 });
 
-import { Mesh, Object3D } from "three/Three";
+import { Mesh, Object3D } from "three";
 export default function colored(geometry, color, options) {
   options = options || {};
   options.color = color;

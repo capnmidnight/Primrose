@@ -34,7 +34,7 @@ It should look something like this:\n\
 });
 
 import cache from "../util/cache";
-import { BoxBufferGeometry } from "three/Three";
+import { BoxBufferGeometry } from "three";
 export default function box(width, height, length) {
   if (height === undefined) {
     height = width;

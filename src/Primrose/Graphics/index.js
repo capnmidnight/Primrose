@@ -1,7 +1,18 @@
-import fixGeometry from "./fixGeometry"
-import InsideSphereGeometry from "./InsideSphereGeometry"
-import loadTexture from "./loadTexture"
-import ModelLoader from "./ModelLoader"
+import fixGeometry from "./fixGeometry";
+import InsideSphereGeometry from "./InsideSphereGeometry";
+import loadTexture from "./loadTexture";
+import ModelLoader from "./ModelLoade";
 
-import * as Graphics from ".";
-export default Graphics;
+export {
+  fixGeometry,
+  InsideSphereGeometry,
+  loadTexture,
+  ModelLoader
+};
+
+export default {
+  fixGeometry,
+  InsideSphereGeometry,
+  loadTexture,
+  ModelLoader
+};

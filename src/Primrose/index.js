@@ -19,21 +19,54 @@ pliny.namespace({
   description: "Primrose helps you make VR applications for web browsers as easy as making other types of interactive web pages.\n\nThis top-level namespace contains classes for manipulating and viewing 3D environments."
 });
 
-import { default as Audio } from "./Audio";
-import { default as Controls } from "./Controls";
-import { default as DOM } from "./DOM";
-import { default as Geometry } from "./Geometry";
-import { default as Input } from "./Input";
-import { default as Network } from "./Network";
-import { default as Random } from "./Random";
-import { default as Text } from "./Text";
-import { default as AbstractEventEmitter } from "./AbstractEventEmitter";
-import { default as Angle } from "./Angle";
-import { default as BrowserEnvironment } from "./BrowserEnvironment";
-import { default as constants } from "./constants";
-import { default as HTTP } from "./HTTP";
-import { default as Keys } from "./Keys";
-import { default as Pointer } from "./Pointer";
+import Audio from "./Audio";
+import Controls from "./Controls";
+import DOM from "./DOM";
+import Geometry from "./Geometry";
+import Input from "./Input";
+import Network from "./Network";
+import Random from "./Random";
+import Text from "./Text";
+import AbstractEventEmitter from "./AbstractEventEmitter";
+import Angle from "./Angle";
+import BrowserEnvironment from "./BrowserEnvironment";
+import constants from "./constants";
+import HTTP from "./HTTP";
+import Keys from "./Keys";
+import Pointer from "./Pointer";
 
-import * as Primrose from ".";
-export default Primrose;
+export {
+  Audio,
+  Controls,
+  DOM,
+  Geometry,
+  Input,
+  Network,
+  Random,
+  Text,
+  AbstractEventEmitter,
+  Angle,
+  BrowserEnvironment,
+  constants,
+  HTTP,
+  Keys,
+  Pointer
+};
+
+export default {
+  Audio,
+  Controls,
+  DOM,
+  Geometry,
+  Input,
+  Network,
+  Random,
+  Text,
+  AbstractEventEmitter,
+  Angle,
+  BrowserEnvironment,
+  constants,
+  HTTP,
+  Keys,
+  Pointer
+};

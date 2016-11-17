@@ -1,4 +1,4 @@
-import { Vector3, Euler, Quaternion, Matrix4 } from "three/Three";
+import { Vector3, Euler, Quaternion, Matrix4 } from "three";
 import AbstractEventEmitter from "../AbstractEventEmitter"
 import Keyboard from "./Keyboard";
 import Mouse from "./Mouse";

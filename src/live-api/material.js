@@ -1,4 +1,4 @@
-import { FrontSide, MeshStandardMaterial, MeshBasicMaterial, CubeTexture, Texture } from "three/Three";
+import { FrontSide, MeshStandardMaterial, MeshBasicMaterial, CubeTexture, Texture } from "three";
 export default function material(textureDescription, options){
   options = options || {};
 

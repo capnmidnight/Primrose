@@ -32,7 +32,7 @@ pliny.class({
 import AbstractEventEmitter from "../AbstractEventEmitter";
 import randColor from "../Random/color";
 import colored from "../../live-api/colored";
-import { Quaternion, Vector3 } from "three/Three";
+import { Quaternion, Vector3 } from "three";
 export default class RemoteUser extends AbstractEventEmitter {
 
   constructor(userName, modelFactory, nameMaterial, disableWebRTC, requestICEPath, microphone, localUserName, goSecond) {

@@ -1,4 +1,4 @@
-import { Object3D } from "three/Three";
+import { Object3D } from "three";
 
 pliny.method({
   parent: "THREE.Object3D",

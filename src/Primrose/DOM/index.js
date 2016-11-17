@@ -4,9 +4,18 @@ pliny.namespace({
   description: "A few functions for manipulating DOM."
 });
 
-import { default as cascadeElement } from "./cascadeElement";
-import { default as findEverything } from "./findEverything";
-import { default as makeHidingContainer } from "./makeHidingContainer";
+import cascadeElement from "./cascadeElement";
+import findEverything from "./findEverything";
+import makeHidingContainer from "./makeHidingContainer";
 
-import * as DOM from ".";
-export default DOM;
+export {
+  cascadeElement,
+  findEverything,
+  makeHidingContainer
+};
+
+export default {
+  cascadeElement,
+  findEverything,
+  makeHidingContainer
+};

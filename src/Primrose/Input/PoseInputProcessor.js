@@ -1,4 +1,4 @@
-import { Vector3, Quaternion, Matrix4 } from "three/Three";
+import { Vector3, Quaternion, Matrix4 } from "three";
 import InputProcessor from "./InputProcessor";
 
 const DEFAULT_POSE = {

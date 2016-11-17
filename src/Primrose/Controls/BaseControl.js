@@ -1,4 +1,4 @@
-import { Vector3 } from "three/Three";
+import { Vector3 } from "three";
 import AbstractEventEmitter from "../AbstractEventEmitter";
 
 var ID = 1,

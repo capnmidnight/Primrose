@@ -4,11 +4,24 @@ pliny.namespace({
   description: "The CodePages namespace contains international keyboard parameters."
 });
 
-import { default as CodePages } from "./CodePages";
-import { default as DE_QWERTZ } from "./DE_QWERTZ";
-import { default as EN_UKX } from "./EN_UKX";
-import { default as EN_US } from "./EN_US";
-import { default as FR_AZERTY } from "./FR_AZERTY";
+import CodePages from "./CodePages";
+import DE_QWERTZ from "./DE_QWERTZ";
+import EN_UKX from "./EN_UKX";
+import EN_US from "./EN_US";
+import FR_AZERTY from "./FR_AZERTY";
 
-import * as CodePages from ".";
-export default CodePages;
+export {
+  CodePages,
+  DE_QWERTZ,
+  EN_UKX,
+  EN_US,
+  FR_AZERTY
+};
+
+ export default {
+  CodePages,
+  DE_QWERTZ,
+  EN_UKX,
+  EN_US,
+  FR_AZERTY
+};

@@ -4,11 +4,21 @@ pliny.namespace({
   description: "The OperatingSystems namespace contains sets of keyboard shortcuts for different operating systems."
 });
 
+import Linux from "./Linux";
+import macOS from "./macOS";
+import Windows from "./Windows";
+import OperatingSystem from "./OperatingSystem";
 
-import { default as Linux } from "./Linux";
-import { default as macOS } from "./macOS";
-import { default as OperatingSystem } from "./OperatingSystem";
-import { default as Windows } from "./Windows";
+export {
+  Linux,
+  macOS,
+  Windows,
+  OperatingSystem
+};
 
-import * as OperatingSystems from ".";
-export default OperatingSystems;
+export default {
+  Linux,
+  macOS,
+  Windows,
+  OperatingSystem
+};

@@ -1,4 +1,4 @@
-import { Matrix4 } from "three/Three";
+import { Matrix4 } from "three";
 
 Matrix4.prototype.toString = function(digits) {
   if(digits === undefined){

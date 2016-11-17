@@ -1,4 +1,4 @@
-import { Vector2 } from "three/Three";
+import { Vector2 } from "three";
 import InputProcessor from "./InputProcessor";
 
 const TEMP = new Vector2();

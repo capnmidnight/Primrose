@@ -26,7 +26,7 @@ pliny.function({
   }]
 });
 
-import { Vector3 } from "three/Three";
+import { Vector3 } from "three";
 export default function v3(x, y, z) {
   return new Vector3(x, y, z);
 };

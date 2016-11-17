@@ -1,4 +1,4 @@
-import { PlaneGeometry, Mesh, Texture, MeshBasicMaterial } from "three/Three";
+import { PlaneGeometry, Mesh, Texture, MeshBasicMaterial } from "three";
 
 pliny.class({
   parent: "Primrose.Text.Controls",

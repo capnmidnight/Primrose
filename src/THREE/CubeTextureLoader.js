@@ -1,4 +1,4 @@
-import { CubeTextureLoader, CubeTexture, ImageLoader } from "three/Three";
+import { CubeTextureLoader, CubeTexture, ImageLoader } from "three";
 
 CubeTextureLoader.prototype.load = function( urls, onLoad, onProgress, onError ) {
   var texture = new CubeTexture();

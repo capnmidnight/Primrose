@@ -42,7 +42,7 @@ The results should look like this:\n\
 });
 
 import cache from "../util/cache";
-import { Geometry, PointsMaterial, Points } from "three/Three";
+import { Geometry, PointsMaterial, Points } from "three";
 export default function cloud(verts, c, s) {
   var geom = new Geometry();
   for (var i = 0; i < verts.length; ++i) {

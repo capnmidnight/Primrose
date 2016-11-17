@@ -1,13 +1,36 @@
-export { default as cache } from "./cache";
-export { default as clone } from "./clone";
-export { default as deleteSetting } from "./deleteSetting";
-export { default as emit } from "./emit";
-export { default as findProperty } from "./findProperty";
-export { default as getSetting } from "./getSetting";
-export { default as identity } from "./identity";
-export { default as priv } from "./priv";
-export { default as setFalse } from "./setFalse";
-export { default as setSetting } from "./setSetting";
+import cache from "./cache";
+import clone from "./clone";
+import deleteSetting from "./deleteSetting";
+import emit from "./emit";
+import findProperty from "./findProperty";
+import getSetting from "./getSetting";
+import identity from "./identity";
+import priv from "./priv";
+import setFalse from "./setFalse";
+import setSetting from "./setSetting";
 
-import * as Util from ".";
-export default Util;
+export {
+  cache,
+  clone,
+  deleteSetting,
+  emit,
+  findProperty,
+  getSetting,
+  identity,
+  priv,
+  setFalse,
+  setSetting
+};
+
+export default {
+  cache,
+  clone,
+  deleteSetting,
+  emit,
+  findProperty,
+  getSetting,
+  identity,
+  priv,
+  setFalse,
+  setSetting
+};

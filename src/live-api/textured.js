@@ -5,7 +5,7 @@ pliny.function({
 
 import cache from "../util/cache";
 import material from "./material";
-import { Texture, Mesh, RepeatWrapping } from "three/Three";
+import { Texture, Mesh, RepeatWrapping } from "three";
 import { Surface, loadTexture } from "../Primrose";
 import TextBox from "../Primrose/Text/Controls/TextBox";
 

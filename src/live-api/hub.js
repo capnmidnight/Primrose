@@ -9,7 +9,7 @@ pliny.function({
     var base2 = hub();"
   }]
 });
-import { Object3D } from "three/Three";
+import { Object3D } from "three";
 export default function hub() {
   return new Object3D();
 };

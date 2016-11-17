@@ -1,4 +1,4 @@
-import { BufferGeometry, Geometry, Mesh } from "three/Three";
+import { BufferGeometry, Geometry, Mesh } from "three";
 
 BufferGeometry.prototype.colored =
 Geometry.prototype.colored =

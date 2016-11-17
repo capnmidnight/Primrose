@@ -39,7 +39,7 @@ pliny.function({
 });
 
 import cache from "../util/cache";
-import { SphereBufferGeometry } from "three/Three";
+import { SphereBufferGeometry } from "three";
 
 export default function sphere(r, slices, rings) {
   return cache(

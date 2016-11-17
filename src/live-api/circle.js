@@ -44,7 +44,7 @@ It should look something like this:\n\
 });
 
 import cache from "../util/cache";
-import { CircleBufferGeometry } from "three/Three";
+import { CircleBufferGeometry } from "three";
 export default function circle(r, sections, start, end) {
   r = r || 1;
   sections = sections || 18;

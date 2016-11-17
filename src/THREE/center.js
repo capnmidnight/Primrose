@@ -1,4 +1,4 @@
-import { Geometry, BufferGeometry } from "three/Three";
+import { Geometry, BufferGeometry } from "three";
 
 BufferGeometry.prototype.center =
 Geometry.prototype.center =

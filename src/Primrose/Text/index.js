@@ -4,19 +4,48 @@ pliny.namespace({
   description: "The Text namespace contains classes everything regarding the Primrose source code editor."
 });
 
-import { default as CodePages } from "./CodePages";
-import { default as CommandPacks } from "./CommandPacks";
-import { default as Controls } from "./Controls";
-import { default as Grammars } from "./Grammars";
-import { default as OperatingSystems } from "./OperatingSystems";
-import { default as Themes } from "./Themes";
-import { default as Cursor } from "./Cursor";
-import { default as Point } from "./Point";
-import { default as Rectangle } from "./Rectangle";
-import { default as Rule } from "./Rule";
-import { default as Size } from "./Size";
-import { default as Terminal } from "./Terminal";
-import { default as Token } from "./Token";
+import CodePages from "./CodePages";
+import CommandPacks from "./CommandPacks";
+import Controls from "./Controls";
+import Grammars from "./Grammars";
+import OperatingSystems from "./OperatingSystems";
+import Themes from "./Themes";
+import Cursor from "./Cursor";
+import Point from "./Point";
+import Rectangle from "./Rectangle";
+import Rule from "./Rule";
+import Size from "./Size";
+import Terminal from "./Terminal";
+import Token from "./Token";
 
-import * as Text from ".";
-export default Text;
+export {
+  CodePages,
+  CommandPacks,
+  Controls,
+  Grammars,
+  OperatingSystems,
+  Themes,
+  Cursor,
+  Point,
+  Rectangle,
+  Rule,
+  Size,
+  Terminal,
+  Token
+};
+
+export default {
+  CodePages,
+  CommandPacks,
+  Controls,
+  Grammars,
+  OperatingSystems,
+  Themes,
+  Cursor,
+  Point,
+  Rectangle,
+  Rule,
+  Size,
+  Terminal,
+  Token
+};

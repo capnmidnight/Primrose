@@ -5,8 +5,15 @@ pliny.namespace({
 });
 
 
-import { default as Dark } from "./Dark";
-import { default as Default } from "./Default";
+import Dark from "./Dark";
+import Default from "./Default";
 
-import * as Themes from ".";
-export default Themes;
+export {
+  Dark,
+  Default
+};
+
+export default {
+  Dark,
+  Default
+};
