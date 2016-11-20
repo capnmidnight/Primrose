@@ -1,3 +1,8 @@
+import { Vector3 } from "three/src/math/Vector3";
+import { Matrix4 } from "three/src/math/Matrix4";
+import { getBuffer } from "../HTTP";
+import cascadeElement from "../DOM/cascadeElement"
+
 // polyfill
 window.AudioContext =
   window.AudioContext ||
@@ -5,9 +10,9 @@ window.AudioContext =
 
 
 
-let VECTOR = new THREE.Vector3(),
-  UP = new THREE.Vector3(),
-  TEMP = new THREE.Matrix4();
+let VECTOR = new Vector3(),
+  UP = new Vector3(),
+  TEMP = new Matrix4();
 
 pliny.class({
   parent: "Primrose.Output",
@@ -19,7 +24,7 @@ export default class Audio3D {
   static setAudioStream(stream, id) {
     const audioElementCount = document.querySelectorAll("audio")
       .length,
-      element = Primrose.DOM.cascadeElement(id || ("audioStream" + audioElementCount), "audio", HTMLAudioElement, true);
+      element = cascadeElement(id || ("audioStream" + audioElementCount), "audio", HTMLAudioElement, true);
     setAudioProperties(element);
     element.srcObject = stream;
     return element;
@@ -129,7 +134,7 @@ export default class Audio3D {
   loadURL(src) {
     return this.ready.then(() => {
       console.log("Loading " + src + " from URL");
-      Primrose.HTTP.getBuffer(src);
+      getBuffer(src);
     })
       .then((data) => new Promise((resolve, reject) =>
         this.context.decodeAudioData(data, resolve, reject)))

@@ -1,4 +1,4 @@
-import { Object3D } from "three";
+import { Object3D } from "three/src/core/Object3D";
 
 pliny.method({
   parent: "THREE.Object3D",
@@ -49,4 +49,9 @@ Object3D.prototype.latLon = function(lat, lon, r) {
   this.position.set(0, 0, -r);
   this.position.applyQuaternion(this.quaternion);
   return this;
-}
+};
+
+Object3D.prototype.named = function(name){
+  this.name = name;
+  return this;
+};

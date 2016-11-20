@@ -50,7 +50,7 @@ pliny.function({
     description: "The angle at which to end sweeping the cylinder.",
     default: 2 * Math.PI
   }],
-  returns: "THREE.CylinderGeometry",
+  returns: "THREE.CylinderBufferGeometry",
   examples: [{
     name: "Basic usage",
     description: "Three.js separates geometry from materials, so you can create shared materials and geometry that recombine in different ways. To create a simple cylinder geometry object that you can then add a material to create a mesh: \n\
@@ -68,7 +68,7 @@ It should look something like this:\n\
 });
 
 import cache from "../util/cache";
-import { CylinderBufferGeometry } from "three";
+import { CylinderBufferGeometry } from "three/src/geometries/CylinderBufferGeometry";
 export default function cylinder(rT, rB, height, rS, hS, openEnded, thetaStart, thetaEnd) {
   if (rT === undefined) {
     rT = 0.5;

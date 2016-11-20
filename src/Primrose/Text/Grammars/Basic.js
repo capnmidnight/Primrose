@@ -1,5 +1,6 @@
 // we don't use strict here because this grammar includes an interpreter that uses `eval()`
 import Grammar from "./Grammar";
+import Token from "../Token"
 
 pliny.value({
   parent: "Primrose.Text.Grammars",
@@ -41,7 +42,7 @@ Basic.tokenize = function (code) {
 Basic.interpret = function (sourceCode, input, output, errorOut, next,
   clearScreen, loadFile, done) {
   var tokens = this.tokenize(sourceCode),
-    EQUAL_SIGN = new Primrose.Text.Token("=", "operators"),
+    EQUAL_SIGN = new Token("=", "operators"),
     counter = 0,
     isDone = false,
     program = {},
@@ -81,11 +82,11 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next,
     };
 
   function toNum(ln) {
-    return new Primrose.Text.Token(ln.toString(), "numbers");
+    return new Token(ln.toString(), "numbers");
   }
 
   function toStr(str) {
-    return new Primrose.Text.Token("\"" + str.replace("\n", "\\n")
+    return new Token("\"" + str.replace("\n", "\\n")
       .replace("\"", "\\\"") + "\"", "strings");
   }
 

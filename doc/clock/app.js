@@ -3,7 +3,6 @@ var skyColor = 0xffff7f,
     backgroundColor: skyColor,
     groundTexture: "../images/sand.png",
     useFog: true,
-    drawDistance: 25,
     showHeadPointer: isMobile,
     fullScreenButtonContainer: "body",
     enableShadows: true,
@@ -12,11 +11,13 @@ var skyColor = 0xffff7f,
 
   sunDistance = 20,
   sun = circle(1, 45)
-    .colored("sun", 0xffffff, { unshaded: true }),
+    .colored(0xffffff, { unshaded: true })
+    .named("sun"),
 
   t = function(name, rt, rb, h, sr){
     return cylinder(rt, rb, h, sr, 1)
-      .textured(name, "../images/rock.png", { shadow: true });
+      .textured("../images/rock.png", { shadow: true })
+      .named(name);
   },
 
   sunDialColor = 0xd0d0c0,

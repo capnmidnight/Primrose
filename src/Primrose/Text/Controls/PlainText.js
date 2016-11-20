@@ -1,4 +1,8 @@
-import { PlaneGeometry, Mesh, Texture, MeshBasicMaterial } from "three";
+import { PlaneGeometry } from "three/src/geometries/PlaneGeometry";
+import { Mesh } from "three/src/objects/Mesh";
+import { Texture } from "three/src/textures/Texture";
+import { MeshBasicMaterial } from "three/src/materials/MeshBasicMaterial";
+import { FlatShading } from "three/src/constants";
 
 pliny.class({
   parent: "Primrose.Text.Controls",
@@ -67,23 +71,23 @@ export default class PlainText {
       textContext.fillText(lines[i], 0, i * lineHeight);
     }
 
-    var texture = new THREE.Texture(textCanvas);
+    var texture = new Texture(textCanvas);
     texture.needsUpdate = true;
 
-    var material = new THREE.MeshBasicMaterial({
+    var material = new MeshBasicMaterial({
       map: texture,
       transparent: bgcolor === "transparent",
       useScreenCoordinates: false,
       color: 0xffffff,
-      shading: THREE.FlatShading
+      shading: FlatShading
     });
 
-    var textGeometry = new THREE.PlaneGeometry(size * width / lineHeight,
+    var textGeometry = new PlaneGeometry(size * width / lineHeight,
       size * lines.length);
     textGeometry.computeBoundingBox();
     textGeometry.computeVertexNormals();
 
-    var textMesh = new THREE.Mesh(textGeometry, material);
+    var textMesh = new Mesh(textGeometry, material);
     if (hAlign === "left") {
       x -= textGeometry.boundingBox.min.x;
     }

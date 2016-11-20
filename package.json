@@ -24,6 +24,7 @@
     "src/",
     "doc/"
   ],
+  "jsnext:main": "src/index",
   "scripts": {
     "start": "node StartHere.js --url doc/"
   },

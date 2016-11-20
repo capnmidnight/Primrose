@@ -32,7 +32,7 @@ export default class Button2D extends Label {
 
   addToBrowserEnvironment(env, scene) {
     var btn3d = env.buttonFactory.create();
-    btn3d._handlers = this.listeners;
+    btn3d._handlers = this._handlers;
     return env.appendChild(btn3d);
   }
 

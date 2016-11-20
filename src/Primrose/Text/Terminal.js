@@ -1,3 +1,6 @@
+import { getText } from "../HTTP";
+import PlainText from "./Grammars/PlainText";
+
 pliny.class({
   parent: "Primrose.Text",
     name: "Terminal",
@@ -94,14 +97,14 @@ export default class Terminal {
         currentProgram = inputEditor.value;
         looper = originalGrammar.interpret(currentProgram, input, stdout,
           stdout, next, clearScreen, this.loadFile.bind(this), done);
-        outputEditor.tokenizer = Primrose.Text.Grammars.PlainText;
+        outputEditor.tokenizer = PlainText;
         clearScreen();
         next();
       }
     };
 
     this.loadFile = function (fileName) {
-      return Primrose.HTTP.getText(fileName.toLowerCase())
+      return getText(fileName.toLowerCase())
         .then(function (file) {
           if (isMacOS) {
             file = file.replace("CTRL+SHIFT+SPACE", "CMD+OPT+E");

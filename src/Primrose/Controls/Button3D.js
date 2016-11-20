@@ -1,3 +1,7 @@
+import BaseControl from "./BaseControl";
+import { Color } from "three/src/math/Color";
+import { Object3D } from "three/src/core/Object3D";
+
 pliny.class({
   parent: "Primrose",
     name: "Button3D",
@@ -17,9 +21,6 @@ pliny.class({
     }],
     description: "A 3D button control, with a separate cap from a stand that it sits on. You click and depress the cap on top of the stand to actuate."
 });
-
-import BaseControl from "./BaseControl";
-import { Color, Object3D } from "three";
 export default class Button3D extends BaseControl {
   constructor(model, name, options) {
     super();

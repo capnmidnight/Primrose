@@ -1,3 +1,8 @@
+import { Texture } from "three/src/textures/Texture";
+import { Vector2 } from "three/src/math/Vector2";
+import Entity from "./Entity";
+import Rectangle from "../Text/Rectangle";
+
 var COUNTER = 0;
 
 pliny.class({
@@ -15,7 +20,6 @@ pliny.class({
       description: "The size and location of the surface to create."
     }]
 });
-import Entity from "./Entity";
 export default class Surface extends Entity {
 
   static create() {
@@ -26,9 +30,8 @@ export default class Surface extends Entity {
     super();
     this.options = Object.assign({}, {
       id: "Primrose.Surface[" + (COUNTER++) + "]",
-      bounds: new Primrose.Text.Rectangle()
+      bounds: new Rectangle()
     }, options);
-    this.listeners.move = [];
     this.bounds = this.options.bounds;
     this.canvas = null;
     this.context = null;
@@ -179,7 +182,7 @@ export default class Surface extends Entity {
       bounds.left = 0;
       bounds.top = 0;
     }
-    else if (bounds instanceof Primrose.Text.Rectangle) {
+    else if (bounds instanceof Rectangle) {
       bounds = bounds.clone();
     }
     for (var i = 0; i < this.children.length; ++i) {
@@ -274,7 +277,7 @@ export default class Surface extends Entity {
 
   get texture() {
     if (!this._texture) {
-      this._texture = new THREE.Texture(this.canvas);
+      this._texture = new Texture(this.canvas);
     }
     return this._texture;
   }
@@ -307,7 +310,7 @@ export default class Surface extends Entity {
         y: (1 - point[1]) * this.imageHeight
       };
     }
-    else if(point instanceof THREE.Vector2) {
+    else if(point instanceof Vector2) {
       return {
         x: point.x * this.imageWidth,
         y: (1 - point.y) * this.imageHeight

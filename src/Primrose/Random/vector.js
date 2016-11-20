@@ -1,3 +1,6 @@
+import randNum from "./number";
+import { Vector3 } from "three/src/math/Vector3";
+
 pliny.function({
   parent: "Primrose.Random",
   name: "vector",
@@ -29,9 +32,6 @@ pliny.function({
 > <0.157, -0.364, 0.448>"
   }]
 });
-
-import randNum from "./number";
-import { Vector3 } from "three";
 export default function vector(min, max){
   return new Vector3().set(
     randNum(min, max),

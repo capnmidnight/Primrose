@@ -1,5 +1,6 @@
 import InputProcessor from "./InputProcessor";
 import isChrome from "../../flags/isChrome";
+import PointerLock from "webvr-standard-monitor/src/PointerLock";
 
 pliny.class({
   parent: "Primrose.Input",

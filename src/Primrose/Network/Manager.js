@@ -1,3 +1,6 @@
+import AbstractEventEmitter from "../AbstractEventEmitter";
+import RemoteUser from "./RemoteUser";
+
 pliny.class({
   parent: "Primrose.Network",
     name: "Manager",
@@ -15,7 +18,6 @@ pliny.class({
       description: "Model factory for creating avatars for new remote users."
     }]
 });
-import AbstractEventEmitter from "../AbstractEventEmitter";
 export default class Manager extends AbstractEventEmitter {
   constructor(localUser, audio, factories, options) {
     super();
@@ -36,8 +38,8 @@ export default class Manager extends AbstractEventEmitter {
   update(dt) {
     if (this._socket && this.deviceIndex === 0) {
       this.lastNetworkUpdate += dt;
-      if (this.lastNetworkUpdate >= Primrose.Network.RemoteUser.NETWORK_DT) {
-        this.lastNetworkUpdate -= Primrose.Network.RemoteUser.NETWORK_DT;
+      if (this.lastNetworkUpdate >= RemoteUser.NETWORK_DT) {
+        this.lastNetworkUpdate -= RemoteUser.NETWORK_DT;
         for (var i = 0; i < this.localUser.newState.length; ++i) {
           if (this.oldState[i] !== this.localUser.newState[i]) {
             this._socket.emit("userState", this.localUser.newState);
@@ -106,7 +108,7 @@ export default class Manager extends AbstractEventEmitter {
   addUser(state, goSecond) {
     console.log("User %s logging on.", state[0]);
     var toUserName = state[0],
-      user = new Primrose.Network.RemoteUser(toUserName, this.factories.avatar, this.options.foregroundColor, this.options.disableWebRTC, this.options.webRTC, this.microphone, this.userName, goSecond);
+      user = new RemoteUser(toUserName, this.factories.avatar, this.options.foregroundColor, this.options.disableWebRTC, this.options.webRTC, this.microphone, this.userName, goSecond);
     this.users[toUserName] = user;
     this.updateUser(state);
     this.emit("addavatar", user);

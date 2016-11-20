@@ -6,21 +6,20 @@ var GRASS = "../images/grass.png",
 
   env = new Primrose.BrowserEnvironment({
     skyTexture: "../images/bg2.jpg",
-    ambientSound: "../audio/wind.ogg",
     groundTexture: GRASS,
     font: "../fonts/helvetiker_regular.typeface.json"
   }),
 
-  subScene = new THREE.Object3D(),
+  subScene = hub(),
 
   editor = null,
   editorFrame = null,
   editorFrameMesh = null,
 
-  modA = isOSX ? "metaKey" : "ctrlKey",
-  modB = isOSX ? "altKey" : "shiftKey",
-  cmdA = isOSX ? "CMD" : "CTRL",
-  cmdB = isOSX ? "OPT" : "SHIFT",
+  modA = isMacOS ? "metaKey" : "ctrlKey",
+  modB = isMacOS ? "altKey" : "shiftKey",
+  cmdA = isMacOS ? "CMD" : "CTRL",
+  cmdB = isMacOS ? "OPT" : "SHIFT",
   cmdPre = cmdA + "+" + cmdB,
 
   scriptUpdateTimeout,

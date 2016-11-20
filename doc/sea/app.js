@@ -9,7 +9,7 @@ var env = new Primrose.BrowserEnvironment({
   fullScreenButtonContainer: "body"
 }),
 
-  moon = textured(new THREE.CircleBufferGeometry(1, 45), "moon.jpg", {
+  moon = textured(circle(1, 45), "moon.jpg", {
     unshaded: true
   }),
 
@@ -23,7 +23,7 @@ moon.latLon(-30, 30, 7);
 moon.lookAt(env.scene.position);
 moon.material.color.setHex(0xffef9f);
 
-Primrose.ModelLoader.loadModel("../models/dolphin.obj")
+Primrose.Graphics.ModelLoader.loadModel("../models/dolphin.obj")
   .then(function(dolphinTemplate) {
     range(3, function(i) {
       var dolphin = dolphinTemplate.clone();

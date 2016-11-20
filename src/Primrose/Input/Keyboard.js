@@ -28,11 +28,6 @@ pliny.class({
 export default class Keyboard extends InputProcessor {
   constructor(input, commands) {
     super("Keyboard", commands);
-    this.listeners = {
-      clipboard: [],
-      keydown: [],
-      keyup: []
-    };
 
     this._operatingSystem = null;
     this.browser = isChrome ? "CHROMIUM" : (isFirefox ? "FIREFOX" : (isIE ? "IE" : (isOpera ? "OPERA" : (isSafari ? "SAFARI" : "UNKNOWN"))));
@@ -43,17 +38,10 @@ export default class Keyboard extends InputProcessor {
     this.setButton(evt.keyCode, evt.type === "keydown");
   }
 
-  addEventListener(name, thunk){
-    if(this.listeners[name]){
-      this.listeners[name].push(thunk);
-    }
-  }
-
   doTyping(elem, evt) {
     if (elem && elem.execCommand && this.operatingSystem && this.browser && this.codePage) {
       var oldDeadKeyState = this.operatingSystem._deadKeyState,
         cmdName = this.operatingSystem.makeCommandName(evt, this.codePage);
-
       if (elem.execCommand(this.browser, this.codePage, cmdName)) {
         evt.preventDefault();
       }

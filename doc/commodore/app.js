@@ -1,7 +1,7 @@
 // different operating systems have different keyboard shortcuts.
-var modA = isOSX ? "metaKey" : "ctrlKey",
-  modB = isOSX ? "altKey" : "shiftKey",
-  execKey = isOSX ? "E" : "SPACE",
+var modA = isMacOS ? "metaKey" : "ctrlKey",
+  modB = isMacOS ? "altKey" : "shiftKey",
+  execKey = isMacOS ? "E" : "SPACE",
 
   // a place to stow an object we will modify out of the loaded scene file
   editor = null,

@@ -1,3 +1,11 @@
+import { Mesh } from "three/src/objects/Mesh";
+import { ObjectLoader } from "three/src/loaders/ObjectLoader";
+import { FontLoader } from "three/src/loaders/FontLoader";
+import { SkinnedMesh } from "three/src/objects/SkinnedMesh";
+import { AnimationClip } from "three/src/animation/AnimationClip";
+
+import { MTLLoader, OBJLoader } from "../../THREE"
+
 // The JSON format object loader is not always included in the Three.js distribution,
 // so we have to first check for it.
 var loaders = null,
@@ -35,7 +43,7 @@ var propertyTests = {
 
 function setProperties(object) {
   object.traverse(function (obj) {
-    if (obj instanceof THREE.Mesh) {
+    if (obj instanceof Mesh) {
       for (var prop in propertyTests) {
         obj[prop] = obj[prop] || propertyTests[prop](obj);
       }
@@ -98,11 +106,7 @@ export default class ModelLoader {
       name: "loadObject",
       description: "Asynchronously loads a JSON, OBJ, or MTL file as a Three.js object. It processes the scene for attributes, creates new properties on the scene to give us\n\
     faster access to some of the elements within it. It uses callbacks to tell you when loading progresses. It uses a Promise to tell you when it's complete, or when an error occurred.\n\
-    Useful for one-time use models.\n\
-    \n\
-    > NOTE: ModelLoader uses the same Cross-Origin Request policy as THREE.ImageUtils,\n\
-    > meaning you may use THREE.ImageUtils.crossOrigin to configure the cross-origin\n\
-    > policy that Primrose uses for requests.",
+    Useful for one-time use models.",
       returns: "Promise",
       parameters: [{
         name: "src",
@@ -157,12 +161,10 @@ export default class ModelLoader {
       extension = extension.toLowerCase();
       if(loaders === null){
         loaders = {
-          ".json": THREE.ObjectLoader,
-          ".fbx": THREE.FBXLoader,
-          ".mtl": THREE.MTLLoader,
-          ".obj": THREE.OBJLoader,
-          ".stl": THREE.STLLoader,
-          ".typeface.json": THREE.FontLoader
+          ".json": ObjectLoader,
+          ".mtl": MTLLoader,
+          ".obj": OBJLoader,
+          ".typeface.json": FontLoader
         }
       }
       var Loader = new loaders[extension]();
@@ -202,7 +204,7 @@ export default class ModelLoader {
         }
         else {
           if (Loader.setCrossOrigin) {
-            Loader.setCrossOrigin(THREE.ImageUtils.crossOrigin);
+            Loader.setCrossOrigin("anonymous");
           }
           promise = promise.then(() => new Promise((resolve, reject) => Loader.load(src, resolve, progress, reject)));
         }
@@ -344,13 +346,13 @@ export default class ModelLoader {
     var obj = this.template.clone();
 
     obj.traverse((child) => {
-      if (child instanceof THREE.SkinnedMesh) {
-        obj.animation = new THREE.Animation(child, child.geometry.animation);
-        if (!this.template.originalAnimationData && obj.animation.data) {
-          this.template.originalAnimationData = obj.animation.data;
+      if (child instanceof SkinnedMesh) {
+        obj.animation = new AnimationClip(child, child.geometry.animation);
+        if (!this.template.originalAnimationClipData && obj.animation.data) {
+          this.template.originalAnimationClipData = obj.animation.data;
         }
         if (!obj.animation.data) {
-          obj.animation.data = this.template.originalAnimationData;
+          obj.animation.data = this.template.originalAnimationClipData;
         }
       }
     });

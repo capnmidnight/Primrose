@@ -33,7 +33,7 @@ pliny.function({
     put(light(0xffff00)).on(scene).at(0, 100, 0);"
   }]
 });
-import { PointLight } from "three";
+import { PointLight } from "three/src/lights/PointLight";
 export default function light(color, intensity, distance, decay) {
   return new PointLight(color, intensity, distance, decay);
 };

@@ -13,6 +13,7 @@ import quad from "./quad";
 import range from "./range";
 import ring from "./ring";
 import shell from "./shell";
+import shooter from "./shooter";
 import sphere from "./sphere";
 import textured from "./textured";
 import v3 from "./v3";
@@ -33,6 +34,7 @@ export {
   range,
   ring,
   shell,
+  shooter,
   sphere,
   textured,
   v3
@@ -54,6 +56,7 @@ export default {
   range,
   ring,
   shell,
+  shooter,
   sphere,
   textured,
   v3

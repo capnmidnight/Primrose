@@ -1,3 +1,10 @@
+import AbstractEventEmitter from "../AbstractEventEmitter";
+import randColor from "../Random/color";
+import colored from "../../live-api/colored";
+import Audio3D from "../Audio/Audio3D";
+import { Quaternion } from "three/src/math/Quaternion";
+import { Vector3 } from "three/src/math/Vector3";
+
 pliny.class({
   parent: "Primrose.Network",
   name: "RemoteUser",
@@ -29,10 +36,6 @@ pliny.class({
     description: "The name of the user initiating the peer connection."
   }]
 });
-import AbstractEventEmitter from "../AbstractEventEmitter";
-import randColor from "../Random/color";
-import colored from "../../live-api/colored";
-import { Quaternion, Vector3 } from "three";
 export default class RemoteUser extends AbstractEventEmitter {
 
   constructor(userName, modelFactory, nameMaterial, disableWebRTC, requestICEPath, microphone, localUserName, goSecond) {
@@ -93,11 +96,11 @@ export default class RemoteUser extends AbstractEventEmitter {
   setAudio(audio, audioSource){
     if(audioSource instanceof Element){
       this.audioElement = audioSource;
-      Primrose.Output.Audio3D.setAudioProperties(this.audioElement);
+      Audio3D.setAudioProperties(this.audioElement);
       this.audioStream = audio.context.createMediaElementSource(this.audioElement);
     }
     else {
-      this.audioElement = Primrose.Output.Audio3D.setAudioStream(audioSource, "audio" + this.userName);
+      this.audioElement = Audio3D.setAudioStream(audioSource, "audio" + this.userName);
       this.audioStream = audio.context.createMediaStreamSource(audioSource);
     }
     this.gain = audio.context.createGain();

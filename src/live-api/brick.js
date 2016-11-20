@@ -1,3 +1,7 @@
+import textured from "./textured";
+import colored from "./colored";
+import box from "./box";
+
 pliny.function({
   name: "brick",
   description: "Creates a textured box. See [`box()`](#box) and [`textured()`](#textured). The texture will be repeated across the box.",
@@ -40,12 +44,18 @@ The result should appear as:\n\
 ![screenshot](images/brick.jpg)"
   }]
 });
-
-import textured from "./textured";
-import box from "./box";
-export default function brick(txt, w, h, l) {
-  return textured(box(w || 1, h || 1, l || 1), txt, {
+export default function brick(txt, w, h, l, options) {
+  w = w || 1;
+  h = h || 1;
+  l = l || 1;
+  options = Object.assign({}, {
     txtRepeatS: w,
-    txtRepeatT: l
-  });
+    txtRepeatT: l,
+    anisotropy: 8,
+    transparent: true,
+    opacity: 1
+  }, options);
+  const m = (typeof txt === "number") ? colored : textured,
+    obj = m(box(w, h, l), txt, options);
+  return obj;
 };

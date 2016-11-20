@@ -85,7 +85,9 @@ export default class CodePage {
       }
     };
 
-    Object.assign(commands, options);
+    for(var key in options){
+      commands[key] = Object.assign({}, commands[key], options[key]);
+    }
 
     var char, code, cmdName;
     for (var i = 0; i <= 9; ++i) {

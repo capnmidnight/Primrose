@@ -46,7 +46,6 @@ export default class Speech {
         msg.text = txt;
         msg.onend = resolve;
         msg.onerror = reject;
-        msg.onboundary = console.log.bind(console, "boundary");
         speechSynthesis.speak(msg);
       });
     }

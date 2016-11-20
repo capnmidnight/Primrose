@@ -15,7 +15,7 @@ var height = 8,
     textSize = 0.05,
     skipOne = false,
     perMeasure = 2 / height,
-    DIST = new THREE.Vector3(),
+    DIST = v3(),
     env = new Primrose.BrowserEnvironment({
       groundTexture: "https://www.primrosevr.com/doc/images/deck.png",
       font: "https://primrosevr.com/doc/fonts/helvetiker_regular.typeface.json",
@@ -35,7 +35,8 @@ function Board(type){
   this.object = hub();
   this.title = put(text3D(0.15, type)
       .center()
-      .colored("text" + type, colorPlay))
+      .colored(colorPlay)
+      .named("text" + type))
     .on(this.object)
     .at(0, 0.7, -1.3)
     .obj();
@@ -48,10 +49,12 @@ function Board(type){
       lon = (midWidth - x) * 10,
       lat = (y - midHeight) * 10,
       btn = box(padSize, padSize, padDepth)
-        .colored("btn" + i, colorOff)
+        .colored(colorOff)
+        .named("btn" + i)
         .latLon(lat, lon);
     put(box(padSize * 1.1, padSize * 1.1, padDepth * 0.9)
-        .colored("bevel" + i, colorPlay))
+        .colored(colorPlay)
+        .named("bevel" + i))
       .on(btn);
     env.registerPickableObject(btn);
     btn.onselect = this.select.bind(this, i);
@@ -64,10 +67,11 @@ function Board(type){
 Board.prototype.play = function(i, dt) {
   this.highlight(i, colorPlay);
   this.object.getWorldDirection(DIST);
-  env.music.play(this.type, 25 - numButtons + i * 3, 0.25, perMeasure * 0.85,
-    this.object.x, this.object.y, this.object.z,
-    DIST.x, DIST.y, DIST.z, dt)
-    .then(() => this.highlight(i));
+  var duration = perMeasure * 0.85;
+  env.music.play(this.type, 25 - numButtons + i * 3, 0.25, duration, dt)
+    .at(this.object.x, this.object.y, this.object.z,
+        DIST.x, DIST.y, DIST.z);
+  setTimeout(this.highlight.bind(this, i), duration * 1000);
 }
 
 Board.prototype.update = function() {
@@ -90,7 +94,7 @@ Board.prototype.update = function() {
 Board.prototype.highlight = function(i, color) {
   color = color || this.btnState[i] && colorOn || colorOff;
   var btn = this.btns[i]
-  btn.colored(btn.name, color);
+  btn.colored(color).named(btn.name);
 };
 
 Board.prototype.select = function(i, evt) {
@@ -101,7 +105,7 @@ Board.prototype.select = function(i, evt) {
 };
 
 env.addEventListener("ready", function () {
-  const types = Primrose.Output.Music.TYPES,
+  const types = Primrose.Audio.Music.TYPES,
     nTypes = types.length;
   types.forEach(function(type, t) {
     var board = new Board(type);

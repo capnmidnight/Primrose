@@ -1,12 +1,47 @@
+import PointerLock from "webvr-standard-monitor/src/PointerLock";
+import box from "../live-api/box";
+import hub from "../live-api/hub";
 import Angle from "./Angle";
 import AbstractEventEmitter from "./AbstractEventEmitter";
+import Pointer from "./Pointer";
+import Keys from "./Keys";
+import Text2Speech from "./Audio/Speech";
+import Audio3D from "./Audio/Audio3D";
+import Music from "./Audio/Music";
+import Entity from "./Controls/Entity";
+import Button2D from "./Controls/Button2D";
+import Button3D from "./Controls/Button3D";
+import ButtonFactory from "./Controls/ButtonFactory";
+import Image from "./Controls/Image";
+import Surface from "./Controls/Surface";
+import cascadeElement from "./DOM/cascadeElement";
+import makeHidingContainer from "./DOM/makeHidingContainer";
+import ModelLoader from "./Graphics/ModelLoader";
+import FPSInput from "./Input/FPSInput";
+import VR from "./Input/VR";
+import NetworkManager from "./Network/Manager";
+import TextBox from "./Text/Controls/TextBox";
+import PlainText from "./Text/Grammars/PlainText";
 import { Quality, PIXEL_SCALES } from "./constants";
+import { BackSide } from "three/src/constants";
+import { PCFSoftShadowMap } from "three/src/constants";
+import { FogExp2 } from "three/src/scenes/FogExp2";
+import { Scene } from "three/src/scenes/Scene";
+import { Mesh } from "three/src/objects/Mesh";
+import { PerspectiveCamera } from "three/src/cameras/PerspectiveCamera";
+import { AmbientLight } from "three/src/lights/AmbientLight";
+import { TextGeometry } from "three/src/geometries/TextGeometry";
+import { Quaternion } from "three/src/math/Quaternion";
+import { Color } from "three/src/math/Color";
+import { Euler } from "three/src/math/Euler";
+import { Vector3 } from "three/src/math/Vector3";
+import { WebGLRenderer } from "three/src/renderers/WebGLRenderer";
 
 const MILLISECONDS_TO_SECONDS = 0.001,
   MAX_MOVE_DISTANCE = 5,
   MAX_MOVE_DISTANCE_SQ = MAX_MOVE_DISTANCE * MAX_MOVE_DISTANCE,
   TELEPORT_COOLDOWN = 250,
-  TELEPORT_DISPLACEMENT = new THREE.Vector3(),
+  TELEPORT_DISPLACEMENT = new Vector3(),
   GROUND_HEIGHT = -0.07;
 
 pliny.class({
@@ -20,7 +55,7 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
 
     this.network = null;
     this.options = Object.assign({}, BrowserEnvironment.DEFAULTS, options);
-    this.options.foregroundColor = this.options.foregroundColor || complementColor(new THREE.Color(this.options.backgroundColor))
+    this.options.foregroundColor = this.options.foregroundColor || complementColor(new Color(this.options.backgroundColor))
       .getHex();
     if(this.options.nonstandardIPD !== null){
       this.options.nonstandardIPD *= 0.5;
@@ -55,7 +90,7 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
     };
 
     this.turns = new Angle(0);
-    const followEuler = new THREE.Euler(),
+    const followEuler = new Euler(),
       maxX = -Math.PI / 4,
       maxY = Math.PI / 6;
 
@@ -133,7 +168,7 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
           if(this.options.nonstandardNeckDepth !== null){
             st.translation.z = this.options.nonstandardNeckDepth;
           }
-          Primrose.Entity.eyeBlankAll(i);
+          Entity.eyeBlankAll(i);
           this.camera.projectionMatrix.copy(st.projection);
           this.camera.translateOnAxis(st.translation, 1);
           this.renderer.setViewport(
@@ -194,9 +229,9 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
 
     var lt = 0,
       currentHeading = 0,
-      qPitch = new THREE.Quaternion(),
-      vEye = new THREE.Vector3(),
-      vBody = new THREE.Vector3(),
+      qPitch = new Quaternion(),
+      vEye = new Vector3(),
+      vBody = new Vector3(),
       modelFiles = {
         scene: this.options.sceneModel,
         avatar: this.options.avatarModel,
@@ -205,14 +240,14 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
       },
       resolutionScale = 1,
       factories = {
-        button: Primrose.Controls.Button2D,
-        img: Primrose.Controls.Image,
-        section: Primrose.Surface,
-        textarea: Primrose.Text.Controls.TextBox,
+        button: Button2D,
+        img: Image,
+        section: Surface,
+        textarea: TextBox,
         avatar: null,
         pre: {
-          create: () => new Primrose.Text.Controls.TextBox({
-            tokenizer: Primrose.Text.Grammars.PlainText,
+          create: () => new TextBox({
+            tokenizer: PlainText,
             hideLineNumbers: true,
             readOnly: true
           })
@@ -228,7 +263,7 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
     };
 
     this.appendChild = (elem) => {
-      if (elem instanceof THREE.Mesh) {
+      if (elem instanceof Mesh) {
         this.scene.add(elem);
       }
       else {
@@ -250,10 +285,10 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
       return rgb;
     }
 
-    var modelsReady = Primrose.ModelLoader.loadObjects(modelFiles)
+    var modelsReady = ModelLoader.loadObjects(modelFiles)
       .then((models) => {
         window.text3D = function (font, size, text) {
-          var geom = new THREE.TextGeometry(text, {
+          var geom = new TextGeometry(text, {
             font: font,
             size: size,
             height: size / 5,
@@ -269,16 +304,16 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
         }
 
         if (models.avatar) {
-          factories.avatar = new Primrose.ModelLoader(models.avatar);
+          factories.avatar = new ModelLoader(models.avatar);
         }
 
         if (models.button) {
-          this.buttonFactory = new Primrose.ButtonFactory(
+          this.buttonFactory = new ButtonFactory(
             models.button,
             this.options.button.options);
         }
         else {
-          this.buttonFactory = new Primrose.ButtonFactory(
+          this.buttonFactory = new ButtonFactory(
             colored(box(1, 1, 1), 0xff0000), {
               maxThrow: 0.1,
               minDeflection: 10,
@@ -291,7 +326,7 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
       .catch((err) => {
         console.error(err);
         if (!this.buttonFactory) {
-          this.buttonFactory = new Primrose.ButtonFactory(
+          this.buttonFactory = new ButtonFactory(
             colored(box(1, 1, 1), 0xff0000), {
               maxThrow: 0.1,
               minDeflection: 10,
@@ -308,8 +343,8 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
     this.avatarHeight = this.options.avatarHeight;
     this.walkSpeed = this.options.walkSpeed;
 
-    this.speech = new Primrose.Output.Speech(this.options.speech);
-    this.audio = new Primrose.Output.Audio3D();
+    this.speech = new Text2Speech(this.options.speech);
+    this.audio = new Audio3D();
     if (this.options.ambientSound) {
       this.audio.load3DSound(this.options.ambientSound, true, -1, 1, -1)
         .then((aud) => {
@@ -335,7 +370,7 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
       });
     }
 
-    this.music = new Primrose.Output.Music(this.audio);
+    this.music = new Music(this.audio);
 
     this.pickableObjects = [];
     this.registerPickableObject = this.pickableObjects.push.bind(this.pickableObjects);
@@ -391,8 +426,8 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
         .length() > 0.2,
       immediate);
 
-    const POSITION = new THREE.Vector3(),
-      START_POINT = new THREE.Vector3();
+    const POSITION = new Vector3(),
+      START_POINT = new Vector3();
 
     this.selectControl = (evt) => {
       const hit = evt.hit,
@@ -472,29 +507,29 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
       }
     };
 
-    this.options.scene = this.scene = this.options.scene || new THREE.Scene();
+    this.options.scene = this.scene = this.options.scene || new Scene();
     if (this.options.useFog) {
-      this.scene.fog = new THREE.FogExp2(this.options.backgroundColor, 2 / this.options.drawDistance);
+      this.scene.fog = new FogExp2(this.options.backgroundColor, 1 / Math.sqrt(this.options.drawDistance));
     }
 
-    this.camera = new THREE.PerspectiveCamera(75, 1, this.options.nearPlane, this.options.nearPlane + this.options.drawDistance);
+    this.camera = new PerspectiveCamera(75, 1, this.options.nearPlane, this.options.nearPlane + this.options.drawDistance);
 
     let skyReady = null;
     if (this.options.skyTexture !== null) {
       skyReady = new Promise((resolve, reject) => {
-        const skyFunc = (typeof this.options.skyTexture === "number") ? colored : textured,
-          skyDim = this.options.drawDistance * 0.9;
+        const skyFunc = (typeof this.options.skyTexture === "number") ? colored : textured;
 
         let skyGeom = null;
         if(typeof this.options.skyTexture === "string"){
-          skyGeom = sphere(skyDim, 18, 9);
+          skyGeom = sphere(this.options.drawDistance, 18, 9);
         }
         else {
+          const skyDim = this.options.drawDistance / Math.sqrt(2);
           skyGeom = box(skyDim, skyDim, skyDim);
         }
 
         this.sky = skyFunc(skyGeom, this.options.skyTexture, {
-          side: THREE.BackSide,
+          side: BackSide,
           fog: false,
           unshaded: true,
           transparent: true,
@@ -510,25 +545,30 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
     }
 
     skyReady = skyReady.then(() => {
-      console.log(this.sky);
       this.sky.name = "Sky";
       this.scene.add(this.sky);
+
+
+      if(!this.options.disableDefaultLighting) {
+        this.ambient = new AmbientLight(0xffffff, 0.5);
+        this.sky.add(this.ambient);
+
+        this.sun = light(0xffffff, 1, 50);
+        put(this.sun)
+          .on(this.sky)
+          .at(0, 10, 10);
+      }
     });
 
     let groundReady = null;
     if (this.options.groundTexture !== null) {
       groundReady = new Promise((resolve, reject) => {
-        const dim = this.options.drawDistance / Math.sqrt(2),
-          gm = new THREE.BoxBufferGeometry(dim * 5, 0.1, dim * 5, dim, 1, dim),
-          groundFunc = (typeof this.options.groundTexture === "number") ? colored : textured;
-        this.ground = groundFunc(gm, this.options.groundTexture, {
+        const dim = 2 * this.options.drawDistance;
+        this.ground = brick(this.options.groundTexture, dim * 5, 0.1, dim * 5, {
           txtRepeatS: dim * 5,
           txtRepeatT: dim * 5,
-          transparent: true,
-          opacity: 1,
           resolve: resolve,
-          progress: this.options.progress,
-          anisotropy: 8
+          progress: this.options.progress
         });
         this.registerPickableObject(this.ground);
       });
@@ -543,7 +583,7 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
       this.scene.add(this.ground);
     });
 
-    this.ui = new THREE.Object3D();
+    this.ui = hub().named("UI");
     this.scene.add(this.ui);
 
     var buildScene = (sceneGraph) => {
@@ -551,7 +591,7 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
       sceneGraph.traverse(function (child) {
         if (child.isButton) {
           sceneGraph.buttons.push(
-            new Primrose.Controls.Button3D(child.parent, child.name));
+            new Button3D(child.parent, child.name));
         }
         if (child.name) {
           sceneGraph[child.name] = child;
@@ -581,16 +621,6 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
       }
       return sceneGraph;
     };
-
-    if(!this.options.disableDefaultLighting) {
-      this.ambient = new THREE.AmbientLight(0xffffff, 0.5);
-      this.scene.add(this.ambient);
-
-      this.sun = light(0xffffff, 1, 50);
-      put(this.sun)
-        .on(this.scene)
-        .at(0, 10, 10);
-    }
 
     var currentTimerObject = null;
     this.timer = 0;
@@ -660,8 +690,8 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
         this.renderer = this.options.renderer;
       }
       else {
-        this.renderer = new THREE.WebGLRenderer({
-          canvas: Primrose.DOM.cascadeElement(this.options.canvasElement, "canvas", HTMLCanvasElement),
+        this.renderer = new WebGLRenderer({
+          canvas: cascadeElement(this.options.canvasElement, "canvas", HTMLCanvasElement),
           context: this.options.context,
           antialias: this.options.antialias,
           alpha: true,
@@ -686,7 +716,7 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
       this.renderer.domElement.addEventListener('webglcontextlost', this.stop, false);
       this.renderer.domElement.addEventListener('webglcontextrestored', this.start, false);
 
-      this.input = new Primrose.Input.FPSInput(this.options.fullScreenElement, this.options);
+      this.input = new FPSInput(this.options.fullScreenElement, this.options);
       this.input.addEventListener("zero", this.zero, false);
       this.input.VR.ready.then((displays) => displays.forEach((display, i) => {
         window.addEventListener("vrdisplayactivate", (evt) => {
@@ -706,18 +736,18 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
         fog: false,
         transparent: true,
         unshaded: true,
-        side: THREE.BackSide
+        side: BackSide
       });
       this.fader.visible = false;
       this.input.head.root.add(this.fader);
 
-      Primrose.Pointer.EVENTS.forEach((evt) => this.input.addEventListener(evt, this.selectControl.bind(this), false));
-      this.input.forward(this, Primrose.Pointer.EVENTS);
+      Pointer.EVENTS.forEach((evt) => this.input.addEventListener(evt, this.selectControl.bind(this), false));
+      this.input.forward(this, Pointer.EVENTS);
 
       if(!this.options.disableKeyboard) {
         const keyDown =  (evt) => {
             if (this.input.VR.isPresenting) {
-              if (evt.keyCode === Primrose.Keys.ESCAPE && !this.input.VR.isPolyfilled) {
+              if (evt.keyCode === Keys.ESCAPE && !this.input.VR.isPolyfilled) {
                 this.input.cancelVR();
               }
             }
@@ -785,8 +815,8 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
         };
 
         // the `surrogate` textarea makes clipboard events possible
-        var surrogate = Primrose.DOM.cascadeElement("primrose-surrogate-textarea", "textarea", HTMLTextAreaElement),
-          surrogateContainer = Primrose.DOM.makeHidingContainer("primrose-surrogate-textarea-container", surrogate);
+        var surrogate = cascadeElement("primrose-surrogate-textarea", "textarea", HTMLTextAreaElement),
+          surrogateContainer = makeHidingContainer("primrose-surrogate-textarea-container", surrogate);
 
         surrogateContainer.style.position = "absolute";
         surrogateContainer.style.overflow = "hidden";
@@ -825,7 +855,7 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
         this.renderer.domElement.style.cursor = "default";
         if(this.options.enableShadows && this.sun) {
           this.renderer.shadowMap.enabled = true;
-          this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+          this.renderer.shadowMap.type = PCFSoftShadowMap;
           this.sun.castShadow = true;
           this.sun.shadow.mapSize.width =
           this.sun.shadow.mapSize.height = this.options.shadowMapSize;
@@ -910,7 +940,7 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
 
   connect(socket, userName) {
     if(!this.network){
-      this.network = new Primrose.Network.Manager(this.input, this.audio, this.factories, this.options);
+      this.network = new NetworkManager(this.input, this.audio, this.factories, this.options);
       this.network.addEventListener("addavatar", this.addAvatar);
       this.network.addEventListener("removeavatar", this.removeAvatar);
     }
@@ -938,7 +968,7 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
     const container = document.querySelector(containerSpec);
     return this.displays.map((display, i) => {
       const btn = document.createElement("button"),
-        isStereo = Primrose.Input.VR.isStereoDisplay(display),
+        isStereo = VR.isStereoDisplay(display),
         enterVR = this.goFullScreen.bind(this, i);
       btn.type = "button";
       btn.className = isStereo ? "stereo" : "mono";
@@ -985,11 +1015,11 @@ BrowserEnvironment.DEFAULTS = {
   ambientSound: null,
   // HTML5 canvas element, if one had already been created.
   canvasElement: "frontBuffer",
-  // THREE.js renderer, if one had already been created.
+  // Three.js renderer, if one had already been created.
   renderer: null,
   // A WebGL context to use, if one had already been created.
   context: null,
-  // THREE.js scene, if one had already been created.
+  // Three.js scene, if one had already been created.
   scene: null,
   // I highly suggest you don't go down the road that requires setting this. I will not help you understand what it does, because I would rather you just not use it.
   nonstandardIPD: null,

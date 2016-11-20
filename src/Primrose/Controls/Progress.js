@@ -5,6 +5,7 @@ const SIZE = 1,
   INSET_LARGE = (1 - (1 - INSET) / PROPORTION);
 
 import { colored, box } from "../../live-api";
+import { BackSide } from "three/src/constants";
 export default class Progress {
 
   constructor(majorColor, minorColor) {
@@ -14,7 +15,7 @@ export default class Progress {
 
     this.totalBar = colored(geom, minorColor, {
       unshaded: true,
-      side: THREE.BackSide
+      side: BackSide
     });
 
     this.valueBar = colored(geom, majorColor, {

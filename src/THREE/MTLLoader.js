@@ -2,30 +2,31 @@
  * Loads a Wavefront .mtl file specifying materials
  *
  * @author angelxuanchang
+ *
+ * Converted to ES2015 by @capnmidnight
+ *
  */
+import { EventDispatcher } from "three/src/core/EventDispatcher";
+import { DefaultLoadingManager } from "three/src/loaders/LoadingManager";
+import { Loader } from "three/src/loaders/Loader";
+import { RepeatWrapping } from "three/src/constants";
+import { XHRLoader } from "three/src/loaders/XHRLoader";
+import { TextureLoader } from "three/src/loaders/TextureLoader";
+import { FrontSide } from "three/src/constants";
+import { MeshPhongMaterial } from "three/src/materials/MeshPhongMaterial";
+import { MeshBasicMaterial } from "three/src/materials/MeshBasicMaterial";
+import { Color } from "three/src/math/Color";
+import { Vector2 } from "three/src/math/Vector2";
 
-window.THREE.MTLLoader = function MTLLoader( manager ) {
+export class MTLLoader extends EventDispatcher {
 
-  this.manager = ( manager !== undefined ) ? manager : THREE.DefaultLoadingManager;
+  constructor ( manager ) {
 
-};
+    super();
 
-// http://paulbourke.net/dataformats/mtl/
-Object.assign( MTLLoader, {
-  COLOR_ON_AND_AMBIENT_OFF: 0,
-  COLOR_ON_AND_AMBIENT_ON: 1,
-  HIGHLIGHT_ON: 2,
-  REFLECTION_ON_AND_RAY_TRACE_ON: 3,
-  TRANSPARENCY_GLASS_ON_REFLECTION_RAY_TRACE_ON: 4,
-  REFLECTION_FRESNEL_ON_AND_RAY_TRACE_ON: 5,
-  TRANSPARENCY_REFRACTION_ON_REFLECTION_FRESNEL_OFF_AND_RAY_TRACE_ON: 6,
-  TRANSPARENCY_REFRACTION_ON_REFLECTION_FRESNEL_ON_AND_RAY_TRACE_ON: 7,
-  REFLECTION_ON_AND_RAY_TRACE_OFF: 8,
-  TRANSPARENCY_GLASS_ON_REFLECTION_RAY_TRACE_OFF: 9,
-  CASTS_SHADOWS_ONTO_INVISIBLE_SURFACES: 10
-});
+    this.manager = ( manager !== undefined ) ? manager : DefaultLoadingManager;
 
-Object.assign( MTLLoader.prototype, THREE.EventDispatcher.prototype, {
+  }
 
   /**
    * Loads and parses a MTL asset from a URL.
@@ -40,11 +41,11 @@ Object.assign( MTLLoader.prototype, THREE.EventDispatcher.prototype, {
    * @note In order for relative texture references to resolve correctly
    * you must call setPath and/or setTexturePath explicitly prior to load.
    */
-  load: function ( url, onLoad, onProgress, onError ) {
+  load ( url, onLoad, onProgress, onError ) {
 
     var scope = this;
 
-    var loader = new THREE.XHRLoader( this.manager );
+    var loader = new XHRLoader( this.manager );
     loader.setPath( this.path );
     loader.load( url, function ( text ) {
 
@@ -52,7 +53,7 @@ Object.assign( MTLLoader.prototype, THREE.EventDispatcher.prototype, {
 
     }, onProgress, onError );
 
-  },
+  }
 
   /**
    * Set base path for resolving references.
@@ -65,11 +66,11 @@ Object.assign( MTLLoader.prototype, THREE.EventDispatcher.prototype, {
    *     mtlLoader.setPath( 'assets/obj/' );
    *     mtlLoader.load( 'my.mtl', ... );
    */
-  setPath: function ( path ) {
+  setPath ( path ) {
 
     this.path = path;
 
-  },
+  }
 
   /**
    * Set base path for resolving texture references.
@@ -84,31 +85,31 @@ Object.assign( MTLLoader.prototype, THREE.EventDispatcher.prototype, {
    *     mtlLoader.setTexturePath( 'assets/textures/' );
    *     mtlLoader.load( 'my.mtl', ... );
    */
-  setTexturePath: function( path ) {
+  setTexturePath ( path ) {
 
     this.texturePath = path;
 
-  },
+  }
 
-  setBaseUrl: function( path ) {
+  setBaseUrl ( path ) {
 
     console.warn( 'MTLLoader: .setBaseUrl() is deprecated. Use .setTexturePath( path ) for texture path or .setPath( path ) for general base path instead.' );
 
     this.setTexturePath( path );
 
-  },
+  }
 
-  setCrossOrigin: function ( value ) {
+  setCrossOrigin ( value ) {
 
     this.crossOrigin = value;
 
-  },
+  }
 
-  setMaterialOptions: function ( value ) {
+  setMaterialOptions ( value ) {
 
     this.materialOptions = value;
 
-  },
+  }
 
   /**
    * Parses a MTL file.
@@ -121,7 +122,7 @@ Object.assign( MTLLoader.prototype, THREE.EventDispatcher.prototype, {
    * @note In order for relative texture references to resolve correctly
    * you must call setPath and/or setTexturePath explicitly prior to parse.
    */
-  parse: function ( text ) {
+  parse ( text ) {
 
     var lines = text.split( '\n' );
     var info = {};
@@ -172,7 +173,7 @@ Object.assign( MTLLoader.prototype, THREE.EventDispatcher.prototype, {
 
     }
 
-    var materialCreator = new MTLLoader.MaterialCreator( this.texturePath || this.path, this.materialOptions );
+    var materialCreator = new MaterialCreator( this.texturePath || this.path, this.materialOptions );
     materialCreator.setCrossOrigin( this.crossOrigin );
     materialCreator.setManager( this.manager );
     materialCreator.setMaterials( materialsInfo );
@@ -180,7 +181,7 @@ Object.assign( MTLLoader.prototype, THREE.EventDispatcher.prototype, {
 
   }
 
-} );
+};
 
 /**
  * Create a new MTLLoader.MaterialCreator
@@ -197,46 +198,44 @@ Object.assign( MTLLoader.prototype, THREE.EventDispatcher.prototype, {
  * @constructor
  */
 
-MTLLoader.MaterialCreator = function( baseUrl, options ) {
+class MaterialCreator {
 
-  this.baseUrl = baseUrl || '';
-  this.options = options;
-  this.materialsInfo = {};
-  this.materials = {};
-  this.materialsArray = [];
-  this.nameLookup = {};
+  constructor ( baseUrl, options ) {
 
-  this.side = ( this.options && this.options.side ) ? this.options.side : THREE.FrontSide;
-  this.wrap = ( this.options && this.options.wrap ) ? this.options.wrap : THREE.RepeatWrapping;
+    this.baseUrl = baseUrl || '';
+    this.options = options;
+    this.materialsInfo = {};
+    this.materials = {};
+    this.materialsArray = [];
+    this.nameLookup = {};
 
-};
+    this.side = ( this.options && this.options.side ) ? this.options.side : FrontSide;
+    this.wrap = ( this.options && this.options.wrap ) ? this.options.wrap : RepeatWrapping;
 
-MTLLoader.MaterialCreator.prototype = {
+  }
 
-  constructor: MTLLoader.MaterialCreator,
-
-  setCrossOrigin: function ( value ) {
+  setCrossOrigin ( value ) {
 
     this.crossOrigin = value;
 
-  },
+  }
 
-  setManager: function ( value ) {
+  setManager ( value ) {
 
     this.manager = value;
 
-  },
+  }
 
-  setMaterials: function( materialsInfo ) {
+  setMaterials ( materialsInfo ) {
 
     this.materialsInfo = this.convert( materialsInfo );
     this.materials = {};
     this.materialsArray = [];
     this.nameLookup = {};
 
-  },
+  }
 
-  convert: function( materialsInfo ) {
+  convert ( materialsInfo ) {
 
     if ( ! this.options ) return materialsInfo;
 
@@ -303,9 +302,9 @@ MTLLoader.MaterialCreator.prototype = {
 
     return converted;
 
-  },
+  }
 
-  preload: function () {
+  preload () {
 
     for ( var mn in this.materialsInfo ) {
 
@@ -313,15 +312,15 @@ MTLLoader.MaterialCreator.prototype = {
 
     }
 
-  },
+  }
 
-  getIndex: function( materialName ) {
+  getIndex ( materialName ) {
 
     return this.nameLookup[ materialName ];
 
-  },
+  }
 
-  getAsArray: function() {
+  getAsArray () {
 
     var index = 0;
 
@@ -335,9 +334,9 @@ MTLLoader.MaterialCreator.prototype = {
 
     return this.materialsArray;
 
-  },
+  }
 
-  create: function ( materialName ) {
+  create ( materialName ) {
 
     if ( this.materials[ materialName ] === undefined ) {
 
@@ -347,13 +346,13 @@ MTLLoader.MaterialCreator.prototype = {
 
     return this.materials[ materialName ];
 
-  },
+  }
 
-  createMaterial_: function ( materialName ) {
+  createMaterial_ ( materialName ) {
 
     // Create material
 
-    var TMaterial = THREE.MeshPhongMaterial;
+    var TMaterial = MeshPhongMaterial;
     var scope = this;
     var mat = this.materialsInfo[ materialName ];
     var params = {
@@ -406,14 +405,14 @@ MTLLoader.MaterialCreator.prototype = {
 
           // Diffuse color (color under white light) using RGB values
 
-          params.color = new THREE.Color().fromArray( value );
+          params.color = new Color().fromArray( value );
 
           break;
 
         case 'ks':
 
           // Specular color (color when light is reflected from shiny surface) using RGB values
-          params.specular = new THREE.Color().fromArray( value );
+          params.specular = new Color().fromArray( value );
 
           break;
 
@@ -468,7 +467,7 @@ MTLLoader.MaterialCreator.prototype = {
 
           if ( value === MTLLoader.COLOR_ON_AND_AMBIENT_OFF ) {
 
-            TMaterial = THREE.MeshBasicMaterial;
+            TMaterial = MeshBasicMaterial;
 
           }
 
@@ -492,7 +491,7 @@ MTLLoader.MaterialCreator.prototype = {
 
     }
 
-    if ( TMaterial === THREE.MeshBasicMaterial ) {
+    if ( TMaterial === MeshBasicMaterial ) {
 
       [ "shininess", "specular" ].forEach( function ( attribute ) {
 
@@ -508,14 +507,14 @@ MTLLoader.MaterialCreator.prototype = {
 
     this.materials[ materialName ] = new TMaterial( params );
     return this.materials[ materialName ];
-  },
+  }
 
-  getTextureParams: function( value, matParams ) {
+  getTextureParams ( value, matParams ) {
 
     var texParams = {
 
-      scale: new THREE.Vector2( 1, 1 ),
-      offset: new THREE.Vector2( 0, 0 ),
+      scale: new Vector2( 1, 1 ),
+      offset: new Vector2( 0, 0 ),
 
      };
 
@@ -549,17 +548,17 @@ MTLLoader.MaterialCreator.prototype = {
     texParams.url = items.join(' ').trim();
     return texParams;
 
-  },
+  }
 
-  loadTexture: function ( url, mapping, onLoad, onProgress, onError ) {
+  loadTexture ( url, mapping, onLoad, onProgress, onError ) {
 
     var texture;
-    var loader = THREE.Loader.Handlers.get( url );
-    var manager = ( this.manager !== undefined ) ? this.manager : THREE.DefaultLoadingManager;
+    var loader = Loader.Handlers.get( url );
+    var manager = ( this.manager !== undefined ) ? this.manager : DefaultLoadingManager;
 
     if ( loader === null ) {
 
-      loader = new THREE.TextureLoader( manager );
+      loader = new TextureLoader( manager );
 
     }
 
@@ -573,3 +572,18 @@ MTLLoader.MaterialCreator.prototype = {
   }
 
 };
+
+// http://paulbourke.net/dataformats/mtl/
+Object.assign( MTLLoader, {
+  COLOR_ON_AND_AMBIENT_OFF: 0,
+  COLOR_ON_AND_AMBIENT_ON: 1,
+  HIGHLIGHT_ON: 2,
+  REFLECTION_ON_AND_RAY_TRACE_ON: 3,
+  TRANSPARENCY_GLASS_ON_REFLECTION_RAY_TRACE_ON: 4,
+  REFLECTION_FRESNEL_ON_AND_RAY_TRACE_ON: 5,
+  TRANSPARENCY_REFRACTION_ON_REFLECTION_FRESNEL_OFF_AND_RAY_TRACE_ON: 6,
+  TRANSPARENCY_REFRACTION_ON_REFLECTION_FRESNEL_ON_AND_RAY_TRACE_ON: 7,
+  REFLECTION_ON_AND_RAY_TRACE_OFF: 8,
+  TRANSPARENCY_GLASS_ON_REFLECTION_RAY_TRACE_OFF: 9,
+  CASTS_SHADOWS_ONTO_INVISIBLE_SURFACES: 10
+});

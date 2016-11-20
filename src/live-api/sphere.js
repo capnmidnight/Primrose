@@ -39,10 +39,10 @@ pliny.function({
 });
 
 import cache from "../util/cache";
-import { SphereBufferGeometry } from "three";
+import { SphereGeometry } from "three/src/geometries/SphereGeometry";
 
 export default function sphere(r, slices, rings) {
   return cache(
-    `SphereBufferGeometry(${r}, ${slices}, ${rings})`,
-    () => new THREE.SphereBufferGeometry(r, slices, rings));
+    `SphereGeometry(${r}, ${slices}, ${rings})`,
+    () => new SphereGeometry(r, slices, rings));
 };

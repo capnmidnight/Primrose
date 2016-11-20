@@ -56,17 +56,17 @@ It should look something like this:\n\
 });
 
 import cache from "../util/cache";
-import { RingBufferGeometry } from "three";
+import { RingBufferGeometry } from "three/src/geometries/RingBufferGeometry";
 export default function ring(rInner, rOuter, sectors, rings, start, end) {
   if(rInner === undefined){
     rInner = 0.5;
   }
-  sectirs = sectors || 18;
+  sectors = sectors || 18;
   rings = rings || 1;
   rOuter = rOuter || 1;
   start = start || 0;
   end = end || 2 * Math.PI;
   return cache(
     `RingBufferGeometry(${rInner}, ${rOuter}, ${sectors}, ${rings}, ${start}, ${end})`,
-    () => new THREE.RingBufferGeometry(rInner, rOuter, sectors, rings, start, end));
+    () => new RingBufferGeometry(rInner, rOuter, sectors, rings, start, end));
 };

@@ -1,13 +1,20 @@
+import AbstractEventEmitter from "./AbstractEventEmitter"
+import { Vector3 } from "three/src/math/Vector3";
+import { Euler } from "three/src/math/Euler";
+import { Quaternion } from "three/src/math/Quaternion";
+import { Raycaster } from "three/src/core/Raycaster";
+import { Object3D } from "three/src/core/Object3D";
+
 const TELEPORT_PAD_RADIUS = 0.4,
-  FORWARD = new THREE.Vector3(0, 0, -1),
+  FORWARD = new Vector3(0, 0, -1),
   LASER_WIDTH = 0.01,
   LASER_LENGTH = 3 * LASER_WIDTH,
   GAZE_RING_DISTANCE  = -1.25,
   GAZE_RING_INNER = 0.015,
   GAZE_RING_OUTER = 0.03,
-  VECTOR_TEMP = new THREE.Vector3(),
-  EULER_TEMP = new THREE.Euler(),
-  QUAT_TEMP = new THREE.Quaternion();
+  VECTOR_TEMP = new Vector3(),
+  EULER_TEMP = new Euler(),
+  QUAT_TEMP = new Quaternion();
 
 
 function hasGazeEvent(obj){
@@ -48,7 +55,6 @@ pliny.class({
       defaultValue: null
     }]
 });
-import AbstractEventEmitter from "./AbstractEventEmitter"
 export default class Pointer extends AbstractEventEmitter {
   constructor(name, color, highlight, s, devices, triggerDevices, options) {
     super();
@@ -60,11 +66,11 @@ export default class Pointer extends AbstractEventEmitter {
 
     this.unproject = null;
 
-    this.picker = new THREE.Raycaster();
+    this.picker = new Raycaster();
     this.showPointer = true;
     this.color = color;
     this.highlight = highlight;
-    this.velocity = new THREE.Vector3();
+    this.velocity = new Vector3();
     this.mesh = colored(box(LASER_WIDTH / s, LASER_WIDTH / s, LASER_LENGTH * s), this.color, {
       unshaded: true
     });
@@ -95,7 +101,7 @@ export default class Pointer extends AbstractEventEmitter {
     this.gazeOuter.visible = false;
     this.gazeInner.add(this.gazeOuter);
 
-    this.root = new THREE.Object3D();
+    this.root = new Object3D();
     this.root.add(this.mesh);
     this.root.add(this.gazeInner);
 
@@ -353,7 +359,7 @@ export default class Pointer extends AbstractEventEmitter {
       }
 
       if(changed){
-        _priv.lastHit = currentHit;
+        this.lastHit = currentHit;
       }
     }
   }

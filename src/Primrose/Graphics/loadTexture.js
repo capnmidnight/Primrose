@@ -1,47 +1,34 @@
-var objectIDs = new WeakMap(),
-  counter = 0;
+import { CubeTextureLoader } from "three/src/loaders/CubeTextureLoader";
+import { TextureLoader } from "three/src/loaders/TextureLoader";
+import { Texture } from "three/src/textures/Texture";
 
-export default function loadTexture(url, resolve, progress, reject) {
-  var textureLoader = null,
-    txtName = null;
+export default function loadTexture(id, url, progress) {
+  var textureLoader = null;
   if(url instanceof Array && url.length === 6) {
-    textureLoader = new THREE.CubeTextureLoader();
-    txtName = url.join(",");
+    textureLoader = new CubeTextureLoader();;
   }
   else {
     if(url instanceof HTMLImageElement){
-      txtName = url.src;
       url = url.src;
-    }
-    else if(typeof url === "object"){
-      if(!objectIDs.has(url)) {
-        objectIDs.set(url, `object-${counter++}`);
-      }
-      txtName = objectIDs.get(url);
     }
 
     if(typeof url === "string") {
-      txtName = url;
-      textureLoader = new THREE.TextureLoader();
+      textureLoader = new TextureLoader();
     }
   }
 
   if(textureLoader){
-    textureLoader.setCrossOrigin(THREE.ImageUtils.crossOrigin);
+    textureLoader.setCrossOrigin("anonymous");
   }
 
   return cache(
-    `Texture(${txtName})`,
-    () => {
-      var txt = null;
+    `Texture(${id})`,
+    () => new Promise((resolve, reject) => {
       if(textureLoader){
-        txt = textureLoader.load(url, resolve, progress, reject);
+        textureLoader.load(url, resolve, progress, reject);
       }
       else{
-        txt = new THREE.Texture(url);
-        resolve();
-      }
-      return txt;
-    },
-    resolve);
+        resolve(new Texture(url))
+      };
+    }));
 }

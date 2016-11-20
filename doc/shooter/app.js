@@ -10,26 +10,29 @@ var cube = range(6, function(i) { return "../images/space" + i + ".jpg"; }),
   }),
   blocks = [],
   shots = [],
-  TEMP = new THREE.Vector3(),
+  TEMP = v3(),
   baseVectorSize = 3,
   asteroidColor = 0x7f7f7f,
   shotSoundType = "sawtooth",
   asteroid = [
-    box(baseVectorSize).colored("asteroid1", asteroidColor),
+    box(baseVectorSize)
+      .colored(asteroidColor)
+      .named("asteroid1"),
     [],
     []
   ],
   sounds = null,
   nextSound = 0,
   explosion = null,
-  checker = new THREE.Raycaster();
+  checker = shooter();
 for(var s = 1; s <= 2; ++s){
   for(var x = 0; x < 2; ++x){
     for(var y = 0; y < 2; ++y){
       for(var z = 0; z < 2; ++z){
         var sz = baseVectorSize * 0.5 / s,
           b = box(sz)
-            .colored("asteroid" + s + "_" + x + "_" + y + "_" + z, asteroidColor);
+            .colored(asteroidColor)
+            .named("asteroid" + s + "_" + x + "_" + y + "_" + z);
         b.position.set(sz * (x - 1), sz * (y - 1), sz * (z - 1));
         asteroid[s].push(b);
       }
@@ -57,14 +60,9 @@ env.addEventListener("ready", function(){
     env.options.fullScreenElement.addEventListener("keydown", fixAudio);
   }
   env.insertFullScreenButtons("body");
-  Promise.all(range(10, () => env.audio.loadSource("../audio/exp.ogg")))
+  Promise.all(range(10, () => new Primrose.Audio.Sound(env.audio, "../audio/exp.ogg").ready))
     .then(function(snds) {
       sounds = snds;
-      for(var i = 0; i < sounds.length; ++i){
-        var snd = sounds[i];
-        snd.volume.gain.setValueAtTime(0, env.audio.context.currentTime);
-        snd.volume.connect(env.audio.mainVolume);
-      }
       range(10, () => {
         var b = asteroid[0].clone();
         b.nextSize = 1;
@@ -76,15 +74,16 @@ env.addEventListener("ready", function(){
     });
 });
 
-THREE.Object3D.prototype.update = function(dt) {
-  if(this.velocity){
-    TEMP.copy(this.velocity)
+function updateObj(obj, dt) {
+  if(obj.velocity){
+    TEMP.copy(obj.velocity)
       .multiplyScalar(dt)
-      .add(this.position);
-    if(this.age !== undefined) {
-      this.lookAt(TEMP);
+      .add(obj.position);
+    obj.position.copy(TEMP);
+    if(obj.sound){
+      obj.sound.at(obj.position.x, obj.position.y, obj.position.z,
+        obj.velocity.x, obj.velocity.y, obj.velocity.z);
     }
-    this.position.copy(TEMP);
   }
 };
 
@@ -96,13 +95,13 @@ env.addEventListener("update", function(dt){
     var dist = TEMP.lengthSq();
     block.velocity.add(TEMP.normalize()
       .multiplyScalar(0.5 / dist));
-    block.update(dt);
+    updateObj(block, dt);
   }
 
   for(var i = 0; i < shots.length; ++i){
     var shot = shots[i],
       v = shot.velocity.lengthSq() * dt;
-    shot.update(dt);
+    updateObj(shot, dt);
     shot.age -= dt;
     if(shot.age <= 0){
       shot.visible = false;
@@ -119,6 +118,13 @@ env.addEventListener("update", function(dt){
           shot.visible = false;
           var block = hit.object,
             k = blocks.indexOf(block);
+          if(sounds){
+            var snd = sounds[nextSound];
+            nextSound = (nextSound + 1) % sounds.length;
+            snd.play()
+              .at(block.position.x, block.position.y, block.position.z,
+                block.velocity.x, block.velocity.y, block.velocity.z);
+          }
           env.scene.remove(block);
           if(block.nextSize < asteroid.length){
             var newBlocks = asteroid[block.nextSize];
@@ -140,13 +146,6 @@ env.addEventListener("update", function(dt){
           else{
             blocks.splice(k, 1);
           }
-          if(sounds){
-            var snd = sounds[nextSound];
-            nextSound = (nextSound + 1) % sounds.length;
-            snd.volume.gain.setValueAtTime(1, env.audio.context.currentTime);
-            snd.source.mediaElement.play()
-              .then(console.log.bind(console));
-          }
           break;
         }
       }
@@ -164,10 +163,11 @@ function shoot(evt){
   var block = null;
   if(n >= shots.length){
     block = box(0.01, 0.01, 0.05)
-      .colored("shot" + shots.length, 0xffff7f, {
+      .colored(0xffff7f, {
         unshaded: true
-      });
-    block.velocity = new THREE.Vector3();
+      })
+      .named("shot" + shots.length);
+    block.velocity = v3();
     shots.push(block);
     env.scene.add(block);
   }
@@ -180,12 +180,14 @@ function shoot(evt){
   block.velocity.copy(evt.pointer.picker.ray.direction)
     .multiplyScalar(10);
   block.age = 3;
+  block.lookAt(TEMP.copy(block.position).add(block.velocity));
   block.visible = true;
-  var note = env.music.noteOn(shotSoundType, 0.25, 30, block.position.x, block.position.y, block.position.z);
-  note.timeout = setTimeout(function(i){
-    env.music.noteOff(shotSoundType, i)
-  }, 500, note.index);
-  note.osc.frequency.exponentialRampToValueAtTime(Primrose.Output.Music.piano(5), env.audio.context.currentTime + 0.5);
+  block.sound = env.music.getOsc(shotSoundType)
+    .on(30, 0.25)
+    .at(block.position.x, block.position.y, block.position.z,
+      block.velocity.x, block.velocity.y, block.velocity.z)
+    .on(5, 0.25, 0.5, true)
+    .off(0.51);
 }
 
 env.addEventListener("pointerend", shoot);

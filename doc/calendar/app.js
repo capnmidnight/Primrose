@@ -4,9 +4,9 @@ const monthNames = ["January", "February", "March", "April", "May", "June", "Jul
       secondaryColor = 0x303030,
       todayColor = 0x306080,
       angleThreshold = 15,
-      primaryMaterial = new THREE.MeshStandardMaterial({color:primaryColor}),
-      secondaryMaterial = new THREE.MeshStandardMaterial({color:secondaryColor}),
-      todayMaterial = new THREE.MeshStandardMaterial({color:todayColor}),
+      primaryMaterial = material({color:primaryColor}),
+      secondaryMaterial = material({color:secondaryColor}),
+      todayMaterial = material({color:todayColor}),
       objs = [],
       dim = 50,
       boxSize = dim / 300,
@@ -22,17 +22,12 @@ const monthNames = ["January", "February", "March", "April", "May", "June", "Jul
         font: "../fonts/helvetiker_regular.typeface.json",
         backgroundColor: 0x000000,
         useFog: true,
-        drawDistance: hDim / 2
+        drawDistance: hDim / 2,
+        enableShadows: true
       });
 
 let months = null,
     currentMonth = new Date().getMonth();
-
-THREE.Mesh.prototype.select = function(thunk){
-  env.registerPickableObject(this);
-  this.onselect = thunk;
-  return this;
-};
 
 function setColor(){
   var date = new Date(),
@@ -97,7 +92,8 @@ function showMonth(month){
       o.box.material = secondaryMaterial;
     }
     o.box.onenter = setColor.bind(o.box);
-    o.box.select(hitDate.bind(null, month, d));
+    env.registerPickableObject(o.box);
+    o.box.onselect = hitDate.bind(null, month, d);
     env.ui.add(o.hub.latLon(boxSpacing * (y - 2) - 45, boxSpacing * (3 - x)));
     date.setDate(date.getDate() + 1);
     lastDay = x;
@@ -107,23 +103,22 @@ function showMonth(month){
 
 env.addEventListener("ready", function(){
   env.insertFullScreenButtons("body");
-  env.renderer.shadowMap.enabled = true;
-  env.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  env.sun.castShadow = true;
-  env.sun.shadow.mapSize.width =
-  env.sun.shadow.mapSize.height = 1024;
   months = monthNames
     .map((month) => text(month, 3.5)
-    .colored(month, primaryColor));
+    .colored(primaryColor)
+    .named(month));
 
   for(let d = 0; d < 31; ++d){
     const o = hub(),
           b = box(boxSize)
-            .colored("box" + (d+1), secondaryColor),
+            .colored(secondaryColor)
+            .named("box" + (d+1)),
           bev = box(boxSize * 1.1,boxSize * 1.1,boxSize * 0.9)
-            .colored("bev" + (d+1), primaryColor),
+            .colored(primaryColor)
+            .named("bev" + (d+1)),
           t = text((d + 1).toString())
-            .colored("txt" + (d + 1), primaryColor);
+            .colored(primaryColor)
+            .named("txt" + (d + 1));
 
     t.castShadow = true;
     b.receiveShadow = true;
@@ -142,10 +137,12 @@ env.addEventListener("ready", function(){
   showMonth(currentMonth);
 
   env.ui.add(text("Turn left or right to change month", 0.5)
-    .colored("inst1", primaryColor)
+    .colored(primaryColor)
+    .named("inst1")
     .latLon(-20, 0, 1));
   env.ui.add(text("Click on dates.", 0.5)
-    .colored("inst2", primaryColor)
+    .colored(primaryColor)
+    .named("inst2")
     .latLon(-17, 0, 1));
 });
 

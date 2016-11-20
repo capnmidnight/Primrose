@@ -1,6 +1,7 @@
 import Entity from "./Entity";
 import { textured, quad, shell } from "../../live-api";
 import loadTexture from "../Graphics/loadTexture";
+import enableInlineVideo from "iphone-inline-video";
 
 var COUNTER = 0;
 
@@ -20,7 +21,7 @@ function findAndFixVideo(evt){
 function fixVideo(vid) {
   if(processedVideos.indexOf(vid) === -1){
     processedVideos.push(vid);
-    makeVideoPlayableInline(vid, false);
+    enableInlineVideo(vid, false);
   }
 }
 
@@ -151,15 +152,15 @@ export default class Image extends Entity {
   }
 
   loadImages(images, progress) {
-    return Promise.all(Array.prototype.map.call(images, (src, i) => new Promise((resolve, reject) => {
-      const txt = loadTexture(src, resolve, progress, reject);
-      this._textures[i] = txt;
-      this._setGeometry();
-      this._meshes[i] = textured(
-          this.options.geometry,
-          txt,
-          this.options);
-    })))
+    return Promise.all(Array.prototype.map.call(images, (src, i) => loadTexture(`Primrose.Controls.Image(${src}, ${i})`, src, progress)
+      .then((txt) => {
+        this._textures[i] = txt;
+        this._setGeometry();
+        this._meshes[i] = textured(
+            this.options.geometry,
+            txt,
+            this.options);
+      })))
     .then(() => this.isVideo = false)
     .then(() => this);
   }

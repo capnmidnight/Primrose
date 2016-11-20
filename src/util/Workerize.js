@@ -221,16 +221,6 @@ export default class Workerize extends AbstractEventEmitter {
     });
     this.args = [null, null];
 
-    // create a mapper from the UI-thread side onmessage event, to receive
-    // messages from the worker thread that events occured and pass them on to
-    // the UI thread.
-    pliny.property({
-      name: "listeners",
-      type: "Object",
-      description: "A bag of arrays of callbacks for each of the class' events."
-    });
-    this.listeners = {};
-
     this.worker.onmessage = (e) => this.emit(e.data[0], e.data[1]);
 
     // create mappers from the UI-thread side method calls to the UI-thread side

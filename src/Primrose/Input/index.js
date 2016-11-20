@@ -6,6 +6,7 @@ pliny.namespace({
 
 import FPSInput from "./FPSInput";
 import Gamepad from "./Gamepad";
+import GamepadManager from "./GamepadManager";
 import InputProcessor from "./InputProcessor";
 import Keyboard from "./Keyboard";
 import Location from "./Location";

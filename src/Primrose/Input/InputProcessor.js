@@ -1,4 +1,5 @@
 import Keys from "../Keys";
+import AbstractEventEmitter from "../AbstractEventEmitter";
 
 const SETTINGS_TO_ZERO = ["heading", "pitch", "roll", "pointerPitch", "headX", "headY", "headZ"];
 
@@ -97,9 +98,10 @@ pliny.class({
     name: "InputProcessor",
     description: "| [under construction]"
 });
-export default class InputProcessor {
+export default class InputProcessor extends AbstractEventEmitter {
 
   constructor(name, commands, axisNames) {
+    super();
     this.name = name;
     this.commands = {};
     this.commandNames = [];

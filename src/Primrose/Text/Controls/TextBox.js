@@ -38,7 +38,6 @@ export default class TextBox extends Surface {
     super(Object.assign({}, {
       id: "Primrose.Text.Controls.TextBox[" + (COUNTER++) + "]"
     }, options));
-    this.listeners.change = [];
     ////////////////////////////////////////////////////////////////////////
     // normalize input parameters
     ////////////////////////////////////////////////////////////////////////
@@ -434,6 +433,10 @@ export default class TextBox extends Surface {
         this.commandPack[commandName] ||
         codePage[altCommandName] ||
         codePage[commandName];
+
+      if(!func){
+        console.log(this.commandPack, codePage);
+      }
 
       if (func instanceof String || typeof func === "string") {
         console.log("okay");

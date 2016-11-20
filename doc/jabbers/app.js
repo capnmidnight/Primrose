@@ -8,9 +8,12 @@ var WIDTH = 100,
   jabs = {},
   R = Primrose.Random,
   env = new Primrose.BrowserEnvironment({
-    skyTexture: "../images/bg2.jpg",
+    backgroundColor: 0xC9E6EE,
+    skyTexture: "../images/bg.jpg",
     groundTexture: "../images/grass.png",
-    font: "../fonts/helvetiker_regular.typeface.json"
+    font: "../fonts/helvetiker_regular.typeface.json",
+    useFog: true,
+    drawDistance: 100
   });
 
 // and clicking on the objects in the scene

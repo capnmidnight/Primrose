@@ -1,3 +1,7 @@
+import Surface from "./Surface";
+import Size from "../Text/Size";
+import DefaultTheme from "../Text/Themes/Default";
+
 var COUNTER = 0;
 
 pliny.class({
@@ -15,8 +19,6 @@ pliny.class({
       description: "Named parameters for creating the Button."
     }]
 });
-import Surface from "./Surface";
-import Size from "../Text/Size";
 export default class Label extends Surface {
   constructor(options) {
     ////////////////////////////////////////////////////////////////////////
@@ -73,7 +75,7 @@ export default class Label extends Surface {
   }
 
   set theme(t) {
-    this._theme = clone(t || Primrose.Text.Themes.Default);
+    this._theme = clone(t || DefaultTheme);
     this._theme.fontSize = this.fontSize;
     this.refreshCharacter();
     this.render();

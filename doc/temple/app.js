@@ -15,26 +15,31 @@ var GRASS = "../images/grass.png",
   dy = 2.5,
   dz = 4,
   env = new Primrose.BrowserEnvironment({
-    skyTexture: "../images/bg2.jpg",
-    groundTexture: ROCK,
-    font: "../fonts/helvetiker_regular.typeface.json"
+    skyTexture: "../images/bg.jpg",
+    groundTexture: DECK,
+    useFog: true
   });
 
-function column(a, b, h) {
-  return textured(cylinder(a, b, h, 6, 1), SAND);
-}
-
 env.addEventListener("ready", function () {
+
   var start = put(hub())
     .on(this.scene)
     .at(-MIDX, 0, -MIDZ)
-    .obj(),
-    verts = [];
-
-  ball = put(brick(WATER))
-    .on(start)
-    .at(0, 0, 0)
     .obj();
+
+  var ceiling = brick(DECK, WIDTH, 0.1, DEPTH, {
+    resolve: function(){
+      put(ceiling).on(start).at(WIDTH / 2, 12.5, DEPTH / 2);
+    }
+  }).named("Ceiling");
+
+  var verts = [];
+
+  ball = brick(ROCK, 1, 1, 1, {
+    resolve: function(){
+      put(ball).on(start).at(0, 0, 0);
+    }
+  }).named("Ball");
 
   for (var i = 0; i < 5000; ++i) {
     verts.push(v3(Primrose.Random.number(-0.5 * WIDTH, 0.5 * WIDTH),
@@ -68,23 +73,21 @@ env.addEventListener("ready", function () {
 
   makeSphere(10, 0.1);
 
+  function column(a, b, h, x, y, z) {
+    var obj = textured(cylinder(a, b, h, 6, 1), SAND, {
+      resolve: function(){
+        put(obj).on(start).at(x, y, z);
+      }
+    });
+  }
+
   for (var i = 0; i < 100; ++i) {
     var x = Primrose.Random.int(WIDTH),
       z = Primrose.Random.int(DEPTH);
-    put(column(0.5, 1, 1))
-      .on(start)
-      .at(x, 0, z);
-    put(column(0.5, 0.5, 11))
-      .on(start)
-      .at(x, 6, z);
-    put(column(2, 0.5, 1))
-      .on(start)
-      .at(x, 12, z);
+    column(0.5, 1, 1, x, 0, z);
+    column(0.5, 0.5, 11, x, 6, z);
+    column(2, 0.5, 1, x, 12, z);
   }
-
-  put(brick(ROCK, WIDTH, 1, DEPTH))
-    .on(start)
-    .at(WIDTH / 2, 12.5, DEPTH / 2);
 }.bind(env));
 
 env.addEventListener("update", function (dt) {

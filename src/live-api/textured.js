@@ -5,76 +5,80 @@ pliny.function({
 
 import cache from "../util/cache";
 import material from "./material";
-import { Texture, Mesh, RepeatWrapping } from "three";
+import { CubeTexture } from "three/src/textures/CubeTexture";
+import { Texture } from "three/src/textures/Texture";
+import { Mesh } from "three/src/objects/Mesh";
+import { RepeatWrapping } from "three/src/constants";
 import Surface from "../Primrose/Controls/Surface";
 import loadTexture from "../Primrose/Graphics/loadTexture";
 import TextBox from "../Primrose/Text/Controls/TextBox";
 
 export default function textured(geometry, txt, options) {
-  options = options || {};
-  if (options.txtRepeatS === undefined) {
-    options.txtRepeatS = 1;
-  }
-  if (options.txtRepeatT === undefined) {
-    options.txtRepeatT = 1;
-  }
+  options = Object.assign({}, {
+    txtRepeatS: 1,
+    txtRepeatT: 1,
+    anisotropy: 1
+  }, options);
 
-  var txtID = (txt.id || txt).toString(),
-    textureDescription = `Primrose.textured(${txtID}, ${options.txtRepeatS}, ${options.txtRepeatT}, ${options.anisotropy})`,
-    texture = cache(textureDescription, () => {
-      if (txt instanceof Surface) {
-        if (!options.scaleTextureWidth || !options.scaleTextureHeight) {
-          var imgWidth = txt.imageWidth,
-            imgHeight = txt.imageHeight,
-            dimX = Math.ceil(Math.log(imgWidth) / Math.LN2),
-            dimY = Math.ceil(Math.log(imgHeight) / Math.LN2),
-            newWidth = Math.pow(2, dimX),
-            newHeight = Math.pow(2, dimY);
-
-          if(options.scaleTexture){
-            newWidth *= options.scaleTexture;
-            newHeight *= options.scaleTexture;
-          }
-
-          var scaleX = imgWidth / newWidth,
-            scaleY = imgHeight / newHeight;
-
-          if (scaleX !== 1 || scaleY !== 1) {
-            if (scaleX !== 1) {
-              options.scaleTextureWidth = scaleX;
-            }
-
-            if (scaleY !== 1) {
-              options.scaleTextureHeight = scaleY;
-            }
-
-            txt.bounds.width = newWidth;
-            txt.bounds.height = newHeight;
-            txt.resize();
-            txt.render(true);
-          }
-        }
-        txt._material = mat;
-        return txt.texture;
-      }
-      else if (typeof txt === "string" || (txt instanceof Array || txt.length === 6)) {
-        return loadTexture(txt, options.resolve, options.progress, options.reject);
-      }
-      else if (txt instanceof TextBox) {
-        return txt.renderer.texture;
-      }
-      else if (txt instanceof HTMLCanvasElement || txt instanceof HTMLVideoElement) {
-        return new Texture(txt);
-      }
-      else if(txt instanceof Texture) {
-        return txt;
+  const txtID = (txt.id || txt).toString(),
+    textureDescription = `Primrose.textured(${txtID}, ${options.txtRepeatS}, ${options.txtRepeatT}, ${options.anisotropy}, ${options.scaleTextureWidth}, ${options.scaleTextureHeight})`;
+  const texturePromise = cache(textureDescription, () => {
+      if (typeof txt === "string" || (txt instanceof Array || txt.length === 6)) {
+        return loadTexture(textureDescription, txt, options.progress);
       }
       else {
-        throw new Error("Texture description couldn't be converted to a THREE.Texture object");
+        let retValue = null;
+        if (txt instanceof Surface) {
+          if (!options.scaleTextureWidth || !options.scaleTextureHeight) {
+            var imgWidth = txt.imageWidth,
+              imgHeight = txt.imageHeight,
+              dimX = Math.ceil(Math.log(imgWidth) / Math.LN2),
+              dimY = Math.ceil(Math.log(imgHeight) / Math.LN2),
+              newWidth = Math.pow(2, dimX),
+              newHeight = Math.pow(2, dimY);
+
+            if(options.scaleTexture){
+              newWidth *= options.scaleTexture;
+              newHeight *= options.scaleTexture;
+            }
+
+            var scaleX = imgWidth / newWidth,
+              scaleY = imgHeight / newHeight;
+
+            if (scaleX !== 1 || scaleY !== 1) {
+              if (scaleX !== 1) {
+                options.scaleTextureWidth = scaleX;
+              }
+
+              if (scaleY !== 1) {
+                options.scaleTextureHeight = scaleY;
+              }
+
+              txt.bounds.width = newWidth;
+              txt.bounds.height = newHeight;
+              txt.resize();
+              txt.render(true);
+            }
+          }
+          txt._material = mat;
+          retValue = txt.texture;
+        }
+        else if (txt instanceof TextBox) {
+          retValue = txt.renderer.texture;
+        }
+        else if (txt instanceof HTMLCanvasElement || txt instanceof HTMLVideoElement) {
+          retValue = new Texture(txt);
+        }
+        else if(txt instanceof Texture) {
+          retValue = txt;
+        }
+        else {
+          Promise.reject("Texture description couldn't be converted to a THREE.Texture object");
+        }
+
+        return Promise.resolve(retValue);
       }
     });
-
-  options.texture = texture;
 
   var mat = material(textureDescription, options),
     obj = null;
@@ -87,7 +91,6 @@ export default function textured(geometry, txt, options) {
     geometry = obj.geometry;
   }
 
-
   if (txt instanceof Surface) {
     obj.surface = txt;
   }
@@ -95,15 +98,6 @@ export default function textured(geometry, txt, options) {
   if(options.shadow){
     obj.receiveShadow = true;
     obj.castShadow = true;
-  }
-
-  if (options.txtRepeatS * options.txtRepeatT > 1) {
-    texture.wrapS = texture.wrapT = RepeatWrapping;
-    texture.repeat.set(options.txtRepeatS, options.txtRepeatT);
-  }
-
-  if(options.anisotropy){
-    texture.anisotropy = options.anisotropy;
   }
 
   if ((options.scaleTextureWidth || options.scaleTextureHeight)) {
@@ -127,8 +121,24 @@ export default function textured(geometry, txt, options) {
     }
   }
 
-  mat.needsUpdate = true;
-  texture.needsUpdate = true;
+  texturePromise.then((texture) => {
+    if (options.txtRepeatS * options.txtRepeatT > 1) {
+      texture.wrapS = texture.wrapT = RepeatWrapping;
+      texture.repeat.set(options.txtRepeatS, options.txtRepeatT);
+    }
+
+    if(texture instanceof CubeTexture){
+      mat.envMap = texture;
+    }
+    else if(texture instanceof Texture){
+      mat.map = texture;
+    }
+
+    mat.needsUpdate = true;
+    texture.needsUpdate = true;
+    return texture;
+  }).then(options.resolve)
+    .catch(options.reject);
 
   return obj;
 }

@@ -1,3 +1,5 @@
+import { Vector3 } from "three/src/math/Vector3";
+
 pliny.function({
   name: "v3",
   description: "A shortcut function for creating a new THREE.Vector3 object.",
@@ -25,8 +27,6 @@ pliny.function({
     console.assert(a.toArray().join(\", \") === \"1, 2, 3\");"
   }]
 });
-
-import { Vector3 } from "three";
 export default function v3(x, y, z) {
   return new Vector3(x, y, z);
 };

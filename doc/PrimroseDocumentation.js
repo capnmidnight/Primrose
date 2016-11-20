@@ -419,32 +419,6 @@ pliny.function({
         description: "Searches the deepest leaf-node of the control graph for a control that has its `focused` property set to `true`."
       });
       pliny.class({
-  parent: "Primrose",
-  name: "Surface",
-  description: "Cascades through a number of options to eventually return a CanvasRenderingContext2D object on which one will perform drawing operations.",
-  baseClass: "Primrose.Entity",
-  parameters: [{
-    name: "options.id",
-    type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
-    description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
-  }, {
-    name: "options.bounds",
-    type: "Primrose.Text.Rectangle",
-    description: "The size and location of the surface to create."
-  }]
-});
-pliny.error({
-        name: "Invalid element",
-        type: "Error",
-        description: "If the element could not be found, could not be created, or one of the appropriate ID was found but did not match the expected type, an error is thrown to halt operation."
-      });
-      pliny.class({
-  parent: "Primrose.Text",
-  name: "Cursor",
-  description: "| [under construction]"
-});
-
-pliny.class({
   parent: "Primrose.Text",
   name: "Point",
   description: "| [under construction]"
@@ -459,6 +433,33 @@ pliny.class({
 pliny.class({
   parent: "Primrose.Text",
   name: "Rectangle",
+  description: "| [under construction]"
+});
+
+pliny.class({
+  parent: "Primrose",
+  name: "Surface",
+  description: "Cascades through a number of options to eventually return a CanvasRenderingContext2D object on which one will perform drawing operations.",
+  baseClass: "Primrose.Entity",
+  parameters: [{
+    name: "options.id",
+    type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
+    description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
+  }, {
+    name: "options.bounds",
+    type: "Primrose.Text.Rectangle",
+    description: "The size and location of the surface to create."
+  }]
+});
+
+pliny.error({
+        name: "Invalid element",
+        type: "Error",
+        description: "If the element could not be found, could not be created, or one of the appropriate ID was found but did not match the expected type, an error is thrown to halt operation."
+      });
+      pliny.class({
+  parent: "Primrose.Text",
+  name: "Cursor",
   description: "| [under construction]"
 });
 
@@ -658,6 +659,12 @@ pliny.function({
 });
 
 pliny.function({
+  name: "colored",
+  description: "Apply a color to a geometry, creating the intermediate material as necessary, and returning the resulting mesh",
+  returns: "THREE.Mesh",
+  parameters: [{ name: "geometry", type: "THREE.Geometry", description: "The geometry to which to apply the color." }, { name: "color", type: "Number", description: "A hexadecimal color value in RGB format." }, { name: "options", type: "Object", optional: true, description: "Optional settings for material properties." }, { name: "options.side", type: "Number", optional: true, defaultValue: "THREE.FrontSide", description: "Either THREE.FontSide, THREE.BackSide, or THREE.Both, for which side of the polygon should be shaded." }, { name: "options.opacity", type: "Number", optional: true, defaultValue: 1, description: "Make objects semi-transparent. Note: this usually doesn't work like you'd expect." }, { name: "options.roughness", type: "Number", optional: true, defaultValue: 0.5, description: "A value indicating the degree of light scattering the material causes." }, { name: "options.metalness", type: "Number", optional: true, defaultValue: 0, description: "A value indicating the degree of shininess the material causes." }, { name: "options.unshaded", type: "Boolean", optional: true, defaultValue: false, description: "Make objects not respond to lighting." }, { name: "options.wireframe", type: "Boolean", optional: true, defaultValue: false, description: "Draw objects as basic wireframes. Note: there's no control over the wire thickness. This should be considered a debugging feature, not a graphical feature." }]
+});
+pliny.function({
   name: "box",
   description: "A shortcut function for the THREE.BoxGeometry class. Creates a \"rectilinear prism\", i.e. the general class of rectangular objects that includes cubes.",
   parameters: [{
@@ -674,6 +681,24 @@ pliny.function({
     type: "Number",
     optional: true,
     description: "The size of the box in the Z dimension. If length is not provided, it will be set to the width parameter."
+  }, {
+    name: "t",
+    type: "Number",
+    description: "The number of horizontal sections in which to split the box.",
+    optional: true,
+    default: 1
+  }, {
+    name: "u",
+    type: "Number",
+    description: "The number of vertical sections in which to split the box.",
+    optional: true,
+    default: 1
+  }, {
+    name: "v",
+    type: "Number",
+    description: "The number of sections deep in which to split the box.",
+    optional: true,
+    default: 1
   }],
   returns: "THREE.BoxGeometry",
   examples: [{
@@ -734,7 +759,6 @@ The result should appear as:\n\
 ![screenshot](images/brick.jpg)"
   }]
 });
-
 pliny.function({
   name: "axis",
   description: "Creates a set of reference axes, with X as red, Y as green, and Z as blue.",
@@ -852,14 +876,6 @@ The results should look like this:\n\
 <img src=\"images/cloud.jpg\">"
   }]
 });
-
-pliny.function({
-  name: "colored",
-  description: "Apply a color to a geometry, creating the intermediate material as necessary, and returning the resulting mesh",
-  returns: "THREE.Mesh",
-  parameters: [{ name: "geometry", type: "THREE.Geometry", description: "The geometry to which to apply the color." }, { name: "color", type: "Number", description: "A hexadecimal color value in RGB format." }, { name: "options", type: "Object", optional: true, description: "Optional settings for material properties." }, { name: "options.side", type: "Number", optional: true, defaultValue: "THREE.FrontSide", description: "Either THREE.FontSide, THREE.BackSide, or THREE.Both, for which side of the polygon should be shaded." }, { name: "options.opacity", type: "Number", optional: true, defaultValue: 1, description: "Make objects semi-transparent. Note: this usually doesn't work like you'd expect." }, { name: "options.roughness", type: "Number", optional: true, defaultValue: 0.5, description: "A value indicating the degree of light scattering the material causes." }, { name: "options.metalness", type: "Number", optional: true, defaultValue: 0, description: "A value indicating the degree of shininess the material causes." }, { name: "options.unshaded", type: "Boolean", optional: true, defaultValue: false, description: "Make objects not respond to lighting." }, { name: "options.wireframe", type: "Boolean", optional: true, defaultValue: false, description: "Draw objects as basic wireframes. Note: there's no control over the wire thickness. This should be considered a debugging feature, not a graphical feature." }]
-});
-
 pliny.function({
   name: "cylinder",
   description: "Shorthand function for creating a new THREE.CylinderGeometry object.",
@@ -912,7 +928,7 @@ pliny.function({
     description: "The angle at which to end sweeping the cylinder.",
     default: 2 * Math.PI
   }],
-  returns: "THREE.CylinderGeometry",
+  returns: "THREE.CylinderBufferGeometry",
   examples: [{
     name: "Basic usage",
     description: "Three.js separates geometry from materials, so you can create shared materials and geometry that recombine in different ways. To create a simple cylinder geometry object that you can then add a material to create a mesh: \n\
@@ -1269,6 +1285,10 @@ file to use as the texture, execute code as such:\n\
 });
 
 pliny.function({
+  name: "shooter",
+  description: "Creates a THREE.Raycaster."
+});
+pliny.function({
   name: "sphere",
   parameters: [{
     name: "radius",
@@ -1335,7 +1355,6 @@ pliny.function({
     console.assert(a.toArray().join(\", \") === \"1, 2, 3\");"
   }]
 });
-
 pliny.function({
   name: "clone",
   parameters: [{
@@ -1609,11 +1628,6 @@ pliny.function({
       description: "Static allocation of an array to save on memory usage when piping commands to a worker."
     });
     pliny.property({
-      name: "listeners",
-      type: "Object",
-      description: "A bag of arrays of callbacks for each of the class' events."
-    });
-    pliny.property({
       name: "&lt;mappings for each method in the original class&gt;",
       type: "Function",
       description: "Each mapped function causes a message to be posted to the worker thread with its arguments packed into an array."
@@ -1633,7 +1647,31 @@ pliny.function({
         }]
       });
 
-      pliny.class({
+      pliny.method({
+  parent: "THREE.Object3D",
+  name: "addToBrowserEnvironment",
+  description: "A polyfill method for being able to add the object to a `Primrose.BrowserEnvironment` using `appendChild()` and to add other elements to the Object3D using `appendChild()` such that they may be pickable in the scene. This half of the polyfill implements the visitor pattern, so that individual objects can define their own processing for this action.",
+  parameters: [{
+    name: "env",
+    type: "Primrose.BrowserEnvironment",
+    description: "The environment (with collision detection and ray-picking capability) to which to register objects"
+  }, {
+    name: "scene",
+    type: "THREE.Object3D",
+    description: "The true parent element for `this` object"
+  }]
+});
+pliny.method({
+    parent: "THREE.Object3D",
+    name: "appendChild",
+    description: "A polyfill method for being able to add the object to a `Primrose.BrowserEnvironment` using `appendChild()` and to add other elements to the Object3D using `appendChild()` such that they may be pickable in the scene.",
+    parameters: [{
+      name: "child",
+      type: "Object",
+      description: "Any Primrose.Entity or THREE.Object3D to add to this object."
+    }]
+  });
+  pliny.class({
   parent: "Primrose",
   name: "Angle",
   description: "The Angle class smooths out the jump from 360 to 0 degrees. It\n\
@@ -1719,7 +1757,385 @@ pliny.property({
         description: "Get/set the current value of the angle in radians."
       });
 
-      pliny.class({
+      pliny.namespace({
+  parent: "Primrose",
+  name: "HTTP",
+  description: "A collection of basic XMLHttpRequest wrappers."
+});
+
+pliny.function({
+  parent: "Primrose.HTTP",
+  name: "XHR",
+  description: "Wraps up the XMLHttpRequest object into a workflow that is easier for me to handle: a single function call. Can handle both GETs and POSTs, with or  without a payload.",
+  returns: "Promise",
+  parameters: [{
+    name: "method",
+    type: "String",
+    description: "The HTTP Verb being used for the request."
+  }, {
+    name: "type",
+    type: "String",
+    description: "How the response should be interpreted. One of [\"text\", \"json\", \"arraybuffer\"]. See the [MDN - XMLHttpRequest - responseType](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype).",
+    default: "\"text\""
+  }, {
+    name: "url",
+    type: "String",
+    description: "The resource to which the request is being sent."
+  }, {
+    name: "options.data",
+    type: "Object",
+    description: "The data object to use as the request body payload, if this is a PUT request."
+  }, {
+    name: "options.progress",
+    type: "Function",
+    optional: true,
+    description: "A callback function to be called as the download from the server progresses."
+  }],
+  examples: [{
+    name: "Make a GET request.",
+    description: "Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  Primrose.HTTP.XHR(\"GET\", \"json\", \"localFile.json\", {\n\
+    progress: console.log.bind(console, \"progress\"))\n\
+    .then(console.log.bind(console, \"done\")))\n\
+    .catch(console.error.bind(console));\n\
+\n\
+## Results:\n\
+> Object {field1: 1, field2: \"Field2\"}"
+  }]
+});
+
+pliny.function({
+  parent: "Primrose.HTTP",
+  name: "del",
+  description: "Process an HTTP DELETE request.",
+  returns: "Promise",
+  parameters: [{
+    name: "type",
+    type: "String",
+    description: "How the response should be interpreted. One of [\"text\", \"json\", \"arraybuffer\"]. See the [MDN - XMLHttpRequest - responseType](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype).",
+    default: "\"text\""
+  }, {
+    name: "url",
+    type: "String",
+    description: "The resource to which the request is being sent."
+  }, {
+    name: "options.data",
+    type: "Object",
+    description: "The data object to use as the request body payload."
+  }, {
+    name: "options.progress",
+    type: "Function",
+    optional: true,
+    description: "A callback function to be called as the download from the server progresses."
+  }]
+});
+
+
+pliny.function({
+  parent: "Primrose.HTTP",
+  name: "delObject",
+  description: "Delete something on the server, and receive JSON in response.",
+  returns: "Promise",
+  parameters: [{
+    name: "url",
+    type: "String",
+    description: "The resource to which the request is being sent."
+  }, {
+    name: "options.data",
+    type: "Object",
+    description: "The data object to use as the request body payload, if this is a PUT request."
+  }, {
+    name: "options.progress",
+    type: "Function",
+    optional: true,
+    description: "A callback function to be called as the download from the server progresses."
+  }]
+});
+
+
+
+pliny.function({
+  parent: "Primrose.HTTP",
+  name: "get",
+  description: "Process an HTTP GET request.",
+  returns: "Promise",
+  parameters: [{
+    name: "type",
+    type: "String",
+    description: "How the response should be interpreted. One of [\"text\", \"json\", \"arraybuffer\"]. See the [MDN - XMLHttpRequest - responseType](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype).",
+    default: "\"text\""
+  }, {
+    name: "url",
+    type: "String",
+    description: "The resource to which the request is being sent."
+  }, {
+    name: "options.progress",
+    type: "Function",
+    optional: true,
+    description: "A callback function to be called as the download from the server progresses."
+  }],
+  examples: [{
+    name: "Make a GET request.",
+    description: "Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  Primrose.HTTP.get(\"json\", \"localFile.json\",\n\
+    console.log.bind(console, \"progress\"),\n\
+    console.log.bind(console, \"done\"),\n\
+    console.error.bind(console));\n\
+\n\
+## Results:\n\
+> Object {field1: 1, field2: \"Field2\"}"
+  }]
+});
+
+pliny.function({
+  parent: "Primrose.HTTP",
+  name: "getBuffer",
+  description: "Get an ArrayBuffer from a server.",
+  returns: "Promise",
+  parameters: [{
+    name: "url",
+    type: "String",
+    description: "The resource to which the request is being sent."
+  }, {
+    name: "options.progress",
+    type: "Function",
+    optional: true,
+    description: "A callback function to be called as the download from the server progresses."
+  }],
+  examples: [{
+    name: "Make a GET request for an ArrayBuffer.",
+    description: "Use this to load audio files and do whatever you want with them.\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var context = new AudioContext();\n\
+  Primrose.HTTP.getBuffer(\"audio.mp3\",\n\
+    console.log.bind(console, \"progress\"));,\n\
+    function(buffer){\n\
+      context.decodeAudioData(\n\
+        buffer,\n\
+        console.log.bind(console, \"success\"),\n\
+        console.error.bind(console, \"error decoding\"));\n\
+    },\n\
+    console.error.bind(console, \"error loading\")\n"
+  }]
+});
+
+pliny.function({
+  parent: "Primrose.HTTP",
+  name: "getObject",
+  description: "Get a JSON object from a server.",
+  returns: "Promise",
+  parameters: [{
+    name: "url",
+    type: "String",
+    description: "The resource to which the request is being sent."
+  }, {
+    name: "options.progress",
+    type: "Function",
+    optional: true,
+    description: "A callback function to be called as the download from the server progresses."
+  }],
+  examples: [{
+    name: "Make a GET request for a JSON object.",
+    description: "Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  Primrose.HTTP.getObject(\"localFile.json\", {\n\
+      progress: console.log.bind(console, \"progress\")\n\
+    })\n\
+    .then(console.log.bind(console, \"done\"))\n\
+    .catch(console.error.bind(console)));\n\
+\n\
+## Results:\n\
+> Object {field1: 1, field2: \"Field2\"}"
+  }]
+});
+
+
+
+pliny.function({
+  parent: "Primrose.HTTP",
+  name: "getText",
+  description: "Get plain text from a server. Returns a promise that will be resolve with the text retrieved from the server.",
+  returns: "Promise",
+  parameters: [{
+    name: "url",
+    type: "String",
+    description: "The resource to which the request is being sent."
+  }, {
+    name: "options.progress",
+    type: "Function",
+    optional: true,
+    description: "A callback function to be called as the download from the server progresses."
+  }],
+  examples: [{
+    name: "Make a GET request for plain text.",
+    description: "Use this to load arbitrary files and do whatever you want with them.\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  Primrose.HTTP.getText(\"localFile.json\",\n\
+    console.log.bind(console, \"progress\"),\n\
+    console.log.bind(console, \"done\"),\n\
+    console.error.bind(console));\n\
+\n\
+## Results:\n\
+> \"Object {field1: 1, field2: \\\"Field2\\\"}\""
+  }]
+});
+
+pliny.function({
+  parent: "Primrose.HTTP",
+  name: "post",
+  description: "Process an HTTP POST request.",
+  returns: "Promise",
+  parameters: [{
+    name: "type",
+    type: "String",
+    description: "How the response should be interpreted. One of [\"text\", \"json\", \"arraybuffer\"]. See the [MDN - XMLHttpRequest - responseType](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype).",
+    default: "\"text\""
+  }, {
+    name: "url",
+    type: "String",
+    description: "The resource to which the request is being sent."
+  }, {
+    name: "options.data",
+    type: "Object",
+    description: "The data object to use as the request body payload, if this is a POST request."
+  }, {
+    name: "options.progress",
+    type: "Function",
+    optional: true,
+    description: "A callback function to be called as the download from the server progresses."
+  }]
+});
+
+
+
+pliny.function({
+  parent: "Primrose.HTTP",
+  name: "postObject",
+  description: "Send a JSON object to a server.",
+  returns: "Promise",
+  parameters: [{
+    name: "url",
+    type: "String",
+    description: "The resource to which the request is being sent."
+  }, {
+    name: "options.data",
+    type: "Object",
+    description: "The data object to use as the request body payload, if this is a PUT request."
+  }, {
+    name: "options.progress",
+    type: "Function",
+    optional: true,
+    description: "A callback function to be called as the download from the server progresses."
+  }]
+});
+
+pliny.function({
+  parent: "Primrose.DOM",
+  name: "cascadeElement",
+  returns: "Element",
+  parameters: [{
+    name: "id",
+    type: "(String|Element)",
+    description: "A vague reference to the element. Either a String id where the element can be had, a String id to give a newly created element if it does not exist, or an Element to manipulate and validate"
+  }, {
+    name: "tag",
+    type: "String",
+    description: "The HTML tag name of the element we are finding/creating/validating."
+  }, {
+    name: "DOMClass",
+    type: "Class",
+    description: "The class Function that is the type of element that we are frobnicating."
+  }],
+  description: "* If `id` is a string, tries to find the DOM element that has said ID\n\
+  * If it exists, and it matches the expected tag type, returns the element, or throws an error if validation fails.\n\
+  * If it doesn't exist, creates it and sets its ID to the provided id, then returns the new DOM element, not yet placed in the document anywhere.\n\
+* If `id` is a DOM element, validates that it is of the expected type,\n\
+  * returning the DOM element back if it's good,\n\
+  * or throwing an error if it is not\n\
+* If `id` is null, creates the DOM element to match the expected type.",
+  examples: [{
+    name: "Get an element by ID that already exists.",
+    description: "Assuming the following HTML snippet:\n\
+\n\
+  grammar(\"HTML\");\n\
+  <div>\n\
+    <div id=\"First\">first element</div>\n\
+    <section id=\"second-elem\">\n\
+      Second element\n\
+      <img id=\"img1\" src=\"img.png\">\n\
+    </section>\n\
+  </div>\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var elem = Primrose.DOM.cascadeElement(\"second-elem\", \"section\", HTMLElement);\n\
+  console.assert(elem.textContent === \"Second element\");"
+  }, {
+    name: "Validate the tag type.",
+    description: "Assuming the following HTML snippet:\n\
+\n\
+  grammar(\"HTML\");\n\
+  <div>\n\
+    <div id=\"First\">first element</div>\n\
+    <section id=\"second-elem\">\n\
+      Second element\n\
+      <img id=\"img1\" src=\"img.png\">\n\
+    </section>\n\
+  </div>\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  //The following line of code should cause a runtime error.\n\
+  Primrose.DOM.cascadeElement(\"img1\", \"section\", HTMLElement);"
+  }, {
+    name: "Create an element.",
+    description: "Assuming the following HTML snippet:\n\
+\n\
+  grammar(\"HTML\");\n\
+  <div>\n\
+    <div id=\"First\">first element</div>\n\
+    <section id=\"second-elem\">\n\
+      Second element\n\
+      <img id=\"img1\" src=\"img.png\">\n\
+    </section>\n\
+  </div>\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var elem = Primrose.DOM.cascadeElement(\"img2\", \"img\", HTMLImageElement);\n\
+  console.assert(elem.id === \"img2\");\n\
+  console.assert(elem.parentElement === null);\n\
+  document.body.appendChild(elem);\n\
+  console.assert(elem.parentElement === document.body);"
+  }]
+});
+
+pliny.error({
+      name: "Invalid element",
+      type: "Error",
+      description: "If the element could not be found, could not be created, or one of the appropriate ID was found but did not match the expected type, an error is thrown to halt operation."
+    });
+    pliny.class({
   parent: "Primrose.Output",
   name: "Audio3D",
   description: "| [under construction]"
@@ -1796,36 +2212,86 @@ pliny.namespace({
   description: "The audio namespace contains classes that handle output to devices other than the screen (e.g. Audio, Music, etc.)."
 });
 
-pliny.value({
-  name: "PIXEL_SCALES",
-  description: "Scaling factors for changing the resolution of the display when the render quality level changes."
-});
-pliny.value({
-  name: "SKINS",
-  type: "Array of String",
-  description: "A selection of color values that closely match skin colors of people."
-});
-pliny.value({
-  name: "SKIN_VALUES",
-  type: "Array of Number",
-  description: "A selection of color values that closely match skin colors of people."
-});
-pliny.value({
-  parent: "Primrose",
-  name: "SYS_FONTS",
-  type: "String",
-  description: "A selection of fonts that will match whatever the user's operating system normally uses."
-});
-pliny.enumeration({
-  name: "Quality",
-  description: "Graphics quality settings."
-});
 pliny.class({
   parent: "Primrose",
-  name: "BrowserEnvironment",
-  description: "Make a Virtual Reality app in your web browser!"
+  name: "Pointer",
+  baseClass: "Primrose.AbstractEventEmitter",
+  description: "An object that points into the scene somewhere, casting a ray at objects for picking operations.",
+  parameters: [{
+    name: "name ",
+    type: "String",
+    description: "A friendly name for this pointer object, to make debugging easier."
+  }, {
+    name: "color",
+    type: "Number",
+    description: "The color to use to render the teleport pad and 3D pointer cursor."
+  }, {
+    name: "highlight",
+    type: "Number",
+    description: "The color to use to highlight the teleport pad and 3D pointer cursor when it's pointing at a real thing."
+  }, {
+    name: "devices",
+    type: "Array",
+    description: "An Array of `Primrose.InputProcessor` objects that define the orientation for this pointer."
+  }, {
+    name: "triggerDevices",
+    type: "Array",
+    description: "An Array of `Primrose.InputProcessor` objects that define the button trigger for this pointer.",
+    optional: true,
+    defaultValue: null
+  }]
 });
 
+pliny.method({
+        parent: "Primrose.Pointer",
+        name: "addToBrowserEnvironment",
+        description: "Add this meshes that give the visual representation of the pointer, to the scene.",
+        parameters: [{
+          name: "env",
+          type: "Primrose.BrowserEnvironment",
+          description: "Not used, just here to fulfill a common interface in the framework."
+        }, {
+          name: "scene",
+          type: "THREE.Scene",
+          description: "The scene to which to add the 3D cursor."
+        }]
+      });
+      pliny.enumeration({
+  parent: "Primrose",
+  name: "Keys",
+  description: "Keycode values for system keys that are the same across all international standards"
+});
+pliny.class({
+  parent: "Primrose.Controls",
+  name: "Label",
+  description: "A simple label of text to put on a Surface.",
+  baseClass: "Primrose.Surface",
+  parameters: [{
+    name: "idOrCanvasOrContext",
+    type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
+    description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
+  }, {
+    name: "options",
+    type: "Object",
+    description: "Named parameters for creating the Button."
+  }]
+});
+
+pliny.class({
+  parent: "Primrose.Controls",
+  name: "Button2D",
+  description: "A simple button to put on a Surface.",
+  baseClass: "Primrose.Controls.Label",
+  parameters: [{
+    name: "idOrCanvasOrContext",
+    type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
+    description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
+  }, {
+    name: "options",
+    type: "Object",
+    description: "Named parameters for creating the Button."
+  }]
+});
 pliny.class({
   parent: "Primrose",
   baseClass: "Primrose.AbstractEventEmitter",
@@ -1930,36 +2396,6 @@ pliny.property({
       });
 
       pliny.class({
-  parent: "Primrose.Controls",
-  name: "Label",
-  description: "A simple label of text to put on a Surface.",
-  baseClass: "Primrose.Surface",
-  parameters: [{
-    name: "idOrCanvasOrContext",
-    type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
-    description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
-  }, {
-    name: "options",
-    type: "Object",
-    description: "Named parameters for creating the Button."
-  }]
-});
-pliny.class({
-  parent: "Primrose.Controls",
-  name: "Button2D",
-  description: "A simple button to put on a Surface.",
-  baseClass: "Primrose.Controls.Label",
-  parameters: [{
-    name: "idOrCanvasOrContext",
-    type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
-    description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
-  }, {
-    name: "options",
-    type: "Object",
-    description: "Named parameters for creating the Button."
-  }]
-});
-pliny.class({
   parent: "Primrose",
   name: "Button3D",
   baseClass: "Primrose.BaseControl",
@@ -2093,12 +2529,6 @@ pliny.property({
 
       pliny.class({
   parent: "Primrose.Controls",
-  name: "Form",
-  baseClass: "Primrose.Entity",
-  description: "A basic 2D form control, with its own mesh to use as a frame."
-});
-pliny.class({
-  parent: "Primrose.Controls",
   name: "Image",
   baseClass: "Primrose.Surface",
   description: "A simple 2D image to put on a Surface.",
@@ -2106,152 +2536,6 @@ pliny.class({
     name: "options",
     type: "Object",
     description: "Named parameters for creating the Image."
-  }]
-});
-
-pliny.namespace({
-  name: "Controls",
-  parent: "Primrose",
-  description: "Various 3D control objects."
-});
-
-pliny.function({
-  parent: "Primrose.DOM",
-  name: "cascadeElement",
-  returns: "Element",
-  parameters: [{
-    name: "id",
-    type: "(String|Element)",
-    description: "A vague reference to the element. Either a String id where the element can be had, a String id to give a newly created element if it does not exist, or an Element to manipulate and validate"
-  }, {
-    name: "tag",
-    type: "String",
-    description: "The HTML tag name of the element we are finding/creating/validating."
-  }, {
-    name: "DOMClass",
-    type: "Class",
-    description: "The class Function that is the type of element that we are frobnicating."
-  }],
-  description: "* If `id` is a string, tries to find the DOM element that has said ID\n\
-  * If it exists, and it matches the expected tag type, returns the element, or throws an error if validation fails.\n\
-  * If it doesn't exist, creates it and sets its ID to the provided id, then returns the new DOM element, not yet placed in the document anywhere.\n\
-* If `id` is a DOM element, validates that it is of the expected type,\n\
-  * returning the DOM element back if it's good,\n\
-  * or throwing an error if it is not\n\
-* If `id` is null, creates the DOM element to match the expected type.",
-  examples: [{
-    name: "Get an element by ID that already exists.",
-    description: "Assuming the following HTML snippet:\n\
-\n\
-  grammar(\"HTML\");\n\
-  <div>\n\
-    <div id=\"First\">first element</div>\n\
-    <section id=\"second-elem\">\n\
-      Second element\n\
-      <img id=\"img1\" src=\"img.png\">\n\
-    </section>\n\
-  </div>\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  var elem = Primrose.DOM.cascadeElement(\"second-elem\", \"section\", HTMLElement);\n\
-  console.assert(elem.textContent === \"Second element\");"
-  }, {
-    name: "Validate the tag type.",
-    description: "Assuming the following HTML snippet:\n\
-\n\
-  grammar(\"HTML\");\n\
-  <div>\n\
-    <div id=\"First\">first element</div>\n\
-    <section id=\"second-elem\">\n\
-      Second element\n\
-      <img id=\"img1\" src=\"img.png\">\n\
-    </section>\n\
-  </div>\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  //The following line of code should cause a runtime error.\n\
-  Primrose.DOM.cascadeElement(\"img1\", \"section\", HTMLElement);"
-  }, {
-    name: "Create an element.",
-    description: "Assuming the following HTML snippet:\n\
-\n\
-  grammar(\"HTML\");\n\
-  <div>\n\
-    <div id=\"First\">first element</div>\n\
-    <section id=\"second-elem\">\n\
-      Second element\n\
-      <img id=\"img1\" src=\"img.png\">\n\
-    </section>\n\
-  </div>\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  var elem = Primrose.DOM.cascadeElement(\"img2\", \"img\", HTMLImageElement);\n\
-  console.assert(elem.id === \"img2\");\n\
-  console.assert(elem.parentElement === null);\n\
-  document.body.appendChild(elem);\n\
-  console.assert(elem.parentElement === document.body);"
-  }]
-});
-
-pliny.error({
-      name: "Invalid element",
-      type: "Error",
-      description: "If the element could not be found, could not be created, or one of the appropriate ID was found but did not match the expected type, an error is thrown to halt operation."
-    });
-    pliny.function({
-  parent: "Primrose.DOM",
-  name: "findEverything",
-  description: "Searches an element for all sub elements that have a named ID,\n\
-using that ID as the name of a field in a hashmap to store a reference to the element.\n\
-Basically, a quick way to get at all the named elements in a page. Returns an object full\n\
-of element references, with fields named by the ID of the elements that were found.\n\
-\n\
-> NOTE: You may name your IDs pretty much anything you want, but for ease of use,\n\
-> you should name them in a camalCase fashion. See [CamelCase - Wikipedia, the free encyclopedia](https://en.wikipedia.org/wiki/CamelCase).",
-  parameters: [{
-    name: "elem",
-    type: "Element",
-    optional: true,
-    description: "the root element from which to search.",
-    default: "`document`."
-  }, {
-    name: "obj",
-    type: "Object",
-    optional: true,
-    description: "the object in which to store the element references. If no object is provided, one will be created."
-  }],
-  returns: "Object",
-  examples: [{
-    name: "Get all child elements.",
-    description: "Assuming the following HTML snippet:\n\
-\n\
-  grammar(\"HTML\");\n\
-  <div>\n\
-    <div id=\"First\">first element</div>\n\
-    <section id=\"second-elem\">\n\
-      Second element\n\
-      <img id=\"img1\" src=\"img.png\">\n\
-    </section>\n\
-  </div>\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  var elems = Primrose.DOM.findEverything();\n\
-  console.log(elems.First.innerHTML);\n\
-  console.log(elems[\"second-elem\"].textContent);\n\
-  console.log(elems.img1.src);\n\
-\n\
-## Results:\n\
-> first element  \n\
-> Second element  \n\
-> img.png"
   }]
 });
 
@@ -2274,12 +2558,6 @@ a newly created element if it does not exist, or an Element to manipulate and va
     description: "The child element to stow in the hiding container."
   }],
   returns: "The hiding container element, not yet inserted into the DOM."
-});
-
-pliny.namespace({
-  parent: "Primrose",
-  name: "DOM",
-  description: "A few functions for manipulating DOM."
 });
 
 pliny.class({
@@ -2327,11 +2605,7 @@ pliny.function({
         name: "loadObject",
         description: "Asynchronously loads a JSON, OBJ, or MTL file as a Three.js object. It processes the scene for attributes, creates new properties on the scene to give us\n\
     faster access to some of the elements within it. It uses callbacks to tell you when loading progresses. It uses a Promise to tell you when it's complete, or when an error occurred.\n\
-    Useful for one-time use models.\n\
-    \n\
-    > NOTE: ModelLoader uses the same Cross-Origin Request policy as THREE.ImageUtils,\n\
-    > meaning you may use THREE.ImageUtils.crossOrigin to configure the cross-origin\n\
-    > policy that Primrose uses for requests.",
+    Useful for one-time use models.",
         returns: "Promise",
         parameters: [{
           name: "src",
@@ -2480,309 +2754,7 @@ pliny.function({
       });"
         }]
       });
-      pliny.namespace({
-  parent: "Primrose",
-  name: "HTTP",
-  description: "A collection of basic XMLHttpRequest wrappers."
-});
-
-pliny.function({
-  parent: "Primrose.HTTP",
-  name: "XHR",
-  description: "Wraps up the XMLHttpRequest object into a workflow that is easier for me to handle: a single function call. Can handle both GETs and POSTs, with or  without a payload.",
-  returns: "Promise",
-  parameters: [{
-    name: "method",
-    type: "String",
-    description: "The HTTP Verb being used for the request."
-  }, {
-    name: "type",
-    type: "String",
-    description: "How the response should be interpreted. One of [\"text\", \"json\", \"arraybuffer\"]. See the [MDN - XMLHttpRequest - responseType](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype).",
-    default: "\"text\""
-  }, {
-    name: "url",
-    type: "String",
-    description: "The resource to which the request is being sent."
-  }, {
-    name: "options.data",
-    type: "Object",
-    description: "The data object to use as the request body payload, if this is a PUT request."
-  }, {
-    name: "options.progress",
-    type: "Function",
-    optional: true,
-    description: "A callback function to be called as the download from the server progresses."
-  }],
-  examples: [{
-    name: "Make a GET request.",
-    description: "Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  Primrose.HTTP.XHR(\"GET\", \"json\", \"localFile.json\", {\n\
-    progress: console.log.bind(console, \"progress\"))\n\
-    .then(console.log.bind(console, \"done\")))\n\
-    .catch(console.error.bind(console));\n\
-\n\
-## Results:\n\
-> Object {field1: 1, field2: \"Field2\"}"
-  }]
-});
-
-
-
-pliny.function({
-  parent: "Primrose.HTTP",
-  name: "del",
-  description: "Process an HTTP DELETE request.",
-  returns: "Promise",
-  parameters: [{
-    name: "type",
-    type: "String",
-    description: "How the response should be interpreted. One of [\"text\", \"json\", \"arraybuffer\"]. See the [MDN - XMLHttpRequest - responseType](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype).",
-    default: "\"text\""
-  }, {
-    name: "url",
-    type: "String",
-    description: "The resource to which the request is being sent."
-  }, {
-    name: "options.data",
-    type: "Object",
-    description: "The data object to use as the request body payload."
-  }, {
-    name: "options.progress",
-    type: "Function",
-    optional: true,
-    description: "A callback function to be called as the download from the server progresses."
-  }]
-});
-
-
-pliny.function({
-  parent: "Primrose.HTTP",
-  name: "delObject",
-  description: "Delete something on the server, and receive JSON in response.",
-  returns: "Promise",
-  parameters: [{
-    name: "url",
-    type: "String",
-    description: "The resource to which the request is being sent."
-  }, {
-    name: "options.data",
-    type: "Object",
-    description: "The data object to use as the request body payload, if this is a PUT request."
-  }, {
-    name: "options.progress",
-    type: "Function",
-    optional: true,
-    description: "A callback function to be called as the download from the server progresses."
-  }]
-});
-
-
-
-pliny.function({
-  parent: "Primrose.HTTP",
-  name: "get",
-  description: "Process an HTTP GET request.",
-  returns: "Promise",
-  parameters: [{
-    name: "type",
-    type: "String",
-    description: "How the response should be interpreted. One of [\"text\", \"json\", \"arraybuffer\"]. See the [MDN - XMLHttpRequest - responseType](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype).",
-    default: "\"text\""
-  }, {
-    name: "url",
-    type: "String",
-    description: "The resource to which the request is being sent."
-  }, {
-    name: "options.progress",
-    type: "Function",
-    optional: true,
-    description: "A callback function to be called as the download from the server progresses."
-  }],
-  examples: [{
-    name: "Make a GET request.",
-    description: "Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  Primrose.HTTP.get(\"json\", \"localFile.json\",\n\
-    console.log.bind(console, \"progress\"),\n\
-    console.log.bind(console, \"done\"),\n\
-    console.error.bind(console));\n\
-\n\
-## Results:\n\
-> Object {field1: 1, field2: \"Field2\"}"
-  }]
-});
-
-
-
-pliny.function({
-  parent: "Primrose.HTTP",
-  name: "getBuffer",
-  description: "Get an ArrayBuffer from a server.",
-  returns: "Promise",
-  parameters: [{
-    name: "url",
-    type: "String",
-    description: "The resource to which the request is being sent."
-  }, {
-    name: "options.progress",
-    type: "Function",
-    optional: true,
-    description: "A callback function to be called as the download from the server progresses."
-  }],
-  examples: [{
-    name: "Make a GET request for an ArrayBuffer.",
-    description: "Use this to load audio files and do whatever you want with them.\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  var context = new AudioContext();\n\
-  Primrose.HTTP.getBuffer(\"audio.mp3\",\n\
-    console.log.bind(console, \"progress\"));,\n\
-    function(buffer){\n\
-      context.decodeAudioData(\n\
-        buffer,\n\
-        console.log.bind(console, \"success\"),\n\
-        console.error.bind(console, \"error decoding\"));\n\
-    },\n\
-    console.error.bind(console, \"error loading\")\n"
-  }]
-});
-
-
-
-pliny.function({
-  parent: "Primrose.HTTP",
-  name: "getObject",
-  description: "Get a JSON object from a server.",
-  returns: "Promise",
-  parameters: [{
-    name: "url",
-    type: "String",
-    description: "The resource to which the request is being sent."
-  }, {
-    name: "options.progress",
-    type: "Function",
-    optional: true,
-    description: "A callback function to be called as the download from the server progresses."
-  }],
-  examples: [{
-    name: "Make a GET request for a JSON object.",
-    description: "Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  Primrose.HTTP.getObject(\"localFile.json\", {\n\
-      progress: console.log.bind(console, \"progress\")\n\
-    })\n\
-    .then(console.log.bind(console, \"done\"))\n\
-    .catch(console.error.bind(console)));\n\
-\n\
-## Results:\n\
-> Object {field1: 1, field2: \"Field2\"}"
-  }]
-});
-
-
-
-pliny.function({
-  parent: "Primrose.HTTP",
-  name: "getText",
-  description: "Get plain text from a server. Returns a promise that will be resolve with the text retrieved from the server.",
-  returns: "Promise",
-  parameters: [{
-    name: "url",
-    type: "String",
-    description: "The resource to which the request is being sent."
-  }, {
-    name: "options.progress",
-    type: "Function",
-    optional: true,
-    description: "A callback function to be called as the download from the server progresses."
-  }],
-  examples: [{
-    name: "Make a GET request for plain text.",
-    description: "Use this to load arbitrary files and do whatever you want with them.\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  Primrose.HTTP.getText(\"localFile.json\",\n\
-    console.log.bind(console, \"progress\"),\n\
-    console.log.bind(console, \"done\"),\n\
-    console.error.bind(console));\n\
-\n\
-## Results:\n\
-> \"Object {field1: 1, field2: \\\"Field2\\\"}\""
-  }]
-});
-
-
-
-pliny.function({
-  parent: "Primrose.HTTP",
-  name: "post",
-  description: "Process an HTTP POST request.",
-  returns: "Promise",
-  parameters: [{
-    name: "type",
-    type: "String",
-    description: "How the response should be interpreted. One of [\"text\", \"json\", \"arraybuffer\"]. See the [MDN - XMLHttpRequest - responseType](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype).",
-    default: "\"text\""
-  }, {
-    name: "url",
-    type: "String",
-    description: "The resource to which the request is being sent."
-  }, {
-    name: "options.data",
-    type: "Object",
-    description: "The data object to use as the request body payload, if this is a POST request."
-  }, {
-    name: "options.progress",
-    type: "Function",
-    optional: true,
-    description: "A callback function to be called as the download from the server progresses."
-  }]
-});
-
-
-
-pliny.function({
-  parent: "Primrose.HTTP",
-  name: "postObject",
-  description: "Send a JSON object to a server.",
-  returns: "Promise",
-  parameters: [{
-    name: "url",
-    type: "String",
-    description: "The resource to which the request is being sent."
-  }, {
-    name: "options.data",
-    type: "Object",
-    description: "The data object to use as the request body payload, if this is a PUT request."
-  }, {
-    name: "options.progress",
-    type: "Function",
-    optional: true,
-    description: "A callback function to be called as the download from the server progresses."
-  }]
-});
-
-pliny.enumeration({
-  parent: "Primrose",
-  name: "Keys",
-  description: "Keycode values for system keys that are the same across all international standards"
-});
-pliny.class({
+      pliny.class({
   parent: "Primrose",
   name: "InputProcessor",
   description: "| [under construction]"
@@ -3009,49 +2981,6 @@ pliny.class({
 });
 
 pliny.class({
-  parent: "Primrose",
-  name: "Pointer",
-  baseClass: "Primrose.AbstractEventEmitter",
-  description: "An object that points into the scene somewhere, casting a ray at objects for picking operations.",
-  parameters: [{
-    name: "name ",
-    type: "String",
-    description: "A friendly name for this pointer object, to make debugging easier."
-  }, {
-    name: "color",
-    type: "Number",
-    description: "The color to use to render the teleport pad and 3D pointer cursor."
-  }, {
-    name: "highlight",
-    type: "Number",
-    description: "The color to use to highlight the teleport pad and 3D pointer cursor when it's pointing at a real thing."
-  }, {
-    name: "devices",
-    type: "Array",
-    description: "An Array of `Primrose.InputProcessor` objects that define the orientation for this pointer."
-  }, {
-    name: "triggerDevices",
-    type: "Array",
-    description: "An Array of `Primrose.InputProcessor` objects that define the button trigger for this pointer.",
-    optional: true,
-    defaultValue: null
-  }]
-});
-pliny.method({
-        parent: "Primrose.Pointer",
-        name: "addToBrowserEnvironment",
-        description: "Add this meshes that give the visual representation of the pointer, to the scene.",
-        parameters: [{
-          name: "env",
-          type: "Primrose.BrowserEnvironment",
-          description: "Not used, just here to fulfill a common interface in the framework."
-        }, {
-          name: "scene",
-          type: "THREE.Scene",
-          description: "The scene to which to add the 3D cursor."
-        }]
-      });
-      pliny.class({
   parent: "Primrose.Input",
   name: "FPSInput",
   baseClass: "Primrose.AbstractEventEmitter",
@@ -3069,36 +2998,6 @@ pliny.method({
   }]
 });
 
-pliny.class({
-  parent: "Primrose.Input",
-  name: "Location",
-  baseClass: "Primrose.InputProcessor",
-  description: "| [under construction]"
-});
-
-pliny.namespace({
-  parent: "Primrose",
-  name: "Input",
-  description: "The Input namespace contains classes that handle user input, for use in navigating the 3D environment."
-});
-
-pliny.class({
-  parent: "Primrose.Network",
-  name: "Manager",
-  parameters: [{
-    name: "localUser",
-    type: "Primrose.Input.FPSInput",
-    description: "The object that represents the player's location in the scene."
-  }, {
-    name: "audio",
-    type: "Primrose.Output.Audio3D",
-    description: "The audio manager being used in the current Environment."
-  }, {
-    name: "factories",
-    type: "Primrose.ModelLoader",
-    description: "Model factory for creating avatars for new remote users."
-  }]
-});
 pliny.function({
   parent: "Primrose.Random",
   name: "number",
@@ -3272,6 +3171,7 @@ pliny.class({
     description: "The name of the user initiating the peer connection."
   }]
 });
+
 pliny.method({
         parent: "Pliny.RemoteUser",
         name: "unpeer",
@@ -3300,7 +3200,142 @@ pliny.method({
         }]
       });
 
-      pliny.namespace({
+      pliny.class({
+  parent: "Primrose.Network",
+  name: "Manager",
+  parameters: [{
+    name: "localUser",
+    type: "Primrose.Input.FPSInput",
+    description: "The object that represents the player's location in the scene."
+  }, {
+    name: "audio",
+    type: "Primrose.Output.Audio3D",
+    description: "The audio manager being used in the current Environment."
+  }, {
+    name: "factories",
+    type: "Primrose.ModelLoader",
+    description: "Model factory for creating avatars for new remote users."
+  }]
+});
+
+pliny.value({
+  parent: "Primrose.Text.Grammars",
+  name: "PlainText",
+  description: "A grammar that makes displaying plain text work with the text editor designed for syntax highlighting."
+});
+pliny.value({
+  name: "PIXEL_SCALES",
+  description: "Scaling factors for changing the resolution of the display when the render quality level changes."
+});
+pliny.value({
+  name: "SKINS",
+  type: "Array of String",
+  description: "A selection of color values that closely match skin colors of people."
+});
+pliny.value({
+  name: "SKIN_VALUES",
+  type: "Array of Number",
+  description: "A selection of color values that closely match skin colors of people."
+});
+pliny.value({
+  parent: "Primrose",
+  name: "SYS_FONTS",
+  type: "String",
+  description: "A selection of fonts that will match whatever the user's operating system normally uses."
+});
+pliny.enumeration({
+  name: "Quality",
+  description: "Graphics quality settings."
+});
+pliny.class({
+  parent: "Primrose",
+  name: "BrowserEnvironment",
+  description: "Make a Virtual Reality app in your web browser!"
+});
+
+pliny.class({
+  parent: "Primrose.Controls",
+  name: "Form",
+  baseClass: "Primrose.Entity",
+  description: "A basic 2D form control, with its own mesh to use as a frame."
+});
+pliny.namespace({
+  name: "Controls",
+  parent: "Primrose",
+  description: "Various 3D control objects."
+});
+
+pliny.function({
+  parent: "Primrose.DOM",
+  name: "findEverything",
+  description: "Searches an element for all sub elements that have a named ID,\n\
+using that ID as the name of a field in a hashmap to store a reference to the element.\n\
+Basically, a quick way to get at all the named elements in a page. Returns an object full\n\
+of element references, with fields named by the ID of the elements that were found.\n\
+\n\
+> NOTE: You may name your IDs pretty much anything you want, but for ease of use,\n\
+> you should name them in a camalCase fashion. See [CamelCase - Wikipedia, the free encyclopedia](https://en.wikipedia.org/wiki/CamelCase).",
+  parameters: [{
+    name: "elem",
+    type: "Element",
+    optional: true,
+    description: "the root element from which to search.",
+    default: "`document`."
+  }, {
+    name: "obj",
+    type: "Object",
+    optional: true,
+    description: "the object in which to store the element references. If no object is provided, one will be created."
+  }],
+  returns: "Object",
+  examples: [{
+    name: "Get all child elements.",
+    description: "Assuming the following HTML snippet:\n\
+\n\
+  grammar(\"HTML\");\n\
+  <div>\n\
+    <div id=\"First\">first element</div>\n\
+    <section id=\"second-elem\">\n\
+      Second element\n\
+      <img id=\"img1\" src=\"img.png\">\n\
+    </section>\n\
+  </div>\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var elems = Primrose.DOM.findEverything();\n\
+  console.log(elems.First.innerHTML);\n\
+  console.log(elems[\"second-elem\"].textContent);\n\
+  console.log(elems.img1.src);\n\
+\n\
+## Results:\n\
+> first element  \n\
+> Second element  \n\
+> img.png"
+  }]
+});
+
+pliny.namespace({
+  parent: "Primrose",
+  name: "DOM",
+  description: "A few functions for manipulating DOM."
+});
+
+pliny.class({
+  parent: "Primrose.Input",
+  name: "Location",
+  baseClass: "Primrose.InputProcessor",
+  description: "| [under construction]"
+});
+
+pliny.namespace({
+  parent: "Primrose",
+  name: "Input",
+  description: "The Input namespace contains classes that handle user input, for use in navigating the 3D environment."
+});
+
+pliny.namespace({
   parent: "Primrose",
   name: "Network",
   description: "The Network namespace contains classes for communicating events between entities in a graph relationship across different types of communication boundaries: in-thread, cross-thread, cross-WAN, and cross-LAN."
@@ -3452,7 +3487,6 @@ pliny.function({
 > <0.157, -0.364, 0.448>"
   }]
 });
-
 pliny.namespace({
   parent: "Primrose",
   name: "Random",
@@ -3511,11 +3545,6 @@ pliny.class({
   }]
 });
 
-pliny.value({
-  parent: "Primrose.Text.Grammars",
-  name: "PlainText",
-  description: "A grammar that makes displaying plain text work with the text editor designed for syntax highlighting."
-});
 pliny.class({
   parent: "Primrose.Text.Controls",
   name: "TextInput",
@@ -3582,28 +3611,3 @@ pliny.namespace({
   description: "Primrose helps you make VR applications for web browsers as easy as making other types of interactive web pages.\n\nThis top-level namespace contains classes for manipulating and viewing 3D environments."
 });
 
-pliny.method({
-  parent: "THREE.Object3D",
-  name: "addToBrowserEnvironment",
-  description: "A polyfill method for being able to add the object to a `Primrose.BrowserEnvironment` using `appendChild()` and to add other elements to the Object3D using `appendChild()` such that they may be pickable in the scene. This half of the polyfill implements the visitor pattern, so that individual objects can define their own processing for this action.",
-  parameters: [{
-    name: "env",
-    type: "Primrose.BrowserEnvironment",
-    description: "The environment (with collision detection and ray-picking capability) to which to register objects"
-  }, {
-    name: "scene",
-    type: "THREE.Object3D",
-    description: "The true parent element for `this` object"
-  }]
-});
-pliny.method({
-    parent: "THREE.Object3D",
-    name: "appendChild",
-    description: "A polyfill method for being able to add the object to a `Primrose.BrowserEnvironment` using `appendChild()` and to add other elements to the Object3D using `appendChild()` such that they may be pickable in the scene.",
-    parameters: [{
-      name: "child",
-      type: "Object",
-      description: "Any Primrose.Entity or THREE.Object3D to add to this object."
-    }]
-  });
-  

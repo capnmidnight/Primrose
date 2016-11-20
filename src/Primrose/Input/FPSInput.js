@@ -1,8 +1,12 @@
-import { Vector3, Euler, Quaternion, Matrix4 } from "three";
+import { Vector3 } from "three/src/math/Vector3";
+import { Euler } from "three/src/math/Euler";
+import { Quaternion } from "three/src/math/Quaternion";
+import { Matrix4 } from "three/src/math/Matrix4";
 import AbstractEventEmitter from "../AbstractEventEmitter"
 import Keyboard from "./Keyboard";
 import Mouse from "./Mouse";
 import Gamepad from "./Gamepad";
+import GamepadManager from "./GamepadManager";
 import Touch from "./Touch";
 import Speech from "./Speech";
 import VR from "./VR";
@@ -169,8 +173,9 @@ export default class FPSInput extends AbstractEventEmitter {
     this.add(new VR(this.options.avatarHeight));
     this.motionDevices.push(this.VR);
 
-    if(!this.options.disableGamepad && Gamepad.isAvailable){
-      Gamepad.addEventListener("gamepadconnected", (pad) => {
+    if(!this.options.disableGamepad && GamepadManager.isAvailable){
+      this.gamepadMgr = new GamepadManager();
+      this.gamepadMgr.addEventListener("gamepadconnected", (pad) => {
         const padID = Gamepad.ID(pad);
         let mgr = null;
 
@@ -184,7 +189,7 @@ export default class FPSInput extends AbstractEventEmitter {
               }
             }
 
-            mgr = new Gamepad(pad, controllerNumber, {
+            mgr = new Gamepad(this.gamepadMgr, pad, controllerNumber, {
               buttons: {
                 axes: ["BUTTONS"]
               },
@@ -214,7 +219,7 @@ export default class FPSInput extends AbstractEventEmitter {
             ptr.forward(this, Pointer.EVENTS);
           }
           else {
-            mgr = new Gamepad(pad, 0, {
+            mgr = new Gamepad(this.gamepadMgr, pad, 0, {
               buttons: {
                 axes: ["BUTTONS"]
               },
@@ -257,7 +262,7 @@ export default class FPSInput extends AbstractEventEmitter {
         }
       });
 
-      Gamepad.addEventListener("gamepaddisconnected", this.remove.bind(this));
+      this.gamepadMgr.addEventListener("gamepaddisconnected", this.remove.bind(this));
     }
 
     this.stage = hub();
@@ -340,8 +345,8 @@ export default class FPSInput extends AbstractEventEmitter {
 
   update(dt) {
     const hadGamepad = this.hasGamepad;
-    if(Gamepad.isAvailable){
-      Gamepad.poll();
+    if(this.gamepadMgr) {
+      this.gamepadMgr.poll();
     }
     for (let i = 0; i < this.managers.length; ++i) {
       this.managers[i].update(dt);

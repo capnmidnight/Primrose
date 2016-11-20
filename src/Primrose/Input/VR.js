@@ -1,5 +1,9 @@
-import { Vector3, Matrix4 } from "three";
+import { Vector3 } from "three/src/math/Vector3";
+import { Matrix4 } from "three/src/math/Matrix4";
 import PoseInputProcessor from "./PoseInputProcessor";
+import PointerLock from "webvr-standard-monitor/src/PointerLock";
+import installWebVRStandardMonitor from "webvr-standard-monitor/src/install";
+import WebVRStandardMonitor from "webvr-standard-monitor/src/WebVRStandardMonitor";
 
 const DEFAULT_POSE = {
     position: [0, 0, 0],

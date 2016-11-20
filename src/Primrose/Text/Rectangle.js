@@ -1,3 +1,6 @@
+import Point from "./Point";
+import Size from "./Size";
+
 pliny.class({
   parent: "Primrose.Text",
     name: "Rectangle",
@@ -5,8 +8,8 @@ pliny.class({
 });
 export default class Rectangle {
   constructor(x, y, width, height) {
-    this.point = new Primrose.Text.Point(x, y);
-    this.size = new Primrose.Text.Size(width, height);
+    this.point = new Point(x, y);
+    this.size = new Size(width, height);
   }
 
   get x() {

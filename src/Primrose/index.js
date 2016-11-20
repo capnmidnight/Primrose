@@ -53,7 +53,7 @@ export {
   Text
 };
 
-export default {
+const obj = {
   AbstractEventEmitter,
   Angle,
   Audio,
@@ -70,3 +70,6 @@ export default {
   Random,
   Text
 };
+
+Object.assign(obj, constants);
+export default obj;
