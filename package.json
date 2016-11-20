@@ -20,11 +20,14 @@
     "CHANGELOG.md",
     "Primrose.js",
     "Primrose.min.js",
+    "Primrose.modules.js",
     "quickstart/",
     "src/",
     "doc/"
   ],
   "jsnext:main": "src/index",
+  "main": "Primrose.js",
+  "browser": "Primrose.min.js",
   "scripts": {
     "start": "node StartHere.js --url doc/"
   },

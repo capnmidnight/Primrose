@@ -1,107 +1,29 @@
-(function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-    typeof define === 'function' && define.amd ? define(factory) :
-    (global.Primrose = factory());
-}(this, (function () { 'use strict';
-
-pliny.value({
-  name: "isOpera",
-  type: "Boolean",
-  description: "Flag indicating the browser is currently calling itself Opera.\n\
-Opera is a substandard browser that lags adoption of cutting edge web technologies,\n\
-so you are not likely to need this flag if you are using Primrose, other than to\n\
-cajole users into downloading a more advanced browser such as Mozilla Firefox or\n\
-Google Chrome."
-});
 var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
 
-pliny.value({
-  name: "isChrome",
-  type: "Boolean",
-  description: "Flag indicating the browser is currently calling itself Chrome\n\
-or Chromium."
-});
 var isChrome = !!window.chrome && !isOpera;
 
-pliny.value({
-  name: "isFirefox",
-  type: "Boolean",
-  description: "Flag indicating the browser is currently calling itself Firefox."
-});
 var isFirefox = typeof window.InstallTrigger !== 'undefined';
 
-pliny.value({
-  name: "isGearVR",
-  type: "Boolean",
-  description: "Flag indicating the application is running on the Samsung Gear VR in the Samsung Internet app."
-});
 var isGearVR = navigator.userAgent.indexOf("Mobile VR") > -1;
 
-pliny.value({
-  name: "isIE",
-  type: "Boolean",
-  description: "Flag indicating the browser is currently calling itself Internet\n\
-Explorer. Once the bane of every web developer's existence, it has since passed\n\
-the torch on to Safari in all of its many useless incarnations."
-});
 var isIE = false || !!document.documentMode;
 
-pliny.value({
-  name: "isHomeScreen",
-  type: "Boolean",
-  description: "Flag indicating the script is currently running in an IFRAME or not."
-});
 var isInIFrame = window.self !== window.top;
 
-pliny.value({
-  name: "isiOS",
-  type: "Boolean",
-  description: "Flag indicating the current system is a device running the Apple\n\
-iOS operating system: iPad, iPod Touch, iPhone. Useful for invoking optional code\n\
-paths necessary to deal with deficiencies in Apple's implementation of web standards."
-});
 var isiOS = /iP(hone|od|ad)/.test(navigator.userAgent || "");
 
-pliny.value({
-  name: "isMacOS",
-  type: "Boolean",
-  description: "Flag indicating the current system is a computer running the Apple\n\
-macOS operating system. Useful for changing keyboard shortcuts to support Apple's\n\
-idiosyncratic, consensus-defying keyboard shortcuts."
-});
 var isMacOS$1 = /Macintosh/.test(navigator.userAgent || "");
 
-pliny.value({
-  name: "isMobile",
-  type: "Boolean",
-  description: "Flag indicating the current system is a recognized \"mobile\"\n\
-device, usually possessing a motion sensor."
-});
 function testUserAgent(a) {
   return (/(android|bb\d+|meego).+|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od|ad)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(a) || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substring(0, 4))
   );
 }
 var isMobile = testUserAgent(navigator.userAgent || navigator.vendor || window.opera);
 
-pliny.value({
-  name: "isSafari",
-  type: "Boolean",
-  description: "Flag indicating the browser is currently calling itself Safari. Safari is an overly opinionated browser that thinks users should be protected from themselves in such a way as to prevent users from gaining access to the latest in cutting-edge web technologies. Essentially, it was replaced Microsoft Internet Explorer as the Internet Explorer of the web."
-});
 var isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;
 
-pliny.value({
-  name: "isWebKit",
-  type: "Boolean",
-  description: "Flag indicating the browser is one of Chrome, Safari, or Opera. WebKit browsers have certain issues in common that can be treated together, like a common basis for orientation events."
-});
 var isWebKit = isOpera || isChrome || isSafari;
 
-pliny.value({
-  name: "isWindows",
-  type: "Boolean",
-  description: "Flag indicating the current system is a computer running one of the Microsoft Windows operating systems."
-});
 var isWindows = /Windows/.test(navigator.userAgent || "");
 
 var index$1 = {
@@ -3772,45 +3694,10 @@ function Object3DIdCount() {
 	return count++;
 }
 
-pliny.function({
-  name: "hub",
-  description: "Calling `hub()` is a short-hand for creating a new `THREE.Object3D`. This is useful in live-coding examples to keep code terse and easy to write. It also polyfills in a method for being able to add the object to a `Primrose.BrowserEnvironment` using `appendChild()` and to add other elements to the hub using `appendChild()` such that they may be pickable in the scene.",
-  examples: [{
-    name: "Basic usage",
-    description: "\n\
-    //these two lines of code perform the same task.\n\
-    var base1 = new THREE.Object3D();\n\
-    var base2 = hub();"
-  }]
-});
 function hub$1() {
   return new Object3D();
 }
 
-pliny.function({
-  name: "put",
-  description: "A literate interface for putting objects onto scenes with basic, common transformations. You call `put()` with an object, then have access to a series of methods that you can chain together, before receiving the object back again. This makes it possible to create objects in the parameter position of `put()` at the same time as declaring the variable that will hold it.\n\
-\n\
-* .on(scene) - the Primrose.Entity or THREE.Object3D on which to append the element.\n\
-* .at(x, y, z) - set the translation for the object.\n\
-* .rot(x, y, z) - set the rotation for the object.\n\
-* .scale(x, y, z) - set the scale for the object.\n\
-* .obj() - return the naked object, if not all of the transformations are desired.",
-  parameters: [{
-    name: "object",
-    type: "Object",
-    description: "The object to manipulate."
-  }],
-  returns: "Object",
-  examples: [{
-    name: "Put an object on a scene at a specific location.",
-    description: "    grammar(\"JavaScript\");\n\
-    var myCylinder = put(colored(cylinder(), 0x00ff00))\n\
-      .on(scene)\n\
-      .at(1, 2, 3)\n\
-      .obj();"
-  }]
-});
 function put$1(object) {
   var box = {
     on: null,
@@ -3870,38 +3757,6 @@ function put$1(object) {
   return box;
 }
 
-pliny.function({
-  name: "cache",
-  description: "Looks for the hashed name of the object in the object cache, and if it exists, returns it. If it doesn't exist, calls the makeObject function, using the return results to set the object in the cache, and returning it. In other words, a simple sort of memoization.",
-  parameters: [{
-    name: "hash",
-    type: "String",
-    description: "The hash key for the object to cache or retrieve."
-  }, {
-    name: "makeObject",
-    type: "Function",
-    description: "A function that creates the object we want, if it doesn't already exist in the cache."
-  }],
-  returns: "Object",
-  examples: [{
-    name: "Basic usage",
-    description: "Using the `cache()` function lets you create an object once and retrieve it back again with the same function call.\n\
-\n\
-    grammar(\"JavaScript\");\n\
-    function makeCube(i){\n\
-      return cache(\"cubeGeom\" + i, function(){\n\
-        return new THREE.BoxGeometry(i, i, i);\n\
-      });\n\
-    }\n\
-    \n\
-    var a = makeCube(1),\n\
-        b = makeCube(2),\n\
-        c = makeCube(1);\n\
-    \n\
-    console.assert(a !== b);\n\
-    console.assert(a === c);"
-  }]
-});
 var _cache = {};
 function cache$1(hash, makeObject, onCacheHit) {
   if (!_cache[hash]) {
@@ -11339,27 +11194,11 @@ var AbstractEventEmitter = function () {
 var entityKeys = [];
 var entities = new WeakMap();
 
-pliny.class({
-  parent: "Primrose",
-  name: "Entity",
-  description: "The Entity class is the parent class for all 3D controls. It manages a unique ID for every new control, the focus state of the control, and performs basic conversions from DOM elements to the internal Control format."
-});
-
 var Entity = function (_AbstractEventEmitter) {
   inherits(Entity, _AbstractEventEmitter);
   createClass(Entity, null, [{
     key: "registerEntity",
     value: function registerEntity(e) {
-      pliny.function({
-        parent: "Primrose.Entity",
-        name: "registerEntity",
-        description: "Register an entity to be able to receive eyeBlank events.",
-        parameters: [{
-          name: "e",
-          type: "Primrose.Entity",
-          description: "The entity to register."
-        }]
-      });
       entities.set(e._idObj, e);
       entityKeys.push(e._idObj);
       e.addEventListener("_idchanged", function (evt) {
@@ -11372,16 +11211,6 @@ var Entity = function (_AbstractEventEmitter) {
   }, {
     key: "eyeBlankAll",
     value: function eyeBlankAll(eye) {
-      pliny.function({
-        parent: "Primrose.Entity",
-        name: "eyeBlankAll",
-        description: "Trigger the eyeBlank event for all registered entities.",
-        parameters: [{
-          name: "eye",
-          type: "Number",
-          description: "The eye to switch to: -1 for left, +1 for right."
-        }]
-      });
       entityKeys.forEach(function (id) {
         entities.get(id).eyeBlank(eye);
       });
@@ -11395,81 +11224,20 @@ var Entity = function (_AbstractEventEmitter) {
 
     _this.id = id;
 
-    pliny.property({
-      parent: "Primrose.Entity",
-      name: "parent ",
-      type: "Primrose.Entity",
-      description: "The parent element of this element, if this element has been added as a child to another element."
-    });
     _this.parent = null;
 
-    pliny.property({
-      parent: "Primrose.Entity",
-      name: "children",
-      type: "Array",
-      description: "The child elements of this element."
-    });
     _this.children = [];
 
-    pliny.property({
-      parent: "Primrose.Entity",
-      name: "focused",
-      type: "Boolean",
-      description: "A flag indicating if the element, or a child element within it, has received focus from the user."
-    });
     _this.focused = false;
 
-    pliny.property({
-      parent: "Primrose.Entity",
-      name: "focusable",
-      type: "Boolean",
-      description: "A flag indicating if the element, or any child elements within it, is capable of receiving focus."
-    });
     _this.focusable = true;
 
-    pliny.event({ parent: "Primrose.Entity", name: "focus", description: "If the element is focusable, occurs when the user clicks on an element for the first time, or when a program calls the `focus()` method." });
-    pliny.event({ parent: "Primrose.Entity", name: "blur", description: "If the element is focused (which implies it is also focusable), occurs when the user clicks off of an element, or when a program calls the `blur()` method." });
-    pliny.event({ parent: "Primrose.Entity", name: "click", description: "Occurs whenever the user clicks on an element." });
-    pliny.event({ parent: "Primrose.Entity", name: "keydown", description: "Occurs when the user pushes a key down while focused on the element." });
-    pliny.event({ parent: "Primrose.Entity", name: "keyup", description: "Occurs when the user releases a key while focused on the element." });
-    pliny.event({ parent: "Primrose.Entity", name: "paste", description: "Occurs when the user activates the clipboard's `paste` command while focused on the element." });
-    pliny.event({ parent: "Primrose.Entity", name: "cut", description: "Occurs when the user activates the clipboard's `cut` command while focused on the element." });
-    pliny.event({ parent: "Primrose.Entity", name: "copy", description: "Occurs when the user activates the clipboard's `copy` command while focused on the element." });
-    pliny.event({ parent: "Primrose.Entity", name: "wheel", description: "Occurs when the user scrolls the mouse wheel while focused on the element." });
     return _this;
   }
 
   createClass(Entity, [{
     key: "focus",
     value: function focus() {
-      pliny.method({
-        parent: "Primrose.Entity",
-        name: "focus",
-        description: "If the control is focusable, sets the focus property of the control, does not change the focus property of any other control.",
-        examples: [{
-          name: "Focus on one control, blur all the rest",
-          description: "When we have a list of controls and we are trying to track focus between them all, we must coordinate calls between `focus()` and `blur()`.\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  var ctrls = [\n\
-  new Primrose.Text.Controls.TextBox(),\n\
-  new Primrose.Text.Controls.TextBox(),\n\
-  new Primrose.Text.Button()\n\
-  ];\n\
-  \n\
-  function focusOn(id){\n\
-    for(var i = 0; i < ctrls.length; ++i){\n\
-      var c = ctrls[i];\n\
-      if(c.controlID === id){\n\
-        c.focus();\n\
-      }\n\
-      else{\n\
-        c.blur();\n\
-      }\n\
-    }\n\
-  }"
-        }]
-      });
       if (this.focusable) {
         this.focused = true;
         this.emit("focus", {
@@ -11480,34 +11248,6 @@ var Entity = function (_AbstractEventEmitter) {
   }, {
     key: "blur",
     value: function blur() {
-      pliny.method({
-        parent: "Primrose.Entity",
-        name: "blur",
-        description: "If the element is focused, unsets the focus property of the control and all child controls. Does not change the focus property of any parent or sibling controls.",
-        examples: [{
-          name: "Focus on one control, blur all the rest",
-          description: "When we have a list of controls and we are trying to track focus between them all, we must coordinate calls between `focus()` and `blur()`.\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  var ctrls = [\n\
-  new Primrose.Text.Controls.TextBox(),\n\
-  new Primrose.Text.Controls.TextBox(),\n\
-  new Primrose.Text.Button()\n\
-  ];\n\
-  \n\
-  function focusOn(id){\n\
-    for(var i = 0; i < ctrls.length; ++i){\n\
-      var c = ctrls[i];\n\
-      if(c.controlID === id){\n\
-        c.focus();\n\
-      }\n\
-      else{\n\
-        c.blur();\n\
-      }\n\
-    }\n\
-  }"
-        }]
-      });
       if (this.focused) {
         this.focused = false;
         for (var i = 0; i < this.children.length; ++i) {
@@ -11523,28 +11263,6 @@ var Entity = function (_AbstractEventEmitter) {
   }, {
     key: "appendChild",
     value: function appendChild(child) {
-      pliny.method({
-        parent: "Primrose.Entity",
-        name: "appendChild",
-        description: "Adds an Entity as a child entity of this entity.",
-        parameters: [{
-          name: "child",
-          type: "Primrose.Entity",
-          description: "The object to add. Will only succeed if `child.parent` is not set to a value."
-        }],
-        examples: [{
-          name: "Add an entity to another entity",
-          description: "Entities can be arranged in parent-child relationships.\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  var a = new Primrose.Entity(),\n\
-  b = new Primrose.Entity();\n\
-  a.appendChild(b);\n\
-  console.assert(a.children.length === 1);\n\
-  console.assert(a.children[0] === b);\n\
-  console.assert(b.parent === a);"
-        }]
-      });
       if (child && !child.parent) {
         child.parent = this;
         this.children.push(child);
@@ -11553,31 +11271,6 @@ var Entity = function (_AbstractEventEmitter) {
   }, {
     key: "removeChild",
     value: function removeChild(child) {
-      pliny.method({
-        parent: "Primrose.Entity",
-        name: "removeChild",
-        description: "Removes an Entity from another Entity of this entity.",
-        parameters: [{
-          name: "child",
-          type: "Primrose.Entity",
-          description: "The object to remove. Will only succeed if `child.parent` is this object."
-        }],
-        examples: [{
-          name: "Remove an entity from another entity",
-          description: "Entities can be arranged in parent-child relationships.\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  var a = new Primrose.Entity(),\n\
-  b = new Primrose.Entity();\n\
-  a.appendChild(b);\n\
-  console.assert(a.children.length === 1);\n\
-  console.assert(a.children[0] === b);\n\
-  console.assert(b.parent === a);\n\
-  a.removeChild(b);\n\
-  console.assert(a.children.length === 0)\n\
-  console.assert(b.parent === null);"
-        }]
-      });
       var i = this.children.indexOf(child);
       if (0 <= i && i < this.children.length) {
         this.children.splice(i, 1);
@@ -11587,16 +11280,6 @@ var Entity = function (_AbstractEventEmitter) {
   }, {
     key: "eyeBlank",
     value: function eyeBlank(eye) {
-      pliny.method({
-        parent: "Primrose.Entity",
-        name: "eyeBlank",
-        parameters: [{
-          name: "eye",
-          type: "Number",
-          description: "The eye to switch to: -1 for left, +1 for right."
-        }],
-        description: "Instructs any stereoscopically rendered surfaces to change their rendering offset."
-      });
       for (var i = 0; i < this.children.length; ++i) {
         this.children[i].eyeBlank(eye);
       }
@@ -11612,41 +11295,16 @@ var Entity = function (_AbstractEventEmitter) {
   }, {
     key: "startUV",
     value: function startUV(evt) {
-      pliny.method({
-        parent: "Primrose.Entity",
-        name: "startUV",
-        parameters: [{
-          name: "evt",
-          type: "Event",
-          description: "The pointer event to read"
-        }],
-        description: "Hooks up to the window's `mouseDown` and `touchStart` events, with coordinates translated to tangent-space UV coordinates, and propagates it to any of its focused children."
-      });
       this._forFocusedChild("startUV", evt);
     }
   }, {
     key: "moveUV",
     value: function moveUV(evt) {
-      pliny.method({
-        parent: "Primrose.Entity",
-        name: "moveUV",
-        parameters: [{
-          name: "evt",
-          type: "Event",
-          description: "The pointer event to read"
-        }],
-        description: "Hooks up to the window's `mouseMove` and `touchMove` events, with coordinates translated to tangent-space UV coordinates, and propagates it to any of its focused children."
-      });
       this._forFocusedChild("moveUV", evt);
     }
   }, {
     key: "endPointer",
     value: function endPointer(evt) {
-      pliny.method({
-        parent: "Primrose.Entity",
-        name: "endPointer",
-        description: "Hooks up to the window's `mouseUp` and `toucheEnd` events and propagates it to any of its focused children."
-      });
       this._forFocusedChild("endPointer", evt);
     }
   }, {
@@ -11676,102 +11334,36 @@ var Entity = function (_AbstractEventEmitter) {
   }, {
     key: "keyDown",
     value: function keyDown(evt) {
-      pliny.method({
-        parent: "Primrose.Entity",
-        name: "keyDown",
-        parameters: [{
-          name: "evt",
-          type: "Event",
-          description: "The key event to read"
-        }],
-        description: "Hooks up to the window's `keyDown` event and propagates it to any of its focused children."
-      });
       this._forFocusedChild("keyDown", evt);
     }
   }, {
     key: "keyUp",
     value: function keyUp(evt) {
-      pliny.method({
-        parent: "Primrose.Entity",
-        name: "keyUp",
-        parameters: [{
-          name: "evt",
-          type: "Event",
-          description: "The key event to read"
-        }],
-        description: "Hooks up to the window's `keyUp` event and propagates it to any of its focused children."
-      });
       this._forFocusedChild("keyUp", evt);
     }
   }, {
     key: "readClipboard",
     value: function readClipboard(evt) {
-      pliny.method({
-        parent: "Primrose.Entity",
-        name: "readClipboard",
-        parameters: [{
-          name: "evt",
-          type: "Event",
-          description: "The clipboard event to read"
-        }],
-        description: "Hooks up to the clipboard's `paste` event and propagates it to any of its focused children."
-      });
       this._forFocusedChild("readClipboard", evt);
     }
   }, {
     key: "copySelectedText",
     value: function copySelectedText(evt) {
-      pliny.method({
-        parent: "Primrose.Entity",
-        name: "copySelectedText",
-        parameters: [{
-          name: "evt",
-          type: "Event",
-          description: "The clipboard event to read"
-        }],
-        description: "Hooks up to the clipboard's `copy` event and propagates it to any of its focused children."
-      });
       this._forFocusedChild("copySelectedText", evt);
     }
   }, {
     key: "cutSelectedText",
     value: function cutSelectedText(evt) {
-      pliny.method({
-        parent: "Primrose.Entity",
-        name: "cutSelectedText",
-        parameters: [{
-          name: "evt",
-          type: "Event",
-          description: "The clipboard event to read"
-        }],
-        description: "Hooks up to the clipboard's `cut` event and propagates it to any of its focused children."
-      });
       this._forFocusedChild("cutSelectedText", evt);
     }
   }, {
     key: "readWheel",
     value: function readWheel(evt) {
-      pliny.method({
-        parent: "Primrose.Entity",
-        name: "readWheel",
-        parameters: [{
-          name: "evt",
-          type: "Event",
-          description: "The wheel event to read"
-        }],
-        description: "Hooks up to the window's `wheel` event and propagates it to any of its focused children."
-      });
       this._forFocusedChild("readWheel", evt);
     }
   }, {
     key: "id",
     get: function get() {
-      pliny.property({
-        parent: "Primrose.Entity",
-        name: "id ",
-        type: "String",
-        description: "Get or set the id for the control."
-      });
       return this._id;
     },
     set: function set(v) {
@@ -11789,12 +11381,6 @@ var Entity = function (_AbstractEventEmitter) {
   }, {
     key: "theme",
     get: function get() {
-      pliny.property({
-        parent: "Primrose.Entity",
-        name: "theme",
-        type: "Primrose.Text.Themes.*",
-        description: "Get or set the theme used for rendering text on any controls in the control tree."
-      });
       return null;
     },
     set: function set(v) {
@@ -11805,12 +11391,6 @@ var Entity = function (_AbstractEventEmitter) {
   }, {
     key: "lockMovement",
     get: function get() {
-      pliny.property({
-        parent: "Primrose.Entity",
-        name: "lockMovement",
-        type: "Boolean",
-        description: "Recursively searches the deepest leaf-node of the control graph for a control that has its `lockMovement` property set to `true`, indicating that key events should not be used to navigate the user, because they are being interpreted as typing commands."
-      });
       var lock = false;
       for (var i = 0; i < this.children.length && !lock; ++i) {
         lock = lock || this.children[i].lockMovement;
@@ -11820,12 +11400,6 @@ var Entity = function (_AbstractEventEmitter) {
   }, {
     key: "focusedElement",
     get: function get() {
-      pliny.property({
-        parent: "Primrose.Entity",
-        name: "focusedElement",
-        type: "Primrose.Entity",
-        description: "Searches the deepest leaf-node of the control graph for a control that has its `focused` property set to `true`."
-      });
       var result = null,
           head = this;
       while (head && head.focused) {
@@ -11844,12 +11418,6 @@ var Entity = function (_AbstractEventEmitter) {
   }]);
   return Entity;
 }(AbstractEventEmitter);
-
-pliny.class({
-  parent: "Primrose.Text",
-  name: "Point",
-  description: "| [under construction]"
-});
 
 var Point = function () {
   function Point(x, y) {
@@ -11886,12 +11454,6 @@ var Point = function () {
   return Point;
 }();
 
-pliny.class({
-  parent: "Primrose.Text",
-  name: "Size",
-  description: "| [under construction]"
-});
-
 var Size = function () {
   function Size(width, height) {
     classCallCheck(this, Size);
@@ -11926,12 +11488,6 @@ var Size = function () {
   }]);
   return Size;
 }();
-
-pliny.class({
-  parent: "Primrose.Text",
-  name: "Rectangle",
-  description: "| [under construction]"
-});
 
 var Rectangle = function () {
   function Rectangle(x, y, width, height) {
@@ -12051,22 +11607,6 @@ var Rectangle = function () {
 
 var COUNTER = 0;
 
-pliny.class({
-  parent: "Primrose",
-  name: "Surface",
-  description: "Cascades through a number of options to eventually return a CanvasRenderingContext2D object on which one will perform drawing operations.",
-  baseClass: "Primrose.Entity",
-  parameters: [{
-    name: "options.id",
-    type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
-    description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
-  }, {
-    name: "options.bounds",
-    type: "Primrose.Text.Rectangle",
-    description: "The size and location of the surface to create."
-  }]
-});
-
 var Surface = function (_Entity) {
   inherits(Surface, _Entity);
   createClass(Surface, null, [{
@@ -12179,11 +11719,6 @@ var Surface = function (_Entity) {
     }
 
     if (_this.canvas === null) {
-      pliny.error({
-        name: "Invalid element",
-        type: "Error",
-        description: "If the element could not be found, could not be created, or one of the appropriate ID was found but did not match the expected type, an error is thrown to halt operation."
-      });
       console.error(_typeof(_this.options.id));
       console.error(_this.options.id);
       throw new Error(_this.options.id + " does not refer to a valid canvas element.");
@@ -12987,12 +12522,6 @@ var reverse = function () {
   return reverse;
 }();
 
-pliny.class({
-  parent: "Primrose.Text",
-  name: "Cursor",
-  description: "| [under construction]"
-});
-
 var Cursor = function () {
   createClass(Cursor, null, [{
     key: "min",
@@ -13244,37 +12773,12 @@ var Cursor = function () {
   return Cursor;
 }();
 
-pliny.class({
-  parent: "Primrose.Text",
-  name: "CommandPack",
-  description: "A CommandPack is a collection of key sequences and text editor commands. It provides a means of using a single text rendering control to create a variety of text-controls that utilize the text space differently.",
-  parameters: [{
-    name: "name ",
-    type: "String",
-    description: "A friendly name for the command pack."
-  }, {
-    name: "commands",
-    type: "Object",
-    description: "An object literal of key-value pairs describing the commands.\n\
-\n\
-* The object key elements are strings describing the key sequence that activates the command.\n\
-* The value elements are the action that occurs when the command is activated."
-  }]
-});
-
 var CommandPack = function CommandPack(name, commands) {
   classCallCheck(this, CommandPack);
 
   this.name = name;
   Object.assign(this, commands);
 };
-
-pliny.record({
-  parent: "Primrose.Text.CommandPacks",
-  name: "BasicTextInput",
-  baseClass: "Primrose.Text.CommandPacks.CommandPack",
-  description: "A set of commands for editing a single line of text in a text editor. This is the same set of commands for both single-line text elements and multi-line text elements."
-});
 
 var BasicTextInput = function (_CommandPack) {
   inherits(BasicTextInput, _CommandPack);
@@ -13391,11 +12895,6 @@ var BasicTextInput = function (_CommandPack) {
   return BasicTextInput;
 }(CommandPack);
 
-pliny.record({
-  parent: "Primrose.Text.CommandPacks",
-  name: "TextEditor",
-  description: "A set of commands for a multi-line text editing, extending single-line text editing."
-});
 var TextEditor = new BasicTextInput("Text Area input commands", {
   NORMAL_UPARROW: function NORMAL_UPARROW(prim, tokenRows) {
     prim.cursorUp(tokenRows, prim.frontCursor);
@@ -13444,11 +12943,6 @@ var TextEditor = new BasicTextInput("Text Area input commands", {
   }
 });
 
-pliny.record({
-  parent: "Primrose.Text.Themes",
-  name: "Default",
-  description: "A light background with dark foreground text."
-});
 var Default = {
   name: "Light",
   fontFamily: "'Droid Sans Mono', 'Consolas', 'Lucida Console', 'Courier New', 'Courier', monospace",
@@ -13494,12 +12988,6 @@ var Default = {
     fontStyle: "underline italic"
   }
 };
-
-pliny.class({
-  parent: "Primrose.Text",
-  name: "Rule",
-  description: "| [under construction]"
-});
 
 var Rule = function () {
   function Rule(name, test) {
@@ -13549,12 +13037,6 @@ var Rule = function () {
   return Rule;
 }();
 
-pliny.class({
-  parent: "Primrose.Text",
-  name: "Token",
-  description: "| [under construction]"
-});
-
 var Token = function () {
   function Token(value, type, index, line) {
     classCallCheck(this, Token);
@@ -13586,91 +13068,12 @@ var Token = function () {
   return Token;
 }();
 
-pliny.class({
-  parent: "Primrose.Text",
-  name: "Grammar",
-  parameters: [{
-    name: "name",
-    type: "String",
-    description: "A user-friendly name for the grammar, to be able to include it in an options listing."
-  }, {
-    name: "rules",
-    type: "Array",
-    description: "A collection of rules to apply to tokenize text. The rules should be an array of two-element arrays. The first element should be a token name (see [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names), followed by a regular expression that selects the token out of the source code."
-  }],
-  description: "A Grammar is a collection of rules for processing text into tokens. Tokens are special characters that tell us about the structure of the text, things like keywords, curly braces, numbers, etc. After the text is tokenized, the tokens get a rough processing pass that groups them into larger elements that can be rendered in color on the screen.\n\
-\n\
-As tokens are discovered, they are removed from the text being processed, so order is important. Grammar rules are applied in the order they are specified, and more than one rule can produce the same token type.\n\
-\n\
-See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.",
-  examples: [{
-    name: "A plain-text \"grammar\".",
-    description: "Plain text does not actually have a grammar that needs to be processed. However, to get the text to work with the rendering system, a basic grammar is necessary to be able to break the text up into lines and prepare it for rendering.\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  var plainTextGrammar = new Primrose.Text.Grammar(\n\
-    // The name is for displaying in options views.\n\
-    \"Plain-text\", [\n\
-    // Text needs at least the newlines token, or else every line will attempt to render as a single line and the line count won't work.\n\
-    [\"newlines\", /(?:\\r\\n|\\r|\\n)/] \n\
-  ] );"
-  }, {
-    name: "A grammar for BASIC",
-    description: "The BASIC programming language is now defunct, but a grammar for it to display in Primrose is quite easy to build.\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  var basicGrammar = new Primrose.Text.Grammar( \"BASIC\",\n\
-    // Grammar rules are applied in the order they are specified.\n\
-    [\n\
-      // Text needs at least the newlines token, or else every line will attempt to render as a single line and the line count won't work.\n\
-      [ \"newlines\", /(?:\\r\\n|\\r|\\n)/ ],\n\
-      // BASIC programs used to require the programmer type in her own line numbers. The start at the beginning of the line.\n\
-      [ \"lineNumbers\", /^\\d+\\s+/ ],\n\
-      // Comments were lines that started with the keyword \"REM\" (for REMARK) and ran to the end of the line. They did not have to be numbered, because they were not executable and were stripped out by the interpreter.\n\
-      [ \"startLineComments\", /^REM\\s/ ],\n\
-      // Both double-quoted and single-quoted strings were not always supported, but in this case, I'm just demonstrating how it would be done for both.\n\
-      [ \"strings\", /\"(?:\\\\\"|[^\"])*\"/ ],\n\
-      [ \"strings\", /'(?:\\\\'|[^'])*'/ ],\n\
-      // Numbers are an optional dash, followed by a optional digits, followed by optional period, followed by 1 or more required digits. This allows us to match both integers and decimal numbers, both positive and negative, with or without leading zeroes for decimal numbers between (-1, 1).\n\
-      [ \"numbers\", /-?(?:(?:\\b\\d*)?\\.)?\\b\\d+\\b/ ],\n\
-      // Keywords are really just a list of different words we want to match, surrounded by the \"word boundary\" selector \"\\b\".\n\
-      [ \"keywords\",\n\
-        /\\b(?:RESTORE|REPEAT|RETURN|LOAD|LABEL|DATA|READ|THEN|ELSE|FOR|DIM|LET|IF|TO|STEP|NEXT|WHILE|WEND|UNTIL|GOTO|GOSUB|ON|TAB|AT|END|STOP|PRINT|INPUT|RND|INT|CLS|CLK|LEN)\\b/\n\
-      ],\n\
-      // Sometimes things we want to treat as keywords have different meanings in different locations. We can specify rules for tokens more than once.\n\
-      [ \"keywords\", /^DEF FN/ ],\n\
-      // These are all treated as mathematical operations.\n\
-      [ \"operators\",\n\
-        /(?:\\+|;|,|-|\\*\\*|\\*|\\/|>=|<=|=|<>|<|>|OR|AND|NOT|MOD|\\(|\\)|\\[|\\])/\n\
-      ],\n\
-      // Once everything else has been matched, the left over blocks of words are treated as variable and function names.\n\
-      [ \"identifiers\", /\\w+\\$?/ ]\n\
-    ] );"
-  }]
-});
-
 var Grammar = function () {
   function Grammar(name, rules) {
     classCallCheck(this, Grammar);
 
-    pliny.property({
-      parent: "Primrose.Text.Grammar",
-      name: " name",
-      type: "String",
-      description: "A user-friendly name for the grammar, to be able to include it in an options listing."
-    });
     this.name = name;
 
-    pliny.property({
-      parent: "Primrose.Text.Grammar",
-      name: "grammar",
-      type: "Array",
-      description: "A collection of rules to apply to tokenize text. The rules should be an array of two-element arrays. The first element should be a token name (see [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names), followed by a regular expression that selects the token out of the source code."
-    });
     // clone the preprocessing grammar to start a new grammar
     this.grammar = rules.map(function (rule) {
       return new Rule(rule[0], rule[1]);
@@ -13723,49 +13126,6 @@ var Grammar = function () {
       }
     }
 
-    pliny.method({
-      parent: "Primrose.Text.Grammar",
-      name: "tokenize",
-      parameters: [{
-        name: "text",
-        type: "String",
-        description: "The text to tokenize."
-      }],
-      returns: "An array of tokens, ammounting to drawing instructions to the renderer. However, they still need to be layed out to fit the bounds of the text area.",
-      description: "Breaks plain text up into a list of tokens that can later be rendered with color.",
-      examples: [{
-        name: 'Tokenize some JavaScript',
-        description: 'Primrose comes with a grammar for JavaScript built in.\n\
-  \n\
-  ## Code:\n\
-  \n\
-    grammar(\"JavaScript\");\n\
-    var tokens = new Primrose.Text.Grammars.JavaScript\n\
-      .tokenize("var x = 3;\\n\\\n\
-    var y = 2;\\n\\\n\
-    console.log(x + y);");\n\
-    console.log(JSON.stringify(tokens));\n\
-  \n\
-  ## Result:\n\
-  \n\
-    grammar(\"JavaScript\");\n\
-    [ \n\
-      { "value": "var", "type": "keywords", "index": 0, "line": 0 },\n\
-      { "value": " x = ", "type": "regular", "index": 3, "line": 0 },\n\
-      { "value": "3", "type": "numbers", "index": 8, "line": 0 },\n\
-      { "value": ";", "type": "regular", "index": 9, "line": 0 },\n\
-      { "value": "\\n", "type": "newlines", "index": 10, "line": 0 },\n\
-      { "value": " y = ", "type": "regular", "index": 11, "line": 1 },\n\
-      { "value": "2", "type": "numbers", "index": 16, "line": 1 },\n\
-      { "value": ";", "type": "regular", "index": 17, "line": 1 },\n\
-      { "value": "\\n", "type": "newlines", "index": 18, "line": 1 },\n\
-      { "value": "console", "type": "members", "index": 19, "line": 2 },\n\
-      { "value": ".", "type": "regular", "index": 26, "line": 2 },\n\
-      { "value": "log", "type": "functions", "index": 27, "line": 2 },\n\
-      { "value": "(x + y);", "type": "regular", "index": 30, "line": 2 }\n\
-    ]'
-      }]
-    });
     this.tokenize = function (text) {
       // all text starts off as regular text, then gets cut up into tokens of
       // more specific type
@@ -13812,32 +13172,11 @@ var Grammar = function () {
   return Grammar;
 }();
 
-pliny.value({
-  parent: "Primrose.Text.Grammars",
-  name: "JavaScript",
-  description: "A grammar for the JavaScript programming language."
-});
 var JavaScript = new Grammar("JavaScript", [["newlines", /(?:\r\n|\r|\n)/], ["startBlockComments", /\/\*/], ["endBlockComments", /\*\//], ["regexes", /(?:^|,|;|\(|\[|\{)(?:\s*)(\/(?:\\\/|[^\n\/])+\/)/], ["stringDelim", /("|')/], ["startLineComments", /\/\/.*$/m], ["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/], ["keywords", /\b(?:break|case|catch|class|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/], ["functions", /(\w+)(?:\s*\()/], ["members", /(\w+)\./], ["members", /((\w+\.)+)(\w+)/]]);
 
 var SCROLL_SCALE = isFirefox ? 3 : 100;
 var COUNTER$1 = 0;
 var OFFSET = 0;
-
-pliny.class({
-  parent: "Primrose.Text.Controls",
-  name: "TextBox",
-  description: "Syntax highlighting textbox control.",
-  baseClass: "Primrose.Surface",
-  parameters: [{
-    name: "idOrCanvasOrContext",
-    type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
-    description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
-  }, {
-    name: "options",
-    type: "Object",
-    description: "Named parameters for creating the TextBox."
-  }]
-});
 
 var TextBox = function (_Surface) {
   inherits(TextBox, _Surface);
@@ -14764,11 +14103,6 @@ var TextBox = function (_Surface) {
   return TextBox;
 }(Surface);
 
-pliny.function({
-  name: "textured",
-  description: "| [under construction]"
-});
-
 function textured$1(geometry, txt, options) {
   options = Object.assign({}, {
     txtRepeatS: 1,
@@ -14890,12 +14224,6 @@ function textured$1(geometry, txt, options) {
   return obj;
 }
 
-pliny.function({
-  name: "colored",
-  description: "Apply a color to a geometry, creating the intermediate material as necessary, and returning the resulting mesh",
-  returns: "THREE.Mesh",
-  parameters: [{ name: "geometry", type: "THREE.Geometry", description: "The geometry to which to apply the color." }, { name: "color", type: "Number", description: "A hexadecimal color value in RGB format." }, { name: "options", type: "Object", optional: true, description: "Optional settings for material properties." }, { name: "options.side", type: "Number", optional: true, defaultValue: "THREE.FrontSide", description: "Either THREE.FontSide, THREE.BackSide, or THREE.Both, for which side of the polygon should be shaded." }, { name: "options.opacity", type: "Number", optional: true, defaultValue: 1, description: "Make objects semi-transparent. Note: this usually doesn't work like you'd expect." }, { name: "options.roughness", type: "Number", optional: true, defaultValue: 0.5, description: "A value indicating the degree of light scattering the material causes." }, { name: "options.metalness", type: "Number", optional: true, defaultValue: 0, description: "A value indicating the degree of shininess the material causes." }, { name: "options.unshaded", type: "Boolean", optional: true, defaultValue: false, description: "Make objects not respond to lighting." }, { name: "options.wireframe", type: "Boolean", optional: true, defaultValue: false, description: "Draw objects as basic wireframes. Note: there's no control over the wire thickness. This should be considered a debugging feature, not a graphical feature." }]
-});
 function colored$1(geometry, color, options) {
   options = options || {};
   options.color = color;
@@ -15108,59 +14436,6 @@ function BoxBufferGeometry(width, height, depth, widthSegments, heightSegments, 
 BoxBufferGeometry.prototype = Object.create(BufferGeometry.prototype);
 BoxBufferGeometry.prototype.constructor = BoxBufferGeometry;
 
-pliny.function({
-  name: "box",
-  description: "A shortcut function for the THREE.BoxGeometry class. Creates a \"rectilinear prism\", i.e. the general class of rectangular objects that includes cubes.",
-  parameters: [{
-    name: "width",
-    type: "Number",
-    description: "The size of the box in the X dimension."
-  }, {
-    name: "height",
-    type: "Number",
-    optional: true,
-    description: "The size of the box in the Y dimension. If height is not provided, it will be set to the width parameter."
-  }, {
-    name: "length",
-    type: "Number",
-    optional: true,
-    description: "The size of the box in the Z dimension. If length is not provided, it will be set to the width parameter."
-  }, {
-    name: "t",
-    type: "Number",
-    description: "The number of horizontal sections in which to split the box.",
-    optional: true,
-    default: 1
-  }, {
-    name: "u",
-    type: "Number",
-    description: "The number of vertical sections in which to split the box.",
-    optional: true,
-    default: 1
-  }, {
-    name: "v",
-    type: "Number",
-    description: "The number of sections deep in which to split the box.",
-    optional: true,
-    default: 1
-  }],
-  returns: "THREE.BoxGeometry",
-  examples: [{
-    name: "Basic usage",
-    description: "Three.js separates geometry from materials, so you can create shared materials and geometry that recombine in different ways. To create a simple box geometry object that you can then add a material to create a mesh:\n\
-  \n\
-    grammar(\"JavaScript\");\n\
-    var geom = box(1, 2, 3),\n\
-      mesh = colored(geom, 0xff0000);\n\
-    put(mesh)\n\
-      .on(scene)\n\
-      .at(-2, 1, -5);\n\
-\n\
-It should look something like this:\n\
-<img src=\"images/box.jpg\">"
-  }]
-});
-
 function box$1(width, height, length, t, u, v) {
   if (height === undefined) {
     height = width;
@@ -15173,48 +14448,6 @@ function box$1(width, height, length, t, u, v) {
   });
 }
 
-pliny.function({
-  name: "brick",
-  description: "Creates a textured box. See [`box()`](#box) and [`textured()`](#textured). The texture will be repeated across the box.",
-  parameters: [{
-    name: "txt",
-    type: "Texture description",
-    description: "The texture to apply to the box."
-  }, {
-    name: "width",
-    type: "Number",
-    optional: true,
-    description: "The size of the box in the X dimension.",
-    default: 1
-  }, {
-    name: "height",
-    type: "Number",
-    optional: true,
-    description: "The size of the box in the Y dimension.",
-    default: 1
-  }, {
-    name: "length",
-    type: "Number",
-    optional: true,
-    description: "The size of the box in the Z dimension.",
-    default: 1
-  }],
-  returns: "THREE.Mesh",
-  examples: [{
-    name: "Basic usage",
-    description: "To create a textured brick with the `brick()` function.:\n\
-\n\
-    grammar(\"JavaScript\");\n\
-    var mesh = brick(DECK, 1, 2, 3);\n\
-    put(mesh)\n\
-      .on(scene)\n\
-      .at(-2, 1, -5);\n\
-\n\
-The result should appear as:\n\
-\n\
-![screenshot](images/brick.jpg)"
-  }]
-});
 function brick$1(txt, w, h, l, options) {
   w = w || 1;
   h = h || 1;
@@ -15230,36 +14463,6 @@ function brick$1(txt, w, h, l, options) {
       obj = m(box$1(w, h, l), txt, options);
   return obj;
 }
-
-pliny.function({
-  name: "axis",
-  description: "Creates a set of reference axes, with X as red, Y as green, and Z as blue.",
-  parameters: [{
-    name: "length",
-    type: "Number",
-    description: "The length each axis should be in its own axis."
-  }, {
-    name: "width",
-    type: "Number",
-    description: "The size each axis should be in the other axes."
-  }],
-  returns: "THREE.Object3D",
-  examples: [{
-    name: "Basic usage",
-    description: "To create a fixed point of reference in the scene, use the `axis()` function.:\n\
-\n\
-    grammar(\"JavaScript\");\n\
-    var scene = new THREE.Scene()\n\
-    // This set of axis bars will each be 1 meter long and 5cm wide.\n\
-    // They'll be centered on each other, so the individual halves\n\
-    // of the bars will only extend half a meter.\n\
-    scene.add(axis(1, 0.05));\n\
-\n\
-The result should appear as:\n\
-\n\
-![screenshot](images/axis.png)"
-  }]
-});
 
 function axis(length, width) {
   var center = hub$1();
@@ -15333,51 +14536,6 @@ function CircleBufferGeometry(radius, segments, thetaStart, thetaLength) {
 
 CircleBufferGeometry.prototype = Object.create(BufferGeometry.prototype);
 CircleBufferGeometry.prototype.constructor = CircleBufferGeometry;
-
-pliny.function({
-  name: "circle",
-  description: "A shortcut function for the THREE.CircleBufferGeometry class. Creates a flat circle, oriented in the XZ plane. `Circle` is a bit of a misnomer. It's actually an N-sided polygon, with the implication being that N must be large to convincingly approximate a true circle.",
-  parameters: [{
-    name: "r",
-    type: "Number",
-    description: "The radius of the circle.",
-    optional: true,
-    default: 1
-  }, {
-    name: "sections",
-    type: "Number",
-    description: "The number of sides for the polygon approximating a circle.",
-    optional: true,
-    default: 18
-  }, {
-    name: "start",
-    type: "Number",
-    description: "The angle in radians at which to start drawing the circle polygon.",
-    optional: true,
-    default: 0
-  }, {
-    name: "end",
-    type: "Number",
-    description: "The angle in radians at which to stop drawing the circle polygon.",
-    optional: true,
-    default: 2 * Math.PI
-  }],
-  returns: "THREE.CircleBufferGeometry",
-  examples: [{
-    name: "Basic usage",
-    description: "Three.js separates geometry from materials, so you can create shared materials and geometry that recombine in different ways. To create a simple circle geometry object that you can then add a material to create a mesh:\n\
-  \n\
-    grammar(\"JavaScript\");\n\
-    var geom = circle(1, 18, 0, 2 * Math.PI),\n\
-      mesh = colored(geom, 0xff0000);\n\
-    put(mesh)\n\
-      .on(scene)\n\
-      .at(-2, 1, -5);\n\
-\n\
-It should look something like this:\n\
-<img src=\"images/circle.jpg\">"
-  }]
-});
 
 function circle$1(r, sections, start, end) {
   r = r || 1;
@@ -15561,48 +14719,6 @@ Points.prototype = Object.assign(Object.create(Object3D.prototype), {
 
 });
 
-pliny.function({
-  name: "cloud",
-  description: "Creates a point cloud with points of a fixed color and size out of an array of vertices.",
-  parameters: [{
-    name: "verts",
-    type: "Array",
-    description: "An array of `THREE.Vector3`s to turn into a `THREE.Points` object."
-  }, {
-    name: "c",
-    type: "Number",
-    description: "A hexadecimal color value to use when creating the `THREE.PointsMaterial` to go with the point cloud."
-  }, {
-    name: "s",
-    type: "Number",
-    description: "A numeric size value to use when creating the `THREE.PointsMaterial` to go with the point cloud."
-  }],
-  returns: "THREE.Points",
-  examples: [{
-    name: "Create randomized \"dust\".",
-    description: "Creating a cloud is pretty simple.\n\
-\n\
-    grammar(\"JavaScript\");\n\
-    var verts = [],\n\
-        R = Primrose.Random.number,\n\
-        WIDTH = 10,\n\
-        HEIGHT = 10,\n\
-        DEPTH = 10;\n\
-    \n\
-    for (var i = 0; i< 5000; ++i) {\n\
-      verts.push(v3(R(-0.5 * WIDTH, 0.5 * WIDTH),\n\
-                    R(-0.5 * HEIGHT, 0.5 * HEIGHT),\n\
-                    R(-0.5 * DEPTH, 0.5 * DEPTH)));\n\
-    }\n\
-    put(cloud(verts, 0x7f7f7f 0.05))\n\
-      .on(scene)\n\
-      .at(WIDTH / 2 , HEIGHT / 2, DEPTH / 2);\n\
-\n\
-The results should look like this:\n\
-\n\
-<img src=\"images/cloud.jpg\">"
-  }]
-});
 function cloud(verts, c, s) {
   var geom = new Geometry();
   for (var i = 0; i < verts.length; ++i) {
@@ -15916,75 +15032,6 @@ function CylinderBufferGeometry(radiusTop, radiusBottom, height, radialSegments,
 
 CylinderBufferGeometry.prototype = Object.create(BufferGeometry.prototype);
 CylinderBufferGeometry.prototype.constructor = CylinderBufferGeometry;
-
-pliny.function({
-  name: "cylinder",
-  description: "Shorthand function for creating a new THREE.CylinderGeometry object.",
-  parameters: [{
-    name: "rT",
-    type: "Number",
-    optional: true,
-    description: "The radius at the top of the cylinder.",
-    default: 0.5
-  }, {
-    name: "rB",
-    type: "Number",
-    optional: true,
-    description: "The radius at the bottom of the cylinder.",
-    default: 0.5
-  }, {
-    name: "height",
-    type: "Number",
-    optional: true,
-    description: "The height of the cylinder.",
-    default: 1
-  }, {
-    name: "rS",
-    type: "Number",
-    optional: true,
-    description: "The number of sides on the cylinder.",
-    default: 8
-  }, {
-    name: "hS",
-    type: "Number",
-    optional: true,
-    description: "The number of slices along the height of the cylinder.",
-    default: 1
-  }, {
-    name: "openEnded",
-    type: "Boolean",
-    optional: true,
-    description: "Whether or not to leave the end of the cylinder open, thereby making a pipe.",
-    default: false
-  }, {
-    name: "thetaStart",
-    type: "Number",
-    optional: true,
-    description: "The angle at which to start sweeping the cylinder.",
-    default: 0
-  }, {
-    name: "thetaEnd",
-    type: "Number",
-    optional: true,
-    description: "The angle at which to end sweeping the cylinder.",
-    default: 2 * Math.PI
-  }],
-  returns: "THREE.CylinderBufferGeometry",
-  examples: [{
-    name: "Basic usage",
-    description: "Three.js separates geometry from materials, so you can create shared materials and geometry that recombine in different ways. To create a simple cylinder geometry object that you can then add a material to create a mesh: \n\
-  \n\
-    grammar(\"JavaScript\");\n\
-    var geom = cylinder(),\n\
-      mesh = colored(geom, 0xff0000);\n\
-    put(mesh)\n\
-      .on(scene)\n\
-      .at(-2, 1, -5);\n\
-\n\
-It should look something like this:\n\
-<img src=\"images/cylinder.jpg\">"
-  }]
-});
 
 function cylinder(rT, rB, height, rS, hS, openEnded, thetaStart, thetaEnd) {
   if (rT === undefined) {
@@ -16425,41 +15472,6 @@ PointLight.prototype = Object.assign(Object.create(Light.prototype), {
 
 });
 
-pliny.function({
-  name: "light",
-  description: "Shortcut function for creating a new THREE.PointLight object.",
-  parameters: [{
-    name: "color",
-    type: "Number",
-    optional: true,
-    description: "The RGB color value for the light.",
-    default: "0xffffff"
-  }, {
-    name: "intensity",
-    type: "Number",
-    optional: true,
-    description: "The strength of the light.",
-    default: 1
-  }, {
-    name: "distance",
-    type: "Number",
-    optional: true,
-    description: "The distance the light will shine.",
-    default: 0
-  }, {
-    name: "decay",
-    type: "Number",
-    optional: true,
-    description: "How much the light dims over distance.",
-    default: 1
-  }],
-  returns: "THREE.PointLight",
-  examples: [{
-    name: "Basic usage",
-    description: "    grammar(\"JavaScript\");\n\
-    put(light(0xffff00)).on(scene).at(0, 100, 0);"
-  }]
-});
 function light$1(color, intensity, distance, decay) {
   return new PointLight(color, intensity, distance, decay);
 }
@@ -16587,66 +15599,6 @@ function PlaneBufferGeometry(width, height, widthSegments, heightSegments) {
 PlaneBufferGeometry.prototype = Object.create(BufferGeometry.prototype);
 PlaneBufferGeometry.prototype.constructor = PlaneBufferGeometry;
 
-pliny.function({
-  name: "quad",
-  description: "A shortcut function for the THREE.PlaneBufferGeometry class. Creates a flat rectangle, oriented in the XY plane.",
-  parameters: [{
-    name: "width",
-    type: "Number",
-    description: "The width of the rectangle."
-  }, {
-    name: "height",
-    type: "Number",
-    description: "The height of the rectangle.",
-    optional: true,
-    default: "The value of the `width` parameter."
-  }, {
-    name: "options",
-    type: "Object",
-    optional: true,
-    description: "Optional settings for creating the quad geometry."
-  }, {
-    name: "options.s",
-    type: "Number",
-    description: "The number of sub-quads in which to divide the quad horizontally.",
-    optional: true,
-    default: 1
-  }, {
-    name: "options.t",
-    type: "Number",
-    description: "The number of sub-quads in which to divide the quad vertically.",
-    optional: true,
-    default: 1
-  }, {
-    name: "options.maxU",
-    type: "Number",
-    description: "A scalar value for the texture coordinate U component.",
-    optional: true,
-    default: 1
-  }, {
-    name: "options.maxV",
-    type: "Number",
-    description: "A scalar value for the texture coordinate V component.",
-    optional: true,
-    default: 1
-  }],
-  returns: "THREE.CircleBufferGeometry",
-  examples: [{
-    name: "Basic usage",
-    description: "Three.js separates geometry from materials, so you can create shared materials and geometry that recombine in different ways. To create a simple circle geometry object that you can then add a material to create a mesh:\n\
-  \n\
-    grammar(\"JavaScript\");\n\
-    var geom = quad(1, 2),\n\
-      mesh = colored(geom, 0xff0000);\n\
-    put(mesh)\n\
-      .on(scene)\n\
-      .at(-2, 1, -5);\n\
-\n\
-It should look something like this:\n\
-<img src=\"images/quad.jpg\">"
-  }]
-});
-
 function quad$1(width, height, options) {
   if (height === undefined) {
     height = width;
@@ -16666,87 +15618,6 @@ function quad$1(width, height, options) {
 function identity$1(obj) {
   return obj;
 }
-
-pliny.function({
-  name: "range",
-  description: "Executes a function a set number of times, to shorten up common programming patterns a little. If the provided function returns value, they will be collected into an array that is returned at the end of the loop. This function has a weird cascading syntax that does not work like normal functions with default values for positional parameters.",
-  parameters: [{
-    name: "n",
-    type: "Number",
-    description: "The starting value for the loop counter.",
-    optional: true,
-    default: 0
-  }, {
-    name: "m",
-    type: "Number",
-    description: "The ending value for the loop counter."
-  }, {
-    name: "s",
-    type: "Number",
-    description: "The value by which to increment the loop counter.",
-    optional: true,
-    default: 1
-  }, {
-    name: "t",
-    type: "Function",
-    description: "A function that receives the current loop counter value, does work, and optionally returns a result.",
-    optional: true,
-    default: "the identity function"
-  }],
-  returns: "Array",
-  examples: [{
-    name: "Generate an array of ten numbers, from 0 to 9.",
-    description: "The most basic usage is with one parameter.\n\
-\n\
-    grammar(\"JavaScript\");\n\
-    var arr = range(10);\n\
-    console.log(arr); // [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];\n\
-"
-  }, {
-    name: "Generate an array of five objects.",
-    description: "The last parameter position is always a function.\n\
-\n\
-    grammar(\"JavaScript\");\n\
-    var arr = range(5, hub);\n\
-    console.log(arr); // [[Object], [Object], [Object], [Object], [Object]];\n\
-"
-  }, {
-    name: "Generate a subsection of an array of numbers.",
-    description: "If you provide two number parameters, the first is treated as the starting value and the second is the end.\n\
-\n\
-    grammar(\"JavaScript\");\n\
-    var arr = range(3, 5);\n\
-    console.log(arr); // [3, 4];\n\
-"
-  }, {
-    name: "Generate a series of strings.",
-    description: "If you provide two number parameters, the first is treated as the starting value and the second is the end.\n\
-\n\
-    grammar(\"JavaScript\");\n\
-    var arr = range(3, 5, (i) => \"num\" + i);\n\
-    console.log(arr); // [\"num3\", \"num4\"];\n\
-"
-  }, {
-    name: "Specify a step value.",
-    description: "If you provide three number parameters, the first is treated as the starting value, the second is the end, and the third is the step value.\n\
-\n\
-    grammar(\"JavaScript\");\n\
-    var arr = range(3, 15, 3);\n\
-    console.log(arr); // [3, 6, 9, 12];\n\
-"
-  }, {
-    name: "Generate objects using a step value.",
-    description: "If you provide three number parameters, the first is treated as the starting value, the second is the end, and the third is the step value.\n\
-\n\
-    grammar(\"JavaScript\");\n\
-    var arr = range(3, 15, 3, (x) => {\n\
-      var obj = hub();\n\
-      obj.position.x = x;\n\
-      return obj;\n\
-    });\n\
-"
-  }]
-});
 
 function range(n, m, s, t) {
   var n2 = s && n || 0,
@@ -16891,63 +15762,6 @@ function RingBufferGeometry(innerRadius, outerRadius, thetaSegments, phiSegments
 RingBufferGeometry.prototype = Object.create(BufferGeometry.prototype);
 RingBufferGeometry.prototype.constructor = RingBufferGeometry;
 
-pliny.function({
-  name: "ring",
-  description: "A shortcut function for the THREE.RingBufferGeometry class. Creates a flat ring, which is a larger circle with a smaller circle cut out of its center, oriented in the XZ plane. `Circle` is a bit of a misnomer. It's actually an N-sided polygon, with the implication being that N must be large to convincingly approximate a true circle.",
-  parameters: [{
-    name: "rInner",
-    type: "Number",
-    description: "The radius of the inner circle of the ring.",
-    optional: true,
-    default: 0.5
-  }, {
-    name: "rOuter",
-    type: "Number",
-    description: "The radius of the outer circle of the ring.",
-    optional: true,
-    default: 1
-  }, {
-    name: "sectors",
-    type: "Number",
-    description: "The number of radial sides for the polygon approximating a ring.",
-    optional: true,
-    default: 18
-  }, {
-    name: "rings",
-    type: "Number",
-    description: "The number of concentric rings in which to split the ring.",
-    optional: true,
-    default: 1
-  }, {
-    name: "start",
-    type: "Number",
-    description: "The angle in radians at which to start drawing the ring polygon.",
-    optional: true,
-    default: 0
-  }, {
-    name: "end",
-    type: "Number",
-    description: "The angle in radians at which to stop drawing the ring polygon.",
-    optional: true,
-    default: 2 * Math.PI
-  }],
-  returns: "THREE.CircleBufferGeometry",
-  examples: [{
-    name: "Basic usage",
-    description: "Three.js separates geometry from materials, so you can create shared materials and geometry that recombine in different ways. To create a simple circle geometry object that you can then add a material to create a mesh:\n\
-  \n\
-    grammar(\"JavaScript\");\n\
-    var geom = ring(0.5, 1, 18, 1, 0, 2 * Math.PI),\n\
-      mesh = colored(geom, 0xff0000);\n\
-    put(mesh)\n\
-      .on(scene)\n\
-      .at(-2, 1, -5);\n\
-\n\
-It should look something like this:\n\
-<img src=\"images/ring.jpg\">"
-  }]
-});
-
 function ring$1(rInner, rOuter, sectors, rings, start, end) {
   if (rInner === undefined) {
     rInner = 0.5;
@@ -16961,47 +15775,6 @@ function ring$1(rInner, rOuter, sectors, rings, start, end) {
     return new RingBufferGeometry(rInner, rOuter, sectors, rings, start, end);
   });
 }
-
-pliny.class({
-  name: "InsideSphereGeometry",
-  parameters: [{
-    name: "radius",
-    type: "Number",
-    description: "How far the sphere should extend away from a center point."
-  }, {
-    name: "widthSegments",
-    type: "Number",
-    description: "The number of faces wide in which to slice the geometry."
-  }, {
-    name: "heightSegments",
-    type: "Number",
-    description: "The number of faces tall in which to slice the geometry."
-  }, {
-    name: "phiStart",
-    type: "Number",
-    description: "The angle in radians around the Y-axis at which the sphere starts."
-  }, {
-    name: "phiLength",
-    type: "Number",
-    description: "The change of angle in radians around the Y-axis to which the sphere ends."
-  }, {
-    name: "thetaStart",
-    type: "Number",
-    description: "The angle in radians around the Z-axis at which the sphere starts."
-  }, {
-    name: "thetaLength",
-    type: "Number",
-    description: "The change of angle in radians around the Z-axis to which the sphere ends."
-  }],
-  description: "The InsideSphereGeometry is basically an inside-out Sphere. Or\n\
-more accurately, it's a Sphere where the face winding order is reversed, so that\n\
-textures appear on the inside of the sphere, rather than the outside. I know, that's\n\
-note exactly helpful.\n\
-\n\
-Say you want a to model the sky as a sphere, or the inside of a helmet. You don't\n\
-care anything about the outside of this sphere, only the inside. You would use\n\
-InsideSphereGeometry in this case. Or its alias, [`shell()`](#shell)."
-});
 
 var InsideSphereGeometry = function (_Geometry) {
   inherits(InsideSphereGeometry, _Geometry);
@@ -17122,71 +15895,6 @@ var InsideSphereGeometry = function (_Geometry) {
 
   return InsideSphereGeometry;
 }(Geometry);
-
-pliny.function({
-  name: "shell",
-  parameters: [{
-    name: "radius",
-    type: "Number",
-    description: "How far the sphere should extend away from a center point."
-  }, {
-    name: "widthSegments",
-    type: "Number",
-    description: "The number of faces wide in which to slice the geometry."
-  }, {
-    name: "heightSegments",
-    type: "Number",
-    description: "The number of faces tall in which to slice the geometry."
-  }, {
-    name: "phi",
-    type: "Number",
-    optional: true,
-    description: "The angle in radians around the Y-axis of the sphere.",
-    default: "80 degrees."
-  }, {
-    name: "theta",
-    type: "Number",
-    optional: true,
-    description: "The angle in radians around the Z-axis of the sphere.",
-    default: "48 degrees."
-  }],
-  description: "The shell is basically an inside-out sphere. Say you want a to model\n\
-the sky as a sphere, or the inside of a helmet. You don't care anything about the\n\
-outside of this sphere, only the inside. You would use InsideSphereGeometry in this\n\
-case. It is mostly an alias for [`InsideSphereGeometry`](#InsideSphereGeometry).",
-  examples: [{
-    name: "Create a sky sphere",
-    description: "To create a sphere that hovers around the user at a\n\
-far distance, showing a sky of some kind, you can use the `shell()` function in\n\
-combination with the [`textured()`](#textured) function. Assuming you have an image\n\
-file to use as the texture, execute code as such:\n\
-\n\
-    grammar(\"JavaScript\");\n\
-    var sky = textured(\n\
-      shell(\n\
-          // The radius value should be less than your draw distance.\n\
-          1000,\n\
-          // The number of slices defines how smooth the sphere will be in the\n\
-          // horizontal direction. Think of it like lines of longitude.\n\
-          18,\n\
-          // The number of rings defines how smooth the sphere will be in the\n\
-          // vertical direction. Think of it like lines of latitude.\n\
-          9,\n\
-          // The phi angle is the number or radians around the 'belt' of the sphere\n\
-          // to sweep out the geometry. To make a full circle, you'll need 2 * PI\n\
-          // radians.\n\
-          Math.PI * 2,\n\
-          // The theta angle is the number of radians above and below the 'belt'\n\
-          // of the sphere to sweep out the geometry. Since the belt sweeps a full\n\
-          // 360 degrees, theta only needs to sweep a half circle, or PI radians.\n\
-          Math.PI ),\n\
-      // Specify the texture image next.\n\
-      \"skyTexture.jpg\",\n\
-      // Specify that the material should be shadeless, i.e. no shadows. This\n\
-      // works best for skymaps.\n\
-      {unshaded: true} );"
-  }]
-});
 
 function shell$1(r, slices, rings, phi, theta, options) {
   var SLICE = 0.45;
@@ -17322,10 +16030,6 @@ Raycaster.prototype = {
 
 };
 
-pliny.function({
-  name: "shooter",
-  description: "Creates a THREE.Raycaster."
-});
 function shooter() {
   return new Raycaster();
 }
@@ -17455,79 +16159,12 @@ function SphereGeometry(radius, widthSegments, heightSegments, phiStart, phiLeng
 SphereGeometry.prototype = Object.create(Geometry.prototype);
 SphereGeometry.prototype.constructor = SphereGeometry;
 
-pliny.function({
-  name: "sphere",
-  parameters: [{
-    name: "radius",
-    type: "Number",
-    description: "How far the sphere should extend away from a center point."
-  }, {
-    name: "widthSegments",
-    type: "Number",
-    description: "The number of faces wide in which to slice the geometry."
-  }, {
-    name: "heightSegments",
-    type: "Number",
-    description: "The number of faces tall in which to slice the geometry."
-  }, {
-    name: "phi",
-    type: "Number",
-    optional: true,
-    description: "The angle in radians around the Y-axis of the sphere.",
-    default: "80 degrees."
-  }, {
-    name: "theta",
-    type: "Number",
-    optional: true,
-    description: "The angle in radians around the Z-axis of the sphere.",
-    default: "48 degrees."
-  }],
-  description: "Creates a THREE.SphereBuffereGeometry.",
-  examples: [{
-    name: "Create a pointer.",
-    description: "Small spheres are useful for indicating things:\n\
-\n\
-    grammar(\"JavaScript\");\n\
-    var ball = colored(\n\
-      sphere(0.1),\n\
-      0xffff00,\n\
-      {unshaded: true} );"
-  }]
-});
-
 function sphere$1(r, slices, rings) {
   return cache$1("SphereGeometry(" + r + ", " + slices + ", " + rings + ")", function () {
     return new SphereGeometry(r, slices, rings);
   });
 }
 
-pliny.function({
-  name: "v3",
-  description: "A shortcut function for creating a new THREE.Vector3 object.",
-  parameters: [{
-    name: "x",
-    type: "Number",
-    description: "The X component of the vector"
-  }, {
-    name: "y",
-    type: "Number",
-    description: "The Y component of the vector"
-  }, {
-    name: "z",
-    type: "Number",
-    description: "The Z component of the vector"
-  }],
-  returns: "THREE.Vector3",
-  examples: [{
-    name: "Create a vector",
-    description: "    grammar(\"JavaScript\");\n\
-    var a = v3(1, 2, 3);\n\
-    console.assert(a.x === 1);\n\
-    console.assert(a.y === 2);\n\
-    console.assert(a.z === 3);\n\
-    console.assert(a.toArray().join(\", \") === \"1, 2, 3\");"
-  }]
-});
 function v3(x, y, z) {
   return new Vector3(x, y, z);
 }
@@ -17577,82 +16214,15 @@ var liveAPI = Object.freeze({
 	default: index$2
 });
 
-pliny.function({
-  name: "clone",
-  parameters: [{
-    name: "obj",
-    type: "Object",
-    description: "The object-literal to clone"
-  }],
-  description: "Creates a copy of a JavaScript object literal.",
-  examples: [{
-    name: "Create a copy of an object.",
-    description: "To create a copy of an object that can be modified without modifying the original object, use the `clone()` function:\n\
-\n\
-    grammar(\"JavaScript\");\n\
-    var objA = { x: 1, y: 2 },\n\
-        objB = clone(objA);\n\
-    console.assert(objA !== objB);\n\
-    console.assert(objA.x === objB.x);\n\
-    console.assert(objA.y === objB.y);\n\
-    objB.x = 3;\n\
-    console.assert(objA.x !== objB.x);"
-  }]
-});
-
 function clone$1(obj) {
   return JSON.parse(JSON.stringify(obj));
 }
-
-pliny.function({
-  name: "deleteSetting",
-  parameters: [{
-    name: " name",
-    type: "string",
-    description: "The name of the setting to delete."
-  }],
-  description: "Removes an object from localStorage",
-  examples: [{
-    name: "Basic usage",
-    description: "\
-\n\
-    grammar(\"JavaScript\");\n\
-    console.assert(getSetting(\"A\", \"default-A\") === \"default-A\");\n\
-    setSetting(\"A\", \"modified-A\");\n\
-    console.assert(getSetting(\"A\", \"default-A\") === \"modified-A\");\n\
-    deleteSetting(\"A\");\n\
-    console.assert(getSetting(\"A\", \"default-A\") === \"default-A\");"
-  }]
-});
 
 function deleteSetting(name) {
   if (window.localStorage) {
     window.localStorage.removeItem(name);
   }
 }
-
-pliny.function({
-  name: "findProperty",
-  description: "Searches an object for a property that might go by different names in different browsers.",
-  parameters: [{
-    name: "elem",
-    type: "Object",
-    description: "The object to search."
-  }, {
-    name: "arr",
-    type: "Array",
-    description: "An array of strings that lists the possible values for the property name."
-  }],
-  returns: "String",
-  examples: [{
-    name: "Find the right name of the full screen element.",
-    description: "    grammar(\"JavaScript\");\n\
-    var elementName = findProperty(document, [\"fullscreenElement\", \"mozFullScreenElement\", \"webkitFullscreenElement\", \"msFullscreenElement\"]);\n\
-    console.assert(!isFirefox || elementName === \"mozFullScreenElement\");\n\
-    console.assert(!isChrome || elementName === \"webkitFullscreenElement\");\n\
-    console.assert(!isIE || elementName === \"msFullscreenElement\");"
-  }]
-});
 
 function findProperty(elem, arr) {
   for (var i = 0; i < arr.length; ++i) {
@@ -17661,39 +16231,6 @@ function findProperty(elem, arr) {
     }
   }
 }
-
-pliny.function({
-  name: "getSetting",
-  parameters: [{
-    name: " name",
-    type: "string",
-    description: "The name of the setting to read."
-  }, {
-    name: "defValue",
-    type: "Object",
-    description: "The default value to return, if the setting is not present in `localStorage`."
-  }],
-  returns: "The Object stored in `localStorage` for the given name, or the default value provided if the setting doesn't exist in `localStorage`.",
-  description: "Retrieves named values out of `localStorage`. The values should\n\
-be valid for passing to `JSON.parse()`. A default value can be specified in the\n\
-function call that should be returned if the value does not exist, or causes an\n\
-error in parsing. Typically, you'd call this function at page-load time after having\n\
-called the [`setSetting()`](#setSetting) function during a previous page session.",
-  examples: [{
-    name: "Basic usage",
-    description: "Assuming a text input element with the id `text1`, the following\n\
-code should persist between reloads whatever the user writes in the text area:\n\
-\n\
-    grammar(\"JavaScript\");\n\
-    var text1 = document.getElementById(\"text1\");\n\
-    document.addEventListener(\"unload\", function(){\n\
-      setSetting(\"text1-value\", text1.value);\n\
-    }, false);\n\
-    document.addEventListener(\"load\", function(){\n\
-      text1.value = getSetting(\"text1-value\", \"My default value!\");\n\
-    }, false);"
-  }]
-});
 
 function getSetting(name, defValue) {
   if (window.localStorage) {
@@ -17711,36 +16248,6 @@ function getSetting(name, defValue) {
   return defValue;
 }
 
-pliny.function({
-  name: "setSetting",
-  parameters: [{
-    name: " name",
-    type: "string",
-    description: "The name of the setting to set."
-  }, {
-    name: "val",
-    type: "Object",
-    description: "The value to write. It should be useable as a parameter to `JSON.stringify()`."
-  }],
-  description: "Writes named values to `localStorage`. The values should be valid\n\
-for passing to `JSON.stringify()`. Typically, you'd call this function at page-unload\n\
-time, then call the [`getSetting()`](#getSetting) function during a subsequent page load.",
-  examples: [{
-    name: "Basic usage",
-    description: "Assuming a text input element with the id `text1`, the following\n\
-code should persist between reloads whatever the user writes in the text area:\n\
-\n\
-    grammar(\"JavaScript\");\n\
-    var text1 = document.getElementById(\"text1\");\n\
-    document.addEventListener(\"unload\", function(){\n\
-      setSetting(\"text1-value\", text1.value);\n\
-    }, false);\n\
-    document.addEventListener(\"load\", function(){\n\
-      text1.value = getSetting(\"text1-value\", \"My default value!\");\n\
-    }, false);"
-  }]
-});
-
 function setSetting(name, val) {
   if (window.localStorage && val) {
     try {
@@ -17751,143 +16258,11 @@ function setSetting(name, val) {
   }
 }
 
-pliny.class({
-  name: "Workerize",
-  description: "Builds a WebWorker thread out of a JavaScript class's source code, and attempts to create a message interface that matches the message-passing interface that the class already uses.\n\
-\n\
-Automatically workerized classes should have methods that take a single array for any parameters and return no values. All return results should come through an Event that the class emits.",
-  parameters: [{
-    name: "func",
-    type: "Function",
-    description: "The class function to workerize"
-  }],
-  examples: [{
-    name: "Create a basic workerized class.",
-    description: "Classes in JavaScript are created by adding new functions to the `prototype` of another function, then instantiating objects from that class with `new`. When creating such a class for automatic workerization, a few restrictions are required:\n\
-* All methods in the class must be on the prototype. Any methods created and assigned in the constructor will not be available to the message passing interface.\n\
-* All interaction with objects of the class must be through these publicly accessible methods. This includes initialization.\n\
-* All methods should take at most a single argument. If you need multiple arguments, pack them into an array.\n\
-* The methods cannot return any values. If a value must be returned to the calling context, it must be done through an event callback.\n\
-* The class must assign handlers to events through an addEventListener method that mirrors the standard interface used in DOM. Workerize will not respect the 3rd `bubbles` parameter that is so often omitted when programming against DOM.\n\
-\n\
-Assuming the following class:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  function MyClass(){\n\
-    this.listeners = {\n\
-      complete: []\n\
-    };\n\
-    this.objects = [];\n\
-  }\n\
-\n\
-  MyClass.prototype.addEventListener = function(evt, handler){\n\
-    if(this.listeners[evt]){\n\
-      this.listeners[evt].push(handler);\n\
-    }\n\
-  };\n\
-\n\
-  MyClass.prototype.addObject = function(obj){\n\
-    this.objects.push(obj);\n\
-  };\n\
-\n\
-  MyClass.prototype.update = function(dt){\n\
-    // we can make essentially arbitrarily small timeslice updates\n\
-    var SLICE = 0.1;\n\
-    for(var ddt = 0; ddt < dt; ddt += SLICE){\n\
-      for(var i = 0; i < this.objects.length; ++i){\n\
-        var o = this.objects[i];\n\
-        o.x += o.vx * SLICE;\n\
-        o.y += o.vy * SLICE;\n\
-        o.z += o.vz * SLICE;\n\
-      }\n\
-    }\n\
-    // prepare our return state for the UI thread.\n\
-    var returnValue = [];\n\
-    for(var i = 0; i < this.objects.length; ++i){\n\
-      returnValue.push([o.x, o.y, o.z]);\n\
-    }\n\
-    // and emit the event to all of the listeners.\n\
-    for(var i = 0; i < this.listeners.complete.length; ++i){\n\
-      this.listeners.complete[i](returnValue);\n\
-    }\n\
-  };\n\
-\n\
-Then we can create and use an automatically workerized version of it as follows.\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  var phys = new Primrose.Workerize(MyClass);\n\
-  // we keep a local copy of the state so we can perform other operations on it.\n\
-  var objects = [];\n\
-  for(var i = 0; i < 10; ++i){\n\
-    var obj = {\n\
-      // random values between -1 and 1\n\
-      x: 2 * Math.random() - 1,\n\
-      y: 2 * Math.random() - 1,\n\
-      z: 2 * Math.random() - 1,\n\
-      vx: 2 * Math.random() - 1,\n\
-      vy: 2 * Math.random() - 1,\n\
-      vz: 2 * Math.random() - 1\n\
-    };\n\
-    objects.push(obj);\n\
-    phys.addObject(obj);\n\
-  }\n\
-  \n\
-  // this flag lets us keep track of whether or not we know that the worker is in the middle of an expensive operation.\n\
-  phys.ready = true;\n\
-  phys.addEventListener(\"complete\", function(newPositions){\n\
-    // We update the state in the UI thread with the expensively-computed values.\n\
-    for(var i = 0; i < newPositions.length; ++i){\n\
-      objects[i].x = newPositions[i][0];\n\
-      objects[i].y = newPositions[i][1];\n\
-      objects[i].z = newPositions[i][2];\n\
-    }\n\
-    phys.ready = true;\n\
-  });\n\
-  \n\
-  var lt = null;\n\
-  function paint(t){\n\
-    requestAnimationFrame(paint);\n\
-    if(lt === undefined || lt === null){\n\
-      lt = t;\n\
-    } else {\n\
-      var dt = t - lt;\n\
-      if(phys.ready){\n\
-        phys.ready = false;\n\
-        phys.update(dt);\n\
-        lt = t;\n\
-      }\n\
-      for(var i = 0; i < objects.length; ++i){\n\
-        var o = objects[i];\n\
-        // We can even perform a much cheaper position update to smooth over the blips in the expensive update on the worker thread.\n\
-        drawObjectAt(o.x + o.vx * dt, o.y + o.vy * dt, o.z + o.vz * dt);\n\
-      }\n\
-    }\n\
-  }\n\
-  requestAnimationFrame(paint);"
-  }]
-});
-
 var Workerize = function (_AbstractEventEmitter) {
   inherits(Workerize, _AbstractEventEmitter);
   createClass(Workerize, null, [{
     key: "createWorker",
     value: function createWorker(script, stripFunc) {
-
-      pliny.function({
-        parent: "Primrose.Workerize",
-        name: "createWorker",
-        description: "A static function that loads Plain Ol' JavaScript Functions into a WebWorker.",
-        parameters: [{
-          name: "script",
-          type: "(String|Function)",
-          description: "A String defining a script, or a Function that can be toString()'d to get it's script."
-        }, {
-          name: "stripFunc",
-          type: "Boolean",
-          description: "Set to true if you want the function to strip the surround function block scope from the script."
-        }],
-        returns: "The WebWorker object."
-      });
 
       if (typeof script === "function") {
         script = script.toString();
@@ -17950,18 +16325,8 @@ var Workerize = function (_AbstractEventEmitter) {
 
     // The binary-large-object can be used to convert the script from text to a
     // data URI, because workers can only be created from same-origin URIs.
-    pliny.property({
-      name: "worker",
-      type: "WebWorker",
-      description: "The worker thread containing our class."
-    });
     _this.worker = Workerize.createWorker(script, false);
 
-    pliny.property({
-      name: "args",
-      type: "Array",
-      description: "Static allocation of an array to save on memory usage when piping commands to a worker."
-    });
     _this.args = [null, null];
 
     _this.worker.onmessage = function (e) {
@@ -17971,11 +16336,6 @@ var Workerize = function (_AbstractEventEmitter) {
     // create mappers from the UI-thread side method calls to the UI-thread side
     // postMessage method, to inform the worker thread that methods were called,
     // with parameters.
-    pliny.property({
-      name: "&lt;mappings for each method in the original class&gt;",
-      type: "Function",
-      description: "Each mapped function causes a message to be posted to the worker thread with its arguments packed into an array."
-    });
     for (k in func.prototype) {
       // we skip the addEventListener method because we override it in a
       // different way, to be able to pass messages across the thread boundary.
@@ -17992,21 +16352,6 @@ var Workerize = function (_AbstractEventEmitter) {
   createClass(Workerize, [{
     key: "methodShim",
     value: function methodShim(eventName, args) {
-
-      pliny.method({
-        parent: "Primrose.Workerize",
-        name: "methodShim",
-        description: "Posts messages to the worker thread by packing arguments into an array. The worker will receive the array and interpret the first value as the name of the method to invoke and the second value as another array of parameters.",
-        parameters: [{
-          name: "methodName",
-          type: "String",
-          description: "The method inside the worker context that we want to invoke."
-        }, {
-          name: "args",
-          type: "Array",
-          description: "The arguments that we want to pass to the method that we are calling in the worker context."
-        }]
-      });
 
       this.args[0] = eventName;
       this.args[1] = args;
@@ -20507,20 +18852,6 @@ Object.assign(MTLLoader, {
     CASTS_SHADOWS_ONTO_INVISIBLE_SURFACES: 10
 });
 
-pliny.method({
-  parent: "THREE.Object3D",
-  name: "addToBrowserEnvironment",
-  description: "A polyfill method for being able to add the object to a `Primrose.BrowserEnvironment` using `appendChild()` and to add other elements to the Object3D using `appendChild()` such that they may be pickable in the scene. This half of the polyfill implements the visitor pattern, so that individual objects can define their own processing for this action.",
-  parameters: [{
-    name: "env",
-    type: "Primrose.BrowserEnvironment",
-    description: "The environment (with collision detection and ray-picking capability) to which to register objects"
-  }, {
-    name: "scene",
-    type: "THREE.Object3D",
-    description: "The true parent element for `this` object"
-  }]
-});
 Object3D.prototype.addToBrowserEnvironment = function (env, scene) {
   var _this = this;
 
@@ -20528,16 +18859,6 @@ Object3D.prototype.addToBrowserEnvironment = function (env, scene) {
   // this has to be done as a lambda expression because it needs to capture the
   // env variable provided in the addToBrowserEnvironment call;
 
-  pliny.method({
-    parent: "THREE.Object3D",
-    name: "appendChild",
-    description: "A polyfill method for being able to add the object to a `Primrose.BrowserEnvironment` using `appendChild()` and to add other elements to the Object3D using `appendChild()` such that they may be pickable in the scene.",
-    parameters: [{
-      name: "child",
-      type: "Object",
-      description: "Any Primrose.Entity or THREE.Object3D to add to this object."
-    }]
-  });
   this.appendChild = function (child) {
     if (child.addToBrowserEnvironment) {
       return child.addToBrowserEnvironment(env, _this);
@@ -21730,78 +20051,6 @@ var promise = createCommonjsModule(function (module) {
 
 var DEG2RAD = Math.PI / 180;
 var RAD2DEG = 180 / Math.PI;
-pliny.class({
-  parent: "Primrose",
-  name: "Angle",
-  description: "The Angle class smooths out the jump from 360 to 0 degrees. It\n\
-keeps track of the previous state of angle values and keeps the change between\n\
-angle values to a maximum magnitude of 180 degrees, plus or minus. This allows for\n\
-smoother operation as rotating past 360 degrees will not reset to 0, but continue\n\
-to 361 degrees and beyond, while rotating behind 0 degrees will not reset to 360\n\
-but continue to -1 and below.\n\
-\n\
-When instantiating, choose a value that is as close as you can guess will be your\n\
-initial sensor readings.\n\
-\n\
-This is particularly important for the 180 degrees, +- 10 degrees or so. If you\n\
-expect values to run back and forth over 180 degrees, then initialAngleInDegrees\n\
-should be set to 180. Otherwise, if your initial value is anything slightly larger\n\
-than 180, the correction will rotate the angle into negative degrees, e.g.:\n\
-* initialAngleInDegrees = 0\n\
-* first reading = 185\n\
-* updated degrees value = -175\n\
-\n\
-It also automatically performs degree-to-radian and radian-to-degree conversions.\n\
-For more information, see [Radian - Wikipedia, the free encyclopedia](https://en.wikipedia.org/wiki/Radian).\n\
-\n\
-![Radians](https://upload.wikimedia.org/wikipedia/commons/4/4e/Circle_radians.gif)",
-  parameters: [{
-    name: "initialAngleInDegrees",
-    type: "Number",
-    description: "(Required) Specifies the initial context of the angle. Zero is not always the correct value."
-  }],
-  examples: [{
-    name: "Basic usage",
-    description: "To use the Angle class, create an instance of it with `new`, and modify the `degrees` property.\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  var a = new Primrose.Angle(356);\n\
-  a.degrees += 5;\n\
-  console.log(a.degrees);\n\
-\n\
-## Results:\n\
-> 361"
-  }, {
-    name: "Convert degrees to radians",
-    description: "Create an instance of Primrose.Angle, modify the `degrees` property, and read the `radians` property.\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  var a = new Primrose.Angle(10);\n\
-  a.degrees += 355;\n\
-  console.log(a.radians);\n\
-\n\
-## Results:\n\
-> 0.08726646259971647"
-  }, {
-    name: "Convert radians to degress",
-    description: "Create an instance of Primrose.Angle, modify the `radians` property, and read the `degrees` property.\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  var a = new Primrose.Angle(0);\n\
-  a.radians += Math.PI / 2;\n\
-  console.log(a.degrees);\n\
-\n\
-## Results:\n\
-> 90"
-  }]
-});
-
 var Angle = function () {
   function Angle(v) {
     classCallCheck(this, Angle);
@@ -21823,13 +20072,6 @@ var Angle = function () {
       return this._value;
     },
     set: function set(newValue) {
-
-      pliny.property({
-        parent: "Primrose.Angle",
-        name: "degrees",
-        type: "Number",
-        description: "Get/set the current value of the angle in degrees."
-      });
 
       do {
         // figure out if it is adding the raw value, or whole
@@ -21854,69 +20096,11 @@ var Angle = function () {
     },
     set: function set(val) {
 
-      pliny.property({
-        parent: "Primrose.Angle",
-        name: "radians",
-        type: "Number",
-        description: "Get/set the current value of the angle in radians."
-      });
-
       this.degrees = val * RAD2DEG;
     }
   }]);
   return Angle;
 }();
-
-pliny.namespace({
-  parent: "Primrose",
-  name: "HTTP",
-  description: "A collection of basic XMLHttpRequest wrappers."
-});
-
-pliny.function({
-  parent: "Primrose.HTTP",
-  name: "XHR",
-  description: "Wraps up the XMLHttpRequest object into a workflow that is easier for me to handle: a single function call. Can handle both GETs and POSTs, with or  without a payload.",
-  returns: "Promise",
-  parameters: [{
-    name: "method",
-    type: "String",
-    description: "The HTTP Verb being used for the request."
-  }, {
-    name: "type",
-    type: "String",
-    description: "How the response should be interpreted. One of [\"text\", \"json\", \"arraybuffer\"]. See the [MDN - XMLHttpRequest - responseType](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype).",
-    default: "\"text\""
-  }, {
-    name: "url",
-    type: "String",
-    description: "The resource to which the request is being sent."
-  }, {
-    name: "options.data",
-    type: "Object",
-    description: "The data object to use as the request body payload, if this is a PUT request."
-  }, {
-    name: "options.progress",
-    type: "Function",
-    optional: true,
-    description: "A callback function to be called as the download from the server progresses."
-  }],
-  examples: [{
-    name: "Make a GET request.",
-    description: "Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  Primrose.HTTP.XHR(\"GET\", \"json\", \"localFile.json\", {\n\
-    progress: console.log.bind(console, \"progress\"))\n\
-    .then(console.log.bind(console, \"done\")))\n\
-    .catch(console.error.bind(console));\n\
-\n\
-## Results:\n\
-> Object {field1: 1, field2: \"Field2\"}"
-  }]
-});
 
 function XHR(method, type, url, options) {
   return new Promise(function (resolve, reject) {
@@ -21970,339 +20154,17 @@ function XHR(method, type, url, options) {
   });
 }
 
-pliny.function({
-  parent: "Primrose.HTTP",
-  name: "del",
-  description: "Process an HTTP DELETE request.",
-  returns: "Promise",
-  parameters: [{
-    name: "type",
-    type: "String",
-    description: "How the response should be interpreted. One of [\"text\", \"json\", \"arraybuffer\"]. See the [MDN - XMLHttpRequest - responseType](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype).",
-    default: "\"text\""
-  }, {
-    name: "url",
-    type: "String",
-    description: "The resource to which the request is being sent."
-  }, {
-    name: "options.data",
-    type: "Object",
-    description: "The data object to use as the request body payload."
-  }, {
-    name: "options.progress",
-    type: "Function",
-    optional: true,
-    description: "A callback function to be called as the download from the server progresses."
-  }]
-});
-
-
-pliny.function({
-  parent: "Primrose.HTTP",
-  name: "delObject",
-  description: "Delete something on the server, and receive JSON in response.",
-  returns: "Promise",
-  parameters: [{
-    name: "url",
-    type: "String",
-    description: "The resource to which the request is being sent."
-  }, {
-    name: "options.data",
-    type: "Object",
-    description: "The data object to use as the request body payload, if this is a PUT request."
-  }, {
-    name: "options.progress",
-    type: "Function",
-    optional: true,
-    description: "A callback function to be called as the download from the server progresses."
-  }]
-});
-
-
-
-pliny.function({
-  parent: "Primrose.HTTP",
-  name: "get",
-  description: "Process an HTTP GET request.",
-  returns: "Promise",
-  parameters: [{
-    name: "type",
-    type: "String",
-    description: "How the response should be interpreted. One of [\"text\", \"json\", \"arraybuffer\"]. See the [MDN - XMLHttpRequest - responseType](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype).",
-    default: "\"text\""
-  }, {
-    name: "url",
-    type: "String",
-    description: "The resource to which the request is being sent."
-  }, {
-    name: "options.progress",
-    type: "Function",
-    optional: true,
-    description: "A callback function to be called as the download from the server progresses."
-  }],
-  examples: [{
-    name: "Make a GET request.",
-    description: "Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  Primrose.HTTP.get(\"json\", \"localFile.json\",\n\
-    console.log.bind(console, \"progress\"),\n\
-    console.log.bind(console, \"done\"),\n\
-    console.error.bind(console));\n\
-\n\
-## Results:\n\
-> Object {field1: 1, field2: \"Field2\"}"
-  }]
-});
-
 function get$2(type, url, options) {
   return XHR("GET", type || "text", url, options);
 }
-
-pliny.function({
-  parent: "Primrose.HTTP",
-  name: "getBuffer",
-  description: "Get an ArrayBuffer from a server.",
-  returns: "Promise",
-  parameters: [{
-    name: "url",
-    type: "String",
-    description: "The resource to which the request is being sent."
-  }, {
-    name: "options.progress",
-    type: "Function",
-    optional: true,
-    description: "A callback function to be called as the download from the server progresses."
-  }],
-  examples: [{
-    name: "Make a GET request for an ArrayBuffer.",
-    description: "Use this to load audio files and do whatever you want with them.\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  var context = new AudioContext();\n\
-  Primrose.HTTP.getBuffer(\"audio.mp3\",\n\
-    console.log.bind(console, \"progress\"));,\n\
-    function(buffer){\n\
-      context.decodeAudioData(\n\
-        buffer,\n\
-        console.log.bind(console, \"success\"),\n\
-        console.error.bind(console, \"error decoding\"));\n\
-    },\n\
-    console.error.bind(console, \"error loading\")\n"
-  }]
-});
 
 function getBuffer(url, options) {
   return get$2("arraybuffer", url, options);
 }
 
-pliny.function({
-  parent: "Primrose.HTTP",
-  name: "getObject",
-  description: "Get a JSON object from a server.",
-  returns: "Promise",
-  parameters: [{
-    name: "url",
-    type: "String",
-    description: "The resource to which the request is being sent."
-  }, {
-    name: "options.progress",
-    type: "Function",
-    optional: true,
-    description: "A callback function to be called as the download from the server progresses."
-  }],
-  examples: [{
-    name: "Make a GET request for a JSON object.",
-    description: "Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  Primrose.HTTP.getObject(\"localFile.json\", {\n\
-      progress: console.log.bind(console, \"progress\")\n\
-    })\n\
-    .then(console.log.bind(console, \"done\"))\n\
-    .catch(console.error.bind(console)));\n\
-\n\
-## Results:\n\
-> Object {field1: 1, field2: \"Field2\"}"
-  }]
-});
-
-
-
-pliny.function({
-  parent: "Primrose.HTTP",
-  name: "getText",
-  description: "Get plain text from a server. Returns a promise that will be resolve with the text retrieved from the server.",
-  returns: "Promise",
-  parameters: [{
-    name: "url",
-    type: "String",
-    description: "The resource to which the request is being sent."
-  }, {
-    name: "options.progress",
-    type: "Function",
-    optional: true,
-    description: "A callback function to be called as the download from the server progresses."
-  }],
-  examples: [{
-    name: "Make a GET request for plain text.",
-    description: "Use this to load arbitrary files and do whatever you want with them.\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  Primrose.HTTP.getText(\"localFile.json\",\n\
-    console.log.bind(console, \"progress\"),\n\
-    console.log.bind(console, \"done\"),\n\
-    console.error.bind(console));\n\
-\n\
-## Results:\n\
-> \"Object {field1: 1, field2: \\\"Field2\\\"}\""
-  }]
-});
-
 function getText(url, options) {
   return get$2("text", url, options);
 }
-
-pliny.function({
-  parent: "Primrose.HTTP",
-  name: "post",
-  description: "Process an HTTP POST request.",
-  returns: "Promise",
-  parameters: [{
-    name: "type",
-    type: "String",
-    description: "How the response should be interpreted. One of [\"text\", \"json\", \"arraybuffer\"]. See the [MDN - XMLHttpRequest - responseType](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype).",
-    default: "\"text\""
-  }, {
-    name: "url",
-    type: "String",
-    description: "The resource to which the request is being sent."
-  }, {
-    name: "options.data",
-    type: "Object",
-    description: "The data object to use as the request body payload, if this is a POST request."
-  }, {
-    name: "options.progress",
-    type: "Function",
-    optional: true,
-    description: "A callback function to be called as the download from the server progresses."
-  }]
-});
-
-
-
-pliny.function({
-  parent: "Primrose.HTTP",
-  name: "postObject",
-  description: "Send a JSON object to a server.",
-  returns: "Promise",
-  parameters: [{
-    name: "url",
-    type: "String",
-    description: "The resource to which the request is being sent."
-  }, {
-    name: "options.data",
-    type: "Object",
-    description: "The data object to use as the request body payload, if this is a PUT request."
-  }, {
-    name: "options.progress",
-    type: "Function",
-    optional: true,
-    description: "A callback function to be called as the download from the server progresses."
-  }]
-});
-
-pliny.function({
-  parent: "Primrose.DOM",
-  name: "cascadeElement",
-  returns: "Element",
-  parameters: [{
-    name: "id",
-    type: "(String|Element)",
-    description: "A vague reference to the element. Either a String id where the element can be had, a String id to give a newly created element if it does not exist, or an Element to manipulate and validate"
-  }, {
-    name: "tag",
-    type: "String",
-    description: "The HTML tag name of the element we are finding/creating/validating."
-  }, {
-    name: "DOMClass",
-    type: "Class",
-    description: "The class Function that is the type of element that we are frobnicating."
-  }],
-  description: "* If `id` is a string, tries to find the DOM element that has said ID\n\
-  * If it exists, and it matches the expected tag type, returns the element, or throws an error if validation fails.\n\
-  * If it doesn't exist, creates it and sets its ID to the provided id, then returns the new DOM element, not yet placed in the document anywhere.\n\
-* If `id` is a DOM element, validates that it is of the expected type,\n\
-  * returning the DOM element back if it's good,\n\
-  * or throwing an error if it is not\n\
-* If `id` is null, creates the DOM element to match the expected type.",
-  examples: [{
-    name: "Get an element by ID that already exists.",
-    description: "Assuming the following HTML snippet:\n\
-\n\
-  grammar(\"HTML\");\n\
-  <div>\n\
-    <div id=\"First\">first element</div>\n\
-    <section id=\"second-elem\">\n\
-      Second element\n\
-      <img id=\"img1\" src=\"img.png\">\n\
-    </section>\n\
-  </div>\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  var elem = Primrose.DOM.cascadeElement(\"second-elem\", \"section\", HTMLElement);\n\
-  console.assert(elem.textContent === \"Second element\");"
-  }, {
-    name: "Validate the tag type.",
-    description: "Assuming the following HTML snippet:\n\
-\n\
-  grammar(\"HTML\");\n\
-  <div>\n\
-    <div id=\"First\">first element</div>\n\
-    <section id=\"second-elem\">\n\
-      Second element\n\
-      <img id=\"img1\" src=\"img.png\">\n\
-    </section>\n\
-  </div>\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  //The following line of code should cause a runtime error.\n\
-  Primrose.DOM.cascadeElement(\"img1\", \"section\", HTMLElement);"
-  }, {
-    name: "Create an element.",
-    description: "Assuming the following HTML snippet:\n\
-\n\
-  grammar(\"HTML\");\n\
-  <div>\n\
-    <div id=\"First\">first element</div>\n\
-    <section id=\"second-elem\">\n\
-      Second element\n\
-      <img id=\"img1\" src=\"img.png\">\n\
-    </section>\n\
-  </div>\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  var elem = Primrose.DOM.cascadeElement(\"img2\", \"img\", HTMLImageElement);\n\
-  console.assert(elem.id === \"img2\");\n\
-  console.assert(elem.parentElement === null);\n\
-  document.body.appendChild(elem);\n\
-  console.assert(elem.parentElement === document.body);"
-  }]
-});
 
 function cascadeElement(id, tag, DOMClass, add) {
   var elem = null;
@@ -22325,11 +20187,6 @@ function cascadeElement(id, tag, DOMClass, add) {
   }
 
   if (elem === null) {
-    pliny.error({
-      name: "Invalid element",
-      type: "Error",
-      description: "If the element could not be found, could not be created, or one of the appropriate ID was found but did not match the expected type, an error is thrown to halt operation."
-    });
     throw new Error(id + " does not refer to a valid " + tag + " element.");
   }
   return elem;
@@ -22341,12 +20198,6 @@ window.AudioContext = window.AudioContext || window.webkitAudioContext;
 var VECTOR = new Vector3();
 var UP = new Vector3();
 var TEMP = new Matrix4();
-
-pliny.class({
-  parent: "Primrose.Output",
-  name: "Audio3D",
-  description: "| [under construction]"
-});
 
 var Audio3D = function () {
   createClass(Audio3D, null, [{
@@ -22530,59 +20381,6 @@ var Audio3D = function () {
     value: function loadSource(sources, loop) {
       var _this3 = this;
 
-      pliny.method({
-        parent: "Primrose.Output.Audio3D",
-        name: "loadSound",
-        returns: "Promise<MediaElementAudioSourceNode>",
-        parameters: [{
-          name: "sources",
-          type: "String|Array<String>",
-          description: "A string URI to an audio source, or an array of string URIs to audio sources. Will be used as a collection of HTML5 &lt;source> tags as children of an HTML5 &lt;audio> tag."
-        }, {
-          name: "loop",
-          type: "Boolean",
-          optional: true,
-          description: "indicate that the sound should be played on loop."
-        }],
-        description: "Loads the first element of the `sources` array for which the browser supports the file format as an HTML5 &lt;audio> tag to use as an `AudioSourceNode` attached to the current `AudioContext`. This does not load all of the audio files. It only loads the first one of a list of options that could work, because all browsers do not support the same audio formats.",
-        examples: [{
-          name: "Load a single audio file.",
-          description: "There is no one, good, compressed audio format supported in all browsers, but they do all support uncompressed WAV. You shouldn't use this on the Internet, but it might be okay for a local solution.\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  var audio = new Primrose.Output.Audio3D();\n\
-  audio.loadSource(\"mySong.wav\").then(function(node){\n\
-    node.connect(audio.context.destination);\n\
-  });"
-        }, {
-          name: "Load a single audio file from a list of options.",
-          description: "There is no one, good, compressed audio format supported in all browsers. As a hack around the problem, HTML5 media tags may include one or more &lt;source> tags as children to specify a cascading list of media sources. The browser will select the first one that it can successfully decode.\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  var audio = new Primrose.Output.Audio3D();\n\
-  audio.loadSource([\n\
-    \"mySong.mp3\",\n\
-    \"mySong.aac\",\n\
-    \"mySong.ogg\"\n\
-  ]).then(function(node){\n\
-    node.connect(audio.context.destination);\n\
-  });"
-        }, {
-          name: "Load an ambient audio file that should be looped.",
-          description: "The only audio option that is available is whether or not the audio file should be looped. You specify this with the second parameter to the `loadSource()` method, a `Boolean` value to indicate that looping is desired.\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  var audio = new Primrose.Output.Audio3D();\n\
-  audio.loadSource([\n\
-    \"mySong.mp3\",\n\
-    \"mySong.aac\",\n\
-    \"mySong.ogg\"\n\
-  ], true).then(function(node){\n\
-    node.connect(audio.context.destination);\n\
-  });"
-        }]
-      });
-
       return this.ready.then(function () {
         return new Promise(function (resolve, reject) {
           console.log("Loading " + sources);
@@ -22730,12 +20528,6 @@ var Note = function (_PositionalSound) {
 var MAX_NOTE_COUNT = (navigator.maxTouchPoints || 10) + 1;
 var TYPES = ["sine", "square", "sawtooth", "triangle"];
 
-pliny.class({
-  parent: "Primrose.Output",
-  name: "Music",
-  description: "| [under construction]"
-});
-
 var Music = function () {
   function Music(audio, numNotes) {
     var _this = this;
@@ -22871,12 +20663,6 @@ var DEFAULT_SPEECH_SETTINGS = {
   voice: 0
 };
 
-pliny.class({
-  parent: "Primrose.Output",
-  name: "Speech",
-  description: "| [under construction]"
-});
-
 var Speech = function () {
   function Speech(options) {
     var _this = this;
@@ -22933,12 +20719,6 @@ var Speech = function () {
   }]);
   return Speech;
 }();
-
-pliny.namespace({
-  parent: "Primrose",
-  name: "Audio",
-  description: "The audio namespace contains classes that handle output to devices other than the screen (e.g. Audio, Music, etc.)."
-});
 
 var Audio$1 = {
   Audio3D: Audio3D,
@@ -23081,36 +20861,6 @@ function hasGazeEvent(obj) {
   return !!obj.ongazecomplete || !!obj.onselect || !!obj.onclick || obj._handlers && (obj._handlers.gazecomplete && obj._handlers.gazecomplete.length > 0 || obj._handlers.select && obj._handlers.select.length > 0 || obj._handlers.click && obj._handlers.click.length > 0) || obj.button && hasGazeEvent(obj.button);
 }
 
-pliny.class({
-  parent: "Primrose",
-  name: "Pointer",
-  baseClass: "Primrose.AbstractEventEmitter",
-  description: "An object that points into the scene somewhere, casting a ray at objects for picking operations.",
-  parameters: [{
-    name: "name ",
-    type: "String",
-    description: "A friendly name for this pointer object, to make debugging easier."
-  }, {
-    name: "color",
-    type: "Number",
-    description: "The color to use to render the teleport pad and 3D pointer cursor."
-  }, {
-    name: "highlight",
-    type: "Number",
-    description: "The color to use to highlight the teleport pad and 3D pointer cursor when it's pointing at a real thing."
-  }, {
-    name: "devices",
-    type: "Array",
-    description: "An Array of `Primrose.InputProcessor` objects that define the orientation for this pointer."
-  }, {
-    name: "triggerDevices",
-    type: "Array",
-    description: "An Array of `Primrose.InputProcessor` objects that define the button trigger for this pointer.",
-    optional: true,
-    defaultValue: null
-  }]
-});
-
 var Pointer = function (_AbstractEventEmitter) {
   inherits(Pointer, _AbstractEventEmitter);
 
@@ -23190,20 +20940,6 @@ var Pointer = function (_AbstractEventEmitter) {
   }, {
     key: "addToBrowserEnvironment",
     value: function addToBrowserEnvironment(env, scene) {
-      pliny.method({
-        parent: "Primrose.Pointer",
-        name: "addToBrowserEnvironment",
-        description: "Add this meshes that give the visual representation of the pointer, to the scene.",
-        parameters: [{
-          name: "env",
-          type: "Primrose.BrowserEnvironment",
-          description: "Not used, just here to fulfill a common interface in the framework."
-        }, {
-          name: "scene",
-          type: "THREE.Scene",
-          description: "The scene to which to add the 3D cursor."
-        }]
-      });
       scene.add(this.root);
       scene.add(this.disk);
     }
@@ -23426,11 +21162,6 @@ var Pointer = function (_AbstractEventEmitter) {
 
 Pointer.EVENTS = ["pointerstart", "pointerend", "pointermove", "gazestart", "gazemove", "gazecomplete", "gazecancel", "exit", "enter", "select"];
 
-pliny.enumeration({
-  parent: "Primrose",
-  name: "Keys",
-  description: "Keycode values for system keys that are the same across all international standards"
-});
 var Keys = {
   ANY: Number.MAX_VALUE,
   ///////////////////////////////////////////////////////////////////////////
@@ -23565,22 +21296,6 @@ for (var key in Keys) {
 }
 
 var COUNTER$3 = 0;
-
-pliny.class({
-  parent: "Primrose.Controls",
-  name: "Label",
-  description: "A simple label of text to put on a Surface.",
-  baseClass: "Primrose.Surface",
-  parameters: [{
-    name: "idOrCanvasOrContext",
-    type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
-    description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
-  }, {
-    name: "options",
-    type: "Object",
-    description: "Named parameters for creating the Button."
-  }]
-});
 
 var Label = function (_Surface) {
   inherits(Label, _Surface);
@@ -23735,21 +21450,6 @@ var Label = function (_Surface) {
 
 var COUNTER$2 = 0;
 
-pliny.class({
-  parent: "Primrose.Controls",
-  name: "Button2D",
-  description: "A simple button to put on a Surface.",
-  baseClass: "Primrose.Controls.Label",
-  parameters: [{
-    name: "idOrCanvasOrContext",
-    type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
-    description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
-  }, {
-    name: "options",
-    type: "Object",
-    description: "Named parameters for creating the Button."
-  }]
-});
 var Button2D = function (_Label) {
   inherits(Button2D, _Label);
   createClass(Button2D, null, [{
@@ -23822,15 +21522,6 @@ var TRANSLATE_PATTERN = new RegExp("translate3d\\s*\\(\\s*" + NUMBER_PATTERN + U
 var ROTATE_PATTERN = new RegExp("rotate3d\\s*\\(\\s*" + NUMBER_PATTERN + DELIM + NUMBER_PATTERN + DELIM + NUMBER_PATTERN + DELIM + NUMBER_PATTERN + "rad\\s*\\)", "i");
 var TEMP_VECTOR = new Vector3();
 
-pliny.class({
-  parent: "Primrose",
-  baseClass: "Primrose.AbstractEventEmitter",
-  name: "BaseControl",
-  description: "The BaseControl class is the parent class for all 3D controls.\n\
-It manages a unique ID for every new control, the focus state of the control, and\n\
-performs basic conversions from DOM elements to the internal Control format."
-});
-
 var BaseControl = function (_AbstractEventEmitter) {
   inherits(BaseControl, _AbstractEventEmitter);
 
@@ -23839,18 +21530,8 @@ var BaseControl = function (_AbstractEventEmitter) {
 
     var _this = possibleConstructorReturn(this, (BaseControl.__proto__ || Object.getPrototypeOf(BaseControl)).call(this));
 
-    pliny.property({
-      name: "controlID",
-      type: "Number",
-      description: "Automatically incrementing counter for controls, to make sure there is a distinct differentiator between them all."
-    });
     _this.controlID = ID$1++;
 
-    pliny.property({
-      name: "focused",
-      type: "Boolean",
-      description: "Flag indicating this control has received focus. You should theoretically only read it."
-    });
     _this.focused = false;
     return _this;
   }
@@ -23858,36 +21539,6 @@ var BaseControl = function (_AbstractEventEmitter) {
   createClass(BaseControl, [{
     key: "focus",
     value: function focus() {
-
-      pliny.method({
-        parent: "Primrose.BaseControl",
-        name: "focus",
-        description: "Sets the focus property of the control, does not change the focus property of any other control.",
-        examples: [{
-          name: "Focus on one control, blur all the rest",
-          description: "When we have a list of controls and we are trying to track\n\
-    focus between them all, we must coordinate calls between `focus()` and `blur()`.\n\
-    \n\
-      grammar(\"JavaScript\");\n\
-      var ctrls = [\n\
-        new Primrose.Text.Controls.TextBox(),\n\
-        new Primrose.Text.Controls.TextBox(),\n\
-        new Primrose.Text.Button()\n\
-      ];\n\
-    \n\
-      function focusOn(id){\n\
-        for(var i = 0; i < ctrls.length; ++i){\n\
-          var c = ctrls[i];\n\
-          if(c.controlID === id){\n\
-            c.focus();\n\
-          }\n\
-          else{\n\
-            c.blur();\n\
-          }\n\
-        }\n\
-      }"
-        }]
-      });
 
       this.focused = true;
       this.emit("focus", {
@@ -23898,36 +21549,6 @@ var BaseControl = function (_AbstractEventEmitter) {
     key: "blur",
     value: function blur() {
 
-      pliny.method({
-        parent: "Primrose.BaseControl",
-        name: "blur",
-        description: "Unsets the focus property of the control, does not change the focus property of any other control.",
-        examples: [{
-          name: "Focus on one control, blur all the rest",
-          description: "When we have a list of controls and we are trying to track\n\
-    focus between them all, we must coordinate calls between `focus()` and `blur()`.\n\
-    \n\
-      grammar(\"JavaScript\");\n\
-      var ctrls = [\n\
-        new Primrose.Text.Controls.TextBox(),\n\
-        new Primrose.Text.Controls.TextBox(),\n\
-        new Primrose.Text.Button()\n\
-      ];\n\
-      \n\
-      function focusOn(id){\n\
-        for(var i = 0; i < ctrls.length; ++i){\n\
-          var c = ctrls[i];\n\
-          if(c.controlID === id){\n\
-            c.focus();\n\
-          }\n\
-          else{\n\
-            c.blur();\n\
-          }\n\
-        }\n\
-      }"
-        }]
-      });
-
       this.focused = false;
       this.emit("blur", {
         target: this
@@ -23936,30 +21557,6 @@ var BaseControl = function (_AbstractEventEmitter) {
   }, {
     key: "copyElement",
     value: function copyElement(elem) {
-
-      pliny.method({
-        parent: "Primrose.BaseControl",
-        name: "copyElement",
-        description: "Copies properties from a DOM element that the control is supposed to match.",
-        parameters: [{
-          name: "elem",
-          type: "Element",
-          description: "The element--e.g. a button or textarea--to copy."
-        }],
-        examples: [{
-          name: "Rough concept",
-          description: "The class is not used directly. Its methods would be used in a base\n\
-    class that implements its functionality.\n\
-    \n\
-    The `copyElement()` method gets used when a DOM element is getting \"converted\"\n\
-    to a 3D element on-the-fly.\n\
-    \n\
-      grammar(\"JavaScript\");\n\
-      var myDOMButton = document.querySelector(\"button[type='button']\"),\n\
-        my3DButton = new Primrose.Controls.Button3D();\n\
-      my3DButton.copyElement(myDOMButton);"
-        }]
-      });
 
       this.element = elem;
       if (elem.style.transform) {
@@ -23978,26 +21575,6 @@ var BaseControl = function (_AbstractEventEmitter) {
   return BaseControl;
 }(AbstractEventEmitter);
 
-pliny.class({
-  parent: "Primrose",
-  name: "Button3D",
-  baseClass: "Primrose.BaseControl",
-  parameters: [{
-    name: "model",
-    type: "THREE.Object3D",
-    description: "A 3D model to use as the graphics for this button."
-  }, {
-    name: "name",
-    type: "String",
-    description: "A name for the button, to make it distinct from other buttons."
-  }, {
-    name: "options",
-    type: "Object",
-    description: "A hash of options:\n\t\t\tmaxThrow - The limit for how far the button can be depressed.\n\t\t\tminDeflection - The minimum distance the button must be depressed before it is activated.\n\t\t\tcolorPressed - The color to change the button cap to when the button is activated.\n\t\t\tcolorUnpressed - The color to change the button cap to when the button is deactivated.\n\t\t\ttoggle - True if deactivating the button should require a second click. False if the button should deactivate when it is released."
-  }],
-  description: "A 3D button control, with a separate cap from a stand that it sits on. You click and depress the cap on top of the stand to actuate."
-});
-
 var Button3D = function (_BaseControl) {
   inherits(Button3D, _BaseControl);
 
@@ -24011,48 +21588,18 @@ var Button3D = function (_BaseControl) {
     _this.options.colorUnpressed = new Color(_this.options.colorUnpressed);
     _this.options.colorPressed = new Color(_this.options.colorPressed);
 
-    pliny.event({
-      name: "click",
-      description: "Occurs when the button is activated."
-    });
-
-    pliny.event({
-      name: "release",
-      description: "Occurs when the button is deactivated."
-    });
-
-    pliny.property({
-      name: "base",
-      type: "THREE.Object3D",
-      description: "The stand the button cap sits on."
-    });
     _this.base = model.children[1];
 
-    pliny.property({
-      name: "base",
-      type: "THREE.Object3D",
-      description: "The moveable part of the button, that triggers the click event."
-    });
     _this.cap = model.children[0];
     _this.cap.name = name;
     _this.cap.material = _this.cap.material.clone();
     _this.cap.button = _this;
     _this.cap.base = _this.base;
 
-    pliny.property({
-      name: "container",
-      type: "THREE.Object3D",
-      description: "A grouping collection for the base and cap."
-    });
     _this.container = new Object3D();
     _this.container.add(_this.base);
     _this.container.add(_this.cap);
 
-    pliny.property({
-      name: "color",
-      type: "Number",
-      description: "The current color of the button cap."
-    });
     _this.color = _this.cap.material.color;
     _this.name = name;
     _this.element = null;
@@ -24111,48 +21658,6 @@ var Button3D = function (_BaseControl) {
   return Button3D;
 }(BaseControl);
 
-pliny.record({
-  parent: "Primrose.Controls.Button3D",
-  name: "DEFAULTS",
-  description: "Default option values that override undefined options passed to the Button3D class."
-});
-
-pliny.property({
-  parent: "Primrose.Controls.Button3D",
-  name: "position",
-  type: "THREE.Vector3",
-  description: "The location of the button."
-});
-pliny.value({
-  parent: "Primrose.Controls.Button3D.DEFAULTS",
-  name: "maxThrow",
-  type: "Number",
-  description: "The limit for how far the button can be depressed."
-});
-pliny.value({
-  parent: "Primrose.Controls.Button3D.DEFAULTS",
-  name: "minDeflection",
-  type: "Number",
-  description: "The minimum distance the button must be depressed before it is activated."
-});
-pliny.value({
-  parent: "Primrose.Controls.Button3D.DEFAULTS",
-  name: "colorUnpressed",
-  type: "Number",
-  description: "The color to change the button cap to when the button is deactivated."
-});
-pliny.value({
-  parent: "Primrose.Controls.Button3D.DEFAULTS",
-  name: "colorPressed",
-  type: "Number",
-  description: "The color to change the button cap to when the button is activated."
-});
-pliny.value({
-  parent: "Primrose.Controls.Button3D.DEFAULTS",
-  name: "toggle",
-  type: "Boolean",
-  description: "True if deactivating the button should require a second click. False if the button should deactivate when it is released."
-});
 Button3D.DEFAULTS = {
   maxThrow: 0.1,
   minDeflection: 10,
@@ -24163,57 +21668,17 @@ Button3D.DEFAULTS = {
 
 var buttonCount = 0;
 
-pliny.class({
-  parent: "Primrose",
-  name: "ButtonFactory",
-  description: "Loads a model file and holds the data, creating clones of the data whenever a new button is desired.",
-  parameters: [{
-    name: "template",
-    type: "THREE.Object3D",
-    description: "A THREE.Object3D that specifies a 3D model for a button, to be used as a template."
-  }, {
-    name: "options",
-    type: "Object",
-    description: "The options to apply to all buttons that get created by the factory."
-  }, {
-    name: "complete",
-    type: "Function",
-    description: "A callback function to indicate when the loading process has completed, if `templateFile` was a String path."
-  }]
-});
 var ButtonFactory = function () {
   function ButtonFactory(templateFile, options) {
     classCallCheck(this, ButtonFactory);
 
-    pliny.property({
-      name: "options",
-      type: "Object",
-      description: "The options that the user provided, so that we might change them after the factory has been created, if we so choose."
-    });
     this.options = options;
-    pliny.property({
-      name: "template",
-      type: "THREE.Object3D",
-      description: "The 3D model for the button, that will be cloned every time a new button is created."
-    });
     this.template = templateFile;
   }
 
   createClass(ButtonFactory, [{
     key: "create",
     value: function create(toggle) {
-      pliny.method({
-        parent: "Primrose.ButtonFactory",
-        name: "create",
-        description: "Clones all of the geometry, materials, etc. in a 3D model to create a new copy of it. This really should be done with instanced objects, but I just don't have the time to deal with it right now.",
-        parameters: [{
-          name: "toggle",
-          type: "Boolean",
-          description: "True if the new button should be a toggle button (requiring additional clicks to deactivate) or a regular button (deactivating when the button is released, aka \"momentary\"."
-        }],
-        return: "The cloned button that which we so desired."
-      });
-
       var name = "button" + ++buttonCount;
       var obj = this.template.clone();
       var btn = new Button3D(obj, name, this.options, toggle);
@@ -24607,18 +22072,6 @@ window.addEventListener("touchend", findAndFixVideo, false);
 window.addEventListener("mouseup", findAndFixVideo, false);
 window.addEventListener("keyup", findAndFixVideo, false);
 
-pliny.class({
-  parent: "Primrose.Controls",
-  name: "Image",
-  baseClass: "Primrose.Surface",
-  description: "A simple 2D image to put on a Surface.",
-  parameters: [{
-    name: "options",
-    type: "Object",
-    description: "Named parameters for creating the Image."
-  }]
-});
-
 var Image = function (_Entity) {
   inherits(Image, _Entity);
   createClass(Image, null, [{
@@ -24863,27 +22316,6 @@ var Image = function (_Entity) {
   }]);
   return Image;
 }(Entity);
-
-pliny.function({
-  parent: "Primrose.DOM",
-  name: "makeHidingContainer",
-  description: "Takes an element and shoves it into a containing element that\n\
-is 0x0 pixels in size, with the overflow hidden. Sometimes, we need an element\n\
-like a TextArea in the DOM to be able to receive key events, but we don't want the\n\
-user to see it, so the makeHidingContainer function makes it easy to make it disappear.",
-  parameters: [{
-    name: "id",
-    type: "(String|Element)",
-    description: "A vague reference to\n\
-the element. Either a String id where the element can be had, a String id to give\n\
-a newly created element if it does not exist, or an Element to manipulate and validate."
-  }, {
-    name: "obj",
-    type: "Element",
-    description: "The child element to stow in the hiding container."
-  }],
-  returns: "The hiding container element, not yet inserted into the DOM."
-});
 
 function makeHidingContainer(id, obj) {
   var elem = cascadeElement(id, "div", window.HTMLDivElement);
@@ -33291,46 +30723,6 @@ function setProperties(object) {
   return object;
 }
 
-pliny.class({
-  parent: "Primrose",
-  name: "ModelLoader",
-  description: "Creates an interface for cloning 3D models loaded from files, to instance those objects.\n\
-\n\
-> NOTE: You don't instantiate this class directly. Call `ModelLoader.loadModel`.",
-  parameters: [{
-    name: "template",
-    type: "THREE.Object3D",
-    description: "The 3D model to make clonable."
-  }],
-  examples: [{
-    name: "Load a basic model.",
-    description: "When Blender exports the Three.js JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  // Create the scene where objects will go\n\
-  var scene = new THREE.Scene(),\n\
-   \n\
-  // Load up the file, optionally \"check it out\"\n\
-    modelFactory = new Primrose.loadModel(\"path/to/model.json\", console.log.bind(console, \"Progress:\"))\n\
-    .then(function(model){\n\
-      model.template.traverse(function(child){\n\
-        // Do whatever you want to the individual child objects of the scene.\n\
-      });\n\
-   \n\
-    // Add copies of the model to the scene every time the user hits the ENTER key.\n\
-    window.addEventListener(\"keyup\", function(evt){\n\
-      // If the template object exists, then the model loaded successfully.\n\
-      if(evt.keyCode === 10){\n\
-        scene.add(model.clone());\n\
-      }\n\
-    });\n\
-  })\n\
-  .catch(console.error.bind(console));"
-  }]
-});
-
 var ModelLoader = function () {
   createClass(ModelLoader, null, [{
     key: "loadModel",
@@ -33342,57 +30734,6 @@ var ModelLoader = function () {
   }, {
     key: "loadObject",
     value: function loadObject(src, type, progress) {
-
-      pliny.function({
-        parent: "Primrose.ModelLoader",
-        name: "loadObject",
-        description: "Asynchronously loads a JSON, OBJ, or MTL file as a Three.js object. It processes the scene for attributes, creates new properties on the scene to give us\n\
-    faster access to some of the elements within it. It uses callbacks to tell you when loading progresses. It uses a Promise to tell you when it's complete, or when an error occurred.\n\
-    Useful for one-time use models.",
-        returns: "Promise",
-        parameters: [{
-          name: "src",
-          type: "String",
-          description: "The file from which to load."
-        }, {
-          name: "type",
-          type: "String",
-          optional: true,
-          description: "The type of the file--JSON, FBX, OJB, or STL--if it can't be determined from the file extension."
-        }, {
-          name: "progress",
-          type: "Function",
-          optional: true,
-          description: "A callback function to be called as the download from the server progresses."
-        }],
-        examples: [{
-          name: "Load a basic model.",
-          description: "When Blender exports the Three.js JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
-    \n\
-    ## Code:\n\
-    \n\
-      grammar(\"JavaScript\");\n\
-      // Create the scene where objects will go\n\
-      var renderer = new THREE.WebGLRenderer(),\n\
-          currentScene = new THREE.Scene(),\n\
-          camera = new THREE.PerspectiveCamera();\n\
-       \n\
-      // Load up the file\n\
-      Primrose.ModelLoader.loadObject(\n\
-        \"path/to/model.json\",\n\
-        null,\n\
-        console.log.bind(console, \"Progress:\"))\n\
-        .then(scene.add.bind(scene))\n\
-        .catch(console.error.bind(console));\n\
-       \n\
-      function paint(t){\n\
-        requestAnimationFrame(paint);\n\
-        renderer.render(scene, camera);\n\
-      }\n\
-       \n\
-      requestAnimationFrame(paint);"
-        }]
-      });
 
       var extMatch = src.match(EXTENSION_PATTERN),
           extension = type && "." + type || extMatch[0];
@@ -33466,73 +30807,6 @@ var ModelLoader = function () {
     key: "loadObjects",
     value: function loadObjects(map) {
 
-      pliny.function({
-        parent: "Primrose.ModelLoader",
-        name: "loadObjects",
-        description: "Asynchronously loads an array of JSON, OBJ, or MTL file as a Three.js object. It processes the objects for attributes, creating new properties on each object to give us\n\
-    faster access to some of the elements within it. It uses callbacks to tell you when loading progresses. It uses a Promise to tell you when it's complete, or when an error occurred.\n\
-    Useful for static models.\n\
-    \n\
-    See [`Primrose.ModelLoader.loadObject()`](#Primrose_ModelLoader_loadObject) for more details on how individual models are loaded.",
-        returns: "Promise",
-        parameters: [{
-          name: "arr",
-          type: "Array",
-          description: "The files from which to load."
-        }, {
-          name: "type",
-          type: "String",
-          optional: true,
-          description: "The type of the file--JSON, FBX, OJB, or STL--if it can't be determined from the file extension."
-        }, {
-          name: "progress",
-          type: "Function",
-          optional: true,
-          description: "A callback function to be called as the download from the server progresses."
-        }],
-        examples: [{
-          name: "Load some models.",
-          description: "When Blender exports models, they are frequently treated as full scenes, essentially making them scene-graph sub-trees.\n\
-    We can load a bunch of models in one go using the following code.\n\
-    \n\
-    ## Code:\n\
-    \n\
-      grammar(\"JavaScript\");\n\
-      // Create the scene where objects will go\n\
-      var renderer = new THREE.WebGLRenderer(),\n\
-          currentScene = new THREE.Scene(),\n\
-          camera = new THREE.PerspectiveCamera(),\n\
-          allModels = null;\n\
-       \n\
-      // Load up the file\n\
-      Primrose.ModelLoader.loadObjects(\n\
-        [\"path/to/model1.json\",\n\
-          \"path/to/model2.obj\",\n\
-          \"path/to/model3.obj\",\n\
-          \"path/to/model4.fbx\"],\n\
-        console.log.bind(console, \"Progress:\"))\n\
-        .then(function(models){\n\
-          allModels = models;\n\
-          models.forEach(function(model){\n\
-            scene.add(model);\n\
-          });\n\
-        })\n\
-        .catch(console.error.bind(console));\n\
-       \n\
-      function paint(t){\n\
-        requestAnimationFrame(paint);\n\
-        \n\
-        if(allModels){\n\
-          // do whatever updating you want on the models\n\
-        }\n\
-        \n\
-        renderer.render(scene, camera);\n\
-      }\n\
-      \n\
-      requestAnimationFrame(paint);"
-        }]
-      });
-
       var output = {},
           promise = Promise.resolve(output);
       for (var key in map) {
@@ -33547,11 +30821,6 @@ var ModelLoader = function () {
   function ModelLoader(template) {
     classCallCheck(this, ModelLoader);
 
-    pliny.property({
-      name: "template",
-      type: "THREE.Object3D",
-      description: "When a model is loaded, stores a reference to the model so it can be cloned in the future."
-    });
     this.template = template;
   }
 
@@ -33560,37 +30829,6 @@ var ModelLoader = function () {
     value: function clone() {
       var _this = this;
 
-      pliny.method({
-        parent: "Primrose.ModelLoader",
-        name: "clone",
-        description: "Creates a copy of the stored template model.",
-        returns: "A THREE.Object3D that is a copy of the stored template.",
-        examples: [{
-          name: "Load a basic model.",
-          description: "When Blender exports the Three.js JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
-    \n\
-    ## Code:\n\
-    \n\
-      grammar(\"JavaScript\");\n\
-      // Create the scene where objects will go\n\
-      var scene = new THREE.Scene(),\n\
-      \n\
-      // Load up the file, optionally \"check it out\"\n\
-        modelFactory = new Primrose.ModelLoader(\"path/to/model.json\", function(model){\n\
-          model.traverse(function(child){\n\
-            // Do whatever you want to the individual child objects of the scene.\n\
-          });\n\
-      }, console.error.bind(console), console.log.bind(console, \"Progress:\"));\n\
-      \n\
-      // Add copies of the model to the scene every time the user hits the ENTER key.\n\
-      window.addEventListener(\"keyup\", function(evt){\n\
-        // If the template object exists, then the model loaded successfully.\n\
-        if(modelFactory.template && evt.keyCode === 10){\n\
-          scene.add(modelFactory.clone());\n\
-        }\n\
-      });"
-        }]
-      });
       var obj = this.template.clone();
 
       obj.traverse(function (child) {
@@ -33708,12 +30946,6 @@ var CommandState = function CommandState() {
   this.ct = 0;
   this.repeatCount = 0;
 };
-
-pliny.class({
-  parent: "Primrose",
-  name: "InputProcessor",
-  description: "| [under construction]"
-});
 
 var InputProcessor = function (_AbstractEventEmitter) {
   inherits(InputProcessor, _AbstractEventEmitter);
@@ -34155,45 +31387,6 @@ function setCursorCommand(obj, mod, key, func, cur) {
   };
 }
 
-pliny.class({
-  parent: "Primrose.Text",
-  name: "OperatingSystem",
-  description: "A description of how a specific operating system handles keyboard shortcuts.",
-  parameters: [{
-    name: "name ",
-    type: "String",
-    description: "A friendly name for the operating system."
-  }, {
-    name: "pre1",
-    type: "String",
-    description: "Standard keyboard modifier."
-  }, {
-    name: "pre2",
-    type: "String",
-    description: "Key modifier for moving the cursor by whole words."
-  }, {
-    name: "redo",
-    type: "String",
-    description: "Key sequence to redo changes in text that were undone."
-  }, {
-    name: "pre3",
-    type: "String",
-    description: "Key modifier for home and end."
-  }, {
-    name: "home",
-    type: "String",
-    description: "Key sequence to send cursor to the beginning of the current line."
-  }, {
-    name: "end",
-    type: "String",
-    description: "Key sequence to send cursor to the end of the current line."
-  }, {
-    name: "pre5",
-    type: "String",
-    description: "Modifiers for the fullHome and fullEnd commands."
-  }]
-});
-
 var OperatingSystem = function () {
   function OperatingSystem(name, pre1, pre2, redo, pre3, home, end, pre5) {
     classCallCheck(this, OperatingSystem);
@@ -34259,31 +31452,9 @@ var OperatingSystem = function () {
   return OperatingSystem;
 }();
 
-pliny.value({
-  parent: "Primrose.Text.OperatingSystems",
-  name: "Windows",
-  description: "Keyboard shortcuts for the Windows operating system."
-});
 var Windows = new OperatingSystem("Windows", "CTRL", "CTRL", "CTRL_y", "", "HOME", "END", "CTRL", "HOME", "END");
 
-pliny.value({
-  parent: "Primrose.Text.OperatingSystems",
-  name: "Linux",
-  description: "Keyboard shortcuts for the Linux operating system (actually just a reference to the Windows shortcuts)."
-});
-
-pliny.value({
-  parent: "Primrose.Text.OperatingSystems",
-  name: "macOS",
-  description: "Keyboard shortcuts for Apple macOS nee OSX."
-});
 var macOS = new OperatingSystem("macOS", "META", "ALT", "METASHIFT_z", "META", "LEFTARROW", "RIGHTARROW", "META", "UPARROW", "DOWNARROW");
-
-pliny.namespace({
-  parent: "Primrose.Text",
-  name: "OperatingSystems",
-  description: "The OperatingSystems namespace contains sets of keyboard shortcuts for different operating systems."
-});
 
 var OperatingSystems = {
   Linux: Windows,
@@ -34291,27 +31462,6 @@ var OperatingSystems = {
   OperatingSystem: OperatingSystem,
   Windows: Windows
 };
-
-pliny.class({
-  parent: "Primrose.Text",
-  name: "CodePage",
-  description: "A code page is a description of how a certain cultural locale's keyboard works. Keys send \"key codes\" to the operating system, and the operating system then translates this into \"virtual key codes\" (as the keyboard's own code system is arbitrary and proprietary). The operating system's virtual key codes attempt to express the intended meaning of the user's key striking activity.\n\
-\n\
-As we work in the browser and not at the operating system level, we do not receive these virtual key codes. The browser does yet another translation into \"key events\" that are nominally standardized. Unfortunately, the standard is incomplete with regards to the full breadth of cultural locales in the world, and the current state of browser support for the standard is subopitmal. So we have to reinterpret what the browser tells us to get a better idea of what the user actually meant. And that reinterpretation is this CodePage class.",
-  parameters: [{
-    name: "name ",
-    type: "String",
-    description: "A readable name for the CodePage, to be used in options UIs."
-  }, {
-    name: "lang",
-    type: "String",
-    description: "The IETF standard language tag describing the locale for which this CodePage was created. See: https://en.wikipedia.org/wiki/IETF_language_tag."
-  }, {
-    name: "options",
-    type: "Object",
-    description: "The CodePage description, an object literal expressing how different key events with different modifier keys result into different character codes or dead key state transitions. See: https://en.wikipedia.org/wiki/Dead_key."
-  }]
-});
 
 var CodePage = function CodePage(name, lang, options) {
   classCallCheck(this, CodePage);
@@ -34441,11 +31591,6 @@ CodePage.DEAD = function (key) {
   };
 };
 
-pliny.record({
-  parent: "Primrose.Text.CodePages",
-  name: "DE_QWERTZ",
-  description: "CodePage for `Deutsch: QWERTZ` locale."
-});
 var DE_QWERTZ = new CodePage("Deutsch: QWERTZ", "de", {
   deadKeys: [220, 221, 160, 192],
   NORMAL: {
@@ -34564,11 +31709,6 @@ var DE_QWERTZ = new CodePage("Deutsch: QWERTZ", "de", {
   }
 });
 
-pliny.record({
-  parent: "Primrose.Text.CodePages",
-  name: "EN_UKX",
-  description: "CodePage for the `English: UK Extended` locale."
-});
 var EN_UKX = new CodePage("English: UK Extended", "en-GB", {
   CTRLALT: {
     "52": "€",
@@ -34650,11 +31790,6 @@ var EN_UKX = new CodePage("English: UK Extended", "en-GB", {
   }
 });
 
-pliny.record({
-  parent: "Primrose.Text.CodePages",
-  name: "EN_US",
-  description: "CodePage for the `English: USA` locale."
-});
 var EN_US = new CodePage("English: USA", "en-US", {
   NORMAL: {
     "32": " ",
@@ -34710,11 +31845,6 @@ var EN_US = new CodePage("English: USA", "en-US", {
   }
 });
 
-pliny.record({
-  parent: "Primrose.Text.CodePages",
-  name: "FR_AZERTY",
-  description: "CodePage for the `Français: AZERTY` locale."
-});
 var FR_AZERTY = new CodePage("Français: AZERTY", "fr", {
   deadKeys: [221, 50, 55],
   NORMAL: {
@@ -34804,12 +31934,6 @@ var FR_AZERTY = new CodePage("Français: AZERTY", "fr", {
   }
 });
 
-pliny.namespace({
-  parent: "Primrose.Text",
-  name: "CodePages",
-  description: "The CodePages namespace contains international keyboard parameters."
-});
-
 var CodePages = {
   CodePage: CodePage,
   DE_QWERTZ: DE_QWERTZ,
@@ -34817,30 +31941,6 @@ var CodePages = {
   EN_US: EN_US,
   FR_AZERTY: FR_AZERTY
 };
-
-pliny.class({
-  parent: "Primrose.Input",
-  name: "Keyboard",
-  baseClass: "Primrose.InputProcessor",
-  description: "| [under construction]",
-  parameters: [{
-    name: "",
-    type: "",
-    description: ""
-  }, {
-    name: "",
-    type: "",
-    description: ""
-  }, {
-    name: "",
-    type: "",
-    description: ""
-  }, {
-    name: "",
-    type: "",
-    description: ""
-  }]
-});
 
 var Keyboard = function (_InputProcessor) {
   inherits(Keyboard, _InputProcessor);
@@ -34914,13 +32014,6 @@ var Keyboard = function (_InputProcessor) {
   }]);
   return Keyboard;
 }(InputProcessor);
-
-pliny.class({
-  parent: "Primrose.Input",
-  name: "Mouse",
-  baseClass: "Primrose.InputProcessor",
-  description: "| [under construction]"
-});
 
 var Mouse = function (_InputProcessor) {
   inherits(Mouse, _InputProcessor);
@@ -35001,13 +32094,6 @@ var DEFAULT_POSE = {
 var EMPTY_SCALE = new Vector3();
 var IE_CORRECTION = new Quaternion(1, 0, 0, 0);
 
-pliny.class({
-  parent: "Primrose",
-  name: "PoseInputProcessor",
-  baseClass: "Primrose.InputProcessor",
-  description: "| [under construction]"
-});
-
 var PoseInputProcessor = function (_InputProcessor) {
   inherits(PoseInputProcessor, _InputProcessor);
 
@@ -35083,23 +32169,6 @@ function playPattern(devices, pattern, pause) {
     setTimeout(playPattern, length, devices, pattern, !pause);
   }
 }
-
-pliny.class({
-  parent: "Primrose.Input",
-  name: "Gamepad",
-  baseClass: "Primrose.PoseInputProcessor",
-  parameters: [{
-    name: "name",
-    type: "string",
-    description: "An unique name for this input manager. Note that systems with motion controllers will often have two controllers with the same ID, but different indexes. The name should take that into account."
-  }, {
-    name: "commands",
-    type: "Array",
-    optional: true,
-    description: "An array of input command descriptions."
-  }],
-  description: "An input processor for Gamepads, including those with positional data."
-});
 
 var Gamepad = function (_PoseInputProcessor) {
   inherits(Gamepad, _PoseInputProcessor);
@@ -35196,11 +32265,6 @@ var Gamepad = function (_PoseInputProcessor) {
   return Gamepad;
 }(PoseInputProcessor);
 
-pliny.enumeration({
-  parent: "Primrose.Input.Gamepad",
-  name: "XBOX_360_BUTTONS",
-  description: "Labeled names for each of the different control features of the Xbox 360 controller."
-});
 Gamepad.XBOX_360_BUTTONS = {
   A: 1,
   B: 2,
@@ -35220,11 +32284,6 @@ Gamepad.XBOX_360_BUTTONS = {
   RIGHT_DPAD: 16
 };
 
-pliny.enumeration({
-  parent: "Primrose.Input.Gamepad",
-  name: "XBOX_ONE_BUTTONS",
-  description: "Labeled names for each of the different control features of the Xbox 360 controller."
-});
 Gamepad.XBOX_ONE_BUTTONS = {
   A: 1,
   B: 2,
@@ -35244,11 +32303,6 @@ Gamepad.XBOX_ONE_BUTTONS = {
   RIGHT_DPAD: 16
 };
 
-pliny.enumeration({
-  parent: "Primrose.Input.Gamepad",
-  name: "VIVE_BUTTONS",
-  description: "Labeled names for each of the different control buttons of the HTC Vive Motion Controllers."
-});
 Gamepad.VIVE_BUTTONS = {
   TOUCHPAD_PRESSED: 0,
   TRIGGER_PRESSED: 1,
@@ -35346,13 +32400,6 @@ var GamepadManager = function (_AbstractEventEmitter) {
 
 var TEMP$1 = new Vector2();
 
-pliny.class({
-  parent: "Primrose.Input",
-  name: "Touch",
-  baseClass: "Primrose.InputProcessor",
-  description: "| [under construction]"
-});
-
 var Touch = function (_InputProcessor) {
   inherits(Touch, _InputProcessor);
 
@@ -35438,29 +32485,6 @@ var Touch = function (_InputProcessor) {
   }]);
   return Touch;
 }(InputProcessor);
-
-pliny.class({
-  parent: "Primrose.Input",
-  name: "Speech",
-  baseClass: "Primrose.InputProcessor",
-  description: "Connects to a the webkitSpeechRecognition API and manages callbacks based on keyword sets related to the callbacks. Note that the webkitSpeechRecognition API requires a network connection, as the processing is done on an external server.",
-  parameters: [{
-    name: "commands",
-    type: "Array",
-    description: "The `commands` parameter specifies a collection of keywords tied to callbacks that will be called when one of the keywords are heard. Each callback can be associated with multiple keywords, to be able to increase the accuracy of matches by combining words and phrases that sound similar.\n\
-\n\
-Each command entry is a simple object following the pattern:\n\
-\n\
-    {\n\
-      \"keywords\": [\"phrase no. 1\", \"phrase no. 2\", ...],\n\
-      \"command\": <callbackFunction>\n\
-    }\n\
-\n\
-The `keywords` property is an array of strings for which SpeechInput will listen. If any of the words or phrases in the array matches matches the heard command, the associated callbackFunction will be executed.\n\
-\n\
-The `command` property is the callback function that will be executed. It takes no parameters."
-  }]
-});
 
 var Speech$1 = function (_InputProcessor) {
   inherits(Speech, _InputProcessor);
@@ -35903,18 +32927,6 @@ function install() {
   }
 }
 
-pliny.class({
-  parent: "Primrose.Input",
-  name: "VR",
-  baseClass: "Primrose.PoseInputProcessor",
-  parameters: [{
-    name: "avatarHeight",
-    type: "Number",
-    description: "The default height to use for the user, if the HMD doesn't provide a stage transform."
-  }],
-  description: "An input manager for gamepad devices."
-});
-
 var VR = function (_PoseInputProcessor) {
   inherits(VR, _PoseInputProcessor);
   createClass(VR, null, [{
@@ -36222,24 +33234,6 @@ var DISPLACEMENT = new Vector3();
 var EULER_TEMP$1 = new Euler();
 var QUAT_TEMP$1 = new Quaternion();
 var WEDGE = Math.PI / 3;
-
-pliny.class({
-  parent: "Primrose.Input",
-  name: "FPSInput",
-  baseClass: "Primrose.AbstractEventEmitter",
-  description: "A massive hairball of a class that handles all of the input abstraction.",
-  parameters: [{
-    name: "DOMElement",
-    type: "Element",
-    description: "The DOM element on which to add most events.",
-    optional: true,
-    defaultValue: "window"
-  }, {
-    name: "options",
-    type: "Object",
-    description: "Optional setup: avatarHeight, gravity, and scene."
-  }]
-});
 
 var FPSInput = function (_AbstractEventEmitter) {
   inherits(FPSInput, _AbstractEventEmitter);
@@ -36693,51 +33687,6 @@ var FPSInput = function (_AbstractEventEmitter) {
   return FPSInput;
 }(AbstractEventEmitter);
 
-pliny.function({
-  parent: "Primrose.Random",
-  name: "number",
-  description: "Returns a random floating-point number on a given range [min, max), i.e. min is inclusive, max is exclusive. As random as your JavaScript engine supports with Math.random(), which is not good enough for crypto, but is certainly good enough for games.",
-  parameters: [{
-    name: "min",
-    type: "Number",
-    description: "The included minimum side of the range of numbers."
-  }, {
-    name: "max",
-    type: "Number",
-    description: "The excluded maximum side of the range of numbers."
-  }, {
-    name: "power",
-    type: "Number",
-    optional: true,
-    description: "The power to which to raise the random number before scaling and translating into the desired range. Values greater than 1 skew output values to the minimum of the range. Values less than 1 skew output values to the maximum of the range.",
-    default: 1
-  }],
-  returns: "Number",
-  examples: [{
-    name: "Generate a random number on the range [-1, 1).",
-    description: "To generate a random number on a closed range, call the `Primrose.Random.number` function as shown:\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  for(var i = 0; i < 10; ++i){\n\
-    console.log(Primrose.Random.number(-1, 1));\n\
-  }\n\
-\n\
-## Result (note that this is just one possible outcome):\n\
-> -0.4869012129493058  \n\
-> 0.5300767715089023  \n\
-> 0.11962601682171226  \n\
-> -0.22012147679924965  \n\
-> 0.48508461797609925  \n\
-> -0.8488651723600924  \n\
-> 0.15711558377370238  \n\
-> -0.3644236018881202  \n\
-> 0.4486056035384536  \n\
-> -0.9659552359953523"
-  }]
-});
-
 function number(min, max, power) {
   power = power || 1;
   if (max === undefined) {
@@ -36749,106 +33698,9 @@ function number(min, max, power) {
   return min + n * delta;
 }
 
-pliny.function({
-  parent: "Primrose.Random",
-  name: "int",
-  description: "Returns a random integer number on a given range [min, max), i.e. min is inclusive, max is exclusive. Includes a means to skew the results in one direction or another. The number is as good as your JavaScript engine supports with Math.random(), which is not good enough for crypto, but is certainly good enough for games.",
-  parameters: [{
-    name: "min",
-    type: "Number",
-    description: "The included minimum side of the range of numbers."
-  }, {
-    name: "max",
-    type: "Number",
-    description: "The excluded maximum side of the range of numbers."
-  }, {
-    name: "power",
-    type: "Number",
-    optional: true,
-    description: "The power to which to raise the random number before scaling and translating into the desired range. Values greater than 1 skew output values to the minimum of the range. Values less than 1 skew output values to the maximum of the range.",
-    default: 1
-  }],
-  returns: "Number",
-  examples: [{
-    name: "Generate a random integer numbers on the range [-10, 10).",
-    description: "To generate a random integer on a closed range, call the `Primrose.Random.integer` function as shown:\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  for(var i = 0; i < 10; ++i){\n\
-    console.log(Primrose.Random.int(-10, 10));\n\
-  }\n\
-\n\
-## Result (note that this is just one possible outcome):\n\
-> -3  \n\
-> 1  \n\
-> -2  \n\
-> 8  \n\
-> 7  \n\
-> 4  \n\
-> 5  \n\
-> -9  \n\
-> 4  \n\
-> 0"
-  }, {
-    name: "Generate skewed random integer numbers on the range [-100, 100).",
-    description: "To generate a random integer skewed to one end of the range on a closed range, call the `Primrose.Random.integer` function with the `power` parameter as shown:\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  for(var i = 0; i < 10; ++i){\n\
-    console.log(Primrose.Random.int(-100, 100, 5));\n\
-  }\n\
-\n\
-## Result (note that this is just one possible outcome):\n\
-> -100  \n\
-> -100  \n\
-> -78  \n\
-> -81  \n\
-> -99  \n\
-> 18  \n\
-> -100  \n\
-> -100  \n\
-> -100  \n\
-> 52"
-  }]
-});
-
 function int(min, max, power) {
   return Math.floor(number(min, max, power));
 }
-
-pliny.function({
-  parent: "Primrose.Random",
-  name: "color",
-  description: "Returns a random hex RGB number to be used as a color.",
-  returns: "Number",
-  examples: [{
-    name: "Generate a random color.",
-    description: "To generate colors at random, call the `Primrose.Random.color()` function:\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  for(var i = 0; i < 10; ++i){\n\
-    console.log(Primrose.Random.color().toString(16));\n\
-  }\n\
-\n\
-## Result (note that this is just one possible outcome):\n\
-> 351233\n\
-> 3e8e9\n\
-> 8a85a6\n\
-> 5fad58\n\
-> 17fe2b\n\
-> d4b42b\n\
-> e986bf\n\
-> 38541a\n\
-> 5a19db\n\
-> 5f5c50"
-  }]
-});
 
 function color() {
   var r = int(0, 256),
@@ -36856,38 +33708,6 @@ function color() {
       b = int(0, 256);
   return r << 16 | g << 8 | b;
 }
-
-pliny.class({
-  parent: "Primrose.Network",
-  name: "RemoteUser",
-  baseClass: "Primrose.AbstractEventEmitter",
-  description: "A networked user.",
-  parameters: [{
-    name: "userName",
-    type: "String",
-    description: "The name of the user."
-  }, {
-    name: "modelFactory",
-    type: "Primrose.ModelLoader",
-    description: "The factory for creating avatars for the user."
-  }, {
-    name: "nameMaterial",
-    type: "Number",
-    description: "The color to use with `colored()` to set as the material for the NAME object that will float above the user's avatar."
-  }, {
-    name: "requestICEPath",
-    type: "string",
-    description: "A request path at which to retrieve the extra ICE servers to use with the connection."
-  }, {
-    name: "microphone",
-    type: "Promise",
-    description: "A promise that resolves with an audio stream that can be sent to the remote user, representing the local user's voice chat."
-  }, {
-    name: "localUserName",
-    type: "String",
-    description: "The name of the user initiating the peer connection."
-  }]
-});
 
 var RemoteUser = function (_AbstractEventEmitter) {
   inherits(RemoteUser, _AbstractEventEmitter);
@@ -36976,12 +33796,6 @@ var RemoteUser = function (_AbstractEventEmitter) {
   }, {
     key: "unpeer",
     value: function unpeer() {
-      pliny.method({
-        parent: "Pliny.RemoteUser",
-        name: "unpeer",
-        description: "Cleans up after a user has left the room, removing the audio channels that were created for the user."
-      });
-
       if (this.audioChannel) {
         this.audioChannel.close();
         if (this.audioElement) {
@@ -37023,17 +33837,6 @@ var RemoteUser = function (_AbstractEventEmitter) {
   }, {
     key: "update",
     value: function update(dt) {
-      pliny.method({
-        parent: "Pliny.RemoteUser",
-        name: "update",
-        description: "Moves the avatar by its velocity for a set amount of time. Updates the audio panner information.",
-        parameters: [{
-          name: "dt",
-          type: "Number",
-          description: "The amount of time since the last update to the user."
-        }]
-      });
-
       this.time += dt;
       var fade = this.time >= RemoteUser.NETWORK_DT;
       this._updateV(this.headPosition, dt, fade);
@@ -37051,17 +33854,6 @@ var RemoteUser = function (_AbstractEventEmitter) {
   }, {
     key: "setState",
     value: function setState(v) {
-      pliny.property({
-        parent: "Pliny.RemoteUser",
-        name: "state",
-        description: "After receiving a network update, sets the current state of the remote user so that, by the time the next network update comes around, the user will be where it is predicted to be.",
-        parameters: [{
-          name: "v",
-          type: "Array",
-          description: "The raw state array from the network (includes the un-read first username field)."
-        }]
-      });
-
       this.time = 0;
       this._predict(this.headPosition, v, 1);
       this._predict(this.headQuaternion, v, 4);
@@ -37078,24 +33870,6 @@ var RemoteUser = function (_AbstractEventEmitter) {
 RemoteUser.FADE_FACTOR = 0.5;
 RemoteUser.NETWORK_DT = 0.10;
 RemoteUser.NETWORK_DT_INV = 1 / RemoteUser.NETWORK_DT;
-
-pliny.class({
-  parent: "Primrose.Network",
-  name: "Manager",
-  parameters: [{
-    name: "localUser",
-    type: "Primrose.Input.FPSInput",
-    description: "The object that represents the player's location in the scene."
-  }, {
-    name: "audio",
-    type: "Primrose.Output.Audio3D",
-    description: "The audio manager being used in the current Environment."
-  }, {
-    name: "factories",
-    type: "Primrose.ModelLoader",
-    description: "Model factory for creating avatars for new remote users."
-  }]
-});
 
 var Manager = function (_AbstractEventEmitter) {
   inherits(Manager, _AbstractEventEmitter);
@@ -37253,47 +34027,18 @@ var Manager = function (_AbstractEventEmitter) {
   return Manager;
 }(AbstractEventEmitter);
 
-pliny.value({
-  parent: "Primrose.Text.Grammars",
-  name: "PlainText",
-  description: "A grammar that makes displaying plain text work with the text editor designed for syntax highlighting."
-});
 var PlainText = new Grammar("PlainText", [["newlines", /(?:\r\n|\r|\n)/]]);
 
-pliny.value({
-  name: "PIXEL_SCALES",
-  description: "Scaling factors for changing the resolution of the display when the render quality level changes."
-});
 var PIXEL_SCALES = [0.5, 0.25, 0.333333, 0.5, 1];
 
-pliny.value({
-  name: "SKINS",
-  type: "Array of String",
-  description: "A selection of color values that closely match skin colors of people."
-});
 var SKINS = ["#FFDFC4", "#F0D5BE", "#EECEB3", "#E1B899", "#E5C298", "#FFDCB2", "#E5B887", "#E5A073", "#E79E6D", "#DB9065", "#CE967C", "#C67856", "#BA6C49", "#A57257", "#F0C8C9", "#DDA8A0", "#B97C6D", "#A8756C", "#AD6452", "#5C3836", "#CB8442", "#BD723C", "#704139", "#A3866A", "#870400", "#710101", "#430000", "#5B0001", "#302E2E"];
 
-pliny.value({
-  name: "SKIN_VALUES",
-  type: "Array of Number",
-  description: "A selection of color values that closely match skin colors of people."
-});
 var SKINS_VALUES = SKINS.map(function (s) {
   return parseInt(s.substring(1), 16);
 });
 
-pliny.value({
-  parent: "Primrose",
-  name: "SYS_FONTS",
-  type: "String",
-  description: "A selection of fonts that will match whatever the user's operating system normally uses."
-});
 var SYS_FONTS = "-apple-system, '.SFNSText-Regular', 'San Francisco', 'Roboto', 'Segoe UI', 'Helvetica Neue', 'Lucida Grande', sans-serif";
 
-pliny.enumeration({
-  name: "Quality",
-  description: "Graphics quality settings."
-});
 var Quality = {
   NONE: 0,
   VERYLOW: 1,
@@ -44903,12 +41648,6 @@ var TELEPORT_COOLDOWN = 250;
 var TELEPORT_DISPLACEMENT = new Vector3();
 var GROUND_HEIGHT = -0.07;
 
-pliny.class({
-  parent: "Primrose",
-  name: "BrowserEnvironment",
-  description: "Make a Virtual Reality app in your web browser!"
-});
-
 var BrowserEnvironment = function (_AbstractEventEmitter) {
   inherits(BrowserEnvironment, _AbstractEventEmitter);
 
@@ -45869,12 +42608,6 @@ BrowserEnvironment.DEFAULTS = {
 };
 
 var COUNTER$5 = 0;
-pliny.class({
-  parent: "Primrose.Controls",
-  name: "Form",
-  baseClass: "Primrose.Entity",
-  description: "A basic 2D form control, with its own mesh to use as a frame."
-});
 var Form = function (_Surface) {
   inherits(Form, _Surface);
   createClass(Form, null, [{
@@ -46069,12 +42802,6 @@ var Progress = function () {
   return Progress;
 }();
 
-pliny.namespace({
-  name: "Controls",
-  parent: "Primrose",
-  description: "Various 3D control objects."
-});
-
 var Controls = {
   BaseControl: BaseControl,
   Button2D: Button2D,
@@ -46087,57 +42814,6 @@ var Controls = {
   Progress: Progress,
   Surface: Surface
 };
-
-pliny.function({
-  parent: "Primrose.DOM",
-  name: "findEverything",
-  description: "Searches an element for all sub elements that have a named ID,\n\
-using that ID as the name of a field in a hashmap to store a reference to the element.\n\
-Basically, a quick way to get at all the named elements in a page. Returns an object full\n\
-of element references, with fields named by the ID of the elements that were found.\n\
-\n\
-> NOTE: You may name your IDs pretty much anything you want, but for ease of use,\n\
-> you should name them in a camalCase fashion. See [CamelCase - Wikipedia, the free encyclopedia](https://en.wikipedia.org/wiki/CamelCase).",
-  parameters: [{
-    name: "elem",
-    type: "Element",
-    optional: true,
-    description: "the root element from which to search.",
-    default: "`document`."
-  }, {
-    name: "obj",
-    type: "Object",
-    optional: true,
-    description: "the object in which to store the element references. If no object is provided, one will be created."
-  }],
-  returns: "Object",
-  examples: [{
-    name: "Get all child elements.",
-    description: "Assuming the following HTML snippet:\n\
-\n\
-  grammar(\"HTML\");\n\
-  <div>\n\
-    <div id=\"First\">first element</div>\n\
-    <section id=\"second-elem\">\n\
-      Second element\n\
-      <img id=\"img1\" src=\"img.png\">\n\
-    </section>\n\
-  </div>\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  var elems = Primrose.DOM.findEverything();\n\
-  console.log(elems.First.innerHTML);\n\
-  console.log(elems[\"second-elem\"].textContent);\n\
-  console.log(elems.img1.src);\n\
-\n\
-## Results:\n\
-> first element  \n\
-> Second element  \n\
-> img.png"
-  }]
-});
 
 function findEverything(elem, obj) {
   elem = elem || document;
@@ -46155,12 +42831,6 @@ function findEverything(elem, obj) {
   return obj;
 }
 
-pliny.namespace({
-  parent: "Primrose",
-  name: "DOM",
-  description: "A few functions for manipulating DOM."
-});
-
 var DOM = {
   cascadeElement: cascadeElement,
   findEverything: findEverything,
@@ -46173,13 +42843,6 @@ var Graphics = {
   loadTexture: loadTexture$1,
   ModelLoader: ModelLoader
 };
-
-pliny.class({
-  parent: "Primrose.Input",
-  name: "Location",
-  baseClass: "Primrose.InputProcessor",
-  description: "| [under construction]"
-});
 
 var Location = function (_InputProcessor) {
   inherits(Location, _InputProcessor);
@@ -46223,12 +42886,6 @@ Location.DEFAULTS = {
   timeout: 25000
 };
 
-pliny.namespace({
-  parent: "Primrose",
-  name: "Input",
-  description: "The Input namespace contains classes that handle user input, for use in navigating the 3D environment."
-});
-
 var Input = {
   FPSInput: FPSInput,
   Gamepad: Gamepad,
@@ -46242,184 +42899,26 @@ var Input = {
   VR: VR
 };
 
-pliny.namespace({
-  parent: "Primrose",
-  name: "Network",
-  description: "The Network namespace contains classes for communicating events between entities in a graph relationship across different types of communication boundaries: in-thread, cross-thread, cross-WAN, and cross-LAN."
-});
-
 var Network = {
   Manager: Manager,
   RemoteUser: RemoteUser
 };
 
-pliny.function({
-  parent: "Primrose.Random",
-  name: "ID",
-  description: "Returns a randomized string to be used as a general purpose identifier. Collisions are possible, but should be rare.",
-  returns: "String",
-  examples: [{
-    name: "Generate 10 random identifiers.",
-    description: "To generate a randomized identifier, call the `Primrose.Random.ID()` function as shown:\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  for(var i = 0; i < 10; ++i){\n\
-    console.log(Primrose.Random.ID());\n\
-  }\n\
-\n\
-## Result (note that this is just one possible outcome):\n\
-> 25xzdqnhg1ma2qsb3k1n61or\n\
-> 1hyajmimpyjb4chvge5ng66r\n\
-> cq3dy9qnkwhneza3vr3haor\n\
-> g3l5k2kfwmxjrxjwg0uj714i\n\
-> 7qsta7cutxke8t88pahy3nmi\n\
-> h75g0nj0d4gh7zsyowxko6r\n\
-> 7pbej49fhhd5icimp3krzfr\n\
-> 3vnlovkkvyvmetsjcyirizfr\n\
-> icrehedvz97dpgkusfumzpvi\n\
-> 9p06sytn6dfearuibsnn4s4i"
-  }]
-});
-
 function ID$2() {
   return (Math.random() * Math.log(Number.MAX_VALUE)).toString(36).replace(".", "");
 }
-
-pliny.function({
-  parent: "Primrose.Random",
-  name: "item",
-  description: "Returns a random element from an array.",
-  parameters: [{
-    name: "arr",
-    type: "Array",
-    description: "The array form which to pick items."
-  }],
-  returns: "Any",
-  examples: [{
-    name: "Select a random element from an array.",
-    description: "To pick an item from an array at random, call the `Primrose.Random.item` function with the `power` parameter as shown:\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  var numbers = [\n\
-    \"one\",\n\
-    \"two\",\n\
-    \"three\",\n\
-    \"four\",\n\
-    \"five\"\n\
-  ];\n\
-  for(var i = 0; i < 10; ++i){\n\
-    console.log(Primrose.Random.item(numbers));\n\
-  }\n\
-\n\
-## Result (note that this is just one possible outcome):\n\
-> three  \n\
-> four  \n\
-> four  \n\
-> two  \n\
-> three  \n\
-> two  \n\
-> five  \n\
-> four  \n\
-> three  \n\
-> two"
-  }]
-});
 
 function item(arr) {
   return arr[int(arr.length)];
 }
 
-pliny.function({
-  parent: "Primrose.Random",
-  name: "steps",
-  description: "Returns a random integer number on a given range [min, max), i.e. min is inclusive, max is exclusive, sticking to a number of steps in between. Useful for randomly generating music note values on pentatonic scales. As random as your JavaScript engine supports with Math.random(), which is not good enough for crypto, but is certainly good enough for games.",
-  parameters: [{
-    name: "min",
-    type: "Number",
-    description: "The included minimum side of the range of numbers."
-  }, {
-    name: "max",
-    type: "Number",
-    description: "The excluded maximum side of the range of numbers."
-  }, {
-    name: "steps",
-    type: "Number",
-    description: "The number of steps between individual integers, e.g. if min is even and step is even, then no odd numbers will be generated."
-  }],
-  returns: "Number",
-  examples: [{
-    name: "Generate random, even numbers.",
-    description: "To generate numbers on a closed range with a constant step size between them, call the `Primrose.Random.step` function as shown:\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  for(var i = 0; i < 10; ++i){\n\
-    console.log(Primrose.Random.steps(0, 100, 2));\n\
-  }\n\
-\n\
-## Result (note that this is just one possible outcome):\n\
-> 86  \n\
-> 32  \n\
-> 86  \n\
-> 56  \n\
-> 4  \n\
-> 96  \n\
-> 68  \n\
-> 92  \n\
-> 4  \n\
-> 36"
-  }]
-});
-
 function steps(min, max, steps) {
   return min + int(0, (1 + max - min) / steps) * steps;
 }
 
-pliny.function({
-  parent: "Primrose.Random",
-  name: "vector",
-  description: "Returns a random THREE.Vector3 of floating-point numbers on a given range [min, max), i.e. min is inclusive, max is exclusive. As random as your JavaScript engine supports with Math.random(), which is not good enough for crypto, but is certainly good enough for games.",
-  parameters: [{
-    name: "min",
-    type: "Number",
-    description: "The included minimum side of the range of numbers."
-  }, {
-    name: "max",
-    type: "Number",
-    description: "The excluded maximum side of the range of numbers."
-  }],
-  returns: "THREE.Vector3",
-  examples: [{
-    name: "Generate a random vector on the range [-1, 1).",
-    description: "To generate a random vector on a closed range, call the `Primrose.Random.vector` function as shown:\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  for(var i = 0; i < 10; ++i){\n\
-    console.log(Primrose.Random.vector(-1, 1).toString(\"test\", 3));\n\
-  }\n\
-\n\
-## Result (note that this is just one possible outcome):\n\
-> <-0.486, 0.530, 0.119>\n\
-> <-0.220, 0.485, -0.848>\n\
-> <0.157, -0.364, 0.448>"
-  }]
-});
 function vector(min, max) {
   return new Vector3().set(number(min, max), number(min, max), number(min, max));
 }
-
-pliny.namespace({
-  parent: "Primrose",
-  name: "Random",
-  description: "Functions for handling random numbers of different criteria, or selecting random elements of arrays."
-});
 
 var Random = {
   color: color,
@@ -46436,18 +42935,7 @@ var Random = {
 // If SHIFT is not held, then "front".
 // If SHIFT is held, then "back"
 //
-pliny.record({
-  parent: "Primrose.Text.CommandPacks",
-  name: "TextInput",
-  description: "A concrete instantiation of the single-line text editor commands provided by BasicTextInput."
-});
 var TextInputCommands = new BasicTextInput("Text Line input commands");
-
-pliny.namespace({
-  parent: "Primrose.Text",
-  name: "CommandPacks",
-  description: "The CommandPacks namespace contains sets of keyboard shortcuts for different types of text-oriented controls."
-});
 
 var CommandPacks = {
   BasicTextInput: BasicTextInput,
@@ -46455,47 +42943,6 @@ var CommandPacks = {
   TextEditor: TextEditor,
   TextInput: TextInputCommands
 };
-
-pliny.class({
-  parent: "Primrose.Text.Controls",
-  name: "PlainText",
-  description: "A texture that uses Canvas2D calls to draw simple, monochrome text to a polygon.",
-  parameters: [{
-    name: "text",
-    type: "String",
-    description: "The initial text to render on the PlainText control."
-  }, {
-    name: "size",
-    type: "Number",
-    description: "The font size at which to render the text."
-  }, {
-    name: "fgcolor",
-    type: "String",
-    description: "A Canvas2D fillStyle description to use for drawing the text."
-  }, {
-    name: "bgcolor",
-    type: "String",
-    description: "A Canvas2D fillStyle description to use for drawing the background behind the text."
-  }, {
-    name: "x",
-    type: "Number",
-    description: "The X component of the position at which to set the PlainText control's polygon mesh."
-  }, {
-    name: "y",
-    type: "Number",
-    description: "The Y component of the position at which to set the PlainText control's polygon mesh."
-  }, {
-    name: "z",
-    type: "Number",
-    description: "The Z component of the position at which to set the PlainText control's polygon mesh."
-  }, {
-    name: "hAlign",
-    type: "String",
-    description: "The horizontal alignment of the text, \"left\", \"center\", or \"right\".",
-    optional: true,
-    default: "center"
-  }]
-});
 
 var PlainText$1 = function PlainText$1(text, size, fgcolor, bgcolor, x, y, z) {
   var hAlign = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : "center";
@@ -46550,22 +42997,6 @@ var PlainText$1 = function PlainText$1(text, size, fgcolor, bgcolor, x, y, z) {
 };
 
 var COUNTER$6 = 0;
-
-pliny.class({
-  parent: "Primrose.Text.Controls",
-  name: "TextInput",
-  description: "plain text input box.",
-  baseClass: "Primrose.Text.Controls.TextBox",
-  parameters: [{
-    name: "idOrCanvasOrContext",
-    type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
-    description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
-  }, {
-    name: "options",
-    type: "Object",
-    description: "Named parameters for creating the TextInput."
-  }]
-});
 
 var TextInput = function (_TextBox) {
   inherits(TextInput, _TextBox);
@@ -46625,12 +43056,6 @@ var TextInput = function (_TextBox) {
   return TextInput;
 }(TextBox);
 
-pliny.namespace({
-  parent: "Primrose.Text",
-  name: "Controls",
-  description: "The Controls namespace contains different types of text-oriented controls."
-});
-
 var Controls$1 = {
   PlainText: PlainText$1,
   TextBox: TextBox,
@@ -46638,11 +43063,6 @@ var Controls$1 = {
 };
 
 // we don't use strict here because this grammar includes an interpreter that uses `eval()`
-pliny.value({
-  parent: "Primrose.Text.Grammars",
-  name: "Basic",
-  description: "A grammar and an interpreter for a BASIC-like language."
-});
 var Basic = new Grammar("BASIC",
 // Grammar rules are applied in the order they are specified.
 [
@@ -47240,18 +43660,7 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next, clearScre
   };
 };
 
-pliny.value({
-  parent: "Primrose.Text.Grammars",
-  name: "TestResults",
-  description: "A grammar for displaying the results of Unit Tests."
-});
 var TestResults = new Grammar("TestResults", [["newlines", /(?:\r\n|\r|\n)/, true], ["numbers", /(\[)(o+)/, true], ["numbers", /(\d+ succeeded), 0 failed/, true], ["numbers", /^    Successes:/, true], ["functions", /(x+)\]/, true], ["functions", /[1-9]\d* failed/, true], ["functions", /^    Failures:/, true], ["comments", /(\d+ms:)(.*)/, true], ["keywords", /(Test results for )(\w+):/, true], ["strings", /        \w+/, true]]);
-
-pliny.namespace({
-  parent: "Primrose.Text",
-  name: "Grammars",
-  description: "The Grammars namespace contains grammar parsers for different types of programming languages, to enable syntax highlighting."
-});
 
 var Grammars = {
   Basic: Basic,
@@ -47260,12 +43669,6 @@ var Grammars = {
   PlainText: PlainText,
   TestResults: TestResults
 };
-
-pliny.class({
-  parent: "Primrose.Text",
-  name: "Terminal",
-  description: "| [under construction]"
-});
 
 var Terminal = function Terminal(inputEditor, outputEditor) {
   classCallCheck(this, Terminal);
@@ -47382,11 +43785,6 @@ var Terminal = function Terminal(inputEditor, outputEditor) {
   };
 };
 
-pliny.record({
-  parent: "Primrose.Text.Themes",
-  name: "Dark",
-  description: "A dark background with a light foreground for text."
-});
 var Dark = {
   name: "Dark",
   fontFamily: "'Droid Sans Mono', 'Consolas', 'Lucida Console', 'Courier New', 'Courier', monospace",
@@ -47433,22 +43831,10 @@ var Dark = {
   }
 };
 
-pliny.namespace({
-  parent: "Primrose.Text",
-  name: "Themes",
-  description: "The Themes namespace contains color themes for text-oriented controls, for use when coupled with a parsing grammar."
-});
-
 var Themes = {
   Dark: Dark,
   Default: Default
 };
-
-pliny.namespace({
-  parent: "Primrose",
-  name: "Text",
-  description: "The Text namespace contains classes everything regarding the Primrose source code editor."
-});
 
 var Text = {
   CodePages: CodePages,
@@ -47482,11 +43868,6 @@ var Text = {
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-pliny.namespace({
-  name: "Primrose",
-  description: "Primrose helps you make VR applications for web browsers as easy as making other types of interactive web pages.\n\nThis top-level namespace contains classes for manipulating and viewing 3D environments."
-});
-
 var obj$1 = {
   AbstractEventEmitter: AbstractEventEmitter,
   Angle: Angle,
@@ -47530,6 +43911,4 @@ var HTTP = Object.freeze({
 Object.assign(window, flags, liveAPI, util);
 // Do this just for side effects, we are monkey-patching Three.js classes with our own utilities.
 
-return obj$1;
-
-})));
+export default obj$1;

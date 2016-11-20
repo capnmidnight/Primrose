@@ -1,19 +1,22 @@
-var Primrose = (function () {
-'use strict';
+(function (global, factory) {
+    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+    typeof define === 'function' && define.amd ? define(factory) :
+    (global.Primrose = factory());
+}(this, (function () { 'use strict';
 
-var isOpera$1 = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
+var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
 
-var isChrome$1 = !!window.chrome && !isOpera$1;
+var isChrome = !!window.chrome && !isOpera;
 
-var isFirefox$1 = typeof window.InstallTrigger !== 'undefined';
+var isFirefox = typeof window.InstallTrigger !== 'undefined';
 
 var isGearVR = navigator.userAgent.indexOf("Mobile VR") > -1;
 
-var isIE$1 = false || !!document.documentMode;
+var isIE = false || !!document.documentMode;
 
 var isInIFrame = window.self !== window.top;
 
-var isiOS$1 = /iP(hone|od|ad)/.test(navigator.userAgent || "");
+var isiOS = /iP(hone|od|ad)/.test(navigator.userAgent || "");
 
 var isMacOS$1 = /Macintosh/.test(navigator.userAgent || "");
 
@@ -21,40 +24,40 @@ function testUserAgent(a) {
   return (/(android|bb\d+|meego).+|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od|ad)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(a) || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substring(0, 4))
   );
 }
-var isMobile$1 = testUserAgent(navigator.userAgent || navigator.vendor || window.opera);
+var isMobile = testUserAgent(navigator.userAgent || navigator.vendor || window.opera);
 
-var isSafari$1 = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;
+var isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;
 
-var isWebKit = isOpera$1 || isChrome$1 || isSafari$1;
+var isWebKit = isOpera || isChrome || isSafari;
 
 var isWindows = /Windows/.test(navigator.userAgent || "");
 
 var index$1 = {
-  isChrome: isChrome$1,
-  isFirefox: isFirefox$1,
+  isChrome: isChrome,
+  isFirefox: isFirefox,
   isGearVR: isGearVR,
-  isIE: isIE$1,
+  isIE: isIE,
   isInIFrame: isInIFrame,
-  isiOS: isiOS$1,
+  isiOS: isiOS,
   isMacOS: isMacOS$1,
-  isMobile: isMobile$1,
-  isOpera: isOpera$1,
-  isSafari: isSafari$1,
+  isMobile: isMobile,
+  isOpera: isOpera,
+  isSafari: isSafari,
   isWebKit: isWebKit,
   isWindows: isWindows
 };
 
 var flags = Object.freeze({
-	isChrome: isChrome$1,
-	isFirefox: isFirefox$1,
+	isChrome: isChrome,
+	isFirefox: isFirefox,
 	isGearVR: isGearVR,
-	isIE: isIE$1,
+	isIE: isIE,
 	isInIFrame: isInIFrame,
-	isiOS: isiOS$1,
+	isiOS: isiOS,
 	isMacOS: isMacOS$1,
-	isMobile: isMobile$1,
-	isOpera: isOpera$1,
-	isSafari: isSafari$1,
+	isMobile: isMobile,
+	isOpera: isOpera,
+	isSafari: isSafari,
 	isWebKit: isWebKit,
 	isWindows: isWindows,
 	default: index$1
@@ -212,6 +215,19 @@ var _Math = {
 	}
 
 };
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author supereggbert / http://www.paulbrunt.co.uk/
+ * @author philogb / http://blog.thejit.org/
+ * @author jordi_ros / http://plattsoft.com
+ * @author D1plo1d / http://github.com/D1plo1d
+ * @author alteredq / http://alteredqualia.com/
+ * @author mikael emtinger / http://gomo.se/
+ * @author timknip / http://www.floorplanner.com/
+ * @author bhouston / http://clara.io
+ * @author WestLangley / http://github.com/WestLangley
+ */
 
 function Matrix4() {
 
@@ -1103,6 +1119,15 @@ Matrix4.prototype = {
 
 };
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author *kile / http://kile.stravaganza.org/
+ * @author philogb / http://blog.thejit.org/
+ * @author mikael emtinger / http://gomo.se/
+ * @author egraether / http://egraether.com/
+ * @author WestLangley / http://github.com/WestLangley
+ */
+
 function Vector3(x, y, z) {
 
 	this.x = x || 0;
@@ -1806,6 +1831,13 @@ Vector3.prototype = {
 
 };
 
+/**
+ * @author mikael emtinger / http://gomo.se/
+ * @author alteredq / http://alteredqualia.com/
+ * @author WestLangley / http://github.com/WestLangley
+ * @author bhouston / http://clara.io
+ */
+
 function Quaternion(x, y, z, w) {
 
 	this._x = x || 0;
@@ -2423,6 +2455,12 @@ Object.assign(EventDispatcher.prototype, {
 
 });
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author WestLangley / http://github.com/WestLangley
+ * @author bhouston / http://clara.io
+ */
+
 function Euler(x, y, z, order) {
 
 	this._x = x || 0;
@@ -2748,6 +2786,13 @@ Layers.prototype = {
 
 };
 
+/**
+ * @author alteredq / http://alteredqualia.com/
+ * @author WestLangley / http://github.com/WestLangley
+ * @author bhouston / http://clara.io
+ * @author tschw
+ */
+
 function Matrix3() {
 
 	this.elements = new Float32Array([1, 0, 0, 0, 1, 0, 0, 0, 1]);
@@ -3010,6 +3055,14 @@ Matrix3.prototype = {
 	}
 
 };
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author mikael emtinger / http://gomo.se/
+ * @author alteredq / http://alteredqualia.com/
+ * @author WestLangley / http://github.com/WestLangley
+ * @author elephantatwork / www.elephantatwork.ch
+ */
 
 function Object3D() {
 
@@ -3878,6 +3931,11 @@ var RGBDEncoding = 3006;
 var BasicDepthPacking = 3200;
 var RGBADepthPacking = 3201;
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ */
+
 function Material() {
 
 	Object.defineProperty(this, 'id', { value: MaterialIdCount() });
@@ -4627,6 +4685,10 @@ Vector2.prototype = {
 
 };
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function Color(r, g, b) {
 
 	if (g === undefined && b === undefined) {
@@ -5099,6 +5161,57 @@ var ColorKeywords = { 'aliceblue': 0xF0F8FF, 'antiquewhite': 0xFAEBD7, 'aqua': 0
 	'springgreen': 0x00FF7F, 'steelblue': 0x4682B4, 'tan': 0xD2B48C, 'teal': 0x008080, 'thistle': 0xD8BFD8, 'tomato': 0xFF6347, 'turquoise': 0x40E0D0,
 	'violet': 0xEE82EE, 'wheat': 0xF5DEB3, 'white': 0xFFFFFF, 'whitesmoke': 0xF5F5F5, 'yellow': 0xFFFF00, 'yellowgreen': 0x9ACD32 };
 
+/**
+ * @author WestLangley / http://github.com/WestLangley
+ *
+ * parameters = {
+ *  color: <hex>,
+ *  roughness: <float>,
+ *  metalness: <float>,
+ *  opacity: <float>,
+ *
+ *  map: new THREE.Texture( <Image> ),
+ *
+ *  lightMap: new THREE.Texture( <Image> ),
+ *  lightMapIntensity: <float>
+ *
+ *  aoMap: new THREE.Texture( <Image> ),
+ *  aoMapIntensity: <float>
+ *
+ *  emissive: <hex>,
+ *  emissiveIntensity: <float>
+ *  emissiveMap: new THREE.Texture( <Image> ),
+ *
+ *  bumpMap: new THREE.Texture( <Image> ),
+ *  bumpScale: <float>,
+ *
+ *  normalMap: new THREE.Texture( <Image> ),
+ *  normalScale: <Vector2>,
+ *
+ *  displacementMap: new THREE.Texture( <Image> ),
+ *  displacementScale: <float>,
+ *  displacementBias: <float>,
+ *
+ *  roughnessMap: new THREE.Texture( <Image> ),
+ *
+ *  metalnessMap: new THREE.Texture( <Image> ),
+ *
+ *  alphaMap: new THREE.Texture( <Image> ),
+ *
+ *  envMap: new THREE.CubeTexture( [posx, negx, posy, negy, posz, negz] ),
+ *  envMapIntensity: <float>
+ *
+ *  refractionRatio: <float>,
+ *
+ *  wireframe: <boolean>,
+ *  wireframeLinewidth: <float>,
+ *
+ *  skinning: <bool>,
+ *  morphTargets: <bool>,
+ *  morphNormals: <bool>
+ * }
+ */
+
 function MeshStandardMaterial(parameters) {
 
 	Material.call(this);
@@ -5215,6 +5328,39 @@ MeshStandardMaterial.prototype.copy = function (source) {
 
 	return this;
 };
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ *
+ * parameters = {
+ *  color: <hex>,
+ *  opacity: <float>,
+ *  map: new THREE.Texture( <Image> ),
+ *
+ *  aoMap: new THREE.Texture( <Image> ),
+ *  aoMapIntensity: <float>
+ *
+ *  specularMap: new THREE.Texture( <Image> ),
+ *
+ *  alphaMap: new THREE.Texture( <Image> ),
+ *
+ *  envMap: new THREE.TextureCube( [posx, negx, posy, negy, posz, negz] ),
+ *  combine: THREE.Multiply,
+ *  reflectivity: <float>,
+ *  refractionRatio: <float>,
+ *
+ *  shading: THREE.SmoothShading,
+ *  depthTest: <bool>,
+ *  depthWrite: <bool>,
+ *
+ *  wireframe: <boolean>,
+ *  wireframeLinewidth: <float>,
+ *
+ *  skinning: <bool>,
+ *  morphTargets: <bool>
+ * }
+ */
 
 function MeshBasicMaterial(parameters) {
 
@@ -5334,6 +5480,12 @@ function material$1(textureDescription, options) {
     return mat;
   });
 }
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ * @author szimek / https://github.com/szimek/
+ */
 
 function Texture(image, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy, encoding) {
 
@@ -5593,6 +5745,10 @@ function TextureIdCount() {
 	return count$2++;
 }
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function CubeTexture(images, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy, encoding) {
 
 	images = images !== undefined ? images : [];
@@ -5621,6 +5777,11 @@ Object.defineProperty(CubeTexture.prototype, 'images', {
 	}
 
 });
+
+/**
+ * @author bhouston / http://clara.io
+ * @author WestLangley / http://github.com/WestLangley
+ */
 
 function Box3(min, max) {
 
@@ -6020,6 +6181,11 @@ Box3.prototype = {
 
 };
 
+/**
+ * @author bhouston / http://clara.io
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function Sphere(center, radius) {
 
 	this.center = center !== undefined ? center : new Vector3();
@@ -6168,6 +6334,10 @@ Sphere.prototype = {
 	}
 
 };
+
+/**
+ * @author bhouston / http://clara.io
+ */
 
 function Ray(origin, direction) {
 
@@ -6639,6 +6809,10 @@ Ray.prototype = {
 
 };
 
+/**
+ * @author bhouston / http://clara.io
+ */
+
 function Line3(start, end) {
 
 	this.start = start !== undefined ? start : new Vector3();
@@ -6746,6 +6920,10 @@ Line3.prototype = {
 	}
 
 };
+
+/**
+ * @author bhouston / http://clara.io
+ */
 
 function Plane(normal, constant) {
 
@@ -6948,6 +7126,11 @@ Plane.prototype = {
 	}
 
 };
+
+/**
+ * @author bhouston / http://clara.io
+ * @author mrdoob / http://mrdoob.com/
+ */
 
 function Triangle(a, b, c) {
 
@@ -7171,6 +7354,11 @@ Triangle.prototype = {
 	}
 
 };
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ */
 
 function Face3(a, b, c, normal, color, materialIndex) {
 
@@ -7806,6 +7994,10 @@ Vector4.prototype = {
 
 };
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function BufferAttribute(array, itemSize, normalized) {
 
 	if (Array.isArray(array)) {
@@ -8093,8 +8285,6 @@ BufferAttribute.prototype = {
 
 };
 
-//
-
 function Uint16Attribute(array, itemSize) {
 
 	return new BufferAttribute(new Uint16Array(array), itemSize);
@@ -8109,6 +8299,15 @@ function Float32Attribute(array, itemSize) {
 
 	return new BufferAttribute(new Float32Array(array), itemSize);
 }
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author kile / http://kile.stravaganza.org/
+ * @author alteredq / http://alteredqualia.com/
+ * @author mikael emtinger / http://gomo.se/
+ * @author zz85 / http://www.lab4games.net/zz85/blog
+ * @author bhouston / http://clara.io
+ */
 
 function Geometry() {
 
@@ -9217,6 +9416,10 @@ function GeometryIdCount() {
 	return count$3++;
 }
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function DirectGeometry() {
 
 	Object.defineProperty(this, 'id', { value: GeometryIdCount() });
@@ -9470,6 +9673,11 @@ Object.assign(DirectGeometry.prototype, EventDispatcher.prototype, {
 	}
 
 });
+
+/**
+ * @author alteredq / http://alteredqualia.com/
+ * @author mrdoob / http://mrdoob.com/
+ */
 
 function BufferGeometry() {
 
@@ -10378,6 +10586,13 @@ Object.assign(BufferGeometry.prototype, EventDispatcher.prototype, {
 });
 
 BufferGeometry.MaxIndex = 65535;
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ * @author mikael emtinger / http://gomo.se/
+ * @author jonobr1 / http://jonobr1.com/
+ */
 
 function Mesh(geometry, material) {
 
@@ -11884,6 +12099,10 @@ function LoadingManager(onLoad, onProgress, onError) {
 
 var DefaultLoadingManager = new LoadingManager();
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function XHRLoader(manager) {
 
 	this.manager = manager !== undefined ? manager : DefaultLoadingManager;
@@ -12077,6 +12296,10 @@ Object.assign(XHRLoader.prototype, {
 
 });
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function ImageLoader(manager) {
 
 	this.manager = manager !== undefined ? manager : DefaultLoadingManager;
@@ -12141,6 +12364,10 @@ Object.assign(ImageLoader.prototype, {
 
 });
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function CubeTextureLoader(manager) {
 
 	this.manager = manager !== undefined ? manager : DefaultLoadingManager;
@@ -12196,6 +12423,10 @@ Object.assign(CubeTextureLoader.prototype, {
 	}
 
 });
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
 
 function TextureLoader(manager) {
 
@@ -12949,7 +13180,7 @@ var Grammar = function () {
 
 var JavaScript = new Grammar("JavaScript", [["newlines", /(?:\r\n|\r|\n)/], ["startBlockComments", /\/\*/], ["endBlockComments", /\*\//], ["regexes", /(?:^|,|;|\(|\[|\{)(?:\s*)(\/(?:\\\/|[^\n\/])+\/)/], ["stringDelim", /("|')/], ["startLineComments", /\/\/.*$/m], ["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/], ["keywords", /\b(?:break|case|catch|class|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/], ["functions", /(\w+)(?:\s*\()/], ["members", /(\w+)\./], ["members", /((\w+\.)+)(\w+)/]]);
 
-var SCROLL_SCALE = isFirefox$1 ? 3 : 100;
+var SCROLL_SCALE = isFirefox ? 3 : 100;
 var COUNTER$1 = 0;
 var OFFSET = 0;
 
@@ -12981,7 +13212,7 @@ var TextBox = function (_Surface) {
       _this.options = options || {};
     }
 
-    _this.useCaching = !isFirefox$1 || !isMobile;
+    _this.useCaching = !isFirefox || !isMobile;
 
     var makeCursorCommand = function makeCursorCommand(name) {
       var method = name.toLowerCase();
@@ -13023,7 +13254,7 @@ var TextBox = function (_Surface) {
 
     // different browsers have different sets of keycodes for less-frequently
     // used keys like curly brackets.
-    _this._browser = isChrome ? "CHROMIUM" : isFirefox$1 ? "FIREFOX" : isIE ? "IE" : isOpera ? "OPERA" : isSafari ? "SAFARI" : "UNKNOWN";
+    _this._browser = isChrome ? "CHROMIUM" : isFirefox ? "FIREFOX" : isIE ? "IE" : isOpera ? "OPERA" : isSafari ? "SAFARI" : "UNKNOWN";
     _this._pointer = new Point();
     _this._deadKeyState = "";
     _this._history = [];
@@ -14024,6 +14255,10 @@ function colored$1(geometry, color, options) {
   return obj;
 }
 
+/**
+ * @author Mugen87 / https://github.com/Mugen87
+ */
+
 function BoxBufferGeometry(width, height, depth, widthSegments, heightSegments, depthSegments) {
 
 	BufferGeometry.call(this);
@@ -14243,6 +14478,10 @@ function axis(length, width) {
   return center;
 }
 
+/**
+ * @author benaadams / https://twitter.com/ben_a_adams
+ */
+
 function CircleBufferGeometry(radius, segments, thetaStart, thetaLength) {
 
 	BufferGeometry.call(this);
@@ -14312,6 +14551,20 @@ function circle$1(r, sections, start, end) {
   });
 }
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ *
+ * parameters = {
+ *  color: <hex>,
+ *  opacity: <float>,
+ *  map: new THREE.Texture( <Image> ),
+ *
+ *  size: <float>,
+ *  sizeAttenuation: <bool>
+ * }
+ */
+
 function PointsMaterial(parameters) {
 
 	Material.call(this);
@@ -14348,6 +14601,10 @@ PointsMaterial.prototype.copy = function (source) {
 
 	return this;
 };
+
+/**
+ * @author alteredq / http://alteredqualia.com/
+ */
 
 function Points(geometry, material) {
 
@@ -14481,6 +14738,10 @@ function cloud(verts, c, s) {
   });
   return new Points(geom, mat);
 }
+
+/**
+ * @author Mugen87 / https://github.com/Mugen87
+ */
 
 function CylinderBufferGeometry(radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength) {
 
@@ -14793,6 +15054,11 @@ function cylinder(rT, rB, height, rS, hS, openEnded, thetaStart, thetaEnd) {
   });
 }
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ */
+
 function Light(color, intensity) {
 
 	Object3D.call(this);
@@ -14841,6 +15107,12 @@ Light.prototype = Object.assign(Object.create(Object3D.prototype), {
 	}
 
 });
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author mikael emtinger / http://gomo.se/
+ * @author WestLangley / http://github.com/WestLangley
+*/
 
 function Camera() {
 
@@ -14899,6 +15171,13 @@ Camera.prototype.copy = function (source) {
 
 	return this;
 };
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author greggman / http://games.greggman.com/
+ * @author zz85 / http://www.lab4games.net/zz85/blog
+ * @author tschw
+ */
 
 function PerspectiveCamera(fov, aspect, near, far) {
 
@@ -15098,6 +15377,10 @@ PerspectiveCamera.prototype = Object.assign(Object.create(Camera.prototype), {
 
 });
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function LightShadow(camera) {
 
 	this.camera = camera;
@@ -15145,6 +15428,10 @@ Object.assign(LightShadow.prototype, {
 	}
 
 });
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
 
 function PointLight(color, intensity, distance, decay) {
 
@@ -15225,6 +15512,11 @@ function fixGeometry(geometry, options) {
 
   return geometry;
 }
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * based on http://papervision3d.googlecode.com/svn/trunk/as3/trunk/src/org/papervision3d/objects/primitives/Plane.as
+ */
 
 function PlaneBufferGeometry(width, height, widthSegments, heightSegments) {
 
@@ -15357,6 +15649,10 @@ function range(n, m, s, t) {
     return output;
   }
 }
+
+/**
+ * @author Mugen87 / https://github.com/Mugen87
+ */
 
 function RingBufferGeometry(innerRadius, outerRadius, thetaSegments, phiSegments, thetaStart, thetaLength) {
 
@@ -15622,6 +15918,12 @@ function shell$1(r, slices, rings, phi, theta, options) {
   });
 }
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author bhouston / http://clara.io/
+ * @author stephomi / http://stephaneginier.com/
+ */
+
 function Raycaster(origin, direction, near, far) {
 
 	this.ray = new Ray(origin, direction);
@@ -15738,6 +16040,11 @@ function shooter() {
   return new Raycaster();
 }
 
+/**
+ * @author benaadams / https://twitter.com/ben_a_adams
+ * based on THREE.SphereGeometry
+ */
+
 function SphereBufferGeometry(radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength) {
 
 	BufferGeometry.call(this);
@@ -15831,6 +16138,10 @@ function SphereBufferGeometry(radius, widthSegments, heightSegments, phiStart, p
 
 SphereBufferGeometry.prototype = Object.create(BufferGeometry.prototype);
 SphereBufferGeometry.prototype.constructor = SphereBufferGeometry;
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
 
 function SphereGeometry(radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength) {
 
@@ -16204,6 +16515,27 @@ var UniformsUtils = {
 	}
 
 };
+
+/**
+ * @author alteredq / http://alteredqualia.com/
+ *
+ * parameters = {
+ *  defines: { "label" : "value" },
+ *  uniforms: { "parameter1": { value: 1.0 }, "parameter2": { value2: 2 } },
+ *
+ *  fragmentShader: <string>,
+ *  vertexShader: <string>,
+ *
+ *  wireframe: <boolean>,
+ *  wireframeLinewidth: <float>,
+ *
+ *  lights: <bool>,
+ *
+ *  skinning: <bool>,
+ *  morphTargets: <bool>,
+ *  morphNormals: <bool>
+ * }
+ */
 
 function ShaderMaterial(parameters) {
 
@@ -16620,6 +16952,10 @@ var ShaderChunk = {
 	shadow_vert: shadow_vert
 };
 
+/**
+ * Uniforms library for shared webgl shaders
+ */
+
 var UniformsLib = {
 
 	common: {
@@ -16774,6 +17110,10 @@ var UniformsLib = {
 
 };
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function ShadowMaterial() {
 
 	ShaderMaterial.call(this, {
@@ -16804,6 +17144,19 @@ ShadowMaterial.prototype = Object.create(ShaderMaterial.prototype);
 ShadowMaterial.prototype.constructor = ShadowMaterial;
 
 ShadowMaterial.prototype.isShadowMaterial = true;
+
+/**
+ * @author alteredq / http://alteredqualia.com/
+ *
+ * parameters = {
+ *  color: <hex>,
+ *  opacity: <float>,
+ *  map: new THREE.Texture( <Image> ),
+ *
+ *	uvOffset: new THREE.Vector2(),
+ *	uvScale: new THREE.Vector2()
+ * }
+ */
 
 function SpriteMaterial(parameters) {
 
@@ -16837,6 +17190,10 @@ SpriteMaterial.prototype.copy = function (source) {
 	return this;
 };
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function RawShaderMaterial(parameters) {
 
   ShaderMaterial.call(this, parameters);
@@ -16848,6 +17205,10 @@ RawShaderMaterial.prototype = Object.create(ShaderMaterial.prototype);
 RawShaderMaterial.prototype.constructor = RawShaderMaterial;
 
 RawShaderMaterial.prototype.isRawShaderMaterial = true;
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
 
 function MultiMaterial(materials) {
 
@@ -16910,6 +17271,14 @@ MultiMaterial.prototype = {
 
 };
 
+/**
+ * @author WestLangley / http://github.com/WestLangley
+ *
+ * parameters = {
+ *  reflectivity: <float>
+ * }
+ */
+
 function MeshPhysicalMaterial(parameters) {
 
 	MeshStandardMaterial.call(this);
@@ -16944,6 +17313,56 @@ MeshPhysicalMaterial.prototype.copy = function (source) {
 
 	return this;
 };
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ *
+ * parameters = {
+ *  color: <hex>,
+ *  specular: <hex>,
+ *  shininess: <float>,
+ *  opacity: <float>,
+ *
+ *  map: new THREE.Texture( <Image> ),
+ *
+ *  lightMap: new THREE.Texture( <Image> ),
+ *  lightMapIntensity: <float>
+ *
+ *  aoMap: new THREE.Texture( <Image> ),
+ *  aoMapIntensity: <float>
+ *
+ *  emissive: <hex>,
+ *  emissiveIntensity: <float>
+ *  emissiveMap: new THREE.Texture( <Image> ),
+ *
+ *  bumpMap: new THREE.Texture( <Image> ),
+ *  bumpScale: <float>,
+ *
+ *  normalMap: new THREE.Texture( <Image> ),
+ *  normalScale: <Vector2>,
+ *
+ *  displacementMap: new THREE.Texture( <Image> ),
+ *  displacementScale: <float>,
+ *  displacementBias: <float>,
+ *
+ *  specularMap: new THREE.Texture( <Image> ),
+ *
+ *  alphaMap: new THREE.Texture( <Image> ),
+ *
+ *  envMap: new THREE.TextureCube( [posx, negx, posy, negy, posz, negz] ),
+ *  combine: THREE.Multiply,
+ *  reflectivity: <float>,
+ *  refractionRatio: <float>,
+ *
+ *  wireframe: <boolean>,
+ *  wireframeLinewidth: <float>,
+ *
+ *  skinning: <bool>,
+ *  morphTargets: <bool>,
+ *  morphNormals: <bool>
+ * }
+ */
 
 function MeshPhongMaterial(parameters) {
 
@@ -17054,6 +17473,17 @@ MeshPhongMaterial.prototype.copy = function (source) {
 	return this;
 };
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ *
+ * parameters = {
+ *  opacity: <float>,
+ *
+ *  wireframe: <boolean>,
+ *  wireframeLinewidth: <float>
+ * }
+ */
+
 function MeshNormalMaterial(parameters) {
 
 	Material.call(this, parameters);
@@ -17084,6 +17514,44 @@ MeshNormalMaterial.prototype.copy = function (source) {
 
 	return this;
 };
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ *
+ * parameters = {
+ *  color: <hex>,
+ *  opacity: <float>,
+ *
+ *  map: new THREE.Texture( <Image> ),
+ *
+ *  lightMap: new THREE.Texture( <Image> ),
+ *  lightMapIntensity: <float>
+ *
+ *  aoMap: new THREE.Texture( <Image> ),
+ *  aoMapIntensity: <float>
+ *
+ *  emissive: <hex>,
+ *  emissiveIntensity: <float>
+ *  emissiveMap: new THREE.Texture( <Image> ),
+ *
+ *  specularMap: new THREE.Texture( <Image> ),
+ *
+ *  alphaMap: new THREE.Texture( <Image> ),
+ *
+ *  envMap: new THREE.TextureCube( [posx, negx, posy, negy, posz, negz] ),
+ *  combine: THREE.Multiply,
+ *  reflectivity: <float>,
+ *  refractionRatio: <float>,
+ *
+ *  wireframe: <boolean>,
+ *  wireframeLinewidth: <float>,
+ *
+ *  skinning: <bool>,
+ *  morphTargets: <bool>,
+ *  morphNormals: <bool>
+ * }
+ */
 
 function MeshLambertMaterial(parameters) {
 
@@ -17170,6 +17638,29 @@ MeshLambertMaterial.prototype.copy = function (source) {
 	return this;
 };
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ * @author bhouston / https://clara.io
+ * @author WestLangley / http://github.com/WestLangley
+ *
+ * parameters = {
+ *
+ *  opacity: <float>,
+ *
+ *  map: new THREE.Texture( <Image> ),
+ *
+ *  alphaMap: new THREE.Texture( <Image> ),
+ *
+ *  displacementMap: new THREE.Texture( <Image> ),
+ *  displacementScale: <float>,
+ *  displacementBias: <float>,
+ *
+ *  wireframe: <boolean>,
+ *  wireframeLinewidth: <float>
+ * }
+ */
+
 function MeshDepthMaterial(parameters) {
 
 	Material.call(this);
@@ -17226,6 +17717,21 @@ MeshDepthMaterial.prototype.copy = function (source) {
 	return this;
 };
 
+/**
+ * @author alteredq / http://alteredqualia.com/
+ *
+ * parameters = {
+ *  color: <hex>,
+ *  opacity: <float>,
+ *
+ *  linewidth: <float>,
+ *
+ *  scale: <float>,
+ *  dashSize: <float>,
+ *  gapSize: <float>
+ * }
+ */
+
 function LineDashedMaterial(parameters) {
 
 	Material.call(this);
@@ -17264,6 +17770,20 @@ LineDashedMaterial.prototype.copy = function (source) {
 
 	return this;
 };
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ *
+ * parameters = {
+ *  color: <hex>,
+ *  opacity: <float>,
+ *
+ *  linewidth: <float>,
+ *  linecap: "round",
+ *  linejoin: "round"
+ * }
+ */
 
 function LineBasicMaterial(parameters) {
 
@@ -17320,6 +17840,10 @@ var Materials = Object.freeze({
 	LineBasicMaterial: LineBasicMaterial,
 	Material: Material
 });
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
 
 function MaterialLoader(manager) {
 
@@ -17459,6 +17983,10 @@ Object.assign(MaterialLoader.prototype, {
 	}
 
 });
+
+/**
+ * @author alteredq / http://alteredqualia.com/
+ */
 
 function Loader() {
 
@@ -18363,6 +18891,10 @@ Object3D.prototype.named = function (name) {
   return this;
 };
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function Line(geometry, material, mode) {
 
 	if (mode === 1) {
@@ -18532,6 +19064,10 @@ Line.prototype = Object.assign(Object.create(Object3D.prototype), {
 
 });
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function LineSegments(geometry, material) {
 
 	Line.call(this, geometry, material);
@@ -18546,6 +19082,10 @@ LineSegments.prototype = Object.assign(Object.create(Line.prototype), {
 	isLineSegments: true
 
 });
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
 
 function Group() {
 
@@ -18565,665 +19105,665 @@ Group.prototype = Object.assign(Object.create(Object3D.prototype), {
  */
 
 var OBJLoader = function () {
-	function OBJLoader(manager) {
-		classCallCheck(this, OBJLoader);
+		function OBJLoader(manager) {
+				classCallCheck(this, OBJLoader);
 
 
-		this.manager = manager !== undefined ? manager : DefaultLoadingManager;
+				this.manager = manager !== undefined ? manager : DefaultLoadingManager;
 
-		this.materials = null;
+				this.materials = null;
 
-		this.regexp = {
-			// v float float float
-			vertex_pattern: /^v\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)/,
-			// vn float float float
-			normal_pattern: /^vn\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)/,
-			// vt float float
-			uv_pattern: /^vt\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)/,
-			// f vertex vertex vertex
-			face_vertex: /^f\s+(-?\d+)\s+(-?\d+)\s+(-?\d+)(?:\s+(-?\d+))?/,
-			// f vertex/uv vertex/uv vertex/uv
-			face_vertex_uv: /^f\s+(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)(?:\s+(-?\d+)\/(-?\d+))?/,
-			// f vertex/uv/normal vertex/uv/normal vertex/uv/normal
-			face_vertex_uv_normal: /^f\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)(?:\s+(-?\d+)\/(-?\d+)\/(-?\d+))?/,
-			// f vertex//normal vertex//normal vertex//normal
-			face_vertex_normal: /^f\s+(-?\d+)\/\/(-?\d+)\s+(-?\d+)\/\/(-?\d+)\s+(-?\d+)\/\/(-?\d+)(?:\s+(-?\d+)\/\/(-?\d+))?/,
-			// o object_name | g group_name
-			object_pattern: /^[og]\s*(.+)?/,
-			// s boolean
-			smoothing_pattern: /^s\s+(\d+|on|off)/,
-			// mtllib file_reference
-			material_library_pattern: /^mtllib /,
-			// usemtl material_name
-			material_use_pattern: /^usemtl /
-		};
-	}
-
-	createClass(OBJLoader, [{
-		key: "load",
-		value: function load(url, onLoad, onProgress, onError) {
-
-			var scope = this;
-
-			var loader = new XHRLoader(scope.manager);
-			loader.setPath(this.path);
-			loader.load(url, function (text) {
-
-				onLoad(scope.parse(text));
-			}, onProgress, onError);
-		}
-	}, {
-		key: "setPath",
-		value: function setPath(value) {
-
-			this.path = value;
-		}
-	}, {
-		key: "setMaterials",
-		value: function setMaterials(materials) {
-
-			this.materials = materials;
-		}
-	}, {
-		key: "_createParserState",
-		value: function _createParserState() {
-
-			var state = new OBJParserState();
-
-			state.startObject('', false);
-
-			return state;
-		}
-	}, {
-		key: "parse",
-		value: function parse(text) {
-
-			console.time('OBJLoader');
-
-			var state = this._createParserState();
-
-			if (text.indexOf('\r\n') !== -1) {
-
-				// This is faster than String.split with regex that splits on both
-				text = text.replace('\r\n', '\n');
-			}
-
-			var lines = text.split('\n');
-			var line = '',
-			    lineFirstChar = '',
-			    lineSecondChar = '';
-			var lineLength = 0;
-			var result = [];
-
-			// Faster to just trim left side of the line. Use if available.
-			var trimLeft = typeof ''.trimLeft === 'function';
-
-			for (var i = 0, l = lines.length; i < l; i++) {
-
-				line = lines[i];
-
-				line = trimLeft ? line.trimLeft() : line.trim();
-
-				lineLength = line.length;
-
-				if (lineLength === 0) continue;
-
-				lineFirstChar = line.charAt(0);
-
-				// @todo invoke passed in handler if any
-				if (lineFirstChar === '#') continue;
-
-				if (lineFirstChar === 'v') {
-
-					lineSecondChar = line.charAt(1);
-
-					if (lineSecondChar === ' ' && (result = this.regexp.vertex_pattern.exec(line)) !== null) {
-
-						// 0                  1      2      3
-						// ["v 1.0 2.0 3.0", "1.0", "2.0", "3.0"]
-
-						state.vertices.push(parseFloat(result[1]), parseFloat(result[2]), parseFloat(result[3]));
-					} else if (lineSecondChar === 'n' && (result = this.regexp.normal_pattern.exec(line)) !== null) {
-
-						// 0                   1      2      3
-						// ["vn 1.0 2.0 3.0", "1.0", "2.0", "3.0"]
-
-						state.normals.push(parseFloat(result[1]), parseFloat(result[2]), parseFloat(result[3]));
-					} else if (lineSecondChar === 't' && (result = this.regexp.uv_pattern.exec(line)) !== null) {
-
-						// 0               1      2
-						// ["vt 0.1 0.2", "0.1", "0.2"]
-
-						state.uvs.push(parseFloat(result[1]), parseFloat(result[2]));
-					} else {
-
-						throw new Error("Unexpected vertex/normal/uv line: '" + line + "'");
-					}
-				} else if (lineFirstChar === "f") {
-
-					if ((result = this.regexp.face_vertex_uv_normal.exec(line)) !== null) {
-
-						// f vertex/uv/normal vertex/uv/normal vertex/uv/normal
-						// 0                        1    2    3    4    5    6    7    8    9   10         11         12
-						// ["f 1/1/1 2/2/2 3/3/3", "1", "1", "1", "2", "2", "2", "3", "3", "3", undefined, undefined, undefined]
-
-						state.addFace(result[1], result[4], result[7], result[10], result[2], result[5], result[8], result[11], result[3], result[6], result[9], result[12]);
-					} else if ((result = this.regexp.face_vertex_uv.exec(line)) !== null) {
-
-						// f vertex/uv vertex/uv vertex/uv
-						// 0                  1    2    3    4    5    6   7          8
-						// ["f 1/1 2/2 3/3", "1", "1", "2", "2", "3", "3", undefined, undefined]
-
-						state.addFace(result[1], result[3], result[5], result[7], result[2], result[4], result[6], result[8]);
-					} else if ((result = this.regexp.face_vertex_normal.exec(line)) !== null) {
-
-						// f vertex//normal vertex//normal vertex//normal
-						// 0                     1    2    3    4    5    6   7          8
-						// ["f 1//1 2//2 3//3", "1", "1", "2", "2", "3", "3", undefined, undefined]
-
-						state.addFace(result[1], result[3], result[5], result[7], undefined, undefined, undefined, undefined, result[2], result[4], result[6], result[8]);
-					} else if ((result = this.regexp.face_vertex.exec(line)) !== null) {
-
+				this.regexp = {
+						// v float float float
+						vertex_pattern: /^v\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)/,
+						// vn float float float
+						normal_pattern: /^vn\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)/,
+						// vt float float
+						uv_pattern: /^vt\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)/,
 						// f vertex vertex vertex
-						// 0            1    2    3   4
-						// ["f 1 2 3", "1", "2", "3", undefined]
-
-						state.addFace(result[1], result[2], result[3], result[4]);
-					} else {
-
-						throw new Error("Unexpected face line: '" + line + "'");
-					}
-				} else if (lineFirstChar === "l") {
-
-					var lineParts = line.substring(1).trim().split(" ");
-					var lineVertices = [],
-					    lineUVs = [];
-
-					if (line.indexOf("/") === -1) {
-
-						lineVertices = lineParts;
-					} else {
-
-						for (var li = 0, llen = lineParts.length; li < llen; li++) {
-
-							var parts = lineParts[li].split("/");
-
-							if (parts[0] !== "") lineVertices.push(parts[0]);
-							if (parts[1] !== "") lineUVs.push(parts[1]);
-						}
-					}
-					state.addLineGeometry(lineVertices, lineUVs);
-				} else if ((result = this.regexp.object_pattern.exec(line)) !== null) {
-
-					// o object_name
-					// or
-					// g group_name
-
-					var name = result[0].substr(1).trim();
-					state.startObject(name);
-				} else if (this.regexp.material_use_pattern.test(line)) {
-
-					// material
-
-					state.object.startMaterial(line.substring(7).trim(), state.materialLibraries);
-				} else if (this.regexp.material_library_pattern.test(line)) {
-
-					// mtl file
-
-					state.materialLibraries.push(line.substring(7).trim());
-				} else if ((result = this.regexp.smoothing_pattern.exec(line)) !== null) {
-
-					// smooth shading
-
-					// @todo Handle files that have varying smooth values for a set of faces inside one geometry,
-					// but does not define a usemtl for each face set.
-					// This should be detected and a dummy material created (later MultiMaterial and geometry groups).
-					// This requires some care to not create extra material on each smooth value for "normal" obj files.
-					// where explicit usemtl defines geometry groups.
-					// Example asset: examples/models/obj/cerberus/Cerberus.obj
-
-					var value = result[1].trim().toLowerCase();
-					state.object.smooth = value === '1' || value === 'on';
-
-					var material = state.object.currentMaterial();
-					if (material) {
-
-						material.smooth = state.object.smooth;
-					}
-				} else {
-
-					// Handle null terminated files without exception
-					if (line === '\0') continue;
-
-					throw new Error("Unexpected line: '" + line + "'");
-				}
-			}
-
-			state.finalize();
-
-			var container = new Group();
-			container.materialLibraries = [].concat(state.materialLibraries);
-
-			for (var i = 0, l = state.objects.length; i < l; i++) {
-
-				var object = state.objects[i];
-				var geometry = object.geometry;
-				var materials = object.materials;
-				var isLine = geometry.type === 'Line';
-
-				// Skip o/g line declarations that did not follow with any faces
-				if (geometry.vertices.length === 0) continue;
-
-				var buffergeometry = new BufferGeometry();
-
-				buffergeometry.addAttribute('position', new BufferAttribute(new Float32Array(geometry.vertices), 3));
-
-				if (geometry.normals.length > 0) {
-
-					buffergeometry.addAttribute('normal', new BufferAttribute(new Float32Array(geometry.normals), 3));
-				} else {
-
-					buffergeometry.computeVertexNormals();
-				}
-
-				if (geometry.uvs.length > 0) {
-
-					buffergeometry.addAttribute('uv', new BufferAttribute(new Float32Array(geometry.uvs), 2));
-				}
-
-				// Create materials
-
-				var createdMaterials = [];
-
-				for (var mi = 0, miLen = materials.length; mi < miLen; mi++) {
-
-					var sourceMaterial = materials[mi];
-					var material = undefined;
-
-					if (this.materials !== null) {
-
-						material = this.materials.create(sourceMaterial.name);
-
-						// mtl etc. loaders probably can't create line materials correctly, copy properties to a line material.
-						if (isLine && material && !(material instanceof LineBasicMaterial)) {
-
-							var materialLine = new LineBasicMaterial();
-							materialLine.copy(material);
-							material = materialLine;
-						}
-					}
-
-					if (!material) {
-
-						material = !isLine ? new MeshPhongMaterial() : new LineBasicMaterial();
-						material.name = sourceMaterial.name;
-					}
-
-					material.shading = sourceMaterial.smooth ? SmoothShading : FlatShading;
-
-					createdMaterials.push(material);
-				}
-
-				// Create mesh
-
-				var mesh;
-
-				if (createdMaterials.length > 1) {
-
-					for (var mi = 0, miLen = materials.length; mi < miLen; mi++) {
-
-						var sourceMaterial = materials[mi];
-						buffergeometry.addGroup(sourceMaterial.groupStart, sourceMaterial.groupCount, mi);
-					}
-
-					var multiMaterial = new MultiMaterial(createdMaterials);
-					mesh = !isLine ? new Mesh(buffergeometry, multiMaterial) : new LineSegments(buffergeometry, multiMaterial);
-				} else {
-
-					mesh = !isLine ? new Mesh(buffergeometry, createdMaterials[0]) : new LineSegments(buffergeometry, createdMaterials[0]);
-				}
-
-				mesh.name = object.name;
-
-				container.add(mesh);
-			}
-
-			console.timeEnd('OBJLoader');
-
-			return container;
+						face_vertex: /^f\s+(-?\d+)\s+(-?\d+)\s+(-?\d+)(?:\s+(-?\d+))?/,
+						// f vertex/uv vertex/uv vertex/uv
+						face_vertex_uv: /^f\s+(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)(?:\s+(-?\d+)\/(-?\d+))?/,
+						// f vertex/uv/normal vertex/uv/normal vertex/uv/normal
+						face_vertex_uv_normal: /^f\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)(?:\s+(-?\d+)\/(-?\d+)\/(-?\d+))?/,
+						// f vertex//normal vertex//normal vertex//normal
+						face_vertex_normal: /^f\s+(-?\d+)\/\/(-?\d+)\s+(-?\d+)\/\/(-?\d+)\s+(-?\d+)\/\/(-?\d+)(?:\s+(-?\d+)\/\/(-?\d+))?/,
+						// o object_name | g group_name
+						object_pattern: /^[og]\s*(.+)?/,
+						// s boolean
+						smoothing_pattern: /^s\s+(\d+|on|off)/,
+						// mtllib file_reference
+						material_library_pattern: /^mtllib /,
+						// usemtl material_name
+						material_use_pattern: /^usemtl /
+				};
 		}
-	}]);
-	return OBJLoader;
+
+		createClass(OBJLoader, [{
+				key: "load",
+				value: function load(url, onLoad, onProgress, onError) {
+
+						var scope = this;
+
+						var loader = new XHRLoader(scope.manager);
+						loader.setPath(this.path);
+						loader.load(url, function (text) {
+
+								onLoad(scope.parse(text));
+						}, onProgress, onError);
+				}
+		}, {
+				key: "setPath",
+				value: function setPath(value) {
+
+						this.path = value;
+				}
+		}, {
+				key: "setMaterials",
+				value: function setMaterials(materials) {
+
+						this.materials = materials;
+				}
+		}, {
+				key: "_createParserState",
+				value: function _createParserState() {
+
+						var state = new OBJParserState();
+
+						state.startObject('', false);
+
+						return state;
+				}
+		}, {
+				key: "parse",
+				value: function parse(text) {
+
+						console.time('OBJLoader');
+
+						var state = this._createParserState();
+
+						if (text.indexOf('\r\n') !== -1) {
+
+								// This is faster than String.split with regex that splits on both
+								text = text.replace('\r\n', '\n');
+						}
+
+						var lines = text.split('\n');
+						var line = '',
+						    lineFirstChar = '',
+						    lineSecondChar = '';
+						var lineLength = 0;
+						var result = [];
+
+						// Faster to just trim left side of the line. Use if available.
+						var trimLeft = typeof ''.trimLeft === 'function';
+
+						for (var i = 0, l = lines.length; i < l; i++) {
+
+								line = lines[i];
+
+								line = trimLeft ? line.trimLeft() : line.trim();
+
+								lineLength = line.length;
+
+								if (lineLength === 0) continue;
+
+								lineFirstChar = line.charAt(0);
+
+								// @todo invoke passed in handler if any
+								if (lineFirstChar === '#') continue;
+
+								if (lineFirstChar === 'v') {
+
+										lineSecondChar = line.charAt(1);
+
+										if (lineSecondChar === ' ' && (result = this.regexp.vertex_pattern.exec(line)) !== null) {
+
+												// 0                  1      2      3
+												// ["v 1.0 2.0 3.0", "1.0", "2.0", "3.0"]
+
+												state.vertices.push(parseFloat(result[1]), parseFloat(result[2]), parseFloat(result[3]));
+										} else if (lineSecondChar === 'n' && (result = this.regexp.normal_pattern.exec(line)) !== null) {
+
+												// 0                   1      2      3
+												// ["vn 1.0 2.0 3.0", "1.0", "2.0", "3.0"]
+
+												state.normals.push(parseFloat(result[1]), parseFloat(result[2]), parseFloat(result[3]));
+										} else if (lineSecondChar === 't' && (result = this.regexp.uv_pattern.exec(line)) !== null) {
+
+												// 0               1      2
+												// ["vt 0.1 0.2", "0.1", "0.2"]
+
+												state.uvs.push(parseFloat(result[1]), parseFloat(result[2]));
+										} else {
+
+												throw new Error("Unexpected vertex/normal/uv line: '" + line + "'");
+										}
+								} else if (lineFirstChar === "f") {
+
+										if ((result = this.regexp.face_vertex_uv_normal.exec(line)) !== null) {
+
+												// f vertex/uv/normal vertex/uv/normal vertex/uv/normal
+												// 0                        1    2    3    4    5    6    7    8    9   10         11         12
+												// ["f 1/1/1 2/2/2 3/3/3", "1", "1", "1", "2", "2", "2", "3", "3", "3", undefined, undefined, undefined]
+
+												state.addFace(result[1], result[4], result[7], result[10], result[2], result[5], result[8], result[11], result[3], result[6], result[9], result[12]);
+										} else if ((result = this.regexp.face_vertex_uv.exec(line)) !== null) {
+
+												// f vertex/uv vertex/uv vertex/uv
+												// 0                  1    2    3    4    5    6   7          8
+												// ["f 1/1 2/2 3/3", "1", "1", "2", "2", "3", "3", undefined, undefined]
+
+												state.addFace(result[1], result[3], result[5], result[7], result[2], result[4], result[6], result[8]);
+										} else if ((result = this.regexp.face_vertex_normal.exec(line)) !== null) {
+
+												// f vertex//normal vertex//normal vertex//normal
+												// 0                     1    2    3    4    5    6   7          8
+												// ["f 1//1 2//2 3//3", "1", "1", "2", "2", "3", "3", undefined, undefined]
+
+												state.addFace(result[1], result[3], result[5], result[7], undefined, undefined, undefined, undefined, result[2], result[4], result[6], result[8]);
+										} else if ((result = this.regexp.face_vertex.exec(line)) !== null) {
+
+												// f vertex vertex vertex
+												// 0            1    2    3   4
+												// ["f 1 2 3", "1", "2", "3", undefined]
+
+												state.addFace(result[1], result[2], result[3], result[4]);
+										} else {
+
+												throw new Error("Unexpected face line: '" + line + "'");
+										}
+								} else if (lineFirstChar === "l") {
+
+										var lineParts = line.substring(1).trim().split(" ");
+										var lineVertices = [],
+										    lineUVs = [];
+
+										if (line.indexOf("/") === -1) {
+
+												lineVertices = lineParts;
+										} else {
+
+												for (var li = 0, llen = lineParts.length; li < llen; li++) {
+
+														var parts = lineParts[li].split("/");
+
+														if (parts[0] !== "") lineVertices.push(parts[0]);
+														if (parts[1] !== "") lineUVs.push(parts[1]);
+												}
+										}
+										state.addLineGeometry(lineVertices, lineUVs);
+								} else if ((result = this.regexp.object_pattern.exec(line)) !== null) {
+
+										// o object_name
+										// or
+										// g group_name
+
+										var name = result[0].substr(1).trim();
+										state.startObject(name);
+								} else if (this.regexp.material_use_pattern.test(line)) {
+
+										// material
+
+										state.object.startMaterial(line.substring(7).trim(), state.materialLibraries);
+								} else if (this.regexp.material_library_pattern.test(line)) {
+
+										// mtl file
+
+										state.materialLibraries.push(line.substring(7).trim());
+								} else if ((result = this.regexp.smoothing_pattern.exec(line)) !== null) {
+
+										// smooth shading
+
+										// @todo Handle files that have varying smooth values for a set of faces inside one geometry,
+										// but does not define a usemtl for each face set.
+										// This should be detected and a dummy material created (later MultiMaterial and geometry groups).
+										// This requires some care to not create extra material on each smooth value for "normal" obj files.
+										// where explicit usemtl defines geometry groups.
+										// Example asset: examples/models/obj/cerberus/Cerberus.obj
+
+										var value = result[1].trim().toLowerCase();
+										state.object.smooth = value === '1' || value === 'on';
+
+										var material = state.object.currentMaterial();
+										if (material) {
+
+												material.smooth = state.object.smooth;
+										}
+								} else {
+
+										// Handle null terminated files without exception
+										if (line === '\0') continue;
+
+										throw new Error("Unexpected line: '" + line + "'");
+								}
+						}
+
+						state.finalize();
+
+						var container = new Group();
+						container.materialLibraries = [].concat(state.materialLibraries);
+
+						for (var i = 0, l = state.objects.length; i < l; i++) {
+
+								var object = state.objects[i];
+								var geometry = object.geometry;
+								var materials = object.materials;
+								var isLine = geometry.type === 'Line';
+
+								// Skip o/g line declarations that did not follow with any faces
+								if (geometry.vertices.length === 0) continue;
+
+								var buffergeometry = new BufferGeometry();
+
+								buffergeometry.addAttribute('position', new BufferAttribute(new Float32Array(geometry.vertices), 3));
+
+								if (geometry.normals.length > 0) {
+
+										buffergeometry.addAttribute('normal', new BufferAttribute(new Float32Array(geometry.normals), 3));
+								} else {
+
+										buffergeometry.computeVertexNormals();
+								}
+
+								if (geometry.uvs.length > 0) {
+
+										buffergeometry.addAttribute('uv', new BufferAttribute(new Float32Array(geometry.uvs), 2));
+								}
+
+								// Create materials
+
+								var createdMaterials = [];
+
+								for (var mi = 0, miLen = materials.length; mi < miLen; mi++) {
+
+										var sourceMaterial = materials[mi];
+										var material = undefined;
+
+										if (this.materials !== null) {
+
+												material = this.materials.create(sourceMaterial.name);
+
+												// mtl etc. loaders probably can't create line materials correctly, copy properties to a line material.
+												if (isLine && material && !(material instanceof LineBasicMaterial)) {
+
+														var materialLine = new LineBasicMaterial();
+														materialLine.copy(material);
+														material = materialLine;
+												}
+										}
+
+										if (!material) {
+
+												material = !isLine ? new MeshPhongMaterial() : new LineBasicMaterial();
+												material.name = sourceMaterial.name;
+										}
+
+										material.shading = sourceMaterial.smooth ? SmoothShading : FlatShading;
+
+										createdMaterials.push(material);
+								}
+
+								// Create mesh
+
+								var mesh;
+
+								if (createdMaterials.length > 1) {
+
+										for (var mi = 0, miLen = materials.length; mi < miLen; mi++) {
+
+												var sourceMaterial = materials[mi];
+												buffergeometry.addGroup(sourceMaterial.groupStart, sourceMaterial.groupCount, mi);
+										}
+
+										var multiMaterial = new MultiMaterial(createdMaterials);
+										mesh = !isLine ? new Mesh(buffergeometry, multiMaterial) : new LineSegments(buffergeometry, multiMaterial);
+								} else {
+
+										mesh = !isLine ? new Mesh(buffergeometry, createdMaterials[0]) : new LineSegments(buffergeometry, createdMaterials[0]);
+								}
+
+								mesh.name = object.name;
+
+								container.add(mesh);
+						}
+
+						console.timeEnd('OBJLoader');
+
+						return container;
+				}
+		}]);
+		return OBJLoader;
 }();
 
 var OBJParserState = function () {
-	function OBJParserState() {
-		classCallCheck(this, OBJParserState);
+		function OBJParserState() {
+				classCallCheck(this, OBJParserState);
 
-		this.objects = [];
-		this.object = {};
+				this.objects = [];
+				this.object = {};
 
-		this.vertices = [];
-		this.normals = [];
-		this.uvs = [];
+				this.vertices = [];
+				this.normals = [];
+				this.uvs = [];
 
-		this.materialLibraries = [];
-	}
-
-	createClass(OBJParserState, [{
-		key: "startObject",
-		value: function startObject(name, fromDeclaration) {
-
-			// If the current object (initial from reset) is not from a g/o declaration in the parsed
-			// file. We need to use it for the first parsed g/o to keep things in sync.
-			if (this.object && this.object.fromDeclaration === false) {
-
-				this.object.name = name;
-				this.object.fromDeclaration = fromDeclaration !== false;
-				return;
-			}
-
-			if (this.object && typeof this.object._finalize === 'function') {
-
-				this.object._finalize();
-			}
-
-			var previousMaterial = this.object && typeof this.object.currentMaterial === 'function' ? this.object.currentMaterial() : undefined;
-
-			this.object = new OBJ(name, fromDeclaration);
-
-			// Inherit previous objects material.
-			// Spec tells us that a declared material must be set to all objects until a new material is declared.
-			// If a usemtl declaration is encountered while this new object is being parsed, it will
-			// overwrite the inherited material. Exception being that there was already face declarations
-			// to the inherited material, then it will be preserved for proper MultiMaterial continuation.
-
-			if (previousMaterial && previousMaterial.name && typeof previousMaterial.clone === "function") {
-
-				var declared = previousMaterial.clone(0);
-				declared.inherited = true;
-				this.object.materials.push(declared);
-			}
-
-			this.objects.push(this.object);
+				this.materialLibraries = [];
 		}
-	}, {
-		key: "finalize",
-		value: function finalize() {
 
-			if (this.object && typeof this.object._finalize === 'function') {
+		createClass(OBJParserState, [{
+				key: "startObject",
+				value: function startObject(name, fromDeclaration) {
 
-				this.object._finalize();
-			}
-		}
-	}, {
-		key: "parseVertexIndex",
-		value: function parseVertexIndex(value, len) {
+						// If the current object (initial from reset) is not from a g/o declaration in the parsed
+						// file. We need to use it for the first parsed g/o to keep things in sync.
+						if (this.object && this.object.fromDeclaration === false) {
 
-			var index = parseInt(value, 10);
-			return (index >= 0 ? index - 1 : index + len / 3) * 3;
-		}
-	}, {
-		key: "parseNormalIndex",
-		value: function parseNormalIndex(value, len) {
+								this.object.name = name;
+								this.object.fromDeclaration = fromDeclaration !== false;
+								return;
+						}
 
-			var index = parseInt(value, 10);
-			return (index >= 0 ? index - 1 : index + len / 3) * 3;
-		}
-	}, {
-		key: "parseUVIndex",
-		value: function parseUVIndex(value, len) {
+						if (this.object && typeof this.object._finalize === 'function') {
 
-			var index = parseInt(value, 10);
-			return (index >= 0 ? index - 1 : index + len / 2) * 2;
-		}
-	}, {
-		key: "addVertex",
-		value: function addVertex(a, b, c) {
+								this.object._finalize();
+						}
 
-			var src = this.vertices;
-			var dst = this.object.geometry.vertices;
+						var previousMaterial = this.object && typeof this.object.currentMaterial === 'function' ? this.object.currentMaterial() : undefined;
 
-			dst.push(src[a + 0]);
-			dst.push(src[a + 1]);
-			dst.push(src[a + 2]);
-			dst.push(src[b + 0]);
-			dst.push(src[b + 1]);
-			dst.push(src[b + 2]);
-			dst.push(src[c + 0]);
-			dst.push(src[c + 1]);
-			dst.push(src[c + 2]);
-		}
-	}, {
-		key: "addVertexLine",
-		value: function addVertexLine(a) {
+						this.object = new OBJ(name, fromDeclaration);
 
-			var src = this.vertices;
-			var dst = this.object.geometry.vertices;
+						// Inherit previous objects material.
+						// Spec tells us that a declared material must be set to all objects until a new material is declared.
+						// If a usemtl declaration is encountered while this new object is being parsed, it will
+						// overwrite the inherited material. Exception being that there was already face declarations
+						// to the inherited material, then it will be preserved for proper MultiMaterial continuation.
 
-			dst.push(src[a + 0]);
-			dst.push(src[a + 1]);
-			dst.push(src[a + 2]);
-		}
-	}, {
-		key: "addNormal",
-		value: function addNormal(a, b, c) {
+						if (previousMaterial && previousMaterial.name && typeof previousMaterial.clone === "function") {
 
-			var src = this.normals;
-			var dst = this.object.geometry.normals;
+								var declared = previousMaterial.clone(0);
+								declared.inherited = true;
+								this.object.materials.push(declared);
+						}
 
-			dst.push(src[a + 0]);
-			dst.push(src[a + 1]);
-			dst.push(src[a + 2]);
-			dst.push(src[b + 0]);
-			dst.push(src[b + 1]);
-			dst.push(src[b + 2]);
-			dst.push(src[c + 0]);
-			dst.push(src[c + 1]);
-			dst.push(src[c + 2]);
-		}
-	}, {
-		key: "addUV",
-		value: function addUV(a, b, c) {
-
-			var src = this.uvs;
-			var dst = this.object.geometry.uvs;
-
-			dst.push(src[a + 0]);
-			dst.push(src[a + 1]);
-			dst.push(src[b + 0]);
-			dst.push(src[b + 1]);
-			dst.push(src[c + 0]);
-			dst.push(src[c + 1]);
-		}
-	}, {
-		key: "addUVLine",
-		value: function addUVLine(a) {
-
-			var src = this.uvs;
-			var dst = this.object.geometry.uvs;
-
-			dst.push(src[a + 0]);
-			dst.push(src[a + 1]);
-		}
-	}, {
-		key: "addFace",
-		value: function addFace(a, b, c, d, ua, ub, uc, ud, na, nb, nc, nd) {
-
-			var vLen = this.vertices.length;
-
-			var ia = this.parseVertexIndex(a, vLen);
-			var ib = this.parseVertexIndex(b, vLen);
-			var ic = this.parseVertexIndex(c, vLen);
-			var id;
-
-			if (d === undefined) {
-
-				this.addVertex(ia, ib, ic);
-			} else {
-
-				id = this.parseVertexIndex(d, vLen);
-
-				this.addVertex(ia, ib, id);
-				this.addVertex(ib, ic, id);
-			}
-
-			if (ua !== undefined) {
-
-				var uvLen = this.uvs.length;
-
-				ia = this.parseUVIndex(ua, uvLen);
-				ib = this.parseUVIndex(ub, uvLen);
-				ic = this.parseUVIndex(uc, uvLen);
-
-				if (d === undefined) {
-
-					this.addUV(ia, ib, ic);
-				} else {
-
-					id = this.parseUVIndex(ud, uvLen);
-
-					this.addUV(ia, ib, id);
-					this.addUV(ib, ic, id);
+						this.objects.push(this.object);
 				}
-			}
+		}, {
+				key: "finalize",
+				value: function finalize() {
 
-			if (na !== undefined) {
+						if (this.object && typeof this.object._finalize === 'function') {
 
-				// Normals are many times the same. If so, skip function call and parseInt.
-				var nLen = this.normals.length;
-				ia = this.parseNormalIndex(na, nLen);
-
-				ib = na === nb ? ia : this.parseNormalIndex(nb, nLen);
-				ic = na === nc ? ia : this.parseNormalIndex(nc, nLen);
-
-				if (d === undefined) {
-
-					this.addNormal(ia, ib, ic);
-				} else {
-
-					id = this.parseNormalIndex(nd, nLen);
-
-					this.addNormal(ia, ib, id);
-					this.addNormal(ib, ic, id);
+								this.object._finalize();
+						}
 				}
-			}
-		}
-	}, {
-		key: "addLineGeometry",
-		value: function addLineGeometry(vertices, uvs) {
+		}, {
+				key: "parseVertexIndex",
+				value: function parseVertexIndex(value, len) {
 
-			this.object.geometry.type = 'Line';
+						var index = parseInt(value, 10);
+						return (index >= 0 ? index - 1 : index + len / 3) * 3;
+				}
+		}, {
+				key: "parseNormalIndex",
+				value: function parseNormalIndex(value, len) {
 
-			var vLen = this.vertices.length;
-			var uvLen = this.uvs.length;
+						var index = parseInt(value, 10);
+						return (index >= 0 ? index - 1 : index + len / 3) * 3;
+				}
+		}, {
+				key: "parseUVIndex",
+				value: function parseUVIndex(value, len) {
 
-			for (var vi = 0, l = vertices.length; vi < l; vi++) {
+						var index = parseInt(value, 10);
+						return (index >= 0 ? index - 1 : index + len / 2) * 2;
+				}
+		}, {
+				key: "addVertex",
+				value: function addVertex(a, b, c) {
 
-				this.addVertexLine(this.parseVertexIndex(vertices[vi], vLen));
-			}
+						var src = this.vertices;
+						var dst = this.object.geometry.vertices;
 
-			for (var uvi = 0, l = uvs.length; uvi < l; uvi++) {
+						dst.push(src[a + 0]);
+						dst.push(src[a + 1]);
+						dst.push(src[a + 2]);
+						dst.push(src[b + 0]);
+						dst.push(src[b + 1]);
+						dst.push(src[b + 2]);
+						dst.push(src[c + 0]);
+						dst.push(src[c + 1]);
+						dst.push(src[c + 2]);
+				}
+		}, {
+				key: "addVertexLine",
+				value: function addVertexLine(a) {
 
-				this.addUVLine(this.parseUVIndex(uvs[uvi], uvLen));
-			}
-		}
-	}]);
-	return OBJParserState;
+						var src = this.vertices;
+						var dst = this.object.geometry.vertices;
+
+						dst.push(src[a + 0]);
+						dst.push(src[a + 1]);
+						dst.push(src[a + 2]);
+				}
+		}, {
+				key: "addNormal",
+				value: function addNormal(a, b, c) {
+
+						var src = this.normals;
+						var dst = this.object.geometry.normals;
+
+						dst.push(src[a + 0]);
+						dst.push(src[a + 1]);
+						dst.push(src[a + 2]);
+						dst.push(src[b + 0]);
+						dst.push(src[b + 1]);
+						dst.push(src[b + 2]);
+						dst.push(src[c + 0]);
+						dst.push(src[c + 1]);
+						dst.push(src[c + 2]);
+				}
+		}, {
+				key: "addUV",
+				value: function addUV(a, b, c) {
+
+						var src = this.uvs;
+						var dst = this.object.geometry.uvs;
+
+						dst.push(src[a + 0]);
+						dst.push(src[a + 1]);
+						dst.push(src[b + 0]);
+						dst.push(src[b + 1]);
+						dst.push(src[c + 0]);
+						dst.push(src[c + 1]);
+				}
+		}, {
+				key: "addUVLine",
+				value: function addUVLine(a) {
+
+						var src = this.uvs;
+						var dst = this.object.geometry.uvs;
+
+						dst.push(src[a + 0]);
+						dst.push(src[a + 1]);
+				}
+		}, {
+				key: "addFace",
+				value: function addFace(a, b, c, d, ua, ub, uc, ud, na, nb, nc, nd) {
+
+						var vLen = this.vertices.length;
+
+						var ia = this.parseVertexIndex(a, vLen);
+						var ib = this.parseVertexIndex(b, vLen);
+						var ic = this.parseVertexIndex(c, vLen);
+						var id;
+
+						if (d === undefined) {
+
+								this.addVertex(ia, ib, ic);
+						} else {
+
+								id = this.parseVertexIndex(d, vLen);
+
+								this.addVertex(ia, ib, id);
+								this.addVertex(ib, ic, id);
+						}
+
+						if (ua !== undefined) {
+
+								var uvLen = this.uvs.length;
+
+								ia = this.parseUVIndex(ua, uvLen);
+								ib = this.parseUVIndex(ub, uvLen);
+								ic = this.parseUVIndex(uc, uvLen);
+
+								if (d === undefined) {
+
+										this.addUV(ia, ib, ic);
+								} else {
+
+										id = this.parseUVIndex(ud, uvLen);
+
+										this.addUV(ia, ib, id);
+										this.addUV(ib, ic, id);
+								}
+						}
+
+						if (na !== undefined) {
+
+								// Normals are many times the same. If so, skip function call and parseInt.
+								var nLen = this.normals.length;
+								ia = this.parseNormalIndex(na, nLen);
+
+								ib = na === nb ? ia : this.parseNormalIndex(nb, nLen);
+								ic = na === nc ? ia : this.parseNormalIndex(nc, nLen);
+
+								if (d === undefined) {
+
+										this.addNormal(ia, ib, ic);
+								} else {
+
+										id = this.parseNormalIndex(nd, nLen);
+
+										this.addNormal(ia, ib, id);
+										this.addNormal(ib, ic, id);
+								}
+						}
+				}
+		}, {
+				key: "addLineGeometry",
+				value: function addLineGeometry(vertices, uvs) {
+
+						this.object.geometry.type = 'Line';
+
+						var vLen = this.vertices.length;
+						var uvLen = this.uvs.length;
+
+						for (var vi = 0, l = vertices.length; vi < l; vi++) {
+
+								this.addVertexLine(this.parseVertexIndex(vertices[vi], vLen));
+						}
+
+						for (var uvi = 0, l = uvs.length; uvi < l; uvi++) {
+
+								this.addUVLine(this.parseUVIndex(uvs[uvi], uvLen));
+						}
+				}
+		}]);
+		return OBJParserState;
 }();
 
 var OBJ = function () {
-	function OBJ(name, fromDeclaration) {
-		classCallCheck(this, OBJ);
+		function OBJ(name, fromDeclaration) {
+				classCallCheck(this, OBJ);
 
 
-		this.name = name || '';
-		this.fromDeclaration = fromDeclaration !== false;
+				this.name = name || '';
+				this.fromDeclaration = fromDeclaration !== false;
 
-		this.geometry = {
-			vertices: [],
-			normals: [],
-			uvs: []
-		};
-		this.materials = [];
-		this.smooth = true;
-	}
+				this.geometry = {
+						vertices: [],
+						normals: [],
+						uvs: []
+				};
+				this.materials = [];
+				this.smooth = true;
+		}
 
-	createClass(OBJ, [{
-		key: "startMaterial",
-		value: function startMaterial(name, libraries) {
+		createClass(OBJ, [{
+				key: "startMaterial",
+				value: function startMaterial(name, libraries) {
 
-			var previous = this._finalize(false);
+						var previous = this._finalize(false);
 
-			// New usemtl declaration overwrites an inherited material, except if faces were declared
-			// after the material, then it must be preserved for proper MultiMaterial continuation.
-			if (previous && (previous.inherited || previous.groupCount <= 0)) {
+						// New usemtl declaration overwrites an inherited material, except if faces were declared
+						// after the material, then it must be preserved for proper MultiMaterial continuation.
+						if (previous && (previous.inherited || previous.groupCount <= 0)) {
 
-				this.materials.splice(previous.index, 1);
-			}
+								this.materials.splice(previous.index, 1);
+						}
 
-			var material = {
-				index: this.materials.length,
-				name: name || '',
-				mtllib: Array.isArray(libraries) && libraries.length > 0 ? libraries[libraries.length - 1] : '',
-				smooth: previous !== undefined ? previous.smooth : this.smooth,
-				groupStart: previous !== undefined ? previous.groupEnd : 0,
-				groupEnd: -1,
-				groupCount: -1,
-				inherited: false,
+						var material = {
+								index: this.materials.length,
+								name: name || '',
+								mtllib: Array.isArray(libraries) && libraries.length > 0 ? libraries[libraries.length - 1] : '',
+								smooth: previous !== undefined ? previous.smooth : this.smooth,
+								groupStart: previous !== undefined ? previous.groupEnd : 0,
+								groupEnd: -1,
+								groupCount: -1,
+								inherited: false,
 
-				clone: function clone(index) {
-					return {
-						index: typeof index === 'number' ? index : this.index,
-						name: this.name,
-						mtllib: this.mtllib,
-						smooth: this.smooth,
-						groupStart: this.groupEnd,
-						groupEnd: -1,
-						groupCount: -1,
-						inherited: false
-					};
+								clone: function clone(index) {
+										return {
+												index: typeof index === 'number' ? index : this.index,
+												name: this.name,
+												mtllib: this.mtllib,
+												smooth: this.smooth,
+												groupStart: this.groupEnd,
+												groupEnd: -1,
+												groupCount: -1,
+												inherited: false
+										};
+								}
+						};
+
+						this.materials.push(material);
+
+						return material;
 				}
-			};
+		}, {
+				key: "currentMaterial",
+				value: function currentMaterial() {
 
-			this.materials.push(material);
+						if (this.materials.length > 0) {
+								return this.materials[this.materials.length - 1];
+						}
 
-			return material;
-		}
-	}, {
-		key: "currentMaterial",
-		value: function currentMaterial() {
+						return undefined;
+				}
+		}, {
+				key: "_finalize",
+				value: function _finalize(end) {
 
-			if (this.materials.length > 0) {
-				return this.materials[this.materials.length - 1];
-			}
+						var lastMultiMaterial = this.currentMaterial();
+						if (lastMultiMaterial && lastMultiMaterial.groupEnd === -1) {
 
-			return undefined;
-		}
-	}, {
-		key: "_finalize",
-		value: function _finalize(end) {
+								lastMultiMaterial.groupEnd = this.geometry.vertices.length / 3;
+								lastMultiMaterial.groupCount = lastMultiMaterial.groupEnd - lastMultiMaterial.groupStart;
+								lastMultiMaterial.inherited = false;
+						}
 
-			var lastMultiMaterial = this.currentMaterial();
-			if (lastMultiMaterial && lastMultiMaterial.groupEnd === -1) {
+						// Guarantee at least one empty material, this makes the creation later more straight forward.
+						if (end !== false && this.materials.length === 0) {
+								this.materials.push({
+										name: '',
+										smooth: this.smooth
+								});
+						}
 
-				lastMultiMaterial.groupEnd = this.geometry.vertices.length / 3;
-				lastMultiMaterial.groupCount = lastMultiMaterial.groupEnd - lastMultiMaterial.groupStart;
-				lastMultiMaterial.inherited = false;
-			}
-
-			// Guarantee at least one empty material, this makes the creation later more straight forward.
-			if (end !== false && this.materials.length === 0) {
-				this.materials.push({
-					name: '',
-					smooth: this.smooth
-				});
-			}
-
-			return lastMultiMaterial;
-		}
-	}]);
-	return OBJ;
+						return lastMultiMaterial;
+				}
+		}]);
+		return OBJ;
 }();
 
 Geometry.prototype.offset = function (x, y, z) {
@@ -19658,6 +20198,7 @@ function cascadeElement(id, tag, DOMClass, add) {
   return elem;
 }
 
+// polyfill
 window.AudioContext = window.AudioContext || window.webkitAudioContext;
 
 var VECTOR = new Vector3();
@@ -21794,6 +22335,11 @@ function makeHidingContainer(id, obj) {
   return elem;
 }
 
+/**
+ * @author mikael emtinger / http://gomo.se/
+ * @author alteredq / http://alteredqualia.com/
+ */
+
 function Sprite(material) {
 
 	Object3D.call(this);
@@ -21842,6 +22388,12 @@ Sprite.prototype = Object.assign(Object.create(Object3D.prototype), {
 	}
 
 });
+
+/**
+ * @author mikael emtinger / http://gomo.se/
+ * @author alteredq / http://alteredqualia.com/
+ * @author mrdoob / http://mrdoob.com/
+ */
 
 function LOD() {
 
@@ -21988,6 +22540,10 @@ LOD.prototype = Object.assign(Object.create(Object3D.prototype), {
 
 });
 
+/**
+ * @author alteredq / http://alteredqualia.com/
+ */
+
 function DataTexture(data, width, height, format, type, mapping, wrapS, wrapT, magFilter, minFilter, anisotropy, encoding) {
 
 	Texture.call(this, null, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy, encoding);
@@ -22006,6 +22562,13 @@ DataTexture.prototype = Object.create(Texture.prototype);
 DataTexture.prototype.constructor = DataTexture;
 
 DataTexture.prototype.isDataTexture = true;
+
+/**
+ * @author mikael emtinger / http://gomo.se/
+ * @author alteredq / http://alteredqualia.com/
+ * @author michael guerrero / http://realitymeltdown.com
+ * @author ikerr / http://verold.com
+ */
 
 function Skeleton(bones, boneInverses, useVertexTexture) {
 
@@ -22158,6 +22721,12 @@ Object.assign(Skeleton.prototype, {
 
 });
 
+/**
+ * @author mikael emtinger / http://gomo.se/
+ * @author alteredq / http://alteredqualia.com/
+ * @author ikerr / http://verold.com
+ */
+
 function Bone(skin) {
 
 	Object3D.call(this);
@@ -22183,6 +22752,12 @@ Bone.prototype = Object.assign(Object.create(Object3D.prototype), {
 	}
 
 });
+
+/**
+ * @author mikael emtinger / http://gomo.se/
+ * @author alteredq / http://alteredqualia.com/
+ * @author ikerr / http://verold.com
+ */
 
 function SkinnedMesh(geometry, material, useVertexTexture) {
 
@@ -22335,6 +22910,11 @@ SkinnedMesh.prototype = Object.assign(Object.create(Mesh.prototype), {
 
 });
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ */
+
 function Fog(color, near, far) {
 
 	this.name = '';
@@ -22362,6 +22942,11 @@ Fog.prototype.toJSON = function (meta) {
 	};
 };
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ */
+
 function FogExp2(color, density) {
 
 	this.name = '';
@@ -22385,6 +22970,10 @@ FogExp2.prototype.toJSON = function (meta) {
 		density: this.density
 	};
 };
+
+/**
+ * @author alteredq / http://alteredqualia.com/
+ */
 
 function HemisphereLight(skyColor, groundColor, intensity) {
 
@@ -22417,6 +23006,10 @@ HemisphereLight.prototype = Object.assign(Object.create(Light.prototype), {
 
 });
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function SpotLightShadow() {
 
 	LightShadow.call(this, new PerspectiveCamera(50, 1, 0.5, 500));
@@ -22446,6 +23039,10 @@ SpotLightShadow.prototype = Object.assign(Object.create(LightShadow.prototype), 
 	}
 
 });
+
+/**
+ * @author alteredq / http://alteredqualia.com/
+ */
 
 function SpotLight(color, intensity, distance, angle, penumbra, decay) {
 
@@ -22502,6 +23099,11 @@ SpotLight.prototype = Object.assign(Object.create(Light.prototype), {
 	}
 
 });
+
+/**
+ * @author alteredq / http://alteredqualia.com/
+ * @author arose / http://github.com/arose
+ */
 
 function OrthographicCamera(left, right, top, bottom, near, far) {
 
@@ -22613,6 +23215,10 @@ OrthographicCamera.prototype = Object.assign(Object.create(Camera.prototype), {
 
 });
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function DirectionalLightShadow(light) {
 
   LightShadow.call(this, new OrthographicCamera(-5, 5, 5, -5, 0.5, 500));
@@ -22623,6 +23229,11 @@ DirectionalLightShadow.prototype = Object.assign(Object.create(LightShadow.proto
   constructor: DirectionalLightShadow
 
 });
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ */
 
 function DirectionalLight(color, intensity) {
 
@@ -22657,6 +23268,10 @@ DirectionalLight.prototype = Object.assign(Object.create(Light.prototype), {
 
 });
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function AmbientLight(color, intensity) {
 
 	Light.call(this, color, intensity);
@@ -22673,6 +23288,10 @@ AmbientLight.prototype = Object.assign(Object.create(Light.prototype), {
 	isAmbientLight: true
 
 });
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
 
 function Scene() {
 
@@ -23086,6 +23705,16 @@ Object.assign(Interpolant.prototype, {
 
 });
 
+/**
+ * Fast and simple cubic spline interpolant.
+ *
+ * It was derived from a Hermitian construction setting the first derivative
+ * at each sample position to the linear slope between neighboring positions
+ * over their parameter interval.
+ *
+ * @author tschw
+ */
+
 function CubicInterpolant(parameterPositions, sampleValues, sampleSize, resultBuffer) {
 
 	Interpolant.call(this, parameterPositions, sampleValues, sampleSize, resultBuffer);
@@ -23218,6 +23847,10 @@ CubicInterpolant.prototype = Object.assign(Object.create(Interpolant.prototype),
 
 });
 
+/**
+ * @author tschw
+ */
+
 function LinearInterpolant(parameterPositions, sampleValues, sampleSize, resultBuffer) {
 
 	Interpolant.call(this, parameterPositions, sampleValues, sampleSize, resultBuffer);
@@ -23246,6 +23879,14 @@ LinearInterpolant.prototype = Object.assign(Object.create(Interpolant.prototype)
 	}
 
 });
+
+/**
+ *
+ * Interpolant that evaluates to the sample value at the position preceeding
+ * the parameter.
+ *
+ * @author tschw
+ */
 
 function DiscreteInterpolant(parameterPositions, sampleValues, sampleSize, resultBuffer) {
 
@@ -23593,6 +24234,16 @@ function KeyframeTrackConstructor(name, times, values, interpolation) {
 	this.optimize();
 }
 
+/**
+ *
+ * A Track of vectored keyframe values.
+ *
+ *
+ * @author Ben Houston / http://clara.io/
+ * @author David Sarno / http://lighthaus.us/
+ * @author tschw
+ */
+
 function VectorKeyframeTrack(name, times, values, interpolation) {
 
   KeyframeTrackConstructor.call(this, name, times, values, interpolation);
@@ -23609,6 +24260,12 @@ VectorKeyframeTrack.prototype = Object.assign(Object.create(KeyframeTrackPrototy
   // DefaultInterpolation is inherited
 
 });
+
+/**
+ * Spherical linear unit quaternion interpolant.
+ *
+ * @author tschw
+ */
 
 function QuaternionLinearInterpolant(parameterPositions, sampleValues, sampleSize, resultBuffer) {
 
@@ -23637,6 +24294,15 @@ QuaternionLinearInterpolant.prototype = Object.assign(Object.create(Interpolant.
 
 });
 
+/**
+ *
+ * A Track of quaternion keyframe values.
+ *
+ * @author Ben Houston / http://clara.io/
+ * @author David Sarno / http://lighthaus.us/
+ * @author tschw
+ */
+
 function QuaternionKeyframeTrack(name, times, values, interpolation) {
 
 	KeyframeTrackConstructor.call(this, name, times, values, interpolation);
@@ -23661,6 +24327,15 @@ QuaternionKeyframeTrack.prototype = Object.assign(Object.create(KeyframeTrackPro
 
 });
 
+/**
+ *
+ * A Track of numeric keyframe values.
+ *
+ * @author Ben Houston / http://clara.io/
+ * @author David Sarno / http://lighthaus.us/
+ * @author tschw
+ */
+
 function NumberKeyframeTrack(name, times, values, interpolation) {
 
   KeyframeTrackConstructor.call(this, name, times, values, interpolation);
@@ -23673,6 +24348,16 @@ NumberKeyframeTrack.prototype = Object.assign(Object.create(KeyframeTrackPrototy
   ValueTypeName: 'number'
 
 });
+
+/**
+ *
+ * A Track that interpolates Strings
+ *
+ *
+ * @author Ben Houston / http://clara.io/
+ * @author David Sarno / http://lighthaus.us/
+ * @author tschw
+ */
 
 function StringKeyframeTrack(name, times, values, interpolation) {
 
@@ -23693,6 +24378,16 @@ StringKeyframeTrack.prototype = Object.assign(Object.create(KeyframeTrackPrototy
   InterpolantFactoryMethodSmooth: undefined
 
 });
+
+/**
+ *
+ * A Track of Boolean keyframe values.
+ *
+ *
+ * @author Ben Houston / http://clara.io/
+ * @author David Sarno / http://lighthaus.us/
+ * @author tschw
+ */
 
 function BooleanKeyframeTrack(name, times, values) {
 
@@ -23717,6 +24412,16 @@ BooleanKeyframeTrack.prototype = Object.assign(Object.create(KeyframeTrackProtot
 
 });
 
+/**
+ *
+ * A Track of keyframe values that represent color.
+ *
+ *
+ * @author Ben Houston / http://clara.io/
+ * @author David Sarno / http://lighthaus.us/
+ * @author tschw
+ */
+
 function ColorKeyframeTrack(name, times, values, interpolation) {
 
   KeyframeTrackConstructor.call(this, name, times, values, interpolation);
@@ -23737,6 +24442,16 @@ ColorKeyframeTrack.prototype = Object.assign(Object.create(KeyframeTrackPrototyp
   // However, this is the place for color space parameterization.
 
 });
+
+/**
+ *
+ * A timed sequence of keyframes for a specific property.
+ *
+ *
+ * @author Ben Houston / http://clara.io/
+ * @author David Sarno / http://lighthaus.us/
+ * @author tschw
+ */
 
 function KeyframeTrack(name, times, values, interpolation) {
 
@@ -23860,6 +24575,14 @@ Object.assign(KeyframeTrack, {
 	}
 
 });
+
+/**
+ *
+ * Reusable set of Tracks that represent an animation.
+ *
+ * @author Ben Houston / http://clara.io/
+ * @author David Sarno / http://lighthaus.us/
+ */
 
 function AnimationClip(name, duration, tracks) {
 
@@ -24155,6 +24878,10 @@ Object.assign(AnimationClip, {
 
 });
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function BufferGeometryLoader(manager) {
 
 	this.manager = manager !== undefined ? manager : DefaultLoadingManager;
@@ -24237,6 +24964,11 @@ Object.assign(BufferGeometryLoader.prototype, {
 	}
 
 });
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ */
 
 function JSONLoader(manager) {
 
@@ -24698,6 +25430,10 @@ Object.assign(JSONLoader.prototype, {
 
 });
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function WireframeGeometry(geometry) {
 
 	BufferGeometry.call(this);
@@ -24858,6 +25594,13 @@ function WireframeGeometry(geometry) {
 WireframeGeometry.prototype = Object.create(BufferGeometry.prototype);
 WireframeGeometry.prototype.constructor = WireframeGeometry;
 
+/**
+ * @author Mugen87 / https://github.com/Mugen87
+ *
+ * Parametric Surfaces Geometry
+ * based on the brilliant article by @prideout http://prideout.net/blog/?p=44
+ */
+
 function ParametricBufferGeometry(func, slices, stacks) {
 
 	BufferGeometry.call(this);
@@ -24930,6 +25673,13 @@ function ParametricBufferGeometry(func, slices, stacks) {
 ParametricBufferGeometry.prototype = Object.create(BufferGeometry.prototype);
 ParametricBufferGeometry.prototype.constructor = ParametricBufferGeometry;
 
+/**
+ * @author zz85 / https://github.com/zz85
+ *
+ * Parametric Surfaces Geometry
+ * based on the brilliant article by @prideout http://prideout.net/blog/?p=44
+ */
+
 function ParametricGeometry(func, slices, stacks) {
 
 	Geometry.call(this);
@@ -24948,6 +25698,10 @@ function ParametricGeometry(func, slices, stacks) {
 
 ParametricGeometry.prototype = Object.create(Geometry.prototype);
 ParametricGeometry.prototype.constructor = ParametricGeometry;
+
+/**
+ * @author Mugen87 / https://github.com/Mugen87
+ */
 
 function PolyhedronBufferGeometry(vertices, indices, radius, detail) {
 
@@ -25214,6 +25968,10 @@ function PolyhedronBufferGeometry(vertices, indices, radius, detail) {
 PolyhedronBufferGeometry.prototype = Object.create(BufferGeometry.prototype);
 PolyhedronBufferGeometry.prototype.constructor = PolyhedronBufferGeometry;
 
+/**
+ * @author Mugen87 / https://github.com/Mugen87
+ */
+
 function TetrahedronBufferGeometry(radius, detail) {
 
 	var vertices = [1, 1, 1, -1, -1, 1, -1, 1, -1, 1, -1, -1];
@@ -25233,6 +25991,10 @@ function TetrahedronBufferGeometry(radius, detail) {
 TetrahedronBufferGeometry.prototype = Object.create(PolyhedronBufferGeometry.prototype);
 TetrahedronBufferGeometry.prototype.constructor = TetrahedronBufferGeometry;
 
+/**
+ * @author timothypratley / https://github.com/timothypratley
+ */
+
 function TetrahedronGeometry(radius, detail) {
 
 	Geometry.call(this);
@@ -25250,6 +26012,10 @@ function TetrahedronGeometry(radius, detail) {
 
 TetrahedronGeometry.prototype = Object.create(Geometry.prototype);
 TetrahedronGeometry.prototype.constructor = TetrahedronGeometry;
+
+/**
+ * @author Mugen87 / https://github.com/Mugen87
+ */
 
 function OctahedronBufferGeometry(radius, detail) {
 
@@ -25270,6 +26036,10 @@ function OctahedronBufferGeometry(radius, detail) {
 OctahedronBufferGeometry.prototype = Object.create(PolyhedronBufferGeometry.prototype);
 OctahedronBufferGeometry.prototype.constructor = OctahedronBufferGeometry;
 
+/**
+ * @author timothypratley / https://github.com/timothypratley
+ */
+
 function OctahedronGeometry(radius, detail) {
 
 	Geometry.call(this);
@@ -25287,6 +26057,10 @@ function OctahedronGeometry(radius, detail) {
 
 OctahedronGeometry.prototype = Object.create(Geometry.prototype);
 OctahedronGeometry.prototype.constructor = OctahedronGeometry;
+
+/**
+ * @author Mugen87 / https://github.com/Mugen87
+ */
 
 function IcosahedronBufferGeometry(radius, detail) {
 
@@ -25309,6 +26083,10 @@ function IcosahedronBufferGeometry(radius, detail) {
 IcosahedronBufferGeometry.prototype = Object.create(PolyhedronBufferGeometry.prototype);
 IcosahedronBufferGeometry.prototype.constructor = IcosahedronBufferGeometry;
 
+/**
+ * @author timothypratley / https://github.com/timothypratley
+ */
+
 function IcosahedronGeometry(radius, detail) {
 
 	Geometry.call(this);
@@ -25326,6 +26104,10 @@ function IcosahedronGeometry(radius, detail) {
 
 IcosahedronGeometry.prototype = Object.create(Geometry.prototype);
 IcosahedronGeometry.prototype.constructor = IcosahedronGeometry;
+
+/**
+ * @author Mugen87 / https://github.com/Mugen87
+ */
 
 function DodecahedronBufferGeometry(radius, detail) {
 
@@ -25361,6 +26143,10 @@ function DodecahedronBufferGeometry(radius, detail) {
 DodecahedronBufferGeometry.prototype = Object.create(PolyhedronBufferGeometry.prototype);
 DodecahedronBufferGeometry.prototype.constructor = DodecahedronBufferGeometry;
 
+/**
+ * @author Abe Pazos / https://hamoid.com
+ */
+
 function DodecahedronGeometry(radius, detail) {
 
 	Geometry.call(this);
@@ -25378,6 +26164,12 @@ function DodecahedronGeometry(radius, detail) {
 
 DodecahedronGeometry.prototype = Object.create(Geometry.prototype);
 DodecahedronGeometry.prototype.constructor = DodecahedronGeometry;
+
+/**
+ * @author clockworkgeek / https://github.com/clockworkgeek
+ * @author timothypratley / https://github.com/timothypratley
+ * @author WestLangley / http://github.com/WestLangley
+*/
 
 function PolyhedronGeometry(vertices, indices, radius, detail) {
 
@@ -25398,6 +26190,13 @@ function PolyhedronGeometry(vertices, indices, radius, detail) {
 
 PolyhedronGeometry.prototype = Object.create(Geometry.prototype);
 PolyhedronGeometry.prototype.constructor = PolyhedronGeometry;
+
+/**
+ * @author Mugen87 / https://github.com/Mugen87
+ *
+ * Creates a tube which extrudes along a 3d spline.
+ *
+ */
 
 function TubeBufferGeometry(path, tubularSegments, radius, radialSegments, closed) {
 
@@ -25554,6 +26353,16 @@ function TubeBufferGeometry(path, tubularSegments, radius, radialSegments, close
 TubeBufferGeometry.prototype = Object.create(BufferGeometry.prototype);
 TubeBufferGeometry.prototype.constructor = TubeBufferGeometry;
 
+/**
+ * @author oosmoxiecode / https://github.com/oosmoxiecode
+ * @author WestLangley / https://github.com/WestLangley
+ * @author zz85 / https://github.com/zz85
+ * @author miningold / https://github.com/miningold
+ * @author jonobr1 / https://github.com/jonobr1
+ *
+ * Creates a tube which extrudes along a 3d spline.
+ */
+
 function TubeGeometry(path, tubularSegments, radius, radialSegments, closed, taper) {
 
 	Geometry.call(this);
@@ -25587,6 +26396,11 @@ function TubeGeometry(path, tubularSegments, radius, radialSegments, closed, tap
 TubeGeometry.prototype = Object.create(Geometry.prototype);
 TubeGeometry.prototype.constructor = TubeGeometry;
 
+/**
+ * @author Mugen87 / https://github.com/Mugen87
+ *
+ * see: http://www.blackpawn.com/texts/pqtorus/
+ */
 function TorusKnotBufferGeometry(radius, tube, tubularSegments, radialSegments, p, q) {
 
 	BufferGeometry.call(this);
@@ -25744,6 +26558,10 @@ function TorusKnotBufferGeometry(radius, tube, tubularSegments, radialSegments, 
 TorusKnotBufferGeometry.prototype = Object.create(BufferGeometry.prototype);
 TorusKnotBufferGeometry.prototype.constructor = TorusKnotBufferGeometry;
 
+/**
+ * @author oosmoxiecode
+ */
+
 function TorusKnotGeometry(radius, tube, tubularSegments, radialSegments, p, q, heightScale) {
 
 	Geometry.call(this);
@@ -25767,6 +26585,10 @@ function TorusKnotGeometry(radius, tube, tubularSegments, radialSegments, p, q, 
 
 TorusKnotGeometry.prototype = Object.create(Geometry.prototype);
 TorusKnotGeometry.prototype.constructor = TorusKnotGeometry;
+
+/**
+ * @author Mugen87 / https://github.com/Mugen87
+ */
 
 function TorusBufferGeometry(radius, tube, radialSegments, tubularSegments, arc) {
 
@@ -25885,6 +26707,12 @@ function TorusBufferGeometry(radius, tube, radialSegments, tubularSegments, arc)
 
 TorusBufferGeometry.prototype = Object.create(BufferGeometry.prototype);
 TorusBufferGeometry.prototype.constructor = TorusBufferGeometry;
+
+/**
+ * @author oosmoxiecode
+ * @author mrdoob / http://mrdoob.com/
+ * based on http://code.google.com/p/away3d/source/browse/trunk/fp10/Away3DLite/src/away3dlite/primitives/Torus.as?r=2888
+ */
 
 function TorusGeometry(radius, tube, radialSegments, tubularSegments, arc) {
 
@@ -26595,6 +27423,30 @@ var ShapeUtils = {
 
 };
 
+/**
+ * @author zz85 / http://www.lab4games.net/zz85/blog
+ *
+ * Creates extruded geometry from a path shape.
+ *
+ * parameters = {
+ *
+ *  curveSegments: <int>, // number of points on the curves
+ *  steps: <int>, // number of points for z-side extrusions / used for subdividing segments of extrude spline too
+ *  amount: <int>, // Depth to extrude the shape
+ *
+ *  bevelEnabled: <bool>, // turn on bevel
+ *  bevelThickness: <float>, // how deep into the original shape bevel goes
+ *  bevelSize: <float>, // how far from shape outline is bevel
+ *  bevelSegments: <int>, // number of bevel layers
+ *
+ *  extrudePath: <THREE.CurvePath> // 3d spline path to extrude shape along. (creates Frames if .frames aren't defined)
+ *  frames: <Object> // containing arrays of tangents, normals, binormals
+ *
+ *  uvGenerator: <Object> // object that provides UV generator functions
+ *
+ * }
+ **/
+
 function ExtrudeGeometry(shapes, options) {
 
 	if (typeof shapes === "undefined") {
@@ -27195,6 +28047,25 @@ ExtrudeGeometry.WorldUVGenerator = {
 	}
 };
 
+/**
+ * @author zz85 / http://www.lab4games.net/zz85/blog
+ * @author alteredq / http://alteredqualia.com/
+ *
+ * Text = 3D Text
+ *
+ * parameters = {
+ *  font: <THREE.Font>, // font
+ *
+ *  size: <float>, // size of the text
+ *  height: <float>, // thickness to extrude text
+ *  curveSegments: <int>, // number of points on the curves
+ *
+ *  bevelEnabled: <bool>, // turn on bevel
+ *  bevelThickness: <float>, // how deep into text bevel goes
+ *  bevelSize: <float> // how far from text outline is bevel
+ * }
+ */
+
 function TextGeometry(text, parameters) {
 
   parameters = parameters || {};
@@ -27227,6 +28098,10 @@ function TextGeometry(text, parameters) {
 TextGeometry.prototype = Object.create(ExtrudeGeometry.prototype);
 TextGeometry.prototype.constructor = TextGeometry;
 
+/**
+ * @author Kaleb Murphy
+ */
+
 function RingGeometry(innerRadius, outerRadius, thetaSegments, phiSegments, thetaStart, thetaLength) {
 
 	Geometry.call(this);
@@ -27248,6 +28123,11 @@ function RingGeometry(innerRadius, outerRadius, thetaSegments, phiSegments, thet
 RingGeometry.prototype = Object.create(Geometry.prototype);
 RingGeometry.prototype.constructor = RingGeometry;
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * based on http://papervision3d.googlecode.com/svn/trunk/as3/trunk/src/org/papervision3d/objects/primitives/Plane.as
+ */
+
 function PlaneGeometry(width, height, widthSegments, heightSegments) {
 
 	Geometry.call(this);
@@ -27266,6 +28146,17 @@ function PlaneGeometry(width, height, widthSegments, heightSegments) {
 
 PlaneGeometry.prototype = Object.create(Geometry.prototype);
 PlaneGeometry.prototype.constructor = PlaneGeometry;
+
+/**
+ * @author Mugen87 / https://github.com/Mugen87
+ */
+
+// points - to create a closed torus, one must use a set of points
+//    like so: [ a, b, c, d, a ], see first is the same as last.
+// segments - the number of circumference segments to create
+// phiStart - the starting radian
+// phiLength - the radian (0 to 2PI) range of the lathed section
+//    2PI is a closed lathe, less than 2PI is a portion.
 
 function LatheBufferGeometry(points, segments, phiStart, phiLength) {
 
@@ -27407,6 +28298,19 @@ function LatheBufferGeometry(points, segments, phiStart, phiLength) {
 LatheBufferGeometry.prototype = Object.create(BufferGeometry.prototype);
 LatheBufferGeometry.prototype.constructor = LatheBufferGeometry;
 
+/**
+ * @author astrodud / http://astrodud.isgreat.org/
+ * @author zz85 / https://github.com/zz85
+ * @author bhouston / http://clara.io
+ */
+
+// points - to create a closed torus, one must use a set of points
+//    like so: [ a, b, c, d, a ], see first is the same as last.
+// segments - the number of circumference segments to create
+// phiStart - the starting radian
+// phiLength - the radian (0 to 2PI) range of the lathed section
+//    2PI is a closed lathe, less than 2PI is a portion.
+
 function LatheGeometry(points, segments, phiStart, phiLength) {
 
 	Geometry.call(this);
@@ -27426,6 +28330,22 @@ function LatheGeometry(points, segments, phiStart, phiLength) {
 
 LatheGeometry.prototype = Object.create(Geometry.prototype);
 LatheGeometry.prototype.constructor = LatheGeometry;
+
+/**
+ * @author jonobr1 / http://jonobr1.com
+ *
+ * Creates a one-sided polygonal geometry from a path shape. Similar to
+ * ExtrudeGeometry.
+ *
+ * parameters = {
+ *
+ *	curveSegments: <int>, // number of points on the curves. NOT USED AT THE MOMENT.
+ *
+ *	material: <int> // material index for front and back faces
+ *	uvGenerator: <Object> // object that provides UV generator functions
+ *
+ * }
+ **/
 
 function ShapeGeometry(shapes, options) {
 
@@ -27535,6 +28455,10 @@ ShapeGeometry.prototype.addShape = function (shape, options) {
 	}
 };
 
+/**
+ * @author WestLangley / http://github.com/WestLangley
+ */
+
 function EdgesGeometry(geometry, thresholdAngle) {
 
 	BufferGeometry.call(this);
@@ -27618,6 +28542,10 @@ function EdgesGeometry(geometry, thresholdAngle) {
 EdgesGeometry.prototype = Object.create(BufferGeometry.prototype);
 EdgesGeometry.prototype.constructor = EdgesGeometry;
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function CylinderGeometry(radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength) {
 
 	Geometry.call(this);
@@ -27642,6 +28570,10 @@ function CylinderGeometry(radiusTop, radiusBottom, height, radialSegments, heigh
 CylinderGeometry.prototype = Object.create(Geometry.prototype);
 CylinderGeometry.prototype.constructor = CylinderGeometry;
 
+/**
+ * @author abelnation / http://github.com/abelnation
+ */
+
 function ConeGeometry(radius, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength) {
 
 	CylinderGeometry.call(this, 0, radius, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength);
@@ -27661,6 +28593,10 @@ function ConeGeometry(radius, height, radialSegments, heightSegments, openEnded,
 
 ConeGeometry.prototype = Object.create(CylinderGeometry.prototype);
 ConeGeometry.prototype.constructor = ConeGeometry;
+
+/**
+ * @author: abelnation / http://github.com/abelnation
+ */
 
 function ConeBufferGeometry(radius, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength) {
 
@@ -27682,6 +28618,10 @@ function ConeBufferGeometry(radius, height, radialSegments, heightSegments, open
 ConeBufferGeometry.prototype = Object.create(CylinderBufferGeometry.prototype);
 ConeBufferGeometry.prototype.constructor = ConeBufferGeometry;
 
+/**
+ * @author hughes
+ */
+
 function CircleGeometry(radius, segments, thetaStart, thetaLength) {
 
 	Geometry.call(this);
@@ -27700,6 +28640,11 @@ function CircleGeometry(radius, segments, thetaStart, thetaLength) {
 
 CircleGeometry.prototype = Object.create(Geometry.prototype);
 CircleGeometry.prototype.constructor = CircleGeometry;
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * based on http://papervision3d.googlecode.com/svn/trunk/as3/trunk/src/org/papervision3d/objects/primitives/Cube.as
+ */
 
 function BoxGeometry(width, height, depth, widthSegments, heightSegments, depthSegments) {
 
@@ -27766,6 +28711,10 @@ var Geometries = Object.freeze({
 	BoxBufferGeometry: BoxBufferGeometry,
 	BoxGeometry: BoxGeometry
 });
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
 
 function ObjectLoader(manager) {
 
@@ -28307,6 +29256,41 @@ Object.assign(ObjectLoader.prototype, {
 
 });
 
+/**
+ * @author zz85 / http://www.lab4games.net/zz85/blog
+ * Extensible curve object
+ *
+ * Some common of Curve methods
+ * .getPoint(t), getTangent(t)
+ * .getPointAt(u), getTangentAt(u)
+ * .getPoints(), .getSpacedPoints()
+ * .getLength()
+ * .updateArcLengths()
+ *
+ * This following classes subclasses THREE.Curve:
+ *
+ * -- 2d classes --
+ * THREE.LineCurve
+ * THREE.QuadraticBezierCurve
+ * THREE.CubicBezierCurve
+ * THREE.SplineCurve
+ * THREE.ArcCurve
+ * THREE.EllipseCurve
+ *
+ * -- 3d classes --
+ * THREE.LineCurve3
+ * THREE.QuadraticBezierCurve3
+ * THREE.CubicBezierCurve3
+ * THREE.SplineCurve3
+ *
+ * A series of curves can be represented as a THREE.CurvePath
+ *
+ **/
+
+/**************************************************************
+ *	Abstract Curve base class
+ **************************************************************/
+
 function Curve() {}
 
 Curve.prototype = {
@@ -28642,6 +29626,10 @@ Curve.create = function (constructor, getPointFunc) {
 	return constructor;
 };
 
+/**************************************************************
+ *	Line
+ **************************************************************/
+
 function LineCurve(v1, v2) {
 
 	this.v1 = v1;
@@ -28679,6 +29667,16 @@ LineCurve.prototype.getTangent = function (t) {
 
 	return tangent.normalize();
 };
+
+/**
+ * @author zz85 / http://www.lab4games.net/zz85/blog
+ *
+ **/
+
+/**************************************************************
+ *	Curved Path - a curve path is simply a array of connected
+ *  curves, but retains the api of a curve
+ **************************************************************/
 
 function CurvePath() {
 
@@ -28880,6 +29878,10 @@ CurvePath.prototype = Object.assign(Object.create(Curve.prototype), {
 
 });
 
+/**************************************************************
+ *	Ellipse curve
+ **************************************************************/
+
 function EllipseCurve(aX, aY, xRadius, yRadius, aStartAngle, aEndAngle, aClockwise, aRotation) {
 
 	this.aX = aX;
@@ -28997,6 +29999,10 @@ var CurveUtils = {
 
 };
 
+/**************************************************************
+ *	Spline curve
+ **************************************************************/
+
 function SplineCurve(points /* array of Vector2 */) {
 
 	this.points = points === undefined ? [] : points;
@@ -29025,6 +30031,10 @@ SplineCurve.prototype.getPoint = function (t) {
 	return new Vector2(interpolate(point0.x, point1.x, point2.x, point3.x, weight), interpolate(point0.y, point1.y, point2.y, point3.y, weight));
 };
 
+/**************************************************************
+ *	Cubic Bezier curve
+ **************************************************************/
+
 function CubicBezierCurve(v0, v1, v2, v3) {
 
 	this.v0 = v0;
@@ -29049,6 +30059,10 @@ CubicBezierCurve.prototype.getTangent = function (t) {
 
 	return new Vector2(tangentCubicBezier(t, this.v0.x, this.v1.x, this.v2.x, this.v3.x), tangentCubicBezier(t, this.v0.y, this.v1.y, this.v2.y, this.v3.y)).normalize();
 };
+
+/**************************************************************
+ *	Quadratic Bezier curve
+ **************************************************************/
 
 function QuadraticBezierCurve(v0, v1, v2) {
 
@@ -29171,6 +30185,17 @@ var PathPrototype = Object.assign(Object.create(CurvePath.prototype), {
 
 });
 
+/**
+ * @author zz85 / http://www.lab4games.net/zz85/blog
+ * Defines a 2d shape plane using paths.
+ **/
+
+// STEP 1 Create a path.
+// STEP 2 Turn path into shape.
+// STEP 3 ExtrudeGeometry takes in Shape/Shapes
+// STEP 3a - Extract points from each shape, turn to vertices
+// STEP 3b - Triangulate each shape, add faces.
+
 function Shape() {
 
 	Path.apply(this, arguments);
@@ -29212,6 +30237,12 @@ Shape.prototype = Object.assign(Object.create(PathPrototype), {
 	}
 
 });
+
+/**
+ * @author zz85 / http://www.lab4games.net/zz85/blog
+ * Creates free form 2d path using series of points, lines or curves.
+ *
+ **/
 
 function Path(points) {
 
@@ -29454,6 +30485,11 @@ ShapePath.prototype = {
 	}
 };
 
+/**
+ * @author zz85 / http://www.lab4games.net/zz85/blog
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function Font(data) {
 
 	this.data = data;
@@ -29610,6 +30646,10 @@ Object.assign(Font.prototype, {
 
 });
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function FontLoader(manager) {
 
 	this.manager = manager !== undefined ? manager : DefaultLoadingManager;
@@ -29648,6 +30688,8 @@ Object.assign(FontLoader.prototype, {
 
 });
 
+// The JSON format object loader is not always included in the Three.js distribution,
+// so we have to first check for it.
 var loaders = null;
 var PATH_PATTERN = /((?:https?:\/\/)?(?:[^/]+\/)+)(\w+)(\.(?:\w+))$/;
 var EXTENSION_PATTERN = /(\.(?:\w+))+$/;
@@ -31029,7 +32071,7 @@ var Mouse = function (_InputProcessor) {
     }, false);
 
     DOMElement.addEventListener("wheel", function (event) {
-      if (isChrome$1) {
+      if (isChrome) {
         _this.W += event.deltaX;
         _this.Z += event.deltaY;
       } else if (event.shiftKey) {
@@ -31669,7 +32711,7 @@ function mutable(value, type) {
   };
 }
 
-var isMobile$2 = (function (a) {
+var isMobile$1 = (function (a) {
   return (/(android|bb\d+|meego).+|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od|ad)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(a) || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substring(0, 4))
   );
 })(navigator.userAgent || navigator.vendor || window.opera);
@@ -31709,7 +32751,7 @@ var WebVRStandardMonitor = function () {
   }, {
     key: "standardLockBehavior",
     value: function standardLockBehavior(elem) {
-      if (isMobile$2) {
+      if (isMobile$1) {
         return Orientation$1.lock(elem).catch(warn("OrientationLock failed"));
       } else {
         return PointerLock.request(elem).catch(warn("PointerLock failed"));
@@ -31725,7 +32767,7 @@ var WebVRStandardMonitor = function () {
   }, {
     key: "standardUnlockBehavior",
     value: function standardUnlockBehavior() {
-      if (isMobile$2) {
+      if (isMobile$1) {
         Orientation$1.unlock();
         return Promise.resolve();
       } else {
@@ -31744,14 +32786,14 @@ var WebVRStandardMonitor = function () {
       Object.defineProperties(this, {
         capabilities: immutable(Object.defineProperties({}, {
           hasPosition: immutable(false),
-          hasOrientation: immutable(isMobile$2),
+          hasOrientation: immutable(isMobile$1),
           hasExternalDisplay: immutable(false),
           canPresent: immutable(true),
           maxLayers: immutable(1)
         })),
         isPolyfilled: immutable(display && display.isPolyfilled || false),
         displayId: immutable(0),
-        displayName: immutable(isMobile$2 && "Magic Window" || "Standard Monitor"),
+        displayName: immutable(isMobile$1 && "Magic Window" || "Standard Monitor"),
         isConnected: immutable(true),
         stageParameters: immutable(null),
         isPresenting: immutable(function () {
@@ -31780,7 +32822,7 @@ var WebVRStandardMonitor = function () {
   }, {
     key: "getPose",
     value: function getPose() {
-      var display = isMobile$2 && this._display;
+      var display = isMobile$1 && this._display;
       if (display) {
         return display.getPose();
       } else {
@@ -31790,7 +32832,7 @@ var WebVRStandardMonitor = function () {
   }, {
     key: "getImmediatePose",
     value: function getImmediatePose() {
-      var display = isMobile$2 && this._display;
+      var display = isMobile$1 && this._display;
       if (display) {
         return display.getImmediatePose();
       } else {
@@ -31800,7 +32842,7 @@ var WebVRStandardMonitor = function () {
   }, {
     key: "resetPose",
     value: function resetPose() {
-      var display = isMobile$2 && this._display;
+      var display = isMobile$1 && this._display;
       if (display) {
         return display.resetPose();
       }
@@ -31812,7 +32854,7 @@ var WebVRStandardMonitor = function () {
         this._currentLayers[i] = layers[i];
       }
       var elem = layers[0].source;
-      if (isMobile$2) {
+      if (isMobile$1) {
         return this._display.requestPresent(layers).then(function () {
           return WebVRStandardMonitor.standardLockBehavior(elem);
         });
@@ -31833,7 +32875,7 @@ var WebVRStandardMonitor = function () {
 
       this._currentLayers.splice(0);
 
-      if (isMobile$2) {
+      if (isMobile$1) {
         return WebVRStandardMonitor.standardUnlockBehavior().then(function () {
           return _this._display.exitPresent();
         });
@@ -33537,6 +34579,12 @@ WebGLUniforms.seqWithValue = function (seq, values) {
 	return r;
 };
 
+/**
+ * @author alteredq / http://alteredqualia.com/
+ * @author mrdoob / http://mrdoob.com/
+ * @author mikael emtinger / http://gomo.se/
+ */
+
 var ShaderLib = {
 
 	basic: {
@@ -33688,6 +34736,10 @@ ShaderLib.physical = {
 	fragmentShader: ShaderChunk.meshphysical_frag
 
 };
+
+/**
+ * @author bhouston / http://clara.io
+ */
 
 function Box2(min, max) {
 
@@ -33886,6 +34938,11 @@ Box2.prototype = {
 	}
 
 };
+
+/**
+ * @author mikael emtinger / http://gomo.se/
+ * @author alteredq / http://alteredqualia.com/
+ */
 
 function LensFlarePlugin(renderer, flares) {
 
@@ -34168,6 +35225,11 @@ function LensFlarePlugin(renderer, flares) {
 	}
 }
 
+/**
+ * @author mikael emtinger / http://gomo.se/
+ * @author alteredq / http://alteredqualia.com/
+ */
+
 function SpritePlugin(renderer, sprites) {
 
 	var gl = renderer.context;
@@ -34423,6 +35485,17 @@ function SpritePlugin(renderer, sprites) {
 	}
 }
 
+/**
+ * @author szimek / https://github.com/szimek/
+ * @author alteredq / http://alteredqualia.com/
+ * @author Marius Kintel / https://github.com/kintel
+ */
+
+/*
+ In options, we can specify:
+ * Texture parameters for an auto-generated target texture
+ * depthBuffer/stencilBuffer: Booleans to indicate if we should generate these buffers
+*/
 function WebGLRenderTarget(width, height, options) {
 
 	this.uuid = _Math.generateUUID();
@@ -34491,6 +35564,12 @@ Object.assign(WebGLRenderTarget.prototype, EventDispatcher.prototype, {
 	}
 
 });
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ * @author bhouston / http://clara.io
+ */
 
 function Frustum(p0, p1, p2, p3, p4, p5) {
 
@@ -38119,6 +39198,14 @@ function WebGLClipping() {
 		return dstArray;
 	}
 }
+
+/**
+ * @author supereggbert / http://www.paulbrunt.co.uk/
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ * @author szimek / https://github.com/szimek/
+ * @author tschw
+ */
 
 function WebGLRenderer(parameters) {
 
@@ -41849,6 +42936,11 @@ var Random = {
   vector: vector
 };
 
+////
+// For all of these commands, the "current" cursor is:
+// If SHIFT is not held, then "front".
+// If SHIFT is held, then "back"
+//
 var TextInputCommands = new BasicTextInput("Text Line input commands");
 
 var CommandPacks = {
@@ -42682,7 +43774,7 @@ var Terminal = function Terminal(inputEditor, outputEditor) {
 
   this.loadFile = function (fileName) {
     return getText(fileName.toLowerCase()).then(function (file) {
-      if (isMacOS) {
+      if (isMacOS$1) {
         file = file.replace("CTRL+SHIFT+SPACE", "CMD+OPT+E");
       }
       inputEditor.value = currentProgram = file;
@@ -42827,4 +43919,4 @@ Object.assign(window, flags, liveAPI, util);
 
 return obj$1;
 
-}());
+})));
