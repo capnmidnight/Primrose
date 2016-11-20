@@ -2,6 +2,8 @@ import { Vector3 } from "three/src/math/Vector3";
 import { Quaternion } from "three/src/math/Quaternion";
 import { Matrix4 } from "three/src/math/Matrix4";
 import InputProcessor from "./InputProcessor";
+import isMobile from "../../flags/isMobile";
+import isIE from "../../flags/isIE";
 
 const DEFAULT_POSE = {
     position: [0, 0, 0],

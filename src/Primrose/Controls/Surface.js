@@ -1,5 +1,6 @@
 import { Texture } from "three/src/textures/Texture";
 import { Vector2 } from "three/src/math/Vector2";
+import isChrome from "../../flags/isChrome";
 import Entity from "./Entity";
 import Rectangle from "../Text/Rectangle";
 

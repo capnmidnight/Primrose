@@ -7,6 +7,11 @@ import TextEditor from "../CommandPacks/TextEditor";
 import DefaultTheme from "../Themes/Default";
 import JavaScript from "../Grammars/JavaScript";
 import isFirefox from "../../../flags/isFirefox";
+import isChrome from "../../../flags/isChrome";
+import isIE from "../../../flags/isIE";
+import isOpera from "../../../flags/isOpera";
+import isSafari from "../../../flags/isSafari";
+import isMobile from "../../../flags/isMobile";
 
 var SCROLL_SCALE = isFirefox ? 3 : 100,
   COUNTER = 0,

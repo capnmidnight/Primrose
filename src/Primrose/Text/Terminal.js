@@ -1,5 +1,6 @@
 import { getText } from "../HTTP";
 import PlainText from "./Grammars/PlainText";
+import isMacOS from "../../flags/isMacOS";
 
 pliny.class({
   parent: "Primrose.Text",

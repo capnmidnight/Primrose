@@ -1,4 +1,5 @@
 import PointerLock from "webvr-standard-monitor/src/PointerLock";
+import isMobile from "../flags/isMobile";
 import box from "../live-api/box";
 import hub from "../live-api/hub";
 import Angle from "./Angle";
