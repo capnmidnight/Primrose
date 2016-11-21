@@ -4,6 +4,7 @@ import isChrome from "../../flags/isChrome";
 import isIE from "../../flags/isIE";
 import isOpera from "../../flags/isOpera";
 import isSafari from "../../flags/isSafari";
+import isMacOS from "../../flags/isMacOS";
 import { Windows, macOS } from "../Text/OperatingSystems"
 import CodePages from "../Text/CodePages";
 

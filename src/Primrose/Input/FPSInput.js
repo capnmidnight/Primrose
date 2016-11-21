@@ -2,7 +2,8 @@ import { Vector3 } from "three/src/math/Vector3";
 import { Euler } from "three/src/math/Euler";
 import { Quaternion } from "three/src/math/Quaternion";
 import { Matrix4 } from "three/src/math/Matrix4";
-import AbstractEventEmitter from "../AbstractEventEmitter"
+import AbstractEventEmitter from "../AbstractEventEmitter";
+import identity from "../../util/identity";
 import Keyboard from "./Keyboard";
 import Mouse from "./Mouse";
 import Gamepad from "./Gamepad";

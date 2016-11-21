@@ -4,6 +4,7 @@ import { Euler } from "three/src/math/Euler";
 import { Quaternion } from "three/src/math/Quaternion";
 import { Raycaster } from "three/src/core/Raycaster";
 import { Object3D } from "three/src/core/Object3D";
+import identity from "../util/identity";
 
 const TELEPORT_PAD_RADIUS = 0.4,
   FORWARD = new Vector3(0, 0, -1),

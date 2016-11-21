@@ -37,10 +37,6 @@ html
     block head
       link(type="text/css", rel="stylesheet", href=fileRoot + "doc/demoUI" + cssExt)
       style #frontBuffer { background-image:url(screenshot.jpg); }
-      if debug
-        script(src=fileRoot + "../bare-bones-logger/bareBonesLogger" + jsExt)
-        script //logger.setup(logger.HTTP, "/logger");
-      script(src=fileRoot + "Primrose" + jsExt)
   body
     <!-- start demoIFrame.pug main block -->
     block main
@@ -48,21 +44,5 @@ html
       #controls
         #fullScreenButtonContainer
         block controls
-    script(type="text/javascript").
-      (function(){
-        window.addEventListener("vrbrowserenvironmentready", function(evt){
-          var env = evt.detail,
-            c = document.getElementById("fullScreenButtonContainer"),
-            t = document.getElementById("controls");
-          window.addEventListener("vrdisplaypresentchange", function(){
-            var cd = env.input.VR.currentDevice;
-            t.style.display = cd && cd.isPresenting ? "none" : "";
-          });
-          var btns = env.insertFullScreenButtons("#fullScreenButtonContainer");
-          btns.forEach(function(btn) {
-            btn.className = "primary";
-          });
-        });
-      })();
     script(src="app.js")
     <!-- end demoIFrame.pug main block -->

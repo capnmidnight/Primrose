@@ -22,9 +22,6 @@
     <title>Primrose VR: WebVR Application Framework</title><!-- end main.pug title block -->
     <link type="text/css" rel="stylesheet" href="../../doc/demoUI.css">
     <style>#frontBuffer { background-image:url(screenshot.jpg); }</style>
-    <script src="../../../bare-bones-logger/bareBonesLogger.js"></script>
-    <script>//logger.setup(logger.HTTP, "/logger");</script>
-    <script src="../../Primrose.js"></script>
   </head>
   <body><!-- start demoIFrame.pug main block -->
     <h1>Example: Drum Machine</h1>
@@ -32,23 +29,6 @@
     <div id="controls">
       <div id="fullScreenButtonContainer"></div>
     </div>
-    <script type="text/javascript">
-      (function(){
-        window.addEventListener("vrbrowserenvironmentready", function(evt){
-          var env = evt.detail,
-            c = document.getElementById("fullScreenButtonContainer"),
-            t = document.getElementById("controls");
-          window.addEventListener("vrdisplaypresentchange", function(){
-            var cd = env.input.VR.currentDevice;
-            t.style.display = cd && cd.isPresenting ? "none" : "";
-          });
-          var btns = env.insertFullScreenButtons("#fullScreenButtonContainer");
-          btns.forEach(function(btn) {
-            btn.className = "primary";
-          });
-        });
-      })();
-    </script>
     <script src="app.js"></script><!-- end demoIFrame.pug main block -->
   </body>
 </html>
