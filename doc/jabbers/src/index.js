@@ -1,26 +1,20 @@
-(function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? factory() :
-  typeof define === 'function' && define.amd ? define(factory) :
-  (factory());
-}(this, (function () { 'use strict';
-
-var WIDTH = 100;
-var HEIGHT = 6;
-var DEPTH = 100;
-var MIDX = WIDTH / 2;
-var MIDY = HEIGHT / 2;
-var MIDZ = DEPTH / 2;
-var t = 0;
-var jabs = {};
-var R = Primrose.Random;
-var env = new Primrose.BrowserEnvironment({
-  backgroundColor: 0xC9E6EE,
-  skyTexture: "../images/bg.jpg",
-  groundTexture: "../images/grass.png",
-  font: "../fonts/helvetiker_regular.typeface.json",
-  useFog: true,
-  drawDistance: 100
-});
+var WIDTH = 100,
+  HEIGHT = 6,
+  DEPTH = 100,
+  MIDX = WIDTH / 2,
+  MIDY = HEIGHT / 2,
+  MIDZ = DEPTH / 2,
+  t = 0,
+  jabs = {},
+  R = Primrose.Random,
+  env = new Primrose.BrowserEnvironment({
+    backgroundColor: 0xC9E6EE,
+    skyTexture: "../images/bg.jpg",
+    groundTexture: "../images/grass.png",
+    font: "../fonts/helvetiker_regular.typeface.json",
+    useFog: true,
+    drawDistance: 100
+  });
 
 // and clicking on the objects in the scene
 function makeJabJump(evt) {
@@ -32,18 +26,29 @@ env.addEventListener("gazecomplete", makeJabJump);
 env.addEventListener("pointerend", makeJabJump);
 
 function eye(side, body) {
-  var ball = put(colored(sphere(0.05, 6, 3), 0xffffff)).on(body).at(side * 0.07, 0.05, 0.16).obj();
-  put(colored(sphere(0.01, 3, 2), 0)).on(ball).at(0, 0, 0.045);
+  var ball = put(colored(sphere(0.05, 6, 3), 0xffffff))
+    .on(body)
+    .at(side * 0.07, 0.05, 0.16)
+    .obj();
+  put(colored(sphere(0.01, 3, 2), 0))
+    .on(ball)
+    .at(0, 0, 0.045);
   return ball;
 }
 
 function Jabber(w, h, s) {
   var skin = R.item(Primrose.SKINS_VALUES),
-      body = colored(sphere(0.2, 14, 7), skin),
-      velocity = v3(R.number(-s, s), 0, R.number(-s, s)),
-      v = v3(0, 0, 0);
+    body = colored(sphere(0.2, 14, 7), skin),
+    velocity = v3(
+      R.number(-s, s),
+      0,
+      R.number(-s, s)),
+    v = v3(0, 0, 0);
 
-  body.position.set(R.number(-w, w), 1, R.number(-h, h));
+  body.position.set(
+    R.number(-w, w),
+    1,
+    R.number(-h, h))
 
   eye(-1, body);
   eye(1, body);
@@ -51,27 +56,36 @@ function Jabber(w, h, s) {
   body.rotation.y = Math.PI;
   body.update = function (dt) {
     velocity.y -= env.options.gravity * dt;
-    body.position.add(v.copy(velocity).multiplyScalar(dt));
-    if (velocity.x > 0 && body.position.x >= w || velocity.x < 0 && body.position.x <= -w) {
+    body.position.add(v.copy(velocity)
+      .multiplyScalar(dt));
+    if (velocity.x > 0 && body.position.x >= w ||
+      velocity.x < 0 && body.position.x <= -w) {
       velocity.x *= -1;
     }
-    if (velocity.z > 0 && body.position.z >= h || velocity.z < 0 && body.position.z <= -h) {
+    if (velocity.z > 0 && body.position.z >= h ||
+      velocity.z < 0 && body.position.z <= -h) {
       velocity.z *= -1;
     }
     if (velocity.y < 0 && body.position.y < 1) {
       velocity.y = 0;
       body.position.y = 1;
     }
-    v.copy(body.position).sub(env.input.head.position);
+    v.copy(body.position)
+      .sub(env.input.head.position);
     var d = v.length();
     if (d < 3) {
       body.lookAt(env.input.head.position);
-      body.position.set(R.number(-0.01, 0.01), R.number(-0.01, 0.01), R.number(-0.01, 0.01));
+      body.position.set(
+        R.number(-0.01, 0.01),
+        R.number(-0.01, 0.01),
+        R.number(-0.01, 0.01));
       v.divideScalar(d);
       v.y = 0;
       velocity.add(v.multiplyScalar((3 - d) / 100));
-    } else {
-      body.lookAt(v.copy(velocity).add(body.position));
+    }
+    else {
+      body.lookAt(v.copy(velocity)
+        .add(body.position));
     }
   };
   body.jump = function (normal) {
@@ -89,7 +103,9 @@ function Jabber(w, h, s) {
 // indicating that we may make additional changes to the scene now.
 env.addEventListener("ready", function () {
   for (var i = 0; i < 25; ++i) {
-    var jab = Jabber(MIDX / 5, MIDZ / 5, 1);
+    var jab = Jabber(
+      MIDX / 5,
+      MIDZ / 5, 1);
     jabs[jab.uuid] = jab;
     env.appendChild(jab);
   }
@@ -100,5 +116,3 @@ env.addEventListener("update", function (dt) {
     jabs[id].update(dt);
   }
 });
-
-})));

@@ -52,8 +52,9 @@
     "bare-bones-logger": "^4.0.0",
     "iphone-inline-video": "^1.9.3",
     "jstransformer-marked": "^1.0.1",
+    "notion-node": "0.0.4",
+    "notiontheory-basic-build": "^3.0.0",
     "pliny": "^3.2.6",
-    "promise-polyfill": "^5.2.1",
-    "notiontheory-basic-build": "^3.0.0"
+    "promise-polyfill": "^5.2.1"
   }
 }

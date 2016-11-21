@@ -127,6 +127,8 @@ export default function textured(geometry, txt, options) {
       texture.repeat.set(options.txtRepeatS, options.txtRepeatT);
     }
 
+    texture.anisotropy = options.anisotropy;
+
     if(texture instanceof CubeTexture){
       mat.envMap = texture;
     }

@@ -1,7 +1,11 @@
 import PointerLock from "webvr-standard-monitor/src/PointerLock";
 import isMobile from "../flags/isMobile";
 import box from "../live-api/box";
+import brick from "../live-api/brick";
+import colored from "../live-api/colored";
 import hub from "../live-api/hub";
+import light from "../live-api/light";
+import put from "../live-api/put";
 import Angle from "./Angle";
 import AbstractEventEmitter from "./AbstractEventEmitter";
 import Pointer from "./Pointer";
@@ -568,6 +572,7 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
         this.ground = brick(this.options.groundTexture, dim * 5, 0.1, dim * 5, {
           txtRepeatS: dim * 5,
           txtRepeatT: dim * 5,
+          anisotropy: 8,
           resolve: resolve,
           progress: this.options.progress
         });

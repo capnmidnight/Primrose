@@ -3652,7 +3652,7 @@ pliny.function({
     var base2 = hub();"
   }]
 });
-function hub$1() {
+function hub() {
   return new Object3D();
 }
 
@@ -5441,7 +5441,7 @@ MeshBasicMaterial.prototype.copy = function (source) {
 	return this;
 };
 
-function material$1(textureDescription, options) {
+function material(textureDescription, options) {
   if (options === undefined && typeof textureDescription !== "string") {
     options = textureDescription;
     textureDescription = "none";
@@ -14754,7 +14754,7 @@ function textured$1(geometry, txt, options) {
     }
   });
 
-  var mat = material$1(textureDescription, options),
+  var mat = material(textureDescription, options),
       obj = null;
   if (geometry.type.indexOf("Geometry") > -1) {
     obj = new Mesh(geometry, mat);
@@ -14825,7 +14825,7 @@ function colored$1(geometry, color, options) {
   options = options || {};
   options.color = color;
 
-  var mat = material$1("", options),
+  var mat = material("", options),
       obj = null;
 
   if (geometry.type.indexOf("Geometry") > -1) {
@@ -15187,7 +15187,7 @@ The result should appear as:\n\
 });
 
 function axis(length, width) {
-  var center = hub$1();
+  var center = hub();
   put(brick(0xff0000, length, width, width)).on(center);
   put(brick(0x00ff00, width, length, width)).on(center);
   put(brick(0x0000ff, width, width, length)).on(center);
@@ -15304,7 +15304,7 @@ It should look something like this:\n\
   }]
 });
 
-function circle(r, sections, start, end) {
+function circle$1(r, sections, start, end) {
   r = r || 1;
   sections = sections || 18;
   return cache("CircleBufferGeometry(" + r + ", " + sections + ", " + start + ", " + end + ")", function () {
@@ -15911,7 +15911,7 @@ It should look something like this:\n\
   }]
 });
 
-function cylinder(rT, rB, height, rS, hS, openEnded, thetaStart, thetaEnd) {
+function cylinder$1(rT, rB, height, rS, hS, openEnded, thetaStart, thetaEnd) {
   if (rT === undefined) {
     rT = 0.5;
   }
@@ -17461,13 +17461,13 @@ var index$1 = {
   axis: axis,
   box: box$1,
   brick: brick,
-  circle: circle,
+  circle: circle$1,
   cloud: cloud,
   colored: colored$1,
-  cylinder: cylinder,
-  hub: hub$1,
+  cylinder: cylinder$1,
+  hub: hub,
   light: light,
-  material: material$1,
+  material: material,
   put: put,
   quad: quad$1,
   range: range,
@@ -17483,13 +17483,13 @@ var liveAPI = Object.freeze({
 	axis: axis,
 	box: box$1,
 	brick: brick,
-	circle: circle,
+	circle: circle$1,
 	cloud: cloud,
 	colored: colored$1,
-	cylinder: cylinder,
-	hub: hub$1,
+	cylinder: cylinder$1,
+	hub: hub,
 	light: light,
-	material: material$1,
+	material: material,
 	put: put,
 	quad: quad$1,
 	range: range,
@@ -17839,7 +17839,7 @@ var Pointer = function (_AbstractEventEmitter) {
     _this.disk.visible = false;
     _this.disk.geometry.computeBoundingBox();
 
-    _this.gazeInner = colored$1(circle(GAZE_RING_INNER / 2, 10), 0xc0c0c0, {
+    _this.gazeInner = colored$1(circle$1(GAZE_RING_INNER / 2, 10), 0xc0c0c0, {
       unshaded: true
     });
     _this.gazeInner.position.set(0, 0, GAZE_RING_DISTANCE);
@@ -17956,7 +17956,7 @@ var Pointer = function (_AbstractEventEmitter) {
     value: function resolvePicking(objects) {
       this.mesh.visible = false;
       this.gazeInner.visible = false;
-      this.mesh.material = material$1("", {
+      this.mesh.material = material("", {
         color: this.color,
         unshaded: true
       });
@@ -17992,7 +17992,7 @@ var Pointer = function (_AbstractEventEmitter) {
         if (currentHit) {
           currentHit.time = performance.now();
 
-          this.mesh.material = material$1("", {
+          this.mesh.material = material("", {
             color: this.highlight,
             unshaded: true
           });
@@ -35401,7 +35401,7 @@ var FPSInput = function (_AbstractEventEmitter) {
       _this.gamepadMgr.addEventListener("gamepaddisconnected", _this.remove.bind(_this));
     }
 
-    _this.stage = hub$1();
+    _this.stage = hub();
 
     _this.head = new Pointer("GazePointer", 0xffff00, 0x0000ff, 0.8, [_this.VR], [_this.Mouse, _this.Touch, _this.Keyboard], _this.options);
 
@@ -46277,7 +46277,7 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
         });
       });
     } else {
-      _this.sky = hub$1();
+      _this.sky = hub();
       skyReady = Promise.resolve();
     }
 
@@ -46308,7 +46308,7 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
         _this.registerPickableObject(_this.ground);
       });
     } else {
-      _this.ground = hub$1();
+      _this.ground = hub();
       groundReady = Promise.resolve();
     }
 
@@ -46317,7 +46317,7 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
       _this.scene.add(_this.ground);
     });
 
-    _this.ui = hub$1().named("UI");
+    _this.ui = hub().named("UI");
     _this.scene.add(_this.ui);
 
     var buildScene = function buildScene(sceneGraph) {
@@ -46771,162 +46771,57 @@ BrowserEnvironment.DEFAULTS = {
 };
 
 Object.assign(window, liveAPI);
-var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-var dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-var primaryColor = 0xb09000;
-var secondaryColor = 0x303030;
-var todayColor = 0x306080;
-var angleThreshold = 15;
-var primaryMaterial = material({ color: primaryColor });
-var secondaryMaterial = material({ color: secondaryColor });
-var todayMaterial = material({ color: todayColor });
-var objs = [];
-var dim = 50;
-var boxSize = dim / 300;
-var boxSpacing = boxSize * 50;
-var textSize = boxSize * 0.333;
-var hDim = dim / 2;
-var deg2rad = function deg2rad(a) {
-  return Math.PI * a / 180;
-};
-var rad2deg = function rad2deg(r) {
-  return 180 * r / Math.PI;
-};
-var rand = function rand() {
-  return number(0, dim);
-};
-var randDegree = function randDegree() {
-  return number(-Math.PI, Math.PI);
-};
+var skyColor = 0xffff7f;
 var env = new BrowserEnvironment({
-  groundTexture: "../images/deck.png",
-  font: "../fonts/helvetiker_regular.typeface.json",
-  backgroundColor: 0x000000,
+  backgroundColor: skyColor,
+  groundTexture: "../images/sand.png",
   useFog: true,
-  drawDistance: hDim / 2,
+  fullScreenButtonContainer: "#fullScreenButtonContainer",
   enableShadows: true,
-  fullScreenButtonContainer: "#fullScreenButtonContainer"
+  shadowMapSize: 2048
 });
+var sunDistance = 20;
+var sun = circle(1, 45).colored(0xffffff, { unshaded: true }).named("sun");
+var t = function t(name, rt, rb, h, sr) {
+  return cylinder(rt, rb, h, sr, 1).textured("../images/rock.png", { shadow: true }).named(name);
+};
+var sunDialColor = 0xd0d0c0;
+var dial = t("dial", 0.333, 0.333, 0.03, 45);
+var handHeight = 0.25;
+var hand = t("hand", 0.01, 0.02, handHeight, 3);
+var standHeight = 1;
+var stand = t("stand", 0.1, 0.3, standHeight, 4);
+var baseHeight = 0.10;
+var base = t("base", 0.35, 0.35, baseHeight, 4);
+var time = 0;
 
-var months = null;
-var currentMonth = new Date().getMonth();
+env.sky.add(sun);
+sun.material.fog = false;
+sun.material.needsUpdate = true;
 
-function setColor() {
-  var _this = this;
+env.scene.add(stand);
+stand.position.y += standHeight / 2;
+stand.position.z += -1.5;
+stand.rotation.y = Math.PI / 4;
 
-  var date = new Date(),
-      month = date.getMonth(),
-      d = date.getDate() - 1;
-  objs.forEach(function (o, i) {
-    if (o.box === _this) {
-      o.box.material = primaryMaterial;
-      o.lbl.material = secondaryMaterial;
-      o.bev.material = secondaryMaterial;
-    } else {
-      o.box.material = month === currentMonth && i === d ? todayMaterial : secondaryMaterial;
-      o.lbl.material = primaryMaterial;
-      o.bev.material = primaryMaterial;
-    }
-  });
-}
+stand.add(dial);
+dial.position.y += standHeight / 2;
 
-function text(text, size) {
-  size = size || 1;
-  return text3D(size * textSize, text).center();
-}
+stand.add(base);
+base.position.y += (baseHeight - standHeight) / 2;
 
-function hitDate(month, date) {
-  var d = new Date();
-  d.setMonth(month);
-  d.setDate(date);
-  env.speech.speak(dayNames[d.getDay()] + ", " + monthNames[month] + " " + date + ", " + d.getFullYear());
-}
+dial.add(hand);
+hand.position.y += handHeight / 2;
 
-function showMonth(month) {
-  env.ui.children.splice(0);
-
-  var date = new Date(),
-      today = null;
-
-  if (month == date.getMonth()) {
-    today = date.getDate();
-  } else {
-    date.setMonth(month);
-  }
-
-  date.setDate(1);
-  var x = 0,
-      y = 0,
-      lastDay = 0;
-  env.ui.add(months[month].latLon(-72, 0));
-  while (date.getMonth() === month) {
-    x = date.getDay();
-    if (x < lastDay) {
-      ++y;
-    }
-
-    var d = date.getDate(),
-        o = objs[d - 1];
-    if (today == d) {
-      o.box.material = todayMaterial;
-    } else {
-      o.box.material = secondaryMaterial;
-    }
-    o.box.onenter = setColor.bind(o.box);
-    env.registerPickableObject(o.box);
-    o.box.onselect = hitDate.bind(null, month, d);
-    env.ui.add(o.hub.latLon(boxSpacing * (y - 2) - 45, boxSpacing * (3 - x)));
-    date.setDate(date.getDate() + 1);
-    lastDay = x;
-  }
-  env.ground.onenter = setColor.bind(env.ground);
-}
-
-env.addEventListener("ready", function () {
-  env.insertFullScreenButtons("body");
-  months = monthNames.map(function (month) {
-    return text(month, 3.5).colored(primaryColor).named(month);
-  });
-
-  for (var d = 0; d < 31; ++d) {
-    var o = hub(),
-        b = box(boxSize).colored(secondaryColor).named("box" + (d + 1)),
-        bev = box(boxSize * 1.1, boxSize * 1.1, boxSize * 0.9).colored(primaryColor).named("bev" + (d + 1)),
-        t = text((d + 1).toString()).colored(primaryColor).named("txt" + (d + 1));
-
-    t.castShadow = true;
-    b.receiveShadow = true;
-    t.position.z = 0.08;
-    o.add(b);
-    b.add(bev);
-    b.add(t);
-    objs.push({
-      hub: o,
-      box: b,
-      lbl: t,
-      bev: bev
-    });
-  }
-
-  showMonth(currentMonth);
-
-  env.ui.add(text("Turn left or right to change month", 0.5).colored(primaryColor).named("inst1").latLon(-20, 0, 1));
-  env.ui.add(text("Click on dates.", 0.5).colored(primaryColor).named("inst2").latLon(-17, 0, 1));
-});
-
-var lt = 0;
-env.addEventListener("update", function () {
-  var dt = env.turns.degrees - lt;
-  if (Math.abs(dt) > angleThreshold) {
-    currentMonth = currentMonth + (dt < 0 ? 1 : -1);
-    if (currentMonth < 0) {
-      currentMonth += 12;
-    } else if (currentMonth >= 12) {
-      currentMonth -= 12;
-    }
-    showMonth(currentMonth);
-    lt = env.turns.degrees;
-  }
+env.addEventListener("update", function (dt) {
+  time += dt;
+  env.sun.latLon(10 - time, 30, sunDistance);
+  sun.position.copy(env.sun.position);
+  sun.lookAt(env.sky.position);
+  var s = (1 + sun.position.y / sunDistance) / 2;
+  env.ambient.intensity = 0.5 * s;
+  env.scene.fog.color.setHex(skyColor).multiplyScalar(s);
+  env.renderer.setClearColor(env.scene.fog.color.getHex());
 });
 
 })));

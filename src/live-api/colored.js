@@ -1,5 +1,6 @@
 import { Mesh } from "three/src/objects/Mesh";
 import { Object3D } from "three/src/core/Object3D";
+import material from "./material";
 
 pliny.function({
   name: "colored",

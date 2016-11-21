@@ -1,7 +1,7 @@
 import * as liveAPI from "../../../src/live-api";
-import randNum from "../../../src/Primrose/Random/number";
-import BrowserEnvironment from "../../../src/Primrose/BrowserEnvironment";
 Object.assign(window, liveAPI);
+import BrowserEnvironment from "../../../src/Primrose/BrowserEnvironment";
+import randNum from "../../../src/Primrose/Random/number";
 
 const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
       dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
