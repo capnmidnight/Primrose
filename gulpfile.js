@@ -61,32 +61,33 @@ var gulp = require("gulp"),
   }, { format: null, default: null, debug: [], release: [] }),
 
   html = nt.html("Primrose", ["*.pug", "doc/**/*.pug", "templates/**/*.pug"], "src"),
-  css = nt.css("Primrose", ["*.styl", "doc/**/*.styl"]);
+  css = nt.css("Primrose", ["*.styl", "doc/**/*.styl"]),
+  demos = glob("doc/*/src/index.js").map(function(file) {
+    var name = file.match(/doc\/(\w+)\/src\/index\.js/)[1],
+      parts = path.parse(file),
+      taskName = "Demo:" + name,
+      inFile = path.join(parts.dir, "../appWithDoc.js"),
+      outFile = inFile.replace("WithDoc", ""),
+      js = nt.js(taskName, parts.dir, {
+        moduleName: name,
+        fileName: inFile,
+        format: "umd",
+        watch: ["src/**/*.js"],
+        post: (inFile, cb) => pliny.carve(inFile, outFile, null, cb)
+      }),
+      min = nt.min(taskName, [outFile], [{
+        debug: js.debug,
+        release: js.release
+      }]);
 
-glob("doc/*/src/index.js").forEach(function(file) {
-  var name = file.match(/doc\/(\w+)\/src\/index\.js/)[1],
-    parts = path.parse(file),
-    taskName = "Demo:" + name,
-    inFile = path.join(parts.dir, "../appWithDoc.js"),
-    outFile = inFile.replace("WithDoc", ""),
-    js = nt.js(taskName, parts.dir, {
-      moduleName: name,
-      fileName: inFile,
-      format: "umd",
-      watch: ["src/**/*.js"],
-      post: (inFile, cb) => pliny.carve(inFile, outFile, null, cb)
-    }),
-    min = nt.min(taskName, [outFile], [{
-      debug: js.debug,
-      release: js.release
-    }]);
-
-  tasks.format.push(js.format);
-  tasks.default.push(js.default);
-  tasks.default.push(min.default);
-  tasks.debug.push(min.debug);
-  tasks.release.push(min.release);
-});
+    return {
+      name: name,
+      format: js.format,
+      default: [js.default, min.default],
+      debug: min.debug,
+      release: min.release
+    };
+  });
 
 gulp.task("clean", [nt.clean("Primrose:full", [
   "Primrose*.js",
@@ -102,12 +103,17 @@ gulp.task("tidy", [nt.clean("Primrose", [
 gulp.task("copy", ["tidy"], () => gulp.src(["Primrose.min.js"])
   .pipe(gulp.dest("quickstart")));
 
+tasks.format.push.apply(tasks.format, demos.map(d=>d.format));
+tasks.debug.push.apply(tasks.format, demos.map(d=>d.debug));
+tasks.release.push.apply(tasks.format, demos.map(d=>d.release));
+
 gulp.task("format", tasks.format);
 gulp.task("js", tasks.default);
+gulp.task("demos", tasks.default.concat(demos.reduce((a, b)=>a.concat(b.default), [])));
 gulp.task("js:debug", tasks.debug);
 gulp.task("js:release", tasks.release);
-gulp.task("html", [html.debug]);
-gulp.task("css", [css.debug]);
+gulp.task("html", [html.default]);
+gulp.task("css", [css.default]);
 
 gulp.task("default", [
   "js",
