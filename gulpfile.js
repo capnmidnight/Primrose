@@ -8,6 +8,10 @@ var gulp = require("gulp"),
   build = require("../notiontheory-basic-build"),
   nt = build.setup(gulp, pkg),
 
+  html = nt.html("Primrose", ["*.pug", "doc/**/*.pug", "templates/**/*.pug"], "src"),
+
+  css = nt.css("Primrose", ["*.styl", "doc/**/*.styl"]),
+
   formats = ["umd", "es"],
 
   tasks = formats.map((format) => {
@@ -52,30 +56,28 @@ var gulp = require("gulp"),
   }).reduce((collect, task) => {
     if(!collect.format) {
       collect.format = [task.js.format];
-      collect.default = [task.js.default, task.min.default];
+      collect.default = [task.js.default];
     }
-    task = task.min || task.js;
-    collect.debug.push(task.debug);
-    collect.release.push(task.release);
+    collect.debug.push(task.js.debug);
+    collect.release.push(task.js.release);
     return collect;
   }, { format: null, default: null, debug: [], release: [] }),
 
-  html = nt.html("Primrose", ["*.pug", "doc/**/*.pug", "templates/**/*.pug"], "src"),
-  css = nt.css("Primrose", ["*.styl", "doc/**/*.styl"]),
-  demos = glob("doc/*/src/index.js").map(function(file) {
+  demos = glob("doc/**/src/index.js").map(function(file) {
     var name = file.match(/doc\/(\w+)\/src\/index\.js/)[1],
       parts = path.parse(file),
       taskName = "Demo:" + name,
       inFile = path.join(parts.dir, "../appWithDoc.js"),
       outFile = inFile.replace("WithDoc", ""),
+      docFile = inFile.replace("WithDoc", "Documentation"),
       js = nt.js(taskName, parts.dir, {
         moduleName: name,
         fileName: inFile,
         format: "umd",
         watch: ["src/**/*.js"],
-        post: (inFile, cb) => pliny.carve(inFile, outFile, null, cb)
+        post: (_, cb) => pliny.carve(inFile, outFile, docFile, cb)
       }),
-      min = nt.min(taskName, [outFile], [{
+      min = nt.min(taskName, outFile, [{
         debug: js.debug,
         release: js.release
       }]);
@@ -104,12 +106,16 @@ gulp.task("copy", ["tidy"], () => gulp.src(["Primrose.min.js"])
   .pipe(gulp.dest("quickstart")));
 
 tasks.format.push.apply(tasks.format, demos.map(d=>d.format));
-tasks.debug.push.apply(tasks.format, demos.map(d=>d.debug));
-tasks.release.push.apply(tasks.format, demos.map(d=>d.release));
+tasks.debug.push.apply(tasks.debug, demos.map(d=>d.debug));
+tasks.release.push.apply(tasks.release, demos.map(d=>d.release));
 
 gulp.task("format", tasks.format);
 gulp.task("js", tasks.default);
-gulp.task("demos", tasks.default.concat(demos.reduce((a, b)=>a.concat(b.default), [])));
+
+const demoTasks = tasks.default.slice();
+demos.forEach((d)=>demoTasks.push.apply(demoTasks, d.default));
+
+gulp.task("demos", demoTasks);
 gulp.task("js:debug", tasks.debug);
 gulp.task("js:release", tasks.release);
 gulp.task("html", [html.default]);
