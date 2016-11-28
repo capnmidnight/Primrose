@@ -12,7 +12,7 @@ var isInIFrame = window.self !== window.top;
 
 var isiOS = /iP(hone|od|ad)/.test(navigator.userAgent || "");
 
-var isMacOS$1 = /Macintosh/.test(navigator.userAgent || "");
+var isMacOS = /Macintosh/.test(navigator.userAgent || "");
 
 function testUserAgent(a) {
   return (/(android|bb\d+|meego).+|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od|ad)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(a) || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substring(0, 4))
@@ -33,7 +33,7 @@ var index$1 = {
   isIE: isIE,
   isInIFrame: isInIFrame,
   isiOS: isiOS,
-  isMacOS: isMacOS$1,
+  isMacOS: isMacOS,
   isMobile: isMobile,
   isOpera: isOpera,
   isSafari: isSafari,
@@ -48,7 +48,7 @@ var flags = Object.freeze({
 	isIE: isIE,
 	isInIFrame: isInIFrame,
 	isiOS: isiOS,
-	isMacOS: isMacOS$1,
+	isMacOS: isMacOS,
 	isMobile: isMobile,
 	isOpera: isOpera,
 	isSafari: isSafari,
@@ -3694,11 +3694,11 @@ function Object3DIdCount() {
 	return count++;
 }
 
-function hub$1() {
+function hub() {
   return new Object3D();
 }
 
-function put$1(object) {
+function put(object) {
   var box = {
     on: null,
     at: null,
@@ -3758,7 +3758,7 @@ function put$1(object) {
 }
 
 var _cache = {};
-function cache$1(hash, makeObject, onCacheHit) {
+function cache(hash, makeObject, onCacheHit) {
   if (!_cache[hash]) {
     _cache[hash] = makeObject();
   } else if (onCacheHit) {
@@ -5427,7 +5427,7 @@ MeshBasicMaterial.prototype.copy = function (source) {
 	return this;
 };
 
-function material$1(textureDescription, options) {
+function material(textureDescription, options) {
   if (options === undefined && typeof textureDescription !== "string") {
     options = textureDescription;
     textureDescription = "none";
@@ -10901,118 +10901,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 
 
-var asyncGenerator = function () {
-  function AwaitValue(value) {
-    this.value = value;
-  }
 
-  function AsyncGenerator(gen) {
-    var front, back;
-
-    function send(key, arg) {
-      return new Promise(function (resolve, reject) {
-        var request = {
-          key: key,
-          arg: arg,
-          resolve: resolve,
-          reject: reject,
-          next: null
-        };
-
-        if (back) {
-          back = back.next = request;
-        } else {
-          front = back = request;
-          resume(key, arg);
-        }
-      });
-    }
-
-    function resume(key, arg) {
-      try {
-        var result = gen[key](arg);
-        var value = result.value;
-
-        if (value instanceof AwaitValue) {
-          Promise.resolve(value.value).then(function (arg) {
-            resume("next", arg);
-          }, function (arg) {
-            resume("throw", arg);
-          });
-        } else {
-          settle(result.done ? "return" : "normal", result.value);
-        }
-      } catch (err) {
-        settle("throw", err);
-      }
-    }
-
-    function settle(type, value) {
-      switch (type) {
-        case "return":
-          front.resolve({
-            value: value,
-            done: true
-          });
-          break;
-
-        case "throw":
-          front.reject(value);
-          break;
-
-        default:
-          front.resolve({
-            value: value,
-            done: false
-          });
-          break;
-      }
-
-      front = front.next;
-
-      if (front) {
-        resume(front.key, front.arg);
-      } else {
-        back = null;
-      }
-    }
-
-    this._invoke = send;
-
-    if (typeof gen.return !== "function") {
-      this.return = undefined;
-    }
-  }
-
-  if (typeof Symbol === "function" && Symbol.asyncIterator) {
-    AsyncGenerator.prototype[Symbol.asyncIterator] = function () {
-      return this;
-    };
-  }
-
-  AsyncGenerator.prototype.next = function (arg) {
-    return this._invoke("next", arg);
-  };
-
-  AsyncGenerator.prototype.throw = function (arg) {
-    return this._invoke("throw", arg);
-  };
-
-  AsyncGenerator.prototype.return = function (arg) {
-    return this._invoke("return", arg);
-  };
-
-  return {
-    wrap: function (fn) {
-      return function () {
-        return new AsyncGenerator(fn.apply(this, arguments));
-      };
-    },
-    await: function (value) {
-      return new AwaitValue(value);
-    }
-  };
-}();
 
 
 
@@ -13174,6 +13063,10 @@ var Grammar = function () {
 
 var JavaScript = new Grammar("JavaScript", [["newlines", /(?:\r\n|\r|\n)/], ["startBlockComments", /\/\*/], ["endBlockComments", /\*\//], ["regexes", /(?:^|,|;|\(|\[|\{)(?:\s*)(\/(?:\\\/|[^\n\/])+\/)/], ["stringDelim", /("|')/], ["startLineComments", /\/\/.*$/m], ["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/], ["keywords", /\b(?:break|case|catch|class|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/], ["functions", /(\w+)(?:\s*\()/], ["members", /(\w+)\./], ["members", /((\w+\.)+)(\w+)/]]);
 
+function clone$1(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+
 var SCROLL_SCALE = isFirefox ? 3 : 100;
 var COUNTER$1 = 0;
 var OFFSET = 0;
@@ -14017,7 +13910,7 @@ var TextBox = function (_Surface) {
       return this._theme;
     },
     set: function set(t) {
-      this._theme = clone(t || Default);
+      this._theme = clone$1(t || Default);
       this._theme.fontSize = this.fontSize;
       this._rowCache = {};
       this.render();
@@ -14112,7 +14005,7 @@ function textured$1(geometry, txt, options) {
 
   var txtID = (txt.id || txt).toString(),
       textureDescription = "Primrose.textured(" + txtID + ", " + options.txtRepeatS + ", " + options.txtRepeatT + ", " + options.anisotropy + ", " + options.scaleTextureWidth + ", " + options.scaleTextureHeight + ")";
-  var texturePromise = cache$1(textureDescription, function () {
+  var texturePromise = cache(textureDescription, function () {
     if (typeof txt === "string" || txt instanceof Array || txt.length === 6) {
       return loadTexture$1(textureDescription, txt, options.progress);
     } else {
@@ -14165,7 +14058,7 @@ function textured$1(geometry, txt, options) {
     }
   });
 
-  var mat = material$1(textureDescription, options),
+  var mat = material(textureDescription, options),
       obj = null;
   if (geometry.type.indexOf("Geometry") > -1) {
     obj = new Mesh(geometry, mat);
@@ -14209,6 +14102,8 @@ function textured$1(geometry, txt, options) {
       texture.wrapS = texture.wrapT = RepeatWrapping;
       texture.repeat.set(options.txtRepeatS, options.txtRepeatT);
     }
+
+    texture.anisotropy = options.anisotropy;
 
     if (texture instanceof CubeTexture) {
       mat.envMap = texture;
@@ -14443,12 +14338,12 @@ function box$1(width, height, length, t, u, v) {
   if (length === undefined) {
     length = width;
   }
-  return cache$1("BoxBufferGeometry(" + width + ", " + height + ", " + length + ", " + t + ", " + u + ", " + v + ")", function () {
+  return cache("BoxBufferGeometry(" + width + ", " + height + ", " + length + ", " + t + ", " + u + ", " + v + ")", function () {
     return new BoxBufferGeometry(width, height, length, t, u, v);
   });
 }
 
-function brick$1(txt, w, h, l, options) {
+function brick(txt, w, h, l, options) {
   w = w || 1;
   h = h || 1;
   l = l || 1;
@@ -14465,10 +14360,10 @@ function brick$1(txt, w, h, l, options) {
 }
 
 function axis(length, width) {
-  var center = hub$1();
-  put$1(brick$1(0xff0000, length, width, width)).on(center);
-  put$1(brick$1(0x00ff00, width, length, width)).on(center);
-  put$1(brick$1(0x0000ff, width, width, length)).on(center);
+  var center = hub();
+  put(brick(0xff0000, length, width, width)).on(center);
+  put(brick(0x00ff00, width, length, width)).on(center);
+  put(brick(0x0000ff, width, width, length)).on(center);
   return center;
 }
 
@@ -14537,10 +14432,10 @@ function CircleBufferGeometry(radius, segments, thetaStart, thetaLength) {
 CircleBufferGeometry.prototype = Object.create(BufferGeometry.prototype);
 CircleBufferGeometry.prototype.constructor = CircleBufferGeometry;
 
-function circle$1(r, sections, start, end) {
+function circle(r, sections, start, end) {
   r = r || 1;
   sections = sections || 18;
-  return cache$1("CircleBufferGeometry(" + r + ", " + sections + ", " + start + ", " + end + ")", function () {
+  return cache("CircleBufferGeometry(" + r + ", " + sections + ", " + start + ", " + end + ")", function () {
     return new CircleBufferGeometry(r, sections, start, end);
   });
 }
@@ -14724,7 +14619,7 @@ function cloud(verts, c, s) {
   for (var i = 0; i < verts.length; ++i) {
     geom.vertices.push(verts[i]);
   }
-  var mat = cache$1("PointsMaterial(" + c + ", " + s + ")", function () {
+  var mat = cache("PointsMaterial(" + c + ", " + s + ")", function () {
     return new PointsMaterial({
       color: c,
       size: s
@@ -15043,7 +14938,7 @@ function cylinder(rT, rB, height, rS, hS, openEnded, thetaStart, thetaEnd) {
   if (height === undefined) {
     height = 1;
   }
-  return cache$1("CylinderBufferGeometry(" + rT + ", " + rB + ", " + height + ", " + rS + ", " + hS + ", " + openEnded + ", " + thetaStart + ", " + thetaEnd + ")", function () {
+  return cache("CylinderBufferGeometry(" + rT + ", " + rB + ", " + height + ", " + rS + ", " + hS + ", " + openEnded + ", " + thetaStart + ", " + thetaEnd + ")", function () {
     return new CylinderBufferGeometry(rT, rB, height, rS, hS, openEnded, thetaStart, thetaEnd);
   });
 }
@@ -15472,7 +15367,7 @@ PointLight.prototype = Object.assign(Object.create(Light.prototype), {
 
 });
 
-function light$1(color, intensity, distance, decay) {
+function light(color, intensity, distance, decay) {
   return new PointLight(color, intensity, distance, decay);
 }
 
@@ -15610,7 +15505,7 @@ function quad$1(width, height, options) {
   if (options.t === undefined) {
     options.t = 1;
   }
-  return cache$1("PlaneBufferGeometry(" + width + ", " + height + ", " + options.s + ", " + options.t + ", " + options.maxU + ", " + options.maxV + ")", function () {
+  return cache("PlaneBufferGeometry(" + width + ", " + height + ", " + options.s + ", " + options.t + ", " + options.maxU + ", " + options.maxV + ")", function () {
     return fixGeometry(new PlaneBufferGeometry(width, height, options.s, options.t), options);
   });
 }
@@ -15762,7 +15657,7 @@ function RingBufferGeometry(innerRadius, outerRadius, thetaSegments, phiSegments
 RingBufferGeometry.prototype = Object.create(BufferGeometry.prototype);
 RingBufferGeometry.prototype.constructor = RingBufferGeometry;
 
-function ring$1(rInner, rOuter, sectors, rings, start, end) {
+function ring(rInner, rOuter, sectors, rings, start, end) {
   if (rInner === undefined) {
     rInner = 0.5;
   }
@@ -15771,7 +15666,7 @@ function ring$1(rInner, rOuter, sectors, rings, start, end) {
   rOuter = rOuter || 1;
   start = start || 0;
   end = end || 2 * Math.PI;
-  return cache$1("RingBufferGeometry(" + rInner + ", " + rOuter + ", " + sectors + ", " + rings + ", " + start + ", " + end + ")", function () {
+  return cache("RingBufferGeometry(" + rInner + ", " + rOuter + ", " + sectors + ", " + rings + ", " + start + ", " + end + ")", function () {
     return new RingBufferGeometry(rInner, rOuter, sectors, rings, start, end);
   });
 }
@@ -15907,7 +15802,7 @@ function shell$1(r, slices, rings, phi, theta, options) {
   var phiStart = 1.5 * Math.PI - phi * 0.5,
       thetaStart = (Math.PI - theta) * 0.5;
   options = options || {};
-  return cache$1("InsideSphereGeometry(" + r + ", " + slices + ", " + rings + ", " + phi + ", " + theta + ")", function () {
+  return cache("InsideSphereGeometry(" + r + ", " + slices + ", " + rings + ", " + phi + ", " + theta + ")", function () {
     return fixGeometry(new InsideSphereGeometry(r, slices, rings, phiStart, phi, thetaStart, theta, true), options);
   });
 }
@@ -16160,7 +16055,7 @@ SphereGeometry.prototype = Object.create(Geometry.prototype);
 SphereGeometry.prototype.constructor = SphereGeometry;
 
 function sphere$1(r, slices, rings) {
-  return cache$1("SphereGeometry(" + r + ", " + slices + ", " + rings + ")", function () {
+  return cache("SphereGeometry(" + r + ", " + slices + ", " + rings + ")", function () {
     return new SphereGeometry(r, slices, rings);
   });
 }
@@ -16172,18 +16067,18 @@ function v3(x, y, z) {
 var index$2 = {
   axis: axis,
   box: box$1,
-  brick: brick$1,
-  circle: circle$1,
+  brick: brick,
+  circle: circle,
   cloud: cloud,
   colored: colored$1,
   cylinder: cylinder,
-  hub: hub$1,
-  light: light$1,
-  material: material$1,
-  put: put$1,
+  hub: hub,
+  light: light,
+  material: material,
+  put: put,
   quad: quad$1,
   range: range,
-  ring: ring$1,
+  ring: ring,
   shell: shell$1,
   shooter: shooter,
   sphere: sphere$1,
@@ -16194,18 +16089,18 @@ var index$2 = {
 var liveAPI = Object.freeze({
 	axis: axis,
 	box: box$1,
-	brick: brick$1,
-	circle: circle$1,
+	brick: brick,
+	circle: circle,
 	cloud: cloud,
 	colored: colored$1,
 	cylinder: cylinder,
-	hub: hub$1,
-	light: light$1,
-	material: material$1,
-	put: put$1,
+	hub: hub,
+	light: light,
+	material: material,
+	put: put,
 	quad: quad$1,
 	range: range,
-	ring: ring$1,
+	ring: ring,
 	shell: shell$1,
 	shooter: shooter,
 	sphere: sphere$1,
@@ -16213,10 +16108,6 @@ var liveAPI = Object.freeze({
 	v3: v3,
 	default: index$2
 });
-
-function clone$1(obj) {
-  return JSON.parse(JSON.stringify(obj));
-}
 
 function deleteSetting(name) {
   if (window.localStorage) {
@@ -16362,7 +16253,7 @@ var Workerize = function (_AbstractEventEmitter) {
 }(AbstractEventEmitter);
 
 var index$3 = {
-  cache: cache$1,
+  cache: cache,
   clone: clone$1,
   deleteSetting: deleteSetting,
   findProperty: findProperty,
@@ -16373,7 +16264,7 @@ var index$3 = {
 };
 
 var util = Object.freeze({
-	cache: cache$1,
+	cache: cache,
 	clone: clone$1,
 	deleteSetting: deleteSetting,
 	findProperty: findProperty,
@@ -19800,11 +19691,11 @@ Euler.prototype.toString = Quaternion.prototype.toString = Vector2.prototype.toS
   return "<" + parts.join(", ") + ">";
 };
 
-var cache$2 = {};
+var cache$1 = {};
 Euler.prototype.debug = Quaternion.prototype.debug = Vector2.prototype.debug = Vector3.prototype.debug = Vector4.prototype.debug = function (label, digits) {
   var val = this.toString(digits);
-  if (val !== cache$2[label]) {
-    cache$2[label] = val;
+  if (val !== cache$1[label]) {
+    cache$1[label] = val;
     console.log(label + "\n" + val);
   }
   return this;
@@ -20870,8 +20761,8 @@ var Pointer = function (_AbstractEventEmitter) {
     var _this = possibleConstructorReturn(this, (Pointer.__proto__ || Object.getPrototypeOf(Pointer)).call(this));
 
     _this.name = name;
-    _this.devices = devices.filter(identity);
-    _this.triggerDevices = triggerDevices && triggerDevices.filter(identity) || _this.devices.slice();
+    _this.devices = devices.filter(identity$1);
+    _this.triggerDevices = triggerDevices && triggerDevices.filter(identity$1) || _this.devices.slice();
     _this.options = options;
     _this.gazeTimeout = (_this.options.gazeLength || 1.5) * 1000;
 
@@ -20882,12 +20773,12 @@ var Pointer = function (_AbstractEventEmitter) {
     _this.color = color;
     _this.highlight = highlight;
     _this.velocity = new Vector3();
-    _this.mesh = colored(box(LASER_WIDTH / s, LASER_WIDTH / s, LASER_LENGTH * s), _this.color, {
+    _this.mesh = colored$1(box$1(LASER_WIDTH / s, LASER_WIDTH / s, LASER_LENGTH * s), _this.color, {
       unshaded: true
     });
     _this.mesh.position.z = -1.5;
 
-    _this.disk = colored(sphere(TELEPORT_PAD_RADIUS, 128, 3), _this.color, {
+    _this.disk = colored$1(sphere$1(TELEPORT_PAD_RADIUS, 128, 3), _this.color, {
       unshaded: true
     });
     _this.disk.geometry.computeBoundingBox();
@@ -20897,16 +20788,16 @@ var Pointer = function (_AbstractEventEmitter) {
     _this.disk.visible = false;
     _this.disk.geometry.computeBoundingBox();
 
-    _this.gazeInner = colored(circle(GAZE_RING_INNER / 2, 10), 0xc0c0c0, {
+    _this.gazeInner = colored$1(circle(GAZE_RING_INNER / 2, 10), 0xc0c0c0, {
       unshaded: true
     });
     _this.gazeInner.position.set(0, 0, GAZE_RING_DISTANCE);
 
-    _this.gazeInner.add(colored(ring(GAZE_RING_INNER * 0.5, GAZE_RING_INNER * 0.75, 10, 36, 0, 2 * Math.PI), 0xffffff, {
+    _this.gazeInner.add(colored$1(ring(GAZE_RING_INNER * 0.5, GAZE_RING_INNER * 0.75, 10, 36, 0, 2 * Math.PI), 0xffffff, {
       unshaded: true
     }));
 
-    _this.gazeOuter = colored(ring(GAZE_RING_INNER, GAZE_RING_OUTER, 10, 36, 0, 2 * Math.PI), 0xffffff, {
+    _this.gazeOuter = colored$1(ring(GAZE_RING_INNER, GAZE_RING_OUTER, 10, 36, 0, 2 * Math.PI), 0xffffff, {
       unshaded: true
     });
     _this.gazeOuter.visible = false;
@@ -31380,13 +31271,6 @@ var InputProcessor = function (_AbstractEventEmitter) {
   return InputProcessor;
 }(AbstractEventEmitter);
 
-function setCursorCommand(obj, mod, key, func, cur) {
-  var name = mod + "_" + key;
-  obj[name] = function (prim, tokenRows) {
-    prim["cursor" + func](tokenRows, prim[cur + "Cursor"]);
-  };
-}
-
 var OperatingSystem = function () {
   function OperatingSystem(name, pre1, pre2, redo, pre3, home, end, pre5) {
     classCallCheck(this, OperatingSystem);
@@ -33472,7 +33356,7 @@ var FPSInput = function (_AbstractEventEmitter) {
     });
     _this.ready = Promise.all(_this.managers.map(function (mgr) {
       return mgr.ready;
-    }).filter(identity));
+    }).filter(identity$1));
     return _this;
   }
 
@@ -41905,7 +41789,7 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
       if (models.button) {
         _this.buttonFactory = new ButtonFactory(models.button, _this.options.button.options);
       } else {
-        _this.buttonFactory = new ButtonFactory(colored(box$1(1, 1, 1), 0xff0000), {
+        _this.buttonFactory = new ButtonFactory(colored$1(box$1(1, 1, 1), 0xff0000), {
           maxThrow: 0.1,
           minDeflection: 10,
           colorUnpressed: 0x7f0000,
@@ -41916,7 +41800,7 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
     }).catch(function (err) {
       console.error(err);
       if (!_this.buttonFactory) {
-        _this.buttonFactory = new ButtonFactory(colored(box$1(1, 1, 1), 0xff0000), {
+        _this.buttonFactory = new ButtonFactory(colored$1(box$1(1, 1, 1), 0xff0000), {
           maxThrow: 0.1,
           minDeflection: 10,
           colorUnpressed: 0x7f0000,
@@ -42094,7 +41978,7 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
     var skyReady = null;
     if (_this.options.skyTexture !== null) {
       skyReady = new Promise(function (resolve, reject) {
-        var skyFunc = typeof _this.options.skyTexture === "number" ? colored : textured;
+        var skyFunc = typeof _this.options.skyTexture === "number" ? colored$1 : textured;
 
         var skyGeom = null;
         if (typeof _this.options.skyTexture === "string") {
@@ -42115,7 +41999,7 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
         });
       });
     } else {
-      _this.sky = hub$1();
+      _this.sky = hub();
       skyReady = Promise.resolve();
     }
 
@@ -42139,13 +42023,14 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
         _this.ground = brick(_this.options.groundTexture, dim * 5, 0.1, dim * 5, {
           txtRepeatS: dim * 5,
           txtRepeatT: dim * 5,
+          anisotropy: 8,
           resolve: resolve,
           progress: _this.options.progress
         });
         _this.registerPickableObject(_this.ground);
       });
     } else {
-      _this.ground = hub$1();
+      _this.ground = hub();
       groundReady = Promise.resolve();
     }
 
@@ -42154,7 +42039,7 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
       _this.scene.add(_this.ground);
     });
 
-    _this.ui = hub$1().named("UI");
+    _this.ui = hub().named("UI");
     _this.scene.add(_this.ui);
 
     var buildScene = function buildScene(sceneGraph) {
@@ -42175,7 +42060,7 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
               unshaded: true
             });
           } else {
-            colored(obj, obj.material.color.getHex(), {
+            colored$1(obj, obj.material.color.getHex(), {
               unshaded: true
             });
           }
@@ -42308,7 +42193,7 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
         });
       });
 
-      _this.fader = colored(box$1(1, 1, 1), _this.options.backgroundColor, {
+      _this.fader = colored$1(box$1(1, 1, 1), _this.options.backgroundColor, {
         opacity: 0,
         fog: false,
         transparent: true,
@@ -43768,7 +43653,7 @@ var Terminal = function Terminal(inputEditor, outputEditor) {
 
   this.loadFile = function (fileName) {
     return getText(fileName.toLowerCase()).then(function (file) {
-      if (isMacOS$1) {
+      if (isMacOS) {
         file = file.replace("CTRL+SHIFT+SPACE", "CMD+OPT+E");
       }
       inputEditor.value = currentProgram = file;

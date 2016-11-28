@@ -34,10 +34,7 @@ var gulp = require("gulp"),
       post: (inFile, cb) => {
         // removes the documentation objects from the concatenated library.
         var outFile = inFile.replace("WithDoc", ""),
-          docFile = null;
-        if(format === "umd") {
           docFile = "doc/" + inFile.replace("WithDoc", "Documentation");
-        }
         pliny.carve(inFile, outFile, docFile, cb);
       }
     });
@@ -82,10 +79,18 @@ var gulp = require("gulp"),
         release: js.release
       }]);
 
+
+
+    const demoTasks = tasks.default.slice();
+    demoTasks.push(js.default, min.default);
+
+    const demoTaskName = "Demo:" + name;
+    gulp.task(demoTaskName, demoTasks);
+
     return {
       name: name,
       format: js.format,
-      default: [js.default, min.default],
+      default: demoTaskName,
       debug: min.debug,
       release: min.release
     };
@@ -96,11 +101,14 @@ gulp.task("clean", [nt.clean("Primrose:full", [
   "doc/Primrose*.js"
 ])]);
 
-gulp.task("tidy", [nt.clean("Primrose", [
+const tidyFiles = [
   "PrimroseWithDoc*.js",
-  "doc/PrimroseDocumentation.js",
-  "doc/*/appWithDoc.js"
-], tasks.release)]);
+  "doc/*/appWithDoc.js",
+  "doc/*/appDocumentation.js",
+  "doc/PrimroseDocumentation.modules.js"
+];
+gulp.task("tidy", [nt.clean("Primrose", tidyFiles, tasks.release)]);
+gulp.task("tidy:only", [nt.clean("Primrose", tidyFiles)]);
 
 gulp.task("copy", ["tidy"], () => gulp.src(["Primrose.min.js"])
   .pipe(gulp.dest("quickstart")));
@@ -113,7 +121,7 @@ gulp.task("format", tasks.format);
 gulp.task("js", tasks.default);
 
 const demoTasks = tasks.default.slice();
-demos.forEach((d)=>demoTasks.push.apply(demoTasks, d.default));
+demoTasks.push.apply(demoTasks, demos.map(d=>d.default));
 
 gulp.task("demos", demoTasks);
 gulp.task("js:debug", tasks.debug);
