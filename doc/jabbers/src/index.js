@@ -1,3 +1,5 @@
+import Primrose from "../../../Primrose.modules.js";
+
 var WIDTH = 100,
   HEIGHT = 6,
   DEPTH = 100,
