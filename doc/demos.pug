@@ -1,7 +1,7 @@
 extends ../templates/documentation.pug
 
 block document
-  for file in dir("**/src/index.js").map(rem).map(parent).map(parent).map((p) => path.join(fileRoot, p))
+  for file in dir("**/screenshot.jpg").map(rem).map(parent).map((p) => path.join(fileRoot, p))
     article
       a(href= file)
         img(src= file + "/screenshot.jpg" style="width:100%")
