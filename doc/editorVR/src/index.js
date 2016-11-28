@@ -5,8 +5,10 @@ import JavaScript from "../../../src/Primrose/Text/Grammars/JavaScript";
 import Dark from "../../../src/Primrose/Text/Themes/Dark";
 import * as liveAPI from "../../../src/live-api";
 import getSetting from "../../../src/util/getSetting";
+import * as rand from "../../../src/Primrose/Random";
+import { Quality } from "../../../src/Primrose/constants";
 
-Object.assign(window, liveAPI);
+Object.assign(window, liveAPI, rand);
 
 var GRASS = "../images/grass.png",
   ROCK = "../images/rock.png",
@@ -90,9 +92,10 @@ env.addEventListener("update", function (dt) {
 env.addEventListener("keydown", function (evt) {
   if (evt[modA] && evt[modB]) {
     if (evt.keyCode === Keys.E) {
-      if (!editorFrameMesh.visible && env.currentEditor && env.currentEditor.focused) {
-        env.currentEditor.blur();
-        env.currentEditor = null;
+      editorFrameMesh.visible = !editorFrameMesh.visible;
+      if (!editorFrameMesh.visible && env.currentControl && env.currentControl.focused) {
+        env.currentControl.blur();
+        env.currentControl = null;
       }
     }
     else if (evt.keyCode === Keys.X) {
@@ -173,14 +176,18 @@ function getSourceCode(skipReload) {
 }
 
 function testDemo(scene) {
-  var WIDTH = 5,
+  var GRASS = "../images/grass.png",
+    ROCK = "../images/rock.png",
+    SAND = "../images/sand.png",
+    WATER = "../images/water.png",
+    DECK = "../images/deck.png",
+    WIDTH = 5,
     HEIGHT = 5,
     DEPTH = 5,
     MIDX = WIDTH / 2 - 5,
     MIDY = HEIGHT / 2,
     MIDZ = DEPTH / 2,
     t = 0,
-    R = Primrose.Random,
     start = put(hub())
     .on(scene)
     .at(-MIDX, 0, -DEPTH - 2)
@@ -191,15 +198,15 @@ function testDemo(scene) {
   for (var i = 0; i < 10; ++i) {
     balls.push(put(brick(DECK))
       .on(start)
-      .at(R.int(WIDTH),
-        R.int(HEIGHT),
-        R.int(DEPTH))
+      .at(number(WIDTH),
+        number(HEIGHT),
+        number(DEPTH))
       .obj());
 
     balls[i].velocity = v3(
-      R.number(0, WIDTH),
-      R.number(0, HEIGHT),
-      R.number(0, DEPTH));
+      number(WIDTH),
+      number(HEIGHT),
+      number(DEPTH));
   }
 
   function update(dt) {
