@@ -440,9 +440,6 @@ export default class TextBox extends Surface {
         codePage[altCommandName] ||
         codePage[commandName];
 
-      if(!func){
-        console.log(this.commandPack, codePage);
-      }
 
       if (func instanceof String || typeof func === "string") {
         console.log("okay");
