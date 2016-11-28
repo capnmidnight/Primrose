@@ -1,9 +1,11 @@
-import { isMacOS, isMobile } from "../../../src/flags";
+import { isMacOS, isMobile, isInIFrame } from "../../../src/flags";
 import BrowserEnvironment from "../../../src/Primrose/BrowserEnvironment";
 import Keys from "../../../src/Primrose/Keys";
 import JavaScript from "../../../src/Primrose/Text/Grammars/JavaScript";
 import Dark from "../../../src/Primrose/Text/Themes/Dark";
 import * as liveAPI from "../../../src/live-api";
+import getSetting from "../../../src/util/getSetting";
+
 Object.assign(window, liveAPI);
 
 var GRASS = "../images/grass.png",

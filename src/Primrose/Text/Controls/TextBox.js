@@ -12,6 +12,7 @@ import isIE from "../../../flags/isIE";
 import isOpera from "../../../flags/isOpera";
 import isSafari from "../../../flags/isSafari";
 import isMobile from "../../../flags/isMobile";
+import clone from "../../../util/clone";
 
 var SCROLL_SCALE = isFirefox ? 3 : 100,
   COUNTER = 0,
