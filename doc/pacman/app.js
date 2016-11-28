@@ -1,43 +1,42 @@
-(function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? factory() :
-  typeof define === 'function' && define.amd ? define(factory) :
-  (factory());
-}(this, (function () { 'use strict';
+var GRASS = "../images/grass.png",
+  ROCK = "../images/rock.png",
+  SAND = "../images/sand.png",
+  WATER = "../images/water.png",
+  DECK = "../images/deck.png",
+  CODE_KEY = "Pacman code",
 
-var GRASS = "../images/grass.png";
-var ROCK = "../images/rock.png";
-var SAND = "../images/sand.png";
-var WATER = "../images/water.png";
-var DECK = "../images/deck.png";
-var CODE_KEY = "Pacman code";
-var env = new Primrose.BrowserEnvironment({
-  quality: Primrose.Quality.HIGH,
-  backgroundColor: 0x000000,
-  skyTexture: DECK,
-  groundTexture: DECK,
-  font: "../fonts/helvetiker_regular.typeface.json"
-});
-var editor = null;
-var output = null;
-var editorFrame = null;
-var editorFrameMesh = null;
-var modA = isMacOS ? "metaKey" : "ctrlKey";
-var modB = isMacOS ? "altKey" : "shiftKey";
-var cmdA = isMacOS ? "CMD" : "CTRL";
-var cmdB = isMacOS ? "OPT" : "SHIFT";
-var cmdPre = cmdA + "+" + cmdB;
-var scriptUpdateTimeout;
-var lastScript = null;
-var scriptAnimate = null;
-var subScene = hub();
-var editorCenter = hub();
+  env = new Primrose.BrowserEnvironment({
+    quality: Primrose.Quality.HIGH,
+    backgroundColor: 0x000000,
+    skyTexture: DECK,
+    groundTexture: DECK,
+    font: "../fonts/helvetiker_regular.typeface.json"
+  }),
+
+  editor = null,
+  output = null,
+  editorFrame = null,
+  editorFrameMesh = null,
+
+  modA = isMacOS ? "metaKey" : "ctrlKey",
+  modB = isMacOS ? "altKey" : "shiftKey",
+  cmdA = isMacOS ? "CMD" : "CTRL",
+  cmdB = isMacOS ? "OPT" : "SHIFT",
+  cmdPre = cmdA + "+" + cmdB,
+
+  scriptUpdateTimeout,
+  lastScript = null,
+  scriptAnimate = null,
+
+  subScene = hub(),
+  editorCenter = hub();
 
 env.addEventListener("ready", function () {
   env.appendChild(editorCenter);
   env.appendChild(subScene);
 
   var editorSize = isMobile ? 512 : 1024,
-      fontSize = 40 / env.quality;
+    fontSize = 40 / env.quality;
 
   editorFrame = env.createElement("section");
   editorFrame.id = "EditorFrame";
@@ -86,10 +85,12 @@ env.addEventListener("update", function (dt) {
     if (env.quality === Primrose.Quality.NONE) {
       scriptAnimate = null;
       wipeScene();
-    } else {
+    }
+    else {
       try {
         scriptAnimate.call(env, dt);
-      } catch (exp) {
+      }
+      catch (exp) {
         console.error(exp);
         scriptAnimate = null;
       }
@@ -99,12 +100,13 @@ env.addEventListener("update", function (dt) {
 
 function getSourceCode(skipReload) {
   var defaultDemo = pacman.toString(),
-      src = skipReload && defaultDemo || getSetting(CODE_KEY, defaultDemo);
+    src = skipReload && defaultDemo || getSetting(CODE_KEY, defaultDemo);
   // If there was no source code stored in local storage,
   // we use the script from a saved function and assume
   // it has been formatted with 2 spaces per-line.
   if (src === defaultDemo) {
-    var lines = src.replace("\r\n", "\n").split("\n");
+    var lines = src.replace("\r\n", "\n")
+      .split("\n");
     lines.pop();
     lines.shift();
     for (var i = 0; i < lines.length; ++i) {
@@ -117,17 +119,35 @@ function getSourceCode(skipReload) {
 
 function pacman() {
   var R = Primrose.Random.int,
-      L = Primrose.Graphics.ModelLoader.loadObject,
-      T = 3,
-      W = 30,
-      H = 30,
-      colors = [0xff0000, 0xffff00, 0xff00ff, 0x00ffff],
-      ghosts,
-      map = ["12222222221", "10000000001", "10222022201", "10001000001", "10101022201", "10100010101", "10222220101", "10000000001", "12222222221"];
+    L = Primrose.Graphics.ModelLoader.loadObject,
+    T = 3,
+    W = 30,
+    H = 30,
+    colors = [
+      0xff0000,
+      0xffff00,
+      0xff00ff,
+      0x00ffff
+    ],
+    ghosts,
+    map = [
+      "12222222221",
+      "10000000001",
+      "10222022201",
+      "10001000001",
+      "10101022201",
+      "10100010101",
+      "10222220101",
+      "10000000001",
+      "12222222221"
+    ];
 
   function C(n, x, y) {
     if (n !== 0) {
-      put(colored(cylinder(0.5, 0.5, T), 0x0000ff)).on(scene).rot(0, n * Math.PI / 2, Math.PI / 2).at(T * x - W / 2, env.avatarHeight, T * y - H / 2);
+      put(colored(cylinder(0.5, 0.5, T), 0x0000ff))
+        .on(scene)
+        .rot(0, n * Math.PI / 2, Math.PI / 2)
+        .at(T * x - W / 2, env.avatarHeight, T * y - H / 2);
     }
   }
 
@@ -138,35 +158,40 @@ function pacman() {
     }
   }
   console.log("Here we go");
-  L("../models/ghost.obj").then(function (ghost) {
-    console.log("ghost", ghost);
-    ghosts = colors.map(function (color, i) {
-      var g = ghost.clone(),
+  L("../models/ghost.obj")
+    .then(function (ghost) {
+      console.log("ghost", ghost);
+      ghosts = colors.map(function (color, i) {
+        var g = ghost.clone(),
           body = g.children[0];
-      colored(body, color);
-      scene.appendChild(g);
-      g.position.set(i * 3 - 4, 0, -5);
-      g.velocity = v3(0, 0, 0);
-      g.velocity.x = R(-1, 2);
-      if (g.velocity.x === 0 && g.velocity.z === 0) {
-        g.velocity.z = R(-1, 2);
-      }
-      return g;
+        colored(body, color);
+        scene.appendChild(g);
+        g.position.set(i * 3 - 4, 0, -5);
+        g.velocity = v3(0, 0, 0);
+        g.velocity.x = R(-1, 2);
+        if (g.velocity.x === 0 && g.velocity.z === 0) {
+          g.velocity.z = R(-1, 2);
+        }
+        return g;
+      });
     });
-  });
 
   function collisionCheck(dt, a, t) {
     var x = Math.floor((a.position.x + W / 2 + 1) / T),
-        y = Math.floor((a.position.z + H / 2 + 1) / T),
-        row = map[y],
-        tile = row && row[x] | 0;
-    var v = a.velocity.clone().multiplyScalar(-dt * 1.5);
+      y = Math.floor((a.position.z + H / 2 + 1) / T),
+      row = map[y],
+      tile = row && row[x] | 0;
+    var v = a.velocity.clone()
+      .multiplyScalar(-dt * 1.5);
     if (tile > 0) {
       if (t || a.isOnGround) {
         a.position.add(v);
       }
       if (t) {
-        a.velocity.set(a.velocity.z, 0, -a.velocity.x);
+        a.velocity.set(
+          a.velocity.z,
+          0, -a.velocity.x
+        );
       }
     }
   }
@@ -174,12 +199,13 @@ function pacman() {
   return function (dt) {
     if (ghosts) {
       ghosts.forEach(function (g) {
-        g.position.add(g.velocity.clone().multiplyScalar(dt));
+        g.position.add(g.velocity.clone()
+          .multiplyScalar(dt));
         collisionCheck(dt, g, env.input.head);
       });
     }
     collisionCheck(dt, env.input.head, null);
-  };
+  }
 }
 
 window.addEventListener("keydown", function (evt) {
@@ -191,7 +217,8 @@ window.addEventListener("keydown", function (evt) {
       }
       editorFrameMesh.visible = !editorFrameMesh.visible;
       editorFrameMesh.disabled = !editorFrameMesh.disabled;
-    } else if (evt.keyCode === Primrose.Keys.E && editor) {
+    }
+    else if (evt.keyCode === Primrose.Keys.E && editor) {
       Primrose.HTTP.postObject("saveScript", {
         "Content-Type": "application/json",
         data: {
@@ -199,7 +226,8 @@ window.addEventListener("keydown", function (evt) {
           content: editor.value
         }
       });
-    } else if (evt.keyCode === Primrose.Keys.X) {
+    }
+    else if (evt.keyCode === Primrose.Keys.X) {
       editor.value = getSourceCode(true);
     }
   }
@@ -218,11 +246,12 @@ function wipeScene() {
 
 function updateScript() {
   var newScript = editor.value,
-      exp;
+    exp;
   if (newScript !== lastScript) {
     scriptUpdateTimeout = null;
     lastScript = newScript;
-    if (newScript.indexOf("function update") >= 0 && newScript.indexOf("return update") < 0) {
+    if (newScript.indexOf("function update") >= 0 &&
+      newScript.indexOf("return update") < 0) {
       newScript += "\nreturn update;";
     }
     try {
@@ -236,10 +265,12 @@ function updateScript() {
       console.log("----- script loaded -----");
       if (!scriptAnimate) {
         console.log("----- No update script provided -----");
-      } else if (env.quality === Primrose.Quality.NONE) {
+      }
+      else if (env.quality === Primrose.Quality.NONE) {
         env.quality = Primrose.Quality.MEDIUM;
       }
-    } catch (exp) {
+    }
+    catch (exp) {
       console.error(exp);
       scriptAnimate = null;
       throw exp;
@@ -247,4 +278,11 @@ function updateScript() {
   }
 }
 
-})));
+function clrscr() {
+  if (output) {
+    var t = output;
+    t.value = "";
+    t.selectionStart = t.selectionEnd = t.value.length;
+    t.scrollIntoView(t.frontCursor);
+  }
+}
