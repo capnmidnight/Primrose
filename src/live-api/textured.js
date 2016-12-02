@@ -5,13 +5,9 @@ pliny.function({
 
 import cache from "../util/cache";
 import material from "./material";
-import { CubeTexture } from "three/src/textures/CubeTexture";
-import { Texture } from "three/src/textures/Texture";
 import { Mesh } from "three/src/objects/Mesh";
 import { RepeatWrapping } from "three/src/constants";
-import Surface from "../Primrose/Controls/Surface";
 import loadTexture from "../Primrose/Graphics/loadTexture";
-import TextBox from "../Primrose/Text/Controls/TextBox";
 
 export default function textured(geometry, txt, options) {
   options = Object.assign({}, {
@@ -28,7 +24,7 @@ export default function textured(geometry, txt, options) {
       }
       else {
         let retValue = null;
-        if (txt instanceof Surface) {
+        if (txt.isSurface) {
           if (!options.scaleTextureWidth || !options.scaleTextureHeight) {
             var imgWidth = txt.imageWidth,
               imgHeight = txt.imageHeight,
@@ -63,13 +59,13 @@ export default function textured(geometry, txt, options) {
           txt._material = mat;
           retValue = txt.texture;
         }
-        else if (txt instanceof TextBox) {
+        else if (txt.isTextBox) {
           retValue = txt.renderer.texture;
         }
         else if (txt instanceof HTMLCanvasElement || txt instanceof HTMLVideoElement) {
           retValue = new Texture(txt);
         }
-        else if(txt instanceof Texture) {
+        else if(txt.isTexture) {
           retValue = txt;
         }
         else {
@@ -85,13 +81,13 @@ export default function textured(geometry, txt, options) {
   if (geometry.type.indexOf("Geometry") > -1) {
     obj = new Mesh(geometry, mat);
   }
-  else if (geometry instanceof Mesh) {
+  else if (geometry.isMesh) {
     obj = geometry;
     obj.material = mat;
     geometry = obj.geometry;
   }
 
-  if (txt instanceof Surface) {
+  if (txt.isSurface) {
     obj.surface = txt;
   }
 
@@ -129,10 +125,10 @@ export default function textured(geometry, txt, options) {
 
     texture.anisotropy = options.anisotropy;
 
-    if(texture instanceof CubeTexture){
+    if(texture.isCubeTexture){
       mat.envMap = texture;
     }
-    else if(texture instanceof Texture){
+    else if(texture.isTexture){
       mat.map = texture;
     }
 

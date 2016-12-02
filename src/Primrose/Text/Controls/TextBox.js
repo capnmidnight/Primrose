@@ -44,6 +44,8 @@ export default class TextBox extends Surface {
     super(Object.assign({}, {
       id: "Primrose.Text.Controls.TextBox[" + (COUNTER++) + "]"
     }, options));
+
+    this.isTextBox = true;
     ////////////////////////////////////////////////////////////////////////
     // normalize input parameters
     ////////////////////////////////////////////////////////////////////////

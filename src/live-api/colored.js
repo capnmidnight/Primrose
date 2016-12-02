@@ -1,7 +1,3 @@
-import { Mesh } from "three/src/objects/Mesh";
-import { Object3D } from "three/src/core/Object3D";
-import material from "./material";
-
 pliny.function({
   name: "colored",
   description: "Apply a color to a geometry, creating the intermediate material as necessary, and returning the resulting mesh",
@@ -18,6 +14,9 @@ pliny.function({
     { name: "options.wireframe", type: "Boolean", optional: true, defaultValue: false, description: "Draw objects as basic wireframes. Note: there's no control over the wire thickness. This should be considered a debugging feature, not a graphical feature."}
   ]
 });
+
+import { Mesh } from "three/src/objects/Mesh";
+import material from "./material";
 export default function colored(geometry, color, options) {
   options = options || {};
   options.color = color;
@@ -28,7 +27,7 @@ export default function colored(geometry, color, options) {
   if (geometry.type.indexOf("Geometry") > -1) {
     obj = new Mesh(geometry, mat);
   }
-  else if (geometry instanceof Object3D) {
+  else if (geometry.isObject3D) {
     obj = geometry;
     obj.material = mat;
   }

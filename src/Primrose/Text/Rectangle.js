@@ -8,6 +8,7 @@ pliny.class({
 });
 export default class Rectangle {
   constructor(x, y, width, height) {
+    this.isRectangle = true;
     this.point = new Point(x, y);
     this.size = new Size(width, height);
   }

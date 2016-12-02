@@ -1,7 +1,5 @@
-import { Mesh } from "three/src/objects/Mesh";
 import { ObjectLoader } from "three/src/loaders/ObjectLoader";
 import { FontLoader } from "three/src/loaders/FontLoader";
-import { SkinnedMesh } from "three/src/objects/SkinnedMesh";
 import { AnimationClip } from "three/src/animation/AnimationClip";
 
 import { MTLLoader, OBJLoader } from "../../THREE"
@@ -43,7 +41,7 @@ var propertyTests = {
 
 function setProperties(object) {
   object.traverse(function (obj) {
-    if (obj instanceof Mesh) {
+    if (obj.isMesh) {
       for (var prop in propertyTests) {
         obj[prop] = obj[prop] || propertyTests[prop](obj);
       }
@@ -346,7 +344,7 @@ export default class ModelLoader {
     var obj = this.template.clone();
 
     obj.traverse((child) => {
-      if (child instanceof SkinnedMesh) {
+      if (child.isSkinnedMesh) {
         obj.animation = new AnimationClip(child, child.geometry.animation);
         if (!this.template.originalAnimationClipData && obj.animation.data) {
           this.template.originalAnimationClipData = obj.animation.data;

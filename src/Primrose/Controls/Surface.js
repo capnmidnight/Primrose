@@ -1,5 +1,4 @@
 import { Texture } from "three/src/textures/Texture";
-import { Vector2 } from "three/src/math/Vector2";
 import isChrome from "../../flags/isChrome";
 import Entity from "./Entity";
 import Rectangle from "../Text/Rectangle";
@@ -29,6 +28,7 @@ export default class Surface extends Entity {
 
   constructor(options) {
     super();
+    this.isSurface = true;
     this.options = Object.assign({}, {
       id: "Primrose.Surface[" + (COUNTER++) + "]",
       bounds: new Rectangle()
@@ -110,7 +110,7 @@ export default class Surface extends Entity {
     });
 
 
-    if (this.options.id instanceof Surface) {
+    if (this.options.id.isSurface) {
       throw new Error("Object is already a Surface. Please don't try to wrap them.");
     }
     else if (this.options.id instanceof CanvasRenderingContext2D) {
@@ -183,7 +183,7 @@ export default class Surface extends Entity {
       bounds.left = 0;
       bounds.top = 0;
     }
-    else if (bounds instanceof Rectangle) {
+    else if (bounds.isRectangle) {
       bounds = bounds.clone();
     }
     for (var i = 0; i < this.children.length; ++i) {
@@ -297,7 +297,7 @@ export default class Surface extends Entity {
   }
 
   appendChild(child) {
-    if (!(child instanceof Surface)) {
+    if (!(child.isSurface)) {
       throw new Error("Can only append other Surfaces to a Surface. You gave: " + child);
     }
     super.appendChild(child);
@@ -311,7 +311,7 @@ export default class Surface extends Entity {
         y: (1 - point[1]) * this.imageHeight
       };
     }
-    else if(point instanceof Vector2) {
+    else if(point.isVector2) {
       return {
         x: point.x * this.imageWidth,
         y: (1 - point.y) * this.imageHeight

@@ -31,7 +31,6 @@ import { Quality, PIXEL_SCALES } from "./constants";
 import { BackSide, PCFSoftShadowMap } from "three/src/constants";
 import { FogExp2 } from "three/src/scenes/FogExp2";
 import { Scene } from "three/src/scenes/Scene";
-import { Mesh } from "three/src/objects/Mesh";
 import { PerspectiveCamera } from "three/src/cameras/PerspectiveCamera";
 import { AmbientLight } from "three/src/lights/AmbientLight";
 import { TextGeometry } from "three/src/geometries/TextGeometry";
@@ -267,7 +266,7 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
     };
 
     this.appendChild = (elem) => {
-      if (elem instanceof Mesh) {
+      if (elem.isMesh) {
         this.scene.add(elem);
       }
       else {
