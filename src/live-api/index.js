@@ -1,3 +1,8 @@
+pliny.namespace({
+  name: "Live API",
+  description: "The Live API is a set of functions that serve as shorthand for common Three.js objects, with a caching system built in to deduplicate repeated creations of geometries and materials."
+});
+
 import axis from "./axis";
 import box from "./box";
 import brick from "./brick";

@@ -1,4 +1,5 @@
 pliny.function({
+  parent: "Live API",
   name: "cloud",
   description: "Creates a point cloud with points of a fixed color and size out of an array of vertices.",
   parameters: [{

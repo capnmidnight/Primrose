@@ -59,7 +59,7 @@ pliny.class({
       type: "Array",
       description: "An Array of `Primrose.InputProcessor` objects that define the button trigger for this pointer.",
       optional: true,
-      defaultValue: null
+      default: null
     }]
 });
 export default class Pointer extends AbstractEventEmitter {

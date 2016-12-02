@@ -1,4 +1,5 @@
 pliny.function({
+  parent: "Live API",
   name: "circle",
   description: "A shortcut function for the THREE.CircleBufferGeometry class. Creates a flat circle, oriented in the XZ plane. `Circle` is a bit of a misnomer. It's actually an N-sided polygon, with the implication being that N must be large to convincingly approximate a true circle.",
   parameters: [{

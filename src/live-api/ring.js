@@ -1,4 +1,5 @@
 pliny.function({
+  parent: "Live API",
   name: "ring",
   description: "A shortcut function for the THREE.RingBufferGeometry class. Creates a flat ring, which is a larger circle with a smaller circle cut out of its center, oriented in the XZ plane. `Circle` is a bit of a misnomer. It's actually an N-sided polygon, with the implication being that N must be large to convincingly approximate a true circle.",
   parameters: [{

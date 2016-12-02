@@ -38,7 +38,7 @@ pliny.class({
     description: "The InsideSphereGeometry is basically an inside-out Sphere. Or\n\
 more accurately, it's a Sphere where the face winding order is reversed, so that\n\
 textures appear on the inside of the sphere, rather than the outside. I know, that's\n\
-note exactly helpful.\n\
+not exactly helpful.\n\
 \n\
 Say you want a to model the sky as a sphere, or the inside of a helmet. You don't\n\
 care anything about the outside of this sphere, only the inside. You would use\n\

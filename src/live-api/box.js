@@ -1,4 +1,5 @@
 pliny.function({
+  parent: "Live API",
   name: "box",
   description: "A shortcut function for the THREE.BoxGeometry class. Creates a \"rectilinear prism\", i.e. the general class of rectangular objects that includes cubes.",
   parameters: [{

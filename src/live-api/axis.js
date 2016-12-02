@@ -1,4 +1,5 @@
 pliny.function({
+  parent: "Live API",
   name: "axis",
   description: "Creates a set of reference axes, with X as red, Y as green, and Z as blue.",
   parameters: [{

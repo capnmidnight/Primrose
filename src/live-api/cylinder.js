@@ -1,4 +1,5 @@
 pliny.function({
+  parent: "Live API",
   name: "cylinder",
   description: "Shorthand function for creating a new THREE.CylinderGeometry object.",
   parameters: [{

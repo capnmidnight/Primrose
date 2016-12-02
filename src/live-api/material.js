@@ -1,3 +1,8 @@
+pliny.function({
+  parent: "Live API",
+  name: "material",
+})
+
 import { FrontSide } from "three/src/constants";
 import { FlatShading } from "three/src/constants";
 import { MeshStandardMaterial } from "three/src/materials/MeshStandardMaterial";

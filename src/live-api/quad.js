@@ -1,4 +1,5 @@
 pliny.function({
+  parent: "Live API",
   name: "quad",
   description: "A shortcut function for the THREE.PlaneBufferGeometry class. Creates a flat rectangle, oriented in the XY plane.",
   parameters: [{

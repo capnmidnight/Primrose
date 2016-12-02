@@ -30,7 +30,7 @@ pliny.class({
       type: "Element",
       description: "The DOM element on which to add most events.",
       optional: true,
-      defaultValue: "window"
+      default: "window"
     }, {
       name: "options",
       type: "Object",

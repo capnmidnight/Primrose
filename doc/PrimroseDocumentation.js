@@ -71,6 +71,7 @@ pliny.value({
   description: "Flag indicating the current system is a computer running one of the Microsoft Windows operating systems."
 });
 pliny.function({
+  parent: "Live API",
   name: "hub",
   description: "Calling `hub()` is a short-hand for creating a new `THREE.Object3D`. This is useful in live-coding examples to keep code terse and easy to write. It also polyfills in a method for being able to add the object to a `Primrose.BrowserEnvironment` using `appendChild()` and to add other elements to the hub using `appendChild()` such that they may be pickable in the scene.",
   examples: [{
@@ -81,7 +82,9 @@ pliny.function({
     var base2 = hub();"
   }]
 });
+
 pliny.function({
+  parent: "Live API",
   name: "put",
   description: "A literate interface for putting objects onto scenes with basic, common transformations. You call `put()` with an object, then have access to a series of methods that you can chain together, before receiving the object back again. This makes it possible to create objects in the parameter position of `put()` at the same time as declaring the variable that will hold it.\n\
 \n\
@@ -138,18 +141,75 @@ pliny.function({
   }]
 });
 pliny.function({
+  parent: "Live API",
+  name: "material"
+});
+
+pliny.function({
+  parent: "Live API",
   name: "textured",
   description: "| [under construction]"
 });
 
 pliny.function({
+  parent: "Live API",
   name: "colored",
   description: "Apply a color to a geometry, creating the intermediate material as necessary, and returning the resulting mesh",
   returns: "THREE.Mesh",
-  parameters: [{ name: "geometry", type: "THREE.Geometry", description: "The geometry to which to apply the color." }, { name: "color", type: "Number", description: "A hexadecimal color value in RGB format." }, { name: "options", type: "Object", optional: true, description: "Optional settings for material properties." }, { name: "options.side", type: "Number", optional: true, defaultValue: "THREE.FrontSide", description: "Either THREE.FontSide, THREE.BackSide, or THREE.Both, for which side of the polygon should be shaded." }, { name: "options.opacity", type: "Number", optional: true, defaultValue: 1, description: "Make objects semi-transparent. Note: this usually doesn't work like you'd expect." }, { name: "options.roughness", type: "Number", optional: true, defaultValue: 0.5, description: "A value indicating the degree of light scattering the material causes." }, { name: "options.metalness", type: "Number", optional: true, defaultValue: 0, description: "A value indicating the degree of shininess the material causes." }, { name: "options.unshaded", type: "Boolean", optional: true, defaultValue: false, description: "Make objects not respond to lighting." }, { name: "options.wireframe", type: "Boolean", optional: true, defaultValue: false, description: "Draw objects as basic wireframes. Note: there's no control over the wire thickness. This should be considered a debugging feature, not a graphical feature." }]
+  parameters: [{
+    name: "geometry",
+    type: "THREE.Geometry",
+    description: "The geometry to which to apply the color."
+  }, {
+    name: "color",
+    type: "Number",
+    description: "A hexadecimal color value in RGB format."
+  }, {
+    name: "options",
+    type: "Object",
+    optional: true,
+    description: "Optional settings for material properties."
+  }, {
+    name: "options.side",
+    type: "Number",
+    optional: true,
+    default: "THREE.FrontSide",
+    description: "Either THREE.FontSide, THREE.BackSide, or THREE.Both, for which side of the polygon should be shaded."
+  }, {
+    name: "options.opacity",
+    type: "Number",
+    optional: true,
+    default: 1,
+    description: "Make objects semi-transparent. Note: this usually doesn't work like you'd expect."
+  }, {
+    name: "options.roughness",
+    type: "Number",
+    optional: true,
+    default: 0.5,
+    description: "A value indicating the degree of light scattering the material causes."
+  }, {
+    name: "options.metalness",
+    type: "Number",
+    optional: true,
+    default: 0,
+    description: "A value indicating the degree of shininess the material causes."
+  }, {
+    name: "options.unshaded",
+    type: "Boolean",
+    optional: true,
+    default: false,
+    description: "Make objects not respond to lighting."
+  }, {
+    name: "options.wireframe",
+    type: "Boolean",
+    optional: true,
+    default: false,
+    description: "Draw objects as basic wireframes. Note: there's no control over the wire thickness. This should be considered a debugging feature, not a graphical feature."
+  }]
 });
 
 pliny.function({
+  parent: "Live API",
   name: "box",
   description: "A shortcut function for the THREE.BoxGeometry class. Creates a \"rectilinear prism\", i.e. the general class of rectangular objects that includes cubes.",
   parameters: [{
@@ -203,11 +263,12 @@ It should look something like this:\n\
 });
 
 pliny.function({
+  parent: "Live API",
   name: "brick",
-  description: "Creates a textured box. See [`box()`](#box) and [`textured()`](#textured). The texture will be repeated across the box.",
+  description: "Creates a textured box. See [`box()`](#box) and [`textured()`](#textured) or [`colored()`](#colored). The texture will be repeated across the box.",
   parameters: [{
     name: "txt",
-    type: "Texture description",
+    type: "Number or Image",
     description: "The texture to apply to the box."
   }, {
     name: "width",
@@ -227,6 +288,11 @@ pliny.function({
     optional: true,
     description: "The size of the box in the Z dimension.",
     default: 1
+  }, {
+    name: "options",
+    type: "Object",
+    optional: true,
+    description: "A hashmap specifying other options to pass on to the material creation function. The material creation function is either [`colored()`](#colored) or [`textured()`](#textured), depending on the value of the `txt` parameter passed to this function."
   }],
   returns: "THREE.Mesh",
   examples: [{
@@ -246,6 +312,7 @@ The result should appear as:\n\
 });
 
 pliny.function({
+  parent: "Live API",
   name: "axis",
   description: "Creates a set of reference axes, with X as red, Y as green, and Z as blue.",
   parameters: [{
@@ -276,6 +343,7 @@ The result should appear as:\n\
 });
 
 pliny.function({
+  parent: "Live API",
   name: "circle",
   description: "A shortcut function for the THREE.CircleBufferGeometry class. Creates a flat circle, oriented in the XZ plane. `Circle` is a bit of a misnomer. It's actually an N-sided polygon, with the implication being that N must be large to convincingly approximate a true circle.",
   parameters: [{
@@ -321,6 +389,7 @@ It should look something like this:\n\
 });
 
 pliny.function({
+  parent: "Live API",
   name: "cloud",
   description: "Creates a point cloud with points of a fixed color and size out of an array of vertices.",
   parameters: [{
@@ -364,6 +433,7 @@ The results should look like this:\n\
 });
 
 pliny.function({
+  parent: "Live API",
   name: "cylinder",
   description: "Shorthand function for creating a new THREE.CylinderGeometry object.",
   parameters: [{
@@ -433,6 +503,7 @@ It should look something like this:\n\
 });
 
 pliny.function({
+  parent: "Live API",
   name: "light",
   description: "Shortcut function for creating a new THREE.PointLight object.",
   parameters: [{
@@ -467,7 +538,9 @@ pliny.function({
     put(light(0xffff00)).on(scene).at(0, 100, 0);"
   }]
 });
+
 pliny.function({
+  parent: "Live API",
   name: "quad",
   description: "A shortcut function for the THREE.PlaneBufferGeometry class. Creates a flat rectangle, oriented in the XY plane.",
   parameters: [{
@@ -528,6 +601,7 @@ It should look something like this:\n\
 });
 
 pliny.function({
+  parent: "Live API",
   name: "range",
   description: "Executes a function a set number of times, to shorten up common programming patterns a little. If the provided function returns value, they will be collected into an array that is returned at the end of the loop. This function has a weird cascading syntax that does not work like normal functions with default values for positional parameters.",
   parameters: [{
@@ -609,6 +683,7 @@ pliny.function({
 });
 
 pliny.function({
+  parent: "Live API",
   name: "ring",
   description: "A shortcut function for the THREE.RingBufferGeometry class. Creates a flat ring, which is a larger circle with a smaller circle cut out of its center, oriented in the XZ plane. `Circle` is a bit of a misnomer. It's actually an N-sided polygon, with the implication being that N must be large to convincingly approximate a true circle.",
   parameters: [{
@@ -699,7 +774,7 @@ pliny.class({
   description: "The InsideSphereGeometry is basically an inside-out Sphere. Or\n\
 more accurately, it's a Sphere where the face winding order is reversed, so that\n\
 textures appear on the inside of the sphere, rather than the outside. I know, that's\n\
-note exactly helpful.\n\
+not exactly helpful.\n\
 \n\
 Say you want a to model the sky as a sphere, or the inside of a helmet. You don't\n\
 care anything about the outside of this sphere, only the inside. You would use\n\
@@ -707,6 +782,7 @@ InsideSphereGeometry in this case. Or its alias, [`shell()`](#shell)."
 });
 
 pliny.function({
+  parent: "Live API",
   name: "shell",
   parameters: [{
     name: "radius",
@@ -772,10 +848,12 @@ file to use as the texture, execute code as such:\n\
 });
 
 pliny.function({
+  parent: "Live API",
   name: "shooter",
   description: "Creates a THREE.Raycaster."
 });
 pliny.function({
+  parent: "Live API",
   name: "sphere",
   parameters: [{
     name: "radius",
@@ -816,6 +894,7 @@ pliny.function({
 });
 
 pliny.function({
+  parent: "Live API",
   name: "v3",
   description: "A shortcut function for creating a new THREE.Vector3 object.",
   parameters: [{
@@ -842,6 +921,11 @@ pliny.function({
     console.assert(a.toArray().join(\", \") === \"1, 2, 3\");"
   }]
 });
+pliny.namespace({
+  name: "Live API",
+  description: "The Live API is a set of functions that serve as shorthand for common Three.js objects, with a caching system built in to deduplicate repeated creations of geometries and materials."
+});
+
 pliny.function({
   name: "clone",
   parameters: [{
@@ -1725,7 +1809,7 @@ pliny.class({
     type: "Array",
     description: "An Array of `Primrose.InputProcessor` objects that define the button trigger for this pointer.",
     optional: true,
-    defaultValue: null
+    default: null
   }]
 });
 
@@ -2802,7 +2886,7 @@ pliny.class({
     type: "Element",
     description: "The DOM element on which to add most events.",
     optional: true,
-    defaultValue: "window"
+    default: "window"
   }, {
     name: "options",
     type: "Object",

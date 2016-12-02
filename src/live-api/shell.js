@@ -1,4 +1,5 @@
 pliny.function({
+  parent: "Live API",
   name: "shell",
   parameters: [{
     name: "radius",

@@ -1,4 +1,5 @@
 pliny.function({
+  parent: "Live API",
   name: "range",
   description: "Executes a function a set number of times, to shorten up common programming patterns a little. If the provided function returns value, they will be collected into an array that is returned at the end of the loop. This function has a weird cascading syntax that does not work like normal functions with default values for positional parameters.",
   parameters: [{

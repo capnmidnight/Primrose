@@ -1,9 +1,10 @@
 pliny.function({
+  parent: "Live API",
   name: "brick",
-  description: "Creates a textured box. See [`box()`](#box) and [`textured()`](#textured). The texture will be repeated across the box.",
+  description: "Creates a textured box. See [`box()`](#box) and [`textured()`](#textured) or [`colored()`](#colored). The texture will be repeated across the box.",
   parameters: [{
     name: "txt",
-    type: "Texture description",
+    type: "Number or Image",
     description: "The texture to apply to the box."
   }, {
     name: "width",
@@ -23,6 +24,11 @@ pliny.function({
     optional: true,
     description: "The size of the box in the Z dimension.",
     default: 1
+  }, {
+    name: "options",
+    type: "Object",
+    optional: true,
+    description: "A hashmap specifying other options to pass on to the material creation function. The material creation function is either [`colored()`](#colored) or [`textured()`](#textured), depending on the value of the `txt` parameter passed to this function."
   }],
   returns: "THREE.Mesh",
   examples: [{
@@ -44,18 +50,18 @@ The result should appear as:\n\
 import textured from "./textured";
 import colored from "./colored";
 import box from "./box";
-export default function brick(txt, w, h, l, options) {
-  w = w || 1;
-  h = h || 1;
-  l = l || 1;
+export default function brick(txt, width, height, length, options) {
+  width = width || 1;
+  height = height || 1;
+  length = length || 1;
   options = Object.assign({}, {
-    txtRepeatS: w,
-    txtRepeatT: l,
+    txtRepeatS: width,
+    txtRepeatT: length,
     anisotropy: 8,
     transparent: true,
     opacity: 1
   }, options);
   const m = (typeof txt === "number") ? colored : textured,
-    obj = m(box(w, h, l), txt, options);
+    obj = m(box(width, height, length), txt, options);
   return obj;
 };

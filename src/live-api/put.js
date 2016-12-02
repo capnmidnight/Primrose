@@ -1,4 +1,5 @@
 pliny.function({
+  parent: "Live API",
   name: "put",
   description: "A literate interface for putting objects onto scenes with basic, common transformations. You call `put()` with an object, then have access to a series of methods that you can chain together, before receiving the object back again. This makes it possible to create objects in the parameter position of `put()` at the same time as declaring the variable that will hold it.\n\
 \n\

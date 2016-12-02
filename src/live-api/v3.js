@@ -1,6 +1,7 @@
 import { Vector3 } from "three/src/math/Vector3";
 
 pliny.function({
+  parent: "Live API",
   name: "v3",
   description: "A shortcut function for creating a new THREE.Vector3 object.",
   parameters: [{

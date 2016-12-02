@@ -1,4 +1,5 @@
 pliny.function({
+  parent: "Live API",
   name: "textured",
   description: "| [under construction]"
 });
