@@ -311,19 +311,6 @@ var _Math = {
 
 };
 
-/**
- * @author mrdoob / http://mrdoob.com/
- * @author supereggbert / http://www.paulbrunt.co.uk/
- * @author philogb / http://blog.thejit.org/
- * @author jordi_ros / http://plattsoft.com
- * @author D1plo1d / http://github.com/D1plo1d
- * @author alteredq / http://alteredqualia.com/
- * @author mikael emtinger / http://gomo.se/
- * @author timknip / http://www.floorplanner.com/
- * @author bhouston / http://clara.io
- * @author WestLangley / http://github.com/WestLangley
- */
-
 function Matrix4() {
 
 	this.elements = new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
@@ -1214,13 +1201,6 @@ Matrix4.prototype = {
 
 };
 
-/**
- * @author mikael emtinger / http://gomo.se/
- * @author alteredq / http://alteredqualia.com/
- * @author WestLangley / http://github.com/WestLangley
- * @author bhouston / http://clara.io
- */
-
 function Quaternion(x, y, z, w) {
 
 	this._x = x || 0;
@@ -1751,15 +1731,6 @@ Object.assign(Quaternion, {
 	}
 
 });
-
-/**
- * @author mrdoob / http://mrdoob.com/
- * @author *kile / http://kile.stravaganza.org/
- * @author philogb / http://blog.thejit.org/
- * @author mikael emtinger / http://gomo.se/
- * @author egraether / http://egraether.com/
- * @author WestLangley / http://github.com/WestLangley
- */
 
 function Vector3(x, y, z) {
 
@@ -2464,11 +2435,6 @@ Vector3.prototype = {
 
 };
 
-/**
- * @author bhouston / http://clara.io
- * @author mrdoob / http://mrdoob.com/
- */
-
 function Sphere(center, radius) {
 
 	this.center = center !== undefined ? center : new Vector3();
@@ -2617,11 +2583,6 @@ Sphere.prototype = {
 	}
 
 };
-
-/**
- * @author bhouston / http://clara.io
- * @author WestLangley / http://github.com/WestLangley
- */
 
 function Box3(min, max) {
 
@@ -4126,10 +4087,6 @@ Vector2.prototype = {
 
 };
 
-/**
- * @author mrdoob / http://mrdoob.com/
- */
-
 function Color(r, g, b) {
 
 	if (g === undefined && b === undefined) {
@@ -4602,10 +4559,6 @@ var ColorKeywords = { 'aliceblue': 0xF0F8FF, 'antiquewhite': 0xFAEBD7, 'aqua': 0
 	'springgreen': 0x00FF7F, 'steelblue': 0x4682B4, 'tan': 0xD2B48C, 'teal': 0x008080, 'thistle': 0xD8BFD8, 'tomato': 0xFF6347, 'turquoise': 0x40E0D0,
 	'violet': 0xEE82EE, 'wheat': 0xF5DEB3, 'white': 0xFFFFFF, 'whitesmoke': 0xF5F5F5, 'yellow': 0xFFFF00, 'yellowgreen': 0x9ACD32 };
 
-/**
- * @author mrdoob / http://mrdoob.com/
- */
-
 function BufferAttribute(array, itemSize, normalized) {
 
 	if (Array.isArray(array)) {
@@ -4893,6 +4846,8 @@ BufferAttribute.prototype = {
 
 };
 
+//
+
 function Uint16Attribute(array, itemSize) {
 
 	return new BufferAttribute(new Uint16Array(array), itemSize);
@@ -4907,11 +4862,6 @@ function Float32Attribute(array, itemSize) {
 
 	return new BufferAttribute(new Float32Array(array), itemSize);
 }
-
-/**
- * @author mrdoob / http://mrdoob.com/
- * @author alteredq / http://alteredqualia.com/
- */
 
 function Face3(a, b, c, normal, color, materialIndex) {
 
@@ -4962,13 +4912,6 @@ Face3.prototype = {
 	}
 
 };
-
-/**
- * @author alteredq / http://alteredqualia.com/
- * @author WestLangley / http://github.com/WestLangley
- * @author bhouston / http://clara.io
- * @author tschw
- */
 
 function Matrix3() {
 
@@ -5232,12 +5175,6 @@ Matrix3.prototype = {
 	}
 
 };
-
-/**
- * @author mrdoob / http://mrdoob.com/
- * @author WestLangley / http://github.com/WestLangley
- * @author bhouston / http://clara.io
- */
 
 function Euler(x, y, z, order) {
 
@@ -5563,14 +5500,6 @@ Layers.prototype = {
 	}
 
 };
-
-/**
- * @author mrdoob / http://mrdoob.com/
- * @author mikael emtinger / http://gomo.se/
- * @author alteredq / http://alteredqualia.com/
- * @author WestLangley / http://github.com/WestLangley
- * @author elephantatwork / www.elephantatwork.ch
- */
 
 function Object3D() {
 
@@ -6207,15 +6136,6 @@ var count$1 = 0;
 function Object3DIdCount() {
 	return count$1++;
 }
-
-/**
- * @author mrdoob / http://mrdoob.com/
- * @author kile / http://kile.stravaganza.org/
- * @author alteredq / http://alteredqualia.com/
- * @author mikael emtinger / http://gomo.se/
- * @author zz85 / http://www.lab4games.net/zz85/blog
- * @author bhouston / http://clara.io
- */
 
 function Geometry() {
 
@@ -7324,10 +7244,6 @@ function GeometryIdCount() {
 	return count++;
 }
 
-/**
- * @author mrdoob / http://mrdoob.com/
- */
-
 function DirectGeometry() {
 
 	Object.defineProperty(this, 'id', { value: GeometryIdCount() });
@@ -7581,11 +7497,6 @@ Object.assign(DirectGeometry.prototype, EventDispatcher.prototype, {
 	}
 
 });
-
-/**
- * @author alteredq / http://alteredqualia.com/
- * @author mrdoob / http://mrdoob.com/
- */
 
 function BufferGeometry() {
 
@@ -8495,10 +8406,6 @@ Object.assign(BufferGeometry.prototype, EventDispatcher.prototype, {
 
 BufferGeometry.MaxIndex = 65535;
 
-/**
- * @author Mugen87 / https://github.com/Mugen87
- */
-
 function BoxBufferGeometry(width, height, depth, widthSegments, heightSegments, depthSegments) {
 
 	BufferGeometry.call(this);
@@ -8851,11 +8758,6 @@ var RGBDEncoding = 3006;
 var BasicDepthPacking = 3200;
 var RGBADepthPacking = 3201;
 
-/**
- * @author mrdoob / http://mrdoob.com/
- * @author alteredq / http://alteredqualia.com/
- */
-
 function Material() {
 
 	Object.defineProperty(this, 'id', { value: MaterialIdCount() });
@@ -9170,57 +9072,6 @@ function MaterialIdCount() {
 	return count$2++;
 }
 
-/**
- * @author WestLangley / http://github.com/WestLangley
- *
- * parameters = {
- *  color: <hex>,
- *  roughness: <float>,
- *  metalness: <float>,
- *  opacity: <float>,
- *
- *  map: new THREE.Texture( <Image> ),
- *
- *  lightMap: new THREE.Texture( <Image> ),
- *  lightMapIntensity: <float>
- *
- *  aoMap: new THREE.Texture( <Image> ),
- *  aoMapIntensity: <float>
- *
- *  emissive: <hex>,
- *  emissiveIntensity: <float>
- *  emissiveMap: new THREE.Texture( <Image> ),
- *
- *  bumpMap: new THREE.Texture( <Image> ),
- *  bumpScale: <float>,
- *
- *  normalMap: new THREE.Texture( <Image> ),
- *  normalScale: <Vector2>,
- *
- *  displacementMap: new THREE.Texture( <Image> ),
- *  displacementScale: <float>,
- *  displacementBias: <float>,
- *
- *  roughnessMap: new THREE.Texture( <Image> ),
- *
- *  metalnessMap: new THREE.Texture( <Image> ),
- *
- *  alphaMap: new THREE.Texture( <Image> ),
- *
- *  envMap: new THREE.CubeTexture( [posx, negx, posy, negy, posz, negz] ),
- *  envMapIntensity: <float>
- *
- *  refractionRatio: <float>,
- *
- *  wireframe: <boolean>,
- *  wireframeLinewidth: <float>,
- *
- *  skinning: <bool>,
- *  morphTargets: <bool>,
- *  morphNormals: <bool>
- * }
- */
-
 function MeshStandardMaterial(parameters) {
 
 	Material.call(this);
@@ -9337,39 +9188,6 @@ MeshStandardMaterial.prototype.copy = function (source) {
 
 	return this;
 };
-
-/**
- * @author mrdoob / http://mrdoob.com/
- * @author alteredq / http://alteredqualia.com/
- *
- * parameters = {
- *  color: <hex>,
- *  opacity: <float>,
- *  map: new THREE.Texture( <Image> ),
- *
- *  aoMap: new THREE.Texture( <Image> ),
- *  aoMapIntensity: <float>
- *
- *  specularMap: new THREE.Texture( <Image> ),
- *
- *  alphaMap: new THREE.Texture( <Image> ),
- *
- *  envMap: new THREE.TextureCube( [posx, negx, posy, negy, posz, negz] ),
- *  combine: THREE.Multiply,
- *  reflectivity: <float>,
- *  refractionRatio: <float>,
- *
- *  shading: THREE.SmoothShading,
- *  depthTest: <bool>,
- *  depthWrite: <bool>,
- *
- *  wireframe: <boolean>,
- *  wireframeLinewidth: <float>,
- *
- *  skinning: <bool>,
- *  morphTargets: <bool>
- * }
- */
 
 function MeshBasicMaterial(parameters) {
 
@@ -9489,307 +9307,6 @@ function material(textureDescription, options) {
     return mat;
   });
 }
-
-/**
- * @author mrdoob / http://mrdoob.com/
- * @author alteredq / http://alteredqualia.com/
- * @author szimek / https://github.com/szimek/
- */
-
-function Texture(image, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy, encoding) {
-
-	Object.defineProperty(this, 'id', { value: TextureIdCount() });
-
-	this.uuid = _Math.generateUUID();
-
-	this.name = '';
-	this.sourceFile = '';
-
-	this.image = image !== undefined ? image : Texture.DEFAULT_IMAGE;
-	this.mipmaps = [];
-
-	this.mapping = mapping !== undefined ? mapping : Texture.DEFAULT_MAPPING;
-
-	this.wrapS = wrapS !== undefined ? wrapS : ClampToEdgeWrapping;
-	this.wrapT = wrapT !== undefined ? wrapT : ClampToEdgeWrapping;
-
-	this.magFilter = magFilter !== undefined ? magFilter : LinearFilter;
-	this.minFilter = minFilter !== undefined ? minFilter : LinearMipMapLinearFilter;
-
-	this.anisotropy = anisotropy !== undefined ? anisotropy : 1;
-
-	this.format = format !== undefined ? format : RGBAFormat;
-	this.type = type !== undefined ? type : UnsignedByteType;
-
-	this.offset = new Vector2(0, 0);
-	this.repeat = new Vector2(1, 1);
-
-	this.generateMipmaps = true;
-	this.premultiplyAlpha = false;
-	this.flipY = true;
-	this.unpackAlignment = 4; // valid values: 1, 2, 4, 8 (see http://www.khronos.org/opengles/sdk/docs/man/xhtml/glPixelStorei.xml)
-
-
-	// Values of encoding !== THREE.LinearEncoding only supported on map, envMap and emissiveMap.
-	//
-	// Also changing the encoding after already used by a Material will not automatically make the Material
-	// update.  You need to explicitly call Material.needsUpdate to trigger it to recompile.
-	this.encoding = encoding !== undefined ? encoding : LinearEncoding;
-
-	this.version = 0;
-	this.onUpdate = null;
-}
-
-Texture.DEFAULT_IMAGE = undefined;
-Texture.DEFAULT_MAPPING = UVMapping;
-
-Texture.prototype = {
-
-	constructor: Texture,
-
-	isTexture: true,
-
-	set needsUpdate(value) {
-
-		if (value === true) this.version++;
-	},
-
-	clone: function clone() {
-
-		return new this.constructor().copy(this);
-	},
-
-	copy: function copy(source) {
-
-		this.image = source.image;
-		this.mipmaps = source.mipmaps.slice(0);
-
-		this.mapping = source.mapping;
-
-		this.wrapS = source.wrapS;
-		this.wrapT = source.wrapT;
-
-		this.magFilter = source.magFilter;
-		this.minFilter = source.minFilter;
-
-		this.anisotropy = source.anisotropy;
-
-		this.format = source.format;
-		this.type = source.type;
-
-		this.offset.copy(source.offset);
-		this.repeat.copy(source.repeat);
-
-		this.generateMipmaps = source.generateMipmaps;
-		this.premultiplyAlpha = source.premultiplyAlpha;
-		this.flipY = source.flipY;
-		this.unpackAlignment = source.unpackAlignment;
-		this.encoding = source.encoding;
-
-		return this;
-	},
-
-	toJSON: function toJSON(meta) {
-
-		if (meta.textures[this.uuid] !== undefined) {
-
-			return meta.textures[this.uuid];
-		}
-
-		function getDataURL(image) {
-
-			var canvas;
-
-			if (image.toDataURL !== undefined) {
-
-				canvas = image;
-			} else {
-
-				canvas = document.createElementNS('http://www.w3.org/1999/xhtml', 'canvas');
-				canvas.width = image.width;
-				canvas.height = image.height;
-
-				canvas.getContext('2d').drawImage(image, 0, 0, image.width, image.height);
-			}
-
-			if (canvas.width > 2048 || canvas.height > 2048) {
-
-				return canvas.toDataURL('image/jpeg', 0.6);
-			} else {
-
-				return canvas.toDataURL('image/png');
-			}
-		}
-
-		var output = {
-			metadata: {
-				version: 4.4,
-				type: 'Texture',
-				generator: 'Texture.toJSON'
-			},
-
-			uuid: this.uuid,
-			name: this.name,
-
-			mapping: this.mapping,
-
-			repeat: [this.repeat.x, this.repeat.y],
-			offset: [this.offset.x, this.offset.y],
-			wrap: [this.wrapS, this.wrapT],
-
-			minFilter: this.minFilter,
-			magFilter: this.magFilter,
-			anisotropy: this.anisotropy,
-
-			flipY: this.flipY
-		};
-
-		if (this.image !== undefined) {
-
-			// TODO: Move to THREE.Image
-
-			var image = this.image;
-
-			if (image.uuid === undefined) {
-
-				image.uuid = _Math.generateUUID(); // UGH
-			}
-
-			if (meta.images[image.uuid] === undefined) {
-
-				meta.images[image.uuid] = {
-					uuid: image.uuid,
-					url: getDataURL(image)
-				};
-			}
-
-			output.image = image.uuid;
-		}
-
-		meta.textures[this.uuid] = output;
-
-		return output;
-	},
-
-	dispose: function dispose() {
-
-		this.dispatchEvent({ type: 'dispose' });
-	},
-
-	transformUv: function transformUv(uv) {
-
-		if (this.mapping !== UVMapping) return;
-
-		uv.multiply(this.repeat);
-		uv.add(this.offset);
-
-		if (uv.x < 0 || uv.x > 1) {
-
-			switch (this.wrapS) {
-
-				case RepeatWrapping:
-
-					uv.x = uv.x - Math.floor(uv.x);
-					break;
-
-				case ClampToEdgeWrapping:
-
-					uv.x = uv.x < 0 ? 0 : 1;
-					break;
-
-				case MirroredRepeatWrapping:
-
-					if (Math.abs(Math.floor(uv.x) % 2) === 1) {
-
-						uv.x = Math.ceil(uv.x) - uv.x;
-					} else {
-
-						uv.x = uv.x - Math.floor(uv.x);
-					}
-					break;
-
-			}
-		}
-
-		if (uv.y < 0 || uv.y > 1) {
-
-			switch (this.wrapT) {
-
-				case RepeatWrapping:
-
-					uv.y = uv.y - Math.floor(uv.y);
-					break;
-
-				case ClampToEdgeWrapping:
-
-					uv.y = uv.y < 0 ? 0 : 1;
-					break;
-
-				case MirroredRepeatWrapping:
-
-					if (Math.abs(Math.floor(uv.y) % 2) === 1) {
-
-						uv.y = Math.ceil(uv.y) - uv.y;
-					} else {
-
-						uv.y = uv.y - Math.floor(uv.y);
-					}
-					break;
-
-			}
-		}
-
-		if (this.flipY) {
-
-			uv.y = 1 - uv.y;
-		}
-	}
-
-};
-
-Object.assign(Texture.prototype, EventDispatcher.prototype);
-
-var count$3 = 0;
-function TextureIdCount() {
-	return count$3++;
-}
-
-/**
- * @author mrdoob / http://mrdoob.com/
- */
-
-function CubeTexture(images, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy, encoding) {
-
-	images = images !== undefined ? images : [];
-	mapping = mapping !== undefined ? mapping : CubeReflectionMapping;
-
-	Texture.call(this, images, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy, encoding);
-
-	this.flipY = false;
-}
-
-CubeTexture.prototype = Object.create(Texture.prototype);
-CubeTexture.prototype.constructor = CubeTexture;
-
-CubeTexture.prototype.isCubeTexture = true;
-
-Object.defineProperty(CubeTexture.prototype, 'images', {
-
-	get: function get() {
-
-		return this.image;
-	},
-
-	set: function set(value) {
-
-		this.image = value;
-	}
-
-});
-
-/**
- * @author bhouston / http://clara.io
- */
 
 function Ray(origin, direction) {
 
@@ -10261,10 +9778,6 @@ Ray.prototype = {
 
 };
 
-/**
- * @author bhouston / http://clara.io
- */
-
 function Line3(start, end) {
 
 	this.start = start !== undefined ? start : new Vector3();
@@ -10372,10 +9885,6 @@ Line3.prototype = {
 	}
 
 };
-
-/**
- * @author bhouston / http://clara.io
- */
 
 function Plane(normal, constant) {
 
@@ -10578,11 +10087,6 @@ Plane.prototype = {
 	}
 
 };
-
-/**
- * @author bhouston / http://clara.io
- * @author mrdoob / http://mrdoob.com/
- */
 
 function Triangle(a, b, c) {
 
@@ -10806,13 +10310,6 @@ Triangle.prototype = {
 	}
 
 };
-
-/**
- * @author mrdoob / http://mrdoob.com/
- * @author alteredq / http://alteredqualia.com/
- * @author mikael emtinger / http://gomo.se/
- * @author jonobr1 / http://jonobr1.com/
- */
 
 function Mesh(geometry, material) {
 
@@ -11117,994 +10614,6 @@ Mesh.prototype = Object.assign(Object.create(Object3D.prototype), {
 
 });
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
-  return typeof obj;
-} : function (obj) {
-  return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-};
-
-
-
-
-
-
-
-
-
-
-
-var classCallCheck = function (instance, Constructor) {
-  if (!(instance instanceof Constructor)) {
-    throw new TypeError("Cannot call a class as a function");
-  }
-};
-
-var createClass = function () {
-  function defineProperties(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-
-  return function (Constructor, protoProps, staticProps) {
-    if (protoProps) defineProperties(Constructor.prototype, protoProps);
-    if (staticProps) defineProperties(Constructor, staticProps);
-    return Constructor;
-  };
-}();
-
-
-
-
-
-
-
-var get$1 = function get$1(object, property, receiver) {
-  if (object === null) object = Function.prototype;
-  var desc = Object.getOwnPropertyDescriptor(object, property);
-
-  if (desc === undefined) {
-    var parent = Object.getPrototypeOf(object);
-
-    if (parent === null) {
-      return undefined;
-    } else {
-      return get$1(parent, property, receiver);
-    }
-  } else if ("value" in desc) {
-    return desc.value;
-  } else {
-    var getter = desc.get;
-
-    if (getter === undefined) {
-      return undefined;
-    }
-
-    return getter.call(receiver);
-  }
-};
-
-var inherits = function (subClass, superClass) {
-  if (typeof superClass !== "function" && superClass !== null) {
-    throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
-  }
-
-  subClass.prototype = Object.create(superClass && superClass.prototype, {
-    constructor: {
-      value: subClass,
-      enumerable: false,
-      writable: true,
-      configurable: true
-    }
-  });
-  if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
-};
-
-
-
-
-
-
-
-
-
-
-
-var possibleConstructorReturn = function (self, call) {
-  if (!self) {
-    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-  }
-
-  return call && (typeof call === "object" || typeof call === "function") ? call : self;
-};
-
-
-
-var set$1 = function set$1(object, property, value, receiver) {
-  var desc = Object.getOwnPropertyDescriptor(object, property);
-
-  if (desc === undefined) {
-    var parent = Object.getPrototypeOf(object);
-
-    if (parent !== null) {
-      set$1(parent, property, value, receiver);
-    }
-  } else if ("value" in desc && desc.writable) {
-    desc.value = value;
-  } else {
-    var setter = desc.set;
-
-    if (setter !== undefined) {
-      setter.call(receiver, value);
-    }
-  }
-
-  return value;
-};
-
-var AbstractEventEmitter = function () {
-  function AbstractEventEmitter() {
-    classCallCheck(this, AbstractEventEmitter);
-
-    this._handlers = {};
-  }
-
-  createClass(AbstractEventEmitter, [{
-    key: "addEventListener",
-    value: function addEventListener(name, thunk) {
-      if (!this._handlers[name]) {
-        this._handlers[name] = [];
-      }
-      this._handlers[name].push(thunk);
-    }
-  }, {
-    key: "removeEventListener",
-    value: function removeEventListener(name, thunk) {
-      if (this._handlers[name]) {
-        var idx = this._handlers[name].indexOf(thunk);
-        if (idx > -1) {
-          this._handlers[name].splice(idx, 1);
-        }
-      }
-    }
-  }, {
-    key: "forward",
-    value: function forward(obj, evts) {
-      var _this = this;
-
-      evts.forEach(function (evt) {
-        return _this.addEventListener(evt, obj.emit.bind(obj, evt));
-      });
-    }
-  }, {
-    key: "emit",
-    value: function emit(name, obj) {
-      if (this._handlers[name]) {
-        if ((typeof obj === "undefined" ? "undefined" : _typeof(obj)) === "object" && !(obj instanceof Event)) {
-          obj.type = name;
-          if (obj.defaultPrevented === undefined) {
-            obj.defaultPrevented = false;
-            obj.preventDefault = function () {
-              return obj.defaultPrevented = true;
-            };
-          }
-        }
-        var h = this._handlers[name];
-        for (var i = 0; h && i < h.length; ++i) {
-          h[i](obj);
-          if (obj && obj.defaultPrevented) {
-            return;
-          }
-        }
-      }
-    }
-  }]);
-  return AbstractEventEmitter;
-}();
-
-var entityKeys = [];
-var entities = new WeakMap();
-
-var Entity = function (_AbstractEventEmitter) {
-  inherits(Entity, _AbstractEventEmitter);
-  createClass(Entity, null, [{
-    key: "registerEntity",
-    value: function registerEntity(e) {
-      entities.set(e._idObj, e);
-      entityKeys.push(e._idObj);
-      e.addEventListener("_idchanged", function (evt) {
-        entityKeys.splice(entityKeys.indexOf(evt.oldID), 1);
-        entities.delete(evt.oldID);
-        entities.set(evt.entity._idObj, evt.entity);
-        entityKeys.push(evt.entity._idObj);
-      }, false);
-    }
-  }, {
-    key: "eyeBlankAll",
-    value: function eyeBlankAll(eye) {
-      entityKeys.forEach(function (id) {
-        entities.get(id).eyeBlank(eye);
-      });
-    }
-  }]);
-
-  function Entity(id) {
-    classCallCheck(this, Entity);
-
-    var _this = possibleConstructorReturn(this, (Entity.__proto__ || Object.getPrototypeOf(Entity)).call(this));
-
-    _this.id = id;
-
-    _this.parent = null;
-
-    _this.children = [];
-
-    _this.focused = false;
-
-    _this.focusable = true;
-
-    return _this;
-  }
-
-  createClass(Entity, [{
-    key: "focus",
-    value: function focus() {
-      if (this.focusable) {
-        this.focused = true;
-        this.emit("focus", {
-          target: this
-        });
-      }
-    }
-  }, {
-    key: "blur",
-    value: function blur() {
-      if (this.focused) {
-        this.focused = false;
-        for (var i = 0; i < this.children.length; ++i) {
-          if (this.children[i].focused) {
-            this.children[i].blur();
-          }
-        }
-        this.emit("blur", {
-          target: this
-        });
-      }
-    }
-  }, {
-    key: "appendChild",
-    value: function appendChild(child) {
-      if (child && !child.parent) {
-        child.parent = this;
-        this.children.push(child);
-      }
-    }
-  }, {
-    key: "removeChild",
-    value: function removeChild(child) {
-      var i = this.children.indexOf(child);
-      if (0 <= i && i < this.children.length) {
-        this.children.splice(i, 1);
-        child.parent = null;
-      }
-    }
-  }, {
-    key: "eyeBlank",
-    value: function eyeBlank(eye) {
-      for (var i = 0; i < this.children.length; ++i) {
-        this.children[i].eyeBlank(eye);
-      }
-    }
-  }, {
-    key: "_forFocusedChild",
-    value: function _forFocusedChild(name, evt) {
-      var elem = this.focusedElement;
-      if (elem && elem !== this) {
-        elem[name](evt);
-      }
-    }
-  }, {
-    key: "startUV",
-    value: function startUV(evt) {
-      this._forFocusedChild("startUV", evt);
-    }
-  }, {
-    key: "moveUV",
-    value: function moveUV(evt) {
-      this._forFocusedChild("moveUV", evt);
-    }
-  }, {
-    key: "endPointer",
-    value: function endPointer(evt) {
-      this._forFocusedChild("endPointer", evt);
-    }
-  }, {
-    key: "dispatchEvent",
-    value: function dispatchEvent(evt) {
-      var _this2 = this;
-
-      switch (evt.type) {
-        case "pointerstart":
-          this.startUV(evt.hit.uv);
-          break;
-        case "pointerend":
-          this.endPointer(evt);
-          break;
-        case "pointermove":
-        case "gazemove":
-          this.moveUV(evt.hit.uv);
-          break;
-        case "gazecomplete":
-          this.startUV(evt.hit.uv);
-          setTimeout(function () {
-            return _this2.endPointer(evt);
-          }, 100);
-          break;
-      }
-    }
-  }, {
-    key: "keyDown",
-    value: function keyDown(evt) {
-      this._forFocusedChild("keyDown", evt);
-    }
-  }, {
-    key: "keyUp",
-    value: function keyUp(evt) {
-      this._forFocusedChild("keyUp", evt);
-    }
-  }, {
-    key: "readClipboard",
-    value: function readClipboard(evt) {
-      this._forFocusedChild("readClipboard", evt);
-    }
-  }, {
-    key: "copySelectedText",
-    value: function copySelectedText(evt) {
-      this._forFocusedChild("copySelectedText", evt);
-    }
-  }, {
-    key: "cutSelectedText",
-    value: function cutSelectedText(evt) {
-      this._forFocusedChild("cutSelectedText", evt);
-    }
-  }, {
-    key: "readWheel",
-    value: function readWheel(evt) {
-      this._forFocusedChild("readWheel", evt);
-    }
-  }, {
-    key: "id",
-    get: function get() {
-      return this._id;
-    },
-    set: function set(v) {
-      if (this._id !== v) {
-        var oldID = this._idObj;
-        this._id = v;
-        this._idObj = new Object(v);
-        // this `_idchanged` event is necessary to update the related ID in the WeakMap of entities for eye-blanking.
-        this.emit("_idchanged", {
-          oldID: oldID,
-          entity: this
-        });
-      }
-    }
-  }, {
-    key: "theme",
-    get: function get() {
-      return null;
-    },
-    set: function set(v) {
-      for (var i = 0; i < this.children.length; ++i) {
-        this.children[i].theme = v;
-      }
-    }
-  }, {
-    key: "lockMovement",
-    get: function get() {
-      var lock = false;
-      for (var i = 0; i < this.children.length && !lock; ++i) {
-        lock = lock || this.children[i].lockMovement;
-      }
-      return lock;
-    }
-  }, {
-    key: "focusedElement",
-    get: function get() {
-      var result = null,
-          head = this;
-      while (head && head.focused) {
-        result = head;
-        var children = head.children;
-        head = null;
-        for (var i = 0; i < children.length; ++i) {
-          var child = children[i];
-          if (child.focused) {
-            head = child;
-          }
-        }
-      }
-      return result;
-    }
-  }]);
-  return Entity;
-}(AbstractEventEmitter);
-
-var Point = function () {
-  function Point(x, y) {
-    classCallCheck(this, Point);
-
-    this.set(x || 0, y || 0);
-  }
-
-  createClass(Point, [{
-    key: "set",
-    value: function set(x, y) {
-      this.x = x;
-      this.y = y;
-    }
-  }, {
-    key: "copy",
-    value: function copy(p) {
-      if (p) {
-        this.x = p.x;
-        this.y = p.y;
-      }
-    }
-  }, {
-    key: "clone",
-    value: function clone() {
-      return new Point(this.x, this.y);
-    }
-  }, {
-    key: "toString",
-    value: function toString() {
-      return "(x:" + this.x + ", y:" + this.y + ")";
-    }
-  }]);
-  return Point;
-}();
-
-var Size = function () {
-  function Size(width, height) {
-    classCallCheck(this, Size);
-
-    this.set(width || 0, height || 0);
-  }
-
-  createClass(Size, [{
-    key: "set",
-    value: function set(width, height) {
-      this.width = width;
-      this.height = height;
-    }
-  }, {
-    key: "copy",
-    value: function copy(s) {
-      if (s) {
-        this.width = s.width;
-        this.height = s.height;
-      }
-    }
-  }, {
-    key: "clone",
-    value: function clone() {
-      return new Size(this.width, this.height);
-    }
-  }, {
-    key: "toString",
-    value: function toString() {
-      return "<w:" + this.width + ", h:" + this.height + ">";
-    }
-  }]);
-  return Size;
-}();
-
-var Rectangle = function () {
-  function Rectangle(x, y, width, height) {
-    classCallCheck(this, Rectangle);
-
-    this.point = new Point(x, y);
-    this.size = new Size(width, height);
-  }
-
-  createClass(Rectangle, [{
-    key: "set",
-    value: function set(x, y, width, height) {
-      this.point.set(x, y);
-      this.size.set(width, height);
-    }
-  }, {
-    key: "copy",
-    value: function copy(r) {
-      if (r) {
-        this.point.copy(r.point);
-        this.size.copy(r.size);
-      }
-    }
-  }, {
-    key: "clone",
-    value: function clone() {
-      return new Rectangle(this.point.x, this.point.y, this.size.width, this.size.height);
-    }
-  }, {
-    key: "toString",
-    value: function toString() {
-      return "[" + this.point.toString() + " x " + this.size.toString() + "]";
-    }
-  }, {
-    key: "overlap",
-    value: function overlap(r) {
-      var left = Math.max(this.left, r.left),
-          top = Math.max(this.top, r.top),
-          right = Math.min(this.right, r.right),
-          bottom = Math.min(this.bottom, r.bottom);
-      if (right > left && bottom > top) {
-        return new Rectangle(left, top, right - left, bottom - top);
-      }
-    }
-  }, {
-    key: "x",
-    get: function get() {
-      return this.point.x;
-    },
-    set: function set(x) {
-      this.point.x = x;
-    }
-  }, {
-    key: "left",
-    get: function get() {
-      return this.point.x;
-    },
-    set: function set(x) {
-      this.point.x = x;
-    }
-  }, {
-    key: "width",
-    get: function get() {
-      return this.size.width;
-    },
-    set: function set(width) {
-      this.size.width = width;
-    }
-  }, {
-    key: "right",
-    get: function get() {
-      return this.point.x + this.size.width;
-    },
-    set: function set(right) {
-      this.point.x = right - this.size.width;
-    }
-  }, {
-    key: "y",
-    get: function get() {
-      return this.point.y;
-    },
-    set: function set(y) {
-      this.point.y = y;
-    }
-  }, {
-    key: "top",
-    get: function get() {
-      return this.point.y;
-    },
-    set: function set(y) {
-      this.point.y = y;
-    }
-  }, {
-    key: "height",
-    get: function get() {
-      return this.size.height;
-    },
-    set: function set(height) {
-      this.size.height = height;
-    }
-  }, {
-    key: "bottom",
-    get: function get() {
-      return this.point.y + this.size.height;
-    },
-    set: function set(bottom) {
-      this.point.y = bottom - this.size.height;
-    }
-  }, {
-    key: "area",
-    get: function get() {
-      return this.width * this.height;
-    }
-  }]);
-  return Rectangle;
-}();
-
-var COUNTER = 0;
-
-var Surface = function (_Entity) {
-  inherits(Surface, _Entity);
-  createClass(Surface, null, [{
-    key: "create",
-    value: function create() {
-      return new Surface();
-    }
-  }]);
-
-  function Surface(options) {
-    classCallCheck(this, Surface);
-
-    var _this = possibleConstructorReturn(this, (Surface.__proto__ || Object.getPrototypeOf(Surface)).call(this));
-
-    _this.options = Object.assign({}, {
-      id: "Primrose.Surface[" + COUNTER++ + "]",
-      bounds: new Rectangle()
-    }, options);
-    _this.bounds = _this.options.bounds;
-    _this.canvas = null;
-    _this.context = null;
-    _this._opacity = 1;
-
-    _this.style = {};
-
-    Object.defineProperties(_this.style, {
-      width: {
-        get: function get() {
-          return _this.bounds.width;
-        },
-        set: function set(v) {
-          _this.bounds.width = v;
-          _this.resize();
-        }
-      },
-      height: {
-        get: function get() {
-          return _this.bounds.height;
-        },
-        set: function set(v) {
-          _this.bounds.height = v;
-          _this.resize();
-        }
-      },
-      left: {
-        get: function get() {
-          return _this.bounds.left;
-        },
-        set: function set(v) {
-          _this.bounds.left = v;
-        }
-      },
-      top: {
-        get: function get() {
-          return _this.bounds.top;
-        },
-        set: function set(v) {
-          _this.bounds.top = v;
-        }
-      },
-      opacity: {
-        get: function get() {
-          return _this._opacity;
-        },
-        set: function set(v) {
-          _this._opacity = v;
-        }
-      },
-      fontSize: {
-        get: function get() {
-          return _this.fontSize;
-        },
-        set: function set(v) {
-          _this.fontSize = v;
-        }
-      },
-      backgroundColor: {
-        get: function get() {
-          return _this.backgroundColor;
-        },
-        set: function set(v) {
-          _this.backgroundColor = v;
-        }
-      },
-      color: {
-        get: function get() {
-          return _this.color;
-        },
-        set: function set(v) {
-          _this.color = v;
-        }
-      }
-    });
-
-    if (_this.options.id instanceof Surface) {
-      throw new Error("Object is already a Surface. Please don't try to wrap them.");
-    } else if (_this.options.id instanceof CanvasRenderingContext2D) {
-      _this.context = _this.options.id;
-      _this.canvas = _this.context.canvas;
-    } else if (_this.options.id instanceof HTMLCanvasElement) {
-      _this.canvas = _this.options.id;
-    } else if (typeof _this.options.id === "string" || _this.options.id instanceof String) {
-      _this.canvas = document.getElementById(_this.options.id);
-      if (_this.canvas === null) {
-        _this.canvas = document.createElement("canvas");
-        _this.canvas.id = _this.options.id;
-      } else if (_this.canvas.tagName !== "CANVAS") {
-        _this.canvas = null;
-      }
-    }
-
-    if (_this.canvas === null) {
-      console.error(_typeof(_this.options.id));
-      console.error(_this.options.id);
-      throw new Error(_this.options.id + " does not refer to a valid canvas element.");
-    }
-
-    _this.id = _this.canvas.id;
-
-    if (_this.bounds.width === 0) {
-      _this.bounds.width = _this.imageWidth;
-      _this.bounds.height = _this.imageHeight;
-    }
-
-    _this.imageWidth = _this.bounds.width;
-    _this.imageHeight = _this.bounds.height;
-
-    if (_this.context === null) {
-      _this.context = _this.canvas.getContext("2d");
-    }
-
-    _this.canvas.style.imageRendering = isChrome ? "pixelated" : "optimizespeed";
-    _this.context.imageSmoothingEnabled = false;
-    _this.context.textBaseline = "top";
-
-    _this._texture = null;
-    _this._material = null;
-    _this._environment = null;
-    return _this;
-  }
-
-  createClass(Surface, [{
-    key: "addToBrowserEnvironment",
-    value: function addToBrowserEnvironment(env, scene) {
-      this._environment = env;
-      var geom = this.className === "shell" ? shell(3, 10, 10) : quad(2, 2),
-          mesh = textured(geom, this, {
-        opacity: this._opacity
-      });
-      scene.add(mesh);
-      env.registerPickableObject(mesh);
-      return mesh;
-    }
-  }, {
-    key: "invalidate",
-    value: function invalidate(bounds) {
-      var useDefault = !bounds;
-      if (!bounds) {
-        bounds = this.bounds.clone();
-        bounds.left = 0;
-        bounds.top = 0;
-      } else if (bounds instanceof Rectangle) {
-        bounds = bounds.clone();
-      }
-      for (var i = 0; i < this.children.length; ++i) {
-        var child = this.children[i],
-            overlap = bounds.overlap(child.bounds);
-        if (overlap) {
-          var x = overlap.left - child.bounds.left,
-              y = overlap.top - child.bounds.top;
-          this.context.drawImage(child.canvas, x, y, overlap.width, overlap.height, overlap.x, overlap.y, overlap.width, overlap.height);
-        }
-      }
-      if (this._texture) {
-        this._texture.needsUpdate = true;
-      }
-      if (this._material) {
-        this._material.needsUpdate = true;
-      }
-      if (this.parent && this.parent.invalidate) {
-        bounds.left += this.bounds.left;
-        bounds.top += this.bounds.top;
-        this.parent.invalidate(bounds);
-      }
-    }
-  }, {
-    key: "render",
-    value: function render() {
-      this.invalidate();
-    }
-  }, {
-    key: "resize",
-    value: function resize() {
-      this.setSize(this.surfaceWidth, this.surfaceHeight);
-    }
-  }, {
-    key: "setSize",
-    value: function setSize(width, height) {
-      var oldTextBaseline = this.context.textBaseline,
-          oldTextAlign = this.context.textAlign;
-      this.imageWidth = width;
-      this.imageHeight = height;
-
-      this.context.textBaseline = oldTextBaseline;
-      this.context.textAlign = oldTextAlign;
-    }
-  }, {
-    key: "appendChild",
-    value: function appendChild(child) {
-      if (!(child instanceof Surface)) {
-        throw new Error("Can only append other Surfaces to a Surface. You gave: " + child);
-      }
-      get$1(Surface.prototype.__proto__ || Object.getPrototypeOf(Surface.prototype), "appendChild", this).call(this, child);
-      this.invalidate();
-    }
-  }, {
-    key: "mapUV",
-    value: function mapUV(point) {
-      if (point instanceof Array) {
-        return {
-          x: point[0] * this.imageWidth,
-          y: (1 - point[1]) * this.imageHeight
-        };
-      } else if (point instanceof Vector2) {
-        return {
-          x: point.x * this.imageWidth,
-          y: (1 - point.y) * this.imageHeight
-        };
-      }
-    }
-  }, {
-    key: "unmapUV",
-    value: function unmapUV(point) {
-      return [point.x / this.imageWidth, 1 - point.y / this.imageHeight];
-    }
-  }, {
-    key: "_findChild",
-    value: function _findChild(x, y, thunk) {
-      var here = this.inBounds(x, y),
-          found = null;
-      for (var i = this.children.length - 1; i >= 0; --i) {
-        var child = this.children[i];
-        if (!found && child.inBounds(x - this.bounds.left, y - this.bounds.top)) {
-          found = child;
-        } else if (child.focused) {
-          child.blur();
-        }
-      }
-      return found || here && this;
-    }
-  }, {
-    key: "inBounds",
-    value: function inBounds(x, y) {
-      return this.bounds.left <= x && x < this.bounds.right && this.bounds.top <= y && y < this.bounds.bottom;
-    }
-  }, {
-    key: "startPointer",
-    value: function startPointer(x, y) {
-      if (this.inBounds(x, y)) {
-        var target = this._findChild(x, y, function (child, x2, y2) {
-          return child.startPointer(x2, y2);
-        });
-        if (target) {
-          if (!this.focused) {
-            this.focus();
-          }
-          this.emit("click", {
-            target: target,
-            x: x,
-            y: y
-          });
-          if (target !== this) {
-            target.startPointer(x - this.bounds.left, y - this.bounds.top);
-          }
-        } else if (this.focused) {
-          this.blur();
-        }
-      }
-    }
-  }, {
-    key: "movePointer",
-    value: function movePointer(x, y) {
-      var target = this._findChild(x, y, function (child, x2, y2) {
-        return child.startPointer(x2, y2);
-      });
-      if (target) {
-        this.emit("move", {
-          target: target,
-          x: x,
-          y: y
-        });
-        if (target !== this) {
-          target.movePointer(x - this.bounds.left, y - this.bounds.top);
-        }
-      }
-    }
-  }, {
-    key: "startUV",
-    value: function startUV(point) {
-      var p = this.mapUV(point);
-      this.startPointer(p.x, p.y);
-    }
-  }, {
-    key: "moveUV",
-    value: function moveUV(point) {
-      var p = this.mapUV(point);
-      this.movePointer(p.x, p.y);
-    }
-  }, {
-    key: "imageWidth",
-    get: function get() {
-      return this.canvas.width;
-    },
-    set: function set(v) {
-      this.canvas.width = v;
-      this.bounds.width = v;
-    }
-  }, {
-    key: "imageHeight",
-    get: function get() {
-      return this.canvas.height;
-    },
-    set: function set(v) {
-      this.canvas.height = v;
-      this.bounds.height = v;
-    }
-  }, {
-    key: "elementWidth",
-    get: function get() {
-      return this.canvas.clientWidth * devicePixelRatio;
-    },
-    set: function set(v) {
-      this.canvas.style.width = v / devicePixelRatio + "px";
-    }
-  }, {
-    key: "elementHeight",
-    get: function get() {
-      return this.canvas.clientHeight * devicePixelRatio;
-    },
-    set: function set(v) {
-      this.canvas.style.height = v / devicePixelRatio + "px";
-    }
-  }, {
-    key: "surfaceWidth",
-    get: function get() {
-      return this.canvas.parentElement ? this.elementWidth : this.bounds.width;
-    }
-  }, {
-    key: "surfaceHeight",
-    get: function get() {
-      return this.canvas.parentElement ? this.elementHeight : this.bounds.height;
-    }
-  }, {
-    key: "resized",
-    get: function get() {
-      return this.imageWidth !== this.surfaceWidth || this.imageHeight !== this.surfaceHeight;
-    }
-  }, {
-    key: "texture",
-    get: function get() {
-      if (!this._texture) {
-        this._texture = new Texture(this.canvas);
-      }
-      return this._texture;
-    }
-  }, {
-    key: "environment",
-    get: function get() {
-      var head = this;
-      while (head) {
-        if (head._environment) {
-          if (head !== this) {
-            this._environment = head._environment;
-          }
-          return this._environment;
-        }
-        head = head.parent;
-      }
-    }
-  }]);
-  return Surface;
-}(Entity);
-
 /**
  * @author mrdoob / http://mrdoob.com/
  */
@@ -12207,10 +10716,6 @@ function LoadingManager(onLoad, onProgress, onError) {
 }
 
 var DefaultLoadingManager = new LoadingManager();
-
-/**
- * @author mrdoob / http://mrdoob.com/
- */
 
 function XHRLoader(manager) {
 
@@ -12405,10 +10910,6 @@ Object.assign(XHRLoader.prototype, {
 
 });
 
-/**
- * @author mrdoob / http://mrdoob.com/
- */
-
 function ImageLoader(manager) {
 
 	this.manager = manager !== undefined ? manager : DefaultLoadingManager;
@@ -12473,9 +10974,292 @@ Object.assign(ImageLoader.prototype, {
 
 });
 
-/**
- * @author mrdoob / http://mrdoob.com/
- */
+function Texture$1(image, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy, encoding) {
+
+	Object.defineProperty(this, 'id', { value: TextureIdCount() });
+
+	this.uuid = _Math.generateUUID();
+
+	this.name = '';
+	this.sourceFile = '';
+
+	this.image = image !== undefined ? image : Texture$1.DEFAULT_IMAGE;
+	this.mipmaps = [];
+
+	this.mapping = mapping !== undefined ? mapping : Texture$1.DEFAULT_MAPPING;
+
+	this.wrapS = wrapS !== undefined ? wrapS : ClampToEdgeWrapping;
+	this.wrapT = wrapT !== undefined ? wrapT : ClampToEdgeWrapping;
+
+	this.magFilter = magFilter !== undefined ? magFilter : LinearFilter;
+	this.minFilter = minFilter !== undefined ? minFilter : LinearMipMapLinearFilter;
+
+	this.anisotropy = anisotropy !== undefined ? anisotropy : 1;
+
+	this.format = format !== undefined ? format : RGBAFormat;
+	this.type = type !== undefined ? type : UnsignedByteType;
+
+	this.offset = new Vector2(0, 0);
+	this.repeat = new Vector2(1, 1);
+
+	this.generateMipmaps = true;
+	this.premultiplyAlpha = false;
+	this.flipY = true;
+	this.unpackAlignment = 4; // valid values: 1, 2, 4, 8 (see http://www.khronos.org/opengles/sdk/docs/man/xhtml/glPixelStorei.xml)
+
+
+	// Values of encoding !== THREE.LinearEncoding only supported on map, envMap and emissiveMap.
+	//
+	// Also changing the encoding after already used by a Material will not automatically make the Material
+	// update.  You need to explicitly call Material.needsUpdate to trigger it to recompile.
+	this.encoding = encoding !== undefined ? encoding : LinearEncoding;
+
+	this.version = 0;
+	this.onUpdate = null;
+}
+
+Texture$1.DEFAULT_IMAGE = undefined;
+Texture$1.DEFAULT_MAPPING = UVMapping;
+
+Texture$1.prototype = {
+
+	constructor: Texture$1,
+
+	isTexture: true,
+
+	set needsUpdate(value) {
+
+		if (value === true) this.version++;
+	},
+
+	clone: function clone() {
+
+		return new this.constructor().copy(this);
+	},
+
+	copy: function copy(source) {
+
+		this.image = source.image;
+		this.mipmaps = source.mipmaps.slice(0);
+
+		this.mapping = source.mapping;
+
+		this.wrapS = source.wrapS;
+		this.wrapT = source.wrapT;
+
+		this.magFilter = source.magFilter;
+		this.minFilter = source.minFilter;
+
+		this.anisotropy = source.anisotropy;
+
+		this.format = source.format;
+		this.type = source.type;
+
+		this.offset.copy(source.offset);
+		this.repeat.copy(source.repeat);
+
+		this.generateMipmaps = source.generateMipmaps;
+		this.premultiplyAlpha = source.premultiplyAlpha;
+		this.flipY = source.flipY;
+		this.unpackAlignment = source.unpackAlignment;
+		this.encoding = source.encoding;
+
+		return this;
+	},
+
+	toJSON: function toJSON(meta) {
+
+		if (meta.textures[this.uuid] !== undefined) {
+
+			return meta.textures[this.uuid];
+		}
+
+		function getDataURL(image) {
+
+			var canvas;
+
+			if (image.toDataURL !== undefined) {
+
+				canvas = image;
+			} else {
+
+				canvas = document.createElementNS('http://www.w3.org/1999/xhtml', 'canvas');
+				canvas.width = image.width;
+				canvas.height = image.height;
+
+				canvas.getContext('2d').drawImage(image, 0, 0, image.width, image.height);
+			}
+
+			if (canvas.width > 2048 || canvas.height > 2048) {
+
+				return canvas.toDataURL('image/jpeg', 0.6);
+			} else {
+
+				return canvas.toDataURL('image/png');
+			}
+		}
+
+		var output = {
+			metadata: {
+				version: 4.4,
+				type: 'Texture',
+				generator: 'Texture.toJSON'
+			},
+
+			uuid: this.uuid,
+			name: this.name,
+
+			mapping: this.mapping,
+
+			repeat: [this.repeat.x, this.repeat.y],
+			offset: [this.offset.x, this.offset.y],
+			wrap: [this.wrapS, this.wrapT],
+
+			minFilter: this.minFilter,
+			magFilter: this.magFilter,
+			anisotropy: this.anisotropy,
+
+			flipY: this.flipY
+		};
+
+		if (this.image !== undefined) {
+
+			// TODO: Move to THREE.Image
+
+			var image = this.image;
+
+			if (image.uuid === undefined) {
+
+				image.uuid = _Math.generateUUID(); // UGH
+			}
+
+			if (meta.images[image.uuid] === undefined) {
+
+				meta.images[image.uuid] = {
+					uuid: image.uuid,
+					url: getDataURL(image)
+				};
+			}
+
+			output.image = image.uuid;
+		}
+
+		meta.textures[this.uuid] = output;
+
+		return output;
+	},
+
+	dispose: function dispose() {
+
+		this.dispatchEvent({ type: 'dispose' });
+	},
+
+	transformUv: function transformUv(uv) {
+
+		if (this.mapping !== UVMapping) return;
+
+		uv.multiply(this.repeat);
+		uv.add(this.offset);
+
+		if (uv.x < 0 || uv.x > 1) {
+
+			switch (this.wrapS) {
+
+				case RepeatWrapping:
+
+					uv.x = uv.x - Math.floor(uv.x);
+					break;
+
+				case ClampToEdgeWrapping:
+
+					uv.x = uv.x < 0 ? 0 : 1;
+					break;
+
+				case MirroredRepeatWrapping:
+
+					if (Math.abs(Math.floor(uv.x) % 2) === 1) {
+
+						uv.x = Math.ceil(uv.x) - uv.x;
+					} else {
+
+						uv.x = uv.x - Math.floor(uv.x);
+					}
+					break;
+
+			}
+		}
+
+		if (uv.y < 0 || uv.y > 1) {
+
+			switch (this.wrapT) {
+
+				case RepeatWrapping:
+
+					uv.y = uv.y - Math.floor(uv.y);
+					break;
+
+				case ClampToEdgeWrapping:
+
+					uv.y = uv.y < 0 ? 0 : 1;
+					break;
+
+				case MirroredRepeatWrapping:
+
+					if (Math.abs(Math.floor(uv.y) % 2) === 1) {
+
+						uv.y = Math.ceil(uv.y) - uv.y;
+					} else {
+
+						uv.y = uv.y - Math.floor(uv.y);
+					}
+					break;
+
+			}
+		}
+
+		if (this.flipY) {
+
+			uv.y = 1 - uv.y;
+		}
+	}
+
+};
+
+Object.assign(Texture$1.prototype, EventDispatcher.prototype);
+
+var count$3 = 0;
+function TextureIdCount() {
+	return count$3++;
+}
+
+function CubeTexture(images, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy, encoding) {
+
+	images = images !== undefined ? images : [];
+	mapping = mapping !== undefined ? mapping : CubeReflectionMapping;
+
+	Texture$1.call(this, images, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy, encoding);
+
+	this.flipY = false;
+}
+
+CubeTexture.prototype = Object.create(Texture$1.prototype);
+CubeTexture.prototype.constructor = CubeTexture;
+
+CubeTexture.prototype.isCubeTexture = true;
+
+Object.defineProperty(CubeTexture.prototype, 'images', {
+
+	get: function get() {
+
+		return this.image;
+	},
+
+	set: function set(value) {
+
+		this.image = value;
+	}
+
+});
 
 function CubeTextureLoader(manager) {
 
@@ -12533,10 +11317,6 @@ Object.assign(CubeTextureLoader.prototype, {
 
 });
 
-/**
- * @author mrdoob / http://mrdoob.com/
- */
-
 function TextureLoader(manager) {
 
 	this.manager = manager !== undefined ? manager : DefaultLoadingManager;
@@ -12546,7 +11326,7 @@ Object.assign(TextureLoader.prototype, {
 
 	load: function load(url, onLoad, onProgress, onError) {
 
-		var texture = new Texture();
+		var texture = new Texture$1();
 
 		var loader = new ImageLoader(this.manager);
 		loader.setCrossOrigin(this.crossOrigin);
@@ -12613,1610 +11393,11 @@ function loadTexture$1(id, url, progress) {
       if (textureLoader) {
         textureLoader.load(url, resolve, progress, reject);
       } else {
-        resolve(new Texture(url));
+        resolve(new Texture$1(url));
       }
     });
   });
 }
-
-// unicode-aware string reverse
-var reverse = function () {
-  var combiningMarks = /(<%= allExceptCombiningMarks %>)(<%= combiningMarks %>+)/g,
-      surrogatePair = /(<%= highSurrogates %>)(<%= lowSurrogates %>)/g;
-
-  function reverse(str) {
-    str = str.replace(combiningMarks, function (match, capture1, capture2) {
-      return reverse(capture2) + capture1;
-    }).replace(surrogatePair, "$2$1");
-    var res = "";
-    for (var i = str.length - 1; i >= 0; --i) {
-      res += str[i];
-    }
-    return res;
-  }
-  return reverse;
-}();
-
-var Cursor = function () {
-  createClass(Cursor, null, [{
-    key: "min",
-    value: function min(a, b) {
-      if (a.i <= b.i) {
-        return a;
-      }
-      return b;
-    }
-  }, {
-    key: "max",
-    value: function max(a, b) {
-      if (a.i > b.i) {
-        return a;
-      }
-      return b;
-    }
-  }]);
-
-  function Cursor(i, x, y) {
-    classCallCheck(this, Cursor);
-
-    this.i = i || 0;
-    this.x = x || 0;
-    this.y = y || 0;
-    this.moved = true;
-  }
-
-  createClass(Cursor, [{
-    key: "clone",
-    value: function clone() {
-      return new Cursor(this.i, this.x, this.y);
-    }
-  }, {
-    key: "toString",
-    value: function toString() {
-      return "[i:" + this.i + " x:" + this.x + " y:" + this.y + "]";
-    }
-  }, {
-    key: "copy",
-    value: function copy(cursor) {
-      this.i = cursor.i;
-      this.x = cursor.x;
-      this.y = cursor.y;
-      this.moved = false;
-    }
-  }, {
-    key: "fullhome",
-    value: function fullhome() {
-      this.i = 0;
-      this.x = 0;
-      this.y = 0;
-      this.moved = true;
-    }
-  }, {
-    key: "fullend",
-    value: function fullend(lines) {
-      this.i = 0;
-      var lastLength = 0;
-      for (var y = 0; y < lines.length; ++y) {
-        var line = lines[y];
-        lastLength = line.length;
-        this.i += lastLength;
-      }
-      this.y = lines.length - 1;
-      this.x = lastLength;
-      this.moved = true;
-    }
-  }, {
-    key: "skipleft",
-    value: function skipleft(lines) {
-      if (this.x === 0) {
-        this.left(lines);
-      } else {
-        var x = this.x - 1;
-        var line = lines[this.y];
-        var word = reverse(line.substring(0, x));
-        var m = word.match(/(\s|\W)+/);
-        var dx = m ? m.index + m[0].length + 1 : word.length;
-        this.i -= dx;
-        this.x -= dx;
-      }
-      this.moved = true;
-    }
-  }, {
-    key: "left",
-    value: function left(lines) {
-      if (this.i > 0) {
-        --this.i;
-        --this.x;
-        if (this.x < 0) {
-          --this.y;
-          var line = lines[this.y];
-          this.x = line.length;
-        }
-        if (this.reverseFromNewline(lines)) {
-          ++this.i;
-        }
-      }
-      this.moved = true;
-    }
-  }, {
-    key: "skipright",
-    value: function skipright(lines) {
-      var line = lines[this.y];
-      if (this.x === line.length || line[this.x] === '\n') {
-        this.right(lines);
-      } else {
-        var x = this.x + 1;
-        line = line.substring(x);
-        var m = line.match(/(\s|\W)+/);
-        var dx = m ? m.index + m[0].length + 1 : line.length - this.x;
-        this.i += dx;
-        this.x += dx;
-        this.reverseFromNewline(lines);
-      }
-      this.moved = true;
-    }
-  }, {
-    key: "fixCursor",
-    value: function fixCursor(lines) {
-      this.x = this.i;
-      this.y = 0;
-      var total = 0;
-      var line = lines[this.y];
-      while (this.x > line.length) {
-        this.x -= line.length;
-        total += line.length;
-        if (this.y >= lines.length - 1) {
-          this.i = total;
-          this.x = line.length;
-          this.moved = true;
-          break;
-        }
-        ++this.y;
-        line = lines[this.y];
-      }
-      return this.moved;
-    }
-  }, {
-    key: "right",
-    value: function right(lines) {
-      this.advanceN(lines, 1);
-    }
-  }, {
-    key: "advanceN",
-    value: function advanceN(lines, n) {
-      var line = lines[this.y];
-      if (this.y < lines.length - 1 || this.x < line.length) {
-        this.i += n;
-        this.fixCursor(lines);
-        line = lines[this.y];
-        if (this.x > 0 && line[this.x - 1] === '\n') {
-          ++this.y;
-          this.x = 0;
-        }
-      }
-      this.moved = true;
-    }
-  }, {
-    key: "home",
-    value: function home() {
-      this.i -= this.x;
-      this.x = 0;
-      this.moved = true;
-    }
-  }, {
-    key: "end",
-    value: function end(lines) {
-      var line = lines[this.y];
-      var dx = line.length - this.x;
-      this.i += dx;
-      this.x += dx;
-      this.reverseFromNewline(lines);
-      this.moved = true;
-    }
-  }, {
-    key: "up",
-    value: function up(lines) {
-      if (this.y > 0) {
-        --this.y;
-        var line = lines[this.y];
-        var dx = Math.min(0, line.length - this.x);
-        this.x += dx;
-        this.i -= line.length - dx;
-        this.reverseFromNewline(lines);
-      }
-      this.moved = true;
-    }
-  }, {
-    key: "down",
-    value: function down(lines) {
-      if (this.y < lines.length - 1) {
-        ++this.y;
-        var line = lines[this.y];
-        var pLine = lines[this.y - 1];
-        var dx = Math.min(0, line.length - this.x);
-        this.x += dx;
-        this.i += pLine.length + dx;
-        this.reverseFromNewline(lines);
-      }
-      this.moved = true;
-    }
-  }, {
-    key: "incY",
-    value: function incY(dy, lines) {
-      this.y = Math.max(0, Math.min(lines.length - 1, this.y + dy));
-      var line = lines[this.y];
-      this.x = Math.max(0, Math.min(line.length, this.x));
-      this.i = this.x;
-      for (var i = 0; i < this.y; ++i) {
-        this.i += lines[i].length;
-      }
-      this.reverseFromNewline(lines);
-      this.moved = true;
-    }
-  }, {
-    key: "setXY",
-    value: function setXY(x, y, lines) {
-      this.y = Math.max(0, Math.min(lines.length - 1, y));
-      var line = lines[this.y];
-      this.x = Math.max(0, Math.min(line.length, x));
-      this.i = this.x;
-      for (var i = 0; i < this.y; ++i) {
-        this.i += lines[i].length;
-      }
-      this.reverseFromNewline(lines);
-      this.moved = true;
-    }
-  }, {
-    key: "setI",
-    value: function setI(i, lines) {
-      this.i = i;
-      this.fixCursor(lines);
-      this.moved = true;
-    }
-  }, {
-    key: "reverseFromNewline",
-    value: function reverseFromNewline(lines) {
-      var line = lines[this.y];
-      if (this.x > 0 && line[this.x - 1] === '\n') {
-        --this.x;
-        --this.i;
-        return true;
-      }
-      return false;
-    }
-  }]);
-  return Cursor;
-}();
-
-var CommandPack = function CommandPack(name, commands) {
-  classCallCheck(this, CommandPack);
-
-  this.name = name;
-  Object.assign(this, commands);
-};
-
-var BasicTextInput = function (_CommandPack) {
-  inherits(BasicTextInput, _CommandPack);
-
-  function BasicTextInput(additionalName, additionalCommands) {
-    classCallCheck(this, BasicTextInput);
-
-    var commands = {
-      NORMAL_LEFTARROW: function NORMAL_LEFTARROW(prim, tokenRows) {
-        prim.cursorLeft(tokenRows, prim.frontCursor);
-      },
-      NORMAL_SKIPLEFT: function NORMAL_SKIPLEFT(prim, tokenRows) {
-        prim.cursorSkipLeft(tokenRows, prim.frontCursor);
-      },
-      NORMAL_RIGHTARROW: function NORMAL_RIGHTARROW(prim, tokenRows) {
-        prim.cursorRight(tokenRows, prim.frontCursor);
-      },
-      NORMAL_SKIPRIGHT: function NORMAL_SKIPRIGHT(prim, tokenRows) {
-        prim.cursorSkipRight(tokenRows, prim.frontCursor);
-      },
-      NORMAL_HOME: function NORMAL_HOME(prim, tokenRows) {
-        prim.cursorHome(tokenRows, prim.frontCursor);
-      },
-      NORMAL_END: function NORMAL_END(prim, tokenRows) {
-        prim.cursorEnd(tokenRows, prim.frontCursor);
-      },
-      NORMAL_BACKSPACE: function NORMAL_BACKSPACE(prim, tokenRows) {
-        if (prim.frontCursor.i === prim.backCursor.i) {
-          prim.frontCursor.left(tokenRows);
-        }
-        prim.selectedText = "";
-        prim.scrollIntoView(prim.frontCursor);
-      },
-      NORMAL_ENTER: function NORMAL_ENTER(prim, tokenRows, currentToken) {
-        prim.emit("change", {
-          target: prim
-        });
-      },
-      NORMAL_DELETE: function NORMAL_DELETE(prim, tokenRows) {
-        if (prim.frontCursor.i === prim.backCursor.i) {
-          prim.backCursor.right(tokenRows);
-        }
-        prim.selectedText = "";
-        prim.scrollIntoView(prim.frontCursor);
-      },
-      NORMAL_TAB: function NORMAL_TAB(prim, tokenRows) {
-        prim.selectedText = prim.tabString;
-      },
-
-      SHIFT_LEFTARROW: function SHIFT_LEFTARROW(prim, tokenRows) {
-        prim.cursorLeft(tokenRows, prim.backCursor);
-      },
-      SHIFT_SKIPLEFT: function SHIFT_SKIPLEFT(prim, tokenRows) {
-        prim.cursorSkipLeft(tokenRows, prim.backCursor);
-      },
-      SHIFT_RIGHTARROW: function SHIFT_RIGHTARROW(prim, tokenRows) {
-        prim.cursorRight(tokenRows, prim.backCursor);
-      },
-      SHIFT_SKIPRIGHT: function SHIFT_SKIPRIGHT(prim, tokenRows) {
-        prim.cursorSkipRight(tokenRows, prim.backCursor);
-      },
-      SHIFT_HOME: function SHIFT_HOME(prim, tokenRows) {
-        prim.cursorHome(tokenRows, prim.backCursor);
-      },
-      SHIFT_END: function SHIFT_END(prim, tokenRows) {
-        prim.cursorEnd(tokenRows, prim.backCursor);
-      },
-      SHIFT_DELETE: function SHIFT_DELETE(prim, tokenRows) {
-        if (prim.frontCursor.i === prim.backCursor.i) {
-          prim.frontCursor.home(tokenRows);
-          prim.backCursor.end(tokenRows);
-        }
-        prim.selectedText = "";
-        prim.scrollIntoView(prim.frontCursor);
-      },
-      CTRL_HOME: function CTRL_HOME(prim, tokenRows) {
-        prim.cursorFullHome(tokenRows, prim.frontCursor);
-      },
-      CTRL_END: function CTRL_END(prim, tokenRows) {
-        prim.cursorFullEnd(tokenRows, prim.frontCursor);
-      },
-
-      CTRLSHIFT_HOME: function CTRLSHIFT_HOME(prim, tokenRows) {
-        prim.cursorFullHome(tokenRows, prim.backCursor);
-      },
-      CTRLSHIFT_END: function CTRLSHIFT_END(prim, tokenRows) {
-        prim.cursorFullEnd(tokenRows, prim.backCursor);
-      },
-
-      SELECT_ALL: function SELECT_ALL(prim, tokenRows) {
-        prim.frontCursor.fullhome(tokenRows);
-        prim.backCursor.fullend(tokenRows);
-      },
-
-      REDO: function REDO(prim, tokenRows) {
-        prim.redo();
-        prim.scrollIntoView(prim.frontCursor);
-      },
-      UNDO: function UNDO(prim, tokenRows) {
-        prim.undo();
-        prim.scrollIntoView(prim.frontCursor);
-      }
-    };
-
-    if (additionalCommands) {
-      for (var key in additionalCommands) {
-        commands[key] = additionalCommands[key];
-      }
-    }
-
-    return possibleConstructorReturn(this, (BasicTextInput.__proto__ || Object.getPrototypeOf(BasicTextInput)).call(this, additionalName || "Text editor commands", commands));
-  }
-
-  return BasicTextInput;
-}(CommandPack);
-
-var TextEditor = new BasicTextInput("Text Area input commands", {
-  NORMAL_UPARROW: function NORMAL_UPARROW(prim, tokenRows) {
-    prim.cursorUp(tokenRows, prim.frontCursor);
-  },
-  NORMAL_DOWNARROW: function NORMAL_DOWNARROW(prim, tokenRows) {
-    prim.cursorDown(tokenRows, prim.frontCursor);
-  },
-  NORMAL_PAGEUP: function NORMAL_PAGEUP(prim, tokenRows) {
-    prim.cursorPageUp(tokenRows, prim.frontCursor);
-  },
-  NORMAL_PAGEDOWN: function NORMAL_PAGEDOWN(prim, tokenRows) {
-    prim.cursorPageDown(tokenRows, prim.frontCursor);
-  },
-  NORMAL_ENTER: function NORMAL_ENTER(prim, tokenRows, currentToken) {
-    var indent = "";
-    var tokenRow = tokenRows[prim.frontCursor.y];
-    if (tokenRow.length > 0 && tokenRow[0].type === "whitespace") {
-      indent = tokenRow[0].value;
-    }
-    prim.selectedText = "\n" + indent;
-    prim.scrollIntoView(prim.frontCursor);
-  },
-
-  SHIFT_UPARROW: function SHIFT_UPARROW(prim, tokenRows) {
-    prim.cursorUp(tokenRows, prim.backCursor);
-  },
-  SHIFT_DOWNARROW: function SHIFT_DOWNARROW(prim, tokenRows) {
-    prim.cursorDown(tokenRows, prim.backCursor);
-  },
-  SHIFT_PAGEUP: function SHIFT_PAGEUP(prim, tokenRows) {
-    prim.cursorPageUp(tokenRows, prim.backCursor);
-  },
-  SHIFT_PAGEDOWN: function SHIFT_PAGEDOWN(prim, tokenRows) {
-    prim.cursorPageDown(tokenRows, prim.backCursor);
-  },
-
-  WINDOW_SCROLL_DOWN: function WINDOW_SCROLL_DOWN(prim, tokenRows) {
-    if (prim.scroll.y < tokenRows.length) {
-      ++prim.scroll.y;
-    }
-  },
-  WINDOW_SCROLL_UP: function WINDOW_SCROLL_UP(prim, tokenRows) {
-    if (prim.scroll.y > 0) {
-      --prim.scroll.y;
-    }
-  }
-});
-
-var Default = {
-  name: "Light",
-  fontFamily: "'Droid Sans Mono', 'Consolas', 'Lucida Console', 'Courier New', 'Courier', monospace",
-  cursorColor: "black",
-  fontSize: 16,
-  lineNumbers: {
-    foreColor: "black"
-  },
-  regular: {
-    backColor: "white",
-    foreColor: "black",
-    currentRowBackColor: "#f0f0f0",
-    selectedBackColor: "#c0c0c0",
-    unfocused: "rgba(0, 0, 255, 0.25)"
-  },
-  strings: {
-    foreColor: "#aa9900",
-    fontStyle: "italic"
-  },
-  regexes: {
-    foreColor: "#aa0099",
-    fontStyle: "italic"
-  },
-  numbers: {
-    foreColor: "green"
-  },
-  comments: {
-    foreColor: "grey",
-    fontStyle: "italic"
-  },
-  keywords: {
-    foreColor: "blue"
-  },
-  functions: {
-    foreColor: "brown",
-    fontWeight: "bold"
-  },
-  members: {
-    foreColor: "green"
-  },
-  error: {
-    foreColor: "red",
-    fontStyle: "underline italic"
-  }
-};
-
-var Rule = function () {
-  function Rule(name, test) {
-    classCallCheck(this, Rule);
-
-    this.name = name;
-    this.test = test;
-  }
-
-  createClass(Rule, [{
-    key: "carveOutMatchedToken",
-    value: function carveOutMatchedToken(tokens, j) {
-      var token = tokens[j];
-      if (token.type === "regular") {
-        var res = this.test.exec(token.value);
-        if (res) {
-          // Only use the last group that matches the regex, to allow for more
-          // complex regexes that can match in special contexts, but not make
-          // the context part of the token.
-          var midx = res[res.length - 1],
-              start = res.input.indexOf(midx),
-              end = start + midx.length;
-          if (start === 0) {
-            // the rule matches the start of the token
-            token.type = this.name;
-            if (end < token.value.length) {
-              // but not the end
-              var next = token.splitAt(end);
-              next.type = "regular";
-              tokens.splice(j + 1, 0, next);
-            }
-          } else {
-            // the rule matches from the middle of the token
-            var mid = token.splitAt(start);
-            if (midx.length < mid.value.length) {
-              // but not the end
-              var right = mid.splitAt(midx.length);
-              tokens.splice(j + 1, 0, right);
-            }
-            mid.type = this.name;
-            tokens.splice(j + 1, 0, mid);
-          }
-        }
-      }
-    }
-  }]);
-  return Rule;
-}();
-
-var Token = function () {
-  function Token(value, type, index, line) {
-    classCallCheck(this, Token);
-
-    this.value = value;
-    this.type = type;
-    this.index = index;
-    this.line = line;
-  }
-
-  createClass(Token, [{
-    key: "clone",
-    value: function clone() {
-      return new Token(this.value, this.type, this.index, this.line);
-    }
-  }, {
-    key: "splitAt",
-    value: function splitAt(i) {
-      var next = this.value.substring(i);
-      this.value = this.value.substring(0, i);
-      return new Token(next, this.type, this.index + i, this.line);
-    }
-  }, {
-    key: "toString",
-    value: function toString() {
-      return "[" + this.type + ": " + this.value + "]";
-    }
-  }]);
-  return Token;
-}();
-
-var Grammar = function () {
-  function Grammar(name, rules) {
-    classCallCheck(this, Grammar);
-
-    this.name = name;
-
-    // clone the preprocessing grammar to start a new grammar
-    this.grammar = rules.map(function (rule) {
-      return new Rule(rule[0], rule[1]);
-    });
-
-    function crudeParsing(tokens) {
-      var commentDelim = null,
-          stringDelim = null,
-          line = 0,
-          i,
-          t;
-      for (i = 0; i < tokens.length; ++i) {
-        t = tokens[i];
-        t.line = line;
-        if (t.type === "newlines") {
-          ++line;
-        }
-
-        if (stringDelim) {
-          if (t.type === "stringDelim" && t.value === stringDelim && (i === 0 || tokens[i - 1].value[tokens[i - 1].value.length - 1] !== "\\")) {
-            stringDelim = null;
-          }
-          if (t.type !== "newlines") {
-            t.type = "strings";
-          }
-        } else if (commentDelim) {
-          if (commentDelim === "startBlockComments" && t.type === "endBlockComments" || commentDelim === "startLineComments" && t.type === "newlines") {
-            commentDelim = null;
-          }
-          if (t.type !== "newlines") {
-            t.type = "comments";
-          }
-        } else if (t.type === "stringDelim") {
-          stringDelim = t.value;
-          t.type = "strings";
-        } else if (t.type === "startBlockComments" || t.type === "startLineComments") {
-          commentDelim = t.type;
-          t.type = "comments";
-        }
-      }
-
-      // recombine like-tokens
-      for (i = tokens.length - 1; i > 0; --i) {
-        var p = tokens[i - 1];
-        t = tokens[i];
-        if (p.type === t.type && p.type !== "newlines") {
-          p.value += t.value;
-          tokens.splice(i, 1);
-        }
-      }
-    }
-
-    this.tokenize = function (text) {
-      // all text starts off as regular text, then gets cut up into tokens of
-      // more specific type
-      var tokens = [new Token(text, "regular", 0)];
-      for (var i = 0; i < this.grammar.length; ++i) {
-        var rule = this.grammar[i];
-        for (var j = 0; j < tokens.length; ++j) {
-          rule.carveOutMatchedToken(tokens, j);
-        }
-      }
-
-      crudeParsing(tokens);
-      return tokens;
-    };
-  }
-
-  createClass(Grammar, [{
-    key: "toHTML",
-    value: function toHTML(txt) {
-      var theme = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : Default;
-
-      var tokenRows = this.tokenize(txt),
-          temp = document.createElement("div");
-      for (var y = 0; y < tokenRows.length; ++y) {
-        // draw the tokens on this row
-        var t = tokenRows[y];
-        if (t.type === "newlines") {
-          temp.appendChild(document.createElement("br"));
-        } else {
-          var style = theme[t.type] || {},
-              elem = document.createElement("span");
-          elem.style.fontWeight = style.fontWeight || theme.regular.fontWeight;
-          elem.style.fontStyle = style.fontStyle || theme.regular.fontStyle || "";
-          elem.style.color = style.foreColor || theme.regular.foreColor;
-          elem.style.backgroundColor = style.backColor || theme.regular.backColor;
-          elem.style.fontFamily = style.fontFamily || theme.fontFamily;
-          elem.appendChild(document.createTextNode(t.value));
-          temp.appendChild(elem);
-        }
-      }
-      return temp.innerHTML;
-    }
-  }]);
-  return Grammar;
-}();
-
-var JavaScript = new Grammar("JavaScript", [["newlines", /(?:\r\n|\r|\n)/], ["startBlockComments", /\/\*/], ["endBlockComments", /\*\//], ["regexes", /(?:^|,|;|\(|\[|\{)(?:\s*)(\/(?:\\\/|[^\n\/])+\/)/], ["stringDelim", /("|')/], ["startLineComments", /\/\/.*$/m], ["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/], ["keywords", /\b(?:break|case|catch|class|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/], ["functions", /(\w+)(?:\s*\()/], ["members", /(\w+)\./], ["members", /((\w+\.)+)(\w+)/]]);
-
-function clone$1(obj) {
-  return JSON.parse(JSON.stringify(obj));
-}
-
-var SCROLL_SCALE = isFirefox ? 3 : 100;
-var COUNTER$1 = 0;
-var OFFSET = 0;
-
-var TextBox = function (_Surface) {
-  inherits(TextBox, _Surface);
-  createClass(TextBox, null, [{
-    key: "create",
-    value: function create() {
-      return new TextBox();
-    }
-  }]);
-
-  function TextBox(options) {
-    classCallCheck(this, TextBox);
-
-    ////////////////////////////////////////////////////////////////////////
-    // normalize input parameters
-    ////////////////////////////////////////////////////////////////////////
-
-    var _this = possibleConstructorReturn(this, (TextBox.__proto__ || Object.getPrototypeOf(TextBox)).call(this, Object.assign({}, {
-      id: "Primrose.Text.Controls.TextBox[" + COUNTER$1++ + "]"
-    }, options)));
-
-    if (typeof options === "string") {
-      _this.options = {
-        value: _this.options
-      };
-    } else {
-      _this.options = options || {};
-    }
-
-    _this.useCaching = !isFirefox || !isMobile;
-
-    var makeCursorCommand = function makeCursorCommand(name) {
-      var method = name.toLowerCase();
-      this["cursor" + name] = function (lines, cursor) {
-        cursor[method](lines);
-        this.scrollIntoView(cursor);
-      };
-    };
-
-    ["Left", "Right", "SkipLeft", "SkipRight", "Up", "Down", "Home", "End", "FullHome", "FullEnd"].map(makeCursorCommand.bind(_this));
-
-    ////////////////////////////////////////////////////////////////////////
-    // initialization
-    ///////////////////////////////////////////////////////////////////////
-    _this.tokens = null;
-    _this.lines = null;
-    _this._commandPack = null;
-    _this._tokenRows = null;
-    _this._tokenHashes = null;
-    _this._tabString = null;
-    _this._currentTouchID = null;
-    _this._lineCountWidth = null;
-
-    _this._lastFont = null;
-    _this._lastText = null;
-    _this._lastCharacterWidth = null;
-    _this._lastCharacterHeight = null;
-    _this._lastGridBounds = null;
-    _this._lastPadding = null;
-    _this._lastFrontCursor = null;
-    _this._lastBackCursor = null;
-    _this._lastWidth = -1;
-    _this._lastHeight = -1;
-    _this._lastScrollX = -1;
-    _this._lastScrollY = -1;
-    _this._lastFocused = false;
-    _this._lastThemeName = null;
-    _this._lastPointer = new Point();
-
-    // different browsers have different sets of keycodes for less-frequently
-    // used keys like curly brackets.
-    _this._browser = isChrome ? "CHROMIUM" : isFirefox ? "FIREFOX" : isIE ? "IE" : isOpera ? "OPERA" : isSafari ? "SAFARI" : "UNKNOWN";
-    _this._pointer = new Point();
-    _this._deadKeyState = "";
-    _this._history = [];
-    _this._historyFrame = -1;
-    _this._topLeftGutter = new Size();
-    _this._bottomRightGutter = new Size();
-    _this._dragging = false;
-    _this._scrolling = false;
-    _this._wheelScrollSpeed = 4;
-    var subBounds = new Rectangle(0, 0, _this.bounds.width, _this.bounds.height);
-    _this._fg = new Surface({
-      id: _this.id + "-fore",
-      bounds: subBounds
-    });
-    _this._fgCanvas = _this._fg.canvas;
-    _this._fgfx = _this._fg.context;
-    _this._bg = new Surface({
-      id: _this.id + "-back",
-      bounds: subBounds
-    });
-    _this._bgCanvas = _this._bg.canvas;
-    _this._bgfx = _this._bg.context;
-    _this._trim = new Surface({
-      id: _this.id + "-trim",
-      bounds: subBounds
-    });
-    _this._trimCanvas = _this._trim.canvas;
-    _this._tgfx = _this._trim.context;
-    _this._rowCache = {};
-    _this._VSCROLL_WIDTH = 2;
-
-    _this.tabWidth = _this.options.tabWidth;
-    _this.showLineNumbers = !_this.options.hideLineNumbers;
-    _this.showScrollBars = !_this.options.hideScrollBars;
-    _this.wordWrap = !_this.options.disableWordWrap;
-    _this.readOnly = !!_this.options.readOnly;
-    _this.multiline = !_this.options.singleLine;
-    _this.gridBounds = new Rectangle();
-    _this.frontCursor = new Cursor();
-    _this.backCursor = new Cursor();
-    _this.scroll = new Point();
-    _this.character = new Size();
-    _this.theme = _this.options.theme;
-    _this.fontSize = _this.options.fontSize;
-    _this.tokenizer = _this.options.tokenizer;
-    _this.commandPack = _this.options.commands || TextEditor;
-    _this.value = _this.options.value;
-    _this.padding = _this.options.padding || 1;
-
-    _this.addEventListener("focus", _this.render.bind(_this), false);
-    _this.addEventListener("blur", _this.render.bind(_this), false);
-    return _this;
-  }
-
-  createClass(TextBox, [{
-    key: "cursorPageUp",
-    value: function cursorPageUp(lines, cursor) {
-      cursor.incY(-this.gridBounds.height, lines);
-      this.scrollIntoView(cursor);
-    }
-  }, {
-    key: "cursorPageDown",
-    value: function cursorPageDown(lines, cursor) {
-      cursor.incY(this.gridBounds.height, lines);
-      this.scrollIntoView(cursor);
-    }
-  }, {
-    key: "setDeadKeyState",
-    value: function setDeadKeyState(st) {
-      this._deadKeyState = st || "";
-    }
-  }, {
-    key: "pushUndo",
-    value: function pushUndo(lines) {
-      if (this._historyFrame < this._history.length - 1) {
-        this._history.splice(this._historyFrame + 1);
-      }
-      this._history.push(lines);
-      this._historyFrame = this._history.length - 1;
-      this.refreshTokens();
-      this.render();
-    }
-  }, {
-    key: "redo",
-    value: function redo() {
-      if (this._historyFrame < this._history.length - 1) {
-        ++this._historyFrame;
-      }
-      this.refreshTokens();
-      this.fixCursor();
-      this.render();
-    }
-  }, {
-    key: "undo",
-    value: function undo() {
-      if (this._historyFrame > 0) {
-        --this._historyFrame;
-      }
-      this.refreshTokens();
-      this.fixCursor();
-      this.render();
-    }
-  }, {
-    key: "scrollIntoView",
-    value: function scrollIntoView(currentCursor) {
-      this.scroll.y += this.minDelta(currentCursor.y, this.scroll.y, this.scroll.y + this.gridBounds.height);
-      if (!this.wordWrap) {
-        this.scroll.x += this.minDelta(currentCursor.x, this.scroll.x, this.scroll.x + this.gridBounds.width);
-      }
-      this.clampScroll();
-    }
-  }, {
-    key: "readWheel",
-    value: function readWheel(evt) {
-      if (this.focused) {
-        if (evt.shiftKey || isChrome) {
-          this.fontSize += -evt.deltaX / SCROLL_SCALE;
-        }
-        if (!evt.shiftKey || isChrome) {
-          this.scroll.y += Math.floor(evt.deltaY * this._wheelScrollSpeed / SCROLL_SCALE);
-        }
-        this.clampScroll();
-        this.render();
-        evt.preventDefault();
-      }
-    }
-  }, {
-    key: "startPointer",
-    value: function startPointer(x, y) {
-      if (!get$1(TextBox.prototype.__proto__ || Object.getPrototypeOf(TextBox.prototype), "startPointer", this).call(this, x, y)) {
-        this._dragging = true;
-        this.setCursorXY(this.frontCursor, x, y);
-      }
-    }
-  }, {
-    key: "movePointer",
-    value: function movePointer(x, y) {
-      if (this._dragging) {
-        this.setCursorXY(this.backCursor, x, y);
-      }
-    }
-  }, {
-    key: "endPointer",
-    value: function endPointer() {
-      get$1(TextBox.prototype.__proto__ || Object.getPrototypeOf(TextBox.prototype), "endPointer", this).call(this);
-      this._dragging = false;
-      this._scrolling = false;
-    }
-  }, {
-    key: "copySelectedText",
-    value: function copySelectedText(evt) {
-      if (this.focused && this.frontCursor.i !== this.backCursor.i) {
-        var clipboard = evt.clipboardData || window.clipboardData;
-        clipboard.setData(window.clipboardData ? "Text" : "text/plain", this.selectedText);
-        evt.returnValue = false;
-      }
-    }
-  }, {
-    key: "cutSelectedText",
-    value: function cutSelectedText(evt) {
-      if (this.focused) {
-        this.copySelectedText(evt);
-        if (!this.readOnly) {
-          this.selectedText = "";
-        }
-      }
-    }
-  }, {
-    key: "keyDown",
-    value: function keyDown(evt) {
-      this.environment.input.Keyboard.doTyping(this, evt);
-    }
-  }, {
-    key: "execCommand",
-    value: function execCommand(browser, codePage, commandName) {
-      if (commandName && this.focused && !this.readOnly) {
-        var altCommandName = browser + "_" + commandName,
-            func = this.commandPack[altCommandName] || this.commandPack[commandName] || codePage[altCommandName] || codePage[commandName];
-
-        if (func instanceof String || typeof func === "string") {
-          console.log("okay");
-          func = this.commandPack[func] || this.commandPack[func] || func;
-        }
-
-        if (func === undefined) {
-          return false;
-        } else {
-          this.frontCursor.moved = false;
-          this.backCursor.moved = false;
-          if (func instanceof Function) {
-            func(this, this.lines);
-          } else if (func instanceof String || typeof func === "string") {
-            console.log(func);
-            this.selectedText = func;
-          }
-          if (this.frontCursor.moved && !this.backCursor.moved) {
-            this.backCursor.copy(this.frontCursor);
-          }
-          this.clampScroll();
-          this.render();
-          return true;
-        }
-      }
-    }
-  }, {
-    key: "readClipboard",
-    value: function readClipboard(evt) {
-      if (this.focused && !this.readOnly) {
-        evt.returnValue = false;
-        var clipboard = evt.clipboardData || window.clipboardData,
-            str = clipboard.getData(window.clipboardData ? "Text" : "text/plain");
-        if (str) {
-          this.selectedText = str;
-        }
-      }
-    }
-  }, {
-    key: "resize",
-    value: function resize() {
-      get$1(TextBox.prototype.__proto__ || Object.getPrototypeOf(TextBox.prototype), "resize", this).call(this);
-      this._bg.setSize(this.surfaceWidth, this.surfaceHeight);
-      this._fg.setSize(this.surfaceWidth, this.surfaceHeight);
-      this._trim.setSize(this.surfaceWidth, this.surfaceHeight);
-      if (this.theme) {
-        this.character.height = this.fontSize;
-        this.context.font = this.character.height + "px " + this.theme.fontFamily;
-        // measure 100 letter M's, then divide by 100, to get the width of an M
-        // to two decimal places on systems that return integer values from
-        // measureText.
-        this.character.width = this.context.measureText("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM").width / 100;
-      }
-      this.render();
-    }
-  }, {
-    key: "pixel2cell",
-    value: function pixel2cell(point) {
-      var x = point.x * this.imageWidth / this.surfaceWidth,
-          y = point.y * this.imageHeight / this.surfaceHeight;
-      point.set(Math.round(point.x / this.character.width) + this.scroll.x - this.gridBounds.x, Math.floor(point.y / this.character.height - 0.25) + this.scroll.y);
-    }
-  }, {
-    key: "clampScroll",
-    value: function clampScroll() {
-      if (this.scroll.y < 0) {
-        this.scroll.y = 0;
-      } else {
-        while (0 < this.scroll.y && this.scroll.y > this.lines.length - this.gridBounds.height) {
-          --this.scroll.y;
-        }
-      }
-    }
-  }, {
-    key: "refreshTokens",
-    value: function refreshTokens() {
-      this.tokens = this.tokenizer.tokenize(this.value);
-    }
-  }, {
-    key: "fixCursor",
-    value: function fixCursor() {
-      var moved = this.frontCursor.fixCursor(this.lines) || this.backCursor.fixCursor(this.lines);
-      if (moved) {
-        this.render();
-      }
-    }
-  }, {
-    key: "setCursorXY",
-    value: function setCursorXY(cursor, x, y) {
-      x = Math.round(x);
-      y = Math.round(y);
-      this._pointer.set(x, y);
-      this.pixel2cell(this._pointer, this.scroll, this.gridBounds);
-      var gx = this._pointer.x - this.scroll.x,
-          gy = this._pointer.y - this.scroll.y,
-          onBottom = gy >= this.gridBounds.height,
-          onLeft = gx < 0,
-          onRight = this._pointer.x >= this.gridBounds.width;
-      if (!this._scrolling && !onBottom && !onLeft && !onRight) {
-        cursor.setXY(this._pointer.x, this._pointer.y, this.lines);
-        this.backCursor.copy(cursor);
-      } else if (this._scrolling || onRight && !onBottom) {
-        this._scrolling = true;
-        var scrollHeight = this.lines.length - this.gridBounds.height;
-        if (gy >= 0 && scrollHeight >= 0) {
-          var sy = gy * scrollHeight / this.gridBounds.height;
-          this.scroll.y = Math.floor(sy);
-        }
-      } else if (onBottom && !onLeft) {
-        var maxWidth = 0;
-        for (var dy = 0; dy < this.lines.length; ++dy) {
-          maxWidth = Math.max(maxWidth, this.lines[dy].length);
-        }
-        var scrollWidth = maxWidth - this.gridBounds.width;
-        if (gx >= 0 && scrollWidth >= 0) {
-          var sx = gx * scrollWidth / this.gridBounds.width;
-          this.scroll.x = Math.floor(sx);
-        }
-      } else if (onLeft && !onBottom) {
-        // clicked in number-line gutter
-      } else {
-          // clicked in the lower-left corner
-        }
-      this._lastPointer.copy(this._pointer);
-      this.render();
-    }
-  }, {
-    key: "setGutter",
-    value: function setGutter() {
-      if (this.showLineNumbers) {
-        this._topLeftGutter.width = 1;
-      } else {
-        this._topLeftGutter.width = 0;
-      }
-
-      if (!this.showScrollBars) {
-        this._bottomRightGutter.set(0, 0);
-      } else if (this.wordWrap) {
-        this._bottomRightGutter.set(this._VSCROLL_WIDTH, 0);
-      } else {
-        this._bottomRightGutter.set(this._VSCROLL_WIDTH, 1);
-      }
-    }
-  }, {
-    key: "refreshGridBounds",
-    value: function refreshGridBounds() {
-      this._lineCountWidth = 0;
-      if (this.showLineNumbers) {
-        this._lineCountWidth = Math.max(1, Math.ceil(Math.log(this._history[this._historyFrame].length) / Math.LN10));
-      }
-
-      var x = Math.floor(this._topLeftGutter.width + this._lineCountWidth + this.padding / this.character.width),
-          y = Math.floor(this.padding / this.character.height),
-          w = Math.floor((this.imageWidth - 2 * this.padding) / this.character.width) - x - this._bottomRightGutter.width,
-          h = Math.floor((this.imageHeight - 2 * this.padding) / this.character.height) - y - this._bottomRightGutter.height;
-      this.gridBounds.set(x, y, w, h);
-    }
-  }, {
-    key: "performLayout",
-    value: function performLayout() {
-
-      // group the tokens into rows
-      this._tokenRows = [[]];
-      this._tokenHashes = [""];
-      this.lines = [""];
-      var currentRowWidth = 0;
-      var tokenQueue = this.tokens.slice();
-      for (var i = 0; i < tokenQueue.length; ++i) {
-        var t = tokenQueue[i].clone();
-        var widthLeft = this.gridBounds.width - currentRowWidth;
-        var wrap = this.wordWrap && t.type !== "newlines" && t.value.length > widthLeft;
-        var breakLine = t.type === "newlines" || wrap;
-        if (wrap) {
-          var split = t.value.length > this.gridBounds.width ? widthLeft : 0;
-          tokenQueue.splice(i + 1, 0, t.splitAt(split));
-        }
-
-        if (t.value.length > 0) {
-          this._tokenRows[this._tokenRows.length - 1].push(t);
-          this._tokenHashes[this._tokenHashes.length - 1] += JSON.stringify(t);
-          this.lines[this.lines.length - 1] += t.value;
-          currentRowWidth += t.value.length;
-        }
-
-        if (breakLine) {
-          this._tokenRows.push([]);
-          this._tokenHashes.push("");
-          this.lines.push("");
-          currentRowWidth = 0;
-        }
-      }
-    }
-  }, {
-    key: "minDelta",
-    value: function minDelta(v, minV, maxV) {
-      var dvMinV = v - minV,
-          dvMaxV = v - maxV + 5,
-          dv = 0;
-      if (dvMinV < 0 || dvMaxV >= 0) {
-        // compare the absolute values, so we get the smallest change
-        // regardless of direction.
-        dv = Math.abs(dvMinV) < Math.abs(dvMaxV) ? dvMinV : dvMaxV;
-      }
-
-      return dv;
-    }
-  }, {
-    key: "fillRect",
-    value: function fillRect(gfx, fill, x, y, w, h) {
-      gfx.fillStyle = fill;
-      gfx.fillRect(x * this.character.width, y * this.character.height, w * this.character.width + 1, h * this.character.height + 1);
-    }
-  }, {
-    key: "strokeRect",
-    value: function strokeRect(gfx, stroke, x, y, w, h) {
-      gfx.strokeStyle = stroke;
-      gfx.strokeRect(x * this.character.width, y * this.character.height, w * this.character.width + 1, h * this.character.height + 1);
-    }
-  }, {
-    key: "renderCanvasBackground",
-    value: function renderCanvasBackground() {
-      var minCursor = Cursor.min(this.frontCursor, this.backCursor),
-          maxCursor = Cursor.max(this.frontCursor, this.backCursor),
-          tokenFront = new Cursor(),
-          tokenBack = new Cursor(),
-          clearFunc = this.theme.regular.backColor ? "fillRect" : "clearRect",
-          OFFSETY = OFFSET / this.character.height;
-
-      if (this.theme.regular.backColor) {
-        this._bgfx.fillStyle = this.theme.regular.backColor;
-      }
-
-      this._bgfx[clearFunc](0, 0, this.imageWidth, this.imageHeight);
-      this._bgfx.save();
-      this._bgfx.translate((this.gridBounds.x - this.scroll.x) * this.character.width + this.padding, -this.scroll.y * this.character.height + this.padding);
-
-      // draw the current row highlighter
-      if (this.focused) {
-        this.fillRect(this._bgfx, this.theme.regular.currentRowBackColor || Default.regular.currentRowBackColor, 0, minCursor.y + OFFSETY, this.gridBounds.width, maxCursor.y - minCursor.y + 1);
-      }
-
-      for (var y = 0; y < this._tokenRows.length; ++y) {
-        // draw the tokens on this row
-        var row = this._tokenRows[y];
-
-        for (var i = 0; i < row.length; ++i) {
-          var t = row[i];
-          tokenBack.x += t.value.length;
-          tokenBack.i += t.value.length;
-
-          // skip drawing tokens that aren't in view
-          if (this.scroll.y <= y && y < this.scroll.y + this.gridBounds.height && this.scroll.x <= tokenBack.x && tokenFront.x < this.scroll.x + this.gridBounds.width) {
-            // draw the selection box
-            var inSelection = minCursor.i <= tokenBack.i && tokenFront.i < maxCursor.i;
-            if (inSelection) {
-              var selectionFront = Cursor.max(minCursor, tokenFront);
-              var selectionBack = Cursor.min(maxCursor, tokenBack);
-              var cw = selectionBack.i - selectionFront.i;
-              this.fillRect(this._bgfx, this.theme.regular.selectedBackColor || Default.regular.selectedBackColor, selectionFront.x, selectionFront.y + OFFSETY, cw, 1);
-            }
-          }
-
-          tokenFront.copy(tokenBack);
-        }
-
-        tokenFront.x = 0;
-        ++tokenFront.y;
-        tokenBack.copy(tokenFront);
-      }
-
-      // draw the cursor caret
-      if (this.focused) {
-        var cc = this.theme.cursorColor || "black";
-        var w = 1 / this.character.width;
-        this.fillRect(this._bgfx, cc, minCursor.x, minCursor.y + OFFSETY, w, 1);
-        this.fillRect(this._bgfx, cc, maxCursor.x, maxCursor.y + OFFSETY, w, 1);
-      }
-      this._bgfx.restore();
-    }
-  }, {
-    key: "renderCanvasForeground",
-    value: function renderCanvasForeground() {
-      var tokenFront = new Cursor(),
-          tokenBack = new Cursor();
-
-      this._fgfx.clearRect(0, 0, this.imageWidth, this.imageHeight);
-      this._fgfx.save();
-      this._fgfx.translate((this.gridBounds.x - this.scroll.x) * this.character.width + this.padding, this.padding);
-      for (var y = 0; y < this._tokenRows.length; ++y) {
-        // draw the tokens on this row
-        var line = this.lines[y] + this.padding,
-            row = this._tokenRows[y],
-            drawn = false,
-            textY = (y - this.scroll.y) * this.character.height;
-
-        for (var i = 0; i < row.length; ++i) {
-          var t = row[i];
-          tokenBack.x += t.value.length;
-          tokenBack.i += t.value.length;
-
-          // skip drawing tokens that aren't in view
-          if (this.scroll.y <= y && y < this.scroll.y + this.gridBounds.height && this.scroll.x <= tokenBack.x && tokenFront.x < this.scroll.x + this.gridBounds.width) {
-
-            // draw the text
-            if (this.useCaching && this._rowCache[line] !== undefined) {
-              if (i === 0) {
-                this._fgfx.putImageData(this._rowCache[line], this.padding, textY + this.padding + OFFSET);
-              }
-            } else {
-              var style = this.theme[t.type] || {};
-              var font = (style.fontWeight || this.theme.regular.fontWeight || "") + " " + (style.fontStyle || this.theme.regular.fontStyle || "") + " " + this.character.height + "px " + this.theme.fontFamily;
-              this._fgfx.font = font.trim();
-              this._fgfx.fillStyle = style.foreColor || this.theme.regular.foreColor;
-              this.drawText(this._fgfx, t.value, tokenFront.x * this.character.width, textY);
-              drawn = true;
-            }
-          }
-
-          tokenFront.copy(tokenBack);
-        }
-
-        tokenFront.x = 0;
-        ++tokenFront.y;
-        tokenBack.copy(tokenFront);
-        if (this.useCaching && drawn && this._rowCache[line] === undefined) {
-          this._rowCache[line] = this._fgfx.getImageData(this.padding, textY + this.padding + OFFSET, this.imageWidth - 2 * this.padding, this.character.height);
-        }
-      }
-
-      this._fgfx.restore();
-    }
-
-    // provides a hook for TextInput to be able to override text drawing and spit out password blanking characters
-
-  }, {
-    key: "drawText",
-    value: function drawText(ctx, txt, x, y) {
-      ctx.fillText(txt, x, y);
-    }
-  }, {
-    key: "renderCanvasTrim",
-    value: function renderCanvasTrim() {
-      var tokenFront = new Cursor(),
-          tokenBack = new Cursor(),
-          maxLineWidth = 0;
-
-      this._tgfx.clearRect(0, 0, this.imageWidth, this.imageHeight);
-      this._tgfx.save();
-      this._tgfx.translate(this.padding, this.padding);
-      this._tgfx.save();
-      this._tgfx.lineWidth = 2;
-      this._tgfx.translate(0, -this.scroll.y * this.character.height);
-      for (var y = 0, lastLine = -1; y < this._tokenRows.length; ++y) {
-        var row = this._tokenRows[y];
-
-        for (var i = 0; i < row.length; ++i) {
-          var t = row[i];
-          tokenBack.x += t.value.length;
-          tokenBack.i += t.value.length;
-          tokenFront.copy(tokenBack);
-        }
-
-        maxLineWidth = Math.max(maxLineWidth, tokenBack.x);
-        tokenFront.x = 0;
-        ++tokenFront.y;
-        tokenBack.copy(tokenFront);
-
-        if (this.showLineNumbers && this.scroll.y <= y && y < this.scroll.y + this.gridBounds.height) {
-          var currentLine = row.length > 0 ? row[0].line : lastLine + 1;
-          // draw the left gutter
-          var lineNumber = currentLine.toString();
-          while (lineNumber.length < this._lineCountWidth) {
-            lineNumber = " " + lineNumber;
-          }
-          this.fillRect(this._tgfx, this.theme.regular.selectedBackColor || Default.regular.selectedBackColor, 0, y, this.gridBounds.x, 1);
-          this._tgfx.font = "bold " + this.character.height + "px " + this.theme.fontFamily;
-
-          if (currentLine > lastLine) {
-            this._tgfx.fillStyle = this.theme.regular.foreColor;
-            this._tgfx.fillText(lineNumber, 0, y * this.character.height);
-          }
-          lastLine = currentLine;
-        }
-      }
-
-      this._tgfx.restore();
-
-      if (this.showLineNumbers) {
-        this.strokeRect(this._tgfx, this.theme.regular.foreColor || Default.regular.foreColor, 0, 0, this.gridBounds.x, this.gridBounds.height);
-      }
-
-      // draw the scrollbars
-      if (this.showScrollBars) {
-        var drawWidth = this.gridBounds.width * this.character.width - this.padding,
-            drawHeight = this.gridBounds.height * this.character.height,
-            scrollX = this.scroll.x * drawWidth / maxLineWidth + this.gridBounds.x * this.character.width,
-            scrollY = this.scroll.y * drawHeight / this._tokenRows.length;
-
-        this._tgfx.fillStyle = this.theme.regular.selectedBackColor || Default.regular.selectedBackColor;
-        // horizontal
-        var bw;
-        if (!this.wordWrap && maxLineWidth > this.gridBounds.width) {
-          var scrollBarWidth = drawWidth * (this.gridBounds.width / maxLineWidth),
-              by = this.gridBounds.height * this.character.height;
-          bw = Math.max(this.character.width, scrollBarWidth);
-          this._tgfx.fillRect(scrollX, by, bw, this.character.height);
-          this._tgfx.strokeRect(scrollX, by, bw, this.character.height);
-        }
-
-        //vertical
-        if (this._tokenRows.length > this.gridBounds.height) {
-          var scrollBarHeight = drawHeight * (this.gridBounds.height / this._tokenRows.length),
-              bx = this.image - this._VSCROLL_WIDTH * this.character.width - 2 * this.padding,
-              bh = Math.max(this.character.height, scrollBarHeight);
-          bw = this._VSCROLL_WIDTH * this.character.width;
-          this._tgfx.fillRect(bx, scrollY, bw, bh);
-          this._tgfx.strokeRect(bx, scrollY, bw, bh);
-        }
-      }
-
-      this._tgfx.lineWidth = 2;
-      this._tgfx.restore();
-      this._tgfx.strokeRect(1, 1, this.imageWidth - 2, this.imageHeight - 2);
-      if (!this.focused) {
-        this._tgfx.fillStyle = this.theme.regular.unfocused || Default.regular.unfocused;
-        this._tgfx.fillRect(0, 0, this.imageWidth, this.imageHeight);
-      }
-    }
-  }, {
-    key: "render",
-    value: function render() {
-      if (this.tokens && this.theme) {
-        this.refreshGridBounds();
-        var boundsChanged = this.gridBounds.toString() !== this._lastGridBounds,
-            textChanged = this._lastText !== this.value,
-            characterWidthChanged = this.character.width !== this._lastCharacterWidth,
-            characterHeightChanged = this.character.height !== this._lastCharacterHeight,
-            paddingChanged = this.padding !== this._lastPadding,
-            cursorChanged = !this._lastFrontCursor || !this._lastBackCursor || this.frontCursor.i !== this._lastFrontCursor.i || this._lastBackCursor.i !== this.backCursor.i,
-            scrollChanged = this.scroll.x !== this._lastScrollX || this.scroll.y !== this._lastScrollY,
-            fontChanged = this.context.font !== this._lastFont,
-            themeChanged = this.theme.name !== this._lastThemeName,
-            focusChanged = this.focused !== this._lastFocused,
-            changeBounds = null,
-            layoutChanged = this.resized || boundsChanged || textChanged || characterWidthChanged || characterHeightChanged || paddingChanged,
-            backgroundChanged = layoutChanged || cursorChanged || scrollChanged || themeChanged,
-            foregroundChanged = backgroundChanged || textChanged,
-            trimChanged = backgroundChanged || focusChanged,
-            imageChanged = foregroundChanged || backgroundChanged || trimChanged;
-
-        if (layoutChanged) {
-          this.performLayout(this.gridBounds);
-          this._rowCache = {};
-        }
-
-        if (imageChanged) {
-          if (cursorChanged && !(layoutChanged || scrollChanged || themeChanged || focusChanged)) {
-            var top = Math.min(this.frontCursor.y, this._lastFrontCursor.y, this.backCursor.y, this._lastBackCursor.y) - this.scroll.y + this.gridBounds.y,
-                bottom = Math.max(this.frontCursor.y, this._lastFrontCursor.y, this.backCursor.y, this._lastBackCursor.y) - this.scroll.y + 1;
-            changeBounds = new Rectangle(0, top * this.character.height, this.bounds.width, (bottom - top) * this.character.height + 2);
-          }
-
-          if (backgroundChanged) {
-            this.renderCanvasBackground();
-          }
-          if (foregroundChanged) {
-            this.renderCanvasForeground();
-          }
-          if (trimChanged) {
-            this.renderCanvasTrim();
-          }
-
-          this.context.clearRect(0, 0, this.imageWidth, this.imageHeight);
-          this.context.drawImage(this._bgCanvas, 0, 0);
-          this.context.drawImage(this._fgCanvas, 0, 0);
-          this.context.drawImage(this._trimCanvas, 0, 0);
-          this.invalidate(changeBounds);
-        }
-
-        this._lastGridBounds = this.gridBounds.toString();
-        this._lastText = this.value;
-        this._lastCharacterWidth = this.character.width;
-        this._lastCharacterHeight = this.character.height;
-        this._lastWidth = this.imageWidth;
-        this._lastHeight = this.imageHeight;
-        this._lastPadding = this.padding;
-        this._lastFrontCursor = this.frontCursor.clone();
-        this._lastBackCursor = this.backCursor.clone();
-        this._lastFocused = this.focused;
-        this._lastFont = this.context.font;
-        this._lastThemeName = this.theme.name;
-        this._lastScrollX = this.scroll.x;
-        this._lastScrollY = this.scroll.y;
-      }
-    }
-  }, {
-    key: "value",
-    get: function get() {
-      return this._history[this._historyFrame].join("\n");
-    },
-    set: function set(txt) {
-      txt = txt || "";
-      txt = txt.replace(/\r\n/g, "\n");
-      if (!this.multiline) {
-        txt = txt.replace(/\n/g, "");
-      }
-      var lines = txt.split("\n");
-      this.pushUndo(lines);
-      this.render();
-      this.emit("change", {
-        target: this
-      });
-    }
-  }, {
-    key: "selectedText",
-    get: function get() {
-      var minCursor = Cursor.min(this.frontCursor, this.backCursor),
-          maxCursor = Cursor.max(this.frontCursor, this.backCursor);
-      return this.value.substring(minCursor.i, maxCursor.i);
-    },
-    set: function set(str) {
-      str = str || "";
-      str = str.replace(/\r\n/g, "\n");
-
-      if (this.frontCursor.i !== this.backCursor.i || str.length > 0) {
-        var minCursor = Cursor.min(this.frontCursor, this.backCursor),
-            maxCursor = Cursor.max(this.frontCursor, this.backCursor),
-
-        // TODO: don't recalc the string first.
-        text = this.value,
-            left = text.substring(0, minCursor.i),
-            right = text.substring(maxCursor.i);
-
-        var v = left + str + right;
-        this.value = v;
-        this.refreshGridBounds();
-        this.performLayout();
-        minCursor.advanceN(this.lines, Math.max(0, str.length));
-        this.scrollIntoView(maxCursor);
-        this.clampScroll();
-        maxCursor.copy(minCursor);
-        this.render();
-      }
-    }
-  }, {
-    key: "padding",
-    get: function get() {
-      return this._padding;
-    },
-    set: function set(v) {
-      this._padding = v;
-      this.render();
-    }
-  }, {
-    key: "wordWrap",
-    get: function get() {
-      return this._wordWrap;
-    },
-    set: function set(v) {
-      this._wordWrap = v || false;
-      this.setGutter();
-    }
-  }, {
-    key: "showLineNumbers",
-    get: function get() {
-      return this._showLineNumbers;
-    },
-    set: function set(v) {
-      this._showLineNumbers = v;
-      this.setGutter();
-    }
-  }, {
-    key: "showScrollBars",
-    get: function get() {
-      return this._showScrollBars;
-    },
-    set: function set(v) {
-      this._showScrollBars = v;
-      this.setGutter();
-    }
-  }, {
-    key: "theme",
-    get: function get() {
-      return this._theme;
-    },
-    set: function set(t) {
-      this._theme = clone$1(t || Default);
-      this._theme.fontSize = this.fontSize;
-      this._rowCache = {};
-      this.render();
-    }
-  }, {
-    key: "commandPack",
-    get: function get() {
-      return this._commandPack;
-    },
-    set: function set(v) {
-      this._commandPack = v;
-    }
-  }, {
-    key: "selectionStart",
-    get: function get() {
-      return this.frontCursor.i;
-    },
-    set: function set(i) {
-      this.frontCursor.setI(i, this.lines);
-    }
-  }, {
-    key: "selectionEnd",
-    get: function get() {
-      return this.backCursor.i;
-    },
-    set: function set(i) {
-      this.backCursor.setI(i, this.lines);
-    }
-  }, {
-    key: "selectionDirection",
-    get: function get() {
-      return this.frontCursor.i <= this.backCursor.i ? "forward" : "backward";
-    }
-  }, {
-    key: "tokenizer",
-    get: function get() {
-      return this._tokenizer;
-    },
-    set: function set(tk) {
-      this._tokenizer = tk || JavaScript;
-      if (this._history && this._history.length > 0) {
-        this.refreshTokens();
-        this.render();
-      }
-    }
-  }, {
-    key: "tabWidth",
-    get: function get() {
-      return this._tabWidth;
-    },
-    set: function set(tw) {
-      this._tabWidth = tw || 2;
-      this._tabString = "";
-      for (var i = 0; i < this._tabWidth; ++i) {
-        this._tabString += " ";
-      }
-    }
-  }, {
-    key: "tabString",
-    get: function get() {
-      return this._tabString;
-    }
-  }, {
-    key: "fontSize",
-    get: function get() {
-      return this._fontSize || 16;
-    },
-    set: function set(v) {
-      v = v || 16;
-      this._fontSize = v;
-      if (this.theme) {
-        this.theme.fontSize = this._fontSize;
-        this.resize();
-        this.render();
-      }
-    }
-  }, {
-    key: "lockMovement",
-    get: function get() {
-      return this.focused && !this.readOnly;
-    }
-  }]);
-  return TextBox;
-}(Surface);
 
 function textured$1(geometry, txt, options) {
   options = Object.assign({}, {
@@ -14232,7 +11413,7 @@ function textured$1(geometry, txt, options) {
       return loadTexture$1(textureDescription, txt, options.progress);
     } else {
       var retValue = null;
-      if (txt instanceof Surface) {
+      if (txt.isSurface) {
         if (!options.scaleTextureWidth || !options.scaleTextureHeight) {
           var imgWidth = txt.imageWidth,
               imgHeight = txt.imageHeight,
@@ -14266,11 +11447,11 @@ function textured$1(geometry, txt, options) {
         }
         txt._material = mat;
         retValue = txt.texture;
-      } else if (txt instanceof TextBox) {
+      } else if (txt.isTextBox) {
         retValue = txt.renderer.texture;
       } else if (txt instanceof HTMLCanvasElement || txt instanceof HTMLVideoElement) {
         retValue = new Texture(txt);
-      } else if (txt instanceof Texture) {
+      } else if (txt.isTexture) {
         retValue = txt;
       } else {
         Promise.reject("Texture description couldn't be converted to a THREE.Texture object");
@@ -14284,13 +11465,13 @@ function textured$1(geometry, txt, options) {
       obj = null;
   if (geometry.type.indexOf("Geometry") > -1) {
     obj = new Mesh(geometry, mat);
-  } else if (geometry instanceof Mesh) {
+  } else if (geometry.isMesh) {
     obj = geometry;
     obj.material = mat;
     geometry = obj.geometry;
   }
 
-  if (txt instanceof Surface) {
+  if (txt.isSurface) {
     obj.surface = txt;
   }
 
@@ -14327,9 +11508,9 @@ function textured$1(geometry, txt, options) {
 
     texture.anisotropy = options.anisotropy;
 
-    if (texture instanceof CubeTexture) {
+    if (texture.isCubeTexture) {
       mat.envMap = texture;
-    } else if (texture instanceof Texture) {
+    } else if (texture.isTexture) {
       mat.map = texture;
     }
 
@@ -14350,7 +11531,7 @@ function colored$1(geometry, color, options) {
 
   if (geometry.type.indexOf("Geometry") > -1) {
     obj = new Mesh(geometry, mat);
-  } else if (geometry instanceof Object3D) {
+  } else if (geometry.isObject3D) {
     obj = geometry;
     obj.material = mat;
   }
@@ -14385,11 +11566,6 @@ function brick$1(txt, w, h, l, options) {
 function hub$1() {
   return new Object3D();
 }
-
-/**
- * @author mrdoob / http://mrdoob.com/
- * @author alteredq / http://alteredqualia.com/
- */
 
 function Light(color, intensity) {
 
@@ -14439,12 +11615,6 @@ Light.prototype = Object.assign(Object.create(Object3D.prototype), {
 	}
 
 });
-
-/**
- * @author mrdoob / http://mrdoob.com/
- * @author mikael emtinger / http://gomo.se/
- * @author WestLangley / http://github.com/WestLangley
-*/
 
 function Camera() {
 
@@ -14503,13 +11673,6 @@ Camera.prototype.copy = function (source) {
 
 	return this;
 };
-
-/**
- * @author mrdoob / http://mrdoob.com/
- * @author greggman / http://games.greggman.com/
- * @author zz85 / http://www.lab4games.net/zz85/blog
- * @author tschw
- */
 
 function PerspectiveCamera(fov, aspect, near, far) {
 
@@ -14709,10 +11872,6 @@ PerspectiveCamera.prototype = Object.assign(Object.create(Camera.prototype), {
 
 });
 
-/**
- * @author mrdoob / http://mrdoob.com/
- */
-
 function LightShadow(camera) {
 
 	this.camera = camera;
@@ -14760,10 +11919,6 @@ Object.assign(LightShadow.prototype, {
 	}
 
 });
-
-/**
- * @author mrdoob / http://mrdoob.com/
- */
 
 function PointLight(color, intensity, distance, decay) {
 
@@ -14873,6 +12028,135 @@ function put$1(object) {
   return box;
 }
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
+  return typeof obj;
+} : function (obj) {
+  return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+};
+
+
+
+
+
+
+
+
+
+
+
+var classCallCheck = function (instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError("Cannot call a class as a function");
+  }
+};
+
+var createClass = function () {
+  function defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+
+  return function (Constructor, protoProps, staticProps) {
+    if (protoProps) defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) defineProperties(Constructor, staticProps);
+    return Constructor;
+  };
+}();
+
+
+
+
+
+
+
+var get$1 = function get$1(object, property, receiver) {
+  if (object === null) object = Function.prototype;
+  var desc = Object.getOwnPropertyDescriptor(object, property);
+
+  if (desc === undefined) {
+    var parent = Object.getPrototypeOf(object);
+
+    if (parent === null) {
+      return undefined;
+    } else {
+      return get$1(parent, property, receiver);
+    }
+  } else if ("value" in desc) {
+    return desc.value;
+  } else {
+    var getter = desc.get;
+
+    if (getter === undefined) {
+      return undefined;
+    }
+
+    return getter.call(receiver);
+  }
+};
+
+var inherits = function (subClass, superClass) {
+  if (typeof superClass !== "function" && superClass !== null) {
+    throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
+  }
+
+  subClass.prototype = Object.create(superClass && superClass.prototype, {
+    constructor: {
+      value: subClass,
+      enumerable: false,
+      writable: true,
+      configurable: true
+    }
+  });
+  if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
+};
+
+
+
+
+
+
+
+
+
+
+
+var possibleConstructorReturn = function (self, call) {
+  if (!self) {
+    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+  }
+
+  return call && (typeof call === "object" || typeof call === "function") ? call : self;
+};
+
+
+
+var set$1 = function set$1(object, property, value, receiver) {
+  var desc = Object.getOwnPropertyDescriptor(object, property);
+
+  if (desc === undefined) {
+    var parent = Object.getPrototypeOf(object);
+
+    if (parent !== null) {
+      set$1(parent, property, value, receiver);
+    }
+  } else if ("value" in desc && desc.writable) {
+    desc.value = value;
+  } else {
+    var setter = desc.set;
+
+    if (setter !== undefined) {
+      setter.call(receiver, value);
+    }
+  }
+
+  return value;
+};
+
 var DEG2RAD = Math.PI / 180;
 var RAD2DEG = 180 / Math.PI;
 var Angle = function () {
@@ -14926,11 +12210,65 @@ var Angle = function () {
   return Angle;
 }();
 
-/**
- * @author mrdoob / http://mrdoob.com/
- * @author bhouston / http://clara.io/
- * @author stephomi / http://stephaneginier.com/
- */
+var AbstractEventEmitter = function () {
+  function AbstractEventEmitter() {
+    classCallCheck(this, AbstractEventEmitter);
+
+    this._handlers = {};
+  }
+
+  createClass(AbstractEventEmitter, [{
+    key: "addEventListener",
+    value: function addEventListener(name, thunk) {
+      if (!this._handlers[name]) {
+        this._handlers[name] = [];
+      }
+      this._handlers[name].push(thunk);
+    }
+  }, {
+    key: "removeEventListener",
+    value: function removeEventListener(name, thunk) {
+      if (this._handlers[name]) {
+        var idx = this._handlers[name].indexOf(thunk);
+        if (idx > -1) {
+          this._handlers[name].splice(idx, 1);
+        }
+      }
+    }
+  }, {
+    key: "forward",
+    value: function forward(obj, evts) {
+      var _this = this;
+
+      evts.forEach(function (evt) {
+        return _this.addEventListener(evt, obj.emit.bind(obj, evt));
+      });
+    }
+  }, {
+    key: "emit",
+    value: function emit(name, obj) {
+      if (this._handlers[name]) {
+        if ((typeof obj === "undefined" ? "undefined" : _typeof(obj)) === "object" && !(obj instanceof Event)) {
+          obj.type = name;
+          if (obj.defaultPrevented === undefined) {
+            obj.defaultPrevented = false;
+            obj.preventDefault = function () {
+              return obj.defaultPrevented = true;
+            };
+          }
+        }
+        var h = this._handlers[name];
+        for (var i = 0; h && i < h.length; ++i) {
+          h[i](obj);
+          if (obj && obj.defaultPrevented) {
+            return;
+          }
+        }
+      }
+    }
+  }]);
+  return AbstractEventEmitter;
+}();
 
 function Raycaster(origin, direction, near, far) {
 
@@ -15048,11 +12386,6 @@ function identity$1(obj) {
   return obj;
 }
 
-/**
- * @author benaadams / https://twitter.com/ben_a_adams
- * based on THREE.SphereGeometry
- */
-
 function SphereBufferGeometry(radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength) {
 
 	BufferGeometry.call(this);
@@ -15147,10 +12480,6 @@ function SphereBufferGeometry(radius, widthSegments, heightSegments, phiStart, p
 SphereBufferGeometry.prototype = Object.create(BufferGeometry.prototype);
 SphereBufferGeometry.prototype.constructor = SphereBufferGeometry;
 
-/**
- * @author mrdoob / http://mrdoob.com/
- */
-
 function SphereGeometry(radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength) {
 
 	Geometry.call(this);
@@ -15178,10 +12507,6 @@ function sphere$1(r, slices, rings) {
     return new SphereGeometry(r, slices, rings);
   });
 }
-
-/**
- * @author benaadams / https://twitter.com/ben_a_adams
- */
 
 function CircleBufferGeometry(radius, segments, thetaStart, thetaLength) {
 
@@ -15251,10 +12576,6 @@ function circle(r, sections, start, end) {
     return new CircleBufferGeometry(r, sections, start, end);
   });
 }
-
-/**
- * @author Mugen87 / https://github.com/Mugen87
- */
 
 function RingBufferGeometry(innerRadius, outerRadius, thetaSegments, phiSegments, thetaStart, thetaLength) {
 
@@ -16215,7 +13536,854 @@ var BaseControl = function (_AbstractEventEmitter) {
   return BaseControl;
 }(AbstractEventEmitter);
 
-var COUNTER$3 = 0;
+var entityKeys = [];
+var entities = new WeakMap();
+
+var Entity = function (_AbstractEventEmitter) {
+  inherits(Entity, _AbstractEventEmitter);
+  createClass(Entity, null, [{
+    key: "registerEntity",
+    value: function registerEntity(e) {
+      entities.set(e._idObj, e);
+      entityKeys.push(e._idObj);
+      e.addEventListener("_idchanged", function (evt) {
+        entityKeys.splice(entityKeys.indexOf(evt.oldID), 1);
+        entities.delete(evt.oldID);
+        entities.set(evt.entity._idObj, evt.entity);
+        entityKeys.push(evt.entity._idObj);
+      }, false);
+    }
+  }, {
+    key: "eyeBlankAll",
+    value: function eyeBlankAll(eye) {
+      entityKeys.forEach(function (id) {
+        entities.get(id).eyeBlank(eye);
+      });
+    }
+  }]);
+
+  function Entity(id) {
+    classCallCheck(this, Entity);
+
+    var _this = possibleConstructorReturn(this, (Entity.__proto__ || Object.getPrototypeOf(Entity)).call(this));
+
+    _this.id = id;
+
+    _this.parent = null;
+
+    _this.children = [];
+
+    _this.focused = false;
+
+    _this.focusable = true;
+
+    return _this;
+  }
+
+  createClass(Entity, [{
+    key: "focus",
+    value: function focus() {
+      if (this.focusable) {
+        this.focused = true;
+        this.emit("focus", {
+          target: this
+        });
+      }
+    }
+  }, {
+    key: "blur",
+    value: function blur() {
+      if (this.focused) {
+        this.focused = false;
+        for (var i = 0; i < this.children.length; ++i) {
+          if (this.children[i].focused) {
+            this.children[i].blur();
+          }
+        }
+        this.emit("blur", {
+          target: this
+        });
+      }
+    }
+  }, {
+    key: "appendChild",
+    value: function appendChild(child) {
+      if (child && !child.parent) {
+        child.parent = this;
+        this.children.push(child);
+      }
+    }
+  }, {
+    key: "removeChild",
+    value: function removeChild(child) {
+      var i = this.children.indexOf(child);
+      if (0 <= i && i < this.children.length) {
+        this.children.splice(i, 1);
+        child.parent = null;
+      }
+    }
+  }, {
+    key: "eyeBlank",
+    value: function eyeBlank(eye) {
+      for (var i = 0; i < this.children.length; ++i) {
+        this.children[i].eyeBlank(eye);
+      }
+    }
+  }, {
+    key: "_forFocusedChild",
+    value: function _forFocusedChild(name, evt) {
+      var elem = this.focusedElement;
+      if (elem && elem !== this) {
+        elem[name](evt);
+      }
+    }
+  }, {
+    key: "startUV",
+    value: function startUV(evt) {
+      this._forFocusedChild("startUV", evt);
+    }
+  }, {
+    key: "moveUV",
+    value: function moveUV(evt) {
+      this._forFocusedChild("moveUV", evt);
+    }
+  }, {
+    key: "endPointer",
+    value: function endPointer(evt) {
+      this._forFocusedChild("endPointer", evt);
+    }
+  }, {
+    key: "dispatchEvent",
+    value: function dispatchEvent(evt) {
+      var _this2 = this;
+
+      switch (evt.type) {
+        case "pointerstart":
+          this.startUV(evt.hit.uv);
+          break;
+        case "pointerend":
+          this.endPointer(evt);
+          break;
+        case "pointermove":
+        case "gazemove":
+          this.moveUV(evt.hit.uv);
+          break;
+        case "gazecomplete":
+          this.startUV(evt.hit.uv);
+          setTimeout(function () {
+            return _this2.endPointer(evt);
+          }, 100);
+          break;
+      }
+    }
+  }, {
+    key: "keyDown",
+    value: function keyDown(evt) {
+      this._forFocusedChild("keyDown", evt);
+    }
+  }, {
+    key: "keyUp",
+    value: function keyUp(evt) {
+      this._forFocusedChild("keyUp", evt);
+    }
+  }, {
+    key: "readClipboard",
+    value: function readClipboard(evt) {
+      this._forFocusedChild("readClipboard", evt);
+    }
+  }, {
+    key: "copySelectedText",
+    value: function copySelectedText(evt) {
+      this._forFocusedChild("copySelectedText", evt);
+    }
+  }, {
+    key: "cutSelectedText",
+    value: function cutSelectedText(evt) {
+      this._forFocusedChild("cutSelectedText", evt);
+    }
+  }, {
+    key: "readWheel",
+    value: function readWheel(evt) {
+      this._forFocusedChild("readWheel", evt);
+    }
+  }, {
+    key: "id",
+    get: function get() {
+      return this._id;
+    },
+    set: function set(v) {
+      if (this._id !== v) {
+        var oldID = this._idObj;
+        this._id = v;
+        this._idObj = new Object(v);
+        // this `_idchanged` event is necessary to update the related ID in the WeakMap of entities for eye-blanking.
+        this.emit("_idchanged", {
+          oldID: oldID,
+          entity: this
+        });
+      }
+    }
+  }, {
+    key: "theme",
+    get: function get() {
+      return null;
+    },
+    set: function set(v) {
+      for (var i = 0; i < this.children.length; ++i) {
+        this.children[i].theme = v;
+      }
+    }
+  }, {
+    key: "lockMovement",
+    get: function get() {
+      var lock = false;
+      for (var i = 0; i < this.children.length && !lock; ++i) {
+        lock = lock || this.children[i].lockMovement;
+      }
+      return lock;
+    }
+  }, {
+    key: "focusedElement",
+    get: function get() {
+      var result = null,
+          head = this;
+      while (head && head.focused) {
+        result = head;
+        var children = head.children;
+        head = null;
+        for (var i = 0; i < children.length; ++i) {
+          var child = children[i];
+          if (child.focused) {
+            head = child;
+          }
+        }
+      }
+      return result;
+    }
+  }]);
+  return Entity;
+}(AbstractEventEmitter);
+
+var Point = function () {
+  function Point(x, y) {
+    classCallCheck(this, Point);
+
+    this.set(x || 0, y || 0);
+  }
+
+  createClass(Point, [{
+    key: "set",
+    value: function set(x, y) {
+      this.x = x;
+      this.y = y;
+    }
+  }, {
+    key: "copy",
+    value: function copy(p) {
+      if (p) {
+        this.x = p.x;
+        this.y = p.y;
+      }
+    }
+  }, {
+    key: "clone",
+    value: function clone() {
+      return new Point(this.x, this.y);
+    }
+  }, {
+    key: "toString",
+    value: function toString() {
+      return "(x:" + this.x + ", y:" + this.y + ")";
+    }
+  }]);
+  return Point;
+}();
+
+var Size = function () {
+  function Size(width, height) {
+    classCallCheck(this, Size);
+
+    this.set(width || 0, height || 0);
+  }
+
+  createClass(Size, [{
+    key: "set",
+    value: function set(width, height) {
+      this.width = width;
+      this.height = height;
+    }
+  }, {
+    key: "copy",
+    value: function copy(s) {
+      if (s) {
+        this.width = s.width;
+        this.height = s.height;
+      }
+    }
+  }, {
+    key: "clone",
+    value: function clone() {
+      return new Size(this.width, this.height);
+    }
+  }, {
+    key: "toString",
+    value: function toString() {
+      return "<w:" + this.width + ", h:" + this.height + ">";
+    }
+  }]);
+  return Size;
+}();
+
+var Rectangle = function () {
+  function Rectangle(x, y, width, height) {
+    classCallCheck(this, Rectangle);
+
+    this.isRectangle = true;
+    this.point = new Point(x, y);
+    this.size = new Size(width, height);
+  }
+
+  createClass(Rectangle, [{
+    key: "set",
+    value: function set(x, y, width, height) {
+      this.point.set(x, y);
+      this.size.set(width, height);
+    }
+  }, {
+    key: "copy",
+    value: function copy(r) {
+      if (r) {
+        this.point.copy(r.point);
+        this.size.copy(r.size);
+      }
+    }
+  }, {
+    key: "clone",
+    value: function clone() {
+      return new Rectangle(this.point.x, this.point.y, this.size.width, this.size.height);
+    }
+  }, {
+    key: "toString",
+    value: function toString() {
+      return "[" + this.point.toString() + " x " + this.size.toString() + "]";
+    }
+  }, {
+    key: "overlap",
+    value: function overlap(r) {
+      var left = Math.max(this.left, r.left),
+          top = Math.max(this.top, r.top),
+          right = Math.min(this.right, r.right),
+          bottom = Math.min(this.bottom, r.bottom);
+      if (right > left && bottom > top) {
+        return new Rectangle(left, top, right - left, bottom - top);
+      }
+    }
+  }, {
+    key: "x",
+    get: function get() {
+      return this.point.x;
+    },
+    set: function set(x) {
+      this.point.x = x;
+    }
+  }, {
+    key: "left",
+    get: function get() {
+      return this.point.x;
+    },
+    set: function set(x) {
+      this.point.x = x;
+    }
+  }, {
+    key: "width",
+    get: function get() {
+      return this.size.width;
+    },
+    set: function set(width) {
+      this.size.width = width;
+    }
+  }, {
+    key: "right",
+    get: function get() {
+      return this.point.x + this.size.width;
+    },
+    set: function set(right) {
+      this.point.x = right - this.size.width;
+    }
+  }, {
+    key: "y",
+    get: function get() {
+      return this.point.y;
+    },
+    set: function set(y) {
+      this.point.y = y;
+    }
+  }, {
+    key: "top",
+    get: function get() {
+      return this.point.y;
+    },
+    set: function set(y) {
+      this.point.y = y;
+    }
+  }, {
+    key: "height",
+    get: function get() {
+      return this.size.height;
+    },
+    set: function set(height) {
+      this.size.height = height;
+    }
+  }, {
+    key: "bottom",
+    get: function get() {
+      return this.point.y + this.size.height;
+    },
+    set: function set(bottom) {
+      this.point.y = bottom - this.size.height;
+    }
+  }, {
+    key: "area",
+    get: function get() {
+      return this.width * this.height;
+    }
+  }]);
+  return Rectangle;
+}();
+
+var COUNTER$2 = 0;
+
+var Surface = function (_Entity) {
+  inherits(Surface, _Entity);
+  createClass(Surface, null, [{
+    key: "create",
+    value: function create() {
+      return new Surface();
+    }
+  }]);
+
+  function Surface(options) {
+    classCallCheck(this, Surface);
+
+    var _this = possibleConstructorReturn(this, (Surface.__proto__ || Object.getPrototypeOf(Surface)).call(this));
+
+    _this.isSurface = true;
+    _this.options = Object.assign({}, {
+      id: "Primrose.Surface[" + COUNTER$2++ + "]",
+      bounds: new Rectangle()
+    }, options);
+    _this.bounds = _this.options.bounds;
+    _this.canvas = null;
+    _this.context = null;
+    _this._opacity = 1;
+
+    _this.style = {};
+
+    Object.defineProperties(_this.style, {
+      width: {
+        get: function get() {
+          return _this.bounds.width;
+        },
+        set: function set(v) {
+          _this.bounds.width = v;
+          _this.resize();
+        }
+      },
+      height: {
+        get: function get() {
+          return _this.bounds.height;
+        },
+        set: function set(v) {
+          _this.bounds.height = v;
+          _this.resize();
+        }
+      },
+      left: {
+        get: function get() {
+          return _this.bounds.left;
+        },
+        set: function set(v) {
+          _this.bounds.left = v;
+        }
+      },
+      top: {
+        get: function get() {
+          return _this.bounds.top;
+        },
+        set: function set(v) {
+          _this.bounds.top = v;
+        }
+      },
+      opacity: {
+        get: function get() {
+          return _this._opacity;
+        },
+        set: function set(v) {
+          _this._opacity = v;
+        }
+      },
+      fontSize: {
+        get: function get() {
+          return _this.fontSize;
+        },
+        set: function set(v) {
+          _this.fontSize = v;
+        }
+      },
+      backgroundColor: {
+        get: function get() {
+          return _this.backgroundColor;
+        },
+        set: function set(v) {
+          _this.backgroundColor = v;
+        }
+      },
+      color: {
+        get: function get() {
+          return _this.color;
+        },
+        set: function set(v) {
+          _this.color = v;
+        }
+      }
+    });
+
+    if (_this.options.id.isSurface) {
+      throw new Error("Object is already a Surface. Please don't try to wrap them.");
+    } else if (_this.options.id instanceof CanvasRenderingContext2D) {
+      _this.context = _this.options.id;
+      _this.canvas = _this.context.canvas;
+    } else if (_this.options.id instanceof HTMLCanvasElement) {
+      _this.canvas = _this.options.id;
+    } else if (typeof _this.options.id === "string" || _this.options.id instanceof String) {
+      _this.canvas = document.getElementById(_this.options.id);
+      if (_this.canvas === null) {
+        _this.canvas = document.createElement("canvas");
+        _this.canvas.id = _this.options.id;
+      } else if (_this.canvas.tagName !== "CANVAS") {
+        _this.canvas = null;
+      }
+    }
+
+    if (_this.canvas === null) {
+      console.error(_typeof(_this.options.id));
+      console.error(_this.options.id);
+      throw new Error(_this.options.id + " does not refer to a valid canvas element.");
+    }
+
+    _this.id = _this.canvas.id;
+
+    if (_this.bounds.width === 0) {
+      _this.bounds.width = _this.imageWidth;
+      _this.bounds.height = _this.imageHeight;
+    }
+
+    _this.imageWidth = _this.bounds.width;
+    _this.imageHeight = _this.bounds.height;
+
+    if (_this.context === null) {
+      _this.context = _this.canvas.getContext("2d");
+    }
+
+    _this.canvas.style.imageRendering = isChrome ? "pixelated" : "optimizespeed";
+    _this.context.imageSmoothingEnabled = false;
+    _this.context.textBaseline = "top";
+
+    _this._texture = null;
+    _this._material = null;
+    _this._environment = null;
+    return _this;
+  }
+
+  createClass(Surface, [{
+    key: "addToBrowserEnvironment",
+    value: function addToBrowserEnvironment(env, scene) {
+      this._environment = env;
+      var geom = this.className === "shell" ? shell(3, 10, 10) : quad(2, 2),
+          mesh = textured(geom, this, {
+        opacity: this._opacity
+      });
+      scene.add(mesh);
+      env.registerPickableObject(mesh);
+      return mesh;
+    }
+  }, {
+    key: "invalidate",
+    value: function invalidate(bounds) {
+      var useDefault = !bounds;
+      if (!bounds) {
+        bounds = this.bounds.clone();
+        bounds.left = 0;
+        bounds.top = 0;
+      } else if (bounds.isRectangle) {
+        bounds = bounds.clone();
+      }
+      for (var i = 0; i < this.children.length; ++i) {
+        var child = this.children[i],
+            overlap = bounds.overlap(child.bounds);
+        if (overlap) {
+          var x = overlap.left - child.bounds.left,
+              y = overlap.top - child.bounds.top;
+          this.context.drawImage(child.canvas, x, y, overlap.width, overlap.height, overlap.x, overlap.y, overlap.width, overlap.height);
+        }
+      }
+      if (this._texture) {
+        this._texture.needsUpdate = true;
+      }
+      if (this._material) {
+        this._material.needsUpdate = true;
+      }
+      if (this.parent && this.parent.invalidate) {
+        bounds.left += this.bounds.left;
+        bounds.top += this.bounds.top;
+        this.parent.invalidate(bounds);
+      }
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      this.invalidate();
+    }
+  }, {
+    key: "resize",
+    value: function resize() {
+      this.setSize(this.surfaceWidth, this.surfaceHeight);
+    }
+  }, {
+    key: "setSize",
+    value: function setSize(width, height) {
+      var oldTextBaseline = this.context.textBaseline,
+          oldTextAlign = this.context.textAlign;
+      this.imageWidth = width;
+      this.imageHeight = height;
+
+      this.context.textBaseline = oldTextBaseline;
+      this.context.textAlign = oldTextAlign;
+    }
+  }, {
+    key: "appendChild",
+    value: function appendChild(child) {
+      if (!child.isSurface) {
+        throw new Error("Can only append other Surfaces to a Surface. You gave: " + child);
+      }
+      get$1(Surface.prototype.__proto__ || Object.getPrototypeOf(Surface.prototype), "appendChild", this).call(this, child);
+      this.invalidate();
+    }
+  }, {
+    key: "mapUV",
+    value: function mapUV(point) {
+      if (point instanceof Array) {
+        return {
+          x: point[0] * this.imageWidth,
+          y: (1 - point[1]) * this.imageHeight
+        };
+      } else if (point.isVector2) {
+        return {
+          x: point.x * this.imageWidth,
+          y: (1 - point.y) * this.imageHeight
+        };
+      }
+    }
+  }, {
+    key: "unmapUV",
+    value: function unmapUV(point) {
+      return [point.x / this.imageWidth, 1 - point.y / this.imageHeight];
+    }
+  }, {
+    key: "_findChild",
+    value: function _findChild(x, y, thunk) {
+      var here = this.inBounds(x, y),
+          found = null;
+      for (var i = this.children.length - 1; i >= 0; --i) {
+        var child = this.children[i];
+        if (!found && child.inBounds(x - this.bounds.left, y - this.bounds.top)) {
+          found = child;
+        } else if (child.focused) {
+          child.blur();
+        }
+      }
+      return found || here && this;
+    }
+  }, {
+    key: "inBounds",
+    value: function inBounds(x, y) {
+      return this.bounds.left <= x && x < this.bounds.right && this.bounds.top <= y && y < this.bounds.bottom;
+    }
+  }, {
+    key: "startPointer",
+    value: function startPointer(x, y) {
+      if (this.inBounds(x, y)) {
+        var target = this._findChild(x, y, function (child, x2, y2) {
+          return child.startPointer(x2, y2);
+        });
+        if (target) {
+          if (!this.focused) {
+            this.focus();
+          }
+          this.emit("click", {
+            target: target,
+            x: x,
+            y: y
+          });
+          if (target !== this) {
+            target.startPointer(x - this.bounds.left, y - this.bounds.top);
+          }
+        } else if (this.focused) {
+          this.blur();
+        }
+      }
+    }
+  }, {
+    key: "movePointer",
+    value: function movePointer(x, y) {
+      var target = this._findChild(x, y, function (child, x2, y2) {
+        return child.startPointer(x2, y2);
+      });
+      if (target) {
+        this.emit("move", {
+          target: target,
+          x: x,
+          y: y
+        });
+        if (target !== this) {
+          target.movePointer(x - this.bounds.left, y - this.bounds.top);
+        }
+      }
+    }
+  }, {
+    key: "startUV",
+    value: function startUV(point) {
+      var p = this.mapUV(point);
+      this.startPointer(p.x, p.y);
+    }
+  }, {
+    key: "moveUV",
+    value: function moveUV(point) {
+      var p = this.mapUV(point);
+      this.movePointer(p.x, p.y);
+    }
+  }, {
+    key: "imageWidth",
+    get: function get() {
+      return this.canvas.width;
+    },
+    set: function set(v) {
+      this.canvas.width = v;
+      this.bounds.width = v;
+    }
+  }, {
+    key: "imageHeight",
+    get: function get() {
+      return this.canvas.height;
+    },
+    set: function set(v) {
+      this.canvas.height = v;
+      this.bounds.height = v;
+    }
+  }, {
+    key: "elementWidth",
+    get: function get() {
+      return this.canvas.clientWidth * devicePixelRatio;
+    },
+    set: function set(v) {
+      this.canvas.style.width = v / devicePixelRatio + "px";
+    }
+  }, {
+    key: "elementHeight",
+    get: function get() {
+      return this.canvas.clientHeight * devicePixelRatio;
+    },
+    set: function set(v) {
+      this.canvas.style.height = v / devicePixelRatio + "px";
+    }
+  }, {
+    key: "surfaceWidth",
+    get: function get() {
+      return this.canvas.parentElement ? this.elementWidth : this.bounds.width;
+    }
+  }, {
+    key: "surfaceHeight",
+    get: function get() {
+      return this.canvas.parentElement ? this.elementHeight : this.bounds.height;
+    }
+  }, {
+    key: "resized",
+    get: function get() {
+      return this.imageWidth !== this.surfaceWidth || this.imageHeight !== this.surfaceHeight;
+    }
+  }, {
+    key: "texture",
+    get: function get() {
+      if (!this._texture) {
+        this._texture = new Texture$1(this.canvas);
+      }
+      return this._texture;
+    }
+  }, {
+    key: "environment",
+    get: function get() {
+      var head = this;
+      while (head) {
+        if (head._environment) {
+          if (head !== this) {
+            this._environment = head._environment;
+          }
+          return this._environment;
+        }
+        head = head.parent;
+      }
+    }
+  }]);
+  return Surface;
+}(Entity);
+
+var Default = {
+  name: "Light",
+  fontFamily: "'Droid Sans Mono', 'Consolas', 'Lucida Console', 'Courier New', 'Courier', monospace",
+  cursorColor: "black",
+  fontSize: 16,
+  lineNumbers: {
+    foreColor: "black"
+  },
+  regular: {
+    backColor: "white",
+    foreColor: "black",
+    currentRowBackColor: "#f0f0f0",
+    selectedBackColor: "#c0c0c0",
+    unfocused: "rgba(0, 0, 255, 0.25)"
+  },
+  strings: {
+    foreColor: "#aa9900",
+    fontStyle: "italic"
+  },
+  regexes: {
+    foreColor: "#aa0099",
+    fontStyle: "italic"
+  },
+  numbers: {
+    foreColor: "green"
+  },
+  comments: {
+    foreColor: "grey",
+    fontStyle: "italic"
+  },
+  keywords: {
+    foreColor: "blue"
+  },
+  functions: {
+    foreColor: "brown",
+    fontWeight: "bold"
+  },
+  members: {
+    foreColor: "green"
+  },
+  error: {
+    foreColor: "red",
+    fontStyle: "underline italic"
+  }
+};
+
+var COUNTER$1 = 0;
 
 var Label = function (_Surface) {
   inherits(Label, _Surface);
@@ -16228,7 +14396,7 @@ var Label = function (_Surface) {
     ///////////////////////////////////////////////////////////////////////
 
     var _this = possibleConstructorReturn(this, (Label.__proto__ || Object.getPrototypeOf(Label)).call(this, Object.assign({}, {
-      id: "Primrose.Controls.Label[" + COUNTER$3++ + "]"
+      id: "Primrose.Controls.Label[" + COUNTER$1++ + "]"
     }, options)));
     ////////////////////////////////////////////////////////////////////////
     // normalize input parameters
@@ -16368,7 +14536,7 @@ var Label = function (_Surface) {
   return Label;
 }(Surface);
 
-var COUNTER$2 = 0;
+var COUNTER = 0;
 
 var Button2D = function (_Label) {
   inherits(Button2D, _Label);
@@ -16383,7 +14551,7 @@ var Button2D = function (_Label) {
     classCallCheck(this, Button2D);
 
     var _this = possibleConstructorReturn(this, (Button2D.__proto__ || Object.getPrototypeOf(Button2D)).call(this, Object.assign({}, {
-      id: "Primrose.Controls.Button2D[" + COUNTER$2++ + "]",
+      id: "Primrose.Controls.Button2D[" + COUNTER++ + "]",
       textAlign: "center"
     }, options)));
 
@@ -16555,20 +14723,6 @@ function axis(length, width) {
   return center;
 }
 
-/**
- * @author mrdoob / http://mrdoob.com/
- * @author alteredq / http://alteredqualia.com/
- *
- * parameters = {
- *  color: <hex>,
- *  opacity: <float>,
- *  map: new THREE.Texture( <Image> ),
- *
- *  size: <float>,
- *  sizeAttenuation: <bool>
- * }
- */
-
 function PointsMaterial(parameters) {
 
 	Material.call(this);
@@ -16605,10 +14759,6 @@ PointsMaterial.prototype.copy = function (source) {
 
 	return this;
 };
-
-/**
- * @author alteredq / http://alteredqualia.com/
- */
 
 function Points(geometry, material) {
 
@@ -16742,10 +14892,6 @@ function cloud(verts, c, s) {
   });
   return new Points(geom, mat);
 }
-
-/**
- * @author Mugen87 / https://github.com/Mugen87
- */
 
 function CylinderBufferGeometry(radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength) {
 
@@ -17089,11 +15235,6 @@ function fixGeometry(geometry, options) {
   return geometry;
 }
 
-/**
- * @author mrdoob / http://mrdoob.com/
- * based on http://papervision3d.googlecode.com/svn/trunk/as3/trunk/src/org/papervision3d/objects/primitives/Plane.as
- */
-
 function PlaneBufferGeometry(width, height, widthSegments, heightSegments) {
 
 	BufferGeometry.call(this);
@@ -17411,7 +15552,7 @@ var liveAPI = Object.freeze({
 	default: index$2
 });
 
-var COUNTER$4 = 0;
+var COUNTER$3 = 0;
 var Form = function (_Surface) {
   inherits(Form, _Surface);
   createClass(Form, null, [{
@@ -17425,7 +15566,7 @@ var Form = function (_Surface) {
     classCallCheck(this, Form);
 
     var _this = possibleConstructorReturn(this, (Form.__proto__ || Object.getPrototypeOf(Form)).call(this, Object.assign({}, {
-      id: "Primrose.Controls.Form[" + COUNTER$4++ + "]"
+      id: "Primrose.Controls.Form[" + COUNTER$3++ + "]"
     }, options)));
 
     _this._mesh = textured$1(quad$1(1, _this.bounds.height / _this.bounds.width), _this);
@@ -17865,7 +16006,7 @@ function enableInlineVideo(video, hasAudio, onlyWhitelisted) {
 
 enableInlineVideo.isWhitelisted = isWhitelisted;
 
-var COUNTER$5 = 0;
+var COUNTER$4 = 0;
 
 // Videos don't auto-play on mobile devices, so let's make them all play whenever
 // we tap the screen.
@@ -17915,7 +16056,7 @@ var Image = function (_Entity) {
     }
 
     options = Object.assign({}, {
-      id: "Primrose.Controls.Image[" + COUNTER$5++ + "]"
+      id: "Primrose.Controls.Image[" + COUNTER$4++ + "]"
     }, options);
 
     var _this = possibleConstructorReturn(this, (Image.__proto__ || Object.getPrototypeOf(Image)).call(this, options.id));
@@ -18308,10 +16449,6 @@ var DOM = {
   makeHidingContainer: makeHidingContainer
 };
 
-/**
- * @author mrdoob / http://mrdoob.com/
- */
-
 function Group() {
 
 	Object3D.call(this);
@@ -18324,19 +16461,6 @@ Group.prototype = Object.assign(Object.create(Object3D.prototype), {
 	constructor: Group
 
 });
-
-/**
- * @author alteredq / http://alteredqualia.com/
- *
- * parameters = {
- *  color: <hex>,
- *  opacity: <float>,
- *  map: new THREE.Texture( <Image> ),
- *
- *	uvOffset: new THREE.Vector2(),
- *	uvScale: new THREE.Vector2()
- * }
- */
 
 function SpriteMaterial(parameters) {
 
@@ -18369,11 +16493,6 @@ SpriteMaterial.prototype.copy = function (source) {
 
 	return this;
 };
-
-/**
- * @author mikael emtinger / http://gomo.se/
- * @author alteredq / http://alteredqualia.com/
- */
 
 function Sprite(material) {
 
@@ -18424,20 +16543,6 @@ Sprite.prototype = Object.assign(Object.create(Object3D.prototype), {
 
 });
 
-/**
- * @author mrdoob / http://mrdoob.com/
- * @author alteredq / http://alteredqualia.com/
- *
- * parameters = {
- *  color: <hex>,
- *  opacity: <float>,
- *
- *  linewidth: <float>,
- *  linecap: "round",
- *  linejoin: "round"
- * }
- */
-
 function LineBasicMaterial(parameters) {
 
 	Material.call(this);
@@ -18473,10 +16578,6 @@ LineBasicMaterial.prototype.copy = function (source) {
 	return this;
 };
 
-/**
- * @author mrdoob / http://mrdoob.com/
- */
-
 function LineSegments(geometry, material) {
 
 	Line.call(this, geometry, material);
@@ -18491,10 +16592,6 @@ LineSegments.prototype = Object.assign(Object.create(Line.prototype), {
 	isLineSegments: true
 
 });
-
-/**
- * @author mrdoob / http://mrdoob.com/
- */
 
 function Line(geometry, material, mode) {
 
@@ -18665,12 +16762,6 @@ Line.prototype = Object.assign(Object.create(Object3D.prototype), {
 
 });
 
-/**
- * @author mikael emtinger / http://gomo.se/
- * @author alteredq / http://alteredqualia.com/
- * @author mrdoob / http://mrdoob.com/
- */
-
 function LOD() {
 
 	Object3D.call(this);
@@ -18816,13 +16907,9 @@ LOD.prototype = Object.assign(Object.create(Object3D.prototype), {
 
 });
 
-/**
- * @author alteredq / http://alteredqualia.com/
- */
-
 function DataTexture(data, width, height, format, type, mapping, wrapS, wrapT, magFilter, minFilter, anisotropy, encoding) {
 
-	Texture.call(this, null, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy, encoding);
+	Texture$1.call(this, null, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy, encoding);
 
 	this.image = { data: data, width: width, height: height };
 
@@ -18834,17 +16921,10 @@ function DataTexture(data, width, height, format, type, mapping, wrapS, wrapT, m
 	this.unpackAlignment = 1;
 }
 
-DataTexture.prototype = Object.create(Texture.prototype);
+DataTexture.prototype = Object.create(Texture$1.prototype);
 DataTexture.prototype.constructor = DataTexture;
 
 DataTexture.prototype.isDataTexture = true;
-
-/**
- * @author mikael emtinger / http://gomo.se/
- * @author alteredq / http://alteredqualia.com/
- * @author michael guerrero / http://realitymeltdown.com
- * @author ikerr / http://verold.com
- */
 
 function Skeleton(bones, boneInverses, useVertexTexture) {
 
@@ -18997,12 +17077,6 @@ Object.assign(Skeleton.prototype, {
 
 });
 
-/**
- * @author mikael emtinger / http://gomo.se/
- * @author alteredq / http://alteredqualia.com/
- * @author ikerr / http://verold.com
- */
-
 function Bone(skin) {
 
 	Object3D.call(this);
@@ -19028,12 +17102,6 @@ Bone.prototype = Object.assign(Object.create(Object3D.prototype), {
 	}
 
 });
-
-/**
- * @author mikael emtinger / http://gomo.se/
- * @author alteredq / http://alteredqualia.com/
- * @author ikerr / http://verold.com
- */
 
 function SkinnedMesh(geometry, material, useVertexTexture) {
 
@@ -19186,11 +17254,6 @@ SkinnedMesh.prototype = Object.assign(Object.create(Mesh.prototype), {
 
 });
 
-/**
- * @author mrdoob / http://mrdoob.com/
- * @author alteredq / http://alteredqualia.com/
- */
-
 function Fog(color, near, far) {
 
 	this.name = '';
@@ -19218,11 +17281,6 @@ Fog.prototype.toJSON = function (meta) {
 	};
 };
 
-/**
- * @author mrdoob / http://mrdoob.com/
- * @author alteredq / http://alteredqualia.com/
- */
-
 function FogExp2(color, density) {
 
 	this.name = '';
@@ -19246,10 +17304,6 @@ FogExp2.prototype.toJSON = function (meta) {
 		density: this.density
 	};
 };
-
-/**
- * @author alteredq / http://alteredqualia.com/
- */
 
 function HemisphereLight(skyColor, groundColor, intensity) {
 
@@ -19282,10 +17336,6 @@ HemisphereLight.prototype = Object.assign(Object.create(Light.prototype), {
 
 });
 
-/**
- * @author mrdoob / http://mrdoob.com/
- */
-
 function SpotLightShadow() {
 
 	LightShadow.call(this, new PerspectiveCamera(50, 1, 0.5, 500));
@@ -19315,10 +17365,6 @@ SpotLightShadow.prototype = Object.assign(Object.create(LightShadow.prototype), 
 	}
 
 });
-
-/**
- * @author alteredq / http://alteredqualia.com/
- */
 
 function SpotLight(color, intensity, distance, angle, penumbra, decay) {
 
@@ -19375,11 +17421,6 @@ SpotLight.prototype = Object.assign(Object.create(Light.prototype), {
 	}
 
 });
-
-/**
- * @author alteredq / http://alteredqualia.com/
- * @author arose / http://github.com/arose
- */
 
 function OrthographicCamera(left, right, top, bottom, near, far) {
 
@@ -19491,10 +17532,6 @@ OrthographicCamera.prototype = Object.assign(Object.create(Camera.prototype), {
 
 });
 
-/**
- * @author mrdoob / http://mrdoob.com/
- */
-
 function DirectionalLightShadow(light) {
 
   LightShadow.call(this, new OrthographicCamera(-5, 5, 5, -5, 0.5, 500));
@@ -19505,11 +17542,6 @@ DirectionalLightShadow.prototype = Object.assign(Object.create(LightShadow.proto
   constructor: DirectionalLightShadow
 
 });
-
-/**
- * @author mrdoob / http://mrdoob.com/
- * @author alteredq / http://alteredqualia.com/
- */
 
 function DirectionalLight(color, intensity) {
 
@@ -19544,10 +17576,6 @@ DirectionalLight.prototype = Object.assign(Object.create(Light.prototype), {
 
 });
 
-/**
- * @author mrdoob / http://mrdoob.com/
- */
-
 function AmbientLight(color, intensity) {
 
 	Light.call(this, color, intensity);
@@ -19564,10 +17592,6 @@ AmbientLight.prototype = Object.assign(Object.create(Light.prototype), {
 	isAmbientLight: true
 
 });
-
-/**
- * @author mrdoob / http://mrdoob.com/
- */
 
 function Scene() {
 
@@ -19981,16 +18005,6 @@ Object.assign(Interpolant.prototype, {
 
 });
 
-/**
- * Fast and simple cubic spline interpolant.
- *
- * It was derived from a Hermitian construction setting the first derivative
- * at each sample position to the linear slope between neighboring positions
- * over their parameter interval.
- *
- * @author tschw
- */
-
 function CubicInterpolant(parameterPositions, sampleValues, sampleSize, resultBuffer) {
 
 	Interpolant.call(this, parameterPositions, sampleValues, sampleSize, resultBuffer);
@@ -20123,10 +18137,6 @@ CubicInterpolant.prototype = Object.assign(Object.create(Interpolant.prototype),
 
 });
 
-/**
- * @author tschw
- */
-
 function LinearInterpolant(parameterPositions, sampleValues, sampleSize, resultBuffer) {
 
 	Interpolant.call(this, parameterPositions, sampleValues, sampleSize, resultBuffer);
@@ -20155,14 +18165,6 @@ LinearInterpolant.prototype = Object.assign(Object.create(Interpolant.prototype)
 	}
 
 });
-
-/**
- *
- * Interpolant that evaluates to the sample value at the position preceeding
- * the parameter.
- *
- * @author tschw
- */
 
 function DiscreteInterpolant(parameterPositions, sampleValues, sampleSize, resultBuffer) {
 
@@ -20510,16 +18512,6 @@ function KeyframeTrackConstructor(name, times, values, interpolation) {
 	this.optimize();
 }
 
-/**
- *
- * A Track of vectored keyframe values.
- *
- *
- * @author Ben Houston / http://clara.io/
- * @author David Sarno / http://lighthaus.us/
- * @author tschw
- */
-
 function VectorKeyframeTrack(name, times, values, interpolation) {
 
   KeyframeTrackConstructor.call(this, name, times, values, interpolation);
@@ -20536,12 +18528,6 @@ VectorKeyframeTrack.prototype = Object.assign(Object.create(KeyframeTrackPrototy
   // DefaultInterpolation is inherited
 
 });
-
-/**
- * Spherical linear unit quaternion interpolant.
- *
- * @author tschw
- */
 
 function QuaternionLinearInterpolant(parameterPositions, sampleValues, sampleSize, resultBuffer) {
 
@@ -20570,15 +18556,6 @@ QuaternionLinearInterpolant.prototype = Object.assign(Object.create(Interpolant.
 
 });
 
-/**
- *
- * A Track of quaternion keyframe values.
- *
- * @author Ben Houston / http://clara.io/
- * @author David Sarno / http://lighthaus.us/
- * @author tschw
- */
-
 function QuaternionKeyframeTrack(name, times, values, interpolation) {
 
 	KeyframeTrackConstructor.call(this, name, times, values, interpolation);
@@ -20603,15 +18580,6 @@ QuaternionKeyframeTrack.prototype = Object.assign(Object.create(KeyframeTrackPro
 
 });
 
-/**
- *
- * A Track of numeric keyframe values.
- *
- * @author Ben Houston / http://clara.io/
- * @author David Sarno / http://lighthaus.us/
- * @author tschw
- */
-
 function NumberKeyframeTrack(name, times, values, interpolation) {
 
   KeyframeTrackConstructor.call(this, name, times, values, interpolation);
@@ -20624,16 +18592,6 @@ NumberKeyframeTrack.prototype = Object.assign(Object.create(KeyframeTrackPrototy
   ValueTypeName: 'number'
 
 });
-
-/**
- *
- * A Track that interpolates Strings
- *
- *
- * @author Ben Houston / http://clara.io/
- * @author David Sarno / http://lighthaus.us/
- * @author tschw
- */
 
 function StringKeyframeTrack(name, times, values, interpolation) {
 
@@ -20654,16 +18612,6 @@ StringKeyframeTrack.prototype = Object.assign(Object.create(KeyframeTrackPrototy
   InterpolantFactoryMethodSmooth: undefined
 
 });
-
-/**
- *
- * A Track of Boolean keyframe values.
- *
- *
- * @author Ben Houston / http://clara.io/
- * @author David Sarno / http://lighthaus.us/
- * @author tschw
- */
 
 function BooleanKeyframeTrack(name, times, values) {
 
@@ -20688,16 +18636,6 @@ BooleanKeyframeTrack.prototype = Object.assign(Object.create(KeyframeTrackProtot
 
 });
 
-/**
- *
- * A Track of keyframe values that represent color.
- *
- *
- * @author Ben Houston / http://clara.io/
- * @author David Sarno / http://lighthaus.us/
- * @author tschw
- */
-
 function ColorKeyframeTrack(name, times, values, interpolation) {
 
   KeyframeTrackConstructor.call(this, name, times, values, interpolation);
@@ -20718,16 +18656,6 @@ ColorKeyframeTrack.prototype = Object.assign(Object.create(KeyframeTrackPrototyp
   // However, this is the place for color space parameterization.
 
 });
-
-/**
- *
- * A timed sequence of keyframes for a specific property.
- *
- *
- * @author Ben Houston / http://clara.io/
- * @author David Sarno / http://lighthaus.us/
- * @author tschw
- */
 
 function KeyframeTrack(name, times, values, interpolation) {
 
@@ -20851,14 +18779,6 @@ Object.assign(KeyframeTrack, {
 	}
 
 });
-
-/**
- *
- * Reusable set of Tracks that represent an animation.
- *
- * @author Ben Houston / http://clara.io/
- * @author David Sarno / http://lighthaus.us/
- */
 
 function AnimationClip(name, duration, tracks) {
 
@@ -21206,27 +19126,6 @@ var UniformsUtils = {
 	}
 
 };
-
-/**
- * @author alteredq / http://alteredqualia.com/
- *
- * parameters = {
- *  defines: { "label" : "value" },
- *  uniforms: { "parameter1": { value: 1.0 }, "parameter2": { value2: 2 } },
- *
- *  fragmentShader: <string>,
- *  vertexShader: <string>,
- *
- *  wireframe: <boolean>,
- *  wireframeLinewidth: <float>,
- *
- *  lights: <bool>,
- *
- *  skinning: <bool>,
- *  morphTargets: <bool>,
- *  morphNormals: <bool>
- * }
- */
 
 function ShaderMaterial(parameters) {
 
@@ -21643,10 +19542,6 @@ var ShaderChunk = {
 	shadow_vert: shadow_vert
 };
 
-/**
- * Uniforms library for shared webgl shaders
- */
-
 var UniformsLib = {
 
 	common: {
@@ -21801,10 +19696,6 @@ var UniformsLib = {
 
 };
 
-/**
- * @author mrdoob / http://mrdoob.com/
- */
-
 function ShadowMaterial() {
 
 	ShaderMaterial.call(this, {
@@ -21836,10 +19727,6 @@ ShadowMaterial.prototype.constructor = ShadowMaterial;
 
 ShadowMaterial.prototype.isShadowMaterial = true;
 
-/**
- * @author mrdoob / http://mrdoob.com/
- */
-
 function RawShaderMaterial(parameters) {
 
   ShaderMaterial.call(this, parameters);
@@ -21851,10 +19738,6 @@ RawShaderMaterial.prototype = Object.create(ShaderMaterial.prototype);
 RawShaderMaterial.prototype.constructor = RawShaderMaterial;
 
 RawShaderMaterial.prototype.isRawShaderMaterial = true;
-
-/**
- * @author mrdoob / http://mrdoob.com/
- */
 
 function MultiMaterial(materials) {
 
@@ -21917,14 +19800,6 @@ MultiMaterial.prototype = {
 
 };
 
-/**
- * @author WestLangley / http://github.com/WestLangley
- *
- * parameters = {
- *  reflectivity: <float>
- * }
- */
-
 function MeshPhysicalMaterial(parameters) {
 
 	MeshStandardMaterial.call(this);
@@ -21959,56 +19834,6 @@ MeshPhysicalMaterial.prototype.copy = function (source) {
 
 	return this;
 };
-
-/**
- * @author mrdoob / http://mrdoob.com/
- * @author alteredq / http://alteredqualia.com/
- *
- * parameters = {
- *  color: <hex>,
- *  specular: <hex>,
- *  shininess: <float>,
- *  opacity: <float>,
- *
- *  map: new THREE.Texture( <Image> ),
- *
- *  lightMap: new THREE.Texture( <Image> ),
- *  lightMapIntensity: <float>
- *
- *  aoMap: new THREE.Texture( <Image> ),
- *  aoMapIntensity: <float>
- *
- *  emissive: <hex>,
- *  emissiveIntensity: <float>
- *  emissiveMap: new THREE.Texture( <Image> ),
- *
- *  bumpMap: new THREE.Texture( <Image> ),
- *  bumpScale: <float>,
- *
- *  normalMap: new THREE.Texture( <Image> ),
- *  normalScale: <Vector2>,
- *
- *  displacementMap: new THREE.Texture( <Image> ),
- *  displacementScale: <float>,
- *  displacementBias: <float>,
- *
- *  specularMap: new THREE.Texture( <Image> ),
- *
- *  alphaMap: new THREE.Texture( <Image> ),
- *
- *  envMap: new THREE.TextureCube( [posx, negx, posy, negy, posz, negz] ),
- *  combine: THREE.Multiply,
- *  reflectivity: <float>,
- *  refractionRatio: <float>,
- *
- *  wireframe: <boolean>,
- *  wireframeLinewidth: <float>,
- *
- *  skinning: <bool>,
- *  morphTargets: <bool>,
- *  morphNormals: <bool>
- * }
- */
 
 function MeshPhongMaterial(parameters) {
 
@@ -22119,17 +19944,6 @@ MeshPhongMaterial.prototype.copy = function (source) {
 	return this;
 };
 
-/**
- * @author mrdoob / http://mrdoob.com/
- *
- * parameters = {
- *  opacity: <float>,
- *
- *  wireframe: <boolean>,
- *  wireframeLinewidth: <float>
- * }
- */
-
 function MeshNormalMaterial(parameters) {
 
 	Material.call(this, parameters);
@@ -22160,44 +19974,6 @@ MeshNormalMaterial.prototype.copy = function (source) {
 
 	return this;
 };
-
-/**
- * @author mrdoob / http://mrdoob.com/
- * @author alteredq / http://alteredqualia.com/
- *
- * parameters = {
- *  color: <hex>,
- *  opacity: <float>,
- *
- *  map: new THREE.Texture( <Image> ),
- *
- *  lightMap: new THREE.Texture( <Image> ),
- *  lightMapIntensity: <float>
- *
- *  aoMap: new THREE.Texture( <Image> ),
- *  aoMapIntensity: <float>
- *
- *  emissive: <hex>,
- *  emissiveIntensity: <float>
- *  emissiveMap: new THREE.Texture( <Image> ),
- *
- *  specularMap: new THREE.Texture( <Image> ),
- *
- *  alphaMap: new THREE.Texture( <Image> ),
- *
- *  envMap: new THREE.TextureCube( [posx, negx, posy, negy, posz, negz] ),
- *  combine: THREE.Multiply,
- *  reflectivity: <float>,
- *  refractionRatio: <float>,
- *
- *  wireframe: <boolean>,
- *  wireframeLinewidth: <float>,
- *
- *  skinning: <bool>,
- *  morphTargets: <bool>,
- *  morphNormals: <bool>
- * }
- */
 
 function MeshLambertMaterial(parameters) {
 
@@ -22284,29 +20060,6 @@ MeshLambertMaterial.prototype.copy = function (source) {
 	return this;
 };
 
-/**
- * @author mrdoob / http://mrdoob.com/
- * @author alteredq / http://alteredqualia.com/
- * @author bhouston / https://clara.io
- * @author WestLangley / http://github.com/WestLangley
- *
- * parameters = {
- *
- *  opacity: <float>,
- *
- *  map: new THREE.Texture( <Image> ),
- *
- *  alphaMap: new THREE.Texture( <Image> ),
- *
- *  displacementMap: new THREE.Texture( <Image> ),
- *  displacementScale: <float>,
- *  displacementBias: <float>,
- *
- *  wireframe: <boolean>,
- *  wireframeLinewidth: <float>
- * }
- */
-
 function MeshDepthMaterial(parameters) {
 
 	Material.call(this);
@@ -22362,21 +20115,6 @@ MeshDepthMaterial.prototype.copy = function (source) {
 
 	return this;
 };
-
-/**
- * @author alteredq / http://alteredqualia.com/
- *
- * parameters = {
- *  color: <hex>,
- *  opacity: <float>,
- *
- *  linewidth: <float>,
- *
- *  scale: <float>,
- *  dashSize: <float>,
- *  gapSize: <float>
- * }
- */
 
 function LineDashedMaterial(parameters) {
 
@@ -22437,10 +20175,6 @@ var Materials = Object.freeze({
 	LineBasicMaterial: LineBasicMaterial,
 	Material: Material
 });
-
-/**
- * @author mrdoob / http://mrdoob.com/
- */
 
 function MaterialLoader(manager) {
 
@@ -22581,10 +20315,6 @@ Object.assign(MaterialLoader.prototype, {
 
 });
 
-/**
- * @author mrdoob / http://mrdoob.com/
- */
-
 function BufferGeometryLoader(manager) {
 
 	this.manager = manager !== undefined ? manager : DefaultLoadingManager;
@@ -22667,10 +20397,6 @@ Object.assign(BufferGeometryLoader.prototype, {
 	}
 
 });
-
-/**
- * @author alteredq / http://alteredqualia.com/
- */
 
 function Loader() {
 
@@ -22973,11 +20699,6 @@ Loader.Handlers = {
 	}
 
 };
-
-/**
- * @author mrdoob / http://mrdoob.com/
- * @author alteredq / http://alteredqualia.com/
- */
 
 function JSONLoader(manager) {
 
@@ -23439,10 +21160,6 @@ Object.assign(JSONLoader.prototype, {
 
 });
 
-/**
- * @author mrdoob / http://mrdoob.com/
- */
-
 function WireframeGeometry(geometry) {
 
 	BufferGeometry.call(this);
@@ -23603,13 +21320,6 @@ function WireframeGeometry(geometry) {
 WireframeGeometry.prototype = Object.create(BufferGeometry.prototype);
 WireframeGeometry.prototype.constructor = WireframeGeometry;
 
-/**
- * @author Mugen87 / https://github.com/Mugen87
- *
- * Parametric Surfaces Geometry
- * based on the brilliant article by @prideout http://prideout.net/blog/?p=44
- */
-
 function ParametricBufferGeometry(func, slices, stacks) {
 
 	BufferGeometry.call(this);
@@ -23682,13 +21392,6 @@ function ParametricBufferGeometry(func, slices, stacks) {
 ParametricBufferGeometry.prototype = Object.create(BufferGeometry.prototype);
 ParametricBufferGeometry.prototype.constructor = ParametricBufferGeometry;
 
-/**
- * @author zz85 / https://github.com/zz85
- *
- * Parametric Surfaces Geometry
- * based on the brilliant article by @prideout http://prideout.net/blog/?p=44
- */
-
 function ParametricGeometry(func, slices, stacks) {
 
 	Geometry.call(this);
@@ -23707,10 +21410,6 @@ function ParametricGeometry(func, slices, stacks) {
 
 ParametricGeometry.prototype = Object.create(Geometry.prototype);
 ParametricGeometry.prototype.constructor = ParametricGeometry;
-
-/**
- * @author Mugen87 / https://github.com/Mugen87
- */
 
 function PolyhedronBufferGeometry(vertices, indices, radius, detail) {
 
@@ -23977,10 +21676,6 @@ function PolyhedronBufferGeometry(vertices, indices, radius, detail) {
 PolyhedronBufferGeometry.prototype = Object.create(BufferGeometry.prototype);
 PolyhedronBufferGeometry.prototype.constructor = PolyhedronBufferGeometry;
 
-/**
- * @author Mugen87 / https://github.com/Mugen87
- */
-
 function TetrahedronBufferGeometry(radius, detail) {
 
 	var vertices = [1, 1, 1, -1, -1, 1, -1, 1, -1, 1, -1, -1];
@@ -24000,10 +21695,6 @@ function TetrahedronBufferGeometry(radius, detail) {
 TetrahedronBufferGeometry.prototype = Object.create(PolyhedronBufferGeometry.prototype);
 TetrahedronBufferGeometry.prototype.constructor = TetrahedronBufferGeometry;
 
-/**
- * @author timothypratley / https://github.com/timothypratley
- */
-
 function TetrahedronGeometry(radius, detail) {
 
 	Geometry.call(this);
@@ -24021,10 +21712,6 @@ function TetrahedronGeometry(radius, detail) {
 
 TetrahedronGeometry.prototype = Object.create(Geometry.prototype);
 TetrahedronGeometry.prototype.constructor = TetrahedronGeometry;
-
-/**
- * @author Mugen87 / https://github.com/Mugen87
- */
 
 function OctahedronBufferGeometry(radius, detail) {
 
@@ -24045,10 +21732,6 @@ function OctahedronBufferGeometry(radius, detail) {
 OctahedronBufferGeometry.prototype = Object.create(PolyhedronBufferGeometry.prototype);
 OctahedronBufferGeometry.prototype.constructor = OctahedronBufferGeometry;
 
-/**
- * @author timothypratley / https://github.com/timothypratley
- */
-
 function OctahedronGeometry(radius, detail) {
 
 	Geometry.call(this);
@@ -24066,10 +21749,6 @@ function OctahedronGeometry(radius, detail) {
 
 OctahedronGeometry.prototype = Object.create(Geometry.prototype);
 OctahedronGeometry.prototype.constructor = OctahedronGeometry;
-
-/**
- * @author Mugen87 / https://github.com/Mugen87
- */
 
 function IcosahedronBufferGeometry(radius, detail) {
 
@@ -24092,10 +21771,6 @@ function IcosahedronBufferGeometry(radius, detail) {
 IcosahedronBufferGeometry.prototype = Object.create(PolyhedronBufferGeometry.prototype);
 IcosahedronBufferGeometry.prototype.constructor = IcosahedronBufferGeometry;
 
-/**
- * @author timothypratley / https://github.com/timothypratley
- */
-
 function IcosahedronGeometry(radius, detail) {
 
 	Geometry.call(this);
@@ -24113,10 +21788,6 @@ function IcosahedronGeometry(radius, detail) {
 
 IcosahedronGeometry.prototype = Object.create(Geometry.prototype);
 IcosahedronGeometry.prototype.constructor = IcosahedronGeometry;
-
-/**
- * @author Mugen87 / https://github.com/Mugen87
- */
 
 function DodecahedronBufferGeometry(radius, detail) {
 
@@ -24152,10 +21823,6 @@ function DodecahedronBufferGeometry(radius, detail) {
 DodecahedronBufferGeometry.prototype = Object.create(PolyhedronBufferGeometry.prototype);
 DodecahedronBufferGeometry.prototype.constructor = DodecahedronBufferGeometry;
 
-/**
- * @author Abe Pazos / https://hamoid.com
- */
-
 function DodecahedronGeometry(radius, detail) {
 
 	Geometry.call(this);
@@ -24173,12 +21840,6 @@ function DodecahedronGeometry(radius, detail) {
 
 DodecahedronGeometry.prototype = Object.create(Geometry.prototype);
 DodecahedronGeometry.prototype.constructor = DodecahedronGeometry;
-
-/**
- * @author clockworkgeek / https://github.com/clockworkgeek
- * @author timothypratley / https://github.com/timothypratley
- * @author WestLangley / http://github.com/WestLangley
-*/
 
 function PolyhedronGeometry(vertices, indices, radius, detail) {
 
@@ -24199,13 +21860,6 @@ function PolyhedronGeometry(vertices, indices, radius, detail) {
 
 PolyhedronGeometry.prototype = Object.create(Geometry.prototype);
 PolyhedronGeometry.prototype.constructor = PolyhedronGeometry;
-
-/**
- * @author Mugen87 / https://github.com/Mugen87
- *
- * Creates a tube which extrudes along a 3d spline.
- *
- */
 
 function TubeBufferGeometry(path, tubularSegments, radius, radialSegments, closed) {
 
@@ -24362,16 +22016,6 @@ function TubeBufferGeometry(path, tubularSegments, radius, radialSegments, close
 TubeBufferGeometry.prototype = Object.create(BufferGeometry.prototype);
 TubeBufferGeometry.prototype.constructor = TubeBufferGeometry;
 
-/**
- * @author oosmoxiecode / https://github.com/oosmoxiecode
- * @author WestLangley / https://github.com/WestLangley
- * @author zz85 / https://github.com/zz85
- * @author miningold / https://github.com/miningold
- * @author jonobr1 / https://github.com/jonobr1
- *
- * Creates a tube which extrudes along a 3d spline.
- */
-
 function TubeGeometry(path, tubularSegments, radius, radialSegments, closed, taper) {
 
 	Geometry.call(this);
@@ -24405,11 +22049,6 @@ function TubeGeometry(path, tubularSegments, radius, radialSegments, closed, tap
 TubeGeometry.prototype = Object.create(Geometry.prototype);
 TubeGeometry.prototype.constructor = TubeGeometry;
 
-/**
- * @author Mugen87 / https://github.com/Mugen87
- *
- * see: http://www.blackpawn.com/texts/pqtorus/
- */
 function TorusKnotBufferGeometry(radius, tube, tubularSegments, radialSegments, p, q) {
 
 	BufferGeometry.call(this);
@@ -24567,10 +22206,6 @@ function TorusKnotBufferGeometry(radius, tube, tubularSegments, radialSegments, 
 TorusKnotBufferGeometry.prototype = Object.create(BufferGeometry.prototype);
 TorusKnotBufferGeometry.prototype.constructor = TorusKnotBufferGeometry;
 
-/**
- * @author oosmoxiecode
- */
-
 function TorusKnotGeometry(radius, tube, tubularSegments, radialSegments, p, q, heightScale) {
 
 	Geometry.call(this);
@@ -24594,10 +22229,6 @@ function TorusKnotGeometry(radius, tube, tubularSegments, radialSegments, p, q, 
 
 TorusKnotGeometry.prototype = Object.create(Geometry.prototype);
 TorusKnotGeometry.prototype.constructor = TorusKnotGeometry;
-
-/**
- * @author Mugen87 / https://github.com/Mugen87
- */
 
 function TorusBufferGeometry(radius, tube, radialSegments, tubularSegments, arc) {
 
@@ -24716,12 +22347,6 @@ function TorusBufferGeometry(radius, tube, radialSegments, tubularSegments, arc)
 
 TorusBufferGeometry.prototype = Object.create(BufferGeometry.prototype);
 TorusBufferGeometry.prototype.constructor = TorusBufferGeometry;
-
-/**
- * @author oosmoxiecode
- * @author mrdoob / http://mrdoob.com/
- * based on http://code.google.com/p/away3d/source/browse/trunk/fp10/Away3DLite/src/away3dlite/primitives/Torus.as?r=2888
- */
 
 function TorusGeometry(radius, tube, radialSegments, tubularSegments, arc) {
 
@@ -25432,30 +23057,6 @@ var ShapeUtils = {
 
 };
 
-/**
- * @author zz85 / http://www.lab4games.net/zz85/blog
- *
- * Creates extruded geometry from a path shape.
- *
- * parameters = {
- *
- *  curveSegments: <int>, // number of points on the curves
- *  steps: <int>, // number of points for z-side extrusions / used for subdividing segments of extrude spline too
- *  amount: <int>, // Depth to extrude the shape
- *
- *  bevelEnabled: <bool>, // turn on bevel
- *  bevelThickness: <float>, // how deep into the original shape bevel goes
- *  bevelSize: <float>, // how far from shape outline is bevel
- *  bevelSegments: <int>, // number of bevel layers
- *
- *  extrudePath: <THREE.CurvePath> // 3d spline path to extrude shape along. (creates Frames if .frames aren't defined)
- *  frames: <Object> // containing arrays of tangents, normals, binormals
- *
- *  uvGenerator: <Object> // object that provides UV generator functions
- *
- * }
- **/
-
 function ExtrudeGeometry(shapes, options) {
 
 	if (typeof shapes === "undefined") {
@@ -26056,25 +23657,6 @@ ExtrudeGeometry.WorldUVGenerator = {
 	}
 };
 
-/**
- * @author zz85 / http://www.lab4games.net/zz85/blog
- * @author alteredq / http://alteredqualia.com/
- *
- * Text = 3D Text
- *
- * parameters = {
- *  font: <THREE.Font>, // font
- *
- *  size: <float>, // size of the text
- *  height: <float>, // thickness to extrude text
- *  curveSegments: <int>, // number of points on the curves
- *
- *  bevelEnabled: <bool>, // turn on bevel
- *  bevelThickness: <float>, // how deep into text bevel goes
- *  bevelSize: <float> // how far from text outline is bevel
- * }
- */
-
 function TextGeometry(text, parameters) {
 
   parameters = parameters || {};
@@ -26107,10 +23689,6 @@ function TextGeometry(text, parameters) {
 TextGeometry.prototype = Object.create(ExtrudeGeometry.prototype);
 TextGeometry.prototype.constructor = TextGeometry;
 
-/**
- * @author Kaleb Murphy
- */
-
 function RingGeometry(innerRadius, outerRadius, thetaSegments, phiSegments, thetaStart, thetaLength) {
 
 	Geometry.call(this);
@@ -26132,11 +23710,6 @@ function RingGeometry(innerRadius, outerRadius, thetaSegments, phiSegments, thet
 RingGeometry.prototype = Object.create(Geometry.prototype);
 RingGeometry.prototype.constructor = RingGeometry;
 
-/**
- * @author mrdoob / http://mrdoob.com/
- * based on http://papervision3d.googlecode.com/svn/trunk/as3/trunk/src/org/papervision3d/objects/primitives/Plane.as
- */
-
 function PlaneGeometry(width, height, widthSegments, heightSegments) {
 
 	Geometry.call(this);
@@ -26155,17 +23728,6 @@ function PlaneGeometry(width, height, widthSegments, heightSegments) {
 
 PlaneGeometry.prototype = Object.create(Geometry.prototype);
 PlaneGeometry.prototype.constructor = PlaneGeometry;
-
-/**
- * @author Mugen87 / https://github.com/Mugen87
- */
-
-// points - to create a closed torus, one must use a set of points
-//    like so: [ a, b, c, d, a ], see first is the same as last.
-// segments - the number of circumference segments to create
-// phiStart - the starting radian
-// phiLength - the radian (0 to 2PI) range of the lathed section
-//    2PI is a closed lathe, less than 2PI is a portion.
 
 function LatheBufferGeometry(points, segments, phiStart, phiLength) {
 
@@ -26307,19 +23869,6 @@ function LatheBufferGeometry(points, segments, phiStart, phiLength) {
 LatheBufferGeometry.prototype = Object.create(BufferGeometry.prototype);
 LatheBufferGeometry.prototype.constructor = LatheBufferGeometry;
 
-/**
- * @author astrodud / http://astrodud.isgreat.org/
- * @author zz85 / https://github.com/zz85
- * @author bhouston / http://clara.io
- */
-
-// points - to create a closed torus, one must use a set of points
-//    like so: [ a, b, c, d, a ], see first is the same as last.
-// segments - the number of circumference segments to create
-// phiStart - the starting radian
-// phiLength - the radian (0 to 2PI) range of the lathed section
-//    2PI is a closed lathe, less than 2PI is a portion.
-
 function LatheGeometry(points, segments, phiStart, phiLength) {
 
 	Geometry.call(this);
@@ -26339,22 +23888,6 @@ function LatheGeometry(points, segments, phiStart, phiLength) {
 
 LatheGeometry.prototype = Object.create(Geometry.prototype);
 LatheGeometry.prototype.constructor = LatheGeometry;
-
-/**
- * @author jonobr1 / http://jonobr1.com
- *
- * Creates a one-sided polygonal geometry from a path shape. Similar to
- * ExtrudeGeometry.
- *
- * parameters = {
- *
- *	curveSegments: <int>, // number of points on the curves. NOT USED AT THE MOMENT.
- *
- *	material: <int> // material index for front and back faces
- *	uvGenerator: <Object> // object that provides UV generator functions
- *
- * }
- **/
 
 function ShapeGeometry(shapes, options) {
 
@@ -26464,10 +23997,6 @@ ShapeGeometry.prototype.addShape = function (shape, options) {
 	}
 };
 
-/**
- * @author WestLangley / http://github.com/WestLangley
- */
-
 function EdgesGeometry(geometry, thresholdAngle) {
 
 	BufferGeometry.call(this);
@@ -26551,10 +24080,6 @@ function EdgesGeometry(geometry, thresholdAngle) {
 EdgesGeometry.prototype = Object.create(BufferGeometry.prototype);
 EdgesGeometry.prototype.constructor = EdgesGeometry;
 
-/**
- * @author mrdoob / http://mrdoob.com/
- */
-
 function CylinderGeometry(radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength) {
 
 	Geometry.call(this);
@@ -26579,10 +24104,6 @@ function CylinderGeometry(radiusTop, radiusBottom, height, radialSegments, heigh
 CylinderGeometry.prototype = Object.create(Geometry.prototype);
 CylinderGeometry.prototype.constructor = CylinderGeometry;
 
-/**
- * @author abelnation / http://github.com/abelnation
- */
-
 function ConeGeometry(radius, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength) {
 
 	CylinderGeometry.call(this, 0, radius, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength);
@@ -26602,10 +24123,6 @@ function ConeGeometry(radius, height, radialSegments, heightSegments, openEnded,
 
 ConeGeometry.prototype = Object.create(CylinderGeometry.prototype);
 ConeGeometry.prototype.constructor = ConeGeometry;
-
-/**
- * @author: abelnation / http://github.com/abelnation
- */
 
 function ConeBufferGeometry(radius, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength) {
 
@@ -26627,10 +24144,6 @@ function ConeBufferGeometry(radius, height, radialSegments, heightSegments, open
 ConeBufferGeometry.prototype = Object.create(CylinderBufferGeometry.prototype);
 ConeBufferGeometry.prototype.constructor = ConeBufferGeometry;
 
-/**
- * @author hughes
- */
-
 function CircleGeometry(radius, segments, thetaStart, thetaLength) {
 
 	Geometry.call(this);
@@ -26649,11 +24162,6 @@ function CircleGeometry(radius, segments, thetaStart, thetaLength) {
 
 CircleGeometry.prototype = Object.create(Geometry.prototype);
 CircleGeometry.prototype.constructor = CircleGeometry;
-
-/**
- * @author mrdoob / http://mrdoob.com/
- * based on http://papervision3d.googlecode.com/svn/trunk/as3/trunk/src/org/papervision3d/objects/primitives/Cube.as
- */
 
 function BoxGeometry(width, height, depth, widthSegments, heightSegments, depthSegments) {
 
@@ -26720,10 +24228,6 @@ var Geometries = Object.freeze({
 	BoxBufferGeometry: BoxBufferGeometry,
 	BoxGeometry: BoxGeometry
 });
-
-/**
- * @author mrdoob / http://mrdoob.com/
- */
 
 function ObjectLoader(manager) {
 
@@ -27013,7 +24517,7 @@ Object.assign(ObjectLoader.prototype, {
 					console.warn('THREE.ObjectLoader: Undefined image', data.image);
 				}
 
-				var texture = new Texture(images[data.image]);
+				var texture = new Texture$1(images[data.image]);
 				texture.needsUpdate = true;
 
 				texture.uuid = data.uuid;
@@ -27264,41 +24768,6 @@ Object.assign(ObjectLoader.prototype, {
 	}()
 
 });
-
-/**
- * @author zz85 / http://www.lab4games.net/zz85/blog
- * Extensible curve object
- *
- * Some common of Curve methods
- * .getPoint(t), getTangent(t)
- * .getPointAt(u), getTangentAt(u)
- * .getPoints(), .getSpacedPoints()
- * .getLength()
- * .updateArcLengths()
- *
- * This following classes subclasses THREE.Curve:
- *
- * -- 2d classes --
- * THREE.LineCurve
- * THREE.QuadraticBezierCurve
- * THREE.CubicBezierCurve
- * THREE.SplineCurve
- * THREE.ArcCurve
- * THREE.EllipseCurve
- *
- * -- 3d classes --
- * THREE.LineCurve3
- * THREE.QuadraticBezierCurve3
- * THREE.CubicBezierCurve3
- * THREE.SplineCurve3
- *
- * A series of curves can be represented as a THREE.CurvePath
- *
- **/
-
-/**************************************************************
- *	Abstract Curve base class
- **************************************************************/
 
 function Curve() {}
 
@@ -27635,10 +25104,6 @@ Curve.create = function (constructor, getPointFunc) {
 	return constructor;
 };
 
-/**************************************************************
- *	Line
- **************************************************************/
-
 function LineCurve(v1, v2) {
 
 	this.v1 = v1;
@@ -27676,16 +25141,6 @@ LineCurve.prototype.getTangent = function (t) {
 
 	return tangent.normalize();
 };
-
-/**
- * @author zz85 / http://www.lab4games.net/zz85/blog
- *
- **/
-
-/**************************************************************
- *	Curved Path - a curve path is simply a array of connected
- *  curves, but retains the api of a curve
- **************************************************************/
 
 function CurvePath() {
 
@@ -27887,10 +25342,6 @@ CurvePath.prototype = Object.assign(Object.create(Curve.prototype), {
 
 });
 
-/**************************************************************
- *	Ellipse curve
- **************************************************************/
-
 function EllipseCurve(aX, aY, xRadius, yRadius, aStartAngle, aEndAngle, aClockwise, aRotation) {
 
 	this.aX = aX;
@@ -28008,10 +25459,6 @@ var CurveUtils = {
 
 };
 
-/**************************************************************
- *	Spline curve
- **************************************************************/
-
 function SplineCurve(points /* array of Vector2 */) {
 
 	this.points = points === undefined ? [] : points;
@@ -28040,10 +25487,6 @@ SplineCurve.prototype.getPoint = function (t) {
 	return new Vector2(interpolate(point0.x, point1.x, point2.x, point3.x, weight), interpolate(point0.y, point1.y, point2.y, point3.y, weight));
 };
 
-/**************************************************************
- *	Cubic Bezier curve
- **************************************************************/
-
 function CubicBezierCurve(v0, v1, v2, v3) {
 
 	this.v0 = v0;
@@ -28068,10 +25511,6 @@ CubicBezierCurve.prototype.getTangent = function (t) {
 
 	return new Vector2(tangentCubicBezier(t, this.v0.x, this.v1.x, this.v2.x, this.v3.x), tangentCubicBezier(t, this.v0.y, this.v1.y, this.v2.y, this.v3.y)).normalize();
 };
-
-/**************************************************************
- *	Quadratic Bezier curve
- **************************************************************/
 
 function QuadraticBezierCurve(v0, v1, v2) {
 
@@ -28194,17 +25633,6 @@ var PathPrototype = Object.assign(Object.create(CurvePath.prototype), {
 
 });
 
-/**
- * @author zz85 / http://www.lab4games.net/zz85/blog
- * Defines a 2d shape plane using paths.
- **/
-
-// STEP 1 Create a path.
-// STEP 2 Turn path into shape.
-// STEP 3 ExtrudeGeometry takes in Shape/Shapes
-// STEP 3a - Extract points from each shape, turn to vertices
-// STEP 3b - Triangulate each shape, add faces.
-
 function Shape() {
 
 	Path.apply(this, arguments);
@@ -28246,12 +25674,6 @@ Shape.prototype = Object.assign(Object.create(PathPrototype), {
 	}
 
 });
-
-/**
- * @author zz85 / http://www.lab4games.net/zz85/blog
- * Creates free form 2d path using series of points, lines or curves.
- *
- **/
 
 function Path(points) {
 
@@ -28494,11 +25916,6 @@ ShapePath.prototype = {
 	}
 };
 
-/**
- * @author zz85 / http://www.lab4games.net/zz85/blog
- * @author mrdoob / http://mrdoob.com/
- */
-
 function Font(data) {
 
 	this.data = data;
@@ -28654,10 +26071,6 @@ Object.assign(Font.prototype, {
 	}
 
 });
-
-/**
- * @author mrdoob / http://mrdoob.com/
- */
 
 function FontLoader(manager) {
 
@@ -29656,7 +27069,7 @@ var OBJLoader = function () {
 												material = this.materials.create(sourceMaterial.name);
 
 												// mtl etc. loaders probably can't create line materials correctly, copy properties to a line material.
-												if (isLine && material && !(material instanceof LineBasicMaterial)) {
+												if (isLine && material && !material.isLineBasicMaterial) {
 
 														var materialLine = new LineBasicMaterial();
 														materialLine.copy(material);
@@ -30087,8 +27500,6 @@ Euler.prototype.debug = Quaternion.prototype.debug = Vector2.prototype.debug = V
   return this;
 };
 
-// The JSON format object loader is not always included in the Three.js distribution,
-// so we have to first check for it.
 var loaders = null;
 var PATH_PATTERN = /((?:https?:\/\/)?(?:[^/]+\/)+)(\w+)(\.(?:\w+))$/;
 var EXTENSION_PATTERN = /(\.(?:\w+))+$/;
@@ -30119,7 +27530,7 @@ var propertyTests = {
 
 function setProperties(object) {
   object.traverse(function (obj) {
-    if (obj instanceof Mesh) {
+    if (obj.isMesh) {
       for (var prop in propertyTests) {
         obj[prop] = obj[prop] || propertyTests[prop](obj);
       }
@@ -30237,7 +27648,7 @@ var ModelLoader = function () {
       var obj = this.template.clone();
 
       obj.traverse(function (child) {
-        if (child instanceof SkinnedMesh) {
+        if (child.isSkinnedMesh) {
           obj.animation = new AnimationClip(child, child.geometry.animation);
           if (!_this.template.originalAnimationClipData && obj.animation.data) {
             _this.template.originalAnimationClipData = obj.animation.data;
@@ -33529,11 +30940,176 @@ var rand = Object.freeze({
 	default: Random
 });
 
-////
-// For all of these commands, the "current" cursor is:
-// If SHIFT is not held, then "front".
-// If SHIFT is held, then "back"
-//
+var CommandPack = function CommandPack(name, commands) {
+  classCallCheck(this, CommandPack);
+
+  this.name = name;
+  Object.assign(this, commands);
+};
+
+var BasicTextInput = function (_CommandPack) {
+  inherits(BasicTextInput, _CommandPack);
+
+  function BasicTextInput(additionalName, additionalCommands) {
+    classCallCheck(this, BasicTextInput);
+
+    var commands = {
+      NORMAL_LEFTARROW: function NORMAL_LEFTARROW(prim, tokenRows) {
+        prim.cursorLeft(tokenRows, prim.frontCursor);
+      },
+      NORMAL_SKIPLEFT: function NORMAL_SKIPLEFT(prim, tokenRows) {
+        prim.cursorSkipLeft(tokenRows, prim.frontCursor);
+      },
+      NORMAL_RIGHTARROW: function NORMAL_RIGHTARROW(prim, tokenRows) {
+        prim.cursorRight(tokenRows, prim.frontCursor);
+      },
+      NORMAL_SKIPRIGHT: function NORMAL_SKIPRIGHT(prim, tokenRows) {
+        prim.cursorSkipRight(tokenRows, prim.frontCursor);
+      },
+      NORMAL_HOME: function NORMAL_HOME(prim, tokenRows) {
+        prim.cursorHome(tokenRows, prim.frontCursor);
+      },
+      NORMAL_END: function NORMAL_END(prim, tokenRows) {
+        prim.cursorEnd(tokenRows, prim.frontCursor);
+      },
+      NORMAL_BACKSPACE: function NORMAL_BACKSPACE(prim, tokenRows) {
+        if (prim.frontCursor.i === prim.backCursor.i) {
+          prim.frontCursor.left(tokenRows);
+        }
+        prim.selectedText = "";
+        prim.scrollIntoView(prim.frontCursor);
+      },
+      NORMAL_ENTER: function NORMAL_ENTER(prim, tokenRows, currentToken) {
+        prim.emit("change", {
+          target: prim
+        });
+      },
+      NORMAL_DELETE: function NORMAL_DELETE(prim, tokenRows) {
+        if (prim.frontCursor.i === prim.backCursor.i) {
+          prim.backCursor.right(tokenRows);
+        }
+        prim.selectedText = "";
+        prim.scrollIntoView(prim.frontCursor);
+      },
+      NORMAL_TAB: function NORMAL_TAB(prim, tokenRows) {
+        prim.selectedText = prim.tabString;
+      },
+
+      SHIFT_LEFTARROW: function SHIFT_LEFTARROW(prim, tokenRows) {
+        prim.cursorLeft(tokenRows, prim.backCursor);
+      },
+      SHIFT_SKIPLEFT: function SHIFT_SKIPLEFT(prim, tokenRows) {
+        prim.cursorSkipLeft(tokenRows, prim.backCursor);
+      },
+      SHIFT_RIGHTARROW: function SHIFT_RIGHTARROW(prim, tokenRows) {
+        prim.cursorRight(tokenRows, prim.backCursor);
+      },
+      SHIFT_SKIPRIGHT: function SHIFT_SKIPRIGHT(prim, tokenRows) {
+        prim.cursorSkipRight(tokenRows, prim.backCursor);
+      },
+      SHIFT_HOME: function SHIFT_HOME(prim, tokenRows) {
+        prim.cursorHome(tokenRows, prim.backCursor);
+      },
+      SHIFT_END: function SHIFT_END(prim, tokenRows) {
+        prim.cursorEnd(tokenRows, prim.backCursor);
+      },
+      SHIFT_DELETE: function SHIFT_DELETE(prim, tokenRows) {
+        if (prim.frontCursor.i === prim.backCursor.i) {
+          prim.frontCursor.home(tokenRows);
+          prim.backCursor.end(tokenRows);
+        }
+        prim.selectedText = "";
+        prim.scrollIntoView(prim.frontCursor);
+      },
+      CTRL_HOME: function CTRL_HOME(prim, tokenRows) {
+        prim.cursorFullHome(tokenRows, prim.frontCursor);
+      },
+      CTRL_END: function CTRL_END(prim, tokenRows) {
+        prim.cursorFullEnd(tokenRows, prim.frontCursor);
+      },
+
+      CTRLSHIFT_HOME: function CTRLSHIFT_HOME(prim, tokenRows) {
+        prim.cursorFullHome(tokenRows, prim.backCursor);
+      },
+      CTRLSHIFT_END: function CTRLSHIFT_END(prim, tokenRows) {
+        prim.cursorFullEnd(tokenRows, prim.backCursor);
+      },
+
+      SELECT_ALL: function SELECT_ALL(prim, tokenRows) {
+        prim.frontCursor.fullhome(tokenRows);
+        prim.backCursor.fullend(tokenRows);
+      },
+
+      REDO: function REDO(prim, tokenRows) {
+        prim.redo();
+        prim.scrollIntoView(prim.frontCursor);
+      },
+      UNDO: function UNDO(prim, tokenRows) {
+        prim.undo();
+        prim.scrollIntoView(prim.frontCursor);
+      }
+    };
+
+    if (additionalCommands) {
+      for (var key in additionalCommands) {
+        commands[key] = additionalCommands[key];
+      }
+    }
+
+    return possibleConstructorReturn(this, (BasicTextInput.__proto__ || Object.getPrototypeOf(BasicTextInput)).call(this, additionalName || "Text editor commands", commands));
+  }
+
+  return BasicTextInput;
+}(CommandPack);
+
+var TextEditor = new BasicTextInput("Text Area input commands", {
+  NORMAL_UPARROW: function NORMAL_UPARROW(prim, tokenRows) {
+    prim.cursorUp(tokenRows, prim.frontCursor);
+  },
+  NORMAL_DOWNARROW: function NORMAL_DOWNARROW(prim, tokenRows) {
+    prim.cursorDown(tokenRows, prim.frontCursor);
+  },
+  NORMAL_PAGEUP: function NORMAL_PAGEUP(prim, tokenRows) {
+    prim.cursorPageUp(tokenRows, prim.frontCursor);
+  },
+  NORMAL_PAGEDOWN: function NORMAL_PAGEDOWN(prim, tokenRows) {
+    prim.cursorPageDown(tokenRows, prim.frontCursor);
+  },
+  NORMAL_ENTER: function NORMAL_ENTER(prim, tokenRows, currentToken) {
+    var indent = "";
+    var tokenRow = tokenRows[prim.frontCursor.y];
+    if (tokenRow.length > 0 && tokenRow[0].type === "whitespace") {
+      indent = tokenRow[0].value;
+    }
+    prim.selectedText = "\n" + indent;
+    prim.scrollIntoView(prim.frontCursor);
+  },
+
+  SHIFT_UPARROW: function SHIFT_UPARROW(prim, tokenRows) {
+    prim.cursorUp(tokenRows, prim.backCursor);
+  },
+  SHIFT_DOWNARROW: function SHIFT_DOWNARROW(prim, tokenRows) {
+    prim.cursorDown(tokenRows, prim.backCursor);
+  },
+  SHIFT_PAGEUP: function SHIFT_PAGEUP(prim, tokenRows) {
+    prim.cursorPageUp(tokenRows, prim.backCursor);
+  },
+  SHIFT_PAGEDOWN: function SHIFT_PAGEDOWN(prim, tokenRows) {
+    prim.cursorPageDown(tokenRows, prim.backCursor);
+  },
+
+  WINDOW_SCROLL_DOWN: function WINDOW_SCROLL_DOWN(prim, tokenRows) {
+    if (prim.scroll.y < tokenRows.length) {
+      ++prim.scroll.y;
+    }
+  },
+  WINDOW_SCROLL_UP: function WINDOW_SCROLL_UP(prim, tokenRows) {
+    if (prim.scroll.y > 0) {
+      --prim.scroll.y;
+    }
+  }
+});
+
 var TextInputCommands = new BasicTextInput("Text Line input commands");
 
 var CommandPacks = {
@@ -33570,7 +31146,7 @@ var PlainText = function PlainText(text, size, fgcolor, bgcolor, x, y, z) {
     textContext.fillText(lines[i], 0, i * lineHeight);
   }
 
-  var texture = new Texture(textCanvas);
+  var texture = new Texture$1(textCanvas);
   texture.needsUpdate = true;
 
   var material = new MeshBasicMaterial({
@@ -33594,6 +31170,1390 @@ var PlainText = function PlainText(text, size, fgcolor, bgcolor, x, y, z) {
   textMesh.position.set(x, y, z);
   return textMesh;
 };
+
+// unicode-aware string reverse
+var reverse = function () {
+  var combiningMarks = /(<%= allExceptCombiningMarks %>)(<%= combiningMarks %>+)/g,
+      surrogatePair = /(<%= highSurrogates %>)(<%= lowSurrogates %>)/g;
+
+  function reverse(str) {
+    str = str.replace(combiningMarks, function (match, capture1, capture2) {
+      return reverse(capture2) + capture1;
+    }).replace(surrogatePair, "$2$1");
+    var res = "";
+    for (var i = str.length - 1; i >= 0; --i) {
+      res += str[i];
+    }
+    return res;
+  }
+  return reverse;
+}();
+
+var Cursor = function () {
+  createClass(Cursor, null, [{
+    key: "min",
+    value: function min(a, b) {
+      if (a.i <= b.i) {
+        return a;
+      }
+      return b;
+    }
+  }, {
+    key: "max",
+    value: function max(a, b) {
+      if (a.i > b.i) {
+        return a;
+      }
+      return b;
+    }
+  }]);
+
+  function Cursor(i, x, y) {
+    classCallCheck(this, Cursor);
+
+    this.i = i || 0;
+    this.x = x || 0;
+    this.y = y || 0;
+    this.moved = true;
+  }
+
+  createClass(Cursor, [{
+    key: "clone",
+    value: function clone() {
+      return new Cursor(this.i, this.x, this.y);
+    }
+  }, {
+    key: "toString",
+    value: function toString() {
+      return "[i:" + this.i + " x:" + this.x + " y:" + this.y + "]";
+    }
+  }, {
+    key: "copy",
+    value: function copy(cursor) {
+      this.i = cursor.i;
+      this.x = cursor.x;
+      this.y = cursor.y;
+      this.moved = false;
+    }
+  }, {
+    key: "fullhome",
+    value: function fullhome() {
+      this.i = 0;
+      this.x = 0;
+      this.y = 0;
+      this.moved = true;
+    }
+  }, {
+    key: "fullend",
+    value: function fullend(lines) {
+      this.i = 0;
+      var lastLength = 0;
+      for (var y = 0; y < lines.length; ++y) {
+        var line = lines[y];
+        lastLength = line.length;
+        this.i += lastLength;
+      }
+      this.y = lines.length - 1;
+      this.x = lastLength;
+      this.moved = true;
+    }
+  }, {
+    key: "skipleft",
+    value: function skipleft(lines) {
+      if (this.x === 0) {
+        this.left(lines);
+      } else {
+        var x = this.x - 1;
+        var line = lines[this.y];
+        var word = reverse(line.substring(0, x));
+        var m = word.match(/(\s|\W)+/);
+        var dx = m ? m.index + m[0].length + 1 : word.length;
+        this.i -= dx;
+        this.x -= dx;
+      }
+      this.moved = true;
+    }
+  }, {
+    key: "left",
+    value: function left(lines) {
+      if (this.i > 0) {
+        --this.i;
+        --this.x;
+        if (this.x < 0) {
+          --this.y;
+          var line = lines[this.y];
+          this.x = line.length;
+        }
+        if (this.reverseFromNewline(lines)) {
+          ++this.i;
+        }
+      }
+      this.moved = true;
+    }
+  }, {
+    key: "skipright",
+    value: function skipright(lines) {
+      var line = lines[this.y];
+      if (this.x === line.length || line[this.x] === '\n') {
+        this.right(lines);
+      } else {
+        var x = this.x + 1;
+        line = line.substring(x);
+        var m = line.match(/(\s|\W)+/);
+        var dx = m ? m.index + m[0].length + 1 : line.length - this.x;
+        this.i += dx;
+        this.x += dx;
+        this.reverseFromNewline(lines);
+      }
+      this.moved = true;
+    }
+  }, {
+    key: "fixCursor",
+    value: function fixCursor(lines) {
+      this.x = this.i;
+      this.y = 0;
+      var total = 0;
+      var line = lines[this.y];
+      while (this.x > line.length) {
+        this.x -= line.length;
+        total += line.length;
+        if (this.y >= lines.length - 1) {
+          this.i = total;
+          this.x = line.length;
+          this.moved = true;
+          break;
+        }
+        ++this.y;
+        line = lines[this.y];
+      }
+      return this.moved;
+    }
+  }, {
+    key: "right",
+    value: function right(lines) {
+      this.advanceN(lines, 1);
+    }
+  }, {
+    key: "advanceN",
+    value: function advanceN(lines, n) {
+      var line = lines[this.y];
+      if (this.y < lines.length - 1 || this.x < line.length) {
+        this.i += n;
+        this.fixCursor(lines);
+        line = lines[this.y];
+        if (this.x > 0 && line[this.x - 1] === '\n') {
+          ++this.y;
+          this.x = 0;
+        }
+      }
+      this.moved = true;
+    }
+  }, {
+    key: "home",
+    value: function home() {
+      this.i -= this.x;
+      this.x = 0;
+      this.moved = true;
+    }
+  }, {
+    key: "end",
+    value: function end(lines) {
+      var line = lines[this.y];
+      var dx = line.length - this.x;
+      this.i += dx;
+      this.x += dx;
+      this.reverseFromNewline(lines);
+      this.moved = true;
+    }
+  }, {
+    key: "up",
+    value: function up(lines) {
+      if (this.y > 0) {
+        --this.y;
+        var line = lines[this.y];
+        var dx = Math.min(0, line.length - this.x);
+        this.x += dx;
+        this.i -= line.length - dx;
+        this.reverseFromNewline(lines);
+      }
+      this.moved = true;
+    }
+  }, {
+    key: "down",
+    value: function down(lines) {
+      if (this.y < lines.length - 1) {
+        ++this.y;
+        var line = lines[this.y];
+        var pLine = lines[this.y - 1];
+        var dx = Math.min(0, line.length - this.x);
+        this.x += dx;
+        this.i += pLine.length + dx;
+        this.reverseFromNewline(lines);
+      }
+      this.moved = true;
+    }
+  }, {
+    key: "incY",
+    value: function incY(dy, lines) {
+      this.y = Math.max(0, Math.min(lines.length - 1, this.y + dy));
+      var line = lines[this.y];
+      this.x = Math.max(0, Math.min(line.length, this.x));
+      this.i = this.x;
+      for (var i = 0; i < this.y; ++i) {
+        this.i += lines[i].length;
+      }
+      this.reverseFromNewline(lines);
+      this.moved = true;
+    }
+  }, {
+    key: "setXY",
+    value: function setXY(x, y, lines) {
+      this.y = Math.max(0, Math.min(lines.length - 1, y));
+      var line = lines[this.y];
+      this.x = Math.max(0, Math.min(line.length, x));
+      this.i = this.x;
+      for (var i = 0; i < this.y; ++i) {
+        this.i += lines[i].length;
+      }
+      this.reverseFromNewline(lines);
+      this.moved = true;
+    }
+  }, {
+    key: "setI",
+    value: function setI(i, lines) {
+      this.i = i;
+      this.fixCursor(lines);
+      this.moved = true;
+    }
+  }, {
+    key: "reverseFromNewline",
+    value: function reverseFromNewline(lines) {
+      var line = lines[this.y];
+      if (this.x > 0 && line[this.x - 1] === '\n') {
+        --this.x;
+        --this.i;
+        return true;
+      }
+      return false;
+    }
+  }]);
+  return Cursor;
+}();
+
+var Rule = function () {
+  function Rule(name, test) {
+    classCallCheck(this, Rule);
+
+    this.name = name;
+    this.test = test;
+  }
+
+  createClass(Rule, [{
+    key: "carveOutMatchedToken",
+    value: function carveOutMatchedToken(tokens, j) {
+      var token = tokens[j];
+      if (token.type === "regular") {
+        var res = this.test.exec(token.value);
+        if (res) {
+          // Only use the last group that matches the regex, to allow for more
+          // complex regexes that can match in special contexts, but not make
+          // the context part of the token.
+          var midx = res[res.length - 1],
+              start = res.input.indexOf(midx),
+              end = start + midx.length;
+          if (start === 0) {
+            // the rule matches the start of the token
+            token.type = this.name;
+            if (end < token.value.length) {
+              // but not the end
+              var next = token.splitAt(end);
+              next.type = "regular";
+              tokens.splice(j + 1, 0, next);
+            }
+          } else {
+            // the rule matches from the middle of the token
+            var mid = token.splitAt(start);
+            if (midx.length < mid.value.length) {
+              // but not the end
+              var right = mid.splitAt(midx.length);
+              tokens.splice(j + 1, 0, right);
+            }
+            mid.type = this.name;
+            tokens.splice(j + 1, 0, mid);
+          }
+        }
+      }
+    }
+  }]);
+  return Rule;
+}();
+
+var Token = function () {
+  function Token(value, type, index, line) {
+    classCallCheck(this, Token);
+
+    this.value = value;
+    this.type = type;
+    this.index = index;
+    this.line = line;
+  }
+
+  createClass(Token, [{
+    key: "clone",
+    value: function clone() {
+      return new Token(this.value, this.type, this.index, this.line);
+    }
+  }, {
+    key: "splitAt",
+    value: function splitAt(i) {
+      var next = this.value.substring(i);
+      this.value = this.value.substring(0, i);
+      return new Token(next, this.type, this.index + i, this.line);
+    }
+  }, {
+    key: "toString",
+    value: function toString() {
+      return "[" + this.type + ": " + this.value + "]";
+    }
+  }]);
+  return Token;
+}();
+
+var Grammar = function () {
+  function Grammar(name, rules) {
+    classCallCheck(this, Grammar);
+
+    this.name = name;
+
+    // clone the preprocessing grammar to start a new grammar
+    this.grammar = rules.map(function (rule) {
+      return new Rule(rule[0], rule[1]);
+    });
+
+    function crudeParsing(tokens) {
+      var commentDelim = null,
+          stringDelim = null,
+          line = 0,
+          i,
+          t;
+      for (i = 0; i < tokens.length; ++i) {
+        t = tokens[i];
+        t.line = line;
+        if (t.type === "newlines") {
+          ++line;
+        }
+
+        if (stringDelim) {
+          if (t.type === "stringDelim" && t.value === stringDelim && (i === 0 || tokens[i - 1].value[tokens[i - 1].value.length - 1] !== "\\")) {
+            stringDelim = null;
+          }
+          if (t.type !== "newlines") {
+            t.type = "strings";
+          }
+        } else if (commentDelim) {
+          if (commentDelim === "startBlockComments" && t.type === "endBlockComments" || commentDelim === "startLineComments" && t.type === "newlines") {
+            commentDelim = null;
+          }
+          if (t.type !== "newlines") {
+            t.type = "comments";
+          }
+        } else if (t.type === "stringDelim") {
+          stringDelim = t.value;
+          t.type = "strings";
+        } else if (t.type === "startBlockComments" || t.type === "startLineComments") {
+          commentDelim = t.type;
+          t.type = "comments";
+        }
+      }
+
+      // recombine like-tokens
+      for (i = tokens.length - 1; i > 0; --i) {
+        var p = tokens[i - 1];
+        t = tokens[i];
+        if (p.type === t.type && p.type !== "newlines") {
+          p.value += t.value;
+          tokens.splice(i, 1);
+        }
+      }
+    }
+
+    this.tokenize = function (text) {
+      // all text starts off as regular text, then gets cut up into tokens of
+      // more specific type
+      var tokens = [new Token(text, "regular", 0)];
+      for (var i = 0; i < this.grammar.length; ++i) {
+        var rule = this.grammar[i];
+        for (var j = 0; j < tokens.length; ++j) {
+          rule.carveOutMatchedToken(tokens, j);
+        }
+      }
+
+      crudeParsing(tokens);
+      return tokens;
+    };
+  }
+
+  createClass(Grammar, [{
+    key: "toHTML",
+    value: function toHTML(txt) {
+      var theme = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : Default;
+
+      var tokenRows = this.tokenize(txt),
+          temp = document.createElement("div");
+      for (var y = 0; y < tokenRows.length; ++y) {
+        // draw the tokens on this row
+        var t = tokenRows[y];
+        if (t.type === "newlines") {
+          temp.appendChild(document.createElement("br"));
+        } else {
+          var style = theme[t.type] || {},
+              elem = document.createElement("span");
+          elem.style.fontWeight = style.fontWeight || theme.regular.fontWeight;
+          elem.style.fontStyle = style.fontStyle || theme.regular.fontStyle || "";
+          elem.style.color = style.foreColor || theme.regular.foreColor;
+          elem.style.backgroundColor = style.backColor || theme.regular.backColor;
+          elem.style.fontFamily = style.fontFamily || theme.fontFamily;
+          elem.appendChild(document.createTextNode(t.value));
+          temp.appendChild(elem);
+        }
+      }
+      return temp.innerHTML;
+    }
+  }]);
+  return Grammar;
+}();
+
+var JavaScript = new Grammar("JavaScript", [["newlines", /(?:\r\n|\r|\n)/], ["startBlockComments", /\/\*/], ["endBlockComments", /\*\//], ["regexes", /(?:^|,|;|\(|\[|\{)(?:\s*)(\/(?:\\\/|[^\n\/])+\/)/], ["stringDelim", /("|')/], ["startLineComments", /\/\/.*$/m], ["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/], ["keywords", /\b(?:break|case|catch|class|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/], ["functions", /(\w+)(?:\s*\()/], ["members", /(\w+)\./], ["members", /((\w+\.)+)(\w+)/]]);
+
+function clone$1(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+
+var SCROLL_SCALE = isFirefox ? 3 : 100;
+var COUNTER$5 = 0;
+var OFFSET = 0;
+
+var TextBox = function (_Surface) {
+  inherits(TextBox, _Surface);
+  createClass(TextBox, null, [{
+    key: "create",
+    value: function create() {
+      return new TextBox();
+    }
+  }]);
+
+  function TextBox(options) {
+    classCallCheck(this, TextBox);
+
+    var _this = possibleConstructorReturn(this, (TextBox.__proto__ || Object.getPrototypeOf(TextBox)).call(this, Object.assign({}, {
+      id: "Primrose.Text.Controls.TextBox[" + COUNTER$5++ + "]"
+    }, options)));
+
+    _this.isTextBox = true;
+    ////////////////////////////////////////////////////////////////////////
+    // normalize input parameters
+    ////////////////////////////////////////////////////////////////////////
+
+    if (typeof options === "string") {
+      _this.options = {
+        value: _this.options
+      };
+    } else {
+      _this.options = options || {};
+    }
+
+    _this.useCaching = !isFirefox || !isMobile;
+
+    var makeCursorCommand = function makeCursorCommand(name) {
+      var method = name.toLowerCase();
+      this["cursor" + name] = function (lines, cursor) {
+        cursor[method](lines);
+        this.scrollIntoView(cursor);
+      };
+    };
+
+    ["Left", "Right", "SkipLeft", "SkipRight", "Up", "Down", "Home", "End", "FullHome", "FullEnd"].map(makeCursorCommand.bind(_this));
+
+    ////////////////////////////////////////////////////////////////////////
+    // initialization
+    ///////////////////////////////////////////////////////////////////////
+    _this.tokens = null;
+    _this.lines = null;
+    _this._commandPack = null;
+    _this._tokenRows = null;
+    _this._tokenHashes = null;
+    _this._tabString = null;
+    _this._currentTouchID = null;
+    _this._lineCountWidth = null;
+
+    _this._lastFont = null;
+    _this._lastText = null;
+    _this._lastCharacterWidth = null;
+    _this._lastCharacterHeight = null;
+    _this._lastGridBounds = null;
+    _this._lastPadding = null;
+    _this._lastFrontCursor = null;
+    _this._lastBackCursor = null;
+    _this._lastWidth = -1;
+    _this._lastHeight = -1;
+    _this._lastScrollX = -1;
+    _this._lastScrollY = -1;
+    _this._lastFocused = false;
+    _this._lastThemeName = null;
+    _this._lastPointer = new Point();
+
+    // different browsers have different sets of keycodes for less-frequently
+    // used keys like curly brackets.
+    _this._browser = isChrome ? "CHROMIUM" : isFirefox ? "FIREFOX" : isIE ? "IE" : isOpera ? "OPERA" : isSafari ? "SAFARI" : "UNKNOWN";
+    _this._pointer = new Point();
+    _this._deadKeyState = "";
+    _this._history = [];
+    _this._historyFrame = -1;
+    _this._topLeftGutter = new Size();
+    _this._bottomRightGutter = new Size();
+    _this._dragging = false;
+    _this._scrolling = false;
+    _this._wheelScrollSpeed = 4;
+    var subBounds = new Rectangle(0, 0, _this.bounds.width, _this.bounds.height);
+    _this._fg = new Surface({
+      id: _this.id + "-fore",
+      bounds: subBounds
+    });
+    _this._fgCanvas = _this._fg.canvas;
+    _this._fgfx = _this._fg.context;
+    _this._bg = new Surface({
+      id: _this.id + "-back",
+      bounds: subBounds
+    });
+    _this._bgCanvas = _this._bg.canvas;
+    _this._bgfx = _this._bg.context;
+    _this._trim = new Surface({
+      id: _this.id + "-trim",
+      bounds: subBounds
+    });
+    _this._trimCanvas = _this._trim.canvas;
+    _this._tgfx = _this._trim.context;
+    _this._rowCache = {};
+    _this._VSCROLL_WIDTH = 2;
+
+    _this.tabWidth = _this.options.tabWidth;
+    _this.showLineNumbers = !_this.options.hideLineNumbers;
+    _this.showScrollBars = !_this.options.hideScrollBars;
+    _this.wordWrap = !_this.options.disableWordWrap;
+    _this.readOnly = !!_this.options.readOnly;
+    _this.multiline = !_this.options.singleLine;
+    _this.gridBounds = new Rectangle();
+    _this.frontCursor = new Cursor();
+    _this.backCursor = new Cursor();
+    _this.scroll = new Point();
+    _this.character = new Size();
+    _this.theme = _this.options.theme;
+    _this.fontSize = _this.options.fontSize;
+    _this.tokenizer = _this.options.tokenizer;
+    _this.commandPack = _this.options.commands || TextEditor;
+    _this.value = _this.options.value;
+    _this.padding = _this.options.padding || 1;
+
+    _this.addEventListener("focus", _this.render.bind(_this), false);
+    _this.addEventListener("blur", _this.render.bind(_this), false);
+    return _this;
+  }
+
+  createClass(TextBox, [{
+    key: "cursorPageUp",
+    value: function cursorPageUp(lines, cursor) {
+      cursor.incY(-this.gridBounds.height, lines);
+      this.scrollIntoView(cursor);
+    }
+  }, {
+    key: "cursorPageDown",
+    value: function cursorPageDown(lines, cursor) {
+      cursor.incY(this.gridBounds.height, lines);
+      this.scrollIntoView(cursor);
+    }
+  }, {
+    key: "setDeadKeyState",
+    value: function setDeadKeyState(st) {
+      this._deadKeyState = st || "";
+    }
+  }, {
+    key: "pushUndo",
+    value: function pushUndo(lines) {
+      if (this._historyFrame < this._history.length - 1) {
+        this._history.splice(this._historyFrame + 1);
+      }
+      this._history.push(lines);
+      this._historyFrame = this._history.length - 1;
+      this.refreshTokens();
+      this.render();
+    }
+  }, {
+    key: "redo",
+    value: function redo() {
+      if (this._historyFrame < this._history.length - 1) {
+        ++this._historyFrame;
+      }
+      this.refreshTokens();
+      this.fixCursor();
+      this.render();
+    }
+  }, {
+    key: "undo",
+    value: function undo() {
+      if (this._historyFrame > 0) {
+        --this._historyFrame;
+      }
+      this.refreshTokens();
+      this.fixCursor();
+      this.render();
+    }
+  }, {
+    key: "scrollIntoView",
+    value: function scrollIntoView(currentCursor) {
+      this.scroll.y += this.minDelta(currentCursor.y, this.scroll.y, this.scroll.y + this.gridBounds.height);
+      if (!this.wordWrap) {
+        this.scroll.x += this.minDelta(currentCursor.x, this.scroll.x, this.scroll.x + this.gridBounds.width);
+      }
+      this.clampScroll();
+    }
+  }, {
+    key: "readWheel",
+    value: function readWheel(evt) {
+      if (this.focused) {
+        if (evt.shiftKey || isChrome) {
+          this.fontSize += -evt.deltaX / SCROLL_SCALE;
+        }
+        if (!evt.shiftKey || isChrome) {
+          this.scroll.y += Math.floor(evt.deltaY * this._wheelScrollSpeed / SCROLL_SCALE);
+        }
+        this.clampScroll();
+        this.render();
+        evt.preventDefault();
+      }
+    }
+  }, {
+    key: "startPointer",
+    value: function startPointer(x, y) {
+      if (!get$1(TextBox.prototype.__proto__ || Object.getPrototypeOf(TextBox.prototype), "startPointer", this).call(this, x, y)) {
+        this._dragging = true;
+        this.setCursorXY(this.frontCursor, x, y);
+      }
+    }
+  }, {
+    key: "movePointer",
+    value: function movePointer(x, y) {
+      if (this._dragging) {
+        this.setCursorXY(this.backCursor, x, y);
+      }
+    }
+  }, {
+    key: "endPointer",
+    value: function endPointer() {
+      get$1(TextBox.prototype.__proto__ || Object.getPrototypeOf(TextBox.prototype), "endPointer", this).call(this);
+      this._dragging = false;
+      this._scrolling = false;
+    }
+  }, {
+    key: "copySelectedText",
+    value: function copySelectedText(evt) {
+      if (this.focused && this.frontCursor.i !== this.backCursor.i) {
+        var clipboard = evt.clipboardData || window.clipboardData;
+        clipboard.setData(window.clipboardData ? "Text" : "text/plain", this.selectedText);
+        evt.returnValue = false;
+      }
+    }
+  }, {
+    key: "cutSelectedText",
+    value: function cutSelectedText(evt) {
+      if (this.focused) {
+        this.copySelectedText(evt);
+        if (!this.readOnly) {
+          this.selectedText = "";
+        }
+      }
+    }
+  }, {
+    key: "keyDown",
+    value: function keyDown(evt) {
+      this.environment.input.Keyboard.doTyping(this, evt);
+    }
+  }, {
+    key: "execCommand",
+    value: function execCommand(browser, codePage, commandName) {
+      if (commandName && this.focused && !this.readOnly) {
+        var altCommandName = browser + "_" + commandName,
+            func = this.commandPack[altCommandName] || this.commandPack[commandName] || codePage[altCommandName] || codePage[commandName];
+
+        if (func instanceof String || typeof func === "string") {
+          console.log("okay");
+          func = this.commandPack[func] || this.commandPack[func] || func;
+        }
+
+        if (func === undefined) {
+          return false;
+        } else {
+          this.frontCursor.moved = false;
+          this.backCursor.moved = false;
+          if (func instanceof Function) {
+            func(this, this.lines);
+          } else if (func instanceof String || typeof func === "string") {
+            console.log(func);
+            this.selectedText = func;
+          }
+          if (this.frontCursor.moved && !this.backCursor.moved) {
+            this.backCursor.copy(this.frontCursor);
+          }
+          this.clampScroll();
+          this.render();
+          return true;
+        }
+      }
+    }
+  }, {
+    key: "readClipboard",
+    value: function readClipboard(evt) {
+      if (this.focused && !this.readOnly) {
+        evt.returnValue = false;
+        var clipboard = evt.clipboardData || window.clipboardData,
+            str = clipboard.getData(window.clipboardData ? "Text" : "text/plain");
+        if (str) {
+          this.selectedText = str;
+        }
+      }
+    }
+  }, {
+    key: "resize",
+    value: function resize() {
+      get$1(TextBox.prototype.__proto__ || Object.getPrototypeOf(TextBox.prototype), "resize", this).call(this);
+      this._bg.setSize(this.surfaceWidth, this.surfaceHeight);
+      this._fg.setSize(this.surfaceWidth, this.surfaceHeight);
+      this._trim.setSize(this.surfaceWidth, this.surfaceHeight);
+      if (this.theme) {
+        this.character.height = this.fontSize;
+        this.context.font = this.character.height + "px " + this.theme.fontFamily;
+        // measure 100 letter M's, then divide by 100, to get the width of an M
+        // to two decimal places on systems that return integer values from
+        // measureText.
+        this.character.width = this.context.measureText("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM").width / 100;
+      }
+      this.render();
+    }
+  }, {
+    key: "pixel2cell",
+    value: function pixel2cell(point) {
+      var x = point.x * this.imageWidth / this.surfaceWidth,
+          y = point.y * this.imageHeight / this.surfaceHeight;
+      point.set(Math.round(point.x / this.character.width) + this.scroll.x - this.gridBounds.x, Math.floor(point.y / this.character.height - 0.25) + this.scroll.y);
+    }
+  }, {
+    key: "clampScroll",
+    value: function clampScroll() {
+      if (this.scroll.y < 0) {
+        this.scroll.y = 0;
+      } else {
+        while (0 < this.scroll.y && this.scroll.y > this.lines.length - this.gridBounds.height) {
+          --this.scroll.y;
+        }
+      }
+    }
+  }, {
+    key: "refreshTokens",
+    value: function refreshTokens() {
+      this.tokens = this.tokenizer.tokenize(this.value);
+    }
+  }, {
+    key: "fixCursor",
+    value: function fixCursor() {
+      var moved = this.frontCursor.fixCursor(this.lines) || this.backCursor.fixCursor(this.lines);
+      if (moved) {
+        this.render();
+      }
+    }
+  }, {
+    key: "setCursorXY",
+    value: function setCursorXY(cursor, x, y) {
+      x = Math.round(x);
+      y = Math.round(y);
+      this._pointer.set(x, y);
+      this.pixel2cell(this._pointer, this.scroll, this.gridBounds);
+      var gx = this._pointer.x - this.scroll.x,
+          gy = this._pointer.y - this.scroll.y,
+          onBottom = gy >= this.gridBounds.height,
+          onLeft = gx < 0,
+          onRight = this._pointer.x >= this.gridBounds.width;
+      if (!this._scrolling && !onBottom && !onLeft && !onRight) {
+        cursor.setXY(this._pointer.x, this._pointer.y, this.lines);
+        this.backCursor.copy(cursor);
+      } else if (this._scrolling || onRight && !onBottom) {
+        this._scrolling = true;
+        var scrollHeight = this.lines.length - this.gridBounds.height;
+        if (gy >= 0 && scrollHeight >= 0) {
+          var sy = gy * scrollHeight / this.gridBounds.height;
+          this.scroll.y = Math.floor(sy);
+        }
+      } else if (onBottom && !onLeft) {
+        var maxWidth = 0;
+        for (var dy = 0; dy < this.lines.length; ++dy) {
+          maxWidth = Math.max(maxWidth, this.lines[dy].length);
+        }
+        var scrollWidth = maxWidth - this.gridBounds.width;
+        if (gx >= 0 && scrollWidth >= 0) {
+          var sx = gx * scrollWidth / this.gridBounds.width;
+          this.scroll.x = Math.floor(sx);
+        }
+      } else if (onLeft && !onBottom) {
+        // clicked in number-line gutter
+      } else {
+          // clicked in the lower-left corner
+        }
+      this._lastPointer.copy(this._pointer);
+      this.render();
+    }
+  }, {
+    key: "setGutter",
+    value: function setGutter() {
+      if (this.showLineNumbers) {
+        this._topLeftGutter.width = 1;
+      } else {
+        this._topLeftGutter.width = 0;
+      }
+
+      if (!this.showScrollBars) {
+        this._bottomRightGutter.set(0, 0);
+      } else if (this.wordWrap) {
+        this._bottomRightGutter.set(this._VSCROLL_WIDTH, 0);
+      } else {
+        this._bottomRightGutter.set(this._VSCROLL_WIDTH, 1);
+      }
+    }
+  }, {
+    key: "refreshGridBounds",
+    value: function refreshGridBounds() {
+      this._lineCountWidth = 0;
+      if (this.showLineNumbers) {
+        this._lineCountWidth = Math.max(1, Math.ceil(Math.log(this._history[this._historyFrame].length) / Math.LN10));
+      }
+
+      var x = Math.floor(this._topLeftGutter.width + this._lineCountWidth + this.padding / this.character.width),
+          y = Math.floor(this.padding / this.character.height),
+          w = Math.floor((this.imageWidth - 2 * this.padding) / this.character.width) - x - this._bottomRightGutter.width,
+          h = Math.floor((this.imageHeight - 2 * this.padding) / this.character.height) - y - this._bottomRightGutter.height;
+      this.gridBounds.set(x, y, w, h);
+    }
+  }, {
+    key: "performLayout",
+    value: function performLayout() {
+
+      // group the tokens into rows
+      this._tokenRows = [[]];
+      this._tokenHashes = [""];
+      this.lines = [""];
+      var currentRowWidth = 0;
+      var tokenQueue = this.tokens.slice();
+      for (var i = 0; i < tokenQueue.length; ++i) {
+        var t = tokenQueue[i].clone();
+        var widthLeft = this.gridBounds.width - currentRowWidth;
+        var wrap = this.wordWrap && t.type !== "newlines" && t.value.length > widthLeft;
+        var breakLine = t.type === "newlines" || wrap;
+        if (wrap) {
+          var split = t.value.length > this.gridBounds.width ? widthLeft : 0;
+          tokenQueue.splice(i + 1, 0, t.splitAt(split));
+        }
+
+        if (t.value.length > 0) {
+          this._tokenRows[this._tokenRows.length - 1].push(t);
+          this._tokenHashes[this._tokenHashes.length - 1] += JSON.stringify(t);
+          this.lines[this.lines.length - 1] += t.value;
+          currentRowWidth += t.value.length;
+        }
+
+        if (breakLine) {
+          this._tokenRows.push([]);
+          this._tokenHashes.push("");
+          this.lines.push("");
+          currentRowWidth = 0;
+        }
+      }
+    }
+  }, {
+    key: "minDelta",
+    value: function minDelta(v, minV, maxV) {
+      var dvMinV = v - minV,
+          dvMaxV = v - maxV + 5,
+          dv = 0;
+      if (dvMinV < 0 || dvMaxV >= 0) {
+        // compare the absolute values, so we get the smallest change
+        // regardless of direction.
+        dv = Math.abs(dvMinV) < Math.abs(dvMaxV) ? dvMinV : dvMaxV;
+      }
+
+      return dv;
+    }
+  }, {
+    key: "fillRect",
+    value: function fillRect(gfx, fill, x, y, w, h) {
+      gfx.fillStyle = fill;
+      gfx.fillRect(x * this.character.width, y * this.character.height, w * this.character.width + 1, h * this.character.height + 1);
+    }
+  }, {
+    key: "strokeRect",
+    value: function strokeRect(gfx, stroke, x, y, w, h) {
+      gfx.strokeStyle = stroke;
+      gfx.strokeRect(x * this.character.width, y * this.character.height, w * this.character.width + 1, h * this.character.height + 1);
+    }
+  }, {
+    key: "renderCanvasBackground",
+    value: function renderCanvasBackground() {
+      var minCursor = Cursor.min(this.frontCursor, this.backCursor),
+          maxCursor = Cursor.max(this.frontCursor, this.backCursor),
+          tokenFront = new Cursor(),
+          tokenBack = new Cursor(),
+          clearFunc = this.theme.regular.backColor ? "fillRect" : "clearRect",
+          OFFSETY = OFFSET / this.character.height;
+
+      if (this.theme.regular.backColor) {
+        this._bgfx.fillStyle = this.theme.regular.backColor;
+      }
+
+      this._bgfx[clearFunc](0, 0, this.imageWidth, this.imageHeight);
+      this._bgfx.save();
+      this._bgfx.translate((this.gridBounds.x - this.scroll.x) * this.character.width + this.padding, -this.scroll.y * this.character.height + this.padding);
+
+      // draw the current row highlighter
+      if (this.focused) {
+        this.fillRect(this._bgfx, this.theme.regular.currentRowBackColor || Default.regular.currentRowBackColor, 0, minCursor.y + OFFSETY, this.gridBounds.width, maxCursor.y - minCursor.y + 1);
+      }
+
+      for (var y = 0; y < this._tokenRows.length; ++y) {
+        // draw the tokens on this row
+        var row = this._tokenRows[y];
+
+        for (var i = 0; i < row.length; ++i) {
+          var t = row[i];
+          tokenBack.x += t.value.length;
+          tokenBack.i += t.value.length;
+
+          // skip drawing tokens that aren't in view
+          if (this.scroll.y <= y && y < this.scroll.y + this.gridBounds.height && this.scroll.x <= tokenBack.x && tokenFront.x < this.scroll.x + this.gridBounds.width) {
+            // draw the selection box
+            var inSelection = minCursor.i <= tokenBack.i && tokenFront.i < maxCursor.i;
+            if (inSelection) {
+              var selectionFront = Cursor.max(minCursor, tokenFront);
+              var selectionBack = Cursor.min(maxCursor, tokenBack);
+              var cw = selectionBack.i - selectionFront.i;
+              this.fillRect(this._bgfx, this.theme.regular.selectedBackColor || Default.regular.selectedBackColor, selectionFront.x, selectionFront.y + OFFSETY, cw, 1);
+            }
+          }
+
+          tokenFront.copy(tokenBack);
+        }
+
+        tokenFront.x = 0;
+        ++tokenFront.y;
+        tokenBack.copy(tokenFront);
+      }
+
+      // draw the cursor caret
+      if (this.focused) {
+        var cc = this.theme.cursorColor || "black";
+        var w = 1 / this.character.width;
+        this.fillRect(this._bgfx, cc, minCursor.x, minCursor.y + OFFSETY, w, 1);
+        this.fillRect(this._bgfx, cc, maxCursor.x, maxCursor.y + OFFSETY, w, 1);
+      }
+      this._bgfx.restore();
+    }
+  }, {
+    key: "renderCanvasForeground",
+    value: function renderCanvasForeground() {
+      var tokenFront = new Cursor(),
+          tokenBack = new Cursor();
+
+      this._fgfx.clearRect(0, 0, this.imageWidth, this.imageHeight);
+      this._fgfx.save();
+      this._fgfx.translate((this.gridBounds.x - this.scroll.x) * this.character.width + this.padding, this.padding);
+      for (var y = 0; y < this._tokenRows.length; ++y) {
+        // draw the tokens on this row
+        var line = this.lines[y] + this.padding,
+            row = this._tokenRows[y],
+            drawn = false,
+            textY = (y - this.scroll.y) * this.character.height;
+
+        for (var i = 0; i < row.length; ++i) {
+          var t = row[i];
+          tokenBack.x += t.value.length;
+          tokenBack.i += t.value.length;
+
+          // skip drawing tokens that aren't in view
+          if (this.scroll.y <= y && y < this.scroll.y + this.gridBounds.height && this.scroll.x <= tokenBack.x && tokenFront.x < this.scroll.x + this.gridBounds.width) {
+
+            // draw the text
+            if (this.useCaching && this._rowCache[line] !== undefined) {
+              if (i === 0) {
+                this._fgfx.putImageData(this._rowCache[line], this.padding, textY + this.padding + OFFSET);
+              }
+            } else {
+              var style = this.theme[t.type] || {};
+              var font = (style.fontWeight || this.theme.regular.fontWeight || "") + " " + (style.fontStyle || this.theme.regular.fontStyle || "") + " " + this.character.height + "px " + this.theme.fontFamily;
+              this._fgfx.font = font.trim();
+              this._fgfx.fillStyle = style.foreColor || this.theme.regular.foreColor;
+              this.drawText(this._fgfx, t.value, tokenFront.x * this.character.width, textY);
+              drawn = true;
+            }
+          }
+
+          tokenFront.copy(tokenBack);
+        }
+
+        tokenFront.x = 0;
+        ++tokenFront.y;
+        tokenBack.copy(tokenFront);
+        if (this.useCaching && drawn && this._rowCache[line] === undefined) {
+          this._rowCache[line] = this._fgfx.getImageData(this.padding, textY + this.padding + OFFSET, this.imageWidth - 2 * this.padding, this.character.height);
+        }
+      }
+
+      this._fgfx.restore();
+    }
+
+    // provides a hook for TextInput to be able to override text drawing and spit out password blanking characters
+
+  }, {
+    key: "drawText",
+    value: function drawText(ctx, txt, x, y) {
+      ctx.fillText(txt, x, y);
+    }
+  }, {
+    key: "renderCanvasTrim",
+    value: function renderCanvasTrim() {
+      var tokenFront = new Cursor(),
+          tokenBack = new Cursor(),
+          maxLineWidth = 0;
+
+      this._tgfx.clearRect(0, 0, this.imageWidth, this.imageHeight);
+      this._tgfx.save();
+      this._tgfx.translate(this.padding, this.padding);
+      this._tgfx.save();
+      this._tgfx.lineWidth = 2;
+      this._tgfx.translate(0, -this.scroll.y * this.character.height);
+      for (var y = 0, lastLine = -1; y < this._tokenRows.length; ++y) {
+        var row = this._tokenRows[y];
+
+        for (var i = 0; i < row.length; ++i) {
+          var t = row[i];
+          tokenBack.x += t.value.length;
+          tokenBack.i += t.value.length;
+          tokenFront.copy(tokenBack);
+        }
+
+        maxLineWidth = Math.max(maxLineWidth, tokenBack.x);
+        tokenFront.x = 0;
+        ++tokenFront.y;
+        tokenBack.copy(tokenFront);
+
+        if (this.showLineNumbers && this.scroll.y <= y && y < this.scroll.y + this.gridBounds.height) {
+          var currentLine = row.length > 0 ? row[0].line : lastLine + 1;
+          // draw the left gutter
+          var lineNumber = currentLine.toString();
+          while (lineNumber.length < this._lineCountWidth) {
+            lineNumber = " " + lineNumber;
+          }
+          this.fillRect(this._tgfx, this.theme.regular.selectedBackColor || Default.regular.selectedBackColor, 0, y, this.gridBounds.x, 1);
+          this._tgfx.font = "bold " + this.character.height + "px " + this.theme.fontFamily;
+
+          if (currentLine > lastLine) {
+            this._tgfx.fillStyle = this.theme.regular.foreColor;
+            this._tgfx.fillText(lineNumber, 0, y * this.character.height);
+          }
+          lastLine = currentLine;
+        }
+      }
+
+      this._tgfx.restore();
+
+      if (this.showLineNumbers) {
+        this.strokeRect(this._tgfx, this.theme.regular.foreColor || Default.regular.foreColor, 0, 0, this.gridBounds.x, this.gridBounds.height);
+      }
+
+      // draw the scrollbars
+      if (this.showScrollBars) {
+        var drawWidth = this.gridBounds.width * this.character.width - this.padding,
+            drawHeight = this.gridBounds.height * this.character.height,
+            scrollX = this.scroll.x * drawWidth / maxLineWidth + this.gridBounds.x * this.character.width,
+            scrollY = this.scroll.y * drawHeight / this._tokenRows.length;
+
+        this._tgfx.fillStyle = this.theme.regular.selectedBackColor || Default.regular.selectedBackColor;
+        // horizontal
+        var bw;
+        if (!this.wordWrap && maxLineWidth > this.gridBounds.width) {
+          var scrollBarWidth = drawWidth * (this.gridBounds.width / maxLineWidth),
+              by = this.gridBounds.height * this.character.height;
+          bw = Math.max(this.character.width, scrollBarWidth);
+          this._tgfx.fillRect(scrollX, by, bw, this.character.height);
+          this._tgfx.strokeRect(scrollX, by, bw, this.character.height);
+        }
+
+        //vertical
+        if (this._tokenRows.length > this.gridBounds.height) {
+          var scrollBarHeight = drawHeight * (this.gridBounds.height / this._tokenRows.length),
+              bx = this.image - this._VSCROLL_WIDTH * this.character.width - 2 * this.padding,
+              bh = Math.max(this.character.height, scrollBarHeight);
+          bw = this._VSCROLL_WIDTH * this.character.width;
+          this._tgfx.fillRect(bx, scrollY, bw, bh);
+          this._tgfx.strokeRect(bx, scrollY, bw, bh);
+        }
+      }
+
+      this._tgfx.lineWidth = 2;
+      this._tgfx.restore();
+      this._tgfx.strokeRect(1, 1, this.imageWidth - 2, this.imageHeight - 2);
+      if (!this.focused) {
+        this._tgfx.fillStyle = this.theme.regular.unfocused || Default.regular.unfocused;
+        this._tgfx.fillRect(0, 0, this.imageWidth, this.imageHeight);
+      }
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      if (this.tokens && this.theme) {
+        this.refreshGridBounds();
+        var boundsChanged = this.gridBounds.toString() !== this._lastGridBounds,
+            textChanged = this._lastText !== this.value,
+            characterWidthChanged = this.character.width !== this._lastCharacterWidth,
+            characterHeightChanged = this.character.height !== this._lastCharacterHeight,
+            paddingChanged = this.padding !== this._lastPadding,
+            cursorChanged = !this._lastFrontCursor || !this._lastBackCursor || this.frontCursor.i !== this._lastFrontCursor.i || this._lastBackCursor.i !== this.backCursor.i,
+            scrollChanged = this.scroll.x !== this._lastScrollX || this.scroll.y !== this._lastScrollY,
+            fontChanged = this.context.font !== this._lastFont,
+            themeChanged = this.theme.name !== this._lastThemeName,
+            focusChanged = this.focused !== this._lastFocused,
+            changeBounds = null,
+            layoutChanged = this.resized || boundsChanged || textChanged || characterWidthChanged || characterHeightChanged || paddingChanged,
+            backgroundChanged = layoutChanged || cursorChanged || scrollChanged || themeChanged,
+            foregroundChanged = backgroundChanged || textChanged,
+            trimChanged = backgroundChanged || focusChanged,
+            imageChanged = foregroundChanged || backgroundChanged || trimChanged;
+
+        if (layoutChanged) {
+          this.performLayout(this.gridBounds);
+          this._rowCache = {};
+        }
+
+        if (imageChanged) {
+          if (cursorChanged && !(layoutChanged || scrollChanged || themeChanged || focusChanged)) {
+            var top = Math.min(this.frontCursor.y, this._lastFrontCursor.y, this.backCursor.y, this._lastBackCursor.y) - this.scroll.y + this.gridBounds.y,
+                bottom = Math.max(this.frontCursor.y, this._lastFrontCursor.y, this.backCursor.y, this._lastBackCursor.y) - this.scroll.y + 1;
+            changeBounds = new Rectangle(0, top * this.character.height, this.bounds.width, (bottom - top) * this.character.height + 2);
+          }
+
+          if (backgroundChanged) {
+            this.renderCanvasBackground();
+          }
+          if (foregroundChanged) {
+            this.renderCanvasForeground();
+          }
+          if (trimChanged) {
+            this.renderCanvasTrim();
+          }
+
+          this.context.clearRect(0, 0, this.imageWidth, this.imageHeight);
+          this.context.drawImage(this._bgCanvas, 0, 0);
+          this.context.drawImage(this._fgCanvas, 0, 0);
+          this.context.drawImage(this._trimCanvas, 0, 0);
+          this.invalidate(changeBounds);
+        }
+
+        this._lastGridBounds = this.gridBounds.toString();
+        this._lastText = this.value;
+        this._lastCharacterWidth = this.character.width;
+        this._lastCharacterHeight = this.character.height;
+        this._lastWidth = this.imageWidth;
+        this._lastHeight = this.imageHeight;
+        this._lastPadding = this.padding;
+        this._lastFrontCursor = this.frontCursor.clone();
+        this._lastBackCursor = this.backCursor.clone();
+        this._lastFocused = this.focused;
+        this._lastFont = this.context.font;
+        this._lastThemeName = this.theme.name;
+        this._lastScrollX = this.scroll.x;
+        this._lastScrollY = this.scroll.y;
+      }
+    }
+  }, {
+    key: "value",
+    get: function get() {
+      return this._history[this._historyFrame].join("\n");
+    },
+    set: function set(txt) {
+      txt = txt || "";
+      txt = txt.replace(/\r\n/g, "\n");
+      if (!this.multiline) {
+        txt = txt.replace(/\n/g, "");
+      }
+      var lines = txt.split("\n");
+      this.pushUndo(lines);
+      this.render();
+      this.emit("change", {
+        target: this
+      });
+    }
+  }, {
+    key: "selectedText",
+    get: function get() {
+      var minCursor = Cursor.min(this.frontCursor, this.backCursor),
+          maxCursor = Cursor.max(this.frontCursor, this.backCursor);
+      return this.value.substring(minCursor.i, maxCursor.i);
+    },
+    set: function set(str) {
+      str = str || "";
+      str = str.replace(/\r\n/g, "\n");
+
+      if (this.frontCursor.i !== this.backCursor.i || str.length > 0) {
+        var minCursor = Cursor.min(this.frontCursor, this.backCursor),
+            maxCursor = Cursor.max(this.frontCursor, this.backCursor),
+
+        // TODO: don't recalc the string first.
+        text = this.value,
+            left = text.substring(0, minCursor.i),
+            right = text.substring(maxCursor.i);
+
+        var v = left + str + right;
+        this.value = v;
+        this.refreshGridBounds();
+        this.performLayout();
+        minCursor.advanceN(this.lines, Math.max(0, str.length));
+        this.scrollIntoView(maxCursor);
+        this.clampScroll();
+        maxCursor.copy(minCursor);
+        this.render();
+      }
+    }
+  }, {
+    key: "padding",
+    get: function get() {
+      return this._padding;
+    },
+    set: function set(v) {
+      this._padding = v;
+      this.render();
+    }
+  }, {
+    key: "wordWrap",
+    get: function get() {
+      return this._wordWrap;
+    },
+    set: function set(v) {
+      this._wordWrap = v || false;
+      this.setGutter();
+    }
+  }, {
+    key: "showLineNumbers",
+    get: function get() {
+      return this._showLineNumbers;
+    },
+    set: function set(v) {
+      this._showLineNumbers = v;
+      this.setGutter();
+    }
+  }, {
+    key: "showScrollBars",
+    get: function get() {
+      return this._showScrollBars;
+    },
+    set: function set(v) {
+      this._showScrollBars = v;
+      this.setGutter();
+    }
+  }, {
+    key: "theme",
+    get: function get() {
+      return this._theme;
+    },
+    set: function set(t) {
+      this._theme = clone$1(t || Default);
+      this._theme.fontSize = this.fontSize;
+      this._rowCache = {};
+      this.render();
+    }
+  }, {
+    key: "commandPack",
+    get: function get() {
+      return this._commandPack;
+    },
+    set: function set(v) {
+      this._commandPack = v;
+    }
+  }, {
+    key: "selectionStart",
+    get: function get() {
+      return this.frontCursor.i;
+    },
+    set: function set(i) {
+      this.frontCursor.setI(i, this.lines);
+    }
+  }, {
+    key: "selectionEnd",
+    get: function get() {
+      return this.backCursor.i;
+    },
+    set: function set(i) {
+      this.backCursor.setI(i, this.lines);
+    }
+  }, {
+    key: "selectionDirection",
+    get: function get() {
+      return this.frontCursor.i <= this.backCursor.i ? "forward" : "backward";
+    }
+  }, {
+    key: "tokenizer",
+    get: function get() {
+      return this._tokenizer;
+    },
+    set: function set(tk) {
+      this._tokenizer = tk || JavaScript;
+      if (this._history && this._history.length > 0) {
+        this.refreshTokens();
+        this.render();
+      }
+    }
+  }, {
+    key: "tabWidth",
+    get: function get() {
+      return this._tabWidth;
+    },
+    set: function set(tw) {
+      this._tabWidth = tw || 2;
+      this._tabString = "";
+      for (var i = 0; i < this._tabWidth; ++i) {
+        this._tabString += " ";
+      }
+    }
+  }, {
+    key: "tabString",
+    get: function get() {
+      return this._tabString;
+    }
+  }, {
+    key: "fontSize",
+    get: function get() {
+      return this._fontSize || 16;
+    },
+    set: function set(v) {
+      v = v || 16;
+      this._fontSize = v;
+      if (this.theme) {
+        this.theme.fontSize = this._fontSize;
+        this.resize();
+        this.render();
+      }
+    }
+  }, {
+    key: "lockMovement",
+    get: function get() {
+      return this.focused && !this.readOnly;
+    }
+  }]);
+  return TextBox;
+}(Surface);
 
 var PlainText$2 = new Grammar("PlainText", [["newlines", /(?:\r\n|\r|\n)/]]);
 
@@ -34573,7 +33533,6 @@ function getText(url, options) {
   return get$2("text", url, options);
 }
 
-// polyfill
 window.AudioContext = window.AudioContext || window.webkitAudioContext;
 
 var VECTOR = new Vector3();
@@ -34865,7 +33824,7 @@ Audio3D.isAvailable = !!window.AudioContext && !!AudioContext.prototype.createGa
  *
  */
 
-var emptyTexture = new Texture();
+var emptyTexture = new Texture$1();
 var emptyCubeTexture = new CubeTexture();
 
 // --- Base for inner nodes (including the root) ---
@@ -35333,12 +34292,6 @@ WebGLUniforms.seqWithValue = function (seq, values) {
 	return r;
 };
 
-/**
- * @author alteredq / http://alteredqualia.com/
- * @author mrdoob / http://mrdoob.com/
- * @author mikael emtinger / http://gomo.se/
- */
-
 var ShaderLib = {
 
 	basic: {
@@ -35490,10 +34443,6 @@ ShaderLib.physical = {
 	fragmentShader: ShaderChunk.meshphysical_frag
 
 };
-
-/**
- * @author bhouston / http://clara.io
- */
 
 function Box2(min, max) {
 
@@ -35692,11 +34641,6 @@ Box2.prototype = {
 	}
 
 };
-
-/**
- * @author mikael emtinger / http://gomo.se/
- * @author alteredq / http://alteredqualia.com/
- */
 
 function LensFlarePlugin(renderer, flares) {
 
@@ -35979,11 +34923,6 @@ function LensFlarePlugin(renderer, flares) {
 	}
 }
 
-/**
- * @author mikael emtinger / http://gomo.se/
- * @author alteredq / http://alteredqualia.com/
- */
-
 function SpritePlugin(renderer, sprites) {
 
 	var gl = renderer.context;
@@ -36053,7 +34992,7 @@ function SpritePlugin(renderer, sprites) {
 		context.fillStyle = 'white';
 		context.fillRect(0, 0, 8, 8);
 
-		texture = new Texture(canvas);
+		texture = new Texture$1(canvas);
 		texture.needsUpdate = true;
 	}
 
@@ -36239,17 +35178,6 @@ function SpritePlugin(renderer, sprites) {
 	}
 }
 
-/**
- * @author szimek / https://github.com/szimek/
- * @author alteredq / http://alteredqualia.com/
- * @author Marius Kintel / https://github.com/kintel
- */
-
-/*
- In options, we can specify:
- * Texture parameters for an auto-generated target texture
- * depthBuffer/stencilBuffer: Booleans to indicate if we should generate these buffers
-*/
 function WebGLRenderTarget(width, height, options) {
 
 	this.uuid = _Math.generateUUID();
@@ -36266,7 +35194,7 @@ function WebGLRenderTarget(width, height, options) {
 
 	if (options.minFilter === undefined) options.minFilter = LinearFilter;
 
-	this.texture = new Texture(undefined, undefined, options.wrapS, options.wrapT, options.magFilter, options.minFilter, options.format, options.type, options.anisotropy, options.encoding);
+	this.texture = new Texture$1(undefined, undefined, options.wrapS, options.wrapT, options.magFilter, options.minFilter, options.format, options.type, options.anisotropy, options.encoding);
 
 	this.depthBuffer = options.depthBuffer !== undefined ? options.depthBuffer : true;
 	this.stencilBuffer = options.stencilBuffer !== undefined ? options.stencilBuffer : true;
@@ -36318,12 +35246,6 @@ Object.assign(WebGLRenderTarget.prototype, EventDispatcher.prototype, {
 	}
 
 });
-
-/**
- * @author mrdoob / http://mrdoob.com/
- * @author alteredq / http://alteredqualia.com/
- * @author bhouston / http://clara.io
- */
 
 function Frustum(p0, p1, p2, p3, p4, p5) {
 
@@ -39953,14 +38875,6 @@ function WebGLClipping() {
 	}
 }
 
-/**
- * @author supereggbert / http://www.paulbrunt.co.uk/
- * @author mrdoob / http://mrdoob.com/
- * @author alteredq / http://alteredqualia.com/
- * @author szimek / https://github.com/szimek/
- * @author tschw
- */
-
 function WebGLRenderer(parameters) {
 
 	console.log('THREE.WebGLRenderer', REVISION);
@@ -42619,7 +41533,7 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
     };
 
     _this.appendChild = function (elem) {
-      if (elem instanceof Mesh) {
+      if (elem.isMesh) {
         _this.scene.add(elem);
       } else {
         return elem.addToBrowserEnvironment(_this, _this.scene);
@@ -43508,29 +42422,33 @@ function wipeScene() {
   }
 }
 
+var first = true;
 function updateScript() {
   var newScript = editor.value,
       exp;
   if (newScript !== lastScript) {
-    scriptUpdateTimeout = null;
-    lastScript = newScript;
-    if (newScript.indexOf("function update") >= 0 && newScript.indexOf("return update") < 0) {
-      newScript += "\nreturn update;";
-    }
-    console.log("----- loading new script -----");
-    scriptAnimate = null;
-    var scriptUpdate = new Function("scene", newScript);
-    wipeScene();
-    scriptAnimate = scriptUpdate.call(env, subScene);
-    if (scriptAnimate) {
-      scriptAnimate(0);
-    }
-    console.log("----- script loaded -----");
-    if (!scriptAnimate) {
-      console.log("----- No update script provided -----");
-    } else if (env.quality === Quality.NONE) {
-      env.quality = Quality.MEDIUM;
-    }
+    env.transition(function () {
+      scriptUpdateTimeout = null;
+      lastScript = newScript;
+      if (newScript.indexOf("function update") >= 0 && newScript.indexOf("return update") < 0) {
+        newScript += "\nreturn update;";
+      }
+      console.log("----- loading new script -----");
+      scriptAnimate = null;
+      var scriptUpdate = new Function("scene", newScript);
+      wipeScene();
+      scriptAnimate = scriptUpdate.call(env, subScene);
+      if (scriptAnimate) {
+        scriptAnimate(0);
+      }
+      console.log("----- script loaded -----");
+      if (!scriptAnimate) {
+        console.log("----- No update script provided -----");
+      } else if (env.quality === Quality.NONE) {
+        env.quality = Quality.MEDIUM;
+      }
+    }, null, first);
+    first = false;
   }
 }
 

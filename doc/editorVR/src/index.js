@@ -129,31 +129,35 @@ function wipeScene() {
   }
 }
 
+var first = true;
 function updateScript() {
   var newScript = editor.value,
     exp;
-  if (newScript !== lastScript) {
-    scriptUpdateTimeout = null;
-    lastScript = newScript;
-    if (newScript.indexOf("function update") >= 0 &&
-      newScript.indexOf("return update") < 0) {
-      newScript += "\nreturn update;";
-    }
-    console.log("----- loading new script -----");
-    scriptAnimate = null;
-    var scriptUpdate = new Function("scene", newScript);
-    wipeScene();
-    scriptAnimate = scriptUpdate.call(env, subScene);
-    if (scriptAnimate) {
-      scriptAnimate(0);
-    }
-    console.log("----- script loaded -----");
-    if (!scriptAnimate) {
-      console.log("----- No update script provided -----");
-    }
-    else if (env.quality === Quality.NONE) {
-      env.quality = Quality.MEDIUM;
-    }
+  if (newScript !== lastScript) {  
+    env.transition(function() {
+      scriptUpdateTimeout = null;
+      lastScript = newScript;
+      if (newScript.indexOf("function update") >= 0 &&
+        newScript.indexOf("return update") < 0) {
+        newScript += "\nreturn update;";
+      }
+      console.log("----- loading new script -----");
+      scriptAnimate = null;
+      var scriptUpdate = new Function("scene", newScript);
+      wipeScene();
+      scriptAnimate = scriptUpdate.call(env, subScene);
+      if (scriptAnimate) {
+        scriptAnimate(0);
+      }
+      console.log("----- script loaded -----");
+      if (!scriptAnimate) {
+        console.log("----- No update script provided -----");
+      }
+      else if (env.quality === Quality.NONE) {
+        env.quality = Quality.MEDIUM;
+      }
+    }, null, first);
+    first = false;
   }
 }
 
