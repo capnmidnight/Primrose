@@ -12,7 +12,6 @@ import isIE from "../../../flags/isIE";
 import isOpera from "../../../flags/isOpera";
 import isSafari from "../../../flags/isSafari";
 import isMobile from "../../../flags/isMobile";
-import clone from "../../../util/clone";
 
 var SCROLL_SCALE = isFirefox ? 3 : 100,
   COUNTER = 0,
@@ -263,7 +262,7 @@ export default class TextBox extends Surface {
   }
 
   set theme(t) {
-    this._theme = clone(t || DefaultTheme);
+    this._theme = Object.assign({}, DefaultTheme, t);
     this._theme.fontSize = this.fontSize;
     this._rowCache = {};
     this.render();

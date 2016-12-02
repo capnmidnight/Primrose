@@ -75,7 +75,7 @@ export default class Label extends Surface {
   }
 
   set theme(t) {
-    this._theme = clone(t || DefaultTheme);
+    this._theme = Object.assign({}, DefaultTheme, t);
     this._theme.fontSize = this.fontSize;
     this.refreshCharacter();
     this.render();

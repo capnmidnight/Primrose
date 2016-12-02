@@ -13766,10 +13766,6 @@ var liveAPI = Object.freeze({
 	default: index$2
 });
 
-function clone$1(obj) {
-  return JSON.parse(JSON.stringify(obj));
-}
-
 function deleteSetting(name) {
   if (window.localStorage) {
     window.localStorage.removeItem(name);
@@ -13975,7 +13971,6 @@ var Workerize = function (_AbstractEventEmitter) {
 
 var index$3 = {
   cache: cache,
-  clone: clone$1,
   deleteSetting: deleteSetting,
   findProperty: findProperty,
   getSetting: getSetting,
@@ -13986,7 +13981,6 @@ var index$3 = {
 
 var util = Object.freeze({
 	cache: cache,
-	clone: clone$1,
 	deleteSetting: deleteSetting,
 	findProperty: findProperty,
 	getSetting: getSetting,
@@ -19898,7 +19892,7 @@ var Label = function (_Surface) {
       return this._theme;
     },
     set: function set(t) {
-      this._theme = clone(t || Default);
+      this._theme = Object.assign({}, Default, t);
       this._theme.fontSize = this.fontSize;
       this.refreshCharacter();
       this.render();
@@ -33950,7 +33944,7 @@ var TextBox = function (_Surface) {
       return this._theme;
     },
     set: function set(t) {
-      this._theme = clone$1(t || Default);
+      this._theme = Object.assign({}, Default, t);
       this._theme.fontSize = this.fontSize;
       this._rowCache = {};
       this.render();
