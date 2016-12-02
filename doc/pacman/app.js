@@ -10,7 +10,8 @@ var GRASS = "../images/grass.png",
     backgroundColor: 0x000000,
     skyTexture: DECK,
     groundTexture: DECK,
-    font: "../fonts/helvetiker_regular.typeface.json"
+    font: "../fonts/helvetiker_regular.typeface.json",
+    fullScreenButtonContainer: "#fullScreenButtonContainer"
   }),
 
   editor = null,

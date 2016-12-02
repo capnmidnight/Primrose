@@ -17,7 +17,8 @@ var GRASS = "../images/grass.png",
   env = new Primrose.BrowserEnvironment({
     skyTexture: "../images/bg.jpg",
     groundTexture: DECK,
-    useFog: true
+    useFog: true,
+    fullScreenButtonContainer: "#fullScreenButtonContainer"
   });
 
 env.addEventListener("ready", function () {

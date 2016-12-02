@@ -19,7 +19,8 @@ var GRASS = "../images/grass.png",
   env = new BrowserEnvironment({
     skyTexture: "../images/bg2.jpg",
     groundTexture: GRASS,
-    font: "../fonts/helvetiker_regular.typeface.json"
+    font: "../fonts/helvetiker_regular.typeface.json",
+    fullScreenButtonContainer: "#fullScreenButtonContainer"
   }),
 
   subScene = hub(),

@@ -13548,10 +13548,6 @@ var TextBox = function (_Surface) {
         var altCommandName = browser + "_" + commandName,
             func = this.commandPack[altCommandName] || this.commandPack[commandName] || codePage[altCommandName] || codePage[commandName];
 
-        if (!func) {
-          console.log(this.commandPack, codePage);
-        }
-
         if (func instanceof String || typeof func === "string") {
           console.log("okay");
           func = this.commandPack[func] || this.commandPack[func] || func;

@@ -6,7 +6,8 @@ var cube = range(6, function(i) { return "../images/space" + i + ".jpg"; }),
     drawDistance: 100,
     gazeLength: 0.25,
     showHeadPointer: isMobile,
-    ambientSound: "../audio/space.ogg"
+    ambientSound: "../audio/space.ogg",
+    fullScreenButtonContainer: "#fullScreenButtonContainer"
   }),
   blocks = [],
   shots = [],

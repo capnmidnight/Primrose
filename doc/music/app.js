@@ -23,7 +23,7 @@ var height = 8,
       useFog: true,
       useGaze: isMobile,
       drawDistance: 10,
-      fullScreenButtonContainer: "body"
+      fullScreenButtonContainer: "#fullScreenButtonContainer"
     });
 
 function text(size, text) {

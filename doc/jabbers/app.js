@@ -2832,7 +2832,8 @@ var env = new obj$1.BrowserEnvironment({
   groundTexture: "../images/grass.png",
   font: "../fonts/helvetiker_regular.typeface.json",
   useFog: true,
-  drawDistance: 100
+  drawDistance: 100,
+  fullScreenButtonContainer: "#fullScreenButtonContainer"
 });
 
 // and clicking on the objects in the scene
