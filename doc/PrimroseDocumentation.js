@@ -137,545 +137,6 @@ pliny.function({
     console.assert(a === c);"
   }]
 });
-pliny.class({
-  parent: "Primrose",
-  name: "Entity",
-  description: "The Entity class is the parent class for all 3D controls. It manages a unique ID for every new control, the focus state of the control, and performs basic conversions from DOM elements to the internal Control format."
-});
-
-pliny.function({
-        parent: "Primrose.Entity",
-        name: "registerEntity",
-        description: "Register an entity to be able to receive eyeBlank events.",
-        parameters: [{
-          name: "e",
-          type: "Primrose.Entity",
-          description: "The entity to register."
-        }]
-      });
-      pliny.function({
-        parent: "Primrose.Entity",
-        name: "eyeBlankAll",
-        description: "Trigger the eyeBlank event for all registered entities.",
-        parameters: [{
-          name: "eye",
-          type: "Number",
-          description: "The eye to switch to: -1 for left, +1 for right."
-        }]
-      });
-      pliny.property({
-      parent: "Primrose.Entity",
-      name: "parent ",
-      type: "Primrose.Entity",
-      description: "The parent element of this element, if this element has been added as a child to another element."
-    });
-    pliny.property({
-      parent: "Primrose.Entity",
-      name: "children",
-      type: "Array",
-      description: "The child elements of this element."
-    });
-    pliny.property({
-      parent: "Primrose.Entity",
-      name: "focused",
-      type: "Boolean",
-      description: "A flag indicating if the element, or a child element within it, has received focus from the user."
-    });
-    pliny.property({
-      parent: "Primrose.Entity",
-      name: "focusable",
-      type: "Boolean",
-      description: "A flag indicating if the element, or any child elements within it, is capable of receiving focus."
-    });
-    pliny.event({ parent: "Primrose.Entity", name: "focus", description: "If the element is focusable, occurs when the user clicks on an element for the first time, or when a program calls the `focus()` method." });
-    pliny.event({ parent: "Primrose.Entity", name: "blur", description: "If the element is focused (which implies it is also focusable), occurs when the user clicks off of an element, or when a program calls the `blur()` method." });
-    pliny.event({ parent: "Primrose.Entity", name: "click", description: "Occurs whenever the user clicks on an element." });
-    pliny.event({ parent: "Primrose.Entity", name: "keydown", description: "Occurs when the user pushes a key down while focused on the element." });
-    pliny.event({ parent: "Primrose.Entity", name: "keyup", description: "Occurs when the user releases a key while focused on the element." });
-    pliny.event({ parent: "Primrose.Entity", name: "paste", description: "Occurs when the user activates the clipboard's `paste` command while focused on the element." });
-    pliny.event({ parent: "Primrose.Entity", name: "cut", description: "Occurs when the user activates the clipboard's `cut` command while focused on the element." });
-    pliny.event({ parent: "Primrose.Entity", name: "copy", description: "Occurs when the user activates the clipboard's `copy` command while focused on the element." });
-    pliny.event({ parent: "Primrose.Entity", name: "wheel", description: "Occurs when the user scrolls the mouse wheel while focused on the element." });
-    pliny.method({
-        parent: "Primrose.Entity",
-        name: "focus",
-        description: "If the control is focusable, sets the focus property of the control, does not change the focus property of any other control.",
-        examples: [{
-          name: "Focus on one control, blur all the rest",
-          description: "When we have a list of controls and we are trying to track focus between them all, we must coordinate calls between `focus()` and `blur()`.\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  var ctrls = [\n\
-  new Primrose.Text.Controls.TextBox(),\n\
-  new Primrose.Text.Controls.TextBox(),\n\
-  new Primrose.Text.Button()\n\
-  ];\n\
-  \n\
-  function focusOn(id){\n\
-    for(var i = 0; i < ctrls.length; ++i){\n\
-      var c = ctrls[i];\n\
-      if(c.controlID === id){\n\
-        c.focus();\n\
-      }\n\
-      else{\n\
-        c.blur();\n\
-      }\n\
-    }\n\
-  }"
-        }]
-      });
-      pliny.method({
-        parent: "Primrose.Entity",
-        name: "blur",
-        description: "If the element is focused, unsets the focus property of the control and all child controls. Does not change the focus property of any parent or sibling controls.",
-        examples: [{
-          name: "Focus on one control, blur all the rest",
-          description: "When we have a list of controls and we are trying to track focus between them all, we must coordinate calls between `focus()` and `blur()`.\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  var ctrls = [\n\
-  new Primrose.Text.Controls.TextBox(),\n\
-  new Primrose.Text.Controls.TextBox(),\n\
-  new Primrose.Text.Button()\n\
-  ];\n\
-  \n\
-  function focusOn(id){\n\
-    for(var i = 0; i < ctrls.length; ++i){\n\
-      var c = ctrls[i];\n\
-      if(c.controlID === id){\n\
-        c.focus();\n\
-      }\n\
-      else{\n\
-        c.blur();\n\
-      }\n\
-    }\n\
-  }"
-        }]
-      });
-      pliny.method({
-        parent: "Primrose.Entity",
-        name: "appendChild",
-        description: "Adds an Entity as a child entity of this entity.",
-        parameters: [{
-          name: "child",
-          type: "Primrose.Entity",
-          description: "The object to add. Will only succeed if `child.parent` is not set to a value."
-        }],
-        examples: [{
-          name: "Add an entity to another entity",
-          description: "Entities can be arranged in parent-child relationships.\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  var a = new Primrose.Entity(),\n\
-  b = new Primrose.Entity();\n\
-  a.appendChild(b);\n\
-  console.assert(a.children.length === 1);\n\
-  console.assert(a.children[0] === b);\n\
-  console.assert(b.parent === a);"
-        }]
-      });
-      pliny.method({
-        parent: "Primrose.Entity",
-        name: "removeChild",
-        description: "Removes an Entity from another Entity of this entity.",
-        parameters: [{
-          name: "child",
-          type: "Primrose.Entity",
-          description: "The object to remove. Will only succeed if `child.parent` is this object."
-        }],
-        examples: [{
-          name: "Remove an entity from another entity",
-          description: "Entities can be arranged in parent-child relationships.\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  var a = new Primrose.Entity(),\n\
-  b = new Primrose.Entity();\n\
-  a.appendChild(b);\n\
-  console.assert(a.children.length === 1);\n\
-  console.assert(a.children[0] === b);\n\
-  console.assert(b.parent === a);\n\
-  a.removeChild(b);\n\
-  console.assert(a.children.length === 0)\n\
-  console.assert(b.parent === null);"
-        }]
-      });
-      pliny.method({
-        parent: "Primrose.Entity",
-        name: "eyeBlank",
-        parameters: [{
-          name: "eye",
-          type: "Number",
-          description: "The eye to switch to: -1 for left, +1 for right."
-        }],
-        description: "Instructs any stereoscopically rendered surfaces to change their rendering offset."
-      });
-      pliny.method({
-        parent: "Primrose.Entity",
-        name: "startUV",
-        parameters: [{
-          name: "evt",
-          type: "Event",
-          description: "The pointer event to read"
-        }],
-        description: "Hooks up to the window's `mouseDown` and `touchStart` events, with coordinates translated to tangent-space UV coordinates, and propagates it to any of its focused children."
-      });
-      pliny.method({
-        parent: "Primrose.Entity",
-        name: "moveUV",
-        parameters: [{
-          name: "evt",
-          type: "Event",
-          description: "The pointer event to read"
-        }],
-        description: "Hooks up to the window's `mouseMove` and `touchMove` events, with coordinates translated to tangent-space UV coordinates, and propagates it to any of its focused children."
-      });
-      pliny.method({
-        parent: "Primrose.Entity",
-        name: "endPointer",
-        description: "Hooks up to the window's `mouseUp` and `toucheEnd` events and propagates it to any of its focused children."
-      });
-      pliny.method({
-        parent: "Primrose.Entity",
-        name: "keyDown",
-        parameters: [{
-          name: "evt",
-          type: "Event",
-          description: "The key event to read"
-        }],
-        description: "Hooks up to the window's `keyDown` event and propagates it to any of its focused children."
-      });
-      pliny.method({
-        parent: "Primrose.Entity",
-        name: "keyUp",
-        parameters: [{
-          name: "evt",
-          type: "Event",
-          description: "The key event to read"
-        }],
-        description: "Hooks up to the window's `keyUp` event and propagates it to any of its focused children."
-      });
-      pliny.method({
-        parent: "Primrose.Entity",
-        name: "readClipboard",
-        parameters: [{
-          name: "evt",
-          type: "Event",
-          description: "The clipboard event to read"
-        }],
-        description: "Hooks up to the clipboard's `paste` event and propagates it to any of its focused children."
-      });
-      pliny.method({
-        parent: "Primrose.Entity",
-        name: "copySelectedText",
-        parameters: [{
-          name: "evt",
-          type: "Event",
-          description: "The clipboard event to read"
-        }],
-        description: "Hooks up to the clipboard's `copy` event and propagates it to any of its focused children."
-      });
-      pliny.method({
-        parent: "Primrose.Entity",
-        name: "cutSelectedText",
-        parameters: [{
-          name: "evt",
-          type: "Event",
-          description: "The clipboard event to read"
-        }],
-        description: "Hooks up to the clipboard's `cut` event and propagates it to any of its focused children."
-      });
-      pliny.method({
-        parent: "Primrose.Entity",
-        name: "readWheel",
-        parameters: [{
-          name: "evt",
-          type: "Event",
-          description: "The wheel event to read"
-        }],
-        description: "Hooks up to the window's `wheel` event and propagates it to any of its focused children."
-      });
-      pliny.property({
-        parent: "Primrose.Entity",
-        name: "id ",
-        type: "String",
-        description: "Get or set the id for the control."
-      });
-      pliny.property({
-        parent: "Primrose.Entity",
-        name: "theme",
-        type: "Primrose.Text.Themes.*",
-        description: "Get or set the theme used for rendering text on any controls in the control tree."
-      });
-      pliny.property({
-        parent: "Primrose.Entity",
-        name: "lockMovement",
-        type: "Boolean",
-        description: "Recursively searches the deepest leaf-node of the control graph for a control that has its `lockMovement` property set to `true`, indicating that key events should not be used to navigate the user, because they are being interpreted as typing commands."
-      });
-      pliny.property({
-        parent: "Primrose.Entity",
-        name: "focusedElement",
-        type: "Primrose.Entity",
-        description: "Searches the deepest leaf-node of the control graph for a control that has its `focused` property set to `true`."
-      });
-      pliny.class({
-  parent: "Primrose.Text",
-  name: "Point",
-  description: "| [under construction]"
-});
-
-pliny.class({
-  parent: "Primrose.Text",
-  name: "Size",
-  description: "| [under construction]"
-});
-
-pliny.class({
-  parent: "Primrose.Text",
-  name: "Rectangle",
-  description: "| [under construction]"
-});
-
-pliny.class({
-  parent: "Primrose",
-  name: "Surface",
-  description: "Cascades through a number of options to eventually return a CanvasRenderingContext2D object on which one will perform drawing operations.",
-  baseClass: "Primrose.Entity",
-  parameters: [{
-    name: "options.id",
-    type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
-    description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
-  }, {
-    name: "options.bounds",
-    type: "Primrose.Text.Rectangle",
-    description: "The size and location of the surface to create."
-  }]
-});
-
-pliny.error({
-        name: "Invalid element",
-        type: "Error",
-        description: "If the element could not be found, could not be created, or one of the appropriate ID was found but did not match the expected type, an error is thrown to halt operation."
-      });
-      pliny.class({
-  parent: "Primrose.Text",
-  name: "Cursor",
-  description: "| [under construction]"
-});
-
-pliny.class({
-  parent: "Primrose.Text",
-  name: "CommandPack",
-  description: "A CommandPack is a collection of key sequences and text editor commands. It provides a means of using a single text rendering control to create a variety of text-controls that utilize the text space differently.",
-  parameters: [{
-    name: "name ",
-    type: "String",
-    description: "A friendly name for the command pack."
-  }, {
-    name: "commands",
-    type: "Object",
-    description: "An object literal of key-value pairs describing the commands.\n\
-\n\
-* The object key elements are strings describing the key sequence that activates the command.\n\
-* The value elements are the action that occurs when the command is activated."
-  }]
-});
-
-pliny.record({
-  parent: "Primrose.Text.CommandPacks",
-  name: "BasicTextInput",
-  baseClass: "Primrose.Text.CommandPacks.CommandPack",
-  description: "A set of commands for editing a single line of text in a text editor. This is the same set of commands for both single-line text elements and multi-line text elements."
-});
-
-pliny.record({
-  parent: "Primrose.Text.CommandPacks",
-  name: "TextEditor",
-  description: "A set of commands for a multi-line text editing, extending single-line text editing."
-});
-pliny.record({
-  parent: "Primrose.Text.Themes",
-  name: "Default",
-  description: "A light background with dark foreground text."
-});
-pliny.class({
-  parent: "Primrose.Text",
-  name: "Rule",
-  description: "| [under construction]"
-});
-
-pliny.class({
-  parent: "Primrose.Text",
-  name: "Token",
-  description: "| [under construction]"
-});
-
-pliny.class({
-  parent: "Primrose.Text",
-  name: "Grammar",
-  parameters: [{
-    name: "name",
-    type: "String",
-    description: "A user-friendly name for the grammar, to be able to include it in an options listing."
-  }, {
-    name: "rules",
-    type: "Array",
-    description: "A collection of rules to apply to tokenize text. The rules should be an array of two-element arrays. The first element should be a token name (see [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names), followed by a regular expression that selects the token out of the source code."
-  }],
-  description: "A Grammar is a collection of rules for processing text into tokens. Tokens are special characters that tell us about the structure of the text, things like keywords, curly braces, numbers, etc. After the text is tokenized, the tokens get a rough processing pass that groups them into larger elements that can be rendered in color on the screen.\n\
-\n\
-As tokens are discovered, they are removed from the text being processed, so order is important. Grammar rules are applied in the order they are specified, and more than one rule can produce the same token type.\n\
-\n\
-See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.",
-  examples: [{
-    name: "A plain-text \"grammar\".",
-    description: "Plain text does not actually have a grammar that needs to be processed. However, to get the text to work with the rendering system, a basic grammar is necessary to be able to break the text up into lines and prepare it for rendering.\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  var plainTextGrammar = new Primrose.Text.Grammar(\n\
-    // The name is for displaying in options views.\n\
-    \"Plain-text\", [\n\
-    // Text needs at least the newlines token, or else every line will attempt to render as a single line and the line count won't work.\n\
-    [\"newlines\", /(?:\\r\\n|\\r|\\n)/] \n\
-  ] );"
-  }, {
-    name: "A grammar for BASIC",
-    description: "The BASIC programming language is now defunct, but a grammar for it to display in Primrose is quite easy to build.\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  var basicGrammar = new Primrose.Text.Grammar( \"BASIC\",\n\
-    // Grammar rules are applied in the order they are specified.\n\
-    [\n\
-      // Text needs at least the newlines token, or else every line will attempt to render as a single line and the line count won't work.\n\
-      [ \"newlines\", /(?:\\r\\n|\\r|\\n)/ ],\n\
-      // BASIC programs used to require the programmer type in her own line numbers. The start at the beginning of the line.\n\
-      [ \"lineNumbers\", /^\\d+\\s+/ ],\n\
-      // Comments were lines that started with the keyword \"REM\" (for REMARK) and ran to the end of the line. They did not have to be numbered, because they were not executable and were stripped out by the interpreter.\n\
-      [ \"startLineComments\", /^REM\\s/ ],\n\
-      // Both double-quoted and single-quoted strings were not always supported, but in this case, I'm just demonstrating how it would be done for both.\n\
-      [ \"strings\", /\"(?:\\\\\"|[^\"])*\"/ ],\n\
-      [ \"strings\", /'(?:\\\\'|[^'])*'/ ],\n\
-      // Numbers are an optional dash, followed by a optional digits, followed by optional period, followed by 1 or more required digits. This allows us to match both integers and decimal numbers, both positive and negative, with or without leading zeroes for decimal numbers between (-1, 1).\n\
-      [ \"numbers\", /-?(?:(?:\\b\\d*)?\\.)?\\b\\d+\\b/ ],\n\
-      // Keywords are really just a list of different words we want to match, surrounded by the \"word boundary\" selector \"\\b\".\n\
-      [ \"keywords\",\n\
-        /\\b(?:RESTORE|REPEAT|RETURN|LOAD|LABEL|DATA|READ|THEN|ELSE|FOR|DIM|LET|IF|TO|STEP|NEXT|WHILE|WEND|UNTIL|GOTO|GOSUB|ON|TAB|AT|END|STOP|PRINT|INPUT|RND|INT|CLS|CLK|LEN)\\b/\n\
-      ],\n\
-      // Sometimes things we want to treat as keywords have different meanings in different locations. We can specify rules for tokens more than once.\n\
-      [ \"keywords\", /^DEF FN/ ],\n\
-      // These are all treated as mathematical operations.\n\
-      [ \"operators\",\n\
-        /(?:\\+|;|,|-|\\*\\*|\\*|\\/|>=|<=|=|<>|<|>|OR|AND|NOT|MOD|\\(|\\)|\\[|\\])/\n\
-      ],\n\
-      // Once everything else has been matched, the left over blocks of words are treated as variable and function names.\n\
-      [ \"identifiers\", /\\w+\\$?/ ]\n\
-    ] );"
-  }]
-});
-
-pliny.property({
-      parent: "Primrose.Text.Grammar",
-      name: " name",
-      type: "String",
-      description: "A user-friendly name for the grammar, to be able to include it in an options listing."
-    });
-    pliny.property({
-      parent: "Primrose.Text.Grammar",
-      name: "grammar",
-      type: "Array",
-      description: "A collection of rules to apply to tokenize text. The rules should be an array of two-element arrays. The first element should be a token name (see [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names), followed by a regular expression that selects the token out of the source code."
-    });
-    pliny.method({
-      parent: "Primrose.Text.Grammar",
-      name: "tokenize",
-      parameters: [{
-        name: "text",
-        type: "String",
-        description: "The text to tokenize."
-      }],
-      returns: "An array of tokens, ammounting to drawing instructions to the renderer. However, they still need to be layed out to fit the bounds of the text area.",
-      description: "Breaks plain text up into a list of tokens that can later be rendered with color.",
-      examples: [{
-        name: 'Tokenize some JavaScript',
-        description: 'Primrose comes with a grammar for JavaScript built in.\n\
-  \n\
-  ## Code:\n\
-  \n\
-    grammar(\"JavaScript\");\n\
-    var tokens = new Primrose.Text.Grammars.JavaScript\n\
-      .tokenize("var x = 3;\\n\\\n\
-    var y = 2;\\n\\\n\
-    console.log(x + y);");\n\
-    console.log(JSON.stringify(tokens));\n\
-  \n\
-  ## Result:\n\
-  \n\
-    grammar(\"JavaScript\");\n\
-    [ \n\
-      { "value": "var", "type": "keywords", "index": 0, "line": 0 },\n\
-      { "value": " x = ", "type": "regular", "index": 3, "line": 0 },\n\
-      { "value": "3", "type": "numbers", "index": 8, "line": 0 },\n\
-      { "value": ";", "type": "regular", "index": 9, "line": 0 },\n\
-      { "value": "\\n", "type": "newlines", "index": 10, "line": 0 },\n\
-      { "value": " y = ", "type": "regular", "index": 11, "line": 1 },\n\
-      { "value": "2", "type": "numbers", "index": 16, "line": 1 },\n\
-      { "value": ";", "type": "regular", "index": 17, "line": 1 },\n\
-      { "value": "\\n", "type": "newlines", "index": 18, "line": 1 },\n\
-      { "value": "console", "type": "members", "index": 19, "line": 2 },\n\
-      { "value": ".", "type": "regular", "index": 26, "line": 2 },\n\
-      { "value": "log", "type": "functions", "index": 27, "line": 2 },\n\
-      { "value": "(x + y);", "type": "regular", "index": 30, "line": 2 }\n\
-    ]'
-      }]
-    });
-    pliny.value({
-  parent: "Primrose.Text.Grammars",
-  name: "JavaScript",
-  description: "A grammar for the JavaScript programming language."
-});
-pliny.function({
-  name: "clone",
-  parameters: [{
-    name: "obj",
-    type: "Object",
-    description: "The object-literal to clone"
-  }],
-  description: "Creates a copy of a JavaScript object literal.",
-  examples: [{
-    name: "Create a copy of an object.",
-    description: "To create a copy of an object that can be modified without modifying the original object, use the `clone()` function:\n\
-\n\
-    grammar(\"JavaScript\");\n\
-    var objA = { x: 1, y: 2 },\n\
-        objB = clone(objA);\n\
-    console.assert(objA !== objB);\n\
-    console.assert(objA.x === objB.x);\n\
-    console.assert(objA.y === objB.y);\n\
-    objB.x = 3;\n\
-    console.assert(objA.x !== objB.x);"
-  }]
-});
-
-pliny.class({
-  parent: "Primrose.Text.Controls",
-  name: "TextBox",
-  description: "Syntax highlighting textbox control.",
-  baseClass: "Primrose.Surface",
-  parameters: [{
-    name: "idOrCanvasOrContext",
-    type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
-    description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
-  }, {
-    name: "options",
-    type: "Object",
-    description: "Named parameters for creating the TextBox."
-  }]
-});
-
 pliny.function({
   name: "textured",
   description: "| [under construction]"
@@ -687,6 +148,7 @@ pliny.function({
   returns: "THREE.Mesh",
   parameters: [{ name: "geometry", type: "THREE.Geometry", description: "The geometry to which to apply the color." }, { name: "color", type: "Number", description: "A hexadecimal color value in RGB format." }, { name: "options", type: "Object", optional: true, description: "Optional settings for material properties." }, { name: "options.side", type: "Number", optional: true, defaultValue: "THREE.FrontSide", description: "Either THREE.FontSide, THREE.BackSide, or THREE.Both, for which side of the polygon should be shaded." }, { name: "options.opacity", type: "Number", optional: true, defaultValue: 1, description: "Make objects semi-transparent. Note: this usually doesn't work like you'd expect." }, { name: "options.roughness", type: "Number", optional: true, defaultValue: 0.5, description: "A value indicating the degree of light scattering the material causes." }, { name: "options.metalness", type: "Number", optional: true, defaultValue: 0, description: "A value indicating the degree of shininess the material causes." }, { name: "options.unshaded", type: "Boolean", optional: true, defaultValue: false, description: "Make objects not respond to lighting." }, { name: "options.wireframe", type: "Boolean", optional: true, defaultValue: false, description: "Draw objects as basic wireframes. Note: there's no control over the wire thickness. This should be considered a debugging feature, not a graphical feature." }]
 });
+
 pliny.function({
   name: "box",
   description: "A shortcut function for the THREE.BoxGeometry class. Creates a \"rectilinear prism\", i.e. the general class of rectangular objects that includes cubes.",
@@ -1380,6 +842,29 @@ pliny.function({
     console.assert(a.toArray().join(\", \") === \"1, 2, 3\");"
   }]
 });
+pliny.function({
+  name: "clone",
+  parameters: [{
+    name: "obj",
+    type: "Object",
+    description: "The object-literal to clone"
+  }],
+  description: "Creates a copy of a JavaScript object literal.",
+  examples: [{
+    name: "Create a copy of an object.",
+    description: "To create a copy of an object that can be modified without modifying the original object, use the `clone()` function:\n\
+\n\
+    grammar(\"JavaScript\");\n\
+    var objA = { x: 1, y: 2 },\n\
+        objB = clone(objA);\n\
+    console.assert(objA !== objB);\n\
+    console.assert(objA.x === objB.x);\n\
+    console.assert(objA.y === objB.y);\n\
+    objB.x = 3;\n\
+    console.assert(objA.x !== objB.x);"
+  }]
+});
+
 pliny.function({
   name: "deleteSetting",
   parameters: [{
@@ -2262,6 +1747,331 @@ pliny.method({
   parent: "Primrose",
   name: "Keys",
   description: "Keycode values for system keys that are the same across all international standards"
+});
+pliny.class({
+  parent: "Primrose",
+  name: "Entity",
+  description: "The Entity class is the parent class for all 3D controls. It manages a unique ID for every new control, the focus state of the control, and performs basic conversions from DOM elements to the internal Control format."
+});
+
+pliny.function({
+        parent: "Primrose.Entity",
+        name: "registerEntity",
+        description: "Register an entity to be able to receive eyeBlank events.",
+        parameters: [{
+          name: "e",
+          type: "Primrose.Entity",
+          description: "The entity to register."
+        }]
+      });
+      pliny.function({
+        parent: "Primrose.Entity",
+        name: "eyeBlankAll",
+        description: "Trigger the eyeBlank event for all registered entities.",
+        parameters: [{
+          name: "eye",
+          type: "Number",
+          description: "The eye to switch to: -1 for left, +1 for right."
+        }]
+      });
+      pliny.property({
+      parent: "Primrose.Entity",
+      name: "parent ",
+      type: "Primrose.Entity",
+      description: "The parent element of this element, if this element has been added as a child to another element."
+    });
+    pliny.property({
+      parent: "Primrose.Entity",
+      name: "children",
+      type: "Array",
+      description: "The child elements of this element."
+    });
+    pliny.property({
+      parent: "Primrose.Entity",
+      name: "focused",
+      type: "Boolean",
+      description: "A flag indicating if the element, or a child element within it, has received focus from the user."
+    });
+    pliny.property({
+      parent: "Primrose.Entity",
+      name: "focusable",
+      type: "Boolean",
+      description: "A flag indicating if the element, or any child elements within it, is capable of receiving focus."
+    });
+    pliny.event({ parent: "Primrose.Entity", name: "focus", description: "If the element is focusable, occurs when the user clicks on an element for the first time, or when a program calls the `focus()` method." });
+    pliny.event({ parent: "Primrose.Entity", name: "blur", description: "If the element is focused (which implies it is also focusable), occurs when the user clicks off of an element, or when a program calls the `blur()` method." });
+    pliny.event({ parent: "Primrose.Entity", name: "click", description: "Occurs whenever the user clicks on an element." });
+    pliny.event({ parent: "Primrose.Entity", name: "keydown", description: "Occurs when the user pushes a key down while focused on the element." });
+    pliny.event({ parent: "Primrose.Entity", name: "keyup", description: "Occurs when the user releases a key while focused on the element." });
+    pliny.event({ parent: "Primrose.Entity", name: "paste", description: "Occurs when the user activates the clipboard's `paste` command while focused on the element." });
+    pliny.event({ parent: "Primrose.Entity", name: "cut", description: "Occurs when the user activates the clipboard's `cut` command while focused on the element." });
+    pliny.event({ parent: "Primrose.Entity", name: "copy", description: "Occurs when the user activates the clipboard's `copy` command while focused on the element." });
+    pliny.event({ parent: "Primrose.Entity", name: "wheel", description: "Occurs when the user scrolls the mouse wheel while focused on the element." });
+    pliny.method({
+        parent: "Primrose.Entity",
+        name: "focus",
+        description: "If the control is focusable, sets the focus property of the control, does not change the focus property of any other control.",
+        examples: [{
+          name: "Focus on one control, blur all the rest",
+          description: "When we have a list of controls and we are trying to track focus between them all, we must coordinate calls between `focus()` and `blur()`.\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var ctrls = [\n\
+  new Primrose.Text.Controls.TextBox(),\n\
+  new Primrose.Text.Controls.TextBox(),\n\
+  new Primrose.Text.Button()\n\
+  ];\n\
+  \n\
+  function focusOn(id){\n\
+    for(var i = 0; i < ctrls.length; ++i){\n\
+      var c = ctrls[i];\n\
+      if(c.controlID === id){\n\
+        c.focus();\n\
+      }\n\
+      else{\n\
+        c.blur();\n\
+      }\n\
+    }\n\
+  }"
+        }]
+      });
+      pliny.method({
+        parent: "Primrose.Entity",
+        name: "blur",
+        description: "If the element is focused, unsets the focus property of the control and all child controls. Does not change the focus property of any parent or sibling controls.",
+        examples: [{
+          name: "Focus on one control, blur all the rest",
+          description: "When we have a list of controls and we are trying to track focus between them all, we must coordinate calls between `focus()` and `blur()`.\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var ctrls = [\n\
+  new Primrose.Text.Controls.TextBox(),\n\
+  new Primrose.Text.Controls.TextBox(),\n\
+  new Primrose.Text.Button()\n\
+  ];\n\
+  \n\
+  function focusOn(id){\n\
+    for(var i = 0; i < ctrls.length; ++i){\n\
+      var c = ctrls[i];\n\
+      if(c.controlID === id){\n\
+        c.focus();\n\
+      }\n\
+      else{\n\
+        c.blur();\n\
+      }\n\
+    }\n\
+  }"
+        }]
+      });
+      pliny.method({
+        parent: "Primrose.Entity",
+        name: "appendChild",
+        description: "Adds an Entity as a child entity of this entity.",
+        parameters: [{
+          name: "child",
+          type: "Primrose.Entity",
+          description: "The object to add. Will only succeed if `child.parent` is not set to a value."
+        }],
+        examples: [{
+          name: "Add an entity to another entity",
+          description: "Entities can be arranged in parent-child relationships.\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var a = new Primrose.Entity(),\n\
+  b = new Primrose.Entity();\n\
+  a.appendChild(b);\n\
+  console.assert(a.children.length === 1);\n\
+  console.assert(a.children[0] === b);\n\
+  console.assert(b.parent === a);"
+        }]
+      });
+      pliny.method({
+        parent: "Primrose.Entity",
+        name: "removeChild",
+        description: "Removes an Entity from another Entity of this entity.",
+        parameters: [{
+          name: "child",
+          type: "Primrose.Entity",
+          description: "The object to remove. Will only succeed if `child.parent` is this object."
+        }],
+        examples: [{
+          name: "Remove an entity from another entity",
+          description: "Entities can be arranged in parent-child relationships.\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var a = new Primrose.Entity(),\n\
+  b = new Primrose.Entity();\n\
+  a.appendChild(b);\n\
+  console.assert(a.children.length === 1);\n\
+  console.assert(a.children[0] === b);\n\
+  console.assert(b.parent === a);\n\
+  a.removeChild(b);\n\
+  console.assert(a.children.length === 0)\n\
+  console.assert(b.parent === null);"
+        }]
+      });
+      pliny.method({
+        parent: "Primrose.Entity",
+        name: "eyeBlank",
+        parameters: [{
+          name: "eye",
+          type: "Number",
+          description: "The eye to switch to: -1 for left, +1 for right."
+        }],
+        description: "Instructs any stereoscopically rendered surfaces to change their rendering offset."
+      });
+      pliny.method({
+        parent: "Primrose.Entity",
+        name: "startUV",
+        parameters: [{
+          name: "evt",
+          type: "Event",
+          description: "The pointer event to read"
+        }],
+        description: "Hooks up to the window's `mouseDown` and `touchStart` events, with coordinates translated to tangent-space UV coordinates, and propagates it to any of its focused children."
+      });
+      pliny.method({
+        parent: "Primrose.Entity",
+        name: "moveUV",
+        parameters: [{
+          name: "evt",
+          type: "Event",
+          description: "The pointer event to read"
+        }],
+        description: "Hooks up to the window's `mouseMove` and `touchMove` events, with coordinates translated to tangent-space UV coordinates, and propagates it to any of its focused children."
+      });
+      pliny.method({
+        parent: "Primrose.Entity",
+        name: "endPointer",
+        description: "Hooks up to the window's `mouseUp` and `toucheEnd` events and propagates it to any of its focused children."
+      });
+      pliny.method({
+        parent: "Primrose.Entity",
+        name: "keyDown",
+        parameters: [{
+          name: "evt",
+          type: "Event",
+          description: "The key event to read"
+        }],
+        description: "Hooks up to the window's `keyDown` event and propagates it to any of its focused children."
+      });
+      pliny.method({
+        parent: "Primrose.Entity",
+        name: "keyUp",
+        parameters: [{
+          name: "evt",
+          type: "Event",
+          description: "The key event to read"
+        }],
+        description: "Hooks up to the window's `keyUp` event and propagates it to any of its focused children."
+      });
+      pliny.method({
+        parent: "Primrose.Entity",
+        name: "readClipboard",
+        parameters: [{
+          name: "evt",
+          type: "Event",
+          description: "The clipboard event to read"
+        }],
+        description: "Hooks up to the clipboard's `paste` event and propagates it to any of its focused children."
+      });
+      pliny.method({
+        parent: "Primrose.Entity",
+        name: "copySelectedText",
+        parameters: [{
+          name: "evt",
+          type: "Event",
+          description: "The clipboard event to read"
+        }],
+        description: "Hooks up to the clipboard's `copy` event and propagates it to any of its focused children."
+      });
+      pliny.method({
+        parent: "Primrose.Entity",
+        name: "cutSelectedText",
+        parameters: [{
+          name: "evt",
+          type: "Event",
+          description: "The clipboard event to read"
+        }],
+        description: "Hooks up to the clipboard's `cut` event and propagates it to any of its focused children."
+      });
+      pliny.method({
+        parent: "Primrose.Entity",
+        name: "readWheel",
+        parameters: [{
+          name: "evt",
+          type: "Event",
+          description: "The wheel event to read"
+        }],
+        description: "Hooks up to the window's `wheel` event and propagates it to any of its focused children."
+      });
+      pliny.property({
+        parent: "Primrose.Entity",
+        name: "id ",
+        type: "String",
+        description: "Get or set the id for the control."
+      });
+      pliny.property({
+        parent: "Primrose.Entity",
+        name: "theme",
+        type: "Primrose.Text.Themes.*",
+        description: "Get or set the theme used for rendering text on any controls in the control tree."
+      });
+      pliny.property({
+        parent: "Primrose.Entity",
+        name: "lockMovement",
+        type: "Boolean",
+        description: "Recursively searches the deepest leaf-node of the control graph for a control that has its `lockMovement` property set to `true`, indicating that key events should not be used to navigate the user, because they are being interpreted as typing commands."
+      });
+      pliny.property({
+        parent: "Primrose.Entity",
+        name: "focusedElement",
+        type: "Primrose.Entity",
+        description: "Searches the deepest leaf-node of the control graph for a control that has its `focused` property set to `true`."
+      });
+      pliny.class({
+  parent: "Primrose.Text",
+  name: "Point",
+  description: "| [under construction]"
+});
+
+pliny.class({
+  parent: "Primrose.Text",
+  name: "Size",
+  description: "| [under construction]"
+});
+
+pliny.class({
+  parent: "Primrose.Text",
+  name: "Rectangle",
+  description: "| [under construction]"
+});
+
+pliny.class({
+  parent: "Primrose",
+  name: "Surface",
+  description: "Cascades through a number of options to eventually return a CanvasRenderingContext2D object on which one will perform drawing operations.",
+  baseClass: "Primrose.Entity",
+  parameters: [{
+    name: "options.id",
+    type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
+    description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
+  }, {
+    name: "options.bounds",
+    type: "Primrose.Text.Rectangle",
+    description: "The size and location of the surface to create."
+  }]
+});
+
+pliny.error({
+        name: "Invalid element",
+        type: "Error",
+        description: "If the element could not be found, could not be created, or one of the appropriate ID was found but did not match the expected type, an error is thrown to halt operation."
+      });
+      pliny.record({
+  parent: "Primrose.Text.Themes",
+  name: "Default",
+  description: "A light background with dark foreground text."
 });
 pliny.class({
   parent: "Primrose.Controls",
@@ -3217,6 +3027,197 @@ pliny.method({
     name: "factories",
     type: "Primrose.ModelLoader",
     description: "Model factory for creating avatars for new remote users."
+  }]
+});
+
+pliny.class({
+  parent: "Primrose.Text",
+  name: "Cursor",
+  description: "| [under construction]"
+});
+
+pliny.class({
+  parent: "Primrose.Text",
+  name: "CommandPack",
+  description: "A CommandPack is a collection of key sequences and text editor commands. It provides a means of using a single text rendering control to create a variety of text-controls that utilize the text space differently.",
+  parameters: [{
+    name: "name ",
+    type: "String",
+    description: "A friendly name for the command pack."
+  }, {
+    name: "commands",
+    type: "Object",
+    description: "An object literal of key-value pairs describing the commands.\n\
+\n\
+* The object key elements are strings describing the key sequence that activates the command.\n\
+* The value elements are the action that occurs when the command is activated."
+  }]
+});
+
+pliny.record({
+  parent: "Primrose.Text.CommandPacks",
+  name: "BasicTextInput",
+  baseClass: "Primrose.Text.CommandPacks.CommandPack",
+  description: "A set of commands for editing a single line of text in a text editor. This is the same set of commands for both single-line text elements and multi-line text elements."
+});
+
+pliny.record({
+  parent: "Primrose.Text.CommandPacks",
+  name: "TextEditor",
+  description: "A set of commands for a multi-line text editing, extending single-line text editing."
+});
+pliny.class({
+  parent: "Primrose.Text",
+  name: "Rule",
+  description: "| [under construction]"
+});
+
+pliny.class({
+  parent: "Primrose.Text",
+  name: "Token",
+  description: "| [under construction]"
+});
+
+pliny.class({
+  parent: "Primrose.Text",
+  name: "Grammar",
+  parameters: [{
+    name: "name",
+    type: "String",
+    description: "A user-friendly name for the grammar, to be able to include it in an options listing."
+  }, {
+    name: "rules",
+    type: "Array",
+    description: "A collection of rules to apply to tokenize text. The rules should be an array of two-element arrays. The first element should be a token name (see [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names), followed by a regular expression that selects the token out of the source code."
+  }],
+  description: "A Grammar is a collection of rules for processing text into tokens. Tokens are special characters that tell us about the structure of the text, things like keywords, curly braces, numbers, etc. After the text is tokenized, the tokens get a rough processing pass that groups them into larger elements that can be rendered in color on the screen.\n\
+\n\
+As tokens are discovered, they are removed from the text being processed, so order is important. Grammar rules are applied in the order they are specified, and more than one rule can produce the same token type.\n\
+\n\
+See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.",
+  examples: [{
+    name: "A plain-text \"grammar\".",
+    description: "Plain text does not actually have a grammar that needs to be processed. However, to get the text to work with the rendering system, a basic grammar is necessary to be able to break the text up into lines and prepare it for rendering.\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var plainTextGrammar = new Primrose.Text.Grammar(\n\
+    // The name is for displaying in options views.\n\
+    \"Plain-text\", [\n\
+    // Text needs at least the newlines token, or else every line will attempt to render as a single line and the line count won't work.\n\
+    [\"newlines\", /(?:\\r\\n|\\r|\\n)/] \n\
+  ] );"
+  }, {
+    name: "A grammar for BASIC",
+    description: "The BASIC programming language is now defunct, but a grammar for it to display in Primrose is quite easy to build.\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var basicGrammar = new Primrose.Text.Grammar( \"BASIC\",\n\
+    // Grammar rules are applied in the order they are specified.\n\
+    [\n\
+      // Text needs at least the newlines token, or else every line will attempt to render as a single line and the line count won't work.\n\
+      [ \"newlines\", /(?:\\r\\n|\\r|\\n)/ ],\n\
+      // BASIC programs used to require the programmer type in her own line numbers. The start at the beginning of the line.\n\
+      [ \"lineNumbers\", /^\\d+\\s+/ ],\n\
+      // Comments were lines that started with the keyword \"REM\" (for REMARK) and ran to the end of the line. They did not have to be numbered, because they were not executable and were stripped out by the interpreter.\n\
+      [ \"startLineComments\", /^REM\\s/ ],\n\
+      // Both double-quoted and single-quoted strings were not always supported, but in this case, I'm just demonstrating how it would be done for both.\n\
+      [ \"strings\", /\"(?:\\\\\"|[^\"])*\"/ ],\n\
+      [ \"strings\", /'(?:\\\\'|[^'])*'/ ],\n\
+      // Numbers are an optional dash, followed by a optional digits, followed by optional period, followed by 1 or more required digits. This allows us to match both integers and decimal numbers, both positive and negative, with or without leading zeroes for decimal numbers between (-1, 1).\n\
+      [ \"numbers\", /-?(?:(?:\\b\\d*)?\\.)?\\b\\d+\\b/ ],\n\
+      // Keywords are really just a list of different words we want to match, surrounded by the \"word boundary\" selector \"\\b\".\n\
+      [ \"keywords\",\n\
+        /\\b(?:RESTORE|REPEAT|RETURN|LOAD|LABEL|DATA|READ|THEN|ELSE|FOR|DIM|LET|IF|TO|STEP|NEXT|WHILE|WEND|UNTIL|GOTO|GOSUB|ON|TAB|AT|END|STOP|PRINT|INPUT|RND|INT|CLS|CLK|LEN)\\b/\n\
+      ],\n\
+      // Sometimes things we want to treat as keywords have different meanings in different locations. We can specify rules for tokens more than once.\n\
+      [ \"keywords\", /^DEF FN/ ],\n\
+      // These are all treated as mathematical operations.\n\
+      [ \"operators\",\n\
+        /(?:\\+|;|,|-|\\*\\*|\\*|\\/|>=|<=|=|<>|<|>|OR|AND|NOT|MOD|\\(|\\)|\\[|\\])/\n\
+      ],\n\
+      // Once everything else has been matched, the left over blocks of words are treated as variable and function names.\n\
+      [ \"identifiers\", /\\w+\\$?/ ]\n\
+    ] );"
+  }]
+});
+
+pliny.property({
+      parent: "Primrose.Text.Grammar",
+      name: " name",
+      type: "String",
+      description: "A user-friendly name for the grammar, to be able to include it in an options listing."
+    });
+    pliny.property({
+      parent: "Primrose.Text.Grammar",
+      name: "grammar",
+      type: "Array",
+      description: "A collection of rules to apply to tokenize text. The rules should be an array of two-element arrays. The first element should be a token name (see [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names), followed by a regular expression that selects the token out of the source code."
+    });
+    pliny.method({
+      parent: "Primrose.Text.Grammar",
+      name: "tokenize",
+      parameters: [{
+        name: "text",
+        type: "String",
+        description: "The text to tokenize."
+      }],
+      returns: "An array of tokens, ammounting to drawing instructions to the renderer. However, they still need to be layed out to fit the bounds of the text area.",
+      description: "Breaks plain text up into a list of tokens that can later be rendered with color.",
+      examples: [{
+        name: 'Tokenize some JavaScript',
+        description: 'Primrose comes with a grammar for JavaScript built in.\n\
+  \n\
+  ## Code:\n\
+  \n\
+    grammar(\"JavaScript\");\n\
+    var tokens = new Primrose.Text.Grammars.JavaScript\n\
+      .tokenize("var x = 3;\\n\\\n\
+    var y = 2;\\n\\\n\
+    console.log(x + y);");\n\
+    console.log(JSON.stringify(tokens));\n\
+  \n\
+  ## Result:\n\
+  \n\
+    grammar(\"JavaScript\");\n\
+    [ \n\
+      { "value": "var", "type": "keywords", "index": 0, "line": 0 },\n\
+      { "value": " x = ", "type": "regular", "index": 3, "line": 0 },\n\
+      { "value": "3", "type": "numbers", "index": 8, "line": 0 },\n\
+      { "value": ";", "type": "regular", "index": 9, "line": 0 },\n\
+      { "value": "\\n", "type": "newlines", "index": 10, "line": 0 },\n\
+      { "value": " y = ", "type": "regular", "index": 11, "line": 1 },\n\
+      { "value": "2", "type": "numbers", "index": 16, "line": 1 },\n\
+      { "value": ";", "type": "regular", "index": 17, "line": 1 },\n\
+      { "value": "\\n", "type": "newlines", "index": 18, "line": 1 },\n\
+      { "value": "console", "type": "members", "index": 19, "line": 2 },\n\
+      { "value": ".", "type": "regular", "index": 26, "line": 2 },\n\
+      { "value": "log", "type": "functions", "index": 27, "line": 2 },\n\
+      { "value": "(x + y);", "type": "regular", "index": 30, "line": 2 }\n\
+    ]'
+      }]
+    });
+    pliny.value({
+  parent: "Primrose.Text.Grammars",
+  name: "JavaScript",
+  description: "A grammar for the JavaScript programming language."
+});
+pliny.class({
+  parent: "Primrose.Text.Controls",
+  name: "TextBox",
+  description: "Syntax highlighting textbox control.",
+  baseClass: "Primrose.Surface",
+  parameters: [{
+    name: "idOrCanvasOrContext",
+    type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
+    description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
+  }, {
+    name: "options",
+    type: "Object",
+    description: "Named parameters for creating the TextBox."
   }]
 });
 
