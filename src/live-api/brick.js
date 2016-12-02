@@ -1,7 +1,7 @@
 pliny.function({
   parent: "Live API",
   name: "brick",
-  description: "Creates a textured box. See [`box()`](#box) and [`textured()`](#textured) or [`colored()`](#colored). The texture will be repeated across the box.",
+  description: "Creates a textured box. See [`box()`](#LiveAPI_box) and [`textured()`](#LiveAPI_textured) or [`colored()`](#LiveAPI_colored). The texture will be repeated across the box.",
   parameters: [{
     name: "txt",
     type: "Number or Image",
@@ -28,7 +28,7 @@ pliny.function({
     name: "options",
     type: "Object",
     optional: true,
-    description: "A hashmap specifying other options to pass on to the material creation function. The material creation function is either [`colored()`](#colored) or [`textured()`](#textured), depending on the value of the `txt` parameter passed to this function."
+    description: "A hashmap specifying other options to pass on to the material creation function. The material creation function is either [`colored()`](#LiveAPI_colored) or [`textured()`](#LiveAPI_textured), depending on the value of the `txt` parameter passed to this function."
   }],
   returns: "THREE.Mesh",
   examples: [{

@@ -142,13 +142,200 @@ pliny.function({
 });
 pliny.function({
   parent: "Live API",
-  name: "material"
+  name: "material",
+  description: "A mechanism for creating and caching Three.js Materials so they don't get duplicated, as duplicate materials can severally slow down the system.\n\
+\n\
+You typically won't use this function on your own. It's usually called by one of the functions [`textured()`](#LiveAPI_textured] or [`colored()`](#LiveAPI_colored) to handle common material handling between the two.",
+  returns: "THREE.MeshStandardMaterial or THREE.MeshBasicMaterial",
+  parameters: [{
+    name: "textureDescription",
+    type: "String",
+    optional: true,
+    default: "none",
+    description: "When called from `textured()`, it is the string that uniquely identifies the texture being used as part of the material. When called from `colored()`, it's just an empty string. The `textureDescription` is then used as part of a `materialDescription` that is used to cache the material."
+  }, {
+    name: "options",
+    type: "Live API.material.optionsHash",
+    optional: true,
+    description: "Options to pass to the THREE.MeshStandardMaterial or THREE.MeshBasicMaterial constructor, or infrequently-used options to change the behavior of the setup. See [`Live API.material.optionsHash`](#LiveAPI_material_optionsHash) for more information."
+  }]
+});
+
+pliny.record({
+  parent: "Live API.material",
+  name: "optionsHash",
+  type: "Object",
+  description: "Optional options to alter how the material is created.",
+  parameters: [{
+    name: "color",
+    type: "Number",
+    optional: true,
+    default: "0xffffff",
+    description: "A hex-value RGB color to apply to the material."
+  }, {
+    name: "unshaded",
+    type: "Boolean",
+    optional: true,
+    default: false,
+    description: "Set to true to use THREE.MeshBasicMaterial instead of THREE.MeshStandardMaterial."
+  }, {
+    name: "side",
+    type: "Number",
+    optional: true,
+    default: "THREE.FrontSide",
+    description: "Used to set the sides of the material that get rendered. Options are:\n\
+\n\
+* THREE.FontSide\n\
+* THREE.BackSide\n\
+* THREE.DoubleSide"
+  }, {
+    name: "opacity",
+    type: "Number",
+    optional: true,
+    default: 1,
+    description: "Set how opaque the material will be. When this value is set to a value less than 1, the `transparent` option is automatically set as well"
+  }, {
+    name: "transparent",
+    type: "Boolean",
+    optional: true,
+    description: "Set to true to make the material participate in z-buffered transparency rendering."
+  }, {
+    name: "fog",
+    type: "Boolean",
+    optional: true,
+    default: true,
+    description: "Set whether or not the material is affected by fog in the scene."
+  }, {
+    name: "wireframe",
+    type: "Boolean",
+    optional: true,
+    default: true,
+    description: "Set whether or not the material is rendered as a wireframe, rather than full polygons."
+  }, {
+    name: "roughness",
+    type: "Number",
+    optional: true,
+    default: 0.5,
+    description: "When `unshaded` is falsey, sets the THREE.MeshStandardMaterial's diffuse scattering parameter."
+  }, {
+    name: "metalness",
+    type: "Number",
+    optional: true,
+    default: 0,
+    description: "When `unshaded` is falsey, sets the THREE.MeshStandardMaterial's specular reflection parameter."
+  }, {
+    name: "emissive",
+    type: "Boolean",
+    optional: true,
+    default: true,
+    description: "When `unshaded` is falsey, sets the light that the THREE.MeshStandardMaterial emits onto the scene."
+  }]
 });
 
 pliny.function({
   parent: "Live API",
   name: "textured",
-  description: "| [under construction]"
+  description: "Combines a geometry and a texture description into a mesh. The texture description can be quite complex, as there are a lot of options. The following description makes using this function sound quite complex, but it's actually quite easy to use. It's just complex in its implementation to be able to accommodate ease of use.",
+  returns: "THREE.Texture or THREE.CubeTexture",
+  parameters: [{
+    name: "geometry",
+    type: "THREE.Geometry or THREE.Mesh",
+    description: "The object to which to apply the texture. If the object provided is a THREE.Mesh, this replaces the material currently being used on the Mesh without creating a new Mesh."
+  }, {
+    name: "txt",
+    type: "one of: [String, 6-item Array of String, Primrose.Controls.Surface, HTMLCanvasElement, HTMLVideoElement, HTMLImageElement, THREE.Texture]",
+    description: "There are a lot of options for the types of things use can use for this parameter:\n\
+\n\
+* `String` - A texture will be loaded using the default texture loader with this value as the `src` attribute of the Image that is to be loaded.\n\
+* `6-item Array of String` - Each item of the array will be loaded as a texture as in the case of a single String, but the results will be used to create a THREE.CubeTexture, rather than a THREE.Texture, thereby creating a cube-map.\n\
+* `Primrose.Controls.Surface` - any subclass of the Surface class, including 2D button controls or text editors.\n\
+* `HTMLCanvasElement`, `HTMLVideoElement`, or `HTMLImageElement` - HTML elements that represent image data in some way.\n\
+* `THREE.Texture` - for convenience, any previously loaded texture may also be used as the texture parameter."
+  }, {
+    name: "options",
+    type: "Live API.textured.optionsHash",
+    optional: true,
+    description: "Options to pass to the THREE.Texture constructor, or infrequently-used options to change the behavior of the setup. See [`Live API.textured.optionsHash`](#LiveAPI_textured_optionsHash) for more information."
+  }],
+  examples: [{
+    name: "Basic usage",
+    description: "You'll typically want to create textures out of images.\n\
+\n\
+    grammar(\"JavaScript\");\n\
+    var moon = textured(circle(1, 45), \"moon.jpg\", {\n\
+      unshaded: true,\n\
+      fog: false\n\
+    });\n\
+    \n\
+    env.sky.add(moon); // assuming we have a `Primrose.BrowserEnvironment` named `env`\n\
+    moon.latLon(-30, 30, 7);\n\
+    moon.lookAt(env.scene.position);\n\
+\n\
+The result should appear as:\n\
+\n\
+![screenshot](images/moon.jpg)"
+  }]
+});
+
+pliny.record({
+  parent: "Live API.textured",
+  name: "optionsHash",
+  type: "Object",
+  description: "Optional options to alter how the texture is applied to the geometry. This also includes options that are passed on to the [`material()`](#LiveAPI_material) function.",
+  parameters: [{
+    name: "progress",
+    type: "Function",
+    optional: true,
+    description: "A callback function to use for tracking progress. The callback function should accept a standard [`ProgressEvent`](https://developer.mozilla.org/en-US/docs/Web/API/ProgressEvent)."
+  }, {
+    name: "resolve",
+    type: "Function",
+    optional: true,
+    description: "A callback function to use when a texture is successfully created. It's generally best to use this callback to add the mesh to the scene, rather than adding the mesh when `textured()` returns, as textures that need time to load will cause WebGL warnings and slow down the overall experience."
+  }, {
+    name: "reject",
+    type: "Function",
+    optional: true,
+    description: "An error callback function to use when the texture could not be loaded."
+  }, {
+    name: "shadow",
+    type: "Boolean",
+    optional: true,
+    description: "If true, this texture will receive shadows from other objects, and the mesh will cast shadows onto other objects."
+  }, {
+    name: "txtRepeatX",
+    type: "Number",
+    optional: true,
+    default: 1,
+    description: "The number of times to repeat the texture across the mesh in the X axis."
+  }, {
+    name: "txtRepeatY",
+    type: "Number",
+    optional: true,
+    default: 1,
+    description: "The number of times to repeat the texture across the mesh in the Y axis."
+  }, {
+    name: "anisotropy",
+    type: "Number",
+    optional: true,
+    default: 1,
+    description: "The degree to which to sharpen textures at large distances and sharp angles."
+  }, {
+    name: "scaleTexture",
+    type: "Number",
+    optional: true,
+    description: "The degree to which to resize a texture on both the X and Y  axis, if separate `scaleTextureWidth` and `scaleTextureHeight` options are not provided."
+  }, {
+    name: "scaleTextureWidth",
+    type: "Number",
+    optional: true,
+    description: "The degree to which to resize a texture on the X axis to fit on the model."
+  }, {
+    name: "scaleTextureHeight",
+    type: "Number",
+    optional: true,
+    description: "The degree to which to resize a texture on the Y axis to fit on the model."
+  }]
 });
 
 pliny.function({
@@ -265,7 +452,7 @@ It should look something like this:\n\
 pliny.function({
   parent: "Live API",
   name: "brick",
-  description: "Creates a textured box. See [`box()`](#box) and [`textured()`](#textured) or [`colored()`](#colored). The texture will be repeated across the box.",
+  description: "Creates a textured box. See [`box()`](#LiveAPI_box) and [`textured()`](#LiveAPI_textured) or [`colored()`](#LiveAPI_colored). The texture will be repeated across the box.",
   parameters: [{
     name: "txt",
     type: "Number or Image",
@@ -292,7 +479,7 @@ pliny.function({
     name: "options",
     type: "Object",
     optional: true,
-    description: "A hashmap specifying other options to pass on to the material creation function. The material creation function is either [`colored()`](#colored) or [`textured()`](#textured), depending on the value of the `txt` parameter passed to this function."
+    description: "A hashmap specifying other options to pass on to the material creation function. The material creation function is either [`colored()`](#LiveAPI_colored) or [`textured()`](#LiveAPI_textured), depending on the value of the `txt` parameter passed to this function."
   }],
   returns: "THREE.Mesh",
   examples: [{
@@ -778,7 +965,7 @@ not exactly helpful.\n\
 \n\
 Say you want a to model the sky as a sphere, or the inside of a helmet. You don't\n\
 care anything about the outside of this sphere, only the inside. You would use\n\
-InsideSphereGeometry in this case. Or its alias, [`shell()`](#shell)."
+InsideSphereGeometry in this case. Or its alias, [`shell()`](#LiveAPI_shell)."
 });
 
 pliny.function({
@@ -812,12 +999,12 @@ pliny.function({
   description: "The shell is basically an inside-out sphere. Say you want a to model\n\
 the sky as a sphere, or the inside of a helmet. You don't care anything about the\n\
 outside of this sphere, only the inside. You would use InsideSphereGeometry in this\n\
-case. It is mostly an alias for [`InsideSphereGeometry`](#InsideSphereGeometry).",
+case. It is mostly an alias for [`InsideSphereGeometry`](#LiveAPI_InsideSphereGeometry).",
   examples: [{
     name: "Create a sky sphere",
     description: "To create a sphere that hovers around the user at a\n\
 far distance, showing a sky of some kind, you can use the `shell()` function in\n\
-combination with the [`textured()`](#textured) function. Assuming you have an image\n\
+combination with the [`textured()`](#LiveAPI_textured) function. Assuming you have an image\n\
 file to use as the texture, execute code as such:\n\
 \n\
     grammar(\"JavaScript\");\n\
@@ -849,8 +1036,8 @@ file to use as the texture, execute code as such:\n\
 
 pliny.function({
   parent: "Live API",
-  name: "shooter",
-  description: "Creates a THREE.Raycaster."
+  name: "raycaster",
+  description: "Creates a THREE.Raycaster. This is useful so you don't have to try to figure out how to import any parts of Three.js separately from Primrose. It also makes it possible to use in functional settings."
 });
 pliny.function({
   parent: "Live API",

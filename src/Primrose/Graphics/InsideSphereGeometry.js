@@ -42,7 +42,7 @@ not exactly helpful.\n\
 \n\
 Say you want a to model the sky as a sphere, or the inside of a helmet. You don't\n\
 care anything about the outside of this sphere, only the inside. You would use\n\
-InsideSphereGeometry in this case. Or its alias, [`shell()`](#shell)."
+InsideSphereGeometry in this case. Or its alias, [`shell()`](#LiveAPI_shell)."
 });
 
 export default class InsideSphereGeometry extends Geometry {

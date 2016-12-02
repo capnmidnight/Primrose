@@ -29,12 +29,12 @@ pliny.function({
   description: "The shell is basically an inside-out sphere. Say you want a to model\n\
 the sky as a sphere, or the inside of a helmet. You don't care anything about the\n\
 outside of this sphere, only the inside. You would use InsideSphereGeometry in this\n\
-case. It is mostly an alias for [`InsideSphereGeometry`](#InsideSphereGeometry).",
+case. It is mostly an alias for [`InsideSphereGeometry`](#LiveAPI_InsideSphereGeometry).",
   examples: [{
     name: "Create a sky sphere",
     description: "To create a sphere that hovers around the user at a\n\
 far distance, showing a sky of some kind, you can use the `shell()` function in\n\
-combination with the [`textured()`](#textured) function. Assuming you have an image\n\
+combination with the [`textured()`](#LiveAPI_textured) function. Assuming you have an image\n\
 file to use as the texture, execute code as such:\n\
 \n\
     grammar(\"JavaScript\");\n\

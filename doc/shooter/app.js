@@ -25,7 +25,7 @@ var cube = range(6, function(i) { return "../images/space" + i + ".jpg"; }),
   sounds = null,
   nextSound = 0,
   explosion = null,
-  checker = shooter();
+  checker = raycaster();
 for(var s = 1; s <= 2; ++s){
   for(var x = 0; x < 2; ++x){
     for(var y = 0; y < 2; ++y){

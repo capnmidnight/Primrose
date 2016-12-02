@@ -11,7 +11,8 @@ var env = new Primrose.BrowserEnvironment({
 
   moon = textured(circle(1, 45), "moon.jpg", {
     unshaded: true,
-    fog: false
+    fog: false,
+    color: 0xffef9f
   }),
 
   pod = hub();
@@ -22,7 +23,6 @@ pod.position.set(0, 0, -5);
 env.sky.add(moon);
 moon.latLon(-30, 30, 7);
 moon.lookAt(env.scene.position);
-moon.material.color.setHex(0xffef9f);
 
 Primrose.Graphics.ModelLoader.loadModel("../models/dolphin.obj")
   .then(function(dolphinTemplate) {

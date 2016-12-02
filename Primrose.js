@@ -5454,11 +5454,15 @@ function material(textureDescription, options) {
   return cache(materialDescription, function () {
     var materialOptions = {
       fog: options.fog,
-      transparent: options.transparent || options.opacity < 1,
+      transparent: options.transparent,
       opacity: options.opacity,
       side: options.side || FrontSide
     },
         MaterialType = MeshStandardMaterial;
+
+    if (options.opacity < 1) {
+      materialOptions.transparent = true;
+    }
 
     if (options.unshaded) {
       materialOptions.shading = FlatShading;
@@ -11413,13 +11417,13 @@ function loadTexture$1(id, url, progress) {
 
 function textured$1(geometry, txt, options) {
   options = Object.assign({}, {
-    txtRepeatS: 1,
-    txtRepeatT: 1,
+    txtRepeatX: 1,
+    txtRepeatY: 1,
     anisotropy: 1
   }, options);
 
   var txtID = (txt.id || txt).toString(),
-      textureDescription = "Primrose.textured(" + txtID + ", " + options.txtRepeatS + ", " + options.txtRepeatT + ", " + options.anisotropy + ", " + options.scaleTextureWidth + ", " + options.scaleTextureHeight + ")";
+      textureDescription = "Primrose.textured(" + txtID + ", " + options.txtRepeatX + ", " + options.txtRepeatY + ", " + options.anisotropy + ", " + options.scaleTextureWidth + ", " + options.scaleTextureHeight + ")";
   var texturePromise = cache(textureDescription, function () {
     if (typeof txt === "string" || txt instanceof Array || txt.length === 6) {
       return loadTexture$1(textureDescription, txt, options.progress);
@@ -11459,9 +11463,7 @@ function textured$1(geometry, txt, options) {
         }
         txt._material = mat;
         retValue = txt.texture;
-      } else if (txt.isTextBox) {
-        retValue = txt.renderer.texture;
-      } else if (txt instanceof HTMLCanvasElement || txt instanceof HTMLVideoElement) {
+      } else if (txt instanceof HTMLCanvasElement || txt instanceof HTMLVideoElement || txt instanceof HTMLImageElement) {
         retValue = new Texture(txt);
       } else if (txt.isTexture) {
         retValue = txt;
@@ -11513,9 +11515,9 @@ function textured$1(geometry, txt, options) {
   }
 
   texturePromise.then(function (texture) {
-    if (options.txtRepeatS * options.txtRepeatT > 1) {
+    if (options.txtRepeatX * options.txtRepeatY > 1) {
       texture.wrapS = texture.wrapT = RepeatWrapping;
-      texture.repeat.set(options.txtRepeatS, options.txtRepeatT);
+      texture.repeat.set(options.txtRepeatX, options.txtRepeatY);
     }
 
     texture.anisotropy = options.anisotropy;
@@ -11758,19 +11760,19 @@ function box$1(width, height, length, t, u, v) {
   });
 }
 
-function brick(txt, w, h, l, options) {
-  w = w || 1;
-  h = h || 1;
-  l = l || 1;
+function brick(txt, width, height, length, options) {
+  width = width || 1;
+  height = height || 1;
+  length = length || 1;
   options = Object.assign({}, {
-    txtRepeatS: w,
-    txtRepeatT: l,
+    txtRepeatS: width,
+    txtRepeatT: length,
     anisotropy: 8,
     transparent: true,
     opacity: 1
   }, options);
   var m = typeof txt === "number" ? colored$1 : textured$1,
-      obj = m(box$1(w, h, l), txt, options);
+      obj = m(box$1(width, height, length), txt, options);
   return obj;
 }
 
@@ -13096,7 +13098,118 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 
 
+var asyncGenerator = function () {
+  function AwaitValue(value) {
+    this.value = value;
+  }
 
+  function AsyncGenerator(gen) {
+    var front, back;
+
+    function send(key, arg) {
+      return new Promise(function (resolve, reject) {
+        var request = {
+          key: key,
+          arg: arg,
+          resolve: resolve,
+          reject: reject,
+          next: null
+        };
+
+        if (back) {
+          back = back.next = request;
+        } else {
+          front = back = request;
+          resume(key, arg);
+        }
+      });
+    }
+
+    function resume(key, arg) {
+      try {
+        var result = gen[key](arg);
+        var value = result.value;
+
+        if (value instanceof AwaitValue) {
+          Promise.resolve(value.value).then(function (arg) {
+            resume("next", arg);
+          }, function (arg) {
+            resume("throw", arg);
+          });
+        } else {
+          settle(result.done ? "return" : "normal", result.value);
+        }
+      } catch (err) {
+        settle("throw", err);
+      }
+    }
+
+    function settle(type, value) {
+      switch (type) {
+        case "return":
+          front.resolve({
+            value: value,
+            done: true
+          });
+          break;
+
+        case "throw":
+          front.reject(value);
+          break;
+
+        default:
+          front.resolve({
+            value: value,
+            done: false
+          });
+          break;
+      }
+
+      front = front.next;
+
+      if (front) {
+        resume(front.key, front.arg);
+      } else {
+        back = null;
+      }
+    }
+
+    this._invoke = send;
+
+    if (typeof gen.return !== "function") {
+      this.return = undefined;
+    }
+  }
+
+  if (typeof Symbol === "function" && Symbol.asyncIterator) {
+    AsyncGenerator.prototype[Symbol.asyncIterator] = function () {
+      return this;
+    };
+  }
+
+  AsyncGenerator.prototype.next = function (arg) {
+    return this._invoke("next", arg);
+  };
+
+  AsyncGenerator.prototype.throw = function (arg) {
+    return this._invoke("throw", arg);
+  };
+
+  AsyncGenerator.prototype.return = function (arg) {
+    return this._invoke("return", arg);
+  };
+
+  return {
+    wrap: function (fn) {
+      return function () {
+        return new AsyncGenerator(fn.apply(this, arguments));
+      };
+    },
+    await: function (value) {
+      return new AwaitValue(value);
+    }
+  };
+}();
 
 
 
@@ -13469,7 +13582,7 @@ Raycaster.prototype = {
 
 };
 
-function shooter() {
+function raycaster() {
   return new Raycaster();
 }
 
@@ -13624,7 +13737,7 @@ var index$2 = {
   range: range,
   ring: ring,
   shell: shell$1,
-  shooter: shooter,
+  raycaster: raycaster,
   sphere: sphere$1,
   textured: textured$1,
   v3: v3
@@ -13646,7 +13759,7 @@ var liveAPI = Object.freeze({
 	range: range,
 	ring: ring,
 	shell: shell$1,
-	shooter: shooter,
+	raycaster: raycaster,
 	sphere: sphere$1,
 	textured: textured$1,
 	v3: v3,
@@ -29725,6 +29838,13 @@ var InputProcessor = function (_AbstractEventEmitter) {
   }]);
   return InputProcessor;
 }(AbstractEventEmitter);
+
+function setCursorCommand(obj, mod, key, func, cur) {
+  var name = mod + "_" + key;
+  obj[name] = function (prim, tokenRows) {
+    prim["cursor" + func](tokenRows, prim[cur + "Cursor"]);
+  };
+}
 
 var OperatingSystem = function () {
   function OperatingSystem(name, pre1, pre2, redo, pre3, home, end, pre5) {
