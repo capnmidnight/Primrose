@@ -1,6 +1,9 @@
-extends ../templates/documentation.pug
+extends ../templates/documentationBase.pug
 
-block document
+append header
+  h1 Demos
+
+block main
   for file in dir("**/screenshot.jpg").map(rem).map(parent).map((p) => path.join(fileRoot, p))
     article
       a(href= file)
