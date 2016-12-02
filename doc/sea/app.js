@@ -10,7 +10,8 @@ var env = new Primrose.BrowserEnvironment({
 }),
 
   moon = textured(circle(1, 45), "moon.jpg", {
-    unshaded: true
+    unshaded: true,
+    fog: false
   }),
 
   pod = hub();
