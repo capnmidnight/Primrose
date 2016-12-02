@@ -101,14 +101,12 @@ gulp.task("clean", [nt.clean("Primrose:full", [
   "doc/Primrose*.js"
 ])]);
 
-const tidyFiles = [
+gulp.task("tidy", [nt.clean("Primrose", [
   "PrimroseWithDoc*.js",
   "doc/*/appWithDoc.js",
   "doc/*/appDocumentation.js",
   "doc/PrimroseDocumentation.modules.js"
-];
-gulp.task("tidy", [nt.clean("Primrose", tidyFiles, tasks.release)]);
-gulp.task("tidy:only", [nt.clean("Primrose", tidyFiles)]);
+])]);
 
 gulp.task("copy", ["tidy"], () => gulp.src(["Primrose.min.js"])
   .pipe(gulp.dest("quickstart")));
