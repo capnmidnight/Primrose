@@ -782,6 +782,7 @@ The result should appear as:\n\
 ![screenshot](images/brick.jpg)"
   }]
 });
+
 pliny.function({
   name: "axis",
   description: "Creates a set of reference axes, with X as red, Y as green, and Z as blue.",
@@ -899,6 +900,7 @@ The results should look like this:\n\
 <img src=\"images/cloud.jpg\">"
   }]
 });
+
 pliny.function({
   name: "cylinder",
   description: "Shorthand function for creating a new THREE.CylinderGeometry object.",

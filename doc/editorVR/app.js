@@ -43293,18 +43293,28 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
       var _this2 = this;
 
       var container = document.querySelector(containerSpec);
-      return this.displays.map(function (display, i) {
-        var btn = document.createElement("button"),
-            isStereo = VR.isStereoDisplay(display),
-            enterVR = _this2.goFullScreen.bind(_this2, i);
+      var newButton = function newButton(title, text, thunk) {
+        var btn = document.createElement("button");
         btn.type = "button";
-        btn.className = isStereo ? "stereo" : "mono";
-        btn.title = display.displayName;
-        btn.appendChild(document.createTextNode(display.displayName));
-        btn.addEventListener("click", enterVR, false);
+        btn.title = title;
+        btn.appendChild(document.createTextNode(text));
+        btn.addEventListener("click", thunk, false);
         container.appendChild(btn);
         return btn;
+      };
+
+      var buttons = this.displays.map(function (display, i) {
+        var enterVR = _this2.goFullScreen.bind(_this2, i),
+            btn = newButton(display.displayName, display.displayName, enterVR),
+            isStereo = VR.isStereoDisplay(display);
+        btn.className = isStereo ? "stereo" : "mono";
+        return btn;
       });
+
+      buttons.push(newButton("Primrose", "Primrose", function () {
+        return document.location = "https://www.primrosevr.com";
+      }));
+      return buttons;
     }
   }, {
     key: "lockMovement",

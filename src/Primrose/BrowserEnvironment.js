@@ -971,18 +971,26 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
 
   insertFullScreenButtons(containerSpec){
     const container = document.querySelector(containerSpec);
-    return this.displays.map((display, i) => {
-      const btn = document.createElement("button"),
-        isStereo = VR.isStereoDisplay(display),
-        enterVR = this.goFullScreen.bind(this, i);
+    const newButton = (title, text, thunk) => {
+      const btn = document.createElement("button");
       btn.type = "button";
-      btn.className = isStereo ? "stereo" : "mono";
-      btn.title = display.displayName;
-      btn.appendChild(document.createTextNode(display.displayName));
-      btn.addEventListener("click", enterVR, false);
+      btn.title = title;
+      btn.appendChild(document.createTextNode(text));
+      btn.addEventListener("click", thunk, false);
       container.appendChild(btn);
       return btn;
+    };
+
+    const buttons = this.displays.map((display, i) => {
+      const enterVR = this.goFullScreen.bind(this, i),
+        btn = newButton(display.displayName, display.displayName, enterVR),
+        isStereo = VR.isStereoDisplay(display);
+      btn.className = isStereo ? "stereo" : "mono";
+      return btn;
     });
+
+    buttons.push(newButton("Primrose", "Primrose", () => document.location = "https://www.primrosevr.com"));
+    return buttons;
   }
 }
 
