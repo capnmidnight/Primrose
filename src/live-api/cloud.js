@@ -1,8 +1,3 @@
-import cache from "../util/cache";
-import { Geometry } from "three/src/core/Geometry";
-import { PointsMaterial } from "three/src/materials/PointsMaterial";
-import { Points } from "three/src/objects/Points";
-
 pliny.function({
   name: "cloud",
   description: "Creates a point cloud with points of a fixed color and size out of an array of vertices.",
@@ -45,6 +40,11 @@ The results should look like this:\n\
 <img src=\"images/cloud.jpg\">"
   }]
 });
+
+import cache from "../util/cache";
+import { Geometry } from "three/src/core/Geometry";
+import { PointsMaterial } from "three/src/materials/PointsMaterial";
+import { Points } from "three/src/objects/Points";
 export default function cloud(verts, c, s) {
   var geom = new Geometry();
   for (var i = 0; i < verts.length; ++i) {

@@ -1,7 +1,3 @@
-import textured from "./textured";
-import colored from "./colored";
-import box from "./box";
-
 pliny.function({
   name: "brick",
   description: "Creates a textured box. See [`box()`](#box) and [`textured()`](#textured). The texture will be repeated across the box.",
@@ -44,6 +40,10 @@ The result should appear as:\n\
 ![screenshot](images/brick.jpg)"
   }]
 });
+
+import textured from "./textured";
+import colored from "./colored";
+import box from "./box";
 export default function brick(txt, w, h, l, options) {
   w = w || 1;
   h = h || 1;
