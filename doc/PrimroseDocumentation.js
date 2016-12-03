@@ -3774,16 +3774,12 @@ pliny.value({
   type: "Array of Number",
   description: "A selection of color values that closely match skin colors of people."
 });
-
-
 pliny.value({
   parent: "Primrose.Constants",
   name: "SYS_FONTS",
   type: "String",
   description: "A selection of fonts that will match whatever the user's operating system normally uses."
 });
-
-
 pliny.enumeration({
   parent: "Primrose.Constants",
   name: "Quality",
@@ -3792,38 +3788,298 @@ pliny.enumeration({
 pliny.class({
   parent: "Primrose",
   name: "BrowserEnvironment",
-  description: "Make a Virtual Reality app in your web browser!"
+  description: "Make a Virtual Reality app in your web browser!\n\
+\n\
+The `BrowserEnvironment` class provides a plethora of options for setting up new scenes and customizing the VR experience to your system. It is the starting point for all of your projects. It is named `BrowserEnvironment` as one day their may be an `AltspaceVREnvironment` or a `HiFidelityEnvironment`.",
+  parameters: [{
+    name: "options",
+    type: "Primrose.BrowserEnvironment.optionsHash",
+    description: "Settings to change how the environment looks and behaves. See [`Primrose.BrowserEnvironment.optionsHash`](#Primrose_BrowserEnvironment_optionsHash) for more information."
+  }]
 });
 
-pliny.namespace({
-  parent: "Primrose",
-  name: "Constants",
-  description: "Useful values that are used frequently."
+pliny.record({
+  parent: "Primrose.BrowserEnvironment",
+  name: "optionsHash",
+  description: "Settings to change how the environment looks and behaves.",
+  parameters: [{
+    name: "antialias",
+    type: "Boolean",
+    optional: true,
+    default: true,
+    description: "Enable or disable anti-aliasing"
+  }, {
+    name: "quality",
+    type: "Primrose.Constants.Quality",
+    optional: true,
+    default: "Primrose.Constants.Quality.MAXIMUM",
+    description: "The quality level at which to start rendering."
+  }, {
+    name: "fullScreenButtonContainer",
+    type: "String",
+    optional: true,
+    description: "A DOM query selector that, if provided, will have buttons added to it for each of the fullscreen modes."
+  }, {
+    name: "useGaze",
+    type: "Boolean",
+    optional: true,
+    description: "Whether or not to used timed ring cursors."
+  }, {
+    name: "useFog",
+    type: "Boolean",
+    optional: true,
+    description: "Whether or not to use fog in the scene to limit view distance."
+  }, {
+    name: "avatarHeight",
+    type: "Number",
+    optional: true,
+    default: 1.65,
+    description: "The default height of the user's avatar, if the VR system doesn't provide a height."
+  }, {
+    name: "walkSpeed",
+    type: "Number",
+    optional: true,
+    default: 2,
+    description: "The number of meters per second at which the user runs."
+  }, {
+    name: "disableKeyboard",
+    type: "Boolean",
+    optional: true,
+    description: "Set to true to disable keyboard-based input."
+  }, {
+    name: "enableShadows",
+    type: "",
+    optional: true,
+    description: "Set to true to enable the use of shadows on objects in the scene."
+  }, {
+    name: "shadowMapSize",
+    type: "Number",
+    optional: true,
+    default: 1024,
+    description: "The size to use for the width and height of the shadow map that will be generated."
+  }, {
+    name: "gravity",
+    type: "Number",
+    optional: true,
+    default: 9.8,
+    description: "The acceleration applied to falling objects."
+  }, {
+    name: "gazeLength",
+    type: "Number",
+    optional: true,
+    default: 1.5,
+    description: "The amount of time in seconds to require gazes on objects before triggering the gaze event."
+  }, {
+    name: "disableMirroring",
+    type: "Boolean",
+    optional: true,
+    description: "By default, what we see in the VR view will get mirrored to a regular view on the primary screen. Set to true to improve performance."
+  }, {
+    name: "disableDefaultLighting",
+    type: "Boolean",
+    optional: true,
+    description: "By default, a single light is added to the scene,"
+  }, {
+    name: "backgroundColor",
+    type: "Number",
+    optional: true,
+    default: 0xafbfff,
+    description: "The color that WebGL clears the background with before drawing."
+  }, {
+    name: "skyTexture",
+    type: "String or Array of String",
+    optional: true,
+    description: "The texture(s) to use for the sky."
+  }, {
+    name: "groundTexture",
+    type: "String",
+    optional: true,
+    description: "The texture to use for the ground."
+  }, {
+    name: "nearPlane",
+    type: "Number",
+    optional: true,
+    default: 0.01,
+    description: "The near plane of the camera."
+  }, {
+    name: "drawDistance",
+    type: "Number",
+    optional: true,
+    default: 100,
+    description: "The distance from the near plane to the far plane of the camera."
+  }, {
+    name: "defaultFOV",
+    type: "Number",
+    optional: true,
+    default: 75,
+    description: "The field of view to use in non-VR settings."
+  }, {
+    name: "ambientSound",
+    type: "String",
+    optional: true,
+    description: "The sound to play on loop in the background."
+  }, {
+    name: "canvasElement",
+    type: "HTMLCanvasElement",
+    optional: true,
+    default: "frontBuffer",
+    description: "HTML5 canvas element to which to render, if one had already been created."
+  }, {
+    name: "renderer",
+    type: "THREE.WebGLRenderer",
+    optional: true,
+    description: "Three.js renderer, if one had already been created."
+  }, {
+    name: "context",
+    type: "WebGLRenderingContext",
+    optional: true,
+    description: "A WebGL context to use, if one had already been created."
+  }, {
+    name: "scene",
+    type: "THREE.Scene",
+    optional: true,
+    description: "Three.js scene, if one had already been created."
+  }, {
+    name: "nonstandardIPD",
+    type: "Number",
+    optional: true,
+    description: "When creating a neck model, this is the how far apart to set the eyes. I highly suggest you don't go down the road that requires setting this. I will not help you understand what it does, because I would rather you just not use it."
+  }, {
+
+    name: "nonstandardNeckLength",
+    type: "Number",
+    optional: true,
+    description: "When creating a neck model, this is how high the neck runs. This is an experimental feature for setting the height of a user's \"neck\" on orientation-only systems (such as Google Cardboard and Samsung Gear VR) to create a more realistic feel."
+  }, {
+    name: "nonstandardNeckDepth",
+    type: "Number",
+    optional: true,
+    description: "When creating a neck model, this is the distance from the center meridian of the neck to the eyes."
+  }, {
+    name: "showHeadPointer",
+    type: "Boolean",
+    optional: true,
+    default: true,
+    description: "Whether or not to show a pointer tracking the gaze direction."
+  }]
 });
 
-pliny.value({
-  parent: "Primrose.Constants",
-  name: "PIXEL_SCALES",
-  description: "Scaling factors for changing the resolution of the display when the render quality level changes."
-});
-pliny.value({
-  parent: "Primrose.Constants",
-  name: "SKINS",
-  type: "Array of Number",
-  description: "A selection of color values that closely match skin colors of people."
-});
-pliny.value({
-  parent: "Primrose.Constants",
-  name: "SYS_FONTS",
-  type: "String",
-  description: "A selection of fonts that will match whatever the user's operating system normally uses."
-});
-pliny.enumeration({
-  parent: "Primrose.Constants",
-  name: "Quality",
-  description: "Graphics quality settings."
-});
-pliny.class({
+pliny.property({
+      parent: "Primrose.BrowserEnvironment",
+      name: "options",
+      type: "Object",
+      description: "A manager for messages sent across the network."
+    });
+    pliny.property({
+      parent: "Primrose.BrowserEnvironment",
+      name: "network",
+      type: "Primrose.Network.Manager",
+      description: "A manager for messages sent across the network."
+    });
+    pliny.property({
+      parent: "Primrose.BrowserEnvironment",
+      name: "audioQueue",
+      type: "Array",
+      description: "Remote user Audio elements that joined as peers before the `BrowserEnvironment` could finish loading all of the assets."
+    });
+    pliny.method({
+      parent: "Primrose.BrowserEnvironment",
+      name: "zero",
+      description: "Zero and reset sensor data."
+    });
+    pliny.property({
+      parent: "Primrose.BrowserEnvironment",
+      name: "turns",
+      type: "Primrose.Angle",
+      description: "A slewing angle that loosely follows the user around."
+    });
+    pliny.property({
+      parent: "Primrose.BrowserEnvironment",
+      name: "factories",
+      type: "Object",
+      description: "A database of object factories, generally used to create 3D models."
+    });
+    pliny.method({
+      parent: "Primrose.BrowserEnvironment",
+      name: "createElement",
+      description: "Different types of HTML elements are represented by different types of 3D elements. This method provides a DOM-like interface for creating them.",
+      returns: "Primrose.Entity",
+      parameters: [{
+        name: "type",
+        type: "String",
+        description: "The type of object to create."
+      }]
+    });
+    pliny.method({
+      parent: "Primrose.BrowserEnvironment",
+      name: "appendChild",
+      description: "Add an object to the scene, potentially informing the object so that it may perform other tasks during the transition.",
+      returns: "THREE.Object3D",
+      parameters: [{
+        name: "elem",
+        type: "THREE.Object3D",
+        description: "The object to add to the scene."
+      }]
+    });
+    pliny.property({
+      parent: "Primrose.BrowserEnvironment",
+      name: "speech",
+      type: "Primrose.Audio.Speech",
+      description: "A text-2-speech system."
+    });
+    pliny.property({
+      parent: "Primrose.BrowserEnvironment",
+      name: "audio",
+      type: "Primrose.Audio.Audio3D",
+      description: "An audio graph that keeps track of 3D information."
+    });
+    pliny.property({
+      parent: "Primrose.BrowserEnvironment",
+      name: "music",
+      type: "Primrose.Audio.Music",
+      description: "A primitive sort of synthesizer for making simple music."
+    });
+    pliny.property({
+      parent: "Primrose.BrowserEnvironment",
+      name: "pickableObjects",
+      type: "Array",
+      description: "The objects to raycast against to check for clicks."
+    });
+    pliny.method({
+      parent: "Primrose.BrowserEnvironment",
+      name: "registerPickableObject",
+      description: "Add an object to the list of pickable objects.",
+      parameters: [{
+        name: "obj",
+        type: "Any",
+        description: "The object to make pickable."
+      }]
+    });
+    pliny.property({
+      parent: "Primrose.BrowserEnvironment",
+      name: "currentControl",
+      type: "Primrose.Control.BaseControl",
+      description: "The currently selected control, by a user-click or some other function."
+    });
+    pliny.property({
+      parent: "Primrose.BrowserEnvironment",
+      name: "fadeOut",
+      returns: "Promise",
+      description: "Causes the fully rendered view fade out to the color provided `options.backgroundColor`"
+    });
+    pliny.property({
+      parent: "Primrose.BrowserEnvironment",
+      name: "fadeIn",
+      returns: "Promise",
+      description: "Causes the faded out cube to disappear."
+    });
+    pliny.property({
+      parent: "Primrose.BrowserEnvironment",
+      name: "teleportAvailable",
+      type: "Boolean",
+      description: "Returns true when the system is not currently fading out or in.`"
+    });
+    pliny.class({
   parent: "Primrose.Controls",
   name: "Form",
   baseClass: "Primrose.Controls.Entity",

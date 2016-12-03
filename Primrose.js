@@ -33015,6 +33015,10 @@ var PlainText = new Grammar("PlainText", [["newlines", /(?:\r\n|\r|\n)/]]);
 
 var PIXEL_SCALES = [0.5, 0.25, 0.333333, 0.5, 1];
 
+var SKINS = [0xFFDFC4, 0xF0D5BE, 0xEECEB3, 0xE1B899, 0xE5C298, 0xFFDCB2, 0xE5B887, 0xE5A073, 0xE79E6D, 0xDB9065, 0xCE967C, 0xC67856, 0xBA6C49, 0xA57257, 0xF0C8C9, 0xDDA8A0, 0xB97C6D, 0xA8756C, 0xAD6452, 0x5C3836, 0xCB8442, 0xBD723C, 0x704139, 0xA3866A, 0x870400, 0x710101, 0x430000, 0x5B0001, 0x302E2E];
+
+var SYS_FONTS = "-apple-system, '.SFNSText-Regular', 'San Francisco', 'Roboto', 'Segoe UI', 'Helvetica Neue', 'Lucida Grande', sans-serif";
+
 var Quality = {
   NONE: 0,
   VERYLOW: 1,
@@ -33022,6 +33026,13 @@ var Quality = {
   MEDIUM: 3,
   HIGH: 4,
   MAXIMUM: PIXEL_SCALES.length - 1
+};
+
+var constants$1 = {
+  PIXEL_SCALES: PIXEL_SCALES,
+  SKINS: SKINS,
+  SYS_FONTS: SYS_FONTS,
+  Quality: Quality
 };
 
 /**
@@ -40580,9 +40591,11 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
 
     var _this = possibleConstructorReturn(this, (BrowserEnvironment.__proto__ || Object.getPrototypeOf(BrowserEnvironment)).call(this));
 
-    _this.network = null;
     _this.options = Object.assign({}, BrowserEnvironment.DEFAULTS, options);
     _this.options.foregroundColor = _this.options.foregroundColor || complementColor(new Color(_this.options.backgroundColor)).getHex();
+
+    _this.network = null;
+
     if (_this.options.nonstandardIPD !== null) {
       _this.options.nonstandardIPD *= 0.5;
     }
@@ -40755,8 +40768,9 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
       button: _this.options.button && typeof _this.options.button.model === "string" && _this.options.button.model,
       font: _this.options.font
     },
-        resolutionScale = 1,
-        factories = {
+        resolutionScale = 1;
+
+    _this.factories = {
       button: Button2D,
       img: Image,
       section: Surface,
@@ -40773,11 +40787,9 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
       }
     };
 
-    _this.factories = factories;
-
     _this.createElement = function (type) {
-      if (factories[type]) {
-        return factories[type].create();
+      if (_this.factories[type]) {
+        return _this.factories[type].create();
       }
     };
 
@@ -40822,7 +40834,7 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
       }
 
       if (models.avatar) {
-        factories.avatar = new ModelLoader(models.avatar);
+        _this.factories.avatar = new ModelLoader(models.avatar);
       }
 
       if (models.button) {
@@ -40852,11 +40864,11 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
     //
     // Initialize public properties
     //
-    _this.avatarHeight = _this.options.avatarHeight;
-    _this.walkSpeed = _this.options.walkSpeed;
 
     _this.speech = new Speech(_this.options.speech);
+
     _this.audio = new Audio3D();
+
     if (_this.options.ambientSound) {
       _this.audio.load3DSound(_this.options.ambientSound, true, -1, 1, -1).then(function (aud) {
         if (!(aud.source instanceof MediaElementAudioSourceNode)) {
@@ -40882,6 +40894,7 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
     _this.music = new Music(_this.audio);
 
     _this.pickableObjects = [];
+
     _this.registerPickableObject = _this.pickableObjects.push.bind(_this.pickableObjects);
 
     _this.currentControl = null;
@@ -41496,7 +41509,6 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
 BrowserEnvironment.DEFAULTS = {
   antialias: true,
   quality: Quality.MAXIMUM,
-  useLeap: false,
   useGaze: false,
   useFog: false,
   avatarHeight: 1.65,
@@ -41539,28 +41551,6 @@ BrowserEnvironment.DEFAULTS = {
   nonstandardNeckLength: null,
   nonstandardNeckDepth: null,
   showHeadPointer: true
-};
-
-var PIXEL_SCALES$1 = [0.5, 0.25, 0.333333, 0.5, 1];
-
-var SKINS$1 = [0xFFDFC4, 0xF0D5BE, 0xEECEB3, 0xE1B899, 0xE5C298, 0xFFDCB2, 0xE5B887, 0xE5A073, 0xE79E6D, 0xDB9065, 0xCE967C, 0xC67856, 0xBA6C49, 0xA57257, 0xF0C8C9, 0xDDA8A0, 0xB97C6D, 0xA8756C, 0xAD6452, 0x5C3836, 0xCB8442, 0xBD723C, 0x704139, 0xA3866A, 0x870400, 0x710101, 0x430000, 0x5B0001, 0x302E2E];
-
-var SYS_FONTS$1 = "-apple-system, '.SFNSText-Regular', 'San Francisco', 'Roboto', 'Segoe UI', 'Helvetica Neue', 'Lucida Grande', sans-serif";
-
-var Quality$1 = {
-  NONE: 0,
-  VERYLOW: 1,
-  LOW: 2,
-  MEDIUM: 3,
-  HIGH: 4,
-  MAXIMUM: PIXEL_SCALES$1.length - 1
-};
-
-var constants$3 = {
-  PIXEL_SCALES: PIXEL_SCALES$1,
-  SKINS: SKINS$1,
-  SYS_FONTS: SYS_FONTS$1,
-  Quality: Quality$1
 };
 
 var COUNTER$5 = 0;
@@ -42813,7 +42803,7 @@ var obj$1 = {
   Angle: Angle,
   Audio: Audio$1,
   BrowserEnvironment: BrowserEnvironment,
-  Constants: constants$3,
+  Constants: constants$1,
   Controls: Controls,
   DOM: DOM,
   Graphics: Graphics,
@@ -42834,7 +42824,7 @@ var HTTP = Object.freeze({
 	Angle: Angle,
 	Audio: Audio$1,
 	BrowserEnvironment: BrowserEnvironment,
-	Constants: constants$3,
+	Constants: constants$1,
 	Controls: Controls,
 	DOM: DOM,
 	Graphics: Graphics,
