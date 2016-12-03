@@ -1,7 +1,9 @@
 extends ../templates/documentation.pug
-block document
+
+block header
   h1 Installation and Setup
 
+block document
   blockquote: p NOTE: The easiest way to get up and running with Primrose is to download the Quick Start template. Head over to the #[a(href="index.html") Getting Started page] to download it.
 
   p There are several ways to acquire, install, and use Primrose, depending on your needs. In general, there are two versions of the Primrose package, one that has been "minified", and one that has not. Minification is a process of removing comments and unnecessary whitespace characters, as well as renaming some internal, inaccessible variables and functions to be short, one- or two-character long names.
@@ -19,7 +21,7 @@ block document
   ul
     li: a(href="https://github.com/capnmidnight/pliny/blob/master/README.md", target="_blank") Read about how the Pliny documentation system works with Primrose
     li: a(href="https://www.github.com/NotionTheory/Primrose", target="_blank") Check out the GitHub repository
-    li: a(href="https://trello.com/b/NVZsaC1P/primrose-development-tasks", target="_blank") File an issue report
+    li: a(href="https://github.com/NotionTheory/Primrose/issues", target="_blank") File an issue report
     li: a(href="http://threejs.org/", target="_blank") Learn more about Three.js
     li: a(href="http://webvr.info/", target="_blank") Learn more about WebVR
     li: a(href="https://developer.mozilla.org/en-US/docs/Web/API/WebVR_API", target="_blank") Read the WebVR documentation on MDN
@@ -93,34 +95,23 @@ block document
   blockquote NOTE: because of bandwidth limitations with the Primrose website hosting provider, it is advised that you copy the necessary files to your own project directory and host them with your own provider.
 
   h2 Dependencies
-  p There are also a number of libraries on which Primrose depends. The file #[code PrimroseDependencies.js] contains both the required and optional dependencies. The file #[code Primrose.js] contains the dependencies, plus the Primrose library. The file #[code PrimroseLib.js] contains only the Primrose library, without the dependencies.
-
-  p If you are only using Primrose as a client-side library, then there are only two external dependencies.
+  p There are also a number of libraries on which Primrose depends. If you are only using Primrose as a client-side library, then there are only a few dependencies, though they get bundled into the Primrose package automatically.
   ul
     li
       a(href="http://www.threejs.org") Three.js
       | - an abstraction layer and scene graph implementation for WebGL.
     li
-      a(href="https://html2canvas.hertzen.com/") Html2Canvas
-      | - a tool for taking screenshots of HTML sub-documents, which is necessary for the #[code Primrose.Contrls.HtmlDoc] component.
-
-  p There are a few optional dependencies:
-  ul
+      a(href="https://github.com/NotionTheory/webvr-standard-monitor") WebVR Standard Monitor
+      | - an abstraction for a desktop, 2D display to represent it through the WebVR API.
+    li
+      a(href="https://github.com/NotionTheory/webvr-polyfill") WebVR Minimal Polyfill
+      | - a fork of Boris Smus' WebVR-Polyfill to remove unpolyfill-like features.
     li
       a(href="https://github.com/taylorhakes/promise-polyfill") Promise Polyfill
       | - an ES6 Promise polyfill library for browsers that do not yet have native Promises (i.e. Microsoft Edge).
     li
-      a(href="https://https://github.com/borismus/webvr-polyfill") WebVR Polyfill
-      | - a polyfill library for making WebVR apps work on smartphones that have Device Orientation API but don't yet have WebVR API (i.e. iOS devices).
-    li
-      a(href="https://github.com/capnmidnight/WebVR-Bootstrapper") WebVR Booststrapper
-      | - a minimal set of code to get an image into a VR HMD as soon as possible. Also abstracts a regular full screen view as a mock #[code VRDisplay] to be able to include it as a display option along side VR devices easily.
-    li
-      a(href="https://raw.githubusercontent.com/KhronosGroup/WebGLDeveloperTools/master/src/debug/webgl-debug.js") WebGL-Debug.js
-      | - a wrapper for WebGL contexts that can help debug WebGL-specific issues.
-    li
       a(href="http://www.github.com/capnmidnight/pliny") Pliny
-      | - Pliny provides the documentation for all of the namespaces, classes, functions, etc., in an online database that is accessible during Primrose live-coding sessions.
+      | - (Development only) Pliny provides the documentation for all of the namespaces, classes, functions, etc., in an online database that is accessible during Primrose live-coding sessions.
 
   p Additionally, if you will be using Primrose with the provided multiplayer server, you will need:
   ul

@@ -41,7 +41,7 @@
           <li><a href="https://github.com/NotionTheory/Primrose/" target="_blank">Github</a></li>
         </ul>
       </nav>
-      <h1>Documentation</h1>
+      <h1>Installation and Setup</h1>
     </header><!-- start main.pug banner block --><!-- end main.pug banner block -->
 <!-- start main.pug main block -->
     <main><!-- start documentation.pug main block -->
@@ -49,15 +49,16 @@
       <div id="contents">
         <nav>
           <ul>
-            <li><a href="../doc/setup.html">Installation &amp; Setup</a></li>
+            <li><a href="../doc/readme.html">Installation &amp; Setup</a></li>
+            <li><a href="../doc/contributing.html">Contributing</a></li>
             <li><a href="../doc/demos.html">Demos</a></li>
+            <li><a href="../doc/license.html">License</a></li>
           </ul>
         </nav>
       </div>
       <div id="documentation">
         <section>
           <article><!-- start documentation.pug documentation block -->
-            <h1>Installation and Setup</h1>
             <blockquote>
               <p>NOTE: The easiest way to get up and running with Primrose is to download the Quick Start template. Head over to the <a href="index.html">Getting Started page</a> to download it.</p>
             </blockquote>
@@ -75,7 +76,7 @@
             <ul>
               <li><a href="https://github.com/capnmidnight/pliny/blob/master/README.md" target="_blank">Read about how the Pliny documentation system works with Primrose</a></li>
               <li><a href="https://www.github.com/NotionTheory/Primrose" target="_blank">Check out the GitHub repository</a></li>
-              <li><a href="https://trello.com/b/NVZsaC1P/primrose-development-tasks" target="_blank">File an issue report</a></li>
+              <li><a href="https://github.com/NotionTheory/Primrose/issues" target="_blank">File an issue report</a></li>
               <li><a href="http://threejs.org/" target="_blank">Learn more about Three.js</a></li>
               <li><a href="http://webvr.info/" target="_blank">Learn more about WebVR</a></li>
               <li><a href="https://developer.mozilla.org/en-US/docs/Web/API/WebVR_API" target="_blank">Read the WebVR documentation on MDN</a></li>
@@ -136,19 +137,13 @@
             <p>You can then copy that version number into a filename of the Archive directory to retrieve any historical version you may need.</p>
             <blockquote>NOTE: because of bandwidth limitations with the Primrose website hosting provider, it is advised that you copy the necessary files to your own project directory and host them with your own provider.</blockquote>
             <h2>Dependencies</h2>
-            <p>There are also a number of libraries on which Primrose depends. The file <code>PrimroseDependencies.js</code> contains both the required and optional dependencies. The file <code>Primrose.js</code> contains the dependencies, plus the Primrose library. The file <code>PrimroseLib.js</code> contains only the Primrose library, without the dependencies.</p>
-            <p>If you are only using Primrose as a client-side library, then there are only two external dependencies.</p>
+            <p>There are also a number of libraries on which Primrose depends. If you are only using Primrose as a client-side library, then there are only a few dependencies, though they get bundled into the Primrose package automatically.</p>
             <ul>
               <li><a href="http://www.threejs.org">Three.js</a>- an abstraction layer and scene graph implementation for WebGL.</li>
-              <li><a href="https://html2canvas.hertzen.com/">Html2Canvas</a>- a tool for taking screenshots of HTML sub-documents, which is necessary for the <code>Primrose.Contrls.HtmlDoc</code> component.</li>
-            </ul>
-            <p>There are a few optional dependencies:</p>
-            <ul>
+              <li><a href="https://github.com/NotionTheory/webvr-standard-monitor">WebVR Standard Monitor</a>- an abstraction for a desktop, 2D display to represent it through the WebVR API.</li>
+              <li><a href="https://github.com/NotionTheory/webvr-polyfill">WebVR Minimal Polyfill</a>- a fork of Boris Smus' WebVR-Polyfill to remove unpolyfill-like features.</li>
               <li><a href="https://github.com/taylorhakes/promise-polyfill">Promise Polyfill</a>- an ES6 Promise polyfill library for browsers that do not yet have native Promises (i.e. Microsoft Edge).</li>
-              <li><a href="https://https://github.com/borismus/webvr-polyfill">WebVR Polyfill</a>- a polyfill library for making WebVR apps work on smartphones that have Device Orientation API but don't yet have WebVR API (i.e. iOS devices).</li>
-              <li><a href="https://github.com/capnmidnight/WebVR-Bootstrapper">WebVR Booststrapper</a>- a minimal set of code to get an image into a VR HMD as soon as possible. Also abstracts a regular full screen view as a mock <code>VRDisplay</code> to be able to include it as a display option along side VR devices easily.</li>
-              <li><a href="https://raw.githubusercontent.com/KhronosGroup/WebGLDeveloperTools/master/src/debug/webgl-debug.js">WebGL-Debug.js</a>- a wrapper for WebGL contexts that can help debug WebGL-specific issues.</li>
-              <li><a href="http://www.github.com/capnmidnight/pliny">Pliny</a>- Pliny provides the documentation for all of the namespaces, classes, functions, etc., in an online database that is accessible during Primrose live-coding sessions.</li>
+              <li><a href="http://www.github.com/capnmidnight/pliny">Pliny</a>- (Development only) Pliny provides the documentation for all of the namespaces, classes, functions, etc., in an online database that is accessible during Primrose live-coding sessions.</li>
             </ul>
             <p>Additionally, if you will be using Primrose with the provided multiplayer server, you will need:</p>
             <ul>

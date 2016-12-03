@@ -10,7 +10,7 @@ function scroller(id) {
   "use strict";
 
   function replacePreBlocks() {
-    var doc = document.querySelector("#documentation"),
+    var doc = document.querySelector("#documentation") || document.querySelector("main"),
       codeBlocks = doc.querySelectorAll("pre");
     for (var i = 0; i < codeBlocks.length; ++i) {
       var b = codeBlocks[i],
@@ -51,6 +51,7 @@ function scroller(id) {
   }
 
   function showHash(evt) {
+    console.log("showing hash");
     var page = document.location.hash,
       promise = null;
     if (/\.md$/.test(page)) {
@@ -225,17 +226,22 @@ var GRAMMAR_TEST = /^grammar\("(\w+)"\);\r?\n/,
   window.addEventListener("load", function() {
     nav = document.querySelector("#contents nav > ul");
     doc = document.querySelector("#documentation");
-    main = document.querySelector("main");
-    docoCache = {
-      "": {
-        obj: null,
-        doc: doc.innerHTML
-      },
-      "#Global": {
-        obj: pliny.database,
-        doc: pliny.formats.html.format(pliny.database)
-      }
-    };
-    renderDocs();
+    if(doc){
+      main = document.querySelector("main");
+      docoCache = {
+        "": {
+          obj: null,
+          doc: doc.innerHTML
+        },
+        "#Global": {
+          obj: pliny.database,
+          doc: pliny.formats.html.format(pliny.database)
+        }
+      };
+      renderDocs();
+    }
+    else{
+      replacePreBlocks();
+    }
   });
 })();

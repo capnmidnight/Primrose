@@ -1,7 +1,7 @@
-extends ../templates/documentationBase.pug
+extends ../templates/documentation.pug
 
-append header
+block header
   h1 README
 
-block main
+block document
   include:marked ../README.md

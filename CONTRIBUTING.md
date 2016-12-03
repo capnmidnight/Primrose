@@ -5,7 +5,7 @@ Thank you for your interest in contributing to the Primrose framework! We'd love
 
 ## Creating an Issue
 
-If you have a question about the Primrose framework, please ask in the Primrose channel through the [webVR Slack Community](https://webvr-slack.herokuapp.com/) or in the [Primrose subreddit](https://www.reddit.com/r/primrosevr).
+If you have a question about the Primrose framework, please ask in the Primrose channel through the [WebVR Slack Community](https://webvr-slack.herokuapp.com/) or in the [Primrose subreddit](https://www.reddit.com/r/primrosevr).
 
 If you think you have found a bug, or have a new feature idea, please start by making sure it hasn't already been reported. You can search through existing issues to see if there is a similar one reported (include closed issues as it may have been closed with a solution). When creating an issue, please thoroughly explain the problem.
 

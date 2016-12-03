@@ -41,7 +41,7 @@
           <li><a href="https://github.com/NotionTheory/Primrose/" target="_blank">Github</a></li>
         </ul>
       </nav>
-      <h1>Documentation</h1>
+      <h1>Getting started</h1>
     </header><!-- start main.pug banner block --><!-- end main.pug banner block -->
 <!-- start main.pug main block -->
     <main><!-- start documentation.pug main block -->
@@ -49,63 +49,38 @@
       <div id="contents">
         <nav>
           <ul>
-            <li><a href="../doc/setup.html">Installation &amp; Setup</a></li>
+            <li><a href="../doc/readme.html">Installation &amp; Setup</a></li>
+            <li><a href="../doc/contributing.html">Contributing</a></li>
             <li><a href="../doc/demos.html">Demos</a></li>
+            <li><a href="../doc/license.html">License</a></li>
           </ul>
         </nav>
       </div>
       <div id="documentation">
         <section>
-          <article><!-- start documentation.pug documentation block -->
-            <h1>Getting started</h1><img class="logo" src="../doc/images/logo128.png" alt="logo" title="Primrose" style="float:left;padding:10px">
-            <p>Using Primrose to make web applications is straightforward. To start, <a href="../PrimroseQuickstart.zip">download the `Quick Start` example project</a>. In it, you will find files that create a basic project, showing details on how to model, setup, and run code to work with Primrose:</p>
-            <ul>
-              <li><code>app.js</code> - this is where you will write your JavaScript code to define your scene.</li>
-              <li><code>bg.jpg</code> - a skymap texture.</li>
-              <li><code>deck.png</code> - a ground texture.</li>
-              <li><code>helvetiker_regular.typeface.js</code> - a font for 3D text elements.</li>
-              <li><code>index.html</code> - an HTML file to pull it all together.</li>
-              <li><code>Primrose.min.js</code> - the Primrose framework, with dependencies included.</li>
-              <li><span>run one of the following scripts to setup a local web server and automatically start your browser</span>
-                <ul>
-                  <li><code>StartHere-LINUX.sh</code> - for Linux</li>
-                  <li><code>StartHere-MACOS.exe</code> - for macOS</li>
-                  <li><code>StartHere-WINDOWS.exe</code> - for Windows</li>
-                </ul>
-              </li>
-              <li><code>webvr-bootstrapper.min.js</code> - a minimal file for getting the page loaded quickly, display a loading progress bar, and abstract regular full-screen view as a display option alongside WebVR.</li>
-              <li><code>wind.ogg</code> - some ambient noise for aiding in orienting one's self in the space.</li>
-            </ul>
-            <p>In the <code>app.js</code> file, you'll find the relevant scripts to edit to make your own VR applications. The template project starts out fairly empty.</p>
+          <article><!-- start documentation.pug documentation block --><img class="logo" src="../doc/images/logo128.png" alt="logo" title="Primrose" style="float:left;padding:10px">
+            <p>Primrose is a framework for creating Virtual Reality experiences on the web. Prior to Primrose, there were no frameworks that provided a full, default experience in only a few lines of code. Primrose makes getting up and running in VR very easy.</p>
+            <p>Using Primrose to make web applications is straightforward. The basic concept is to create an "Environment" that wraps around a standard <a href="https://www.threejs.org" target="_blank">Three.js</a> scene. This environment handles the basic interactions of a scene, such as a common UI for entering VR mode, and progressively enhancing between desktop, mobile, Google Cardboard, Samsung Gear VR, Oculus Rift, and HTC Vive.</p>
+            <p>The "empty" project looks like this, giving you a ground to walk on, stereo view with a VR head-mounted display, and the ability to walk around with mouse/keyboard, gamepad, and point-and-click teleportation.</p>
             <pre><code>grammar("JavaScript");
-var app = new Primrose.BrowserEnvironment({
-    skyTexture: "bg.jpg",
-    groundTexture: "deck.png"
-  } );
+var env = new Primrose.BrowserEnvironment({
+  backgroundColor: 0x000000,
+  groundTexture: "images/deck.png",
+  useFog: true
+});
 
-app.addEventListener( "ready", function () {
-  // Perform any post-initialization setup. Once this event fires, the Primrose
-  // framework is ready and will start animation as soon as this function returns.
-} );
+env.addEventListener("ready", function(){
+  // Perform any post-initialization setup. Once this event fires, the
+  // Primrose framework is ready and will start animation as soon as this
+  // function returns.
+});
 
-app.addEventListener( "gazecomplete", function(evt){
-  // You can respond to "intended stare" events here, i.e. when the user gazes
-  // at a particular object for an extended period of time. Usually, about three
-  // seconds.
-} );
-
-app.addEventListener( "pointerend", function(evt){
-  // You can respond to the user "clicking" an object here. This could be by using
-  // a mouse on their desktop PC or by touching the screen while looking at an
-  // object on a mobile device.
-} );
-
-app.addEventListener( "update", function ( dt ) {
-  // Perform per-frame updates here, like moving objects around according to your
-  // own rules.
-} );
+env.addEventListener("update", function(){
+  // Perform per-frame updates here, like moving objects around according
+  // to your own rules.
+});
 </code></pre>
-            <p>If everything worked correctly, it should look something like this:</p><img src="../doc/images/gettingStarted.jpg" alt="screenshot" title="Blank scene"><!-- end documentation.pug documentation block -->
+            <p>If you have the asset file for the floor texture and everything worked correctly, it should look something like this:</p><img src="../doc/empty/screenshot.jpg" alt="screenshot" title="Blank scene"><!-- end documentation.pug documentation block -->
           </article>
         </section>
       </div><!-- end documentation.pug main block -->
