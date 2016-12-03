@@ -1,4 +1,5 @@
 pliny.function({
+  parent: "Util",
   name: "setSetting",
   parameters: [{
     name: " name",

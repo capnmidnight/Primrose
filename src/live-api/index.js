@@ -1,6 +1,8 @@
 pliny.namespace({
   name: "Live API",
-  description: "The Live API is a set of functions that serve as shorthand for common Three.js objects, with a caching system built in to deduplicate repeated creations of geometries and materials."
+  description: "The Live API is a set of functions that serve as shorthand for common Three.js objects, with a caching system built in to deduplicate repeated creations of geometries and materials.\n\
+\n\
+When including Primrose as a `script` tag, the Live API is imported directly onto the window object and is available without qualification."
 });
 
 import axis from "./axis";

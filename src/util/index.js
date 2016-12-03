@@ -1,3 +1,10 @@
+pliny.namespace({
+  name: "Util",
+  description: "A few different utility functions.\n\
+\n\
+When including Primrose as a `script` tag, the Util functions are imported directly onto the window object and is available without qualification."
+});
+
 import cache from "./cache";
 import deleteSetting from "./deleteSetting";
 import findProperty from "./findProperty";

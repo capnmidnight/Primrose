@@ -12505,6 +12505,7 @@ function light(color, intensity, distance, decay) {
 }
 
 function fixGeometry(geometry, options) {
+  options = options || {};
   var maxU = options.maxU || 1,
       maxV = options.maxV || 1,
       attrs = geometry.attributes || geometry._bufferGeometry && geometry._bufferGeometry.attributes;

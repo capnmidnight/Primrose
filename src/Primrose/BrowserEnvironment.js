@@ -1,3 +1,16 @@
+const MILLISECONDS_TO_SECONDS = 0.001,
+  MAX_MOVE_DISTANCE = 5,
+  MAX_MOVE_DISTANCE_SQ = MAX_MOVE_DISTANCE * MAX_MOVE_DISTANCE,
+  TELEPORT_COOLDOWN = 250,
+  TELEPORT_DISPLACEMENT = new Vector3(),
+  GROUND_HEIGHT = -0.07;
+
+pliny.class({
+  parent: "Primrose",
+  name: "BrowserEnvironment",
+  description: "Make a Virtual Reality app in your web browser!"
+});
+
 import PointerLock from "webvr-standard-monitor/src/PointerLock";
 import isMobile from "../flags/isMobile";
 import box from "../live-api/box";
@@ -39,19 +52,6 @@ import { Color } from "three/src/math/Color";
 import { Euler } from "three/src/math/Euler";
 import { Vector3 } from "three/src/math/Vector3";
 import { WebGLRenderer } from "three/src/renderers/WebGLRenderer";
-
-const MILLISECONDS_TO_SECONDS = 0.001,
-  MAX_MOVE_DISTANCE = 5,
-  MAX_MOVE_DISTANCE_SQ = MAX_MOVE_DISTANCE * MAX_MOVE_DISTANCE,
-  TELEPORT_COOLDOWN = 250,
-  TELEPORT_DISPLACEMENT = new Vector3(),
-  GROUND_HEIGHT = -0.07;
-
-pliny.class({
-  parent: "Primrose",
-    name: "BrowserEnvironment",
-    description: "Make a Virtual Reality app in your web browser!"
-});
 export default class BrowserEnvironment extends AbstractEventEmitter {
   constructor(options) {
     super();

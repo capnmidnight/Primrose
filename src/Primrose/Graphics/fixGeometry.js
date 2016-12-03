@@ -1,4 +1,40 @@
+pliny.function({
+  parent: "Primrose.Graphics",
+  name: "fixGeometry",
+  description: "Performs some changes to the geometry's UV coordinates to make them work better.",
+  returns: "THREE.Geometry",
+  parameters: [{
+    name: "geometry",
+    type: "THREE.Geometry",
+    description: "The geometry to fix."
+  }, {
+    name: "options",
+    type: "Primrose.Graphics.fixGeometry.optionsHash",
+    optional: true,
+    description: "Options for changing the UV coordinates. See [`Primrose.Graphics.fixGeometry.optionsHash`](#Primrose_Graphics_fixGeometry_optionsHash) for more information."
+  }]
+});
+
+pliny.record({
+  parent: "Primrose.Graphics.fixGeometry",
+  name: "optionsHash",
+  description: "Options for changing the UV coordinates.",
+  parameters: [{
+    name: "maxU",
+    type: "Number",
+    optional: true,
+    default: 1,
+    description: "The value by which to scale the U component of the texture coordinate."
+  }, {
+    name: "maxV",
+    type: "Number",
+    optional: true,
+    default: 1,
+    description: "The value by which to scale the V component of the texture coordinate."
+  }]
+});
 export default function fixGeometry(geometry, options){
+  options = options || {};
   const maxU = options.maxU || 1,
     maxV = options.maxV || 1,
     attrs = geometry.attributes || (geometry._bufferGeometry && geometry._bufferGeometry.attributes);

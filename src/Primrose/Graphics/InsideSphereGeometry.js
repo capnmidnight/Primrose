@@ -1,41 +1,36 @@
-import { Geometry } from "three/src/core/Geometry";
-import { Vector3 } from "three/src/math/Vector3";
-import { Vector2 } from "three/src/math/Vector2";
-import { Face3 } from "three/src/core/Face3";
-import { Sphere } from "three/src/math/Sphere";
-
 pliny.class({
+  parent: "Primrose.Graphics",
   name: "InsideSphereGeometry",
-    parameters: [{
-      name: "radius",
-      type: "Number",
-      description: "How far the sphere should extend away from a center point."
-    }, {
-      name: "widthSegments",
-      type: "Number",
-      description: "The number of faces wide in which to slice the geometry."
-    }, {
-      name: "heightSegments",
-      type: "Number",
-      description: "The number of faces tall in which to slice the geometry."
-    }, {
-      name: "phiStart",
-      type: "Number",
-      description: "The angle in radians around the Y-axis at which the sphere starts."
-    }, {
-      name: "phiLength",
-      type: "Number",
-      description: "The change of angle in radians around the Y-axis to which the sphere ends."
-    }, {
-      name: "thetaStart",
-      type: "Number",
-      description: "The angle in radians around the Z-axis at which the sphere starts."
-    }, {
-      name: "thetaLength",
-      type: "Number",
-      description: "The change of angle in radians around the Z-axis to which the sphere ends."
-    }],
-    description: "The InsideSphereGeometry is basically an inside-out Sphere. Or\n\
+  parameters: [{
+    name: "radius",
+    type: "Number",
+    description: "How far the sphere should extend away from a center point."
+  }, {
+    name: "widthSegments",
+    type: "Number",
+    description: "The number of faces wide in which to slice the geometry."
+  }, {
+    name: "heightSegments",
+    type: "Number",
+    description: "The number of faces tall in which to slice the geometry."
+  }, {
+    name: "phiStart",
+    type: "Number",
+    description: "The angle in radians around the Y-axis at which the sphere starts."
+  }, {
+    name: "phiLength",
+    type: "Number",
+    description: "The change of angle in radians around the Y-axis to which the sphere ends."
+  }, {
+    name: "thetaStart",
+    type: "Number",
+    description: "The angle in radians around the Z-axis at which the sphere starts."
+  }, {
+    name: "thetaLength",
+    type: "Number",
+    description: "The change of angle in radians around the Z-axis to which the sphere ends."
+  }],
+  description: "The InsideSphereGeometry is basically an inside-out Sphere. Or\n\
 more accurately, it's a Sphere where the face winding order is reversed, so that\n\
 textures appear on the inside of the sphere, rather than the outside. I know, that's\n\
 not exactly helpful.\n\
@@ -45,6 +40,11 @@ care anything about the outside of this sphere, only the inside. You would use\n
 InsideSphereGeometry in this case. Or its alias, [`shell()`](#LiveAPI_shell)."
 });
 
+import { Geometry } from "three/src/core/Geometry";
+import { Vector3 } from "three/src/math/Vector3";
+import { Vector2 } from "three/src/math/Vector2";
+import { Face3 } from "three/src/core/Face3";
+import { Sphere } from "three/src/math/Sphere";
 export default class InsideSphereGeometry extends Geometry {
   constructor(radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength) {
     super();
