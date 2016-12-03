@@ -1,7 +1,12 @@
-import PositionalSound from "./PositionalSound";
-
 const PIANO_BASE = Math.pow(2, 1 / 12);
 
+pliny.class({
+  parent: "Primrose.Output",
+    name: "Note",
+    description: "| [under construction]"
+});
+
+import PositionalSound from "./PositionalSound";
 export default class Note extends PositionalSound {
 
   static piano(n) {

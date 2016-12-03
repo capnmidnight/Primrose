@@ -17266,6 +17266,7 @@ function cascadeElement(id, tag, DOMClass, add) {
   return elem;
 }
 
+// polyfill
 window.AudioContext = window.AudioContext || window.webkitAudioContext;
 
 var VECTOR = new Vector3();

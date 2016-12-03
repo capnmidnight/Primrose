@@ -1,5 +1,3 @@
-import Note from "./Note";
-
 var MAX_NOTE_COUNT = (navigator.maxTouchPoints || 10) + 1,
   TYPES = ["sine",
     "square",
@@ -12,6 +10,8 @@ pliny.class({
     name: "Music",
     description: "| [under construction]"
 });
+
+import Note from "./Note";
 export default class Music {
 
   constructor(audio, numNotes) {

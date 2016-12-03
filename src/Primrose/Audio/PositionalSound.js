@@ -1,3 +1,9 @@
+pliny.class({
+  parent: "Primrose.Output",
+    name: "PositionalSound",
+    description: "| [under construction]"
+});
+
 export default class PositionalSound {
   constructor(ctx, mainVolume){
     this.gn = ctx.createGain(),

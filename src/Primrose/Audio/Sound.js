@@ -1,5 +1,10 @@
-import PositionalSound from "./PositionalSound";
+pliny.class({
+  parent: "Primrose.Output",
+    name: "Sound",
+    description: "| [under construction]"
+});
 
+import PositionalSound from "./PositionalSound";
 export default class Sound extends PositionalSound {
   constructor(audio3D, sources, loop){
     super(audio3D.context, audio3D.mainVolume);

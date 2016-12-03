@@ -11,6 +11,7 @@ pliny.class({
     name: "Speech",
     description: "| [under construction]"
 });
+
 export default class Speech {
   constructor (options) {
     this.options = Object.assign({}, DEFAULT_SPEECH_SETTINGS, options);

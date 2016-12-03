@@ -1983,7 +1983,25 @@ pliny.method({
 
       pliny.class({
   parent: "Primrose.Output",
+  name: "PositionalSound",
+  description: "| [under construction]"
+});
+
+pliny.class({
+  parent: "Primrose.Output",
+  name: "Note",
+  description: "| [under construction]"
+});
+
+pliny.class({
+  parent: "Primrose.Output",
   name: "Music",
+  description: "| [under construction]"
+});
+
+pliny.class({
+  parent: "Primrose.Output",
+  name: "Sound",
   description: "| [under construction]"
 });
 
