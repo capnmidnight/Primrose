@@ -10,7 +10,7 @@ block document
 
   p Using Primrose to make web applications is straightforward. The basic concept is to create an "Environment" that wraps around a standard #[a(href="https://www.threejs.org", target="_blank") Three.js] scene. This environment handles the basic interactions of a scene, such as a common UI for entering VR mode, and progressively enhancing between desktop, mobile, Google Cardboard, Samsung Gear VR, Oculus Rift, and HTC Vive.
 
-  p The "empty" project looks like this, giving you a ground to walk on, stereo view with a VR head-mounted display, and the ability to walk around with mouse/keyboard, gamepad, and point-and-click teleportation.
+  p The "empty" project looks like this, giving you a ground to walk on, stereo view with a VR head-mounted display, and the ability to walk around with mouse/keyboard, gamepad, and point-and-click teleportation. For more information on how to build Primrose applications, start with the documentation for the #[a(href="#Primrose_BrowserEnvironment") Primrose.BrowserEnvironment class]. Pay particular attention to the list of events and methods, as well as the options available in #[a(href="#Primrose_BrowserEnvironment_optionsHash") the Primrose.BrowserEnvironment options hash]
   pre: code.
     grammar("JavaScript");
     var env = new Primrose.BrowserEnvironment({
