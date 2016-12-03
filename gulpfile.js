@@ -113,7 +113,7 @@ gulp.task("copy", ["tidy"], () => gulp.src(["Primrose.min.js"])
 
 tasks.format.push.apply(tasks.format, demos.map(d=>d.format));
 tasks.debug.push.apply(tasks.debug, demos.map(d=>d.debug));
-tasks.release.push.apply(tasks.release, demos.map(d=>d.release));
+//tasks.release.push.apply(tasks.release, demos.map(d=>d.release));
 
 gulp.task("format", tasks.format);
 gulp.task("js", tasks.default);

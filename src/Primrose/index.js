@@ -57,5 +57,4 @@ const obj = {
   Text
 };
 
-Object.assign(obj, constants);
 export default obj;
