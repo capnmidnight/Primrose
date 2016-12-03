@@ -1,10 +1,3 @@
-import AbstractEventEmitter from "../AbstractEventEmitter";
-import randColor from "../Random/color";
-import colored from "../../live-api/colored";
-import Audio3D from "../Audio/Audio3D";
-import { Quaternion } from "three/src/math/Quaternion";
-import { Vector3 } from "three/src/math/Vector3";
-
 pliny.class({
   parent: "Primrose.Network",
   name: "RemoteUser",
@@ -16,7 +9,7 @@ pliny.class({
     description: "The name of the user."
   }, {
     name: "modelFactory",
-    type: "Primrose.ModelLoader",
+    type: "Primrose.Controls.ModelLoader",
     description: "The factory for creating avatars for the user."
   }, {
     name: "nameMaterial",
@@ -36,6 +29,13 @@ pliny.class({
     description: "The name of the user initiating the peer connection."
   }]
 });
+
+import AbstractEventEmitter from "../AbstractEventEmitter";
+import randColor from "../Random/color";
+import colored from "../../live-api/colored";
+import Audio3D from "../Audio/Audio3D";
+import { Quaternion } from "three/src/math/Quaternion";
+import { Vector3 } from "three/src/math/Vector3";
 export default class RemoteUser extends AbstractEventEmitter {
 
   constructor(userName, modelFactory, nameMaterial, disableWebRTC, requestICEPath, microphone, localUserName, goSecond) {

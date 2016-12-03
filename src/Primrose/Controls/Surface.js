@@ -1,25 +1,18 @@
-import { Texture } from "three/src/textures/Texture";
-import isChrome from "../../flags/isChrome";
-import Entity from "./Entity";
-import Rectangle from "../Text/Rectangle";
-
-var COUNTER = 0;
-
 pliny.class({
-  parent: "Primrose",
+  parent: "Primrose.Controls",
   name: "Surface",
+  baseClass: "Primrose.Controls.Entity",
   description: "Cascades through a number of options to eventually return a CanvasRenderingContext2D object on which one will perform drawing operations.",
-  baseClass: "Primrose.Entity",
   parameters: [{
     name: "options",
-    type: "Primrose.Surface.optionsHash",
+    type: "Primrose.Controls.Surface.optionsHash",
     optional: true,
-    description: "Optional settings for creating the surface, including ID and Bounds. See [`Primrose.Surface.optionsHash`](#Primrose_Surface_optionsHash) for more information."
+    description: "Optional settings for creating the surface, including ID and Bounds. See [`Primrose.Controls.Surface.optionsHash`](#Primrose_Controls_Surface_optionsHash) for more information."
   }]
 });
 
 pliny.record({
-  parent: "Primrose.Surface",
+  parent: "Primrose.Controls.Surface",
   name: "optionsHash",
   parameters: [{
     name: "id",
@@ -32,6 +25,12 @@ pliny.record({
   }]
 });
 
+var COUNTER = 0;
+
+import { Texture } from "three/src/textures/Texture";
+import isChrome from "../../flags/isChrome";
+import Entity from "./Entity";
+import Rectangle from "../Text/Rectangle";
 export default class Surface extends Entity {
 
   static create() {
@@ -42,7 +41,7 @@ export default class Surface extends Entity {
     super();
     this.isSurface = true;
     this.options = Object.assign({}, {
-      id: "Primrose.Surface[" + (COUNTER++) + "]",
+      id: "Primrose.Controls.Surface[" + (COUNTER++) + "]",
       bounds: new Rectangle()
     }, options);
     this.bounds = this.options.bounds;
@@ -145,6 +144,7 @@ export default class Surface extends Entity {
 
     if (this.canvas === null) {
       pliny.error({
+        parent: "Primrose.Controls.Surface",
         name: "Invalid element",
         type: "Error",
         description: "If the element could not be found, could not be created, or one of the appropriate ID was found but did not match the expected type, an error is thrown to halt operation."

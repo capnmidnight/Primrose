@@ -1,6 +1,12 @@
+pliny.class({
+  parent: "Primrose.Input",
+  name: "GamepadManager",
+  baseClass: "Primrose.AbstractEventEmitter",
+  description: "| [under construction]"
+});
+
 import AbstractEventEmitter from "../AbstractEventEmitter";
 import Gamepad from "./Gamepad";
-
 export default class GamepadManager extends AbstractEventEmitter {
 
   static get isAvailable() {

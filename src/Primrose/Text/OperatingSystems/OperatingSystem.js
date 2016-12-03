@@ -1,23 +1,9 @@
-import Keys from "../../Keys";
-
-function setCursorCommand(obj, mod, key, func, cur) {
-  var name = mod + "_" + key;
-  obj[name] = function (prim, tokenRows) {
-    prim["cursor" + func](tokenRows, prim[cur + "Cursor"]);
-  };
-}
-
-function makeCursorCommand(obj, baseMod, key, func) {
-  setCursorCommand(obj, baseMod || "NORMAL", key, func, "front");
-  setCursorCommand(obj, baseMod + "SHIFT", key, func, "back");
-}
-
 pliny.class({
   parent: "Primrose.Text",
     name: "OperatingSystem",
     description: "A description of how a specific operating system handles keyboard shortcuts.",
     parameters: [{
-      name: "name ",
+      name: "osName",
       type: "String",
       description: "A friendly name for the operating system."
     }, {
@@ -50,8 +36,25 @@ pliny.class({
       description: "Modifiers for the fullHome and fullEnd commands."
     }]
 });
+
+import Keys from "../../Keys";
+
+function setCursorCommand(obj, mod, key, func, cur) {
+  var name = mod + "_" + key;
+  obj[name] = function (prim, tokenRows) {
+    prim["cursor" + func](tokenRows, prim[cur + "Cursor"]);
+  };
+}
+
+function makeCursorCommand(obj, baseMod, key, func) {
+  setCursorCommand(obj, baseMod || "NORMAL", key, func, "front");
+  setCursorCommand(obj, baseMod + "SHIFT", key, func, "back");
+}
+
 export default class OperatingSystem {
-  constructor(name, pre1, pre2, redo, pre3, home, end, pre5) {
+  constructor(osName, pre1, pre2, redo, pre3, home, end, pre5) {
+    this.name = osName;
+
     var pre4 = pre3;
     pre3 = pre3.length > 0 ? pre3 : "NORMAL";
 

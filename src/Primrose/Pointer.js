@@ -1,3 +1,33 @@
+pliny.class({
+  parent: "Primrose",
+  name: "Pointer",
+  baseClass: "Primrose.AbstractEventEmitter",
+  description: "An object that points into the scene somewhere, casting a ray at objects for picking operations.",
+  parameters: [{
+    name: "pointerName",
+    type: "String",
+    description: "A friendly name for this pointer object, to make debugging easier."
+  }, {
+    name: "color",
+    type: "Number",
+    description: "The color to use to render the teleport pad and 3D pointer cursor."
+  }, {
+    name: "highlight",
+    type: "Number",
+    description: "The color to use to highlight the teleport pad and 3D pointer cursor when it's pointing at a real thing."
+  }, {
+    name: "devices",
+    type: "Array",
+    description: "An Array of `Primrose.InputProcessor` objects that define the orientation for this pointer."
+  }, {
+    name: "triggerDevices",
+    type: "Array",
+    description: "An Array of `Primrose.InputProcessor` objects that define the button trigger for this pointer.",
+    optional: true,
+    default: null
+    }]
+});
+
 import AbstractEventEmitter from "./AbstractEventEmitter"
 import { Vector3 } from "three/src/math/Vector3";
 import { Euler } from "three/src/math/Euler";
@@ -33,39 +63,10 @@ function hasGazeEvent(obj){
     obj.button && hasGazeEvent(obj.button);
 }
 
-pliny.class({
-  parent: "Primrose",
-    name: "Pointer",
-    baseClass: "Primrose.AbstractEventEmitter",
-    description: "An object that points into the scene somewhere, casting a ray at objects for picking operations.",
-    parameters: [{
-      name: "name ",
-      type: "String",
-      description: "A friendly name for this pointer object, to make debugging easier."
-    }, {
-      name: "color",
-      type: "Number",
-      description: "The color to use to render the teleport pad and 3D pointer cursor."
-    }, {
-      name: "highlight",
-      type: "Number",
-      description: "The color to use to highlight the teleport pad and 3D pointer cursor when it's pointing at a real thing."
-    }, {
-      name: "devices",
-      type: "Array",
-      description: "An Array of `Primrose.InputProcessor` objects that define the orientation for this pointer."
-    }, {
-      name: "triggerDevices",
-      type: "Array",
-      description: "An Array of `Primrose.InputProcessor` objects that define the button trigger for this pointer.",
-      optional: true,
-      default: null
-    }]
-});
 export default class Pointer extends AbstractEventEmitter {
-  constructor(name, color, highlight, s, devices, triggerDevices, options) {
+  constructor(pointerName, color, highlight, s, devices, triggerDevices, options) {
     super();
-    this.name = name;
+    this.name = pointerName;
     this.devices = devices.filter(identity);
     this.triggerDevices = triggerDevices && triggerDevices.filter(identity) || this.devices.slice();
     this.options = options;

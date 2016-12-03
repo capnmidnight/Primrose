@@ -1,3 +1,20 @@
+pliny.class({
+  parent: "Primrose.Input",
+  name: "VR",
+  baseClass: "Primrose.Input.PoseInputProcessor",
+  description: "An input manager for gamepad devices.",
+  parameters: [{
+    name: "avatarHeight",
+    type: "Number",
+    description: "The default height to use for the user, if the HMD doesn't provide a stage transform."
+  }]
+});
+
+const DEFAULT_POSE = {
+    position: [0, 0, 0],
+    orientation: [0, 0, 0, 1]
+  };
+
 import { Vector3 } from "three/src/math/Vector3";
 import { Matrix4 } from "three/src/math/Matrix4";
 import PoseInputProcessor from "./PoseInputProcessor";
@@ -7,23 +24,6 @@ import isMobile from "../../flags/isMobile";
 import PointerLock from "webvr-standard-monitor/src/PointerLock";
 import installWebVRStandardMonitor from "webvr-standard-monitor/src/install";
 import WebVRStandardMonitor from "webvr-standard-monitor/src/WebVRStandardMonitor";
-
-const DEFAULT_POSE = {
-    position: [0, 0, 0],
-    orientation: [0, 0, 0, 1]
-  };
-
-pliny.class({
-  parent: "Primrose.Input",
-    name: "VR",
-    baseClass: "Primrose.PoseInputProcessor",
-    parameters: [{
-      name: "avatarHeight",
-      type: "Number",
-      description: "The default height to use for the user, if the HMD doesn't provide a stage transform."
-    }],
-    description: "An input manager for gamepad devices."
-});
 export default class VR extends PoseInputProcessor {
 
   static isStereoDisplay(display) {

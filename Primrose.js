@@ -24,6 +24,7 @@ function testUserAgent(a) {
   return (/(android|bb\d+|meego).+|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od|ad)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(a) || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substring(0, 4))
   );
 }
+
 var isMobile = testUserAgent(navigator.userAgent || navigator.vendor || window.opera);
 
 var isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;
@@ -13463,9 +13464,9 @@ var liveAPI = Object.freeze({
 	default: index$2
 });
 
-function deleteSetting(name) {
+function deleteSetting(settingName) {
   if (window.localStorage) {
-    window.localStorage.removeItem(name);
+    window.localStorage.removeItem(settingName);
   }
 }
 
@@ -13477,28 +13478,28 @@ function findProperty(elem, arr) {
   }
 }
 
-function getSetting(name, defValue) {
+function getSetting(settingName, defValue) {
   if (window.localStorage) {
-    var val = window.localStorage.getItem(name);
+    var val = window.localStorage.getItem(settingName);
     if (val) {
       try {
         return JSON.parse(val);
       } catch (exp) {
-        console.error("getSetting", name, val, typeof val === "undefined" ? "undefined" : _typeof(val), exp);
+        console.error("getSetting", settingName, val, typeof val === "undefined" ? "undefined" : _typeof(val), exp);
         console.error(exp);
-        console.error("getSetting", name, val, typeof val === "undefined" ? "undefined" : _typeof(val));
+        console.error("getSetting", settingName, val, typeof val === "undefined" ? "undefined" : _typeof(val));
       }
     }
   }
   return defValue;
 }
 
-function setSetting(name, val) {
+function setSetting(settingName, val) {
   if (window.localStorage && val) {
     try {
-      window.localStorage.setItem(name, JSON.stringify(val));
+      window.localStorage.setItem(settingName, JSON.stringify(val));
     } catch (exp) {
-      console.error("setSetting", name, val, typeof val === "undefined" ? "undefined" : _typeof(val), exp);
+      console.error("setSetting", settingName, val, typeof val === "undefined" ? "undefined" : _typeof(val), exp);
     }
   }
 }
@@ -13512,19 +13513,21 @@ var AbstractEventEmitter = function () {
 
   createClass(AbstractEventEmitter, [{
     key: "addEventListener",
-    value: function addEventListener(name, thunk) {
-      if (!this._handlers[name]) {
-        this._handlers[name] = [];
+    value: function addEventListener(evt, thunk) {
+
+      if (!this._handlers[evt]) {
+        this._handlers[evt] = [];
       }
-      this._handlers[name].push(thunk);
+      this._handlers[evt].push(thunk);
     }
   }, {
     key: "removeEventListener",
-    value: function removeEventListener(name, thunk) {
-      if (this._handlers[name]) {
-        var idx = this._handlers[name].indexOf(thunk);
+    value: function removeEventListener(evt, thunk) {
+
+      if (this._handlers[evt]) {
+        var idx = this._handlers[evt].indexOf(thunk);
         if (idx > -1) {
-          this._handlers[name].splice(idx, 1);
+          this._handlers[evt].splice(idx, 1);
         }
       }
     }
@@ -13539,10 +13542,11 @@ var AbstractEventEmitter = function () {
     }
   }, {
     key: "emit",
-    value: function emit(name, obj) {
-      if (this._handlers[name]) {
+    value: function emit(evt, obj) {
+
+      if (this._handlers[evt]) {
         if ((typeof obj === "undefined" ? "undefined" : _typeof(obj)) === "object" && !(obj instanceof Event)) {
-          obj.type = name;
+          obj.type = evt;
           if (obj.defaultPrevented === undefined) {
             obj.defaultPrevented = false;
             obj.preventDefault = function () {
@@ -13550,7 +13554,7 @@ var AbstractEventEmitter = function () {
             };
           }
         }
-        var h = this._handlers[name];
+        var h = this._handlers[evt];
         for (var i = 0; h && i < h.length; ++i) {
           h[i](obj);
           if (obj && obj.defaultPrevented) {
@@ -17125,6 +17129,7 @@ var promise = createCommonjsModule(function (module) {
 
 var DEG2RAD = Math.PI / 180;
 var RAD2DEG = 180 / Math.PI;
+
 var Angle = function () {
   function Angle(v) {
     classCallCheck(this, Angle);
@@ -17938,12 +17943,12 @@ function hasGazeEvent(obj) {
 var Pointer = function (_AbstractEventEmitter) {
   inherits(Pointer, _AbstractEventEmitter);
 
-  function Pointer(name, color, highlight, s, devices, triggerDevices, options) {
+  function Pointer(pointerName, color, highlight, s, devices, triggerDevices, options) {
     classCallCheck(this, Pointer);
 
     var _this = possibleConstructorReturn(this, (Pointer.__proto__ || Object.getPrototypeOf(Pointer)).call(this));
 
-    _this.name = name;
+    _this.name = pointerName;
     _this.devices = devices.filter(identity$1);
     _this.triggerDevices = triggerDevices && triggerDevices.filter(identity$1) || _this.devices.slice();
     _this.options = options;
@@ -18802,7 +18807,7 @@ var Surface = function (_Entity) {
 
     _this.isSurface = true;
     _this.options = Object.assign({}, {
-      id: "Primrose.Surface[" + COUNTER$2++ + "]",
+      id: "Primrose.Controls.Surface[" + COUNTER$2++ + "]",
       bounds: new Rectangle()
     }, options);
     _this.bounds = _this.options.bounds;
@@ -19499,7 +19504,7 @@ var BaseControl = function (_AbstractEventEmitter) {
 var Button3D = function (_BaseControl) {
   inherits(Button3D, _BaseControl);
 
-  function Button3D(model, name, options) {
+  function Button3D(model, buttonName, options) {
     classCallCheck(this, Button3D);
 
     var _this = possibleConstructorReturn(this, (Button3D.__proto__ || Object.getPrototypeOf(Button3D)).call(this));
@@ -19512,7 +19517,7 @@ var Button3D = function (_BaseControl) {
     _this.base = model.children[1];
 
     _this.cap = model.children[0];
-    _this.cap.name = name;
+    _this.cap.name = buttonName;
     _this.cap.material = _this.cap.material.clone();
     _this.cap.button = _this;
     _this.cap.base = _this.base;
@@ -19522,7 +19527,9 @@ var Button3D = function (_BaseControl) {
     _this.container.add(_this.cap);
 
     _this.color = _this.cap.material.color;
-    _this.name = name;
+
+    _this.name = buttonName;
+
     _this.element = null;
     return _this;
   }
@@ -19530,6 +19537,7 @@ var Button3D = function (_BaseControl) {
   createClass(Button3D, [{
     key: "startUV",
     value: function startUV(point) {
+
       this.color.copy(this.options.colorPressed);
       if (this.element) {
         this.element.click();
@@ -19540,6 +19548,7 @@ var Button3D = function (_BaseControl) {
   }, {
     key: "endPointer",
     value: function endPointer(evt) {
+
       this.color.copy(this.options.colorUnpressed);
       this.emit("release", { source: this });
     }
@@ -19566,6 +19575,7 @@ var Button3D = function (_BaseControl) {
   }, {
     key: "addToBrowserEnvironment",
     value: function addToBrowserEnvironment(env, scene) {
+
       scene.add(this.container);
       env.registerPickableObject(this.cap);
       return this.container;
@@ -19573,6 +19583,7 @@ var Button3D = function (_BaseControl) {
   }, {
     key: "position",
     get: function get() {
+
       return this.container.position;
     }
   }]);
@@ -19594,6 +19605,7 @@ var ButtonFactory = function () {
     classCallCheck(this, ButtonFactory);
 
     this.options = options;
+
     this.template = templateFile;
   }
 
@@ -28808,8 +28820,10 @@ function setCursorCommand(obj, mod, key, func, cur) {
 }
 
 var OperatingSystem = function () {
-  function OperatingSystem(name, pre1, pre2, redo, pre3, home, end, pre5) {
+  function OperatingSystem(osName, pre1, pre2, redo, pre3, home, end, pre5) {
     classCallCheck(this, OperatingSystem);
+
+    this.name = osName;
 
     var pre4 = pre3;
     pre3 = pre3.length > 0 ? pre3 : "NORMAL";
@@ -28883,10 +28897,10 @@ var OperatingSystems = {
   Windows: Windows
 };
 
-var CodePage = function CodePage(name, lang, options) {
+var CodePage = function CodePage(codePageName, lang, options) {
   classCallCheck(this, CodePage);
 
-  this.name = name;
+  this.name = codePageName;
   this.language = lang;
 
   var commands = {
@@ -31716,10 +31730,10 @@ var Cursor = function () {
   return Cursor;
 }();
 
-var CommandPack = function CommandPack(name, commands) {
+var CommandPack = function CommandPack(commandPackName, commands) {
   classCallCheck(this, CommandPack);
 
-  this.name = name;
+  this.name = commandPackName;
   Object.assign(this, commands);
 };
 
@@ -31966,10 +31980,10 @@ var Token = function () {
 }();
 
 var Grammar = function () {
-  function Grammar(name, rules) {
+  function Grammar(grammarName, rules) {
     classCallCheck(this, Grammar);
 
-    this.name = name;
+    this.name = grammarName;
 
     // clone the preprocessing grammar to start a new grammar
     this.grammar = rules.map(function (rule) {
@@ -33001,14 +33015,6 @@ var PlainText = new Grammar("PlainText", [["newlines", /(?:\r\n|\r|\n)/]]);
 
 var PIXEL_SCALES = [0.5, 0.25, 0.333333, 0.5, 1];
 
-var SKINS = ["#FFDFC4", "#F0D5BE", "#EECEB3", "#E1B899", "#E5C298", "#FFDCB2", "#E5B887", "#E5A073", "#E79E6D", "#DB9065", "#CE967C", "#C67856", "#BA6C49", "#A57257", "#F0C8C9", "#DDA8A0", "#B97C6D", "#A8756C", "#AD6452", "#5C3836", "#CB8442", "#BD723C", "#704139", "#A3866A", "#870400", "#710101", "#430000", "#5B0001", "#302E2E"];
-
-var SKINS_VALUES = SKINS.map(function (s) {
-  return parseInt(s.substring(1), 16);
-});
-
-var SYS_FONTS = "-apple-system, '.SFNSText-Regular', 'San Francisco', 'Roboto', 'Segoe UI', 'Helvetica Neue', 'Lucida Grande', sans-serif";
-
 var Quality = {
   NONE: 0,
   VERYLOW: 1,
@@ -33016,14 +33022,6 @@ var Quality = {
   MEDIUM: 3,
   HIGH: 4,
   MAXIMUM: PIXEL_SCALES.length - 1
-};
-
-var constants = {
-  PIXEL_SCALES: PIXEL_SCALES,
-  SKINS: SKINS,
-  SKINS_VALUES: SKINS_VALUES,
-  SYS_FONTS: SYS_FONTS,
-  Quality: Quality
 };
 
 /**
@@ -41543,7 +41541,30 @@ BrowserEnvironment.DEFAULTS = {
   showHeadPointer: true
 };
 
+var PIXEL_SCALES$1 = [0.5, 0.25, 0.333333, 0.5, 1];
+
+var SKINS$1 = [0xFFDFC4, 0xF0D5BE, 0xEECEB3, 0xE1B899, 0xE5C298, 0xFFDCB2, 0xE5B887, 0xE5A073, 0xE79E6D, 0xDB9065, 0xCE967C, 0xC67856, 0xBA6C49, 0xA57257, 0xF0C8C9, 0xDDA8A0, 0xB97C6D, 0xA8756C, 0xAD6452, 0x5C3836, 0xCB8442, 0xBD723C, 0x704139, 0xA3866A, 0x870400, 0x710101, 0x430000, 0x5B0001, 0x302E2E];
+
+var SYS_FONTS$1 = "-apple-system, '.SFNSText-Regular', 'San Francisco', 'Roboto', 'Segoe UI', 'Helvetica Neue', 'Lucida Grande', sans-serif";
+
+var Quality$1 = {
+  NONE: 0,
+  VERYLOW: 1,
+  LOW: 2,
+  MEDIUM: 3,
+  HIGH: 4,
+  MAXIMUM: PIXEL_SCALES$1.length - 1
+};
+
+var constants$3 = {
+  PIXEL_SCALES: PIXEL_SCALES$1,
+  SKINS: SKINS$1,
+  SYS_FONTS: SYS_FONTS$1,
+  Quality: Quality$1
+};
+
 var COUNTER$5 = 0;
+
 var Form = function (_Surface) {
   inherits(Form, _Surface);
   createClass(Form, null, [{
@@ -41866,6 +41887,11 @@ var Random = {
   vector: vector
 };
 
+////
+// For all of these commands, the "current" cursor is:
+// If SHIFT is not held, then "front".
+// If SHIFT is held, then "back"
+//
 var TextInputCommands = new BasicTextInput("Text Line input commands");
 
 var CommandPacks = {
@@ -41993,7 +42019,6 @@ var Controls$1 = {
   TextInput: TextInput
 };
 
-// we don't use strict here because this grammar includes an interpreter that uses `eval()`
 var Basic = new Grammar("BASIC",
 // Grammar rules are applied in the order they are specified.
 [
@@ -42783,28 +42808,12 @@ var Text = {
   Token: Token
 };
 
-/*
- * Copyright (C) 2014 - 2016 Sean T. McBeth <sean@seanmcbeth.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 var obj$1 = {
   AbstractEventEmitter: AbstractEventEmitter,
   Angle: Angle,
   Audio: Audio$1,
   BrowserEnvironment: BrowserEnvironment,
-  constants: constants,
+  Constants: constants$3,
   Controls: Controls,
   DOM: DOM,
   Graphics: Graphics,
@@ -42825,7 +42834,7 @@ var HTTP = Object.freeze({
 	Angle: Angle,
 	Audio: Audio$1,
 	BrowserEnvironment: BrowserEnvironment,
-	constants: constants,
+	Constants: constants$3,
 	Controls: Controls,
 	DOM: DOM,
 	Graphics: Graphics,
@@ -42838,6 +42847,23 @@ var HTTP = Object.freeze({
 	Text: Text,
 	default: obj$1
 });
+
+/*
+ * Copyright (C) 2014 - 2016 Sean T. McBeth <sean@notiontheory.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 Object.assign(window, flags, liveAPI, util);
 // Do this just for side effects, we are monkey-patching Three.js classes with our own utilities.

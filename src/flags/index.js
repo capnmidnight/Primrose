@@ -1,3 +1,10 @@
+pliny.namespace({
+  name: "Flags",
+  description: "Various flags used for feature detecting and configuring the system.\n\
+\n\
+When including Primrose as a `script` tag, the Flags namespace is imported directly onto the window object and is available without qualification."
+});
+
 import isChrome from "./isChrome";
 import isFirefox from "./isFirefox";
 import isGearVR from "./isGearVR";

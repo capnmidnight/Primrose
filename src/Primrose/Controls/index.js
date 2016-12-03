@@ -1,6 +1,6 @@
 pliny.namespace({
-  name: "Controls",
   parent: "Primrose",
+  name: "Controls",
   description: "Various 3D control objects."
 });
 

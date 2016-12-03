@@ -1,7 +1,14 @@
-import Entity from "./Entity";
-import { textured, quad, shell } from "../../live-api";
-import loadTexture from "../Graphics/loadTexture";
-import enableInlineVideo from "iphone-inline-video";
+pliny.class({
+  parent: "Primrose.Controls",
+  name: "Image",
+  baseClass: "Primrose.Controls.Surface",
+  description: "A simple 2D image to put on a Surface.",
+  parameters: [{
+    name: "options",
+    type: "Object",
+    description: "Named parameters for creating the Image."
+  }]
+});
 
 var COUNTER = 0;
 
@@ -29,17 +36,10 @@ window.addEventListener("touchend", findAndFixVideo, false);
 window.addEventListener("mouseup", findAndFixVideo, false);
 window.addEventListener("keyup", findAndFixVideo, false);
 
-pliny.class({
-  parent: "Primrose.Controls",
-    name: "Image",
-    baseClass: "Primrose.Surface",
-    description: "A simple 2D image to put on a Surface.",
-    parameters: [{
-      name: "options",
-      type: "Object",
-      description: "Named parameters for creating the Image."
-    }]
-});
+import Entity from "./Entity";
+import { textured, quad, shell } from "../../live-api";
+import loadTexture from "../Graphics/loadTexture";
+import enableInlineVideo from "iphone-inline-video";
 export default class Image extends Entity {
 
   static create() {

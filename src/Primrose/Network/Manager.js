@@ -1,6 +1,3 @@
-import AbstractEventEmitter from "../AbstractEventEmitter";
-import RemoteUser from "./RemoteUser";
-
 pliny.class({
   parent: "Primrose.Network",
     name: "Manager",
@@ -14,10 +11,13 @@ pliny.class({
       description: "The audio manager being used in the current Environment."
     }, {
       name: "factories",
-      type: "Primrose.ModelLoader",
+      type: "Primrose.Controls.ModelLoader",
       description: "Model factory for creating avatars for new remote users."
     }]
 });
+
+import AbstractEventEmitter from "../AbstractEventEmitter";
+import RemoteUser from "./RemoteUser";
 export default class Manager extends AbstractEventEmitter {
   constructor(localUser, audio, factories, options) {
     super();

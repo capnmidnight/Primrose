@@ -1,10 +1,12 @@
-var COUNTER = 0;
 pliny.class({
   parent: "Primrose.Controls",
-    name: "Form",
-    baseClass: "Primrose.Entity",
-    description: "A basic 2D form control, with its own mesh to use as a frame."
+  name: "Form",
+  baseClass: "Primrose.Controls.Entity",
+  description: "A basic 2D form control, with its own mesh to use as a frame."
 });
+
+var COUNTER = 0;
+
 import Surface from "./Surface";
 import { textured, quad } from "../../live-api";
 export default class Form extends Surface {

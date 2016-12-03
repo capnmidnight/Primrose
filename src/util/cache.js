@@ -31,6 +31,7 @@ pliny.function({
     console.assert(a === c);"
   }]
 });
+
 const _cache = {};
 export default function cache(hash, makeObject, onCacheHit) {
   if (!_cache[hash]) {

@@ -26,7 +26,7 @@ Object3D.prototype.addToBrowserEnvironment = function(env, scene) {
     parameters: [{
       name: "child",
       type: "Object",
-      description: "Any Primrose.Entity or THREE.Object3D to add to this object."
+      description: "Any Primrose.Controls.Entity or THREE.Object3D to add to this object."
     }]
   });
   this.appendChild = (child) => {

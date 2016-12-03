@@ -1,5 +1,8 @@
-import Keys from "../Keys";
-import AbstractEventEmitter from "../AbstractEventEmitter";
+pliny.class({
+  parent: "Primrose.Input",
+    name: "InputProcessor",
+    description: "| [under construction]"
+});
 
 const SETTINGS_TO_ZERO = ["heading", "pitch", "roll", "pointerPitch", "headX", "headY", "headZ"];
 
@@ -93,11 +96,8 @@ class CommandState{
   }
 }
 
-pliny.class({
-  parent: "Primrose",
-    name: "InputProcessor",
-    description: "| [under construction]"
-});
+import Keys from "../Keys";
+import AbstractEventEmitter from "../AbstractEventEmitter";
 export default class InputProcessor extends AbstractEventEmitter {
 
   constructor(name, commands, axisNames) {

@@ -1,20 +1,21 @@
-var COUNTER = 0;
-
 pliny.class({
   parent: "Primrose.Controls",
-    name: "Button2D",
-    description: "A simple button to put on a Surface.",
-    baseClass: "Primrose.Controls.Label",
-    parameters: [{
-      name: "idOrCanvasOrContext",
-      type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
-      description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
-    }, {
-      name: "options",
-      type: "Object",
-      description: "Named parameters for creating the Button."
-    }]
+  name: "Button2D",
+  baseClass: "Primrose.Controls.Label",
+  description: "A simple button to put on a Surface.",
+  parameters: [{
+    name: "idOrCanvasOrContext",
+    type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
+    description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
+  }, {
+    name: "options",
+    type: "Object",
+    description: "Named parameters for creating the Button."
+  }]
 });
+
+var COUNTER = 0;
+
 import Label from "./Label";
 export default class Button2D extends Label {
 

@@ -1,23 +1,23 @@
-import AbstractEventEmitter from "../AbstractEventEmitter"
+pliny.class({
+  parent: "Primrose.Controls",
+  name: "Entity",
+  description: "The Entity class is the parent class for all 3D controls. It manages a unique ID for every new control, the focus state of the control, and performs basic conversions from DOM elements to the internal Control format."
+});
 
 var entityKeys = [],
   entities = new WeakMap();
 
-pliny.class({
-  parent: "Primrose",
-    name: "Entity",
-    description: "The Entity class is the parent class for all 3D controls. It manages a unique ID for every new control, the focus state of the control, and performs basic conversions from DOM elements to the internal Control format."
-});
+import AbstractEventEmitter from "../AbstractEventEmitter"
 export default class Entity extends AbstractEventEmitter {
 
   static registerEntity(e) {
     pliny.function({
-      parent: "Primrose.Entity",
+      parent: "Primrose.Controls.Entity",
       name: "registerEntity",
       description: "Register an entity to be able to receive eyeBlank events.",
       parameters: [{
         name: "e",
-        type: "Primrose.Entity",
+        type: "Primrose.Controls.Entity",
         description: "The entity to register."
       }]
     });
@@ -33,7 +33,7 @@ export default class Entity extends AbstractEventEmitter {
 
   static eyeBlankAll(eye) {
     pliny.function({
-      parent: "Primrose.Entity",
+      parent: "Primrose.Controls.Entity",
       name: "eyeBlankAll",
       description: "Trigger the eyeBlank event for all registered entities.",
       parameters: [{
@@ -53,15 +53,15 @@ export default class Entity extends AbstractEventEmitter {
     this.id = id;
 
     pliny.property({
-      parent: "Primrose.Entity",
+      parent: "Primrose.Controls.Entity",
       name: "parent ",
-      type: "Primrose.Entity",
+      type: "Primrose.Controls.Entity",
       description: "The parent element of this element, if this element has been added as a child to another element."
     });
     this.parent = null;
 
     pliny.property({
-      parent: "Primrose.Entity",
+      parent: "Primrose.Controls.Entity",
       name: "children",
       type: "Array",
       description: "The child elements of this element."
@@ -69,7 +69,7 @@ export default class Entity extends AbstractEventEmitter {
     this.children = [];
 
     pliny.property({
-      parent: "Primrose.Entity",
+      parent: "Primrose.Controls.Entity",
       name: "focused",
       type: "Boolean",
       description: "A flag indicating if the element, or a child element within it, has received focus from the user."
@@ -77,27 +77,27 @@ export default class Entity extends AbstractEventEmitter {
     this.focused = false;
 
     pliny.property({
-      parent: "Primrose.Entity",
+      parent: "Primrose.Controls.Entity",
       name: "focusable",
       type: "Boolean",
       description: "A flag indicating if the element, or any child elements within it, is capable of receiving focus."
     });
     this.focusable = true;
 
-    pliny.event({ parent: "Primrose.Entity", name: "focus", description: "If the element is focusable, occurs when the user clicks on an element for the first time, or when a program calls the `focus()` method." });
-    pliny.event({ parent: "Primrose.Entity", name: "blur", description: "If the element is focused (which implies it is also focusable), occurs when the user clicks off of an element, or when a program calls the `blur()` method." });
-    pliny.event({ parent: "Primrose.Entity", name: "click", description: "Occurs whenever the user clicks on an element." });
-    pliny.event({ parent: "Primrose.Entity", name: "keydown", description: "Occurs when the user pushes a key down while focused on the element." });
-    pliny.event({ parent: "Primrose.Entity", name: "keyup", description: "Occurs when the user releases a key while focused on the element." });
-    pliny.event({ parent: "Primrose.Entity", name: "paste", description: "Occurs when the user activates the clipboard's `paste` command while focused on the element." });
-    pliny.event({ parent: "Primrose.Entity", name: "cut", description: "Occurs when the user activates the clipboard's `cut` command while focused on the element." });
-    pliny.event({ parent: "Primrose.Entity", name: "copy", description: "Occurs when the user activates the clipboard's `copy` command while focused on the element." });
-    pliny.event({ parent: "Primrose.Entity", name: "wheel", description: "Occurs when the user scrolls the mouse wheel while focused on the element." });
+    pliny.event({ parent: "Primrose.Controls.Entity", name: "focus", description: "If the element is focusable, occurs when the user clicks on an element for the first time, or when a program calls the `focus()` method." });
+    pliny.event({ parent: "Primrose.Controls.Entity", name: "blur", description: "If the element is focused (which implies it is also focusable), occurs when the user clicks off of an element, or when a program calls the `blur()` method." });
+    pliny.event({ parent: "Primrose.Controls.Entity", name: "click", description: "Occurs whenever the user clicks on an element." });
+    pliny.event({ parent: "Primrose.Controls.Entity", name: "keydown", description: "Occurs when the user pushes a key down while focused on the element." });
+    pliny.event({ parent: "Primrose.Controls.Entity", name: "keyup", description: "Occurs when the user releases a key while focused on the element." });
+    pliny.event({ parent: "Primrose.Controls.Entity", name: "paste", description: "Occurs when the user activates the clipboard's `paste` command while focused on the element." });
+    pliny.event({ parent: "Primrose.Controls.Entity", name: "cut", description: "Occurs when the user activates the clipboard's `cut` command while focused on the element." });
+    pliny.event({ parent: "Primrose.Controls.Entity", name: "copy", description: "Occurs when the user activates the clipboard's `copy` command while focused on the element." });
+    pliny.event({ parent: "Primrose.Controls.Entity", name: "wheel", description: "Occurs when the user scrolls the mouse wheel while focused on the element." });
   }
 
   get id() {
     pliny.property({
-      parent: "Primrose.Entity",
+      parent: "Primrose.Controls.Entity",
       name: "id ",
       type: "String",
       description: "Get or set the id for the control."
@@ -120,7 +120,7 @@ export default class Entity extends AbstractEventEmitter {
 
   focus() {
     pliny.method({
-      parent: "Primrose.Entity",
+      parent: "Primrose.Controls.Entity",
       name: "focus",
       description: "If the control is focusable, sets the focus property of the control, does not change the focus property of any other control.",
       examples: [{
@@ -157,7 +157,7 @@ export default class Entity extends AbstractEventEmitter {
 
   blur() {
     pliny.method({
-      parent: "Primrose.Entity",
+      parent: "Primrose.Controls.Entity",
       name: "blur",
       description: "If the element is focused, unsets the focus property of the control and all child controls. Does not change the focus property of any parent or sibling controls.",
       examples: [{
@@ -199,12 +199,12 @@ export default class Entity extends AbstractEventEmitter {
 
   appendChild(child) {
     pliny.method({
-      parent: "Primrose.Entity",
+      parent: "Primrose.Controls.Entity",
       name: "appendChild",
       description: "Adds an Entity as a child entity of this entity.",
       parameters: [{
         name: "child",
-        type: "Primrose.Entity",
+        type: "Primrose.Controls.Entity",
         description: "The object to add. Will only succeed if `child.parent` is not set to a value."
       }],
       examples: [{
@@ -212,8 +212,8 @@ export default class Entity extends AbstractEventEmitter {
         description: "Entities can be arranged in parent-child relationships.\n\
 \n\
   grammar(\"JavaScript\");\n\
-  var a = new Primrose.Entity(),\n\
-  b = new Primrose.Entity();\n\
+  var a = new Primrose.Controls.Entity(),\n\
+  b = new Primrose.Controls.Entity();\n\
   a.appendChild(b);\n\
   console.assert(a.children.length === 1);\n\
   console.assert(a.children[0] === b);\n\
@@ -228,12 +228,12 @@ export default class Entity extends AbstractEventEmitter {
 
   removeChild(child) {
     pliny.method({
-      parent: "Primrose.Entity",
+      parent: "Primrose.Controls.Entity",
       name: "removeChild",
       description: "Removes an Entity from another Entity of this entity.",
       parameters: [{
         name: "child",
-        type: "Primrose.Entity",
+        type: "Primrose.Controls.Entity",
         description: "The object to remove. Will only succeed if `child.parent` is this object."
       }],
       examples: [{
@@ -241,8 +241,8 @@ export default class Entity extends AbstractEventEmitter {
         description: "Entities can be arranged in parent-child relationships.\n\
 \n\
   grammar(\"JavaScript\");\n\
-  var a = new Primrose.Entity(),\n\
-  b = new Primrose.Entity();\n\
+  var a = new Primrose.Controls.Entity(),\n\
+  b = new Primrose.Controls.Entity();\n\
   a.appendChild(b);\n\
   console.assert(a.children.length === 1);\n\
   console.assert(a.children[0] === b);\n\
@@ -261,7 +261,7 @@ export default class Entity extends AbstractEventEmitter {
 
   get theme() {
     pliny.property({
-      parent: "Primrose.Entity",
+      parent: "Primrose.Controls.Entity",
       name: "theme",
       type: "Primrose.Text.Themes.*",
       description: "Get or set the theme used for rendering text on any controls in the control tree."
@@ -277,7 +277,7 @@ export default class Entity extends AbstractEventEmitter {
 
   get lockMovement() {
     pliny.property({
-      parent: "Primrose.Entity",
+      parent: "Primrose.Controls.Entity",
       name: "lockMovement",
       type: "Boolean",
       description: "Recursively searches the deepest leaf-node of the control graph for a control that has its `lockMovement` property set to `true`, indicating that key events should not be used to navigate the user, because they are being interpreted as typing commands."
@@ -291,9 +291,9 @@ export default class Entity extends AbstractEventEmitter {
 
   get focusedElement() {
     pliny.property({
-      parent: "Primrose.Entity",
+      parent: "Primrose.Controls.Entity",
       name: "focusedElement",
-      type: "Primrose.Entity",
+      type: "Primrose.Controls.Entity",
       description: "Searches the deepest leaf-node of the control graph for a control that has its `focused` property set to `true`."
     });
     var result = null,
@@ -314,7 +314,7 @@ export default class Entity extends AbstractEventEmitter {
 
   eyeBlank(eye) {
     pliny.method({
-      parent: "Primrose.Entity",
+      parent: "Primrose.Controls.Entity",
       name: "eyeBlank",
       parameters: [{
         name: "eye",
@@ -337,7 +337,7 @@ export default class Entity extends AbstractEventEmitter {
 
   startUV(evt) {
     pliny.method({
-      parent: "Primrose.Entity",
+      parent: "Primrose.Controls.Entity",
       name: "startUV",
       parameters: [{
         name: "evt",
@@ -351,7 +351,7 @@ export default class Entity extends AbstractEventEmitter {
 
   moveUV(evt) {
     pliny.method({
-      parent: "Primrose.Entity",
+      parent: "Primrose.Controls.Entity",
       name: "moveUV",
       parameters: [{
         name: "evt",
@@ -365,7 +365,7 @@ export default class Entity extends AbstractEventEmitter {
 
   endPointer(evt) {
     pliny.method({
-      parent: "Primrose.Entity",
+      parent: "Primrose.Controls.Entity",
       name: "endPointer",
       description: "Hooks up to the window's `mouseUp` and `toucheEnd` events and propagates it to any of its focused children."
     });
@@ -393,7 +393,7 @@ export default class Entity extends AbstractEventEmitter {
 
   keyDown(evt) {
     pliny.method({
-      parent: "Primrose.Entity",
+      parent: "Primrose.Controls.Entity",
       name: "keyDown",
       parameters: [{
         name: "evt",
@@ -407,7 +407,7 @@ export default class Entity extends AbstractEventEmitter {
 
   keyUp(evt) {
     pliny.method({
-      parent: "Primrose.Entity",
+      parent: "Primrose.Controls.Entity",
       name: "keyUp",
       parameters: [{
         name: "evt",
@@ -421,7 +421,7 @@ export default class Entity extends AbstractEventEmitter {
 
   readClipboard(evt) {
     pliny.method({
-      parent: "Primrose.Entity",
+      parent: "Primrose.Controls.Entity",
       name: "readClipboard",
       parameters: [{
         name: "evt",
@@ -435,7 +435,7 @@ export default class Entity extends AbstractEventEmitter {
 
   copySelectedText(evt) {
     pliny.method({
-      parent: "Primrose.Entity",
+      parent: "Primrose.Controls.Entity",
       name: "copySelectedText",
       parameters: [{
         name: "evt",
@@ -449,7 +449,7 @@ export default class Entity extends AbstractEventEmitter {
 
   cutSelectedText(evt) {
     pliny.method({
-      parent: "Primrose.Entity",
+      parent: "Primrose.Controls.Entity",
       name: "cutSelectedText",
       parameters: [{
         name: "evt",
@@ -463,7 +463,7 @@ export default class Entity extends AbstractEventEmitter {
 
   readWheel(evt) {
     pliny.method({
-      parent: "Primrose.Entity",
+      parent: "Primrose.Controls.Entity",
       name: "readWheel",
       parameters: [{
         name: "evt",

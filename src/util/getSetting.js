@@ -2,7 +2,7 @@ pliny.function({
   parent: "Util",
   name: "getSetting",
   parameters: [{
-    name: " name",
+    name: "settingName",
     type: "string",
     description: "The name of the setting to read."
   }, {
@@ -32,17 +32,17 @@ code should persist between reloads whatever the user writes in the text area:\n
   }]
 });
 
-export default function getSetting(name, defValue) {
+export default function getSetting(settingName, defValue) {
   if (window.localStorage) {
-    var val = window.localStorage.getItem(name);
+    var val = window.localStorage.getItem(settingName);
     if (val) {
       try {
         return JSON.parse(val);
       }
       catch (exp) {
-        console.error("getSetting", name, val, typeof (val), exp);
+        console.error("getSetting", settingName, val, typeof (val), exp);
         console.error(exp);
-        console.error("getSetting", name, val, typeof (val));
+        console.error("getSetting", settingName, val, typeof (val));
       }
     }
   }

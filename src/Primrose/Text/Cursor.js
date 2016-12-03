@@ -1,3 +1,9 @@
+pliny.class({
+  parent: "Primrose.Text",
+    name: "Cursor",
+    description: "| [under construction]"
+});
+
 // unicode-aware string reverse
 var reverse = (function () {
   var combiningMarks =
@@ -19,11 +25,6 @@ var reverse = (function () {
   return reverse;
 })();
 
-pliny.class({
-  parent: "Primrose.Text",
-    name: "Cursor",
-    description: "| [under construction]"
-});
 export default class Cursor {
 
   static min(a, b) {

@@ -58,7 +58,7 @@ pliny.record({
     name: "progress",
     type: "Function",
     optional: true,
-    description: "A callback function to be called as the download from the server progresses."
+    description: "A callback function to use for tracking progress. The callback function should accept a standard [`ProgressEvent`](https://developer.mozilla.org/en-US/docs/Web/API/ProgressEvent)."
   }]
 });
 

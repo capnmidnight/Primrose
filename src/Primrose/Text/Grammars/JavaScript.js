@@ -1,9 +1,10 @@
-import Grammar from "./Grammar";
 pliny.value({
   parent: "Primrose.Text.Grammars",
   name: "JavaScript",
   description: "A grammar for the JavaScript programming language."
 });
+
+import Grammar from "./Grammar";
 export default new Grammar("JavaScript", [
   ["newlines", /(?:\r\n|\r|\n)/],
   ["startBlockComments", /\/\*/],

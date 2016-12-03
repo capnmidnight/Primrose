@@ -1,12 +1,12 @@
-import { getText } from "../HTTP";
-import PlainText from "./Grammars/PlainText";
-import isMacOS from "../../flags/isMacOS";
-
 pliny.class({
   parent: "Primrose.Text",
     name: "Terminal",
     description: "| [under construction]"
 });
+
+import { getText } from "../HTTP";
+import PlainText from "./Grammars/PlainText";
+import isMacOS from "../../flags/isMacOS";
 export default class Terminal {
   constructor(inputEditor, outputEditor) {
     outputEditor = outputEditor || inputEditor;

@@ -1,14 +1,14 @@
-import { Vector2 } from "three/src/math/Vector2";
-import InputProcessor from "./InputProcessor";
+pliny.class({
+  parent: "Primrose.Input",
+  name: "Touch",
+  baseClass: "Primrose.Input.InputProcessor",
+  description: "| [under construction]"
+});
 
 const TEMP = new Vector2();
 
-pliny.class({
-  parent: "Primrose.Input",
-    name: "Touch",
-    baseClass: "Primrose.InputProcessor",
-    description: "| [under construction]"
-});
+import { Vector2 } from "three/src/math/Vector2";
+import InputProcessor from "./InputProcessor";
 export default class Touch extends InputProcessor {
   constructor(DOMElement, commands) {
     var axes = ["FINGERS"];

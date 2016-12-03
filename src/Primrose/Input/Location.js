@@ -1,12 +1,11 @@
-import InputProcessor from "./InputProcessor";
-
 pliny.class({
   parent: "Primrose.Input",
-    name: "Location",
-    baseClass: "Primrose.InputProcessor",
-    description: "| [under construction]"
+  name: "Location",
+  baseClass: "Primrose.Input.InputProcessor",
+  description: "| [under construction]"
 });
 
+import InputProcessor from "./InputProcessor";
 export default class Location extends InputProcessor {
   constructor(commands, options) {
     super("Location", commands, ["LONGITUDE", "LATITUDE", "ALTITUDE", "HEADING", "SPEED"]);

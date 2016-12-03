@@ -1,15 +1,15 @@
+pliny.class({
+  parent: "Primrose",
+  name: "BrowserEnvironment",
+  description: "Make a Virtual Reality app in your web browser!"
+});
+
 const MILLISECONDS_TO_SECONDS = 0.001,
   MAX_MOVE_DISTANCE = 5,
   MAX_MOVE_DISTANCE_SQ = MAX_MOVE_DISTANCE * MAX_MOVE_DISTANCE,
   TELEPORT_COOLDOWN = 250,
   TELEPORT_DISPLACEMENT = new Vector3(),
   GROUND_HEIGHT = -0.07;
-
-pliny.class({
-  parent: "Primrose",
-  name: "BrowserEnvironment",
-  description: "Make a Virtual Reality app in your web browser!"
-});
 
 import PointerLock from "webvr-standard-monitor/src/PointerLock";
 import isMobile from "../flags/isMobile";

@@ -1,5 +1,3 @@
-var DEG2RAD = Math.PI / 180,
-  RAD2DEG = 180 / Math.PI;
 pliny.class({
   parent: "Primrose",
     name: "Angle",
@@ -71,6 +69,9 @@ For more information, see [Radian - Wikipedia, the free encyclopedia](https://en
 > 90"
     }]
 });
+
+var DEG2RAD = Math.PI / 180,
+  RAD2DEG = 180 / Math.PI;
 
 export default class Angle {
   constructor (v) {

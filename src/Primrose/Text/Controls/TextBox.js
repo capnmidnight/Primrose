@@ -1,3 +1,23 @@
+pliny.class({
+  parent: "Primrose.Text.Controls",
+    name: "TextBox",
+    description: "Syntax highlighting textbox control.",
+    baseClass: "Primrose.Controls.Surface",
+    parameters: [{
+      name: "idOrCanvasOrContext",
+      type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
+      description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
+    }, {
+      name: "options",
+      type: "Object",
+      description: "Named parameters for creating the TextBox."
+    }]
+});
+
+var SCROLL_SCALE = isFirefox ? 3 : 100,
+  COUNTER = 0,
+  OFFSET = 0;
+
 import Surface from "../../Controls/Surface";
 import Cursor from "../Cursor";
 import Point from "../Point";
@@ -12,27 +32,6 @@ import isIE from "../../../flags/isIE";
 import isOpera from "../../../flags/isOpera";
 import isSafari from "../../../flags/isSafari";
 import isMobile from "../../../flags/isMobile";
-
-var SCROLL_SCALE = isFirefox ? 3 : 100,
-  COUNTER = 0,
-  OFFSET = 0;
-
-pliny.class({
-  parent: "Primrose.Text.Controls",
-    name: "TextBox",
-    description: "Syntax highlighting textbox control.",
-    baseClass: "Primrose.Surface",
-    parameters: [{
-      name: "idOrCanvasOrContext",
-      type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
-      description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
-    }, {
-      name: "options",
-      type: "Object",
-      description: "Named parameters for creating the TextBox."
-    }]
-});
-
 export default class TextBox extends Surface {
 
   static create() {

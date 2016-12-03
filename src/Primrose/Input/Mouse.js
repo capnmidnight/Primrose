@@ -1,13 +1,13 @@
+pliny.class({
+  parent: "Primrose.Input",
+  name: "Mouse",
+  baseClass: "Primrose.Input.InputProcessor",
+  description: "| [under construction]"
+});
+
 import InputProcessor from "./InputProcessor";
 import isChrome from "../../flags/isChrome";
 import PointerLock from "webvr-standard-monitor/src/PointerLock";
-
-pliny.class({
-  parent: "Primrose.Input",
-    name: "Mouse",
-    baseClass: "Primrose.InputProcessor",
-    description: "| [under construction]"
-});
 export default class Mouse extends InputProcessor {
   constructor(DOMElement, commands) {
     super("Mouse", commands, ["BUTTONS", "X", "Y", "Z", "W"]);

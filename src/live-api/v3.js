@@ -1,5 +1,3 @@
-import { Vector3 } from "three/src/math/Vector3";
-
 pliny.function({
   parent: "Live API",
   name: "v3",
@@ -28,6 +26,8 @@ pliny.function({
     console.assert(a.toArray().join(\", \") === \"1, 2, 3\");"
   }]
 });
+
+import { Vector3 } from "three/src/math/Vector3";
 export default function v3(x, y, z) {
   return new Vector3(x, y, z);
 };

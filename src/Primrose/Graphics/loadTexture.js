@@ -1,3 +1,24 @@
+pliny.function({
+  parent: "Primrose.Graphics",
+  name: "loadTexture",
+  description: "Loads an image as a texture",
+  returns: "THREE.Texture or THREE.CubteTexture",
+  parameters: [{
+    name: "id",
+    type: "String",
+    description: "The key to use to cache the texture."
+  }, {
+    name: "url",
+    type: "String or 6-item Array of String",
+    description: "The texture path(s) to load."
+  }, {
+    name: "progress",
+    type: "Function",
+    optional: true,
+    description: "A callback function to use for tracking progress. The callback function should accept a standard [`ProgressEvent`](https://developer.mozilla.org/en-US/docs/Web/API/ProgressEvent)."
+  }]
+})
+
 import { CubeTextureLoader } from "three/src/loaders/CubeTextureLoader";
 import { TextureLoader } from "three/src/loaders/TextureLoader";
 import { Texture } from "three/src/textures/Texture";

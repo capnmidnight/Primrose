@@ -1,9 +1,3 @@
-import { PlaneGeometry } from "three/src/geometries/PlaneGeometry";
-import { Mesh } from "three/src/objects/Mesh";
-import { Texture } from "three/src/textures/Texture";
-import { MeshBasicMaterial } from "three/src/materials/MeshBasicMaterial";
-import { FlatShading } from "three/src/constants";
-
 pliny.class({
   parent: "Primrose.Text.Controls",
   name: "PlainText",
@@ -45,6 +39,11 @@ pliny.class({
   }]
 });
 
+import { PlaneGeometry } from "three/src/geometries/PlaneGeometry";
+import { Mesh } from "three/src/objects/Mesh";
+import { Texture } from "three/src/textures/Texture";
+import { MeshBasicMaterial } from "three/src/materials/MeshBasicMaterial";
+import { FlatShading } from "three/src/constants";
 export default class PlainText {
   constructor(text, size, fgcolor, bgcolor, x, y, z, hAlign = "center") {
     text = text.replace(/\r\n/g, "\n");

@@ -1,17 +1,7 @@
-import InputProcessor from "./InputProcessor";
-import isFirefox from "../../flags/isFirefox";
-import isChrome from "../../flags/isChrome";
-import isIE from "../../flags/isIE";
-import isOpera from "../../flags/isOpera";
-import isSafari from "../../flags/isSafari";
-import isMacOS from "../../flags/isMacOS";
-import { Windows, macOS } from "../Text/OperatingSystems"
-import CodePages from "../Text/CodePages";
-
 pliny.class({
   parent: "Primrose.Input",
     name: "Keyboard",
-    baseClass: "Primrose.InputProcessor",
+    baseClass: "Primrose.Input.InputProcessor",
     description: "| [under construction]",
     parameters: [{
       name: "",
@@ -31,6 +21,16 @@ pliny.class({
       description: ""
     }]
 });
+
+import InputProcessor from "./InputProcessor";
+import isFirefox from "../../flags/isFirefox";
+import isChrome from "../../flags/isChrome";
+import isIE from "../../flags/isIE";
+import isOpera from "../../flags/isOpera";
+import isSafari from "../../flags/isSafari";
+import isMacOS from "../../flags/isMacOS";
+import { Windows, macOS } from "../Text/OperatingSystems"
+import CodePages from "../Text/CodePages";
 export default class Keyboard extends InputProcessor {
   constructor(input, commands) {
     super("Keyboard", commands);

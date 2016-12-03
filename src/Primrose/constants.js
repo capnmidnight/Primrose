@@ -1,4 +1,11 @@
+pliny.namespace({
+  parent: "Primrose",
+  name: "Constants",
+  description: "Useful values that are used frequently."
+})
+
 pliny.value({
+  parent: "Primrose.Constants",
   name: "PIXEL_SCALES",
   description: "Scaling factors for changing the resolution of the display when the render quality level changes."
 });
@@ -11,26 +18,15 @@ export const PIXEL_SCALES = [
 ];
 
 pliny.value({
+  parent: "Primrose.Constants",
   name: "SKINS",
-  type: "Array of String",
-  description: "A selection of color values that closely match skin colors of people."
-});
-export const SKINS = ["#FFDFC4", "#F0D5BE", "#EECEB3", "#E1B899", "#E5C298", "#FFDCB2",
-  "#E5B887", "#E5A073", "#E79E6D", "#DB9065", "#CE967C", "#C67856", "#BA6C49",
-  "#A57257", "#F0C8C9", "#DDA8A0", "#B97C6D", "#A8756C", "#AD6452", "#5C3836",
-  "#CB8442", "#BD723C", "#704139", "#A3866A", "#870400", "#710101", "#430000",
-  "#5B0001", "#302E2E"
-];
-
-pliny.value({
-  name: "SKIN_VALUES",
   type: "Array of Number",
   description: "A selection of color values that closely match skin colors of people."
 });
-export const SKINS_VALUES = SKINS.map((s) => parseInt(s.substring(1), 16));
+export const SKINS = [0xFFDFC4, 0xF0D5BE, 0xEECEB3, 0xE1B899, 0xE5C298, 0xFFDCB2, 0xE5B887, 0xE5A073, 0xE79E6D, 0xDB9065, 0xCE967C, 0xC67856, 0xBA6C49, 0xA57257, 0xF0C8C9, 0xDDA8A0, 0xB97C6D, 0xA8756C, 0xAD6452, 0x5C3836, 0xCB8442, 0xBD723C, 0x704139, 0xA3866A, 0x870400, 0x710101, 0x430000, 0x5B0001, 0x302E2E ];
 
 pliny.value({
-  parent: "Primrose",
+  parent: "Primrose.Constants",
   name: "SYS_FONTS",
   type: "String",
   description: "A selection of fonts that will match whatever the user's operating system normally uses."
@@ -38,6 +34,7 @@ pliny.value({
 export const SYS_FONTS = "-apple-system, '.SFNSText-Regular', 'San Francisco', 'Roboto', 'Segoe UI', 'Helvetica Neue', 'Lucida Grande', sans-serif";
 
 pliny.enumeration({
+  parent: "Primrose.Constants",
   name: "Quality",
   description: "Graphics quality settings."
 });
@@ -53,7 +50,6 @@ export const Quality = {
 const constants = {
   PIXEL_SCALES,
   SKINS,
-  SKINS_VALUES,
   SYS_FONTS,
   Quality
 };

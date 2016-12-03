@@ -1,3 +1,9 @@
+pliny.class({
+  parent: "Primrose.Output",
+    name: "Audio3D",
+    description: "| [under construction]"
+});
+
 // polyfill
 window.AudioContext =
   window.AudioContext ||
@@ -8,12 +14,6 @@ window.AudioContext =
 let VECTOR = new Vector3(),
   UP = new Vector3(),
   TEMP = new Matrix4();
-
-pliny.class({
-  parent: "Primrose.Output",
-    name: "Audio3D",
-    description: "| [under construction]"
-});
 
 import { Vector3 } from "three/src/math/Vector3";
 import { Matrix4 } from "three/src/math/Matrix4";

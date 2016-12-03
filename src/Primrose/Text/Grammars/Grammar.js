@@ -1,12 +1,8 @@
-import Rule from "../Rule";
-import Token from "../Token";
-import DefaultTheme from "../Themes/Default";
-
 pliny.class({
   parent: "Primrose.Text",
     name: "Grammar",
     parameters: [{
-      name: "name",
+      name: "grammarName",
       type: "String",
       description: "A user-friendly name for the grammar, to be able to include it in an options listing."
     }, {
@@ -69,15 +65,18 @@ See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.
     }]
 });
 
+import Rule from "../Rule";
+import Token from "../Token";
+import DefaultTheme from "../Themes/Default";
 export default class Grammar {
-  constructor(name, rules) {
+  constructor(grammarName, rules) {
     pliny.property({
       parent: "Primrose.Text.Grammar",
       name: " name",
       type: "String",
       description: "A user-friendly name for the grammar, to be able to include it in an options listing."
     });
-    this.name = name;
+    this.name = grammarName;
 
     pliny.property({
       parent: "Primrose.Text.Grammar",

@@ -1,9 +1,3 @@
-import TextBox from "./TextBox";
-import PlainText from "../Grammars/PlainText";
-import TextInputCommands from "../CommandPacks/TextInput";
-
-var COUNTER = 0;
-
 pliny.class({
   parent: "Primrose.Text.Controls",
     name: "TextInput",
@@ -19,6 +13,12 @@ pliny.class({
       description: "Named parameters for creating the TextInput."
     }]
 });
+
+var COUNTER = 0;
+
+import TextBox from "./TextBox";
+import PlainText from "../Grammars/PlainText";
+import TextInputCommands from "../CommandPacks/TextInput";
 export default class TextInput extends TextBox {
   constructor(options) {
     super(Object.assign({}, {

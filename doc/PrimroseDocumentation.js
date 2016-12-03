@@ -1,75 +1,94 @@
 pliny.value({
+  parent: "Flags",
   name: "isOpera",
   type: "Boolean",
-  description: "Flag indicating the browser is currently calling itself Opera.\n\
-Opera is a substandard browser that lags adoption of cutting edge web technologies,\n\
-so you are not likely to need this flag if you are using Primrose, other than to\n\
-cajole users into downloading a more advanced browser such as Mozilla Firefox or\n\
-Google Chrome."
+  description: "Flag indicating the browser is currently calling itself Opera."
 });
+
 pliny.value({
+  parent: "Flags",
   name: "isChrome",
   type: "Boolean",
-  description: "Flag indicating the browser is currently calling itself Chrome\n\
-or Chromium."
+  description: "Flag indicating the browser is currently calling itself Chrome or Chromium."
 });
+
 pliny.value({
+  parent: "Flags",
   name: "isFirefox",
   type: "Boolean",
   description: "Flag indicating the browser is currently calling itself Firefox."
 });
+
 pliny.value({
+  parent: "Flags",
   name: "isGearVR",
   type: "Boolean",
   description: "Flag indicating the application is running on the Samsung Gear VR in the Samsung Internet app."
 });
+
 pliny.value({
+  parent: "Flags",
   name: "isIE",
   type: "Boolean",
-  description: "Flag indicating the browser is currently calling itself Internet\n\
-Explorer. Once the bane of every web developer's existence, it has since passed\n\
-the torch on to Safari in all of its many useless incarnations."
+  description: "Flag indicating the browser is currently calling itself Internet Explorer. Once the bane of every web developer's existence, it has since passed the torch on to Safari in all of its many useless incarnations."
 });
+
 pliny.value({
+  parent: "Flags",
   name: "isHomeScreen",
   type: "Boolean",
   description: "Flag indicating the script is currently running in an IFRAME or not."
 });
+
 pliny.value({
+  parent: "Flags",
   name: "isiOS",
   type: "Boolean",
-  description: "Flag indicating the current system is a device running the Apple\n\
-iOS operating system: iPad, iPod Touch, iPhone. Useful for invoking optional code\n\
-paths necessary to deal with deficiencies in Apple's implementation of web standards."
+  description: "Flag indicating the current system is a device running the Apple iOS operating system: iPad, iPod Touch, iPhone. Useful for invoking optional code paths necessary to deal with deficiencies in Apple's implementation of web standards."
 });
+
 pliny.value({
+  parent: "Flags",
   name: "isMacOS",
   type: "Boolean",
-  description: "Flag indicating the current system is a computer running the Apple\n\
-macOS operating system. Useful for changing keyboard shortcuts to support Apple's\n\
-idiosyncratic, consensus-defying keyboard shortcuts."
+  description: "Flag indicating the current system is a computer running the Apple macOS operating system. Useful for changing keyboard shortcuts to support Apple's idiosyncratic, consensus-defying keyboard shortcuts."
 });
+
 pliny.value({
+  parent: "Flags",
   name: "isMobile",
   type: "Boolean",
-  description: "Flag indicating the current system is a recognized \"mobile\"\n\
-device, usually possessing a motion sensor."
+  description: "Flag indicating the current system is a recognized \"mobile\" device, usually possessing a motion sensor."
 });
+
 pliny.value({
+  parent: "Flags",
   name: "isSafari",
   type: "Boolean",
   description: "Flag indicating the browser is currently calling itself Safari. Safari is an overly opinionated browser that thinks users should be protected from themselves in such a way as to prevent users from gaining access to the latest in cutting-edge web technologies. Essentially, it was replaced Microsoft Internet Explorer as the Internet Explorer of the web."
 });
+
 pliny.value({
+  parent: "Flags",
   name: "isWebKit",
   type: "Boolean",
   description: "Flag indicating the browser is one of Chrome, Safari, or Opera. WebKit browsers have certain issues in common that can be treated together, like a common basis for orientation events."
 });
+
 pliny.value({
+  parent: "Flags",
   name: "isWindows",
   type: "Boolean",
   description: "Flag indicating the current system is a computer running one of the Microsoft Windows operating systems."
 });
+
+pliny.namespace({
+  name: "Flags",
+  description: "Various flags used for feature detecting and configuring the system.\n\
+\n\
+When including Primrose as a `script` tag, the Flags namespace is imported directly onto the window object and is available without qualification."
+});
+
 pliny.function({
   parent: "Live API",
   name: "hub",
@@ -88,7 +107,7 @@ pliny.function({
   name: "put",
   description: "A literate interface for putting objects onto scenes with basic, common transformations. You call `put()` with an object, then have access to a series of methods that you can chain together, before receiving the object back again. This makes it possible to create objects in the parameter position of `put()` at the same time as declaring the variable that will hold it.\n\
 \n\
-* .on(scene) - the Primrose.Entity or THREE.Object3D on which to append the element.\n\
+* .on(scene) - the Primrose.Controls.Entity or THREE.Object3D on which to append the element.\n\
 * .at(x, y, z) - set the translation for the object.\n\
 * .rot(x, y, z) - set the rotation for the object.\n\
 * .scale(x, y, z) - set the scale for the object.\n\
@@ -108,6 +127,7 @@ pliny.function({
       .obj();"
   }]
 });
+
 pliny.function({
   parent: "Util",
   name: "cache",
@@ -141,6 +161,7 @@ pliny.function({
     console.assert(a === c);"
   }]
 });
+
 pliny.function({
   parent: "Live API",
   name: "material",
@@ -231,6 +252,27 @@ pliny.record({
     optional: true,
     default: true,
     description: "When `unshaded` is falsey, sets the light that the THREE.MeshStandardMaterial emits onto the scene."
+  }]
+});
+
+pliny.function({
+  parent: "Primrose.Graphics",
+  name: "loadTexture",
+  description: "Loads an image as a texture",
+  returns: "THREE.Texture or THREE.CubteTexture",
+  parameters: [{
+    name: "id",
+    type: "String",
+    description: "The key to use to cache the texture."
+  }, {
+    name: "url",
+    type: "String or 6-item Array of String",
+    description: "The texture path(s) to load."
+  }, {
+    name: "progress",
+    type: "Function",
+    optional: true,
+    description: "A callback function to use for tracking progress. The callback function should accept a standard [`ProgressEvent`](https://developer.mozilla.org/en-US/docs/Web/API/ProgressEvent)."
   }]
 });
 
@@ -1081,6 +1123,7 @@ pliny.function({
   name: "raycaster",
   description: "Creates a THREE.Raycaster. This is useful so you don't have to try to figure out how to import any parts of Three.js separately from Primrose. It also makes it possible to use in functional settings."
 });
+
 pliny.function({
   parent: "Live API",
   name: "sphere",
@@ -1150,6 +1193,7 @@ pliny.function({
     console.assert(a.toArray().join(\", \") === \"1, 2, 3\");"
   }]
 });
+
 pliny.namespace({
   name: "Live API",
   description: "The Live API is a set of functions that serve as shorthand for common Three.js objects, with a caching system built in to deduplicate repeated creations of geometries and materials.\n\
@@ -1161,7 +1205,7 @@ pliny.function({
   parent: "Util",
   name: "deleteSetting",
   parameters: [{
-    name: " name",
+    name: "settingName",
     type: "string",
     description: "The name of the setting to delete."
   }],
@@ -1207,7 +1251,7 @@ pliny.function({
   parent: "Util",
   name: "getSetting",
   parameters: [{
-    name: " name",
+    name: "settingName",
     type: "string",
     description: "The name of the setting to read."
   }, {
@@ -1241,7 +1285,7 @@ pliny.function({
   parent: "Util",
   name: "setSetting",
   parameters: [{
-    name: " name",
+    name: "settingName",
     type: "string",
     description: "The name of the setting to set."
   }, {
@@ -1269,6 +1313,72 @@ code should persist between reloads whatever the user writes in the text area:\n
 });
 
 pliny.class({
+  parent: "Primrose",
+  name: "AbstractEventEmitter",
+  description: "The base-class from which all event-emitting classes inherit."
+});
+
+pliny.method({
+        parent: "Primrose.AbstractEventEmitter",
+        name: "addEventListener",
+        description: "Register a function as a listener for a named event.",
+        parameters: [{
+          name: "evt",
+          type: "String",
+          description: "The name of the event for which to listen."
+        }, {
+          name: "thunk",
+          type: "Function",
+          description: "The function to use as the event handler."
+        }]
+      });
+
+      pliny.method({
+        parent: "Primrose.AbstractEventEmitter",
+        name: "removeEventListener",
+        description: "Remove a function from being a listener for a named event.",
+        parameters: [{
+          name: "evt",
+          type: "String",
+          description: "The name of the event for which to remove a listener."
+        }, {
+          name: "thunk",
+          type: "Function",
+          description: "The function to remove as a listener."
+        }]
+      });
+
+      pliny.method({
+        parent: "Primrose.AbstractEventEmitter",
+        name: "forward",
+        description: "Copy all events from this object to another.",
+        parameters: [{
+          name: "obj",
+          type: "Primrose.AbstractEventEmitter",
+          description: "The object to which to forward the events."
+        }, {
+          name: "evts",
+          type: "Array of String",
+          description: "The events to copy."
+        }]
+      });
+
+      pliny.method({
+        parent: "Primrose.AbstractEventEmitter",
+        name: "emit",
+        description: "Fire an event.",
+        parameters: [{
+          name: "evt",
+          type: "String",
+          description: "The name of the event to fire."
+        }, {
+          name: "obj",
+          type: "Object",
+          description: "The value to pass to the event handlers."
+        }]
+      });
+
+      pliny.class({
   parent: "Util",
   name: "Workerize",
   description: "Builds a WebWorker thread out of a JavaScript class's source code, and attempts to create a message interface that matches the message-passing interface that the class already uses.\n\
@@ -1386,7 +1496,7 @@ Then we can create and use an automatically workerized version of it as follows.
 });
 
 pliny.function({
-        parent: "Primrose.Workerize",
+        parent: "Util.Workerize",
         name: "createWorker",
         description: "A static function that loads Plain Ol' JavaScript Functions into a WebWorker.",
         parameters: [{
@@ -1402,22 +1512,25 @@ pliny.function({
       });
 
       pliny.property({
+      parent: "Util.Workerize",
       name: "worker",
       type: "WebWorker",
       description: "The worker thread containing our class."
     });
     pliny.property({
+      parent: "Util.Workerize",
       name: "args",
       type: "Array",
       description: "Static allocation of an array to save on memory usage when piping commands to a worker."
     });
     pliny.property({
+      parent: "Util.Workerize",
       name: "&lt;mappings for each method in the original class&gt;",
       type: "Function",
       description: "Each mapped function causes a message to be posted to the worker thread with its arguments packed into an array."
     });
     pliny.method({
-        parent: "Primrose.Workerize",
+        parent: "Util.Workerize",
         name: "methodShim",
         description: "Posts messages to the worker thread by packing arguments into an array. The worker will receive the array and interpret the first value as the name of the method to invoke and the second value as another array of parameters.",
         parameters: [{
@@ -1459,7 +1572,7 @@ pliny.method({
     parameters: [{
       name: "child",
       type: "Object",
-      description: "Any Primrose.Entity or THREE.Object3D to add to this object."
+      description: "Any Primrose.Controls.Entity or THREE.Object3D to add to this object."
     }]
   });
   pliny.class({
@@ -1608,7 +1721,7 @@ pliny.record({
     name: "progress",
     type: "Function",
     optional: true,
-    description: "A callback function to be called as the download from the server progresses."
+    description: "A callback function to use for tracking progress. The callback function should accept a standard [`ProgressEvent`](https://developer.mozilla.org/en-US/docs/Web/API/ProgressEvent)."
   }]
 });
 
@@ -1918,6 +2031,7 @@ pliny.function({
 });
 
 pliny.error({
+      parent: "Primrose.DOM.cascadeElement",
       name: "Invalid element",
       type: "Error",
       description: "If the element could not be found, could not be created, or one of the appropriate ID was found but did not match the expected type, an error is thrown to halt operation."
@@ -2023,7 +2137,7 @@ pliny.class({
   baseClass: "Primrose.AbstractEventEmitter",
   description: "An object that points into the scene somewhere, casting a ray at objects for picking operations.",
   parameters: [{
-    name: "name ",
+    name: "pointerName",
     type: "String",
     description: "A friendly name for this pointer object, to make debugging easier."
   }, {
@@ -2066,24 +2180,25 @@ pliny.method({
   name: "Keys",
   description: "Keycode values for system keys that are the same across all international standards"
 });
+
 pliny.class({
-  parent: "Primrose",
+  parent: "Primrose.Controls",
   name: "Entity",
   description: "The Entity class is the parent class for all 3D controls. It manages a unique ID for every new control, the focus state of the control, and performs basic conversions from DOM elements to the internal Control format."
 });
 
 pliny.function({
-        parent: "Primrose.Entity",
+        parent: "Primrose.Controls.Entity",
         name: "registerEntity",
         description: "Register an entity to be able to receive eyeBlank events.",
         parameters: [{
           name: "e",
-          type: "Primrose.Entity",
+          type: "Primrose.Controls.Entity",
           description: "The entity to register."
         }]
       });
       pliny.function({
-        parent: "Primrose.Entity",
+        parent: "Primrose.Controls.Entity",
         name: "eyeBlankAll",
         description: "Trigger the eyeBlank event for all registered entities.",
         parameters: [{
@@ -2093,40 +2208,40 @@ pliny.function({
         }]
       });
       pliny.property({
-      parent: "Primrose.Entity",
+      parent: "Primrose.Controls.Entity",
       name: "parent ",
-      type: "Primrose.Entity",
+      type: "Primrose.Controls.Entity",
       description: "The parent element of this element, if this element has been added as a child to another element."
     });
     pliny.property({
-      parent: "Primrose.Entity",
+      parent: "Primrose.Controls.Entity",
       name: "children",
       type: "Array",
       description: "The child elements of this element."
     });
     pliny.property({
-      parent: "Primrose.Entity",
+      parent: "Primrose.Controls.Entity",
       name: "focused",
       type: "Boolean",
       description: "A flag indicating if the element, or a child element within it, has received focus from the user."
     });
     pliny.property({
-      parent: "Primrose.Entity",
+      parent: "Primrose.Controls.Entity",
       name: "focusable",
       type: "Boolean",
       description: "A flag indicating if the element, or any child elements within it, is capable of receiving focus."
     });
-    pliny.event({ parent: "Primrose.Entity", name: "focus", description: "If the element is focusable, occurs when the user clicks on an element for the first time, or when a program calls the `focus()` method." });
-    pliny.event({ parent: "Primrose.Entity", name: "blur", description: "If the element is focused (which implies it is also focusable), occurs when the user clicks off of an element, or when a program calls the `blur()` method." });
-    pliny.event({ parent: "Primrose.Entity", name: "click", description: "Occurs whenever the user clicks on an element." });
-    pliny.event({ parent: "Primrose.Entity", name: "keydown", description: "Occurs when the user pushes a key down while focused on the element." });
-    pliny.event({ parent: "Primrose.Entity", name: "keyup", description: "Occurs when the user releases a key while focused on the element." });
-    pliny.event({ parent: "Primrose.Entity", name: "paste", description: "Occurs when the user activates the clipboard's `paste` command while focused on the element." });
-    pliny.event({ parent: "Primrose.Entity", name: "cut", description: "Occurs when the user activates the clipboard's `cut` command while focused on the element." });
-    pliny.event({ parent: "Primrose.Entity", name: "copy", description: "Occurs when the user activates the clipboard's `copy` command while focused on the element." });
-    pliny.event({ parent: "Primrose.Entity", name: "wheel", description: "Occurs when the user scrolls the mouse wheel while focused on the element." });
+    pliny.event({ parent: "Primrose.Controls.Entity", name: "focus", description: "If the element is focusable, occurs when the user clicks on an element for the first time, or when a program calls the `focus()` method." });
+    pliny.event({ parent: "Primrose.Controls.Entity", name: "blur", description: "If the element is focused (which implies it is also focusable), occurs when the user clicks off of an element, or when a program calls the `blur()` method." });
+    pliny.event({ parent: "Primrose.Controls.Entity", name: "click", description: "Occurs whenever the user clicks on an element." });
+    pliny.event({ parent: "Primrose.Controls.Entity", name: "keydown", description: "Occurs when the user pushes a key down while focused on the element." });
+    pliny.event({ parent: "Primrose.Controls.Entity", name: "keyup", description: "Occurs when the user releases a key while focused on the element." });
+    pliny.event({ parent: "Primrose.Controls.Entity", name: "paste", description: "Occurs when the user activates the clipboard's `paste` command while focused on the element." });
+    pliny.event({ parent: "Primrose.Controls.Entity", name: "cut", description: "Occurs when the user activates the clipboard's `cut` command while focused on the element." });
+    pliny.event({ parent: "Primrose.Controls.Entity", name: "copy", description: "Occurs when the user activates the clipboard's `copy` command while focused on the element." });
+    pliny.event({ parent: "Primrose.Controls.Entity", name: "wheel", description: "Occurs when the user scrolls the mouse wheel while focused on the element." });
     pliny.method({
-        parent: "Primrose.Entity",
+        parent: "Primrose.Controls.Entity",
         name: "focus",
         description: "If the control is focusable, sets the focus property of the control, does not change the focus property of any other control.",
         examples: [{
@@ -2154,7 +2269,7 @@ pliny.function({
         }]
       });
       pliny.method({
-        parent: "Primrose.Entity",
+        parent: "Primrose.Controls.Entity",
         name: "blur",
         description: "If the element is focused, unsets the focus property of the control and all child controls. Does not change the focus property of any parent or sibling controls.",
         examples: [{
@@ -2182,12 +2297,12 @@ pliny.function({
         }]
       });
       pliny.method({
-        parent: "Primrose.Entity",
+        parent: "Primrose.Controls.Entity",
         name: "appendChild",
         description: "Adds an Entity as a child entity of this entity.",
         parameters: [{
           name: "child",
-          type: "Primrose.Entity",
+          type: "Primrose.Controls.Entity",
           description: "The object to add. Will only succeed if `child.parent` is not set to a value."
         }],
         examples: [{
@@ -2195,8 +2310,8 @@ pliny.function({
           description: "Entities can be arranged in parent-child relationships.\n\
 \n\
   grammar(\"JavaScript\");\n\
-  var a = new Primrose.Entity(),\n\
-  b = new Primrose.Entity();\n\
+  var a = new Primrose.Controls.Entity(),\n\
+  b = new Primrose.Controls.Entity();\n\
   a.appendChild(b);\n\
   console.assert(a.children.length === 1);\n\
   console.assert(a.children[0] === b);\n\
@@ -2204,12 +2319,12 @@ pliny.function({
         }]
       });
       pliny.method({
-        parent: "Primrose.Entity",
+        parent: "Primrose.Controls.Entity",
         name: "removeChild",
         description: "Removes an Entity from another Entity of this entity.",
         parameters: [{
           name: "child",
-          type: "Primrose.Entity",
+          type: "Primrose.Controls.Entity",
           description: "The object to remove. Will only succeed if `child.parent` is this object."
         }],
         examples: [{
@@ -2217,8 +2332,8 @@ pliny.function({
           description: "Entities can be arranged in parent-child relationships.\n\
 \n\
   grammar(\"JavaScript\");\n\
-  var a = new Primrose.Entity(),\n\
-  b = new Primrose.Entity();\n\
+  var a = new Primrose.Controls.Entity(),\n\
+  b = new Primrose.Controls.Entity();\n\
   a.appendChild(b);\n\
   console.assert(a.children.length === 1);\n\
   console.assert(a.children[0] === b);\n\
@@ -2229,7 +2344,7 @@ pliny.function({
         }]
       });
       pliny.method({
-        parent: "Primrose.Entity",
+        parent: "Primrose.Controls.Entity",
         name: "eyeBlank",
         parameters: [{
           name: "eye",
@@ -2239,7 +2354,7 @@ pliny.function({
         description: "Instructs any stereoscopically rendered surfaces to change their rendering offset."
       });
       pliny.method({
-        parent: "Primrose.Entity",
+        parent: "Primrose.Controls.Entity",
         name: "startUV",
         parameters: [{
           name: "evt",
@@ -2249,7 +2364,7 @@ pliny.function({
         description: "Hooks up to the window's `mouseDown` and `touchStart` events, with coordinates translated to tangent-space UV coordinates, and propagates it to any of its focused children."
       });
       pliny.method({
-        parent: "Primrose.Entity",
+        parent: "Primrose.Controls.Entity",
         name: "moveUV",
         parameters: [{
           name: "evt",
@@ -2259,12 +2374,12 @@ pliny.function({
         description: "Hooks up to the window's `mouseMove` and `touchMove` events, with coordinates translated to tangent-space UV coordinates, and propagates it to any of its focused children."
       });
       pliny.method({
-        parent: "Primrose.Entity",
+        parent: "Primrose.Controls.Entity",
         name: "endPointer",
         description: "Hooks up to the window's `mouseUp` and `toucheEnd` events and propagates it to any of its focused children."
       });
       pliny.method({
-        parent: "Primrose.Entity",
+        parent: "Primrose.Controls.Entity",
         name: "keyDown",
         parameters: [{
           name: "evt",
@@ -2274,7 +2389,7 @@ pliny.function({
         description: "Hooks up to the window's `keyDown` event and propagates it to any of its focused children."
       });
       pliny.method({
-        parent: "Primrose.Entity",
+        parent: "Primrose.Controls.Entity",
         name: "keyUp",
         parameters: [{
           name: "evt",
@@ -2284,7 +2399,7 @@ pliny.function({
         description: "Hooks up to the window's `keyUp` event and propagates it to any of its focused children."
       });
       pliny.method({
-        parent: "Primrose.Entity",
+        parent: "Primrose.Controls.Entity",
         name: "readClipboard",
         parameters: [{
           name: "evt",
@@ -2294,7 +2409,7 @@ pliny.function({
         description: "Hooks up to the clipboard's `paste` event and propagates it to any of its focused children."
       });
       pliny.method({
-        parent: "Primrose.Entity",
+        parent: "Primrose.Controls.Entity",
         name: "copySelectedText",
         parameters: [{
           name: "evt",
@@ -2304,7 +2419,7 @@ pliny.function({
         description: "Hooks up to the clipboard's `copy` event and propagates it to any of its focused children."
       });
       pliny.method({
-        parent: "Primrose.Entity",
+        parent: "Primrose.Controls.Entity",
         name: "cutSelectedText",
         parameters: [{
           name: "evt",
@@ -2314,7 +2429,7 @@ pliny.function({
         description: "Hooks up to the clipboard's `cut` event and propagates it to any of its focused children."
       });
       pliny.method({
-        parent: "Primrose.Entity",
+        parent: "Primrose.Controls.Entity",
         name: "readWheel",
         parameters: [{
           name: "evt",
@@ -2324,27 +2439,27 @@ pliny.function({
         description: "Hooks up to the window's `wheel` event and propagates it to any of its focused children."
       });
       pliny.property({
-        parent: "Primrose.Entity",
+        parent: "Primrose.Controls.Entity",
         name: "id ",
         type: "String",
         description: "Get or set the id for the control."
       });
       pliny.property({
-        parent: "Primrose.Entity",
+        parent: "Primrose.Controls.Entity",
         name: "theme",
         type: "Primrose.Text.Themes.*",
         description: "Get or set the theme used for rendering text on any controls in the control tree."
       });
       pliny.property({
-        parent: "Primrose.Entity",
+        parent: "Primrose.Controls.Entity",
         name: "lockMovement",
         type: "Boolean",
         description: "Recursively searches the deepest leaf-node of the control graph for a control that has its `lockMovement` property set to `true`, indicating that key events should not be used to navigate the user, because they are being interpreted as typing commands."
       });
       pliny.property({
-        parent: "Primrose.Entity",
+        parent: "Primrose.Controls.Entity",
         name: "focusedElement",
-        type: "Primrose.Entity",
+        type: "Primrose.Controls.Entity",
         description: "Searches the deepest leaf-node of the control graph for a control that has its `focused` property set to `true`."
       });
       pliny.class({
@@ -2366,20 +2481,20 @@ pliny.class({
 });
 
 pliny.class({
-  parent: "Primrose",
+  parent: "Primrose.Controls",
   name: "Surface",
+  baseClass: "Primrose.Controls.Entity",
   description: "Cascades through a number of options to eventually return a CanvasRenderingContext2D object on which one will perform drawing operations.",
-  baseClass: "Primrose.Entity",
   parameters: [{
     name: "options",
-    type: "Primrose.Surface.optionsHash",
+    type: "Primrose.Controls.Surface.optionsHash",
     optional: true,
-    description: "Optional settings for creating the surface, including ID and Bounds. See [`Primrose.Surface.optionsHash`](#Primrose_Surface_optionsHash) for more information."
+    description: "Optional settings for creating the surface, including ID and Bounds. See [`Primrose.Controls.Surface.optionsHash`](#Primrose_Controls_Surface_optionsHash) for more information."
   }]
 });
 
 pliny.record({
-  parent: "Primrose.Surface",
+  parent: "Primrose.Controls.Surface",
   name: "optionsHash",
   parameters: [{
     name: "id",
@@ -2393,6 +2508,7 @@ pliny.record({
 });
 
 pliny.error({
+        parent: "Primrose.Controls.Surface",
         name: "Invalid element",
         type: "Error",
         description: "If the element could not be found, could not be created, or one of the appropriate ID was found but did not match the expected type, an error is thrown to halt operation."
@@ -2402,11 +2518,12 @@ pliny.error({
   name: "Default",
   description: "A light background with dark foreground text."
 });
+
 pliny.class({
   parent: "Primrose.Controls",
   name: "Label",
   description: "A simple label of text to put on a Surface.",
-  baseClass: "Primrose.Surface",
+  baseClass: "Primrose.Controls.Surface",
   parameters: [{
     name: "idOrCanvasOrContext",
     type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
@@ -2421,8 +2538,8 @@ pliny.class({
 pliny.class({
   parent: "Primrose.Controls",
   name: "Button2D",
-  description: "A simple button to put on a Surface.",
   baseClass: "Primrose.Controls.Label",
+  description: "A simple button to put on a Surface.",
   parameters: [{
     name: "idOrCanvasOrContext",
     type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
@@ -2433,8 +2550,9 @@ pliny.class({
     description: "Named parameters for creating the Button."
   }]
 });
+
 pliny.class({
-  parent: "Primrose",
+  parent: "Primrose.Controls",
   baseClass: "Primrose.AbstractEventEmitter",
   name: "BaseControl",
   description: "The BaseControl class is the parent class for all 3D controls.\n\
@@ -2443,17 +2561,19 @@ performs basic conversions from DOM elements to the internal Control format."
 });
 
 pliny.property({
+      parent: "Primrose.Controls.BaseControl",
       name: "controlID",
       type: "Number",
       description: "Automatically incrementing counter for controls, to make sure there is a distinct differentiator between them all."
     });
     pliny.property({
+      parent: "Primrose.Controls.BaseControl",
       name: "focused",
       type: "Boolean",
       description: "Flag indicating this control has received focus. You should theoretically only read it."
     });
     pliny.method({
-        parent: "Primrose.BaseControl",
+        parent: "Primrose.Controls.BaseControl",
         name: "focus",
         description: "Sets the focus property of the control, does not change the focus property of any other control.",
         examples: [{
@@ -2483,7 +2603,7 @@ pliny.property({
       });
 
       pliny.method({
-        parent: "Primrose.BaseControl",
+        parent: "Primrose.Controls.BaseControl",
         name: "blur",
         description: "Unsets the focus property of the control, does not change the focus property of any other control.",
         examples: [{
@@ -2513,7 +2633,7 @@ pliny.property({
       });
 
       pliny.method({
-        parent: "Primrose.BaseControl",
+        parent: "Primrose.Controls.BaseControl",
         name: "copyElement",
         description: "Copies properties from a DOM element that the control is supposed to match.",
         parameters: [{
@@ -2537,15 +2657,15 @@ pliny.property({
       });
 
       pliny.class({
-  parent: "Primrose",
+  parent: "Primrose.Controls",
   name: "Button3D",
-  baseClass: "Primrose.BaseControl",
+  baseClass: "Primrose.Controls.BaseControl",
   parameters: [{
     name: "model",
     type: "THREE.Object3D",
     description: "A 3D model to use as the graphics for this button."
   }, {
-    name: "name",
+    name: "buttonName",
     type: "String",
     description: "A name for the button, to make it distinct from other buttons."
   }, {
@@ -2556,47 +2676,119 @@ pliny.property({
   description: "A 3D button control, with a separate cap from a stand that it sits on. You click and depress the cap on top of the stand to actuate."
 });
 
-pliny.event({
+pliny.property({
+      parent: "Primrose.Controls.Button3D",
+      name: "options",
+      type: "Object",
+      description: "Options for how buttons are handled."
+    });
+    pliny.event({
+      parent: "Primrose.Controls.Button3D",
       name: "click",
       description: "Occurs when the button is activated."
     });
 
     pliny.event({
+      parent: "Primrose.Controls.Button3D",
       name: "release",
       description: "Occurs when the button is deactivated."
     });
 
     pliny.property({
+      parent: "Primrose.Controls.Button3D",
       name: "base",
       type: "THREE.Object3D",
       description: "The stand the button cap sits on."
     });
     pliny.property({
+      parent: "Primrose.Controls.Button3D",
       name: "base",
       type: "THREE.Object3D",
       description: "The moveable part of the button, that triggers the click event."
     });
     pliny.property({
+      parent: "Primrose.Controls.Button3D",
       name: "container",
       type: "THREE.Object3D",
       description: "A grouping collection for the base and cap."
     });
     pliny.property({
+      parent: "Primrose.Controls.Button3D",
       name: "color",
       type: "Number",
       description: "The current color of the button cap."
     });
-    pliny.record({
+    pliny.property({
+      parent: "Primrose.Controls.Button3D",
+      name: " name",
+      type: "String",
+      description: "A name for the button, to tell it from others when debugging."
+    });
+    pliny.property({
+      parent: "Primrose.Controls.Button3D",
+      name: "element",
+      type: "Element",
+      optional: true,
+      description: "If this 3D button was created from a copy of an HTMLButtonElement, this is that element."
+    });
+    pliny.method({
+        parent: "Primrose.Controls.Button3D",
+        name: "startUV",
+        description: "Handle a mouse-down event on a textured object.",
+        parameters: [{
+          name: "point",
+          type: "Primrose.Text.Point",
+          description: "The UV coordinate of the texture that was clicked."
+        }]
+      });
+
+      pliny.method({
+        parent: "Primrose.Controls.Button3D",
+        name: "endPointer",
+        description: "Handle a mouse-up event on a textured object.",
+        parameters: [{
+          name: "evt",
+          type: "Event",
+          description: "Not actually used."
+        }]
+      });
+
+      pliny.method({
+        parent: "Primrose.Controls.Button3D",
+        name: "dispatchEvent",
+        description: "Route events.",
+        parameters: [{
+          name: "evt",
+          type: "Event",
+          description: "The event to route."
+        }]
+      });
+
+      pliny.method({
+        parent: "Primrose.Controls.Button3D",
+        name: "addToBrowserEnvironment",
+        description: "Add the button to the scene, registering it as a pickable object in the environment.",
+        parameters: [{
+          name: "env",
+          type: "Primrose.BrowserEnvironment",
+          description: "The environment in which to register the pickable object."
+        }, {
+          name: "scene",
+          type: "THREE.Object3D",
+          description: "The position in the scene graph in which to insert the button."
+        }]
+      });
+
+      pliny.property({
+        parent: "Primrose.Controls.Button3D",
+        name: "position",
+        type: "THREE.Vector3",
+        description: "The location of the button."
+      });
+      pliny.record({
   parent: "Primrose.Controls.Button3D",
   name: "DEFAULTS",
   description: "Default option values that override undefined options passed to the Button3D class."
-});
-
-pliny.property({
-  parent: "Primrose.Controls.Button3D",
-  name: "position",
-  type: "THREE.Vector3",
-  description: "The location of the button."
 });
 pliny.value({
   parent: "Primrose.Controls.Button3D.DEFAULTS",
@@ -2629,7 +2821,7 @@ pliny.value({
   description: "True if deactivating the button should require a second click. False if the button should deactivate when it is released."
 });
 pliny.class({
-  parent: "Primrose",
+  parent: "Primrose.Controls",
   name: "ButtonFactory",
   description: "Loads a model file and holds the data, creating clones of the data whenever a new button is desired.",
   parameters: [{
@@ -2646,12 +2838,15 @@ pliny.class({
     description: "A callback function to indicate when the loading process has completed, if `templateFile` was a String path."
   }]
 });
+
 pliny.property({
+      parent: "Primrose.Controls.Button3D",
       name: "options",
       type: "Object",
       description: "The options that the user provided, so that we might change them after the factory has been created, if we so choose."
     });
     pliny.property({
+      parent: "Primrose.Controls.Button3D",
       name: "template",
       type: "THREE.Object3D",
       description: "The 3D model for the button, that will be cloned every time a new button is created."
@@ -2671,7 +2866,7 @@ pliny.property({
       pliny.class({
   parent: "Primrose.Controls",
   name: "Image",
-  baseClass: "Primrose.Surface",
+  baseClass: "Primrose.Controls.Surface",
   description: "A simple 2D image to put on a Surface.",
   parameters: [{
     name: "options",
@@ -2714,7 +2909,7 @@ pliny.class({
   }],
   examples: [{
     name: "Load a basic model.",
-    description: "When Blender exports the Three.js JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
+    description: "When Blender exports the Three.js JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.Controls.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
 \n\
 ## Code:\n\
 \n\
@@ -2742,7 +2937,7 @@ pliny.class({
 });
 
 pliny.function({
-        parent: "Primrose.ModelLoader",
+        parent: "Primrose.Controls.ModelLoader",
         name: "loadObject",
         description: "Asynchronously loads a JSON, OBJ, or MTL file as a Three.js object. It processes the scene for attributes, creates new properties on the scene to give us\n\
     faster access to some of the elements within it. It uses callbacks to tell you when loading progresses. It uses a Promise to tell you when it's complete, or when an error occurred.\n\
@@ -2761,11 +2956,11 @@ pliny.function({
           name: "progress",
           type: "Function",
           optional: true,
-          description: "A callback function to be called as the download from the server progresses."
+          description: "A callback function to use for tracking progress. The callback function should accept a standard [`ProgressEvent`](https://developer.mozilla.org/en-US/docs/Web/API/ProgressEvent)."
         }],
         examples: [{
           name: "Load a basic model.",
-          description: "When Blender exports the Three.js JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
+          description: "When Blender exports the Three.js JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.Controls.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
     \n\
     ## Code:\n\
     \n\
@@ -2776,7 +2971,7 @@ pliny.function({
           camera = new THREE.PerspectiveCamera();\n\
        \n\
       // Load up the file\n\
-      Primrose.ModelLoader.loadObject(\n\
+      Primrose.Controls.ModelLoader.loadObject(\n\
         \"path/to/model.json\",\n\
         null,\n\
         console.log.bind(console, \"Progress:\"))\n\
@@ -2793,13 +2988,13 @@ pliny.function({
       });
 
       pliny.function({
-        parent: "Primrose.ModelLoader",
+        parent: "Primrose.Controls.ModelLoader",
         name: "loadObjects",
         description: "Asynchronously loads an array of JSON, OBJ, or MTL file as a Three.js object. It processes the objects for attributes, creating new properties on each object to give us\n\
     faster access to some of the elements within it. It uses callbacks to tell you when loading progresses. It uses a Promise to tell you when it's complete, or when an error occurred.\n\
     Useful for static models.\n\
     \n\
-    See [`Primrose.ModelLoader.loadObject()`](#Primrose_ModelLoader_loadObject) for more details on how individual models are loaded.",
+    See [`Primrose.Controls.ModelLoader.loadObject()`](#Primrose_Controls_ModelLoader_loadObject) for more details on how individual models are loaded.",
         returns: "Promise",
         parameters: [{
           name: "arr",
@@ -2814,7 +3009,7 @@ pliny.function({
           name: "progress",
           type: "Function",
           optional: true,
-          description: "A callback function to be called as the download from the server progresses."
+          description: "A callback function to use for tracking progress. The callback function should accept a standard [`ProgressEvent`](https://developer.mozilla.org/en-US/docs/Web/API/ProgressEvent)."
         }],
         examples: [{
           name: "Load some models.",
@@ -2831,7 +3026,7 @@ pliny.function({
           allModels = null;\n\
        \n\
       // Load up the file\n\
-      Primrose.ModelLoader.loadObjects(\n\
+      Primrose.Controls.ModelLoader.loadObjects(\n\
         [\"path/to/model1.json\",\n\
           \"path/to/model2.obj\",\n\
           \"path/to/model3.obj\",\n\
@@ -2860,18 +3055,19 @@ pliny.function({
       });
 
       pliny.property({
+      parent: "Primrose.Graphics.ModelLoader",
       name: "template",
       type: "THREE.Object3D",
       description: "When a model is loaded, stores a reference to the model so it can be cloned in the future."
     });
     pliny.method({
-        parent: "Primrose.ModelLoader",
+        parent: "Primrose.Controls.ModelLoader",
         name: "clone",
         description: "Creates a copy of the stored template model.",
         returns: "A THREE.Object3D that is a copy of the stored template.",
         examples: [{
           name: "Load a basic model.",
-          description: "When Blender exports the Three.js JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
+          description: "When Blender exports the Three.js JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.Controls.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
     \n\
     ## Code:\n\
     \n\
@@ -2880,7 +3076,7 @@ pliny.function({
       var scene = new THREE.Scene(),\n\
       \n\
       // Load up the file, optionally \"check it out\"\n\
-        modelFactory = new Primrose.ModelLoader(\"path/to/model.json\", function(model){\n\
+        modelFactory = new Primrose.Controls.ModelLoader(\"path/to/model.json\", function(model){\n\
           model.traverse(function(child){\n\
             // Do whatever you want to the individual child objects of the scene.\n\
           });\n\
@@ -2896,7 +3092,7 @@ pliny.function({
         }]
       });
       pliny.class({
-  parent: "Primrose",
+  parent: "Primrose.Input",
   name: "InputProcessor",
   description: "| [under construction]"
 });
@@ -2906,7 +3102,7 @@ pliny.class({
   name: "OperatingSystem",
   description: "A description of how a specific operating system handles keyboard shortcuts.",
   parameters: [{
-    name: "name ",
+    name: "osName",
     type: "String",
     description: "A friendly name for the operating system."
   }, {
@@ -2945,6 +3141,7 @@ pliny.value({
   name: "Windows",
   description: "Keyboard shortcuts for the Windows operating system."
 });
+
 pliny.value({
   parent: "Primrose.Text.OperatingSystems",
   name: "Linux",
@@ -2956,6 +3153,7 @@ pliny.value({
   name: "macOS",
   description: "Keyboard shortcuts for Apple macOS nee OSX."
 });
+
 pliny.namespace({
   parent: "Primrose.Text",
   name: "OperatingSystems",
@@ -2969,7 +3167,7 @@ pliny.class({
 \n\
 As we work in the browser and not at the operating system level, we do not receive these virtual key codes. The browser does yet another translation into \"key events\" that are nominally standardized. Unfortunately, the standard is incomplete with regards to the full breadth of cultural locales in the world, and the current state of browser support for the standard is subopitmal. So we have to reinterpret what the browser tells us to get a better idea of what the user actually meant. And that reinterpretation is this CodePage class.",
   parameters: [{
-    name: "name ",
+    name: "codePageName",
     type: "String",
     description: "A readable name for the CodePage, to be used in options UIs."
   }, {
@@ -2988,21 +3186,25 @@ pliny.record({
   name: "DE_QWERTZ",
   description: "CodePage for `Deutsch: QWERTZ` locale."
 });
+
 pliny.record({
   parent: "Primrose.Text.CodePages",
   name: "EN_UKX",
   description: "CodePage for the `English: UK Extended` locale."
 });
+
 pliny.record({
   parent: "Primrose.Text.CodePages",
   name: "EN_US",
   description: "CodePage for the `English: USA` locale."
 });
+
 pliny.record({
   parent: "Primrose.Text.CodePages",
   name: "FR_AZERTY",
   description: "CodePage for the `Français: AZERTY` locale."
 });
+
 pliny.namespace({
   parent: "Primrose.Text",
   name: "CodePages",
@@ -3012,7 +3214,7 @@ pliny.namespace({
 pliny.class({
   parent: "Primrose.Input",
   name: "Keyboard",
-  baseClass: "Primrose.InputProcessor",
+  baseClass: "Primrose.Input.InputProcessor",
   description: "| [under construction]",
   parameters: [{
     name: "",
@@ -3036,32 +3238,22 @@ pliny.class({
 pliny.class({
   parent: "Primrose.Input",
   name: "Mouse",
-  baseClass: "Primrose.InputProcessor",
+  baseClass: "Primrose.Input.InputProcessor",
   description: "| [under construction]"
 });
 
 pliny.class({
-  parent: "Primrose",
+  parent: "Primrose.Input",
   name: "PoseInputProcessor",
-  baseClass: "Primrose.InputProcessor",
+  baseClass: "Primrose.Input.InputProcessor",
   description: "| [under construction]"
 });
 
 pliny.class({
   parent: "Primrose.Input",
   name: "Gamepad",
-  baseClass: "Primrose.PoseInputProcessor",
-  parameters: [{
-    name: "name",
-    type: "string",
-    description: "An unique name for this input manager. Note that systems with motion controllers will often have two controllers with the same ID, but different indexes. The name should take that into account."
-  }, {
-    name: "commands",
-    type: "Array",
-    optional: true,
-    description: "An array of input command descriptions."
-  }],
-  description: "An input processor for Gamepads, including those with positional data."
+  baseClass: "Primrose.Input.PoseInputProcessor",
+  description: "| [under construction]"
 });
 
 pliny.enumeration({
@@ -3081,15 +3273,22 @@ pliny.enumeration({
 });
 pliny.class({
   parent: "Primrose.Input",
+  name: "GamepadManager",
+  baseClass: "Primrose.AbstractEventEmitter",
+  description: "| [under construction]"
+});
+
+pliny.class({
+  parent: "Primrose.Input",
   name: "Touch",
-  baseClass: "Primrose.InputProcessor",
+  baseClass: "Primrose.Input.InputProcessor",
   description: "| [under construction]"
 });
 
 pliny.class({
   parent: "Primrose.Input",
   name: "Speech",
-  baseClass: "Primrose.InputProcessor",
+  baseClass: "Primrose.Input.InputProcessor",
   description: "Connects to a the webkitSpeechRecognition API and manages callbacks based on keyword sets related to the callbacks. Note that the webkitSpeechRecognition API requires a network connection, as the processing is done on an external server.",
   parameters: [{
     name: "commands",
@@ -3112,13 +3311,13 @@ The `command` property is the callback function that will be executed. It takes 
 pliny.class({
   parent: "Primrose.Input",
   name: "VR",
-  baseClass: "Primrose.PoseInputProcessor",
+  baseClass: "Primrose.Input.PoseInputProcessor",
+  description: "An input manager for gamepad devices.",
   parameters: [{
     name: "avatarHeight",
     type: "Number",
     description: "The default height to use for the user, if the HMD doesn't provide a stage transform."
-  }],
-  description: "An input manager for gamepad devices."
+  }]
 });
 
 pliny.class({
@@ -3292,7 +3491,7 @@ pliny.class({
     description: "The name of the user."
   }, {
     name: "modelFactory",
-    type: "Primrose.ModelLoader",
+    type: "Primrose.Controls.ModelLoader",
     description: "The factory for creating avatars for the user."
   }, {
     name: "nameMaterial",
@@ -3354,7 +3553,7 @@ pliny.method({
     description: "The audio manager being used in the current Environment."
   }, {
     name: "factories",
-    type: "Primrose.ModelLoader",
+    type: "Primrose.Controls.ModelLoader",
     description: "Model factory for creating avatars for new remote users."
   }]
 });
@@ -3370,7 +3569,7 @@ pliny.class({
   name: "CommandPack",
   description: "A CommandPack is a collection of key sequences and text editor commands. It provides a means of using a single text rendering control to create a variety of text-controls that utilize the text space differently.",
   parameters: [{
-    name: "name ",
+    name: "commandPackName",
     type: "String",
     description: "A friendly name for the command pack."
   }, {
@@ -3395,6 +3594,7 @@ pliny.record({
   name: "TextEditor",
   description: "A set of commands for a multi-line text editing, extending single-line text editing."
 });
+
 pliny.class({
   parent: "Primrose.Text",
   name: "Rule",
@@ -3411,7 +3611,7 @@ pliny.class({
   parent: "Primrose.Text",
   name: "Grammar",
   parameters: [{
-    name: "name",
+    name: "grammarName",
     type: "String",
     description: "A user-friendly name for the grammar, to be able to include it in an options listing."
   }, {
@@ -3534,11 +3734,12 @@ pliny.property({
   name: "JavaScript",
   description: "A grammar for the JavaScript programming language."
 });
+
 pliny.class({
   parent: "Primrose.Text.Controls",
   name: "TextBox",
   description: "Syntax highlighting textbox control.",
-  baseClass: "Primrose.Surface",
+  baseClass: "Primrose.Controls.Surface",
   parameters: [{
     name: "idOrCanvasOrContext",
     type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
@@ -3555,27 +3756,36 @@ pliny.value({
   name: "PlainText",
   description: "A grammar that makes displaying plain text work with the text editor designed for syntax highlighting."
 });
+
+pliny.namespace({
+  parent: "Primrose",
+  name: "Constants",
+  description: "Useful values that are used frequently."
+});
+
 pliny.value({
+  parent: "Primrose.Constants",
   name: "PIXEL_SCALES",
   description: "Scaling factors for changing the resolution of the display when the render quality level changes."
 });
 pliny.value({
+  parent: "Primrose.Constants",
   name: "SKINS",
-  type: "Array of String",
-  description: "A selection of color values that closely match skin colors of people."
-});
-pliny.value({
-  name: "SKIN_VALUES",
   type: "Array of Number",
   description: "A selection of color values that closely match skin colors of people."
 });
+
+
 pliny.value({
-  parent: "Primrose",
+  parent: "Primrose.Constants",
   name: "SYS_FONTS",
   type: "String",
   description: "A selection of fonts that will match whatever the user's operating system normally uses."
 });
+
+
 pliny.enumeration({
+  parent: "Primrose.Constants",
   name: "Quality",
   description: "Graphics quality settings."
 });
@@ -3585,15 +3795,50 @@ pliny.class({
   description: "Make a Virtual Reality app in your web browser!"
 });
 
+pliny.namespace({
+  parent: "Primrose",
+  name: "Constants",
+  description: "Useful values that are used frequently."
+});
+
+pliny.value({
+  parent: "Primrose.Constants",
+  name: "PIXEL_SCALES",
+  description: "Scaling factors for changing the resolution of the display when the render quality level changes."
+});
+pliny.value({
+  parent: "Primrose.Constants",
+  name: "SKINS",
+  type: "Array of Number",
+  description: "A selection of color values that closely match skin colors of people."
+});
+pliny.value({
+  parent: "Primrose.Constants",
+  name: "SYS_FONTS",
+  type: "String",
+  description: "A selection of fonts that will match whatever the user's operating system normally uses."
+});
+pliny.enumeration({
+  parent: "Primrose.Constants",
+  name: "Quality",
+  description: "Graphics quality settings."
+});
 pliny.class({
   parent: "Primrose.Controls",
   name: "Form",
-  baseClass: "Primrose.Entity",
+  baseClass: "Primrose.Controls.Entity",
   description: "A basic 2D form control, with its own mesh to use as a frame."
 });
+
+pliny.class({
+  parent: "Primrose.Controls",
+  name: "Progress",
+  description: "| [under construction]"
+});
+
 pliny.namespace({
-  name: "Controls",
   parent: "Primrose",
+  name: "Controls",
   description: "Various 3D control objects."
 });
 
@@ -3663,7 +3908,7 @@ pliny.namespace({
 pliny.class({
   parent: "Primrose.Input",
   name: "Location",
-  baseClass: "Primrose.InputProcessor",
+  baseClass: "Primrose.Input.InputProcessor",
   description: "| [under construction]"
 });
 
@@ -3825,6 +4070,7 @@ pliny.function({
 > <0.157, -0.364, 0.448>"
   }]
 });
+
 pliny.namespace({
   parent: "Primrose",
   name: "Random",
@@ -3836,6 +4082,7 @@ pliny.record({
   name: "TextInput",
   description: "A concrete instantiation of the single-line text editor commands provided by BasicTextInput."
 });
+
 pliny.namespace({
   parent: "Primrose.Text",
   name: "CommandPacks",
@@ -3910,11 +4157,13 @@ pliny.value({
   name: "Basic",
   description: "A grammar and an interpreter for a BASIC-like language."
 });
+
 pliny.value({
   parent: "Primrose.Text.Grammars",
   name: "TestResults",
   description: "A grammar for displaying the results of Unit Tests."
 });
+
 pliny.namespace({
   parent: "Primrose.Text",
   name: "Grammars",
@@ -3932,6 +4181,7 @@ pliny.record({
   name: "Dark",
   description: "A dark background with a light foreground for text."
 });
+
 pliny.namespace({
   parent: "Primrose.Text",
   name: "Themes",
@@ -3946,6 +4196,8 @@ pliny.namespace({
 
 pliny.namespace({
   name: "Primrose",
-  description: "Primrose helps you make VR applications for web browsers as easy as making other types of interactive web pages.\n\nThis top-level namespace contains classes for manipulating and viewing 3D environments."
+  description: "Primrose helps you make VR applications for web browsers as easy as making other types of interactive web pages.\n\
+\n\
+This top-level namespace contains classes for manipulating and viewing 3D environments."
 });
 

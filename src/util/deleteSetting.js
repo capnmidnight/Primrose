@@ -2,7 +2,7 @@ pliny.function({
   parent: "Util",
   name: "deleteSetting",
   parameters: [{
-    name: " name",
+    name: "settingName",
     type: "string",
     description: "The name of the setting to delete."
   }],
@@ -20,8 +20,8 @@ pliny.function({
   }]
 });
 
-export default function deleteSetting(name) {
+export default function deleteSetting(settingName) {
   if (window.localStorage) {
-    window.localStorage.removeItem(name);
+    window.localStorage.removeItem(settingName);
   }
 };

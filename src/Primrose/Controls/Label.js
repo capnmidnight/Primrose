@@ -1,24 +1,24 @@
-import Surface from "./Surface";
-import Size from "../Text/Size";
-import DefaultTheme from "../Text/Themes/Default";
+pliny.class({
+  parent: "Primrose.Controls",
+  name: "Label",
+  description: "A simple label of text to put on a Surface.",
+  baseClass: "Primrose.Controls.Surface",
+  parameters: [{
+    name: "idOrCanvasOrContext",
+    type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
+    description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
+  }, {
+    name: "options",
+    type: "Object",
+    description: "Named parameters for creating the Button."
+  }]
+});
 
 var COUNTER = 0;
 
-pliny.class({
-  parent: "Primrose.Controls",
-    name: "Label",
-    description: "A simple label of text to put on a Surface.",
-    baseClass: "Primrose.Surface",
-    parameters: [{
-      name: "idOrCanvasOrContext",
-      type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
-      description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
-    }, {
-      name: "options",
-      type: "Object",
-      description: "Named parameters for creating the Button."
-    }]
-});
+import Surface from "./Surface";
+import Size from "../Text/Size";
+import DefaultTheme from "../Text/Themes/Default";
 export default class Label extends Surface {
   constructor(options) {
     ////////////////////////////////////////////////////////////////////////

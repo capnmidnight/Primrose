@@ -1,14 +1,12 @@
-import InputProcessor from "./InputProcessor";
-
 pliny.class({
   parent: "Primrose.Input",
-    name: "Speech",
-    baseClass: "Primrose.InputProcessor",
-    description: "Connects to a the webkitSpeechRecognition API and manages callbacks based on keyword sets related to the callbacks. Note that the webkitSpeechRecognition API requires a network connection, as the processing is done on an external server.",
-    parameters: [{
-      name: "commands",
-      type: "Array",
-      description: "The `commands` parameter specifies a collection of keywords tied to callbacks that will be called when one of the keywords are heard. Each callback can be associated with multiple keywords, to be able to increase the accuracy of matches by combining words and phrases that sound similar.\n\
+  name: "Speech",
+  baseClass: "Primrose.Input.InputProcessor",
+  description: "Connects to a the webkitSpeechRecognition API and manages callbacks based on keyword sets related to the callbacks. Note that the webkitSpeechRecognition API requires a network connection, as the processing is done on an external server.",
+  parameters: [{
+    name: "commands",
+    type: "Array",
+    description: "The `commands` parameter specifies a collection of keywords tied to callbacks that will be called when one of the keywords are heard. Each callback can be associated with multiple keywords, to be able to increase the accuracy of matches by combining words and phrases that sound similar.\n\
 \n\
 Each command entry is a simple object following the pattern:\n\
 \n\
@@ -22,6 +20,8 @@ The `keywords` property is an array of strings for which SpeechInput will listen
 The `command` property is the callback function that will be executed. It takes no parameters."
     }]
 });
+
+import InputProcessor from "./InputProcessor";
 export default class Speech extends InputProcessor {
   constructor(commands) {
     super("Speech", commands);

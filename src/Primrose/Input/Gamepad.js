@@ -1,4 +1,9 @@
-import PoseInputProcessor from "./PoseInputProcessor"
+pliny.class({
+  parent: "Primrose.Input",
+  name: "Gamepad",
+  baseClass: "Primrose.Input.PoseInputProcessor",
+  description: "| [under construction]"
+});
 
 navigator.getGamepads = navigator.getGamepads ||
   navigator.webkitGetGamepads;
@@ -15,22 +20,7 @@ function playPattern(devices, pattern, pause){
   }
 }
 
-pliny.class({
-  parent: "Primrose.Input",
-    name: "Gamepad",
-    baseClass: "Primrose.PoseInputProcessor",
-    parameters: [{
-      name: "name",
-      type: "string",
-      description: "An unique name for this input manager. Note that systems with motion controllers will often have two controllers with the same ID, but different indexes. The name should take that into account."
-    }, {
-      name: "commands",
-      type: "Array",
-      optional: true,
-      description: "An array of input command descriptions."
-    }],
-    description: "An input processor for Gamepads, including those with positional data."
-});
+import PoseInputProcessor from "./PoseInputProcessor"
 export default class Gamepad extends PoseInputProcessor {
   static ID(pad) {
     var id = pad.id;

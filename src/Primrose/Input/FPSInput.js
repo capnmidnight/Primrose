@@ -1,3 +1,26 @@
+pliny.class({
+  parent: "Primrose.Input",
+  name: "FPSInput",
+  baseClass: "Primrose.AbstractEventEmitter",
+  description: "A massive hairball of a class that handles all of the input abstraction.",
+  parameters: [{
+    name: "DOMElement",
+    type: "Element",
+    description: "The DOM element on which to add most events.",
+    optional: true,
+    default: "window"
+  }, {
+    name: "options",
+    type: "Object",
+    description: "Optional setup: avatarHeight, gravity, and scene."
+  }]
+});
+
+const DISPLACEMENT = new Vector3(),
+  EULER_TEMP = new Euler(),
+  QUAT_TEMP = new Quaternion(),
+  WEDGE = Math.PI / 3;
+
 import { Vector3 } from "three/src/math/Vector3";
 import { Euler } from "three/src/math/Euler";
 import { Quaternion } from "three/src/math/Quaternion";
@@ -14,29 +37,6 @@ import Speech from "./Speech";
 import VR from "./VR";
 import Keys from "../Keys";
 import Pointer from "../Pointer";
-
-const DISPLACEMENT = new Vector3(),
-  EULER_TEMP = new Euler(),
-  QUAT_TEMP = new Quaternion(),
-  WEDGE = Math.PI / 3;
-
-pliny.class({
-  parent: "Primrose.Input",
-    name: "FPSInput",
-    baseClass: "Primrose.AbstractEventEmitter",
-    description: "A massive hairball of a class that handles all of the input abstraction.",
-    parameters: [{
-      name: "DOMElement",
-      type: "Element",
-      description: "The DOM element on which to add most events.",
-      optional: true,
-      default: "window"
-    }, {
-      name: "options",
-      type: "Object",
-      description: "Optional setup: avatarHeight, gravity, and scene."
-    }]
-});
 export default class FPSInput extends AbstractEventEmitter {
   constructor(DOMElement, options) {
     super();

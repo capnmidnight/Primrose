@@ -3,7 +3,7 @@ pliny.function({
   name: "put",
   description: "A literate interface for putting objects onto scenes with basic, common transformations. You call `put()` with an object, then have access to a series of methods that you can chain together, before receiving the object back again. This makes it possible to create objects in the parameter position of `put()` at the same time as declaring the variable that will hold it.\n\
 \n\
-* .on(scene) - the Primrose.Entity or THREE.Object3D on which to append the element.\n\
+* .on(scene) - the Primrose.Controls.Entity or THREE.Object3D on which to append the element.\n\
 * .at(x, y, z) - set the translation for the object.\n\
 * .rot(x, y, z) - set the rotation for the object.\n\
 * .scale(x, y, z) - set the scale for the object.\n\
@@ -23,6 +23,7 @@ pliny.function({
       .obj();"
   }]
 });
+
 import hub from "./hub";
 export default function put(object) {
   var box = {

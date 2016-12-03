@@ -1,11 +1,11 @@
-import Point from "./Point";
-import Size from "./Size";
-
 pliny.class({
   parent: "Primrose.Text",
     name: "Rectangle",
     description: "| [under construction]"
 });
+
+import Point from "./Point";
+import Size from "./Size";
 export default class Rectangle {
   constructor(x, y, width, height) {
     this.isRectangle = true;

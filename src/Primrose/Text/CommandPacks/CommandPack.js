@@ -3,7 +3,7 @@ pliny.class({
     name: "CommandPack",
     description: "A CommandPack is a collection of key sequences and text editor commands. It provides a means of using a single text rendering control to create a variety of text-controls that utilize the text space differently.",
     parameters: [{
-      name: "name ",
+      name: "commandPackName",
       type: "String",
       description: "A friendly name for the command pack."
     }, {
@@ -16,8 +16,8 @@ pliny.class({
     }]
 });
 export default class CommandPack {
-  constructor (name, commands) {
-    this.name = name;
+  constructor (commandPackName, commands) {
+    this.name = commandPackName;
     Object.assign(this, commands);
   }
 };

@@ -1,10 +1,10 @@
-import BasicTextInput from "./BasicTextInput";
-
 pliny.record({
   parent: "Primrose.Text.CommandPacks",
   name: "TextEditor",
   description: "A set of commands for a multi-line text editing, extending single-line text editing."
 });
+
+import BasicTextInput from "./BasicTextInput";
 export default new BasicTextInput(
   "Text Area input commands", {
     NORMAL_UPARROW: function (prim, tokenRows) {

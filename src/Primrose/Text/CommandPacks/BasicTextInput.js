@@ -1,11 +1,11 @@
-import CommandPack from "./CommandPack";
-
 pliny.record({
   parent: "Primrose.Text.CommandPacks",
   name: "BasicTextInput",
   baseClass: "Primrose.Text.CommandPacks.CommandPack",
   description: "A set of commands for editing a single line of text in a text editor. This is the same set of commands for both single-line text elements and multi-line text elements."
 });
+
+import CommandPack from "./CommandPack";
 export default class BasicTextInput extends CommandPack {
   constructor(additionalName, additionalCommands) {
     var commands = {

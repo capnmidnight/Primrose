@@ -1,9 +1,9 @@
-import { Vector3 } from "three/src/math/Vector3";
-import { Quaternion } from "three/src/math/Quaternion";
-import { Matrix4 } from "three/src/math/Matrix4";
-import InputProcessor from "./InputProcessor";
-import isMobile from "../../flags/isMobile";
-import isIE from "../../flags/isIE";
+pliny.class({
+  parent: "Primrose.Input",
+  name: "PoseInputProcessor",
+  baseClass: "Primrose.Input.InputProcessor",
+  description: "| [under construction]"
+});
 
 const DEFAULT_POSE = {
     position: [0, 0, 0],
@@ -12,12 +12,12 @@ const DEFAULT_POSE = {
   EMPTY_SCALE = new Vector3(),
   IE_CORRECTION = new Quaternion(1, 0, 0, 0);
 
-pliny.class({
-  parent: "Primrose",
-    name: "PoseInputProcessor",
-    baseClass: "Primrose.InputProcessor",
-    description: "| [under construction]"
-});
+import { Vector3 } from "three/src/math/Vector3";
+import { Quaternion } from "three/src/math/Quaternion";
+import { Matrix4 } from "three/src/math/Matrix4";
+import InputProcessor from "./InputProcessor";
+import isMobile from "../../flags/isMobile";
+import isIE from "../../flags/isIE";
 export default class PoseInputProcessor extends InputProcessor {
   constructor(name, commands, axisNames) {
     super(name, commands, axisNames);

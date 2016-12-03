@@ -1,3 +1,9 @@
+pliny.class({
+  parent: "Primrose.Output",
+    name: "Speech",
+    description: "| [under construction]"
+});
+
 const DEFAULT_SPEECH_SETTINGS = {
   remoteVoices: true,
   volume: 1,
@@ -5,12 +11,6 @@ const DEFAULT_SPEECH_SETTINGS = {
   pitch: 1,
   voice: 0
 };
-
-pliny.class({
-  parent: "Primrose.Output",
-    name: "Speech",
-    description: "| [under construction]"
-});
 
 export default class Speech {
   constructor (options) {

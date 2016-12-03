@@ -1,15 +1,15 @@
+pliny.class({
+  parent: "Primrose.Output",
+    name: "Music",
+    description: "| [under construction]"
+});
+
 var MAX_NOTE_COUNT = (navigator.maxTouchPoints || 10) + 1,
   TYPES = ["sine",
     "square",
     "sawtooth",
     "triangle"
   ];
-
-pliny.class({
-  parent: "Primrose.Output",
-    name: "Music",
-    description: "| [under construction]"
-});
 
 import Note from "./Note";
 export default class Music {

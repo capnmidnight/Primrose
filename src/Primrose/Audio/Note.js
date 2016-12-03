@@ -1,10 +1,10 @@
-const PIANO_BASE = Math.pow(2, 1 / 12);
-
 pliny.class({
   parent: "Primrose.Output",
     name: "Note",
     description: "| [under construction]"
 });
+
+const PIANO_BASE = Math.pow(2, 1 / 12);
 
 import PositionalSound from "./PositionalSound";
 export default class Note extends PositionalSound {

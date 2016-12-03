@@ -121,7 +121,7 @@ export default class Workerize extends AbstractEventEmitter {
   static createWorker(script, stripFunc) {
 
     pliny.function({
-      parent: "Primrose.Workerize",
+      parent: "Util.Workerize",
       name: "createWorker",
       description: "A static function that loads Plain Ol' JavaScript Functions into a WebWorker.",
       parameters: [{
@@ -209,6 +209,7 @@ export default class Workerize extends AbstractEventEmitter {
     // The binary-large-object can be used to convert the script from text to a
     // data URI, because workers can only be created from same-origin URIs.
     pliny.property({
+      parent: "Util.Workerize",
       name: "worker",
       type: "WebWorker",
       description: "The worker thread containing our class."
@@ -216,6 +217,7 @@ export default class Workerize extends AbstractEventEmitter {
     this.worker = Workerize.createWorker(script, false);
 
     pliny.property({
+      parent: "Util.Workerize",
       name: "args",
       type: "Array",
       description: "Static allocation of an array to save on memory usage when piping commands to a worker."
@@ -228,6 +230,7 @@ export default class Workerize extends AbstractEventEmitter {
     // postMessage method, to inform the worker thread that methods were called,
     // with parameters.
     pliny.property({
+      parent: "Util.Workerize",
       name: "&lt;mappings for each method in the original class&gt;",
       type: "Function",
       description: "Each mapped function causes a message to be posted to the worker thread with its arguments packed into an array."
@@ -247,7 +250,7 @@ export default class Workerize extends AbstractEventEmitter {
   methodShim(eventName, args) {
 
     pliny.method({
-      parent: "Primrose.Workerize",
+      parent: "Util.Workerize",
       name: "methodShim",
       description: "Posts messages to the worker thread by packing arguments into an array. The worker will receive the array and interpret the first value as the name of the method to invoke and the second value as another array of parameters.",
       parameters: [{

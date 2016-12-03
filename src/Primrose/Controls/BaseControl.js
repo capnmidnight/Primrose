@@ -1,5 +1,11 @@
-import { Vector3 } from "three/src/math/Vector3";
-import AbstractEventEmitter from "../AbstractEventEmitter";
+pliny.class({
+  parent: "Primrose.Controls",
+  baseClass: "Primrose.AbstractEventEmitter",
+  name: "BaseControl",
+  description: "The BaseControl class is the parent class for all 3D controls.\n\
+It manages a unique ID for every new control, the focus state of the control, and\n\
+performs basic conversions from DOM elements to the internal Control format."
+});
 
 var ID = 1,
   NUMBER_PATTERN = "([+-]?(?:(?:\\d+(?:\\.\\d*)?)|(?:\\.\\d+)))",
@@ -16,19 +22,14 @@ var ID = 1,
     NUMBER_PATTERN + "rad\\s*\\)", "i"),
   TEMP_VECTOR = new Vector3();
 
-pliny.class({
-  parent: "Primrose",
-  baseClass: "Primrose.AbstractEventEmitter",
-  name: "BaseControl",
-  description: "The BaseControl class is the parent class for all 3D controls.\n\
-It manages a unique ID for every new control, the focus state of the control, and\n\
-performs basic conversions from DOM elements to the internal Control format."
-});
+import { Vector3 } from "three/src/math/Vector3";
+import AbstractEventEmitter from "../AbstractEventEmitter";
 export default class BaseControl extends AbstractEventEmitter {
   constructor() {
     super();
 
     pliny.property({
+      parent: "Primrose.Controls.BaseControl",
       name: "controlID",
       type: "Number",
       description: "Automatically incrementing counter for controls, to make sure there is a distinct differentiator between them all."
@@ -36,6 +37,7 @@ export default class BaseControl extends AbstractEventEmitter {
     this.controlID = ID++;
 
     pliny.property({
+      parent: "Primrose.Controls.BaseControl",
       name: "focused",
       type: "Boolean",
       description: "Flag indicating this control has received focus. You should theoretically only read it."
@@ -46,7 +48,7 @@ export default class BaseControl extends AbstractEventEmitter {
   focus() {
 
     pliny.method({
-      parent: "Primrose.BaseControl",
+      parent: "Primrose.Controls.BaseControl",
       name: "focus",
       description: "Sets the focus property of the control, does not change the focus property of any other control.",
       examples: [{
@@ -84,7 +86,7 @@ export default class BaseControl extends AbstractEventEmitter {
   blur() {
 
     pliny.method({
-      parent: "Primrose.BaseControl",
+      parent: "Primrose.Controls.BaseControl",
       name: "blur",
       description: "Unsets the focus property of the control, does not change the focus property of any other control.",
       examples: [{
@@ -122,7 +124,7 @@ export default class BaseControl extends AbstractEventEmitter {
   copyElement(elem) {
 
     pliny.method({
-      parent: "Primrose.BaseControl",
+      parent: "Primrose.Controls.BaseControl",
       name: "copyElement",
       description: "Copies properties from a DOM element that the control is supposed to match.",
       parameters: [{

@@ -1,12 +1,11 @@
-// we don't use strict here because this grammar includes an interpreter that uses `eval()`
-import Grammar from "./Grammar";
-import Token from "../Token"
-
 pliny.value({
   parent: "Primrose.Text.Grammars",
   name: "Basic",
   description: "A grammar and an interpreter for a BASIC-like language."
 });
+
+import Grammar from "./Grammar";
+import Token from "../Token"
 const Basic = new Grammar("BASIC",
   // Grammar rules are applied in the order they are specified.
   [

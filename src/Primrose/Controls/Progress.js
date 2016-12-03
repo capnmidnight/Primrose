@@ -1,3 +1,9 @@
+pliny.class({
+  parent: "Primrose.Controls",
+  name: "Progress",
+  description: "| [under construction]"
+});
+
 const SIZE = 1,
   INSET = 0.8,
   PROPORTION = 10,
