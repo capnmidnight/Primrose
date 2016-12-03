@@ -21,7 +21,7 @@ pliny.function({
     name: "options",
     type: "Live API.textured.optionsHash",
     optional: true,
-    description: "Options to pass to the THREE.Texture constructor, or infrequently-used options to change the behavior of the setup. See [`Live API.textured.optionsHash`](#LiveAPI_textured_optionsHash) for more information."
+    description: "Options to pass to the THREE.Texture constructor, or infrequently-used options to change the behavior of the setup. See [`Live API.textured.optionsHash`](#LiveAPI_textured_optionsHash) and [`Live API.material.optionsHash`](#LiveAPI_material_optionsHash) for more information."
   }],
   examples: [{
     name: "Basic usage",

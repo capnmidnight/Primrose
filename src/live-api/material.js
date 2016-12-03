@@ -43,9 +43,10 @@ pliny.record({
     default: "THREE.FrontSide",
     description: "Used to set the sides of the material that get rendered. Options are:\n\
 \n\
-* THREE.FontSide\n\
-* THREE.BackSide\n\
-* THREE.DoubleSide"
+* `THREE.FontSide`\n\
+* `THREE.BackSide`\n\
+* `THREE.DoubleSide`\n\
+\n\n"
   }, {
     name: "opacity",
     type: "Number",

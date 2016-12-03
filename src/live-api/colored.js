@@ -3,55 +3,33 @@ pliny.function({
   name: "colored",
   description: "Apply a color to a geometry, creating the intermediate material as necessary, and returning the resulting mesh",
   returns: "THREE.Mesh",
-  parameters: [{ 
-    name: "geometry", 
+  parameters: [{
+    name: "geometry",
     type: "THREE.Geometry",
-    description: "The geometry to which to apply the color." 
-  }, { 
-    name: "color", 
-    type: "Number", 
-    description: "A hexadecimal color value in RGB format." 
-  }, { 
+    description: "The geometry to which to apply the color."
+  }, {
+    name: "color",
+    type: "Number",
+    description: "A hexadecimal color value in RGB format."
+  }, {
     name: "options",
-    type: "Object",
+    type: "Live API.colored.optionsHash",
     optional: true,
-    description: "Optional settings for material properties."
-  }, {
-    name: "options.side",
-    type: "Number",
+    description: "Options to pass on to [`material()`](#LiveAPI_material), or infrequently-used options to change the behavior of the setup. See [`Live API.colored.optionsHash`](#LiveAPI_colored_optionsHash) and [`Live API.material.optionsHash`](#LiveAPI_material_optionsHash) for more information."
+  }]
+});
+
+
+pliny.record({
+  parent: "Live API.colored",
+  name: "optionsHash",
+  type: "Object",
+  description: "Optional options to alter how the texture is applied to the geometry. This also includes options that are passed on to the [`material()`](#LiveAPI_material) function.",
+  parameters: [{
+    name: "resolve",
+    type: "Function",
     optional: true,
-    default: "THREE.FrontSide",
-    description: "Either THREE.FontSide, THREE.BackSide, or THREE.Both, for which side of the polygon should be shaded."
-  }, {
-    name: "options.opacity",
-    type: "Number",
-    optional: true,
-    default: 1,
-    description: "Make objects semi-transparent. Note: this usually doesn't work like you'd expect."
-  }, {
-    name: "options.roughness",
-    type: "Number",
-    optional: true,
-    default: 0.5,
-    description: "A value indicating the degree of light scattering the material causes."
-  }, {
-    name: "options.metalness",
-    type: "Number",
-    optional: true,
-    default: 0,
-    description: "A value indicating the degree of shininess the material causes."
-  }, {
-    name: "options.unshaded",
-    type: "Boolean",
-    optional: true,
-    default: false,
-    description: "Make objects not respond to lighting."
-  }, {
-    name: "options.wireframe",
-    type: "Boolean",
-    optional: true,
-    default: false,
-    description: "Draw objects as basic wireframes. Note: there's no control over the wire thickness. This should be considered a debugging feature, not a graphical feature."
+    description: "A callback function to use when the material is successfully created, so that `colored()` can be used in place of `textured()`."
   }]
 });
 

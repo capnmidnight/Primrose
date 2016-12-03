@@ -185,9 +185,10 @@ pliny.record({
     default: "THREE.FrontSide",
     description: "Used to set the sides of the material that get rendered. Options are:\n\
 \n\
-* THREE.FontSide\n\
-* THREE.BackSide\n\
-* THREE.DoubleSide"
+* `THREE.FontSide`\n\
+* `THREE.BackSide`\n\
+* `THREE.DoubleSide`\n\
+\n\n"
   }, {
     name: "opacity",
     type: "Number",
@@ -255,7 +256,7 @@ pliny.function({
     name: "options",
     type: "Live API.textured.optionsHash",
     optional: true,
-    description: "Options to pass to the THREE.Texture constructor, or infrequently-used options to change the behavior of the setup. See [`Live API.textured.optionsHash`](#LiveAPI_textured_optionsHash) for more information."
+    description: "Options to pass to the THREE.Texture constructor, or infrequently-used options to change the behavior of the setup. See [`Live API.textured.optionsHash`](#LiveAPI_textured_optionsHash) and [`Live API.material.optionsHash`](#LiveAPI_material_optionsHash) for more information."
   }],
   examples: [{
     name: "Basic usage",
@@ -353,45 +354,22 @@ pliny.function({
     description: "A hexadecimal color value in RGB format."
   }, {
     name: "options",
-    type: "Object",
+    type: "Live API.colored.optionsHash",
     optional: true,
-    description: "Optional settings for material properties."
-  }, {
-    name: "options.side",
-    type: "Number",
+    description: "Options to pass on to [`material()`](#LiveAPI_material), or infrequently-used options to change the behavior of the setup. See [`Live API.colored.optionsHash`](#LiveAPI_colored_optionsHash) and [`Live API.material.optionsHash`](#LiveAPI_material_optionsHash) for more information."
+  }]
+});
+
+pliny.record({
+  parent: "Live API.colored",
+  name: "optionsHash",
+  type: "Object",
+  description: "Optional options to alter how the texture is applied to the geometry. This also includes options that are passed on to the [`material()`](#LiveAPI_material) function.",
+  parameters: [{
+    name: "resolve",
+    type: "Function",
     optional: true,
-    default: "THREE.FrontSide",
-    description: "Either THREE.FontSide, THREE.BackSide, or THREE.Both, for which side of the polygon should be shaded."
-  }, {
-    name: "options.opacity",
-    type: "Number",
-    optional: true,
-    default: 1,
-    description: "Make objects semi-transparent. Note: this usually doesn't work like you'd expect."
-  }, {
-    name: "options.roughness",
-    type: "Number",
-    optional: true,
-    default: 0.5,
-    description: "A value indicating the degree of light scattering the material causes."
-  }, {
-    name: "options.metalness",
-    type: "Number",
-    optional: true,
-    default: 0,
-    description: "A value indicating the degree of shininess the material causes."
-  }, {
-    name: "options.unshaded",
-    type: "Boolean",
-    optional: true,
-    default: false,
-    description: "Make objects not respond to lighting."
-  }, {
-    name: "options.wireframe",
-    type: "Boolean",
-    optional: true,
-    default: false,
-    description: "Draw objects as basic wireframes. Note: there's no control over the wire thickness. This should be considered a debugging feature, not a graphical feature."
+    description: "A callback function to use when the material is successfully created, so that `colored()` can be used in place of `textured()`."
   }]
 });
 
@@ -742,33 +720,9 @@ pliny.function({
     default: "The value of the `width` parameter."
   }, {
     name: "options",
-    type: "Object",
+    type: "Live API.quad.optionsHash",
     optional: true,
-    description: "Optional settings for creating the quad geometry."
-  }, {
-    name: "options.s",
-    type: "Number",
-    description: "The number of sub-quads in which to divide the quad horizontally.",
-    optional: true,
-    default: 1
-  }, {
-    name: "options.t",
-    type: "Number",
-    description: "The number of sub-quads in which to divide the quad vertically.",
-    optional: true,
-    default: 1
-  }, {
-    name: "options.maxU",
-    type: "Number",
-    description: "A scalar value for the texture coordinate U component.",
-    optional: true,
-    default: 1
-  }, {
-    name: "options.maxV",
-    type: "Number",
-    description: "A scalar value for the texture coordinate V component.",
-    optional: true,
-    default: 1
+    description: "Optional settings for creating the quad geometry. See [`Live API.quad.optionsHash`](#LiveAPI_quad_optionsHash) for more information."
   }],
   returns: "THREE.CircleBufferGeometry",
   examples: [{
@@ -784,6 +738,37 @@ pliny.function({
 \n\
 It should look something like this:\n\
 <img src=\"images/quad.jpg\">"
+  }]
+});
+
+pliny.record({
+  parent: "Live API.quad",
+  name: "optionsHash",
+  description: "Optional options to alter how the quad is built.",
+  parameters: [{
+    name: "s",
+    type: "Number",
+    description: "The number of sub-quads in which to divide the quad horizontally.",
+    optional: true,
+    default: 1
+  }, {
+    name: "t",
+    type: "Number",
+    description: "The number of sub-quads in which to divide the quad vertically.",
+    optional: true,
+    default: 1
+  }, {
+    name: "maxU",
+    type: "Number",
+    description: "A scalar value for the texture coordinate U component.",
+    optional: true,
+    default: 1
+  }, {
+    name: "maxV",
+    type: "Number",
+    description: "A scalar value for the texture coordinate V component.",
+    optional: true,
+    default: 1
   }]
 });
 
@@ -1517,14 +1502,10 @@ pliny.function({
     type: "String",
     description: "The resource to which the request is being sent."
   }, {
-    name: "options.data",
-    type: "Object",
-    description: "The data object to use as the request body payload, if this is a PUT request."
-  }, {
-    name: "options.progress",
-    type: "Function",
+    name: "options",
+    type: "Primrose.HTTP.XHR.optionsHash",
     optional: true,
-    description: "A callback function to be called as the download from the server progresses."
+    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information."
   }],
   examples: [{
     name: "Make a GET request.",
@@ -1543,6 +1524,23 @@ pliny.function({
   }]
 });
 
+pliny.record({
+  parent: "Primrose.HTTP.XHR",
+  name: "optionsHash",
+  description: "Options for passing data or tracking progress.",
+  parameters: [{
+    name: "data",
+    type: "Object",
+    optional: true,
+    description: "The data object to use as the request body payload, if this is a POST request."
+  }, {
+    name: "progress",
+    type: "Function",
+    optional: true,
+    description: "A callback function to be called as the download from the server progresses."
+  }]
+});
+
 pliny.function({
   parent: "Primrose.HTTP",
   name: "del",
@@ -1558,14 +1556,10 @@ pliny.function({
     type: "String",
     description: "The resource to which the request is being sent."
   }, {
-    name: "options.data",
-    type: "Object",
-    description: "The data object to use as the request body payload."
-  }, {
-    name: "options.progress",
-    type: "Function",
+    name: "options",
+    type: "Primrose.HTTP.XHR.optionsHash",
     optional: true,
-    description: "A callback function to be called as the download from the server progresses."
+    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information."
   }]
 });
 
@@ -1580,14 +1574,10 @@ pliny.function({
     type: "String",
     description: "The resource to which the request is being sent."
   }, {
-    name: "options.data",
-    type: "Object",
-    description: "The data object to use as the request body payload, if this is a PUT request."
-  }, {
-    name: "options.progress",
-    type: "Function",
+    name: "options",
+    type: "Primrose.HTTP.XHR.optionsHash",
     optional: true,
-    description: "A callback function to be called as the download from the server progresses."
+    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information."
   }]
 });
 
@@ -1608,10 +1598,10 @@ pliny.function({
     type: "String",
     description: "The resource to which the request is being sent."
   }, {
-    name: "options.progress",
-    type: "Function",
+    name: "options",
+    type: "Primrose.HTTP.XHR.optionsHash",
     optional: true,
-    description: "A callback function to be called as the download from the server progresses."
+    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information."
   }],
   examples: [{
     name: "Make a GET request.",
@@ -1640,10 +1630,10 @@ pliny.function({
     type: "String",
     description: "The resource to which the request is being sent."
   }, {
-    name: "options.progress",
-    type: "Function",
+    name: "options",
+    type: "Primrose.HTTP.XHR.optionsHash",
     optional: true,
-    description: "A callback function to be called as the download from the server progresses."
+    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information."
   }],
   examples: [{
     name: "Make a GET request for an ArrayBuffer.",
@@ -1675,10 +1665,10 @@ pliny.function({
     type: "String",
     description: "The resource to which the request is being sent."
   }, {
-    name: "options.progress",
-    type: "Function",
+    name: "options",
+    type: "Primrose.HTTP.XHR.optionsHash",
     optional: true,
-    description: "A callback function to be called as the download from the server progresses."
+    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information."
   }],
   examples: [{
     name: "Make a GET request for a JSON object.",
@@ -1710,10 +1700,10 @@ pliny.function({
     type: "String",
     description: "The resource to which the request is being sent."
   }, {
-    name: "options.progress",
-    type: "Function",
+    name: "options",
+    type: "Primrose.HTTP.XHR.optionsHash",
     optional: true,
-    description: "A callback function to be called as the download from the server progresses."
+    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information."
   }],
   examples: [{
     name: "Make a GET request for plain text.",
@@ -1747,17 +1737,12 @@ pliny.function({
     type: "String",
     description: "The resource to which the request is being sent."
   }, {
-    name: "options.data",
-    type: "Object",
-    description: "The data object to use as the request body payload, if this is a POST request."
-  }, {
-    name: "options.progress",
-    type: "Function",
+    name: "options",
+    type: "Primrose.HTTP.XHR.optionsHash",
     optional: true,
-    description: "A callback function to be called as the download from the server progresses."
+    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information. The `data` field is not optional."
   }]
 });
-
 
 
 pliny.function({
@@ -1770,14 +1755,10 @@ pliny.function({
     type: "String",
     description: "The resource to which the request is being sent."
   }, {
-    name: "options.data",
-    type: "Object",
-    description: "The data object to use as the request body payload, if this is a PUT request."
-  }, {
-    name: "options.progress",
-    type: "Function",
+    name: "options",
+    type: "Primrose.HTTP.XHR.optionsHash",
     optional: true,
-    description: "A callback function to be called as the download from the server progresses."
+    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information. The `data` field is not optional."
   }]
 });
 
@@ -2301,11 +2282,22 @@ pliny.class({
   description: "Cascades through a number of options to eventually return a CanvasRenderingContext2D object on which one will perform drawing operations.",
   baseClass: "Primrose.Entity",
   parameters: [{
-    name: "options.id",
+    name: "options",
+    type: "Primrose.Surface.optionsHash",
+    optional: true,
+    description: "Optional settings for creating the surface, including ID and Bounds. See [`Primrose.Surface.optionsHash`](#Primrose_Surface_optionsHash) for more information."
+  }]
+});
+
+pliny.record({
+  parent: "Primrose.Surface",
+  name: "optionsHash",
+  parameters: [{
+    name: "id",
     type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
     description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
   }, {
-    name: "options.bounds",
+    name: "bounds",
     type: "Primrose.Text.Rectangle",
     description: "The size and location of the surface to create."
   }]

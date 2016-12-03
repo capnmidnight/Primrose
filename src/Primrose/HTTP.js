@@ -23,14 +23,10 @@ pliny.function({
     type: "String",
     description: "The resource to which the request is being sent."
   }, {
-    name: "options.data",
-    type: "Object",
-    description: "The data object to use as the request body payload, if this is a PUT request."
-  }, {
-    name: "options.progress",
-    type: "Function",
+    name: "options",
+    type: "Primrose.HTTP.XHR.optionsHash",
     optional: true,
-    description: "A callback function to be called as the download from the server progresses."
+    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information."
   }],
   examples: [{
     name: "Make a GET request.",
@@ -46,6 +42,23 @@ pliny.function({
 \n\
 ## Results:\n\
 > Object {field1: 1, field2: \"Field2\"}"
+  }]
+});
+
+pliny.record({
+  parent: "Primrose.HTTP.XHR",
+  name: "optionsHash",
+  description: "Options for passing data or tracking progress.",
+  parameters: [{
+    name: "data",
+    type: "Object",
+    optional: true,
+    description: "The data object to use as the request body payload, if this is a POST request."
+  }, {
+    name: "progress",
+    type: "Function",
+    optional: true,
+    description: "A callback function to be called as the download from the server progresses."
   }]
 });
 
@@ -115,14 +128,10 @@ pliny.function({
     type: "String",
     description: "The resource to which the request is being sent."
   }, {
-    name: "options.data",
-    type: "Object",
-    description: "The data object to use as the request body payload."
-  }, {
-    name: "options.progress",
-    type: "Function",
+    name: "options",
+    type: "Primrose.HTTP.XHR.optionsHash",
     optional: true,
-    description: "A callback function to be called as the download from the server progresses."
+    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information."
   }]
 });
 export function del(type, url, options) {
@@ -139,14 +148,10 @@ pliny.function({
     type: "String",
     description: "The resource to which the request is being sent."
   }, {
-    name: "options.data",
-    type: "Object",
-    description: "The data object to use as the request body payload, if this is a PUT request."
-  }, {
-    name: "options.progress",
-    type: "Function",
+    name: "options",
+    type: "Primrose.HTTP.XHR.optionsHash",
     optional: true,
-    description: "A callback function to be called as the download from the server progresses."
+    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information."
   }]
 });
 
@@ -170,10 +175,10 @@ pliny.function({
     type: "String",
     description: "The resource to which the request is being sent."
   }, {
-    name: "options.progress",
-    type: "Function",
+    name: "options",
+    type: "Primrose.HTTP.XHR.optionsHash",
     optional: true,
-    description: "A callback function to be called as the download from the server progresses."
+    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information."
   }],
   examples: [{
     name: "Make a GET request.",
@@ -207,10 +212,10 @@ pliny.function({
     type: "String",
     description: "The resource to which the request is being sent."
   }, {
-    name: "options.progress",
-    type: "Function",
+    name: "options",
+    type: "Primrose.HTTP.XHR.optionsHash",
     optional: true,
-    description: "A callback function to be called as the download from the server progresses."
+    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information."
   }],
   examples: [{
     name: "Make a GET request for an ArrayBuffer.",
@@ -247,10 +252,10 @@ pliny.function({
     type: "String",
     description: "The resource to which the request is being sent."
   }, {
-    name: "options.progress",
-    type: "Function",
+    name: "options",
+    type: "Primrose.HTTP.XHR.optionsHash",
     optional: true,
-    description: "A callback function to be called as the download from the server progresses."
+    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information."
   }],
   examples: [{
     name: "Make a GET request for a JSON object.",
@@ -285,10 +290,10 @@ pliny.function({
     type: "String",
     description: "The resource to which the request is being sent."
   }, {
-    name: "options.progress",
-    type: "Function",
+    name: "options",
+    type: "Primrose.HTTP.XHR.optionsHash",
     optional: true,
-    description: "A callback function to be called as the download from the server progresses."
+    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information."
   }],
   examples: [{
     name: "Make a GET request for plain text.",
@@ -326,21 +331,15 @@ pliny.function({
     type: "String",
     description: "The resource to which the request is being sent."
   }, {
-    name: "options.data",
-    type: "Object",
-    description: "The data object to use as the request body payload, if this is a POST request."
-  }, {
-    name: "options.progress",
-    type: "Function",
+    name: "options",
+    type: "Primrose.HTTP.XHR.optionsHash",
     optional: true,
-    description: "A callback function to be called as the download from the server progresses."
+    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information. The `data` field is not optional."
   }]
 });
-
 export function post(type, url, options) {
   return XHR("POST", type, url, options);
 };
-
 
 pliny.function({
   parent: "Primrose.HTTP",
@@ -352,14 +351,10 @@ pliny.function({
     type: "String",
     description: "The resource to which the request is being sent."
   }, {
-    name: "options.data",
-    type: "Object",
-    description: "The data object to use as the request body payload, if this is a PUT request."
-  }, {
-    name: "options.progress",
-    type: "Function",
+    name: "options",
+    type: "Primrose.HTTP.XHR.optionsHash",
     optional: true,
-    description: "A callback function to be called as the download from the server progresses."
+    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information. The `data` field is not optional."
   }]
 });
 

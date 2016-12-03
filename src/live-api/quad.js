@@ -14,33 +14,9 @@ pliny.function({
     default: "The value of the `width` parameter."
   }, {
     name: "options",
-    type: "Object",
+    type: "Live API.quad.optionsHash",
     optional: true,
-    description: "Optional settings for creating the quad geometry."
-  }, {
-    name: "options.s",
-    type: "Number",
-    description: "The number of sub-quads in which to divide the quad horizontally.",
-    optional: true,
-    default: 1
-  }, {
-    name: "options.t",
-    type: "Number",
-    description: "The number of sub-quads in which to divide the quad vertically.",
-    optional: true,
-    default: 1
-  }, {
-    name: "options.maxU",
-    type: "Number",
-    description: "A scalar value for the texture coordinate U component.",
-    optional: true,
-    default: 1
-  }, {
-    name: "options.maxV",
-    type: "Number",
-    description: "A scalar value for the texture coordinate V component.",
-    optional: true,
-    default: 1
+    description: "Optional settings for creating the quad geometry. See [`Live API.quad.optionsHash`](#LiveAPI_quad_optionsHash) for more information."
   }],
   returns: "THREE.CircleBufferGeometry",
   examples: [{
@@ -59,20 +35,55 @@ It should look something like this:\n\
   }]
 });
 
+pliny.record({
+  parent: "Live API.quad",
+  name: "optionsHash",
+  description: "Optional options to alter how the quad is built.",
+  parameters: [{
+    name: "s",
+    type: "Number",
+    description: "The number of sub-quads in which to divide the quad horizontally.",
+    optional: true,
+    default: 1
+  }, {
+    name: "t",
+    type: "Number",
+    description: "The number of sub-quads in which to divide the quad vertically.",
+    optional: true,
+    default: 1
+  }, {
+    name: "maxU",
+    type: "Number",
+    description: "A scalar value for the texture coordinate U component.",
+    optional: true,
+    default: 1
+  }, {
+    name: "maxV",
+    type: "Number",
+    description: "A scalar value for the texture coordinate V component.",
+    optional: true,
+    default: 1
+  }]
+});
+
 import cache from "../util/cache";
 import fixGeometry from "../Primrose/Graphics/fixGeometry";
 import { PlaneBufferGeometry } from "three/src/geometries/PlaneBufferGeometry";
 export default function quad(width, height, options) {
+
+  if (width === undefined) {
+    width = 1;
+  }
+
   if (height === undefined) {
     height = width;
   }
-  options = options || {};
-  if(options.s === undefined){
-    options.s = 1;
-  }
-  if(options.t === undefined){
-    options.t = 1;
-  }
+
+  options = Object.assign({}, {
+    s: 1,
+    t: 1
+  }, options);
+
   return cache(
     `PlaneBufferGeometry(${width}, ${height}, ${options.s}, ${options.t}, ${options.maxU}, ${options.maxV})`,
     () => fixGeometry(new PlaneBufferGeometry(width, height, options.s, options.t), options));

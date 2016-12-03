@@ -7,19 +7,31 @@ var COUNTER = 0;
 
 pliny.class({
   parent: "Primrose",
-    name: "Surface",
-    description: "Cascades through a number of options to eventually return a CanvasRenderingContext2D object on which one will perform drawing operations.",
-    baseClass: "Primrose.Entity",
-    parameters: [{
-      name: "options.id",
-      type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
-      description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
-    }, {
-      name: "options.bounds",
-      type: "Primrose.Text.Rectangle",
-      description: "The size and location of the surface to create."
-    }]
+  name: "Surface",
+  description: "Cascades through a number of options to eventually return a CanvasRenderingContext2D object on which one will perform drawing operations.",
+  baseClass: "Primrose.Entity",
+  parameters: [{
+    name: "options",
+    type: "Primrose.Surface.optionsHash",
+    optional: true,
+    description: "Optional settings for creating the surface, including ID and Bounds. See [`Primrose.Surface.optionsHash`](#Primrose_Surface_optionsHash) for more information."
+  }]
 });
+
+pliny.record({
+  parent: "Primrose.Surface",
+  name: "optionsHash",
+  parameters: [{
+    name: "id",
+    type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
+    description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
+  }, {
+    name: "bounds",
+    type: "Primrose.Text.Rectangle",
+    description: "The size and location of the surface to create."
+  }]
+});
+
 export default class Surface extends Entity {
 
   static create() {
