@@ -1,13 +1,13 @@
+function scroller(id) {
+  document.getElementById(id)
+    .scrollIntoView({
+      block: "top",
+      behavior: "smooth"
+    });
+}
+
 (function () {
   "use strict";
-
-  function scroller(id) {
-    document.getElementById(id)
-      .scrollIntoView({
-        block: "top",
-        behavior: "smooth"
-      });
-  }
 
   function replacePreBlocks() {
     var doc = document.querySelector("#documentation"),
