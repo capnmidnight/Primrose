@@ -1,5 +1,5 @@
 pliny.class({
-  parent: "Primrose.Text.Controls",
+  parent: "Primrose.Controls",
     name: "TextBox",
     description: "Syntax highlighting textbox control.",
     baseClass: "Primrose.Controls.Surface",
@@ -18,20 +18,15 @@ var SCROLL_SCALE = isFirefox ? 3 : 100,
   COUNTER = 0,
   OFFSET = 0;
 
-import Surface from "../../Controls/Surface";
-import Cursor from "../Cursor";
-import Point from "../Point";
-import Size from "../Size";
-import Rectangle from "../Rectangle";
-import TextEditor from "../CommandPacks/TextEditor";
-import DefaultTheme from "../Themes/Default";
-import JavaScript from "../Grammars/JavaScript";
-import isFirefox from "../../../flags/isFirefox";
-import isChrome from "../../../flags/isChrome";
-import isIE from "../../../flags/isIE";
-import isOpera from "../../../flags/isOpera";
-import isSafari from "../../../flags/isSafari";
-import isMobile from "../../../flags/isMobile";
+import Surface from "./Surface";
+import Cursor from "../Text/Cursor";
+import Point from "../Text/Point";
+import Size from "../Text/Size";
+import Rectangle from "../Text/Rectangle";
+import TextEditor from "../Text/CommandPacks/TextEditor";
+import DefaultTheme from "../Text/Themes/Default";
+import JavaScript from "../Text/Grammars/JavaScript";
+import { isFirefox, isChrome, isIE, isOpera, isSafari, isMobile} from "../../flags";
 export default class TextBox extends Surface {
 
   static create() {
@@ -40,7 +35,7 @@ export default class TextBox extends Surface {
 
   constructor(options) {
     super(Object.assign({}, {
-      id: "Primrose.Text.Controls.TextBox[" + (COUNTER++) + "]"
+      id: "Primrose.Controls.TextBox[" + (COUNTER++) + "]"
     }, options));
 
     this.isTextBox = true;

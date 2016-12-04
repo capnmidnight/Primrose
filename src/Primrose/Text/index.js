@@ -6,7 +6,6 @@ pliny.namespace({
 
 import CodePages from "./CodePages";
 import CommandPacks from "./CommandPacks";
-import Controls from "./Controls";
 import Cursor from "./Cursor";
 import Grammars from "./Grammars";
 import OperatingSystems from "./OperatingSystems";
@@ -21,7 +20,6 @@ import Token from "./Token";
 export {
   CodePages,
   CommandPacks,
-  Controls,
   Cursor,
   Grammars,
   OperatingSystems,
@@ -37,7 +35,6 @@ export {
 export default {
   CodePages,
   CommandPacks,
-  Controls,
   Cursor,
   Grammars,
   OperatingSystems,

@@ -1,8 +1,8 @@
 pliny.class({
-  parent: "Primrose.Text.Controls",
+  parent: "Primrose.Controls",
     name: "TextInput",
     description: "plain text input box.",
-    baseClass: "Primrose.Text.Controls.TextBox",
+    baseClass: "Primrose.Controls.TextBox",
     parameters: [{
       name: "idOrCanvasOrContext",
       type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
@@ -17,12 +17,12 @@ pliny.class({
 var COUNTER = 0;
 
 import TextBox from "./TextBox";
-import PlainText from "../Grammars/PlainText";
-import TextInputCommands from "../CommandPacks/TextInput";
+import PlainText from "../Text/Grammars/PlainText";
+import TextInputCommands from "../Text/CommandPacks/TextInput";
 export default class TextInput extends TextBox {
   constructor(options) {
     super(Object.assign({}, {
-        id: "Primrose.Text.Controls.TextInput[" + (COUNTER++) + "]",
+        id: "Primrose.Controls.TextInput[" + (COUNTER++) + "]",
         padding: 5,
         singleLine: true,
         disableWordWrap: true,

@@ -12,8 +12,11 @@ import Entity from "./Entity";
 import Form from "./Form";
 import Image from "./Image";
 import Label from "./Label";
+import PlainText from "./PlainText";
 import Progress from "./Progress";
 import Surface from "./Surface";
+import TextBox from "./TextBox";
+import TextInput from "./TextInput";
 
 export {
   BaseControl,
@@ -24,8 +27,11 @@ export {
   Form,
   Image,
   Label,
+  PlainText,
   Progress,
-  Surface
+  Surface,
+  TextBox,
+  TextInput
 };
 
 export default {
@@ -37,6 +43,9 @@ export default {
   Form,
   Image,
   Label,
+  PlainText,
   Progress,
-  Surface
+  Surface,
+  TextBox,
+  TextInput
 };

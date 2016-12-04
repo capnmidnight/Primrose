@@ -31684,7 +31684,7 @@ var TextBox = function (_Surface) {
     classCallCheck(this, TextBox);
 
     var _this = possibleConstructorReturn(this, (TextBox.__proto__ || Object.getPrototypeOf(TextBox)).call(this, Object.assign({}, {
-      id: "Primrose.Text.Controls.TextBox[" + COUNTER$5++ + "]"
+      id: "Primrose.Controls.TextBox[" + COUNTER$5++ + "]"
     }, options)));
 
     _this.isTextBox = true;

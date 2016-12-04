@@ -2250,9 +2250,9 @@ pliny.function({
 \n\
   grammar(\"JavaScript\");\n\
   var ctrls = [\n\
-  new Primrose.Text.Controls.TextBox(),\n\
-  new Primrose.Text.Controls.TextBox(),\n\
-  new Primrose.Text.Button()\n\
+  new Primrose.Controls.TextBox(),\n\
+  new Primrose.Controls.TextBox(),\n\
+  new Primrose.Controls.Button()\n\
   ];\n\
   \n\
   function focusOn(id){\n\
@@ -2278,9 +2278,9 @@ pliny.function({
 \n\
   grammar(\"JavaScript\");\n\
   var ctrls = [\n\
-  new Primrose.Text.Controls.TextBox(),\n\
-  new Primrose.Text.Controls.TextBox(),\n\
-  new Primrose.Text.Button()\n\
+  new Primrose.Controls.TextBox(),\n\
+  new Primrose.Controls.TextBox(),\n\
+  new Primrose.Controls.Button()\n\
   ];\n\
   \n\
   function focusOn(id){\n\
@@ -2583,9 +2583,9 @@ pliny.property({
     \n\
       grammar(\"JavaScript\");\n\
       var ctrls = [\n\
-        new Primrose.Text.Controls.TextBox(),\n\
-        new Primrose.Text.Controls.TextBox(),\n\
-        new Primrose.Text.Button()\n\
+        new Primrose.Controls.TextBox(),\n\
+        new Primrose.Controls.TextBox(),\n\
+        new Primrose.Controls.Button()\n\
       ];\n\
     \n\
       function focusOn(id){\n\
@@ -2613,9 +2613,9 @@ pliny.property({
     \n\
       grammar(\"JavaScript\");\n\
       var ctrls = [\n\
-        new Primrose.Text.Controls.TextBox(),\n\
-        new Primrose.Text.Controls.TextBox(),\n\
-        new Primrose.Text.Button()\n\
+        new Primrose.Controls.TextBox(),\n\
+        new Primrose.Controls.TextBox(),\n\
+        new Primrose.Controls.Button()\n\
       ];\n\
       \n\
       function focusOn(id){\n\
@@ -3736,7 +3736,7 @@ pliny.property({
 });
 
 pliny.class({
-  parent: "Primrose.Text.Controls",
+  parent: "Primrose.Controls",
   name: "TextBox",
   description: "Syntax highlighting textbox control.",
   baseClass: "Primrose.Controls.Surface",
@@ -4147,18 +4147,18 @@ pliny.property({
       description: "If a `skyTexture` option is provided, it will be a texture cube or photosphere. If no `skyTexture` option is provided, there will only be a THREE.Object3D, to create an anchor point on which implementing scripts can add objects that follow the user's position."
     });
     pliny.property({
-          parent: "Primrose.BrowserEnvironment",
-          name: "ambient",
-          type: "THREE.AmbientLight",
-          description: "If the `disableDefaultLighting` option is not present, the ambient light provides a fill light so that dark shadows do not completely obscure object details."
-        });
-        pliny.property({
-          parent: "Primrose.BrowserEnvironment",
-          name: "sun",
-          type: "THREE.PointLight",
-          description: "If the `disableDefaultLighting` option is not present, the sun light provides a key light so that objects have shading and relief."
-        });
-        pliny.property({
+        parent: "Primrose.BrowserEnvironment",
+        name: "ambient",
+        type: "THREE.AmbientLight",
+        description: "If the `disableDefaultLighting` option is not present, the ambient light provides a fill light so that dark shadows do not completely obscure object details."
+      });
+      pliny.property({
+        parent: "Primrose.BrowserEnvironment",
+        name: "sun",
+        type: "THREE.PointLight",
+        description: "If the `disableDefaultLighting` option is not present, the sun light provides a key light so that objects have shading and relief."
+      });
+      pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "ground",
       type: "THREE.Object3D",
@@ -4351,8 +4351,71 @@ pliny.property({
 
 pliny.class({
   parent: "Primrose.Controls",
+  name: "PlainText",
+  description: "A texture that uses Canvas2D calls to draw simple, monochrome text to a polygon.",
+  parameters: [{
+    name: "text",
+    type: "String",
+    description: "The initial text to render on the PlainText control."
+  }, {
+    name: "size",
+    type: "Number",
+    description: "The font size at which to render the text."
+  }, {
+    name: "fgcolor",
+    type: "String",
+    description: "A Canvas2D fillStyle description to use for drawing the text."
+  }, {
+    name: "bgcolor",
+    type: "String",
+    description: "A Canvas2D fillStyle description to use for drawing the background behind the text."
+  }, {
+    name: "x",
+    type: "Number",
+    description: "The X component of the position at which to set the PlainText control's polygon mesh."
+  }, {
+    name: "y",
+    type: "Number",
+    description: "The Y component of the position at which to set the PlainText control's polygon mesh."
+  }, {
+    name: "z",
+    type: "Number",
+    description: "The Z component of the position at which to set the PlainText control's polygon mesh."
+  }, {
+    name: "hAlign",
+    type: "String",
+    description: "The horizontal alignment of the text, \"left\", \"center\", or \"right\".",
+    optional: true,
+    default: "center"
+  }]
+});
+
+pliny.class({
+  parent: "Primrose.Controls",
   name: "Progress",
   description: "| [under construction]"
+});
+
+pliny.record({
+  parent: "Primrose.Text.CommandPacks",
+  name: "TextInput",
+  description: "A concrete instantiation of the single-line text editor commands provided by BasicTextInput."
+});
+
+pliny.class({
+  parent: "Primrose.Controls",
+  name: "TextInput",
+  description: "plain text input box.",
+  baseClass: "Primrose.Controls.TextBox",
+  parameters: [{
+    name: "idOrCanvasOrContext",
+    type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
+    description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
+  }, {
+    name: "options",
+    type: "Object",
+    description: "Named parameters for creating the TextInput."
+  }]
 });
 
 pliny.namespace({
@@ -4596,79 +4659,10 @@ pliny.namespace({
   description: "Functions for handling random numbers of different criteria, or selecting random elements of arrays."
 });
 
-pliny.record({
-  parent: "Primrose.Text.CommandPacks",
-  name: "TextInput",
-  description: "A concrete instantiation of the single-line text editor commands provided by BasicTextInput."
-});
-
 pliny.namespace({
   parent: "Primrose.Text",
   name: "CommandPacks",
   description: "The CommandPacks namespace contains sets of keyboard shortcuts for different types of text-oriented controls."
-});
-
-pliny.class({
-  parent: "Primrose.Text.Controls",
-  name: "PlainText",
-  description: "A texture that uses Canvas2D calls to draw simple, monochrome text to a polygon.",
-  parameters: [{
-    name: "text",
-    type: "String",
-    description: "The initial text to render on the PlainText control."
-  }, {
-    name: "size",
-    type: "Number",
-    description: "The font size at which to render the text."
-  }, {
-    name: "fgcolor",
-    type: "String",
-    description: "A Canvas2D fillStyle description to use for drawing the text."
-  }, {
-    name: "bgcolor",
-    type: "String",
-    description: "A Canvas2D fillStyle description to use for drawing the background behind the text."
-  }, {
-    name: "x",
-    type: "Number",
-    description: "The X component of the position at which to set the PlainText control's polygon mesh."
-  }, {
-    name: "y",
-    type: "Number",
-    description: "The Y component of the position at which to set the PlainText control's polygon mesh."
-  }, {
-    name: "z",
-    type: "Number",
-    description: "The Z component of the position at which to set the PlainText control's polygon mesh."
-  }, {
-    name: "hAlign",
-    type: "String",
-    description: "The horizontal alignment of the text, \"left\", \"center\", or \"right\".",
-    optional: true,
-    default: "center"
-  }]
-});
-
-pliny.class({
-  parent: "Primrose.Text.Controls",
-  name: "TextInput",
-  description: "plain text input box.",
-  baseClass: "Primrose.Text.Controls.TextBox",
-  parameters: [{
-    name: "idOrCanvasOrContext",
-    type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
-    description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
-  }, {
-    name: "options",
-    type: "Object",
-    description: "Named parameters for creating the TextInput."
-  }]
-});
-
-pliny.namespace({
-  parent: "Primrose.Text",
-  name: "Controls",
-  description: "The Controls namespace contains different types of text-oriented controls."
 });
 
 pliny.value({

@@ -211,7 +211,7 @@ import ModelLoader from "./Graphics/ModelLoader";
 import FPSInput from "./Input/FPSInput";
 import VR from "./Input/VR";
 import NetworkManager from "./Network/Manager";
-import TextBox from "./Text/Controls/TextBox";
+import TextBox from "./Controls/TextBox";
 import PlainText from "./Text/Grammars/PlainText";
 import { Quality, PIXEL_SCALES } from "./Constants";
 import { BackSide, PCFSoftShadowMap } from "three/src/constants";
@@ -911,29 +911,36 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
       skyReady = Promise.resolve();
     }
 
+    if(this.options.disableDefaultLighting) {
+      this.ambient = null;
+      this.sun = null;
+    }
+    else{
+
+      pliny.property({
+        parent: "Primrose.BrowserEnvironment",
+        name: "ambient",
+        type: "THREE.AmbientLight",
+        description: "If the `disableDefaultLighting` option is not present, the ambient light provides a fill light so that dark shadows do not completely obscure object details."
+      });
+      this.ambient = new AmbientLight(0xffffff, 0.5);
+
+      pliny.property({
+        parent: "Primrose.BrowserEnvironment",
+        name: "sun",
+        type: "THREE.PointLight",
+        description: "If the `disableDefaultLighting` option is not present, the sun light provides a key light so that objects have shading and relief."
+      });
+      this.sun = light(0xffffff, 1, 50);
+    }
+
     skyReady = skyReady.then(() => {
       this.sky.name = "Sky";
       this.scene.add(this.sky);
 
 
       if(!this.options.disableDefaultLighting) {
-
-        pliny.property({
-          parent: "Primrose.BrowserEnvironment",
-          name: "ambient",
-          type: "THREE.AmbientLight",
-          description: "If the `disableDefaultLighting` option is not present, the ambient light provides a fill light so that dark shadows do not completely obscure object details."
-        });
-        this.ambient = new AmbientLight(0xffffff, 0.5);
         this.sky.add(this.ambient);
-
-        pliny.property({
-          parent: "Primrose.BrowserEnvironment",
-          name: "sun",
-          type: "THREE.PointLight",
-          description: "If the `disableDefaultLighting` option is not present, the sun light provides a key light so that objects have shading and relief."
-        });
-        this.sun = light(0xffffff, 1, 50);
         put(this.sun)
           .on(this.sky)
           .at(0, 10, 10);

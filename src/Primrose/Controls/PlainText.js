@@ -1,5 +1,5 @@
 pliny.class({
-  parent: "Primrose.Text.Controls",
+  parent: "Primrose.Controls",
   name: "PlainText",
   description: "A texture that uses Canvas2D calls to draw simple, monochrome text to a polygon.",
   parameters: [{

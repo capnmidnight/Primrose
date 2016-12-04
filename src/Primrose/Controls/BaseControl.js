@@ -58,9 +58,9 @@ export default class BaseControl extends AbstractEventEmitter {
     \n\
       grammar(\"JavaScript\");\n\
       var ctrls = [\n\
-        new Primrose.Text.Controls.TextBox(),\n\
-        new Primrose.Text.Controls.TextBox(),\n\
-        new Primrose.Text.Button()\n\
+        new Primrose.Controls.TextBox(),\n\
+        new Primrose.Controls.TextBox(),\n\
+        new Primrose.Controls.Button()\n\
       ];\n\
     \n\
       function focusOn(id){\n\
@@ -96,9 +96,9 @@ export default class BaseControl extends AbstractEventEmitter {
     \n\
       grammar(\"JavaScript\");\n\
       var ctrls = [\n\
-        new Primrose.Text.Controls.TextBox(),\n\
-        new Primrose.Text.Controls.TextBox(),\n\
-        new Primrose.Text.Button()\n\
+        new Primrose.Controls.TextBox(),\n\
+        new Primrose.Controls.TextBox(),\n\
+        new Primrose.Controls.Button()\n\
       ];\n\
       \n\
       function focusOn(id){\n\
