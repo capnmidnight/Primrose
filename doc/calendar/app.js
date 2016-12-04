@@ -5395,15 +5395,11 @@ function material$1(textureDescription, options) {
   return cache(materialDescription, function () {
     var materialOptions = {
       fog: options.fog,
-      transparent: options.transparent,
+      transparent: options.transparent || options.opacity !== undefined && options.opacity < 1,
       opacity: options.opacity,
       side: options.side || FrontSide
     },
         MaterialType = MeshStandardMaterial;
-
-    if (options.opacity < 1) {
-      materialOptions.transparent = true;
-    }
 
     if (options.unshaded) {
       materialOptions.shading = FlatShading;
@@ -14689,20 +14685,7 @@ var Sound = function (_PositionalSound) {
   return Sound;
 }(PositionalSound);
 
-var Audio$1 = {
-  Audio3D: Audio3D,
-  Music: Music,
-  Note: Note,
-  PositionalSound: PositionalSound,
-  Sound: Sound,
-  Speech: Speech
-};
-
 var PIXEL_SCALES = [0.5, 0.25, 0.333333, 0.5, 1];
-
-var SKINS = [0xFFDFC4, 0xF0D5BE, 0xEECEB3, 0xE1B899, 0xE5C298, 0xFFDCB2, 0xE5B887, 0xE5A073, 0xE79E6D, 0xDB9065, 0xCE967C, 0xC67856, 0xBA6C49, 0xA57257, 0xF0C8C9, 0xDDA8A0, 0xB97C6D, 0xA8756C, 0xAD6452, 0x5C3836, 0xCB8442, 0xBD723C, 0x704139, 0xA3866A, 0x870400, 0x710101, 0x430000, 0x5B0001, 0x302E2E];
-
-var SYS_FONTS = "-apple-system, '.SFNSText-Regular', 'San Francisco', 'Roboto', 'Segoe UI', 'Helvetica Neue', 'Lucida Grande', sans-serif";
 
 var Quality = {
   NONE: 0,
@@ -14711,13 +14694,6 @@ var Quality = {
   MEDIUM: 3,
   HIGH: 4,
   MAXIMUM: PIXEL_SCALES.length - 1
-};
-
-var constants$1 = {
-  PIXEL_SCALES: PIXEL_SCALES,
-  SKINS: SKINS,
-  SYS_FONTS: SYS_FONTS,
-  Quality: Quality
 };
 
 var ID$1 = 1;
@@ -16796,19 +16772,6 @@ var Progress = function () {
   return Progress;
 }();
 
-var Controls = {
-  BaseControl: BaseControl,
-  Button2D: Button2D,
-  Button3D: Button3D,
-  ButtonFactory: ButtonFactory,
-  Entity: Entity,
-  Form: Form,
-  Image: Image,
-  Label: Label,
-  Progress: Progress,
-  Surface: Surface
-};
-
 function cascadeElement(id, tag, DOMClass, add) {
   var elem = null;
   if (id === null) {
@@ -16835,22 +16798,6 @@ function cascadeElement(id, tag, DOMClass, add) {
   return elem;
 }
 
-function findEverything(elem, obj) {
-  elem = elem || document;
-  obj = obj || {};
-  var arr = elem.querySelectorAll("*");
-  for (var i = 0; i < arr.length; ++i) {
-    var e = arr[i];
-    if (e.id && e.id.length > 0) {
-      obj[e.id] = e;
-      if (e.parentElement) {
-        e.parentElement[e.id] = e;
-      }
-    }
-  }
-  return obj;
-}
-
 function makeHidingContainer(id, obj) {
   var elem = cascadeElement(id, "div", window.HTMLDivElement);
   elem.style.position = "absolute";
@@ -16862,12 +16809,6 @@ function makeHidingContainer(id, obj) {
   elem.appendChild(obj);
   return elem;
 }
-
-var DOM = {
-  cascadeElement: cascadeElement,
-  findEverything: findEverything,
-  makeHidingContainer: makeHidingContainer
-};
 
 /**
  * @author mrdoob / http://mrdoob.com/
@@ -28825,13 +28766,6 @@ function loader(map, key) {
   };
 }
 
-var Graphics = {
-  fixGeometry: fixGeometry,
-  InsideSphereGeometry: InsideSphereGeometry,
-  loadTexture: loadTexture$1,
-  ModelLoader: ModelLoader
-};
-
 function initState() {
   this.inputState = {
     buttons: [],
@@ -29438,13 +29372,6 @@ var OperatingSystem = function () {
 var Windows = new OperatingSystem("Windows", "CTRL", "CTRL", "CTRL_y", "", "HOME", "END", "CTRL", "HOME", "END");
 
 var macOS = new OperatingSystem("macOS", "META", "ALT", "METASHIFT_z", "META", "LEFTARROW", "RIGHTARROW", "META", "UPARROW", "DOWNARROW");
-
-var OperatingSystems = {
-  Linux: Windows,
-  macOS: macOS,
-  OperatingSystem: OperatingSystem,
-  Windows: Windows
-};
 
 var CodePage = function CodePage(codePageName, lang, options) {
   classCallCheck(this, CodePage);
@@ -31712,19 +31639,6 @@ Location.DEFAULTS = {
   timeout: 25000
 };
 
-var Input = {
-  FPSInput: FPSInput,
-  Gamepad: Gamepad,
-  InputProcessor: InputProcessor,
-  Keyboard: Keyboard,
-  Location: Location,
-  Mouse: Mouse,
-  PoseInputProcessor: PoseInputProcessor,
-  Speech: Speech$2,
-  Touch: Touch,
-  VR: VR
-};
-
 function number(min, max, power) {
   power = power || 1;
   if (max === undefined) {
@@ -32065,37 +31979,6 @@ var Manager = function (_AbstractEventEmitter) {
   return Manager;
 }(AbstractEventEmitter);
 
-var Network = {
-  Manager: Manager,
-  RemoteUser: RemoteUser
-};
-
-function ID$2() {
-  return (Math.random() * Math.log(Number.MAX_VALUE)).toString(36).replace(".", "");
-}
-
-function item(arr) {
-  return arr[int(arr.length)];
-}
-
-function steps(min, max, steps) {
-  return min + int(0, (1 + max - min) / steps) * steps;
-}
-
-function vector(min, max) {
-  return new Vector3().set(number(min, max), number(min, max), number(min, max));
-}
-
-var Random = {
-  color: color,
-  ID: ID$2,
-  int: int,
-  item: item,
-  number: number,
-  steps: steps,
-  vector: vector
-};
-
 var CommandPack = function CommandPack(commandPackName, commands) {
   classCallCheck(this, CommandPack);
 
@@ -32272,13 +32155,6 @@ var TextEditor = new BasicTextInput("Text Area input commands", {
 // If SHIFT is held, then "back"
 //
 var TextInputCommands = new BasicTextInput("Text Line input commands");
-
-var CommandPacks = {
-  BasicTextInput: BasicTextInput,
-  CommandPack: CommandPack,
-  TextEditor: TextEditor,
-  TextInput: TextInputCommands
-};
 
 var PlainText = function PlainText(text, size, fgcolor, bgcolor, x, y, z) {
   var hAlign = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : "center";
@@ -33774,12 +33650,6 @@ var TextInput = function (_TextBox) {
   return TextInput;
 }(TextBox);
 
-var Controls$1 = {
-  PlainText: PlainText,
-  TextBox: TextBox,
-  TextInput: TextInput
-};
-
 var Basic = new Grammar("BASIC",
 // Grammar rules are applied in the order they are specified.
 [
@@ -34377,15 +34247,7 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next, clearScre
   };
 };
 
-var TestResults = new Grammar("TestResults", [["newlines", /(?:\r\n|\r|\n)/, true], ["numbers", /(\[)(o+)/, true], ["numbers", /(\d+ succeeded), 0 failed/, true], ["numbers", /^    Successes:/, true], ["functions", /(x+)\]/, true], ["functions", /[1-9]\d* failed/, true], ["functions", /^    Failures:/, true], ["comments", /(\d+ms:)(.*)/, true], ["keywords", /(Test results for )(\w+):/, true], ["strings", /        \w+/, true]]);
-
-var Grammars = {
-  Basic: Basic,
-  Grammar: Grammar,
-  JavaScript: JavaScript,
-  PlainText: PlainText$2,
-  TestResults: TestResults
-};
+new Grammar("TestResults", [["newlines", /(?:\r\n|\r|\n)/, true], ["numbers", /(\[)(o+)/, true], ["numbers", /(\d+ succeeded), 0 failed/, true], ["numbers", /^    Successes:/, true], ["functions", /(x+)\]/, true], ["functions", /[1-9]\d* failed/, true], ["functions", /^    Failures:/, true], ["comments", /(\d+ms:)(.*)/, true], ["keywords", /(Test results for )(\w+):/, true], ["strings", /        \w+/, true]]);
 
 var Terminal = function Terminal(inputEditor, outputEditor) {
   classCallCheck(this, Terminal);
@@ -34501,113 +34363,6 @@ var Terminal = function Terminal(inputEditor, outputEditor) {
     }
   };
 };
-
-var Dark = {
-  name: "Dark",
-  fontFamily: "'Droid Sans Mono', 'Consolas', 'Lucida Console', 'Courier New', 'Courier', monospace",
-  cursorColor: "white",
-  fontSize: 16,
-  lineNumbers: {
-    foreColor: "white"
-  },
-  regular: {
-    backColor: "black",
-    foreColor: "#c0c0c0",
-    currentRowBackColor: "#202020",
-    selectedBackColor: "#404040",
-    unfocused: "rgba(0, 0, 255, 0.25)"
-  },
-  strings: {
-    foreColor: "#aa9900",
-    fontStyle: "italic"
-  },
-  regexes: {
-    foreColor: "#aa0099",
-    fontStyle: "italic"
-  },
-  numbers: {
-    foreColor: "green"
-  },
-  comments: {
-    foreColor: "yellow",
-    fontStyle: "italic"
-  },
-  keywords: {
-    foreColor: "cyan"
-  },
-  functions: {
-    foreColor: "brown",
-    fontWeight: "bold"
-  },
-  members: {
-    foreColor: "green"
-  },
-  error: {
-    foreColor: "red",
-    fontStyle: "underline italic"
-  }
-};
-
-var Themes = {
-  Dark: Dark,
-  Default: Default
-};
-
-var Text = {
-  CodePages: CodePages,
-  CommandPacks: CommandPacks,
-  Controls: Controls$1,
-  Cursor: Cursor,
-  Grammars: Grammars,
-  OperatingSystems: OperatingSystems,
-  Point: Point,
-  Rectangle: Rectangle,
-  Rule: Rule,
-  Size: Size,
-  Terminal: Terminal,
-  Themes: Themes,
-  Token: Token
-};
-
-var obj$1 = {
-  AbstractEventEmitter: AbstractEventEmitter,
-  Angle: Angle,
-  Audio: Audio$1,
-  BrowserEnvironment: BrowserEnvironment,
-  Constants: constants$1,
-  Controls: Controls,
-  DOM: DOM,
-  Graphics: Graphics,
-  HTTP: HTTP$1,
-  Input: Input,
-  Keys: Keys,
-  Network: Network,
-  Pointer: Pointer,
-  Random: Random,
-  Text: Text
-};
-
-Object.assign(obj$1, constants);
-
-
-var HTTP$1 = Object.freeze({
-	AbstractEventEmitter: AbstractEventEmitter,
-	Angle: Angle,
-	Audio: Audio$1,
-	BrowserEnvironment: BrowserEnvironment,
-	Constants: constants$1,
-	Controls: Controls,
-	DOM: DOM,
-	Graphics: Graphics,
-	HTTP: HTTP$1,
-	Input: Input,
-	Keys: Keys,
-	Network: Network,
-	Pointer: Pointer,
-	Random: Random,
-	Text: Text,
-	default: obj$1
-});
 
 function XHR(method, type, url, options) {
   return new Promise(function (resolve, reject) {

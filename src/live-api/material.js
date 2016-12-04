@@ -116,15 +116,11 @@ export default function material(textureDescription, options){
   return cache(materialDescription, () => {
     var materialOptions = {
         fog: options.fog,
-        transparent: options.transparent,
+        transparent: options.transparent || (options.opacity !== undefined && options.opacity < 1),
         opacity: options.opacity,
         side: options.side || FrontSide
       },
       MaterialType = MeshStandardMaterial;
-
-    if(options.opacity < 1){
-      materialOptions.transparent = true;
-    }
 
     if (options.unshaded) {
       materialOptions.shading = FlatShading;

@@ -6,7 +6,7 @@ var GRASS = "../images/grass.png",
   CODE_KEY = "Pacman code",
 
   env = new Primrose.BrowserEnvironment({
-    quality: Primrose.Quality.HIGH,
+    quality: Primrose.Constants.Quality.HIGH,
     backgroundColor: 0x000000,
     skyTexture: DECK,
     groundTexture: DECK,
@@ -83,7 +83,7 @@ env.addEventListener("update", function (dt) {
   if (scriptAnimate) {
     // If quality has degraded, it's likely because the user bombed on a script.
     // Let's help them not lose their lunch.
-    if (env.quality === Primrose.Quality.NONE) {
+    if (env.quality === Primrose.Constants.Quality.NONE) {
       scriptAnimate = null;
       wipeScene();
     }
@@ -267,8 +267,8 @@ function updateScript() {
       if (!scriptAnimate) {
         console.log("----- No update script provided -----");
       }
-      else if (env.quality === Primrose.Quality.NONE) {
-        env.quality = Primrose.Quality.MEDIUM;
+      else if (env.quality === Primrose.Constants.Quality.NONE) {
+        env.quality = Primrose.Constants.Quality.MEDIUM;
       }
     }
     catch (exp) {

@@ -1,4 +1,4 @@
-import Primrose from "../../../Primrose.modules.js";
+import Primrose from "../../../";
 
 var WIDTH = 100,
   HEIGHT = 6,
@@ -40,7 +40,7 @@ function eye(side, body) {
 }
 
 function Jabber(w, h, s) {
-  var skin = R.item(Primrose.SKINS_VALUES),
+  var skin = R.item(Primrose.Constants.SKINS),
     body = colored(sphere(0.2, 14, 7), skin),
     velocity = v3(
       R.number(-s, s),

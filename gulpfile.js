@@ -25,16 +25,17 @@ var gulp = require("gulp"),
     }
     ext += ".js";
 
-    var js = nt.js("PrimroseWithDoc:" + format, "src", {
+    var inFile = "PrimroseWithDoc" + ext,
+      outFile = inFile.replace("WithDoc", ""),
+      docFile = "doc/" + inFile.replace("WithDoc", "Documentation"),
+      js = nt.js("PrimroseWithDoc:" + format, "src", {
       advertise: true,
       moduleName: "Primrose",
-      fileName: "PrimroseWithDoc" + ext,
+      fileName: inFile,
       dependencies: ["format"],
       format: format,
-      post: (inFile, cb) => {
+      post: (_, cb) => {
         // removes the documentation objects from the concatenated library.
-        var outFile = inFile.replace("WithDoc", ""),
-          docFile = "doc/" + inFile.replace("WithDoc", "Documentation");
         pliny.carve(inFile, outFile, docFile, cb);
       }
     });
@@ -56,7 +57,8 @@ var gulp = require("gulp"),
       collect.default = [task.js.default];
     }
     collect.debug.push(task.js.debug);
-    collect.release.push(task.js.release);
+    var releaseTask = (task.min || task.js).release;
+    collect.release.push(releaseTask);
     return collect;
   }, { format: null, default: null, debug: [], release: [] }),
 
@@ -106,6 +108,13 @@ gulp.task("tidy", [nt.clean("Primrose", [
   "doc/*/appWithDoc.js",
   "doc/*/appDocumentation.js",
   "doc/PrimroseDocumentation.modules.js"
+], ["js:release"])]);
+
+gulp.task("tidy:only", [nt.clean("Primrose", [
+  "PrimroseWithDoc*.js",
+  "doc/*/appWithDoc.js",
+  "doc/*/appDocumentation.js",
+  "doc/PrimroseDocumentation.modules.js"
 ])]);
 
 gulp.task("copy", ["tidy"], () => gulp.src(["Primrose.min.js"])
@@ -113,7 +122,7 @@ gulp.task("copy", ["tidy"], () => gulp.src(["Primrose.min.js"])
 
 tasks.format.push.apply(tasks.format, demos.map(d=>d.format));
 tasks.debug.push.apply(tasks.debug, demos.map(d=>d.debug));
-//tasks.release.push.apply(tasks.release, demos.map(d=>d.release));
+tasks.release.push.apply(tasks.release, demos.map(d=>d.release));
 
 gulp.task("format", tasks.format);
 gulp.task("js", tasks.default);
@@ -145,7 +154,7 @@ gulp.task("test", tasks.release.concat([
 ]));
 
 gulp.task("release",  [
-  "js:release",
+  "tidy",
   html.release,
   css.release
 ]);
