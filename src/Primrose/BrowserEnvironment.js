@@ -959,8 +959,8 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
       groundReady = new Promise((resolve, reject) => {
         const dim = 2 * this.options.drawDistance;
         this.ground = brick(this.options.groundTexture, dim * 5, 0.1, dim * 5, {
-          txtRepeatS: dim * 5,
-          txtRepeatT: dim * 5,
+          txtRepeatX: dim * 5,
+          txtRepeatY: dim * 5,
           anisotropy: 8,
           resolve: resolve,
           progress: this.options.progress

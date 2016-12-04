@@ -55,8 +55,8 @@ export default function brick(txt, width, height, length, options) {
   height = height || 1;
   length = length || 1;
   options = Object.assign({}, {
-    txtRepeatS: width,
-    txtRepeatT: length,
+    txtRepeatX: width,
+    txtRepeatY: length,
     anisotropy: 8,
     transparent: true,
     opacity: 1

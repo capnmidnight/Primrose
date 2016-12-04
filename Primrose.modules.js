@@ -11756,8 +11756,8 @@ function brick(txt, width, height, length, options) {
   height = height || 1;
   length = length || 1;
   options = Object.assign({}, {
-    txtRepeatS: width,
-    txtRepeatT: length,
+    txtRepeatX: width,
+    txtRepeatY: length,
     anisotropy: 8,
     transparent: true,
     opacity: 1
@@ -33130,7 +33130,7 @@ var TextBox = function (_Surface) {
     classCallCheck(this, TextBox);
 
     var _this = possibleConstructorReturn(this, (TextBox.__proto__ || Object.getPrototypeOf(TextBox)).call(this, Object.assign({}, {
-      id: "Primrose.Text.Controls.TextBox[" + COUNTER$4++ + "]"
+      id: "Primrose.Controls.TextBox[" + COUNTER$4++ + "]"
     }, options)));
 
     _this.isTextBox = true;
@@ -42129,16 +42129,22 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
       skyReady = Promise.resolve();
     }
 
+    if (_this.options.disableDefaultLighting) {
+      _this.ambient = null;
+      _this.sun = null;
+    } else {
+
+      _this.ambient = new AmbientLight(0xffffff, 0.5);
+
+      _this.sun = light(0xffffff, 1, 50);
+    }
+
     skyReady = skyReady.then(function () {
       _this.sky.name = "Sky";
       _this.scene.add(_this.sky);
 
       if (!_this.options.disableDefaultLighting) {
-
-        _this.ambient = new AmbientLight(0xffffff, 0.5);
         _this.sky.add(_this.ambient);
-
-        _this.sun = light(0xffffff, 1, 50);
         put(_this.sun).on(_this.sky).at(0, 10, 10);
       }
     });
@@ -42148,8 +42154,8 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
       groundReady = new Promise(function (resolve, reject) {
         var dim = 2 * _this.options.drawDistance;
         _this.ground = brick(_this.options.groundTexture, dim * 5, 0.1, dim * 5, {
-          txtRepeatS: dim * 5,
-          txtRepeatT: dim * 5,
+          txtRepeatX: dim * 5,
+          txtRepeatY: dim * 5,
           anisotropy: 8,
           resolve: resolve,
           progress: _this.options.progress
@@ -42731,6 +42737,58 @@ var Form = function (_Surface) {
   return Form;
 }(Surface);
 
+var PlainText$1 = function PlainText$1(text, size, fgcolor, bgcolor, x, y, z) {
+  var hAlign = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : "center";
+  classCallCheck(this, PlainText$1);
+
+  text = text.replace(/\r\n/g, "\n");
+  var lines = text.split("\n");
+  var lineHeight = size * 1000;
+  var boxHeight = lineHeight * lines.length;
+
+  var textCanvas = document.createElement("canvas");
+  var textContext = textCanvas.getContext("2d");
+  textContext.font = lineHeight + "px Arial";
+  var width = textContext.measureText(text).width;
+
+  textCanvas.width = width;
+  textCanvas.height = boxHeight;
+  textContext.font = lineHeight * 0.8 + "px Arial";
+  if (bgcolor !== "transparent") {
+    textContext.fillStyle = bgcolor;
+    textContext.fillRect(0, 0, textCanvas.width, textCanvas.height);
+  }
+  textContext.fillStyle = fgcolor;
+
+  for (var i = 0; i < lines.length; ++i) {
+    textContext.fillText(lines[i], 0, i * lineHeight);
+  }
+
+  var texture = new Texture$1(textCanvas);
+  texture.needsUpdate = true;
+
+  var material = new MeshBasicMaterial({
+    map: texture,
+    transparent: bgcolor === "transparent",
+    useScreenCoordinates: false,
+    color: 0xffffff,
+    shading: FlatShading
+  });
+
+  var textGeometry = new PlaneGeometry(size * width / lineHeight, size * lines.length);
+  textGeometry.computeBoundingBox();
+  textGeometry.computeVertexNormals();
+
+  var textMesh = new Mesh(textGeometry, material);
+  if (hAlign === "left") {
+    x -= textGeometry.boundingBox.min.x;
+  } else if (hAlign === "right") {
+    x += textGeometry.boundingBox.min.x;
+  }
+  textMesh.position.set(x, y, z);
+  return textMesh;
+};
+
 var SIZE = 1;
 var INSET = 0.8;
 var PROPORTION = 10;
@@ -42830,6 +42888,73 @@ var Progress = function () {
   return Progress;
 }();
 
+////
+// For all of these commands, the "current" cursor is:
+// If SHIFT is not held, then "front".
+// If SHIFT is held, then "back"
+//
+var TextInput$2 = new BasicTextInput("Text Line input commands");
+
+var COUNTER$6 = 0;
+
+var TextInput = function (_TextBox) {
+  inherits(TextInput, _TextBox);
+
+  function TextInput(options) {
+    classCallCheck(this, TextInput);
+
+    var _this = possibleConstructorReturn(this, (TextInput.__proto__ || Object.getPrototypeOf(TextInput)).call(this, Object.assign({}, {
+      id: "Primrose.Controls.TextInput[" + COUNTER$6++ + "]",
+      padding: 5,
+      singleLine: true,
+      disableWordWrap: true,
+      hideLineNumbers: true,
+      hideScrollBars: true,
+      tabWidth: 1,
+      tokenizer: PlainText,
+      commands: TextInput$2
+    }), options));
+
+    _this.passwordCharacter = _this.options.passwordCharacter;
+    return _this;
+  }
+
+  createClass(TextInput, [{
+    key: "drawText",
+    value: function drawText(ctx, txt, x, y) {
+      if (this.passwordCharacter) {
+        var val = "";
+        for (var i = 0; i < txt.length; ++i) {
+          val += this.passwordCharacter;
+        }
+        txt = val;
+      }
+      get$1(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "drawText", this).call(this, ctx, txt, x, y);
+    }
+  }, {
+    key: "value",
+    get: function get() {
+      return get$1(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "value", this);
+    },
+    set: function set(v) {
+      v = v || "";
+      v = v.replace(/\r?\n/g, "");
+      set$1(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "value", v, this);
+    }
+  }, {
+    key: "selectedText",
+    get: function get() {
+      return get$1(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "selectedText", this);
+    },
+    set: function set(v) {
+      v = v || "";
+      v = v.replace(/\r?\n/g, "");
+      set$1(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "selectedText", v, this);
+    }
+  }]);
+  return TextInput;
+}(TextBox);
+
 var Controls = {
   BaseControl: BaseControl,
   Button2D: Button2D,
@@ -42839,8 +42964,11 @@ var Controls = {
   Form: Form,
   Image: Image,
   Label: Label,
+  PlainText: PlainText$1,
   Progress: Progress,
-  Surface: Surface
+  Surface: Surface,
+  TextBox: TextBox,
+  TextInput: TextInput
 };
 
 function findEverything(elem, obj) {
@@ -42958,136 +43086,11 @@ var Random = {
   vector: vector
 };
 
-////
-// For all of these commands, the "current" cursor is:
-// If SHIFT is not held, then "front".
-// If SHIFT is held, then "back"
-//
-var TextInputCommands = new BasicTextInput("Text Line input commands");
-
 var CommandPacks = {
   BasicTextInput: BasicTextInput,
   CommandPack: CommandPack,
   TextEditor: TextEditor,
-  TextInput: TextInputCommands
-};
-
-var PlainText$1 = function PlainText$1(text, size, fgcolor, bgcolor, x, y, z) {
-  var hAlign = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : "center";
-  classCallCheck(this, PlainText$1);
-
-  text = text.replace(/\r\n/g, "\n");
-  var lines = text.split("\n");
-  var lineHeight = size * 1000;
-  var boxHeight = lineHeight * lines.length;
-
-  var textCanvas = document.createElement("canvas");
-  var textContext = textCanvas.getContext("2d");
-  textContext.font = lineHeight + "px Arial";
-  var width = textContext.measureText(text).width;
-
-  textCanvas.width = width;
-  textCanvas.height = boxHeight;
-  textContext.font = lineHeight * 0.8 + "px Arial";
-  if (bgcolor !== "transparent") {
-    textContext.fillStyle = bgcolor;
-    textContext.fillRect(0, 0, textCanvas.width, textCanvas.height);
-  }
-  textContext.fillStyle = fgcolor;
-
-  for (var i = 0; i < lines.length; ++i) {
-    textContext.fillText(lines[i], 0, i * lineHeight);
-  }
-
-  var texture = new Texture$1(textCanvas);
-  texture.needsUpdate = true;
-
-  var material = new MeshBasicMaterial({
-    map: texture,
-    transparent: bgcolor === "transparent",
-    useScreenCoordinates: false,
-    color: 0xffffff,
-    shading: FlatShading
-  });
-
-  var textGeometry = new PlaneGeometry(size * width / lineHeight, size * lines.length);
-  textGeometry.computeBoundingBox();
-  textGeometry.computeVertexNormals();
-
-  var textMesh = new Mesh(textGeometry, material);
-  if (hAlign === "left") {
-    x -= textGeometry.boundingBox.min.x;
-  } else if (hAlign === "right") {
-    x += textGeometry.boundingBox.min.x;
-  }
-  textMesh.position.set(x, y, z);
-  return textMesh;
-};
-
-var COUNTER$6 = 0;
-
-var TextInput = function (_TextBox) {
-  inherits(TextInput, _TextBox);
-
-  function TextInput(options) {
-    classCallCheck(this, TextInput);
-
-    var _this = possibleConstructorReturn(this, (TextInput.__proto__ || Object.getPrototypeOf(TextInput)).call(this, Object.assign({}, {
-      id: "Primrose.Text.Controls.TextInput[" + COUNTER$6++ + "]",
-      padding: 5,
-      singleLine: true,
-      disableWordWrap: true,
-      hideLineNumbers: true,
-      hideScrollBars: true,
-      tabWidth: 1,
-      tokenizer: PlainText,
-      commands: TextInputCommands
-    }), options));
-
-    _this.passwordCharacter = _this.options.passwordCharacter;
-    return _this;
-  }
-
-  createClass(TextInput, [{
-    key: "drawText",
-    value: function drawText(ctx, txt, x, y) {
-      if (this.passwordCharacter) {
-        var val = "";
-        for (var i = 0; i < txt.length; ++i) {
-          val += this.passwordCharacter;
-        }
-        txt = val;
-      }
-      get$1(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "drawText", this).call(this, ctx, txt, x, y);
-    }
-  }, {
-    key: "value",
-    get: function get() {
-      return get$1(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "value", this);
-    },
-    set: function set(v) {
-      v = v || "";
-      v = v.replace(/\r?\n/g, "");
-      set$1(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "value", v, this);
-    }
-  }, {
-    key: "selectedText",
-    get: function get() {
-      return get$1(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "selectedText", this);
-    },
-    set: function set(v) {
-      v = v || "";
-      v = v.replace(/\r?\n/g, "");
-      set$1(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "selectedText", v, this);
-    }
-  }]);
-  return TextInput;
-}(TextBox);
-
-var Controls$1 = {
-  PlainText: PlainText$1,
-  TextBox: TextBox,
-  TextInput: TextInput
+  TextInput: TextInput$2
 };
 
 var Basic = new Grammar("BASIC",
@@ -43866,7 +43869,6 @@ var Themes = {
 var Text = {
   CodePages: CodePages,
   CommandPacks: CommandPacks,
-  Controls: Controls$1,
   Cursor: Cursor,
   Grammars: Grammars,
   OperatingSystems: OperatingSystems,

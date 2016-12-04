@@ -312,6 +312,19 @@ var _Math = {
 
 };
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author supereggbert / http://www.paulbrunt.co.uk/
+ * @author philogb / http://blog.thejit.org/
+ * @author jordi_ros / http://plattsoft.com
+ * @author D1plo1d / http://github.com/D1plo1d
+ * @author alteredq / http://alteredqualia.com/
+ * @author mikael emtinger / http://gomo.se/
+ * @author timknip / http://www.floorplanner.com/
+ * @author bhouston / http://clara.io
+ * @author WestLangley / http://github.com/WestLangley
+ */
+
 function Matrix4() {
 
 	this.elements = new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
@@ -1202,6 +1215,13 @@ Matrix4.prototype = {
 
 };
 
+/**
+ * @author mikael emtinger / http://gomo.se/
+ * @author alteredq / http://alteredqualia.com/
+ * @author WestLangley / http://github.com/WestLangley
+ * @author bhouston / http://clara.io
+ */
+
 function Quaternion(x, y, z, w) {
 
 	this._x = x || 0;
@@ -1732,6 +1752,15 @@ Object.assign(Quaternion, {
 	}
 
 });
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author *kile / http://kile.stravaganza.org/
+ * @author philogb / http://blog.thejit.org/
+ * @author mikael emtinger / http://gomo.se/
+ * @author egraether / http://egraether.com/
+ * @author WestLangley / http://github.com/WestLangley
+ */
 
 function Vector3(x, y, z) {
 
@@ -2436,6 +2465,11 @@ Vector3.prototype = {
 
 };
 
+/**
+ * @author bhouston / http://clara.io
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function Sphere(center, radius) {
 
 	this.center = center !== undefined ? center : new Vector3();
@@ -2584,6 +2618,11 @@ Sphere.prototype = {
 	}
 
 };
+
+/**
+ * @author bhouston / http://clara.io
+ * @author WestLangley / http://github.com/WestLangley
+ */
 
 function Box3(min, max) {
 
@@ -4088,6 +4127,10 @@ Vector2.prototype = {
 
 };
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function Color(r, g, b) {
 
 	if (g === undefined && b === undefined) {
@@ -4560,6 +4603,10 @@ var ColorKeywords = { 'aliceblue': 0xF0F8FF, 'antiquewhite': 0xFAEBD7, 'aqua': 0
 	'springgreen': 0x00FF7F, 'steelblue': 0x4682B4, 'tan': 0xD2B48C, 'teal': 0x008080, 'thistle': 0xD8BFD8, 'tomato': 0xFF6347, 'turquoise': 0x40E0D0,
 	'violet': 0xEE82EE, 'wheat': 0xF5DEB3, 'white': 0xFFFFFF, 'whitesmoke': 0xF5F5F5, 'yellow': 0xFFFF00, 'yellowgreen': 0x9ACD32 };
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function BufferAttribute(array, itemSize, normalized) {
 
 	if (Array.isArray(array)) {
@@ -4847,8 +4894,6 @@ BufferAttribute.prototype = {
 
 };
 
-//
-
 function Uint16Attribute(array, itemSize) {
 
 	return new BufferAttribute(new Uint16Array(array), itemSize);
@@ -4863,6 +4908,11 @@ function Float32Attribute(array, itemSize) {
 
 	return new BufferAttribute(new Float32Array(array), itemSize);
 }
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ */
 
 function Face3(a, b, c, normal, color, materialIndex) {
 
@@ -4913,6 +4963,13 @@ Face3.prototype = {
 	}
 
 };
+
+/**
+ * @author alteredq / http://alteredqualia.com/
+ * @author WestLangley / http://github.com/WestLangley
+ * @author bhouston / http://clara.io
+ * @author tschw
+ */
 
 function Matrix3() {
 
@@ -5176,6 +5233,12 @@ Matrix3.prototype = {
 	}
 
 };
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author WestLangley / http://github.com/WestLangley
+ * @author bhouston / http://clara.io
+ */
 
 function Euler(x, y, z, order) {
 
@@ -5501,6 +5564,14 @@ Layers.prototype = {
 	}
 
 };
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author mikael emtinger / http://gomo.se/
+ * @author alteredq / http://alteredqualia.com/
+ * @author WestLangley / http://github.com/WestLangley
+ * @author elephantatwork / www.elephantatwork.ch
+ */
 
 function Object3D() {
 
@@ -6137,6 +6208,15 @@ var count$1 = 0;
 function Object3DIdCount() {
 	return count$1++;
 }
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author kile / http://kile.stravaganza.org/
+ * @author alteredq / http://alteredqualia.com/
+ * @author mikael emtinger / http://gomo.se/
+ * @author zz85 / http://www.lab4games.net/zz85/blog
+ * @author bhouston / http://clara.io
+ */
 
 function Geometry() {
 
@@ -7245,6 +7325,10 @@ function GeometryIdCount() {
 	return count++;
 }
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function DirectGeometry() {
 
 	Object.defineProperty(this, 'id', { value: GeometryIdCount() });
@@ -7498,6 +7582,11 @@ Object.assign(DirectGeometry.prototype, EventDispatcher.prototype, {
 	}
 
 });
+
+/**
+ * @author alteredq / http://alteredqualia.com/
+ * @author mrdoob / http://mrdoob.com/
+ */
 
 function BufferGeometry() {
 
@@ -8407,6 +8496,10 @@ Object.assign(BufferGeometry.prototype, EventDispatcher.prototype, {
 
 BufferGeometry.MaxIndex = 65535;
 
+/**
+ * @author Mugen87 / https://github.com/Mugen87
+ */
+
 function BoxBufferGeometry(width, height, depth, widthSegments, heightSegments, depthSegments) {
 
 	BufferGeometry.call(this);
@@ -8759,6 +8852,11 @@ var RGBDEncoding = 3006;
 var BasicDepthPacking = 3200;
 var RGBADepthPacking = 3201;
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ */
+
 function Material() {
 
 	Object.defineProperty(this, 'id', { value: MaterialIdCount() });
@@ -9073,6 +9171,57 @@ function MaterialIdCount() {
 	return count$2++;
 }
 
+/**
+ * @author WestLangley / http://github.com/WestLangley
+ *
+ * parameters = {
+ *  color: <hex>,
+ *  roughness: <float>,
+ *  metalness: <float>,
+ *  opacity: <float>,
+ *
+ *  map: new THREE.Texture( <Image> ),
+ *
+ *  lightMap: new THREE.Texture( <Image> ),
+ *  lightMapIntensity: <float>
+ *
+ *  aoMap: new THREE.Texture( <Image> ),
+ *  aoMapIntensity: <float>
+ *
+ *  emissive: <hex>,
+ *  emissiveIntensity: <float>
+ *  emissiveMap: new THREE.Texture( <Image> ),
+ *
+ *  bumpMap: new THREE.Texture( <Image> ),
+ *  bumpScale: <float>,
+ *
+ *  normalMap: new THREE.Texture( <Image> ),
+ *  normalScale: <Vector2>,
+ *
+ *  displacementMap: new THREE.Texture( <Image> ),
+ *  displacementScale: <float>,
+ *  displacementBias: <float>,
+ *
+ *  roughnessMap: new THREE.Texture( <Image> ),
+ *
+ *  metalnessMap: new THREE.Texture( <Image> ),
+ *
+ *  alphaMap: new THREE.Texture( <Image> ),
+ *
+ *  envMap: new THREE.CubeTexture( [posx, negx, posy, negy, posz, negz] ),
+ *  envMapIntensity: <float>
+ *
+ *  refractionRatio: <float>,
+ *
+ *  wireframe: <boolean>,
+ *  wireframeLinewidth: <float>,
+ *
+ *  skinning: <bool>,
+ *  morphTargets: <bool>,
+ *  morphNormals: <bool>
+ * }
+ */
+
 function MeshStandardMaterial(parameters) {
 
 	Material.call(this);
@@ -9189,6 +9338,39 @@ MeshStandardMaterial.prototype.copy = function (source) {
 
 	return this;
 };
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ *
+ * parameters = {
+ *  color: <hex>,
+ *  opacity: <float>,
+ *  map: new THREE.Texture( <Image> ),
+ *
+ *  aoMap: new THREE.Texture( <Image> ),
+ *  aoMapIntensity: <float>
+ *
+ *  specularMap: new THREE.Texture( <Image> ),
+ *
+ *  alphaMap: new THREE.Texture( <Image> ),
+ *
+ *  envMap: new THREE.TextureCube( [posx, negx, posy, negy, posz, negz] ),
+ *  combine: THREE.Multiply,
+ *  reflectivity: <float>,
+ *  refractionRatio: <float>,
+ *
+ *  shading: THREE.SmoothShading,
+ *  depthTest: <bool>,
+ *  depthWrite: <bool>,
+ *
+ *  wireframe: <boolean>,
+ *  wireframeLinewidth: <float>,
+ *
+ *  skinning: <bool>,
+ *  morphTargets: <bool>
+ * }
+ */
 
 function MeshBasicMaterial(parameters) {
 
@@ -9308,6 +9490,10 @@ function material(textureDescription, options) {
     return mat;
   });
 }
+
+/**
+ * @author bhouston / http://clara.io
+ */
 
 function Ray(origin, direction) {
 
@@ -9779,6 +9965,10 @@ Ray.prototype = {
 
 };
 
+/**
+ * @author bhouston / http://clara.io
+ */
+
 function Line3(start, end) {
 
 	this.start = start !== undefined ? start : new Vector3();
@@ -9886,6 +10076,10 @@ Line3.prototype = {
 	}
 
 };
+
+/**
+ * @author bhouston / http://clara.io
+ */
 
 function Plane(normal, constant) {
 
@@ -10088,6 +10282,11 @@ Plane.prototype = {
 	}
 
 };
+
+/**
+ * @author bhouston / http://clara.io
+ * @author mrdoob / http://mrdoob.com/
+ */
 
 function Triangle(a, b, c) {
 
@@ -10311,6 +10510,13 @@ Triangle.prototype = {
 	}
 
 };
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ * @author mikael emtinger / http://gomo.se/
+ * @author jonobr1 / http://jonobr1.com/
+ */
 
 function Mesh(geometry, material) {
 
@@ -10718,6 +10924,10 @@ function LoadingManager(onLoad, onProgress, onError) {
 
 var DefaultLoadingManager = new LoadingManager();
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function XHRLoader(manager) {
 
 	this.manager = manager !== undefined ? manager : DefaultLoadingManager;
@@ -10911,6 +11121,10 @@ Object.assign(XHRLoader.prototype, {
 
 });
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function ImageLoader(manager) {
 
 	this.manager = manager !== undefined ? manager : DefaultLoadingManager;
@@ -10974,6 +11188,12 @@ Object.assign(ImageLoader.prototype, {
 	}
 
 });
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ * @author szimek / https://github.com/szimek/
+ */
 
 function Texture$1(image, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy, encoding) {
 
@@ -11233,6 +11453,10 @@ function TextureIdCount() {
 	return count$3++;
 }
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function CubeTexture(images, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy, encoding) {
 
 	images = images !== undefined ? images : [];
@@ -11261,6 +11485,10 @@ Object.defineProperty(CubeTexture.prototype, 'images', {
 	}
 
 });
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
 
 function CubeTextureLoader(manager) {
 
@@ -11317,6 +11545,10 @@ Object.assign(CubeTextureLoader.prototype, {
 	}
 
 });
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
 
 function TextureLoader(manager) {
 
@@ -11551,8 +11783,8 @@ function brick$1(txt, width, height, length, options) {
   height = height || 1;
   length = length || 1;
   options = Object.assign({}, {
-    txtRepeatS: width,
-    txtRepeatT: length,
+    txtRepeatX: width,
+    txtRepeatY: length,
     anisotropy: 8,
     transparent: true,
     opacity: 1
@@ -11565,6 +11797,11 @@ function brick$1(txt, width, height, length, options) {
 function hub$1() {
   return new Object3D();
 }
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ */
 
 function Light(color, intensity) {
 
@@ -11614,6 +11851,12 @@ Light.prototype = Object.assign(Object.create(Object3D.prototype), {
 	}
 
 });
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author mikael emtinger / http://gomo.se/
+ * @author WestLangley / http://github.com/WestLangley
+*/
 
 function Camera() {
 
@@ -11672,6 +11915,13 @@ Camera.prototype.copy = function (source) {
 
 	return this;
 };
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author greggman / http://games.greggman.com/
+ * @author zz85 / http://www.lab4games.net/zz85/blog
+ * @author tschw
+ */
 
 function PerspectiveCamera(fov, aspect, near, far) {
 
@@ -11871,6 +12121,10 @@ PerspectiveCamera.prototype = Object.assign(Object.create(Camera.prototype), {
 
 });
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function LightShadow(camera) {
 
 	this.camera = camera;
@@ -11918,6 +12172,10 @@ Object.assign(LightShadow.prototype, {
 	}
 
 });
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
 
 function PointLight(color, intensity, distance, decay) {
 
@@ -12384,6 +12642,12 @@ var AbstractEventEmitter = function () {
   return AbstractEventEmitter;
 }();
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author bhouston / http://clara.io/
+ * @author stephomi / http://stephaneginier.com/
+ */
+
 function Raycaster(origin, direction, near, far) {
 
 	this.ray = new Ray(origin, direction);
@@ -12500,6 +12764,11 @@ function identity$1(obj) {
   return obj;
 }
 
+/**
+ * @author benaadams / https://twitter.com/ben_a_adams
+ * based on THREE.SphereGeometry
+ */
+
 function SphereBufferGeometry(radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength) {
 
 	BufferGeometry.call(this);
@@ -12594,6 +12863,10 @@ function SphereBufferGeometry(radius, widthSegments, heightSegments, phiStart, p
 SphereBufferGeometry.prototype = Object.create(BufferGeometry.prototype);
 SphereBufferGeometry.prototype.constructor = SphereBufferGeometry;
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function SphereGeometry(radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength) {
 
 	Geometry.call(this);
@@ -12621,6 +12894,10 @@ function sphere$1(r, slices, rings) {
     return new SphereGeometry(r, slices, rings);
   });
 }
+
+/**
+ * @author benaadams / https://twitter.com/ben_a_adams
+ */
 
 function CircleBufferGeometry(radius, segments, thetaStart, thetaLength) {
 
@@ -12690,6 +12967,10 @@ function circle(r, sections, start, end) {
     return new CircleBufferGeometry(r, sections, start, end);
   });
 }
+
+/**
+ * @author Mugen87 / https://github.com/Mugen87
+ */
 
 function RingBufferGeometry(innerRadius, outerRadius, thetaSegments, phiSegments, thetaStart, thetaLength) {
 
@@ -14819,6 +15100,20 @@ function axis(length, width) {
   return center;
 }
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ *
+ * parameters = {
+ *  color: <hex>,
+ *  opacity: <float>,
+ *  map: new THREE.Texture( <Image> ),
+ *
+ *  size: <float>,
+ *  sizeAttenuation: <bool>
+ * }
+ */
+
 function PointsMaterial(parameters) {
 
 	Material.call(this);
@@ -14855,6 +15150,10 @@ PointsMaterial.prototype.copy = function (source) {
 
 	return this;
 };
+
+/**
+ * @author alteredq / http://alteredqualia.com/
+ */
 
 function Points(geometry, material) {
 
@@ -14988,6 +15287,10 @@ function cloud(verts, c, s) {
   });
   return new Points(geom, mat);
 }
+
+/**
+ * @author Mugen87 / https://github.com/Mugen87
+ */
 
 function CylinderBufferGeometry(radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength) {
 
@@ -15331,6 +15634,11 @@ function fixGeometry(geometry, options) {
 
   return geometry;
 }
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * based on http://papervision3d.googlecode.com/svn/trunk/as3/trunk/src/org/papervision3d/objects/primitives/Plane.as
+ */
 
 function PlaneBufferGeometry(width, height, widthSegments, heightSegments) {
 
@@ -16379,6 +16687,82 @@ var Image = function (_Entity) {
   return Image;
 }(Entity);
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * based on http://papervision3d.googlecode.com/svn/trunk/as3/trunk/src/org/papervision3d/objects/primitives/Plane.as
+ */
+
+function PlaneGeometry(width, height, widthSegments, heightSegments) {
+
+	Geometry.call(this);
+
+	this.type = 'PlaneGeometry';
+
+	this.parameters = {
+		width: width,
+		height: height,
+		widthSegments: widthSegments,
+		heightSegments: heightSegments
+	};
+
+	this.fromBufferGeometry(new PlaneBufferGeometry(width, height, widthSegments, heightSegments));
+}
+
+PlaneGeometry.prototype = Object.create(Geometry.prototype);
+PlaneGeometry.prototype.constructor = PlaneGeometry;
+
+var PlainText = function PlainText(text, size, fgcolor, bgcolor, x, y, z) {
+  var hAlign = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : "center";
+  classCallCheck(this, PlainText);
+
+  text = text.replace(/\r\n/g, "\n");
+  var lines = text.split("\n");
+  var lineHeight = size * 1000;
+  var boxHeight = lineHeight * lines.length;
+
+  var textCanvas = document.createElement("canvas");
+  var textContext = textCanvas.getContext("2d");
+  textContext.font = lineHeight + "px Arial";
+  var width = textContext.measureText(text).width;
+
+  textCanvas.width = width;
+  textCanvas.height = boxHeight;
+  textContext.font = lineHeight * 0.8 + "px Arial";
+  if (bgcolor !== "transparent") {
+    textContext.fillStyle = bgcolor;
+    textContext.fillRect(0, 0, textCanvas.width, textCanvas.height);
+  }
+  textContext.fillStyle = fgcolor;
+
+  for (var i = 0; i < lines.length; ++i) {
+    textContext.fillText(lines[i], 0, i * lineHeight);
+  }
+
+  var texture = new Texture$1(textCanvas);
+  texture.needsUpdate = true;
+
+  var material = new MeshBasicMaterial({
+    map: texture,
+    transparent: bgcolor === "transparent",
+    useScreenCoordinates: false,
+    color: 0xffffff,
+    shading: FlatShading
+  });
+
+  var textGeometry = new PlaneGeometry(size * width / lineHeight, size * lines.length);
+  textGeometry.computeBoundingBox();
+  textGeometry.computeVertexNormals();
+
+  var textMesh = new Mesh(textGeometry, material);
+  if (hAlign === "left") {
+    x -= textGeometry.boundingBox.min.x;
+  } else if (hAlign === "right") {
+    x += textGeometry.boundingBox.min.x;
+  }
+  textMesh.position.set(x, y, z);
+  return textMesh;
+};
+
 var SIZE = 1;
 var INSET = 0.8;
 var PROPORTION = 10;
@@ -16478,6 +16862,1625 @@ var Progress = function () {
   return Progress;
 }();
 
+// unicode-aware string reverse
+var reverse = function () {
+  var combiningMarks = /(<%= allExceptCombiningMarks %>)(<%= combiningMarks %>+)/g,
+      surrogatePair = /(<%= highSurrogates %>)(<%= lowSurrogates %>)/g;
+
+  function reverse(str) {
+    str = str.replace(combiningMarks, function (match, capture1, capture2) {
+      return reverse(capture2) + capture1;
+    }).replace(surrogatePair, "$2$1");
+    var res = "";
+    for (var i = str.length - 1; i >= 0; --i) {
+      res += str[i];
+    }
+    return res;
+  }
+  return reverse;
+}();
+
+var Cursor = function () {
+  createClass(Cursor, null, [{
+    key: "min",
+    value: function min(a, b) {
+      if (a.i <= b.i) {
+        return a;
+      }
+      return b;
+    }
+  }, {
+    key: "max",
+    value: function max(a, b) {
+      if (a.i > b.i) {
+        return a;
+      }
+      return b;
+    }
+  }]);
+
+  function Cursor(i, x, y) {
+    classCallCheck(this, Cursor);
+
+    this.i = i || 0;
+    this.x = x || 0;
+    this.y = y || 0;
+    this.moved = true;
+  }
+
+  createClass(Cursor, [{
+    key: "clone",
+    value: function clone() {
+      return new Cursor(this.i, this.x, this.y);
+    }
+  }, {
+    key: "toString",
+    value: function toString() {
+      return "[i:" + this.i + " x:" + this.x + " y:" + this.y + "]";
+    }
+  }, {
+    key: "copy",
+    value: function copy(cursor) {
+      this.i = cursor.i;
+      this.x = cursor.x;
+      this.y = cursor.y;
+      this.moved = false;
+    }
+  }, {
+    key: "fullhome",
+    value: function fullhome() {
+      this.i = 0;
+      this.x = 0;
+      this.y = 0;
+      this.moved = true;
+    }
+  }, {
+    key: "fullend",
+    value: function fullend(lines) {
+      this.i = 0;
+      var lastLength = 0;
+      for (var y = 0; y < lines.length; ++y) {
+        var line = lines[y];
+        lastLength = line.length;
+        this.i += lastLength;
+      }
+      this.y = lines.length - 1;
+      this.x = lastLength;
+      this.moved = true;
+    }
+  }, {
+    key: "skipleft",
+    value: function skipleft(lines) {
+      if (this.x === 0) {
+        this.left(lines);
+      } else {
+        var x = this.x - 1;
+        var line = lines[this.y];
+        var word = reverse(line.substring(0, x));
+        var m = word.match(/(\s|\W)+/);
+        var dx = m ? m.index + m[0].length + 1 : word.length;
+        this.i -= dx;
+        this.x -= dx;
+      }
+      this.moved = true;
+    }
+  }, {
+    key: "left",
+    value: function left(lines) {
+      if (this.i > 0) {
+        --this.i;
+        --this.x;
+        if (this.x < 0) {
+          --this.y;
+          var line = lines[this.y];
+          this.x = line.length;
+        }
+        if (this.reverseFromNewline(lines)) {
+          ++this.i;
+        }
+      }
+      this.moved = true;
+    }
+  }, {
+    key: "skipright",
+    value: function skipright(lines) {
+      var line = lines[this.y];
+      if (this.x === line.length || line[this.x] === '\n') {
+        this.right(lines);
+      } else {
+        var x = this.x + 1;
+        line = line.substring(x);
+        var m = line.match(/(\s|\W)+/);
+        var dx = m ? m.index + m[0].length + 1 : line.length - this.x;
+        this.i += dx;
+        this.x += dx;
+        this.reverseFromNewline(lines);
+      }
+      this.moved = true;
+    }
+  }, {
+    key: "fixCursor",
+    value: function fixCursor(lines) {
+      this.x = this.i;
+      this.y = 0;
+      var total = 0;
+      var line = lines[this.y];
+      while (this.x > line.length) {
+        this.x -= line.length;
+        total += line.length;
+        if (this.y >= lines.length - 1) {
+          this.i = total;
+          this.x = line.length;
+          this.moved = true;
+          break;
+        }
+        ++this.y;
+        line = lines[this.y];
+      }
+      return this.moved;
+    }
+  }, {
+    key: "right",
+    value: function right(lines) {
+      this.advanceN(lines, 1);
+    }
+  }, {
+    key: "advanceN",
+    value: function advanceN(lines, n) {
+      var line = lines[this.y];
+      if (this.y < lines.length - 1 || this.x < line.length) {
+        this.i += n;
+        this.fixCursor(lines);
+        line = lines[this.y];
+        if (this.x > 0 && line[this.x - 1] === '\n') {
+          ++this.y;
+          this.x = 0;
+        }
+      }
+      this.moved = true;
+    }
+  }, {
+    key: "home",
+    value: function home() {
+      this.i -= this.x;
+      this.x = 0;
+      this.moved = true;
+    }
+  }, {
+    key: "end",
+    value: function end(lines) {
+      var line = lines[this.y];
+      var dx = line.length - this.x;
+      this.i += dx;
+      this.x += dx;
+      this.reverseFromNewline(lines);
+      this.moved = true;
+    }
+  }, {
+    key: "up",
+    value: function up(lines) {
+      if (this.y > 0) {
+        --this.y;
+        var line = lines[this.y];
+        var dx = Math.min(0, line.length - this.x);
+        this.x += dx;
+        this.i -= line.length - dx;
+        this.reverseFromNewline(lines);
+      }
+      this.moved = true;
+    }
+  }, {
+    key: "down",
+    value: function down(lines) {
+      if (this.y < lines.length - 1) {
+        ++this.y;
+        var line = lines[this.y];
+        var pLine = lines[this.y - 1];
+        var dx = Math.min(0, line.length - this.x);
+        this.x += dx;
+        this.i += pLine.length + dx;
+        this.reverseFromNewline(lines);
+      }
+      this.moved = true;
+    }
+  }, {
+    key: "incY",
+    value: function incY(dy, lines) {
+      this.y = Math.max(0, Math.min(lines.length - 1, this.y + dy));
+      var line = lines[this.y];
+      this.x = Math.max(0, Math.min(line.length, this.x));
+      this.i = this.x;
+      for (var i = 0; i < this.y; ++i) {
+        this.i += lines[i].length;
+      }
+      this.reverseFromNewline(lines);
+      this.moved = true;
+    }
+  }, {
+    key: "setXY",
+    value: function setXY(x, y, lines) {
+      this.y = Math.max(0, Math.min(lines.length - 1, y));
+      var line = lines[this.y];
+      this.x = Math.max(0, Math.min(line.length, x));
+      this.i = this.x;
+      for (var i = 0; i < this.y; ++i) {
+        this.i += lines[i].length;
+      }
+      this.reverseFromNewline(lines);
+      this.moved = true;
+    }
+  }, {
+    key: "setI",
+    value: function setI(i, lines) {
+      this.i = i;
+      this.fixCursor(lines);
+      this.moved = true;
+    }
+  }, {
+    key: "reverseFromNewline",
+    value: function reverseFromNewline(lines) {
+      var line = lines[this.y];
+      if (this.x > 0 && line[this.x - 1] === '\n') {
+        --this.x;
+        --this.i;
+        return true;
+      }
+      return false;
+    }
+  }]);
+  return Cursor;
+}();
+
+var CommandPack = function CommandPack(commandPackName, commands) {
+  classCallCheck(this, CommandPack);
+
+  this.name = commandPackName;
+  Object.assign(this, commands);
+};
+
+var BasicTextInput = function (_CommandPack) {
+  inherits(BasicTextInput, _CommandPack);
+
+  function BasicTextInput(additionalName, additionalCommands) {
+    classCallCheck(this, BasicTextInput);
+
+    var commands = {
+      NORMAL_LEFTARROW: function NORMAL_LEFTARROW(prim, tokenRows) {
+        prim.cursorLeft(tokenRows, prim.frontCursor);
+      },
+      NORMAL_SKIPLEFT: function NORMAL_SKIPLEFT(prim, tokenRows) {
+        prim.cursorSkipLeft(tokenRows, prim.frontCursor);
+      },
+      NORMAL_RIGHTARROW: function NORMAL_RIGHTARROW(prim, tokenRows) {
+        prim.cursorRight(tokenRows, prim.frontCursor);
+      },
+      NORMAL_SKIPRIGHT: function NORMAL_SKIPRIGHT(prim, tokenRows) {
+        prim.cursorSkipRight(tokenRows, prim.frontCursor);
+      },
+      NORMAL_HOME: function NORMAL_HOME(prim, tokenRows) {
+        prim.cursorHome(tokenRows, prim.frontCursor);
+      },
+      NORMAL_END: function NORMAL_END(prim, tokenRows) {
+        prim.cursorEnd(tokenRows, prim.frontCursor);
+      },
+      NORMAL_BACKSPACE: function NORMAL_BACKSPACE(prim, tokenRows) {
+        if (prim.frontCursor.i === prim.backCursor.i) {
+          prim.frontCursor.left(tokenRows);
+        }
+        prim.selectedText = "";
+        prim.scrollIntoView(prim.frontCursor);
+      },
+      NORMAL_ENTER: function NORMAL_ENTER(prim, tokenRows, currentToken) {
+        prim.emit("change", {
+          target: prim
+        });
+      },
+      NORMAL_DELETE: function NORMAL_DELETE(prim, tokenRows) {
+        if (prim.frontCursor.i === prim.backCursor.i) {
+          prim.backCursor.right(tokenRows);
+        }
+        prim.selectedText = "";
+        prim.scrollIntoView(prim.frontCursor);
+      },
+      NORMAL_TAB: function NORMAL_TAB(prim, tokenRows) {
+        prim.selectedText = prim.tabString;
+      },
+
+      SHIFT_LEFTARROW: function SHIFT_LEFTARROW(prim, tokenRows) {
+        prim.cursorLeft(tokenRows, prim.backCursor);
+      },
+      SHIFT_SKIPLEFT: function SHIFT_SKIPLEFT(prim, tokenRows) {
+        prim.cursorSkipLeft(tokenRows, prim.backCursor);
+      },
+      SHIFT_RIGHTARROW: function SHIFT_RIGHTARROW(prim, tokenRows) {
+        prim.cursorRight(tokenRows, prim.backCursor);
+      },
+      SHIFT_SKIPRIGHT: function SHIFT_SKIPRIGHT(prim, tokenRows) {
+        prim.cursorSkipRight(tokenRows, prim.backCursor);
+      },
+      SHIFT_HOME: function SHIFT_HOME(prim, tokenRows) {
+        prim.cursorHome(tokenRows, prim.backCursor);
+      },
+      SHIFT_END: function SHIFT_END(prim, tokenRows) {
+        prim.cursorEnd(tokenRows, prim.backCursor);
+      },
+      SHIFT_DELETE: function SHIFT_DELETE(prim, tokenRows) {
+        if (prim.frontCursor.i === prim.backCursor.i) {
+          prim.frontCursor.home(tokenRows);
+          prim.backCursor.end(tokenRows);
+        }
+        prim.selectedText = "";
+        prim.scrollIntoView(prim.frontCursor);
+      },
+      CTRL_HOME: function CTRL_HOME(prim, tokenRows) {
+        prim.cursorFullHome(tokenRows, prim.frontCursor);
+      },
+      CTRL_END: function CTRL_END(prim, tokenRows) {
+        prim.cursorFullEnd(tokenRows, prim.frontCursor);
+      },
+
+      CTRLSHIFT_HOME: function CTRLSHIFT_HOME(prim, tokenRows) {
+        prim.cursorFullHome(tokenRows, prim.backCursor);
+      },
+      CTRLSHIFT_END: function CTRLSHIFT_END(prim, tokenRows) {
+        prim.cursorFullEnd(tokenRows, prim.backCursor);
+      },
+
+      SELECT_ALL: function SELECT_ALL(prim, tokenRows) {
+        prim.frontCursor.fullhome(tokenRows);
+        prim.backCursor.fullend(tokenRows);
+      },
+
+      REDO: function REDO(prim, tokenRows) {
+        prim.redo();
+        prim.scrollIntoView(prim.frontCursor);
+      },
+      UNDO: function UNDO(prim, tokenRows) {
+        prim.undo();
+        prim.scrollIntoView(prim.frontCursor);
+      }
+    };
+
+    if (additionalCommands) {
+      for (var key in additionalCommands) {
+        commands[key] = additionalCommands[key];
+      }
+    }
+
+    return possibleConstructorReturn(this, (BasicTextInput.__proto__ || Object.getPrototypeOf(BasicTextInput)).call(this, additionalName || "Text editor commands", commands));
+  }
+
+  return BasicTextInput;
+}(CommandPack);
+
+var TextEditor = new BasicTextInput("Text Area input commands", {
+  NORMAL_UPARROW: function NORMAL_UPARROW(prim, tokenRows) {
+    prim.cursorUp(tokenRows, prim.frontCursor);
+  },
+  NORMAL_DOWNARROW: function NORMAL_DOWNARROW(prim, tokenRows) {
+    prim.cursorDown(tokenRows, prim.frontCursor);
+  },
+  NORMAL_PAGEUP: function NORMAL_PAGEUP(prim, tokenRows) {
+    prim.cursorPageUp(tokenRows, prim.frontCursor);
+  },
+  NORMAL_PAGEDOWN: function NORMAL_PAGEDOWN(prim, tokenRows) {
+    prim.cursorPageDown(tokenRows, prim.frontCursor);
+  },
+  NORMAL_ENTER: function NORMAL_ENTER(prim, tokenRows, currentToken) {
+    var indent = "";
+    var tokenRow = tokenRows[prim.frontCursor.y];
+    if (tokenRow.length > 0 && tokenRow[0].type === "whitespace") {
+      indent = tokenRow[0].value;
+    }
+    prim.selectedText = "\n" + indent;
+    prim.scrollIntoView(prim.frontCursor);
+  },
+
+  SHIFT_UPARROW: function SHIFT_UPARROW(prim, tokenRows) {
+    prim.cursorUp(tokenRows, prim.backCursor);
+  },
+  SHIFT_DOWNARROW: function SHIFT_DOWNARROW(prim, tokenRows) {
+    prim.cursorDown(tokenRows, prim.backCursor);
+  },
+  SHIFT_PAGEUP: function SHIFT_PAGEUP(prim, tokenRows) {
+    prim.cursorPageUp(tokenRows, prim.backCursor);
+  },
+  SHIFT_PAGEDOWN: function SHIFT_PAGEDOWN(prim, tokenRows) {
+    prim.cursorPageDown(tokenRows, prim.backCursor);
+  },
+
+  WINDOW_SCROLL_DOWN: function WINDOW_SCROLL_DOWN(prim, tokenRows) {
+    if (prim.scroll.y < tokenRows.length) {
+      ++prim.scroll.y;
+    }
+  },
+  WINDOW_SCROLL_UP: function WINDOW_SCROLL_UP(prim, tokenRows) {
+    if (prim.scroll.y > 0) {
+      --prim.scroll.y;
+    }
+  }
+});
+
+var Rule = function () {
+  function Rule(name, test) {
+    classCallCheck(this, Rule);
+
+    this.name = name;
+    this.test = test;
+  }
+
+  createClass(Rule, [{
+    key: "carveOutMatchedToken",
+    value: function carveOutMatchedToken(tokens, j) {
+      var token = tokens[j];
+      if (token.type === "regular") {
+        var res = this.test.exec(token.value);
+        if (res) {
+          // Only use the last group that matches the regex, to allow for more
+          // complex regexes that can match in special contexts, but not make
+          // the context part of the token.
+          var midx = res[res.length - 1],
+              start = res.input.indexOf(midx),
+              end = start + midx.length;
+          if (start === 0) {
+            // the rule matches the start of the token
+            token.type = this.name;
+            if (end < token.value.length) {
+              // but not the end
+              var next = token.splitAt(end);
+              next.type = "regular";
+              tokens.splice(j + 1, 0, next);
+            }
+          } else {
+            // the rule matches from the middle of the token
+            var mid = token.splitAt(start);
+            if (midx.length < mid.value.length) {
+              // but not the end
+              var right = mid.splitAt(midx.length);
+              tokens.splice(j + 1, 0, right);
+            }
+            mid.type = this.name;
+            tokens.splice(j + 1, 0, mid);
+          }
+        }
+      }
+    }
+  }]);
+  return Rule;
+}();
+
+var Token = function () {
+  function Token(value, type, index, line) {
+    classCallCheck(this, Token);
+
+    this.value = value;
+    this.type = type;
+    this.index = index;
+    this.line = line;
+  }
+
+  createClass(Token, [{
+    key: "clone",
+    value: function clone() {
+      return new Token(this.value, this.type, this.index, this.line);
+    }
+  }, {
+    key: "splitAt",
+    value: function splitAt(i) {
+      var next = this.value.substring(i);
+      this.value = this.value.substring(0, i);
+      return new Token(next, this.type, this.index + i, this.line);
+    }
+  }, {
+    key: "toString",
+    value: function toString() {
+      return "[" + this.type + ": " + this.value + "]";
+    }
+  }]);
+  return Token;
+}();
+
+var Grammar = function () {
+  function Grammar(grammarName, rules) {
+    classCallCheck(this, Grammar);
+
+    this.name = grammarName;
+
+    // clone the preprocessing grammar to start a new grammar
+    this.grammar = rules.map(function (rule) {
+      return new Rule(rule[0], rule[1]);
+    });
+
+    function crudeParsing(tokens) {
+      var commentDelim = null,
+          stringDelim = null,
+          line = 0,
+          i,
+          t;
+      for (i = 0; i < tokens.length; ++i) {
+        t = tokens[i];
+        t.line = line;
+        if (t.type === "newlines") {
+          ++line;
+        }
+
+        if (stringDelim) {
+          if (t.type === "stringDelim" && t.value === stringDelim && (i === 0 || tokens[i - 1].value[tokens[i - 1].value.length - 1] !== "\\")) {
+            stringDelim = null;
+          }
+          if (t.type !== "newlines") {
+            t.type = "strings";
+          }
+        } else if (commentDelim) {
+          if (commentDelim === "startBlockComments" && t.type === "endBlockComments" || commentDelim === "startLineComments" && t.type === "newlines") {
+            commentDelim = null;
+          }
+          if (t.type !== "newlines") {
+            t.type = "comments";
+          }
+        } else if (t.type === "stringDelim") {
+          stringDelim = t.value;
+          t.type = "strings";
+        } else if (t.type === "startBlockComments" || t.type === "startLineComments") {
+          commentDelim = t.type;
+          t.type = "comments";
+        }
+      }
+
+      // recombine like-tokens
+      for (i = tokens.length - 1; i > 0; --i) {
+        var p = tokens[i - 1];
+        t = tokens[i];
+        if (p.type === t.type && p.type !== "newlines") {
+          p.value += t.value;
+          tokens.splice(i, 1);
+        }
+      }
+    }
+
+    this.tokenize = function (text) {
+      // all text starts off as regular text, then gets cut up into tokens of
+      // more specific type
+      var tokens = [new Token(text, "regular", 0)];
+      for (var i = 0; i < this.grammar.length; ++i) {
+        var rule = this.grammar[i];
+        for (var j = 0; j < tokens.length; ++j) {
+          rule.carveOutMatchedToken(tokens, j);
+        }
+      }
+
+      crudeParsing(tokens);
+      return tokens;
+    };
+  }
+
+  createClass(Grammar, [{
+    key: "toHTML",
+    value: function toHTML(txt) {
+      var theme = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : Default;
+
+      var tokenRows = this.tokenize(txt),
+          temp = document.createElement("div");
+      for (var y = 0; y < tokenRows.length; ++y) {
+        // draw the tokens on this row
+        var t = tokenRows[y];
+        if (t.type === "newlines") {
+          temp.appendChild(document.createElement("br"));
+        } else {
+          var style = theme[t.type] || {},
+              elem = document.createElement("span");
+          elem.style.fontWeight = style.fontWeight || theme.regular.fontWeight;
+          elem.style.fontStyle = style.fontStyle || theme.regular.fontStyle || "";
+          elem.style.color = style.foreColor || theme.regular.foreColor;
+          elem.style.backgroundColor = style.backColor || theme.regular.backColor;
+          elem.style.fontFamily = style.fontFamily || theme.fontFamily;
+          elem.appendChild(document.createTextNode(t.value));
+          temp.appendChild(elem);
+        }
+      }
+      return temp.innerHTML;
+    }
+  }]);
+  return Grammar;
+}();
+
+var JavaScript = new Grammar("JavaScript", [["newlines", /(?:\r\n|\r|\n)/], ["startBlockComments", /\/\*/], ["endBlockComments", /\*\//], ["regexes", /(?:^|,|;|\(|\[|\{)(?:\s*)(\/(?:\\\/|[^\n\/])+\/)/], ["stringDelim", /("|')/], ["startLineComments", /\/\/.*$/m], ["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/], ["keywords", /\b(?:break|case|catch|class|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/], ["functions", /(\w+)(?:\s*\()/], ["members", /(\w+)\./], ["members", /((\w+\.)+)(\w+)/]]);
+
+var SCROLL_SCALE = isFirefox ? 3 : 100;
+var COUNTER$5 = 0;
+var OFFSET = 0;
+
+var TextBox = function (_Surface) {
+  inherits(TextBox, _Surface);
+  createClass(TextBox, null, [{
+    key: "create",
+    value: function create() {
+      return new TextBox();
+    }
+  }]);
+
+  function TextBox(options) {
+    classCallCheck(this, TextBox);
+
+    var _this = possibleConstructorReturn(this, (TextBox.__proto__ || Object.getPrototypeOf(TextBox)).call(this, Object.assign({}, {
+      id: "Primrose.Controls.TextBox[" + COUNTER$5++ + "]"
+    }, options)));
+
+    _this.isTextBox = true;
+    ////////////////////////////////////////////////////////////////////////
+    // normalize input parameters
+    ////////////////////////////////////////////////////////////////////////
+
+    if (typeof options === "string") {
+      _this.options = {
+        value: _this.options
+      };
+    } else {
+      _this.options = options || {};
+    }
+
+    _this.useCaching = !isFirefox || !isMobile;
+
+    var makeCursorCommand = function makeCursorCommand(name) {
+      var method = name.toLowerCase();
+      this["cursor" + name] = function (lines, cursor) {
+        cursor[method](lines);
+        this.scrollIntoView(cursor);
+      };
+    };
+
+    ["Left", "Right", "SkipLeft", "SkipRight", "Up", "Down", "Home", "End", "FullHome", "FullEnd"].map(makeCursorCommand.bind(_this));
+
+    ////////////////////////////////////////////////////////////////////////
+    // initialization
+    ///////////////////////////////////////////////////////////////////////
+    _this.tokens = null;
+    _this.lines = null;
+    _this._commandPack = null;
+    _this._tokenRows = null;
+    _this._tokenHashes = null;
+    _this._tabString = null;
+    _this._currentTouchID = null;
+    _this._lineCountWidth = null;
+
+    _this._lastFont = null;
+    _this._lastText = null;
+    _this._lastCharacterWidth = null;
+    _this._lastCharacterHeight = null;
+    _this._lastGridBounds = null;
+    _this._lastPadding = null;
+    _this._lastFrontCursor = null;
+    _this._lastBackCursor = null;
+    _this._lastWidth = -1;
+    _this._lastHeight = -1;
+    _this._lastScrollX = -1;
+    _this._lastScrollY = -1;
+    _this._lastFocused = false;
+    _this._lastThemeName = null;
+    _this._lastPointer = new Point();
+
+    // different browsers have different sets of keycodes for less-frequently
+    // used keys like curly brackets.
+    _this._browser = isChrome ? "CHROMIUM" : isFirefox ? "FIREFOX" : isIE ? "IE" : isOpera ? "OPERA" : isSafari ? "SAFARI" : "UNKNOWN";
+    _this._pointer = new Point();
+    _this._deadKeyState = "";
+    _this._history = [];
+    _this._historyFrame = -1;
+    _this._topLeftGutter = new Size();
+    _this._bottomRightGutter = new Size();
+    _this._dragging = false;
+    _this._scrolling = false;
+    _this._wheelScrollSpeed = 4;
+    var subBounds = new Rectangle(0, 0, _this.bounds.width, _this.bounds.height);
+    _this._fg = new Surface({
+      id: _this.id + "-fore",
+      bounds: subBounds
+    });
+    _this._fgCanvas = _this._fg.canvas;
+    _this._fgfx = _this._fg.context;
+    _this._bg = new Surface({
+      id: _this.id + "-back",
+      bounds: subBounds
+    });
+    _this._bgCanvas = _this._bg.canvas;
+    _this._bgfx = _this._bg.context;
+    _this._trim = new Surface({
+      id: _this.id + "-trim",
+      bounds: subBounds
+    });
+    _this._trimCanvas = _this._trim.canvas;
+    _this._tgfx = _this._trim.context;
+    _this._rowCache = {};
+    _this._VSCROLL_WIDTH = 2;
+
+    _this.tabWidth = _this.options.tabWidth;
+    _this.showLineNumbers = !_this.options.hideLineNumbers;
+    _this.showScrollBars = !_this.options.hideScrollBars;
+    _this.wordWrap = !_this.options.disableWordWrap;
+    _this.readOnly = !!_this.options.readOnly;
+    _this.multiline = !_this.options.singleLine;
+    _this.gridBounds = new Rectangle();
+    _this.frontCursor = new Cursor();
+    _this.backCursor = new Cursor();
+    _this.scroll = new Point();
+    _this.character = new Size();
+    _this.theme = _this.options.theme;
+    _this.fontSize = _this.options.fontSize;
+    _this.tokenizer = _this.options.tokenizer;
+    _this.commandPack = _this.options.commands || TextEditor;
+    _this.value = _this.options.value;
+    _this.padding = _this.options.padding || 1;
+
+    _this.addEventListener("focus", _this.render.bind(_this), false);
+    _this.addEventListener("blur", _this.render.bind(_this), false);
+    return _this;
+  }
+
+  createClass(TextBox, [{
+    key: "cursorPageUp",
+    value: function cursorPageUp(lines, cursor) {
+      cursor.incY(-this.gridBounds.height, lines);
+      this.scrollIntoView(cursor);
+    }
+  }, {
+    key: "cursorPageDown",
+    value: function cursorPageDown(lines, cursor) {
+      cursor.incY(this.gridBounds.height, lines);
+      this.scrollIntoView(cursor);
+    }
+  }, {
+    key: "setDeadKeyState",
+    value: function setDeadKeyState(st) {
+      this._deadKeyState = st || "";
+    }
+  }, {
+    key: "pushUndo",
+    value: function pushUndo(lines) {
+      if (this._historyFrame < this._history.length - 1) {
+        this._history.splice(this._historyFrame + 1);
+      }
+      this._history.push(lines);
+      this._historyFrame = this._history.length - 1;
+      this.refreshTokens();
+      this.render();
+    }
+  }, {
+    key: "redo",
+    value: function redo() {
+      if (this._historyFrame < this._history.length - 1) {
+        ++this._historyFrame;
+      }
+      this.refreshTokens();
+      this.fixCursor();
+      this.render();
+    }
+  }, {
+    key: "undo",
+    value: function undo() {
+      if (this._historyFrame > 0) {
+        --this._historyFrame;
+      }
+      this.refreshTokens();
+      this.fixCursor();
+      this.render();
+    }
+  }, {
+    key: "scrollIntoView",
+    value: function scrollIntoView(currentCursor) {
+      this.scroll.y += this.minDelta(currentCursor.y, this.scroll.y, this.scroll.y + this.gridBounds.height);
+      if (!this.wordWrap) {
+        this.scroll.x += this.minDelta(currentCursor.x, this.scroll.x, this.scroll.x + this.gridBounds.width);
+      }
+      this.clampScroll();
+    }
+  }, {
+    key: "readWheel",
+    value: function readWheel(evt) {
+      if (this.focused) {
+        if (evt.shiftKey || isChrome) {
+          this.fontSize += -evt.deltaX / SCROLL_SCALE;
+        }
+        if (!evt.shiftKey || isChrome) {
+          this.scroll.y += Math.floor(evt.deltaY * this._wheelScrollSpeed / SCROLL_SCALE);
+        }
+        this.clampScroll();
+        this.render();
+        evt.preventDefault();
+      }
+    }
+  }, {
+    key: "startPointer",
+    value: function startPointer(x, y) {
+      if (!get$1(TextBox.prototype.__proto__ || Object.getPrototypeOf(TextBox.prototype), "startPointer", this).call(this, x, y)) {
+        this._dragging = true;
+        this.setCursorXY(this.frontCursor, x, y);
+      }
+    }
+  }, {
+    key: "movePointer",
+    value: function movePointer(x, y) {
+      if (this._dragging) {
+        this.setCursorXY(this.backCursor, x, y);
+      }
+    }
+  }, {
+    key: "endPointer",
+    value: function endPointer() {
+      get$1(TextBox.prototype.__proto__ || Object.getPrototypeOf(TextBox.prototype), "endPointer", this).call(this);
+      this._dragging = false;
+      this._scrolling = false;
+    }
+  }, {
+    key: "copySelectedText",
+    value: function copySelectedText(evt) {
+      if (this.focused && this.frontCursor.i !== this.backCursor.i) {
+        var clipboard = evt.clipboardData || window.clipboardData;
+        clipboard.setData(window.clipboardData ? "Text" : "text/plain", this.selectedText);
+        evt.returnValue = false;
+      }
+    }
+  }, {
+    key: "cutSelectedText",
+    value: function cutSelectedText(evt) {
+      if (this.focused) {
+        this.copySelectedText(evt);
+        if (!this.readOnly) {
+          this.selectedText = "";
+        }
+      }
+    }
+  }, {
+    key: "keyDown",
+    value: function keyDown(evt) {
+      this.environment.input.Keyboard.doTyping(this, evt);
+    }
+  }, {
+    key: "execCommand",
+    value: function execCommand(browser, codePage, commandName) {
+      if (commandName && this.focused && !this.readOnly) {
+        var altCommandName = browser + "_" + commandName,
+            func = this.commandPack[altCommandName] || this.commandPack[commandName] || codePage[altCommandName] || codePage[commandName];
+
+        if (func instanceof String || typeof func === "string") {
+          console.log("okay");
+          func = this.commandPack[func] || this.commandPack[func] || func;
+        }
+
+        if (func === undefined) {
+          return false;
+        } else {
+          this.frontCursor.moved = false;
+          this.backCursor.moved = false;
+          if (func instanceof Function) {
+            func(this, this.lines);
+          } else if (func instanceof String || typeof func === "string") {
+            console.log(func);
+            this.selectedText = func;
+          }
+          if (this.frontCursor.moved && !this.backCursor.moved) {
+            this.backCursor.copy(this.frontCursor);
+          }
+          this.clampScroll();
+          this.render();
+          return true;
+        }
+      }
+    }
+  }, {
+    key: "readClipboard",
+    value: function readClipboard(evt) {
+      if (this.focused && !this.readOnly) {
+        evt.returnValue = false;
+        var clipboard = evt.clipboardData || window.clipboardData,
+            str = clipboard.getData(window.clipboardData ? "Text" : "text/plain");
+        if (str) {
+          this.selectedText = str;
+        }
+      }
+    }
+  }, {
+    key: "resize",
+    value: function resize() {
+      get$1(TextBox.prototype.__proto__ || Object.getPrototypeOf(TextBox.prototype), "resize", this).call(this);
+      this._bg.setSize(this.surfaceWidth, this.surfaceHeight);
+      this._fg.setSize(this.surfaceWidth, this.surfaceHeight);
+      this._trim.setSize(this.surfaceWidth, this.surfaceHeight);
+      if (this.theme) {
+        this.character.height = this.fontSize;
+        this.context.font = this.character.height + "px " + this.theme.fontFamily;
+        // measure 100 letter M's, then divide by 100, to get the width of an M
+        // to two decimal places on systems that return integer values from
+        // measureText.
+        this.character.width = this.context.measureText("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM").width / 100;
+      }
+      this.render();
+    }
+  }, {
+    key: "pixel2cell",
+    value: function pixel2cell(point) {
+      var x = point.x * this.imageWidth / this.surfaceWidth,
+          y = point.y * this.imageHeight / this.surfaceHeight;
+      point.set(Math.round(point.x / this.character.width) + this.scroll.x - this.gridBounds.x, Math.floor(point.y / this.character.height - 0.25) + this.scroll.y);
+    }
+  }, {
+    key: "clampScroll",
+    value: function clampScroll() {
+      if (this.scroll.y < 0) {
+        this.scroll.y = 0;
+      } else {
+        while (0 < this.scroll.y && this.scroll.y > this.lines.length - this.gridBounds.height) {
+          --this.scroll.y;
+        }
+      }
+    }
+  }, {
+    key: "refreshTokens",
+    value: function refreshTokens() {
+      this.tokens = this.tokenizer.tokenize(this.value);
+    }
+  }, {
+    key: "fixCursor",
+    value: function fixCursor() {
+      var moved = this.frontCursor.fixCursor(this.lines) || this.backCursor.fixCursor(this.lines);
+      if (moved) {
+        this.render();
+      }
+    }
+  }, {
+    key: "setCursorXY",
+    value: function setCursorXY(cursor, x, y) {
+      x = Math.round(x);
+      y = Math.round(y);
+      this._pointer.set(x, y);
+      this.pixel2cell(this._pointer, this.scroll, this.gridBounds);
+      var gx = this._pointer.x - this.scroll.x,
+          gy = this._pointer.y - this.scroll.y,
+          onBottom = gy >= this.gridBounds.height,
+          onLeft = gx < 0,
+          onRight = this._pointer.x >= this.gridBounds.width;
+      if (!this._scrolling && !onBottom && !onLeft && !onRight) {
+        cursor.setXY(this._pointer.x, this._pointer.y, this.lines);
+        this.backCursor.copy(cursor);
+      } else if (this._scrolling || onRight && !onBottom) {
+        this._scrolling = true;
+        var scrollHeight = this.lines.length - this.gridBounds.height;
+        if (gy >= 0 && scrollHeight >= 0) {
+          var sy = gy * scrollHeight / this.gridBounds.height;
+          this.scroll.y = Math.floor(sy);
+        }
+      } else if (onBottom && !onLeft) {
+        var maxWidth = 0;
+        for (var dy = 0; dy < this.lines.length; ++dy) {
+          maxWidth = Math.max(maxWidth, this.lines[dy].length);
+        }
+        var scrollWidth = maxWidth - this.gridBounds.width;
+        if (gx >= 0 && scrollWidth >= 0) {
+          var sx = gx * scrollWidth / this.gridBounds.width;
+          this.scroll.x = Math.floor(sx);
+        }
+      } else if (onLeft && !onBottom) {
+        // clicked in number-line gutter
+      } else {
+          // clicked in the lower-left corner
+        }
+      this._lastPointer.copy(this._pointer);
+      this.render();
+    }
+  }, {
+    key: "setGutter",
+    value: function setGutter() {
+      if (this.showLineNumbers) {
+        this._topLeftGutter.width = 1;
+      } else {
+        this._topLeftGutter.width = 0;
+      }
+
+      if (!this.showScrollBars) {
+        this._bottomRightGutter.set(0, 0);
+      } else if (this.wordWrap) {
+        this._bottomRightGutter.set(this._VSCROLL_WIDTH, 0);
+      } else {
+        this._bottomRightGutter.set(this._VSCROLL_WIDTH, 1);
+      }
+    }
+  }, {
+    key: "refreshGridBounds",
+    value: function refreshGridBounds() {
+      this._lineCountWidth = 0;
+      if (this.showLineNumbers) {
+        this._lineCountWidth = Math.max(1, Math.ceil(Math.log(this._history[this._historyFrame].length) / Math.LN10));
+      }
+
+      var x = Math.floor(this._topLeftGutter.width + this._lineCountWidth + this.padding / this.character.width),
+          y = Math.floor(this.padding / this.character.height),
+          w = Math.floor((this.imageWidth - 2 * this.padding) / this.character.width) - x - this._bottomRightGutter.width,
+          h = Math.floor((this.imageHeight - 2 * this.padding) / this.character.height) - y - this._bottomRightGutter.height;
+      this.gridBounds.set(x, y, w, h);
+    }
+  }, {
+    key: "performLayout",
+    value: function performLayout() {
+
+      // group the tokens into rows
+      this._tokenRows = [[]];
+      this._tokenHashes = [""];
+      this.lines = [""];
+      var currentRowWidth = 0;
+      var tokenQueue = this.tokens.slice();
+      for (var i = 0; i < tokenQueue.length; ++i) {
+        var t = tokenQueue[i].clone();
+        var widthLeft = this.gridBounds.width - currentRowWidth;
+        var wrap = this.wordWrap && t.type !== "newlines" && t.value.length > widthLeft;
+        var breakLine = t.type === "newlines" || wrap;
+        if (wrap) {
+          var split = t.value.length > this.gridBounds.width ? widthLeft : 0;
+          tokenQueue.splice(i + 1, 0, t.splitAt(split));
+        }
+
+        if (t.value.length > 0) {
+          this._tokenRows[this._tokenRows.length - 1].push(t);
+          this._tokenHashes[this._tokenHashes.length - 1] += JSON.stringify(t);
+          this.lines[this.lines.length - 1] += t.value;
+          currentRowWidth += t.value.length;
+        }
+
+        if (breakLine) {
+          this._tokenRows.push([]);
+          this._tokenHashes.push("");
+          this.lines.push("");
+          currentRowWidth = 0;
+        }
+      }
+    }
+  }, {
+    key: "minDelta",
+    value: function minDelta(v, minV, maxV) {
+      var dvMinV = v - minV,
+          dvMaxV = v - maxV + 5,
+          dv = 0;
+      if (dvMinV < 0 || dvMaxV >= 0) {
+        // compare the absolute values, so we get the smallest change
+        // regardless of direction.
+        dv = Math.abs(dvMinV) < Math.abs(dvMaxV) ? dvMinV : dvMaxV;
+      }
+
+      return dv;
+    }
+  }, {
+    key: "fillRect",
+    value: function fillRect(gfx, fill, x, y, w, h) {
+      gfx.fillStyle = fill;
+      gfx.fillRect(x * this.character.width, y * this.character.height, w * this.character.width + 1, h * this.character.height + 1);
+    }
+  }, {
+    key: "strokeRect",
+    value: function strokeRect(gfx, stroke, x, y, w, h) {
+      gfx.strokeStyle = stroke;
+      gfx.strokeRect(x * this.character.width, y * this.character.height, w * this.character.width + 1, h * this.character.height + 1);
+    }
+  }, {
+    key: "renderCanvasBackground",
+    value: function renderCanvasBackground() {
+      var minCursor = Cursor.min(this.frontCursor, this.backCursor),
+          maxCursor = Cursor.max(this.frontCursor, this.backCursor),
+          tokenFront = new Cursor(),
+          tokenBack = new Cursor(),
+          clearFunc = this.theme.regular.backColor ? "fillRect" : "clearRect",
+          OFFSETY = OFFSET / this.character.height;
+
+      if (this.theme.regular.backColor) {
+        this._bgfx.fillStyle = this.theme.regular.backColor;
+      }
+
+      this._bgfx[clearFunc](0, 0, this.imageWidth, this.imageHeight);
+      this._bgfx.save();
+      this._bgfx.translate((this.gridBounds.x - this.scroll.x) * this.character.width + this.padding, -this.scroll.y * this.character.height + this.padding);
+
+      // draw the current row highlighter
+      if (this.focused) {
+        this.fillRect(this._bgfx, this.theme.regular.currentRowBackColor || Default.regular.currentRowBackColor, 0, minCursor.y + OFFSETY, this.gridBounds.width, maxCursor.y - minCursor.y + 1);
+      }
+
+      for (var y = 0; y < this._tokenRows.length; ++y) {
+        // draw the tokens on this row
+        var row = this._tokenRows[y];
+
+        for (var i = 0; i < row.length; ++i) {
+          var t = row[i];
+          tokenBack.x += t.value.length;
+          tokenBack.i += t.value.length;
+
+          // skip drawing tokens that aren't in view
+          if (this.scroll.y <= y && y < this.scroll.y + this.gridBounds.height && this.scroll.x <= tokenBack.x && tokenFront.x < this.scroll.x + this.gridBounds.width) {
+            // draw the selection box
+            var inSelection = minCursor.i <= tokenBack.i && tokenFront.i < maxCursor.i;
+            if (inSelection) {
+              var selectionFront = Cursor.max(minCursor, tokenFront);
+              var selectionBack = Cursor.min(maxCursor, tokenBack);
+              var cw = selectionBack.i - selectionFront.i;
+              this.fillRect(this._bgfx, this.theme.regular.selectedBackColor || Default.regular.selectedBackColor, selectionFront.x, selectionFront.y + OFFSETY, cw, 1);
+            }
+          }
+
+          tokenFront.copy(tokenBack);
+        }
+
+        tokenFront.x = 0;
+        ++tokenFront.y;
+        tokenBack.copy(tokenFront);
+      }
+
+      // draw the cursor caret
+      if (this.focused) {
+        var cc = this.theme.cursorColor || "black";
+        var w = 1 / this.character.width;
+        this.fillRect(this._bgfx, cc, minCursor.x, minCursor.y + OFFSETY, w, 1);
+        this.fillRect(this._bgfx, cc, maxCursor.x, maxCursor.y + OFFSETY, w, 1);
+      }
+      this._bgfx.restore();
+    }
+  }, {
+    key: "renderCanvasForeground",
+    value: function renderCanvasForeground() {
+      var tokenFront = new Cursor(),
+          tokenBack = new Cursor();
+
+      this._fgfx.clearRect(0, 0, this.imageWidth, this.imageHeight);
+      this._fgfx.save();
+      this._fgfx.translate((this.gridBounds.x - this.scroll.x) * this.character.width + this.padding, this.padding);
+      for (var y = 0; y < this._tokenRows.length; ++y) {
+        // draw the tokens on this row
+        var line = this.lines[y] + this.padding,
+            row = this._tokenRows[y],
+            drawn = false,
+            textY = (y - this.scroll.y) * this.character.height;
+
+        for (var i = 0; i < row.length; ++i) {
+          var t = row[i];
+          tokenBack.x += t.value.length;
+          tokenBack.i += t.value.length;
+
+          // skip drawing tokens that aren't in view
+          if (this.scroll.y <= y && y < this.scroll.y + this.gridBounds.height && this.scroll.x <= tokenBack.x && tokenFront.x < this.scroll.x + this.gridBounds.width) {
+
+            // draw the text
+            if (this.useCaching && this._rowCache[line] !== undefined) {
+              if (i === 0) {
+                this._fgfx.putImageData(this._rowCache[line], this.padding, textY + this.padding + OFFSET);
+              }
+            } else {
+              var style = this.theme[t.type] || {};
+              var font = (style.fontWeight || this.theme.regular.fontWeight || "") + " " + (style.fontStyle || this.theme.regular.fontStyle || "") + " " + this.character.height + "px " + this.theme.fontFamily;
+              this._fgfx.font = font.trim();
+              this._fgfx.fillStyle = style.foreColor || this.theme.regular.foreColor;
+              this.drawText(this._fgfx, t.value, tokenFront.x * this.character.width, textY);
+              drawn = true;
+            }
+          }
+
+          tokenFront.copy(tokenBack);
+        }
+
+        tokenFront.x = 0;
+        ++tokenFront.y;
+        tokenBack.copy(tokenFront);
+        if (this.useCaching && drawn && this._rowCache[line] === undefined) {
+          this._rowCache[line] = this._fgfx.getImageData(this.padding, textY + this.padding + OFFSET, this.imageWidth - 2 * this.padding, this.character.height);
+        }
+      }
+
+      this._fgfx.restore();
+    }
+
+    // provides a hook for TextInput to be able to override text drawing and spit out password blanking characters
+
+  }, {
+    key: "drawText",
+    value: function drawText(ctx, txt, x, y) {
+      ctx.fillText(txt, x, y);
+    }
+  }, {
+    key: "renderCanvasTrim",
+    value: function renderCanvasTrim() {
+      var tokenFront = new Cursor(),
+          tokenBack = new Cursor(),
+          maxLineWidth = 0;
+
+      this._tgfx.clearRect(0, 0, this.imageWidth, this.imageHeight);
+      this._tgfx.save();
+      this._tgfx.translate(this.padding, this.padding);
+      this._tgfx.save();
+      this._tgfx.lineWidth = 2;
+      this._tgfx.translate(0, -this.scroll.y * this.character.height);
+      for (var y = 0, lastLine = -1; y < this._tokenRows.length; ++y) {
+        var row = this._tokenRows[y];
+
+        for (var i = 0; i < row.length; ++i) {
+          var t = row[i];
+          tokenBack.x += t.value.length;
+          tokenBack.i += t.value.length;
+          tokenFront.copy(tokenBack);
+        }
+
+        maxLineWidth = Math.max(maxLineWidth, tokenBack.x);
+        tokenFront.x = 0;
+        ++tokenFront.y;
+        tokenBack.copy(tokenFront);
+
+        if (this.showLineNumbers && this.scroll.y <= y && y < this.scroll.y + this.gridBounds.height) {
+          var currentLine = row.length > 0 ? row[0].line : lastLine + 1;
+          // draw the left gutter
+          var lineNumber = currentLine.toString();
+          while (lineNumber.length < this._lineCountWidth) {
+            lineNumber = " " + lineNumber;
+          }
+          this.fillRect(this._tgfx, this.theme.regular.selectedBackColor || Default.regular.selectedBackColor, 0, y, this.gridBounds.x, 1);
+          this._tgfx.font = "bold " + this.character.height + "px " + this.theme.fontFamily;
+
+          if (currentLine > lastLine) {
+            this._tgfx.fillStyle = this.theme.regular.foreColor;
+            this._tgfx.fillText(lineNumber, 0, y * this.character.height);
+          }
+          lastLine = currentLine;
+        }
+      }
+
+      this._tgfx.restore();
+
+      if (this.showLineNumbers) {
+        this.strokeRect(this._tgfx, this.theme.regular.foreColor || Default.regular.foreColor, 0, 0, this.gridBounds.x, this.gridBounds.height);
+      }
+
+      // draw the scrollbars
+      if (this.showScrollBars) {
+        var drawWidth = this.gridBounds.width * this.character.width - this.padding,
+            drawHeight = this.gridBounds.height * this.character.height,
+            scrollX = this.scroll.x * drawWidth / maxLineWidth + this.gridBounds.x * this.character.width,
+            scrollY = this.scroll.y * drawHeight / this._tokenRows.length;
+
+        this._tgfx.fillStyle = this.theme.regular.selectedBackColor || Default.regular.selectedBackColor;
+        // horizontal
+        var bw;
+        if (!this.wordWrap && maxLineWidth > this.gridBounds.width) {
+          var scrollBarWidth = drawWidth * (this.gridBounds.width / maxLineWidth),
+              by = this.gridBounds.height * this.character.height;
+          bw = Math.max(this.character.width, scrollBarWidth);
+          this._tgfx.fillRect(scrollX, by, bw, this.character.height);
+          this._tgfx.strokeRect(scrollX, by, bw, this.character.height);
+        }
+
+        //vertical
+        if (this._tokenRows.length > this.gridBounds.height) {
+          var scrollBarHeight = drawHeight * (this.gridBounds.height / this._tokenRows.length),
+              bx = this.image - this._VSCROLL_WIDTH * this.character.width - 2 * this.padding,
+              bh = Math.max(this.character.height, scrollBarHeight);
+          bw = this._VSCROLL_WIDTH * this.character.width;
+          this._tgfx.fillRect(bx, scrollY, bw, bh);
+          this._tgfx.strokeRect(bx, scrollY, bw, bh);
+        }
+      }
+
+      this._tgfx.lineWidth = 2;
+      this._tgfx.restore();
+      this._tgfx.strokeRect(1, 1, this.imageWidth - 2, this.imageHeight - 2);
+      if (!this.focused) {
+        this._tgfx.fillStyle = this.theme.regular.unfocused || Default.regular.unfocused;
+        this._tgfx.fillRect(0, 0, this.imageWidth, this.imageHeight);
+      }
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      if (this.tokens && this.theme) {
+        this.refreshGridBounds();
+        var boundsChanged = this.gridBounds.toString() !== this._lastGridBounds,
+            textChanged = this._lastText !== this.value,
+            characterWidthChanged = this.character.width !== this._lastCharacterWidth,
+            characterHeightChanged = this.character.height !== this._lastCharacterHeight,
+            paddingChanged = this.padding !== this._lastPadding,
+            cursorChanged = !this._lastFrontCursor || !this._lastBackCursor || this.frontCursor.i !== this._lastFrontCursor.i || this._lastBackCursor.i !== this.backCursor.i,
+            scrollChanged = this.scroll.x !== this._lastScrollX || this.scroll.y !== this._lastScrollY,
+            fontChanged = this.context.font !== this._lastFont,
+            themeChanged = this.theme.name !== this._lastThemeName,
+            focusChanged = this.focused !== this._lastFocused,
+            changeBounds = null,
+            layoutChanged = this.resized || boundsChanged || textChanged || characterWidthChanged || characterHeightChanged || paddingChanged,
+            backgroundChanged = layoutChanged || cursorChanged || scrollChanged || themeChanged,
+            foregroundChanged = backgroundChanged || textChanged,
+            trimChanged = backgroundChanged || focusChanged,
+            imageChanged = foregroundChanged || backgroundChanged || trimChanged;
+
+        if (layoutChanged) {
+          this.performLayout(this.gridBounds);
+          this._rowCache = {};
+        }
+
+        if (imageChanged) {
+          if (cursorChanged && !(layoutChanged || scrollChanged || themeChanged || focusChanged)) {
+            var top = Math.min(this.frontCursor.y, this._lastFrontCursor.y, this.backCursor.y, this._lastBackCursor.y) - this.scroll.y + this.gridBounds.y,
+                bottom = Math.max(this.frontCursor.y, this._lastFrontCursor.y, this.backCursor.y, this._lastBackCursor.y) - this.scroll.y + 1;
+            changeBounds = new Rectangle(0, top * this.character.height, this.bounds.width, (bottom - top) * this.character.height + 2);
+          }
+
+          if (backgroundChanged) {
+            this.renderCanvasBackground();
+          }
+          if (foregroundChanged) {
+            this.renderCanvasForeground();
+          }
+          if (trimChanged) {
+            this.renderCanvasTrim();
+          }
+
+          this.context.clearRect(0, 0, this.imageWidth, this.imageHeight);
+          this.context.drawImage(this._bgCanvas, 0, 0);
+          this.context.drawImage(this._fgCanvas, 0, 0);
+          this.context.drawImage(this._trimCanvas, 0, 0);
+          this.invalidate(changeBounds);
+        }
+
+        this._lastGridBounds = this.gridBounds.toString();
+        this._lastText = this.value;
+        this._lastCharacterWidth = this.character.width;
+        this._lastCharacterHeight = this.character.height;
+        this._lastWidth = this.imageWidth;
+        this._lastHeight = this.imageHeight;
+        this._lastPadding = this.padding;
+        this._lastFrontCursor = this.frontCursor.clone();
+        this._lastBackCursor = this.backCursor.clone();
+        this._lastFocused = this.focused;
+        this._lastFont = this.context.font;
+        this._lastThemeName = this.theme.name;
+        this._lastScrollX = this.scroll.x;
+        this._lastScrollY = this.scroll.y;
+      }
+    }
+  }, {
+    key: "value",
+    get: function get() {
+      return this._history[this._historyFrame].join("\n");
+    },
+    set: function set(txt) {
+      txt = txt || "";
+      txt = txt.replace(/\r\n/g, "\n");
+      if (!this.multiline) {
+        txt = txt.replace(/\n/g, "");
+      }
+      var lines = txt.split("\n");
+      this.pushUndo(lines);
+      this.render();
+      this.emit("change", {
+        target: this
+      });
+    }
+  }, {
+    key: "selectedText",
+    get: function get() {
+      var minCursor = Cursor.min(this.frontCursor, this.backCursor),
+          maxCursor = Cursor.max(this.frontCursor, this.backCursor);
+      return this.value.substring(minCursor.i, maxCursor.i);
+    },
+    set: function set(str) {
+      str = str || "";
+      str = str.replace(/\r\n/g, "\n");
+
+      if (this.frontCursor.i !== this.backCursor.i || str.length > 0) {
+        var minCursor = Cursor.min(this.frontCursor, this.backCursor),
+            maxCursor = Cursor.max(this.frontCursor, this.backCursor),
+
+        // TODO: don't recalc the string first.
+        text = this.value,
+            left = text.substring(0, minCursor.i),
+            right = text.substring(maxCursor.i);
+
+        var v = left + str + right;
+        this.value = v;
+        this.refreshGridBounds();
+        this.performLayout();
+        minCursor.advanceN(this.lines, Math.max(0, str.length));
+        this.scrollIntoView(maxCursor);
+        this.clampScroll();
+        maxCursor.copy(minCursor);
+        this.render();
+      }
+    }
+  }, {
+    key: "padding",
+    get: function get() {
+      return this._padding;
+    },
+    set: function set(v) {
+      this._padding = v;
+      this.render();
+    }
+  }, {
+    key: "wordWrap",
+    get: function get() {
+      return this._wordWrap;
+    },
+    set: function set(v) {
+      this._wordWrap = v || false;
+      this.setGutter();
+    }
+  }, {
+    key: "showLineNumbers",
+    get: function get() {
+      return this._showLineNumbers;
+    },
+    set: function set(v) {
+      this._showLineNumbers = v;
+      this.setGutter();
+    }
+  }, {
+    key: "showScrollBars",
+    get: function get() {
+      return this._showScrollBars;
+    },
+    set: function set(v) {
+      this._showScrollBars = v;
+      this.setGutter();
+    }
+  }, {
+    key: "theme",
+    get: function get() {
+      return this._theme;
+    },
+    set: function set(t) {
+      this._theme = Object.assign({}, Default, t);
+      this._theme.fontSize = this.fontSize;
+      this._rowCache = {};
+      this.render();
+    }
+  }, {
+    key: "commandPack",
+    get: function get() {
+      return this._commandPack;
+    },
+    set: function set(v) {
+      this._commandPack = v;
+    }
+  }, {
+    key: "selectionStart",
+    get: function get() {
+      return this.frontCursor.i;
+    },
+    set: function set(i) {
+      this.frontCursor.setI(i, this.lines);
+    }
+  }, {
+    key: "selectionEnd",
+    get: function get() {
+      return this.backCursor.i;
+    },
+    set: function set(i) {
+      this.backCursor.setI(i, this.lines);
+    }
+  }, {
+    key: "selectionDirection",
+    get: function get() {
+      return this.frontCursor.i <= this.backCursor.i ? "forward" : "backward";
+    }
+  }, {
+    key: "tokenizer",
+    get: function get() {
+      return this._tokenizer;
+    },
+    set: function set(tk) {
+      this._tokenizer = tk || JavaScript;
+      if (this._history && this._history.length > 0) {
+        this.refreshTokens();
+        this.render();
+      }
+    }
+  }, {
+    key: "tabWidth",
+    get: function get() {
+      return this._tabWidth;
+    },
+    set: function set(tw) {
+      this._tabWidth = tw || 2;
+      this._tabString = "";
+      for (var i = 0; i < this._tabWidth; ++i) {
+        this._tabString += " ";
+      }
+    }
+  }, {
+    key: "tabString",
+    get: function get() {
+      return this._tabString;
+    }
+  }, {
+    key: "fontSize",
+    get: function get() {
+      return this._fontSize || 16;
+    },
+    set: function set(v) {
+      v = v || 16;
+      this._fontSize = v;
+      if (this.theme) {
+        this.theme.fontSize = this._fontSize;
+        this.resize();
+        this.render();
+      }
+    }
+  }, {
+    key: "lockMovement",
+    get: function get() {
+      return this.focused && !this.readOnly;
+    }
+  }]);
+  return TextBox;
+}(Surface);
+
+var PlainText$2 = new Grammar("PlainText", [["newlines", /(?:\r\n|\r|\n)/]]);
+
+////
+// For all of these commands, the "current" cursor is:
+// If SHIFT is not held, then "front".
+// If SHIFT is held, then "back"
+//
+var TextInput$2 = new BasicTextInput("Text Line input commands");
+
+var COUNTER$6 = 0;
+
+var TextInput = function (_TextBox) {
+  inherits(TextInput, _TextBox);
+
+  function TextInput(options) {
+    classCallCheck(this, TextInput);
+
+    var _this = possibleConstructorReturn(this, (TextInput.__proto__ || Object.getPrototypeOf(TextInput)).call(this, Object.assign({}, {
+      id: "Primrose.Controls.TextInput[" + COUNTER$6++ + "]",
+      padding: 5,
+      singleLine: true,
+      disableWordWrap: true,
+      hideLineNumbers: true,
+      hideScrollBars: true,
+      tabWidth: 1,
+      tokenizer: PlainText$2,
+      commands: TextInput$2
+    }), options));
+
+    _this.passwordCharacter = _this.options.passwordCharacter;
+    return _this;
+  }
+
+  createClass(TextInput, [{
+    key: "drawText",
+    value: function drawText(ctx, txt, x, y) {
+      if (this.passwordCharacter) {
+        var val = "";
+        for (var i = 0; i < txt.length; ++i) {
+          val += this.passwordCharacter;
+        }
+        txt = val;
+      }
+      get$1(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "drawText", this).call(this, ctx, txt, x, y);
+    }
+  }, {
+    key: "value",
+    get: function get() {
+      return get$1(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "value", this);
+    },
+    set: function set(v) {
+      v = v || "";
+      v = v.replace(/\r?\n/g, "");
+      set$1(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "value", v, this);
+    }
+  }, {
+    key: "selectedText",
+    get: function get() {
+      return get$1(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "selectedText", this);
+    },
+    set: function set(v) {
+      v = v || "";
+      v = v.replace(/\r?\n/g, "");
+      set$1(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "selectedText", v, this);
+    }
+  }]);
+  return TextInput;
+}(TextBox);
+
 function cascadeElement(id, tag, DOMClass, add) {
   var elem = null;
   if (id === null) {
@@ -16516,6 +18519,10 @@ function makeHidingContainer(id, obj) {
   return elem;
 }
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function Group() {
 
 	Object3D.call(this);
@@ -16528,6 +18535,19 @@ Group.prototype = Object.assign(Object.create(Object3D.prototype), {
 	constructor: Group
 
 });
+
+/**
+ * @author alteredq / http://alteredqualia.com/
+ *
+ * parameters = {
+ *  color: <hex>,
+ *  opacity: <float>,
+ *  map: new THREE.Texture( <Image> ),
+ *
+ *	uvOffset: new THREE.Vector2(),
+ *	uvScale: new THREE.Vector2()
+ * }
+ */
 
 function SpriteMaterial(parameters) {
 
@@ -16560,6 +18580,11 @@ SpriteMaterial.prototype.copy = function (source) {
 
 	return this;
 };
+
+/**
+ * @author mikael emtinger / http://gomo.se/
+ * @author alteredq / http://alteredqualia.com/
+ */
 
 function Sprite(material) {
 
@@ -16610,6 +18635,20 @@ Sprite.prototype = Object.assign(Object.create(Object3D.prototype), {
 
 });
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ *
+ * parameters = {
+ *  color: <hex>,
+ *  opacity: <float>,
+ *
+ *  linewidth: <float>,
+ *  linecap: "round",
+ *  linejoin: "round"
+ * }
+ */
+
 function LineBasicMaterial(parameters) {
 
 	Material.call(this);
@@ -16645,6 +18684,10 @@ LineBasicMaterial.prototype.copy = function (source) {
 	return this;
 };
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function LineSegments(geometry, material) {
 
 	Line.call(this, geometry, material);
@@ -16659,6 +18702,10 @@ LineSegments.prototype = Object.assign(Object.create(Line.prototype), {
 	isLineSegments: true
 
 });
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
 
 function Line(geometry, material, mode) {
 
@@ -16829,6 +18876,12 @@ Line.prototype = Object.assign(Object.create(Object3D.prototype), {
 
 });
 
+/**
+ * @author mikael emtinger / http://gomo.se/
+ * @author alteredq / http://alteredqualia.com/
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function LOD() {
 
 	Object3D.call(this);
@@ -16974,6 +19027,10 @@ LOD.prototype = Object.assign(Object.create(Object3D.prototype), {
 
 });
 
+/**
+ * @author alteredq / http://alteredqualia.com/
+ */
+
 function DataTexture(data, width, height, format, type, mapping, wrapS, wrapT, magFilter, minFilter, anisotropy, encoding) {
 
 	Texture$1.call(this, null, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy, encoding);
@@ -16992,6 +19049,13 @@ DataTexture.prototype = Object.create(Texture$1.prototype);
 DataTexture.prototype.constructor = DataTexture;
 
 DataTexture.prototype.isDataTexture = true;
+
+/**
+ * @author mikael emtinger / http://gomo.se/
+ * @author alteredq / http://alteredqualia.com/
+ * @author michael guerrero / http://realitymeltdown.com
+ * @author ikerr / http://verold.com
+ */
 
 function Skeleton(bones, boneInverses, useVertexTexture) {
 
@@ -17144,6 +19208,12 @@ Object.assign(Skeleton.prototype, {
 
 });
 
+/**
+ * @author mikael emtinger / http://gomo.se/
+ * @author alteredq / http://alteredqualia.com/
+ * @author ikerr / http://verold.com
+ */
+
 function Bone(skin) {
 
 	Object3D.call(this);
@@ -17169,6 +19239,12 @@ Bone.prototype = Object.assign(Object.create(Object3D.prototype), {
 	}
 
 });
+
+/**
+ * @author mikael emtinger / http://gomo.se/
+ * @author alteredq / http://alteredqualia.com/
+ * @author ikerr / http://verold.com
+ */
 
 function SkinnedMesh(geometry, material, useVertexTexture) {
 
@@ -17321,6 +19397,11 @@ SkinnedMesh.prototype = Object.assign(Object.create(Mesh.prototype), {
 
 });
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ */
+
 function Fog(color, near, far) {
 
 	this.name = '';
@@ -17348,6 +19429,11 @@ Fog.prototype.toJSON = function (meta) {
 	};
 };
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ */
+
 function FogExp2(color, density) {
 
 	this.name = '';
@@ -17371,6 +19457,10 @@ FogExp2.prototype.toJSON = function (meta) {
 		density: this.density
 	};
 };
+
+/**
+ * @author alteredq / http://alteredqualia.com/
+ */
 
 function HemisphereLight(skyColor, groundColor, intensity) {
 
@@ -17403,6 +19493,10 @@ HemisphereLight.prototype = Object.assign(Object.create(Light.prototype), {
 
 });
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function SpotLightShadow() {
 
 	LightShadow.call(this, new PerspectiveCamera(50, 1, 0.5, 500));
@@ -17432,6 +19526,10 @@ SpotLightShadow.prototype = Object.assign(Object.create(LightShadow.prototype), 
 	}
 
 });
+
+/**
+ * @author alteredq / http://alteredqualia.com/
+ */
 
 function SpotLight(color, intensity, distance, angle, penumbra, decay) {
 
@@ -17488,6 +19586,11 @@ SpotLight.prototype = Object.assign(Object.create(Light.prototype), {
 	}
 
 });
+
+/**
+ * @author alteredq / http://alteredqualia.com/
+ * @author arose / http://github.com/arose
+ */
 
 function OrthographicCamera(left, right, top, bottom, near, far) {
 
@@ -17599,6 +19702,10 @@ OrthographicCamera.prototype = Object.assign(Object.create(Camera.prototype), {
 
 });
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function DirectionalLightShadow(light) {
 
   LightShadow.call(this, new OrthographicCamera(-5, 5, 5, -5, 0.5, 500));
@@ -17609,6 +19716,11 @@ DirectionalLightShadow.prototype = Object.assign(Object.create(LightShadow.proto
   constructor: DirectionalLightShadow
 
 });
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ */
 
 function DirectionalLight(color, intensity) {
 
@@ -17643,6 +19755,10 @@ DirectionalLight.prototype = Object.assign(Object.create(Light.prototype), {
 
 });
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function AmbientLight(color, intensity) {
 
 	Light.call(this, color, intensity);
@@ -17659,6 +19775,10 @@ AmbientLight.prototype = Object.assign(Object.create(Light.prototype), {
 	isAmbientLight: true
 
 });
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
 
 function Scene() {
 
@@ -18072,6 +20192,16 @@ Object.assign(Interpolant.prototype, {
 
 });
 
+/**
+ * Fast and simple cubic spline interpolant.
+ *
+ * It was derived from a Hermitian construction setting the first derivative
+ * at each sample position to the linear slope between neighboring positions
+ * over their parameter interval.
+ *
+ * @author tschw
+ */
+
 function CubicInterpolant(parameterPositions, sampleValues, sampleSize, resultBuffer) {
 
 	Interpolant.call(this, parameterPositions, sampleValues, sampleSize, resultBuffer);
@@ -18204,6 +20334,10 @@ CubicInterpolant.prototype = Object.assign(Object.create(Interpolant.prototype),
 
 });
 
+/**
+ * @author tschw
+ */
+
 function LinearInterpolant(parameterPositions, sampleValues, sampleSize, resultBuffer) {
 
 	Interpolant.call(this, parameterPositions, sampleValues, sampleSize, resultBuffer);
@@ -18232,6 +20366,14 @@ LinearInterpolant.prototype = Object.assign(Object.create(Interpolant.prototype)
 	}
 
 });
+
+/**
+ *
+ * Interpolant that evaluates to the sample value at the position preceeding
+ * the parameter.
+ *
+ * @author tschw
+ */
 
 function DiscreteInterpolant(parameterPositions, sampleValues, sampleSize, resultBuffer) {
 
@@ -18579,6 +20721,16 @@ function KeyframeTrackConstructor(name, times, values, interpolation) {
 	this.optimize();
 }
 
+/**
+ *
+ * A Track of vectored keyframe values.
+ *
+ *
+ * @author Ben Houston / http://clara.io/
+ * @author David Sarno / http://lighthaus.us/
+ * @author tschw
+ */
+
 function VectorKeyframeTrack(name, times, values, interpolation) {
 
   KeyframeTrackConstructor.call(this, name, times, values, interpolation);
@@ -18595,6 +20747,12 @@ VectorKeyframeTrack.prototype = Object.assign(Object.create(KeyframeTrackPrototy
   // DefaultInterpolation is inherited
 
 });
+
+/**
+ * Spherical linear unit quaternion interpolant.
+ *
+ * @author tschw
+ */
 
 function QuaternionLinearInterpolant(parameterPositions, sampleValues, sampleSize, resultBuffer) {
 
@@ -18623,6 +20781,15 @@ QuaternionLinearInterpolant.prototype = Object.assign(Object.create(Interpolant.
 
 });
 
+/**
+ *
+ * A Track of quaternion keyframe values.
+ *
+ * @author Ben Houston / http://clara.io/
+ * @author David Sarno / http://lighthaus.us/
+ * @author tschw
+ */
+
 function QuaternionKeyframeTrack(name, times, values, interpolation) {
 
 	KeyframeTrackConstructor.call(this, name, times, values, interpolation);
@@ -18647,6 +20814,15 @@ QuaternionKeyframeTrack.prototype = Object.assign(Object.create(KeyframeTrackPro
 
 });
 
+/**
+ *
+ * A Track of numeric keyframe values.
+ *
+ * @author Ben Houston / http://clara.io/
+ * @author David Sarno / http://lighthaus.us/
+ * @author tschw
+ */
+
 function NumberKeyframeTrack(name, times, values, interpolation) {
 
   KeyframeTrackConstructor.call(this, name, times, values, interpolation);
@@ -18659,6 +20835,16 @@ NumberKeyframeTrack.prototype = Object.assign(Object.create(KeyframeTrackPrototy
   ValueTypeName: 'number'
 
 });
+
+/**
+ *
+ * A Track that interpolates Strings
+ *
+ *
+ * @author Ben Houston / http://clara.io/
+ * @author David Sarno / http://lighthaus.us/
+ * @author tschw
+ */
 
 function StringKeyframeTrack(name, times, values, interpolation) {
 
@@ -18679,6 +20865,16 @@ StringKeyframeTrack.prototype = Object.assign(Object.create(KeyframeTrackPrototy
   InterpolantFactoryMethodSmooth: undefined
 
 });
+
+/**
+ *
+ * A Track of Boolean keyframe values.
+ *
+ *
+ * @author Ben Houston / http://clara.io/
+ * @author David Sarno / http://lighthaus.us/
+ * @author tschw
+ */
 
 function BooleanKeyframeTrack(name, times, values) {
 
@@ -18703,6 +20899,16 @@ BooleanKeyframeTrack.prototype = Object.assign(Object.create(KeyframeTrackProtot
 
 });
 
+/**
+ *
+ * A Track of keyframe values that represent color.
+ *
+ *
+ * @author Ben Houston / http://clara.io/
+ * @author David Sarno / http://lighthaus.us/
+ * @author tschw
+ */
+
 function ColorKeyframeTrack(name, times, values, interpolation) {
 
   KeyframeTrackConstructor.call(this, name, times, values, interpolation);
@@ -18723,6 +20929,16 @@ ColorKeyframeTrack.prototype = Object.assign(Object.create(KeyframeTrackPrototyp
   // However, this is the place for color space parameterization.
 
 });
+
+/**
+ *
+ * A timed sequence of keyframes for a specific property.
+ *
+ *
+ * @author Ben Houston / http://clara.io/
+ * @author David Sarno / http://lighthaus.us/
+ * @author tschw
+ */
 
 function KeyframeTrack(name, times, values, interpolation) {
 
@@ -18846,6 +21062,14 @@ Object.assign(KeyframeTrack, {
 	}
 
 });
+
+/**
+ *
+ * Reusable set of Tracks that represent an animation.
+ *
+ * @author Ben Houston / http://clara.io/
+ * @author David Sarno / http://lighthaus.us/
+ */
 
 function AnimationClip(name, duration, tracks) {
 
@@ -19193,6 +21417,27 @@ var UniformsUtils = {
 	}
 
 };
+
+/**
+ * @author alteredq / http://alteredqualia.com/
+ *
+ * parameters = {
+ *  defines: { "label" : "value" },
+ *  uniforms: { "parameter1": { value: 1.0 }, "parameter2": { value2: 2 } },
+ *
+ *  fragmentShader: <string>,
+ *  vertexShader: <string>,
+ *
+ *  wireframe: <boolean>,
+ *  wireframeLinewidth: <float>,
+ *
+ *  lights: <bool>,
+ *
+ *  skinning: <bool>,
+ *  morphTargets: <bool>,
+ *  morphNormals: <bool>
+ * }
+ */
 
 function ShaderMaterial(parameters) {
 
@@ -19609,6 +21854,10 @@ var ShaderChunk = {
 	shadow_vert: shadow_vert
 };
 
+/**
+ * Uniforms library for shared webgl shaders
+ */
+
 var UniformsLib = {
 
 	common: {
@@ -19763,6 +22012,10 @@ var UniformsLib = {
 
 };
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function ShadowMaterial() {
 
 	ShaderMaterial.call(this, {
@@ -19794,6 +22047,10 @@ ShadowMaterial.prototype.constructor = ShadowMaterial;
 
 ShadowMaterial.prototype.isShadowMaterial = true;
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function RawShaderMaterial(parameters) {
 
   ShaderMaterial.call(this, parameters);
@@ -19805,6 +22062,10 @@ RawShaderMaterial.prototype = Object.create(ShaderMaterial.prototype);
 RawShaderMaterial.prototype.constructor = RawShaderMaterial;
 
 RawShaderMaterial.prototype.isRawShaderMaterial = true;
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
 
 function MultiMaterial(materials) {
 
@@ -19867,6 +22128,14 @@ MultiMaterial.prototype = {
 
 };
 
+/**
+ * @author WestLangley / http://github.com/WestLangley
+ *
+ * parameters = {
+ *  reflectivity: <float>
+ * }
+ */
+
 function MeshPhysicalMaterial(parameters) {
 
 	MeshStandardMaterial.call(this);
@@ -19901,6 +22170,56 @@ MeshPhysicalMaterial.prototype.copy = function (source) {
 
 	return this;
 };
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ *
+ * parameters = {
+ *  color: <hex>,
+ *  specular: <hex>,
+ *  shininess: <float>,
+ *  opacity: <float>,
+ *
+ *  map: new THREE.Texture( <Image> ),
+ *
+ *  lightMap: new THREE.Texture( <Image> ),
+ *  lightMapIntensity: <float>
+ *
+ *  aoMap: new THREE.Texture( <Image> ),
+ *  aoMapIntensity: <float>
+ *
+ *  emissive: <hex>,
+ *  emissiveIntensity: <float>
+ *  emissiveMap: new THREE.Texture( <Image> ),
+ *
+ *  bumpMap: new THREE.Texture( <Image> ),
+ *  bumpScale: <float>,
+ *
+ *  normalMap: new THREE.Texture( <Image> ),
+ *  normalScale: <Vector2>,
+ *
+ *  displacementMap: new THREE.Texture( <Image> ),
+ *  displacementScale: <float>,
+ *  displacementBias: <float>,
+ *
+ *  specularMap: new THREE.Texture( <Image> ),
+ *
+ *  alphaMap: new THREE.Texture( <Image> ),
+ *
+ *  envMap: new THREE.TextureCube( [posx, negx, posy, negy, posz, negz] ),
+ *  combine: THREE.Multiply,
+ *  reflectivity: <float>,
+ *  refractionRatio: <float>,
+ *
+ *  wireframe: <boolean>,
+ *  wireframeLinewidth: <float>,
+ *
+ *  skinning: <bool>,
+ *  morphTargets: <bool>,
+ *  morphNormals: <bool>
+ * }
+ */
 
 function MeshPhongMaterial(parameters) {
 
@@ -20011,6 +22330,17 @@ MeshPhongMaterial.prototype.copy = function (source) {
 	return this;
 };
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ *
+ * parameters = {
+ *  opacity: <float>,
+ *
+ *  wireframe: <boolean>,
+ *  wireframeLinewidth: <float>
+ * }
+ */
+
 function MeshNormalMaterial(parameters) {
 
 	Material.call(this, parameters);
@@ -20041,6 +22371,44 @@ MeshNormalMaterial.prototype.copy = function (source) {
 
 	return this;
 };
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ *
+ * parameters = {
+ *  color: <hex>,
+ *  opacity: <float>,
+ *
+ *  map: new THREE.Texture( <Image> ),
+ *
+ *  lightMap: new THREE.Texture( <Image> ),
+ *  lightMapIntensity: <float>
+ *
+ *  aoMap: new THREE.Texture( <Image> ),
+ *  aoMapIntensity: <float>
+ *
+ *  emissive: <hex>,
+ *  emissiveIntensity: <float>
+ *  emissiveMap: new THREE.Texture( <Image> ),
+ *
+ *  specularMap: new THREE.Texture( <Image> ),
+ *
+ *  alphaMap: new THREE.Texture( <Image> ),
+ *
+ *  envMap: new THREE.TextureCube( [posx, negx, posy, negy, posz, negz] ),
+ *  combine: THREE.Multiply,
+ *  reflectivity: <float>,
+ *  refractionRatio: <float>,
+ *
+ *  wireframe: <boolean>,
+ *  wireframeLinewidth: <float>,
+ *
+ *  skinning: <bool>,
+ *  morphTargets: <bool>,
+ *  morphNormals: <bool>
+ * }
+ */
 
 function MeshLambertMaterial(parameters) {
 
@@ -20127,6 +22495,29 @@ MeshLambertMaterial.prototype.copy = function (source) {
 	return this;
 };
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ * @author bhouston / https://clara.io
+ * @author WestLangley / http://github.com/WestLangley
+ *
+ * parameters = {
+ *
+ *  opacity: <float>,
+ *
+ *  map: new THREE.Texture( <Image> ),
+ *
+ *  alphaMap: new THREE.Texture( <Image> ),
+ *
+ *  displacementMap: new THREE.Texture( <Image> ),
+ *  displacementScale: <float>,
+ *  displacementBias: <float>,
+ *
+ *  wireframe: <boolean>,
+ *  wireframeLinewidth: <float>
+ * }
+ */
+
 function MeshDepthMaterial(parameters) {
 
 	Material.call(this);
@@ -20182,6 +22573,21 @@ MeshDepthMaterial.prototype.copy = function (source) {
 
 	return this;
 };
+
+/**
+ * @author alteredq / http://alteredqualia.com/
+ *
+ * parameters = {
+ *  color: <hex>,
+ *  opacity: <float>,
+ *
+ *  linewidth: <float>,
+ *
+ *  scale: <float>,
+ *  dashSize: <float>,
+ *  gapSize: <float>
+ * }
+ */
 
 function LineDashedMaterial(parameters) {
 
@@ -20242,6 +22648,10 @@ var Materials = Object.freeze({
 	LineBasicMaterial: LineBasicMaterial,
 	Material: Material
 });
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
 
 function MaterialLoader(manager) {
 
@@ -20382,6 +22792,10 @@ Object.assign(MaterialLoader.prototype, {
 
 });
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function BufferGeometryLoader(manager) {
 
 	this.manager = manager !== undefined ? manager : DefaultLoadingManager;
@@ -20464,6 +22878,10 @@ Object.assign(BufferGeometryLoader.prototype, {
 	}
 
 });
+
+/**
+ * @author alteredq / http://alteredqualia.com/
+ */
 
 function Loader() {
 
@@ -20766,6 +23184,11 @@ Loader.Handlers = {
 	}
 
 };
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ */
 
 function JSONLoader(manager) {
 
@@ -21227,6 +23650,10 @@ Object.assign(JSONLoader.prototype, {
 
 });
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function WireframeGeometry(geometry) {
 
 	BufferGeometry.call(this);
@@ -21387,6 +23814,13 @@ function WireframeGeometry(geometry) {
 WireframeGeometry.prototype = Object.create(BufferGeometry.prototype);
 WireframeGeometry.prototype.constructor = WireframeGeometry;
 
+/**
+ * @author Mugen87 / https://github.com/Mugen87
+ *
+ * Parametric Surfaces Geometry
+ * based on the brilliant article by @prideout http://prideout.net/blog/?p=44
+ */
+
 function ParametricBufferGeometry(func, slices, stacks) {
 
 	BufferGeometry.call(this);
@@ -21459,6 +23893,13 @@ function ParametricBufferGeometry(func, slices, stacks) {
 ParametricBufferGeometry.prototype = Object.create(BufferGeometry.prototype);
 ParametricBufferGeometry.prototype.constructor = ParametricBufferGeometry;
 
+/**
+ * @author zz85 / https://github.com/zz85
+ *
+ * Parametric Surfaces Geometry
+ * based on the brilliant article by @prideout http://prideout.net/blog/?p=44
+ */
+
 function ParametricGeometry(func, slices, stacks) {
 
 	Geometry.call(this);
@@ -21477,6 +23918,10 @@ function ParametricGeometry(func, slices, stacks) {
 
 ParametricGeometry.prototype = Object.create(Geometry.prototype);
 ParametricGeometry.prototype.constructor = ParametricGeometry;
+
+/**
+ * @author Mugen87 / https://github.com/Mugen87
+ */
 
 function PolyhedronBufferGeometry(vertices, indices, radius, detail) {
 
@@ -21743,6 +24188,10 @@ function PolyhedronBufferGeometry(vertices, indices, radius, detail) {
 PolyhedronBufferGeometry.prototype = Object.create(BufferGeometry.prototype);
 PolyhedronBufferGeometry.prototype.constructor = PolyhedronBufferGeometry;
 
+/**
+ * @author Mugen87 / https://github.com/Mugen87
+ */
+
 function TetrahedronBufferGeometry(radius, detail) {
 
 	var vertices = [1, 1, 1, -1, -1, 1, -1, 1, -1, 1, -1, -1];
@@ -21762,6 +24211,10 @@ function TetrahedronBufferGeometry(radius, detail) {
 TetrahedronBufferGeometry.prototype = Object.create(PolyhedronBufferGeometry.prototype);
 TetrahedronBufferGeometry.prototype.constructor = TetrahedronBufferGeometry;
 
+/**
+ * @author timothypratley / https://github.com/timothypratley
+ */
+
 function TetrahedronGeometry(radius, detail) {
 
 	Geometry.call(this);
@@ -21779,6 +24232,10 @@ function TetrahedronGeometry(radius, detail) {
 
 TetrahedronGeometry.prototype = Object.create(Geometry.prototype);
 TetrahedronGeometry.prototype.constructor = TetrahedronGeometry;
+
+/**
+ * @author Mugen87 / https://github.com/Mugen87
+ */
 
 function OctahedronBufferGeometry(radius, detail) {
 
@@ -21799,6 +24256,10 @@ function OctahedronBufferGeometry(radius, detail) {
 OctahedronBufferGeometry.prototype = Object.create(PolyhedronBufferGeometry.prototype);
 OctahedronBufferGeometry.prototype.constructor = OctahedronBufferGeometry;
 
+/**
+ * @author timothypratley / https://github.com/timothypratley
+ */
+
 function OctahedronGeometry(radius, detail) {
 
 	Geometry.call(this);
@@ -21816,6 +24277,10 @@ function OctahedronGeometry(radius, detail) {
 
 OctahedronGeometry.prototype = Object.create(Geometry.prototype);
 OctahedronGeometry.prototype.constructor = OctahedronGeometry;
+
+/**
+ * @author Mugen87 / https://github.com/Mugen87
+ */
 
 function IcosahedronBufferGeometry(radius, detail) {
 
@@ -21838,6 +24303,10 @@ function IcosahedronBufferGeometry(radius, detail) {
 IcosahedronBufferGeometry.prototype = Object.create(PolyhedronBufferGeometry.prototype);
 IcosahedronBufferGeometry.prototype.constructor = IcosahedronBufferGeometry;
 
+/**
+ * @author timothypratley / https://github.com/timothypratley
+ */
+
 function IcosahedronGeometry(radius, detail) {
 
 	Geometry.call(this);
@@ -21855,6 +24324,10 @@ function IcosahedronGeometry(radius, detail) {
 
 IcosahedronGeometry.prototype = Object.create(Geometry.prototype);
 IcosahedronGeometry.prototype.constructor = IcosahedronGeometry;
+
+/**
+ * @author Mugen87 / https://github.com/Mugen87
+ */
 
 function DodecahedronBufferGeometry(radius, detail) {
 
@@ -21890,6 +24363,10 @@ function DodecahedronBufferGeometry(radius, detail) {
 DodecahedronBufferGeometry.prototype = Object.create(PolyhedronBufferGeometry.prototype);
 DodecahedronBufferGeometry.prototype.constructor = DodecahedronBufferGeometry;
 
+/**
+ * @author Abe Pazos / https://hamoid.com
+ */
+
 function DodecahedronGeometry(radius, detail) {
 
 	Geometry.call(this);
@@ -21907,6 +24384,12 @@ function DodecahedronGeometry(radius, detail) {
 
 DodecahedronGeometry.prototype = Object.create(Geometry.prototype);
 DodecahedronGeometry.prototype.constructor = DodecahedronGeometry;
+
+/**
+ * @author clockworkgeek / https://github.com/clockworkgeek
+ * @author timothypratley / https://github.com/timothypratley
+ * @author WestLangley / http://github.com/WestLangley
+*/
 
 function PolyhedronGeometry(vertices, indices, radius, detail) {
 
@@ -21927,6 +24410,13 @@ function PolyhedronGeometry(vertices, indices, radius, detail) {
 
 PolyhedronGeometry.prototype = Object.create(Geometry.prototype);
 PolyhedronGeometry.prototype.constructor = PolyhedronGeometry;
+
+/**
+ * @author Mugen87 / https://github.com/Mugen87
+ *
+ * Creates a tube which extrudes along a 3d spline.
+ *
+ */
 
 function TubeBufferGeometry(path, tubularSegments, radius, radialSegments, closed) {
 
@@ -22083,6 +24573,16 @@ function TubeBufferGeometry(path, tubularSegments, radius, radialSegments, close
 TubeBufferGeometry.prototype = Object.create(BufferGeometry.prototype);
 TubeBufferGeometry.prototype.constructor = TubeBufferGeometry;
 
+/**
+ * @author oosmoxiecode / https://github.com/oosmoxiecode
+ * @author WestLangley / https://github.com/WestLangley
+ * @author zz85 / https://github.com/zz85
+ * @author miningold / https://github.com/miningold
+ * @author jonobr1 / https://github.com/jonobr1
+ *
+ * Creates a tube which extrudes along a 3d spline.
+ */
+
 function TubeGeometry(path, tubularSegments, radius, radialSegments, closed, taper) {
 
 	Geometry.call(this);
@@ -22116,6 +24616,11 @@ function TubeGeometry(path, tubularSegments, radius, radialSegments, closed, tap
 TubeGeometry.prototype = Object.create(Geometry.prototype);
 TubeGeometry.prototype.constructor = TubeGeometry;
 
+/**
+ * @author Mugen87 / https://github.com/Mugen87
+ *
+ * see: http://www.blackpawn.com/texts/pqtorus/
+ */
 function TorusKnotBufferGeometry(radius, tube, tubularSegments, radialSegments, p, q) {
 
 	BufferGeometry.call(this);
@@ -22273,6 +24778,10 @@ function TorusKnotBufferGeometry(radius, tube, tubularSegments, radialSegments, 
 TorusKnotBufferGeometry.prototype = Object.create(BufferGeometry.prototype);
 TorusKnotBufferGeometry.prototype.constructor = TorusKnotBufferGeometry;
 
+/**
+ * @author oosmoxiecode
+ */
+
 function TorusKnotGeometry(radius, tube, tubularSegments, radialSegments, p, q, heightScale) {
 
 	Geometry.call(this);
@@ -22296,6 +24805,10 @@ function TorusKnotGeometry(radius, tube, tubularSegments, radialSegments, p, q, 
 
 TorusKnotGeometry.prototype = Object.create(Geometry.prototype);
 TorusKnotGeometry.prototype.constructor = TorusKnotGeometry;
+
+/**
+ * @author Mugen87 / https://github.com/Mugen87
+ */
 
 function TorusBufferGeometry(radius, tube, radialSegments, tubularSegments, arc) {
 
@@ -22414,6 +24927,12 @@ function TorusBufferGeometry(radius, tube, radialSegments, tubularSegments, arc)
 
 TorusBufferGeometry.prototype = Object.create(BufferGeometry.prototype);
 TorusBufferGeometry.prototype.constructor = TorusBufferGeometry;
+
+/**
+ * @author oosmoxiecode
+ * @author mrdoob / http://mrdoob.com/
+ * based on http://code.google.com/p/away3d/source/browse/trunk/fp10/Away3DLite/src/away3dlite/primitives/Torus.as?r=2888
+ */
 
 function TorusGeometry(radius, tube, radialSegments, tubularSegments, arc) {
 
@@ -23124,6 +25643,30 @@ var ShapeUtils = {
 
 };
 
+/**
+ * @author zz85 / http://www.lab4games.net/zz85/blog
+ *
+ * Creates extruded geometry from a path shape.
+ *
+ * parameters = {
+ *
+ *  curveSegments: <int>, // number of points on the curves
+ *  steps: <int>, // number of points for z-side extrusions / used for subdividing segments of extrude spline too
+ *  amount: <int>, // Depth to extrude the shape
+ *
+ *  bevelEnabled: <bool>, // turn on bevel
+ *  bevelThickness: <float>, // how deep into the original shape bevel goes
+ *  bevelSize: <float>, // how far from shape outline is bevel
+ *  bevelSegments: <int>, // number of bevel layers
+ *
+ *  extrudePath: <THREE.CurvePath> // 3d spline path to extrude shape along. (creates Frames if .frames aren't defined)
+ *  frames: <Object> // containing arrays of tangents, normals, binormals
+ *
+ *  uvGenerator: <Object> // object that provides UV generator functions
+ *
+ * }
+ **/
+
 function ExtrudeGeometry(shapes, options) {
 
 	if (typeof shapes === "undefined") {
@@ -23724,6 +26267,25 @@ ExtrudeGeometry.WorldUVGenerator = {
 	}
 };
 
+/**
+ * @author zz85 / http://www.lab4games.net/zz85/blog
+ * @author alteredq / http://alteredqualia.com/
+ *
+ * Text = 3D Text
+ *
+ * parameters = {
+ *  font: <THREE.Font>, // font
+ *
+ *  size: <float>, // size of the text
+ *  height: <float>, // thickness to extrude text
+ *  curveSegments: <int>, // number of points on the curves
+ *
+ *  bevelEnabled: <bool>, // turn on bevel
+ *  bevelThickness: <float>, // how deep into text bevel goes
+ *  bevelSize: <float> // how far from text outline is bevel
+ * }
+ */
+
 function TextGeometry(text, parameters) {
 
   parameters = parameters || {};
@@ -23756,6 +26318,10 @@ function TextGeometry(text, parameters) {
 TextGeometry.prototype = Object.create(ExtrudeGeometry.prototype);
 TextGeometry.prototype.constructor = TextGeometry;
 
+/**
+ * @author Kaleb Murphy
+ */
+
 function RingGeometry(innerRadius, outerRadius, thetaSegments, phiSegments, thetaStart, thetaLength) {
 
 	Geometry.call(this);
@@ -23777,24 +26343,16 @@ function RingGeometry(innerRadius, outerRadius, thetaSegments, phiSegments, thet
 RingGeometry.prototype = Object.create(Geometry.prototype);
 RingGeometry.prototype.constructor = RingGeometry;
 
-function PlaneGeometry(width, height, widthSegments, heightSegments) {
+/**
+ * @author Mugen87 / https://github.com/Mugen87
+ */
 
-	Geometry.call(this);
-
-	this.type = 'PlaneGeometry';
-
-	this.parameters = {
-		width: width,
-		height: height,
-		widthSegments: widthSegments,
-		heightSegments: heightSegments
-	};
-
-	this.fromBufferGeometry(new PlaneBufferGeometry(width, height, widthSegments, heightSegments));
-}
-
-PlaneGeometry.prototype = Object.create(Geometry.prototype);
-PlaneGeometry.prototype.constructor = PlaneGeometry;
+// points - to create a closed torus, one must use a set of points
+//    like so: [ a, b, c, d, a ], see first is the same as last.
+// segments - the number of circumference segments to create
+// phiStart - the starting radian
+// phiLength - the radian (0 to 2PI) range of the lathed section
+//    2PI is a closed lathe, less than 2PI is a portion.
 
 function LatheBufferGeometry(points, segments, phiStart, phiLength) {
 
@@ -23936,6 +26494,19 @@ function LatheBufferGeometry(points, segments, phiStart, phiLength) {
 LatheBufferGeometry.prototype = Object.create(BufferGeometry.prototype);
 LatheBufferGeometry.prototype.constructor = LatheBufferGeometry;
 
+/**
+ * @author astrodud / http://astrodud.isgreat.org/
+ * @author zz85 / https://github.com/zz85
+ * @author bhouston / http://clara.io
+ */
+
+// points - to create a closed torus, one must use a set of points
+//    like so: [ a, b, c, d, a ], see first is the same as last.
+// segments - the number of circumference segments to create
+// phiStart - the starting radian
+// phiLength - the radian (0 to 2PI) range of the lathed section
+//    2PI is a closed lathe, less than 2PI is a portion.
+
 function LatheGeometry(points, segments, phiStart, phiLength) {
 
 	Geometry.call(this);
@@ -23955,6 +26526,22 @@ function LatheGeometry(points, segments, phiStart, phiLength) {
 
 LatheGeometry.prototype = Object.create(Geometry.prototype);
 LatheGeometry.prototype.constructor = LatheGeometry;
+
+/**
+ * @author jonobr1 / http://jonobr1.com
+ *
+ * Creates a one-sided polygonal geometry from a path shape. Similar to
+ * ExtrudeGeometry.
+ *
+ * parameters = {
+ *
+ *	curveSegments: <int>, // number of points on the curves. NOT USED AT THE MOMENT.
+ *
+ *	material: <int> // material index for front and back faces
+ *	uvGenerator: <Object> // object that provides UV generator functions
+ *
+ * }
+ **/
 
 function ShapeGeometry(shapes, options) {
 
@@ -24064,6 +26651,10 @@ ShapeGeometry.prototype.addShape = function (shape, options) {
 	}
 };
 
+/**
+ * @author WestLangley / http://github.com/WestLangley
+ */
+
 function EdgesGeometry(geometry, thresholdAngle) {
 
 	BufferGeometry.call(this);
@@ -24147,6 +26738,10 @@ function EdgesGeometry(geometry, thresholdAngle) {
 EdgesGeometry.prototype = Object.create(BufferGeometry.prototype);
 EdgesGeometry.prototype.constructor = EdgesGeometry;
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function CylinderGeometry(radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength) {
 
 	Geometry.call(this);
@@ -24171,6 +26766,10 @@ function CylinderGeometry(radiusTop, radiusBottom, height, radialSegments, heigh
 CylinderGeometry.prototype = Object.create(Geometry.prototype);
 CylinderGeometry.prototype.constructor = CylinderGeometry;
 
+/**
+ * @author abelnation / http://github.com/abelnation
+ */
+
 function ConeGeometry(radius, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength) {
 
 	CylinderGeometry.call(this, 0, radius, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength);
@@ -24190,6 +26789,10 @@ function ConeGeometry(radius, height, radialSegments, heightSegments, openEnded,
 
 ConeGeometry.prototype = Object.create(CylinderGeometry.prototype);
 ConeGeometry.prototype.constructor = ConeGeometry;
+
+/**
+ * @author: abelnation / http://github.com/abelnation
+ */
 
 function ConeBufferGeometry(radius, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength) {
 
@@ -24211,6 +26814,10 @@ function ConeBufferGeometry(radius, height, radialSegments, heightSegments, open
 ConeBufferGeometry.prototype = Object.create(CylinderBufferGeometry.prototype);
 ConeBufferGeometry.prototype.constructor = ConeBufferGeometry;
 
+/**
+ * @author hughes
+ */
+
 function CircleGeometry(radius, segments, thetaStart, thetaLength) {
 
 	Geometry.call(this);
@@ -24229,6 +26836,11 @@ function CircleGeometry(radius, segments, thetaStart, thetaLength) {
 
 CircleGeometry.prototype = Object.create(Geometry.prototype);
 CircleGeometry.prototype.constructor = CircleGeometry;
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * based on http://papervision3d.googlecode.com/svn/trunk/as3/trunk/src/org/papervision3d/objects/primitives/Cube.as
+ */
 
 function BoxGeometry(width, height, depth, widthSegments, heightSegments, depthSegments) {
 
@@ -24295,6 +26907,10 @@ var Geometries = Object.freeze({
 	BoxBufferGeometry: BoxBufferGeometry,
 	BoxGeometry: BoxGeometry
 });
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
 
 function ObjectLoader(manager) {
 
@@ -24836,6 +27452,41 @@ Object.assign(ObjectLoader.prototype, {
 
 });
 
+/**
+ * @author zz85 / http://www.lab4games.net/zz85/blog
+ * Extensible curve object
+ *
+ * Some common of Curve methods
+ * .getPoint(t), getTangent(t)
+ * .getPointAt(u), getTangentAt(u)
+ * .getPoints(), .getSpacedPoints()
+ * .getLength()
+ * .updateArcLengths()
+ *
+ * This following classes subclasses THREE.Curve:
+ *
+ * -- 2d classes --
+ * THREE.LineCurve
+ * THREE.QuadraticBezierCurve
+ * THREE.CubicBezierCurve
+ * THREE.SplineCurve
+ * THREE.ArcCurve
+ * THREE.EllipseCurve
+ *
+ * -- 3d classes --
+ * THREE.LineCurve3
+ * THREE.QuadraticBezierCurve3
+ * THREE.CubicBezierCurve3
+ * THREE.SplineCurve3
+ *
+ * A series of curves can be represented as a THREE.CurvePath
+ *
+ **/
+
+/**************************************************************
+ *	Abstract Curve base class
+ **************************************************************/
+
 function Curve() {}
 
 Curve.prototype = {
@@ -25171,6 +27822,10 @@ Curve.create = function (constructor, getPointFunc) {
 	return constructor;
 };
 
+/**************************************************************
+ *	Line
+ **************************************************************/
+
 function LineCurve(v1, v2) {
 
 	this.v1 = v1;
@@ -25208,6 +27863,16 @@ LineCurve.prototype.getTangent = function (t) {
 
 	return tangent.normalize();
 };
+
+/**
+ * @author zz85 / http://www.lab4games.net/zz85/blog
+ *
+ **/
+
+/**************************************************************
+ *	Curved Path - a curve path is simply a array of connected
+ *  curves, but retains the api of a curve
+ **************************************************************/
 
 function CurvePath() {
 
@@ -25409,6 +28074,10 @@ CurvePath.prototype = Object.assign(Object.create(Curve.prototype), {
 
 });
 
+/**************************************************************
+ *	Ellipse curve
+ **************************************************************/
+
 function EllipseCurve(aX, aY, xRadius, yRadius, aStartAngle, aEndAngle, aClockwise, aRotation) {
 
 	this.aX = aX;
@@ -25526,6 +28195,10 @@ var CurveUtils = {
 
 };
 
+/**************************************************************
+ *	Spline curve
+ **************************************************************/
+
 function SplineCurve(points /* array of Vector2 */) {
 
 	this.points = points === undefined ? [] : points;
@@ -25554,6 +28227,10 @@ SplineCurve.prototype.getPoint = function (t) {
 	return new Vector2(interpolate(point0.x, point1.x, point2.x, point3.x, weight), interpolate(point0.y, point1.y, point2.y, point3.y, weight));
 };
 
+/**************************************************************
+ *	Cubic Bezier curve
+ **************************************************************/
+
 function CubicBezierCurve(v0, v1, v2, v3) {
 
 	this.v0 = v0;
@@ -25578,6 +28255,10 @@ CubicBezierCurve.prototype.getTangent = function (t) {
 
 	return new Vector2(tangentCubicBezier(t, this.v0.x, this.v1.x, this.v2.x, this.v3.x), tangentCubicBezier(t, this.v0.y, this.v1.y, this.v2.y, this.v3.y)).normalize();
 };
+
+/**************************************************************
+ *	Quadratic Bezier curve
+ **************************************************************/
 
 function QuadraticBezierCurve(v0, v1, v2) {
 
@@ -25700,6 +28381,17 @@ var PathPrototype = Object.assign(Object.create(CurvePath.prototype), {
 
 });
 
+/**
+ * @author zz85 / http://www.lab4games.net/zz85/blog
+ * Defines a 2d shape plane using paths.
+ **/
+
+// STEP 1 Create a path.
+// STEP 2 Turn path into shape.
+// STEP 3 ExtrudeGeometry takes in Shape/Shapes
+// STEP 3a - Extract points from each shape, turn to vertices
+// STEP 3b - Triangulate each shape, add faces.
+
 function Shape() {
 
 	Path.apply(this, arguments);
@@ -25741,6 +28433,12 @@ Shape.prototype = Object.assign(Object.create(PathPrototype), {
 	}
 
 });
+
+/**
+ * @author zz85 / http://www.lab4games.net/zz85/blog
+ * Creates free form 2d path using series of points, lines or curves.
+ *
+ **/
 
 function Path(points) {
 
@@ -25983,6 +28681,11 @@ ShapePath.prototype = {
 	}
 };
 
+/**
+ * @author zz85 / http://www.lab4games.net/zz85/blog
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function Font(data) {
 
 	this.data = data;
@@ -26138,6 +28841,10 @@ Object.assign(Font.prototype, {
 	}
 
 });
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
 
 function FontLoader(manager) {
 
@@ -27567,6 +30274,8 @@ Euler.prototype.debug = Quaternion.prototype.debug = Vector2.prototype.debug = V
   return this;
 };
 
+// The JSON format object loader is not always included in the Three.js distribution,
+// so we have to first check for it.
 var loaders = null;
 var PATH_PATTERN = /((?:https?:\/\/)?(?:[^/]+\/)+)(\w+)(\.(?:\w+))$/;
 var EXTENSION_PATTERN = /(\.(?:\w+))+$/;
@@ -30984,1677 +33693,6 @@ var rand = Object.freeze({
 	default: Random
 });
 
-var CommandPack = function CommandPack(commandPackName, commands) {
-  classCallCheck(this, CommandPack);
-
-  this.name = commandPackName;
-  Object.assign(this, commands);
-};
-
-var BasicTextInput = function (_CommandPack) {
-  inherits(BasicTextInput, _CommandPack);
-
-  function BasicTextInput(additionalName, additionalCommands) {
-    classCallCheck(this, BasicTextInput);
-
-    var commands = {
-      NORMAL_LEFTARROW: function NORMAL_LEFTARROW(prim, tokenRows) {
-        prim.cursorLeft(tokenRows, prim.frontCursor);
-      },
-      NORMAL_SKIPLEFT: function NORMAL_SKIPLEFT(prim, tokenRows) {
-        prim.cursorSkipLeft(tokenRows, prim.frontCursor);
-      },
-      NORMAL_RIGHTARROW: function NORMAL_RIGHTARROW(prim, tokenRows) {
-        prim.cursorRight(tokenRows, prim.frontCursor);
-      },
-      NORMAL_SKIPRIGHT: function NORMAL_SKIPRIGHT(prim, tokenRows) {
-        prim.cursorSkipRight(tokenRows, prim.frontCursor);
-      },
-      NORMAL_HOME: function NORMAL_HOME(prim, tokenRows) {
-        prim.cursorHome(tokenRows, prim.frontCursor);
-      },
-      NORMAL_END: function NORMAL_END(prim, tokenRows) {
-        prim.cursorEnd(tokenRows, prim.frontCursor);
-      },
-      NORMAL_BACKSPACE: function NORMAL_BACKSPACE(prim, tokenRows) {
-        if (prim.frontCursor.i === prim.backCursor.i) {
-          prim.frontCursor.left(tokenRows);
-        }
-        prim.selectedText = "";
-        prim.scrollIntoView(prim.frontCursor);
-      },
-      NORMAL_ENTER: function NORMAL_ENTER(prim, tokenRows, currentToken) {
-        prim.emit("change", {
-          target: prim
-        });
-      },
-      NORMAL_DELETE: function NORMAL_DELETE(prim, tokenRows) {
-        if (prim.frontCursor.i === prim.backCursor.i) {
-          prim.backCursor.right(tokenRows);
-        }
-        prim.selectedText = "";
-        prim.scrollIntoView(prim.frontCursor);
-      },
-      NORMAL_TAB: function NORMAL_TAB(prim, tokenRows) {
-        prim.selectedText = prim.tabString;
-      },
-
-      SHIFT_LEFTARROW: function SHIFT_LEFTARROW(prim, tokenRows) {
-        prim.cursorLeft(tokenRows, prim.backCursor);
-      },
-      SHIFT_SKIPLEFT: function SHIFT_SKIPLEFT(prim, tokenRows) {
-        prim.cursorSkipLeft(tokenRows, prim.backCursor);
-      },
-      SHIFT_RIGHTARROW: function SHIFT_RIGHTARROW(prim, tokenRows) {
-        prim.cursorRight(tokenRows, prim.backCursor);
-      },
-      SHIFT_SKIPRIGHT: function SHIFT_SKIPRIGHT(prim, tokenRows) {
-        prim.cursorSkipRight(tokenRows, prim.backCursor);
-      },
-      SHIFT_HOME: function SHIFT_HOME(prim, tokenRows) {
-        prim.cursorHome(tokenRows, prim.backCursor);
-      },
-      SHIFT_END: function SHIFT_END(prim, tokenRows) {
-        prim.cursorEnd(tokenRows, prim.backCursor);
-      },
-      SHIFT_DELETE: function SHIFT_DELETE(prim, tokenRows) {
-        if (prim.frontCursor.i === prim.backCursor.i) {
-          prim.frontCursor.home(tokenRows);
-          prim.backCursor.end(tokenRows);
-        }
-        prim.selectedText = "";
-        prim.scrollIntoView(prim.frontCursor);
-      },
-      CTRL_HOME: function CTRL_HOME(prim, tokenRows) {
-        prim.cursorFullHome(tokenRows, prim.frontCursor);
-      },
-      CTRL_END: function CTRL_END(prim, tokenRows) {
-        prim.cursorFullEnd(tokenRows, prim.frontCursor);
-      },
-
-      CTRLSHIFT_HOME: function CTRLSHIFT_HOME(prim, tokenRows) {
-        prim.cursorFullHome(tokenRows, prim.backCursor);
-      },
-      CTRLSHIFT_END: function CTRLSHIFT_END(prim, tokenRows) {
-        prim.cursorFullEnd(tokenRows, prim.backCursor);
-      },
-
-      SELECT_ALL: function SELECT_ALL(prim, tokenRows) {
-        prim.frontCursor.fullhome(tokenRows);
-        prim.backCursor.fullend(tokenRows);
-      },
-
-      REDO: function REDO(prim, tokenRows) {
-        prim.redo();
-        prim.scrollIntoView(prim.frontCursor);
-      },
-      UNDO: function UNDO(prim, tokenRows) {
-        prim.undo();
-        prim.scrollIntoView(prim.frontCursor);
-      }
-    };
-
-    if (additionalCommands) {
-      for (var key in additionalCommands) {
-        commands[key] = additionalCommands[key];
-      }
-    }
-
-    return possibleConstructorReturn(this, (BasicTextInput.__proto__ || Object.getPrototypeOf(BasicTextInput)).call(this, additionalName || "Text editor commands", commands));
-  }
-
-  return BasicTextInput;
-}(CommandPack);
-
-var TextEditor = new BasicTextInput("Text Area input commands", {
-  NORMAL_UPARROW: function NORMAL_UPARROW(prim, tokenRows) {
-    prim.cursorUp(tokenRows, prim.frontCursor);
-  },
-  NORMAL_DOWNARROW: function NORMAL_DOWNARROW(prim, tokenRows) {
-    prim.cursorDown(tokenRows, prim.frontCursor);
-  },
-  NORMAL_PAGEUP: function NORMAL_PAGEUP(prim, tokenRows) {
-    prim.cursorPageUp(tokenRows, prim.frontCursor);
-  },
-  NORMAL_PAGEDOWN: function NORMAL_PAGEDOWN(prim, tokenRows) {
-    prim.cursorPageDown(tokenRows, prim.frontCursor);
-  },
-  NORMAL_ENTER: function NORMAL_ENTER(prim, tokenRows, currentToken) {
-    var indent = "";
-    var tokenRow = tokenRows[prim.frontCursor.y];
-    if (tokenRow.length > 0 && tokenRow[0].type === "whitespace") {
-      indent = tokenRow[0].value;
-    }
-    prim.selectedText = "\n" + indent;
-    prim.scrollIntoView(prim.frontCursor);
-  },
-
-  SHIFT_UPARROW: function SHIFT_UPARROW(prim, tokenRows) {
-    prim.cursorUp(tokenRows, prim.backCursor);
-  },
-  SHIFT_DOWNARROW: function SHIFT_DOWNARROW(prim, tokenRows) {
-    prim.cursorDown(tokenRows, prim.backCursor);
-  },
-  SHIFT_PAGEUP: function SHIFT_PAGEUP(prim, tokenRows) {
-    prim.cursorPageUp(tokenRows, prim.backCursor);
-  },
-  SHIFT_PAGEDOWN: function SHIFT_PAGEDOWN(prim, tokenRows) {
-    prim.cursorPageDown(tokenRows, prim.backCursor);
-  },
-
-  WINDOW_SCROLL_DOWN: function WINDOW_SCROLL_DOWN(prim, tokenRows) {
-    if (prim.scroll.y < tokenRows.length) {
-      ++prim.scroll.y;
-    }
-  },
-  WINDOW_SCROLL_UP: function WINDOW_SCROLL_UP(prim, tokenRows) {
-    if (prim.scroll.y > 0) {
-      --prim.scroll.y;
-    }
-  }
-});
-
-////
-// For all of these commands, the "current" cursor is:
-// If SHIFT is not held, then "front".
-// If SHIFT is held, then "back"
-//
-var TextInputCommands = new BasicTextInput("Text Line input commands");
-
-var PlainText = function PlainText(text, size, fgcolor, bgcolor, x, y, z) {
-  var hAlign = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : "center";
-  classCallCheck(this, PlainText);
-
-  text = text.replace(/\r\n/g, "\n");
-  var lines = text.split("\n");
-  var lineHeight = size * 1000;
-  var boxHeight = lineHeight * lines.length;
-
-  var textCanvas = document.createElement("canvas");
-  var textContext = textCanvas.getContext("2d");
-  textContext.font = lineHeight + "px Arial";
-  var width = textContext.measureText(text).width;
-
-  textCanvas.width = width;
-  textCanvas.height = boxHeight;
-  textContext.font = lineHeight * 0.8 + "px Arial";
-  if (bgcolor !== "transparent") {
-    textContext.fillStyle = bgcolor;
-    textContext.fillRect(0, 0, textCanvas.width, textCanvas.height);
-  }
-  textContext.fillStyle = fgcolor;
-
-  for (var i = 0; i < lines.length; ++i) {
-    textContext.fillText(lines[i], 0, i * lineHeight);
-  }
-
-  var texture = new Texture$1(textCanvas);
-  texture.needsUpdate = true;
-
-  var material = new MeshBasicMaterial({
-    map: texture,
-    transparent: bgcolor === "transparent",
-    useScreenCoordinates: false,
-    color: 0xffffff,
-    shading: FlatShading
-  });
-
-  var textGeometry = new PlaneGeometry(size * width / lineHeight, size * lines.length);
-  textGeometry.computeBoundingBox();
-  textGeometry.computeVertexNormals();
-
-  var textMesh = new Mesh(textGeometry, material);
-  if (hAlign === "left") {
-    x -= textGeometry.boundingBox.min.x;
-  } else if (hAlign === "right") {
-    x += textGeometry.boundingBox.min.x;
-  }
-  textMesh.position.set(x, y, z);
-  return textMesh;
-};
-
-// unicode-aware string reverse
-var reverse = function () {
-  var combiningMarks = /(<%= allExceptCombiningMarks %>)(<%= combiningMarks %>+)/g,
-      surrogatePair = /(<%= highSurrogates %>)(<%= lowSurrogates %>)/g;
-
-  function reverse(str) {
-    str = str.replace(combiningMarks, function (match, capture1, capture2) {
-      return reverse(capture2) + capture1;
-    }).replace(surrogatePair, "$2$1");
-    var res = "";
-    for (var i = str.length - 1; i >= 0; --i) {
-      res += str[i];
-    }
-    return res;
-  }
-  return reverse;
-}();
-
-var Cursor = function () {
-  createClass(Cursor, null, [{
-    key: "min",
-    value: function min(a, b) {
-      if (a.i <= b.i) {
-        return a;
-      }
-      return b;
-    }
-  }, {
-    key: "max",
-    value: function max(a, b) {
-      if (a.i > b.i) {
-        return a;
-      }
-      return b;
-    }
-  }]);
-
-  function Cursor(i, x, y) {
-    classCallCheck(this, Cursor);
-
-    this.i = i || 0;
-    this.x = x || 0;
-    this.y = y || 0;
-    this.moved = true;
-  }
-
-  createClass(Cursor, [{
-    key: "clone",
-    value: function clone() {
-      return new Cursor(this.i, this.x, this.y);
-    }
-  }, {
-    key: "toString",
-    value: function toString() {
-      return "[i:" + this.i + " x:" + this.x + " y:" + this.y + "]";
-    }
-  }, {
-    key: "copy",
-    value: function copy(cursor) {
-      this.i = cursor.i;
-      this.x = cursor.x;
-      this.y = cursor.y;
-      this.moved = false;
-    }
-  }, {
-    key: "fullhome",
-    value: function fullhome() {
-      this.i = 0;
-      this.x = 0;
-      this.y = 0;
-      this.moved = true;
-    }
-  }, {
-    key: "fullend",
-    value: function fullend(lines) {
-      this.i = 0;
-      var lastLength = 0;
-      for (var y = 0; y < lines.length; ++y) {
-        var line = lines[y];
-        lastLength = line.length;
-        this.i += lastLength;
-      }
-      this.y = lines.length - 1;
-      this.x = lastLength;
-      this.moved = true;
-    }
-  }, {
-    key: "skipleft",
-    value: function skipleft(lines) {
-      if (this.x === 0) {
-        this.left(lines);
-      } else {
-        var x = this.x - 1;
-        var line = lines[this.y];
-        var word = reverse(line.substring(0, x));
-        var m = word.match(/(\s|\W)+/);
-        var dx = m ? m.index + m[0].length + 1 : word.length;
-        this.i -= dx;
-        this.x -= dx;
-      }
-      this.moved = true;
-    }
-  }, {
-    key: "left",
-    value: function left(lines) {
-      if (this.i > 0) {
-        --this.i;
-        --this.x;
-        if (this.x < 0) {
-          --this.y;
-          var line = lines[this.y];
-          this.x = line.length;
-        }
-        if (this.reverseFromNewline(lines)) {
-          ++this.i;
-        }
-      }
-      this.moved = true;
-    }
-  }, {
-    key: "skipright",
-    value: function skipright(lines) {
-      var line = lines[this.y];
-      if (this.x === line.length || line[this.x] === '\n') {
-        this.right(lines);
-      } else {
-        var x = this.x + 1;
-        line = line.substring(x);
-        var m = line.match(/(\s|\W)+/);
-        var dx = m ? m.index + m[0].length + 1 : line.length - this.x;
-        this.i += dx;
-        this.x += dx;
-        this.reverseFromNewline(lines);
-      }
-      this.moved = true;
-    }
-  }, {
-    key: "fixCursor",
-    value: function fixCursor(lines) {
-      this.x = this.i;
-      this.y = 0;
-      var total = 0;
-      var line = lines[this.y];
-      while (this.x > line.length) {
-        this.x -= line.length;
-        total += line.length;
-        if (this.y >= lines.length - 1) {
-          this.i = total;
-          this.x = line.length;
-          this.moved = true;
-          break;
-        }
-        ++this.y;
-        line = lines[this.y];
-      }
-      return this.moved;
-    }
-  }, {
-    key: "right",
-    value: function right(lines) {
-      this.advanceN(lines, 1);
-    }
-  }, {
-    key: "advanceN",
-    value: function advanceN(lines, n) {
-      var line = lines[this.y];
-      if (this.y < lines.length - 1 || this.x < line.length) {
-        this.i += n;
-        this.fixCursor(lines);
-        line = lines[this.y];
-        if (this.x > 0 && line[this.x - 1] === '\n') {
-          ++this.y;
-          this.x = 0;
-        }
-      }
-      this.moved = true;
-    }
-  }, {
-    key: "home",
-    value: function home() {
-      this.i -= this.x;
-      this.x = 0;
-      this.moved = true;
-    }
-  }, {
-    key: "end",
-    value: function end(lines) {
-      var line = lines[this.y];
-      var dx = line.length - this.x;
-      this.i += dx;
-      this.x += dx;
-      this.reverseFromNewline(lines);
-      this.moved = true;
-    }
-  }, {
-    key: "up",
-    value: function up(lines) {
-      if (this.y > 0) {
-        --this.y;
-        var line = lines[this.y];
-        var dx = Math.min(0, line.length - this.x);
-        this.x += dx;
-        this.i -= line.length - dx;
-        this.reverseFromNewline(lines);
-      }
-      this.moved = true;
-    }
-  }, {
-    key: "down",
-    value: function down(lines) {
-      if (this.y < lines.length - 1) {
-        ++this.y;
-        var line = lines[this.y];
-        var pLine = lines[this.y - 1];
-        var dx = Math.min(0, line.length - this.x);
-        this.x += dx;
-        this.i += pLine.length + dx;
-        this.reverseFromNewline(lines);
-      }
-      this.moved = true;
-    }
-  }, {
-    key: "incY",
-    value: function incY(dy, lines) {
-      this.y = Math.max(0, Math.min(lines.length - 1, this.y + dy));
-      var line = lines[this.y];
-      this.x = Math.max(0, Math.min(line.length, this.x));
-      this.i = this.x;
-      for (var i = 0; i < this.y; ++i) {
-        this.i += lines[i].length;
-      }
-      this.reverseFromNewline(lines);
-      this.moved = true;
-    }
-  }, {
-    key: "setXY",
-    value: function setXY(x, y, lines) {
-      this.y = Math.max(0, Math.min(lines.length - 1, y));
-      var line = lines[this.y];
-      this.x = Math.max(0, Math.min(line.length, x));
-      this.i = this.x;
-      for (var i = 0; i < this.y; ++i) {
-        this.i += lines[i].length;
-      }
-      this.reverseFromNewline(lines);
-      this.moved = true;
-    }
-  }, {
-    key: "setI",
-    value: function setI(i, lines) {
-      this.i = i;
-      this.fixCursor(lines);
-      this.moved = true;
-    }
-  }, {
-    key: "reverseFromNewline",
-    value: function reverseFromNewline(lines) {
-      var line = lines[this.y];
-      if (this.x > 0 && line[this.x - 1] === '\n') {
-        --this.x;
-        --this.i;
-        return true;
-      }
-      return false;
-    }
-  }]);
-  return Cursor;
-}();
-
-var Rule = function () {
-  function Rule(name, test) {
-    classCallCheck(this, Rule);
-
-    this.name = name;
-    this.test = test;
-  }
-
-  createClass(Rule, [{
-    key: "carveOutMatchedToken",
-    value: function carveOutMatchedToken(tokens, j) {
-      var token = tokens[j];
-      if (token.type === "regular") {
-        var res = this.test.exec(token.value);
-        if (res) {
-          // Only use the last group that matches the regex, to allow for more
-          // complex regexes that can match in special contexts, but not make
-          // the context part of the token.
-          var midx = res[res.length - 1],
-              start = res.input.indexOf(midx),
-              end = start + midx.length;
-          if (start === 0) {
-            // the rule matches the start of the token
-            token.type = this.name;
-            if (end < token.value.length) {
-              // but not the end
-              var next = token.splitAt(end);
-              next.type = "regular";
-              tokens.splice(j + 1, 0, next);
-            }
-          } else {
-            // the rule matches from the middle of the token
-            var mid = token.splitAt(start);
-            if (midx.length < mid.value.length) {
-              // but not the end
-              var right = mid.splitAt(midx.length);
-              tokens.splice(j + 1, 0, right);
-            }
-            mid.type = this.name;
-            tokens.splice(j + 1, 0, mid);
-          }
-        }
-      }
-    }
-  }]);
-  return Rule;
-}();
-
-var Token = function () {
-  function Token(value, type, index, line) {
-    classCallCheck(this, Token);
-
-    this.value = value;
-    this.type = type;
-    this.index = index;
-    this.line = line;
-  }
-
-  createClass(Token, [{
-    key: "clone",
-    value: function clone() {
-      return new Token(this.value, this.type, this.index, this.line);
-    }
-  }, {
-    key: "splitAt",
-    value: function splitAt(i) {
-      var next = this.value.substring(i);
-      this.value = this.value.substring(0, i);
-      return new Token(next, this.type, this.index + i, this.line);
-    }
-  }, {
-    key: "toString",
-    value: function toString() {
-      return "[" + this.type + ": " + this.value + "]";
-    }
-  }]);
-  return Token;
-}();
-
-var Grammar = function () {
-  function Grammar(grammarName, rules) {
-    classCallCheck(this, Grammar);
-
-    this.name = grammarName;
-
-    // clone the preprocessing grammar to start a new grammar
-    this.grammar = rules.map(function (rule) {
-      return new Rule(rule[0], rule[1]);
-    });
-
-    function crudeParsing(tokens) {
-      var commentDelim = null,
-          stringDelim = null,
-          line = 0,
-          i,
-          t;
-      for (i = 0; i < tokens.length; ++i) {
-        t = tokens[i];
-        t.line = line;
-        if (t.type === "newlines") {
-          ++line;
-        }
-
-        if (stringDelim) {
-          if (t.type === "stringDelim" && t.value === stringDelim && (i === 0 || tokens[i - 1].value[tokens[i - 1].value.length - 1] !== "\\")) {
-            stringDelim = null;
-          }
-          if (t.type !== "newlines") {
-            t.type = "strings";
-          }
-        } else if (commentDelim) {
-          if (commentDelim === "startBlockComments" && t.type === "endBlockComments" || commentDelim === "startLineComments" && t.type === "newlines") {
-            commentDelim = null;
-          }
-          if (t.type !== "newlines") {
-            t.type = "comments";
-          }
-        } else if (t.type === "stringDelim") {
-          stringDelim = t.value;
-          t.type = "strings";
-        } else if (t.type === "startBlockComments" || t.type === "startLineComments") {
-          commentDelim = t.type;
-          t.type = "comments";
-        }
-      }
-
-      // recombine like-tokens
-      for (i = tokens.length - 1; i > 0; --i) {
-        var p = tokens[i - 1];
-        t = tokens[i];
-        if (p.type === t.type && p.type !== "newlines") {
-          p.value += t.value;
-          tokens.splice(i, 1);
-        }
-      }
-    }
-
-    this.tokenize = function (text) {
-      // all text starts off as regular text, then gets cut up into tokens of
-      // more specific type
-      var tokens = [new Token(text, "regular", 0)];
-      for (var i = 0; i < this.grammar.length; ++i) {
-        var rule = this.grammar[i];
-        for (var j = 0; j < tokens.length; ++j) {
-          rule.carveOutMatchedToken(tokens, j);
-        }
-      }
-
-      crudeParsing(tokens);
-      return tokens;
-    };
-  }
-
-  createClass(Grammar, [{
-    key: "toHTML",
-    value: function toHTML(txt) {
-      var theme = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : Default;
-
-      var tokenRows = this.tokenize(txt),
-          temp = document.createElement("div");
-      for (var y = 0; y < tokenRows.length; ++y) {
-        // draw the tokens on this row
-        var t = tokenRows[y];
-        if (t.type === "newlines") {
-          temp.appendChild(document.createElement("br"));
-        } else {
-          var style = theme[t.type] || {},
-              elem = document.createElement("span");
-          elem.style.fontWeight = style.fontWeight || theme.regular.fontWeight;
-          elem.style.fontStyle = style.fontStyle || theme.regular.fontStyle || "";
-          elem.style.color = style.foreColor || theme.regular.foreColor;
-          elem.style.backgroundColor = style.backColor || theme.regular.backColor;
-          elem.style.fontFamily = style.fontFamily || theme.fontFamily;
-          elem.appendChild(document.createTextNode(t.value));
-          temp.appendChild(elem);
-        }
-      }
-      return temp.innerHTML;
-    }
-  }]);
-  return Grammar;
-}();
-
-var JavaScript = new Grammar("JavaScript", [["newlines", /(?:\r\n|\r|\n)/], ["startBlockComments", /\/\*/], ["endBlockComments", /\*\//], ["regexes", /(?:^|,|;|\(|\[|\{)(?:\s*)(\/(?:\\\/|[^\n\/])+\/)/], ["stringDelim", /("|')/], ["startLineComments", /\/\/.*$/m], ["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/], ["keywords", /\b(?:break|case|catch|class|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/], ["functions", /(\w+)(?:\s*\()/], ["members", /(\w+)\./], ["members", /((\w+\.)+)(\w+)/]]);
-
-var SCROLL_SCALE = isFirefox ? 3 : 100;
-var COUNTER$5 = 0;
-var OFFSET = 0;
-
-var TextBox = function (_Surface) {
-  inherits(TextBox, _Surface);
-  createClass(TextBox, null, [{
-    key: "create",
-    value: function create() {
-      return new TextBox();
-    }
-  }]);
-
-  function TextBox(options) {
-    classCallCheck(this, TextBox);
-
-    var _this = possibleConstructorReturn(this, (TextBox.__proto__ || Object.getPrototypeOf(TextBox)).call(this, Object.assign({}, {
-      id: "Primrose.Controls.TextBox[" + COUNTER$5++ + "]"
-    }, options)));
-
-    _this.isTextBox = true;
-    ////////////////////////////////////////////////////////////////////////
-    // normalize input parameters
-    ////////////////////////////////////////////////////////////////////////
-
-    if (typeof options === "string") {
-      _this.options = {
-        value: _this.options
-      };
-    } else {
-      _this.options = options || {};
-    }
-
-    _this.useCaching = !isFirefox || !isMobile;
-
-    var makeCursorCommand = function makeCursorCommand(name) {
-      var method = name.toLowerCase();
-      this["cursor" + name] = function (lines, cursor) {
-        cursor[method](lines);
-        this.scrollIntoView(cursor);
-      };
-    };
-
-    ["Left", "Right", "SkipLeft", "SkipRight", "Up", "Down", "Home", "End", "FullHome", "FullEnd"].map(makeCursorCommand.bind(_this));
-
-    ////////////////////////////////////////////////////////////////////////
-    // initialization
-    ///////////////////////////////////////////////////////////////////////
-    _this.tokens = null;
-    _this.lines = null;
-    _this._commandPack = null;
-    _this._tokenRows = null;
-    _this._tokenHashes = null;
-    _this._tabString = null;
-    _this._currentTouchID = null;
-    _this._lineCountWidth = null;
-
-    _this._lastFont = null;
-    _this._lastText = null;
-    _this._lastCharacterWidth = null;
-    _this._lastCharacterHeight = null;
-    _this._lastGridBounds = null;
-    _this._lastPadding = null;
-    _this._lastFrontCursor = null;
-    _this._lastBackCursor = null;
-    _this._lastWidth = -1;
-    _this._lastHeight = -1;
-    _this._lastScrollX = -1;
-    _this._lastScrollY = -1;
-    _this._lastFocused = false;
-    _this._lastThemeName = null;
-    _this._lastPointer = new Point();
-
-    // different browsers have different sets of keycodes for less-frequently
-    // used keys like curly brackets.
-    _this._browser = isChrome ? "CHROMIUM" : isFirefox ? "FIREFOX" : isIE ? "IE" : isOpera ? "OPERA" : isSafari ? "SAFARI" : "UNKNOWN";
-    _this._pointer = new Point();
-    _this._deadKeyState = "";
-    _this._history = [];
-    _this._historyFrame = -1;
-    _this._topLeftGutter = new Size();
-    _this._bottomRightGutter = new Size();
-    _this._dragging = false;
-    _this._scrolling = false;
-    _this._wheelScrollSpeed = 4;
-    var subBounds = new Rectangle(0, 0, _this.bounds.width, _this.bounds.height);
-    _this._fg = new Surface({
-      id: _this.id + "-fore",
-      bounds: subBounds
-    });
-    _this._fgCanvas = _this._fg.canvas;
-    _this._fgfx = _this._fg.context;
-    _this._bg = new Surface({
-      id: _this.id + "-back",
-      bounds: subBounds
-    });
-    _this._bgCanvas = _this._bg.canvas;
-    _this._bgfx = _this._bg.context;
-    _this._trim = new Surface({
-      id: _this.id + "-trim",
-      bounds: subBounds
-    });
-    _this._trimCanvas = _this._trim.canvas;
-    _this._tgfx = _this._trim.context;
-    _this._rowCache = {};
-    _this._VSCROLL_WIDTH = 2;
-
-    _this.tabWidth = _this.options.tabWidth;
-    _this.showLineNumbers = !_this.options.hideLineNumbers;
-    _this.showScrollBars = !_this.options.hideScrollBars;
-    _this.wordWrap = !_this.options.disableWordWrap;
-    _this.readOnly = !!_this.options.readOnly;
-    _this.multiline = !_this.options.singleLine;
-    _this.gridBounds = new Rectangle();
-    _this.frontCursor = new Cursor();
-    _this.backCursor = new Cursor();
-    _this.scroll = new Point();
-    _this.character = new Size();
-    _this.theme = _this.options.theme;
-    _this.fontSize = _this.options.fontSize;
-    _this.tokenizer = _this.options.tokenizer;
-    _this.commandPack = _this.options.commands || TextEditor;
-    _this.value = _this.options.value;
-    _this.padding = _this.options.padding || 1;
-
-    _this.addEventListener("focus", _this.render.bind(_this), false);
-    _this.addEventListener("blur", _this.render.bind(_this), false);
-    return _this;
-  }
-
-  createClass(TextBox, [{
-    key: "cursorPageUp",
-    value: function cursorPageUp(lines, cursor) {
-      cursor.incY(-this.gridBounds.height, lines);
-      this.scrollIntoView(cursor);
-    }
-  }, {
-    key: "cursorPageDown",
-    value: function cursorPageDown(lines, cursor) {
-      cursor.incY(this.gridBounds.height, lines);
-      this.scrollIntoView(cursor);
-    }
-  }, {
-    key: "setDeadKeyState",
-    value: function setDeadKeyState(st) {
-      this._deadKeyState = st || "";
-    }
-  }, {
-    key: "pushUndo",
-    value: function pushUndo(lines) {
-      if (this._historyFrame < this._history.length - 1) {
-        this._history.splice(this._historyFrame + 1);
-      }
-      this._history.push(lines);
-      this._historyFrame = this._history.length - 1;
-      this.refreshTokens();
-      this.render();
-    }
-  }, {
-    key: "redo",
-    value: function redo() {
-      if (this._historyFrame < this._history.length - 1) {
-        ++this._historyFrame;
-      }
-      this.refreshTokens();
-      this.fixCursor();
-      this.render();
-    }
-  }, {
-    key: "undo",
-    value: function undo() {
-      if (this._historyFrame > 0) {
-        --this._historyFrame;
-      }
-      this.refreshTokens();
-      this.fixCursor();
-      this.render();
-    }
-  }, {
-    key: "scrollIntoView",
-    value: function scrollIntoView(currentCursor) {
-      this.scroll.y += this.minDelta(currentCursor.y, this.scroll.y, this.scroll.y + this.gridBounds.height);
-      if (!this.wordWrap) {
-        this.scroll.x += this.minDelta(currentCursor.x, this.scroll.x, this.scroll.x + this.gridBounds.width);
-      }
-      this.clampScroll();
-    }
-  }, {
-    key: "readWheel",
-    value: function readWheel(evt) {
-      if (this.focused) {
-        if (evt.shiftKey || isChrome) {
-          this.fontSize += -evt.deltaX / SCROLL_SCALE;
-        }
-        if (!evt.shiftKey || isChrome) {
-          this.scroll.y += Math.floor(evt.deltaY * this._wheelScrollSpeed / SCROLL_SCALE);
-        }
-        this.clampScroll();
-        this.render();
-        evt.preventDefault();
-      }
-    }
-  }, {
-    key: "startPointer",
-    value: function startPointer(x, y) {
-      if (!get$1(TextBox.prototype.__proto__ || Object.getPrototypeOf(TextBox.prototype), "startPointer", this).call(this, x, y)) {
-        this._dragging = true;
-        this.setCursorXY(this.frontCursor, x, y);
-      }
-    }
-  }, {
-    key: "movePointer",
-    value: function movePointer(x, y) {
-      if (this._dragging) {
-        this.setCursorXY(this.backCursor, x, y);
-      }
-    }
-  }, {
-    key: "endPointer",
-    value: function endPointer() {
-      get$1(TextBox.prototype.__proto__ || Object.getPrototypeOf(TextBox.prototype), "endPointer", this).call(this);
-      this._dragging = false;
-      this._scrolling = false;
-    }
-  }, {
-    key: "copySelectedText",
-    value: function copySelectedText(evt) {
-      if (this.focused && this.frontCursor.i !== this.backCursor.i) {
-        var clipboard = evt.clipboardData || window.clipboardData;
-        clipboard.setData(window.clipboardData ? "Text" : "text/plain", this.selectedText);
-        evt.returnValue = false;
-      }
-    }
-  }, {
-    key: "cutSelectedText",
-    value: function cutSelectedText(evt) {
-      if (this.focused) {
-        this.copySelectedText(evt);
-        if (!this.readOnly) {
-          this.selectedText = "";
-        }
-      }
-    }
-  }, {
-    key: "keyDown",
-    value: function keyDown(evt) {
-      this.environment.input.Keyboard.doTyping(this, evt);
-    }
-  }, {
-    key: "execCommand",
-    value: function execCommand(browser, codePage, commandName) {
-      if (commandName && this.focused && !this.readOnly) {
-        var altCommandName = browser + "_" + commandName,
-            func = this.commandPack[altCommandName] || this.commandPack[commandName] || codePage[altCommandName] || codePage[commandName];
-
-        if (func instanceof String || typeof func === "string") {
-          console.log("okay");
-          func = this.commandPack[func] || this.commandPack[func] || func;
-        }
-
-        if (func === undefined) {
-          return false;
-        } else {
-          this.frontCursor.moved = false;
-          this.backCursor.moved = false;
-          if (func instanceof Function) {
-            func(this, this.lines);
-          } else if (func instanceof String || typeof func === "string") {
-            console.log(func);
-            this.selectedText = func;
-          }
-          if (this.frontCursor.moved && !this.backCursor.moved) {
-            this.backCursor.copy(this.frontCursor);
-          }
-          this.clampScroll();
-          this.render();
-          return true;
-        }
-      }
-    }
-  }, {
-    key: "readClipboard",
-    value: function readClipboard(evt) {
-      if (this.focused && !this.readOnly) {
-        evt.returnValue = false;
-        var clipboard = evt.clipboardData || window.clipboardData,
-            str = clipboard.getData(window.clipboardData ? "Text" : "text/plain");
-        if (str) {
-          this.selectedText = str;
-        }
-      }
-    }
-  }, {
-    key: "resize",
-    value: function resize() {
-      get$1(TextBox.prototype.__proto__ || Object.getPrototypeOf(TextBox.prototype), "resize", this).call(this);
-      this._bg.setSize(this.surfaceWidth, this.surfaceHeight);
-      this._fg.setSize(this.surfaceWidth, this.surfaceHeight);
-      this._trim.setSize(this.surfaceWidth, this.surfaceHeight);
-      if (this.theme) {
-        this.character.height = this.fontSize;
-        this.context.font = this.character.height + "px " + this.theme.fontFamily;
-        // measure 100 letter M's, then divide by 100, to get the width of an M
-        // to two decimal places on systems that return integer values from
-        // measureText.
-        this.character.width = this.context.measureText("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM").width / 100;
-      }
-      this.render();
-    }
-  }, {
-    key: "pixel2cell",
-    value: function pixel2cell(point) {
-      var x = point.x * this.imageWidth / this.surfaceWidth,
-          y = point.y * this.imageHeight / this.surfaceHeight;
-      point.set(Math.round(point.x / this.character.width) + this.scroll.x - this.gridBounds.x, Math.floor(point.y / this.character.height - 0.25) + this.scroll.y);
-    }
-  }, {
-    key: "clampScroll",
-    value: function clampScroll() {
-      if (this.scroll.y < 0) {
-        this.scroll.y = 0;
-      } else {
-        while (0 < this.scroll.y && this.scroll.y > this.lines.length - this.gridBounds.height) {
-          --this.scroll.y;
-        }
-      }
-    }
-  }, {
-    key: "refreshTokens",
-    value: function refreshTokens() {
-      this.tokens = this.tokenizer.tokenize(this.value);
-    }
-  }, {
-    key: "fixCursor",
-    value: function fixCursor() {
-      var moved = this.frontCursor.fixCursor(this.lines) || this.backCursor.fixCursor(this.lines);
-      if (moved) {
-        this.render();
-      }
-    }
-  }, {
-    key: "setCursorXY",
-    value: function setCursorXY(cursor, x, y) {
-      x = Math.round(x);
-      y = Math.round(y);
-      this._pointer.set(x, y);
-      this.pixel2cell(this._pointer, this.scroll, this.gridBounds);
-      var gx = this._pointer.x - this.scroll.x,
-          gy = this._pointer.y - this.scroll.y,
-          onBottom = gy >= this.gridBounds.height,
-          onLeft = gx < 0,
-          onRight = this._pointer.x >= this.gridBounds.width;
-      if (!this._scrolling && !onBottom && !onLeft && !onRight) {
-        cursor.setXY(this._pointer.x, this._pointer.y, this.lines);
-        this.backCursor.copy(cursor);
-      } else if (this._scrolling || onRight && !onBottom) {
-        this._scrolling = true;
-        var scrollHeight = this.lines.length - this.gridBounds.height;
-        if (gy >= 0 && scrollHeight >= 0) {
-          var sy = gy * scrollHeight / this.gridBounds.height;
-          this.scroll.y = Math.floor(sy);
-        }
-      } else if (onBottom && !onLeft) {
-        var maxWidth = 0;
-        for (var dy = 0; dy < this.lines.length; ++dy) {
-          maxWidth = Math.max(maxWidth, this.lines[dy].length);
-        }
-        var scrollWidth = maxWidth - this.gridBounds.width;
-        if (gx >= 0 && scrollWidth >= 0) {
-          var sx = gx * scrollWidth / this.gridBounds.width;
-          this.scroll.x = Math.floor(sx);
-        }
-      } else if (onLeft && !onBottom) {
-        // clicked in number-line gutter
-      } else {
-          // clicked in the lower-left corner
-        }
-      this._lastPointer.copy(this._pointer);
-      this.render();
-    }
-  }, {
-    key: "setGutter",
-    value: function setGutter() {
-      if (this.showLineNumbers) {
-        this._topLeftGutter.width = 1;
-      } else {
-        this._topLeftGutter.width = 0;
-      }
-
-      if (!this.showScrollBars) {
-        this._bottomRightGutter.set(0, 0);
-      } else if (this.wordWrap) {
-        this._bottomRightGutter.set(this._VSCROLL_WIDTH, 0);
-      } else {
-        this._bottomRightGutter.set(this._VSCROLL_WIDTH, 1);
-      }
-    }
-  }, {
-    key: "refreshGridBounds",
-    value: function refreshGridBounds() {
-      this._lineCountWidth = 0;
-      if (this.showLineNumbers) {
-        this._lineCountWidth = Math.max(1, Math.ceil(Math.log(this._history[this._historyFrame].length) / Math.LN10));
-      }
-
-      var x = Math.floor(this._topLeftGutter.width + this._lineCountWidth + this.padding / this.character.width),
-          y = Math.floor(this.padding / this.character.height),
-          w = Math.floor((this.imageWidth - 2 * this.padding) / this.character.width) - x - this._bottomRightGutter.width,
-          h = Math.floor((this.imageHeight - 2 * this.padding) / this.character.height) - y - this._bottomRightGutter.height;
-      this.gridBounds.set(x, y, w, h);
-    }
-  }, {
-    key: "performLayout",
-    value: function performLayout() {
-
-      // group the tokens into rows
-      this._tokenRows = [[]];
-      this._tokenHashes = [""];
-      this.lines = [""];
-      var currentRowWidth = 0;
-      var tokenQueue = this.tokens.slice();
-      for (var i = 0; i < tokenQueue.length; ++i) {
-        var t = tokenQueue[i].clone();
-        var widthLeft = this.gridBounds.width - currentRowWidth;
-        var wrap = this.wordWrap && t.type !== "newlines" && t.value.length > widthLeft;
-        var breakLine = t.type === "newlines" || wrap;
-        if (wrap) {
-          var split = t.value.length > this.gridBounds.width ? widthLeft : 0;
-          tokenQueue.splice(i + 1, 0, t.splitAt(split));
-        }
-
-        if (t.value.length > 0) {
-          this._tokenRows[this._tokenRows.length - 1].push(t);
-          this._tokenHashes[this._tokenHashes.length - 1] += JSON.stringify(t);
-          this.lines[this.lines.length - 1] += t.value;
-          currentRowWidth += t.value.length;
-        }
-
-        if (breakLine) {
-          this._tokenRows.push([]);
-          this._tokenHashes.push("");
-          this.lines.push("");
-          currentRowWidth = 0;
-        }
-      }
-    }
-  }, {
-    key: "minDelta",
-    value: function minDelta(v, minV, maxV) {
-      var dvMinV = v - minV,
-          dvMaxV = v - maxV + 5,
-          dv = 0;
-      if (dvMinV < 0 || dvMaxV >= 0) {
-        // compare the absolute values, so we get the smallest change
-        // regardless of direction.
-        dv = Math.abs(dvMinV) < Math.abs(dvMaxV) ? dvMinV : dvMaxV;
-      }
-
-      return dv;
-    }
-  }, {
-    key: "fillRect",
-    value: function fillRect(gfx, fill, x, y, w, h) {
-      gfx.fillStyle = fill;
-      gfx.fillRect(x * this.character.width, y * this.character.height, w * this.character.width + 1, h * this.character.height + 1);
-    }
-  }, {
-    key: "strokeRect",
-    value: function strokeRect(gfx, stroke, x, y, w, h) {
-      gfx.strokeStyle = stroke;
-      gfx.strokeRect(x * this.character.width, y * this.character.height, w * this.character.width + 1, h * this.character.height + 1);
-    }
-  }, {
-    key: "renderCanvasBackground",
-    value: function renderCanvasBackground() {
-      var minCursor = Cursor.min(this.frontCursor, this.backCursor),
-          maxCursor = Cursor.max(this.frontCursor, this.backCursor),
-          tokenFront = new Cursor(),
-          tokenBack = new Cursor(),
-          clearFunc = this.theme.regular.backColor ? "fillRect" : "clearRect",
-          OFFSETY = OFFSET / this.character.height;
-
-      if (this.theme.regular.backColor) {
-        this._bgfx.fillStyle = this.theme.regular.backColor;
-      }
-
-      this._bgfx[clearFunc](0, 0, this.imageWidth, this.imageHeight);
-      this._bgfx.save();
-      this._bgfx.translate((this.gridBounds.x - this.scroll.x) * this.character.width + this.padding, -this.scroll.y * this.character.height + this.padding);
-
-      // draw the current row highlighter
-      if (this.focused) {
-        this.fillRect(this._bgfx, this.theme.regular.currentRowBackColor || Default.regular.currentRowBackColor, 0, minCursor.y + OFFSETY, this.gridBounds.width, maxCursor.y - minCursor.y + 1);
-      }
-
-      for (var y = 0; y < this._tokenRows.length; ++y) {
-        // draw the tokens on this row
-        var row = this._tokenRows[y];
-
-        for (var i = 0; i < row.length; ++i) {
-          var t = row[i];
-          tokenBack.x += t.value.length;
-          tokenBack.i += t.value.length;
-
-          // skip drawing tokens that aren't in view
-          if (this.scroll.y <= y && y < this.scroll.y + this.gridBounds.height && this.scroll.x <= tokenBack.x && tokenFront.x < this.scroll.x + this.gridBounds.width) {
-            // draw the selection box
-            var inSelection = minCursor.i <= tokenBack.i && tokenFront.i < maxCursor.i;
-            if (inSelection) {
-              var selectionFront = Cursor.max(minCursor, tokenFront);
-              var selectionBack = Cursor.min(maxCursor, tokenBack);
-              var cw = selectionBack.i - selectionFront.i;
-              this.fillRect(this._bgfx, this.theme.regular.selectedBackColor || Default.regular.selectedBackColor, selectionFront.x, selectionFront.y + OFFSETY, cw, 1);
-            }
-          }
-
-          tokenFront.copy(tokenBack);
-        }
-
-        tokenFront.x = 0;
-        ++tokenFront.y;
-        tokenBack.copy(tokenFront);
-      }
-
-      // draw the cursor caret
-      if (this.focused) {
-        var cc = this.theme.cursorColor || "black";
-        var w = 1 / this.character.width;
-        this.fillRect(this._bgfx, cc, minCursor.x, minCursor.y + OFFSETY, w, 1);
-        this.fillRect(this._bgfx, cc, maxCursor.x, maxCursor.y + OFFSETY, w, 1);
-      }
-      this._bgfx.restore();
-    }
-  }, {
-    key: "renderCanvasForeground",
-    value: function renderCanvasForeground() {
-      var tokenFront = new Cursor(),
-          tokenBack = new Cursor();
-
-      this._fgfx.clearRect(0, 0, this.imageWidth, this.imageHeight);
-      this._fgfx.save();
-      this._fgfx.translate((this.gridBounds.x - this.scroll.x) * this.character.width + this.padding, this.padding);
-      for (var y = 0; y < this._tokenRows.length; ++y) {
-        // draw the tokens on this row
-        var line = this.lines[y] + this.padding,
-            row = this._tokenRows[y],
-            drawn = false,
-            textY = (y - this.scroll.y) * this.character.height;
-
-        for (var i = 0; i < row.length; ++i) {
-          var t = row[i];
-          tokenBack.x += t.value.length;
-          tokenBack.i += t.value.length;
-
-          // skip drawing tokens that aren't in view
-          if (this.scroll.y <= y && y < this.scroll.y + this.gridBounds.height && this.scroll.x <= tokenBack.x && tokenFront.x < this.scroll.x + this.gridBounds.width) {
-
-            // draw the text
-            if (this.useCaching && this._rowCache[line] !== undefined) {
-              if (i === 0) {
-                this._fgfx.putImageData(this._rowCache[line], this.padding, textY + this.padding + OFFSET);
-              }
-            } else {
-              var style = this.theme[t.type] || {};
-              var font = (style.fontWeight || this.theme.regular.fontWeight || "") + " " + (style.fontStyle || this.theme.regular.fontStyle || "") + " " + this.character.height + "px " + this.theme.fontFamily;
-              this._fgfx.font = font.trim();
-              this._fgfx.fillStyle = style.foreColor || this.theme.regular.foreColor;
-              this.drawText(this._fgfx, t.value, tokenFront.x * this.character.width, textY);
-              drawn = true;
-            }
-          }
-
-          tokenFront.copy(tokenBack);
-        }
-
-        tokenFront.x = 0;
-        ++tokenFront.y;
-        tokenBack.copy(tokenFront);
-        if (this.useCaching && drawn && this._rowCache[line] === undefined) {
-          this._rowCache[line] = this._fgfx.getImageData(this.padding, textY + this.padding + OFFSET, this.imageWidth - 2 * this.padding, this.character.height);
-        }
-      }
-
-      this._fgfx.restore();
-    }
-
-    // provides a hook for TextInput to be able to override text drawing and spit out password blanking characters
-
-  }, {
-    key: "drawText",
-    value: function drawText(ctx, txt, x, y) {
-      ctx.fillText(txt, x, y);
-    }
-  }, {
-    key: "renderCanvasTrim",
-    value: function renderCanvasTrim() {
-      var tokenFront = new Cursor(),
-          tokenBack = new Cursor(),
-          maxLineWidth = 0;
-
-      this._tgfx.clearRect(0, 0, this.imageWidth, this.imageHeight);
-      this._tgfx.save();
-      this._tgfx.translate(this.padding, this.padding);
-      this._tgfx.save();
-      this._tgfx.lineWidth = 2;
-      this._tgfx.translate(0, -this.scroll.y * this.character.height);
-      for (var y = 0, lastLine = -1; y < this._tokenRows.length; ++y) {
-        var row = this._tokenRows[y];
-
-        for (var i = 0; i < row.length; ++i) {
-          var t = row[i];
-          tokenBack.x += t.value.length;
-          tokenBack.i += t.value.length;
-          tokenFront.copy(tokenBack);
-        }
-
-        maxLineWidth = Math.max(maxLineWidth, tokenBack.x);
-        tokenFront.x = 0;
-        ++tokenFront.y;
-        tokenBack.copy(tokenFront);
-
-        if (this.showLineNumbers && this.scroll.y <= y && y < this.scroll.y + this.gridBounds.height) {
-          var currentLine = row.length > 0 ? row[0].line : lastLine + 1;
-          // draw the left gutter
-          var lineNumber = currentLine.toString();
-          while (lineNumber.length < this._lineCountWidth) {
-            lineNumber = " " + lineNumber;
-          }
-          this.fillRect(this._tgfx, this.theme.regular.selectedBackColor || Default.regular.selectedBackColor, 0, y, this.gridBounds.x, 1);
-          this._tgfx.font = "bold " + this.character.height + "px " + this.theme.fontFamily;
-
-          if (currentLine > lastLine) {
-            this._tgfx.fillStyle = this.theme.regular.foreColor;
-            this._tgfx.fillText(lineNumber, 0, y * this.character.height);
-          }
-          lastLine = currentLine;
-        }
-      }
-
-      this._tgfx.restore();
-
-      if (this.showLineNumbers) {
-        this.strokeRect(this._tgfx, this.theme.regular.foreColor || Default.regular.foreColor, 0, 0, this.gridBounds.x, this.gridBounds.height);
-      }
-
-      // draw the scrollbars
-      if (this.showScrollBars) {
-        var drawWidth = this.gridBounds.width * this.character.width - this.padding,
-            drawHeight = this.gridBounds.height * this.character.height,
-            scrollX = this.scroll.x * drawWidth / maxLineWidth + this.gridBounds.x * this.character.width,
-            scrollY = this.scroll.y * drawHeight / this._tokenRows.length;
-
-        this._tgfx.fillStyle = this.theme.regular.selectedBackColor || Default.regular.selectedBackColor;
-        // horizontal
-        var bw;
-        if (!this.wordWrap && maxLineWidth > this.gridBounds.width) {
-          var scrollBarWidth = drawWidth * (this.gridBounds.width / maxLineWidth),
-              by = this.gridBounds.height * this.character.height;
-          bw = Math.max(this.character.width, scrollBarWidth);
-          this._tgfx.fillRect(scrollX, by, bw, this.character.height);
-          this._tgfx.strokeRect(scrollX, by, bw, this.character.height);
-        }
-
-        //vertical
-        if (this._tokenRows.length > this.gridBounds.height) {
-          var scrollBarHeight = drawHeight * (this.gridBounds.height / this._tokenRows.length),
-              bx = this.image - this._VSCROLL_WIDTH * this.character.width - 2 * this.padding,
-              bh = Math.max(this.character.height, scrollBarHeight);
-          bw = this._VSCROLL_WIDTH * this.character.width;
-          this._tgfx.fillRect(bx, scrollY, bw, bh);
-          this._tgfx.strokeRect(bx, scrollY, bw, bh);
-        }
-      }
-
-      this._tgfx.lineWidth = 2;
-      this._tgfx.restore();
-      this._tgfx.strokeRect(1, 1, this.imageWidth - 2, this.imageHeight - 2);
-      if (!this.focused) {
-        this._tgfx.fillStyle = this.theme.regular.unfocused || Default.regular.unfocused;
-        this._tgfx.fillRect(0, 0, this.imageWidth, this.imageHeight);
-      }
-    }
-  }, {
-    key: "render",
-    value: function render() {
-      if (this.tokens && this.theme) {
-        this.refreshGridBounds();
-        var boundsChanged = this.gridBounds.toString() !== this._lastGridBounds,
-            textChanged = this._lastText !== this.value,
-            characterWidthChanged = this.character.width !== this._lastCharacterWidth,
-            characterHeightChanged = this.character.height !== this._lastCharacterHeight,
-            paddingChanged = this.padding !== this._lastPadding,
-            cursorChanged = !this._lastFrontCursor || !this._lastBackCursor || this.frontCursor.i !== this._lastFrontCursor.i || this._lastBackCursor.i !== this.backCursor.i,
-            scrollChanged = this.scroll.x !== this._lastScrollX || this.scroll.y !== this._lastScrollY,
-            fontChanged = this.context.font !== this._lastFont,
-            themeChanged = this.theme.name !== this._lastThemeName,
-            focusChanged = this.focused !== this._lastFocused,
-            changeBounds = null,
-            layoutChanged = this.resized || boundsChanged || textChanged || characterWidthChanged || characterHeightChanged || paddingChanged,
-            backgroundChanged = layoutChanged || cursorChanged || scrollChanged || themeChanged,
-            foregroundChanged = backgroundChanged || textChanged,
-            trimChanged = backgroundChanged || focusChanged,
-            imageChanged = foregroundChanged || backgroundChanged || trimChanged;
-
-        if (layoutChanged) {
-          this.performLayout(this.gridBounds);
-          this._rowCache = {};
-        }
-
-        if (imageChanged) {
-          if (cursorChanged && !(layoutChanged || scrollChanged || themeChanged || focusChanged)) {
-            var top = Math.min(this.frontCursor.y, this._lastFrontCursor.y, this.backCursor.y, this._lastBackCursor.y) - this.scroll.y + this.gridBounds.y,
-                bottom = Math.max(this.frontCursor.y, this._lastFrontCursor.y, this.backCursor.y, this._lastBackCursor.y) - this.scroll.y + 1;
-            changeBounds = new Rectangle(0, top * this.character.height, this.bounds.width, (bottom - top) * this.character.height + 2);
-          }
-
-          if (backgroundChanged) {
-            this.renderCanvasBackground();
-          }
-          if (foregroundChanged) {
-            this.renderCanvasForeground();
-          }
-          if (trimChanged) {
-            this.renderCanvasTrim();
-          }
-
-          this.context.clearRect(0, 0, this.imageWidth, this.imageHeight);
-          this.context.drawImage(this._bgCanvas, 0, 0);
-          this.context.drawImage(this._fgCanvas, 0, 0);
-          this.context.drawImage(this._trimCanvas, 0, 0);
-          this.invalidate(changeBounds);
-        }
-
-        this._lastGridBounds = this.gridBounds.toString();
-        this._lastText = this.value;
-        this._lastCharacterWidth = this.character.width;
-        this._lastCharacterHeight = this.character.height;
-        this._lastWidth = this.imageWidth;
-        this._lastHeight = this.imageHeight;
-        this._lastPadding = this.padding;
-        this._lastFrontCursor = this.frontCursor.clone();
-        this._lastBackCursor = this.backCursor.clone();
-        this._lastFocused = this.focused;
-        this._lastFont = this.context.font;
-        this._lastThemeName = this.theme.name;
-        this._lastScrollX = this.scroll.x;
-        this._lastScrollY = this.scroll.y;
-      }
-    }
-  }, {
-    key: "value",
-    get: function get() {
-      return this._history[this._historyFrame].join("\n");
-    },
-    set: function set(txt) {
-      txt = txt || "";
-      txt = txt.replace(/\r\n/g, "\n");
-      if (!this.multiline) {
-        txt = txt.replace(/\n/g, "");
-      }
-      var lines = txt.split("\n");
-      this.pushUndo(lines);
-      this.render();
-      this.emit("change", {
-        target: this
-      });
-    }
-  }, {
-    key: "selectedText",
-    get: function get() {
-      var minCursor = Cursor.min(this.frontCursor, this.backCursor),
-          maxCursor = Cursor.max(this.frontCursor, this.backCursor);
-      return this.value.substring(minCursor.i, maxCursor.i);
-    },
-    set: function set(str) {
-      str = str || "";
-      str = str.replace(/\r\n/g, "\n");
-
-      if (this.frontCursor.i !== this.backCursor.i || str.length > 0) {
-        var minCursor = Cursor.min(this.frontCursor, this.backCursor),
-            maxCursor = Cursor.max(this.frontCursor, this.backCursor),
-
-        // TODO: don't recalc the string first.
-        text = this.value,
-            left = text.substring(0, minCursor.i),
-            right = text.substring(maxCursor.i);
-
-        var v = left + str + right;
-        this.value = v;
-        this.refreshGridBounds();
-        this.performLayout();
-        minCursor.advanceN(this.lines, Math.max(0, str.length));
-        this.scrollIntoView(maxCursor);
-        this.clampScroll();
-        maxCursor.copy(minCursor);
-        this.render();
-      }
-    }
-  }, {
-    key: "padding",
-    get: function get() {
-      return this._padding;
-    },
-    set: function set(v) {
-      this._padding = v;
-      this.render();
-    }
-  }, {
-    key: "wordWrap",
-    get: function get() {
-      return this._wordWrap;
-    },
-    set: function set(v) {
-      this._wordWrap = v || false;
-      this.setGutter();
-    }
-  }, {
-    key: "showLineNumbers",
-    get: function get() {
-      return this._showLineNumbers;
-    },
-    set: function set(v) {
-      this._showLineNumbers = v;
-      this.setGutter();
-    }
-  }, {
-    key: "showScrollBars",
-    get: function get() {
-      return this._showScrollBars;
-    },
-    set: function set(v) {
-      this._showScrollBars = v;
-      this.setGutter();
-    }
-  }, {
-    key: "theme",
-    get: function get() {
-      return this._theme;
-    },
-    set: function set(t) {
-      this._theme = Object.assign({}, Default, t);
-      this._theme.fontSize = this.fontSize;
-      this._rowCache = {};
-      this.render();
-    }
-  }, {
-    key: "commandPack",
-    get: function get() {
-      return this._commandPack;
-    },
-    set: function set(v) {
-      this._commandPack = v;
-    }
-  }, {
-    key: "selectionStart",
-    get: function get() {
-      return this.frontCursor.i;
-    },
-    set: function set(i) {
-      this.frontCursor.setI(i, this.lines);
-    }
-  }, {
-    key: "selectionEnd",
-    get: function get() {
-      return this.backCursor.i;
-    },
-    set: function set(i) {
-      this.backCursor.setI(i, this.lines);
-    }
-  }, {
-    key: "selectionDirection",
-    get: function get() {
-      return this.frontCursor.i <= this.backCursor.i ? "forward" : "backward";
-    }
-  }, {
-    key: "tokenizer",
-    get: function get() {
-      return this._tokenizer;
-    },
-    set: function set(tk) {
-      this._tokenizer = tk || JavaScript;
-      if (this._history && this._history.length > 0) {
-        this.refreshTokens();
-        this.render();
-      }
-    }
-  }, {
-    key: "tabWidth",
-    get: function get() {
-      return this._tabWidth;
-    },
-    set: function set(tw) {
-      this._tabWidth = tw || 2;
-      this._tabString = "";
-      for (var i = 0; i < this._tabWidth; ++i) {
-        this._tabString += " ";
-      }
-    }
-  }, {
-    key: "tabString",
-    get: function get() {
-      return this._tabString;
-    }
-  }, {
-    key: "fontSize",
-    get: function get() {
-      return this._fontSize || 16;
-    },
-    set: function set(v) {
-      v = v || 16;
-      this._fontSize = v;
-      if (this.theme) {
-        this.theme.fontSize = this._fontSize;
-        this.resize();
-        this.render();
-      }
-    }
-  }, {
-    key: "lockMovement",
-    get: function get() {
-      return this.focused && !this.readOnly;
-    }
-  }]);
-  return TextBox;
-}(Surface);
-
-var PlainText$2 = new Grammar("PlainText", [["newlines", /(?:\r\n|\r|\n)/]]);
-
-var COUNTER$6 = 0;
-
-var TextInput = function (_TextBox) {
-  inherits(TextInput, _TextBox);
-
-  function TextInput(options) {
-    classCallCheck(this, TextInput);
-
-    var _this = possibleConstructorReturn(this, (TextInput.__proto__ || Object.getPrototypeOf(TextInput)).call(this, Object.assign({}, {
-      id: "Primrose.Text.Controls.TextInput[" + COUNTER$6++ + "]",
-      padding: 5,
-      singleLine: true,
-      disableWordWrap: true,
-      hideLineNumbers: true,
-      hideScrollBars: true,
-      tabWidth: 1,
-      tokenizer: PlainText$2,
-      commands: TextInputCommands
-    }), options));
-
-    _this.passwordCharacter = _this.options.passwordCharacter;
-    return _this;
-  }
-
-  createClass(TextInput, [{
-    key: "drawText",
-    value: function drawText(ctx, txt, x, y) {
-      if (this.passwordCharacter) {
-        var val = "";
-        for (var i = 0; i < txt.length; ++i) {
-          val += this.passwordCharacter;
-        }
-        txt = val;
-      }
-      get$1(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "drawText", this).call(this, ctx, txt, x, y);
-    }
-  }, {
-    key: "value",
-    get: function get() {
-      return get$1(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "value", this);
-    },
-    set: function set(v) {
-      v = v || "";
-      v = v.replace(/\r?\n/g, "");
-      set$1(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "value", v, this);
-    }
-  }, {
-    key: "selectedText",
-    get: function get() {
-      return get$1(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "selectedText", this);
-    },
-    set: function set(v) {
-      v = v || "";
-      v = v.replace(/\r?\n/g, "");
-      set$1(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "selectedText", v, this);
-    }
-  }]);
-  return TextInput;
-}(TextBox);
-
 var Basic = new Grammar("BASIC",
 // Grammar rules are applied in the order they are specified.
 [
@@ -34193,6 +35231,12 @@ WebGLUniforms.seqWithValue = function (seq, values) {
 	return r;
 };
 
+/**
+ * @author alteredq / http://alteredqualia.com/
+ * @author mrdoob / http://mrdoob.com/
+ * @author mikael emtinger / http://gomo.se/
+ */
+
 var ShaderLib = {
 
 	basic: {
@@ -34344,6 +35388,10 @@ ShaderLib.physical = {
 	fragmentShader: ShaderChunk.meshphysical_frag
 
 };
+
+/**
+ * @author bhouston / http://clara.io
+ */
 
 function Box2(min, max) {
 
@@ -34542,6 +35590,11 @@ Box2.prototype = {
 	}
 
 };
+
+/**
+ * @author mikael emtinger / http://gomo.se/
+ * @author alteredq / http://alteredqualia.com/
+ */
 
 function LensFlarePlugin(renderer, flares) {
 
@@ -34824,6 +35877,11 @@ function LensFlarePlugin(renderer, flares) {
 	}
 }
 
+/**
+ * @author mikael emtinger / http://gomo.se/
+ * @author alteredq / http://alteredqualia.com/
+ */
+
 function SpritePlugin(renderer, sprites) {
 
 	var gl = renderer.context;
@@ -35079,6 +36137,17 @@ function SpritePlugin(renderer, sprites) {
 	}
 }
 
+/**
+ * @author szimek / https://github.com/szimek/
+ * @author alteredq / http://alteredqualia.com/
+ * @author Marius Kintel / https://github.com/kintel
+ */
+
+/*
+ In options, we can specify:
+ * Texture parameters for an auto-generated target texture
+ * depthBuffer/stencilBuffer: Booleans to indicate if we should generate these buffers
+*/
 function WebGLRenderTarget(width, height, options) {
 
 	this.uuid = _Math.generateUUID();
@@ -35147,6 +36216,12 @@ Object.assign(WebGLRenderTarget.prototype, EventDispatcher.prototype, {
 	}
 
 });
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ * @author bhouston / http://clara.io
+ */
 
 function Frustum(p0, p1, p2, p3, p4, p5) {
 
@@ -38776,6 +39851,14 @@ function WebGLClipping() {
 	}
 }
 
+/**
+ * @author supereggbert / http://www.paulbrunt.co.uk/
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ * @author szimek / https://github.com/szimek/
+ * @author tschw
+ */
+
 function WebGLRenderer(parameters) {
 
 	console.log('THREE.WebGLRenderer', REVISION);
@@ -41697,16 +42780,22 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
       skyReady = Promise.resolve();
     }
 
+    if (_this.options.disableDefaultLighting) {
+      _this.ambient = null;
+      _this.sun = null;
+    } else {
+
+      _this.ambient = new AmbientLight(0xffffff, 0.5);
+
+      _this.sun = light(0xffffff, 1, 50);
+    }
+
     skyReady = skyReady.then(function () {
       _this.sky.name = "Sky";
       _this.scene.add(_this.sky);
 
       if (!_this.options.disableDefaultLighting) {
-
-        _this.ambient = new AmbientLight(0xffffff, 0.5);
         _this.sky.add(_this.ambient);
-
-        _this.sun = light(0xffffff, 1, 50);
         put$1(_this.sun).on(_this.sky).at(0, 10, 10);
       }
     });
@@ -41716,8 +42805,8 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
       groundReady = new Promise(function (resolve, reject) {
         var dim = 2 * _this.options.drawDistance;
         _this.ground = brick$1(_this.options.groundTexture, dim * 5, 0.1, dim * 5, {
-          txtRepeatS: dim * 5,
-          txtRepeatT: dim * 5,
+          txtRepeatX: dim * 5,
+          txtRepeatY: dim * 5,
           anisotropy: 8,
           resolve: resolve,
           progress: _this.options.progress
