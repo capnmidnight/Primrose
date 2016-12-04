@@ -31,6 +31,7 @@ import { Texture } from "three/src/textures/Texture";
 import isChrome from "../../flags/isChrome";
 import Entity from "./Entity";
 import Rectangle from "../Text/Rectangle";
+import textured from "../../live-api/textured";
 export default class Surface extends Entity {
 
   static create() {
@@ -183,6 +184,7 @@ export default class Surface extends Entity {
       mesh = textured(geom, this, {
         opacity: this._opacity
       });
+    console.log(mesh, scene, env);
     scene.add(mesh);
     env.registerPickableObject(mesh);
     return mesh;

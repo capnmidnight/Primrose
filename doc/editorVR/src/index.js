@@ -15,16 +15,16 @@ var GRASS = "../images/grass.png",
   ROCK = "../images/rock.png",
   SAND = "../images/sand.png",
   WATER = "../images/water.png",
-  DECK = "../images/deck.png",
+  DECK = "../images/deck.png";
 
-  env = new BrowserEnvironment({
-    skyTexture: "../images/bg2.jpg",
-    groundTexture: GRASS,
-    font: "../fonts/helvetiker_regular.typeface.json",
-    fullScreenButtonContainer: "#fullScreenButtonContainer"
-  }),
+window.env = new BrowserEnvironment({
+  skyTexture: "../images/bg2.jpg",
+  groundTexture: GRASS,
+  font: "../fonts/helvetiker_regular.typeface.json",
+  fullScreenButtonContainer: "#fullScreenButtonContainer"
+});
 
-  subScene = null,
+var subScene = null,
   editor = null,
   editorFrame = null,
   editorFrameMesh = null,
@@ -65,7 +65,7 @@ env.addEventListener("ready", function () {
 
   editorFrameMesh = env.appendChild(editorFrame);
   editorFrameMesh.name = "MyWindow";
-  editorFrameMesh.position.set(0, env.avatarHeight, 0);
+  editorFrameMesh.position.set(0, env.options.avatarHeight, 0);
 
   console.log("INSTRUCTIONS:");
   console.log(" - " + cmdPre + "+E to show/hide editor");

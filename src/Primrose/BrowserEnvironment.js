@@ -192,6 +192,7 @@ import colored from "../live-api/colored";
 import hub from "../live-api/hub";
 import light from "../live-api/light";
 import put from "../live-api/put";
+import textured from "../live-api/textured";
 import Angle from "./Angle";
 import AbstractEventEmitter from "./AbstractEventEmitter";
 import Pointer from "./Pointer";

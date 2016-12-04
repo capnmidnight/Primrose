@@ -28,6 +28,8 @@ import { Matrix4 } from "three/src/math/Matrix4";
 import AbstractEventEmitter from "../AbstractEventEmitter";
 import identity from "../../util/identity";
 import hub from "../../live-api/hub";
+import colored from "../../live-api/colored";
+import box from "../../live-api/box";
 import Keyboard from "./Keyboard";
 import Mouse from "./Mouse";
 import Gamepad from "./Gamepad";

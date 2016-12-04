@@ -27,7 +27,7 @@ function C(n, x, y) {
     put(colored(cylinder(0.5, 0.5, T), 0x0000ff))
       .on(scene)
       .rot(0, n * Math.PI / 2, Math.PI / 2)
-      .at(T * x - W / 2, env.avatarHeight, T * y - H / 2);
+      .at(T * x - W / 2, env.options.avatarHeight, T * y - H / 2);
   }
 }
 

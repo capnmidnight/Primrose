@@ -22,6 +22,7 @@ import isChrome from "../../flags/isChrome";
 import isiOS from "../../flags/isiOS";
 import isMobile from "../../flags/isMobile";
 import PointerLock from "webvr-standard-monitor/src/PointerLock";
+import { unlock as unlockOrientation } from "webvr-standard-monitor/src/Orientation";
 import installWebVRStandardMonitor from "webvr-standard-monitor/src/install";
 import WebVRStandardMonitor from "webvr-standard-monitor/src/WebVRStandardMonitor";
 export default class VR extends PoseInputProcessor {
@@ -122,7 +123,7 @@ export default class VR extends PoseInputProcessor {
     }
 
     if (this.isNativeMobileWebVR) {
-      promise = promise.then(Orientation.unlock);
+      promise = promise.then(unlockOrientation);
     }
 
     return promise

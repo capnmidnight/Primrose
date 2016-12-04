@@ -24,7 +24,6 @@ pliny.function({
   }]
 });
 
-import hub from "./hub";
 export default function put(object) {
   var box = {
       on: null,
