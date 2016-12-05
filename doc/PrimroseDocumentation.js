@@ -84,21 +84,17 @@ pliny.value({
 
 pliny.namespace({
   name: "Flags",
-  description: "Various flags used for feature detecting and configuring the system.\n\
-\n\
-When including Primrose as a `script` tag, the Flags namespace is imported directly onto the window object and is available without qualification."
+  description: "Various flags used for feature detecting and configuring the system.\n\nWhen including Primrose as a `script` tag, the Flags namespace is imported directly onto the window object and is available without qualification."
 });
 
 pliny.function({
   parent: "Live API",
   name: "hub",
   description: "Calling `hub()` is a short-hand for creating a new `THREE.Object3D`. This is useful in live-coding examples to keep code terse and easy to write. It also polyfills in a method for being able to add the object to a `Primrose.BrowserEnvironment` using `appendChild()` and to add other elements to the hub using `appendChild()` such that they may be pickable in the scene.",
+  returns: "THREE.Object3D",
   examples: [{
     name: "Basic usage",
-    description: "\n\
-    //these two lines of code perform the same task.\n\
-    var base1 = new THREE.Object3D();\n\
-    var base2 = hub();"
+    description: "\n    grammar(\"JavaScript\");\n    //these two lines of code perform the same task.\n    var base1 = new THREE.Object3D();\n    var base2 = hub();"
   }]
 });
 
@@ -400,6 +396,10 @@ pliny.function({
     type: "Live API.colored.optionsHash",
     optional: true,
     description: "Options to pass on to [`material()`](#LiveAPI_material), or infrequently-used options to change the behavior of the setup. See [`Live API.colored.optionsHash`](#LiveAPI_colored_optionsHash) and [`Live API.material.optionsHash`](#LiveAPI_material_optionsHash) for more information."
+  }],
+  examples: [{
+    name: "Usage",
+    description: "Apply color to a geometry:\n\n    grammar(\"JavaScript\");\n    var geom = box(),\n      red = colored(geom, 0xff0000),\n      green = colored(geom, 0x00ff00),\n      blue = colored(geom, 0x0000ff);\n\n    red.position.set(-2, 1, -1);\n    green.position.set(0, 1, -1);\n    blue.position.set(2, 1, -1);\n\n    env.scene.add(red);\n    env.scene.add(green);\n    env.scene.add(blue);\n\nThe results should look like this:\n\n<img src=\"images/colored.jpg\">"
   }]
 });
 
@@ -1693,18 +1693,7 @@ pliny.function({
   }],
   examples: [{
     name: "Make a GET request.",
-    description: "Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  Primrose.HTTP.XHR(\"GET\", \"json\", \"localFile.json\", {\n\
-    progress: console.log.bind(console, \"progress\"))\n\
-    .then(console.log.bind(console, \"done\")))\n\
-    .catch(console.error.bind(console));\n\
-\n\
-## Results:\n\
-> Object {field1: 1, field2: \"Field2\"}"
+    description: "Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.\n\n## Code:\n\n    grammar(\"JavaScript\");\n    Primrose.HTTP.XHR(\"GET\", \"json\", \"localFile.json\", {\n      progress: console.log.bind(console, \"progress\"))\n      .then(console.log.bind(console, \"done\")))\n      .catch(console.error.bind(console));\n\n## Results:\n> Object {field1: 1, field2: \"Field2\"}"
   }]
 });
 
@@ -1789,18 +1778,7 @@ pliny.function({
   }],
   examples: [{
     name: "Make a GET request.",
-    description: "Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  Primrose.HTTP.get(\"json\", \"localFile.json\",\n\
-    console.log.bind(console, \"progress\"),\n\
-    console.log.bind(console, \"done\"),\n\
-    console.error.bind(console));\n\
-\n\
-## Results:\n\
-> Object {field1: 1, field2: \"Field2\"}"
+    description: "Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.\n\n## Code:\n\n    grammar(\"JavaScript\");\n    Primrose.HTTP.get(\"json\", \"localFile.json\",\n      console.log.bind(console, \"progress\"),\n      console.log.bind(console, \"done\"),\n      console.error.bind(console));\n\n## Results:\n> Object {field1: 1, field2: \"Field2\"}"
   }]
 });
 
@@ -1821,21 +1799,7 @@ pliny.function({
   }],
   examples: [{
     name: "Make a GET request for an ArrayBuffer.",
-    description: "Use this to load audio files and do whatever you want with them.\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  var context = new AudioContext();\n\
-  Primrose.HTTP.getBuffer(\"audio.mp3\",\n\
-    console.log.bind(console, \"progress\"));,\n\
-    function(buffer){\n\
-      context.decodeAudioData(\n\
-        buffer,\n\
-        console.log.bind(console, \"success\"),\n\
-        console.error.bind(console, \"error decoding\"));\n\
-    },\n\
-    console.error.bind(console, \"error loading\")\n"
+    description: "Use this to load audio files and do whatever you want with them.\n\n## Code:\n\n  grammar(\"JavaScript\");\n  var context = new AudioContext();\n  Primrose.HTTP.getBuffer(\"audio.mp3\",\n    console.log.bind(console, \"progress\"));,\n    function(buffer){\n      context.decodeAudioData(\n        buffer,\n        console.log.bind(console, \"success\"),\n        console.error.bind(console, \"error decoding\"));\n    },\n    console.error.bind(console, \"error loading\")\n"
   }]
 });
 
@@ -1856,19 +1820,7 @@ pliny.function({
   }],
   examples: [{
     name: "Make a GET request for a JSON object.",
-    description: "Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  Primrose.HTTP.getObject(\"localFile.json\", {\n\
-      progress: console.log.bind(console, \"progress\")\n\
-    })\n\
-    .then(console.log.bind(console, \"done\"))\n\
-    .catch(console.error.bind(console)));\n\
-\n\
-## Results:\n\
-> Object {field1: 1, field2: \"Field2\"}"
+    description: "Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.\n\n## Code:\n\n    grammar(\"JavaScript\");\n    Primrose.HTTP.getObject(\"localFile.json\", {\n        progress: console.log.bind(console, \"progress\")\n      })\n      .then(console.log.bind(console, \"done\"))\n      .catch(console.error.bind(console)));\n\n## Results:\n> Object {field1: 1, field2: \"Field2\"}"
   }]
 });
 
@@ -1891,18 +1843,7 @@ pliny.function({
   }],
   examples: [{
     name: "Make a GET request for plain text.",
-    description: "Use this to load arbitrary files and do whatever you want with them.\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  Primrose.HTTP.getText(\"localFile.json\",\n\
-    console.log.bind(console, \"progress\"),\n\
-    console.log.bind(console, \"done\"),\n\
-    console.error.bind(console));\n\
-\n\
-## Results:\n\
-> \"Object {field1: 1, field2: \\\"Field2\\\"}\""
+    description: "Use this to load arbitrary files and do whatever you want with them.\n\n## Code:\n\n    grammar(\"JavaScript\");\n    Primrose.HTTP.getText(\"localFile.json\",\n      console.log.bind(console, \"progress\"),\n      console.log.bind(console, \"done\"),\n      console.error.bind(console));\n\n## Results:\n> \"Object {field1: 1, field2: \\\"Field2\\\"}\""
   }]
 });
 
@@ -1974,59 +1915,59 @@ pliny.function({
     name: "Get an element by ID that already exists.",
     description: "Assuming the following HTML snippet:\n\
 \n\
-  grammar(\"HTML\");\n\
-  <div>\n\
-    <div id=\"First\">first element</div>\n\
-    <section id=\"second-elem\">\n\
-      Second element\n\
-      <img id=\"img1\" src=\"img.png\">\n\
-    </section>\n\
-  </div>\n\
+    grammar(\"HTML\");\n\
+    <div>\n\
+      <div id=\"First\">first element</div>\n\
+      <section id=\"second-elem\">\n\
+        Second element\n\
+        <img id=\"img1\" src=\"img.png\">\n\
+      </section>\n\
+    </div>\n\
 \n\
 ## Code:\n\
 \n\
-  grammar(\"JavaScript\");\n\
-  var elem = Primrose.DOM.cascadeElement(\"second-elem\", \"section\", HTMLElement);\n\
-  console.assert(elem.textContent === \"Second element\");"
+    grammar(\"JavaScript\");\n\
+    var elem = Primrose.DOM.cascadeElement(\"second-elem\", \"section\", HTMLElement);\n\
+    console.assert(elem.textContent === \"Second element\");"
   }, {
     name: "Validate the tag type.",
     description: "Assuming the following HTML snippet:\n\
 \n\
-  grammar(\"HTML\");\n\
-  <div>\n\
-    <div id=\"First\">first element</div>\n\
-    <section id=\"second-elem\">\n\
-      Second element\n\
-      <img id=\"img1\" src=\"img.png\">\n\
-    </section>\n\
-  </div>\n\
+    grammar(\"HTML\");\n\
+    <div>\n\
+      <div id=\"First\">first element</div>\n\
+      <section id=\"second-elem\">\n\
+        Second element\n\
+        <img id=\"img1\" src=\"img.png\">\n\
+      </section>\n\
+    </div>\n\
 \n\
 ## Code:\n\
 \n\
-  grammar(\"JavaScript\");\n\
-  //The following line of code should cause a runtime error.\n\
-  Primrose.DOM.cascadeElement(\"img1\", \"section\", HTMLElement);"
+    grammar(\"JavaScript\");\n\
+    //The following line of code should cause a runtime error.\n\
+    Primrose.DOM.cascadeElement(\"img1\", \"section\", HTMLElement);"
   }, {
     name: "Create an element.",
     description: "Assuming the following HTML snippet:\n\
 \n\
-  grammar(\"HTML\");\n\
-  <div>\n\
-    <div id=\"First\">first element</div>\n\
-    <section id=\"second-elem\">\n\
-      Second element\n\
-      <img id=\"img1\" src=\"img.png\">\n\
-    </section>\n\
-  </div>\n\
+    grammar(\"HTML\");\n\
+    <div>\n\
+      <div id=\"First\">first element</div>\n\
+      <section id=\"second-elem\">\n\
+        Second element\n\
+        <img id=\"img1\" src=\"img.png\">\n\
+      </section>\n\
+    </div>\n\
 \n\
 ## Code:\n\
 \n\
-  grammar(\"JavaScript\");\n\
-  var elem = Primrose.DOM.cascadeElement(\"img2\", \"img\", HTMLImageElement);\n\
-  console.assert(elem.id === \"img2\");\n\
-  console.assert(elem.parentElement === null);\n\
-  document.body.appendChild(elem);\n\
-  console.assert(elem.parentElement === document.body);"
+    grammar(\"JavaScript\");\n\
+    var elem = Primrose.DOM.cascadeElement(\"img2\", \"img\", HTMLImageElement);\n\
+    console.assert(elem.id === \"img2\");\n\
+    console.assert(elem.parentElement === null);\n\
+    document.body.appendChild(elem);\n\
+    console.assert(elem.parentElement === document.body);"
   }]
 });
 

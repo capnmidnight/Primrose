@@ -16,6 +16,28 @@ pliny.function({
     type: "Live API.colored.optionsHash",
     optional: true,
     description: "Options to pass on to [`material()`](#LiveAPI_material), or infrequently-used options to change the behavior of the setup. See [`Live API.colored.optionsHash`](#LiveAPI_colored_optionsHash) and [`Live API.material.optionsHash`](#LiveAPI_material_optionsHash) for more information."
+  }],
+  examples: [{
+    name: "Usage",
+    description: `Apply color to a geometry:
+
+    grammar("JavaScript");
+    var geom = box(),
+      red = colored(geom, 0xff0000),
+      green = colored(geom, 0x00ff00),
+      blue = colored(geom, 0x0000ff);
+
+    red.position.set(-2, 1, -1);
+    green.position.set(0, 1, -1);
+    blue.position.set(2, 1, -1);
+
+    env.scene.add(red);
+    env.scene.add(green);
+    env.scene.add(blue);
+
+The results should look like this:
+
+<img src="images/colored.jpg">`
   }]
 });
 

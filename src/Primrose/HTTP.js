@@ -16,8 +16,8 @@ pliny.function({
   }, {
     name: "type",
     type: "String",
-    description: "How the response should be interpreted. One of [\"text\", \"json\", \"arraybuffer\"]. See the [MDN - XMLHttpRequest - responseType](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype).",
-    default: "\"text\""
+    description: `How the response should be interpreted. One of ["text", "json", "arraybuffer"]. See the [MDN - XMLHttpRequest - responseType](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype).`,
+    default: `"text"`
   }, {
     name: "url",
     type: "String",
@@ -30,18 +30,18 @@ pliny.function({
   }],
   examples: [{
     name: "Make a GET request.",
-    description: "Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  Primrose.HTTP.XHR(\"GET\", \"json\", \"localFile.json\", {\n\
-    progress: console.log.bind(console, \"progress\"))\n\
-    .then(console.log.bind(console, \"done\")))\n\
-    .catch(console.error.bind(console));\n\
-\n\
-## Results:\n\
-> Object {field1: 1, field2: \"Field2\"}"
+    description: `Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.
+
+## Code:
+
+    grammar("JavaScript");
+    Primrose.HTTP.XHR("GET", "json", "localFile.json", {
+      progress: console.log.bind(console, "progress"))
+      .then(console.log.bind(console, "done")))
+      .catch(console.error.bind(console));
+
+## Results:
+> Object {field1: 1, field2: "Field2"}`
   }]
 });
 
@@ -89,7 +89,7 @@ export function XHR(method, type, url, options) {
     // The order of these operations is very explicit. You have to call open
     // first. It seems counter intuitive, but think of it more like you're opening
     // an HTTP document to be able to write to it, and then you finish by sending
-    // the document. The "open" method does not refer to a network connection.
+    // the document. The `open` method does not refer to a network connection.
     req.open(method, url);
     if (type) {
       req.responseType = type;
@@ -121,8 +121,8 @@ pliny.function({
   parameters: [{
     name: "type",
     type: "String",
-    description: "How the response should be interpreted. One of [\"text\", \"json\", \"arraybuffer\"]. See the [MDN - XMLHttpRequest - responseType](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype).",
-    default: "\"text\""
+    description: `How the response should be interpreted. One of ["text", "json", "arraybuffer"]. See the [MDN - XMLHttpRequest - responseType](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype).`,
+    default: `"text"`
   }, {
     name: "url",
     type: "String",
@@ -168,8 +168,8 @@ pliny.function({
   parameters: [{
     name: "type",
     type: "String",
-    description: "How the response should be interpreted. One of [\"text\", \"json\", \"arraybuffer\"]. See the [MDN - XMLHttpRequest - responseType](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype).",
-    default: "\"text\""
+    description: `How the response should be interpreted. One of ["text", "json", "arraybuffer"]. See the [MDN - XMLHttpRequest - responseType](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype).`,
+    default: `"text"`
   }, {
     name: "url",
     type: "String",
@@ -182,18 +182,18 @@ pliny.function({
   }],
   examples: [{
     name: "Make a GET request.",
-    description: "Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  Primrose.HTTP.get(\"json\", \"localFile.json\",\n\
-    console.log.bind(console, \"progress\"),\n\
-    console.log.bind(console, \"done\"),\n\
-    console.error.bind(console));\n\
-\n\
-## Results:\n\
-> Object {field1: 1, field2: \"Field2\"}"
+    description: `Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.
+
+## Code:
+
+    grammar("JavaScript");
+    Primrose.HTTP.get("json", "localFile.json",
+      console.log.bind(console, "progress"),
+      console.log.bind(console, "done"),
+      console.error.bind(console));
+
+## Results:
+> Object {field1: 1, field2: "Field2"}`
   }]
 });
 
@@ -219,21 +219,21 @@ pliny.function({
   }],
   examples: [{
     name: "Make a GET request for an ArrayBuffer.",
-    description: "Use this to load audio files and do whatever you want with them.\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  var context = new AudioContext();\n\
-  Primrose.HTTP.getBuffer(\"audio.mp3\",\n\
-    console.log.bind(console, \"progress\"));,\n\
-    function(buffer){\n\
-      context.decodeAudioData(\n\
-        buffer,\n\
-        console.log.bind(console, \"success\"),\n\
-        console.error.bind(console, \"error decoding\"));\n\
-    },\n\
-    console.error.bind(console, \"error loading\")\n"
+    description: `Use this to load audio files and do whatever you want with them.
+
+## Code:
+
+  grammar("JavaScript");
+  var context = new AudioContext();
+  Primrose.HTTP.getBuffer("audio.mp3",
+    console.log.bind(console, "progress"));,
+    function(buffer){
+      context.decodeAudioData(
+        buffer,
+        console.log.bind(console, "success"),
+        console.error.bind(console, "error decoding"));
+    },
+    console.error.bind(console, "error loading")\n`
   }]
 });
 
@@ -259,19 +259,19 @@ pliny.function({
   }],
   examples: [{
     name: "Make a GET request for a JSON object.",
-    description: "Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  Primrose.HTTP.getObject(\"localFile.json\", {\n\
-      progress: console.log.bind(console, \"progress\")\n\
-    })\n\
-    .then(console.log.bind(console, \"done\"))\n\
-    .catch(console.error.bind(console)));\n\
-\n\
-## Results:\n\
-> Object {field1: 1, field2: \"Field2\"}"
+    description: `Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.
+
+## Code:
+
+    grammar("JavaScript");
+    Primrose.HTTP.getObject("localFile.json", {
+        progress: console.log.bind(console, "progress")
+      })
+      .then(console.log.bind(console, "done"))
+      .catch(console.error.bind(console)));
+
+## Results:
+> Object {field1: 1, field2: "Field2"}`
   }]
 });
 
@@ -297,18 +297,18 @@ pliny.function({
   }],
   examples: [{
     name: "Make a GET request for plain text.",
-    description: "Use this to load arbitrary files and do whatever you want with them.\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  Primrose.HTTP.getText(\"localFile.json\",\n\
-    console.log.bind(console, \"progress\"),\n\
-    console.log.bind(console, \"done\"),\n\
-    console.error.bind(console));\n\
-\n\
-## Results:\n\
-> \"Object {field1: 1, field2: \\\"Field2\\\"}\""
+    description: `Use this to load arbitrary files and do whatever you want with them.
+
+## Code:
+
+    grammar("JavaScript");
+    Primrose.HTTP.getText("localFile.json",
+      console.log.bind(console, "progress"),
+      console.log.bind(console, "done"),
+      console.error.bind(console));
+
+## Results:
+> "Object {field1: 1, field2: \\"Field2\\"}"`
   }]
 });
 
@@ -324,8 +324,8 @@ pliny.function({
   parameters: [{
     name: "type",
     type: "String",
-    description: "How the response should be interpreted. One of [\"text\", \"json\", \"arraybuffer\"]. See the [MDN - XMLHttpRequest - responseType](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype).",
-    default: "\"text\""
+    description: `How the response should be interpreted. One of ["text", "json", "arraybuffer"]. See the [MDN - XMLHttpRequest - responseType](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype).`,
+    default: `"text"`
   }, {
     name: "url",
     type: "String",

@@ -26,59 +26,59 @@ pliny.function({
     name: "Get an element by ID that already exists.",
     description: "Assuming the following HTML snippet:\n\
 \n\
-  grammar(\"HTML\");\n\
-  <div>\n\
-    <div id=\"First\">first element</div>\n\
-    <section id=\"second-elem\">\n\
-      Second element\n\
-      <img id=\"img1\" src=\"img.png\">\n\
-    </section>\n\
-  </div>\n\
+    grammar(\"HTML\");\n\
+    <div>\n\
+      <div id=\"First\">first element</div>\n\
+      <section id=\"second-elem\">\n\
+        Second element\n\
+        <img id=\"img1\" src=\"img.png\">\n\
+      </section>\n\
+    </div>\n\
 \n\
 ## Code:\n\
 \n\
-  grammar(\"JavaScript\");\n\
-  var elem = Primrose.DOM.cascadeElement(\"second-elem\", \"section\", HTMLElement);\n\
-  console.assert(elem.textContent === \"Second element\");"
+    grammar(\"JavaScript\");\n\
+    var elem = Primrose.DOM.cascadeElement(\"second-elem\", \"section\", HTMLElement);\n\
+    console.assert(elem.textContent === \"Second element\");"
   }, {
     name: "Validate the tag type.",
     description: "Assuming the following HTML snippet:\n\
 \n\
-  grammar(\"HTML\");\n\
-  <div>\n\
-    <div id=\"First\">first element</div>\n\
-    <section id=\"second-elem\">\n\
-      Second element\n\
-      <img id=\"img1\" src=\"img.png\">\n\
-    </section>\n\
-  </div>\n\
+    grammar(\"HTML\");\n\
+    <div>\n\
+      <div id=\"First\">first element</div>\n\
+      <section id=\"second-elem\">\n\
+        Second element\n\
+        <img id=\"img1\" src=\"img.png\">\n\
+      </section>\n\
+    </div>\n\
 \n\
 ## Code:\n\
 \n\
-  grammar(\"JavaScript\");\n\
-  //The following line of code should cause a runtime error.\n\
-  Primrose.DOM.cascadeElement(\"img1\", \"section\", HTMLElement);"
+    grammar(\"JavaScript\");\n\
+    //The following line of code should cause a runtime error.\n\
+    Primrose.DOM.cascadeElement(\"img1\", \"section\", HTMLElement);"
   }, {
     name: "Create an element.",
     description: "Assuming the following HTML snippet:\n\
 \n\
-  grammar(\"HTML\");\n\
-  <div>\n\
-    <div id=\"First\">first element</div>\n\
-    <section id=\"second-elem\">\n\
-      Second element\n\
-      <img id=\"img1\" src=\"img.png\">\n\
-    </section>\n\
-  </div>\n\
+    grammar(\"HTML\");\n\
+    <div>\n\
+      <div id=\"First\">first element</div>\n\
+      <section id=\"second-elem\">\n\
+        Second element\n\
+        <img id=\"img1\" src=\"img.png\">\n\
+      </section>\n\
+    </div>\n\
 \n\
 ## Code:\n\
 \n\
-  grammar(\"JavaScript\");\n\
-  var elem = Primrose.DOM.cascadeElement(\"img2\", \"img\", HTMLImageElement);\n\
-  console.assert(elem.id === \"img2\");\n\
-  console.assert(elem.parentElement === null);\n\
-  document.body.appendChild(elem);\n\
-  console.assert(elem.parentElement === document.body);"
+    grammar(\"JavaScript\");\n\
+    var elem = Primrose.DOM.cascadeElement(\"img2\", \"img\", HTMLImageElement);\n\
+    console.assert(elem.id === \"img2\");\n\
+    console.assert(elem.parentElement === null);\n\
+    document.body.appendChild(elem);\n\
+    console.assert(elem.parentElement === document.body);"
   }]
 });
 
