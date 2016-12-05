@@ -1,7 +1,7 @@
 {
   "name": "primrose",
   "description": "Primrose is a framework for building Virtual Reality applications in Web browsers.",
-  "version": "0.29.1",
+  "version": "0.29.2",
   "engines": {
     "node": ">=4.0.0"
   },
@@ -43,18 +43,18 @@
     "highlighting"
   ],
   "dependencies": {
-    "lavu-details-polyfill": "^0.1.0",
-    "three": "^0.82.0",
-    "webvr-polyfill": "github:notiontheory/webvr-polyfill",
-    "webvr-standard-monitor": "^2.0.0"
-  },
-  "devDependencies": {
     "bare-bones-logger": "^4.0.0",
     "iphone-inline-video": "^1.9.3",
     "jstransformer-marked": "^1.0.1",
-    "notion-node": "0.0.4",
-    "notiontheory-basic-build": "^3.0.0",
+    "lavu-details-polyfill": "^0.1.0",
     "pliny": "^3.2.6",
-    "promise-polyfill": "^5.2.1"
+    "promise-polyfill": "^5.2.1",
+    "three": "^0.82.0",
+    "webvr-min-polyfill": "0.0.4",
+    "webvr-standard-monitor": "^2.0.0"
+  },
+  "devDependencies": {
+    "notion-node": "0.0.4",
+    "notiontheory-basic-build": "^4.0.0"
   }
 }
