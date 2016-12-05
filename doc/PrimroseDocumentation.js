@@ -4673,6 +4673,12 @@ pliny.value({
 
 pliny.value({
   parent: "Primrose.Text.Grammars",
+  name: "HTML",
+  description: "A grammar for HyperText Markup Language."
+});
+
+pliny.value({
+  parent: "Primrose.Text.Grammars",
   name: "TestResults",
   description: "A grammar for displaying the results of Unit Tests."
 });

@@ -6,6 +6,7 @@ pliny.namespace({
 
 import Basic from "./Basic";
 import Grammar from "./Grammar";
+import HTML from "./HTML";
 import JavaScript from "./JavaScript";
 import PlainText from "./PlainText";
 import TestResults from "./TestResults";
@@ -13,6 +14,7 @@ import TestResults from "./TestResults";
 export {
   Basic,
   Grammar,
+  HTML,
   JavaScript,
   PlainText,
   TestResults
@@ -21,6 +23,7 @@ export {
 export default {
   Basic,
   Grammar,
+  HTML,
   JavaScript,
   PlainText,
   TestResults
