@@ -10603,6 +10603,270 @@ Mesh.prototype = Object.assign(Object.create(Object3D.prototype), {
 
 /**
  * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ * @author szimek / https://github.com/szimek/
+ */
+
+function Texture(image, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy, encoding) {
+
+	Object.defineProperty(this, 'id', { value: TextureIdCount() });
+
+	this.uuid = _Math.generateUUID();
+
+	this.name = '';
+	this.sourceFile = '';
+
+	this.image = image !== undefined ? image : Texture.DEFAULT_IMAGE;
+	this.mipmaps = [];
+
+	this.mapping = mapping !== undefined ? mapping : Texture.DEFAULT_MAPPING;
+
+	this.wrapS = wrapS !== undefined ? wrapS : ClampToEdgeWrapping;
+	this.wrapT = wrapT !== undefined ? wrapT : ClampToEdgeWrapping;
+
+	this.magFilter = magFilter !== undefined ? magFilter : LinearFilter;
+	this.minFilter = minFilter !== undefined ? minFilter : LinearMipMapLinearFilter;
+
+	this.anisotropy = anisotropy !== undefined ? anisotropy : 1;
+
+	this.format = format !== undefined ? format : RGBAFormat;
+	this.type = type !== undefined ? type : UnsignedByteType;
+
+	this.offset = new Vector2(0, 0);
+	this.repeat = new Vector2(1, 1);
+
+	this.generateMipmaps = true;
+	this.premultiplyAlpha = false;
+	this.flipY = true;
+	this.unpackAlignment = 4; // valid values: 1, 2, 4, 8 (see http://www.khronos.org/opengles/sdk/docs/man/xhtml/glPixelStorei.xml)
+
+
+	// Values of encoding !== THREE.LinearEncoding only supported on map, envMap and emissiveMap.
+	//
+	// Also changing the encoding after already used by a Material will not automatically make the Material
+	// update.  You need to explicitly call Material.needsUpdate to trigger it to recompile.
+	this.encoding = encoding !== undefined ? encoding : LinearEncoding;
+
+	this.version = 0;
+	this.onUpdate = null;
+}
+
+Texture.DEFAULT_IMAGE = undefined;
+Texture.DEFAULT_MAPPING = UVMapping;
+
+Texture.prototype = {
+
+	constructor: Texture,
+
+	isTexture: true,
+
+	set needsUpdate(value) {
+
+		if (value === true) this.version++;
+	},
+
+	clone: function clone() {
+
+		return new this.constructor().copy(this);
+	},
+
+	copy: function copy(source) {
+
+		this.image = source.image;
+		this.mipmaps = source.mipmaps.slice(0);
+
+		this.mapping = source.mapping;
+
+		this.wrapS = source.wrapS;
+		this.wrapT = source.wrapT;
+
+		this.magFilter = source.magFilter;
+		this.minFilter = source.minFilter;
+
+		this.anisotropy = source.anisotropy;
+
+		this.format = source.format;
+		this.type = source.type;
+
+		this.offset.copy(source.offset);
+		this.repeat.copy(source.repeat);
+
+		this.generateMipmaps = source.generateMipmaps;
+		this.premultiplyAlpha = source.premultiplyAlpha;
+		this.flipY = source.flipY;
+		this.unpackAlignment = source.unpackAlignment;
+		this.encoding = source.encoding;
+
+		return this;
+	},
+
+	toJSON: function toJSON(meta) {
+
+		if (meta.textures[this.uuid] !== undefined) {
+
+			return meta.textures[this.uuid];
+		}
+
+		function getDataURL(image) {
+
+			var canvas;
+
+			if (image.toDataURL !== undefined) {
+
+				canvas = image;
+			} else {
+
+				canvas = document.createElementNS('http://www.w3.org/1999/xhtml', 'canvas');
+				canvas.width = image.width;
+				canvas.height = image.height;
+
+				canvas.getContext('2d').drawImage(image, 0, 0, image.width, image.height);
+			}
+
+			if (canvas.width > 2048 || canvas.height > 2048) {
+
+				return canvas.toDataURL('image/jpeg', 0.6);
+			} else {
+
+				return canvas.toDataURL('image/png');
+			}
+		}
+
+		var output = {
+			metadata: {
+				version: 4.4,
+				type: 'Texture',
+				generator: 'Texture.toJSON'
+			},
+
+			uuid: this.uuid,
+			name: this.name,
+
+			mapping: this.mapping,
+
+			repeat: [this.repeat.x, this.repeat.y],
+			offset: [this.offset.x, this.offset.y],
+			wrap: [this.wrapS, this.wrapT],
+
+			minFilter: this.minFilter,
+			magFilter: this.magFilter,
+			anisotropy: this.anisotropy,
+
+			flipY: this.flipY
+		};
+
+		if (this.image !== undefined) {
+
+			// TODO: Move to THREE.Image
+
+			var image = this.image;
+
+			if (image.uuid === undefined) {
+
+				image.uuid = _Math.generateUUID(); // UGH
+			}
+
+			if (meta.images[image.uuid] === undefined) {
+
+				meta.images[image.uuid] = {
+					uuid: image.uuid,
+					url: getDataURL(image)
+				};
+			}
+
+			output.image = image.uuid;
+		}
+
+		meta.textures[this.uuid] = output;
+
+		return output;
+	},
+
+	dispose: function dispose() {
+
+		this.dispatchEvent({ type: 'dispose' });
+	},
+
+	transformUv: function transformUv(uv) {
+
+		if (this.mapping !== UVMapping) return;
+
+		uv.multiply(this.repeat);
+		uv.add(this.offset);
+
+		if (uv.x < 0 || uv.x > 1) {
+
+			switch (this.wrapS) {
+
+				case RepeatWrapping:
+
+					uv.x = uv.x - Math.floor(uv.x);
+					break;
+
+				case ClampToEdgeWrapping:
+
+					uv.x = uv.x < 0 ? 0 : 1;
+					break;
+
+				case MirroredRepeatWrapping:
+
+					if (Math.abs(Math.floor(uv.x) % 2) === 1) {
+
+						uv.x = Math.ceil(uv.x) - uv.x;
+					} else {
+
+						uv.x = uv.x - Math.floor(uv.x);
+					}
+					break;
+
+			}
+		}
+
+		if (uv.y < 0 || uv.y > 1) {
+
+			switch (this.wrapT) {
+
+				case RepeatWrapping:
+
+					uv.y = uv.y - Math.floor(uv.y);
+					break;
+
+				case ClampToEdgeWrapping:
+
+					uv.y = uv.y < 0 ? 0 : 1;
+					break;
+
+				case MirroredRepeatWrapping:
+
+					if (Math.abs(Math.floor(uv.y) % 2) === 1) {
+
+						uv.y = Math.ceil(uv.y) - uv.y;
+					} else {
+
+						uv.y = uv.y - Math.floor(uv.y);
+					}
+					break;
+
+			}
+		}
+
+		if (this.flipY) {
+
+			uv.y = 1 - uv.y;
+		}
+	}
+
+};
+
+Object.assign(Texture.prototype, EventDispatcher.prototype);
+
+var count$3 = 0;
+function TextureIdCount() {
+	return count$3++;
+}
+
+/**
+ * @author mrdoob / http://mrdoob.com/
  */
 
 var Cache = {
@@ -10971,270 +11235,6 @@ Object.assign(ImageLoader.prototype, {
 
 /**
  * @author mrdoob / http://mrdoob.com/
- * @author alteredq / http://alteredqualia.com/
- * @author szimek / https://github.com/szimek/
- */
-
-function Texture$1(image, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy, encoding) {
-
-	Object.defineProperty(this, 'id', { value: TextureIdCount() });
-
-	this.uuid = _Math.generateUUID();
-
-	this.name = '';
-	this.sourceFile = '';
-
-	this.image = image !== undefined ? image : Texture$1.DEFAULT_IMAGE;
-	this.mipmaps = [];
-
-	this.mapping = mapping !== undefined ? mapping : Texture$1.DEFAULT_MAPPING;
-
-	this.wrapS = wrapS !== undefined ? wrapS : ClampToEdgeWrapping;
-	this.wrapT = wrapT !== undefined ? wrapT : ClampToEdgeWrapping;
-
-	this.magFilter = magFilter !== undefined ? magFilter : LinearFilter;
-	this.minFilter = minFilter !== undefined ? minFilter : LinearMipMapLinearFilter;
-
-	this.anisotropy = anisotropy !== undefined ? anisotropy : 1;
-
-	this.format = format !== undefined ? format : RGBAFormat;
-	this.type = type !== undefined ? type : UnsignedByteType;
-
-	this.offset = new Vector2(0, 0);
-	this.repeat = new Vector2(1, 1);
-
-	this.generateMipmaps = true;
-	this.premultiplyAlpha = false;
-	this.flipY = true;
-	this.unpackAlignment = 4; // valid values: 1, 2, 4, 8 (see http://www.khronos.org/opengles/sdk/docs/man/xhtml/glPixelStorei.xml)
-
-
-	// Values of encoding !== THREE.LinearEncoding only supported on map, envMap and emissiveMap.
-	//
-	// Also changing the encoding after already used by a Material will not automatically make the Material
-	// update.  You need to explicitly call Material.needsUpdate to trigger it to recompile.
-	this.encoding = encoding !== undefined ? encoding : LinearEncoding;
-
-	this.version = 0;
-	this.onUpdate = null;
-}
-
-Texture$1.DEFAULT_IMAGE = undefined;
-Texture$1.DEFAULT_MAPPING = UVMapping;
-
-Texture$1.prototype = {
-
-	constructor: Texture$1,
-
-	isTexture: true,
-
-	set needsUpdate(value) {
-
-		if (value === true) this.version++;
-	},
-
-	clone: function clone() {
-
-		return new this.constructor().copy(this);
-	},
-
-	copy: function copy(source) {
-
-		this.image = source.image;
-		this.mipmaps = source.mipmaps.slice(0);
-
-		this.mapping = source.mapping;
-
-		this.wrapS = source.wrapS;
-		this.wrapT = source.wrapT;
-
-		this.magFilter = source.magFilter;
-		this.minFilter = source.minFilter;
-
-		this.anisotropy = source.anisotropy;
-
-		this.format = source.format;
-		this.type = source.type;
-
-		this.offset.copy(source.offset);
-		this.repeat.copy(source.repeat);
-
-		this.generateMipmaps = source.generateMipmaps;
-		this.premultiplyAlpha = source.premultiplyAlpha;
-		this.flipY = source.flipY;
-		this.unpackAlignment = source.unpackAlignment;
-		this.encoding = source.encoding;
-
-		return this;
-	},
-
-	toJSON: function toJSON(meta) {
-
-		if (meta.textures[this.uuid] !== undefined) {
-
-			return meta.textures[this.uuid];
-		}
-
-		function getDataURL(image) {
-
-			var canvas;
-
-			if (image.toDataURL !== undefined) {
-
-				canvas = image;
-			} else {
-
-				canvas = document.createElementNS('http://www.w3.org/1999/xhtml', 'canvas');
-				canvas.width = image.width;
-				canvas.height = image.height;
-
-				canvas.getContext('2d').drawImage(image, 0, 0, image.width, image.height);
-			}
-
-			if (canvas.width > 2048 || canvas.height > 2048) {
-
-				return canvas.toDataURL('image/jpeg', 0.6);
-			} else {
-
-				return canvas.toDataURL('image/png');
-			}
-		}
-
-		var output = {
-			metadata: {
-				version: 4.4,
-				type: 'Texture',
-				generator: 'Texture.toJSON'
-			},
-
-			uuid: this.uuid,
-			name: this.name,
-
-			mapping: this.mapping,
-
-			repeat: [this.repeat.x, this.repeat.y],
-			offset: [this.offset.x, this.offset.y],
-			wrap: [this.wrapS, this.wrapT],
-
-			minFilter: this.minFilter,
-			magFilter: this.magFilter,
-			anisotropy: this.anisotropy,
-
-			flipY: this.flipY
-		};
-
-		if (this.image !== undefined) {
-
-			// TODO: Move to THREE.Image
-
-			var image = this.image;
-
-			if (image.uuid === undefined) {
-
-				image.uuid = _Math.generateUUID(); // UGH
-			}
-
-			if (meta.images[image.uuid] === undefined) {
-
-				meta.images[image.uuid] = {
-					uuid: image.uuid,
-					url: getDataURL(image)
-				};
-			}
-
-			output.image = image.uuid;
-		}
-
-		meta.textures[this.uuid] = output;
-
-		return output;
-	},
-
-	dispose: function dispose() {
-
-		this.dispatchEvent({ type: 'dispose' });
-	},
-
-	transformUv: function transformUv(uv) {
-
-		if (this.mapping !== UVMapping) return;
-
-		uv.multiply(this.repeat);
-		uv.add(this.offset);
-
-		if (uv.x < 0 || uv.x > 1) {
-
-			switch (this.wrapS) {
-
-				case RepeatWrapping:
-
-					uv.x = uv.x - Math.floor(uv.x);
-					break;
-
-				case ClampToEdgeWrapping:
-
-					uv.x = uv.x < 0 ? 0 : 1;
-					break;
-
-				case MirroredRepeatWrapping:
-
-					if (Math.abs(Math.floor(uv.x) % 2) === 1) {
-
-						uv.x = Math.ceil(uv.x) - uv.x;
-					} else {
-
-						uv.x = uv.x - Math.floor(uv.x);
-					}
-					break;
-
-			}
-		}
-
-		if (uv.y < 0 || uv.y > 1) {
-
-			switch (this.wrapT) {
-
-				case RepeatWrapping:
-
-					uv.y = uv.y - Math.floor(uv.y);
-					break;
-
-				case ClampToEdgeWrapping:
-
-					uv.y = uv.y < 0 ? 0 : 1;
-					break;
-
-				case MirroredRepeatWrapping:
-
-					if (Math.abs(Math.floor(uv.y) % 2) === 1) {
-
-						uv.y = Math.ceil(uv.y) - uv.y;
-					} else {
-
-						uv.y = uv.y - Math.floor(uv.y);
-					}
-					break;
-
-			}
-		}
-
-		if (this.flipY) {
-
-			uv.y = 1 - uv.y;
-		}
-	}
-
-};
-
-Object.assign(Texture$1.prototype, EventDispatcher.prototype);
-
-var count$3 = 0;
-function TextureIdCount() {
-	return count$3++;
-}
-
-/**
- * @author mrdoob / http://mrdoob.com/
  */
 
 function CubeTexture(images, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy, encoding) {
@@ -11242,12 +11242,12 @@ function CubeTexture(images, mapping, wrapS, wrapT, magFilter, minFilter, format
 	images = images !== undefined ? images : [];
 	mapping = mapping !== undefined ? mapping : CubeReflectionMapping;
 
-	Texture$1.call(this, images, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy, encoding);
+	Texture.call(this, images, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy, encoding);
 
 	this.flipY = false;
 }
 
-CubeTexture.prototype = Object.create(Texture$1.prototype);
+CubeTexture.prototype = Object.create(Texture.prototype);
 CubeTexture.prototype.constructor = CubeTexture;
 
 CubeTexture.prototype.isCubeTexture = true;
@@ -11339,7 +11339,7 @@ Object.assign(TextureLoader.prototype, {
 
 	load: function load(url, onLoad, onProgress, onError) {
 
-		var texture = new Texture$1();
+		var texture = new Texture();
 
 		var loader = new ImageLoader(this.manager);
 		loader.setCrossOrigin(this.crossOrigin);
@@ -11406,13 +11406,13 @@ function loadTexture$1(id, url, progress) {
       if (textureLoader) {
         textureLoader.load(url, resolve, progress, reject);
       } else {
-        resolve(new Texture$1(url));
+        resolve(new Texture(url));
       }
     });
   });
 }
 
-function textured$1(geometry, txt, options) {
+function textured(geometry, txt, options) {
   options = Object.assign({}, {
     txtRepeatX: 1,
     txtRepeatY: 1,
@@ -11745,7 +11745,7 @@ function BoxBufferGeometry(width, height, depth, widthSegments, heightSegments, 
 BoxBufferGeometry.prototype = Object.create(BufferGeometry.prototype);
 BoxBufferGeometry.prototype.constructor = BoxBufferGeometry;
 
-function box$1(width, height, length, t, u, v) {
+function box(width, height, length, t, u, v) {
   if (height === undefined) {
     height = width;
   }
@@ -11768,8 +11768,8 @@ function brick(txt, width, height, length, options) {
     transparent: true,
     opacity: 1
   }, options);
-  var m = typeof txt === "number" ? colored$1 : textured$1,
-      obj = m(box$1(width, height, length), txt, options);
+  var m = typeof txt === "number" ? colored$1 : textured,
+      obj = m(box(width, height, length), txt, options);
   return obj;
 }
 
@@ -13725,7 +13725,7 @@ function v3$1(x, y, z) {
 
 var index$2 = {
   axis: axis,
-  box: box$1,
+  box: box,
   brick: brick,
   circle: circle,
   cloud: cloud,
@@ -13741,13 +13741,13 @@ var index$2 = {
   shell: shell$1,
   raycaster: raycaster,
   sphere: sphere$1,
-  textured: textured$1,
+  textured: textured,
   v3: v3$1
 };
 
 var liveAPI = Object.freeze({
 	axis: axis,
-	box: box$1,
+	box: box,
 	brick: brick,
 	circle: circle,
 	cloud: cloud,
@@ -13763,7 +13763,7 @@ var liveAPI = Object.freeze({
 	shell: shell$1,
 	raycaster: raycaster,
 	sphere: sphere$1,
-	textured: textured$1,
+	textured: textured,
 	v3: v3$1,
 	default: index$2
 });
@@ -17394,7 +17394,7 @@ BufferGeometry.prototype.offset = function (x, y, z) {
 };
 
 BufferGeometry.prototype.textured = Geometry.prototype.textured = Mesh.prototype.textured = function (texture, options) {
-  return textured$1(this, texture, options);
+  return textured(this, texture, options);
 };
 
 Euler.prototype.toString = Quaternion.prototype.toString = Vector2.prototype.toString = Vector3.prototype.toString = Vector4.prototype.toString = function (digits) {
@@ -18494,7 +18494,7 @@ var Pointer = function (_AbstractEventEmitter) {
     _this.color = color;
     _this.highlight = highlight;
     _this.velocity = new Vector3();
-    _this.mesh = colored$1(box$1(LASER_WIDTH / s, LASER_WIDTH / s, LASER_LENGTH * s), _this.color, {
+    _this.mesh = colored$1(box(LASER_WIDTH / s, LASER_WIDTH / s, LASER_LENGTH * s), _this.color, {
       unshaded: true
     });
     _this.mesh.position.z = -1.5;
@@ -19474,6 +19474,7 @@ var Surface = function (_Entity) {
           mesh = textured(geom, this, {
         opacity: this._opacity
       });
+      console.log(mesh, scene, env);
       scene.add(mesh);
       env.registerPickableObject(mesh);
       return mesh;
@@ -19686,7 +19687,7 @@ var Surface = function (_Entity) {
     key: "texture",
     get: function get() {
       if (!this._texture) {
-        this._texture = new Texture$1(this.canvas);
+        this._texture = new Texture(this.canvas);
       }
       return this._texture;
     }
@@ -20629,7 +20630,7 @@ var Image = function (_Entity) {
         return loadTexture$1("Primrose.Controls.Image(" + src + ", " + i + ")", src, progress).then(function (txt) {
           _this3._textures[i] = txt;
           _this3._setGeometry();
-          _this3._meshes[i] = textured$1(_this3.options.geometry, txt, _this3.options);
+          _this3._meshes[i] = textured(_this3.options.geometry, txt, _this3.options);
         });
       })).then(function () {
         return _this3.isVideo = false;
@@ -20694,7 +20695,7 @@ var Image = function (_Entity) {
               _this4._contexts[i] = _this4._canvases[i].getContext("2d");
             }
 
-            _this4._meshes[i] = textured$1(_this4.options.geometry, _this4._canvases[i] || _this4._elements[i], _this4.options);
+            _this4._meshes[i] = textured(_this4.options.geometry, _this4._canvases[i] || _this4._elements[i], _this4.options);
 
             _this4._textures[i] = _this4._meshes[i].material.map;
             resolve();
@@ -21006,7 +21007,7 @@ LOD.prototype = Object.assign(Object.create(Object3D.prototype), {
 
 function DataTexture(data, width, height, format, type, mapping, wrapS, wrapT, magFilter, minFilter, anisotropy, encoding) {
 
-	Texture$1.call(this, null, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy, encoding);
+	Texture.call(this, null, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy, encoding);
 
 	this.image = { data: data, width: width, height: height };
 
@@ -21018,7 +21019,7 @@ function DataTexture(data, width, height, format, type, mapping, wrapS, wrapT, m
 	this.unpackAlignment = 1;
 }
 
-DataTexture.prototype = Object.create(Texture$1.prototype);
+DataTexture.prototype = Object.create(Texture.prototype);
 DataTexture.prototype.constructor = DataTexture;
 
 DataTexture.prototype.isDataTexture = true;
@@ -27464,7 +27465,7 @@ Object.assign(ObjectLoader.prototype, {
 					console.warn('THREE.ObjectLoader: Undefined image', data.image);
 				}
 
-				var texture = new Texture$1(images[data.image]);
+				var texture = new Texture(images[data.image]);
 				texture.needsUpdate = true;
 
 				texture.uuid = data.uuid;
@@ -31178,7 +31179,7 @@ var isMobile$1 = (function (a) {
   );
 })(navigator.userAgent || navigator.vendor || window.opera);
 
-var Orientation$1 = { lock: lock, unlock: unlock };
+var Orientation = { lock: lock, unlock: unlock };
 
 function warn(msg) {
   return function (exp) {
@@ -31214,7 +31215,7 @@ var WebVRStandardMonitor = function () {
     key: "standardLockBehavior",
     value: function standardLockBehavior(elem) {
       if (isMobile$1) {
-        return Orientation$1.lock(elem).catch(warn("OrientationLock failed"));
+        return Orientation.lock(elem).catch(warn("OrientationLock failed"));
       } else {
         return PointerLock.request(elem).catch(warn("PointerLock failed"));
       }
@@ -31230,7 +31231,7 @@ var WebVRStandardMonitor = function () {
     key: "standardUnlockBehavior",
     value: function standardUnlockBehavior() {
       if (isMobile$1) {
-        Orientation$1.unlock();
+        Orientation.unlock();
         return Promise.resolve();
       } else {
         return PointerLock.exit().catch(warn("PointerLock exit failed"));
@@ -31512,7 +31513,7 @@ var VR = function (_PoseInputProcessor) {
       }
 
       if (this.isNativeMobileWebVR) {
-        promise = promise.then(Orientation.unlock);
+        promise = promise.then(unlock);
       }
 
       return promise.then(PointerLock.exit).catch(function (exp) {
@@ -31865,7 +31866,7 @@ var FPSInput = function (_AbstractEventEmitter) {
                 color = 0x0000ff << shift,
                 highlight = 0xff0000 >> shift,
                 ptr = new Pointer(padID + "Pointer", color, 1, highlight, [mgr], null, _this.options);
-            ptr.add(colored(box(0.1, 0.025, 0.2), color, {
+            ptr.add(colored$1(box(0.1, 0.025, 0.2), color, {
               emissive: highlight
             }));
 
@@ -34118,7 +34119,7 @@ var constants = {
  *
  */
 
-var emptyTexture = new Texture$1();
+var emptyTexture = new Texture();
 var emptyCubeTexture = new CubeTexture();
 
 // --- Base for inner nodes (including the root) ---
@@ -35306,7 +35307,7 @@ function SpritePlugin(renderer, sprites) {
 		context.fillStyle = 'white';
 		context.fillRect(0, 0, 8, 8);
 
-		texture = new Texture$1(canvas);
+		texture = new Texture(canvas);
 		texture.needsUpdate = true;
 	}
 
@@ -35519,7 +35520,7 @@ function WebGLRenderTarget(width, height, options) {
 
 	if (options.minFilter === undefined) options.minFilter = LinearFilter;
 
-	this.texture = new Texture$1(undefined, undefined, options.wrapS, options.wrapT, options.magFilter, options.minFilter, options.format, options.type, options.anisotropy, options.encoding);
+	this.texture = new Texture(undefined, undefined, options.wrapS, options.wrapT, options.magFilter, options.minFilter, options.format, options.type, options.anisotropy, options.encoding);
 
 	this.depthBuffer = options.depthBuffer !== undefined ? options.depthBuffer : true;
 	this.stencilBuffer = options.stencilBuffer !== undefined ? options.stencilBuffer : true;
@@ -41919,7 +41920,7 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
       if (models.button) {
         _this.buttonFactory = new ButtonFactory(models.button, _this.options.button.options);
       } else {
-        _this.buttonFactory = new ButtonFactory(colored$1(box$1(1, 1, 1), 0xff0000), {
+        _this.buttonFactory = new ButtonFactory(colored$1(box(1, 1, 1), 0xff0000), {
           maxThrow: 0.1,
           minDeflection: 10,
           colorUnpressed: 0x7f0000,
@@ -41930,7 +41931,7 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
     }).catch(function (err) {
       console.error(err);
       if (!_this.buttonFactory) {
-        _this.buttonFactory = new ButtonFactory(colored$1(box$1(1, 1, 1), 0xff0000), {
+        _this.buttonFactory = new ButtonFactory(colored$1(box(1, 1, 1), 0xff0000), {
           maxThrow: 0.1,
           minDeflection: 10,
           colorUnpressed: 0x7f0000,
@@ -42117,7 +42118,7 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
           skyGeom = sphere(_this.options.drawDistance, 18, 9);
         } else {
           var skyDim = _this.options.drawDistance / Math.sqrt(2);
-          skyGeom = box$1(skyDim, skyDim, skyDim);
+          skyGeom = box(skyDim, skyDim, skyDim);
         }
 
         _this.sky = skyFunc(skyGeom, _this.options.skyTexture, {
@@ -42329,7 +42330,7 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
         });
       });
 
-      _this.fader = colored$1(box$1(1, 1, 1), _this.options.backgroundColor, {
+      _this.fader = colored$1(box(1, 1, 1), _this.options.backgroundColor, {
         opacity: 0,
         fog: false,
         transparent: true,
@@ -42664,7 +42665,7 @@ var Form = function (_Surface) {
       id: "Primrose.Controls.Form[" + COUNTER$5++ + "]"
     }, options)));
 
-    _this._mesh = textured$1(quad$1(1, _this.bounds.height / _this.bounds.width), _this);
+    _this._mesh = textured(quad$1(1, _this.bounds.height / _this.bounds.width), _this);
     _this._mesh.name = _this.id + "-mesh";
     Object.defineProperties(_this.style, {
       display: {
@@ -42770,7 +42771,7 @@ var PlainText$1 = function PlainText$1(text, size, fgcolor, bgcolor, x, y, z) {
     textContext.fillText(lines[i], 0, i * lineHeight);
   }
 
-  var texture = new Texture$1(textCanvas);
+  var texture = new Texture(textCanvas);
   texture.needsUpdate = true;
 
   var material = new MeshBasicMaterial({
@@ -42807,7 +42808,7 @@ var Progress = function () {
 
     majorColor = majorColor || 0xffffff;
     minorColor = minorColor || 0x000000;
-    var geom = box$1(SIZE, SIZE_SMALL, SIZE_SMALL);
+    var geom = box(SIZE, SIZE_SMALL, SIZE_SMALL);
 
     this.totalBar = colored$1(geom, minorColor, {
       unshaded: true,
