@@ -98,28 +98,6 @@ var gulp = require("gulp"),
     };
   });
 
-gulp.task("clean", [nt.clean("Primrose:full", [
-  "Primrose*.js",
-  "doc/Primrose*.js"
-])]);
-
-gulp.task("tidy", [nt.clean("Primrose", [
-  "PrimroseWithDoc*.js",
-  "doc/*/appWithDoc.js",
-  "doc/*/appDocumentation.js",
-  "doc/PrimroseDocumentation.modules.js"
-], ["js:release"])]);
-
-gulp.task("tidy:only", [nt.clean("Primrose", [
-  "PrimroseWithDoc*.js",
-  "doc/*/appWithDoc.js",
-  "doc/*/appDocumentation.js",
-  "doc/PrimroseDocumentation.modules.js"
-])]);
-
-gulp.task("copy", ["tidy"], () => gulp.src(["Primrose.min.js"])
-  .pipe(gulp.dest("quickstart")));
-
 tasks.format.push.apply(tasks.format, demos.map(d=>d.format));
 tasks.debug.push.apply(tasks.debug, demos.map(d=>d.debug));
 tasks.release.push.apply(tasks.release, demos.map(d=>d.release));
@@ -136,6 +114,23 @@ gulp.task("js:release", tasks.release);
 gulp.task("html", [html.default]);
 gulp.task("css", [css.default]);
 
+gulp.task("clean", [nt.clean("Primrose:full", [
+  "Primrose*.js",
+  "doc/Primrose*.js"
+])]);
+
+const tidyFiles = [
+  "PrimroseWithDoc*.js",
+  "doc/*/appWithDoc.js",
+  "doc/*/appDocumentation.js",
+  "doc/PrimroseDocumentation.modules.js"
+];
+gulp.task("tidy", [nt.clean("Primrose", tidyFiles, ["js:release"])]);
+gulp.task("tidy:only", [nt.clean("Primrose:only", tidyFiles)]);
+
+gulp.task("copy", ["tidy"], () => gulp.src(["Primrose.min.js"])
+  .pipe(gulp.dest("quickstart")));
+
 gulp.task("default", [
   "js",
   html.default,
@@ -148,13 +143,8 @@ gulp.task("debug", [
   css.debug
 ]);
 
-gulp.task("test", tasks.release.concat([
-  html.test,
-  css.release
-]));
-
 gulp.task("release",  [
-  "tidy",
+  "copy",
   html.release,
   css.release
 ]);
