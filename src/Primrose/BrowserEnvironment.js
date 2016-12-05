@@ -1,3 +1,6 @@
+import { packageName, version, homepage } from "../../package.json";
+console.info(`[${packageName} v${version}]:> see ${homepage} for more information.`);
+
 pliny.class({
   parent: "Primrose",
   name: "BrowserEnvironment",
