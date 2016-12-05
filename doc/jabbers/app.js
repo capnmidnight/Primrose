@@ -18341,6 +18341,14 @@ var Audio$1 = {
   Speech: Speech
 };
 
+var packageName = "PrimroseVR";
+
+var version = "0.29.2";
+
+
+
+var homepage = "https://www.primrosevr.com";
+
 function findProperty$1(elem, arr) {
   for (var i = 0; i < arr.length; ++i) {
     if (elem[arr[i]] !== undefined) {
@@ -43669,6 +43677,8 @@ function WebGLRenderer(parameters) {
 	}
 }
 
+console.info("[" + packageName + " v" + version + "]:> see " + homepage + " for more information.");
+
 var MILLISECONDS_TO_SECONDS = 0.001;
 var MAX_MOVE_DISTANCE = 5;
 var MAX_MOVE_DISTANCE_SQ = MAX_MOVE_DISTANCE * MAX_MOVE_DISTANCE;
@@ -44389,13 +44399,13 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
 
           _this.emit("keyup", evt);
         },
-            withCurrentControl = function withCurrentControl(name) {
+            withCurrentControl = function withCurrentControl(name$$1) {
           return function (evt) {
             if (_this.currentControl) {
-              if (_this.currentControl[name]) {
-                _this.currentControl[name](evt);
+              if (_this.currentControl[name$$1]) {
+                _this.currentControl[name$$1](evt);
               } else {
-                console.warn("Couldn't find %s on %o", name, _this.currentControl);
+                console.warn("Couldn't find %s on %o", name$$1, _this.currentControl);
               }
             }
           };
