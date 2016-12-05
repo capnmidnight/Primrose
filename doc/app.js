@@ -51,7 +51,6 @@ function scroller(id) {
   }
 
   function showHash(evt) {
-    console.log("showing hash");
     var page = document.location.hash,
       promise = null;
     if (/\.md$/.test(page)) {
