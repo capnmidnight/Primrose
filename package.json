@@ -52,7 +52,7 @@
     "promise-polyfill": "^5.2.1",
     "three": "^0.82.0",
     "webvr-min-polyfill": "0.0.4",
-    "webvr-standard-monitor": "^2.0.0"
+    "webvr-standard-monitor": "^2.1.0"
   },
   "devDependencies": {
     "notion-node": "0.0.4",

@@ -191,9 +191,13 @@ const MILLISECONDS_TO_SECONDS = 0.001,
   MAX_MOVE_DISTANCE_SQ = MAX_MOVE_DISTANCE * MAX_MOVE_DISTANCE,
   TELEPORT_COOLDOWN = 250,
   TELEPORT_DISPLACEMENT = new Vector3(),
-  GROUND_HEIGHT = -0.07;
+  GROUND_HEIGHT = -0.07,
+  EYE_INDICES = { "left": 0, "right": 1 };
 
 import PointerLock from "webvr-standard-monitor/src/PointerLock";
+import WebVRStandardMonitor from "webvr-standard-monitor/src/WebVRStandardMonitor";
+
+
 import isMobile from "../flags/isMobile";
 import isiOS from "../flags/isiOS";
 
@@ -389,17 +393,21 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
       this.camera.position.set(0, 0, 0);
       this.camera.quaternion.set(0, 0, 0, 1);
       this.audio.setPlayer(this.input.head.mesh);
-      if (this.input.VR.isPresenting) {
-        this.renderer.clear(true, true, true);
+      this.renderer.clear(true, true, true);
 
-        var trans = this.input.VR.getTransforms(
-          this.options.nearPlane,
-          this.options.nearPlane + this.options.drawDistance);
-        for (var i = 0; trans && i < trans.length; ++i) {
-          var st = trans[i],
-            v = st.viewport,
-            side = (2 * i) - 1;
-          if(this.options.nonstandardIPD !== null){
+      var trans = this.input.VR.getTransforms(
+        this.options.nearPlane,
+        this.options.nearPlane + this.options.drawDistance);
+      for (var n = 0; trans && n < trans.length; ++n) {
+        var eye = this.options.eyeRenderOrder[n],
+          i = EYE_INDICES[eye],
+          st = trans[i] || trans[1 - i],
+          v = st.viewport;
+        Entity.eyeBlankAll(i);
+
+        if(trans.length > 1) {
+          var side = (2 * i) - 1;
+          if(this.options.nonstandardIPD !== null && st.translation.x !== 0){
             st.translation.x = Math.sign(st.translation.x) * this.options.nonstandardIPD;
           }
           if(this.options.nonstandardNeckLength !== null){
@@ -408,31 +416,21 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
           if(this.options.nonstandardNeckDepth !== null){
             st.translation.z = this.options.nonstandardNeckDepth;
           }
-          Entity.eyeBlankAll(i);
-          this.camera.projectionMatrix.copy(st.projection);
-          this.camera.translateOnAxis(st.translation, 1);
-          this.renderer.setViewport(
-            v.left * resolutionScale,
-            v.top * resolutionScale,
-            v.width * resolutionScale,
-            v.height * resolutionScale);
-          this.renderer.render(this.scene, this.camera);
-          this.camera.translateOnAxis(st.translation, -1);
         }
-        this.input.submitFrame();
-      }
-
-      if (!this.input.VR.isPresenting || (this.input.VR.canMirror && !this.options.disableMirroring)) {
-        this.camera.fov = this.options.defaultFOV;
-        this.camera.aspect = this.renderer.domElement.width / this.renderer.domElement.height;
-        this.camera.updateProjectionMatrix();
-        this.renderer.clear(true, true, true);
-        if(this.input.mousePointer.unproject){
-          this.input.mousePointer.unproject.getInverse(this.camera.projectionMatrix);
+        this.renderer.setViewport(
+          v.left * resolutionScale,
+          v.top * resolutionScale,
+          v.width * resolutionScale,
+          v.height * resolutionScale);
+        this.camera.projectionMatrix.copy(st.projection);
+        if (this.input.mousePointer.unproject) {
+          this.input.mousePointer.unproject.getInverse(st.projection);
         }
-        this.renderer.setViewport(0, 0, this.renderer.domElement.width, this.renderer.domElement.height);
+        this.camera.translateOnAxis(st.translation, 1);
         this.renderer.render(this.scene, this.camera);
+        this.camera.translateOnAxis(st.translation, -1);
       }
+      this.input.submitFrame();
     };
 
     var modifyScreen = () => {
@@ -1069,9 +1067,13 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
     });
     this.goFullScreen = (index, evt) => {
       if (evt !== "Gaze") {
-        const elem = !this.input.VR.isStereo || isMobile && !this.input.VR.isNativeMobileWebVR ?
-              this.options.fullScreenElement :
-              this.renderer.domElement;
+        let elem = null;
+        if(this.input.VR.canMirror || this.input.VR.isNativeMobileWebVR) {
+          elem = this.renderer.domElement;
+        }
+        else{
+          elem = this.options.fullScreenElement;
+        }
         this.input.VR.connect(index);
         return this.input.VR.requestPresent([{
             source: elem
@@ -1541,6 +1543,21 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
     return this.input.VR.displays;
   }
 
+  get fieldOfView() {
+    var d = this.input.VR.currentDevice,
+      eyes = [
+      d && d.getEyeParameters("left"),
+      d && d.getEyeParameters("right")
+    ].filter(identity);
+    if(eyes.length > 0){
+      return eyes.reduce((fov, eye) => Math.max(fov, eye.fieldOfView.upDegrees + eye.fieldOfView.downDegrees), 0);
+    }
+  }
+
+  set fieldOfView(v){
+    this.options.defaultFOV = WebVRStandardMonitor.DEFAULT_FOV = v;
+  }
+
   setAudioFromUser(userName, audioElement){
 
     pliny.method({
@@ -1591,15 +1608,18 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
       return btn;
     };
 
-    const buttons = this.displays.map((display, i) => {
-      const enterVR = this.goFullScreen.bind(this, i),
-        btn = newButton(display.displayName, display.displayName, enterVR),
-        isStereo = VR.isStereoDisplay(display);
-      btn.className = isStereo ? "stereo" : "mono";
-      return btn;
-    });
+    const buttons = this.displays
+      // We skip the Standard Monitor and Magic Window on iOS because we can't go full screen on those systems.
+      .filter((display) => !isiOS || VR.isStereoDisplay(display))
+      .map((display, i) => {
+        const enterVR = this.goFullScreen.bind(this, i),
+          btn = newButton(display.displayName, display.displayName, enterVR),
+          isStereo = VR.isStereoDisplay(display);
+        btn.className = isStereo ? "stereo" : "mono";
+        return btn;
+      });
 
-    if(!/(www\.)?primrosevr.com/.test(document.location.hostname)) {
+    if(!/(www\.)?primrosevr.com/.test(document.location.hostname) && !this.options.disableAdvertising) {
       buttons.push(newButton("Primrose", "✿", () => document.location = "https://www.primrosevr.com"));
     }
     return buttons;
@@ -1634,7 +1654,7 @@ BrowserEnvironment.DEFAULTS = {
   // the far plane of the camera.
   drawDistance: 100,
   // the field of view to use in non-VR settings.
-  defaultFOV: 75,
+  defaultFOV: 55,
   // The sound to play on loop in the background.
   ambientSound: null,
   // HTML5 canvas element, if one had already been created.
@@ -1645,10 +1665,12 @@ BrowserEnvironment.DEFAULTS = {
   context: null,
   // Three.js scene, if one had already been created.
   scene: null,
-  // I highly suggest you don't go down the road that requires setting this. I will not help you understand what it does, because I would rather you just not use it.
-  nonstandardIPD: null,
   // This is an experimental feature for setting the height of a user's "neck" on orientation-only systems (such as Google Cardboard and Samsung Gear VR) to create a more realistic feel.
   nonstandardNeckLength: null,
   nonstandardNeckDepth: null,
-  showHeadPointer: true
+  showHeadPointer: true,
+  // WARNING: I highly suggest you don't go down the road that requires the following settings this. I will not help you understand what they do, because I would rather you just not use them.
+  eyeRenderOrder: ["left", "right"],
+  nonstandardIPD: null,
+  disableAdvertising: false
 };
