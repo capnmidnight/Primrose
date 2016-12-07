@@ -4,7 +4,7 @@ pliny.class({
     description: "| [under construction]"
 });
 
-import { getText } from "../HTTP";
+import getText from "../HTTP/getText";
 import PlainText from "./Grammars/PlainText";
 import isMacOS from "../../flags/isMacOS";
 export default class Terminal {
