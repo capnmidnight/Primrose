@@ -1661,13 +1661,7 @@ pliny.property({
         description: "Get/set the current value of the angle in radians."
       });
 
-      pliny.namespace({
-  parent: "Primrose",
-  name: "HTTP",
-  description: "A collection of basic XMLHttpRequest wrappers."
-});
-
-pliny.function({
+      pliny.function({
   parent: "Primrose.HTTP",
   name: "XHR",
   description: "Wraps up the XMLHttpRequest object into a workflow that is easier for me to handle: a single function call. Can handle both GETs and POSTs, with or  without a payload.",
@@ -1716,48 +1710,6 @@ pliny.record({
 
 pliny.function({
   parent: "Primrose.HTTP",
-  name: "del",
-  description: "Process an HTTP DELETE request.",
-  returns: "Promise",
-  parameters: [{
-    name: "type",
-    type: "String",
-    description: "How the response should be interpreted. One of [\"text\", \"json\", \"arraybuffer\"]. See the [MDN - XMLHttpRequest - responseType](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype).",
-    default: "\"text\""
-  }, {
-    name: "url",
-    type: "String",
-    description: "The resource to which the request is being sent."
-  }, {
-    name: "options",
-    type: "Primrose.HTTP.XHR.optionsHash",
-    optional: true,
-    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information."
-  }]
-});
-
-
-pliny.function({
-  parent: "Primrose.HTTP",
-  name: "delObject",
-  description: "Delete something on the server, and receive JSON in response.",
-  returns: "Promise",
-  parameters: [{
-    name: "url",
-    type: "String",
-    description: "The resource to which the request is being sent."
-  }, {
-    name: "options",
-    type: "Primrose.HTTP.XHR.optionsHash",
-    optional: true,
-    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information."
-  }]
-});
-
-
-
-pliny.function({
-  parent: "Primrose.HTTP",
   name: "get",
   description: "Process an HTTP GET request.",
   returns: "Promise",
@@ -1800,90 +1752,6 @@ pliny.function({
   examples: [{
     name: "Make a GET request for an ArrayBuffer.",
     description: "Use this to load audio files and do whatever you want with them.\n\n## Code:\n\n  grammar(\"JavaScript\");\n  var context = new AudioContext();\n  Primrose.HTTP.getBuffer(\"audio.mp3\",\n    console.log.bind(console, \"progress\"));,\n    function(buffer){\n      context.decodeAudioData(\n        buffer,\n        console.log.bind(console, \"success\"),\n        console.error.bind(console, \"error decoding\"));\n    },\n    console.error.bind(console, \"error loading\")\n"
-  }]
-});
-
-pliny.function({
-  parent: "Primrose.HTTP",
-  name: "getObject",
-  description: "Get a JSON object from a server.",
-  returns: "Promise",
-  parameters: [{
-    name: "url",
-    type: "String",
-    description: "The resource to which the request is being sent."
-  }, {
-    name: "options",
-    type: "Primrose.HTTP.XHR.optionsHash",
-    optional: true,
-    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information."
-  }],
-  examples: [{
-    name: "Make a GET request for a JSON object.",
-    description: "Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.\n\n## Code:\n\n    grammar(\"JavaScript\");\n    Primrose.HTTP.getObject(\"localFile.json\", {\n        progress: console.log.bind(console, \"progress\")\n      })\n      .then(console.log.bind(console, \"done\"))\n      .catch(console.error.bind(console)));\n\n## Results:\n> Object {field1: 1, field2: \"Field2\"}"
-  }]
-});
-
-
-
-pliny.function({
-  parent: "Primrose.HTTP",
-  name: "getText",
-  description: "Get plain text from a server. Returns a promise that will be resolve with the text retrieved from the server.",
-  returns: "Promise",
-  parameters: [{
-    name: "url",
-    type: "String",
-    description: "The resource to which the request is being sent."
-  }, {
-    name: "options",
-    type: "Primrose.HTTP.XHR.optionsHash",
-    optional: true,
-    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information."
-  }],
-  examples: [{
-    name: "Make a GET request for plain text.",
-    description: "Use this to load arbitrary files and do whatever you want with them.\n\n## Code:\n\n    grammar(\"JavaScript\");\n    Primrose.HTTP.getText(\"localFile.json\",\n      console.log.bind(console, \"progress\"),\n      console.log.bind(console, \"done\"),\n      console.error.bind(console));\n\n## Results:\n> \"Object {field1: 1, field2: \\\"Field2\\\"}\""
-  }]
-});
-
-pliny.function({
-  parent: "Primrose.HTTP",
-  name: "post",
-  description: "Process an HTTP POST request.",
-  returns: "Promise",
-  parameters: [{
-    name: "type",
-    type: "String",
-    description: "How the response should be interpreted. One of [\"text\", \"json\", \"arraybuffer\"]. See the [MDN - XMLHttpRequest - responseType](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype).",
-    default: "\"text\""
-  }, {
-    name: "url",
-    type: "String",
-    description: "The resource to which the request is being sent."
-  }, {
-    name: "options",
-    type: "Primrose.HTTP.XHR.optionsHash",
-    optional: true,
-    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information. The `data` field is not optional."
-  }]
-});
-
-
-pliny.function({
-  parent: "Primrose.HTTP",
-  name: "postObject",
-  description: "Send a JSON object to a server.",
-  returns: "Promise",
-  parameters: [{
-    name: "url",
-    type: "String",
-    description: "The resource to which the request is being sent."
-  }, {
-    name: "options",
-    type: "Primrose.HTTP.XHR.optionsHash",
-    optional: true,
-    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information. The `data` field is not optional."
   }]
 });
 
@@ -2816,6 +2684,199 @@ pliny.property({
   }]
 });
 
+pliny.class({
+  parent: "Primrose.Text",
+  name: "Cursor",
+  description: "| [under construction]"
+});
+
+pliny.class({
+  parent: "Primrose.Text",
+  name: "CommandPack",
+  description: "A CommandPack is a collection of key sequences and text editor commands. It provides a means of using a single text rendering control to create a variety of text-controls that utilize the text space differently.",
+  parameters: [{
+    name: "commandPackName",
+    type: "String",
+    description: "A friendly name for the command pack."
+  }, {
+    name: "commands",
+    type: "Object",
+    description: "An object literal of key-value pairs describing the commands.\n\
+\n\
+* The object key elements are strings describing the key sequence that activates the command.\n\
+* The value elements are the action that occurs when the command is activated."
+  }]
+});
+
+pliny.record({
+  parent: "Primrose.Text.CommandPacks",
+  name: "BasicTextInput",
+  baseClass: "Primrose.Text.CommandPacks.CommandPack",
+  description: "A set of commands for editing a single line of text in a text editor. This is the same set of commands for both single-line text elements and multi-line text elements."
+});
+
+pliny.record({
+  parent: "Primrose.Text.CommandPacks",
+  name: "TextEditor",
+  description: "A set of commands for a multi-line text editing, extending single-line text editing."
+});
+
+pliny.class({
+  parent: "Primrose.Text",
+  name: "Rule",
+  description: "| [under construction]"
+});
+
+pliny.class({
+  parent: "Primrose.Text",
+  name: "Token",
+  description: "| [under construction]"
+});
+
+pliny.class({
+  parent: "Primrose.Text",
+  name: "Grammar",
+  parameters: [{
+    name: "grammarName",
+    type: "String",
+    description: "A user-friendly name for the grammar, to be able to include it in an options listing."
+  }, {
+    name: "rules",
+    type: "Array",
+    description: "A collection of rules to apply to tokenize text. The rules should be an array of two-element arrays. The first element should be a token name (see [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names), followed by a regular expression that selects the token out of the source code."
+  }],
+  description: "A Grammar is a collection of rules for processing text into tokens. Tokens are special characters that tell us about the structure of the text, things like keywords, curly braces, numbers, etc. After the text is tokenized, the tokens get a rough processing pass that groups them into larger elements that can be rendered in color on the screen.\n\
+\n\
+As tokens are discovered, they are removed from the text being processed, so order is important. Grammar rules are applied in the order they are specified, and more than one rule can produce the same token type.\n\
+\n\
+See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.",
+  examples: [{
+    name: "A plain-text \"grammar\".",
+    description: "Plain text does not actually have a grammar that needs to be processed. However, to get the text to work with the rendering system, a basic grammar is necessary to be able to break the text up into lines and prepare it for rendering.\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var plainTextGrammar = new Primrose.Text.Grammar(\n\
+    // The name is for displaying in options views.\n\
+    \"Plain-text\", [\n\
+    // Text needs at least the newlines token, or else every line will attempt to render as a single line and the line count won't work.\n\
+    [\"newlines\", /(?:\\r\\n|\\r|\\n)/] \n\
+  ] );"
+  }, {
+    name: "A grammar for BASIC",
+    description: "The BASIC programming language is now defunct, but a grammar for it to display in Primrose is quite easy to build.\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var basicGrammar = new Primrose.Text.Grammar( \"BASIC\",\n\
+    // Grammar rules are applied in the order they are specified.\n\
+    [\n\
+      // Text needs at least the newlines token, or else every line will attempt to render as a single line and the line count won't work.\n\
+      [ \"newlines\", /(?:\\r\\n|\\r|\\n)/ ],\n\
+      // BASIC programs used to require the programmer type in her own line numbers. The start at the beginning of the line.\n\
+      [ \"lineNumbers\", /^\\d+\\s+/ ],\n\
+      // Comments were lines that started with the keyword \"REM\" (for REMARK) and ran to the end of the line. They did not have to be numbered, because they were not executable and were stripped out by the interpreter.\n\
+      [ \"startLineComments\", /^REM\\s/ ],\n\
+      // Both double-quoted and single-quoted strings were not always supported, but in this case, I'm just demonstrating how it would be done for both.\n\
+      [ \"strings\", /\"(?:\\\\\"|[^\"])*\"/ ],\n\
+      [ \"strings\", /'(?:\\\\'|[^'])*'/ ],\n\
+      // Numbers are an optional dash, followed by a optional digits, followed by optional period, followed by 1 or more required digits. This allows us to match both integers and decimal numbers, both positive and negative, with or without leading zeroes for decimal numbers between (-1, 1).\n\
+      [ \"numbers\", /-?(?:(?:\\b\\d*)?\\.)?\\b\\d+\\b/ ],\n\
+      // Keywords are really just a list of different words we want to match, surrounded by the \"word boundary\" selector \"\\b\".\n\
+      [ \"keywords\",\n\
+        /\\b(?:RESTORE|REPEAT|RETURN|LOAD|LABEL|DATA|READ|THEN|ELSE|FOR|DIM|LET|IF|TO|STEP|NEXT|WHILE|WEND|UNTIL|GOTO|GOSUB|ON|TAB|AT|END|STOP|PRINT|INPUT|RND|INT|CLS|CLK|LEN)\\b/\n\
+      ],\n\
+      // Sometimes things we want to treat as keywords have different meanings in different locations. We can specify rules for tokens more than once.\n\
+      [ \"keywords\", /^DEF FN/ ],\n\
+      // These are all treated as mathematical operations.\n\
+      [ \"operators\",\n\
+        /(?:\\+|;|,|-|\\*\\*|\\*|\\/|>=|<=|=|<>|<|>|OR|AND|NOT|MOD|\\(|\\)|\\[|\\])/\n\
+      ],\n\
+      // Once everything else has been matched, the left over blocks of words are treated as variable and function names.\n\
+      [ \"identifiers\", /\\w+\\$?/ ]\n\
+    ] );"
+  }]
+});
+
+pliny.property({
+      parent: "Primrose.Text.Grammar",
+      name: " name",
+      type: "String",
+      description: "A user-friendly name for the grammar, to be able to include it in an options listing."
+    });
+    pliny.property({
+      parent: "Primrose.Text.Grammar",
+      name: "grammar",
+      type: "Array",
+      description: "A collection of rules to apply to tokenize text. The rules should be an array of two-element arrays. The first element should be a token name (see [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names), followed by a regular expression that selects the token out of the source code."
+    });
+    pliny.method({
+      parent: "Primrose.Text.Grammar",
+      name: "tokenize",
+      parameters: [{
+        name: "text",
+        type: "String",
+        description: "The text to tokenize."
+      }],
+      returns: "An array of tokens, ammounting to drawing instructions to the renderer. However, they still need to be layed out to fit the bounds of the text area.",
+      description: "Breaks plain text up into a list of tokens that can later be rendered with color.",
+      examples: [{
+        name: 'Tokenize some JavaScript',
+        description: 'Primrose comes with a grammar for JavaScript built in.\n\
+  \n\
+  ## Code:\n\
+  \n\
+    grammar(\"JavaScript\");\n\
+    var tokens = new Primrose.Text.Grammars.JavaScript\n\
+      .tokenize("var x = 3;\\n\\\n\
+    var y = 2;\\n\\\n\
+    console.log(x + y);");\n\
+    console.log(JSON.stringify(tokens));\n\
+  \n\
+  ## Result:\n\
+  \n\
+    grammar(\"JavaScript\");\n\
+    [ \n\
+      { "value": "var", "type": "keywords", "index": 0, "line": 0 },\n\
+      { "value": " x = ", "type": "regular", "index": 3, "line": 0 },\n\
+      { "value": "3", "type": "numbers", "index": 8, "line": 0 },\n\
+      { "value": ";", "type": "regular", "index": 9, "line": 0 },\n\
+      { "value": "\\n", "type": "newlines", "index": 10, "line": 0 },\n\
+      { "value": " y = ", "type": "regular", "index": 11, "line": 1 },\n\
+      { "value": "2", "type": "numbers", "index": 16, "line": 1 },\n\
+      { "value": ";", "type": "regular", "index": 17, "line": 1 },\n\
+      { "value": "\\n", "type": "newlines", "index": 18, "line": 1 },\n\
+      { "value": "console", "type": "members", "index": 19, "line": 2 },\n\
+      { "value": ".", "type": "regular", "index": 26, "line": 2 },\n\
+      { "value": "log", "type": "functions", "index": 27, "line": 2 },\n\
+      { "value": "(x + y);", "type": "regular", "index": 30, "line": 2 }\n\
+    ]'
+      }]
+    });
+    pliny.value({
+  parent: "Primrose.Text.Grammars",
+  name: "JavaScript",
+  description: "A grammar for the JavaScript programming language."
+});
+
+pliny.class({
+  parent: "Primrose.Controls",
+  name: "TextBox",
+  description: "Syntax highlighting textbox control.",
+  baseClass: "Primrose.Controls.Surface",
+  parameters: [{
+    name: "idOrCanvasOrContext",
+    type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
+    description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
+  }, {
+    name: "options",
+    type: "Object",
+    description: "Named parameters for creating the TextBox."
+  }]
+});
+
 pliny.function({
   parent: "Primrose.DOM",
   name: "makeHidingContainer",
@@ -3499,199 +3560,6 @@ pliny.method({
   }]
 });
 
-pliny.class({
-  parent: "Primrose.Text",
-  name: "Cursor",
-  description: "| [under construction]"
-});
-
-pliny.class({
-  parent: "Primrose.Text",
-  name: "CommandPack",
-  description: "A CommandPack is a collection of key sequences and text editor commands. It provides a means of using a single text rendering control to create a variety of text-controls that utilize the text space differently.",
-  parameters: [{
-    name: "commandPackName",
-    type: "String",
-    description: "A friendly name for the command pack."
-  }, {
-    name: "commands",
-    type: "Object",
-    description: "An object literal of key-value pairs describing the commands.\n\
-\n\
-* The object key elements are strings describing the key sequence that activates the command.\n\
-* The value elements are the action that occurs when the command is activated."
-  }]
-});
-
-pliny.record({
-  parent: "Primrose.Text.CommandPacks",
-  name: "BasicTextInput",
-  baseClass: "Primrose.Text.CommandPacks.CommandPack",
-  description: "A set of commands for editing a single line of text in a text editor. This is the same set of commands for both single-line text elements and multi-line text elements."
-});
-
-pliny.record({
-  parent: "Primrose.Text.CommandPacks",
-  name: "TextEditor",
-  description: "A set of commands for a multi-line text editing, extending single-line text editing."
-});
-
-pliny.class({
-  parent: "Primrose.Text",
-  name: "Rule",
-  description: "| [under construction]"
-});
-
-pliny.class({
-  parent: "Primrose.Text",
-  name: "Token",
-  description: "| [under construction]"
-});
-
-pliny.class({
-  parent: "Primrose.Text",
-  name: "Grammar",
-  parameters: [{
-    name: "grammarName",
-    type: "String",
-    description: "A user-friendly name for the grammar, to be able to include it in an options listing."
-  }, {
-    name: "rules",
-    type: "Array",
-    description: "A collection of rules to apply to tokenize text. The rules should be an array of two-element arrays. The first element should be a token name (see [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names), followed by a regular expression that selects the token out of the source code."
-  }],
-  description: "A Grammar is a collection of rules for processing text into tokens. Tokens are special characters that tell us about the structure of the text, things like keywords, curly braces, numbers, etc. After the text is tokenized, the tokens get a rough processing pass that groups them into larger elements that can be rendered in color on the screen.\n\
-\n\
-As tokens are discovered, they are removed from the text being processed, so order is important. Grammar rules are applied in the order they are specified, and more than one rule can produce the same token type.\n\
-\n\
-See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.",
-  examples: [{
-    name: "A plain-text \"grammar\".",
-    description: "Plain text does not actually have a grammar that needs to be processed. However, to get the text to work with the rendering system, a basic grammar is necessary to be able to break the text up into lines and prepare it for rendering.\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  var plainTextGrammar = new Primrose.Text.Grammar(\n\
-    // The name is for displaying in options views.\n\
-    \"Plain-text\", [\n\
-    // Text needs at least the newlines token, or else every line will attempt to render as a single line and the line count won't work.\n\
-    [\"newlines\", /(?:\\r\\n|\\r|\\n)/] \n\
-  ] );"
-  }, {
-    name: "A grammar for BASIC",
-    description: "The BASIC programming language is now defunct, but a grammar for it to display in Primrose is quite easy to build.\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  var basicGrammar = new Primrose.Text.Grammar( \"BASIC\",\n\
-    // Grammar rules are applied in the order they are specified.\n\
-    [\n\
-      // Text needs at least the newlines token, or else every line will attempt to render as a single line and the line count won't work.\n\
-      [ \"newlines\", /(?:\\r\\n|\\r|\\n)/ ],\n\
-      // BASIC programs used to require the programmer type in her own line numbers. The start at the beginning of the line.\n\
-      [ \"lineNumbers\", /^\\d+\\s+/ ],\n\
-      // Comments were lines that started with the keyword \"REM\" (for REMARK) and ran to the end of the line. They did not have to be numbered, because they were not executable and were stripped out by the interpreter.\n\
-      [ \"startLineComments\", /^REM\\s/ ],\n\
-      // Both double-quoted and single-quoted strings were not always supported, but in this case, I'm just demonstrating how it would be done for both.\n\
-      [ \"strings\", /\"(?:\\\\\"|[^\"])*\"/ ],\n\
-      [ \"strings\", /'(?:\\\\'|[^'])*'/ ],\n\
-      // Numbers are an optional dash, followed by a optional digits, followed by optional period, followed by 1 or more required digits. This allows us to match both integers and decimal numbers, both positive and negative, with or without leading zeroes for decimal numbers between (-1, 1).\n\
-      [ \"numbers\", /-?(?:(?:\\b\\d*)?\\.)?\\b\\d+\\b/ ],\n\
-      // Keywords are really just a list of different words we want to match, surrounded by the \"word boundary\" selector \"\\b\".\n\
-      [ \"keywords\",\n\
-        /\\b(?:RESTORE|REPEAT|RETURN|LOAD|LABEL|DATA|READ|THEN|ELSE|FOR|DIM|LET|IF|TO|STEP|NEXT|WHILE|WEND|UNTIL|GOTO|GOSUB|ON|TAB|AT|END|STOP|PRINT|INPUT|RND|INT|CLS|CLK|LEN)\\b/\n\
-      ],\n\
-      // Sometimes things we want to treat as keywords have different meanings in different locations. We can specify rules for tokens more than once.\n\
-      [ \"keywords\", /^DEF FN/ ],\n\
-      // These are all treated as mathematical operations.\n\
-      [ \"operators\",\n\
-        /(?:\\+|;|,|-|\\*\\*|\\*|\\/|>=|<=|=|<>|<|>|OR|AND|NOT|MOD|\\(|\\)|\\[|\\])/\n\
-      ],\n\
-      // Once everything else has been matched, the left over blocks of words are treated as variable and function names.\n\
-      [ \"identifiers\", /\\w+\\$?/ ]\n\
-    ] );"
-  }]
-});
-
-pliny.property({
-      parent: "Primrose.Text.Grammar",
-      name: " name",
-      type: "String",
-      description: "A user-friendly name for the grammar, to be able to include it in an options listing."
-    });
-    pliny.property({
-      parent: "Primrose.Text.Grammar",
-      name: "grammar",
-      type: "Array",
-      description: "A collection of rules to apply to tokenize text. The rules should be an array of two-element arrays. The first element should be a token name (see [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names), followed by a regular expression that selects the token out of the source code."
-    });
-    pliny.method({
-      parent: "Primrose.Text.Grammar",
-      name: "tokenize",
-      parameters: [{
-        name: "text",
-        type: "String",
-        description: "The text to tokenize."
-      }],
-      returns: "An array of tokens, ammounting to drawing instructions to the renderer. However, they still need to be layed out to fit the bounds of the text area.",
-      description: "Breaks plain text up into a list of tokens that can later be rendered with color.",
-      examples: [{
-        name: 'Tokenize some JavaScript',
-        description: 'Primrose comes with a grammar for JavaScript built in.\n\
-  \n\
-  ## Code:\n\
-  \n\
-    grammar(\"JavaScript\");\n\
-    var tokens = new Primrose.Text.Grammars.JavaScript\n\
-      .tokenize("var x = 3;\\n\\\n\
-    var y = 2;\\n\\\n\
-    console.log(x + y);");\n\
-    console.log(JSON.stringify(tokens));\n\
-  \n\
-  ## Result:\n\
-  \n\
-    grammar(\"JavaScript\");\n\
-    [ \n\
-      { "value": "var", "type": "keywords", "index": 0, "line": 0 },\n\
-      { "value": " x = ", "type": "regular", "index": 3, "line": 0 },\n\
-      { "value": "3", "type": "numbers", "index": 8, "line": 0 },\n\
-      { "value": ";", "type": "regular", "index": 9, "line": 0 },\n\
-      { "value": "\\n", "type": "newlines", "index": 10, "line": 0 },\n\
-      { "value": " y = ", "type": "regular", "index": 11, "line": 1 },\n\
-      { "value": "2", "type": "numbers", "index": 16, "line": 1 },\n\
-      { "value": ";", "type": "regular", "index": 17, "line": 1 },\n\
-      { "value": "\\n", "type": "newlines", "index": 18, "line": 1 },\n\
-      { "value": "console", "type": "members", "index": 19, "line": 2 },\n\
-      { "value": ".", "type": "regular", "index": 26, "line": 2 },\n\
-      { "value": "log", "type": "functions", "index": 27, "line": 2 },\n\
-      { "value": "(x + y);", "type": "regular", "index": 30, "line": 2 }\n\
-    ]'
-      }]
-    });
-    pliny.value({
-  parent: "Primrose.Text.Grammars",
-  name: "JavaScript",
-  description: "A grammar for the JavaScript programming language."
-});
-
-pliny.class({
-  parent: "Primrose.Controls",
-  name: "TextBox",
-  description: "Syntax highlighting textbox control.",
-  baseClass: "Primrose.Controls.Surface",
-  parameters: [{
-    name: "idOrCanvasOrContext",
-    type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
-    description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
-  }, {
-    name: "options",
-    type: "Object",
-    description: "Named parameters for creating the TextBox."
-  }]
-});
-
 pliny.value({
   parent: "Primrose.Text.Grammars",
   name: "PlainText",
@@ -3881,11 +3749,6 @@ pliny.record({
     optional: true,
     description: "Three.js scene, if one had already been created."
   }, {
-    name: "nonstandardIPD",
-    type: "Number",
-    optional: true,
-    description: "When creating a neck model, this is the how far apart to set the eyes. I highly suggest you don't go down the road that requires setting this. I will not help you understand what it does, because I would rather you just not use it."
-  }, {
 
     name: "nonstandardNeckLength",
     type: "Number",
@@ -3902,6 +3765,17 @@ pliny.record({
     optional: true,
     default: true,
     description: "Whether or not to show a pointer tracking the gaze direction."
+  }, {
+    name: "nonstandardIPD",
+    type: "Number",
+    optional: true,
+    description: "When creating a neck model, this is the how far apart to set the eyes. I highly suggest you don't go down the road that requires setting this. I will not help you understand what it does, because I would rather you just not use it."
+  }, {
+    name: "eyeRenderOrder",
+    type: "Array of String",
+    optional: true,
+    default: "[\"left\", \"right\"]",
+    description: "The order in which to draw the stereo view. I highly suggest you don't go down the road that requires setting this. I will not help you understand what it does, because I would rather you just not use it."
   }]
 });
 
@@ -4426,6 +4300,132 @@ pliny.namespace({
   parent: "Primrose",
   name: "Graphics",
   description: "The Graphics namespace contains classes and functions that with 3D geometry."
+});
+
+pliny.function({
+  parent: "Primrose.HTTP",
+  name: "del",
+  description: "Process an HTTP DELETE request.",
+  returns: "Promise",
+  parameters: [{
+    name: "type",
+    type: "String",
+    description: "How the response should be interpreted. One of [\"text\", \"json\", \"arraybuffer\"]. See the [MDN - XMLHttpRequest - responseType](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype).",
+    default: "\"text\""
+  }, {
+    name: "url",
+    type: "String",
+    description: "The resource to which the request is being sent."
+  }, {
+    name: "options",
+    type: "Primrose.HTTP.XHR.optionsHash",
+    optional: true,
+    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information."
+  }]
+});
+
+pliny.function({
+  parent: "Primrose.HTTP",
+  name: "delObject",
+  description: "Delete something on the server, and receive JSON in response.",
+  returns: "Promise",
+  parameters: [{
+    name: "url",
+    type: "String",
+    description: "The resource to which the request is being sent."
+  }, {
+    name: "options",
+    type: "Primrose.HTTP.XHR.optionsHash",
+    optional: true,
+    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information."
+  }]
+});
+
+pliny.function({
+  parent: "Primrose.HTTP",
+  name: "getObject",
+  description: "Get a JSON object from a server.",
+  returns: "Promise",
+  parameters: [{
+    name: "url",
+    type: "String",
+    description: "The resource to which the request is being sent."
+  }, {
+    name: "options",
+    type: "Primrose.HTTP.XHR.optionsHash",
+    optional: true,
+    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information."
+  }],
+  examples: [{
+    name: "Make a GET request for a JSON object.",
+    description: "Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.\n\n## Code:\n\n    grammar(\"JavaScript\");\n    Primrose.HTTP.getObject(\"localFile.json\", {\n        progress: console.log.bind(console, \"progress\")\n      })\n      .then(console.log.bind(console, \"done\"))\n      .catch(console.error.bind(console)));\n\n## Results:\n> Object {field1: 1, field2: \"Field2\"}"
+  }]
+});
+
+pliny.function({
+  parent: "Primrose.HTTP",
+  name: "getText",
+  description: "Get plain text from a server. Returns a promise that will be resolve with the text retrieved from the server.",
+  returns: "Promise",
+  parameters: [{
+    name: "url",
+    type: "String",
+    description: "The resource to which the request is being sent."
+  }, {
+    name: "options",
+    type: "Primrose.HTTP.XHR.optionsHash",
+    optional: true,
+    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information."
+  }],
+  examples: [{
+    name: "Make a GET request for plain text.",
+    description: "Use this to load arbitrary files and do whatever you want with them.\n\n## Code:\n\n    grammar(\"JavaScript\");\n    Primrose.HTTP.getText(\"localFile.json\",\n      console.log.bind(console, \"progress\"),\n      console.log.bind(console, \"done\"),\n      console.error.bind(console));\n\n## Results:\n> \"Object {field1: 1, field2: \\\"Field2\\\"}\""
+  }]
+});
+
+pliny.function({
+  parent: "Primrose.HTTP",
+  name: "post",
+  description: "Process an HTTP POST request.",
+  returns: "Promise",
+  parameters: [{
+    name: "type",
+    type: "String",
+    description: "How the response should be interpreted. One of [\"text\", \"json\", \"arraybuffer\"]. See the [MDN - XMLHttpRequest - responseType](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype).",
+    default: "\"text\""
+  }, {
+    name: "url",
+    type: "String",
+    description: "The resource to which the request is being sent."
+  }, {
+    name: "options",
+    type: "Primrose.HTTP.XHR.optionsHash",
+    optional: true,
+    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information. The `data` field is not optional."
+  }]
+});
+
+pliny.function({
+  parent: "Primrose.HTTP",
+  name: "postObject",
+  description: "Send a JSON object to a server.",
+  returns: "Promise",
+  parameters: [{
+    name: "url",
+    type: "String",
+    description: "The resource to which the request is being sent."
+  }, {
+    name: "options",
+    type: "Primrose.HTTP.XHR.optionsHash",
+    optional: true,
+    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information. The `data` field is not optional."
+  }]
+});
+
+pliny.namespace({
+  parent: "Primrose",
+  name: "HTTP",
+  description: "A collection of basic XMLHttpRequest wrappers."
 });
 
 pliny.class({

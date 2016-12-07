@@ -11412,6 +11412,249 @@ function loadTexture$1(id, url, progress) {
   });
 }
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
+  return typeof obj;
+} : function (obj) {
+  return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+};
+
+
+
+
+
+var asyncGenerator = function () {
+  function AwaitValue(value) {
+    this.value = value;
+  }
+
+  function AsyncGenerator(gen) {
+    var front, back;
+
+    function send(key, arg) {
+      return new Promise(function (resolve, reject) {
+        var request = {
+          key: key,
+          arg: arg,
+          resolve: resolve,
+          reject: reject,
+          next: null
+        };
+
+        if (back) {
+          back = back.next = request;
+        } else {
+          front = back = request;
+          resume(key, arg);
+        }
+      });
+    }
+
+    function resume(key, arg) {
+      try {
+        var result = gen[key](arg);
+        var value = result.value;
+
+        if (value instanceof AwaitValue) {
+          Promise.resolve(value.value).then(function (arg) {
+            resume("next", arg);
+          }, function (arg) {
+            resume("throw", arg);
+          });
+        } else {
+          settle(result.done ? "return" : "normal", result.value);
+        }
+      } catch (err) {
+        settle("throw", err);
+      }
+    }
+
+    function settle(type, value) {
+      switch (type) {
+        case "return":
+          front.resolve({
+            value: value,
+            done: true
+          });
+          break;
+
+        case "throw":
+          front.reject(value);
+          break;
+
+        default:
+          front.resolve({
+            value: value,
+            done: false
+          });
+          break;
+      }
+
+      front = front.next;
+
+      if (front) {
+        resume(front.key, front.arg);
+      } else {
+        back = null;
+      }
+    }
+
+    this._invoke = send;
+
+    if (typeof gen.return !== "function") {
+      this.return = undefined;
+    }
+  }
+
+  if (typeof Symbol === "function" && Symbol.asyncIterator) {
+    AsyncGenerator.prototype[Symbol.asyncIterator] = function () {
+      return this;
+    };
+  }
+
+  AsyncGenerator.prototype.next = function (arg) {
+    return this._invoke("next", arg);
+  };
+
+  AsyncGenerator.prototype.throw = function (arg) {
+    return this._invoke("throw", arg);
+  };
+
+  AsyncGenerator.prototype.return = function (arg) {
+    return this._invoke("return", arg);
+  };
+
+  return {
+    wrap: function (fn) {
+      return function () {
+        return new AsyncGenerator(fn.apply(this, arguments));
+      };
+    },
+    await: function (value) {
+      return new AwaitValue(value);
+    }
+  };
+}();
+
+
+
+
+
+var classCallCheck = function (instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError("Cannot call a class as a function");
+  }
+};
+
+var createClass = function () {
+  function defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+
+  return function (Constructor, protoProps, staticProps) {
+    if (protoProps) defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) defineProperties(Constructor, staticProps);
+    return Constructor;
+  };
+}();
+
+
+
+
+
+
+
+var get$1 = function get$1(object, property, receiver) {
+  if (object === null) object = Function.prototype;
+  var desc = Object.getOwnPropertyDescriptor(object, property);
+
+  if (desc === undefined) {
+    var parent = Object.getPrototypeOf(object);
+
+    if (parent === null) {
+      return undefined;
+    } else {
+      return get$1(parent, property, receiver);
+    }
+  } else if ("value" in desc) {
+    return desc.value;
+  } else {
+    var getter = desc.get;
+
+    if (getter === undefined) {
+      return undefined;
+    }
+
+    return getter.call(receiver);
+  }
+};
+
+var inherits = function (subClass, superClass) {
+  if (typeof superClass !== "function" && superClass !== null) {
+    throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
+  }
+
+  subClass.prototype = Object.create(superClass && superClass.prototype, {
+    constructor: {
+      value: subClass,
+      enumerable: false,
+      writable: true,
+      configurable: true
+    }
+  });
+  if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
+};
+
+
+
+
+
+
+
+
+
+
+
+var possibleConstructorReturn = function (self, call) {
+  if (!self) {
+    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+  }
+
+  return call && (typeof call === "object" || typeof call === "function") ? call : self;
+};
+
+
+
+var set$1 = function set$1(object, property, value, receiver) {
+  var desc = Object.getOwnPropertyDescriptor(object, property);
+
+  if (desc === undefined) {
+    var parent = Object.getPrototypeOf(object);
+
+    if (parent !== null) {
+      set$1(parent, property, value, receiver);
+    }
+  } else if ("value" in desc && desc.writable) {
+    desc.value = value;
+  } else {
+    var setter = desc.set;
+
+    if (setter !== undefined) {
+      setter.call(receiver, value);
+    }
+  }
+
+  return value;
+};
+
+var seenElements = new WeakMap();
+var seenElementCount = 0;
+
 function textured(geometry, txt, options) {
   options = Object.assign({}, {
     txtRepeatX: 1,
@@ -11419,8 +11662,30 @@ function textured(geometry, txt, options) {
     anisotropy: 1
   }, options);
 
-  var txtID = (txt.id || txt).toString(),
-      textureDescription = "Primrose.textured(" + txtID + ", " + options.txtRepeatX + ", " + options.txtRepeatY + ", " + options.anisotropy + ", " + options.scaleTextureWidth + ", " + options.scaleTextureHeight + ")";
+  var txtType = typeof txt === "undefined" ? "undefined" : _typeof(txt),
+      txtID = null;
+  if (txtType === "object") {
+    if (txt.id) {
+      txtID = txt.id;
+    } else {
+      if (!seenElements.has(txt)) {
+        seenElements.set(txt, "TextureAutoID" + seenElementCount);
+        ++seenElementCount;
+      }
+      txtID = seenElements.get(txt);
+    }
+  } else if (txtType === "string") {
+    txtID = txt;
+  } else {
+    var err = new Error("Couldn't figure out how to make a texture out of typeof '" + txtType + "', value " + txt + ".");
+    if (options.reject) {
+      options.reject(err);
+    } else {
+      throw err;
+    }
+  }
+
+  var textureDescription = "Primrose.textured(" + txtID + ", " + options.txtRepeatX + ", " + options.txtRepeatY + ", " + options.anisotropy + ", " + options.scaleTextureWidth + ", " + options.scaleTextureHeight + ")";
   var texturePromise = cache(textureDescription, function () {
     if (typeof txt === "string" || txt instanceof Array || txt.length === 6) {
       return loadTexture$1(textureDescription, txt, options.progress);
@@ -11529,6 +11794,8 @@ function textured(geometry, txt, options) {
     texture.needsUpdate = true;
     return texture;
   }).then(options.resolve).catch(options.reject);
+
+  options.promise = texturePromise;
 
   return obj;
 }
@@ -13089,246 +13356,6 @@ function ring(rInner, rOuter, sectors, rings, start, end) {
     return new RingBufferGeometry(rInner, rOuter, sectors, rings, start, end);
   });
 }
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
-  return typeof obj;
-} : function (obj) {
-  return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-};
-
-
-
-
-
-var asyncGenerator = function () {
-  function AwaitValue(value) {
-    this.value = value;
-  }
-
-  function AsyncGenerator(gen) {
-    var front, back;
-
-    function send(key, arg) {
-      return new Promise(function (resolve, reject) {
-        var request = {
-          key: key,
-          arg: arg,
-          resolve: resolve,
-          reject: reject,
-          next: null
-        };
-
-        if (back) {
-          back = back.next = request;
-        } else {
-          front = back = request;
-          resume(key, arg);
-        }
-      });
-    }
-
-    function resume(key, arg) {
-      try {
-        var result = gen[key](arg);
-        var value = result.value;
-
-        if (value instanceof AwaitValue) {
-          Promise.resolve(value.value).then(function (arg) {
-            resume("next", arg);
-          }, function (arg) {
-            resume("throw", arg);
-          });
-        } else {
-          settle(result.done ? "return" : "normal", result.value);
-        }
-      } catch (err) {
-        settle("throw", err);
-      }
-    }
-
-    function settle(type, value) {
-      switch (type) {
-        case "return":
-          front.resolve({
-            value: value,
-            done: true
-          });
-          break;
-
-        case "throw":
-          front.reject(value);
-          break;
-
-        default:
-          front.resolve({
-            value: value,
-            done: false
-          });
-          break;
-      }
-
-      front = front.next;
-
-      if (front) {
-        resume(front.key, front.arg);
-      } else {
-        back = null;
-      }
-    }
-
-    this._invoke = send;
-
-    if (typeof gen.return !== "function") {
-      this.return = undefined;
-    }
-  }
-
-  if (typeof Symbol === "function" && Symbol.asyncIterator) {
-    AsyncGenerator.prototype[Symbol.asyncIterator] = function () {
-      return this;
-    };
-  }
-
-  AsyncGenerator.prototype.next = function (arg) {
-    return this._invoke("next", arg);
-  };
-
-  AsyncGenerator.prototype.throw = function (arg) {
-    return this._invoke("throw", arg);
-  };
-
-  AsyncGenerator.prototype.return = function (arg) {
-    return this._invoke("return", arg);
-  };
-
-  return {
-    wrap: function (fn) {
-      return function () {
-        return new AsyncGenerator(fn.apply(this, arguments));
-      };
-    },
-    await: function (value) {
-      return new AwaitValue(value);
-    }
-  };
-}();
-
-
-
-
-
-var classCallCheck = function (instance, Constructor) {
-  if (!(instance instanceof Constructor)) {
-    throw new TypeError("Cannot call a class as a function");
-  }
-};
-
-var createClass = function () {
-  function defineProperties(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-
-  return function (Constructor, protoProps, staticProps) {
-    if (protoProps) defineProperties(Constructor.prototype, protoProps);
-    if (staticProps) defineProperties(Constructor, staticProps);
-    return Constructor;
-  };
-}();
-
-
-
-
-
-
-
-var get$1 = function get$1(object, property, receiver) {
-  if (object === null) object = Function.prototype;
-  var desc = Object.getOwnPropertyDescriptor(object, property);
-
-  if (desc === undefined) {
-    var parent = Object.getPrototypeOf(object);
-
-    if (parent === null) {
-      return undefined;
-    } else {
-      return get$1(parent, property, receiver);
-    }
-  } else if ("value" in desc) {
-    return desc.value;
-  } else {
-    var getter = desc.get;
-
-    if (getter === undefined) {
-      return undefined;
-    }
-
-    return getter.call(receiver);
-  }
-};
-
-var inherits = function (subClass, superClass) {
-  if (typeof superClass !== "function" && superClass !== null) {
-    throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
-  }
-
-  subClass.prototype = Object.create(superClass && superClass.prototype, {
-    constructor: {
-      value: subClass,
-      enumerable: false,
-      writable: true,
-      configurable: true
-    }
-  });
-  if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
-};
-
-
-
-
-
-
-
-
-
-
-
-var possibleConstructorReturn = function (self, call) {
-  if (!self) {
-    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-  }
-
-  return call && (typeof call === "object" || typeof call === "function") ? call : self;
-};
-
-
-
-var set$1 = function set$1(object, property, value, receiver) {
-  var desc = Object.getOwnPropertyDescriptor(object, property);
-
-  if (desc === undefined) {
-    var parent = Object.getPrototypeOf(object);
-
-    if (parent !== null) {
-      set$1(parent, property, value, receiver);
-    }
-  } else if ("value" in desc && desc.writable) {
-    desc.value = value;
-  } else {
-    var setter = desc.set;
-
-    if (setter !== undefined) {
-      setter.call(receiver, value);
-    }
-  }
-
-  return value;
-};
 
 var InsideSphereGeometry = function (_Geometry) {
   inherits(InsideSphereGeometry, _Geometry);
@@ -17774,10 +17801,6 @@ function getBuffer(url, options) {
   return get$2("arraybuffer", url, options);
 }
 
-function getText(url, options) {
-  return get$2("text", url, options);
-}
-
 function cascadeElement(id, tag, DOMClass, add) {
   var elem = null;
   if (id === null) {
@@ -18343,7 +18366,7 @@ var Audio$1 = {
 
 var packageName = "PrimroseVR";
 
-var version = "0.29.2";
+var version = "0.29.3";
 
 
 
@@ -18465,6 +18488,278 @@ function AsyncLockRequest(name, elementOpts, changeEventOpts, errorEventOpts, re
 }
 
 var PointerLock = AsyncLockRequest("Pointer Lock", ["pointerLockElement", "mozPointerLockElement", "webkitPointerLockElement"], ["onpointerlockchange", "onmozpointerlockchange", "onwebkitpointerlockchange"], ["onpointerlockerror", "onmozpointerlockerror", "onwebkitpointerlockerror"], ["requestPointerLock", "mozRequestPointerLock", "webkitRequestPointerLock", "webkitRequestPointerLock"], ["exitPointerLock", "mozExitPointerLock", "webkitExitPointerLock", "webkitExitPointerLock"]);
+
+function lock(element) {
+  var type = screen.orientation && screen.orientation.type || screen.mozOrientation || "";
+  if (type.indexOf("landscape") === -1) {
+    type = "landscape-primary";
+  }
+  if (screen.orientation && screen.orientation.lock) {
+    return screen.orientation.lock(type);
+  } else if (screen.mozLockOrientation) {
+    var locked = screen.mozLockOrientation(type);
+    if (locked) {
+      return Promise.resolve(element);
+    }
+  } else {
+    return Promise.reject(new Error("Pointer lock not supported."));
+  }
+}
+
+function unlock() {
+  if (screen.orientation && screen.orientation.unlock) {
+    screen.orientation.unlock();
+  } else if (screen.mozUnlockOrientation) {
+    screen.mozUnlockOrientation();
+  }
+}
+
+var FullScreen = AsyncLockRequest("Fullscreen", ["fullscreenElement", "mozFullScreenElement", "webkitFullscreenElement", "msFullscreenElement"], ["onfullscreenchange", "onmozfullscreenchange", "onwebkitfullscreenchange", "onmsfullscreenchange"], ["onfullscreenerror", "onmozfullscreenerror", "onwebkitfullscreenerror", "onmsfullscreenerror"], ["requestFullscreen", "mozRequestFullScreen", "webkitRequestFullscreen", "webkitRequestFullScreen", "msRequestFullscreen"], ["exitFullscreen", "mozExitFullScreen", "webkitExitFullscreen", "webkitExitFullScreen", "msExitFullscreen"], function (arg) {
+  return arg || window.Element && window.Element.ALLOW_KEYBOARD_INPUT || undefined;
+});
+
+function immutable(value) {
+  var getter = typeof value === "function" ? value : function () {
+    return value;
+  };
+  return {
+    enumerable: true,
+    get: getter,
+    set: function set() {
+      throw new Error("This value is immutable and may only be read, not written.");
+    }
+  };
+}
+
+function mutable(value, type) {
+  return {
+    enumerable: true,
+    get: function get() {
+      return value;
+    },
+    set: function set(v) {
+      var t = typeof v === "undefined" ? "undefined" : _typeof(v);
+      if (t !== type) {
+        throw new Error("Value must be a " + type + ". An " + t + " was provided instead: " + v);
+      }
+      value = v;
+    }
+  };
+}
+
+var isMobile$2 = (function (a) {
+  return (/(android|bb\d+|meego).+|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od|ad)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(a) || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substring(0, 4))
+  );
+})(navigator.userAgent || navigator.vendor || window.opera);
+
+var Orientation = { lock: lock, unlock: unlock };
+var defaultFieldOfView = 50;
+
+function warn(msg) {
+  return function (exp) {
+    console.warn(msg, exp);
+  };
+}
+
+function defaultPose() {
+  return {
+    position: [0, 0, 0],
+    orientation: [0, 0, 0, 1],
+    linearVelocity: null,
+    linearAcceleration: null,
+    angularVelocity: null,
+    angularAcceleration: null
+  };
+}
+
+function fireDisplayPresentChange(evt) {
+  if (!FullScreen.isActive) {
+    FullScreen.removeChangeListener(fireDisplayPresentChange);
+  }
+  window.dispatchEvent(new Event("vrdisplaypresentchange"));
+}
+
+var WebVRStandardMonitor = function () {
+  createClass(WebVRStandardMonitor, null, [{
+    key: "standardFullScreenBehavior",
+    value: function standardFullScreenBehavior(elem) {
+      return FullScreen.request(elem).catch(warn("FullScreen failed")).then(WebVRStandardMonitor.standardLockBehavior);
+    }
+  }, {
+    key: "standardLockBehavior",
+    value: function standardLockBehavior(elem) {
+      if (isMobile$2) {
+        return Orientation.lock(elem).catch(warn("OrientationLock failed"));
+      } else {
+        return PointerLock.request(elem).catch(warn("PointerLock failed"));
+      }
+    }
+  }, {
+    key: "standardExitFullScreenBehavior",
+    value: function standardExitFullScreenBehavior() {
+      return WebVRStandardMonitor.standardUnlockBehavior().then(function () {
+        return FullScreen.exit();
+      }).catch(warn("FullScreen failed"));
+    }
+  }, {
+    key: "standardUnlockBehavior",
+    value: function standardUnlockBehavior() {
+      if (isMobile$2) {
+        Orientation.unlock();
+        return Promise.resolve();
+      } else {
+        return PointerLock.exit().catch(warn("PointerLock exit failed"));
+      }
+    }
+  }, {
+    key: "DEFAULT_FOV",
+    get: function get() {
+      return defaultFieldOfView;
+    },
+    set: function set(v) {
+      defaultFieldOfView = v;
+    }
+  }]);
+
+  function WebVRStandardMonitor(display) {
+    classCallCheck(this, WebVRStandardMonitor);
+
+    if (this !== window && this !== undefined) {
+      this._currentLayers = [];
+      this._display = display;
+
+      Object.defineProperties(this, {
+        capabilities: immutable(Object.defineProperties({}, {
+          hasPosition: immutable(false),
+          hasOrientation: immutable(isMobile$2),
+          hasExternalDisplay: immutable(false),
+          canPresent: immutable(true),
+          maxLayers: immutable(1)
+        })),
+        isPolyfilled: immutable(display && display.isPolyfilled || false),
+        displayId: immutable(0),
+        displayName: immutable(isMobile$2 && "Magic Window" || "Standard Monitor"),
+        isConnected: immutable(true),
+        stageParameters: immutable(null),
+        isPresenting: immutable(function () {
+          return FullScreen.isActive;
+        }),
+
+        depthNear: mutable(0.01, "number"),
+        depthFar: mutable(10000.0, "number")
+      });
+    }
+  }
+
+  createClass(WebVRStandardMonitor, [{
+    key: "requestAnimationFrame",
+    value: function requestAnimationFrame(thunk) {
+      return window.requestAnimationFrame(thunk);
+    }
+  }, {
+    key: "cancelAnimationFrame",
+    value: function cancelAnimationFrame(handle) {
+      window.cancelAnimationFrame(handle);
+    }
+  }, {
+    key: "submitFrame",
+    value: function submitFrame() {}
+  }, {
+    key: "getPose",
+    value: function getPose() {
+      var display = isMobile$2 && this._display;
+      if (display) {
+        return display.getPose();
+      } else {
+        return defaultPose();
+      }
+    }
+  }, {
+    key: "getImmediatePose",
+    value: function getImmediatePose() {
+      var display = isMobile$2 && this._display;
+      if (display) {
+        return display.getImmediatePose();
+      } else {
+        return defaultPose();
+      }
+    }
+  }, {
+    key: "resetPose",
+    value: function resetPose() {
+      var display = isMobile$2 && this._display;
+      if (display) {
+        return display.resetPose();
+      }
+    }
+  }, {
+    key: "requestPresent",
+    value: function requestPresent(layers) {
+      for (var i = 0; i < this.capabilities.maxLayers && i < layers.length; ++i) {
+        this._currentLayers[i] = layers[i];
+      }
+      var elem = layers[0].source;
+      if (isMobile$2) {
+        return this._display.requestPresent(layers).then(function () {
+          return WebVRStandardMonitor.standardLockBehavior(elem);
+        });
+      } else {
+        FullScreen.addChangeListener(fireDisplayPresentChange);
+        return WebVRStandardMonitor.standardFullScreenBehavior(elem);
+      }
+    }
+  }, {
+    key: "getLayers",
+    value: function getLayers() {
+      return this._currentLayers.slice();
+    }
+  }, {
+    key: "exitPresent",
+    value: function exitPresent() {
+      var _this = this;
+
+      this._currentLayers.splice(0);
+
+      if (isMobile$2) {
+        return WebVRStandardMonitor.standardUnlockBehavior().then(function () {
+          return _this._display.exitPresent();
+        });
+      } else {
+        return WebVRStandardMonitor.standardExitFullScreenBehavior();
+      }
+    }
+  }, {
+    key: "getEyeParameters",
+    value: function getEyeParameters(side) {
+      if (side === "left") {
+        var curLayer = this.getLayers()[0],
+            elem = curLayer && curLayer.source || document.body,
+            width = elem.clientWidth,
+            height = elem.clientHeight,
+            vFOV = defaultFieldOfView / 2,
+            hFOV = calcFoV(vFOV, width, height);
+        return {
+          renderWidth: width * devicePixelRatio,
+          renderHeight: height * devicePixelRatio,
+          offset: new Float32Array([0, 0, 0]),
+          fieldOfView: {
+            upDegrees: vFOV,
+            downDegrees: vFOV,
+            leftDegrees: hFOV,
+            rightDegrees: hFOV
+          }
+        };
+      }
+    }
+  }]);
+  return WebVRStandardMonitor;
+}();
+
+function calcFoV(aFoV, aDim, bDim) {
+  return 360 * Math.atan(Math.tan(aFoV * Math.PI / 360) * aDim / bDim) / Math.PI;
+}
+
+WebVRStandardMonitor._shimSetup = false;
 
 var TELEPORT_PAD_RADIUS = 0.4;
 var FORWARD = new Vector3(0, 0, -1);
@@ -18917,6 +19212,7 @@ for (var key in Keys) {
 
 var entityKeys = [];
 var entities = new WeakMap();
+var lastEye = 0;
 
 var Entity = function (_AbstractEventEmitter) {
   inherits(Entity, _AbstractEventEmitter);
@@ -18935,9 +19231,12 @@ var Entity = function (_AbstractEventEmitter) {
   }, {
     key: "eyeBlankAll",
     value: function eyeBlankAll(eye) {
-      entityKeys.forEach(function (id) {
-        entities.get(id).eyeBlank(eye);
-      });
+      if (eye !== lastEye) {
+        entityKeys.forEach(function (id) {
+          entities.get(id).eyeBlank(eye);
+        });
+        lastEye = eye;
+      }
     }
   }]);
 
@@ -20635,11 +20934,15 @@ var Image = function (_Entity) {
       var _this3 = this;
 
       return Promise.all(Array.prototype.map.call(images, function (src, i) {
-        return loadTexture$1("Primrose.Controls.Image(" + src + ", " + i + ")", src, progress).then(function (txt) {
-          _this3._textures[i] = txt;
-          _this3._setGeometry();
-          _this3._meshes[i] = textured(_this3.options.geometry, txt, _this3.options);
+        var loadOptions = Object.assign({}, _this3.options, {
+          progress: progress,
+          resolve: function resolve(txt) {
+            return _this3._textures[i] = txt;
+          }
         });
+        _this3._setGeometry();
+        _this3._meshes[i] = textured(_this3.options.geometry, src, loadOptions);
+        return loadOptions.promise;
       })).then(function () {
         return _this3.isVideo = false;
       }).then(function () {
@@ -20703,10 +21006,18 @@ var Image = function (_Entity) {
               _this4._contexts[i] = _this4._canvases[i].getContext("2d");
             }
 
-            _this4._meshes[i] = textured(_this4.options.geometry, _this4._canvases[i] || _this4._elements[i], _this4.options);
+            var loadOptions = Object.assign({}, _this4.options, {
+              progress: progress,
+              resolve: function (oldResolve, i, txt) {
+                this._textures[i] = txt;
+                if (typeof oldResolve === "function") {
+                  oldResolve(txt);
+                }
+                resolve();
+              }.bind(_this4, _this4.options.resolve, i)
+            });
 
-            _this4._textures[i] = _this4._meshes[i].material.map;
-            resolve();
+            _this4._meshes[i] = textured(_this4.options.geometry, _this4._canvases[i] || _this4._elements[i], loadOptions);
           };
           if (!video.parentElement) {
             document.body.insertBefore(video, document.body.children[0]);
@@ -20746,7 +21057,11 @@ var Image = function (_Entity) {
             if (i < this._contexts.length) {
               this._contexts[i].drawImage(elem, 0, 0);
             }
-            this._textures[i].needsUpdate = true;
+            try {
+              this._textures[i].needsUpdate = true;
+            } catch (exp) {
+              console.log(i, this);
+            }
             this._lastTime = elem.currentTime;
           }
         }
@@ -20791,6 +21106,1556 @@ var Image = function (_Entity) {
   }]);
   return Image;
 }(Entity);
+
+// unicode-aware string reverse
+var reverse = function () {
+  var combiningMarks = /(<%= allExceptCombiningMarks %>)(<%= combiningMarks %>+)/g,
+      surrogatePair = /(<%= highSurrogates %>)(<%= lowSurrogates %>)/g;
+
+  function reverse(str) {
+    str = str.replace(combiningMarks, function (match, capture1, capture2) {
+      return reverse(capture2) + capture1;
+    }).replace(surrogatePair, "$2$1");
+    var res = "";
+    for (var i = str.length - 1; i >= 0; --i) {
+      res += str[i];
+    }
+    return res;
+  }
+  return reverse;
+}();
+
+var Cursor = function () {
+  createClass(Cursor, null, [{
+    key: "min",
+    value: function min(a, b) {
+      if (a.i <= b.i) {
+        return a;
+      }
+      return b;
+    }
+  }, {
+    key: "max",
+    value: function max(a, b) {
+      if (a.i > b.i) {
+        return a;
+      }
+      return b;
+    }
+  }]);
+
+  function Cursor(i, x, y) {
+    classCallCheck(this, Cursor);
+
+    this.i = i || 0;
+    this.x = x || 0;
+    this.y = y || 0;
+    this.moved = true;
+  }
+
+  createClass(Cursor, [{
+    key: "clone",
+    value: function clone() {
+      return new Cursor(this.i, this.x, this.y);
+    }
+  }, {
+    key: "toString",
+    value: function toString() {
+      return "[i:" + this.i + " x:" + this.x + " y:" + this.y + "]";
+    }
+  }, {
+    key: "copy",
+    value: function copy(cursor) {
+      this.i = cursor.i;
+      this.x = cursor.x;
+      this.y = cursor.y;
+      this.moved = false;
+    }
+  }, {
+    key: "fullhome",
+    value: function fullhome() {
+      this.i = 0;
+      this.x = 0;
+      this.y = 0;
+      this.moved = true;
+    }
+  }, {
+    key: "fullend",
+    value: function fullend(lines) {
+      this.i = 0;
+      var lastLength = 0;
+      for (var y = 0; y < lines.length; ++y) {
+        var line = lines[y];
+        lastLength = line.length;
+        this.i += lastLength;
+      }
+      this.y = lines.length - 1;
+      this.x = lastLength;
+      this.moved = true;
+    }
+  }, {
+    key: "skipleft",
+    value: function skipleft(lines) {
+      if (this.x === 0) {
+        this.left(lines);
+      } else {
+        var x = this.x - 1;
+        var line = lines[this.y];
+        var word = reverse(line.substring(0, x));
+        var m = word.match(/(\s|\W)+/);
+        var dx = m ? m.index + m[0].length + 1 : word.length;
+        this.i -= dx;
+        this.x -= dx;
+      }
+      this.moved = true;
+    }
+  }, {
+    key: "left",
+    value: function left(lines) {
+      if (this.i > 0) {
+        --this.i;
+        --this.x;
+        if (this.x < 0) {
+          --this.y;
+          var line = lines[this.y];
+          this.x = line.length;
+        }
+        if (this.reverseFromNewline(lines)) {
+          ++this.i;
+        }
+      }
+      this.moved = true;
+    }
+  }, {
+    key: "skipright",
+    value: function skipright(lines) {
+      var line = lines[this.y];
+      if (this.x === line.length || line[this.x] === '\n') {
+        this.right(lines);
+      } else {
+        var x = this.x + 1;
+        line = line.substring(x);
+        var m = line.match(/(\s|\W)+/);
+        var dx = m ? m.index + m[0].length + 1 : line.length - this.x;
+        this.i += dx;
+        this.x += dx;
+        this.reverseFromNewline(lines);
+      }
+      this.moved = true;
+    }
+  }, {
+    key: "fixCursor",
+    value: function fixCursor(lines) {
+      this.x = this.i;
+      this.y = 0;
+      var total = 0;
+      var line = lines[this.y];
+      while (this.x > line.length) {
+        this.x -= line.length;
+        total += line.length;
+        if (this.y >= lines.length - 1) {
+          this.i = total;
+          this.x = line.length;
+          this.moved = true;
+          break;
+        }
+        ++this.y;
+        line = lines[this.y];
+      }
+      return this.moved;
+    }
+  }, {
+    key: "right",
+    value: function right(lines) {
+      this.advanceN(lines, 1);
+    }
+  }, {
+    key: "advanceN",
+    value: function advanceN(lines, n) {
+      var line = lines[this.y];
+      if (this.y < lines.length - 1 || this.x < line.length) {
+        this.i += n;
+        this.fixCursor(lines);
+        line = lines[this.y];
+        if (this.x > 0 && line[this.x - 1] === '\n') {
+          ++this.y;
+          this.x = 0;
+        }
+      }
+      this.moved = true;
+    }
+  }, {
+    key: "home",
+    value: function home() {
+      this.i -= this.x;
+      this.x = 0;
+      this.moved = true;
+    }
+  }, {
+    key: "end",
+    value: function end(lines) {
+      var line = lines[this.y];
+      var dx = line.length - this.x;
+      this.i += dx;
+      this.x += dx;
+      this.reverseFromNewline(lines);
+      this.moved = true;
+    }
+  }, {
+    key: "up",
+    value: function up(lines) {
+      if (this.y > 0) {
+        --this.y;
+        var line = lines[this.y];
+        var dx = Math.min(0, line.length - this.x);
+        this.x += dx;
+        this.i -= line.length - dx;
+        this.reverseFromNewline(lines);
+      }
+      this.moved = true;
+    }
+  }, {
+    key: "down",
+    value: function down(lines) {
+      if (this.y < lines.length - 1) {
+        ++this.y;
+        var line = lines[this.y];
+        var pLine = lines[this.y - 1];
+        var dx = Math.min(0, line.length - this.x);
+        this.x += dx;
+        this.i += pLine.length + dx;
+        this.reverseFromNewline(lines);
+      }
+      this.moved = true;
+    }
+  }, {
+    key: "incY",
+    value: function incY(dy, lines) {
+      this.y = Math.max(0, Math.min(lines.length - 1, this.y + dy));
+      var line = lines[this.y];
+      this.x = Math.max(0, Math.min(line.length, this.x));
+      this.i = this.x;
+      for (var i = 0; i < this.y; ++i) {
+        this.i += lines[i].length;
+      }
+      this.reverseFromNewline(lines);
+      this.moved = true;
+    }
+  }, {
+    key: "setXY",
+    value: function setXY(x, y, lines) {
+      this.y = Math.max(0, Math.min(lines.length - 1, y));
+      var line = lines[this.y];
+      this.x = Math.max(0, Math.min(line.length, x));
+      this.i = this.x;
+      for (var i = 0; i < this.y; ++i) {
+        this.i += lines[i].length;
+      }
+      this.reverseFromNewline(lines);
+      this.moved = true;
+    }
+  }, {
+    key: "setI",
+    value: function setI(i, lines) {
+      this.i = i;
+      this.fixCursor(lines);
+      this.moved = true;
+    }
+  }, {
+    key: "reverseFromNewline",
+    value: function reverseFromNewline(lines) {
+      var line = lines[this.y];
+      if (this.x > 0 && line[this.x - 1] === '\n') {
+        --this.x;
+        --this.i;
+        return true;
+      }
+      return false;
+    }
+  }]);
+  return Cursor;
+}();
+
+var CommandPack = function CommandPack(commandPackName, commands) {
+  classCallCheck(this, CommandPack);
+
+  this.name = commandPackName;
+  Object.assign(this, commands);
+};
+
+var BasicTextInput = function (_CommandPack) {
+  inherits(BasicTextInput, _CommandPack);
+
+  function BasicTextInput(additionalName, additionalCommands) {
+    classCallCheck(this, BasicTextInput);
+
+    var commands = {
+      NORMAL_LEFTARROW: function NORMAL_LEFTARROW(prim, tokenRows) {
+        prim.cursorLeft(tokenRows, prim.frontCursor);
+      },
+      NORMAL_SKIPLEFT: function NORMAL_SKIPLEFT(prim, tokenRows) {
+        prim.cursorSkipLeft(tokenRows, prim.frontCursor);
+      },
+      NORMAL_RIGHTARROW: function NORMAL_RIGHTARROW(prim, tokenRows) {
+        prim.cursorRight(tokenRows, prim.frontCursor);
+      },
+      NORMAL_SKIPRIGHT: function NORMAL_SKIPRIGHT(prim, tokenRows) {
+        prim.cursorSkipRight(tokenRows, prim.frontCursor);
+      },
+      NORMAL_HOME: function NORMAL_HOME(prim, tokenRows) {
+        prim.cursorHome(tokenRows, prim.frontCursor);
+      },
+      NORMAL_END: function NORMAL_END(prim, tokenRows) {
+        prim.cursorEnd(tokenRows, prim.frontCursor);
+      },
+      NORMAL_BACKSPACE: function NORMAL_BACKSPACE(prim, tokenRows) {
+        if (prim.frontCursor.i === prim.backCursor.i) {
+          prim.frontCursor.left(tokenRows);
+        }
+        prim.selectedText = "";
+        prim.scrollIntoView(prim.frontCursor);
+      },
+      NORMAL_ENTER: function NORMAL_ENTER(prim, tokenRows, currentToken) {
+        prim.emit("change", {
+          target: prim
+        });
+      },
+      NORMAL_DELETE: function NORMAL_DELETE(prim, tokenRows) {
+        if (prim.frontCursor.i === prim.backCursor.i) {
+          prim.backCursor.right(tokenRows);
+        }
+        prim.selectedText = "";
+        prim.scrollIntoView(prim.frontCursor);
+      },
+      NORMAL_TAB: function NORMAL_TAB(prim, tokenRows) {
+        prim.selectedText = prim.tabString;
+      },
+
+      SHIFT_LEFTARROW: function SHIFT_LEFTARROW(prim, tokenRows) {
+        prim.cursorLeft(tokenRows, prim.backCursor);
+      },
+      SHIFT_SKIPLEFT: function SHIFT_SKIPLEFT(prim, tokenRows) {
+        prim.cursorSkipLeft(tokenRows, prim.backCursor);
+      },
+      SHIFT_RIGHTARROW: function SHIFT_RIGHTARROW(prim, tokenRows) {
+        prim.cursorRight(tokenRows, prim.backCursor);
+      },
+      SHIFT_SKIPRIGHT: function SHIFT_SKIPRIGHT(prim, tokenRows) {
+        prim.cursorSkipRight(tokenRows, prim.backCursor);
+      },
+      SHIFT_HOME: function SHIFT_HOME(prim, tokenRows) {
+        prim.cursorHome(tokenRows, prim.backCursor);
+      },
+      SHIFT_END: function SHIFT_END(prim, tokenRows) {
+        prim.cursorEnd(tokenRows, prim.backCursor);
+      },
+      SHIFT_DELETE: function SHIFT_DELETE(prim, tokenRows) {
+        if (prim.frontCursor.i === prim.backCursor.i) {
+          prim.frontCursor.home(tokenRows);
+          prim.backCursor.end(tokenRows);
+        }
+        prim.selectedText = "";
+        prim.scrollIntoView(prim.frontCursor);
+      },
+      CTRL_HOME: function CTRL_HOME(prim, tokenRows) {
+        prim.cursorFullHome(tokenRows, prim.frontCursor);
+      },
+      CTRL_END: function CTRL_END(prim, tokenRows) {
+        prim.cursorFullEnd(tokenRows, prim.frontCursor);
+      },
+
+      CTRLSHIFT_HOME: function CTRLSHIFT_HOME(prim, tokenRows) {
+        prim.cursorFullHome(tokenRows, prim.backCursor);
+      },
+      CTRLSHIFT_END: function CTRLSHIFT_END(prim, tokenRows) {
+        prim.cursorFullEnd(tokenRows, prim.backCursor);
+      },
+
+      SELECT_ALL: function SELECT_ALL(prim, tokenRows) {
+        prim.frontCursor.fullhome(tokenRows);
+        prim.backCursor.fullend(tokenRows);
+      },
+
+      REDO: function REDO(prim, tokenRows) {
+        prim.redo();
+        prim.scrollIntoView(prim.frontCursor);
+      },
+      UNDO: function UNDO(prim, tokenRows) {
+        prim.undo();
+        prim.scrollIntoView(prim.frontCursor);
+      }
+    };
+
+    if (additionalCommands) {
+      for (var key in additionalCommands) {
+        commands[key] = additionalCommands[key];
+      }
+    }
+
+    return possibleConstructorReturn(this, (BasicTextInput.__proto__ || Object.getPrototypeOf(BasicTextInput)).call(this, additionalName || "Text editor commands", commands));
+  }
+
+  return BasicTextInput;
+}(CommandPack);
+
+var TextEditor = new BasicTextInput("Text Area input commands", {
+  NORMAL_UPARROW: function NORMAL_UPARROW(prim, tokenRows) {
+    prim.cursorUp(tokenRows, prim.frontCursor);
+  },
+  NORMAL_DOWNARROW: function NORMAL_DOWNARROW(prim, tokenRows) {
+    prim.cursorDown(tokenRows, prim.frontCursor);
+  },
+  NORMAL_PAGEUP: function NORMAL_PAGEUP(prim, tokenRows) {
+    prim.cursorPageUp(tokenRows, prim.frontCursor);
+  },
+  NORMAL_PAGEDOWN: function NORMAL_PAGEDOWN(prim, tokenRows) {
+    prim.cursorPageDown(tokenRows, prim.frontCursor);
+  },
+  NORMAL_ENTER: function NORMAL_ENTER(prim, tokenRows, currentToken) {
+    var indent = "";
+    var tokenRow = tokenRows[prim.frontCursor.y];
+    if (tokenRow.length > 0 && tokenRow[0].type === "whitespace") {
+      indent = tokenRow[0].value;
+    }
+    prim.selectedText = "\n" + indent;
+    prim.scrollIntoView(prim.frontCursor);
+  },
+
+  SHIFT_UPARROW: function SHIFT_UPARROW(prim, tokenRows) {
+    prim.cursorUp(tokenRows, prim.backCursor);
+  },
+  SHIFT_DOWNARROW: function SHIFT_DOWNARROW(prim, tokenRows) {
+    prim.cursorDown(tokenRows, prim.backCursor);
+  },
+  SHIFT_PAGEUP: function SHIFT_PAGEUP(prim, tokenRows) {
+    prim.cursorPageUp(tokenRows, prim.backCursor);
+  },
+  SHIFT_PAGEDOWN: function SHIFT_PAGEDOWN(prim, tokenRows) {
+    prim.cursorPageDown(tokenRows, prim.backCursor);
+  },
+
+  WINDOW_SCROLL_DOWN: function WINDOW_SCROLL_DOWN(prim, tokenRows) {
+    if (prim.scroll.y < tokenRows.length) {
+      ++prim.scroll.y;
+    }
+  },
+  WINDOW_SCROLL_UP: function WINDOW_SCROLL_UP(prim, tokenRows) {
+    if (prim.scroll.y > 0) {
+      --prim.scroll.y;
+    }
+  }
+});
+
+var Rule = function () {
+  function Rule(name, test) {
+    classCallCheck(this, Rule);
+
+    this.name = name;
+    this.test = test;
+  }
+
+  createClass(Rule, [{
+    key: "carveOutMatchedToken",
+    value: function carveOutMatchedToken(tokens, j) {
+      var token = tokens[j];
+      if (token.type === "regular") {
+        var res = this.test.exec(token.value);
+        if (res) {
+          // Only use the last group that matches the regex, to allow for more
+          // complex regexes that can match in special contexts, but not make
+          // the context part of the token.
+          var midx = res[res.length - 1],
+              start = res.input.indexOf(midx),
+              end = start + midx.length;
+          if (start === 0) {
+            // the rule matches the start of the token
+            token.type = this.name;
+            if (end < token.value.length) {
+              // but not the end
+              var next = token.splitAt(end);
+              next.type = "regular";
+              tokens.splice(j + 1, 0, next);
+            }
+          } else {
+            // the rule matches from the middle of the token
+            var mid = token.splitAt(start);
+            if (midx.length < mid.value.length) {
+              // but not the end
+              var right = mid.splitAt(midx.length);
+              tokens.splice(j + 1, 0, right);
+            }
+            mid.type = this.name;
+            tokens.splice(j + 1, 0, mid);
+          }
+        }
+      }
+    }
+  }]);
+  return Rule;
+}();
+
+var Token = function () {
+  function Token(value, type, index, line) {
+    classCallCheck(this, Token);
+
+    this.value = value;
+    this.type = type;
+    this.index = index;
+    this.line = line;
+  }
+
+  createClass(Token, [{
+    key: "clone",
+    value: function clone() {
+      return new Token(this.value, this.type, this.index, this.line);
+    }
+  }, {
+    key: "splitAt",
+    value: function splitAt(i) {
+      var next = this.value.substring(i);
+      this.value = this.value.substring(0, i);
+      return new Token(next, this.type, this.index + i, this.line);
+    }
+  }, {
+    key: "toString",
+    value: function toString() {
+      return "[" + this.type + ": " + this.value + "]";
+    }
+  }]);
+  return Token;
+}();
+
+var Grammar = function () {
+  function Grammar(grammarName, rules) {
+    classCallCheck(this, Grammar);
+
+    this.name = grammarName;
+
+    // clone the preprocessing grammar to start a new grammar
+    this.grammar = rules.map(function (rule) {
+      return new Rule(rule[0], rule[1]);
+    });
+
+    function crudeParsing(tokens) {
+      var commentDelim = null,
+          stringDelim = null,
+          line = 0,
+          i,
+          t;
+      for (i = 0; i < tokens.length; ++i) {
+        t = tokens[i];
+        t.line = line;
+        if (t.type === "newlines") {
+          ++line;
+        }
+
+        if (stringDelim) {
+          if (t.type === "stringDelim" && t.value === stringDelim && (i === 0 || tokens[i - 1].value[tokens[i - 1].value.length - 1] !== "\\")) {
+            stringDelim = null;
+          }
+          if (t.type !== "newlines") {
+            t.type = "strings";
+          }
+        } else if (commentDelim) {
+          if (commentDelim === "startBlockComments" && t.type === "endBlockComments" || commentDelim === "startLineComments" && t.type === "newlines") {
+            commentDelim = null;
+          }
+          if (t.type !== "newlines") {
+            t.type = "comments";
+          }
+        } else if (t.type === "stringDelim") {
+          stringDelim = t.value;
+          t.type = "strings";
+        } else if (t.type === "startBlockComments" || t.type === "startLineComments") {
+          commentDelim = t.type;
+          t.type = "comments";
+        }
+      }
+
+      // recombine like-tokens
+      for (i = tokens.length - 1; i > 0; --i) {
+        var p = tokens[i - 1];
+        t = tokens[i];
+        if (p.type === t.type && p.type !== "newlines") {
+          p.value += t.value;
+          tokens.splice(i, 1);
+        }
+      }
+    }
+
+    this.tokenize = function (text) {
+      // all text starts off as regular text, then gets cut up into tokens of
+      // more specific type
+      var tokens = [new Token(text, "regular", 0)];
+      for (var i = 0; i < this.grammar.length; ++i) {
+        var rule = this.grammar[i];
+        for (var j = 0; j < tokens.length; ++j) {
+          rule.carveOutMatchedToken(tokens, j);
+        }
+      }
+
+      crudeParsing(tokens);
+      return tokens;
+    };
+  }
+
+  createClass(Grammar, [{
+    key: "toHTML",
+    value: function toHTML(txt) {
+      var theme = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : Default;
+
+      var tokenRows = this.tokenize(txt),
+          temp = document.createElement("div");
+      for (var y = 0; y < tokenRows.length; ++y) {
+        // draw the tokens on this row
+        var t = tokenRows[y];
+        if (t.type === "newlines") {
+          temp.appendChild(document.createElement("br"));
+        } else {
+          var style = theme[t.type] || {},
+              elem = document.createElement("span");
+          elem.style.fontWeight = style.fontWeight || theme.regular.fontWeight;
+          elem.style.fontStyle = style.fontStyle || theme.regular.fontStyle || "";
+          elem.style.color = style.foreColor || theme.regular.foreColor;
+          elem.style.backgroundColor = style.backColor || theme.regular.backColor;
+          elem.style.fontFamily = style.fontFamily || theme.fontFamily;
+          elem.appendChild(document.createTextNode(t.value));
+          temp.appendChild(elem);
+        }
+      }
+      return temp.innerHTML;
+    }
+  }]);
+  return Grammar;
+}();
+
+var JavaScript = new Grammar("JavaScript", [["newlines", /(?:\r\n|\r|\n)/], ["startBlockComments", /\/\*/], ["endBlockComments", /\*\//], ["regexes", /(?:^|,|;|\(|\[|\{)(?:\s*)(\/(?:\\\/|[^\n\/])+\/)/], ["stringDelim", /("|')/], ["startLineComments", /\/\/.*$/m], ["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/], ["keywords", /\b(?:break|case|catch|class|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/], ["functions", /(\w+)(?:\s*\()/], ["members", /(\w+)\./], ["members", /((\w+\.)+)(\w+)/]]);
+
+var SCROLL_SCALE = isFirefox ? 3 : 100;
+var COUNTER$4 = 0;
+var OFFSET = 0;
+
+var TextBox = function (_Surface) {
+  inherits(TextBox, _Surface);
+  createClass(TextBox, null, [{
+    key: "create",
+    value: function create() {
+      return new TextBox();
+    }
+  }]);
+
+  function TextBox(options) {
+    classCallCheck(this, TextBox);
+
+    var _this = possibleConstructorReturn(this, (TextBox.__proto__ || Object.getPrototypeOf(TextBox)).call(this, Object.assign({}, {
+      id: "Primrose.Controls.TextBox[" + COUNTER$4++ + "]"
+    }, options)));
+
+    _this.isTextBox = true;
+    ////////////////////////////////////////////////////////////////////////
+    // normalize input parameters
+    ////////////////////////////////////////////////////////////////////////
+
+    if (typeof options === "string") {
+      _this.options = {
+        value: _this.options
+      };
+    } else {
+      _this.options = options || {};
+    }
+
+    _this.useCaching = !isFirefox || !isMobile$1;
+
+    var makeCursorCommand = function makeCursorCommand(name) {
+      var method = name.toLowerCase();
+      this["cursor" + name] = function (lines, cursor) {
+        cursor[method](lines);
+        this.scrollIntoView(cursor);
+      };
+    };
+
+    ["Left", "Right", "SkipLeft", "SkipRight", "Up", "Down", "Home", "End", "FullHome", "FullEnd"].map(makeCursorCommand.bind(_this));
+
+    ////////////////////////////////////////////////////////////////////////
+    // initialization
+    ///////////////////////////////////////////////////////////////////////
+    _this.tokens = null;
+    _this.lines = null;
+    _this._commandPack = null;
+    _this._tokenRows = null;
+    _this._tokenHashes = null;
+    _this._tabString = null;
+    _this._currentTouchID = null;
+    _this._lineCountWidth = null;
+
+    _this._lastFont = null;
+    _this._lastText = null;
+    _this._lastCharacterWidth = null;
+    _this._lastCharacterHeight = null;
+    _this._lastGridBounds = null;
+    _this._lastPadding = null;
+    _this._lastFrontCursor = null;
+    _this._lastBackCursor = null;
+    _this._lastWidth = -1;
+    _this._lastHeight = -1;
+    _this._lastScrollX = -1;
+    _this._lastScrollY = -1;
+    _this._lastFocused = false;
+    _this._lastThemeName = null;
+    _this._lastPointer = new Point();
+
+    // different browsers have different sets of keycodes for less-frequently
+    // used keys like curly brackets.
+    _this._browser = isChrome ? "CHROMIUM" : isFirefox ? "FIREFOX" : isIE ? "IE" : isOpera ? "OPERA" : isSafari ? "SAFARI" : "UNKNOWN";
+    _this._pointer = new Point();
+    _this._deadKeyState = "";
+    _this._history = [];
+    _this._historyFrame = -1;
+    _this._topLeftGutter = new Size();
+    _this._bottomRightGutter = new Size();
+    _this._dragging = false;
+    _this._scrolling = false;
+    _this._wheelScrollSpeed = 4;
+    var subBounds = new Rectangle(0, 0, _this.bounds.width, _this.bounds.height);
+    _this._fg = new Surface({
+      id: _this.id + "-fore",
+      bounds: subBounds
+    });
+    _this._fgCanvas = _this._fg.canvas;
+    _this._fgfx = _this._fg.context;
+    _this._bg = new Surface({
+      id: _this.id + "-back",
+      bounds: subBounds
+    });
+    _this._bgCanvas = _this._bg.canvas;
+    _this._bgfx = _this._bg.context;
+    _this._trim = new Surface({
+      id: _this.id + "-trim",
+      bounds: subBounds
+    });
+    _this._trimCanvas = _this._trim.canvas;
+    _this._tgfx = _this._trim.context;
+    _this._rowCache = {};
+    _this._VSCROLL_WIDTH = 2;
+
+    _this.tabWidth = _this.options.tabWidth;
+    _this.showLineNumbers = !_this.options.hideLineNumbers;
+    _this.showScrollBars = !_this.options.hideScrollBars;
+    _this.wordWrap = !_this.options.disableWordWrap;
+    _this.readOnly = !!_this.options.readOnly;
+    _this.multiline = !_this.options.singleLine;
+    _this.gridBounds = new Rectangle();
+    _this.frontCursor = new Cursor();
+    _this.backCursor = new Cursor();
+    _this.scroll = new Point();
+    _this.character = new Size();
+    _this.theme = _this.options.theme;
+    _this.fontSize = _this.options.fontSize;
+    _this.tokenizer = _this.options.tokenizer;
+    _this.commandPack = _this.options.commands || TextEditor;
+    _this.value = _this.options.value;
+    _this.padding = _this.options.padding || 1;
+
+    _this.addEventListener("focus", _this.render.bind(_this), false);
+    _this.addEventListener("blur", _this.render.bind(_this), false);
+    return _this;
+  }
+
+  createClass(TextBox, [{
+    key: "cursorPageUp",
+    value: function cursorPageUp(lines, cursor) {
+      cursor.incY(-this.gridBounds.height, lines);
+      this.scrollIntoView(cursor);
+    }
+  }, {
+    key: "cursorPageDown",
+    value: function cursorPageDown(lines, cursor) {
+      cursor.incY(this.gridBounds.height, lines);
+      this.scrollIntoView(cursor);
+    }
+  }, {
+    key: "setDeadKeyState",
+    value: function setDeadKeyState(st) {
+      this._deadKeyState = st || "";
+    }
+  }, {
+    key: "pushUndo",
+    value: function pushUndo(lines) {
+      if (this._historyFrame < this._history.length - 1) {
+        this._history.splice(this._historyFrame + 1);
+      }
+      this._history.push(lines);
+      this._historyFrame = this._history.length - 1;
+      this.refreshTokens();
+      this.render();
+    }
+  }, {
+    key: "redo",
+    value: function redo() {
+      if (this._historyFrame < this._history.length - 1) {
+        ++this._historyFrame;
+      }
+      this.refreshTokens();
+      this.fixCursor();
+      this.render();
+    }
+  }, {
+    key: "undo",
+    value: function undo() {
+      if (this._historyFrame > 0) {
+        --this._historyFrame;
+      }
+      this.refreshTokens();
+      this.fixCursor();
+      this.render();
+    }
+  }, {
+    key: "scrollIntoView",
+    value: function scrollIntoView(currentCursor) {
+      this.scroll.y += this.minDelta(currentCursor.y, this.scroll.y, this.scroll.y + this.gridBounds.height);
+      if (!this.wordWrap) {
+        this.scroll.x += this.minDelta(currentCursor.x, this.scroll.x, this.scroll.x + this.gridBounds.width);
+      }
+      this.clampScroll();
+    }
+  }, {
+    key: "readWheel",
+    value: function readWheel(evt) {
+      if (this.focused) {
+        if (evt.shiftKey || isChrome) {
+          this.fontSize += -evt.deltaX / SCROLL_SCALE;
+        }
+        if (!evt.shiftKey || isChrome) {
+          this.scroll.y += Math.floor(evt.deltaY * this._wheelScrollSpeed / SCROLL_SCALE);
+        }
+        this.clampScroll();
+        this.render();
+        evt.preventDefault();
+      }
+    }
+  }, {
+    key: "startPointer",
+    value: function startPointer(x, y) {
+      if (!get$1(TextBox.prototype.__proto__ || Object.getPrototypeOf(TextBox.prototype), "startPointer", this).call(this, x, y)) {
+        this._dragging = true;
+        this.setCursorXY(this.frontCursor, x, y);
+      }
+    }
+  }, {
+    key: "movePointer",
+    value: function movePointer(x, y) {
+      if (this._dragging) {
+        this.setCursorXY(this.backCursor, x, y);
+      }
+    }
+  }, {
+    key: "endPointer",
+    value: function endPointer() {
+      get$1(TextBox.prototype.__proto__ || Object.getPrototypeOf(TextBox.prototype), "endPointer", this).call(this);
+      this._dragging = false;
+      this._scrolling = false;
+    }
+  }, {
+    key: "copySelectedText",
+    value: function copySelectedText(evt) {
+      if (this.focused && this.frontCursor.i !== this.backCursor.i) {
+        var clipboard = evt.clipboardData || window.clipboardData;
+        clipboard.setData(window.clipboardData ? "Text" : "text/plain", this.selectedText);
+        evt.returnValue = false;
+      }
+    }
+  }, {
+    key: "cutSelectedText",
+    value: function cutSelectedText(evt) {
+      if (this.focused) {
+        this.copySelectedText(evt);
+        if (!this.readOnly) {
+          this.selectedText = "";
+        }
+      }
+    }
+  }, {
+    key: "keyDown",
+    value: function keyDown(evt) {
+      this.environment.input.Keyboard.doTyping(this, evt);
+    }
+  }, {
+    key: "execCommand",
+    value: function execCommand(browser, codePage, commandName) {
+      if (commandName && this.focused && !this.readOnly) {
+        var altCommandName = browser + "_" + commandName,
+            func = this.commandPack[altCommandName] || this.commandPack[commandName] || codePage[altCommandName] || codePage[commandName];
+
+        if (func instanceof String || typeof func === "string") {
+          console.log("okay");
+          func = this.commandPack[func] || this.commandPack[func] || func;
+        }
+
+        if (func === undefined) {
+          return false;
+        } else {
+          this.frontCursor.moved = false;
+          this.backCursor.moved = false;
+          if (func instanceof Function) {
+            func(this, this.lines);
+          } else if (func instanceof String || typeof func === "string") {
+            console.log(func);
+            this.selectedText = func;
+          }
+          if (this.frontCursor.moved && !this.backCursor.moved) {
+            this.backCursor.copy(this.frontCursor);
+          }
+          this.clampScroll();
+          this.render();
+          return true;
+        }
+      }
+    }
+  }, {
+    key: "readClipboard",
+    value: function readClipboard(evt) {
+      if (this.focused && !this.readOnly) {
+        evt.returnValue = false;
+        var clipboard = evt.clipboardData || window.clipboardData,
+            str = clipboard.getData(window.clipboardData ? "Text" : "text/plain");
+        if (str) {
+          this.selectedText = str;
+        }
+      }
+    }
+  }, {
+    key: "resize",
+    value: function resize() {
+      get$1(TextBox.prototype.__proto__ || Object.getPrototypeOf(TextBox.prototype), "resize", this).call(this);
+      this._bg.setSize(this.surfaceWidth, this.surfaceHeight);
+      this._fg.setSize(this.surfaceWidth, this.surfaceHeight);
+      this._trim.setSize(this.surfaceWidth, this.surfaceHeight);
+      if (this.theme) {
+        this.character.height = this.fontSize;
+        this.context.font = this.character.height + "px " + this.theme.fontFamily;
+        // measure 100 letter M's, then divide by 100, to get the width of an M
+        // to two decimal places on systems that return integer values from
+        // measureText.
+        this.character.width = this.context.measureText("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM").width / 100;
+      }
+      this.render();
+    }
+  }, {
+    key: "pixel2cell",
+    value: function pixel2cell(point) {
+      var x = point.x * this.imageWidth / this.surfaceWidth,
+          y = point.y * this.imageHeight / this.surfaceHeight;
+      point.set(Math.round(point.x / this.character.width) + this.scroll.x - this.gridBounds.x, Math.floor(point.y / this.character.height - 0.25) + this.scroll.y);
+    }
+  }, {
+    key: "clampScroll",
+    value: function clampScroll() {
+      if (this.scroll.y < 0) {
+        this.scroll.y = 0;
+      } else {
+        while (0 < this.scroll.y && this.scroll.y > this.lines.length - this.gridBounds.height) {
+          --this.scroll.y;
+        }
+      }
+    }
+  }, {
+    key: "refreshTokens",
+    value: function refreshTokens() {
+      this.tokens = this.tokenizer.tokenize(this.value);
+    }
+  }, {
+    key: "fixCursor",
+    value: function fixCursor() {
+      var moved = this.frontCursor.fixCursor(this.lines) || this.backCursor.fixCursor(this.lines);
+      if (moved) {
+        this.render();
+      }
+    }
+  }, {
+    key: "setCursorXY",
+    value: function setCursorXY(cursor, x, y) {
+      x = Math.round(x);
+      y = Math.round(y);
+      this._pointer.set(x, y);
+      this.pixel2cell(this._pointer, this.scroll, this.gridBounds);
+      var gx = this._pointer.x - this.scroll.x,
+          gy = this._pointer.y - this.scroll.y,
+          onBottom = gy >= this.gridBounds.height,
+          onLeft = gx < 0,
+          onRight = this._pointer.x >= this.gridBounds.width;
+      if (!this._scrolling && !onBottom && !onLeft && !onRight) {
+        cursor.setXY(this._pointer.x, this._pointer.y, this.lines);
+        this.backCursor.copy(cursor);
+      } else if (this._scrolling || onRight && !onBottom) {
+        this._scrolling = true;
+        var scrollHeight = this.lines.length - this.gridBounds.height;
+        if (gy >= 0 && scrollHeight >= 0) {
+          var sy = gy * scrollHeight / this.gridBounds.height;
+          this.scroll.y = Math.floor(sy);
+        }
+      } else if (onBottom && !onLeft) {
+        var maxWidth = 0;
+        for (var dy = 0; dy < this.lines.length; ++dy) {
+          maxWidth = Math.max(maxWidth, this.lines[dy].length);
+        }
+        var scrollWidth = maxWidth - this.gridBounds.width;
+        if (gx >= 0 && scrollWidth >= 0) {
+          var sx = gx * scrollWidth / this.gridBounds.width;
+          this.scroll.x = Math.floor(sx);
+        }
+      } else if (onLeft && !onBottom) {
+        // clicked in number-line gutter
+      } else {
+          // clicked in the lower-left corner
+        }
+      this._lastPointer.copy(this._pointer);
+      this.render();
+    }
+  }, {
+    key: "setGutter",
+    value: function setGutter() {
+      if (this.showLineNumbers) {
+        this._topLeftGutter.width = 1;
+      } else {
+        this._topLeftGutter.width = 0;
+      }
+
+      if (!this.showScrollBars) {
+        this._bottomRightGutter.set(0, 0);
+      } else if (this.wordWrap) {
+        this._bottomRightGutter.set(this._VSCROLL_WIDTH, 0);
+      } else {
+        this._bottomRightGutter.set(this._VSCROLL_WIDTH, 1);
+      }
+    }
+  }, {
+    key: "refreshGridBounds",
+    value: function refreshGridBounds() {
+      this._lineCountWidth = 0;
+      if (this.showLineNumbers) {
+        this._lineCountWidth = Math.max(1, Math.ceil(Math.log(this._history[this._historyFrame].length) / Math.LN10));
+      }
+
+      var x = Math.floor(this._topLeftGutter.width + this._lineCountWidth + this.padding / this.character.width),
+          y = Math.floor(this.padding / this.character.height),
+          w = Math.floor((this.imageWidth - 2 * this.padding) / this.character.width) - x - this._bottomRightGutter.width,
+          h = Math.floor((this.imageHeight - 2 * this.padding) / this.character.height) - y - this._bottomRightGutter.height;
+      this.gridBounds.set(x, y, w, h);
+    }
+  }, {
+    key: "performLayout",
+    value: function performLayout() {
+
+      // group the tokens into rows
+      this._tokenRows = [[]];
+      this._tokenHashes = [""];
+      this.lines = [""];
+      var currentRowWidth = 0;
+      var tokenQueue = this.tokens.slice();
+      for (var i = 0; i < tokenQueue.length; ++i) {
+        var t = tokenQueue[i].clone();
+        var widthLeft = this.gridBounds.width - currentRowWidth;
+        var wrap = this.wordWrap && t.type !== "newlines" && t.value.length > widthLeft;
+        var breakLine = t.type === "newlines" || wrap;
+        if (wrap) {
+          var split = t.value.length > this.gridBounds.width ? widthLeft : 0;
+          tokenQueue.splice(i + 1, 0, t.splitAt(split));
+        }
+
+        if (t.value.length > 0) {
+          this._tokenRows[this._tokenRows.length - 1].push(t);
+          this._tokenHashes[this._tokenHashes.length - 1] += JSON.stringify(t);
+          this.lines[this.lines.length - 1] += t.value;
+          currentRowWidth += t.value.length;
+        }
+
+        if (breakLine) {
+          this._tokenRows.push([]);
+          this._tokenHashes.push("");
+          this.lines.push("");
+          currentRowWidth = 0;
+        }
+      }
+    }
+  }, {
+    key: "minDelta",
+    value: function minDelta(v, minV, maxV) {
+      var dvMinV = v - minV,
+          dvMaxV = v - maxV + 5,
+          dv = 0;
+      if (dvMinV < 0 || dvMaxV >= 0) {
+        // compare the absolute values, so we get the smallest change
+        // regardless of direction.
+        dv = Math.abs(dvMinV) < Math.abs(dvMaxV) ? dvMinV : dvMaxV;
+      }
+
+      return dv;
+    }
+  }, {
+    key: "fillRect",
+    value: function fillRect(gfx, fill, x, y, w, h) {
+      gfx.fillStyle = fill;
+      gfx.fillRect(x * this.character.width, y * this.character.height, w * this.character.width + 1, h * this.character.height + 1);
+    }
+  }, {
+    key: "strokeRect",
+    value: function strokeRect(gfx, stroke, x, y, w, h) {
+      gfx.strokeStyle = stroke;
+      gfx.strokeRect(x * this.character.width, y * this.character.height, w * this.character.width + 1, h * this.character.height + 1);
+    }
+  }, {
+    key: "renderCanvasBackground",
+    value: function renderCanvasBackground() {
+      var minCursor = Cursor.min(this.frontCursor, this.backCursor),
+          maxCursor = Cursor.max(this.frontCursor, this.backCursor),
+          tokenFront = new Cursor(),
+          tokenBack = new Cursor(),
+          clearFunc = this.theme.regular.backColor ? "fillRect" : "clearRect",
+          OFFSETY = OFFSET / this.character.height;
+
+      if (this.theme.regular.backColor) {
+        this._bgfx.fillStyle = this.theme.regular.backColor;
+      }
+
+      this._bgfx[clearFunc](0, 0, this.imageWidth, this.imageHeight);
+      this._bgfx.save();
+      this._bgfx.translate((this.gridBounds.x - this.scroll.x) * this.character.width + this.padding, -this.scroll.y * this.character.height + this.padding);
+
+      // draw the current row highlighter
+      if (this.focused) {
+        this.fillRect(this._bgfx, this.theme.regular.currentRowBackColor || Default.regular.currentRowBackColor, 0, minCursor.y + OFFSETY, this.gridBounds.width, maxCursor.y - minCursor.y + 1);
+      }
+
+      for (var y = 0; y < this._tokenRows.length; ++y) {
+        // draw the tokens on this row
+        var row = this._tokenRows[y];
+
+        for (var i = 0; i < row.length; ++i) {
+          var t = row[i];
+          tokenBack.x += t.value.length;
+          tokenBack.i += t.value.length;
+
+          // skip drawing tokens that aren't in view
+          if (this.scroll.y <= y && y < this.scroll.y + this.gridBounds.height && this.scroll.x <= tokenBack.x && tokenFront.x < this.scroll.x + this.gridBounds.width) {
+            // draw the selection box
+            var inSelection = minCursor.i <= tokenBack.i && tokenFront.i < maxCursor.i;
+            if (inSelection) {
+              var selectionFront = Cursor.max(minCursor, tokenFront);
+              var selectionBack = Cursor.min(maxCursor, tokenBack);
+              var cw = selectionBack.i - selectionFront.i;
+              this.fillRect(this._bgfx, this.theme.regular.selectedBackColor || Default.regular.selectedBackColor, selectionFront.x, selectionFront.y + OFFSETY, cw, 1);
+            }
+          }
+
+          tokenFront.copy(tokenBack);
+        }
+
+        tokenFront.x = 0;
+        ++tokenFront.y;
+        tokenBack.copy(tokenFront);
+      }
+
+      // draw the cursor caret
+      if (this.focused) {
+        var cc = this.theme.cursorColor || "black";
+        var w = 1 / this.character.width;
+        this.fillRect(this._bgfx, cc, minCursor.x, minCursor.y + OFFSETY, w, 1);
+        this.fillRect(this._bgfx, cc, maxCursor.x, maxCursor.y + OFFSETY, w, 1);
+      }
+      this._bgfx.restore();
+    }
+  }, {
+    key: "renderCanvasForeground",
+    value: function renderCanvasForeground() {
+      var tokenFront = new Cursor(),
+          tokenBack = new Cursor();
+
+      this._fgfx.clearRect(0, 0, this.imageWidth, this.imageHeight);
+      this._fgfx.save();
+      this._fgfx.translate((this.gridBounds.x - this.scroll.x) * this.character.width + this.padding, this.padding);
+      for (var y = 0; y < this._tokenRows.length; ++y) {
+        // draw the tokens on this row
+        var line = this.lines[y] + this.padding,
+            row = this._tokenRows[y],
+            drawn = false,
+            textY = (y - this.scroll.y) * this.character.height;
+
+        for (var i = 0; i < row.length; ++i) {
+          var t = row[i];
+          tokenBack.x += t.value.length;
+          tokenBack.i += t.value.length;
+
+          // skip drawing tokens that aren't in view
+          if (this.scroll.y <= y && y < this.scroll.y + this.gridBounds.height && this.scroll.x <= tokenBack.x && tokenFront.x < this.scroll.x + this.gridBounds.width) {
+
+            // draw the text
+            if (this.useCaching && this._rowCache[line] !== undefined) {
+              if (i === 0) {
+                this._fgfx.putImageData(this._rowCache[line], this.padding, textY + this.padding + OFFSET);
+              }
+            } else {
+              var style = this.theme[t.type] || {};
+              var font = (style.fontWeight || this.theme.regular.fontWeight || "") + " " + (style.fontStyle || this.theme.regular.fontStyle || "") + " " + this.character.height + "px " + this.theme.fontFamily;
+              this._fgfx.font = font.trim();
+              this._fgfx.fillStyle = style.foreColor || this.theme.regular.foreColor;
+              this.drawText(this._fgfx, t.value, tokenFront.x * this.character.width, textY);
+              drawn = true;
+            }
+          }
+
+          tokenFront.copy(tokenBack);
+        }
+
+        tokenFront.x = 0;
+        ++tokenFront.y;
+        tokenBack.copy(tokenFront);
+        if (this.useCaching && drawn && this._rowCache[line] === undefined) {
+          this._rowCache[line] = this._fgfx.getImageData(this.padding, textY + this.padding + OFFSET, this.imageWidth - 2 * this.padding, this.character.height);
+        }
+      }
+
+      this._fgfx.restore();
+    }
+
+    // provides a hook for TextInput to be able to override text drawing and spit out password blanking characters
+
+  }, {
+    key: "drawText",
+    value: function drawText(ctx, txt, x, y) {
+      ctx.fillText(txt, x, y);
+    }
+  }, {
+    key: "renderCanvasTrim",
+    value: function renderCanvasTrim() {
+      var tokenFront = new Cursor(),
+          tokenBack = new Cursor(),
+          maxLineWidth = 0;
+
+      this._tgfx.clearRect(0, 0, this.imageWidth, this.imageHeight);
+      this._tgfx.save();
+      this._tgfx.translate(this.padding, this.padding);
+      this._tgfx.save();
+      this._tgfx.lineWidth = 2;
+      this._tgfx.translate(0, -this.scroll.y * this.character.height);
+      for (var y = 0, lastLine = -1; y < this._tokenRows.length; ++y) {
+        var row = this._tokenRows[y];
+
+        for (var i = 0; i < row.length; ++i) {
+          var t = row[i];
+          tokenBack.x += t.value.length;
+          tokenBack.i += t.value.length;
+          tokenFront.copy(tokenBack);
+        }
+
+        maxLineWidth = Math.max(maxLineWidth, tokenBack.x);
+        tokenFront.x = 0;
+        ++tokenFront.y;
+        tokenBack.copy(tokenFront);
+
+        if (this.showLineNumbers && this.scroll.y <= y && y < this.scroll.y + this.gridBounds.height) {
+          var currentLine = row.length > 0 ? row[0].line : lastLine + 1;
+          // draw the left gutter
+          var lineNumber = currentLine.toString();
+          while (lineNumber.length < this._lineCountWidth) {
+            lineNumber = " " + lineNumber;
+          }
+          this.fillRect(this._tgfx, this.theme.regular.selectedBackColor || Default.regular.selectedBackColor, 0, y, this.gridBounds.x, 1);
+          this._tgfx.font = "bold " + this.character.height + "px " + this.theme.fontFamily;
+
+          if (currentLine > lastLine) {
+            this._tgfx.fillStyle = this.theme.regular.foreColor;
+            this._tgfx.fillText(lineNumber, 0, y * this.character.height);
+          }
+          lastLine = currentLine;
+        }
+      }
+
+      this._tgfx.restore();
+
+      if (this.showLineNumbers) {
+        this.strokeRect(this._tgfx, this.theme.regular.foreColor || Default.regular.foreColor, 0, 0, this.gridBounds.x, this.gridBounds.height);
+      }
+
+      // draw the scrollbars
+      if (this.showScrollBars) {
+        var drawWidth = this.gridBounds.width * this.character.width - this.padding,
+            drawHeight = this.gridBounds.height * this.character.height,
+            scrollX = this.scroll.x * drawWidth / maxLineWidth + this.gridBounds.x * this.character.width,
+            scrollY = this.scroll.y * drawHeight / this._tokenRows.length;
+
+        this._tgfx.fillStyle = this.theme.regular.selectedBackColor || Default.regular.selectedBackColor;
+        // horizontal
+        var bw;
+        if (!this.wordWrap && maxLineWidth > this.gridBounds.width) {
+          var scrollBarWidth = drawWidth * (this.gridBounds.width / maxLineWidth),
+              by = this.gridBounds.height * this.character.height;
+          bw = Math.max(this.character.width, scrollBarWidth);
+          this._tgfx.fillRect(scrollX, by, bw, this.character.height);
+          this._tgfx.strokeRect(scrollX, by, bw, this.character.height);
+        }
+
+        //vertical
+        if (this._tokenRows.length > this.gridBounds.height) {
+          var scrollBarHeight = drawHeight * (this.gridBounds.height / this._tokenRows.length),
+              bx = this.image - this._VSCROLL_WIDTH * this.character.width - 2 * this.padding,
+              bh = Math.max(this.character.height, scrollBarHeight);
+          bw = this._VSCROLL_WIDTH * this.character.width;
+          this._tgfx.fillRect(bx, scrollY, bw, bh);
+          this._tgfx.strokeRect(bx, scrollY, bw, bh);
+        }
+      }
+
+      this._tgfx.lineWidth = 2;
+      this._tgfx.restore();
+      this._tgfx.strokeRect(1, 1, this.imageWidth - 2, this.imageHeight - 2);
+      if (!this.focused) {
+        this._tgfx.fillStyle = this.theme.regular.unfocused || Default.regular.unfocused;
+        this._tgfx.fillRect(0, 0, this.imageWidth, this.imageHeight);
+      }
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      if (this.tokens && this.theme) {
+        this.refreshGridBounds();
+        var boundsChanged = this.gridBounds.toString() !== this._lastGridBounds,
+            textChanged = this._lastText !== this.value,
+            characterWidthChanged = this.character.width !== this._lastCharacterWidth,
+            characterHeightChanged = this.character.height !== this._lastCharacterHeight,
+            paddingChanged = this.padding !== this._lastPadding,
+            cursorChanged = !this._lastFrontCursor || !this._lastBackCursor || this.frontCursor.i !== this._lastFrontCursor.i || this._lastBackCursor.i !== this.backCursor.i,
+            scrollChanged = this.scroll.x !== this._lastScrollX || this.scroll.y !== this._lastScrollY,
+            fontChanged = this.context.font !== this._lastFont,
+            themeChanged = this.theme.name !== this._lastThemeName,
+            focusChanged = this.focused !== this._lastFocused,
+            changeBounds = null,
+            layoutChanged = this.resized || boundsChanged || textChanged || characterWidthChanged || characterHeightChanged || paddingChanged,
+            backgroundChanged = layoutChanged || cursorChanged || scrollChanged || themeChanged,
+            foregroundChanged = backgroundChanged || textChanged,
+            trimChanged = backgroundChanged || focusChanged,
+            imageChanged = foregroundChanged || backgroundChanged || trimChanged;
+
+        if (layoutChanged) {
+          this.performLayout(this.gridBounds);
+          this._rowCache = {};
+        }
+
+        if (imageChanged) {
+          if (cursorChanged && !(layoutChanged || scrollChanged || themeChanged || focusChanged)) {
+            var top = Math.min(this.frontCursor.y, this._lastFrontCursor.y, this.backCursor.y, this._lastBackCursor.y) - this.scroll.y + this.gridBounds.y,
+                bottom = Math.max(this.frontCursor.y, this._lastFrontCursor.y, this.backCursor.y, this._lastBackCursor.y) - this.scroll.y + 1;
+            changeBounds = new Rectangle(0, top * this.character.height, this.bounds.width, (bottom - top) * this.character.height + 2);
+          }
+
+          if (backgroundChanged) {
+            this.renderCanvasBackground();
+          }
+          if (foregroundChanged) {
+            this.renderCanvasForeground();
+          }
+          if (trimChanged) {
+            this.renderCanvasTrim();
+          }
+
+          this.context.clearRect(0, 0, this.imageWidth, this.imageHeight);
+          this.context.drawImage(this._bgCanvas, 0, 0);
+          this.context.drawImage(this._fgCanvas, 0, 0);
+          this.context.drawImage(this._trimCanvas, 0, 0);
+          this.invalidate(changeBounds);
+        }
+
+        this._lastGridBounds = this.gridBounds.toString();
+        this._lastText = this.value;
+        this._lastCharacterWidth = this.character.width;
+        this._lastCharacterHeight = this.character.height;
+        this._lastWidth = this.imageWidth;
+        this._lastHeight = this.imageHeight;
+        this._lastPadding = this.padding;
+        this._lastFrontCursor = this.frontCursor.clone();
+        this._lastBackCursor = this.backCursor.clone();
+        this._lastFocused = this.focused;
+        this._lastFont = this.context.font;
+        this._lastThemeName = this.theme.name;
+        this._lastScrollX = this.scroll.x;
+        this._lastScrollY = this.scroll.y;
+      }
+    }
+  }, {
+    key: "value",
+    get: function get() {
+      return this._history[this._historyFrame].join("\n");
+    },
+    set: function set(txt) {
+      txt = txt || "";
+      txt = txt.replace(/\r\n/g, "\n");
+      if (!this.multiline) {
+        txt = txt.replace(/\n/g, "");
+      }
+      var lines = txt.split("\n");
+      this.pushUndo(lines);
+      this.render();
+      this.emit("change", {
+        target: this
+      });
+    }
+  }, {
+    key: "selectedText",
+    get: function get() {
+      var minCursor = Cursor.min(this.frontCursor, this.backCursor),
+          maxCursor = Cursor.max(this.frontCursor, this.backCursor);
+      return this.value.substring(minCursor.i, maxCursor.i);
+    },
+    set: function set(str) {
+      str = str || "";
+      str = str.replace(/\r\n/g, "\n");
+
+      if (this.frontCursor.i !== this.backCursor.i || str.length > 0) {
+        var minCursor = Cursor.min(this.frontCursor, this.backCursor),
+            maxCursor = Cursor.max(this.frontCursor, this.backCursor),
+
+        // TODO: don't recalc the string first.
+        text = this.value,
+            left = text.substring(0, minCursor.i),
+            right = text.substring(maxCursor.i);
+
+        var v = left + str + right;
+        this.value = v;
+        this.refreshGridBounds();
+        this.performLayout();
+        minCursor.advanceN(this.lines, Math.max(0, str.length));
+        this.scrollIntoView(maxCursor);
+        this.clampScroll();
+        maxCursor.copy(minCursor);
+        this.render();
+      }
+    }
+  }, {
+    key: "padding",
+    get: function get() {
+      return this._padding;
+    },
+    set: function set(v) {
+      this._padding = v;
+      this.render();
+    }
+  }, {
+    key: "wordWrap",
+    get: function get() {
+      return this._wordWrap;
+    },
+    set: function set(v) {
+      this._wordWrap = v || false;
+      this.setGutter();
+    }
+  }, {
+    key: "showLineNumbers",
+    get: function get() {
+      return this._showLineNumbers;
+    },
+    set: function set(v) {
+      this._showLineNumbers = v;
+      this.setGutter();
+    }
+  }, {
+    key: "showScrollBars",
+    get: function get() {
+      return this._showScrollBars;
+    },
+    set: function set(v) {
+      this._showScrollBars = v;
+      this.setGutter();
+    }
+  }, {
+    key: "theme",
+    get: function get() {
+      return this._theme;
+    },
+    set: function set(t) {
+      this._theme = Object.assign({}, Default, t);
+      this._theme.fontSize = this.fontSize;
+      this._rowCache = {};
+      this.render();
+    }
+  }, {
+    key: "commandPack",
+    get: function get() {
+      return this._commandPack;
+    },
+    set: function set(v) {
+      this._commandPack = v;
+    }
+  }, {
+    key: "selectionStart",
+    get: function get() {
+      return this.frontCursor.i;
+    },
+    set: function set(i) {
+      this.frontCursor.setI(i, this.lines);
+    }
+  }, {
+    key: "selectionEnd",
+    get: function get() {
+      return this.backCursor.i;
+    },
+    set: function set(i) {
+      this.backCursor.setI(i, this.lines);
+    }
+  }, {
+    key: "selectionDirection",
+    get: function get() {
+      return this.frontCursor.i <= this.backCursor.i ? "forward" : "backward";
+    }
+  }, {
+    key: "tokenizer",
+    get: function get() {
+      return this._tokenizer;
+    },
+    set: function set(tk) {
+      this._tokenizer = tk || JavaScript;
+      if (this._history && this._history.length > 0) {
+        this.refreshTokens();
+        this.render();
+      }
+    }
+  }, {
+    key: "tabWidth",
+    get: function get() {
+      return this._tabWidth;
+    },
+    set: function set(tw) {
+      this._tabWidth = tw || 2;
+      this._tabString = "";
+      for (var i = 0; i < this._tabWidth; ++i) {
+        this._tabString += " ";
+      }
+    }
+  }, {
+    key: "tabString",
+    get: function get() {
+      return this._tabString;
+    }
+  }, {
+    key: "fontSize",
+    get: function get() {
+      return this._fontSize || 16;
+    },
+    set: function set(v) {
+      v = v || 16;
+      this._fontSize = v;
+      if (this.theme) {
+        this.theme.fontSize = this._fontSize;
+        this.resize();
+        this.render();
+      }
+    }
+  }, {
+    key: "lockMovement",
+    get: function get() {
+      return this.focused && !this.readOnly;
+    }
+  }]);
+  return TextBox;
+}(Surface);
 
 function makeHidingContainer(id, obj) {
   var elem = cascadeElement(id, "div", window.HTMLDivElement);
@@ -31124,112 +32989,87 @@ var Speech$1 = function (_InputProcessor) {
   return Speech;
 }(InputProcessor);
 
-function lock(element) {
-  var type = screen.orientation && screen.orientation.type || screen.mozOrientation || "";
-  if (type.indexOf("landscape") === -1) {
-    type = "landscape-primary";
-  }
-  if (screen.orientation && screen.orientation.lock) {
-    return screen.orientation.lock(type);
-  } else if (screen.mozLockOrientation) {
-    var locked = screen.mozLockOrientation(type);
-    if (locked) {
-      return Promise.resolve(element);
-    }
-  } else {
-    return Promise.reject(new Error("Pointer lock not supported."));
-  }
-}
-
-function unlock() {
-  if (screen.orientation && screen.orientation.unlock) {
-    screen.orientation.unlock();
-  } else if (screen.mozUnlockOrientation) {
-    screen.mozUnlockOrientation();
-  }
-}
-
 /* eslint-disable no-unused-vars */
 
 var hasOwnProperty = Object.prototype.hasOwnProperty;
 var propIsEnumerable = Object.prototype.propertyIsEnumerable;
 
 function toObject(val) {
-	if (val === null || val === undefined) {
-		throw new TypeError('Object.assign cannot be called with null or undefined');
-	}
+  if (val === null || val === undefined) {
+    throw new TypeError('Object.assign cannot be called with null or undefined');
+  }
 
-	return Object(val);
+  return Object(val);
 }
 
 function shouldUseNative() {
-	try {
-		if (!Object.assign) {
-			return false;
-		}
+  try {
+    if (!Object.assign) {
+      return false;
+    }
 
-		// Detect buggy property enumeration order in older V8 versions.
+    // Detect buggy property enumeration order in older V8 versions.
 
-		// https://bugs.chromium.org/p/v8/issues/detail?id=4118
-		var test1 = new String('abc'); // eslint-disable-line
-		test1[5] = 'de';
-		if (Object.getOwnPropertyNames(test1)[0] === '5') {
-			return false;
-		}
+    // https://bugs.chromium.org/p/v8/issues/detail?id=4118
+    var test1 = new String('abc'); // eslint-disable-line
+    test1[5] = 'de';
+    if (Object.getOwnPropertyNames(test1)[0] === '5') {
+      return false;
+    }
 
-		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
-		var test2 = {};
-		for (var i = 0; i < 10; i++) {
-			test2['_' + String.fromCharCode(i)] = i;
-		}
-		var order2 = Object.getOwnPropertyNames(test2).map(function (n) {
-			return test2[n];
-		});
-		if (order2.join('') !== '0123456789') {
-			return false;
-		}
+    // https://bugs.chromium.org/p/v8/issues/detail?id=3056
+    var test2 = {};
+    for (var i = 0; i < 10; i++) {
+      test2['_' + String.fromCharCode(i)] = i;
+    }
+    var order2 = Object.getOwnPropertyNames(test2).map(function (n) {
+      return test2[n];
+    });
+    if (order2.join('') !== '0123456789') {
+      return false;
+    }
 
-		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
-		var test3 = {};
-		'abcdefghijklmnopqrst'.split('').forEach(function (letter) {
-			test3[letter] = letter;
-		});
-		if (Object.keys(Object.assign({}, test3)).join('') !== 'abcdefghijklmnopqrst') {
-			return false;
-		}
+    // https://bugs.chromium.org/p/v8/issues/detail?id=3056
+    var test3 = {};
+    'abcdefghijklmnopqrst'.split('').forEach(function (letter) {
+      test3[letter] = letter;
+    });
+    if (Object.keys(Object.assign({}, test3)).join('') !== 'abcdefghijklmnopqrst') {
+      return false;
+    }
 
-		return true;
-	} catch (e) {
-		// We don't expect any of the above to throw, but better to be safe.
-		return false;
-	}
+    return true;
+  } catch (e) {
+    // We don't expect any of the above to throw, but better to be safe.
+    return false;
+  }
 }
 
 var index$5 = shouldUseNative() ? Object.assign : function (target, source) {
-	var from;
-	var to = toObject(target);
-	var symbols;
+  var from;
+  var to = toObject(target);
+  var symbols;
 
-	for (var s = 1; s < arguments.length; s++) {
-		from = Object(arguments[s]);
+  for (var s = 1; s < arguments.length; s++) {
+    from = Object(arguments[s]);
 
-		for (var key in from) {
-			if (hasOwnProperty.call(from, key)) {
-				to[key] = from[key];
-			}
-		}
+    for (var key in from) {
+      if (hasOwnProperty.call(from, key)) {
+        to[key] = from[key];
+      }
+    }
 
-		if (Object.getOwnPropertySymbols) {
-			symbols = Object.getOwnPropertySymbols(from);
-			for (var i = 0; i < symbols.length; i++) {
-				if (propIsEnumerable.call(from, symbols[i])) {
-					to[symbols[i]] = from[symbols[i]];
-				}
-			}
-		}
-	}
+    if (Object.getOwnPropertySymbols) {
+      symbols = Object.getOwnPropertySymbols(from);
+      for (var i = 0; i < symbols.length; i++) {
+        if (propIsEnumerable.call(from, symbols[i])) {
+          to[symbols[i]] = from[symbols[i]];
+        }
+      }
+    }
+  }
 
-	return to;
+  return to;
 };
 
 /*
@@ -31579,14 +33419,222 @@ Util.frameDataFromPose = function () {
   };
 }();
 
+var asyncGenerator$1 = function () {
+  function AwaitValue(value) {
+    this.value = value;
+  }
+
+  function AsyncGenerator(gen) {
+    var front, back;
+
+    function send(key, arg) {
+      return new Promise(function (resolve, reject) {
+        var request = {
+          key: key,
+          arg: arg,
+          resolve: resolve,
+          reject: reject,
+          next: null
+        };
+
+        if (back) {
+          back = back.next = request;
+        } else {
+          front = back = request;
+          resume(key, arg);
+        }
+      });
+    }
+
+    function resume(key, arg) {
+      try {
+        var result = gen[key](arg);
+        var value = result.value;
+
+        if (value instanceof AwaitValue) {
+          Promise.resolve(value.value).then(function (arg) {
+            resume("next", arg);
+          }, function (arg) {
+            resume("throw", arg);
+          });
+        } else {
+          settle(result.done ? "return" : "normal", result.value);
+        }
+      } catch (err) {
+        settle("throw", err);
+      }
+    }
+
+    function settle(type, value) {
+      switch (type) {
+        case "return":
+          front.resolve({
+            value: value,
+            done: true
+          });
+          break;
+
+        case "throw":
+          front.reject(value);
+          break;
+
+        default:
+          front.resolve({
+            value: value,
+            done: false
+          });
+          break;
+      }
+
+      front = front.next;
+
+      if (front) {
+        resume(front.key, front.arg);
+      } else {
+        back = null;
+      }
+    }
+
+    this._invoke = send;
+
+    if (typeof gen.return !== "function") {
+      this.return = undefined;
+    }
+  }
+
+  if (typeof Symbol === "function" && Symbol.asyncIterator) {
+    AsyncGenerator.prototype[Symbol.asyncIterator] = function () {
+      return this;
+    };
+  }
+
+  AsyncGenerator.prototype.next = function (arg) {
+    return this._invoke("next", arg);
+  };
+
+  AsyncGenerator.prototype.throw = function (arg) {
+    return this._invoke("throw", arg);
+  };
+
+  AsyncGenerator.prototype.return = function (arg) {
+    return this._invoke("return", arg);
+  };
+
+  return {
+    wrap: function wrap(fn) {
+      return function () {
+        return new AsyncGenerator(fn.apply(this, arguments));
+      };
+    },
+    await: function await(value) {
+      return new AwaitValue(value);
+    }
+  };
+}();
+
+var classCallCheck$1 = function classCallCheck$1(instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError("Cannot call a class as a function");
+  }
+};
+
+var createClass$1 = function () {
+  function defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+
+  return function (Constructor, protoProps, staticProps) {
+    if (protoProps) defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) defineProperties(Constructor, staticProps);
+    return Constructor;
+  };
+}();
+
+var get$1$1 = function get$1$1(object, property, receiver) {
+  if (object === null) object = Function.prototype;
+  var desc = Object.getOwnPropertyDescriptor(object, property);
+
+  if (desc === undefined) {
+    var parent = Object.getPrototypeOf(object);
+
+    if (parent === null) {
+      return undefined;
+    } else {
+      return get$1$1(parent, property, receiver);
+    }
+  } else if ("value" in desc) {
+    return desc.value;
+  } else {
+    var getter = desc.get;
+
+    if (getter === undefined) {
+      return undefined;
+    }
+
+    return getter.call(receiver);
+  }
+};
+
+var inherits$1 = function inherits$1(subClass, superClass) {
+  if (typeof superClass !== "function" && superClass !== null) {
+    throw new TypeError("Super expression must either be null or a function, not " + (typeof superClass === 'undefined' ? 'undefined' : _typeof(superClass)));
+  }
+
+  subClass.prototype = Object.create(superClass && superClass.prototype, {
+    constructor: {
+      value: subClass,
+      enumerable: false,
+      writable: true,
+      configurable: true
+    }
+  });
+  if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
+};
+
+var possibleConstructorReturn$1 = function possibleConstructorReturn$1(self, call) {
+  if (!self) {
+    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+  }
+
+  return call && ((typeof call === 'undefined' ? 'undefined' : _typeof(call)) === "object" || typeof call === "function") ? call : self;
+};
+
+var set$1$1 = function set$1$1(object, property, value, receiver) {
+  var desc = Object.getOwnPropertyDescriptor(object, property);
+
+  if (desc === undefined) {
+    var parent = Object.getPrototypeOf(object);
+
+    if (parent !== null) {
+      set$1$1(parent, property, value, receiver);
+    }
+  } else if ("value" in desc && desc.writable) {
+    desc.value = value;
+  } else {
+    var setter = desc.set;
+
+    if (setter !== undefined) {
+      setter.call(receiver, value);
+    }
+  }
+
+  return value;
+};
+
 var SensorSample = function () {
   function SensorSample(sample, timestampS) {
-    classCallCheck(this, SensorSample);
+    classCallCheck$1(this, SensorSample);
 
     this.set(sample, timestampS);
   }
 
-  createClass(SensorSample, [{
+  createClass$1(SensorSample, [{
     key: "set",
     value: function set(sample, timestampS) {
       this.sample = sample;
@@ -32004,7 +34052,7 @@ var DEBUG = false;
 
 var ComplementaryFilter = function () {
   function ComplementaryFilter(kFilter) {
-    classCallCheck(this, ComplementaryFilter);
+    classCallCheck$1(this, ComplementaryFilter);
 
     this.kFilter = kFilter;
 
@@ -32035,7 +34083,7 @@ var ComplementaryFilter = function () {
     this.gyroIntegralQ = new MathUtil.Quaternion();
   }
 
-  createClass(ComplementaryFilter, [{
+  createClass$1(ComplementaryFilter, [{
     key: "addAccelMeasurement",
     value: function addAccelMeasurement(vector, timestampS) {
       this.currentAccelMeasurement.set(vector, timestampS);
@@ -32165,63 +34213,63 @@ var DEBUG$1 = false;
  */
 
 var PosePredictor = function () {
-    function PosePredictor(predictionTimeS) {
-        classCallCheck(this, PosePredictor);
+  function PosePredictor(predictionTimeS) {
+    classCallCheck$1(this, PosePredictor);
 
-        this.predictionTimeS = predictionTimeS;
+    this.predictionTimeS = predictionTimeS;
 
-        // The quaternion corresponding to the previous state.
-        this.previousQ = new MathUtil.Quaternion();
-        // Previous time a prediction occurred.
-        this.previousTimestampS = null;
+    // The quaternion corresponding to the previous state.
+    this.previousQ = new MathUtil.Quaternion();
+    // Previous time a prediction occurred.
+    this.previousTimestampS = null;
 
-        // The delta quaternion that adjusts the current pose.
-        this.deltaQ = new MathUtil.Quaternion();
-        // The output quaternion.
-        this.outQ = new MathUtil.Quaternion();
-    }
+    // The delta quaternion that adjusts the current pose.
+    this.deltaQ = new MathUtil.Quaternion();
+    // The output quaternion.
+    this.outQ = new MathUtil.Quaternion();
+  }
 
-    createClass(PosePredictor, [{
-        key: "getPrediction",
-        value: function getPrediction(currentQ, gyro, timestampS) {
-            if (!this.previousTimestampS) {
-                this.previousQ.copy(currentQ);
-                this.previousTimestampS = timestampS;
-                return currentQ;
-            }
+  createClass$1(PosePredictor, [{
+    key: "getPrediction",
+    value: function getPrediction(currentQ, gyro, timestampS) {
+      if (!this.previousTimestampS) {
+        this.previousQ.copy(currentQ);
+        this.previousTimestampS = timestampS;
+        return currentQ;
+      }
 
-            // Calculate axis and angle based on gyroscope rotation rate data.
-            var axis = new MathUtil.Vector3();
-            axis.copy(gyro);
-            axis.normalize();
+      // Calculate axis and angle based on gyroscope rotation rate data.
+      var axis = new MathUtil.Vector3();
+      axis.copy(gyro);
+      axis.normalize();
 
-            var angularSpeed = gyro.length();
+      var angularSpeed = gyro.length();
 
-            // If we're rotating slowly, don't do prediction.
-            if (angularSpeed < MathUtil.degToRad * 20) {
-                if (DEBUG$1) {
-                    console.log('Moving slowly, at %s deg/s: no prediction', (MathUtil.radToDeg * angularSpeed).toFixed(1));
-                }
-                this.outQ.copy(currentQ);
-                this.previousQ.copy(currentQ);
-                return this.outQ;
-            }
-
-            // Get the predicted angle based on the time delta and latency.
-            var deltaT = timestampS - this.previousTimestampS;
-            var predictAngle = angularSpeed * this.predictionTimeS;
-
-            this.deltaQ.setFromAxisAngle(axis, predictAngle);
-            this.outQ.copy(this.previousQ);
-            this.outQ.multiply(this.deltaQ);
-
-            this.previousQ.copy(currentQ);
-            this.previousTimestampS = timestampS;
-
-            return this.outQ;
+      // If we're rotating slowly, don't do prediction.
+      if (angularSpeed < MathUtil.degToRad * 20) {
+        if (DEBUG$1) {
+          console.log('Moving slowly, at %s deg/s: no prediction', (MathUtil.radToDeg * angularSpeed).toFixed(1));
         }
-    }]);
-    return PosePredictor;
+        this.outQ.copy(currentQ);
+        this.previousQ.copy(currentQ);
+        return this.outQ;
+      }
+
+      // Get the predicted angle based on the time delta and latency.
+      var deltaT = timestampS - this.previousTimestampS;
+      var predictAngle = angularSpeed * this.predictionTimeS;
+
+      this.deltaQ.setFromAxisAngle(axis, predictAngle);
+      this.outQ.copy(this.previousQ);
+      this.outQ.multiply(this.deltaQ);
+
+      this.previousQ.copy(currentQ);
+      this.previousTimestampS = timestampS;
+
+      return this.outQ;
+    }
+  }]);
+  return PosePredictor;
 }();
 
 /*
@@ -32244,7 +34292,7 @@ var PosePredictor = function () {
 
 var FusionPoseSensor = function () {
   function FusionPoseSensor() {
-    classCallCheck(this, FusionPoseSensor);
+    classCallCheck$1(this, FusionPoseSensor);
 
     this.deviceId = 'webvr-polyfill:fused';
     this.deviceName = 'VR Position Device (webvr-polyfill:fused)';
@@ -32287,7 +34335,7 @@ var FusionPoseSensor = function () {
     this.orientationOut_ = new Float32Array(4);
   }
 
-  createClass(FusionPoseSensor, [{
+  createClass$1(FusionPoseSensor, [{
     key: "getPosition",
     value: function getPosition() {
       // This PoseSensor doesn't support position
@@ -32430,7 +34478,7 @@ var defaultRightBounds = [0.5, 0, 0.5, 1];
  */
 
 var VRFrameData = function VRFrameData() {
-  classCallCheck(this, VRFrameData);
+  classCallCheck$1(this, VRFrameData);
 
   this.leftProjectionMatrix = new Float32Array(16);
   this.leftViewMatrix = new Float32Array(16);
@@ -32444,7 +34492,7 @@ var VRFrameData = function VRFrameData() {
  */
 var VRDisplay = function () {
   function VRDisplay() {
-    classCallCheck(this, VRDisplay);
+    classCallCheck$1(this, VRDisplay);
 
     this.isPolyfilled = true;
     this.displayId = nextDisplayId++;
@@ -32477,7 +34525,7 @@ var VRDisplay = function () {
     this.fullscreenErrorHandler_ = null;
   }
 
-  createClass(VRDisplay, [{
+  createClass$1(VRDisplay, [{
     key: 'getFrameData',
     value: function getFrameData(frameData) {
       // TODO: Technically this should retain it's value for the duration of a frame
@@ -32844,12 +34892,12 @@ var Eye = {
  */
 
 var CardboardVRDisplay = function (_VRDisplay) {
-  inherits(CardboardVRDisplay, _VRDisplay);
+  inherits$1(CardboardVRDisplay, _VRDisplay);
 
   function CardboardVRDisplay() {
-    classCallCheck(this, CardboardVRDisplay);
+    classCallCheck$1(this, CardboardVRDisplay);
 
-    var _this = possibleConstructorReturn(this, (CardboardVRDisplay.__proto__ || Object.getPrototypeOf(CardboardVRDisplay)).call(this));
+    var _this = possibleConstructorReturn$1(this, (CardboardVRDisplay.__proto__ || Object.getPrototypeOf(CardboardVRDisplay)).call(this));
 
     _this.DOMElement = null;
     _this.displayName = 'Google Cardboard';
@@ -32867,7 +34915,7 @@ var CardboardVRDisplay = function (_VRDisplay) {
     return _this;
   }
 
-  createClass(CardboardVRDisplay, [{
+  createClass$1(CardboardVRDisplay, [{
     key: "getImmediatePose",
     value: function getImmediatePose() {
       return {
@@ -33002,7 +35050,7 @@ function InstallWebVRSpecShim() {
 
 var WebVRPolyfill = function () {
   function WebVRPolyfill() {
-    classCallCheck(this, WebVRPolyfill);
+    classCallCheck$1(this, WebVRPolyfill);
 
     this.displays = [];
     this.devicesPopulated = false;
@@ -33016,7 +35064,7 @@ var WebVRPolyfill = function () {
     InstallWebVRSpecShim();
   }
 
-  createClass(WebVRPolyfill, [{
+  createClass$1(WebVRPolyfill, [{
     key: "isWebVRAvailable",
     value: function isWebVRAvailable() {
       return 'getVRDisplays' in navigator;
@@ -33163,241 +35211,6 @@ if (!window.WebVRConfig.DEFER_INITIALIZATION) {
   };
 }
 
-var FullScreen = AsyncLockRequest("Fullscreen", ["fullscreenElement", "mozFullScreenElement", "webkitFullscreenElement", "msFullscreenElement"], ["onfullscreenchange", "onmozfullscreenchange", "onwebkitfullscreenchange", "onmsfullscreenchange"], ["onfullscreenerror", "onmozfullscreenerror", "onwebkitfullscreenerror", "onmsfullscreenerror"], ["requestFullscreen", "mozRequestFullScreen", "webkitRequestFullscreen", "webkitRequestFullScreen", "msRequestFullscreen"], ["exitFullscreen", "mozExitFullScreen", "webkitExitFullscreen", "webkitExitFullScreen", "msExitFullscreen"], function (arg) {
-  return arg || window.Element && window.Element.ALLOW_KEYBOARD_INPUT || undefined;
-});
-
-function immutable(value) {
-  var getter = typeof value === "function" ? value : function () {
-    return value;
-  };
-  return {
-    enumerable: true,
-    get: getter,
-    set: function set() {
-      throw new Error("This value is immutable and may only be read, not written.");
-    }
-  };
-}
-
-function mutable(value, type) {
-  return {
-    enumerable: true,
-    get: function get() {
-      return value;
-    },
-    set: function set(v) {
-      var t = typeof v === "undefined" ? "undefined" : _typeof(v);
-      if (t !== type) {
-        throw new Error("Value must be a " + type + ". An " + t + " was provided instead: " + v);
-      }
-      value = v;
-    }
-  };
-}
-
-var isMobile$2 = (function (a) {
-  return (/(android|bb\d+|meego).+|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od|ad)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(a) || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substring(0, 4))
-  );
-})(navigator.userAgent || navigator.vendor || window.opera);
-
-var Orientation = { lock: lock, unlock: unlock };
-
-function warn(msg) {
-  return function (exp) {
-    console.warn(msg, exp);
-  };
-}
-
-function defaultPose() {
-  return {
-    position: [0, 0, 0],
-    orientation: [0, 0, 0, 1],
-    linearVelocity: null,
-    linearAcceleration: null,
-    angularVelocity: null,
-    angularAcceleration: null
-  };
-}
-
-function fireDisplayPresentChange(evt) {
-  if (!FullScreen.isActive) {
-    FullScreen.removeChangeListener(fireDisplayPresentChange);
-  }
-  window.dispatchEvent(new Event("vrdisplaypresentchange"));
-}
-
-var WebVRStandardMonitor = function () {
-  createClass(WebVRStandardMonitor, null, [{
-    key: "standardFullScreenBehavior",
-    value: function standardFullScreenBehavior(elem) {
-      return FullScreen.request(elem).catch(warn("FullScreen failed")).then(WebVRStandardMonitor.standardLockBehavior);
-    }
-  }, {
-    key: "standardLockBehavior",
-    value: function standardLockBehavior(elem) {
-      if (isMobile$2) {
-        return Orientation.lock(elem).catch(warn("OrientationLock failed"));
-      } else {
-        return PointerLock.request(elem).catch(warn("PointerLock failed"));
-      }
-    }
-  }, {
-    key: "standardExitFullScreenBehavior",
-    value: function standardExitFullScreenBehavior() {
-      return WebVRStandardMonitor.standardUnlockBehavior().then(function () {
-        return FullScreen.exit();
-      }).catch(warn("FullScreen failed"));
-    }
-  }, {
-    key: "standardUnlockBehavior",
-    value: function standardUnlockBehavior() {
-      if (isMobile$2) {
-        Orientation.unlock();
-        return Promise.resolve();
-      } else {
-        return PointerLock.exit().catch(warn("PointerLock exit failed"));
-      }
-    }
-  }]);
-
-  function WebVRStandardMonitor(display) {
-    classCallCheck(this, WebVRStandardMonitor);
-
-    if (this !== window && this !== undefined) {
-      this._currentLayers = [];
-      this._display = display;
-
-      Object.defineProperties(this, {
-        capabilities: immutable(Object.defineProperties({}, {
-          hasPosition: immutable(false),
-          hasOrientation: immutable(isMobile$2),
-          hasExternalDisplay: immutable(false),
-          canPresent: immutable(true),
-          maxLayers: immutable(1)
-        })),
-        isPolyfilled: immutable(display && display.isPolyfilled || false),
-        displayId: immutable(0),
-        displayName: immutable(isMobile$2 && "Magic Window" || "Standard Monitor"),
-        isConnected: immutable(true),
-        stageParameters: immutable(null),
-        isPresenting: immutable(function () {
-          return FullScreen.isActive;
-        }),
-
-        depthNear: mutable(0.01, "number"),
-        depthFar: mutable(10000.0, "number")
-      });
-    }
-  }
-
-  createClass(WebVRStandardMonitor, [{
-    key: "requestAnimationFrame",
-    value: function requestAnimationFrame(thunk) {
-      return window.requestAnimationFrame(thunk);
-    }
-  }, {
-    key: "cancelAnimationFrame",
-    value: function cancelAnimationFrame(handle) {
-      window.cancelAnimationFrame(handle);
-    }
-  }, {
-    key: "submitFrame",
-    value: function submitFrame() {}
-  }, {
-    key: "getPose",
-    value: function getPose() {
-      var display = isMobile$2 && this._display;
-      if (display) {
-        return display.getPose();
-      } else {
-        return defaultPose();
-      }
-    }
-  }, {
-    key: "getImmediatePose",
-    value: function getImmediatePose() {
-      var display = isMobile$2 && this._display;
-      if (display) {
-        return display.getImmediatePose();
-      } else {
-        return defaultPose();
-      }
-    }
-  }, {
-    key: "resetPose",
-    value: function resetPose() {
-      var display = isMobile$2 && this._display;
-      if (display) {
-        return display.resetPose();
-      }
-    }
-  }, {
-    key: "requestPresent",
-    value: function requestPresent(layers) {
-      for (var i = 0; i < this.capabilities.maxLayers && i < layers.length; ++i) {
-        this._currentLayers[i] = layers[i];
-      }
-      var elem = layers[0].source;
-      if (isMobile$2) {
-        return this._display.requestPresent(layers).then(function () {
-          return WebVRStandardMonitor.standardLockBehavior(elem);
-        });
-      } else {
-        FullScreen.addChangeListener(fireDisplayPresentChange);
-        return WebVRStandardMonitor.standardFullScreenBehavior(elem);
-      }
-    }
-  }, {
-    key: "getLayers",
-    value: function getLayers() {
-      return this._currentLayers.slice();
-    }
-  }, {
-    key: "exitPresent",
-    value: function exitPresent() {
-      var _this = this;
-
-      this._currentLayers.splice(0);
-
-      if (isMobile$2) {
-        return WebVRStandardMonitor.standardUnlockBehavior().then(function () {
-          return _this._display.exitPresent();
-        });
-      } else {
-        return WebVRStandardMonitor.standardExitFullScreenBehavior();
-      }
-    }
-  }, {
-    key: "getEyeParameters",
-    value: function getEyeParameters(side) {
-      if (side === "left") {
-        var curLayer = this.getLayers()[0],
-            elem = curLayer && curLayer.source || document.body,
-            width = FullScreen.isActive ? screen.width : elem.clientWidth,
-            height = FullScreen.isActive ? screen.height : elem.clientHeight,
-            aspect = width / height,
-            vFOV = 25,
-            hFOV = vFOV * aspect;
-        return {
-          renderWidth: width * devicePixelRatio,
-          renderHeight: height * devicePixelRatio,
-          offset: new Float32Array([0, 0, 0]),
-          fieldOfView: {
-            upDegrees: vFOV,
-            downDegrees: vFOV,
-            leftDegrees: hFOV,
-            rightDegrees: hFOV
-          }
-        };
-      }
-    }
-  }]);
-  return WebVRStandardMonitor;
-}();
-
-WebVRStandardMonitor._shimSetup = false;
-
 function install() {
   if (!WebVRStandardMonitor._shimSetup) {
     WebVRStandardMonitor._shimSetup = true;
@@ -33429,11 +35242,12 @@ var VR = function (_PoseInputProcessor) {
     }
   }]);
 
-  function VR(avatarHeight) {
+  function VR(options) {
     classCallCheck(this, VR);
 
     var _this = possibleConstructorReturn(this, (VR.__proto__ || Object.getPrototypeOf(VR)).call(this, "VR"));
 
+    _this.options = options;
     _this._requestPresent = function (layers) {
       return _this.currentDevice.requestPresent(layers).catch(function (exp) {
         return console.warn("requstPresent", exp);
@@ -33444,19 +35258,15 @@ var VR = function (_PoseInputProcessor) {
     _this._transformers = [];
     _this.currentDeviceIndex = -1;
     _this.movePlayer = new Matrix4();
-    _this.defaultAvatarHeight = avatarHeight;
     _this.stage = null;
     _this.lastStageWidth = null;
     _this.lastStageDepth = null;
     _this.isStereo = false;
-
+    WebVRStandardMonitor.DEFAULT_FOV = _this.options.defaultFOV;
     install();
     _this.ready = navigator.getVRDisplays().then(function (displays) {
-      // We skip the Standard Monitor and Magic Window on iOS because we can't
-      // go full screen on those systems.
-      _this.displays.push.apply(_this.displays, displays.filter(function (display) {
-        return !isiOS || VR.isStereoDisplay(display);
-      }));
+      _this.displays.push.apply(_this.displays, displays);
+      _this.connect(0);
       return _this.displays;
     });
     return _this;
@@ -33571,7 +35381,7 @@ var VR = function (_PoseInputProcessor) {
         x = stage.sizeX;
         z = stage.sizeZ;
       } else {
-        this.movePlayer.makeTranslation(0, this.defaultAvatarHeight, 0);
+        this.movePlayer.makeTranslation(0, this.options.avatarHeight, 0);
         x = 0;
         z = 0;
       }
@@ -33848,7 +35658,7 @@ var FPSInput = function (_AbstractEventEmitter) {
       }
     }));
 
-    _this.add(new VR(_this.options.avatarHeight));
+    _this.add(new VR(_this.options));
     _this.motionDevices.push(_this.VR);
 
     if (!_this.options.disableGamepad && GamepadManager.isAvailable) {
@@ -34517,1556 +36327,6 @@ var Manager = function (_AbstractEventEmitter) {
   }]);
   return Manager;
 }(AbstractEventEmitter);
-
-// unicode-aware string reverse
-var reverse = function () {
-  var combiningMarks = /(<%= allExceptCombiningMarks %>)(<%= combiningMarks %>+)/g,
-      surrogatePair = /(<%= highSurrogates %>)(<%= lowSurrogates %>)/g;
-
-  function reverse(str) {
-    str = str.replace(combiningMarks, function (match, capture1, capture2) {
-      return reverse(capture2) + capture1;
-    }).replace(surrogatePair, "$2$1");
-    var res = "";
-    for (var i = str.length - 1; i >= 0; --i) {
-      res += str[i];
-    }
-    return res;
-  }
-  return reverse;
-}();
-
-var Cursor = function () {
-  createClass(Cursor, null, [{
-    key: "min",
-    value: function min(a, b) {
-      if (a.i <= b.i) {
-        return a;
-      }
-      return b;
-    }
-  }, {
-    key: "max",
-    value: function max(a, b) {
-      if (a.i > b.i) {
-        return a;
-      }
-      return b;
-    }
-  }]);
-
-  function Cursor(i, x, y) {
-    classCallCheck(this, Cursor);
-
-    this.i = i || 0;
-    this.x = x || 0;
-    this.y = y || 0;
-    this.moved = true;
-  }
-
-  createClass(Cursor, [{
-    key: "clone",
-    value: function clone() {
-      return new Cursor(this.i, this.x, this.y);
-    }
-  }, {
-    key: "toString",
-    value: function toString() {
-      return "[i:" + this.i + " x:" + this.x + " y:" + this.y + "]";
-    }
-  }, {
-    key: "copy",
-    value: function copy(cursor) {
-      this.i = cursor.i;
-      this.x = cursor.x;
-      this.y = cursor.y;
-      this.moved = false;
-    }
-  }, {
-    key: "fullhome",
-    value: function fullhome() {
-      this.i = 0;
-      this.x = 0;
-      this.y = 0;
-      this.moved = true;
-    }
-  }, {
-    key: "fullend",
-    value: function fullend(lines) {
-      this.i = 0;
-      var lastLength = 0;
-      for (var y = 0; y < lines.length; ++y) {
-        var line = lines[y];
-        lastLength = line.length;
-        this.i += lastLength;
-      }
-      this.y = lines.length - 1;
-      this.x = lastLength;
-      this.moved = true;
-    }
-  }, {
-    key: "skipleft",
-    value: function skipleft(lines) {
-      if (this.x === 0) {
-        this.left(lines);
-      } else {
-        var x = this.x - 1;
-        var line = lines[this.y];
-        var word = reverse(line.substring(0, x));
-        var m = word.match(/(\s|\W)+/);
-        var dx = m ? m.index + m[0].length + 1 : word.length;
-        this.i -= dx;
-        this.x -= dx;
-      }
-      this.moved = true;
-    }
-  }, {
-    key: "left",
-    value: function left(lines) {
-      if (this.i > 0) {
-        --this.i;
-        --this.x;
-        if (this.x < 0) {
-          --this.y;
-          var line = lines[this.y];
-          this.x = line.length;
-        }
-        if (this.reverseFromNewline(lines)) {
-          ++this.i;
-        }
-      }
-      this.moved = true;
-    }
-  }, {
-    key: "skipright",
-    value: function skipright(lines) {
-      var line = lines[this.y];
-      if (this.x === line.length || line[this.x] === '\n') {
-        this.right(lines);
-      } else {
-        var x = this.x + 1;
-        line = line.substring(x);
-        var m = line.match(/(\s|\W)+/);
-        var dx = m ? m.index + m[0].length + 1 : line.length - this.x;
-        this.i += dx;
-        this.x += dx;
-        this.reverseFromNewline(lines);
-      }
-      this.moved = true;
-    }
-  }, {
-    key: "fixCursor",
-    value: function fixCursor(lines) {
-      this.x = this.i;
-      this.y = 0;
-      var total = 0;
-      var line = lines[this.y];
-      while (this.x > line.length) {
-        this.x -= line.length;
-        total += line.length;
-        if (this.y >= lines.length - 1) {
-          this.i = total;
-          this.x = line.length;
-          this.moved = true;
-          break;
-        }
-        ++this.y;
-        line = lines[this.y];
-      }
-      return this.moved;
-    }
-  }, {
-    key: "right",
-    value: function right(lines) {
-      this.advanceN(lines, 1);
-    }
-  }, {
-    key: "advanceN",
-    value: function advanceN(lines, n) {
-      var line = lines[this.y];
-      if (this.y < lines.length - 1 || this.x < line.length) {
-        this.i += n;
-        this.fixCursor(lines);
-        line = lines[this.y];
-        if (this.x > 0 && line[this.x - 1] === '\n') {
-          ++this.y;
-          this.x = 0;
-        }
-      }
-      this.moved = true;
-    }
-  }, {
-    key: "home",
-    value: function home() {
-      this.i -= this.x;
-      this.x = 0;
-      this.moved = true;
-    }
-  }, {
-    key: "end",
-    value: function end(lines) {
-      var line = lines[this.y];
-      var dx = line.length - this.x;
-      this.i += dx;
-      this.x += dx;
-      this.reverseFromNewline(lines);
-      this.moved = true;
-    }
-  }, {
-    key: "up",
-    value: function up(lines) {
-      if (this.y > 0) {
-        --this.y;
-        var line = lines[this.y];
-        var dx = Math.min(0, line.length - this.x);
-        this.x += dx;
-        this.i -= line.length - dx;
-        this.reverseFromNewline(lines);
-      }
-      this.moved = true;
-    }
-  }, {
-    key: "down",
-    value: function down(lines) {
-      if (this.y < lines.length - 1) {
-        ++this.y;
-        var line = lines[this.y];
-        var pLine = lines[this.y - 1];
-        var dx = Math.min(0, line.length - this.x);
-        this.x += dx;
-        this.i += pLine.length + dx;
-        this.reverseFromNewline(lines);
-      }
-      this.moved = true;
-    }
-  }, {
-    key: "incY",
-    value: function incY(dy, lines) {
-      this.y = Math.max(0, Math.min(lines.length - 1, this.y + dy));
-      var line = lines[this.y];
-      this.x = Math.max(0, Math.min(line.length, this.x));
-      this.i = this.x;
-      for (var i = 0; i < this.y; ++i) {
-        this.i += lines[i].length;
-      }
-      this.reverseFromNewline(lines);
-      this.moved = true;
-    }
-  }, {
-    key: "setXY",
-    value: function setXY(x, y, lines) {
-      this.y = Math.max(0, Math.min(lines.length - 1, y));
-      var line = lines[this.y];
-      this.x = Math.max(0, Math.min(line.length, x));
-      this.i = this.x;
-      for (var i = 0; i < this.y; ++i) {
-        this.i += lines[i].length;
-      }
-      this.reverseFromNewline(lines);
-      this.moved = true;
-    }
-  }, {
-    key: "setI",
-    value: function setI(i, lines) {
-      this.i = i;
-      this.fixCursor(lines);
-      this.moved = true;
-    }
-  }, {
-    key: "reverseFromNewline",
-    value: function reverseFromNewline(lines) {
-      var line = lines[this.y];
-      if (this.x > 0 && line[this.x - 1] === '\n') {
-        --this.x;
-        --this.i;
-        return true;
-      }
-      return false;
-    }
-  }]);
-  return Cursor;
-}();
-
-var CommandPack = function CommandPack(commandPackName, commands) {
-  classCallCheck(this, CommandPack);
-
-  this.name = commandPackName;
-  Object.assign(this, commands);
-};
-
-var BasicTextInput = function (_CommandPack) {
-  inherits(BasicTextInput, _CommandPack);
-
-  function BasicTextInput(additionalName, additionalCommands) {
-    classCallCheck(this, BasicTextInput);
-
-    var commands = {
-      NORMAL_LEFTARROW: function NORMAL_LEFTARROW(prim, tokenRows) {
-        prim.cursorLeft(tokenRows, prim.frontCursor);
-      },
-      NORMAL_SKIPLEFT: function NORMAL_SKIPLEFT(prim, tokenRows) {
-        prim.cursorSkipLeft(tokenRows, prim.frontCursor);
-      },
-      NORMAL_RIGHTARROW: function NORMAL_RIGHTARROW(prim, tokenRows) {
-        prim.cursorRight(tokenRows, prim.frontCursor);
-      },
-      NORMAL_SKIPRIGHT: function NORMAL_SKIPRIGHT(prim, tokenRows) {
-        prim.cursorSkipRight(tokenRows, prim.frontCursor);
-      },
-      NORMAL_HOME: function NORMAL_HOME(prim, tokenRows) {
-        prim.cursorHome(tokenRows, prim.frontCursor);
-      },
-      NORMAL_END: function NORMAL_END(prim, tokenRows) {
-        prim.cursorEnd(tokenRows, prim.frontCursor);
-      },
-      NORMAL_BACKSPACE: function NORMAL_BACKSPACE(prim, tokenRows) {
-        if (prim.frontCursor.i === prim.backCursor.i) {
-          prim.frontCursor.left(tokenRows);
-        }
-        prim.selectedText = "";
-        prim.scrollIntoView(prim.frontCursor);
-      },
-      NORMAL_ENTER: function NORMAL_ENTER(prim, tokenRows, currentToken) {
-        prim.emit("change", {
-          target: prim
-        });
-      },
-      NORMAL_DELETE: function NORMAL_DELETE(prim, tokenRows) {
-        if (prim.frontCursor.i === prim.backCursor.i) {
-          prim.backCursor.right(tokenRows);
-        }
-        prim.selectedText = "";
-        prim.scrollIntoView(prim.frontCursor);
-      },
-      NORMAL_TAB: function NORMAL_TAB(prim, tokenRows) {
-        prim.selectedText = prim.tabString;
-      },
-
-      SHIFT_LEFTARROW: function SHIFT_LEFTARROW(prim, tokenRows) {
-        prim.cursorLeft(tokenRows, prim.backCursor);
-      },
-      SHIFT_SKIPLEFT: function SHIFT_SKIPLEFT(prim, tokenRows) {
-        prim.cursorSkipLeft(tokenRows, prim.backCursor);
-      },
-      SHIFT_RIGHTARROW: function SHIFT_RIGHTARROW(prim, tokenRows) {
-        prim.cursorRight(tokenRows, prim.backCursor);
-      },
-      SHIFT_SKIPRIGHT: function SHIFT_SKIPRIGHT(prim, tokenRows) {
-        prim.cursorSkipRight(tokenRows, prim.backCursor);
-      },
-      SHIFT_HOME: function SHIFT_HOME(prim, tokenRows) {
-        prim.cursorHome(tokenRows, prim.backCursor);
-      },
-      SHIFT_END: function SHIFT_END(prim, tokenRows) {
-        prim.cursorEnd(tokenRows, prim.backCursor);
-      },
-      SHIFT_DELETE: function SHIFT_DELETE(prim, tokenRows) {
-        if (prim.frontCursor.i === prim.backCursor.i) {
-          prim.frontCursor.home(tokenRows);
-          prim.backCursor.end(tokenRows);
-        }
-        prim.selectedText = "";
-        prim.scrollIntoView(prim.frontCursor);
-      },
-      CTRL_HOME: function CTRL_HOME(prim, tokenRows) {
-        prim.cursorFullHome(tokenRows, prim.frontCursor);
-      },
-      CTRL_END: function CTRL_END(prim, tokenRows) {
-        prim.cursorFullEnd(tokenRows, prim.frontCursor);
-      },
-
-      CTRLSHIFT_HOME: function CTRLSHIFT_HOME(prim, tokenRows) {
-        prim.cursorFullHome(tokenRows, prim.backCursor);
-      },
-      CTRLSHIFT_END: function CTRLSHIFT_END(prim, tokenRows) {
-        prim.cursorFullEnd(tokenRows, prim.backCursor);
-      },
-
-      SELECT_ALL: function SELECT_ALL(prim, tokenRows) {
-        prim.frontCursor.fullhome(tokenRows);
-        prim.backCursor.fullend(tokenRows);
-      },
-
-      REDO: function REDO(prim, tokenRows) {
-        prim.redo();
-        prim.scrollIntoView(prim.frontCursor);
-      },
-      UNDO: function UNDO(prim, tokenRows) {
-        prim.undo();
-        prim.scrollIntoView(prim.frontCursor);
-      }
-    };
-
-    if (additionalCommands) {
-      for (var key in additionalCommands) {
-        commands[key] = additionalCommands[key];
-      }
-    }
-
-    return possibleConstructorReturn(this, (BasicTextInput.__proto__ || Object.getPrototypeOf(BasicTextInput)).call(this, additionalName || "Text editor commands", commands));
-  }
-
-  return BasicTextInput;
-}(CommandPack);
-
-var TextEditor = new BasicTextInput("Text Area input commands", {
-  NORMAL_UPARROW: function NORMAL_UPARROW(prim, tokenRows) {
-    prim.cursorUp(tokenRows, prim.frontCursor);
-  },
-  NORMAL_DOWNARROW: function NORMAL_DOWNARROW(prim, tokenRows) {
-    prim.cursorDown(tokenRows, prim.frontCursor);
-  },
-  NORMAL_PAGEUP: function NORMAL_PAGEUP(prim, tokenRows) {
-    prim.cursorPageUp(tokenRows, prim.frontCursor);
-  },
-  NORMAL_PAGEDOWN: function NORMAL_PAGEDOWN(prim, tokenRows) {
-    prim.cursorPageDown(tokenRows, prim.frontCursor);
-  },
-  NORMAL_ENTER: function NORMAL_ENTER(prim, tokenRows, currentToken) {
-    var indent = "";
-    var tokenRow = tokenRows[prim.frontCursor.y];
-    if (tokenRow.length > 0 && tokenRow[0].type === "whitespace") {
-      indent = tokenRow[0].value;
-    }
-    prim.selectedText = "\n" + indent;
-    prim.scrollIntoView(prim.frontCursor);
-  },
-
-  SHIFT_UPARROW: function SHIFT_UPARROW(prim, tokenRows) {
-    prim.cursorUp(tokenRows, prim.backCursor);
-  },
-  SHIFT_DOWNARROW: function SHIFT_DOWNARROW(prim, tokenRows) {
-    prim.cursorDown(tokenRows, prim.backCursor);
-  },
-  SHIFT_PAGEUP: function SHIFT_PAGEUP(prim, tokenRows) {
-    prim.cursorPageUp(tokenRows, prim.backCursor);
-  },
-  SHIFT_PAGEDOWN: function SHIFT_PAGEDOWN(prim, tokenRows) {
-    prim.cursorPageDown(tokenRows, prim.backCursor);
-  },
-
-  WINDOW_SCROLL_DOWN: function WINDOW_SCROLL_DOWN(prim, tokenRows) {
-    if (prim.scroll.y < tokenRows.length) {
-      ++prim.scroll.y;
-    }
-  },
-  WINDOW_SCROLL_UP: function WINDOW_SCROLL_UP(prim, tokenRows) {
-    if (prim.scroll.y > 0) {
-      --prim.scroll.y;
-    }
-  }
-});
-
-var Rule = function () {
-  function Rule(name, test) {
-    classCallCheck(this, Rule);
-
-    this.name = name;
-    this.test = test;
-  }
-
-  createClass(Rule, [{
-    key: "carveOutMatchedToken",
-    value: function carveOutMatchedToken(tokens, j) {
-      var token = tokens[j];
-      if (token.type === "regular") {
-        var res = this.test.exec(token.value);
-        if (res) {
-          // Only use the last group that matches the regex, to allow for more
-          // complex regexes that can match in special contexts, but not make
-          // the context part of the token.
-          var midx = res[res.length - 1],
-              start = res.input.indexOf(midx),
-              end = start + midx.length;
-          if (start === 0) {
-            // the rule matches the start of the token
-            token.type = this.name;
-            if (end < token.value.length) {
-              // but not the end
-              var next = token.splitAt(end);
-              next.type = "regular";
-              tokens.splice(j + 1, 0, next);
-            }
-          } else {
-            // the rule matches from the middle of the token
-            var mid = token.splitAt(start);
-            if (midx.length < mid.value.length) {
-              // but not the end
-              var right = mid.splitAt(midx.length);
-              tokens.splice(j + 1, 0, right);
-            }
-            mid.type = this.name;
-            tokens.splice(j + 1, 0, mid);
-          }
-        }
-      }
-    }
-  }]);
-  return Rule;
-}();
-
-var Token = function () {
-  function Token(value, type, index, line) {
-    classCallCheck(this, Token);
-
-    this.value = value;
-    this.type = type;
-    this.index = index;
-    this.line = line;
-  }
-
-  createClass(Token, [{
-    key: "clone",
-    value: function clone() {
-      return new Token(this.value, this.type, this.index, this.line);
-    }
-  }, {
-    key: "splitAt",
-    value: function splitAt(i) {
-      var next = this.value.substring(i);
-      this.value = this.value.substring(0, i);
-      return new Token(next, this.type, this.index + i, this.line);
-    }
-  }, {
-    key: "toString",
-    value: function toString() {
-      return "[" + this.type + ": " + this.value + "]";
-    }
-  }]);
-  return Token;
-}();
-
-var Grammar = function () {
-  function Grammar(grammarName, rules) {
-    classCallCheck(this, Grammar);
-
-    this.name = grammarName;
-
-    // clone the preprocessing grammar to start a new grammar
-    this.grammar = rules.map(function (rule) {
-      return new Rule(rule[0], rule[1]);
-    });
-
-    function crudeParsing(tokens) {
-      var commentDelim = null,
-          stringDelim = null,
-          line = 0,
-          i,
-          t;
-      for (i = 0; i < tokens.length; ++i) {
-        t = tokens[i];
-        t.line = line;
-        if (t.type === "newlines") {
-          ++line;
-        }
-
-        if (stringDelim) {
-          if (t.type === "stringDelim" && t.value === stringDelim && (i === 0 || tokens[i - 1].value[tokens[i - 1].value.length - 1] !== "\\")) {
-            stringDelim = null;
-          }
-          if (t.type !== "newlines") {
-            t.type = "strings";
-          }
-        } else if (commentDelim) {
-          if (commentDelim === "startBlockComments" && t.type === "endBlockComments" || commentDelim === "startLineComments" && t.type === "newlines") {
-            commentDelim = null;
-          }
-          if (t.type !== "newlines") {
-            t.type = "comments";
-          }
-        } else if (t.type === "stringDelim") {
-          stringDelim = t.value;
-          t.type = "strings";
-        } else if (t.type === "startBlockComments" || t.type === "startLineComments") {
-          commentDelim = t.type;
-          t.type = "comments";
-        }
-      }
-
-      // recombine like-tokens
-      for (i = tokens.length - 1; i > 0; --i) {
-        var p = tokens[i - 1];
-        t = tokens[i];
-        if (p.type === t.type && p.type !== "newlines") {
-          p.value += t.value;
-          tokens.splice(i, 1);
-        }
-      }
-    }
-
-    this.tokenize = function (text) {
-      // all text starts off as regular text, then gets cut up into tokens of
-      // more specific type
-      var tokens = [new Token(text, "regular", 0)];
-      for (var i = 0; i < this.grammar.length; ++i) {
-        var rule = this.grammar[i];
-        for (var j = 0; j < tokens.length; ++j) {
-          rule.carveOutMatchedToken(tokens, j);
-        }
-      }
-
-      crudeParsing(tokens);
-      return tokens;
-    };
-  }
-
-  createClass(Grammar, [{
-    key: "toHTML",
-    value: function toHTML(txt) {
-      var theme = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : Default;
-
-      var tokenRows = this.tokenize(txt),
-          temp = document.createElement("div");
-      for (var y = 0; y < tokenRows.length; ++y) {
-        // draw the tokens on this row
-        var t = tokenRows[y];
-        if (t.type === "newlines") {
-          temp.appendChild(document.createElement("br"));
-        } else {
-          var style = theme[t.type] || {},
-              elem = document.createElement("span");
-          elem.style.fontWeight = style.fontWeight || theme.regular.fontWeight;
-          elem.style.fontStyle = style.fontStyle || theme.regular.fontStyle || "";
-          elem.style.color = style.foreColor || theme.regular.foreColor;
-          elem.style.backgroundColor = style.backColor || theme.regular.backColor;
-          elem.style.fontFamily = style.fontFamily || theme.fontFamily;
-          elem.appendChild(document.createTextNode(t.value));
-          temp.appendChild(elem);
-        }
-      }
-      return temp.innerHTML;
-    }
-  }]);
-  return Grammar;
-}();
-
-var JavaScript = new Grammar("JavaScript", [["newlines", /(?:\r\n|\r|\n)/], ["startBlockComments", /\/\*/], ["endBlockComments", /\*\//], ["regexes", /(?:^|,|;|\(|\[|\{)(?:\s*)(\/(?:\\\/|[^\n\/])+\/)/], ["stringDelim", /("|')/], ["startLineComments", /\/\/.*$/m], ["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/], ["keywords", /\b(?:break|case|catch|class|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/], ["functions", /(\w+)(?:\s*\()/], ["members", /(\w+)\./], ["members", /((\w+\.)+)(\w+)/]]);
-
-var SCROLL_SCALE = isFirefox ? 3 : 100;
-var COUNTER$4 = 0;
-var OFFSET = 0;
-
-var TextBox = function (_Surface) {
-  inherits(TextBox, _Surface);
-  createClass(TextBox, null, [{
-    key: "create",
-    value: function create() {
-      return new TextBox();
-    }
-  }]);
-
-  function TextBox(options) {
-    classCallCheck(this, TextBox);
-
-    var _this = possibleConstructorReturn(this, (TextBox.__proto__ || Object.getPrototypeOf(TextBox)).call(this, Object.assign({}, {
-      id: "Primrose.Controls.TextBox[" + COUNTER$4++ + "]"
-    }, options)));
-
-    _this.isTextBox = true;
-    ////////////////////////////////////////////////////////////////////////
-    // normalize input parameters
-    ////////////////////////////////////////////////////////////////////////
-
-    if (typeof options === "string") {
-      _this.options = {
-        value: _this.options
-      };
-    } else {
-      _this.options = options || {};
-    }
-
-    _this.useCaching = !isFirefox || !isMobile$1;
-
-    var makeCursorCommand = function makeCursorCommand(name) {
-      var method = name.toLowerCase();
-      this["cursor" + name] = function (lines, cursor) {
-        cursor[method](lines);
-        this.scrollIntoView(cursor);
-      };
-    };
-
-    ["Left", "Right", "SkipLeft", "SkipRight", "Up", "Down", "Home", "End", "FullHome", "FullEnd"].map(makeCursorCommand.bind(_this));
-
-    ////////////////////////////////////////////////////////////////////////
-    // initialization
-    ///////////////////////////////////////////////////////////////////////
-    _this.tokens = null;
-    _this.lines = null;
-    _this._commandPack = null;
-    _this._tokenRows = null;
-    _this._tokenHashes = null;
-    _this._tabString = null;
-    _this._currentTouchID = null;
-    _this._lineCountWidth = null;
-
-    _this._lastFont = null;
-    _this._lastText = null;
-    _this._lastCharacterWidth = null;
-    _this._lastCharacterHeight = null;
-    _this._lastGridBounds = null;
-    _this._lastPadding = null;
-    _this._lastFrontCursor = null;
-    _this._lastBackCursor = null;
-    _this._lastWidth = -1;
-    _this._lastHeight = -1;
-    _this._lastScrollX = -1;
-    _this._lastScrollY = -1;
-    _this._lastFocused = false;
-    _this._lastThemeName = null;
-    _this._lastPointer = new Point();
-
-    // different browsers have different sets of keycodes for less-frequently
-    // used keys like curly brackets.
-    _this._browser = isChrome ? "CHROMIUM" : isFirefox ? "FIREFOX" : isIE ? "IE" : isOpera ? "OPERA" : isSafari ? "SAFARI" : "UNKNOWN";
-    _this._pointer = new Point();
-    _this._deadKeyState = "";
-    _this._history = [];
-    _this._historyFrame = -1;
-    _this._topLeftGutter = new Size();
-    _this._bottomRightGutter = new Size();
-    _this._dragging = false;
-    _this._scrolling = false;
-    _this._wheelScrollSpeed = 4;
-    var subBounds = new Rectangle(0, 0, _this.bounds.width, _this.bounds.height);
-    _this._fg = new Surface({
-      id: _this.id + "-fore",
-      bounds: subBounds
-    });
-    _this._fgCanvas = _this._fg.canvas;
-    _this._fgfx = _this._fg.context;
-    _this._bg = new Surface({
-      id: _this.id + "-back",
-      bounds: subBounds
-    });
-    _this._bgCanvas = _this._bg.canvas;
-    _this._bgfx = _this._bg.context;
-    _this._trim = new Surface({
-      id: _this.id + "-trim",
-      bounds: subBounds
-    });
-    _this._trimCanvas = _this._trim.canvas;
-    _this._tgfx = _this._trim.context;
-    _this._rowCache = {};
-    _this._VSCROLL_WIDTH = 2;
-
-    _this.tabWidth = _this.options.tabWidth;
-    _this.showLineNumbers = !_this.options.hideLineNumbers;
-    _this.showScrollBars = !_this.options.hideScrollBars;
-    _this.wordWrap = !_this.options.disableWordWrap;
-    _this.readOnly = !!_this.options.readOnly;
-    _this.multiline = !_this.options.singleLine;
-    _this.gridBounds = new Rectangle();
-    _this.frontCursor = new Cursor();
-    _this.backCursor = new Cursor();
-    _this.scroll = new Point();
-    _this.character = new Size();
-    _this.theme = _this.options.theme;
-    _this.fontSize = _this.options.fontSize;
-    _this.tokenizer = _this.options.tokenizer;
-    _this.commandPack = _this.options.commands || TextEditor;
-    _this.value = _this.options.value;
-    _this.padding = _this.options.padding || 1;
-
-    _this.addEventListener("focus", _this.render.bind(_this), false);
-    _this.addEventListener("blur", _this.render.bind(_this), false);
-    return _this;
-  }
-
-  createClass(TextBox, [{
-    key: "cursorPageUp",
-    value: function cursorPageUp(lines, cursor) {
-      cursor.incY(-this.gridBounds.height, lines);
-      this.scrollIntoView(cursor);
-    }
-  }, {
-    key: "cursorPageDown",
-    value: function cursorPageDown(lines, cursor) {
-      cursor.incY(this.gridBounds.height, lines);
-      this.scrollIntoView(cursor);
-    }
-  }, {
-    key: "setDeadKeyState",
-    value: function setDeadKeyState(st) {
-      this._deadKeyState = st || "";
-    }
-  }, {
-    key: "pushUndo",
-    value: function pushUndo(lines) {
-      if (this._historyFrame < this._history.length - 1) {
-        this._history.splice(this._historyFrame + 1);
-      }
-      this._history.push(lines);
-      this._historyFrame = this._history.length - 1;
-      this.refreshTokens();
-      this.render();
-    }
-  }, {
-    key: "redo",
-    value: function redo() {
-      if (this._historyFrame < this._history.length - 1) {
-        ++this._historyFrame;
-      }
-      this.refreshTokens();
-      this.fixCursor();
-      this.render();
-    }
-  }, {
-    key: "undo",
-    value: function undo() {
-      if (this._historyFrame > 0) {
-        --this._historyFrame;
-      }
-      this.refreshTokens();
-      this.fixCursor();
-      this.render();
-    }
-  }, {
-    key: "scrollIntoView",
-    value: function scrollIntoView(currentCursor) {
-      this.scroll.y += this.minDelta(currentCursor.y, this.scroll.y, this.scroll.y + this.gridBounds.height);
-      if (!this.wordWrap) {
-        this.scroll.x += this.minDelta(currentCursor.x, this.scroll.x, this.scroll.x + this.gridBounds.width);
-      }
-      this.clampScroll();
-    }
-  }, {
-    key: "readWheel",
-    value: function readWheel(evt) {
-      if (this.focused) {
-        if (evt.shiftKey || isChrome) {
-          this.fontSize += -evt.deltaX / SCROLL_SCALE;
-        }
-        if (!evt.shiftKey || isChrome) {
-          this.scroll.y += Math.floor(evt.deltaY * this._wheelScrollSpeed / SCROLL_SCALE);
-        }
-        this.clampScroll();
-        this.render();
-        evt.preventDefault();
-      }
-    }
-  }, {
-    key: "startPointer",
-    value: function startPointer(x, y) {
-      if (!get$1(TextBox.prototype.__proto__ || Object.getPrototypeOf(TextBox.prototype), "startPointer", this).call(this, x, y)) {
-        this._dragging = true;
-        this.setCursorXY(this.frontCursor, x, y);
-      }
-    }
-  }, {
-    key: "movePointer",
-    value: function movePointer(x, y) {
-      if (this._dragging) {
-        this.setCursorXY(this.backCursor, x, y);
-      }
-    }
-  }, {
-    key: "endPointer",
-    value: function endPointer() {
-      get$1(TextBox.prototype.__proto__ || Object.getPrototypeOf(TextBox.prototype), "endPointer", this).call(this);
-      this._dragging = false;
-      this._scrolling = false;
-    }
-  }, {
-    key: "copySelectedText",
-    value: function copySelectedText(evt) {
-      if (this.focused && this.frontCursor.i !== this.backCursor.i) {
-        var clipboard = evt.clipboardData || window.clipboardData;
-        clipboard.setData(window.clipboardData ? "Text" : "text/plain", this.selectedText);
-        evt.returnValue = false;
-      }
-    }
-  }, {
-    key: "cutSelectedText",
-    value: function cutSelectedText(evt) {
-      if (this.focused) {
-        this.copySelectedText(evt);
-        if (!this.readOnly) {
-          this.selectedText = "";
-        }
-      }
-    }
-  }, {
-    key: "keyDown",
-    value: function keyDown(evt) {
-      this.environment.input.Keyboard.doTyping(this, evt);
-    }
-  }, {
-    key: "execCommand",
-    value: function execCommand(browser, codePage, commandName) {
-      if (commandName && this.focused && !this.readOnly) {
-        var altCommandName = browser + "_" + commandName,
-            func = this.commandPack[altCommandName] || this.commandPack[commandName] || codePage[altCommandName] || codePage[commandName];
-
-        if (func instanceof String || typeof func === "string") {
-          console.log("okay");
-          func = this.commandPack[func] || this.commandPack[func] || func;
-        }
-
-        if (func === undefined) {
-          return false;
-        } else {
-          this.frontCursor.moved = false;
-          this.backCursor.moved = false;
-          if (func instanceof Function) {
-            func(this, this.lines);
-          } else if (func instanceof String || typeof func === "string") {
-            console.log(func);
-            this.selectedText = func;
-          }
-          if (this.frontCursor.moved && !this.backCursor.moved) {
-            this.backCursor.copy(this.frontCursor);
-          }
-          this.clampScroll();
-          this.render();
-          return true;
-        }
-      }
-    }
-  }, {
-    key: "readClipboard",
-    value: function readClipboard(evt) {
-      if (this.focused && !this.readOnly) {
-        evt.returnValue = false;
-        var clipboard = evt.clipboardData || window.clipboardData,
-            str = clipboard.getData(window.clipboardData ? "Text" : "text/plain");
-        if (str) {
-          this.selectedText = str;
-        }
-      }
-    }
-  }, {
-    key: "resize",
-    value: function resize() {
-      get$1(TextBox.prototype.__proto__ || Object.getPrototypeOf(TextBox.prototype), "resize", this).call(this);
-      this._bg.setSize(this.surfaceWidth, this.surfaceHeight);
-      this._fg.setSize(this.surfaceWidth, this.surfaceHeight);
-      this._trim.setSize(this.surfaceWidth, this.surfaceHeight);
-      if (this.theme) {
-        this.character.height = this.fontSize;
-        this.context.font = this.character.height + "px " + this.theme.fontFamily;
-        // measure 100 letter M's, then divide by 100, to get the width of an M
-        // to two decimal places on systems that return integer values from
-        // measureText.
-        this.character.width = this.context.measureText("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM").width / 100;
-      }
-      this.render();
-    }
-  }, {
-    key: "pixel2cell",
-    value: function pixel2cell(point) {
-      var x = point.x * this.imageWidth / this.surfaceWidth,
-          y = point.y * this.imageHeight / this.surfaceHeight;
-      point.set(Math.round(point.x / this.character.width) + this.scroll.x - this.gridBounds.x, Math.floor(point.y / this.character.height - 0.25) + this.scroll.y);
-    }
-  }, {
-    key: "clampScroll",
-    value: function clampScroll() {
-      if (this.scroll.y < 0) {
-        this.scroll.y = 0;
-      } else {
-        while (0 < this.scroll.y && this.scroll.y > this.lines.length - this.gridBounds.height) {
-          --this.scroll.y;
-        }
-      }
-    }
-  }, {
-    key: "refreshTokens",
-    value: function refreshTokens() {
-      this.tokens = this.tokenizer.tokenize(this.value);
-    }
-  }, {
-    key: "fixCursor",
-    value: function fixCursor() {
-      var moved = this.frontCursor.fixCursor(this.lines) || this.backCursor.fixCursor(this.lines);
-      if (moved) {
-        this.render();
-      }
-    }
-  }, {
-    key: "setCursorXY",
-    value: function setCursorXY(cursor, x, y) {
-      x = Math.round(x);
-      y = Math.round(y);
-      this._pointer.set(x, y);
-      this.pixel2cell(this._pointer, this.scroll, this.gridBounds);
-      var gx = this._pointer.x - this.scroll.x,
-          gy = this._pointer.y - this.scroll.y,
-          onBottom = gy >= this.gridBounds.height,
-          onLeft = gx < 0,
-          onRight = this._pointer.x >= this.gridBounds.width;
-      if (!this._scrolling && !onBottom && !onLeft && !onRight) {
-        cursor.setXY(this._pointer.x, this._pointer.y, this.lines);
-        this.backCursor.copy(cursor);
-      } else if (this._scrolling || onRight && !onBottom) {
-        this._scrolling = true;
-        var scrollHeight = this.lines.length - this.gridBounds.height;
-        if (gy >= 0 && scrollHeight >= 0) {
-          var sy = gy * scrollHeight / this.gridBounds.height;
-          this.scroll.y = Math.floor(sy);
-        }
-      } else if (onBottom && !onLeft) {
-        var maxWidth = 0;
-        for (var dy = 0; dy < this.lines.length; ++dy) {
-          maxWidth = Math.max(maxWidth, this.lines[dy].length);
-        }
-        var scrollWidth = maxWidth - this.gridBounds.width;
-        if (gx >= 0 && scrollWidth >= 0) {
-          var sx = gx * scrollWidth / this.gridBounds.width;
-          this.scroll.x = Math.floor(sx);
-        }
-      } else if (onLeft && !onBottom) {
-        // clicked in number-line gutter
-      } else {
-          // clicked in the lower-left corner
-        }
-      this._lastPointer.copy(this._pointer);
-      this.render();
-    }
-  }, {
-    key: "setGutter",
-    value: function setGutter() {
-      if (this.showLineNumbers) {
-        this._topLeftGutter.width = 1;
-      } else {
-        this._topLeftGutter.width = 0;
-      }
-
-      if (!this.showScrollBars) {
-        this._bottomRightGutter.set(0, 0);
-      } else if (this.wordWrap) {
-        this._bottomRightGutter.set(this._VSCROLL_WIDTH, 0);
-      } else {
-        this._bottomRightGutter.set(this._VSCROLL_WIDTH, 1);
-      }
-    }
-  }, {
-    key: "refreshGridBounds",
-    value: function refreshGridBounds() {
-      this._lineCountWidth = 0;
-      if (this.showLineNumbers) {
-        this._lineCountWidth = Math.max(1, Math.ceil(Math.log(this._history[this._historyFrame].length) / Math.LN10));
-      }
-
-      var x = Math.floor(this._topLeftGutter.width + this._lineCountWidth + this.padding / this.character.width),
-          y = Math.floor(this.padding / this.character.height),
-          w = Math.floor((this.imageWidth - 2 * this.padding) / this.character.width) - x - this._bottomRightGutter.width,
-          h = Math.floor((this.imageHeight - 2 * this.padding) / this.character.height) - y - this._bottomRightGutter.height;
-      this.gridBounds.set(x, y, w, h);
-    }
-  }, {
-    key: "performLayout",
-    value: function performLayout() {
-
-      // group the tokens into rows
-      this._tokenRows = [[]];
-      this._tokenHashes = [""];
-      this.lines = [""];
-      var currentRowWidth = 0;
-      var tokenQueue = this.tokens.slice();
-      for (var i = 0; i < tokenQueue.length; ++i) {
-        var t = tokenQueue[i].clone();
-        var widthLeft = this.gridBounds.width - currentRowWidth;
-        var wrap = this.wordWrap && t.type !== "newlines" && t.value.length > widthLeft;
-        var breakLine = t.type === "newlines" || wrap;
-        if (wrap) {
-          var split = t.value.length > this.gridBounds.width ? widthLeft : 0;
-          tokenQueue.splice(i + 1, 0, t.splitAt(split));
-        }
-
-        if (t.value.length > 0) {
-          this._tokenRows[this._tokenRows.length - 1].push(t);
-          this._tokenHashes[this._tokenHashes.length - 1] += JSON.stringify(t);
-          this.lines[this.lines.length - 1] += t.value;
-          currentRowWidth += t.value.length;
-        }
-
-        if (breakLine) {
-          this._tokenRows.push([]);
-          this._tokenHashes.push("");
-          this.lines.push("");
-          currentRowWidth = 0;
-        }
-      }
-    }
-  }, {
-    key: "minDelta",
-    value: function minDelta(v, minV, maxV) {
-      var dvMinV = v - minV,
-          dvMaxV = v - maxV + 5,
-          dv = 0;
-      if (dvMinV < 0 || dvMaxV >= 0) {
-        // compare the absolute values, so we get the smallest change
-        // regardless of direction.
-        dv = Math.abs(dvMinV) < Math.abs(dvMaxV) ? dvMinV : dvMaxV;
-      }
-
-      return dv;
-    }
-  }, {
-    key: "fillRect",
-    value: function fillRect(gfx, fill, x, y, w, h) {
-      gfx.fillStyle = fill;
-      gfx.fillRect(x * this.character.width, y * this.character.height, w * this.character.width + 1, h * this.character.height + 1);
-    }
-  }, {
-    key: "strokeRect",
-    value: function strokeRect(gfx, stroke, x, y, w, h) {
-      gfx.strokeStyle = stroke;
-      gfx.strokeRect(x * this.character.width, y * this.character.height, w * this.character.width + 1, h * this.character.height + 1);
-    }
-  }, {
-    key: "renderCanvasBackground",
-    value: function renderCanvasBackground() {
-      var minCursor = Cursor.min(this.frontCursor, this.backCursor),
-          maxCursor = Cursor.max(this.frontCursor, this.backCursor),
-          tokenFront = new Cursor(),
-          tokenBack = new Cursor(),
-          clearFunc = this.theme.regular.backColor ? "fillRect" : "clearRect",
-          OFFSETY = OFFSET / this.character.height;
-
-      if (this.theme.regular.backColor) {
-        this._bgfx.fillStyle = this.theme.regular.backColor;
-      }
-
-      this._bgfx[clearFunc](0, 0, this.imageWidth, this.imageHeight);
-      this._bgfx.save();
-      this._bgfx.translate((this.gridBounds.x - this.scroll.x) * this.character.width + this.padding, -this.scroll.y * this.character.height + this.padding);
-
-      // draw the current row highlighter
-      if (this.focused) {
-        this.fillRect(this._bgfx, this.theme.regular.currentRowBackColor || Default.regular.currentRowBackColor, 0, minCursor.y + OFFSETY, this.gridBounds.width, maxCursor.y - minCursor.y + 1);
-      }
-
-      for (var y = 0; y < this._tokenRows.length; ++y) {
-        // draw the tokens on this row
-        var row = this._tokenRows[y];
-
-        for (var i = 0; i < row.length; ++i) {
-          var t = row[i];
-          tokenBack.x += t.value.length;
-          tokenBack.i += t.value.length;
-
-          // skip drawing tokens that aren't in view
-          if (this.scroll.y <= y && y < this.scroll.y + this.gridBounds.height && this.scroll.x <= tokenBack.x && tokenFront.x < this.scroll.x + this.gridBounds.width) {
-            // draw the selection box
-            var inSelection = minCursor.i <= tokenBack.i && tokenFront.i < maxCursor.i;
-            if (inSelection) {
-              var selectionFront = Cursor.max(minCursor, tokenFront);
-              var selectionBack = Cursor.min(maxCursor, tokenBack);
-              var cw = selectionBack.i - selectionFront.i;
-              this.fillRect(this._bgfx, this.theme.regular.selectedBackColor || Default.regular.selectedBackColor, selectionFront.x, selectionFront.y + OFFSETY, cw, 1);
-            }
-          }
-
-          tokenFront.copy(tokenBack);
-        }
-
-        tokenFront.x = 0;
-        ++tokenFront.y;
-        tokenBack.copy(tokenFront);
-      }
-
-      // draw the cursor caret
-      if (this.focused) {
-        var cc = this.theme.cursorColor || "black";
-        var w = 1 / this.character.width;
-        this.fillRect(this._bgfx, cc, minCursor.x, minCursor.y + OFFSETY, w, 1);
-        this.fillRect(this._bgfx, cc, maxCursor.x, maxCursor.y + OFFSETY, w, 1);
-      }
-      this._bgfx.restore();
-    }
-  }, {
-    key: "renderCanvasForeground",
-    value: function renderCanvasForeground() {
-      var tokenFront = new Cursor(),
-          tokenBack = new Cursor();
-
-      this._fgfx.clearRect(0, 0, this.imageWidth, this.imageHeight);
-      this._fgfx.save();
-      this._fgfx.translate((this.gridBounds.x - this.scroll.x) * this.character.width + this.padding, this.padding);
-      for (var y = 0; y < this._tokenRows.length; ++y) {
-        // draw the tokens on this row
-        var line = this.lines[y] + this.padding,
-            row = this._tokenRows[y],
-            drawn = false,
-            textY = (y - this.scroll.y) * this.character.height;
-
-        for (var i = 0; i < row.length; ++i) {
-          var t = row[i];
-          tokenBack.x += t.value.length;
-          tokenBack.i += t.value.length;
-
-          // skip drawing tokens that aren't in view
-          if (this.scroll.y <= y && y < this.scroll.y + this.gridBounds.height && this.scroll.x <= tokenBack.x && tokenFront.x < this.scroll.x + this.gridBounds.width) {
-
-            // draw the text
-            if (this.useCaching && this._rowCache[line] !== undefined) {
-              if (i === 0) {
-                this._fgfx.putImageData(this._rowCache[line], this.padding, textY + this.padding + OFFSET);
-              }
-            } else {
-              var style = this.theme[t.type] || {};
-              var font = (style.fontWeight || this.theme.regular.fontWeight || "") + " " + (style.fontStyle || this.theme.regular.fontStyle || "") + " " + this.character.height + "px " + this.theme.fontFamily;
-              this._fgfx.font = font.trim();
-              this._fgfx.fillStyle = style.foreColor || this.theme.regular.foreColor;
-              this.drawText(this._fgfx, t.value, tokenFront.x * this.character.width, textY);
-              drawn = true;
-            }
-          }
-
-          tokenFront.copy(tokenBack);
-        }
-
-        tokenFront.x = 0;
-        ++tokenFront.y;
-        tokenBack.copy(tokenFront);
-        if (this.useCaching && drawn && this._rowCache[line] === undefined) {
-          this._rowCache[line] = this._fgfx.getImageData(this.padding, textY + this.padding + OFFSET, this.imageWidth - 2 * this.padding, this.character.height);
-        }
-      }
-
-      this._fgfx.restore();
-    }
-
-    // provides a hook for TextInput to be able to override text drawing and spit out password blanking characters
-
-  }, {
-    key: "drawText",
-    value: function drawText(ctx, txt, x, y) {
-      ctx.fillText(txt, x, y);
-    }
-  }, {
-    key: "renderCanvasTrim",
-    value: function renderCanvasTrim() {
-      var tokenFront = new Cursor(),
-          tokenBack = new Cursor(),
-          maxLineWidth = 0;
-
-      this._tgfx.clearRect(0, 0, this.imageWidth, this.imageHeight);
-      this._tgfx.save();
-      this._tgfx.translate(this.padding, this.padding);
-      this._tgfx.save();
-      this._tgfx.lineWidth = 2;
-      this._tgfx.translate(0, -this.scroll.y * this.character.height);
-      for (var y = 0, lastLine = -1; y < this._tokenRows.length; ++y) {
-        var row = this._tokenRows[y];
-
-        for (var i = 0; i < row.length; ++i) {
-          var t = row[i];
-          tokenBack.x += t.value.length;
-          tokenBack.i += t.value.length;
-          tokenFront.copy(tokenBack);
-        }
-
-        maxLineWidth = Math.max(maxLineWidth, tokenBack.x);
-        tokenFront.x = 0;
-        ++tokenFront.y;
-        tokenBack.copy(tokenFront);
-
-        if (this.showLineNumbers && this.scroll.y <= y && y < this.scroll.y + this.gridBounds.height) {
-          var currentLine = row.length > 0 ? row[0].line : lastLine + 1;
-          // draw the left gutter
-          var lineNumber = currentLine.toString();
-          while (lineNumber.length < this._lineCountWidth) {
-            lineNumber = " " + lineNumber;
-          }
-          this.fillRect(this._tgfx, this.theme.regular.selectedBackColor || Default.regular.selectedBackColor, 0, y, this.gridBounds.x, 1);
-          this._tgfx.font = "bold " + this.character.height + "px " + this.theme.fontFamily;
-
-          if (currentLine > lastLine) {
-            this._tgfx.fillStyle = this.theme.regular.foreColor;
-            this._tgfx.fillText(lineNumber, 0, y * this.character.height);
-          }
-          lastLine = currentLine;
-        }
-      }
-
-      this._tgfx.restore();
-
-      if (this.showLineNumbers) {
-        this.strokeRect(this._tgfx, this.theme.regular.foreColor || Default.regular.foreColor, 0, 0, this.gridBounds.x, this.gridBounds.height);
-      }
-
-      // draw the scrollbars
-      if (this.showScrollBars) {
-        var drawWidth = this.gridBounds.width * this.character.width - this.padding,
-            drawHeight = this.gridBounds.height * this.character.height,
-            scrollX = this.scroll.x * drawWidth / maxLineWidth + this.gridBounds.x * this.character.width,
-            scrollY = this.scroll.y * drawHeight / this._tokenRows.length;
-
-        this._tgfx.fillStyle = this.theme.regular.selectedBackColor || Default.regular.selectedBackColor;
-        // horizontal
-        var bw;
-        if (!this.wordWrap && maxLineWidth > this.gridBounds.width) {
-          var scrollBarWidth = drawWidth * (this.gridBounds.width / maxLineWidth),
-              by = this.gridBounds.height * this.character.height;
-          bw = Math.max(this.character.width, scrollBarWidth);
-          this._tgfx.fillRect(scrollX, by, bw, this.character.height);
-          this._tgfx.strokeRect(scrollX, by, bw, this.character.height);
-        }
-
-        //vertical
-        if (this._tokenRows.length > this.gridBounds.height) {
-          var scrollBarHeight = drawHeight * (this.gridBounds.height / this._tokenRows.length),
-              bx = this.image - this._VSCROLL_WIDTH * this.character.width - 2 * this.padding,
-              bh = Math.max(this.character.height, scrollBarHeight);
-          bw = this._VSCROLL_WIDTH * this.character.width;
-          this._tgfx.fillRect(bx, scrollY, bw, bh);
-          this._tgfx.strokeRect(bx, scrollY, bw, bh);
-        }
-      }
-
-      this._tgfx.lineWidth = 2;
-      this._tgfx.restore();
-      this._tgfx.strokeRect(1, 1, this.imageWidth - 2, this.imageHeight - 2);
-      if (!this.focused) {
-        this._tgfx.fillStyle = this.theme.regular.unfocused || Default.regular.unfocused;
-        this._tgfx.fillRect(0, 0, this.imageWidth, this.imageHeight);
-      }
-    }
-  }, {
-    key: "render",
-    value: function render() {
-      if (this.tokens && this.theme) {
-        this.refreshGridBounds();
-        var boundsChanged = this.gridBounds.toString() !== this._lastGridBounds,
-            textChanged = this._lastText !== this.value,
-            characterWidthChanged = this.character.width !== this._lastCharacterWidth,
-            characterHeightChanged = this.character.height !== this._lastCharacterHeight,
-            paddingChanged = this.padding !== this._lastPadding,
-            cursorChanged = !this._lastFrontCursor || !this._lastBackCursor || this.frontCursor.i !== this._lastFrontCursor.i || this._lastBackCursor.i !== this.backCursor.i,
-            scrollChanged = this.scroll.x !== this._lastScrollX || this.scroll.y !== this._lastScrollY,
-            fontChanged = this.context.font !== this._lastFont,
-            themeChanged = this.theme.name !== this._lastThemeName,
-            focusChanged = this.focused !== this._lastFocused,
-            changeBounds = null,
-            layoutChanged = this.resized || boundsChanged || textChanged || characterWidthChanged || characterHeightChanged || paddingChanged,
-            backgroundChanged = layoutChanged || cursorChanged || scrollChanged || themeChanged,
-            foregroundChanged = backgroundChanged || textChanged,
-            trimChanged = backgroundChanged || focusChanged,
-            imageChanged = foregroundChanged || backgroundChanged || trimChanged;
-
-        if (layoutChanged) {
-          this.performLayout(this.gridBounds);
-          this._rowCache = {};
-        }
-
-        if (imageChanged) {
-          if (cursorChanged && !(layoutChanged || scrollChanged || themeChanged || focusChanged)) {
-            var top = Math.min(this.frontCursor.y, this._lastFrontCursor.y, this.backCursor.y, this._lastBackCursor.y) - this.scroll.y + this.gridBounds.y,
-                bottom = Math.max(this.frontCursor.y, this._lastFrontCursor.y, this.backCursor.y, this._lastBackCursor.y) - this.scroll.y + 1;
-            changeBounds = new Rectangle(0, top * this.character.height, this.bounds.width, (bottom - top) * this.character.height + 2);
-          }
-
-          if (backgroundChanged) {
-            this.renderCanvasBackground();
-          }
-          if (foregroundChanged) {
-            this.renderCanvasForeground();
-          }
-          if (trimChanged) {
-            this.renderCanvasTrim();
-          }
-
-          this.context.clearRect(0, 0, this.imageWidth, this.imageHeight);
-          this.context.drawImage(this._bgCanvas, 0, 0);
-          this.context.drawImage(this._fgCanvas, 0, 0);
-          this.context.drawImage(this._trimCanvas, 0, 0);
-          this.invalidate(changeBounds);
-        }
-
-        this._lastGridBounds = this.gridBounds.toString();
-        this._lastText = this.value;
-        this._lastCharacterWidth = this.character.width;
-        this._lastCharacterHeight = this.character.height;
-        this._lastWidth = this.imageWidth;
-        this._lastHeight = this.imageHeight;
-        this._lastPadding = this.padding;
-        this._lastFrontCursor = this.frontCursor.clone();
-        this._lastBackCursor = this.backCursor.clone();
-        this._lastFocused = this.focused;
-        this._lastFont = this.context.font;
-        this._lastThemeName = this.theme.name;
-        this._lastScrollX = this.scroll.x;
-        this._lastScrollY = this.scroll.y;
-      }
-    }
-  }, {
-    key: "value",
-    get: function get() {
-      return this._history[this._historyFrame].join("\n");
-    },
-    set: function set(txt) {
-      txt = txt || "";
-      txt = txt.replace(/\r\n/g, "\n");
-      if (!this.multiline) {
-        txt = txt.replace(/\n/g, "");
-      }
-      var lines = txt.split("\n");
-      this.pushUndo(lines);
-      this.render();
-      this.emit("change", {
-        target: this
-      });
-    }
-  }, {
-    key: "selectedText",
-    get: function get() {
-      var minCursor = Cursor.min(this.frontCursor, this.backCursor),
-          maxCursor = Cursor.max(this.frontCursor, this.backCursor);
-      return this.value.substring(minCursor.i, maxCursor.i);
-    },
-    set: function set(str) {
-      str = str || "";
-      str = str.replace(/\r\n/g, "\n");
-
-      if (this.frontCursor.i !== this.backCursor.i || str.length > 0) {
-        var minCursor = Cursor.min(this.frontCursor, this.backCursor),
-            maxCursor = Cursor.max(this.frontCursor, this.backCursor),
-
-        // TODO: don't recalc the string first.
-        text = this.value,
-            left = text.substring(0, minCursor.i),
-            right = text.substring(maxCursor.i);
-
-        var v = left + str + right;
-        this.value = v;
-        this.refreshGridBounds();
-        this.performLayout();
-        minCursor.advanceN(this.lines, Math.max(0, str.length));
-        this.scrollIntoView(maxCursor);
-        this.clampScroll();
-        maxCursor.copy(minCursor);
-        this.render();
-      }
-    }
-  }, {
-    key: "padding",
-    get: function get() {
-      return this._padding;
-    },
-    set: function set(v) {
-      this._padding = v;
-      this.render();
-    }
-  }, {
-    key: "wordWrap",
-    get: function get() {
-      return this._wordWrap;
-    },
-    set: function set(v) {
-      this._wordWrap = v || false;
-      this.setGutter();
-    }
-  }, {
-    key: "showLineNumbers",
-    get: function get() {
-      return this._showLineNumbers;
-    },
-    set: function set(v) {
-      this._showLineNumbers = v;
-      this.setGutter();
-    }
-  }, {
-    key: "showScrollBars",
-    get: function get() {
-      return this._showScrollBars;
-    },
-    set: function set(v) {
-      this._showScrollBars = v;
-      this.setGutter();
-    }
-  }, {
-    key: "theme",
-    get: function get() {
-      return this._theme;
-    },
-    set: function set(t) {
-      this._theme = Object.assign({}, Default, t);
-      this._theme.fontSize = this.fontSize;
-      this._rowCache = {};
-      this.render();
-    }
-  }, {
-    key: "commandPack",
-    get: function get() {
-      return this._commandPack;
-    },
-    set: function set(v) {
-      this._commandPack = v;
-    }
-  }, {
-    key: "selectionStart",
-    get: function get() {
-      return this.frontCursor.i;
-    },
-    set: function set(i) {
-      this.frontCursor.setI(i, this.lines);
-    }
-  }, {
-    key: "selectionEnd",
-    get: function get() {
-      return this.backCursor.i;
-    },
-    set: function set(i) {
-      this.backCursor.setI(i, this.lines);
-    }
-  }, {
-    key: "selectionDirection",
-    get: function get() {
-      return this.frontCursor.i <= this.backCursor.i ? "forward" : "backward";
-    }
-  }, {
-    key: "tokenizer",
-    get: function get() {
-      return this._tokenizer;
-    },
-    set: function set(tk) {
-      this._tokenizer = tk || JavaScript;
-      if (this._history && this._history.length > 0) {
-        this.refreshTokens();
-        this.render();
-      }
-    }
-  }, {
-    key: "tabWidth",
-    get: function get() {
-      return this._tabWidth;
-    },
-    set: function set(tw) {
-      this._tabWidth = tw || 2;
-      this._tabString = "";
-      for (var i = 0; i < this._tabWidth; ++i) {
-        this._tabString += " ";
-      }
-    }
-  }, {
-    key: "tabString",
-    get: function get() {
-      return this._tabString;
-    }
-  }, {
-    key: "fontSize",
-    get: function get() {
-      return this._fontSize || 16;
-    },
-    set: function set(v) {
-      v = v || 16;
-      this._fontSize = v;
-      if (this.theme) {
-        this.theme.fontSize = this._fontSize;
-        this.resize();
-        this.render();
-      }
-    }
-  }, {
-    key: "lockMovement",
-    get: function get() {
-      return this.focused && !this.readOnly;
-    }
-  }]);
-  return TextBox;
-}(Surface);
 
 var PlainText = new Grammar("PlainText", [["newlines", /(?:\r\n|\r|\n)/]]);
 
@@ -43685,6 +43945,7 @@ var MAX_MOVE_DISTANCE_SQ = MAX_MOVE_DISTANCE * MAX_MOVE_DISTANCE;
 var TELEPORT_COOLDOWN = 250;
 var TELEPORT_DISPLACEMENT = new Vector3();
 var GROUND_HEIGHT = -0.07;
+var EYE_INDICES = { "left": 0, "right": 1 };
 
 var BrowserEnvironment = function (_AbstractEventEmitter) {
   inherits(BrowserEnvironment, _AbstractEventEmitter);
@@ -43696,6 +43957,7 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
     var _this = possibleConstructorReturn(this, (BrowserEnvironment.__proto__ || Object.getPrototypeOf(BrowserEnvironment)).call(this));
 
     _this.options = Object.assign({}, BrowserEnvironment.DEFAULTS, options);
+
     _this.options.foregroundColor = _this.options.foregroundColor || complementColor(new Color(_this.options.backgroundColor)).getHex();
 
     _this.network = null;
@@ -43789,15 +44051,19 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
       _this.camera.position.set(0, 0, 0);
       _this.camera.quaternion.set(0, 0, 0, 1);
       _this.audio.setPlayer(_this.input.head.mesh);
-      if (_this.input.VR.isPresenting) {
-        _this.renderer.clear(true, true, true);
+      _this.renderer.clear(true, true, true);
 
-        var trans = _this.input.VR.getTransforms(_this.options.nearPlane, _this.options.nearPlane + _this.options.drawDistance);
-        for (var i = 0; trans && i < trans.length; ++i) {
-          var st = trans[i],
-              v = st.viewport,
-              side = 2 * i - 1;
-          if (_this.options.nonstandardIPD !== null) {
+      var trans = _this.input.VR.getTransforms(_this.options.nearPlane, _this.options.nearPlane + _this.options.drawDistance);
+      for (var n = 0; trans && n < trans.length; ++n) {
+        var eye = _this.options.eyeRenderOrder[n],
+            i = EYE_INDICES[eye],
+            st = trans[i] || trans[1 - i],
+            v = st.viewport;
+        Entity.eyeBlankAll(i);
+
+        if (trans.length > 1) {
+          var side = 2 * i - 1;
+          if (_this.options.nonstandardIPD !== null && st.translation.x !== 0) {
             st.translation.x = Math.sign(st.translation.x) * _this.options.nonstandardIPD;
           }
           if (_this.options.nonstandardNeckLength !== null) {
@@ -43806,27 +44072,17 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
           if (_this.options.nonstandardNeckDepth !== null) {
             st.translation.z = _this.options.nonstandardNeckDepth;
           }
-          Entity.eyeBlankAll(i);
-          _this.camera.projectionMatrix.copy(st.projection);
-          _this.camera.translateOnAxis(st.translation, 1);
-          _this.renderer.setViewport(v.left * resolutionScale, v.top * resolutionScale, v.width * resolutionScale, v.height * resolutionScale);
-          _this.renderer.render(_this.scene, _this.camera);
-          _this.camera.translateOnAxis(st.translation, -1);
         }
-        _this.input.submitFrame();
-      }
-
-      if (!_this.input.VR.isPresenting || _this.input.VR.canMirror && !_this.options.disableMirroring) {
-        _this.camera.fov = _this.options.defaultFOV;
-        _this.camera.aspect = _this.renderer.domElement.width / _this.renderer.domElement.height;
-        _this.camera.updateProjectionMatrix();
-        _this.renderer.clear(true, true, true);
+        _this.renderer.setViewport(v.left * resolutionScale, v.top * resolutionScale, v.width * resolutionScale, v.height * resolutionScale);
+        _this.camera.projectionMatrix.copy(st.projection);
         if (_this.input.mousePointer.unproject) {
-          _this.input.mousePointer.unproject.getInverse(_this.camera.projectionMatrix);
+          _this.input.mousePointer.unproject.getInverse(st.projection);
         }
-        _this.renderer.setViewport(0, 0, _this.renderer.domElement.width, _this.renderer.domElement.height);
+        _this.camera.translateOnAxis(st.translation, 1);
         _this.renderer.render(_this.scene, _this.camera);
+        _this.camera.translateOnAxis(st.translation, -1);
       }
+      _this.input.submitFrame();
     };
 
     var modifyScreen = function modifyScreen() {
@@ -44252,7 +44508,12 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
     _this.goFullScreen = function (index, evt) {
       if (evt !== "Gaze") {
         var _ret = function () {
-          var elem = !_this.input.VR.isStereo || isMobile$1 && !_this.input.VR.isNativeMobileWebVR ? _this.options.fullScreenElement : _this.renderer.domElement;
+          var elem = null;
+          if (_this.input.VR.canMirror || _this.input.VR.isNativeMobileWebVR) {
+            elem = _this.renderer.domElement;
+          } else {
+            elem = _this.options.fullScreenElement;
+          }
           _this.input.VR.connect(index);
           return {
             v: _this.input.VR.requestPresent([{
@@ -44595,7 +44856,11 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
         return btn;
       };
 
-      var buttons = this.displays.map(function (display, i) {
+      var buttons = this.displays
+      // We skip the Standard Monitor and Magic Window on iOS because we can't go full screen on those systems.
+      .filter(function (display) {
+        return !isiOS || VR.isStereoDisplay(display);
+      }).map(function (display, i) {
         var enterVR = _this2.goFullScreen.bind(_this2, i),
             btn = newButton(display.displayName, display.displayName, enterVR),
             isStereo = VR.isStereoDisplay(display);
@@ -44603,7 +44868,7 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
         return btn;
       });
 
-      if (!/(www\.)?primrosevr.com/.test(document.location.hostname)) {
+      if (!/(www\.)?primrosevr.com/.test(document.location.hostname) && !this.options.disableAdvertising) {
         buttons.push(newButton("Primrose", "✿", function () {
           return document.location = "https://www.primrosevr.com";
         }));
@@ -44621,6 +44886,20 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
     get: function get() {
 
       return this.input.VR.displays;
+    }
+  }, {
+    key: "fieldOfView",
+    get: function get() {
+      var d = this.input.VR.currentDevice,
+          eyes = [d && d.getEyeParameters("left"), d && d.getEyeParameters("right")].filter(identity$1);
+      if (eyes.length > 0) {
+        return eyes.reduce(function (fov, eye) {
+          return Math.max(fov, eye.fieldOfView.upDegrees + eye.fieldOfView.downDegrees);
+        }, 0);
+      }
+    },
+    set: function set(v) {
+      this.options.defaultFOV = WebVRStandardMonitor.DEFAULT_FOV = v;
     }
   }]);
   return BrowserEnvironment;
@@ -44654,7 +44933,7 @@ BrowserEnvironment.DEFAULTS = {
   // the far plane of the camera.
   drawDistance: 100,
   // the field of view to use in non-VR settings.
-  defaultFOV: 75,
+  defaultFOV: 55,
   // The sound to play on loop in the background.
   ambientSound: null,
   // HTML5 canvas element, if one had already been created.
@@ -44665,12 +44944,14 @@ BrowserEnvironment.DEFAULTS = {
   context: null,
   // Three.js scene, if one had already been created.
   scene: null,
-  // I highly suggest you don't go down the road that requires setting this. I will not help you understand what it does, because I would rather you just not use it.
-  nonstandardIPD: null,
   // This is an experimental feature for setting the height of a user's "neck" on orientation-only systems (such as Google Cardboard and Samsung Gear VR) to create a more realistic feel.
   nonstandardNeckLength: null,
   nonstandardNeckDepth: null,
-  showHeadPointer: true
+  showHeadPointer: true,
+  // WARNING: I highly suggest you don't go down the road that requires the following settings this. I will not help you understand what they do, because I would rather you just not use them.
+  eyeRenderOrder: ["left", "right"],
+  nonstandardIPD: null,
+  disableAdvertising: false
 };
 
 var COUNTER$5 = 0;
@@ -45031,6 +45312,42 @@ var Graphics = {
   InsideSphereGeometry: InsideSphereGeometry,
   loadTexture: loadTexture$1,
   ModelLoader: ModelLoader
+};
+
+function del(type, url, options) {
+  return XHR("DELETE", type, url, options);
+}
+
+function delObject(url, options) {
+  return del("json", url, options);
+}
+
+function getObject(url, options) {
+  return get$2("json", url, options);
+}
+
+function getText(url, options) {
+  return get$2("text", url, options);
+}
+
+function post(type, url, options) {
+  return XHR("POST", type, url, options);
+}
+
+function postObject(url, options) {
+  return post("json", url, options);
+}
+
+var obj$2 = {
+  del: del,
+  delObject: delObject,
+  get: get$2,
+  getBuffer: getBuffer,
+  getObject: getObject,
+  getText: getText,
+  post: post,
+  postObject: postObject,
+  XHR: XHR
 };
 
 var Location = function (_InputProcessor) {
@@ -45926,7 +46243,7 @@ var obj$1 = {
   Controls: Controls,
   DOM: DOM,
   Graphics: Graphics,
-  HTTP: HTTP,
+  HTTP: obj$2,
   Input: Input,
   Keys: Keys,
   Network: Network,
@@ -45934,27 +46251,6 @@ var obj$1 = {
   Random: Random,
   Text: Text
 };
-
-
-
-var HTTP = Object.freeze({
-	AbstractEventEmitter: AbstractEventEmitter,
-	Angle: Angle,
-	Audio: Audio$1,
-	BrowserEnvironment: BrowserEnvironment,
-	Constants: constants,
-	Controls: Controls,
-	DOM: DOM,
-	Graphics: Graphics,
-	HTTP: HTTP,
-	Input: Input,
-	Keys: Keys,
-	Network: Network,
-	Pointer: Pointer,
-	Random: Random,
-	Text: Text,
-	default: obj$1
-});
 
 /*
  * Copyright (C) 2014 - 2016 Sean T. McBeth <sean@notiontheory.com>

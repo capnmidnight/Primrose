@@ -11352,6 +11352,249 @@ function loadTexture$1(id, url, progress) {
   });
 }
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
+  return typeof obj;
+} : function (obj) {
+  return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+};
+
+
+
+
+
+var asyncGenerator = function () {
+  function AwaitValue(value) {
+    this.value = value;
+  }
+
+  function AsyncGenerator(gen) {
+    var front, back;
+
+    function send(key, arg) {
+      return new Promise(function (resolve, reject) {
+        var request = {
+          key: key,
+          arg: arg,
+          resolve: resolve,
+          reject: reject,
+          next: null
+        };
+
+        if (back) {
+          back = back.next = request;
+        } else {
+          front = back = request;
+          resume(key, arg);
+        }
+      });
+    }
+
+    function resume(key, arg) {
+      try {
+        var result = gen[key](arg);
+        var value = result.value;
+
+        if (value instanceof AwaitValue) {
+          Promise.resolve(value.value).then(function (arg) {
+            resume("next", arg);
+          }, function (arg) {
+            resume("throw", arg);
+          });
+        } else {
+          settle(result.done ? "return" : "normal", result.value);
+        }
+      } catch (err) {
+        settle("throw", err);
+      }
+    }
+
+    function settle(type, value) {
+      switch (type) {
+        case "return":
+          front.resolve({
+            value: value,
+            done: true
+          });
+          break;
+
+        case "throw":
+          front.reject(value);
+          break;
+
+        default:
+          front.resolve({
+            value: value,
+            done: false
+          });
+          break;
+      }
+
+      front = front.next;
+
+      if (front) {
+        resume(front.key, front.arg);
+      } else {
+        back = null;
+      }
+    }
+
+    this._invoke = send;
+
+    if (typeof gen.return !== "function") {
+      this.return = undefined;
+    }
+  }
+
+  if (typeof Symbol === "function" && Symbol.asyncIterator) {
+    AsyncGenerator.prototype[Symbol.asyncIterator] = function () {
+      return this;
+    };
+  }
+
+  AsyncGenerator.prototype.next = function (arg) {
+    return this._invoke("next", arg);
+  };
+
+  AsyncGenerator.prototype.throw = function (arg) {
+    return this._invoke("throw", arg);
+  };
+
+  AsyncGenerator.prototype.return = function (arg) {
+    return this._invoke("return", arg);
+  };
+
+  return {
+    wrap: function (fn) {
+      return function () {
+        return new AsyncGenerator(fn.apply(this, arguments));
+      };
+    },
+    await: function (value) {
+      return new AwaitValue(value);
+    }
+  };
+}();
+
+
+
+
+
+var classCallCheck = function (instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError("Cannot call a class as a function");
+  }
+};
+
+var createClass = function () {
+  function defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+
+  return function (Constructor, protoProps, staticProps) {
+    if (protoProps) defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) defineProperties(Constructor, staticProps);
+    return Constructor;
+  };
+}();
+
+
+
+
+
+
+
+var get$1 = function get$1(object, property, receiver) {
+  if (object === null) object = Function.prototype;
+  var desc = Object.getOwnPropertyDescriptor(object, property);
+
+  if (desc === undefined) {
+    var parent = Object.getPrototypeOf(object);
+
+    if (parent === null) {
+      return undefined;
+    } else {
+      return get$1(parent, property, receiver);
+    }
+  } else if ("value" in desc) {
+    return desc.value;
+  } else {
+    var getter = desc.get;
+
+    if (getter === undefined) {
+      return undefined;
+    }
+
+    return getter.call(receiver);
+  }
+};
+
+var inherits = function (subClass, superClass) {
+  if (typeof superClass !== "function" && superClass !== null) {
+    throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
+  }
+
+  subClass.prototype = Object.create(superClass && superClass.prototype, {
+    constructor: {
+      value: subClass,
+      enumerable: false,
+      writable: true,
+      configurable: true
+    }
+  });
+  if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
+};
+
+
+
+
+
+
+
+
+
+
+
+var possibleConstructorReturn = function (self, call) {
+  if (!self) {
+    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+  }
+
+  return call && (typeof call === "object" || typeof call === "function") ? call : self;
+};
+
+
+
+var set$1 = function set$1(object, property, value, receiver) {
+  var desc = Object.getOwnPropertyDescriptor(object, property);
+
+  if (desc === undefined) {
+    var parent = Object.getPrototypeOf(object);
+
+    if (parent !== null) {
+      set$1(parent, property, value, receiver);
+    }
+  } else if ("value" in desc && desc.writable) {
+    desc.value = value;
+  } else {
+    var setter = desc.set;
+
+    if (setter !== undefined) {
+      setter.call(receiver, value);
+    }
+  }
+
+  return value;
+};
+
+var seenElements = new WeakMap();
+var seenElementCount = 0;
+
 function textured(geometry, txt, options) {
   options = Object.assign({}, {
     txtRepeatX: 1,
@@ -11359,8 +11602,30 @@ function textured(geometry, txt, options) {
     anisotropy: 1
   }, options);
 
-  var txtID = (txt.id || txt).toString(),
-      textureDescription = "Primrose.textured(" + txtID + ", " + options.txtRepeatX + ", " + options.txtRepeatY + ", " + options.anisotropy + ", " + options.scaleTextureWidth + ", " + options.scaleTextureHeight + ")";
+  var txtType = typeof txt === "undefined" ? "undefined" : _typeof(txt),
+      txtID = null;
+  if (txtType === "object") {
+    if (txt.id) {
+      txtID = txt.id;
+    } else {
+      if (!seenElements.has(txt)) {
+        seenElements.set(txt, "TextureAutoID" + seenElementCount);
+        ++seenElementCount;
+      }
+      txtID = seenElements.get(txt);
+    }
+  } else if (txtType === "string") {
+    txtID = txt;
+  } else {
+    var err = new Error("Couldn't figure out how to make a texture out of typeof '" + txtType + "', value " + txt + ".");
+    if (options.reject) {
+      options.reject(err);
+    } else {
+      throw err;
+    }
+  }
+
+  var textureDescription = "Primrose.textured(" + txtID + ", " + options.txtRepeatX + ", " + options.txtRepeatY + ", " + options.anisotropy + ", " + options.scaleTextureWidth + ", " + options.scaleTextureHeight + ")";
   var texturePromise = cache(textureDescription, function () {
     if (typeof txt === "string" || txt instanceof Array || txt.length === 6) {
       return loadTexture$1(textureDescription, txt, options.progress);
@@ -11469,6 +11734,8 @@ function textured(geometry, txt, options) {
     texture.needsUpdate = true;
     return texture;
   }).then(options.resolve).catch(options.reject);
+
+  options.promise = texturePromise;
 
   return obj;
 }
@@ -13030,246 +13297,6 @@ function ring(rInner, rOuter, sectors, rings, start, end) {
   });
 }
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
-  return typeof obj;
-} : function (obj) {
-  return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-};
-
-
-
-
-
-var asyncGenerator = function () {
-  function AwaitValue(value) {
-    this.value = value;
-  }
-
-  function AsyncGenerator(gen) {
-    var front, back;
-
-    function send(key, arg) {
-      return new Promise(function (resolve, reject) {
-        var request = {
-          key: key,
-          arg: arg,
-          resolve: resolve,
-          reject: reject,
-          next: null
-        };
-
-        if (back) {
-          back = back.next = request;
-        } else {
-          front = back = request;
-          resume(key, arg);
-        }
-      });
-    }
-
-    function resume(key, arg) {
-      try {
-        var result = gen[key](arg);
-        var value = result.value;
-
-        if (value instanceof AwaitValue) {
-          Promise.resolve(value.value).then(function (arg) {
-            resume("next", arg);
-          }, function (arg) {
-            resume("throw", arg);
-          });
-        } else {
-          settle(result.done ? "return" : "normal", result.value);
-        }
-      } catch (err) {
-        settle("throw", err);
-      }
-    }
-
-    function settle(type, value) {
-      switch (type) {
-        case "return":
-          front.resolve({
-            value: value,
-            done: true
-          });
-          break;
-
-        case "throw":
-          front.reject(value);
-          break;
-
-        default:
-          front.resolve({
-            value: value,
-            done: false
-          });
-          break;
-      }
-
-      front = front.next;
-
-      if (front) {
-        resume(front.key, front.arg);
-      } else {
-        back = null;
-      }
-    }
-
-    this._invoke = send;
-
-    if (typeof gen.return !== "function") {
-      this.return = undefined;
-    }
-  }
-
-  if (typeof Symbol === "function" && Symbol.asyncIterator) {
-    AsyncGenerator.prototype[Symbol.asyncIterator] = function () {
-      return this;
-    };
-  }
-
-  AsyncGenerator.prototype.next = function (arg) {
-    return this._invoke("next", arg);
-  };
-
-  AsyncGenerator.prototype.throw = function (arg) {
-    return this._invoke("throw", arg);
-  };
-
-  AsyncGenerator.prototype.return = function (arg) {
-    return this._invoke("return", arg);
-  };
-
-  return {
-    wrap: function (fn) {
-      return function () {
-        return new AsyncGenerator(fn.apply(this, arguments));
-      };
-    },
-    await: function (value) {
-      return new AwaitValue(value);
-    }
-  };
-}();
-
-
-
-
-
-var classCallCheck = function (instance, Constructor) {
-  if (!(instance instanceof Constructor)) {
-    throw new TypeError("Cannot call a class as a function");
-  }
-};
-
-var createClass = function () {
-  function defineProperties(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-
-  return function (Constructor, protoProps, staticProps) {
-    if (protoProps) defineProperties(Constructor.prototype, protoProps);
-    if (staticProps) defineProperties(Constructor, staticProps);
-    return Constructor;
-  };
-}();
-
-
-
-
-
-
-
-var get$1 = function get$1(object, property, receiver) {
-  if (object === null) object = Function.prototype;
-  var desc = Object.getOwnPropertyDescriptor(object, property);
-
-  if (desc === undefined) {
-    var parent = Object.getPrototypeOf(object);
-
-    if (parent === null) {
-      return undefined;
-    } else {
-      return get$1(parent, property, receiver);
-    }
-  } else if ("value" in desc) {
-    return desc.value;
-  } else {
-    var getter = desc.get;
-
-    if (getter === undefined) {
-      return undefined;
-    }
-
-    return getter.call(receiver);
-  }
-};
-
-var inherits = function (subClass, superClass) {
-  if (typeof superClass !== "function" && superClass !== null) {
-    throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
-  }
-
-  subClass.prototype = Object.create(superClass && superClass.prototype, {
-    constructor: {
-      value: subClass,
-      enumerable: false,
-      writable: true,
-      configurable: true
-    }
-  });
-  if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
-};
-
-
-
-
-
-
-
-
-
-
-
-var possibleConstructorReturn = function (self, call) {
-  if (!self) {
-    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-  }
-
-  return call && (typeof call === "object" || typeof call === "function") ? call : self;
-};
-
-
-
-var set$1 = function set$1(object, property, value, receiver) {
-  var desc = Object.getOwnPropertyDescriptor(object, property);
-
-  if (desc === undefined) {
-    var parent = Object.getPrototypeOf(object);
-
-    if (parent !== null) {
-      set$1(parent, property, value, receiver);
-    }
-  } else if ("value" in desc && desc.writable) {
-    desc.value = value;
-  } else {
-    var setter = desc.set;
-
-    if (setter !== undefined) {
-      setter.call(receiver, value);
-    }
-  }
-
-  return value;
-};
-
 var InsideSphereGeometry = function (_Geometry) {
   inherits(InsideSphereGeometry, _Geometry);
 
@@ -13710,7 +13737,7 @@ var liveAPI = Object.freeze({
 
 var packageName = "PrimroseVR";
 
-var version = "0.29.2";
+var version = "0.29.3";
 
 
 
@@ -13833,12 +13860,286 @@ function AsyncLockRequest(name, elementOpts, changeEventOpts, errorEventOpts, re
 
 var PointerLock = AsyncLockRequest("Pointer Lock", ["pointerLockElement", "mozPointerLockElement", "webkitPointerLockElement"], ["onpointerlockchange", "onmozpointerlockchange", "onwebkitpointerlockchange"], ["onpointerlockerror", "onmozpointerlockerror", "onwebkitpointerlockerror"], ["requestPointerLock", "mozRequestPointerLock", "webkitRequestPointerLock", "webkitRequestPointerLock"], ["exitPointerLock", "mozExitPointerLock", "webkitExitPointerLock", "webkitExitPointerLock"]);
 
+function lock(element) {
+  var type = screen.orientation && screen.orientation.type || screen.mozOrientation || "";
+  if (type.indexOf("landscape") === -1) {
+    type = "landscape-primary";
+  }
+  if (screen.orientation && screen.orientation.lock) {
+    return screen.orientation.lock(type);
+  } else if (screen.mozLockOrientation) {
+    var locked = screen.mozLockOrientation(type);
+    if (locked) {
+      return Promise.resolve(element);
+    }
+  } else {
+    return Promise.reject(new Error("Pointer lock not supported."));
+  }
+}
+
+function unlock() {
+  if (screen.orientation && screen.orientation.unlock) {
+    screen.orientation.unlock();
+  } else if (screen.mozUnlockOrientation) {
+    screen.mozUnlockOrientation();
+  }
+}
+
+var FullScreen = AsyncLockRequest("Fullscreen", ["fullscreenElement", "mozFullScreenElement", "webkitFullscreenElement", "msFullscreenElement"], ["onfullscreenchange", "onmozfullscreenchange", "onwebkitfullscreenchange", "onmsfullscreenchange"], ["onfullscreenerror", "onmozfullscreenerror", "onwebkitfullscreenerror", "onmsfullscreenerror"], ["requestFullscreen", "mozRequestFullScreen", "webkitRequestFullscreen", "webkitRequestFullScreen", "msRequestFullscreen"], ["exitFullscreen", "mozExitFullScreen", "webkitExitFullscreen", "webkitExitFullScreen", "msExitFullscreen"], function (arg) {
+  return arg || window.Element && window.Element.ALLOW_KEYBOARD_INPUT || undefined;
+});
+
+function immutable(value) {
+  var getter = typeof value === "function" ? value : function () {
+    return value;
+  };
+  return {
+    enumerable: true,
+    get: getter,
+    set: function set() {
+      throw new Error("This value is immutable and may only be read, not written.");
+    }
+  };
+}
+
+function mutable(value, type) {
+  return {
+    enumerable: true,
+    get: function get() {
+      return value;
+    },
+    set: function set(v) {
+      var t = typeof v === "undefined" ? "undefined" : _typeof(v);
+      if (t !== type) {
+        throw new Error("Value must be a " + type + ". An " + t + " was provided instead: " + v);
+      }
+      value = v;
+    }
+  };
+}
+
+var isMobile$1 = (function (a) {
+  return (/(android|bb\d+|meego).+|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od|ad)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(a) || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substring(0, 4))
+  );
+})(navigator.userAgent || navigator.vendor || window.opera);
+
+var Orientation = { lock: lock, unlock: unlock };
+var defaultFieldOfView = 50;
+
+function warn(msg) {
+  return function (exp) {
+    console.warn(msg, exp);
+  };
+}
+
+function defaultPose() {
+  return {
+    position: [0, 0, 0],
+    orientation: [0, 0, 0, 1],
+    linearVelocity: null,
+    linearAcceleration: null,
+    angularVelocity: null,
+    angularAcceleration: null
+  };
+}
+
+function fireDisplayPresentChange(evt) {
+  if (!FullScreen.isActive) {
+    FullScreen.removeChangeListener(fireDisplayPresentChange);
+  }
+  window.dispatchEvent(new Event("vrdisplaypresentchange"));
+}
+
+var WebVRStandardMonitor = function () {
+  createClass(WebVRStandardMonitor, null, [{
+    key: "standardFullScreenBehavior",
+    value: function standardFullScreenBehavior(elem) {
+      return FullScreen.request(elem).catch(warn("FullScreen failed")).then(WebVRStandardMonitor.standardLockBehavior);
+    }
+  }, {
+    key: "standardLockBehavior",
+    value: function standardLockBehavior(elem) {
+      if (isMobile$1) {
+        return Orientation.lock(elem).catch(warn("OrientationLock failed"));
+      } else {
+        return PointerLock.request(elem).catch(warn("PointerLock failed"));
+      }
+    }
+  }, {
+    key: "standardExitFullScreenBehavior",
+    value: function standardExitFullScreenBehavior() {
+      return WebVRStandardMonitor.standardUnlockBehavior().then(function () {
+        return FullScreen.exit();
+      }).catch(warn("FullScreen failed"));
+    }
+  }, {
+    key: "standardUnlockBehavior",
+    value: function standardUnlockBehavior() {
+      if (isMobile$1) {
+        Orientation.unlock();
+        return Promise.resolve();
+      } else {
+        return PointerLock.exit().catch(warn("PointerLock exit failed"));
+      }
+    }
+  }, {
+    key: "DEFAULT_FOV",
+    get: function get() {
+      return defaultFieldOfView;
+    },
+    set: function set(v) {
+      defaultFieldOfView = v;
+    }
+  }]);
+
+  function WebVRStandardMonitor(display) {
+    classCallCheck(this, WebVRStandardMonitor);
+
+    if (this !== window && this !== undefined) {
+      this._currentLayers = [];
+      this._display = display;
+
+      Object.defineProperties(this, {
+        capabilities: immutable(Object.defineProperties({}, {
+          hasPosition: immutable(false),
+          hasOrientation: immutable(isMobile$1),
+          hasExternalDisplay: immutable(false),
+          canPresent: immutable(true),
+          maxLayers: immutable(1)
+        })),
+        isPolyfilled: immutable(display && display.isPolyfilled || false),
+        displayId: immutable(0),
+        displayName: immutable(isMobile$1 && "Magic Window" || "Standard Monitor"),
+        isConnected: immutable(true),
+        stageParameters: immutable(null),
+        isPresenting: immutable(function () {
+          return FullScreen.isActive;
+        }),
+
+        depthNear: mutable(0.01, "number"),
+        depthFar: mutable(10000.0, "number")
+      });
+    }
+  }
+
+  createClass(WebVRStandardMonitor, [{
+    key: "requestAnimationFrame",
+    value: function requestAnimationFrame(thunk) {
+      return window.requestAnimationFrame(thunk);
+    }
+  }, {
+    key: "cancelAnimationFrame",
+    value: function cancelAnimationFrame(handle) {
+      window.cancelAnimationFrame(handle);
+    }
+  }, {
+    key: "submitFrame",
+    value: function submitFrame() {}
+  }, {
+    key: "getPose",
+    value: function getPose() {
+      var display = isMobile$1 && this._display;
+      if (display) {
+        return display.getPose();
+      } else {
+        return defaultPose();
+      }
+    }
+  }, {
+    key: "getImmediatePose",
+    value: function getImmediatePose() {
+      var display = isMobile$1 && this._display;
+      if (display) {
+        return display.getImmediatePose();
+      } else {
+        return defaultPose();
+      }
+    }
+  }, {
+    key: "resetPose",
+    value: function resetPose() {
+      var display = isMobile$1 && this._display;
+      if (display) {
+        return display.resetPose();
+      }
+    }
+  }, {
+    key: "requestPresent",
+    value: function requestPresent(layers) {
+      for (var i = 0; i < this.capabilities.maxLayers && i < layers.length; ++i) {
+        this._currentLayers[i] = layers[i];
+      }
+      var elem = layers[0].source;
+      if (isMobile$1) {
+        return this._display.requestPresent(layers).then(function () {
+          return WebVRStandardMonitor.standardLockBehavior(elem);
+        });
+      } else {
+        FullScreen.addChangeListener(fireDisplayPresentChange);
+        return WebVRStandardMonitor.standardFullScreenBehavior(elem);
+      }
+    }
+  }, {
+    key: "getLayers",
+    value: function getLayers() {
+      return this._currentLayers.slice();
+    }
+  }, {
+    key: "exitPresent",
+    value: function exitPresent() {
+      var _this = this;
+
+      this._currentLayers.splice(0);
+
+      if (isMobile$1) {
+        return WebVRStandardMonitor.standardUnlockBehavior().then(function () {
+          return _this._display.exitPresent();
+        });
+      } else {
+        return WebVRStandardMonitor.standardExitFullScreenBehavior();
+      }
+    }
+  }, {
+    key: "getEyeParameters",
+    value: function getEyeParameters(side) {
+      if (side === "left") {
+        var curLayer = this.getLayers()[0],
+            elem = curLayer && curLayer.source || document.body,
+            width = elem.clientWidth,
+            height = elem.clientHeight,
+            vFOV = defaultFieldOfView / 2,
+            hFOV = calcFoV(vFOV, width, height);
+        return {
+          renderWidth: width * devicePixelRatio,
+          renderHeight: height * devicePixelRatio,
+          offset: new Float32Array([0, 0, 0]),
+          fieldOfView: {
+            upDegrees: vFOV,
+            downDegrees: vFOV,
+            leftDegrees: hFOV,
+            rightDegrees: hFOV
+          }
+        };
+      }
+    }
+  }]);
+  return WebVRStandardMonitor;
+}();
+
+function calcFoV(aFoV, aDim, bDim) {
+  return 360 * Math.atan(Math.tan(aFoV * Math.PI / 360) * aDim / bDim) / Math.PI;
+}
+
+WebVRStandardMonitor._shimSetup = false;
+
 function testUserAgent(a) {
   return (/(android|bb\d+|meego).+|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od|ad)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(a) || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substring(0, 4))
   );
 }
 
-var isMobile$1 = testUserAgent(navigator.userAgent || navigator.vendor || window.opera);
+var isMobile$2 = testUserAgent(navigator.userAgent || navigator.vendor || window.opera);
+
+var isiOS = /iP(hone|od|ad)/.test(navigator.userAgent || "");
 
 var DEG2RAD = Math.PI / 180;
 var RAD2DEG = 180 / Math.PI;
@@ -14471,7 +14772,334 @@ var Speech = function () {
   return Speech;
 }();
 
-var isiOS = /iP(hone|od|ad)/.test(navigator.userAgent || "");
+function XHR(method, type, url, options) {
+  return new Promise(function (resolve, reject) {
+    options = options || {};
+    options.headers = options.headers || {};
+    if (method === "POST") {
+      options.headers["Content-Type"] = options.headers["Content-Type"] || type;
+    }
+
+    var req = new XMLHttpRequest();
+    req.onerror = function (evt) {
+      return reject(new Error("Request error: " + evt.message));
+    };
+    req.onabort = function (evt) {
+      return reject(new Error("Request abort: " + evt.message));
+    };
+    req.onload = function () {
+      // The other error events are client-errors. If there was a server error,
+      // we'd find out about it during this event. We need to only respond to
+      // successful requests, i.e. those with HTTP status code in the 200 or 300
+      // range.
+      if (req.status < 400) {
+        resolve(req.response);
+      } else {
+        reject(req);
+      }
+    };
+
+    // The order of these operations is very explicit. You have to call open
+    // first. It seems counter intuitive, but think of it more like you're opening
+    // an HTTP document to be able to write to it, and then you finish by sending
+    // the document. The `open` method does not refer to a network connection.
+    req.open(method, url);
+    if (type) {
+      req.responseType = type;
+    }
+
+    req.onprogress = options.progress;
+
+    for (var key in options.headers) {
+      req.setRequestHeader(key, options.headers[key]);
+    }
+
+    req.withCredentials = !!options.withCredentials;
+
+    if (options.data) {
+      req.send(JSON.stringify(options.data));
+    } else {
+      req.send();
+    }
+  });
+}
+
+function get$2(type, url, options) {
+  return XHR("GET", type || "text", url, options);
+}
+
+function getBuffer(url, options) {
+  return get$2("arraybuffer", url, options);
+}
+
+function cascadeElement(id, tag, DOMClass, add) {
+  var elem = null;
+  if (id === null) {
+    elem = document.createElement(tag);
+    elem.id = id = "auto_" + tag + Date.now();
+  } else if (DOMClass === undefined || id instanceof DOMClass) {
+    elem = id;
+  } else if (typeof id === "string") {
+    elem = document.getElementById(id);
+    if (elem === null) {
+      elem = document.createElement(tag);
+      elem.id = id;
+      if (add) {
+        document.body.appendChild(elem);
+      }
+    } else if (elem.tagName !== tag.toUpperCase()) {
+      elem = null;
+    }
+  }
+
+  if (elem === null) {
+    throw new Error(id + " does not refer to a valid " + tag + " element.");
+  }
+  return elem;
+}
+
+// polyfill
+window.AudioContext = window.AudioContext || window.webkitAudioContext;
+
+var VECTOR = new Vector3();
+var UP = new Vector3();
+var TEMP = new Matrix4();
+
+var Audio3D = function () {
+  createClass(Audio3D, null, [{
+    key: "setAudioStream",
+    value: function setAudioStream(stream, id) {
+      var audioElementCount = document.querySelectorAll("audio").length,
+          element = cascadeElement(id || "audioStream" + audioElementCount, "audio", HTMLAudioElement, true);
+      setAudioProperties(element);
+      element.srcObject = stream;
+      return element;
+    }
+  }, {
+    key: "setAudioProperties",
+    value: function setAudioProperties(element) {
+      element.autoplay = true;
+      element.controls = false;
+      element.crossOrigin = "anonymous";
+      element.muted = true;
+      element.setAttribute("muted", "");
+    }
+  }]);
+
+  function Audio3D() {
+    var _this = this;
+
+    classCallCheck(this, Audio3D);
+
+    this.ready = new Promise(function (resolve, reject) {
+      try {
+        if (Audio3D.isAvailable) {
+          (function () {
+            var finishSetup = function finishSetup() {
+              try {
+                _this.sampleRate = _this.context.sampleRate;
+                _this.mainVolume = _this.context.createGain();
+                _this.start();
+                resolve();
+              } catch (exp) {
+                reject(exp);
+              }
+            };
+
+            if (!isiOS) {
+              _this.context = new AudioContext();
+              finishSetup();
+            } else {
+              (function () {
+                var unlock = function unlock() {
+                  try {
+                    (function () {
+                      _this.context = _this.context || new AudioContext();
+                      var source = _this.context.createBufferSource();
+                      source.buffer = _this.createRawSound([[0]]);
+                      source.connect(_this.context.destination);
+                      source.sine(0, 0);
+                      setTimeout(function () {
+                        if (source.playbackState === source.PLAYING_STATE || source.playbackState === source.FINISHED_STATE) {
+                          window.removeEventListener("mouseup", unlock);
+                          window.removeEventListener("touchend", unlock);
+                          window.removeEventListener("keyup", unlock);
+                          finishSetup();
+                        }
+                      }, 0);
+                    })();
+                  } catch (exp) {
+                    reject(exp);
+                  }
+                };
+
+                window.addEventListener("mouseup", unlock, false);
+                window.addEventListener("touchend", unlock, false);
+                window.addEventListener("keyup", unlock, false);
+              })();
+            }
+          })();
+        }
+      } catch (exp) {
+        reject(exp);
+      }
+    }).then(function () {
+      return console.log("Audio ready");
+    });
+  }
+
+  createClass(Audio3D, [{
+    key: "setVelocity",
+    value: function setVelocity(x, y, z) {
+      if (this.context) {
+        this.context.listener.setVelocity(x, y, z);
+      }
+    }
+  }, {
+    key: "setPlayer",
+    value: function setPlayer(obj) {
+      if (this.context && this.context.listener) {
+        obj.updateMatrixWorld();
+        TEMP.copy(obj.matrixWorld);
+        var mx = TEMP.elements[12],
+            my = TEMP.elements[13],
+            mz = TEMP.elements[14];
+
+        this.context.listener.setPosition(mx, my, mz);
+
+        VECTOR.set(0, 0, -1).applyMatrix4(TEMP).normalize();
+        UP.set(0, 1, 0).applyMatrix4(TEMP).normalize();
+
+        this.context.listener.setOrientation(VECTOR.x, VECTOR.y, VECTOR.z, UP.x, UP.y, UP.z);
+      }
+    }
+  }, {
+    key: "start",
+    value: function start() {
+      if (this.mainVolume) {
+        this.mainVolume.connect(this.context.destination);
+      }
+    }
+  }, {
+    key: "stop",
+    value: function stop() {
+      if (this.mainVolume) {
+        this.mainVolume.disconnect();
+      }
+    }
+  }, {
+    key: "loadURL",
+    value: function loadURL(src) {
+      var _this2 = this;
+
+      return this.ready.then(function () {
+        console.log("Loading " + src + " from URL");
+        getBuffer(src);
+      }).then(function (data) {
+        return new Promise(function (resolve, reject) {
+          return _this2.context.decodeAudioData(data, resolve, reject);
+        });
+      }).then(function (dat) {
+        console.log(src + " loaded");
+        return dat;
+      }).catch(function (err) {
+        console.error("Couldn't load " + src + ". Reason: " + err);
+      });
+    }
+  }, {
+    key: "createRawSound",
+    value: function createRawSound(pcmData) {
+      if (pcmData.length !== 1 && pcmData.length !== 2) {
+        throw new Error("Incorrect number of channels. Expected 1 or 2, got " + pcmData.length);
+      }
+
+      var frameCount = pcmData[0].length;
+      if (pcmData.length > 1 && pcmData[1].length !== frameCount) {
+        throw new Error("Second channel is not the same length as the first channel. Expected " + frameCount + ", but was " + pcmData[1].length);
+      }
+
+      var buffer = this.context.createBuffer(pcmData.length, frameCount, this.sampleRate || 22050);
+      for (var c = 0; c < pcmData.length; ++c) {
+        var channel = buffer.getChannelData(c);
+        for (var i = 0; i < frameCount; ++i) {
+          channel[i] = pcmData[c][i];
+        }
+      }
+      return buffer;
+    }
+  }, {
+    key: "create3DSound",
+    value: function create3DSound(x, y, z, snd) {
+      snd.panner = this.context.createPanner();
+      snd.panner.setPosition(x, y, z);
+      snd.panner.connect(this.mainVolume);
+      snd.volume.connect(snd.panner);
+      return snd;
+    }
+  }, {
+    key: "createFixedSound",
+    value: function createFixedSound(snd) {
+      snd.volume.connect(this.mainVolume);
+      return snd;
+    }
+  }, {
+    key: "loadSource",
+    value: function loadSource(sources, loop) {
+      var _this3 = this;
+
+      return this.ready.then(function () {
+        return new Promise(function (resolve, reject) {
+          console.log("Loading " + sources);
+          if (!(sources instanceof Array)) {
+            sources = [sources];
+          }
+          var audio = document.createElement("audio");
+          audio.autoplay = true;
+          audio.preload = "auto";
+          audio["webkit-playsinline"] = true;
+          audio.playsinline = true;
+          audio.loop = loop;
+          audio.crossOrigin = "anonymous";
+          sources.map(function (src) {
+            var source = document.createElement("source");
+            source.src = src;
+            return source;
+          }).forEach(audio.appendChild.bind(audio));
+          audio.onerror = reject;
+          audio.oncanplay = function () {
+            audio.oncanplay = null;
+            var snd = {
+              volume: _this3.context.createGain(),
+              source: _this3.context.createMediaElementSource(audio)
+            };
+            snd.source.connect(snd.volume);
+            resolve(snd);
+          };
+          audio.play();
+          document.body.appendChild(audio);
+        });
+      }).then(function (dat) {
+        console.log(sources + " loaded");
+        return dat;
+      }).catch(function (err) {
+        console.error("Couldn't load " + sources + ". Reason: " + err);
+      });
+    }
+  }, {
+    key: "load3DSound",
+    value: function load3DSound(src, loop, x, y, z) {
+      return this.loadSource(src, loop).then(this.create3DSound.bind(this, x, y, z));
+    }
+  }, {
+    key: "loadFixedSound",
+    value: function loadFixedSound(src, loop) {
+      return this.loadSource(src, loop).then(this.createFixedSound.bind(this));
+    }
+  }]);
+  return Audio3D;
+}();
+
+Audio3D.isAvailable = !!window.AudioContext && !!AudioContext.prototype.createGain;
 
 var PositionalSound = function () {
   function PositionalSound(ctx, mainVolume) {
@@ -14642,135 +15270,9 @@ var Music = function () {
 
 Music.TYPES = TYPES;
 
-var Sound = function (_PositionalSound) {
-  inherits(Sound, _PositionalSound);
-
-  function Sound(audio3D, sources, loop) {
-    classCallCheck(this, Sound);
-
-    var _this = possibleConstructorReturn(this, (Sound.__proto__ || Object.getPrototypeOf(Sound)).call(this, audio3D.context, audio3D.mainVolume));
-
-    _this.audio = document.createElement("audio");
-    _this.audio.autoplay = true;
-    _this.audio.preload = "auto";
-    _this.audio["webkit-playsinline"] = true;
-    _this.audio.playsinline = true;
-    _this.audio.loop = loop;
-    _this.audio.crossOrigin = "anonymous";
-    console.log("Loading " + sources);
-    if (!(sources instanceof Array)) {
-      sources = [sources];
-    }
-    sources.map(function (src) {
-      var source = document.createElement("source");
-      source.src = src;
-      return source;
-    }).forEach(_this.audio.appendChild.bind(_this.audio));
-    _this.ready = new Promise(function (resolve, reject) {
-      _this.audio.onerror = reject;
-      _this.audio.oncanplay = function () {
-        _this.audio.oncanplay = null;
-        _this.node = _this.ctx.createMediaElementSource(_this.audio);
-        _this.node.connect(_this.gn);
-        _this.gn.gain.setValueAtTime(0, _this.ctx.currentTime);
-        resolve(_this);
-      };
-      _this.audio.play();
-    });
-
-    document.body.appendChild(_this.audio);
-    return _this;
-  }
-
-  createClass(Sound, [{
-    key: "play",
-    value: function play() {
-      this.gn.gain.setValueAtTime(1, this.ctx.currentTime);
-      this.audio.play();
-      return this;
-    }
-  }]);
-  return Sound;
-}(PositionalSound);
-
-var PIXEL_SCALES = [0.5, 0.25, 0.333333, 0.5, 1];
-
-var Quality = {
-  NONE: 0,
-  VERYLOW: 1,
-  LOW: 2,
-  MEDIUM: 3,
-  HIGH: 4,
-  MAXIMUM: PIXEL_SCALES.length - 1
-};
-
-var ID$1 = 1;
-var NUMBER_PATTERN = "([+-]?(?:(?:\\d+(?:\\.\\d*)?)|(?:\\.\\d+)))";
-var DELIM = "\\s*,\\s*";
-var UNITS = "(?:em|px)";
-var TRANSLATE_PATTERN = new RegExp("translate3d\\s*\\(\\s*" + NUMBER_PATTERN + UNITS + DELIM + NUMBER_PATTERN + UNITS + DELIM + NUMBER_PATTERN + UNITS + "\\s*\\)", "i");
-var ROTATE_PATTERN = new RegExp("rotate3d\\s*\\(\\s*" + NUMBER_PATTERN + DELIM + NUMBER_PATTERN + DELIM + NUMBER_PATTERN + DELIM + NUMBER_PATTERN + "rad\\s*\\)", "i");
-var TEMP_VECTOR = new Vector3();
-
-var BaseControl = function (_AbstractEventEmitter) {
-  inherits(BaseControl, _AbstractEventEmitter);
-
-  function BaseControl() {
-    classCallCheck(this, BaseControl);
-
-    var _this = possibleConstructorReturn(this, (BaseControl.__proto__ || Object.getPrototypeOf(BaseControl)).call(this));
-
-    _this.controlID = ID$1++;
-
-    _this.focused = false;
-    return _this;
-  }
-
-  createClass(BaseControl, [{
-    key: "focus",
-    value: function focus() {
-
-      this.focused = true;
-      this.emit("focus", {
-        target: this
-      });
-    }
-  }, {
-    key: "blur",
-    value: function blur() {
-
-      this.focused = false;
-      this.emit("blur", {
-        target: this
-      });
-    }
-  }, {
-    key: "copyElement",
-    value: function copyElement(elem) {
-
-      this.element = elem;
-      if (elem.style.transform) {
-        var match = TRANSLATE_PATTERN.exec(elem.style.transform);
-        if (match) {
-          this.position.set(parseFloat(match[1]), parseFloat(match[2]), parseFloat(match[3]));
-        }
-        match = ROTATE_PATTERN.exec(elem.style.transform);
-        if (match) {
-          TEMP_VECTOR.set(parseFloat(match[1]), parseFloat(match[2]), parseFloat(match[3]));
-          this.quaternion.setFromAxisAngle(TEMP_VECTOR, parseFloat(match[4]));
-        }
-      }
-    }
-  }]);
-  return BaseControl;
-}(AbstractEventEmitter);
-
-var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
-
-var isChrome = !!window.chrome && !isOpera;
-
 var entityKeys = [];
 var entities = new WeakMap();
+var lastEye = 0;
 
 var Entity = function (_AbstractEventEmitter) {
   inherits(Entity, _AbstractEventEmitter);
@@ -14789,9 +15291,12 @@ var Entity = function (_AbstractEventEmitter) {
   }, {
     key: "eyeBlankAll",
     value: function eyeBlankAll(eye) {
-      entityKeys.forEach(function (id) {
-        entities.get(id).eyeBlank(eye);
-      });
+      if (eye !== lastEye) {
+        entityKeys.forEach(function (id) {
+          entities.get(id).eyeBlank(eye);
+        });
+        lastEye = eye;
+      }
     }
   }]);
 
@@ -14996,6 +15501,10 @@ var Entity = function (_AbstractEventEmitter) {
   }]);
   return Entity;
 }(AbstractEventEmitter);
+
+var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
+
+var isChrome = !!window.chrome && !isOpera;
 
 var Point = function () {
   function Point(x, y) {
@@ -15571,7 +16080,7 @@ var Surface = function (_Entity) {
   return Surface;
 }(Entity);
 
-var Default = {
+var DefaultTheme = {
   name: "Light",
   fontFamily: "'Droid Sans Mono', 'Consolas', 'Lucida Console', 'Courier New', 'Courier', monospace",
   cursorColor: "black",
@@ -15761,7 +16270,7 @@ var Label = function (_Surface) {
       return this._theme;
     },
     set: function set(t) {
-      this._theme = Object.assign({}, Default, t);
+      this._theme = Object.assign({}, DefaultTheme, t);
       this._theme.fontSize = this.fontSize;
       this.refreshCharacter();
       this.render();
@@ -15835,6 +16344,67 @@ var Button2D = function (_Label) {
   }]);
   return Button2D;
 }(Label);
+
+var ID$1 = 1;
+var NUMBER_PATTERN = "([+-]?(?:(?:\\d+(?:\\.\\d*)?)|(?:\\.\\d+)))";
+var DELIM = "\\s*,\\s*";
+var UNITS = "(?:em|px)";
+var TRANSLATE_PATTERN = new RegExp("translate3d\\s*\\(\\s*" + NUMBER_PATTERN + UNITS + DELIM + NUMBER_PATTERN + UNITS + DELIM + NUMBER_PATTERN + UNITS + "\\s*\\)", "i");
+var ROTATE_PATTERN = new RegExp("rotate3d\\s*\\(\\s*" + NUMBER_PATTERN + DELIM + NUMBER_PATTERN + DELIM + NUMBER_PATTERN + DELIM + NUMBER_PATTERN + "rad\\s*\\)", "i");
+var TEMP_VECTOR = new Vector3();
+
+var BaseControl = function (_AbstractEventEmitter) {
+  inherits(BaseControl, _AbstractEventEmitter);
+
+  function BaseControl() {
+    classCallCheck(this, BaseControl);
+
+    var _this = possibleConstructorReturn(this, (BaseControl.__proto__ || Object.getPrototypeOf(BaseControl)).call(this));
+
+    _this.controlID = ID$1++;
+
+    _this.focused = false;
+    return _this;
+  }
+
+  createClass(BaseControl, [{
+    key: "focus",
+    value: function focus() {
+
+      this.focused = true;
+      this.emit("focus", {
+        target: this
+      });
+    }
+  }, {
+    key: "blur",
+    value: function blur() {
+
+      this.focused = false;
+      this.emit("blur", {
+        target: this
+      });
+    }
+  }, {
+    key: "copyElement",
+    value: function copyElement(elem) {
+
+      this.element = elem;
+      if (elem.style.transform) {
+        var match = TRANSLATE_PATTERN.exec(elem.style.transform);
+        if (match) {
+          this.position.set(parseFloat(match[1]), parseFloat(match[2]), parseFloat(match[3]));
+        }
+        match = ROTATE_PATTERN.exec(elem.style.transform);
+        if (match) {
+          TEMP_VECTOR.set(parseFloat(match[1]), parseFloat(match[2]), parseFloat(match[3]));
+          this.quaternion.setFromAxisAngle(TEMP_VECTOR, parseFloat(match[4]));
+        }
+      }
+    }
+  }]);
+  return BaseControl;
+}(AbstractEventEmitter);
 
 var Button3D = function (_BaseControl) {
   inherits(Button3D, _BaseControl);
@@ -15955,103 +16525,6 @@ var ButtonFactory = function () {
   }]);
   return ButtonFactory;
 }();
-
-var COUNTER$3 = 0;
-
-var Form = function (_Surface) {
-  inherits(Form, _Surface);
-  createClass(Form, null, [{
-    key: "create",
-    value: function create() {
-      return new Form();
-    }
-  }]);
-
-  function Form(options) {
-    classCallCheck(this, Form);
-
-    var _this = possibleConstructorReturn(this, (Form.__proto__ || Object.getPrototypeOf(Form)).call(this, Object.assign({}, {
-      id: "Primrose.Controls.Form[" + COUNTER$3++ + "]"
-    }, options)));
-
-    _this._mesh = textured(quad$1(1, _this.bounds.height / _this.bounds.width), _this);
-    _this._mesh.name = _this.id + "-mesh";
-    Object.defineProperties(_this.style, {
-      display: {
-        get: function get() {
-          return _this._mesh.visible ? "" : "none";
-        },
-        set: function set(v) {
-          if (v === "none") {
-            _this.hide();
-          } else {
-            _this.show();
-          }
-        }
-      },
-      visible: {
-        get: function get() {
-          return _this._mesh.visible ? "" : "hidden";
-        },
-        set: function set(v) {
-          return _this.visible = v !== "hidden";
-        }
-      }
-    });
-    return _this;
-  }
-
-  createClass(Form, [{
-    key: "addToBrowserEnvironment",
-    value: function addToBrowserEnvironment(env, scene) {
-      scene.add(this._mesh);
-      env.registerPickableObject(this._mesh);
-      return this._mesh;
-    }
-  }, {
-    key: "hide",
-    value: function hide() {
-      this.visible = false;
-      this.disabled = true;
-    }
-  }, {
-    key: "show",
-    value: function show() {
-      this.visible = true;
-      this.disabled = false;
-    }
-  }, {
-    key: "position",
-    get: function get() {
-      return this._mesh.position;
-    }
-  }, {
-    key: "visible",
-    get: function get() {
-      return this._mesh.visible;
-    },
-    set: function set(v) {
-      this._mesh.visible = v;
-    }
-  }, {
-    key: "disabled",
-    get: function get() {
-      return this._mesh.disabled;
-    },
-    set: function set(v) {
-      this._mesh.disabled = v;
-    }
-  }, {
-    key: "enabled",
-    get: function get() {
-      return !this.disabled;
-    },
-    set: function set(v) {
-      this.disabled = !v;
-    }
-  }]);
-  return Form;
-}(Surface);
 
 var index$2 = typeof Symbol === 'undefined' ? function (description) {
 	return '@' + (description || '@') + Math.random();
@@ -16411,7 +16884,7 @@ function enableInlineVideo(video, hasAudio, onlyWhitelisted) {
 
 enableInlineVideo.isWhitelisted = isWhitelisted;
 
-var COUNTER$4 = 0;
+var COUNTER$3 = 0;
 
 // Videos don't auto-play on mobile devices, so let's make them all play whenever
 // we tap the screen.
@@ -16461,7 +16934,7 @@ var Image = function (_Entity) {
     }
 
     options = Object.assign({}, {
-      id: "Primrose.Controls.Image[" + COUNTER$4++ + "]"
+      id: "Primrose.Controls.Image[" + COUNTER$3++ + "]"
     }, options);
 
     var _this = possibleConstructorReturn(this, (Image.__proto__ || Object.getPrototypeOf(Image)).call(this, options.id));
@@ -16525,11 +16998,15 @@ var Image = function (_Entity) {
       var _this3 = this;
 
       return Promise.all(Array.prototype.map.call(images, function (src, i) {
-        return loadTexture$1("Primrose.Controls.Image(" + src + ", " + i + ")", src, progress).then(function (txt) {
-          _this3._textures[i] = txt;
-          _this3._setGeometry();
-          _this3._meshes[i] = textured(_this3.options.geometry, txt, _this3.options);
+        var loadOptions = Object.assign({}, _this3.options, {
+          progress: progress,
+          resolve: function resolve(txt) {
+            return _this3._textures[i] = txt;
+          }
         });
+        _this3._setGeometry();
+        _this3._meshes[i] = textured(_this3.options.geometry, src, loadOptions);
+        return loadOptions.promise;
       })).then(function () {
         return _this3.isVideo = false;
       }).then(function () {
@@ -16593,10 +17070,18 @@ var Image = function (_Entity) {
               _this4._contexts[i] = _this4._canvases[i].getContext("2d");
             }
 
-            _this4._meshes[i] = textured(_this4.options.geometry, _this4._canvases[i] || _this4._elements[i], _this4.options);
+            var loadOptions = Object.assign({}, _this4.options, {
+              progress: progress,
+              resolve: function (oldResolve, i, txt) {
+                this._textures[i] = txt;
+                if (typeof oldResolve === "function") {
+                  oldResolve(txt);
+                }
+                resolve();
+              }.bind(_this4, _this4.options.resolve, i)
+            });
 
-            _this4._textures[i] = _this4._meshes[i].material.map;
-            resolve();
+            _this4._meshes[i] = textured(_this4.options.geometry, _this4._canvases[i] || _this4._elements[i], loadOptions);
           };
           if (!video.parentElement) {
             document.body.insertBefore(video, document.body.children[0]);
@@ -16636,7 +17121,11 @@ var Image = function (_Entity) {
             if (i < this._contexts.length) {
               this._contexts[i].drawImage(elem, 0, 0);
             }
-            this._textures[i].needsUpdate = true;
+            try {
+              this._textures[i].needsUpdate = true;
+            } catch (exp) {
+              console.log(i, this);
+            }
             this._lastTime = elem.currentTime;
           }
         }
@@ -16681,181 +17170,6 @@ var Image = function (_Entity) {
   }]);
   return Image;
 }(Entity);
-
-/**
- * @author mrdoob / http://mrdoob.com/
- * based on http://papervision3d.googlecode.com/svn/trunk/as3/trunk/src/org/papervision3d/objects/primitives/Plane.as
- */
-
-function PlaneGeometry(width, height, widthSegments, heightSegments) {
-
-	Geometry.call(this);
-
-	this.type = 'PlaneGeometry';
-
-	this.parameters = {
-		width: width,
-		height: height,
-		widthSegments: widthSegments,
-		heightSegments: heightSegments
-	};
-
-	this.fromBufferGeometry(new PlaneBufferGeometry(width, height, widthSegments, heightSegments));
-}
-
-PlaneGeometry.prototype = Object.create(Geometry.prototype);
-PlaneGeometry.prototype.constructor = PlaneGeometry;
-
-var PlainText = function PlainText(text, size, fgcolor, bgcolor, x, y, z) {
-  var hAlign = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : "center";
-  classCallCheck(this, PlainText);
-
-  text = text.replace(/\r\n/g, "\n");
-  var lines = text.split("\n");
-  var lineHeight = size * 1000;
-  var boxHeight = lineHeight * lines.length;
-
-  var textCanvas = document.createElement("canvas");
-  var textContext = textCanvas.getContext("2d");
-  textContext.font = lineHeight + "px Arial";
-  var width = textContext.measureText(text).width;
-
-  textCanvas.width = width;
-  textCanvas.height = boxHeight;
-  textContext.font = lineHeight * 0.8 + "px Arial";
-  if (bgcolor !== "transparent") {
-    textContext.fillStyle = bgcolor;
-    textContext.fillRect(0, 0, textCanvas.width, textCanvas.height);
-  }
-  textContext.fillStyle = fgcolor;
-
-  for (var i = 0; i < lines.length; ++i) {
-    textContext.fillText(lines[i], 0, i * lineHeight);
-  }
-
-  var texture = new Texture(textCanvas);
-  texture.needsUpdate = true;
-
-  var material = new MeshBasicMaterial({
-    map: texture,
-    transparent: bgcolor === "transparent",
-    useScreenCoordinates: false,
-    color: 0xffffff,
-    shading: FlatShading
-  });
-
-  var textGeometry = new PlaneGeometry(size * width / lineHeight, size * lines.length);
-  textGeometry.computeBoundingBox();
-  textGeometry.computeVertexNormals();
-
-  var textMesh = new Mesh(textGeometry, material);
-  if (hAlign === "left") {
-    x -= textGeometry.boundingBox.min.x;
-  } else if (hAlign === "right") {
-    x += textGeometry.boundingBox.min.x;
-  }
-  textMesh.position.set(x, y, z);
-  return textMesh;
-};
-
-var SIZE = 1;
-var INSET = 0.8;
-var PROPORTION = 10;
-var SIZE_SMALL = SIZE / PROPORTION;
-var INSET_LARGE = 1 - (1 - INSET) / PROPORTION;
-
-var Progress = function () {
-  function Progress(majorColor, minorColor) {
-    classCallCheck(this, Progress);
-
-    majorColor = majorColor || 0xffffff;
-    minorColor = minorColor || 0x000000;
-    var geom = box$1(SIZE, SIZE_SMALL, SIZE_SMALL);
-
-    this.totalBar = colored(geom, minorColor, {
-      unshaded: true,
-      side: BackSide
-    });
-
-    this.valueBar = colored(geom, majorColor, {
-      unshaded: true
-    });
-    this.valueBar.scale.set(0, INSET, INSET);
-
-    this.totalBar.add(this.valueBar);
-
-    this.fileState = null;
-    this.reset();
-  }
-
-  createClass(Progress, [{
-    key: "addToBrowserEnvironment",
-    value: function addToBrowserEnvironment(env, scene) {
-      scene.add(this.totalBar);
-    }
-  }, {
-    key: "reset",
-    value: function reset() {
-      this.fileState = {};
-      this.value = 0;
-    }
-  }, {
-    key: "onProgress",
-    value: function onProgress(evt) {
-      var file = evt.target.responseURL || evt.target.currentSrc;
-      if (file && evt.loaded !== undefined) {
-        if (!this.fileState[file]) {
-          this.fileState[file] = {};
-        }
-        var f = this.fileState[file];
-        f.loaded = evt.loaded;
-        f.total = evt.total;
-      }
-
-      var total = 0,
-          loaded = 0;
-      for (var key in this.fileState) {
-        var _f = this.fileState[key];
-        total += _f.total;
-        loaded += _f.loaded;
-      }
-
-      if (total > 0) {
-        this.value = loaded / total;
-      } else {
-        this.value = 0;
-      }
-    }
-  }, {
-    key: "visible",
-    get: function get() {
-      return this.totalBar.visible;
-    },
-    set: function set(v) {
-      this.totalBar.visible = v;
-    }
-  }, {
-    key: "position",
-    get: function get() {
-      return this.totalBar.position;
-    }
-  }, {
-    key: "quaternion",
-    get: function get() {
-      return this.totalBar.quaternion;
-    }
-  }, {
-    key: "value",
-    get: function get() {
-      return this.valueBar.scale.x / INSET_LARGE;
-    },
-    set: function set(v) {
-      this.valueBar.scale.x = v * INSET_LARGE;
-      this.valueBar.position.x = -SIZE * (1 - v) * INSET_LARGE / 2;
-    }
-  }]);
-  return Progress;
-}();
 
 // unicode-aware string reverse
 var reverse = function () {
@@ -17452,7 +17766,7 @@ var Grammar = function () {
   createClass(Grammar, [{
     key: "toHTML",
     value: function toHTML(txt) {
-      var theme = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : Default;
+      var theme = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : DefaultTheme;
 
       var tokenRows = this.tokenize(txt),
           temp = document.createElement("div");
@@ -17494,7 +17808,7 @@ var isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Const
 /Windows/.test(navigator.userAgent || "");
 
 var SCROLL_SCALE = isFirefox ? 3 : 100;
-var COUNTER$5 = 0;
+var COUNTER$4 = 0;
 var OFFSET = 0;
 
 var TextBox = function (_Surface) {
@@ -17510,7 +17824,7 @@ var TextBox = function (_Surface) {
     classCallCheck(this, TextBox);
 
     var _this = possibleConstructorReturn(this, (TextBox.__proto__ || Object.getPrototypeOf(TextBox)).call(this, Object.assign({}, {
-      id: "Primrose.Controls.TextBox[" + COUNTER$5++ + "]"
+      id: "Primrose.Controls.TextBox[" + COUNTER$4++ + "]"
     }, options)));
 
     _this.isTextBox = true;
@@ -17526,7 +17840,7 @@ var TextBox = function (_Surface) {
       _this.options = options || {};
     }
 
-    _this.useCaching = !isFirefox || !isMobile$1;
+    _this.useCaching = !isFirefox || !isMobile$2;
 
     var makeCursorCommand = function makeCursorCommand(name) {
       var method = name.toLowerCase();
@@ -17985,7 +18299,7 @@ var TextBox = function (_Surface) {
 
       // draw the current row highlighter
       if (this.focused) {
-        this.fillRect(this._bgfx, this.theme.regular.currentRowBackColor || Default.regular.currentRowBackColor, 0, minCursor.y + OFFSETY, this.gridBounds.width, maxCursor.y - minCursor.y + 1);
+        this.fillRect(this._bgfx, this.theme.regular.currentRowBackColor || DefaultTheme.regular.currentRowBackColor, 0, minCursor.y + OFFSETY, this.gridBounds.width, maxCursor.y - minCursor.y + 1);
       }
 
       for (var y = 0; y < this._tokenRows.length; ++y) {
@@ -18005,7 +18319,7 @@ var TextBox = function (_Surface) {
               var selectionFront = Cursor.max(minCursor, tokenFront);
               var selectionBack = Cursor.min(maxCursor, tokenBack);
               var cw = selectionBack.i - selectionFront.i;
-              this.fillRect(this._bgfx, this.theme.regular.selectedBackColor || Default.regular.selectedBackColor, selectionFront.x, selectionFront.y + OFFSETY, cw, 1);
+              this.fillRect(this._bgfx, this.theme.regular.selectedBackColor || DefaultTheme.regular.selectedBackColor, selectionFront.x, selectionFront.y + OFFSETY, cw, 1);
             }
           }
 
@@ -18121,7 +18435,7 @@ var TextBox = function (_Surface) {
           while (lineNumber.length < this._lineCountWidth) {
             lineNumber = " " + lineNumber;
           }
-          this.fillRect(this._tgfx, this.theme.regular.selectedBackColor || Default.regular.selectedBackColor, 0, y, this.gridBounds.x, 1);
+          this.fillRect(this._tgfx, this.theme.regular.selectedBackColor || DefaultTheme.regular.selectedBackColor, 0, y, this.gridBounds.x, 1);
           this._tgfx.font = "bold " + this.character.height + "px " + this.theme.fontFamily;
 
           if (currentLine > lastLine) {
@@ -18135,7 +18449,7 @@ var TextBox = function (_Surface) {
       this._tgfx.restore();
 
       if (this.showLineNumbers) {
-        this.strokeRect(this._tgfx, this.theme.regular.foreColor || Default.regular.foreColor, 0, 0, this.gridBounds.x, this.gridBounds.height);
+        this.strokeRect(this._tgfx, this.theme.regular.foreColor || DefaultTheme.regular.foreColor, 0, 0, this.gridBounds.x, this.gridBounds.height);
       }
 
       // draw the scrollbars
@@ -18145,7 +18459,7 @@ var TextBox = function (_Surface) {
             scrollX = this.scroll.x * drawWidth / maxLineWidth + this.gridBounds.x * this.character.width,
             scrollY = this.scroll.y * drawHeight / this._tokenRows.length;
 
-        this._tgfx.fillStyle = this.theme.regular.selectedBackColor || Default.regular.selectedBackColor;
+        this._tgfx.fillStyle = this.theme.regular.selectedBackColor || DefaultTheme.regular.selectedBackColor;
         // horizontal
         var bw;
         if (!this.wordWrap && maxLineWidth > this.gridBounds.width) {
@@ -18171,7 +18485,7 @@ var TextBox = function (_Surface) {
       this._tgfx.restore();
       this._tgfx.strokeRect(1, 1, this.imageWidth - 2, this.imageHeight - 2);
       if (!this.focused) {
-        this._tgfx.fillStyle = this.theme.regular.unfocused || Default.regular.unfocused;
+        this._tgfx.fillStyle = this.theme.regular.unfocused || DefaultTheme.regular.unfocused;
         this._tgfx.fillRect(0, 0, this.imageWidth, this.imageHeight);
       }
     }
@@ -18333,7 +18647,7 @@ var TextBox = function (_Surface) {
       return this._theme;
     },
     set: function set(t) {
-      this._theme = Object.assign({}, Default, t);
+      this._theme = Object.assign({}, DefaultTheme, t);
       this._theme.fontSize = this.fontSize;
       this._rowCache = {};
       this.render();
@@ -18418,101 +18732,6 @@ var TextBox = function (_Surface) {
   }]);
   return TextBox;
 }(Surface);
-
-var PlainText$2 = new Grammar("PlainText", [["newlines", /(?:\r\n|\r|\n)/]]);
-
-////
-// For all of these commands, the "current" cursor is:
-// If SHIFT is not held, then "front".
-// If SHIFT is held, then "back"
-//
-var TextInput$2 = new BasicTextInput("Text Line input commands");
-
-var COUNTER$6 = 0;
-
-var TextInput = function (_TextBox) {
-  inherits(TextInput, _TextBox);
-
-  function TextInput(options) {
-    classCallCheck(this, TextInput);
-
-    var _this = possibleConstructorReturn(this, (TextInput.__proto__ || Object.getPrototypeOf(TextInput)).call(this, Object.assign({}, {
-      id: "Primrose.Controls.TextInput[" + COUNTER$6++ + "]",
-      padding: 5,
-      singleLine: true,
-      disableWordWrap: true,
-      hideLineNumbers: true,
-      hideScrollBars: true,
-      tabWidth: 1,
-      tokenizer: PlainText$2,
-      commands: TextInput$2
-    }), options));
-
-    _this.passwordCharacter = _this.options.passwordCharacter;
-    return _this;
-  }
-
-  createClass(TextInput, [{
-    key: "drawText",
-    value: function drawText(ctx, txt, x, y) {
-      if (this.passwordCharacter) {
-        var val = "";
-        for (var i = 0; i < txt.length; ++i) {
-          val += this.passwordCharacter;
-        }
-        txt = val;
-      }
-      get$1(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "drawText", this).call(this, ctx, txt, x, y);
-    }
-  }, {
-    key: "value",
-    get: function get() {
-      return get$1(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "value", this);
-    },
-    set: function set(v) {
-      v = v || "";
-      v = v.replace(/\r?\n/g, "");
-      set$1(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "value", v, this);
-    }
-  }, {
-    key: "selectedText",
-    get: function get() {
-      return get$1(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "selectedText", this);
-    },
-    set: function set(v) {
-      v = v || "";
-      v = v.replace(/\r?\n/g, "");
-      set$1(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "selectedText", v, this);
-    }
-  }]);
-  return TextInput;
-}(TextBox);
-
-function cascadeElement(id, tag, DOMClass, add) {
-  var elem = null;
-  if (id === null) {
-    elem = document.createElement(tag);
-    elem.id = id = "auto_" + tag + Date.now();
-  } else if (DOMClass === undefined || id instanceof DOMClass) {
-    elem = id;
-  } else if (typeof id === "string") {
-    elem = document.getElementById(id);
-    if (elem === null) {
-      elem = document.createElement(tag);
-      elem.id = id;
-      if (add) {
-        document.body.appendChild(elem);
-      }
-    } else if (elem.tagName !== tag.toUpperCase()) {
-      elem = null;
-    }
-  }
-
-  if (elem === null) {
-    throw new Error(id + " does not refer to a valid " + tag + " element.");
-  }
-  return elem;
-}
 
 function makeHidingContainer(id, obj) {
   var elem = cascadeElement(id, "div", window.HTMLDivElement);
@@ -26351,6 +26570,30 @@ RingGeometry.prototype = Object.create(Geometry.prototype);
 RingGeometry.prototype.constructor = RingGeometry;
 
 /**
+ * @author mrdoob / http://mrdoob.com/
+ * based on http://papervision3d.googlecode.com/svn/trunk/as3/trunk/src/org/papervision3d/objects/primitives/Plane.as
+ */
+
+function PlaneGeometry(width, height, widthSegments, heightSegments) {
+
+	Geometry.call(this);
+
+	this.type = 'PlaneGeometry';
+
+	this.parameters = {
+		width: width,
+		height: height,
+		widthSegments: widthSegments,
+		heightSegments: heightSegments
+	};
+
+	this.fromBufferGeometry(new PlaneBufferGeometry(width, height, widthSegments, heightSegments));
+}
+
+PlaneGeometry.prototype = Object.create(Geometry.prototype);
+PlaneGeometry.prototype.constructor = PlaneGeometry;
+
+/**
  * @author Mugen87 / https://github.com/Mugen87
  */
 
@@ -31720,7 +31963,7 @@ var PoseInputProcessor = function (_InputProcessor) {
             pos = this.currentPose && this.currentPose.position;
         if (orient) {
           this.poseQuaternion.fromArray(orient);
-          if (isMobile$1 && isIE) {
+          if (isMobile$2 && isIE) {
             this.poseQuaternion.multiply(IE_CORRECTION);
           }
         } else {
@@ -32080,7 +32323,7 @@ var Touch = function (_InputProcessor) {
   return Touch;
 }(InputProcessor);
 
-var Speech$2 = function (_InputProcessor) {
+var Speech$1 = function (_InputProcessor) {
   inherits(Speech, _InputProcessor);
 
   function Speech(commands) {
@@ -32241,112 +32484,87 @@ var Speech$2 = function (_InputProcessor) {
   return Speech;
 }(InputProcessor);
 
-function lock(element) {
-  var type = screen.orientation && screen.orientation.type || screen.mozOrientation || "";
-  if (type.indexOf("landscape") === -1) {
-    type = "landscape-primary";
-  }
-  if (screen.orientation && screen.orientation.lock) {
-    return screen.orientation.lock(type);
-  } else if (screen.mozLockOrientation) {
-    var locked = screen.mozLockOrientation(type);
-    if (locked) {
-      return Promise.resolve(element);
-    }
-  } else {
-    return Promise.reject(new Error("Pointer lock not supported."));
-  }
-}
-
-function unlock() {
-  if (screen.orientation && screen.orientation.unlock) {
-    screen.orientation.unlock();
-  } else if (screen.mozUnlockOrientation) {
-    screen.mozUnlockOrientation();
-  }
-}
-
 /* eslint-disable no-unused-vars */
 
 var hasOwnProperty = Object.prototype.hasOwnProperty;
 var propIsEnumerable = Object.prototype.propertyIsEnumerable;
 
 function toObject(val) {
-	if (val === null || val === undefined) {
-		throw new TypeError('Object.assign cannot be called with null or undefined');
-	}
+  if (val === null || val === undefined) {
+    throw new TypeError('Object.assign cannot be called with null or undefined');
+  }
 
-	return Object(val);
+  return Object(val);
 }
 
 function shouldUseNative() {
-	try {
-		if (!Object.assign) {
-			return false;
-		}
+  try {
+    if (!Object.assign) {
+      return false;
+    }
 
-		// Detect buggy property enumeration order in older V8 versions.
+    // Detect buggy property enumeration order in older V8 versions.
 
-		// https://bugs.chromium.org/p/v8/issues/detail?id=4118
-		var test1 = new String('abc'); // eslint-disable-line
-		test1[5] = 'de';
-		if (Object.getOwnPropertyNames(test1)[0] === '5') {
-			return false;
-		}
+    // https://bugs.chromium.org/p/v8/issues/detail?id=4118
+    var test1 = new String('abc'); // eslint-disable-line
+    test1[5] = 'de';
+    if (Object.getOwnPropertyNames(test1)[0] === '5') {
+      return false;
+    }
 
-		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
-		var test2 = {};
-		for (var i = 0; i < 10; i++) {
-			test2['_' + String.fromCharCode(i)] = i;
-		}
-		var order2 = Object.getOwnPropertyNames(test2).map(function (n) {
-			return test2[n];
-		});
-		if (order2.join('') !== '0123456789') {
-			return false;
-		}
+    // https://bugs.chromium.org/p/v8/issues/detail?id=3056
+    var test2 = {};
+    for (var i = 0; i < 10; i++) {
+      test2['_' + String.fromCharCode(i)] = i;
+    }
+    var order2 = Object.getOwnPropertyNames(test2).map(function (n) {
+      return test2[n];
+    });
+    if (order2.join('') !== '0123456789') {
+      return false;
+    }
 
-		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
-		var test3 = {};
-		'abcdefghijklmnopqrst'.split('').forEach(function (letter) {
-			test3[letter] = letter;
-		});
-		if (Object.keys(Object.assign({}, test3)).join('') !== 'abcdefghijklmnopqrst') {
-			return false;
-		}
+    // https://bugs.chromium.org/p/v8/issues/detail?id=3056
+    var test3 = {};
+    'abcdefghijklmnopqrst'.split('').forEach(function (letter) {
+      test3[letter] = letter;
+    });
+    if (Object.keys(Object.assign({}, test3)).join('') !== 'abcdefghijklmnopqrst') {
+      return false;
+    }
 
-		return true;
-	} catch (e) {
-		// We don't expect any of the above to throw, but better to be safe.
-		return false;
-	}
+    return true;
+  } catch (e) {
+    // We don't expect any of the above to throw, but better to be safe.
+    return false;
+  }
 }
 
-var index$4 = shouldUseNative() ? Object.assign : function (target, source) {
-	var from;
-	var to = toObject(target);
-	var symbols;
+var index$5 = shouldUseNative() ? Object.assign : function (target, source) {
+  var from;
+  var to = toObject(target);
+  var symbols;
 
-	for (var s = 1; s < arguments.length; s++) {
-		from = Object(arguments[s]);
+  for (var s = 1; s < arguments.length; s++) {
+    from = Object(arguments[s]);
 
-		for (var key in from) {
-			if (hasOwnProperty.call(from, key)) {
-				to[key] = from[key];
-			}
-		}
+    for (var key in from) {
+      if (hasOwnProperty.call(from, key)) {
+        to[key] = from[key];
+      }
+    }
 
-		if (Object.getOwnPropertySymbols) {
-			symbols = Object.getOwnPropertySymbols(from);
-			for (var i = 0; i < symbols.length; i++) {
-				if (propIsEnumerable.call(from, symbols[i])) {
-					to[symbols[i]] = from[symbols[i]];
-				}
-			}
-		}
-	}
+    if (Object.getOwnPropertySymbols) {
+      symbols = Object.getOwnPropertySymbols(from);
+      for (var i = 0; i < symbols.length; i++) {
+        if (propIsEnumerable.call(from, symbols[i])) {
+          to[symbols[i]] = from[symbols[i]];
+        }
+      }
+    }
+  }
 
-	return to;
+  return to;
 };
 
 /*
@@ -32471,7 +32689,7 @@ Util.isMobile = function () {
   return check;
 };
 
-Util.extend = index$4;
+Util.extend = index$5;
 
 Util.safariCssSizeWorkaround = function (canvas) {
   // TODO(smus): Remove this workaround when Safari for iOS is fixed.
@@ -32696,14 +32914,222 @@ Util.frameDataFromPose = function () {
   };
 }();
 
+var asyncGenerator$1 = function () {
+  function AwaitValue(value) {
+    this.value = value;
+  }
+
+  function AsyncGenerator(gen) {
+    var front, back;
+
+    function send(key, arg) {
+      return new Promise(function (resolve, reject) {
+        var request = {
+          key: key,
+          arg: arg,
+          resolve: resolve,
+          reject: reject,
+          next: null
+        };
+
+        if (back) {
+          back = back.next = request;
+        } else {
+          front = back = request;
+          resume(key, arg);
+        }
+      });
+    }
+
+    function resume(key, arg) {
+      try {
+        var result = gen[key](arg);
+        var value = result.value;
+
+        if (value instanceof AwaitValue) {
+          Promise.resolve(value.value).then(function (arg) {
+            resume("next", arg);
+          }, function (arg) {
+            resume("throw", arg);
+          });
+        } else {
+          settle(result.done ? "return" : "normal", result.value);
+        }
+      } catch (err) {
+        settle("throw", err);
+      }
+    }
+
+    function settle(type, value) {
+      switch (type) {
+        case "return":
+          front.resolve({
+            value: value,
+            done: true
+          });
+          break;
+
+        case "throw":
+          front.reject(value);
+          break;
+
+        default:
+          front.resolve({
+            value: value,
+            done: false
+          });
+          break;
+      }
+
+      front = front.next;
+
+      if (front) {
+        resume(front.key, front.arg);
+      } else {
+        back = null;
+      }
+    }
+
+    this._invoke = send;
+
+    if (typeof gen.return !== "function") {
+      this.return = undefined;
+    }
+  }
+
+  if (typeof Symbol === "function" && Symbol.asyncIterator) {
+    AsyncGenerator.prototype[Symbol.asyncIterator] = function () {
+      return this;
+    };
+  }
+
+  AsyncGenerator.prototype.next = function (arg) {
+    return this._invoke("next", arg);
+  };
+
+  AsyncGenerator.prototype.throw = function (arg) {
+    return this._invoke("throw", arg);
+  };
+
+  AsyncGenerator.prototype.return = function (arg) {
+    return this._invoke("return", arg);
+  };
+
+  return {
+    wrap: function wrap(fn) {
+      return function () {
+        return new AsyncGenerator(fn.apply(this, arguments));
+      };
+    },
+    await: function await(value) {
+      return new AwaitValue(value);
+    }
+  };
+}();
+
+var classCallCheck$1 = function classCallCheck$1(instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError("Cannot call a class as a function");
+  }
+};
+
+var createClass$1 = function () {
+  function defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+
+  return function (Constructor, protoProps, staticProps) {
+    if (protoProps) defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) defineProperties(Constructor, staticProps);
+    return Constructor;
+  };
+}();
+
+var get$1$1 = function get$1$1(object, property, receiver) {
+  if (object === null) object = Function.prototype;
+  var desc = Object.getOwnPropertyDescriptor(object, property);
+
+  if (desc === undefined) {
+    var parent = Object.getPrototypeOf(object);
+
+    if (parent === null) {
+      return undefined;
+    } else {
+      return get$1$1(parent, property, receiver);
+    }
+  } else if ("value" in desc) {
+    return desc.value;
+  } else {
+    var getter = desc.get;
+
+    if (getter === undefined) {
+      return undefined;
+    }
+
+    return getter.call(receiver);
+  }
+};
+
+var inherits$1 = function inherits$1(subClass, superClass) {
+  if (typeof superClass !== "function" && superClass !== null) {
+    throw new TypeError("Super expression must either be null or a function, not " + (typeof superClass === 'undefined' ? 'undefined' : _typeof(superClass)));
+  }
+
+  subClass.prototype = Object.create(superClass && superClass.prototype, {
+    constructor: {
+      value: subClass,
+      enumerable: false,
+      writable: true,
+      configurable: true
+    }
+  });
+  if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
+};
+
+var possibleConstructorReturn$1 = function possibleConstructorReturn$1(self, call) {
+  if (!self) {
+    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+  }
+
+  return call && ((typeof call === 'undefined' ? 'undefined' : _typeof(call)) === "object" || typeof call === "function") ? call : self;
+};
+
+var set$1$1 = function set$1$1(object, property, value, receiver) {
+  var desc = Object.getOwnPropertyDescriptor(object, property);
+
+  if (desc === undefined) {
+    var parent = Object.getPrototypeOf(object);
+
+    if (parent !== null) {
+      set$1$1(parent, property, value, receiver);
+    }
+  } else if ("value" in desc && desc.writable) {
+    desc.value = value;
+  } else {
+    var setter = desc.set;
+
+    if (setter !== undefined) {
+      setter.call(receiver, value);
+    }
+  }
+
+  return value;
+};
+
 var SensorSample = function () {
   function SensorSample(sample, timestampS) {
-    classCallCheck(this, SensorSample);
+    classCallCheck$1(this, SensorSample);
 
     this.set(sample, timestampS);
   }
 
-  createClass(SensorSample, [{
+  createClass$1(SensorSample, [{
     key: "set",
     value: function set(sample, timestampS) {
       this.sample = sample;
@@ -33121,7 +33547,7 @@ var DEBUG = false;
 
 var ComplementaryFilter = function () {
   function ComplementaryFilter(kFilter) {
-    classCallCheck(this, ComplementaryFilter);
+    classCallCheck$1(this, ComplementaryFilter);
 
     this.kFilter = kFilter;
 
@@ -33152,7 +33578,7 @@ var ComplementaryFilter = function () {
     this.gyroIntegralQ = new MathUtil.Quaternion();
   }
 
-  createClass(ComplementaryFilter, [{
+  createClass$1(ComplementaryFilter, [{
     key: "addAccelMeasurement",
     value: function addAccelMeasurement(vector, timestampS) {
       this.currentAccelMeasurement.set(vector, timestampS);
@@ -33282,63 +33708,63 @@ var DEBUG$1 = false;
  */
 
 var PosePredictor = function () {
-    function PosePredictor(predictionTimeS) {
-        classCallCheck(this, PosePredictor);
+  function PosePredictor(predictionTimeS) {
+    classCallCheck$1(this, PosePredictor);
 
-        this.predictionTimeS = predictionTimeS;
+    this.predictionTimeS = predictionTimeS;
 
-        // The quaternion corresponding to the previous state.
-        this.previousQ = new MathUtil.Quaternion();
-        // Previous time a prediction occurred.
-        this.previousTimestampS = null;
+    // The quaternion corresponding to the previous state.
+    this.previousQ = new MathUtil.Quaternion();
+    // Previous time a prediction occurred.
+    this.previousTimestampS = null;
 
-        // The delta quaternion that adjusts the current pose.
-        this.deltaQ = new MathUtil.Quaternion();
-        // The output quaternion.
-        this.outQ = new MathUtil.Quaternion();
-    }
+    // The delta quaternion that adjusts the current pose.
+    this.deltaQ = new MathUtil.Quaternion();
+    // The output quaternion.
+    this.outQ = new MathUtil.Quaternion();
+  }
 
-    createClass(PosePredictor, [{
-        key: "getPrediction",
-        value: function getPrediction(currentQ, gyro, timestampS) {
-            if (!this.previousTimestampS) {
-                this.previousQ.copy(currentQ);
-                this.previousTimestampS = timestampS;
-                return currentQ;
-            }
+  createClass$1(PosePredictor, [{
+    key: "getPrediction",
+    value: function getPrediction(currentQ, gyro, timestampS) {
+      if (!this.previousTimestampS) {
+        this.previousQ.copy(currentQ);
+        this.previousTimestampS = timestampS;
+        return currentQ;
+      }
 
-            // Calculate axis and angle based on gyroscope rotation rate data.
-            var axis = new MathUtil.Vector3();
-            axis.copy(gyro);
-            axis.normalize();
+      // Calculate axis and angle based on gyroscope rotation rate data.
+      var axis = new MathUtil.Vector3();
+      axis.copy(gyro);
+      axis.normalize();
 
-            var angularSpeed = gyro.length();
+      var angularSpeed = gyro.length();
 
-            // If we're rotating slowly, don't do prediction.
-            if (angularSpeed < MathUtil.degToRad * 20) {
-                if (DEBUG$1) {
-                    console.log('Moving slowly, at %s deg/s: no prediction', (MathUtil.radToDeg * angularSpeed).toFixed(1));
-                }
-                this.outQ.copy(currentQ);
-                this.previousQ.copy(currentQ);
-                return this.outQ;
-            }
-
-            // Get the predicted angle based on the time delta and latency.
-            var deltaT = timestampS - this.previousTimestampS;
-            var predictAngle = angularSpeed * this.predictionTimeS;
-
-            this.deltaQ.setFromAxisAngle(axis, predictAngle);
-            this.outQ.copy(this.previousQ);
-            this.outQ.multiply(this.deltaQ);
-
-            this.previousQ.copy(currentQ);
-            this.previousTimestampS = timestampS;
-
-            return this.outQ;
+      // If we're rotating slowly, don't do prediction.
+      if (angularSpeed < MathUtil.degToRad * 20) {
+        if (DEBUG$1) {
+          console.log('Moving slowly, at %s deg/s: no prediction', (MathUtil.radToDeg * angularSpeed).toFixed(1));
         }
-    }]);
-    return PosePredictor;
+        this.outQ.copy(currentQ);
+        this.previousQ.copy(currentQ);
+        return this.outQ;
+      }
+
+      // Get the predicted angle based on the time delta and latency.
+      var deltaT = timestampS - this.previousTimestampS;
+      var predictAngle = angularSpeed * this.predictionTimeS;
+
+      this.deltaQ.setFromAxisAngle(axis, predictAngle);
+      this.outQ.copy(this.previousQ);
+      this.outQ.multiply(this.deltaQ);
+
+      this.previousQ.copy(currentQ);
+      this.previousTimestampS = timestampS;
+
+      return this.outQ;
+    }
+  }]);
+  return PosePredictor;
 }();
 
 /*
@@ -33361,7 +33787,7 @@ var PosePredictor = function () {
 
 var FusionPoseSensor = function () {
   function FusionPoseSensor() {
-    classCallCheck(this, FusionPoseSensor);
+    classCallCheck$1(this, FusionPoseSensor);
 
     this.deviceId = 'webvr-polyfill:fused';
     this.deviceName = 'VR Position Device (webvr-polyfill:fused)';
@@ -33404,7 +33830,7 @@ var FusionPoseSensor = function () {
     this.orientationOut_ = new Float32Array(4);
   }
 
-  createClass(FusionPoseSensor, [{
+  createClass$1(FusionPoseSensor, [{
     key: "getPosition",
     value: function getPosition() {
       // This PoseSensor doesn't support position
@@ -33547,7 +33973,7 @@ var defaultRightBounds = [0.5, 0, 0.5, 1];
  */
 
 var VRFrameData = function VRFrameData() {
-  classCallCheck(this, VRFrameData);
+  classCallCheck$1(this, VRFrameData);
 
   this.leftProjectionMatrix = new Float32Array(16);
   this.leftViewMatrix = new Float32Array(16);
@@ -33561,7 +33987,7 @@ var VRFrameData = function VRFrameData() {
  */
 var VRDisplay = function () {
   function VRDisplay() {
-    classCallCheck(this, VRDisplay);
+    classCallCheck$1(this, VRDisplay);
 
     this.isPolyfilled = true;
     this.displayId = nextDisplayId++;
@@ -33594,7 +34020,7 @@ var VRDisplay = function () {
     this.fullscreenErrorHandler_ = null;
   }
 
-  createClass(VRDisplay, [{
+  createClass$1(VRDisplay, [{
     key: 'getFrameData',
     value: function getFrameData(frameData) {
       // TODO: Technically this should retain it's value for the duration of a frame
@@ -33961,12 +34387,12 @@ var Eye = {
  */
 
 var CardboardVRDisplay = function (_VRDisplay) {
-  inherits(CardboardVRDisplay, _VRDisplay);
+  inherits$1(CardboardVRDisplay, _VRDisplay);
 
   function CardboardVRDisplay() {
-    classCallCheck(this, CardboardVRDisplay);
+    classCallCheck$1(this, CardboardVRDisplay);
 
-    var _this = possibleConstructorReturn(this, (CardboardVRDisplay.__proto__ || Object.getPrototypeOf(CardboardVRDisplay)).call(this));
+    var _this = possibleConstructorReturn$1(this, (CardboardVRDisplay.__proto__ || Object.getPrototypeOf(CardboardVRDisplay)).call(this));
 
     _this.DOMElement = null;
     _this.displayName = 'Google Cardboard';
@@ -33984,7 +34410,7 @@ var CardboardVRDisplay = function (_VRDisplay) {
     return _this;
   }
 
-  createClass(CardboardVRDisplay, [{
+  createClass$1(CardboardVRDisplay, [{
     key: "getImmediatePose",
     value: function getImmediatePose() {
       return {
@@ -34119,7 +34545,7 @@ function InstallWebVRSpecShim() {
 
 var WebVRPolyfill = function () {
   function WebVRPolyfill() {
-    classCallCheck(this, WebVRPolyfill);
+    classCallCheck$1(this, WebVRPolyfill);
 
     this.displays = [];
     this.devicesPopulated = false;
@@ -34133,7 +34559,7 @@ var WebVRPolyfill = function () {
     InstallWebVRSpecShim();
   }
 
-  createClass(WebVRPolyfill, [{
+  createClass$1(WebVRPolyfill, [{
     key: "isWebVRAvailable",
     value: function isWebVRAvailable() {
       return 'getVRDisplays' in navigator;
@@ -34280,241 +34706,6 @@ if (!window.WebVRConfig.DEFER_INITIALIZATION) {
   };
 }
 
-var FullScreen = AsyncLockRequest("Fullscreen", ["fullscreenElement", "mozFullScreenElement", "webkitFullscreenElement", "msFullscreenElement"], ["onfullscreenchange", "onmozfullscreenchange", "onwebkitfullscreenchange", "onmsfullscreenchange"], ["onfullscreenerror", "onmozfullscreenerror", "onwebkitfullscreenerror", "onmsfullscreenerror"], ["requestFullscreen", "mozRequestFullScreen", "webkitRequestFullscreen", "webkitRequestFullScreen", "msRequestFullscreen"], ["exitFullscreen", "mozExitFullScreen", "webkitExitFullscreen", "webkitExitFullScreen", "msExitFullscreen"], function (arg) {
-  return arg || window.Element && window.Element.ALLOW_KEYBOARD_INPUT || undefined;
-});
-
-function immutable(value) {
-  var getter = typeof value === "function" ? value : function () {
-    return value;
-  };
-  return {
-    enumerable: true,
-    get: getter,
-    set: function set() {
-      throw new Error("This value is immutable and may only be read, not written.");
-    }
-  };
-}
-
-function mutable(value, type) {
-  return {
-    enumerable: true,
-    get: function get() {
-      return value;
-    },
-    set: function set(v) {
-      var t = typeof v === "undefined" ? "undefined" : _typeof(v);
-      if (t !== type) {
-        throw new Error("Value must be a " + type + ". An " + t + " was provided instead: " + v);
-      }
-      value = v;
-    }
-  };
-}
-
-var isMobile$2 = (function (a) {
-  return (/(android|bb\d+|meego).+|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od|ad)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(a) || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substring(0, 4))
-  );
-})(navigator.userAgent || navigator.vendor || window.opera);
-
-var Orientation = { lock: lock, unlock: unlock };
-
-function warn(msg) {
-  return function (exp) {
-    console.warn(msg, exp);
-  };
-}
-
-function defaultPose() {
-  return {
-    position: [0, 0, 0],
-    orientation: [0, 0, 0, 1],
-    linearVelocity: null,
-    linearAcceleration: null,
-    angularVelocity: null,
-    angularAcceleration: null
-  };
-}
-
-function fireDisplayPresentChange(evt) {
-  if (!FullScreen.isActive) {
-    FullScreen.removeChangeListener(fireDisplayPresentChange);
-  }
-  window.dispatchEvent(new Event("vrdisplaypresentchange"));
-}
-
-var WebVRStandardMonitor = function () {
-  createClass(WebVRStandardMonitor, null, [{
-    key: "standardFullScreenBehavior",
-    value: function standardFullScreenBehavior(elem) {
-      return FullScreen.request(elem).catch(warn("FullScreen failed")).then(WebVRStandardMonitor.standardLockBehavior);
-    }
-  }, {
-    key: "standardLockBehavior",
-    value: function standardLockBehavior(elem) {
-      if (isMobile$2) {
-        return Orientation.lock(elem).catch(warn("OrientationLock failed"));
-      } else {
-        return PointerLock.request(elem).catch(warn("PointerLock failed"));
-      }
-    }
-  }, {
-    key: "standardExitFullScreenBehavior",
-    value: function standardExitFullScreenBehavior() {
-      return WebVRStandardMonitor.standardUnlockBehavior().then(function () {
-        return FullScreen.exit();
-      }).catch(warn("FullScreen failed"));
-    }
-  }, {
-    key: "standardUnlockBehavior",
-    value: function standardUnlockBehavior() {
-      if (isMobile$2) {
-        Orientation.unlock();
-        return Promise.resolve();
-      } else {
-        return PointerLock.exit().catch(warn("PointerLock exit failed"));
-      }
-    }
-  }]);
-
-  function WebVRStandardMonitor(display) {
-    classCallCheck(this, WebVRStandardMonitor);
-
-    if (this !== window && this !== undefined) {
-      this._currentLayers = [];
-      this._display = display;
-
-      Object.defineProperties(this, {
-        capabilities: immutable(Object.defineProperties({}, {
-          hasPosition: immutable(false),
-          hasOrientation: immutable(isMobile$2),
-          hasExternalDisplay: immutable(false),
-          canPresent: immutable(true),
-          maxLayers: immutable(1)
-        })),
-        isPolyfilled: immutable(display && display.isPolyfilled || false),
-        displayId: immutable(0),
-        displayName: immutable(isMobile$2 && "Magic Window" || "Standard Monitor"),
-        isConnected: immutable(true),
-        stageParameters: immutable(null),
-        isPresenting: immutable(function () {
-          return FullScreen.isActive;
-        }),
-
-        depthNear: mutable(0.01, "number"),
-        depthFar: mutable(10000.0, "number")
-      });
-    }
-  }
-
-  createClass(WebVRStandardMonitor, [{
-    key: "requestAnimationFrame",
-    value: function requestAnimationFrame(thunk) {
-      return window.requestAnimationFrame(thunk);
-    }
-  }, {
-    key: "cancelAnimationFrame",
-    value: function cancelAnimationFrame(handle) {
-      window.cancelAnimationFrame(handle);
-    }
-  }, {
-    key: "submitFrame",
-    value: function submitFrame() {}
-  }, {
-    key: "getPose",
-    value: function getPose() {
-      var display = isMobile$2 && this._display;
-      if (display) {
-        return display.getPose();
-      } else {
-        return defaultPose();
-      }
-    }
-  }, {
-    key: "getImmediatePose",
-    value: function getImmediatePose() {
-      var display = isMobile$2 && this._display;
-      if (display) {
-        return display.getImmediatePose();
-      } else {
-        return defaultPose();
-      }
-    }
-  }, {
-    key: "resetPose",
-    value: function resetPose() {
-      var display = isMobile$2 && this._display;
-      if (display) {
-        return display.resetPose();
-      }
-    }
-  }, {
-    key: "requestPresent",
-    value: function requestPresent(layers) {
-      for (var i = 0; i < this.capabilities.maxLayers && i < layers.length; ++i) {
-        this._currentLayers[i] = layers[i];
-      }
-      var elem = layers[0].source;
-      if (isMobile$2) {
-        return this._display.requestPresent(layers).then(function () {
-          return WebVRStandardMonitor.standardLockBehavior(elem);
-        });
-      } else {
-        FullScreen.addChangeListener(fireDisplayPresentChange);
-        return WebVRStandardMonitor.standardFullScreenBehavior(elem);
-      }
-    }
-  }, {
-    key: "getLayers",
-    value: function getLayers() {
-      return this._currentLayers.slice();
-    }
-  }, {
-    key: "exitPresent",
-    value: function exitPresent() {
-      var _this = this;
-
-      this._currentLayers.splice(0);
-
-      if (isMobile$2) {
-        return WebVRStandardMonitor.standardUnlockBehavior().then(function () {
-          return _this._display.exitPresent();
-        });
-      } else {
-        return WebVRStandardMonitor.standardExitFullScreenBehavior();
-      }
-    }
-  }, {
-    key: "getEyeParameters",
-    value: function getEyeParameters(side) {
-      if (side === "left") {
-        var curLayer = this.getLayers()[0],
-            elem = curLayer && curLayer.source || document.body,
-            width = FullScreen.isActive ? screen.width : elem.clientWidth,
-            height = FullScreen.isActive ? screen.height : elem.clientHeight,
-            aspect = width / height,
-            vFOV = 25,
-            hFOV = vFOV * aspect;
-        return {
-          renderWidth: width * devicePixelRatio,
-          renderHeight: height * devicePixelRatio,
-          offset: new Float32Array([0, 0, 0]),
-          fieldOfView: {
-            upDegrees: vFOV,
-            downDegrees: vFOV,
-            leftDegrees: hFOV,
-            rightDegrees: hFOV
-          }
-        };
-      }
-    }
-  }]);
-  return WebVRStandardMonitor;
-}();
-
-WebVRStandardMonitor._shimSetup = false;
-
 function install() {
   if (!WebVRStandardMonitor._shimSetup) {
     WebVRStandardMonitor._shimSetup = true;
@@ -34546,11 +34737,12 @@ var VR = function (_PoseInputProcessor) {
     }
   }]);
 
-  function VR(avatarHeight) {
+  function VR(options) {
     classCallCheck(this, VR);
 
     var _this = possibleConstructorReturn(this, (VR.__proto__ || Object.getPrototypeOf(VR)).call(this, "VR"));
 
+    _this.options = options;
     _this._requestPresent = function (layers) {
       return _this.currentDevice.requestPresent(layers).catch(function (exp) {
         return console.warn("requstPresent", exp);
@@ -34561,19 +34753,15 @@ var VR = function (_PoseInputProcessor) {
     _this._transformers = [];
     _this.currentDeviceIndex = -1;
     _this.movePlayer = new Matrix4();
-    _this.defaultAvatarHeight = avatarHeight;
     _this.stage = null;
     _this.lastStageWidth = null;
     _this.lastStageDepth = null;
     _this.isStereo = false;
-
+    WebVRStandardMonitor.DEFAULT_FOV = _this.options.defaultFOV;
     install();
     _this.ready = navigator.getVRDisplays().then(function (displays) {
-      // We skip the Standard Monitor and Magic Window on iOS because we can't
-      // go full screen on those systems.
-      _this.displays.push.apply(_this.displays, displays.filter(function (display) {
-        return !isiOS || VR.isStereoDisplay(display);
-      }));
+      _this.displays.push.apply(_this.displays, displays);
+      _this.connect(0);
       return _this.displays;
     });
     return _this;
@@ -34688,7 +34876,7 @@ var VR = function (_PoseInputProcessor) {
         x = stage.sizeX;
         z = stage.sizeZ;
       } else {
-        this.movePlayer.makeTranslation(0, this.defaultAvatarHeight, 0);
+        this.movePlayer.makeTranslation(0, this.options.avatarHeight, 0);
         x = 0;
         z = 0;
       }
@@ -34725,7 +34913,7 @@ var VR = function (_PoseInputProcessor) {
   }, {
     key: "isNativeMobileWebVR",
     get: function get() {
-      return !(this.currentDevice && this.currentDevice.isPolyfilled) && isChrome && isMobile$1;
+      return !(this.currentDevice && this.currentDevice.isPolyfilled) && isChrome && isMobile$2;
     }
   }, {
     key: "hasStage",
@@ -34965,7 +35153,7 @@ var FPSInput = function (_AbstractEventEmitter) {
       }
     }));
 
-    _this.add(new VR(_this.options.avatarHeight));
+    _this.add(new VR(_this.options));
     _this.motionDevices.push(_this.VR);
 
     if (!_this.options.disableGamepad && GamepadManager.isAvailable) {
@@ -35294,48 +35482,6 @@ var FPSInput = function (_AbstractEventEmitter) {
   }]);
   return FPSInput;
 }(AbstractEventEmitter);
-
-var Location = function (_InputProcessor) {
-  inherits(Location, _InputProcessor);
-
-  function Location(commands, options) {
-    classCallCheck(this, Location);
-
-    var _this = possibleConstructorReturn(this, (Location.__proto__ || Object.getPrototypeOf(Location)).call(this, "Location", commands, ["LONGITUDE", "LATITUDE", "ALTITUDE", "HEADING", "SPEED"]));
-
-    _this.options = Object.assign({}, Location.DEFAULTS, options);
-
-    _this.available = !!navigator.geolocation;
-    if (_this.available) {
-      navigator.geolocation.watchPosition(_this.setState.bind(_this), function () {
-        return _this.available = false;
-      }, _this.options);
-    }
-    return _this;
-  }
-
-  createClass(Location, [{
-    key: "setState",
-    value: function setState(location) {
-      for (var p in location.coords) {
-        var k = p.toUpperCase();
-        if (this.axisNames.indexOf(k) > -1) {
-          this.setAxis(k, location.coords[p]);
-        }
-      }
-      this.update();
-    }
-  }]);
-  return Location;
-}(InputProcessor);
-
-
-
-Location.DEFAULTS = {
-  enableHighAccuracy: true,
-  maximumAge: 30000,
-  timeout: 25000
-};
 
 function number(min, max, power) {
   power = power || 1;
@@ -35677,1028 +35823,18 @@ var Manager = function (_AbstractEventEmitter) {
   return Manager;
 }(AbstractEventEmitter);
 
-var Basic = new Grammar("BASIC",
-// Grammar rules are applied in the order they are specified.
-[
-// Text needs at least the newlines token, or else every line will attempt to render as a single line and the line count won't work.
-["newlines", /(?:\r\n|\r|\n)/],
-// BASIC programs used to require the programmer type in her own line numbers. The start at the beginning of the line.
-["lineNumbers", /^\d+\s+/],
-// Comments were lines that started with the keyword "REM" (for REMARK) and ran to the end of the line. They did not have to be numbered, because they were not executable and were stripped out by the interpreter.
-["startLineComments", /^REM\s/],
-// Both double-quoted and single-quoted strings were not always supported, but in this case, I'm just demonstrating how it would be done for both.
-["strings", /"(?:\\"|[^"])*"/], ["strings", /'(?:\\'|[^'])*'/],
-// Numbers are an optional dash, followed by a optional digits, followed by optional period, followed by 1 or more required digits. This allows us to match both integers and decimal numbers, both positive and negative, with or without leading zeroes for decimal numbers between (-1, 1).
-["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/],
-// Keywords are really just a list of different words we want to match, surrounded by the "word boundary" selector "\b".
-["keywords", /\b(?:RESTORE|REPEAT|RETURN|LOAD|LABEL|DATA|READ|THEN|ELSE|FOR|DIM|LET|IF|TO|STEP|NEXT|WHILE|WEND|UNTIL|GOTO|GOSUB|ON|TAB|AT|END|STOP|PRINT|INPUT|RND|INT|CLS|CLK|LEN)\b/],
-// Sometimes things we want to treat as keywords have different meanings in different locations. We can specify rules for tokens more than once.
-["keywords", /^DEF FN/],
-// These are all treated as mathematical operations.
-["operators", /(?:\+|;|,|-|\*\*|\*|\/|>=|<=|=|<>|<|>|OR|AND|NOT|MOD|\(|\)|\[|\])/],
-// Once everything else has been matched, the left over blocks of words are treated as variable and function names.
-["identifiers", /\w+\$?/]]);
-var oldTokenize = Basic.tokenize;
-Basic.tokenize = function (code) {
-  return oldTokenize.call(this, code.toUpperCase());
+var PlainText = new Grammar("PlainText", [["newlines", /(?:\r\n|\r|\n)/]]);
+
+var PIXEL_SCALES = [0.5, 0.25, 0.333333, 0.5, 1];
+
+var Quality = {
+  NONE: 0,
+  VERYLOW: 1,
+  LOW: 2,
+  MEDIUM: 3,
+  HIGH: 4,
+  MAXIMUM: PIXEL_SCALES.length - 1
 };
-
-Basic.interpret = function (sourceCode, input, output, errorOut, next, clearScreen, loadFile, done) {
-  var tokens = this.tokenize(sourceCode),
-      EQUAL_SIGN = new Token("=", "operators"),
-      counter = 0,
-      isDone = false,
-      program = {},
-      lineNumbers = [],
-      currentLine = [],
-      lines = [currentLine],
-      data = [],
-      returnStack = [],
-      forLoopCounters = {},
-      dataCounter = 0,
-      state = {
-    INT: function INT(v) {
-      return v | 0;
-    },
-    RND: function RND() {
-      return Math.random();
-    },
-    CLK: function CLK() {
-      return Date.now() / 3600000;
-    },
-    LEN: function LEN(id) {
-      return id.length;
-    },
-    LINE: function LINE() {
-      return lineNumbers[counter];
-    },
-    TAB: function TAB(v) {
-      var str = "";
-      for (var i = 0; i < v; ++i) {
-        str += " ";
-      }
-      return str;
-    },
-    POW: function POW(a, b) {
-      return Math.pow(a, b);
-    }
-  };
-
-  function toNum(ln) {
-    return new Token(ln.toString(), "numbers");
-  }
-
-  function toStr(str) {
-    return new Token("\"" + str.replace("\n", "\\n").replace("\"", "\\\"") + "\"", "strings");
-  }
-
-  var tokenMap = {
-    "OR": "||",
-    "AND": "&&",
-    "NOT": "!",
-    "MOD": "%",
-    "<>": "!="
-  };
-
-  while (tokens.length > 0) {
-    var token = tokens.shift();
-    if (token.type === "newlines") {
-      currentLine = [];
-      lines.push(currentLine);
-    } else if (token.type !== "regular" && token.type !== "comments") {
-      token.value = tokenMap[token.value] || token.value;
-      currentLine.push(token);
-    }
-  }
-
-  for (var i = 0; i < lines.length; ++i) {
-    var line = lines[i];
-    if (line.length > 0) {
-      var lastLine = lineNumbers[lineNumbers.length - 1];
-      var lineNumber = line.shift();
-
-      if (lineNumber.type !== "lineNumbers") {
-        line.unshift(lineNumber);
-
-        if (lastLine === undefined) {
-          lastLine = -1;
-        }
-
-        lineNumber = toNum(lastLine + 1);
-      }
-
-      lineNumber = parseFloat(lineNumber.value);
-      if (lastLine && lineNumber <= lastLine) {
-        throw new Error("expected line number greater than " + lastLine + ", but received " + lineNumber + ".");
-      } else if (line.length > 0) {
-        lineNumbers.push(lineNumber);
-        program[lineNumber] = line;
-      }
-    }
-  }
-
-  function process(line) {
-    if (line && line.length > 0) {
-      var op = line.shift();
-      if (op) {
-        if (commands.hasOwnProperty(op.value)) {
-          return commands[op.value](line);
-        } else if (!isNaN(op.value)) {
-          return setProgramCounter([op]);
-        } else if (state[op.value] || line.length > 0 && line[0].type === "operators" && line[0].value === "=") {
-          line.unshift(op);
-          return translate(line);
-        } else {
-          error("Unknown command. >>> " + op.value);
-        }
-      }
-    }
-    return pauseBeforeComplete();
-  }
-
-  function error(msg) {
-    errorOut("At line " + lineNumbers[counter] + ": " + msg);
-  }
-
-  function getLine(i) {
-    var lineNumber = lineNumbers[i];
-    var line = program[lineNumber];
-    return line && line.slice();
-  }
-
-  function evaluate(line) {
-    var script = "";
-    for (var i = 0; i < line.length; ++i) {
-      var t = line[i];
-      var nest = 0;
-      if (t.type === "identifiers" && typeof state[t.value] !== "function" && i < line.length - 1 && line[i + 1].value === "(") {
-        for (var j = i + 1; j < line.length; ++j) {
-          var t2 = line[j];
-          if (t2.value === "(") {
-            if (nest === 0) {
-              t2.value = "[";
-            }
-            ++nest;
-          } else if (t2.value === ")") {
-            --nest;
-            if (nest === 0) {
-              t2.value = "]";
-            }
-          } else if (t2.value === "," && nest === 1) {
-            t2.value = "][";
-          }
-
-          if (nest === 0) {
-            break;
-          }
-        }
-      }
-      script += t.value;
-    }
-    //with ( state ) { // jshint ignore:line
-    try {
-      return eval(script); // jshint ignore:line
-    } catch (exp) {
-      console.error(exp);
-      console.debug(line.join(", "));
-      console.error(script);
-      error(exp.message + ": " + script);
-    }
-    //}
-  }
-
-  function declareVariable(line) {
-    var decl = [],
-        decls = [decl],
-        nest = 0,
-        i;
-    for (i = 0; i < line.length; ++i) {
-      var t = line[i];
-      if (t.value === "(") {
-        ++nest;
-      } else if (t.value === ")") {
-        --nest;
-      }
-      if (nest === 0 && t.value === ",") {
-        decl = [];
-        decls.push(decl);
-      } else {
-        decl.push(t);
-      }
-    }
-    for (i = 0; i < decls.length; ++i) {
-      decl = decls[i];
-      var id = decl.shift();
-      if (id.type !== "identifiers") {
-        error("Identifier expected: " + id.value);
-      } else {
-        var val = null,
-            j;
-        id = id.value;
-        if (decl[0].value === "(" && decl[decl.length - 1].value === ")") {
-          var sizes = [];
-          for (j = 1; j < decl.length - 1; ++j) {
-            if (decl[j].type === "numbers") {
-              sizes.push(decl[j].value | 0);
-            }
-          }
-          if (sizes.length === 0) {
-            val = [];
-          } else {
-            val = new Array(sizes[0]);
-            var queue = [val];
-            for (j = 1; j < sizes.length; ++j) {
-              var size = sizes[j];
-              for (var k = 0, l = queue.length; k < l; ++k) {
-                var arr = queue.shift();
-                for (var m = 0; m < arr.length; ++m) {
-                  arr[m] = new Array(size);
-                  if (j < sizes.length - 1) {
-                    queue.push(arr[m]);
-                  }
-                }
-              }
-            }
-          }
-        }
-        state[id] = val;
-        return true;
-      }
-    }
-  }
-
-  function print(line) {
-    var endLine = "\n";
-    var nest = 0;
-    line = line.map(function (t, i) {
-      t = t.clone();
-      if (t.type === "operators") {
-        if (t.value === ",") {
-          if (nest === 0) {
-            t.value = "+ \", \" + ";
-          }
-        } else if (t.value === ";") {
-          t.value = "+ \" \"";
-          if (i < line.length - 1) {
-            t.value += " + ";
-          } else {
-            endLine = "";
-          }
-        } else if (t.value === "(") {
-          ++nest;
-        } else if (t.value === ")") {
-          --nest;
-        }
-      }
-      return t;
-    });
-    var txt = evaluate(line);
-    if (txt === undefined) {
-      txt = "";
-    }
-    output(txt + endLine);
-    return true;
-  }
-
-  function setProgramCounter(line) {
-    var lineNumber = parseFloat(evaluate(line));
-    counter = -1;
-    while (counter < lineNumbers.length - 1 && lineNumbers[counter + 1] < lineNumber) {
-      ++counter;
-    }
-
-    return true;
-  }
-
-  function checkConditional(line) {
-    var thenIndex = -1,
-        elseIndex = -1,
-        i;
-    for (i = 0; i < line.length; ++i) {
-      if (line[i].type === "keywords" && line[i].value === "THEN") {
-        thenIndex = i;
-      } else if (line[i].type === "keywords" && line[i].value === "ELSE") {
-        elseIndex = i;
-      }
-    }
-    if (thenIndex === -1) {
-      error("Expected THEN clause.");
-    } else {
-      var condition = line.slice(0, thenIndex);
-      for (i = 0; i < condition.length; ++i) {
-        var t = condition[i];
-        if (t.type === "operators" && t.value === "=") {
-          t.value = "==";
-        }
-      }
-      var thenClause, elseClause;
-      if (elseIndex === -1) {
-        thenClause = line.slice(thenIndex + 1);
-      } else {
-        thenClause = line.slice(thenIndex + 1, elseIndex);
-        elseClause = line.slice(elseIndex + 1);
-      }
-      if (evaluate(condition)) {
-        return process(thenClause);
-      } else if (elseClause) {
-        return process(elseClause);
-      }
-    }
-
-    return true;
-  }
-
-  function pauseBeforeComplete() {
-    output("PROGRAM COMPLETE - PRESS RETURN TO FINISH.");
-    input(function () {
-      isDone = true;
-      if (done) {
-        done();
-      }
-    });
-    return false;
-  }
-
-  function labelLine(line) {
-    line.push(EQUAL_SIGN);
-    line.push(toNum(lineNumbers[counter]));
-    return translate(line);
-  }
-
-  function waitForInput(line) {
-    var toVar = line.pop();
-    if (line.length > 0) {
-      print(line);
-    }
-    input(function (str) {
-      str = str.toUpperCase();
-      var valueToken = null;
-      if (!isNaN(str)) {
-        valueToken = toNum(str);
-      } else {
-        valueToken = toStr(str);
-      }
-      evaluate([toVar, EQUAL_SIGN, valueToken]);
-      if (next) {
-        next();
-      }
-    });
-    return false;
-  }
-
-  function onStatement(line) {
-    var idxExpr = [],
-        idx = null,
-        targets = [];
-    try {
-      while (line.length > 0 && (line[0].type !== "keywords" || line[0].value !== "GOTO")) {
-        idxExpr.push(line.shift());
-      }
-
-      if (line.length > 0) {
-        line.shift(); // burn the goto;
-
-        for (var i = 0; i < line.length; ++i) {
-          var t = line[i];
-          if (t.type !== "operators" || t.value !== ",") {
-            targets.push(t);
-          }
-        }
-
-        idx = evaluate(idxExpr) - 1;
-
-        if (0 <= idx && idx < targets.length) {
-          return setProgramCounter([targets[idx]]);
-        }
-      }
-    } catch (exp) {
-      console.error(exp);
-    }
-    return true;
-  }
-
-  function gotoSubroutine(line) {
-    returnStack.push(toNum(lineNumbers[counter + 1]));
-    return setProgramCounter(line);
-  }
-
-  function setRepeat() {
-    returnStack.push(toNum(lineNumbers[counter]));
-    return true;
-  }
-
-  function conditionalReturn(cond) {
-    var ret = true;
-    var val = returnStack.pop();
-    if (val && cond) {
-      ret = setProgramCounter([val]);
-    }
-    return ret;
-  }
-
-  function untilLoop(line) {
-    var cond = !evaluate(line);
-    return conditionalReturn(cond);
-  }
-
-  function findNext(str) {
-    for (i = counter + 1; i < lineNumbers.length; ++i) {
-      var l = getLine(i);
-      if (l[0].value === str) {
-        return i;
-      }
-    }
-    return lineNumbers.length;
-  }
-
-  function whileLoop(line) {
-    var cond = evaluate(line);
-    if (!cond) {
-      counter = findNext("WEND");
-    } else {
-      returnStack.push(toNum(lineNumbers[counter]));
-    }
-    return true;
-  }
-
-  var FOR_LOOP_DELIMS = ["=", "TO", "STEP"];
-
-  function forLoop(line) {
-    var n = lineNumbers[counter];
-    var varExpr = [];
-    var fromExpr = [];
-    var toExpr = [];
-    var skipExpr = [];
-    var arrs = [varExpr, fromExpr, toExpr, skipExpr];
-    var a = 0;
-    var i = 0;
-    for (i = 0; i < line.length; ++i) {
-      var t = line[i];
-      if (t.value === FOR_LOOP_DELIMS[a]) {
-        if (a === 0) {
-          varExpr.push(t);
-        }
-        ++a;
-      } else {
-        arrs[a].push(t);
-      }
-    }
-
-    var skip = 1;
-    if (skipExpr.length > 0) {
-      skip = evaluate(skipExpr);
-    }
-
-    if (forLoopCounters[n] === undefined) {
-      forLoopCounters[n] = evaluate(fromExpr);
-    }
-
-    var end = evaluate(toExpr);
-    var cond = forLoopCounters[n] <= end;
-    if (!cond) {
-      delete forLoopCounters[n];
-      counter = findNext("NEXT");
-    } else {
-      varExpr.push(toNum(forLoopCounters[n]));
-      process(varExpr);
-      forLoopCounters[n] += skip;
-      returnStack.push(toNum(lineNumbers[counter]));
-    }
-    return true;
-  }
-
-  function stackReturn() {
-    return conditionalReturn(true);
-  }
-
-  function loadCodeFile(line) {
-    loadFile(evaluate(line)).then(next);
-    return false;
-  }
-
-  function noop() {
-    return true;
-  }
-
-  function loadData(line) {
-    while (line.length > 0) {
-      var t = line.shift();
-      if (t.type !== "operators") {
-        data.push(t.value);
-      }
-    }
-    return true;
-  }
-
-  function readData(line) {
-    if (data.length === 0) {
-      var dataLine = findNext("DATA");
-      process(getLine(dataLine));
-    }
-    var value = data[dataCounter];
-    ++dataCounter;
-    line.push(EQUAL_SIGN);
-    line.push(toNum(value));
-    return translate(line);
-  }
-
-  function restoreData() {
-    dataCounter = 0;
-    return true;
-  }
-
-  function defineFunction(line) {
-    var name = line.shift().value;
-    var signature = "";
-    var body = "";
-    var fillSig = true;
-    for (var i = 0; i < line.length; ++i) {
-      var t = line[i];
-      if (t.type === "operators" && t.value === "=") {
-        fillSig = false;
-      } else if (fillSig) {
-        signature += t.value;
-      } else {
-        body += t.value;
-      }
-    }
-    name = "FN" + name;
-    var script = "(function " + name + signature + "{ return " + body + "; })";
-    state[name] = eval(script); // jshint ignore:line
-    return true;
-  }
-
-  function translate(line) {
-    evaluate(line);
-    return true;
-  }
-
-  var commands = {
-    DIM: declareVariable,
-    LET: translate,
-    PRINT: print,
-    GOTO: setProgramCounter,
-    IF: checkConditional,
-    INPUT: waitForInput,
-    END: pauseBeforeComplete,
-    STOP: pauseBeforeComplete,
-    REM: noop,
-    "'": noop,
-    CLS: clearScreen,
-    ON: onStatement,
-    GOSUB: gotoSubroutine,
-    RETURN: stackReturn,
-    LOAD: loadCodeFile,
-    DATA: loadData,
-    READ: readData,
-    RESTORE: restoreData,
-    REPEAT: setRepeat,
-    UNTIL: untilLoop,
-    "DEF FN": defineFunction,
-    WHILE: whileLoop,
-    WEND: stackReturn,
-    FOR: forLoop,
-    NEXT: stackReturn,
-    LABEL: labelLine
-  };
-
-  return function () {
-    if (!isDone) {
-      var goNext = true;
-      while (goNext) {
-        var line = getLine(counter);
-        goNext = process(line);
-        ++counter;
-      }
-    }
-  };
-};
-
-new Grammar("HTML", [["newlines", /(?:\r\n|\r|\n)/], ["startBlockComments", /(?:<|&lt;)!--/], ["endBlockComments", /--(?:>|&gt;)/], ["stringDelim", /("|')/], ["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/], ["keywords", /(?:<|&lt;)\/?(html|base|head|link|meta|style|title|address|article|aside|footer|header|h1|h2|h3|h4|h5|h6|hgroup|nav|section|dd|div|dl|dt|figcaption|figure|hr|li|main|ol|p|pre|ul|a|abbr|b|bdi|bdo|br|cite|code|data|dfn|em|i|kbd|mark|q|rp|rt|rtc|ruby|s|samp|small|span|strong|sub|sup|time|u|var|wbr|area|audio|img|map|track|video|embed|object|param|source|canvas|noscript|script|del|ins|caption|col|colgroup|table|tbody|td|tfoot|th|thead|tr|button|datalist|fieldset|form|input|label|legend|meter|optgroup|option|output|progress|select|textarea|details|dialog|menu|menuitem|summary|content|element|shadow|template|acronym|applet|basefont|big|blink|center|command|content|dir|font|frame|frameset|isindex|keygen|listing|marquee|multicol|nextid|noembed|plaintext|spacer|strike|tt|xmp)\b/], ["members", /(\w+)=/]]);
-
-new Grammar("TestResults", [["newlines", /(?:\r\n|\r|\n)/, true], ["numbers", /(\[)(o+)/, true], ["numbers", /(\d+ succeeded), 0 failed/, true], ["numbers", /^    Successes:/, true], ["functions", /(x+)\]/, true], ["functions", /[1-9]\d* failed/, true], ["functions", /^    Failures:/, true], ["comments", /(\d+ms:)(.*)/, true], ["keywords", /(Test results for )(\w+):/, true], ["strings", /        \w+/, true]]);
-
-var Terminal = function Terminal(inputEditor, outputEditor) {
-  classCallCheck(this, Terminal);
-
-  outputEditor = outputEditor || inputEditor;
-
-  var inputCallback = null,
-      currentProgram = null,
-      originalGrammar = null,
-      currentEditIndex = 0,
-      pageSize = 40,
-      outputQueue = [],
-      buffer = "",
-      restoreInput = inputEditor === outputEditor,
-      self = this;
-
-  this.running = false;
-  this.waitingForInput = false;
-
-  function toEnd(editor) {
-    editor.selectionStart = editor.selectionEnd = editor.value.length;
-    editor.scrollIntoView(editor.frontCursor);
-  }
-
-  function done() {
-    if (self.running) {
-      flush();
-      self.running = false;
-      if (restoreInput) {
-        inputEditor.tokenizer = originalGrammar;
-        inputEditor.value = currentProgram;
-      }
-      toEnd(inputEditor);
-    }
-  }
-
-  function clearScreen() {
-    outputEditor.selectionStart = outputEditor.selectionEnd = 0;
-    outputEditor.value = "";
-    return true;
-  }
-
-  function flush() {
-    if (buffer.length > 0) {
-      var lines = buffer.split("\n");
-      for (var i = 0; i < pageSize && lines.length > 0; ++i) {
-        outputQueue.push(lines.shift());
-      }
-      if (lines.length > 0) {
-        outputQueue.push(" ----- more -----");
-      }
-      buffer = lines.join("\n");
-    }
-  }
-
-  function input(callback) {
-    inputCallback = callback;
-    self.waitingForInput = true;
-    flush();
-  }
-
-  function stdout(str) {
-    buffer += str;
-  }
-
-  this.sendInput = function (evt) {
-    if (buffer.length > 0) {
-      flush();
-    } else {
-      outputEditor.keyDown(evt);
-      var str = outputEditor.value.substring(currentEditIndex);
-      inputCallback(str.trim());
-      inputCallback = null;
-      this.waitingForInput = false;
-    }
-  };
-
-  this.execute = function () {
-    pageSize = 10;
-    originalGrammar = inputEditor.tokenizer;
-    if (originalGrammar && originalGrammar.interpret) {
-      this.running = true;
-      var looper,
-          next = function next() {
-        if (self.running) {
-          setTimeout(looper, 1);
-        }
-      };
-
-      currentProgram = inputEditor.value;
-      looper = originalGrammar.interpret(currentProgram, input, stdout, stdout, next, clearScreen, this.loadFile.bind(this), done);
-      outputEditor.tokenizer = PlainText$2;
-      clearScreen();
-      next();
-    }
-  };
-
-  this.loadFile = function (fileName) {
-    return getText(fileName.toLowerCase()).then(function (file) {
-      if (isMacOS) {
-        file = file.replace("CTRL+SHIFT+SPACE", "CMD+OPT+E");
-      }
-      inputEditor.value = currentProgram = file;
-      return file;
-    });
-  };
-
-  this.update = function () {
-    if (outputQueue.length > 0) {
-      outputEditor.value += outputQueue.shift() + "\n";
-      toEnd(outputEditor);
-      currentEditIndex = outputEditor.selectionStart;
-    }
-  };
-};
-
-function XHR(method, type, url, options) {
-  return new Promise(function (resolve, reject) {
-    options = options || {};
-    options.headers = options.headers || {};
-    if (method === "POST") {
-      options.headers["Content-Type"] = options.headers["Content-Type"] || type;
-    }
-
-    var req = new XMLHttpRequest();
-    req.onerror = function (evt) {
-      return reject(new Error("Request error: " + evt.message));
-    };
-    req.onabort = function (evt) {
-      return reject(new Error("Request abort: " + evt.message));
-    };
-    req.onload = function () {
-      // The other error events are client-errors. If there was a server error,
-      // we'd find out about it during this event. We need to only respond to
-      // successful requests, i.e. those with HTTP status code in the 200 or 300
-      // range.
-      if (req.status < 400) {
-        resolve(req.response);
-      } else {
-        reject(req);
-      }
-    };
-
-    // The order of these operations is very explicit. You have to call open
-    // first. It seems counter intuitive, but think of it more like you're opening
-    // an HTTP document to be able to write to it, and then you finish by sending
-    // the document. The `open` method does not refer to a network connection.
-    req.open(method, url);
-    if (type) {
-      req.responseType = type;
-    }
-
-    req.onprogress = options.progress;
-
-    for (var key in options.headers) {
-      req.setRequestHeader(key, options.headers[key]);
-    }
-
-    req.withCredentials = !!options.withCredentials;
-
-    if (options.data) {
-      req.send(JSON.stringify(options.data));
-    } else {
-      req.send();
-    }
-  });
-}
-
-function get$2(type, url, options) {
-  return XHR("GET", type || "text", url, options);
-}
-
-function getBuffer(url, options) {
-  return get$2("arraybuffer", url, options);
-}
-
-function getText(url, options) {
-  return get$2("text", url, options);
-}
-
-// polyfill
-window.AudioContext = window.AudioContext || window.webkitAudioContext;
-
-var VECTOR = new Vector3();
-var UP = new Vector3();
-var TEMP = new Matrix4();
-
-var Audio3D = function () {
-  createClass(Audio3D, null, [{
-    key: "setAudioStream",
-    value: function setAudioStream(stream, id) {
-      var audioElementCount = document.querySelectorAll("audio").length,
-          element = cascadeElement(id || "audioStream" + audioElementCount, "audio", HTMLAudioElement, true);
-      setAudioProperties(element);
-      element.srcObject = stream;
-      return element;
-    }
-  }, {
-    key: "setAudioProperties",
-    value: function setAudioProperties(element) {
-      element.autoplay = true;
-      element.controls = false;
-      element.crossOrigin = "anonymous";
-      element.muted = true;
-      element.setAttribute("muted", "");
-    }
-  }]);
-
-  function Audio3D() {
-    var _this = this;
-
-    classCallCheck(this, Audio3D);
-
-    this.ready = new Promise(function (resolve, reject) {
-      try {
-        if (Audio3D.isAvailable) {
-          (function () {
-            var finishSetup = function finishSetup() {
-              try {
-                _this.sampleRate = _this.context.sampleRate;
-                _this.mainVolume = _this.context.createGain();
-                _this.start();
-                resolve();
-              } catch (exp) {
-                reject(exp);
-              }
-            };
-
-            if (!isiOS) {
-              _this.context = new AudioContext();
-              finishSetup();
-            } else {
-              (function () {
-                var unlock = function unlock() {
-                  try {
-                    (function () {
-                      _this.context = _this.context || new AudioContext();
-                      var source = _this.context.createBufferSource();
-                      source.buffer = _this.createRawSound([[0]]);
-                      source.connect(_this.context.destination);
-                      source.sine(0, 0);
-                      setTimeout(function () {
-                        if (source.playbackState === source.PLAYING_STATE || source.playbackState === source.FINISHED_STATE) {
-                          window.removeEventListener("mouseup", unlock);
-                          window.removeEventListener("touchend", unlock);
-                          window.removeEventListener("keyup", unlock);
-                          finishSetup();
-                        }
-                      }, 0);
-                    })();
-                  } catch (exp) {
-                    reject(exp);
-                  }
-                };
-
-                window.addEventListener("mouseup", unlock, false);
-                window.addEventListener("touchend", unlock, false);
-                window.addEventListener("keyup", unlock, false);
-              })();
-            }
-          })();
-        }
-      } catch (exp) {
-        reject(exp);
-      }
-    }).then(function () {
-      return console.log("Audio ready");
-    });
-  }
-
-  createClass(Audio3D, [{
-    key: "setVelocity",
-    value: function setVelocity(x, y, z) {
-      if (this.context) {
-        this.context.listener.setVelocity(x, y, z);
-      }
-    }
-  }, {
-    key: "setPlayer",
-    value: function setPlayer(obj) {
-      if (this.context && this.context.listener) {
-        obj.updateMatrixWorld();
-        TEMP.copy(obj.matrixWorld);
-        var mx = TEMP.elements[12],
-            my = TEMP.elements[13],
-            mz = TEMP.elements[14];
-
-        this.context.listener.setPosition(mx, my, mz);
-
-        VECTOR.set(0, 0, -1).applyMatrix4(TEMP).normalize();
-        UP.set(0, 1, 0).applyMatrix4(TEMP).normalize();
-
-        this.context.listener.setOrientation(VECTOR.x, VECTOR.y, VECTOR.z, UP.x, UP.y, UP.z);
-      }
-    }
-  }, {
-    key: "start",
-    value: function start() {
-      if (this.mainVolume) {
-        this.mainVolume.connect(this.context.destination);
-      }
-    }
-  }, {
-    key: "stop",
-    value: function stop() {
-      if (this.mainVolume) {
-        this.mainVolume.disconnect();
-      }
-    }
-  }, {
-    key: "loadURL",
-    value: function loadURL(src) {
-      var _this2 = this;
-
-      return this.ready.then(function () {
-        console.log("Loading " + src + " from URL");
-        getBuffer(src);
-      }).then(function (data) {
-        return new Promise(function (resolve, reject) {
-          return _this2.context.decodeAudioData(data, resolve, reject);
-        });
-      }).then(function (dat) {
-        console.log(src + " loaded");
-        return dat;
-      }).catch(function (err) {
-        console.error("Couldn't load " + src + ". Reason: " + err);
-      });
-    }
-  }, {
-    key: "createRawSound",
-    value: function createRawSound(pcmData) {
-      if (pcmData.length !== 1 && pcmData.length !== 2) {
-        throw new Error("Incorrect number of channels. Expected 1 or 2, got " + pcmData.length);
-      }
-
-      var frameCount = pcmData[0].length;
-      if (pcmData.length > 1 && pcmData[1].length !== frameCount) {
-        throw new Error("Second channel is not the same length as the first channel. Expected " + frameCount + ", but was " + pcmData[1].length);
-      }
-
-      var buffer = this.context.createBuffer(pcmData.length, frameCount, this.sampleRate || 22050);
-      for (var c = 0; c < pcmData.length; ++c) {
-        var channel = buffer.getChannelData(c);
-        for (var i = 0; i < frameCount; ++i) {
-          channel[i] = pcmData[c][i];
-        }
-      }
-      return buffer;
-    }
-  }, {
-    key: "create3DSound",
-    value: function create3DSound(x, y, z, snd) {
-      snd.panner = this.context.createPanner();
-      snd.panner.setPosition(x, y, z);
-      snd.panner.connect(this.mainVolume);
-      snd.volume.connect(snd.panner);
-      return snd;
-    }
-  }, {
-    key: "createFixedSound",
-    value: function createFixedSound(snd) {
-      snd.volume.connect(this.mainVolume);
-      return snd;
-    }
-  }, {
-    key: "loadSource",
-    value: function loadSource(sources, loop) {
-      var _this3 = this;
-
-      return this.ready.then(function () {
-        return new Promise(function (resolve, reject) {
-          console.log("Loading " + sources);
-          if (!(sources instanceof Array)) {
-            sources = [sources];
-          }
-          var audio = document.createElement("audio");
-          audio.autoplay = true;
-          audio.preload = "auto";
-          audio["webkit-playsinline"] = true;
-          audio.playsinline = true;
-          audio.loop = loop;
-          audio.crossOrigin = "anonymous";
-          sources.map(function (src) {
-            var source = document.createElement("source");
-            source.src = src;
-            return source;
-          }).forEach(audio.appendChild.bind(audio));
-          audio.onerror = reject;
-          audio.oncanplay = function () {
-            audio.oncanplay = null;
-            var snd = {
-              volume: _this3.context.createGain(),
-              source: _this3.context.createMediaElementSource(audio)
-            };
-            snd.source.connect(snd.volume);
-            resolve(snd);
-          };
-          audio.play();
-          document.body.appendChild(audio);
-        });
-      }).then(function (dat) {
-        console.log(sources + " loaded");
-        return dat;
-      }).catch(function (err) {
-        console.error("Couldn't load " + sources + ". Reason: " + err);
-      });
-    }
-  }, {
-    key: "load3DSound",
-    value: function load3DSound(src, loop, x, y, z) {
-      return this.loadSource(src, loop).then(this.create3DSound.bind(this, x, y, z));
-    }
-  }, {
-    key: "loadFixedSound",
-    value: function loadFixedSound(src, loop) {
-      return this.loadSource(src, loop).then(this.createFixedSound.bind(this));
-    }
-  }]);
-  return Audio3D;
-}();
-
-Audio3D.isAvailable = !!window.AudioContext && !!AudioContext.prototype.createGain;
 
 /**
  * @author tschw
@@ -44293,6 +43429,7 @@ var MAX_MOVE_DISTANCE_SQ = MAX_MOVE_DISTANCE * MAX_MOVE_DISTANCE;
 var TELEPORT_COOLDOWN = 250;
 var TELEPORT_DISPLACEMENT = new Vector3();
 var GROUND_HEIGHT = -0.07;
+var EYE_INDICES = { "left": 0, "right": 1 };
 
 var BrowserEnvironment = function (_AbstractEventEmitter) {
   inherits(BrowserEnvironment, _AbstractEventEmitter);
@@ -44304,6 +43441,7 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
     var _this = possibleConstructorReturn(this, (BrowserEnvironment.__proto__ || Object.getPrototypeOf(BrowserEnvironment)).call(this));
 
     _this.options = Object.assign({}, BrowserEnvironment.DEFAULTS, options);
+
     _this.options.foregroundColor = _this.options.foregroundColor || complementColor(new Color(_this.options.backgroundColor)).getHex();
 
     _this.network = null;
@@ -44397,15 +43535,19 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
       _this.camera.position.set(0, 0, 0);
       _this.camera.quaternion.set(0, 0, 0, 1);
       _this.audio.setPlayer(_this.input.head.mesh);
-      if (_this.input.VR.isPresenting) {
-        _this.renderer.clear(true, true, true);
+      _this.renderer.clear(true, true, true);
 
-        var trans = _this.input.VR.getTransforms(_this.options.nearPlane, _this.options.nearPlane + _this.options.drawDistance);
-        for (var i = 0; trans && i < trans.length; ++i) {
-          var st = trans[i],
-              v = st.viewport,
-              side = 2 * i - 1;
-          if (_this.options.nonstandardIPD !== null) {
+      var trans = _this.input.VR.getTransforms(_this.options.nearPlane, _this.options.nearPlane + _this.options.drawDistance);
+      for (var n = 0; trans && n < trans.length; ++n) {
+        var eye = _this.options.eyeRenderOrder[n],
+            i = EYE_INDICES[eye],
+            st = trans[i] || trans[1 - i],
+            v = st.viewport;
+        Entity.eyeBlankAll(i);
+
+        if (trans.length > 1) {
+          var side = 2 * i - 1;
+          if (_this.options.nonstandardIPD !== null && st.translation.x !== 0) {
             st.translation.x = Math.sign(st.translation.x) * _this.options.nonstandardIPD;
           }
           if (_this.options.nonstandardNeckLength !== null) {
@@ -44414,27 +43556,17 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
           if (_this.options.nonstandardNeckDepth !== null) {
             st.translation.z = _this.options.nonstandardNeckDepth;
           }
-          Entity.eyeBlankAll(i);
-          _this.camera.projectionMatrix.copy(st.projection);
-          _this.camera.translateOnAxis(st.translation, 1);
-          _this.renderer.setViewport(v.left * resolutionScale, v.top * resolutionScale, v.width * resolutionScale, v.height * resolutionScale);
-          _this.renderer.render(_this.scene, _this.camera);
-          _this.camera.translateOnAxis(st.translation, -1);
         }
-        _this.input.submitFrame();
-      }
-
-      if (!_this.input.VR.isPresenting || _this.input.VR.canMirror && !_this.options.disableMirroring) {
-        _this.camera.fov = _this.options.defaultFOV;
-        _this.camera.aspect = _this.renderer.domElement.width / _this.renderer.domElement.height;
-        _this.camera.updateProjectionMatrix();
-        _this.renderer.clear(true, true, true);
+        _this.renderer.setViewport(v.left * resolutionScale, v.top * resolutionScale, v.width * resolutionScale, v.height * resolutionScale);
+        _this.camera.projectionMatrix.copy(st.projection);
         if (_this.input.mousePointer.unproject) {
-          _this.input.mousePointer.unproject.getInverse(_this.camera.projectionMatrix);
+          _this.input.mousePointer.unproject.getInverse(st.projection);
         }
-        _this.renderer.setViewport(0, 0, _this.renderer.domElement.width, _this.renderer.domElement.height);
+        _this.camera.translateOnAxis(st.translation, 1);
         _this.renderer.render(_this.scene, _this.camera);
+        _this.camera.translateOnAxis(st.translation, -1);
       }
+      _this.input.submitFrame();
     };
 
     var modifyScreen = function modifyScreen() {
@@ -44491,7 +43623,7 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
       pre: {
         create: function create() {
           return new TextBox({
-            tokenizer: PlainText$2,
+            tokenizer: PlainText,
             hideLineNumbers: true,
             readOnly: true
           });
@@ -44860,7 +43992,12 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
     _this.goFullScreen = function (index, evt) {
       if (evt !== "Gaze") {
         var _ret = function () {
-          var elem = !_this.input.VR.isStereo || isMobile$1 && !_this.input.VR.isNativeMobileWebVR ? _this.options.fullScreenElement : _this.renderer.domElement;
+          var elem = null;
+          if (_this.input.VR.canMirror || _this.input.VR.isNativeMobileWebVR) {
+            elem = _this.renderer.domElement;
+          } else {
+            elem = _this.options.fullScreenElement;
+          }
           _this.input.VR.connect(index);
           return {
             v: _this.input.VR.requestPresent([{
@@ -45203,7 +44340,11 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
         return btn;
       };
 
-      var buttons = this.displays.map(function (display, i) {
+      var buttons = this.displays
+      // We skip the Standard Monitor and Magic Window on iOS because we can't go full screen on those systems.
+      .filter(function (display) {
+        return !isiOS || VR.isStereoDisplay(display);
+      }).map(function (display, i) {
         var enterVR = _this2.goFullScreen.bind(_this2, i),
             btn = newButton(display.displayName, display.displayName, enterVR),
             isStereo = VR.isStereoDisplay(display);
@@ -45211,7 +44352,7 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
         return btn;
       });
 
-      if (!/(www\.)?primrosevr.com/.test(document.location.hostname)) {
+      if (!/(www\.)?primrosevr.com/.test(document.location.hostname) && !this.options.disableAdvertising) {
         buttons.push(newButton("Primrose", "✿", function () {
           return document.location = "https://www.primrosevr.com";
         }));
@@ -45229,6 +44370,20 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
     get: function get() {
 
       return this.input.VR.displays;
+    }
+  }, {
+    key: "fieldOfView",
+    get: function get() {
+      var d = this.input.VR.currentDevice,
+          eyes = [d && d.getEyeParameters("left"), d && d.getEyeParameters("right")].filter(identity$1);
+      if (eyes.length > 0) {
+        return eyes.reduce(function (fov, eye) {
+          return Math.max(fov, eye.fieldOfView.upDegrees + eye.fieldOfView.downDegrees);
+        }, 0);
+      }
+    },
+    set: function set(v) {
+      this.options.defaultFOV = WebVRStandardMonitor.DEFAULT_FOV = v;
     }
   }]);
   return BrowserEnvironment;
@@ -45262,7 +44417,7 @@ BrowserEnvironment.DEFAULTS = {
   // the far plane of the camera.
   drawDistance: 100,
   // the field of view to use in non-VR settings.
-  defaultFOV: 75,
+  defaultFOV: 55,
   // The sound to play on loop in the background.
   ambientSound: null,
   // HTML5 canvas element, if one had already been created.
@@ -45273,12 +44428,14 @@ BrowserEnvironment.DEFAULTS = {
   context: null,
   // Three.js scene, if one had already been created.
   scene: null,
-  // I highly suggest you don't go down the road that requires setting this. I will not help you understand what it does, because I would rather you just not use it.
-  nonstandardIPD: null,
   // This is an experimental feature for setting the height of a user's "neck" on orientation-only systems (such as Google Cardboard and Samsung Gear VR) to create a more realistic feel.
   nonstandardNeckLength: null,
   nonstandardNeckDepth: null,
-  showHeadPointer: true
+  showHeadPointer: true,
+  // WARNING: I highly suggest you don't go down the road that requires the following settings this. I will not help you understand what they do, because I would rather you just not use them.
+  eyeRenderOrder: ["left", "right"],
+  nonstandardIPD: null,
+  disableAdvertising: false
 };
 
 Object.assign(window, liveAPI);
