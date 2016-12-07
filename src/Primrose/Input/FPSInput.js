@@ -174,7 +174,7 @@ export default class FPSInput extends AbstractEventEmitter {
       }
     }));
 
-    this.add(new VR(this.options.avatarHeight));
+    this.add(new VR(this.options));
     this.motionDevices.push(this.VR);
 
     if(!this.options.disableGamepad && GamepadManager.isAvailable){

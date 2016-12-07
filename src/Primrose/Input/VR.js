@@ -34,9 +34,10 @@ export default class VR extends PoseInputProcessor {
     return !!(leftParams && rightParams);
   }
 
-  constructor(avatarHeight) {
+  constructor(options) {
     super("VR");
 
+    this.options = options;
     this._requestPresent = (layers) => this.currentDevice.requestPresent(layers)
           .catch((exp) => console.warn("requstPresent", exp));
 
@@ -44,19 +45,16 @@ export default class VR extends PoseInputProcessor {
     this._transformers = [];
     this.currentDeviceIndex = -1;
     this.movePlayer = new Matrix4();
-    this.defaultAvatarHeight = avatarHeight;
     this.stage = null;
     this.lastStageWidth = null;
     this.lastStageDepth = null;
     this.isStereo = false;
-
+    WebVRStandardMonitor.DEFAULT_FOV = this.options.defaultFOV;
     installWebVRStandardMonitor();
     this.ready = navigator.getVRDisplays()
       .then((displays) => {
-        // We skip the Standard Monitor and Magic Window on iOS because we can't
-        // go full screen on those systems.
-        this.displays.push.apply(this.displays, displays.filter((display) =>
-          !isiOS || VR.isStereoDisplay(display)));
+        this.displays.push.apply(this.displays, displays);
+        this.connect(0);
         return this.displays;
       });
   }
@@ -159,7 +157,7 @@ export default class VR extends PoseInputProcessor {
       z = stage.sizeZ;
     }
     else {
-      this.movePlayer.makeTranslation(0, this.defaultAvatarHeight, 0);
+      this.movePlayer.makeTranslation(0, this.options.avatarHeight, 0);
       x = 0;
       z = 0;
     }
