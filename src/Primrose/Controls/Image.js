@@ -152,15 +152,18 @@ export default class Image extends Entity {
   }
 
   loadImages(images, progress) {
-    return Promise.all(Array.prototype.map.call(images, (src, i) => loadTexture(`Primrose.Controls.Image(${src}, ${i})`, src, progress)
-      .then((txt) => {
-        this._textures[i] = txt;
-        this._setGeometry();
-        this._meshes[i] = textured(
-            this.options.geometry,
-            txt,
-            this.options);
-      })))
+    return Promise.all(Array.prototype.map.call(images, (src, i) => {
+      var loadOptions = Object.assign({}, this.options, {
+        progress: progress,
+        resolve: (txt) => this._textures[i] = txt
+      });
+      this._setGeometry();
+      this._meshes[i] = textured(
+        this.options.geometry,
+        src,
+        loadOptions);
+      return loadOptions.promise;
+    }))
     .then(() => this.isVideo = false)
     .then(() => this);
   }
@@ -218,13 +221,21 @@ export default class Image extends Entity {
           this._contexts[i] = this._canvases[i].getContext("2d");
         }
 
+        var loadOptions = Object.assign({}, this.options, {
+          progress: progress,
+          resolve: (function(oldResolve, i, txt) {
+            this._textures[i] = txt;
+            if(typeof oldResolve === "function"){
+              oldResolve(txt);
+            }
+            resolve();
+          }).bind(this, this.options.resolve, i)
+        })
+
         this._meshes[i] = textured(
           this.options.geometry,
           this._canvases[i] || this._elements[i],
-          this.options);
-
-        this._textures[i] = this._meshes[i].material.map;
-        resolve();
+          loadOptions);
       };
       if(!video.parentElement){
         document.body.insertBefore(video, document.body.children[0]);
@@ -259,7 +270,12 @@ export default class Image extends Entity {
           if(i < this._contexts.length) {
             this._contexts[i].drawImage(elem, 0, 0);
           }
-          this._textures[i].needsUpdate = true;
+          try{
+            this._textures[i].needsUpdate = true;
+          }
+          catch(exp){
+            console.log(i, this);
+          }
           this._lastTime = elem.currentTime;
         }
       }
