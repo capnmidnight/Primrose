@@ -156,11 +156,6 @@ pliny.record({
     optional: true,
     description: "Three.js scene, if one had already been created."
   }, {
-    name: "nonstandardIPD",
-    type: "Number",
-    optional: true,
-    description: "When creating a neck model, this is the how far apart to set the eyes. I highly suggest you don't go down the road that requires setting this. I will not help you understand what it does, because I would rather you just not use it."
-  }, {
 
     name: "nonstandardNeckLength",
     type: "Number",
@@ -177,6 +172,17 @@ pliny.record({
     optional: true,
     default: true,
     description: "Whether or not to show a pointer tracking the gaze direction."
+  }, {
+    name: "nonstandardIPD",
+    type: "Number",
+    optional: true,
+    description: "When creating a neck model, this is the how far apart to set the eyes. I highly suggest you don't go down the road that requires setting this. I will not help you understand what it does, because I would rather you just not use it."
+  }, {
+    name: "eyeRenderOrder",
+    type: "Array of String",
+    optional: true,
+    default: `["left", "right"]`,
+    description: "The order in which to draw the stereo view. I highly suggest you don't go down the road that requires setting this. I will not help you understand what it does, because I would rather you just not use it."
   }]
 });
 
@@ -189,6 +195,8 @@ const MILLISECONDS_TO_SECONDS = 0.001,
 
 import PointerLock from "webvr-standard-monitor/src/PointerLock";
 import isMobile from "../flags/isMobile";
+import isiOS from "../flags/isiOS";
+
 import box from "../live-api/box";
 import brick from "../live-api/brick";
 import colored from "../live-api/colored";
@@ -196,28 +204,41 @@ import hub from "../live-api/hub";
 import light from "../live-api/light";
 import put from "../live-api/put";
 import textured from "../live-api/textured";
+
+import identity from "../util/identity";
+
 import Angle from "./Angle";
 import AbstractEventEmitter from "./AbstractEventEmitter";
 import Pointer from "./Pointer";
 import Keys from "./Keys";
+
 import Text2Speech from "./Audio/Speech";
 import Audio3D from "./Audio/Audio3D";
 import Music from "./Audio/Music";
+
 import Entity from "./Controls/Entity";
 import Button2D from "./Controls/Button2D";
 import Button3D from "./Controls/Button3D";
 import ButtonFactory from "./Controls/ButtonFactory";
 import Image from "./Controls/Image";
 import Surface from "./Controls/Surface";
+import TextBox from "./Controls/TextBox";
+
 import cascadeElement from "./DOM/cascadeElement";
 import makeHidingContainer from "./DOM/makeHidingContainer";
+
 import ModelLoader from "./Graphics/ModelLoader";
+
 import FPSInput from "./Input/FPSInput";
 import VR from "./Input/VR";
+
 import NetworkManager from "./Network/Manager";
-import TextBox from "./Controls/TextBox";
+
 import PlainText from "./Text/Grammars/PlainText";
+
 import { Quality, PIXEL_SCALES } from "./Constants";
+
+
 import { BackSide, PCFSoftShadowMap } from "three/src/constants";
 import { FogExp2 } from "three/src/scenes/FogExp2";
 import { Scene } from "three/src/scenes/Scene";
@@ -229,6 +250,7 @@ import { Color } from "three/src/math/Color";
 import { Euler } from "three/src/math/Euler";
 import { Vector3 } from "three/src/math/Vector3";
 import { WebGLRenderer } from "three/src/renderers/WebGLRenderer";
+
 export default class BrowserEnvironment extends AbstractEventEmitter {
   constructor(options) {
     super();
@@ -240,6 +262,7 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
       description: "A manager for messages sent across the network."
     });
     this.options = Object.assign({}, BrowserEnvironment.DEFAULTS, options);
+
     this.options.foregroundColor = this.options.foregroundColor || complementColor(new Color(this.options.backgroundColor))
       .getHex();
 
