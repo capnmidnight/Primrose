@@ -34,6 +34,7 @@ var gulp = require("gulp"),
       fileName: inFile,
       dependencies: ["format"],
       format: format,
+      watch: ["../webvr-standard-monitor/src/**/*.js"],
       post: (_, cb) => {
         // removes the documentation objects from the concatenated library.
         pliny.carve(inFile, outFile, docFile, cb);
@@ -63,12 +64,14 @@ var gulp = require("gulp"),
   }, { format: null, default: null, debug: [], release: [] }),
 
   demos = glob("doc/**/src/index.js").map(function(file) {
+
     var name = file.match(/doc\/(\w+)\/src\/index\.js/)[1],
       parts = path.parse(file),
       taskName = "Demo:" + name,
       inFile = path.join(parts.dir, "../appWithDoc.js"),
       outFile = inFile.replace("WithDoc", ""),
       docFile = inFile.replace("WithDoc", "Documentation"),
+
       js = nt.js(taskName, parts.dir, {
         moduleName: name,
         fileName: inFile,
@@ -76,12 +79,11 @@ var gulp = require("gulp"),
         watch: ["src/**/*.js"],
         post: (_, cb) => pliny.carve(inFile, outFile, docFile, cb)
       }),
+
       min = nt.min(taskName, outFile, [{
         debug: js.debug,
         release: js.release
       }]);
-
-
 
     const demoTasks = tasks.default.slice();
     demoTasks.push(js.default, min.default);
