@@ -5,7 +5,8 @@ pliny.class({
 });
 
 var entityKeys = [],
-  entities = new WeakMap();
+  entities = new WeakMap(),
+  lastEye = 0;
 
 import AbstractEventEmitter from "../AbstractEventEmitter"
 export default class Entity extends AbstractEventEmitter {
@@ -42,10 +43,13 @@ export default class Entity extends AbstractEventEmitter {
         description: "The eye to switch to: -1 for left, +1 for right."
       }]
     });
-    entityKeys.forEach((id) => {
-      entities.get(id)
-        .eyeBlank(eye);
-    });
+    if(eye !== lastEye) {
+      entityKeys.forEach((id) => {
+        entities.get(id)
+          .eyeBlank(eye);
+      });
+      lastEye = eye;
+    }
   }
 
   constructor(id) {
