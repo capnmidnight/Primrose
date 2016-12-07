@@ -111,6 +111,9 @@ import { RepeatWrapping } from "three/src/constants";
 import { Texture } from "three/src/textures/Texture";
 import loadTexture from "../Primrose/Graphics/loadTexture";
 
+const seenElements = new WeakMap();
+let seenElementCount = 0;
+
 export default function textured(geometry, txt, options) {
   options = Object.assign({}, {
     txtRepeatX: 1,
@@ -118,8 +121,34 @@ export default function textured(geometry, txt, options) {
     anisotropy: 1
   }, options);
 
-  const txtID = (txt.id || txt).toString(),
-    textureDescription = `Primrose.textured(${txtID}, ${options.txtRepeatX}, ${options.txtRepeatY}, ${options.anisotropy}, ${options.scaleTextureWidth}, ${options.scaleTextureHeight})`;
+  let txtType = typeof txt,
+    txtID = null;
+  if(txtType === "object") {
+    if(txt.id){
+      txtID = txt.id;
+    }
+    else{
+      if(!seenElements.has(txt)) {
+        seenElements.set(txt, "TextureAutoID" + seenElementCount);
+        ++seenElementCount;
+      }
+      txtID = seenElements.get(txt);
+    }
+  }
+  else if(txtType === "string") {
+    txtID = txt;
+  }
+  else{
+    var err = new Error(`Couldn't figure out how to make a texture out of typeof '${txtType}', value ${txt}.`);
+    if(options.reject){
+      options.reject(err);
+    }
+    else{
+      throw err;
+    }
+  }
+
+  const textureDescription = `Primrose.textured(${txtID}, ${options.txtRepeatX}, ${options.txtRepeatY}, ${options.anisotropy}, ${options.scaleTextureWidth}, ${options.scaleTextureHeight})`;
   const texturePromise = cache(textureDescription, () => {
       if (typeof txt === "string" || (txt instanceof Array || txt.length === 6)) {
         return loadTexture(textureDescription, txt, options.progress);
@@ -236,6 +265,8 @@ export default function textured(geometry, txt, options) {
     return texture;
   }).then(options.resolve)
     .catch(options.reject);
+
+  options.promise = texturePromise;
 
   return obj;
 }
