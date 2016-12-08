@@ -207,18 +207,25 @@ export default class Image extends Entity {
 
         this._elements[i] = video;
 
-        this._setGeometry({
-          maxU: width / p2Width,
-          maxV: height / p2Height
-        });
 
         if((width !== p2Width || height !== p2Height) && !this.options.disableVideoCopying){
+
+          this._setGeometry({
+            maxU: width / p2Width,
+            maxV: height / p2Height
+          });
+
           this._canvases[i] = document.createElement("canvas");
           this._canvases[i].id = (video.id || this.id) + "-canvas";
           this._canvases[i].width = p2Width;
           this._canvases[i].height = p2Height;
 
           this._contexts[i] = this._canvases[i].getContext("2d");
+        }
+        else {
+
+          this._setGeometry();
+
         }
 
         var loadOptions = Object.assign({}, this.options, {
