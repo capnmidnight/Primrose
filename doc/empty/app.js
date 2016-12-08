@@ -17,7 +17,7 @@ function number(min, max, power) {
 
 var packageName = "PrimroseVR";
 
-var version = "0.29.3";
+var version = "0.29.4";
 
 
 
@@ -16952,18 +16952,22 @@ var Image = function (_Entity) {
 
             _this4._elements[i] = video;
 
-            _this4._setGeometry({
-              maxU: width / p2Width,
-              maxV: height / p2Height
-            });
-
             if ((width !== p2Width || height !== p2Height) && !_this4.options.disableVideoCopying) {
+
+              _this4._setGeometry({
+                maxU: width / p2Width,
+                maxV: height / p2Height
+              });
+
               _this4._canvases[i] = document.createElement("canvas");
               _this4._canvases[i].id = (video.id || _this4.id) + "-canvas";
               _this4._canvases[i].width = p2Width;
               _this4._canvases[i].height = p2Height;
 
               _this4._contexts[i] = _this4._canvases[i].getContext("2d");
+            } else {
+
+              _this4._setGeometry();
             }
 
             var loadOptions = Object.assign({}, _this4.options, {
