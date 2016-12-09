@@ -186,6 +186,10 @@ export default class Image extends Entity {
       else if(spec instanceof HTMLVideoElement){
         video = spec;
       }
+      else if(spec.toString() === "[object MediaStream]" || spec.toString() === "[object LocalMediaStream]"){
+        video = document.createElement("video");
+        video.srcObject = spec;
+      }
       video.onprogress = progress;
       video.onloadedmetadata = progress;
       video.onerror = reject;

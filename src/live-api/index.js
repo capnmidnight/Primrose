@@ -8,6 +8,7 @@ When including Primrose as a `script` tag, the Live API is imported directly ont
 import axis from "./axis";
 import box from "./box";
 import brick from "./brick";
+import camera from "./camera";
 import circle from "./circle";
 import cloud from "./cloud";
 import colored from "./colored";
@@ -29,6 +30,7 @@ export {
   axis,
   box,
   brick,
+  camera,
   circle,
   cloud,
   colored,
@@ -51,6 +53,7 @@ export default {
   axis,
   box,
   brick,
+  camera,
   circle,
   cloud,
   colored,

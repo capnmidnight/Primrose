@@ -1,39 +1,31 @@
-import randNum from "../../../src/Primrose/Random/number";
 import BrowserEnvironment from "../../../src/Primrose/BrowserEnvironment";
-import ModelLoader from "../../../src/Primrose/Graphics/ModelLoader";
+import Image from "../../../src/Primrose/Controls/Image";
+import * as liveAPI from "../../../src/live-api";
 
-var dim = 100,
-  hDim = dim / 2,
-  rand = () => randNum(0, dim),
-  randDegree = () => randNum(-Math.PI, Math.PI),
-  env = new BrowserEnvironment({
+Object.assign(window, liveAPI);
+
+const env = new BrowserEnvironment({
     backgroundColor: 0x000000,
     groundTexture: "../images/deck.png",
     useFog: true,
-    drawDistance: hDim + 1,
+    drawDistance: 100,
     fullScreenButtonContainer: "#fullScreenButtonContainer"
   });
 
-export { env };
+window.env = env;
+window.cam = null;
 
 env.addEventListener("ready", function(){
-  ModelLoader.loadModel("../models/cardboard.obj")
-    .then(buildScene);
+  cam = put(camera(1))
+    .on(env.input.head)
+    .at(0, -0.125, -0.75)
+    .rot(-Math.PI / 8, 0, 0)
+    .obj();
+  cam.ready.then(console.log.bind(console, "camera ready"));
 });
 
-function buildScene(gc) {
-  for(let i = 0; i < 100; ++i){
-    const m = gc.clone();
-    m.position.set(
-      rand() - hDim,
-      rand() / 2,
-      rand() - hDim
-    );
-    m.rotation.set(
-      randDegree(),
-      randDegree(),
-      randDegree()
-    );
-    env.scene.add(m);
+env.addEventListener("update", function(){
+  if(cam && cam.image){
+    cam.image.update();
   }
-}
+});
