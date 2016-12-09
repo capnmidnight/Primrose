@@ -1,0 +1,75 @@
+extends ../templates/documentation.pug
+
+block header
+  h1 Pairing Multiple SteamVR Controllers
+
+block document
+  p SteamVR and the HTC Vive at first appear to only support two wireless controllers. You can plug more controllers in over USB, but there is no apparent process for pairing more controllers over a wireless connection.
+
+  p This is because there is a little bit of a conceit going on with the two existing controllers. The HTC Vive head-mounted display is not just a display. It also has an entire USB hub inside of it (including a spare USB port, if you have any devices of your own you would like to connect!). Soldered directly into that USB hub are two standard #[a(href="http://store.steampowered.com/app/530260/", target="_blank") Steam Controller wireless dongles], reflashed with a firmware specific to the Vive controllers. When you pair a controller "with the headset", you're really just pairing to those USB wireless dongles that just so happen to be inside the headset.
+
+  p This means that, if we have a process to reflash our own Steam Controller dongles, we can connect more than two Vive controllers in a wireless configuration.
+
+  p The process is a little convoluted, because the SteamVR UI only expects to be able to pair two controllers at a time. But you can trick it into complying by removing all hardware, adding two dongles at a time, pairing controllers, and repeating until you have all controllers paired with all dongles. Once the pairing song and dance is complete, you can reconnect all dongles at once and suddenly SteamVR recognizes more than two controllers.
+
+  p Here we go.
+
+  h2 Reflash Steam Controller Dongles to be SteamVR Dongles.
+
+  p We'll need the SteamVR Tracking Hardware Development Kit to perform the next two tasks, as it has the tool that we will use to reflash the dongles. If you don't have your own means to gain access to the HDK, I don't know how else you will get it. As an alternative to this step and the next, you could email us at [info@notiontheory.com](mailto:info@notiontheory.com) and we could flash a couple of dongles for you and send them to you, for the cost of the dongles and shipping.
+
+  h3 Step 1: Install the SteamVR Tracking Hardware Development Kit.
+
+  ol
+    li Open Steam.
+    li Log in to your own account.
+    li Go to Library &gt; Software.
+    li Install "SteamVR Tracking HDK".
+    li Locate your Steam installation directory (it’s usually #[code C:\Program Files (x86)\Steam]).
+    li Locate your SteamVR HDK directory (it should be #[code &lt;Steam Install Directory&gt;\steamapps\common\SteamVR Tracking HDK])
+    li Add the HDK tools directory to your System Path
+      ol
+        li It should be #[code &lt;SteamVR HDK Directory&gt;\tools\bin\win32])
+        li Open the Start Menu and type "Path". Select "Edit the system environment variables"
+        li Click the "Environment Variables…" button
+        li In the "System Variables" list, select "Path"
+        li Click "Edit"
+        li Click "New"
+        li Copy and paste the HDK tools directory into the text box.
+        li OK out of all of the dialog boxes.
+
+  h3 Step 2: Reflash Steam Controller dongles to be SteamVR dongles.
+
+  p This can be done all at once, and it will only update devices that need to be updated. However, just to be safe, make sure the headset and link box are completely disconnected before you do this.
+
+  ol
+    li Completely disconnect the Vive link box from the PC.
+    li Plug in all Steam Controller dongles that need to be reflashed.
+    li (Optional) Use scotch tape and a pen to label the dongle "VR" so later we know it has been reflashed already.
+    li Open Windows PowerShell (open the Start Menu and type "PowerShell". Hit Enter.)
+    li Navigate to #[code &lt;SteamVR HDK Directory&gt;\firmware\&lt;latest version&gt;]. As of this writing, the latest version is #[code 10.27.2016]
+    li Run the reflash command:
+      ul
+        li: code lighthouse_watchman_update -D watchman_v3_dongle.bin
+        li Note that the switch is an uppercase D, not a lowercase d.
+        It takes about 30 seconds to get through a single dongle. The tool will iterate through all dongles connected to the system and reflash any that are an older version than the version being flashed.
+
+  h2 Pair All of the Controllers
+
+  p This is the tricky part. SteamVR only displays two unpaired controllers at a time, and if there are two controllers connected to the system, it will not show any more pair-able controller slots. So you have to trick it by pairing two controllers at a time, removing those controller dongles, adding two more, and continuing with the pairing process.
+
+  ol
+    li Remove all SteamVR hardware from the system.
+    li Start SteamVR
+    li Add two SteamVR dongles (the ones now labeled "VR" with masking tape).
+    li Right-click one of the grey controller icons in SteamVR and select "Pair Controller".
+    li Follow the on-screen instructions for pairing.
+    li Click "pair another controller" and finish the pairing for the second controller.
+    li If more controllers need to be paired:
+      ol
+        li Remove the two SteamVR dongles
+        li return to step #3 above.
+
+  p Once all controllers have been paired, you can plug in all of the dongles, turn the controllers on, and SteamVR should now populate more controller icons for any controllers past 2.
+
+  p We don’t know what game support is like, but at least in the SteamVR System View, you should see all of the controllers appear and be independently usable.
