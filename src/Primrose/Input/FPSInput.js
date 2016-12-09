@@ -203,7 +203,7 @@ export default class FPSInput extends AbstractEventEmitter {
               },
               zero: {
                 buttons: [Gamepad.VIVE_BUTTONS.GRIP_PRESSED],
-                commandUp: emit.bind(this, "zero")
+                commandUp: this.emit.bind(this, "zero")
               }
             });
 
