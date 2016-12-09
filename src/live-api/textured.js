@@ -2,7 +2,7 @@ pliny.function({
   parent: "Live API",
   name: "textured",
   description: "Combines a geometry and a texture description into a mesh. The texture description can be quite complex, as there are a lot of options. The following description makes using this function sound quite complex, but it's actually quite easy to use. It's just complex in its implementation to be able to accommodate ease of use.",
-  returns: "THREE.Texture or THREE.CubeTexture",
+  returns: "THREE.Mesh",
   parameters: [{
     name: "geometry",
     type: "THREE.Geometry or THREE.Mesh",
