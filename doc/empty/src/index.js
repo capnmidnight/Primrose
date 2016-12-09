@@ -12,20 +12,8 @@ const env = new BrowserEnvironment({
     fullScreenButtonContainer: "#fullScreenButtonContainer"
   });
 
-window.env = env;
-window.cam = null;
-
 env.addEventListener("ready", function(){
-  cam = put(camera(1))
-    .on(env.input.head)
-    .at(0, -0.125, -0.75)
-    .rot(-Math.PI / 8, 0, 0)
-    .obj();
-  cam.ready.then(console.log.bind(console, "camera ready"));
 });
 
 env.addEventListener("update", function(){
-  if(cam && cam.image){
-    cam.image.update();
-  }
 });
