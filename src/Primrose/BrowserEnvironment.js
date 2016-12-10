@@ -447,8 +447,8 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
           canvasHeight = Math.max(canvasHeight, p[i].viewport.height);
         }
 
-        this.input.Mouse.commands.U.scale = 2/canvasWidth;
-        this.input.Mouse.commands.V.scale = 2/canvasHeight;
+        this.input.Mouse.commands.U.scale = devicePixelRatio * 2 / canvasWidth;
+        this.input.Mouse.commands.V.scale = devicePixelRatio * 2 / canvasHeight;
 
         canvasWidth = Math.floor(canvasWidth * resolutionScale);
         canvasHeight = Math.floor(canvasHeight * resolutionScale);
