@@ -59,7 +59,7 @@ pliny.record({
     optional: true,
     description: "Set to true to make the material participate in z-buffered transparency rendering."
   }, {
-    name: "fog",
+    name: "useFog",
     type: "Boolean",
     optional: true,
     default: true,
@@ -105,17 +105,17 @@ export default function material(textureDescription, options){
     roughness: 0.5,
     metalness: 0,
     color: 0xffffff,
-    fog: true,
+    useFog: true,
     unshaded: false,
     wireframe: false,
     side: FrontSide
   }, options);
 
-  var materialDescription = `Primrose.material(${textureDescription}, ${options.color}, ${options.unshaded}, ${options.side}, ${options.opacity}, ${options.roughness}, ${options.metalness}, ${options.color}, ${options.emissive}, ${options.wireframe}, ${options.fog})`;
+  var materialDescription = `Primrose.material(${textureDescription}, ${options.color}, ${options.unshaded}, ${options.side}, ${options.opacity}, ${options.roughness}, ${options.metalness}, ${options.color}, ${options.emissive}, ${options.wireframe}, ${options.useFog})`;
 
   return cache(materialDescription, () => {
     var materialOptions = {
-        fog: options.fog,
+        useFog: options.useFog,
         transparent: options.transparent || (options.opacity !== undefined && options.opacity < 1),
         opacity: options.opacity,
         side: options.side || FrontSide

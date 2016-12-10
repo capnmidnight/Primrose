@@ -30,7 +30,7 @@ pliny.function({
     grammar(\"JavaScript\");\n\
     var moon = textured(circle(1, 45), \"moon.jpg\", {\n\
       unshaded: true,\n\
-      fog: false\n\
+      useFog: false\n\
     });\n\
     \n\
     env.sky.add(moon); // assuming we have a `Primrose.BrowserEnvironment` named `env`\n\

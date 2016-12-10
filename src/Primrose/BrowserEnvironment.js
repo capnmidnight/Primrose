@@ -922,7 +922,7 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
 
         this.sky = skyFunc(skyGeom, this.options.skyTexture, {
           side: BackSide,
-          fog: false,
+          useFog: false,
           unshaded: true,
           transparent: true,
           opacity: 1,
@@ -1181,7 +1181,7 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
 
       this.fader = colored(box(1, 1, 1), this.options.backgroundColor, {
         opacity: 0,
-        fog: false,
+        useFog: false,
         transparent: true,
         unshaded: true,
         side: BackSide
