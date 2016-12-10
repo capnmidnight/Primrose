@@ -33,7 +33,7 @@ var isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Const
 
 var packageName = "PrimroseVR";
 
-var version = "0.29.4";
+var version = "0.29.5";
 
 
 
@@ -208,118 +208,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 
 
-var asyncGenerator = function () {
-  function AwaitValue(value) {
-    this.value = value;
-  }
 
-  function AsyncGenerator(gen) {
-    var front, back;
-
-    function send(key, arg) {
-      return new Promise(function (resolve, reject) {
-        var request = {
-          key: key,
-          arg: arg,
-          resolve: resolve,
-          reject: reject,
-          next: null
-        };
-
-        if (back) {
-          back = back.next = request;
-        } else {
-          front = back = request;
-          resume(key, arg);
-        }
-      });
-    }
-
-    function resume(key, arg) {
-      try {
-        var result = gen[key](arg);
-        var value = result.value;
-
-        if (value instanceof AwaitValue) {
-          Promise.resolve(value.value).then(function (arg) {
-            resume("next", arg);
-          }, function (arg) {
-            resume("throw", arg);
-          });
-        } else {
-          settle(result.done ? "return" : "normal", result.value);
-        }
-      } catch (err) {
-        settle("throw", err);
-      }
-    }
-
-    function settle(type, value) {
-      switch (type) {
-        case "return":
-          front.resolve({
-            value: value,
-            done: true
-          });
-          break;
-
-        case "throw":
-          front.reject(value);
-          break;
-
-        default:
-          front.resolve({
-            value: value,
-            done: false
-          });
-          break;
-      }
-
-      front = front.next;
-
-      if (front) {
-        resume(front.key, front.arg);
-      } else {
-        back = null;
-      }
-    }
-
-    this._invoke = send;
-
-    if (typeof gen.return !== "function") {
-      this.return = undefined;
-    }
-  }
-
-  if (typeof Symbol === "function" && Symbol.asyncIterator) {
-    AsyncGenerator.prototype[Symbol.asyncIterator] = function () {
-      return this;
-    };
-  }
-
-  AsyncGenerator.prototype.next = function (arg) {
-    return this._invoke("next", arg);
-  };
-
-  AsyncGenerator.prototype.throw = function (arg) {
-    return this._invoke("throw", arg);
-  };
-
-  AsyncGenerator.prototype.return = function (arg) {
-    return this._invoke("return", arg);
-  };
-
-  return {
-    wrap: function (fn) {
-      return function () {
-        return new AsyncGenerator(fn.apply(this, arguments));
-      };
-    },
-    await: function (value) {
-      return new AwaitValue(value);
-    }
-  };
-}();
 
 
 
@@ -9973,17 +9862,17 @@ function material(textureDescription, options) {
     roughness: 0.5,
     metalness: 0,
     color: 0xffffff,
-    fog: true,
+    useFog: true,
     unshaded: false,
     wireframe: false,
     side: FrontSide
   }, options);
 
-  var materialDescription = "Primrose.material(" + textureDescription + ", " + options.color + ", " + options.unshaded + ", " + options.side + ", " + options.opacity + ", " + options.roughness + ", " + options.metalness + ", " + options.color + ", " + options.emissive + ", " + options.wireframe + ", " + options.fog + ")";
+  var materialDescription = "Primrose.material(" + textureDescription + ", " + options.color + ", " + options.unshaded + ", " + options.side + ", " + options.opacity + ", " + options.roughness + ", " + options.metalness + ", " + options.color + ", " + options.emissive + ", " + options.wireframe + ", " + options.useFog + ")";
 
   return cache(materialDescription, function () {
     var materialOptions = {
-      fog: options.fog,
+      useFog: options.useFog,
       transparent: options.transparent || options.opacity !== undefined && options.opacity < 1,
       opacity: options.opacity,
       side: options.side || FrontSide
@@ -15679,6 +15568,40 @@ function axis(length, width) {
   return center;
 }
 
+function camera(index, options) {
+  options = Object.assign({
+    width: 1,
+    height: 768 / 1280,
+    disableVideoCopying: false,
+    unshaded: true,
+    transparent: true,
+    opacity: 0.5
+  }, options);
+  var cam = hub$1();
+  cam.ready = navigator.mediaDevices.enumerateDevices().catch(console.error.bind(console, "ERR [enumerating devices]:>")).then(function (devices) {
+    return devices.filter(function (d) {
+      return d.kind === "videoinput";
+    })[index];
+  }).catch(console.error.bind(console, "ERR [filtering devices]:>")).then(function (device) {
+    return navigator.mediaDevices.getUserMedia({
+      video: {
+        deviceId: device.deviceId,
+        width: { ideal: 1280 },
+        height: { ideal: 768 }
+      }
+    });
+  }).catch(console.error.bind(console, "ERR [getting media access]:>")).then(function (stream) {
+    return new Image(options).loadVideos([stream]);
+  }).catch(console.error.bind(console, "ERR [creating image]:>")).then(function (image) {
+    image._meshes.forEach(function (mesh) {
+      return cam.add(mesh);
+    });
+    cam.image = image;
+    return cam;
+  });
+  return cam;
+}
+
 /**
  * @author mrdoob / http://mrdoob.com/
  * @author alteredq / http://alteredqualia.com/
@@ -16499,6 +16422,7 @@ var index$2 = {
   axis: axis,
   box: box,
   brick: brick$1,
+  camera: camera,
   circle: circle,
   cloud: cloud,
   colored: colored,
@@ -16521,6 +16445,7 @@ var liveAPI = Object.freeze({
 	axis: axis,
 	box: box,
 	brick: brick$1,
+	camera: camera,
 	circle: circle,
 	cloud: cloud,
 	colored: colored,
@@ -17048,6 +16973,9 @@ var Image = function (_Entity) {
             }
           } else if (spec instanceof HTMLVideoElement) {
             video = spec;
+          } else if (spec.toString() === "[object MediaStream]" || spec.toString() === "[object LocalMediaStream]") {
+            video = document.createElement("video");
+            video.srcObject = spec;
           }
           video.onprogress = progress;
           video.onloadedmetadata = progress;
@@ -31228,13 +31156,6 @@ var InputProcessor = function (_AbstractEventEmitter) {
   return InputProcessor;
 }(AbstractEventEmitter);
 
-function setCursorCommand(obj, mod, key, func, cur) {
-  var name = mod + "_" + key;
-  obj[name] = function (prim, tokenRows) {
-    prim["cursor" + func](tokenRows, prim[cur + "Cursor"]);
-  };
-}
-
 var OperatingSystem = function () {
   function OperatingSystem(osName, pre1, pre2, redo, pre3, home, end, pre5) {
     classCallCheck(this, OperatingSystem);
@@ -32917,119 +32838,6 @@ Util.frameDataFromPose = function () {
     updateEyeMatrices(frameData.rightProjectionMatrix, frameData.rightViewMatrix, pose, vrDisplay.getEyeParameters("right"), vrDisplay);
 
     return true;
-  };
-}();
-
-var asyncGenerator$1 = function () {
-  function AwaitValue(value) {
-    this.value = value;
-  }
-
-  function AsyncGenerator(gen) {
-    var front, back;
-
-    function send(key, arg) {
-      return new Promise(function (resolve, reject) {
-        var request = {
-          key: key,
-          arg: arg,
-          resolve: resolve,
-          reject: reject,
-          next: null
-        };
-
-        if (back) {
-          back = back.next = request;
-        } else {
-          front = back = request;
-          resume(key, arg);
-        }
-      });
-    }
-
-    function resume(key, arg) {
-      try {
-        var result = gen[key](arg);
-        var value = result.value;
-
-        if (value instanceof AwaitValue) {
-          Promise.resolve(value.value).then(function (arg) {
-            resume("next", arg);
-          }, function (arg) {
-            resume("throw", arg);
-          });
-        } else {
-          settle(result.done ? "return" : "normal", result.value);
-        }
-      } catch (err) {
-        settle("throw", err);
-      }
-    }
-
-    function settle(type, value) {
-      switch (type) {
-        case "return":
-          front.resolve({
-            value: value,
-            done: true
-          });
-          break;
-
-        case "throw":
-          front.reject(value);
-          break;
-
-        default:
-          front.resolve({
-            value: value,
-            done: false
-          });
-          break;
-      }
-
-      front = front.next;
-
-      if (front) {
-        resume(front.key, front.arg);
-      } else {
-        back = null;
-      }
-    }
-
-    this._invoke = send;
-
-    if (typeof gen.return !== "function") {
-      this.return = undefined;
-    }
-  }
-
-  if (typeof Symbol === "function" && Symbol.asyncIterator) {
-    AsyncGenerator.prototype[Symbol.asyncIterator] = function () {
-      return this;
-    };
-  }
-
-  AsyncGenerator.prototype.next = function (arg) {
-    return this._invoke("next", arg);
-  };
-
-  AsyncGenerator.prototype.throw = function (arg) {
-    return this._invoke("throw", arg);
-  };
-
-  AsyncGenerator.prototype.return = function (arg) {
-    return this._invoke("return", arg);
-  };
-
-  return {
-    wrap: function wrap(fn) {
-      return function () {
-        return new AsyncGenerator(fn.apply(this, arguments));
-      };
-    },
-    await: function await(value) {
-      return new AwaitValue(value);
-    }
   };
 }();
 
@@ -35188,7 +34996,7 @@ var FPSInput = function (_AbstractEventEmitter) {
               },
               zero: {
                 buttons: [Gamepad.VIVE_BUTTONS.GRIP_PRESSED],
-                commandUp: emit.bind(_this, "zero")
+                commandUp: _this.emit.bind(_this, "zero")
               }
             });
 
@@ -43589,8 +43397,8 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
           canvasHeight = Math.max(canvasHeight, p[i].viewport.height);
         }
 
-        _this.input.Mouse.commands.U.scale = 2 / canvasWidth;
-        _this.input.Mouse.commands.V.scale = 2 / canvasHeight;
+        _this.input.Mouse.commands.U.scale = devicePixelRatio * 2 / canvasWidth;
+        _this.input.Mouse.commands.V.scale = devicePixelRatio * 2 / canvasHeight;
 
         canvasWidth = Math.floor(canvasWidth * resolutionScale);
         canvasHeight = Math.floor(canvasHeight * resolutionScale);
@@ -43893,7 +43701,7 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
 
         _this.sky = skyFunc(skyGeom, _this.options.skyTexture, {
           side: BackSide,
-          fog: false,
+          useFog: false,
           unshaded: true,
           transparent: true,
           opacity: 1,
@@ -43999,7 +43807,7 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
       if (evt !== "Gaze") {
         var _ret = function () {
           var elem = null;
-          if (_this.input.VR.canMirror || _this.input.VR.isNativeMobileWebVR) {
+          if (evt === "force" || _this.input.VR.canMirror || _this.input.VR.isNativeMobileWebVR) {
             elem = _this.renderer.domElement;
           } else {
             elem = _this.options.fullScreenElement;
@@ -44107,7 +43915,7 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
 
       _this.fader = colored(box(1, 1, 1), _this.options.backgroundColor, {
         opacity: 0,
-        fog: false,
+        useFog: false,
         transparent: true,
         unshaded: true,
         side: BackSide
@@ -44211,11 +44019,7 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
 
       _this.input.head.add(_this.camera);
 
-      return _this.input.ready.then(function () {
-        if (_this.options.fullScreenButtonContainer) {
-          _this.insertFullScreenButtons(_this.options.fullScreenButtonContainer);
-        }
-      });
+      return _this.input.ready;
     });
 
     var allReady = Promise.all([skyReady, groundReady, modelsReady, documentReady]).then(function () {
@@ -44230,12 +44034,24 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
           _this.ground.castShadow = true;
         }
       }
+
       _this.input.VR.displays.forEach(function (display) {
         if (display.DOMElement !== undefined) {
           display.DOMElement = _this.renderer.domElement;
         }
       });
-      _this.input.VR.connect(0);
+
+      if (_this.options.fullScreenButtonContainer) {
+        _this.insertFullScreenButtons(_this.options.fullScreenButtonContainer);
+      }
+
+      if (isMobile$1) {
+        _this.goFullScreen(1, "force").catch(function () {
+          return _this.input.VR.connect(0);
+        });
+      } else {
+        _this.input.VR.connect(0);
+      }
 
       _this.emit("ready");
       window.dispatchEvent(new CustomEvent("vrbrowserenvironmentready", {
@@ -44357,6 +44173,12 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
         btn.className = isStereo ? "stereo" : "mono";
         return btn;
       });
+
+      if (isMobile$1) {
+        buttons.push(newButton("GearVR", "Open in GearVR", function () {
+          return document.location = "ovrweb:" + location;
+        }));
+      }
 
       if (!/(www\.)?primrosevr.com/.test(document.location.hostname) && !this.options.disableAdvertising) {
         buttons.push(newButton("Primrose", "✿", function () {

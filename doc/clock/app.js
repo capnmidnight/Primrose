@@ -5384,17 +5384,17 @@ function material(textureDescription, options) {
     roughness: 0.5,
     metalness: 0,
     color: 0xffffff,
-    fog: true,
+    useFog: true,
     unshaded: false,
     wireframe: false,
     side: FrontSide
   }, options);
 
-  var materialDescription = "Primrose.material(" + textureDescription + ", " + options.color + ", " + options.unshaded + ", " + options.side + ", " + options.opacity + ", " + options.roughness + ", " + options.metalness + ", " + options.color + ", " + options.emissive + ", " + options.wireframe + ", " + options.fog + ")";
+  var materialDescription = "Primrose.material(" + textureDescription + ", " + options.color + ", " + options.unshaded + ", " + options.side + ", " + options.opacity + ", " + options.roughness + ", " + options.metalness + ", " + options.color + ", " + options.emissive + ", " + options.wireframe + ", " + options.useFog + ")";
 
   return cache(materialDescription, function () {
     var materialOptions = {
-      fog: options.fog,
+      useFog: options.useFog,
       transparent: options.transparent || options.opacity !== undefined && options.opacity < 1,
       opacity: options.opacity,
       side: options.side || FrontSide
@@ -11362,118 +11362,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 
 
-var asyncGenerator = function () {
-  function AwaitValue(value) {
-    this.value = value;
-  }
 
-  function AsyncGenerator(gen) {
-    var front, back;
-
-    function send(key, arg) {
-      return new Promise(function (resolve, reject) {
-        var request = {
-          key: key,
-          arg: arg,
-          resolve: resolve,
-          reject: reject,
-          next: null
-        };
-
-        if (back) {
-          back = back.next = request;
-        } else {
-          front = back = request;
-          resume(key, arg);
-        }
-      });
-    }
-
-    function resume(key, arg) {
-      try {
-        var result = gen[key](arg);
-        var value = result.value;
-
-        if (value instanceof AwaitValue) {
-          Promise.resolve(value.value).then(function (arg) {
-            resume("next", arg);
-          }, function (arg) {
-            resume("throw", arg);
-          });
-        } else {
-          settle(result.done ? "return" : "normal", result.value);
-        }
-      } catch (err) {
-        settle("throw", err);
-      }
-    }
-
-    function settle(type, value) {
-      switch (type) {
-        case "return":
-          front.resolve({
-            value: value,
-            done: true
-          });
-          break;
-
-        case "throw":
-          front.reject(value);
-          break;
-
-        default:
-          front.resolve({
-            value: value,
-            done: false
-          });
-          break;
-      }
-
-      front = front.next;
-
-      if (front) {
-        resume(front.key, front.arg);
-      } else {
-        back = null;
-      }
-    }
-
-    this._invoke = send;
-
-    if (typeof gen.return !== "function") {
-      this.return = undefined;
-    }
-  }
-
-  if (typeof Symbol === "function" && Symbol.asyncIterator) {
-    AsyncGenerator.prototype[Symbol.asyncIterator] = function () {
-      return this;
-    };
-  }
-
-  AsyncGenerator.prototype.next = function (arg) {
-    return this._invoke("next", arg);
-  };
-
-  AsyncGenerator.prototype.throw = function (arg) {
-    return this._invoke("throw", arg);
-  };
-
-  AsyncGenerator.prototype.return = function (arg) {
-    return this._invoke("return", arg);
-  };
-
-  return {
-    wrap: function (fn) {
-      return function () {
-        return new AsyncGenerator(fn.apply(this, arguments));
-      };
-    },
-    await: function (value) {
-      return new AwaitValue(value);
-    }
-  };
-}();
 
 
 
@@ -11986,6 +11875,987 @@ function axis(length, width) {
   put(brick(0x00ff00, width, length, width)).on(center);
   put(brick(0x0000ff, width, width, length)).on(center);
   return center;
+}
+
+var AbstractEventEmitter = function () {
+  function AbstractEventEmitter() {
+    classCallCheck(this, AbstractEventEmitter);
+
+    this._handlers = {};
+  }
+
+  createClass(AbstractEventEmitter, [{
+    key: "addEventListener",
+    value: function addEventListener(evt, thunk) {
+
+      if (!this._handlers[evt]) {
+        this._handlers[evt] = [];
+      }
+      this._handlers[evt].push(thunk);
+    }
+  }, {
+    key: "removeEventListener",
+    value: function removeEventListener(evt, thunk) {
+
+      if (this._handlers[evt]) {
+        var idx = this._handlers[evt].indexOf(thunk);
+        if (idx > -1) {
+          this._handlers[evt].splice(idx, 1);
+        }
+      }
+    }
+  }, {
+    key: "forward",
+    value: function forward(obj, evts) {
+      var _this = this;
+
+      evts.forEach(function (evt) {
+        return _this.addEventListener(evt, obj.emit.bind(obj, evt));
+      });
+    }
+  }, {
+    key: "emit",
+    value: function emit(evt, obj) {
+
+      if (this._handlers[evt]) {
+        if ((typeof obj === "undefined" ? "undefined" : _typeof(obj)) === "object" && !(obj instanceof Event)) {
+          obj.type = evt;
+          if (obj.defaultPrevented === undefined) {
+            obj.defaultPrevented = false;
+            obj.preventDefault = function () {
+              return obj.defaultPrevented = true;
+            };
+          }
+        }
+        var h = this._handlers[evt];
+        for (var i = 0; h && i < h.length; ++i) {
+          h[i](obj);
+          if (obj && obj.defaultPrevented) {
+            return;
+          }
+        }
+      }
+    }
+  }]);
+  return AbstractEventEmitter;
+}();
+
+var entityKeys = [];
+var entities = new WeakMap();
+var lastEye = 0;
+
+var Entity = function (_AbstractEventEmitter) {
+  inherits(Entity, _AbstractEventEmitter);
+  createClass(Entity, null, [{
+    key: "registerEntity",
+    value: function registerEntity(e) {
+      entities.set(e._idObj, e);
+      entityKeys.push(e._idObj);
+      e.addEventListener("_idchanged", function (evt) {
+        entityKeys.splice(entityKeys.indexOf(evt.oldID), 1);
+        entities.delete(evt.oldID);
+        entities.set(evt.entity._idObj, evt.entity);
+        entityKeys.push(evt.entity._idObj);
+      }, false);
+    }
+  }, {
+    key: "eyeBlankAll",
+    value: function eyeBlankAll(eye) {
+      if (eye !== lastEye) {
+        entityKeys.forEach(function (id) {
+          entities.get(id).eyeBlank(eye);
+        });
+        lastEye = eye;
+      }
+    }
+  }]);
+
+  function Entity(id) {
+    classCallCheck(this, Entity);
+
+    var _this = possibleConstructorReturn(this, (Entity.__proto__ || Object.getPrototypeOf(Entity)).call(this));
+
+    _this.id = id;
+
+    _this.parent = null;
+
+    _this.children = [];
+
+    _this.focused = false;
+
+    _this.focusable = true;
+
+    return _this;
+  }
+
+  createClass(Entity, [{
+    key: "focus",
+    value: function focus() {
+      if (this.focusable) {
+        this.focused = true;
+        this.emit("focus", {
+          target: this
+        });
+      }
+    }
+  }, {
+    key: "blur",
+    value: function blur() {
+      if (this.focused) {
+        this.focused = false;
+        for (var i = 0; i < this.children.length; ++i) {
+          if (this.children[i].focused) {
+            this.children[i].blur();
+          }
+        }
+        this.emit("blur", {
+          target: this
+        });
+      }
+    }
+  }, {
+    key: "appendChild",
+    value: function appendChild(child) {
+      if (child && !child.parent) {
+        child.parent = this;
+        this.children.push(child);
+      }
+    }
+  }, {
+    key: "removeChild",
+    value: function removeChild(child) {
+      var i = this.children.indexOf(child);
+      if (0 <= i && i < this.children.length) {
+        this.children.splice(i, 1);
+        child.parent = null;
+      }
+    }
+  }, {
+    key: "eyeBlank",
+    value: function eyeBlank(eye) {
+      for (var i = 0; i < this.children.length; ++i) {
+        this.children[i].eyeBlank(eye);
+      }
+    }
+  }, {
+    key: "_forFocusedChild",
+    value: function _forFocusedChild(name, evt) {
+      var elem = this.focusedElement;
+      if (elem && elem !== this) {
+        elem[name](evt);
+      }
+    }
+  }, {
+    key: "startUV",
+    value: function startUV(evt) {
+      this._forFocusedChild("startUV", evt);
+    }
+  }, {
+    key: "moveUV",
+    value: function moveUV(evt) {
+      this._forFocusedChild("moveUV", evt);
+    }
+  }, {
+    key: "endPointer",
+    value: function endPointer(evt) {
+      this._forFocusedChild("endPointer", evt);
+    }
+  }, {
+    key: "dispatchEvent",
+    value: function dispatchEvent(evt) {
+      var _this2 = this;
+
+      switch (evt.type) {
+        case "pointerstart":
+          this.startUV(evt.hit.uv);
+          break;
+        case "pointerend":
+          this.endPointer(evt);
+          break;
+        case "pointermove":
+        case "gazemove":
+          this.moveUV(evt.hit.uv);
+          break;
+        case "gazecomplete":
+          this.startUV(evt.hit.uv);
+          setTimeout(function () {
+            return _this2.endPointer(evt);
+          }, 100);
+          break;
+      }
+    }
+  }, {
+    key: "keyDown",
+    value: function keyDown(evt) {
+      this._forFocusedChild("keyDown", evt);
+    }
+  }, {
+    key: "keyUp",
+    value: function keyUp(evt) {
+      this._forFocusedChild("keyUp", evt);
+    }
+  }, {
+    key: "readClipboard",
+    value: function readClipboard(evt) {
+      this._forFocusedChild("readClipboard", evt);
+    }
+  }, {
+    key: "copySelectedText",
+    value: function copySelectedText(evt) {
+      this._forFocusedChild("copySelectedText", evt);
+    }
+  }, {
+    key: "cutSelectedText",
+    value: function cutSelectedText(evt) {
+      this._forFocusedChild("cutSelectedText", evt);
+    }
+  }, {
+    key: "readWheel",
+    value: function readWheel(evt) {
+      this._forFocusedChild("readWheel", evt);
+    }
+  }, {
+    key: "id",
+    get: function get() {
+      return this._id;
+    },
+    set: function set(v) {
+      if (this._id !== v) {
+        var oldID = this._idObj;
+        this._id = v;
+        this._idObj = new Object(v);
+        // this `_idchanged` event is necessary to update the related ID in the WeakMap of entities for eye-blanking.
+        this.emit("_idchanged", {
+          oldID: oldID,
+          entity: this
+        });
+      }
+    }
+  }, {
+    key: "theme",
+    get: function get() {
+      return null;
+    },
+    set: function set(v) {
+      for (var i = 0; i < this.children.length; ++i) {
+        this.children[i].theme = v;
+      }
+    }
+  }, {
+    key: "lockMovement",
+    get: function get() {
+      var lock = false;
+      for (var i = 0; i < this.children.length && !lock; ++i) {
+        lock = lock || this.children[i].lockMovement;
+      }
+      return lock;
+    }
+  }, {
+    key: "focusedElement",
+    get: function get() {
+      var result = null,
+          head = this;
+      while (head && head.focused) {
+        result = head;
+        var children = head.children;
+        head = null;
+        for (var i = 0; i < children.length; ++i) {
+          var child = children[i];
+          if (child.focused) {
+            head = child;
+          }
+        }
+      }
+      return result;
+    }
+  }]);
+  return Entity;
+}(AbstractEventEmitter);
+
+var index$2 = typeof Symbol === 'undefined' ? function (description) {
+	return '@' + (description || '@') + Math.random();
+} : Symbol;
+
+/*! npm.im/intervalometer */
+function intervalometer(cb, request, cancel, requestParameter) {
+	var requestId;
+	var previousLoopTime;
+	function loop(now) {
+		// must be requested before cb() because that might call .stop()
+		requestId = request(loop, requestParameter);
+
+		// called with "ms since last call". 0 on start()
+		cb(now - (previousLoopTime || now));
+
+		previousLoopTime = now;
+	}
+	return {
+		start: function start() {
+			if (!requestId) {
+				// prevent double starts
+				loop(0);
+			}
+		},
+		stop: function stop() {
+			cancel(requestId);
+			requestId = null;
+			previousLoopTime = 0;
+		}
+	};
+}
+
+function frameIntervalometer(cb) {
+	return intervalometer(cb, requestAnimationFrame, cancelAnimationFrame);
+}
+
+/*! npm.im/iphone-inline-video */
+function preventEvent(element, eventName, toggleProperty, preventWithProperty) {
+	function handler(e) {
+		if (Boolean(element[toggleProperty]) === Boolean(preventWithProperty)) {
+			e.stopImmediatePropagation();
+			// console.log(eventName, 'prevented on', element);
+		}
+		delete element[toggleProperty];
+	}
+	element.addEventListener(eventName, handler, false);
+
+	// Return handler to allow to disable the prevention. Usage:
+	// const preventionHandler = preventEvent(el, 'click');
+	// el.removeEventHandler('click', preventionHandler);
+	return handler;
+}
+
+function proxyProperty(object, propertyName, sourceObject, copyFirst) {
+	function get() {
+		return sourceObject[propertyName];
+	}
+	function set(value) {
+		sourceObject[propertyName] = value;
+	}
+
+	if (copyFirst) {
+		set(object[propertyName]);
+	}
+
+	Object.defineProperty(object, propertyName, { get: get, set: set });
+}
+
+function proxyEvent(object, eventName, sourceObject) {
+	sourceObject.addEventListener(eventName, function () {
+		return object.dispatchEvent(new Event(eventName));
+	});
+}
+
+function dispatchEventAsync(element, type) {
+	Promise.resolve().then(function () {
+		element.dispatchEvent(new Event(type));
+	});
+}
+
+// iOS 10 adds support for native inline playback + silent autoplay
+var isWhitelisted = /iPhone|iPod/i.test(navigator.userAgent) && !matchMedia('(-webkit-video-playable-inline)').matches;
+
+var ಠ = index$2();
+var ಠevent = index$2();
+var ಠplay = index$2('nativeplay');
+var ಠpause = index$2('nativepause');
+
+/**
+ * UTILS
+ */
+
+function getAudioFromVideo(video) {
+	var audio = new Audio();
+	proxyEvent(video, 'play', audio);
+	proxyEvent(video, 'playing', audio);
+	proxyEvent(video, 'pause', audio);
+	audio.crossOrigin = video.crossOrigin;
+
+	// 'data:' causes audio.networkState > 0
+	// which then allows to keep <audio> in a resumable playing state
+	// i.e. once you set a real src it will keep playing if it was if .play() was called
+	audio.src = video.src || video.currentSrc || 'data:';
+
+	// if (audio.src === 'data:') {
+	//   TODO: wait for video to be selected
+	// }
+	return audio;
+}
+
+var lastRequests = [];
+var requestIndex = 0;
+var lastTimeupdateEvent;
+
+function setTime(video, time, rememberOnly) {
+	// allow one timeupdate event every 200+ ms
+	if ((lastTimeupdateEvent || 0) + 200 < Date.now()) {
+		video[ಠevent] = true;
+		lastTimeupdateEvent = Date.now();
+	}
+	if (!rememberOnly) {
+		video.currentTime = time;
+	}
+	lastRequests[++requestIndex % 3] = time * 100 | 0 / 100;
+}
+
+function isPlayerEnded(player) {
+	return player.driver.currentTime >= player.video.duration;
+}
+
+function update$1(timeDiff) {
+	var player = this;
+	// console.log('update', player.video.readyState, player.video.networkState, player.driver.readyState, player.driver.networkState, player.driver.paused);
+	if (player.video.readyState >= player.video.HAVE_FUTURE_DATA) {
+		if (!player.hasAudio) {
+			player.driver.currentTime = player.video.currentTime + timeDiff * player.video.playbackRate / 1000;
+			if (player.video.loop && isPlayerEnded(player)) {
+				player.driver.currentTime = 0;
+			}
+		}
+		setTime(player.video, player.driver.currentTime);
+	} else if (player.video.networkState === player.video.NETWORK_IDLE && !player.video.buffered.length) {
+		// this should happen when the source is available but:
+		// - it's potentially playing (.paused === false)
+		// - it's not ready to play
+		// - it's not loading
+		// If it hasAudio, that will be loaded in the 'emptied' handler below
+		player.video.load();
+		// console.log('Will load');
+	}
+
+	// console.assert(player.video.currentTime === player.driver.currentTime, 'Video not updating!');
+
+	if (player.video.ended) {
+		delete player.video[ಠevent]; // allow timeupdate event
+		player.video.pause(true);
+	}
+}
+
+/**
+ * METHODS
+ */
+
+function play$1() {
+	// console.log('play');
+	var video = this;
+	var player = video[ಠ];
+
+	// if it's fullscreen, use the native player
+	if (video.webkitDisplayingFullscreen) {
+		video[ಠplay]();
+		return;
+	}
+
+	if (player.driver.src !== 'data:' && player.driver.src !== video.src) {
+		// console.log('src changed on play', video.src);
+		setTime(video, 0, true);
+		player.driver.src = video.src;
+	}
+
+	if (!video.paused) {
+		return;
+	}
+	player.paused = false;
+
+	if (!video.buffered.length) {
+		// .load() causes the emptied event
+		// the alternative is .play()+.pause() but that triggers play/pause events, even worse
+		// possibly the alternative is preventing this event only once
+		video.load();
+	}
+
+	player.driver.play();
+	player.updater.start();
+
+	if (!player.hasAudio) {
+		dispatchEventAsync(video, 'play');
+		if (player.video.readyState >= player.video.HAVE_ENOUGH_DATA) {
+			// console.log('onplay');
+			dispatchEventAsync(video, 'playing');
+		}
+	}
+}
+function pause$1(forceEvents) {
+	// console.log('pause');
+	var video = this;
+	var player = video[ಠ];
+
+	player.driver.pause();
+	player.updater.stop();
+
+	// if it's fullscreen, the developer the native player.pause()
+	// This is at the end of pause() because it also
+	// needs to make sure that the simulation is paused
+	if (video.webkitDisplayingFullscreen) {
+		video[ಠpause]();
+	}
+
+	if (player.paused && !forceEvents) {
+		return;
+	}
+
+	player.paused = true;
+	if (!player.hasAudio) {
+		dispatchEventAsync(video, 'pause');
+	}
+	if (video.ended) {
+		video[ಠevent] = true;
+		dispatchEventAsync(video, 'ended');
+	}
+}
+
+/**
+ * SETUP
+ */
+
+function addPlayer(video, hasAudio) {
+	var player = video[ಠ] = {};
+	player.paused = true; // track whether 'pause' events have been fired
+	player.hasAudio = hasAudio;
+	player.video = video;
+	player.updater = frameIntervalometer(update$1.bind(player));
+
+	if (hasAudio) {
+		player.driver = getAudioFromVideo(video);
+	} else {
+		video.addEventListener('canplay', function () {
+			if (!video.paused) {
+				// console.log('oncanplay');
+				dispatchEventAsync(video, 'playing');
+			}
+		});
+		player.driver = {
+			src: video.src || video.currentSrc || 'data:',
+			muted: true,
+			paused: true,
+			pause: function pause$1() {
+				player.driver.paused = true;
+			},
+			play: function play$1() {
+				player.driver.paused = false;
+				// media automatically goes to 0 if .play() is called when it's done
+				if (isPlayerEnded(player)) {
+					setTime(video, 0);
+				}
+			},
+			get ended() {
+				return isPlayerEnded(player);
+			}
+		};
+	}
+
+	// .load() causes the emptied event
+	video.addEventListener('emptied', function () {
+		// console.log('driver src is', player.driver.src);
+		var wasEmpty = !player.driver.src || player.driver.src === 'data:';
+		if (player.driver.src && player.driver.src !== video.src) {
+			// console.log('src changed to', video.src);
+			setTime(video, 0, true);
+			player.driver.src = video.src;
+			// playing videos will only keep playing if no src was present when .play()’ed
+			if (wasEmpty) {
+				player.driver.play();
+			} else {
+				player.updater.stop();
+			}
+		}
+	}, false);
+
+	// stop programmatic player when OS takes over
+	video.addEventListener('webkitbeginfullscreen', function () {
+		if (!video.paused) {
+			// make sure that the <audio> and the syncer/updater are stopped
+			video.pause();
+
+			// play video natively
+			video[ಠplay]();
+		} else if (hasAudio && !player.driver.buffered.length) {
+			// if the first play is native,
+			// the <audio> needs to be buffered manually
+			// so when the fullscreen ends, it can be set to the same current time
+			player.driver.load();
+		}
+	});
+	if (hasAudio) {
+		video.addEventListener('webkitendfullscreen', function () {
+			// sync audio to new video position
+			player.driver.currentTime = video.currentTime;
+			// console.assert(player.driver.currentTime === video.currentTime, 'Audio not synced');
+		});
+
+		// allow seeking
+		video.addEventListener('seeking', function () {
+			if (lastRequests.indexOf(video.currentTime * 100 | 0 / 100) < 0) {
+				// console.log('User-requested seeking');
+				player.driver.currentTime = video.currentTime;
+			}
+		});
+	}
+}
+
+function overloadAPI(video) {
+	var player = video[ಠ];
+	video[ಠplay] = video.play;
+	video[ಠpause] = video.pause;
+	video.play = play$1;
+	video.pause = pause$1;
+	proxyProperty(video, 'paused', player.driver);
+	proxyProperty(video, 'muted', player.driver, true);
+	proxyProperty(video, 'playbackRate', player.driver, true);
+	proxyProperty(video, 'ended', player.driver);
+	proxyProperty(video, 'loop', player.driver, true);
+	preventEvent(video, 'seeking');
+	preventEvent(video, 'seeked');
+	preventEvent(video, 'timeupdate', ಠevent, false);
+	preventEvent(video, 'ended', ಠevent, false); // prevent occasional native ended events
+}
+
+function enableInlineVideo(video, hasAudio, onlyWhitelisted) {
+	if (hasAudio === void 0) hasAudio = true;
+	if (onlyWhitelisted === void 0) onlyWhitelisted = true;
+
+	if (onlyWhitelisted && !isWhitelisted || video[ಠ]) {
+		return;
+	}
+	addPlayer(video, hasAudio);
+	overloadAPI(video);
+	video.classList.add('IIV');
+	if (!hasAudio && video.autoplay) {
+		video.play();
+	}
+	if (!/iPhone|iPod|iPad/.test(navigator.platform)) {
+		console.warn('iphone-inline-video is not guaranteed to work in emulated environments');
+	}
+}
+
+enableInlineVideo.isWhitelisted = isWhitelisted;
+
+var COUNTER = 0;
+
+// Videos don't auto-play on mobile devices, so let's make them all play whenever
+// we tap the screen.
+var processedVideos = [];
+function findAndFixVideo(evt) {
+  var vids = document.querySelectorAll("video");
+  for (var i = 0; i < vids.length; ++i) {
+    fixVideo(vids[i]);
+  }
+  window.removeEventListener("touchend", findAndFixVideo);
+  window.removeEventListener("mouseup", findAndFixVideo);
+  window.removeEventListener("keyup", findAndFixVideo);
+}
+
+function fixVideo(vid) {
+  if (processedVideos.indexOf(vid) === -1) {
+    processedVideos.push(vid);
+    enableInlineVideo(vid, false);
+  }
+}
+
+window.addEventListener("touchend", findAndFixVideo, false);
+window.addEventListener("mouseup", findAndFixVideo, false);
+window.addEventListener("keyup", findAndFixVideo, false);
+
+var Image = function (_Entity) {
+  inherits(Image, _Entity);
+  createClass(Image, null, [{
+    key: "create",
+    value: function create() {
+      return new Image();
+    }
+  }]);
+
+  function Image(options) {
+    classCallCheck(this, Image);
+
+    ////////////////////////////////////////////////////////////////////////
+    // normalize input parameters
+    ////////////////////////////////////////////////////////////////////////
+
+    options = options || {};
+    if (typeof options === "string") {
+      options = {
+        value: options
+      };
+    }
+
+    options = Object.assign({}, {
+      id: "Primrose.Controls.Image[" + COUNTER++ + "]"
+    }, options);
+
+    var _this = possibleConstructorReturn(this, (Image.__proto__ || Object.getPrototypeOf(Image)).call(this, options.id));
+
+    _this.options = options;
+
+    Entity.registerEntity(_this);
+
+    ////////////////////////////////////////////////////////////////////////
+    // initialization
+    ///////////////////////////////////////////////////////////////////////
+    _this._canvases = [];
+    _this._contexts = [];
+    _this._elements = [];
+    _this._meshes = [];
+    _this._textures = [];
+    _this._currentImageIndex = 0;
+    _this._lastTime = null;
+    _this.isVideo = false;
+    return _this;
+  }
+
+  createClass(Image, [{
+    key: "add",
+    value: function add(child) {
+      this._meshes[0].add(child);
+    }
+  }, {
+    key: "addToBrowserEnvironment",
+    value: function addToBrowserEnvironment(env, scene) {
+      var _this2 = this;
+
+      this._meshes.forEach(function (mesh, i) {
+        scene.add(mesh);
+        mesh.name = _this2.id + "-" + i;
+        if (i > 0) {
+          mesh.visible = false;
+        } else if (_this2.options.pickable) {
+          env.registerPickableObject(mesh);
+        }
+      });
+    }
+  }, {
+    key: "_setGeometry",
+    value: function _setGeometry(options) {
+      if (this.options.radius) {
+        this.options.geometry = shell$1(this.options.radius, 72, 36, Math.PI * 2, Math.PI, options);
+      } else if (!this.options.geometry) {
+        if (!this.options.width) {
+          this.options.width = 0.5;
+        }
+        if (!this.options.height) {
+          this.options.height = 0.5;
+        }
+        this.options.geometry = quad$1(this.options.width, this.options.height, options);
+      }
+    }
+  }, {
+    key: "loadImages",
+    value: function loadImages(images, progress) {
+      var _this3 = this;
+
+      return Promise.all(Array.prototype.map.call(images, function (src, i) {
+        var loadOptions = Object.assign({}, _this3.options, {
+          progress: progress,
+          resolve: function resolve(txt) {
+            return _this3._textures[i] = txt;
+          }
+        });
+        _this3._setGeometry();
+        _this3._meshes[i] = textured(_this3.options.geometry, src, loadOptions);
+        return loadOptions.promise;
+      })).then(function () {
+        return _this3.isVideo = false;
+      }).then(function () {
+        return _this3;
+      });
+    }
+  }, {
+    key: "loadVideos",
+    value: function loadVideos(videos, progress) {
+      var _this4 = this;
+
+      this._elements.splice(0);
+      this._canvases.splice(0);
+      this._contexts.splice(0);
+      this._textures.splice(0);
+
+      return Promise.all(Array.prototype.map.call(videos, function (spec, i) {
+        return new Promise(function (resolve, reject) {
+          var video = null;
+          if (typeof spec === "string") {
+            video = document.querySelector("video[src='" + spec + "']");
+            if (!video) {
+              video = document.createElement("video");
+              video.src = spec;
+            }
+          } else if (spec instanceof HTMLVideoElement) {
+            video = spec;
+          } else if (spec.toString() === "[object MediaStream]" || spec.toString() === "[object LocalMediaStream]") {
+            video = document.createElement("video");
+            video.srcObject = spec;
+          }
+          video.onprogress = progress;
+          video.onloadedmetadata = progress;
+          video.onerror = reject;
+          video.muted = true;
+          video.preload = "auto";
+          video.autoplay = true;
+          video.loop = true;
+          video.controls = true;
+          video.setAttribute("playsinline", "");
+          video.setAttribute("webkit-playsinline", "");
+          video.oncanplay = function () {
+            video.oncanplay = null;
+            video.onerror = null;
+
+            var width = video.videoWidth,
+                height = video.videoHeight,
+                p2Width = Math.pow(2, Math.ceil(Math.log2(width))),
+                p2Height = Math.pow(2, Math.ceil(Math.log2(height)));
+
+            _this4._elements[i] = video;
+
+            if ((width !== p2Width || height !== p2Height) && !_this4.options.disableVideoCopying) {
+
+              _this4._setGeometry({
+                maxU: width / p2Width,
+                maxV: height / p2Height
+              });
+
+              _this4._canvases[i] = document.createElement("canvas");
+              _this4._canvases[i].id = (video.id || _this4.id) + "-canvas";
+              _this4._canvases[i].width = p2Width;
+              _this4._canvases[i].height = p2Height;
+
+              _this4._contexts[i] = _this4._canvases[i].getContext("2d");
+            } else {
+
+              _this4._setGeometry();
+            }
+
+            var loadOptions = Object.assign({}, _this4.options, {
+              progress: progress,
+              resolve: function (oldResolve, i, txt) {
+                this._textures[i] = txt;
+                if (typeof oldResolve === "function") {
+                  oldResolve(txt);
+                }
+                resolve();
+              }.bind(_this4, _this4.options.resolve, i)
+            });
+
+            _this4._meshes[i] = textured(_this4.options.geometry, _this4._canvases[i] || _this4._elements[i], loadOptions);
+          };
+          if (!video.parentElement) {
+            document.body.insertBefore(video, document.body.children[0]);
+          }
+          video.play();
+        });
+      })).then(function () {
+        return _this4.isVideo = true;
+      }).then(function () {
+        return _this4;
+      });
+    }
+  }, {
+    key: "eyeBlank",
+    value: function eyeBlank(eye) {
+      if (this._meshes) {
+        this._currentImageIndex = eye % this._meshes.length;
+        var isVisible = this.visible;
+        for (var i = 0; i < this._meshes.length; ++i) {
+          var m = this._meshes[i];
+          m.visible = isVisible && i === this._currentImageIndex;
+          if (i > 0) {
+            m.position.copy(this.position);
+            m.quaternion.copy(this.quaternion);
+            m.scale.copy(this.scale);
+          }
+        }
+      }
+    }
+  }, {
+    key: "update",
+    value: function update() {
+      if (this.isVideo) {
+        for (var i = 0; i < this._textures.length; ++i) {
+          var elem = this._elements[i];
+          if (elem.currentTime !== this._lastTime) {
+            if (i < this._contexts.length) {
+              this._contexts[i].drawImage(elem, 0, 0);
+            }
+            try {
+              this._textures[i].needsUpdate = true;
+            } catch (exp) {
+              console.log(i, this);
+            }
+            this._lastTime = elem.currentTime;
+          }
+        }
+      }
+    }
+  }, {
+    key: "matrixWorld",
+    get: function get() {
+      return this._meshes[0].matrixWorld;
+    }
+  }, {
+    key: "position",
+    get: function get() {
+      return this._meshes[0].position;
+    }
+  }, {
+    key: "quaternion",
+    get: function get() {
+      return this._meshes[0].quaternion;
+    }
+  }, {
+    key: "scale",
+    get: function get() {
+      return this._meshes[0].scale;
+    }
+  }, {
+    key: "visible",
+    get: function get() {
+      for (var i = 0; i < this._meshes.length; ++i) {
+        if (this._meshes[i].visible) {
+          return true;
+        }
+      }
+      return false;
+    },
+    set: function set(v) {
+      var img = this._meshes[this._currentImageIndex];
+      if (img) {
+        img.visible = v;
+      }
+    }
+  }]);
+  return Image;
+}(Entity);
+
+function camera(index, options) {
+  options = Object.assign({
+    width: 1,
+    height: 768 / 1280,
+    disableVideoCopying: false,
+    unshaded: true,
+    transparent: true,
+    opacity: 0.5
+  }, options);
+  var cam = hub();
+  cam.ready = navigator.mediaDevices.enumerateDevices().catch(console.error.bind(console, "ERR [enumerating devices]:>")).then(function (devices) {
+    return devices.filter(function (d) {
+      return d.kind === "videoinput";
+    })[index];
+  }).catch(console.error.bind(console, "ERR [filtering devices]:>")).then(function (device) {
+    return navigator.mediaDevices.getUserMedia({
+      video: {
+        deviceId: device.deviceId,
+        width: { ideal: 1280 },
+        height: { ideal: 768 }
+      }
+    });
+  }).catch(console.error.bind(console, "ERR [getting media access]:>")).then(function (stream) {
+    return new Image(options).loadVideos([stream]);
+  }).catch(console.error.bind(console, "ERR [creating image]:>")).then(function (image) {
+    image._meshes.forEach(function (mesh) {
+      return cam.add(mesh);
+    });
+    cam.image = image;
+    return cam;
+  });
+  return cam;
 }
 
 /**
@@ -13694,6 +14564,7 @@ var index$1 = {
   axis: axis,
   box: box,
   brick: brick,
+  camera: camera,
   circle: circle$1,
   cloud: cloud,
   colored: colored,
@@ -13716,6 +14587,7 @@ var liveAPI = Object.freeze({
 	axis: axis,
 	box: box,
 	brick: brick,
+	camera: camera,
 	circle: circle$1,
 	cloud: cloud,
 	colored: colored,
@@ -13737,7 +14609,7 @@ var liveAPI = Object.freeze({
 
 var packageName = "PrimroseVR";
 
-var version = "0.29.4";
+var version = "0.29.5";
 
 
 
@@ -14193,69 +15065,6 @@ var Angle = function () {
     }
   }]);
   return Angle;
-}();
-
-var AbstractEventEmitter = function () {
-  function AbstractEventEmitter() {
-    classCallCheck(this, AbstractEventEmitter);
-
-    this._handlers = {};
-  }
-
-  createClass(AbstractEventEmitter, [{
-    key: "addEventListener",
-    value: function addEventListener(evt, thunk) {
-
-      if (!this._handlers[evt]) {
-        this._handlers[evt] = [];
-      }
-      this._handlers[evt].push(thunk);
-    }
-  }, {
-    key: "removeEventListener",
-    value: function removeEventListener(evt, thunk) {
-
-      if (this._handlers[evt]) {
-        var idx = this._handlers[evt].indexOf(thunk);
-        if (idx > -1) {
-          this._handlers[evt].splice(idx, 1);
-        }
-      }
-    }
-  }, {
-    key: "forward",
-    value: function forward(obj, evts) {
-      var _this = this;
-
-      evts.forEach(function (evt) {
-        return _this.addEventListener(evt, obj.emit.bind(obj, evt));
-      });
-    }
-  }, {
-    key: "emit",
-    value: function emit(evt, obj) {
-
-      if (this._handlers[evt]) {
-        if ((typeof obj === "undefined" ? "undefined" : _typeof(obj)) === "object" && !(obj instanceof Event)) {
-          obj.type = evt;
-          if (obj.defaultPrevented === undefined) {
-            obj.defaultPrevented = false;
-            obj.preventDefault = function () {
-              return obj.defaultPrevented = true;
-            };
-          }
-        }
-        var h = this._handlers[evt];
-        for (var i = 0; h && i < h.length; ++i) {
-          h[i](obj);
-          if (obj && obj.defaultPrevented) {
-            return;
-          }
-        }
-      }
-    }
-  }]);
-  return AbstractEventEmitter;
 }();
 
 var TELEPORT_PAD_RADIUS = 0.4;
@@ -15270,238 +16079,6 @@ var Music = function () {
 
 Music.TYPES = TYPES;
 
-var entityKeys = [];
-var entities = new WeakMap();
-var lastEye = 0;
-
-var Entity = function (_AbstractEventEmitter) {
-  inherits(Entity, _AbstractEventEmitter);
-  createClass(Entity, null, [{
-    key: "registerEntity",
-    value: function registerEntity(e) {
-      entities.set(e._idObj, e);
-      entityKeys.push(e._idObj);
-      e.addEventListener("_idchanged", function (evt) {
-        entityKeys.splice(entityKeys.indexOf(evt.oldID), 1);
-        entities.delete(evt.oldID);
-        entities.set(evt.entity._idObj, evt.entity);
-        entityKeys.push(evt.entity._idObj);
-      }, false);
-    }
-  }, {
-    key: "eyeBlankAll",
-    value: function eyeBlankAll(eye) {
-      if (eye !== lastEye) {
-        entityKeys.forEach(function (id) {
-          entities.get(id).eyeBlank(eye);
-        });
-        lastEye = eye;
-      }
-    }
-  }]);
-
-  function Entity(id) {
-    classCallCheck(this, Entity);
-
-    var _this = possibleConstructorReturn(this, (Entity.__proto__ || Object.getPrototypeOf(Entity)).call(this));
-
-    _this.id = id;
-
-    _this.parent = null;
-
-    _this.children = [];
-
-    _this.focused = false;
-
-    _this.focusable = true;
-
-    return _this;
-  }
-
-  createClass(Entity, [{
-    key: "focus",
-    value: function focus() {
-      if (this.focusable) {
-        this.focused = true;
-        this.emit("focus", {
-          target: this
-        });
-      }
-    }
-  }, {
-    key: "blur",
-    value: function blur() {
-      if (this.focused) {
-        this.focused = false;
-        for (var i = 0; i < this.children.length; ++i) {
-          if (this.children[i].focused) {
-            this.children[i].blur();
-          }
-        }
-        this.emit("blur", {
-          target: this
-        });
-      }
-    }
-  }, {
-    key: "appendChild",
-    value: function appendChild(child) {
-      if (child && !child.parent) {
-        child.parent = this;
-        this.children.push(child);
-      }
-    }
-  }, {
-    key: "removeChild",
-    value: function removeChild(child) {
-      var i = this.children.indexOf(child);
-      if (0 <= i && i < this.children.length) {
-        this.children.splice(i, 1);
-        child.parent = null;
-      }
-    }
-  }, {
-    key: "eyeBlank",
-    value: function eyeBlank(eye) {
-      for (var i = 0; i < this.children.length; ++i) {
-        this.children[i].eyeBlank(eye);
-      }
-    }
-  }, {
-    key: "_forFocusedChild",
-    value: function _forFocusedChild(name, evt) {
-      var elem = this.focusedElement;
-      if (elem && elem !== this) {
-        elem[name](evt);
-      }
-    }
-  }, {
-    key: "startUV",
-    value: function startUV(evt) {
-      this._forFocusedChild("startUV", evt);
-    }
-  }, {
-    key: "moveUV",
-    value: function moveUV(evt) {
-      this._forFocusedChild("moveUV", evt);
-    }
-  }, {
-    key: "endPointer",
-    value: function endPointer(evt) {
-      this._forFocusedChild("endPointer", evt);
-    }
-  }, {
-    key: "dispatchEvent",
-    value: function dispatchEvent(evt) {
-      var _this2 = this;
-
-      switch (evt.type) {
-        case "pointerstart":
-          this.startUV(evt.hit.uv);
-          break;
-        case "pointerend":
-          this.endPointer(evt);
-          break;
-        case "pointermove":
-        case "gazemove":
-          this.moveUV(evt.hit.uv);
-          break;
-        case "gazecomplete":
-          this.startUV(evt.hit.uv);
-          setTimeout(function () {
-            return _this2.endPointer(evt);
-          }, 100);
-          break;
-      }
-    }
-  }, {
-    key: "keyDown",
-    value: function keyDown(evt) {
-      this._forFocusedChild("keyDown", evt);
-    }
-  }, {
-    key: "keyUp",
-    value: function keyUp(evt) {
-      this._forFocusedChild("keyUp", evt);
-    }
-  }, {
-    key: "readClipboard",
-    value: function readClipboard(evt) {
-      this._forFocusedChild("readClipboard", evt);
-    }
-  }, {
-    key: "copySelectedText",
-    value: function copySelectedText(evt) {
-      this._forFocusedChild("copySelectedText", evt);
-    }
-  }, {
-    key: "cutSelectedText",
-    value: function cutSelectedText(evt) {
-      this._forFocusedChild("cutSelectedText", evt);
-    }
-  }, {
-    key: "readWheel",
-    value: function readWheel(evt) {
-      this._forFocusedChild("readWheel", evt);
-    }
-  }, {
-    key: "id",
-    get: function get() {
-      return this._id;
-    },
-    set: function set(v) {
-      if (this._id !== v) {
-        var oldID = this._idObj;
-        this._id = v;
-        this._idObj = new Object(v);
-        // this `_idchanged` event is necessary to update the related ID in the WeakMap of entities for eye-blanking.
-        this.emit("_idchanged", {
-          oldID: oldID,
-          entity: this
-        });
-      }
-    }
-  }, {
-    key: "theme",
-    get: function get() {
-      return null;
-    },
-    set: function set(v) {
-      for (var i = 0; i < this.children.length; ++i) {
-        this.children[i].theme = v;
-      }
-    }
-  }, {
-    key: "lockMovement",
-    get: function get() {
-      var lock = false;
-      for (var i = 0; i < this.children.length && !lock; ++i) {
-        lock = lock || this.children[i].lockMovement;
-      }
-      return lock;
-    }
-  }, {
-    key: "focusedElement",
-    get: function get() {
-      var result = null,
-          head = this;
-      while (head && head.focused) {
-        result = head;
-        var children = head.children;
-        head = null;
-        for (var i = 0; i < children.length; ++i) {
-          var child = children[i];
-          if (child.focused) {
-            head = child;
-          }
-        }
-      }
-      return result;
-    }
-  }]);
-  return Entity;
-}(AbstractEventEmitter);
-
 var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
 
 var isChrome = !!window.chrome && !isOpera;
@@ -15693,7 +16270,7 @@ var Rectangle = function () {
   return Rectangle;
 }();
 
-var COUNTER$2 = 0;
+var COUNTER$3 = 0;
 
 var Surface = function (_Entity) {
   inherits(Surface, _Entity);
@@ -15711,7 +16288,7 @@ var Surface = function (_Entity) {
 
     _this.isSurface = true;
     _this.options = Object.assign({}, {
-      id: "Primrose.Controls.Surface[" + COUNTER$2++ + "]",
+      id: "Primrose.Controls.Surface[" + COUNTER$3++ + "]",
       bounds: new Rectangle()
     }, options);
     _this.bounds = _this.options.bounds;
@@ -16126,7 +16703,7 @@ var DefaultTheme = {
   }
 };
 
-var COUNTER$1 = 0;
+var COUNTER$2 = 0;
 
 var Label = function (_Surface) {
   inherits(Label, _Surface);
@@ -16139,7 +16716,7 @@ var Label = function (_Surface) {
     ///////////////////////////////////////////////////////////////////////
 
     var _this = possibleConstructorReturn(this, (Label.__proto__ || Object.getPrototypeOf(Label)).call(this, Object.assign({}, {
-      id: "Primrose.Controls.Label[" + COUNTER$1++ + "]"
+      id: "Primrose.Controls.Label[" + COUNTER$2++ + "]"
     }, options)));
     ////////////////////////////////////////////////////////////////////////
     // normalize input parameters
@@ -16279,7 +16856,7 @@ var Label = function (_Surface) {
   return Label;
 }(Surface);
 
-var COUNTER = 0;
+var COUNTER$1 = 0;
 
 var Button2D = function (_Label) {
   inherits(Button2D, _Label);
@@ -16294,7 +16871,7 @@ var Button2D = function (_Label) {
     classCallCheck(this, Button2D);
 
     var _this = possibleConstructorReturn(this, (Button2D.__proto__ || Object.getPrototypeOf(Button2D)).call(this, Object.assign({}, {
-      id: "Primrose.Controls.Button2D[" + COUNTER++ + "]",
+      id: "Primrose.Controls.Button2D[" + COUNTER$1++ + "]",
       textAlign: "center"
     }, options)));
 
@@ -16525,655 +17102,6 @@ var ButtonFactory = function () {
   }]);
   return ButtonFactory;
 }();
-
-var index$2 = typeof Symbol === 'undefined' ? function (description) {
-	return '@' + (description || '@') + Math.random();
-} : Symbol;
-
-/*! npm.im/intervalometer */
-function intervalometer(cb, request, cancel, requestParameter) {
-	var requestId;
-	var previousLoopTime;
-	function loop(now) {
-		// must be requested before cb() because that might call .stop()
-		requestId = request(loop, requestParameter);
-
-		// called with "ms since last call". 0 on start()
-		cb(now - (previousLoopTime || now));
-
-		previousLoopTime = now;
-	}
-	return {
-		start: function start() {
-			if (!requestId) {
-				// prevent double starts
-				loop(0);
-			}
-		},
-		stop: function stop() {
-			cancel(requestId);
-			requestId = null;
-			previousLoopTime = 0;
-		}
-	};
-}
-
-function frameIntervalometer(cb) {
-	return intervalometer(cb, requestAnimationFrame, cancelAnimationFrame);
-}
-
-/*! npm.im/iphone-inline-video */
-function preventEvent(element, eventName, toggleProperty, preventWithProperty) {
-	function handler(e) {
-		if (Boolean(element[toggleProperty]) === Boolean(preventWithProperty)) {
-			e.stopImmediatePropagation();
-			// console.log(eventName, 'prevented on', element);
-		}
-		delete element[toggleProperty];
-	}
-	element.addEventListener(eventName, handler, false);
-
-	// Return handler to allow to disable the prevention. Usage:
-	// const preventionHandler = preventEvent(el, 'click');
-	// el.removeEventHandler('click', preventionHandler);
-	return handler;
-}
-
-function proxyProperty(object, propertyName, sourceObject, copyFirst) {
-	function get() {
-		return sourceObject[propertyName];
-	}
-	function set(value) {
-		sourceObject[propertyName] = value;
-	}
-
-	if (copyFirst) {
-		set(object[propertyName]);
-	}
-
-	Object.defineProperty(object, propertyName, { get: get, set: set });
-}
-
-function proxyEvent(object, eventName, sourceObject) {
-	sourceObject.addEventListener(eventName, function () {
-		return object.dispatchEvent(new Event(eventName));
-	});
-}
-
-function dispatchEventAsync(element, type) {
-	Promise.resolve().then(function () {
-		element.dispatchEvent(new Event(type));
-	});
-}
-
-// iOS 10 adds support for native inline playback + silent autoplay
-var isWhitelisted = /iPhone|iPod/i.test(navigator.userAgent) && !matchMedia('(-webkit-video-playable-inline)').matches;
-
-var ಠ = index$2();
-var ಠevent = index$2();
-var ಠplay = index$2('nativeplay');
-var ಠpause = index$2('nativepause');
-
-/**
- * UTILS
- */
-
-function getAudioFromVideo(video) {
-	var audio = new Audio();
-	proxyEvent(video, 'play', audio);
-	proxyEvent(video, 'playing', audio);
-	proxyEvent(video, 'pause', audio);
-	audio.crossOrigin = video.crossOrigin;
-
-	// 'data:' causes audio.networkState > 0
-	// which then allows to keep <audio> in a resumable playing state
-	// i.e. once you set a real src it will keep playing if it was if .play() was called
-	audio.src = video.src || video.currentSrc || 'data:';
-
-	// if (audio.src === 'data:') {
-	//   TODO: wait for video to be selected
-	// }
-	return audio;
-}
-
-var lastRequests = [];
-var requestIndex = 0;
-var lastTimeupdateEvent;
-
-function setTime(video, time, rememberOnly) {
-	// allow one timeupdate event every 200+ ms
-	if ((lastTimeupdateEvent || 0) + 200 < Date.now()) {
-		video[ಠevent] = true;
-		lastTimeupdateEvent = Date.now();
-	}
-	if (!rememberOnly) {
-		video.currentTime = time;
-	}
-	lastRequests[++requestIndex % 3] = time * 100 | 0 / 100;
-}
-
-function isPlayerEnded(player) {
-	return player.driver.currentTime >= player.video.duration;
-}
-
-function update$1(timeDiff) {
-	var player = this;
-	// console.log('update', player.video.readyState, player.video.networkState, player.driver.readyState, player.driver.networkState, player.driver.paused);
-	if (player.video.readyState >= player.video.HAVE_FUTURE_DATA) {
-		if (!player.hasAudio) {
-			player.driver.currentTime = player.video.currentTime + timeDiff * player.video.playbackRate / 1000;
-			if (player.video.loop && isPlayerEnded(player)) {
-				player.driver.currentTime = 0;
-			}
-		}
-		setTime(player.video, player.driver.currentTime);
-	} else if (player.video.networkState === player.video.NETWORK_IDLE && !player.video.buffered.length) {
-		// this should happen when the source is available but:
-		// - it's potentially playing (.paused === false)
-		// - it's not ready to play
-		// - it's not loading
-		// If it hasAudio, that will be loaded in the 'emptied' handler below
-		player.video.load();
-		// console.log('Will load');
-	}
-
-	// console.assert(player.video.currentTime === player.driver.currentTime, 'Video not updating!');
-
-	if (player.video.ended) {
-		delete player.video[ಠevent]; // allow timeupdate event
-		player.video.pause(true);
-	}
-}
-
-/**
- * METHODS
- */
-
-function play$1() {
-	// console.log('play');
-	var video = this;
-	var player = video[ಠ];
-
-	// if it's fullscreen, use the native player
-	if (video.webkitDisplayingFullscreen) {
-		video[ಠplay]();
-		return;
-	}
-
-	if (player.driver.src !== 'data:' && player.driver.src !== video.src) {
-		// console.log('src changed on play', video.src);
-		setTime(video, 0, true);
-		player.driver.src = video.src;
-	}
-
-	if (!video.paused) {
-		return;
-	}
-	player.paused = false;
-
-	if (!video.buffered.length) {
-		// .load() causes the emptied event
-		// the alternative is .play()+.pause() but that triggers play/pause events, even worse
-		// possibly the alternative is preventing this event only once
-		video.load();
-	}
-
-	player.driver.play();
-	player.updater.start();
-
-	if (!player.hasAudio) {
-		dispatchEventAsync(video, 'play');
-		if (player.video.readyState >= player.video.HAVE_ENOUGH_DATA) {
-			// console.log('onplay');
-			dispatchEventAsync(video, 'playing');
-		}
-	}
-}
-function pause$1(forceEvents) {
-	// console.log('pause');
-	var video = this;
-	var player = video[ಠ];
-
-	player.driver.pause();
-	player.updater.stop();
-
-	// if it's fullscreen, the developer the native player.pause()
-	// This is at the end of pause() because it also
-	// needs to make sure that the simulation is paused
-	if (video.webkitDisplayingFullscreen) {
-		video[ಠpause]();
-	}
-
-	if (player.paused && !forceEvents) {
-		return;
-	}
-
-	player.paused = true;
-	if (!player.hasAudio) {
-		dispatchEventAsync(video, 'pause');
-	}
-	if (video.ended) {
-		video[ಠevent] = true;
-		dispatchEventAsync(video, 'ended');
-	}
-}
-
-/**
- * SETUP
- */
-
-function addPlayer(video, hasAudio) {
-	var player = video[ಠ] = {};
-	player.paused = true; // track whether 'pause' events have been fired
-	player.hasAudio = hasAudio;
-	player.video = video;
-	player.updater = frameIntervalometer(update$1.bind(player));
-
-	if (hasAudio) {
-		player.driver = getAudioFromVideo(video);
-	} else {
-		video.addEventListener('canplay', function () {
-			if (!video.paused) {
-				// console.log('oncanplay');
-				dispatchEventAsync(video, 'playing');
-			}
-		});
-		player.driver = {
-			src: video.src || video.currentSrc || 'data:',
-			muted: true,
-			paused: true,
-			pause: function pause$1() {
-				player.driver.paused = true;
-			},
-			play: function play$1() {
-				player.driver.paused = false;
-				// media automatically goes to 0 if .play() is called when it's done
-				if (isPlayerEnded(player)) {
-					setTime(video, 0);
-				}
-			},
-			get ended() {
-				return isPlayerEnded(player);
-			}
-		};
-	}
-
-	// .load() causes the emptied event
-	video.addEventListener('emptied', function () {
-		// console.log('driver src is', player.driver.src);
-		var wasEmpty = !player.driver.src || player.driver.src === 'data:';
-		if (player.driver.src && player.driver.src !== video.src) {
-			// console.log('src changed to', video.src);
-			setTime(video, 0, true);
-			player.driver.src = video.src;
-			// playing videos will only keep playing if no src was present when .play()’ed
-			if (wasEmpty) {
-				player.driver.play();
-			} else {
-				player.updater.stop();
-			}
-		}
-	}, false);
-
-	// stop programmatic player when OS takes over
-	video.addEventListener('webkitbeginfullscreen', function () {
-		if (!video.paused) {
-			// make sure that the <audio> and the syncer/updater are stopped
-			video.pause();
-
-			// play video natively
-			video[ಠplay]();
-		} else if (hasAudio && !player.driver.buffered.length) {
-			// if the first play is native,
-			// the <audio> needs to be buffered manually
-			// so when the fullscreen ends, it can be set to the same current time
-			player.driver.load();
-		}
-	});
-	if (hasAudio) {
-		video.addEventListener('webkitendfullscreen', function () {
-			// sync audio to new video position
-			player.driver.currentTime = video.currentTime;
-			// console.assert(player.driver.currentTime === video.currentTime, 'Audio not synced');
-		});
-
-		// allow seeking
-		video.addEventListener('seeking', function () {
-			if (lastRequests.indexOf(video.currentTime * 100 | 0 / 100) < 0) {
-				// console.log('User-requested seeking');
-				player.driver.currentTime = video.currentTime;
-			}
-		});
-	}
-}
-
-function overloadAPI(video) {
-	var player = video[ಠ];
-	video[ಠplay] = video.play;
-	video[ಠpause] = video.pause;
-	video.play = play$1;
-	video.pause = pause$1;
-	proxyProperty(video, 'paused', player.driver);
-	proxyProperty(video, 'muted', player.driver, true);
-	proxyProperty(video, 'playbackRate', player.driver, true);
-	proxyProperty(video, 'ended', player.driver);
-	proxyProperty(video, 'loop', player.driver, true);
-	preventEvent(video, 'seeking');
-	preventEvent(video, 'seeked');
-	preventEvent(video, 'timeupdate', ಠevent, false);
-	preventEvent(video, 'ended', ಠevent, false); // prevent occasional native ended events
-}
-
-function enableInlineVideo(video, hasAudio, onlyWhitelisted) {
-	if (hasAudio === void 0) hasAudio = true;
-	if (onlyWhitelisted === void 0) onlyWhitelisted = true;
-
-	if (onlyWhitelisted && !isWhitelisted || video[ಠ]) {
-		return;
-	}
-	addPlayer(video, hasAudio);
-	overloadAPI(video);
-	video.classList.add('IIV');
-	if (!hasAudio && video.autoplay) {
-		video.play();
-	}
-	if (!/iPhone|iPod|iPad/.test(navigator.platform)) {
-		console.warn('iphone-inline-video is not guaranteed to work in emulated environments');
-	}
-}
-
-enableInlineVideo.isWhitelisted = isWhitelisted;
-
-var COUNTER$3 = 0;
-
-// Videos don't auto-play on mobile devices, so let's make them all play whenever
-// we tap the screen.
-var processedVideos = [];
-function findAndFixVideo(evt) {
-  var vids = document.querySelectorAll("video");
-  for (var i = 0; i < vids.length; ++i) {
-    fixVideo(vids[i]);
-  }
-  window.removeEventListener("touchend", findAndFixVideo);
-  window.removeEventListener("mouseup", findAndFixVideo);
-  window.removeEventListener("keyup", findAndFixVideo);
-}
-
-function fixVideo(vid) {
-  if (processedVideos.indexOf(vid) === -1) {
-    processedVideos.push(vid);
-    enableInlineVideo(vid, false);
-  }
-}
-
-window.addEventListener("touchend", findAndFixVideo, false);
-window.addEventListener("mouseup", findAndFixVideo, false);
-window.addEventListener("keyup", findAndFixVideo, false);
-
-var Image = function (_Entity) {
-  inherits(Image, _Entity);
-  createClass(Image, null, [{
-    key: "create",
-    value: function create() {
-      return new Image();
-    }
-  }]);
-
-  function Image(options) {
-    classCallCheck(this, Image);
-
-    ////////////////////////////////////////////////////////////////////////
-    // normalize input parameters
-    ////////////////////////////////////////////////////////////////////////
-
-    options = options || {};
-    if (typeof options === "string") {
-      options = {
-        value: options
-      };
-    }
-
-    options = Object.assign({}, {
-      id: "Primrose.Controls.Image[" + COUNTER$3++ + "]"
-    }, options);
-
-    var _this = possibleConstructorReturn(this, (Image.__proto__ || Object.getPrototypeOf(Image)).call(this, options.id));
-
-    _this.options = options;
-
-    Entity.registerEntity(_this);
-
-    ////////////////////////////////////////////////////////////////////////
-    // initialization
-    ///////////////////////////////////////////////////////////////////////
-    _this._canvases = [];
-    _this._contexts = [];
-    _this._elements = [];
-    _this._meshes = [];
-    _this._textures = [];
-    _this._currentImageIndex = 0;
-    _this._lastTime = null;
-    _this.isVideo = false;
-    return _this;
-  }
-
-  createClass(Image, [{
-    key: "add",
-    value: function add(child) {
-      this._meshes[0].add(child);
-    }
-  }, {
-    key: "addToBrowserEnvironment",
-    value: function addToBrowserEnvironment(env, scene) {
-      var _this2 = this;
-
-      this._meshes.forEach(function (mesh, i) {
-        scene.add(mesh);
-        mesh.name = _this2.id + "-" + i;
-        if (i > 0) {
-          mesh.visible = false;
-        } else if (_this2.options.pickable) {
-          env.registerPickableObject(mesh);
-        }
-      });
-    }
-  }, {
-    key: "_setGeometry",
-    value: function _setGeometry(options) {
-      if (this.options.radius) {
-        this.options.geometry = shell$1(this.options.radius, 72, 36, Math.PI * 2, Math.PI, options);
-      } else if (!this.options.geometry) {
-        if (!this.options.width) {
-          this.options.width = 0.5;
-        }
-        if (!this.options.height) {
-          this.options.height = 0.5;
-        }
-        this.options.geometry = quad$1(this.options.width, this.options.height, options);
-      }
-    }
-  }, {
-    key: "loadImages",
-    value: function loadImages(images, progress) {
-      var _this3 = this;
-
-      return Promise.all(Array.prototype.map.call(images, function (src, i) {
-        var loadOptions = Object.assign({}, _this3.options, {
-          progress: progress,
-          resolve: function resolve(txt) {
-            return _this3._textures[i] = txt;
-          }
-        });
-        _this3._setGeometry();
-        _this3._meshes[i] = textured(_this3.options.geometry, src, loadOptions);
-        return loadOptions.promise;
-      })).then(function () {
-        return _this3.isVideo = false;
-      }).then(function () {
-        return _this3;
-      });
-    }
-  }, {
-    key: "loadVideos",
-    value: function loadVideos(videos, progress) {
-      var _this4 = this;
-
-      this._elements.splice(0);
-      this._canvases.splice(0);
-      this._contexts.splice(0);
-      this._textures.splice(0);
-
-      return Promise.all(Array.prototype.map.call(videos, function (spec, i) {
-        return new Promise(function (resolve, reject) {
-          var video = null;
-          if (typeof spec === "string") {
-            video = document.querySelector("video[src='" + spec + "']");
-            if (!video) {
-              video = document.createElement("video");
-              video.src = spec;
-            }
-          } else if (spec instanceof HTMLVideoElement) {
-            video = spec;
-          }
-          video.onprogress = progress;
-          video.onloadedmetadata = progress;
-          video.onerror = reject;
-          video.muted = true;
-          video.preload = "auto";
-          video.autoplay = true;
-          video.loop = true;
-          video.controls = true;
-          video.setAttribute("playsinline", "");
-          video.setAttribute("webkit-playsinline", "");
-          video.oncanplay = function () {
-            video.oncanplay = null;
-            video.onerror = null;
-
-            var width = video.videoWidth,
-                height = video.videoHeight,
-                p2Width = Math.pow(2, Math.ceil(Math.log2(width))),
-                p2Height = Math.pow(2, Math.ceil(Math.log2(height)));
-
-            _this4._elements[i] = video;
-
-            if ((width !== p2Width || height !== p2Height) && !_this4.options.disableVideoCopying) {
-
-              _this4._setGeometry({
-                maxU: width / p2Width,
-                maxV: height / p2Height
-              });
-
-              _this4._canvases[i] = document.createElement("canvas");
-              _this4._canvases[i].id = (video.id || _this4.id) + "-canvas";
-              _this4._canvases[i].width = p2Width;
-              _this4._canvases[i].height = p2Height;
-
-              _this4._contexts[i] = _this4._canvases[i].getContext("2d");
-            } else {
-
-              _this4._setGeometry();
-            }
-
-            var loadOptions = Object.assign({}, _this4.options, {
-              progress: progress,
-              resolve: function (oldResolve, i, txt) {
-                this._textures[i] = txt;
-                if (typeof oldResolve === "function") {
-                  oldResolve(txt);
-                }
-                resolve();
-              }.bind(_this4, _this4.options.resolve, i)
-            });
-
-            _this4._meshes[i] = textured(_this4.options.geometry, _this4._canvases[i] || _this4._elements[i], loadOptions);
-          };
-          if (!video.parentElement) {
-            document.body.insertBefore(video, document.body.children[0]);
-          }
-          video.play();
-        });
-      })).then(function () {
-        return _this4.isVideo = true;
-      }).then(function () {
-        return _this4;
-      });
-    }
-  }, {
-    key: "eyeBlank",
-    value: function eyeBlank(eye) {
-      if (this._meshes) {
-        this._currentImageIndex = eye % this._meshes.length;
-        var isVisible = this.visible;
-        for (var i = 0; i < this._meshes.length; ++i) {
-          var m = this._meshes[i];
-          m.visible = isVisible && i === this._currentImageIndex;
-          if (i > 0) {
-            m.position.copy(this.position);
-            m.quaternion.copy(this.quaternion);
-            m.scale.copy(this.scale);
-          }
-        }
-      }
-    }
-  }, {
-    key: "update",
-    value: function update() {
-      if (this.isVideo) {
-        for (var i = 0; i < this._textures.length; ++i) {
-          var elem = this._elements[i];
-          if (elem.currentTime !== this._lastTime) {
-            if (i < this._contexts.length) {
-              this._contexts[i].drawImage(elem, 0, 0);
-            }
-            try {
-              this._textures[i].needsUpdate = true;
-            } catch (exp) {
-              console.log(i, this);
-            }
-            this._lastTime = elem.currentTime;
-          }
-        }
-      }
-    }
-  }, {
-    key: "matrixWorld",
-    get: function get() {
-      return this._meshes[0].matrixWorld;
-    }
-  }, {
-    key: "position",
-    get: function get() {
-      return this._meshes[0].position;
-    }
-  }, {
-    key: "quaternion",
-    get: function get() {
-      return this._meshes[0].quaternion;
-    }
-  }, {
-    key: "scale",
-    get: function get() {
-      return this._meshes[0].scale;
-    }
-  }, {
-    key: "visible",
-    get: function get() {
-      for (var i = 0; i < this._meshes.length; ++i) {
-        if (this._meshes[i].visible) {
-          return true;
-        }
-      }
-      return false;
-    },
-    set: function set(v) {
-      var img = this._meshes[this._currentImageIndex];
-      if (img) {
-        img.visible = v;
-      }
-    }
-  }]);
-  return Image;
-}(Entity);
 
 // unicode-aware string reverse
 var reverse = function () {
@@ -31226,13 +31154,6 @@ var InputProcessor = function (_AbstractEventEmitter) {
   return InputProcessor;
 }(AbstractEventEmitter);
 
-function setCursorCommand(obj, mod, key, func, cur) {
-  var name = mod + "_" + key;
-  obj[name] = function (prim, tokenRows) {
-    prim["cursor" + func](tokenRows, prim[cur + "Cursor"]);
-  };
-}
-
 var OperatingSystem = function () {
   function OperatingSystem(osName, pre1, pre2, redo, pre3, home, end, pre5) {
     classCallCheck(this, OperatingSystem);
@@ -32915,119 +32836,6 @@ Util.frameDataFromPose = function () {
     updateEyeMatrices(frameData.rightProjectionMatrix, frameData.rightViewMatrix, pose, vrDisplay.getEyeParameters("right"), vrDisplay);
 
     return true;
-  };
-}();
-
-var asyncGenerator$1 = function () {
-  function AwaitValue(value) {
-    this.value = value;
-  }
-
-  function AsyncGenerator(gen) {
-    var front, back;
-
-    function send(key, arg) {
-      return new Promise(function (resolve, reject) {
-        var request = {
-          key: key,
-          arg: arg,
-          resolve: resolve,
-          reject: reject,
-          next: null
-        };
-
-        if (back) {
-          back = back.next = request;
-        } else {
-          front = back = request;
-          resume(key, arg);
-        }
-      });
-    }
-
-    function resume(key, arg) {
-      try {
-        var result = gen[key](arg);
-        var value = result.value;
-
-        if (value instanceof AwaitValue) {
-          Promise.resolve(value.value).then(function (arg) {
-            resume("next", arg);
-          }, function (arg) {
-            resume("throw", arg);
-          });
-        } else {
-          settle(result.done ? "return" : "normal", result.value);
-        }
-      } catch (err) {
-        settle("throw", err);
-      }
-    }
-
-    function settle(type, value) {
-      switch (type) {
-        case "return":
-          front.resolve({
-            value: value,
-            done: true
-          });
-          break;
-
-        case "throw":
-          front.reject(value);
-          break;
-
-        default:
-          front.resolve({
-            value: value,
-            done: false
-          });
-          break;
-      }
-
-      front = front.next;
-
-      if (front) {
-        resume(front.key, front.arg);
-      } else {
-        back = null;
-      }
-    }
-
-    this._invoke = send;
-
-    if (typeof gen.return !== "function") {
-      this.return = undefined;
-    }
-  }
-
-  if (typeof Symbol === "function" && Symbol.asyncIterator) {
-    AsyncGenerator.prototype[Symbol.asyncIterator] = function () {
-      return this;
-    };
-  }
-
-  AsyncGenerator.prototype.next = function (arg) {
-    return this._invoke("next", arg);
-  };
-
-  AsyncGenerator.prototype.throw = function (arg) {
-    return this._invoke("throw", arg);
-  };
-
-  AsyncGenerator.prototype.return = function (arg) {
-    return this._invoke("return", arg);
-  };
-
-  return {
-    wrap: function wrap(fn) {
-      return function () {
-        return new AsyncGenerator(fn.apply(this, arguments));
-      };
-    },
-    await: function await(value) {
-      return new AwaitValue(value);
-    }
   };
 }();
 
@@ -35186,7 +34994,7 @@ var FPSInput = function (_AbstractEventEmitter) {
               },
               zero: {
                 buttons: [Gamepad.VIVE_BUTTONS.GRIP_PRESSED],
-                commandUp: emit.bind(_this, "zero")
+                commandUp: _this.emit.bind(_this, "zero")
               }
             });
 
@@ -43587,8 +43395,8 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
           canvasHeight = Math.max(canvasHeight, p[i].viewport.height);
         }
 
-        _this.input.Mouse.commands.U.scale = 2 / canvasWidth;
-        _this.input.Mouse.commands.V.scale = 2 / canvasHeight;
+        _this.input.Mouse.commands.U.scale = devicePixelRatio * 2 / canvasWidth;
+        _this.input.Mouse.commands.V.scale = devicePixelRatio * 2 / canvasHeight;
 
         canvasWidth = Math.floor(canvasWidth * resolutionScale);
         canvasHeight = Math.floor(canvasHeight * resolutionScale);
@@ -43891,7 +43699,7 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
 
         _this.sky = skyFunc(skyGeom, _this.options.skyTexture, {
           side: BackSide,
-          fog: false,
+          useFog: false,
           unshaded: true,
           transparent: true,
           opacity: 1,
@@ -43997,7 +43805,7 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
       if (evt !== "Gaze") {
         var _ret = function () {
           var elem = null;
-          if (_this.input.VR.canMirror || _this.input.VR.isNativeMobileWebVR) {
+          if (evt === "force" || _this.input.VR.canMirror || _this.input.VR.isNativeMobileWebVR) {
             elem = _this.renderer.domElement;
           } else {
             elem = _this.options.fullScreenElement;
@@ -44105,7 +43913,7 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
 
       _this.fader = colored(box(1, 1, 1), _this.options.backgroundColor, {
         opacity: 0,
-        fog: false,
+        useFog: false,
         transparent: true,
         unshaded: true,
         side: BackSide
@@ -44209,11 +44017,7 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
 
       _this.input.head.add(_this.camera);
 
-      return _this.input.ready.then(function () {
-        if (_this.options.fullScreenButtonContainer) {
-          _this.insertFullScreenButtons(_this.options.fullScreenButtonContainer);
-        }
-      });
+      return _this.input.ready;
     });
 
     var allReady = Promise.all([skyReady, groundReady, modelsReady, documentReady]).then(function () {
@@ -44228,12 +44032,24 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
           _this.ground.castShadow = true;
         }
       }
+
       _this.input.VR.displays.forEach(function (display) {
         if (display.DOMElement !== undefined) {
           display.DOMElement = _this.renderer.domElement;
         }
       });
-      _this.input.VR.connect(0);
+
+      if (_this.options.fullScreenButtonContainer) {
+        _this.insertFullScreenButtons(_this.options.fullScreenButtonContainer);
+      }
+
+      if (isMobile$2) {
+        _this.goFullScreen(1, "force").catch(function () {
+          return _this.input.VR.connect(0);
+        });
+      } else {
+        _this.input.VR.connect(0);
+      }
 
       _this.emit("ready");
       window.dispatchEvent(new CustomEvent("vrbrowserenvironmentready", {
@@ -44355,6 +44171,12 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
         btn.className = isStereo ? "stereo" : "mono";
         return btn;
       });
+
+      if (isMobile$2) {
+        buttons.push(newButton("GearVR", "Open in GearVR", function () {
+          return document.location = "ovrweb:" + location;
+        }));
+      }
 
       if (!/(www\.)?primrosevr.com/.test(document.location.hostname) && !this.options.disableAdvertising) {
         buttons.push(newButton("Primrose", "✿", function () {

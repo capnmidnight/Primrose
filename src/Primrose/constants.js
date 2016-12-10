@@ -47,10 +47,57 @@ export const Quality = {
   MAXIMUM: PIXEL_SCALES.length - 1
 };
 
+
+pliny.value({
+  parent: "Primrose.Constants",
+  name: "NAMES",
+  type: "Array of String",
+  description: "Just a list of nice names."
+});
+export const NAMES = [
+  "Dahlia",
+  "Zinnia",
+  "Camellia",
+  "Ren",
+  "Lotus",
+  "Azalea",
+  "Kunal",
+  "Saffron",
+  "Jessamine",
+  "Basil",
+  "Indigo",
+  "Violet",
+  "Iris",
+  "Holly",
+  "Yarrow",
+  "Hazel",
+  "Cypress",
+  "Amaranth",
+  "Aster",
+  "Emerald",
+  "Ash",
+  "Boxwood",
+  "Birchwood",
+  "Ebony",
+  "Forsythia",
+  "Hawthorn",
+  "Hemlock",
+  "Locust",
+  "Juniper",
+  "Linden",
+  "Magnolia",
+  "Laurel",
+  "Oak",
+  "Alder",
+  "Sycamore",
+  "Blackhaw"
+];
+
 const constants = {
   PIXEL_SCALES,
   SKINS,
   SYS_FONTS,
+  NAMES,
   Quality
 };
 export default constants;

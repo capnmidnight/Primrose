@@ -11,7 +11,7 @@ var env = new Primrose.BrowserEnvironment({
 
   moon = textured(circle(1, 45), "moon.jpg", {
     unshaded: true,
-    fog: false,
+    useFog: false,
     color: 0xffef9f
   }),
 

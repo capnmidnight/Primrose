@@ -1068,7 +1068,7 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
     this.goFullScreen = (index, evt) => {
       if (evt !== "Gaze") {
         let elem = null;
-        if(this.input.VR.canMirror || this.input.VR.isNativeMobileWebVR) {
+        if(evt === "force" || this.input.VR.canMirror || this.input.VR.isNativeMobileWebVR) {
           elem = this.renderer.domElement;
         }
         else{
@@ -1361,11 +1361,7 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
 
       this.input.head.add(this.camera);
 
-      return this.input.ready.then(() => {
-        if(this.options.fullScreenButtonContainer){
-          this.insertFullScreenButtons(this.options.fullScreenButtonContainer);
-        }
-      });
+      return this.input.ready;
     });
 
     var allReady = Promise.all([
@@ -1387,12 +1383,24 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
             this.ground.castShadow = true;
           }
         }
+
         this.input.VR.displays.forEach((display) => {
           if(display.DOMElement !== undefined) {
             display.DOMElement = this.renderer.domElement;
           }
         });
-        this.input.VR.connect(0);
+
+        if(this.options.fullScreenButtonContainer){
+          this.insertFullScreenButtons(this.options.fullScreenButtonContainer);
+        }
+
+        if(isMobile){
+          this.goFullScreen(1, "force")
+            .catch(() => this.input.VR.connect(0));
+        }
+        else{
+          this.input.VR.connect(0);
+        }
 
 
         pliny.event({
@@ -1618,6 +1626,10 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
         btn.className = isStereo ? "stereo" : "mono";
         return btn;
       });
+
+    if(isMobile) {
+      buttons.push(newButton("GearVR", "Open in GearVR", () => document.location = "ovrweb:" + location));
+    }
 
     if(!/(www\.)?primrosevr.com/.test(document.location.hostname) && !this.options.disableAdvertising) {
       buttons.push(newButton("Primrose", "✿", () => document.location = "https://www.primrosevr.com"));

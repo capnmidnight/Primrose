@@ -219,7 +219,7 @@ pliny.record({
     optional: true,
     description: "Set to true to make the material participate in z-buffered transparency rendering."
   }, {
-    name: "fog",
+    name: "useFog",
     type: "Boolean",
     optional: true,
     default: true,
@@ -304,7 +304,7 @@ pliny.function({
     grammar(\"JavaScript\");\n\
     var moon = textured(circle(1, 45), \"moon.jpg\", {\n\
       unshaded: true,\n\
-      fog: false\n\
+      useFog: false\n\
     });\n\
     \n\
     env.sky.add(moon); // assuming we have a `Primrose.BrowserEnvironment` named `env`\n\
@@ -3623,6 +3623,12 @@ pliny.enumeration({
   parent: "Primrose.Constants",
   name: "Quality",
   description: "Graphics quality settings."
+});
+pliny.value({
+  parent: "Primrose.Constants",
+  name: "NAMES",
+  type: "Array of String",
+  description: "Just a list of nice names."
 });
 pliny.class({
   parent: "Primrose",
