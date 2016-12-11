@@ -115,7 +115,7 @@ export default function material(textureDescription, options){
 
   return cache(materialDescription, () => {
     var materialOptions = {
-        useFog: options.useFog,
+        fog: options.useFog,
         transparent: options.transparent || (options.opacity !== undefined && options.opacity < 1),
         opacity: options.opacity,
         side: options.side || FrontSide
