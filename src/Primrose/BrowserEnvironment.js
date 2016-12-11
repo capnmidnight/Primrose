@@ -1394,14 +1394,7 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
           this.insertFullScreenButtons(this.options.fullScreenButtonContainer);
         }
 
-        if(isMobile){
-          this.goFullScreen(1, "force")
-            .catch(() => this.input.VR.connect(0));
-        }
-        else{
-          this.input.VR.connect(0);
-        }
-
+        this.input.VR.connect(0);
 
         pliny.event({
           parent: "Primrose.BrowserEnvironment",
