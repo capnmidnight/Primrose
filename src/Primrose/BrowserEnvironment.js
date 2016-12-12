@@ -1620,10 +1620,6 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
         return btn;
       });
 
-    if(isMobile) {
-      buttons.push(newButton("GearVR", "Open in GearVR", () => document.location = "ovrweb:" + location));
-    }
-
     if(!/(www\.)?primrosevr.com/.test(document.location.hostname) && !this.options.disableAdvertising) {
       buttons.push(newButton("Primrose", "✿", () => document.location = "https://www.primrosevr.com"));
     }

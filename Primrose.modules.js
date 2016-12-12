@@ -5448,7 +5448,7 @@ function material(textureDescription, options) {
 
   return cache(materialDescription, function () {
     var materialOptions = {
-      useFog: options.useFog,
+      fog: options.useFog,
       transparent: options.transparent || options.opacity !== undefined && options.opacity < 1,
       opacity: options.opacity,
       side: options.side || FrontSide
@@ -19169,7 +19169,7 @@ var Audio$1 = {
 
 var packageName = "PrimroseVR";
 
-var version = "0.29.5";
+var version = "0.29.6";
 
 
 
@@ -44556,13 +44556,7 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
         _this.insertFullScreenButtons(_this.options.fullScreenButtonContainer);
       }
 
-      if (isMobile$1) {
-        _this.goFullScreen(1, "force").catch(function () {
-          return _this.input.VR.connect(0);
-        });
-      } else {
-        _this.input.VR.connect(0);
-      }
+      _this.input.VR.connect(0);
 
       _this.emit("ready");
       window.dispatchEvent(new CustomEvent("vrbrowserenvironmentready", {
@@ -44684,12 +44678,6 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
         btn.className = isStereo ? "stereo" : "mono";
         return btn;
       });
-
-      if (isMobile$1) {
-        buttons.push(newButton("GearVR", "Open in GearVR", function () {
-          return document.location = "ovrweb:" + location;
-        }));
-      }
 
       if (!/(www\.)?primrosevr.com/.test(document.location.hostname) && !this.options.disableAdvertising) {
         buttons.push(newButton("Primrose", "✿", function () {
