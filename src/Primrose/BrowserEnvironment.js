@@ -987,6 +987,7 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
           txtRepeatY: dim * 5,
           anisotropy: 8,
           resolve: resolve,
+          transparent: false,
           progress: this.options.progress
         });
         this.registerPickableObject(this.ground);
