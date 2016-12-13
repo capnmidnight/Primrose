@@ -1621,7 +1621,7 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
       });
 
     if(!/(www\.)?primrosevr.com/.test(document.location.hostname) && !this.options.disableAdvertising) {
-      buttons.push(newButton("Primrose", "✿", () => document.location = "https://www.primrosevr.com"));
+      buttons.push(newButton("Primrose", "✿", () => open("https://www.primrosevr.com", "_blank")));
     }
     return buttons;
   }
