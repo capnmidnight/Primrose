@@ -899,8 +899,20 @@ pliny.function({
       });
       pliny.class({
   parent: "Primrose.Controls",
-  name: "Image",
+  name: "BaseTextured",
   baseClass: "Primrose.Controls.Surface",
+  description: "A simple 2D texture that has to be loaded from a file.",
+  parameters: [{
+    name: "options",
+    type: "Object",
+    description: "Named parameters for creating the textured object."
+  }]
+});
+
+pliny.class({
+  parent: "Primrose.Controls",
+  name: "Image",
+  baseClass: "Primrose.Controls.BaseTextured",
   description: "A simple 2D image to put on a Surface.",
   parameters: [{
     name: "options",

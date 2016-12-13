@@ -33,7 +33,7 @@ var isWebKit = isOpera || isChrome || isSafari;
 
 var isWindows = /Windows/.test(navigator.userAgent || "");
 
-var index$1 = {
+var index = {
   isChrome: isChrome,
   isFirefox: isFirefox,
   isGearVR: isGearVR,
@@ -61,7 +61,7 @@ var flags = Object.freeze({
 	isSafari: isSafari,
 	isWebKit: isWebKit,
 	isWindows: isWindows,
-	default: index$1
+	default: index
 });
 
 /**
@@ -12232,418 +12232,13 @@ var Entity = function (_AbstractEventEmitter) {
   return Entity;
 }(AbstractEventEmitter);
 
-var index$3 = typeof Symbol === 'undefined' ? function (description) {
-	return '@' + (description || '@') + Math.random();
-} : Symbol;
+var BaseTextured = function (_Entity) {
+  inherits(BaseTextured, _Entity);
 
-/*! npm.im/intervalometer */
-function intervalometer(cb, request, cancel, requestParameter) {
-	var requestId;
-	var previousLoopTime;
-	function loop(now) {
-		// must be requested before cb() because that might call .stop()
-		requestId = request(loop, requestParameter);
+  function BaseTextured(files, options) {
+    classCallCheck(this, BaseTextured);
 
-		// called with "ms since last call". 0 on start()
-		cb(now - (previousLoopTime || now));
-
-		previousLoopTime = now;
-	}
-	return {
-		start: function start() {
-			if (!requestId) {
-				// prevent double starts
-				loop(0);
-			}
-		},
-		stop: function stop() {
-			cancel(requestId);
-			requestId = null;
-			previousLoopTime = 0;
-		}
-	};
-}
-
-function frameIntervalometer(cb) {
-	return intervalometer(cb, requestAnimationFrame, cancelAnimationFrame);
-}
-
-/*! npm.im/iphone-inline-video */
-function preventEvent(element, eventName, toggleProperty, preventWithProperty) {
-	function handler(e) {
-		if (Boolean(element[toggleProperty]) === Boolean(preventWithProperty)) {
-			e.stopImmediatePropagation();
-			// console.log(eventName, 'prevented on', element);
-		}
-		delete element[toggleProperty];
-	}
-	element.addEventListener(eventName, handler, false);
-
-	// Return handler to allow to disable the prevention. Usage:
-	// const preventionHandler = preventEvent(el, 'click');
-	// el.removeEventHandler('click', preventionHandler);
-	return handler;
-}
-
-function proxyProperty(object, propertyName, sourceObject, copyFirst) {
-	function get() {
-		return sourceObject[propertyName];
-	}
-	function set(value) {
-		sourceObject[propertyName] = value;
-	}
-
-	if (copyFirst) {
-		set(object[propertyName]);
-	}
-
-	Object.defineProperty(object, propertyName, { get: get, set: set });
-}
-
-function proxyEvent(object, eventName, sourceObject) {
-	sourceObject.addEventListener(eventName, function () {
-		return object.dispatchEvent(new Event(eventName));
-	});
-}
-
-function dispatchEventAsync(element, type) {
-	Promise.resolve().then(function () {
-		element.dispatchEvent(new Event(type));
-	});
-}
-
-// iOS 10 adds support for native inline playback + silent autoplay
-var isWhitelisted = /iPhone|iPod/i.test(navigator.userAgent) && !matchMedia('(-webkit-video-playable-inline)').matches;
-
-var ಠ = index$3();
-var ಠevent = index$3();
-var ಠplay = index$3('nativeplay');
-var ಠpause = index$3('nativepause');
-
-/**
- * UTILS
- */
-
-function getAudioFromVideo(video) {
-	var audio = new Audio();
-	proxyEvent(video, 'play', audio);
-	proxyEvent(video, 'playing', audio);
-	proxyEvent(video, 'pause', audio);
-	audio.crossOrigin = video.crossOrigin;
-
-	// 'data:' causes audio.networkState > 0
-	// which then allows to keep <audio> in a resumable playing state
-	// i.e. once you set a real src it will keep playing if it was if .play() was called
-	audio.src = video.src || video.currentSrc || 'data:';
-
-	// if (audio.src === 'data:') {
-	//   TODO: wait for video to be selected
-	// }
-	return audio;
-}
-
-var lastRequests = [];
-var requestIndex = 0;
-var lastTimeupdateEvent;
-
-function setTime(video, time, rememberOnly) {
-	// allow one timeupdate event every 200+ ms
-	if ((lastTimeupdateEvent || 0) + 200 < Date.now()) {
-		video[ಠevent] = true;
-		lastTimeupdateEvent = Date.now();
-	}
-	if (!rememberOnly) {
-		video.currentTime = time;
-	}
-	lastRequests[++requestIndex % 3] = time * 100 | 0 / 100;
-}
-
-function isPlayerEnded(player) {
-	return player.driver.currentTime >= player.video.duration;
-}
-
-function update$1(timeDiff) {
-	var player = this;
-	// console.log('update', player.video.readyState, player.video.networkState, player.driver.readyState, player.driver.networkState, player.driver.paused);
-	if (player.video.readyState >= player.video.HAVE_FUTURE_DATA) {
-		if (!player.hasAudio) {
-			player.driver.currentTime = player.video.currentTime + timeDiff * player.video.playbackRate / 1000;
-			if (player.video.loop && isPlayerEnded(player)) {
-				player.driver.currentTime = 0;
-			}
-		}
-		setTime(player.video, player.driver.currentTime);
-	} else if (player.video.networkState === player.video.NETWORK_IDLE && !player.video.buffered.length) {
-		// this should happen when the source is available but:
-		// - it's potentially playing (.paused === false)
-		// - it's not ready to play
-		// - it's not loading
-		// If it hasAudio, that will be loaded in the 'emptied' handler below
-		player.video.load();
-		// console.log('Will load');
-	}
-
-	// console.assert(player.video.currentTime === player.driver.currentTime, 'Video not updating!');
-
-	if (player.video.ended) {
-		delete player.video[ಠevent]; // allow timeupdate event
-		player.video.pause(true);
-	}
-}
-
-/**
- * METHODS
- */
-
-function play$1() {
-	// console.log('play');
-	var video = this;
-	var player = video[ಠ];
-
-	// if it's fullscreen, use the native player
-	if (video.webkitDisplayingFullscreen) {
-		video[ಠplay]();
-		return;
-	}
-
-	if (player.driver.src !== 'data:' && player.driver.src !== video.src) {
-		// console.log('src changed on play', video.src);
-		setTime(video, 0, true);
-		player.driver.src = video.src;
-	}
-
-	if (!video.paused) {
-		return;
-	}
-	player.paused = false;
-
-	if (!video.buffered.length) {
-		// .load() causes the emptied event
-		// the alternative is .play()+.pause() but that triggers play/pause events, even worse
-		// possibly the alternative is preventing this event only once
-		video.load();
-	}
-
-	player.driver.play();
-	player.updater.start();
-
-	if (!player.hasAudio) {
-		dispatchEventAsync(video, 'play');
-		if (player.video.readyState >= player.video.HAVE_ENOUGH_DATA) {
-			// console.log('onplay');
-			dispatchEventAsync(video, 'playing');
-		}
-	}
-}
-function pause$1(forceEvents) {
-	// console.log('pause');
-	var video = this;
-	var player = video[ಠ];
-
-	player.driver.pause();
-	player.updater.stop();
-
-	// if it's fullscreen, the developer the native player.pause()
-	// This is at the end of pause() because it also
-	// needs to make sure that the simulation is paused
-	if (video.webkitDisplayingFullscreen) {
-		video[ಠpause]();
-	}
-
-	if (player.paused && !forceEvents) {
-		return;
-	}
-
-	player.paused = true;
-	if (!player.hasAudio) {
-		dispatchEventAsync(video, 'pause');
-	}
-	if (video.ended) {
-		video[ಠevent] = true;
-		dispatchEventAsync(video, 'ended');
-	}
-}
-
-/**
- * SETUP
- */
-
-function addPlayer(video, hasAudio) {
-	var player = video[ಠ] = {};
-	player.paused = true; // track whether 'pause' events have been fired
-	player.hasAudio = hasAudio;
-	player.video = video;
-	player.updater = frameIntervalometer(update$1.bind(player));
-
-	if (hasAudio) {
-		player.driver = getAudioFromVideo(video);
-	} else {
-		video.addEventListener('canplay', function () {
-			if (!video.paused) {
-				// console.log('oncanplay');
-				dispatchEventAsync(video, 'playing');
-			}
-		});
-		player.driver = {
-			src: video.src || video.currentSrc || 'data:',
-			muted: true,
-			paused: true,
-			pause: function pause$1() {
-				player.driver.paused = true;
-			},
-			play: function play$1() {
-				player.driver.paused = false;
-				// media automatically goes to 0 if .play() is called when it's done
-				if (isPlayerEnded(player)) {
-					setTime(video, 0);
-				}
-			},
-			get ended() {
-				return isPlayerEnded(player);
-			}
-		};
-	}
-
-	// .load() causes the emptied event
-	video.addEventListener('emptied', function () {
-		// console.log('driver src is', player.driver.src);
-		var wasEmpty = !player.driver.src || player.driver.src === 'data:';
-		if (player.driver.src && player.driver.src !== video.src) {
-			// console.log('src changed to', video.src);
-			setTime(video, 0, true);
-			player.driver.src = video.src;
-			// playing videos will only keep playing if no src was present when .play()’ed
-			if (wasEmpty) {
-				player.driver.play();
-			} else {
-				player.updater.stop();
-			}
-		}
-	}, false);
-
-	// stop programmatic player when OS takes over
-	video.addEventListener('webkitbeginfullscreen', function () {
-		if (!video.paused) {
-			// make sure that the <audio> and the syncer/updater are stopped
-			video.pause();
-
-			// play video natively
-			video[ಠplay]();
-		} else if (hasAudio && !player.driver.buffered.length) {
-			// if the first play is native,
-			// the <audio> needs to be buffered manually
-			// so when the fullscreen ends, it can be set to the same current time
-			player.driver.load();
-		}
-	});
-	if (hasAudio) {
-		video.addEventListener('webkitendfullscreen', function () {
-			// sync audio to new video position
-			player.driver.currentTime = video.currentTime;
-			// console.assert(player.driver.currentTime === video.currentTime, 'Audio not synced');
-		});
-
-		// allow seeking
-		video.addEventListener('seeking', function () {
-			if (lastRequests.indexOf(video.currentTime * 100 | 0 / 100) < 0) {
-				// console.log('User-requested seeking');
-				player.driver.currentTime = video.currentTime;
-			}
-		});
-	}
-}
-
-function overloadAPI(video) {
-	var player = video[ಠ];
-	video[ಠplay] = video.play;
-	video[ಠpause] = video.pause;
-	video.play = play$1;
-	video.pause = pause$1;
-	proxyProperty(video, 'paused', player.driver);
-	proxyProperty(video, 'muted', player.driver, true);
-	proxyProperty(video, 'playbackRate', player.driver, true);
-	proxyProperty(video, 'ended', player.driver);
-	proxyProperty(video, 'loop', player.driver, true);
-	preventEvent(video, 'seeking');
-	preventEvent(video, 'seeked');
-	preventEvent(video, 'timeupdate', ಠevent, false);
-	preventEvent(video, 'ended', ಠevent, false); // prevent occasional native ended events
-}
-
-function enableInlineVideo(video, hasAudio, onlyWhitelisted) {
-	if (hasAudio === void 0) hasAudio = true;
-	if (onlyWhitelisted === void 0) onlyWhitelisted = true;
-
-	if (onlyWhitelisted && !isWhitelisted || video[ಠ]) {
-		return;
-	}
-	addPlayer(video, hasAudio);
-	overloadAPI(video);
-	video.classList.add('IIV');
-	if (!hasAudio && video.autoplay) {
-		video.play();
-	}
-	if (!/iPhone|iPod|iPad/.test(navigator.platform)) {
-		console.warn('iphone-inline-video is not guaranteed to work in emulated environments');
-	}
-}
-
-enableInlineVideo.isWhitelisted = isWhitelisted;
-
-var COUNTER = 0;
-
-// Videos don't auto-play on mobile devices, so let's make them all play whenever
-// we tap the screen.
-var processedVideos = [];
-function findAndFixVideo(evt) {
-  var vids = document.querySelectorAll("video");
-  for (var i = 0; i < vids.length; ++i) {
-    fixVideo(vids[i]);
-  }
-  window.removeEventListener("touchend", findAndFixVideo);
-  window.removeEventListener("mouseup", findAndFixVideo);
-  window.removeEventListener("keyup", findAndFixVideo);
-}
-
-function fixVideo(vid) {
-  if (processedVideos.indexOf(vid) === -1) {
-    processedVideos.push(vid);
-    enableInlineVideo(vid, false);
-  }
-}
-
-window.addEventListener("touchend", findAndFixVideo, false);
-window.addEventListener("mouseup", findAndFixVideo, false);
-window.addEventListener("keyup", findAndFixVideo, false);
-
-var Image = function (_Entity) {
-  inherits(Image, _Entity);
-  createClass(Image, null, [{
-    key: "create",
-    value: function create() {
-      return new Image();
-    }
-  }]);
-
-  function Image(options) {
-    classCallCheck(this, Image);
-
-    ////////////////////////////////////////////////////////////////////////
-    // normalize input parameters
-    ////////////////////////////////////////////////////////////////////////
-
-    options = options || {};
-    if (typeof options === "string") {
-      options = {
-        value: options
-      };
-    }
-
-    options = Object.assign({}, {
-      id: "Primrose.Controls.Image[" + COUNTER++ + "]"
-    }, options);
-
-    var _this = possibleConstructorReturn(this, (Image.__proto__ || Object.getPrototypeOf(Image)).call(this, options.id));
+    var _this = possibleConstructorReturn(this, (BaseTextured.__proto__ || Object.getPrototypeOf(BaseTextured)).call(this, options.id));
 
     _this.options = options;
 
@@ -12652,237 +12247,144 @@ var Image = function (_Entity) {
     ////////////////////////////////////////////////////////////////////////
     // initialization
     ///////////////////////////////////////////////////////////////////////
-    _this._canvases = [];
-    _this._contexts = [];
     _this._elements = [];
     _this._meshes = [];
     _this._textures = [];
     _this._currentImageIndex = 0;
-    _this._lastTime = null;
-    _this.isVideo = false;
+    _this._environment = null;
+    _this._pickableRegistered = false;
+    _this.object = hub();
+
+    if (!_this.options.geometry) {
+      if (_this.options.radius) {
+        _this.options.geometry = shell$1(_this.options.radius, 72, 36, Math.PI * 2, Math.PI, options);
+      } else {
+        if (!_this.options.width) {
+          _this.options.width = 0.5;
+        }
+        if (!_this.options.height) {
+          _this.options.height = 0.5;
+        }
+        _this.options.geometry = quad$1(_this.options.width, _this.options.height, options);
+      }
+    }
+
+    _this.ready = _this._loadFiles(files, _this.options.progress).then(function () {
+      return _this._registerPickableObjects();
+    }).then(function () {
+      return _this;
+    });
     return _this;
   }
 
-  createClass(Image, [{
+  createClass(BaseTextured, [{
     key: "add",
     value: function add(child) {
-      this._meshes[0].add(child);
+      this.object.add(child);
     }
   }, {
     key: "addToBrowserEnvironment",
     value: function addToBrowserEnvironment(env, scene) {
-      var _this2 = this;
-
-      this._meshes.forEach(function (mesh, i) {
-        scene.add(mesh);
-        mesh.name = _this2.id + "-" + i;
-        if (i > 0) {
-          mesh.visible = false;
-        } else if (_this2.options.pickable) {
-          env.registerPickableObject(mesh);
-        }
-      });
+      scene.add(this.object);
+      this._environment = env;
+      this._registerPickableObjects();
     }
   }, {
-    key: "_setGeometry",
-    value: function _setGeometry(options) {
-      if (this.options.radius) {
-        this.options.geometry = shell$1(this.options.radius, 72, 36, Math.PI * 2, Math.PI, options);
-      } else if (!this.options.geometry) {
-        if (!this.options.width) {
-          this.options.width = 0.5;
-        }
-        if (!this.options.height) {
-          this.options.height = 0.5;
-        }
-        this.options.geometry = quad$1(this.options.width, this.options.height, options);
+    key: "_registerPickableObjects",
+    value: function _registerPickableObjects() {
+      if (this._environment && this.options.pickable && this._meshes.length > 0 && !this._pickableRegistered) {
+        this._environment.registerPickableObject(this._meshes[0]);
+        this._pickableRegistered = true;
       }
-    }
-  }, {
-    key: "loadImages",
-    value: function loadImages(images, progress) {
-      var _this3 = this;
-
-      return Promise.all(Array.prototype.map.call(images, function (src, i) {
-        var loadOptions = Object.assign({}, _this3.options, {
-          progress: progress,
-          resolve: function resolve(txt) {
-            return _this3._textures[i] = txt;
-          }
-        });
-        _this3._setGeometry();
-        _this3._meshes[i] = textured(_this3.options.geometry, src, loadOptions);
-        return loadOptions.promise;
-      })).then(function () {
-        return _this3.isVideo = false;
-      }).then(function () {
-        return _this3;
-      });
-    }
-  }, {
-    key: "loadVideos",
-    value: function loadVideos(videos, progress) {
-      var _this4 = this;
-
-      this._elements.splice(0);
-      this._canvases.splice(0);
-      this._contexts.splice(0);
-      this._textures.splice(0);
-
-      return Promise.all(Array.prototype.map.call(videos, function (spec, i) {
-        return new Promise(function (resolve, reject) {
-          var video = null;
-          if (typeof spec === "string") {
-            video = document.querySelector("video[src='" + spec + "']");
-            if (!video) {
-              video = document.createElement("video");
-              video.src = spec;
-            }
-          } else if (spec instanceof HTMLVideoElement) {
-            video = spec;
-          } else if (spec.toString() === "[object MediaStream]" || spec.toString() === "[object LocalMediaStream]") {
-            video = document.createElement("video");
-            video.srcObject = spec;
-          }
-          video.onprogress = progress;
-          video.onloadedmetadata = progress;
-          video.onerror = reject;
-          video.muted = true;
-          video.preload = "auto";
-          video.autoplay = true;
-          video.loop = true;
-          video.controls = true;
-          video.setAttribute("playsinline", "");
-          video.setAttribute("webkit-playsinline", "");
-          video.oncanplay = function () {
-            video.oncanplay = null;
-            video.onerror = null;
-
-            var width = video.videoWidth,
-                height = video.videoHeight,
-                p2Width = Math.pow(2, Math.ceil(Math.log2(width))),
-                p2Height = Math.pow(2, Math.ceil(Math.log2(height)));
-
-            _this4._elements[i] = video;
-
-            if ((width !== p2Width || height !== p2Height) && !_this4.options.disableVideoCopying) {
-
-              _this4._setGeometry({
-                maxU: width / p2Width,
-                maxV: height / p2Height
-              });
-
-              _this4._canvases[i] = document.createElement("canvas");
-              _this4._canvases[i].id = (video.id || _this4.id) + "-canvas";
-              _this4._canvases[i].width = p2Width;
-              _this4._canvases[i].height = p2Height;
-
-              _this4._contexts[i] = _this4._canvases[i].getContext("2d");
-            } else {
-
-              _this4._setGeometry();
-            }
-
-            var loadOptions = Object.assign({}, _this4.options, {
-              progress: progress,
-              resolve: function (oldResolve, i, txt) {
-                this._textures[i] = txt;
-                if (typeof oldResolve === "function") {
-                  oldResolve(txt);
-                }
-                resolve();
-              }.bind(_this4, _this4.options.resolve, i)
-            });
-
-            _this4._meshes[i] = textured(_this4.options.geometry, _this4._canvases[i] || _this4._elements[i], loadOptions);
-          };
-          if (!video.parentElement) {
-            document.body.insertBefore(video, document.body.children[0]);
-          }
-          video.play();
-        });
-      })).then(function () {
-        return _this4.isVideo = true;
-      }).then(function () {
-        return _this4;
-      });
     }
   }, {
     key: "eyeBlank",
     value: function eyeBlank(eye) {
       if (this._meshes) {
         this._currentImageIndex = eye % this._meshes.length;
-        var isVisible = this.visible;
         for (var i = 0; i < this._meshes.length; ++i) {
-          var m = this._meshes[i];
-          m.visible = isVisible && i === this._currentImageIndex;
-          if (i > 0) {
-            m.position.copy(this.position);
-            m.quaternion.copy(this.quaternion);
-            m.scale.copy(this.scale);
-          }
+          this._meshes[i].visible = i === this._currentImageIndex;
         }
       }
     }
   }, {
     key: "update",
-    value: function update() {
-      if (this.isVideo) {
-        for (var i = 0; i < this._textures.length; ++i) {
-          var elem = this._elements[i];
-          if (elem.currentTime !== this._lastTime) {
-            if (i < this._contexts.length) {
-              this._contexts[i].drawImage(elem, 0, 0);
-            }
-            try {
-              this._textures[i].needsUpdate = true;
-            } catch (exp) {
-              console.log(i, this);
-            }
-            this._lastTime = elem.currentTime;
-          }
-        }
-      }
-    }
+    value: function update() {}
   }, {
     key: "matrixWorld",
     get: function get() {
-      return this._meshes[0].matrixWorld;
+      return this.object.matrixWorld;
     }
   }, {
     key: "position",
     get: function get() {
-      return this._meshes[0].position;
+      return this.object.position;
     }
   }, {
     key: "quaternion",
     get: function get() {
-      return this._meshes[0].quaternion;
+      return this.object.quaternion;
     }
   }, {
     key: "scale",
     get: function get() {
-      return this._meshes[0].scale;
+      return this.object.scale;
     }
   }, {
     key: "visible",
     get: function get() {
-      for (var i = 0; i < this._meshes.length; ++i) {
-        if (this._meshes[i].visible) {
-          return true;
-        }
-      }
-      return false;
+      return this.object.visible;
     },
     set: function set(v) {
-      var img = this._meshes[this._currentImageIndex];
-      if (img) {
-        img.visible = v;
-      }
+      this.object.visible = v;
+    }
+  }]);
+  return BaseTextured;
+}(Entity);
+
+var COUNTER = 0;
+
+var Image = function (_BaseTextured) {
+  inherits(Image, _BaseTextured);
+
+  function Image(images, options) {
+    classCallCheck(this, Image);
+
+    ////////////////////////////////////////////////////////////////////////
+    // normalize input parameters
+    ////////////////////////////////////////////////////////////////////////
+    if (!(images instanceof Array)) {
+      images = [images];
+    }
+
+    options = Object.assign({}, {
+      id: "Primrose.Controls.Image[" + COUNTER++ + "]"
+    }, options);
+
+    return possibleConstructorReturn(this, (Image.__proto__ || Object.getPrototypeOf(Image)).call(this, images, options));
+  }
+
+  createClass(Image, [{
+    key: "_loadFiles",
+    value: function _loadFiles(images, progress) {
+      var _this2 = this;
+
+      return Promise.all(Array.prototype.map.call(images, function (src, i) {
+        var loadOptions = Object.assign({}, _this2.options, {
+          progress: progress,
+          resolve: function resolve(txt) {
+            _this2._textures[i] = txt;
+            _this2.object.add(_this2._meshes[i]);
+          }
+        });
+
+        _this2._meshes[i] = textured(_this2.options.geometry, src, loadOptions);
+        return loadOptions.promise;
+      }));
     }
   }]);
   return Image;
-}(Entity);
+}(BaseTextured);
 
 function camera(index, options) {
   options = Object.assign({
@@ -14620,7 +14122,7 @@ function v3(x, y, z) {
   return new Vector3(x, y, z);
 }
 
-var index$2 = {
+var index$1 = {
   axis: axis,
   box: box,
   brick: brick,
@@ -14664,7 +14166,7 @@ var liveAPI = Object.freeze({
 	sphere: sphere$1,
 	textured: textured,
 	v3: v3,
-	default: index$2
+	default: index$1
 });
 
 function deleteSetting(settingName) {
@@ -14810,7 +14312,7 @@ var Workerize = function (_AbstractEventEmitter) {
   return Workerize;
 }(AbstractEventEmitter);
 
-var index$4 = {
+var index$2 = {
   cache: cache,
   deleteSetting: deleteSetting,
   findProperty: findProperty,
@@ -14828,7 +14330,7 @@ var util = Object.freeze({
 	identity: identity$1,
 	setSetting: setSetting,
 	Workerize: Workerize,
-	default: index$4
+	default: index$2
 });
 
 BufferGeometry.prototype.center = Geometry.prototype.center = function () {
@@ -19164,7 +18666,7 @@ var Speech = function () {
   return Speech;
 }();
 
-var Audio$1 = {
+var Audio = {
   Audio3D: Audio3D,
   Music: Music,
   Note: Note,
@@ -19175,7 +18677,7 @@ var Audio$1 = {
 
 var packageName = "PrimroseVR";
 
-var version = "0.29.6";
+var version = "0.30.0";
 
 
 
@@ -20206,7 +19708,7 @@ var Rectangle = function () {
   return Rectangle;
 }();
 
-var COUNTER$3 = 0;
+var COUNTER$4 = 0;
 
 var Surface = function (_Entity) {
   inherits(Surface, _Entity);
@@ -20224,7 +19726,7 @@ var Surface = function (_Entity) {
 
     _this.isSurface = true;
     _this.options = Object.assign({}, {
-      id: "Primrose.Controls.Surface[" + COUNTER$3++ + "]",
+      id: "Primrose.Controls.Surface[" + COUNTER$4++ + "]",
       bounds: new Rectangle()
     }, options);
     _this.bounds = _this.options.bounds;
@@ -20639,7 +20141,7 @@ var Default = {
   }
 };
 
-var COUNTER$2 = 0;
+var COUNTER$3 = 0;
 
 var Label = function (_Surface) {
   inherits(Label, _Surface);
@@ -20652,7 +20154,7 @@ var Label = function (_Surface) {
     ///////////////////////////////////////////////////////////////////////
 
     var _this = possibleConstructorReturn(this, (Label.__proto__ || Object.getPrototypeOf(Label)).call(this, Object.assign({}, {
-      id: "Primrose.Controls.Label[" + COUNTER$2++ + "]"
+      id: "Primrose.Controls.Label[" + COUNTER$3++ + "]"
     }, options)));
     ////////////////////////////////////////////////////////////////////////
     // normalize input parameters
@@ -20792,7 +20294,7 @@ var Label = function (_Surface) {
   return Label;
 }(Surface);
 
-var COUNTER$1 = 0;
+var COUNTER$2 = 0;
 
 var Button2D = function (_Label) {
   inherits(Button2D, _Label);
@@ -20807,7 +20309,7 @@ var Button2D = function (_Label) {
     classCallCheck(this, Button2D);
 
     var _this = possibleConstructorReturn(this, (Button2D.__proto__ || Object.getPrototypeOf(Button2D)).call(this, Object.assign({}, {
-      id: "Primrose.Controls.Button2D[" + COUNTER$1++ + "]",
+      id: "Primrose.Controls.Button2D[" + COUNTER$2++ + "]",
       textAlign: "center"
     }, options)));
 
@@ -21664,7 +21166,7 @@ var Grammar = function () {
 var JavaScript = new Grammar("JavaScript", [["newlines", /(?:\r\n|\r|\n)/], ["startBlockComments", /\/\*/], ["endBlockComments", /\*\//], ["regexes", /(?:^|,|;|\(|\[|\{)(?:\s*)(\/(?:\\\/|[^\n\/])+\/)/], ["stringDelim", /("|')/], ["startLineComments", /\/\/.*$/m], ["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/], ["keywords", /\b(?:break|case|catch|class|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/], ["functions", /(\w+)(?:\s*\()/], ["members", /(\w+)\./], ["members", /((\w+\.)+)(\w+)/]]);
 
 var SCROLL_SCALE = isFirefox ? 3 : 100;
-var COUNTER$4 = 0;
+var COUNTER$5 = 0;
 var OFFSET = 0;
 
 var TextBox = function (_Surface) {
@@ -21680,7 +21182,7 @@ var TextBox = function (_Surface) {
     classCallCheck(this, TextBox);
 
     var _this = possibleConstructorReturn(this, (TextBox.__proto__ || Object.getPrototypeOf(TextBox)).call(this, Object.assign({}, {
-      id: "Primrose.Controls.TextBox[" + COUNTER$4++ + "]"
+      id: "Primrose.Controls.TextBox[" + COUNTER$5++ + "]"
     }, options)));
 
     _this.isTextBox = true;
@@ -32970,7 +32472,7 @@ function shouldUseNative() {
   }
 }
 
-var index$5 = shouldUseNative() ? Object.assign : function (target, source) {
+var index$3 = shouldUseNative() ? Object.assign : function (target, source) {
   var from;
   var to = toObject(target);
   var symbols;
@@ -33119,7 +32621,7 @@ Util.isMobile = function () {
   return check;
 };
 
-Util.extend = index$5;
+Util.extend = index$3;
 
 Util.safariCssSizeWorkaround = function (canvas) {
   // TODO(smus): Remove this workaround when Safari for iOS is fixed.
@@ -44771,7 +44273,7 @@ BrowserEnvironment.DEFAULTS = {
   disableAdvertising: false
 };
 
-var COUNTER$5 = 0;
+var COUNTER$6 = 0;
 
 var Form = function (_Surface) {
   inherits(Form, _Surface);
@@ -44786,7 +44288,7 @@ var Form = function (_Surface) {
     classCallCheck(this, Form);
 
     var _this = possibleConstructorReturn(this, (Form.__proto__ || Object.getPrototypeOf(Form)).call(this, Object.assign({}, {
-      id: "Primrose.Controls.Form[" + COUNTER$5++ + "]"
+      id: "Primrose.Controls.Form[" + COUNTER$6++ + "]"
     }, options)));
 
     _this._mesh = textured(quad$1(1, _this.bounds.height / _this.bounds.width), _this);
@@ -45026,7 +44528,7 @@ var Progress = function () {
 //
 var TextInput$2 = new BasicTextInput("Text Line input commands");
 
-var COUNTER$6 = 0;
+var COUNTER$7 = 0;
 
 var TextInput = function (_TextBox) {
   inherits(TextInput, _TextBox);
@@ -45035,7 +44537,7 @@ var TextInput = function (_TextBox) {
     classCallCheck(this, TextInput);
 
     var _this = possibleConstructorReturn(this, (TextInput.__proto__ || Object.getPrototypeOf(TextInput)).call(this, Object.assign({}, {
-      id: "Primrose.Controls.TextInput[" + COUNTER$6++ + "]",
+      id: "Primrose.Controls.TextInput[" + COUNTER$7++ + "]",
       padding: 5,
       singleLine: true,
       disableWordWrap: true,
@@ -46054,7 +45556,7 @@ var Text = {
 var obj$1 = {
   AbstractEventEmitter: AbstractEventEmitter,
   Angle: Angle,
-  Audio: Audio$1,
+  Audio: Audio,
   BrowserEnvironment: BrowserEnvironment,
   Constants: constants,
   Controls: Controls,
