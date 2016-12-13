@@ -925,8 +925,6 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
           side: BackSide,
           useFog: false,
           unshaded: true,
-          transparent: true,
-          opacity: 1,
           resolve: resolve,
           progress: this.options.progress
         });
