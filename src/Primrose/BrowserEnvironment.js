@@ -208,6 +208,7 @@ import hub from "../live-api/hub";
 import light from "../live-api/light";
 import put from "../live-api/put";
 import textured from "../live-api/textured";
+import sphere from "../live-api/sphere";
 
 import identity from "../util/identity";
 
