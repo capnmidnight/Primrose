@@ -53,7 +53,7 @@ export default function camera(index, options) {
       }
     }))
     .catch(console.error.bind(console, "ERR [getting media access]:>"))
-    .then((stream) => new Image(options).loadVideos([stream]))
+    .then((stream) => new Image(stream, options).ready)
     .catch(console.error.bind(console, "ERR [creating image]:>"))
     .then((image) => {
       image._meshes.forEach((mesh) => cam.add(mesh));
