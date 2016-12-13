@@ -33,7 +33,7 @@ var isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Const
 
 var packageName = "PrimroseVR";
 
-var version = "0.30.0";
+var version = "0.30.1";
 
 
 
@@ -12721,6 +12721,137 @@ function put$1(object) {
   return box;
 }
 
+/**
+ * @author benaadams / https://twitter.com/ben_a_adams
+ * based on THREE.SphereGeometry
+ */
+
+function SphereBufferGeometry(radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength) {
+
+	BufferGeometry.call(this);
+
+	this.type = 'SphereBufferGeometry';
+
+	this.parameters = {
+		radius: radius,
+		widthSegments: widthSegments,
+		heightSegments: heightSegments,
+		phiStart: phiStart,
+		phiLength: phiLength,
+		thetaStart: thetaStart,
+		thetaLength: thetaLength
+	};
+
+	radius = radius || 50;
+
+	widthSegments = Math.max(3, Math.floor(widthSegments) || 8);
+	heightSegments = Math.max(2, Math.floor(heightSegments) || 6);
+
+	phiStart = phiStart !== undefined ? phiStart : 0;
+	phiLength = phiLength !== undefined ? phiLength : Math.PI * 2;
+
+	thetaStart = thetaStart !== undefined ? thetaStart : 0;
+	thetaLength = thetaLength !== undefined ? thetaLength : Math.PI;
+
+	var thetaEnd = thetaStart + thetaLength;
+
+	var vertexCount = (widthSegments + 1) * (heightSegments + 1);
+
+	var positions = new BufferAttribute(new Float32Array(vertexCount * 3), 3);
+	var normals = new BufferAttribute(new Float32Array(vertexCount * 3), 3);
+	var uvs = new BufferAttribute(new Float32Array(vertexCount * 2), 2);
+
+	var index = 0,
+	    vertices = [],
+	    normal = new Vector3();
+
+	for (var y = 0; y <= heightSegments; y++) {
+
+		var verticesRow = [];
+
+		var v = y / heightSegments;
+
+		for (var x = 0; x <= widthSegments; x++) {
+
+			var u = x / widthSegments;
+
+			var px = -radius * Math.cos(phiStart + u * phiLength) * Math.sin(thetaStart + v * thetaLength);
+			var py = radius * Math.cos(thetaStart + v * thetaLength);
+			var pz = radius * Math.sin(phiStart + u * phiLength) * Math.sin(thetaStart + v * thetaLength);
+
+			normal.set(px, py, pz).normalize();
+
+			positions.setXYZ(index, px, py, pz);
+			normals.setXYZ(index, normal.x, normal.y, normal.z);
+			uvs.setXY(index, u, 1 - v);
+
+			verticesRow.push(index);
+
+			index++;
+		}
+
+		vertices.push(verticesRow);
+	}
+
+	var indices = [];
+
+	for (var y = 0; y < heightSegments; y++) {
+
+		for (var x = 0; x < widthSegments; x++) {
+
+			var v1 = vertices[y][x + 1];
+			var v2 = vertices[y][x];
+			var v3 = vertices[y + 1][x];
+			var v4 = vertices[y + 1][x + 1];
+
+			if (y !== 0 || thetaStart > 0) indices.push(v1, v2, v4);
+			if (y !== heightSegments - 1 || thetaEnd < Math.PI) indices.push(v2, v3, v4);
+		}
+	}
+
+	this.setIndex(new (positions.count > 65535 ? Uint32Attribute : Uint16Attribute)(indices, 1));
+	this.addAttribute('position', positions);
+	this.addAttribute('normal', normals);
+	this.addAttribute('uv', uvs);
+
+	this.boundingSphere = new Sphere(new Vector3(), radius);
+}
+
+SphereBufferGeometry.prototype = Object.create(BufferGeometry.prototype);
+SphereBufferGeometry.prototype.constructor = SphereBufferGeometry;
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
+function SphereGeometry(radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength) {
+
+	Geometry.call(this);
+
+	this.type = 'SphereGeometry';
+
+	this.parameters = {
+		radius: radius,
+		widthSegments: widthSegments,
+		heightSegments: heightSegments,
+		phiStart: phiStart,
+		phiLength: phiLength,
+		thetaStart: thetaStart,
+		thetaLength: thetaLength
+	};
+
+	this.fromBufferGeometry(new SphereBufferGeometry(radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength));
+}
+
+SphereGeometry.prototype = Object.create(Geometry.prototype);
+SphereGeometry.prototype.constructor = SphereGeometry;
+
+function sphere(r, slices, rings) {
+  return cache("SphereGeometry(" + r + ", " + slices + ", " + rings + ")", function () {
+    return new SphereGeometry(r, slices, rings);
+  });
+}
+
 function identity$1(obj) {
   return obj;
 }
@@ -12959,137 +13090,6 @@ Raycaster.prototype = {
 	}
 
 };
-
-/**
- * @author benaadams / https://twitter.com/ben_a_adams
- * based on THREE.SphereGeometry
- */
-
-function SphereBufferGeometry(radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength) {
-
-	BufferGeometry.call(this);
-
-	this.type = 'SphereBufferGeometry';
-
-	this.parameters = {
-		radius: radius,
-		widthSegments: widthSegments,
-		heightSegments: heightSegments,
-		phiStart: phiStart,
-		phiLength: phiLength,
-		thetaStart: thetaStart,
-		thetaLength: thetaLength
-	};
-
-	radius = radius || 50;
-
-	widthSegments = Math.max(3, Math.floor(widthSegments) || 8);
-	heightSegments = Math.max(2, Math.floor(heightSegments) || 6);
-
-	phiStart = phiStart !== undefined ? phiStart : 0;
-	phiLength = phiLength !== undefined ? phiLength : Math.PI * 2;
-
-	thetaStart = thetaStart !== undefined ? thetaStart : 0;
-	thetaLength = thetaLength !== undefined ? thetaLength : Math.PI;
-
-	var thetaEnd = thetaStart + thetaLength;
-
-	var vertexCount = (widthSegments + 1) * (heightSegments + 1);
-
-	var positions = new BufferAttribute(new Float32Array(vertexCount * 3), 3);
-	var normals = new BufferAttribute(new Float32Array(vertexCount * 3), 3);
-	var uvs = new BufferAttribute(new Float32Array(vertexCount * 2), 2);
-
-	var index = 0,
-	    vertices = [],
-	    normal = new Vector3();
-
-	for (var y = 0; y <= heightSegments; y++) {
-
-		var verticesRow = [];
-
-		var v = y / heightSegments;
-
-		for (var x = 0; x <= widthSegments; x++) {
-
-			var u = x / widthSegments;
-
-			var px = -radius * Math.cos(phiStart + u * phiLength) * Math.sin(thetaStart + v * thetaLength);
-			var py = radius * Math.cos(thetaStart + v * thetaLength);
-			var pz = radius * Math.sin(phiStart + u * phiLength) * Math.sin(thetaStart + v * thetaLength);
-
-			normal.set(px, py, pz).normalize();
-
-			positions.setXYZ(index, px, py, pz);
-			normals.setXYZ(index, normal.x, normal.y, normal.z);
-			uvs.setXY(index, u, 1 - v);
-
-			verticesRow.push(index);
-
-			index++;
-		}
-
-		vertices.push(verticesRow);
-	}
-
-	var indices = [];
-
-	for (var y = 0; y < heightSegments; y++) {
-
-		for (var x = 0; x < widthSegments; x++) {
-
-			var v1 = vertices[y][x + 1];
-			var v2 = vertices[y][x];
-			var v3 = vertices[y + 1][x];
-			var v4 = vertices[y + 1][x + 1];
-
-			if (y !== 0 || thetaStart > 0) indices.push(v1, v2, v4);
-			if (y !== heightSegments - 1 || thetaEnd < Math.PI) indices.push(v2, v3, v4);
-		}
-	}
-
-	this.setIndex(new (positions.count > 65535 ? Uint32Attribute : Uint16Attribute)(indices, 1));
-	this.addAttribute('position', positions);
-	this.addAttribute('normal', normals);
-	this.addAttribute('uv', uvs);
-
-	this.boundingSphere = new Sphere(new Vector3(), radius);
-}
-
-SphereBufferGeometry.prototype = Object.create(BufferGeometry.prototype);
-SphereBufferGeometry.prototype.constructor = SphereBufferGeometry;
-
-/**
- * @author mrdoob / http://mrdoob.com/
- */
-
-function SphereGeometry(radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength) {
-
-	Geometry.call(this);
-
-	this.type = 'SphereGeometry';
-
-	this.parameters = {
-		radius: radius,
-		widthSegments: widthSegments,
-		heightSegments: heightSegments,
-		phiStart: phiStart,
-		phiLength: phiLength,
-		thetaStart: thetaStart,
-		thetaLength: thetaLength
-	};
-
-	this.fromBufferGeometry(new SphereBufferGeometry(radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength));
-}
-
-SphereGeometry.prototype = Object.create(Geometry.prototype);
-SphereGeometry.prototype.constructor = SphereGeometry;
-
-function sphere$1(r, slices, rings) {
-  return cache("SphereGeometry(" + r + ", " + slices + ", " + rings + ")", function () {
-    return new SphereGeometry(r, slices, rings);
-  });
-}
 
 /**
  * @author benaadams / https://twitter.com/ben_a_adams
@@ -13337,7 +13337,7 @@ var Pointer = function (_AbstractEventEmitter) {
     });
     _this.mesh.position.z = -1.5;
 
-    _this.disk = colored(sphere$1(TELEPORT_PAD_RADIUS, 128, 3), _this.color, {
+    _this.disk = colored(sphere(TELEPORT_PAD_RADIUS, 128, 3), _this.color, {
       unshaded: true
     });
     _this.disk.geometry.computeBoundingBox();
@@ -15591,7 +15591,7 @@ function camera(index, options) {
       }
     });
   }).catch(console.error.bind(console, "ERR [getting media access]:>")).then(function (stream) {
-    return new Image(options).loadVideos([stream]);
+    return new Image(stream, options).ready;
   }).catch(console.error.bind(console, "ERR [creating image]:>")).then(function (image) {
     image._meshes.forEach(function (mesh) {
       return cam.add(mesh);
@@ -16436,7 +16436,7 @@ var index$1 = {
   ring: ring,
   shell: shell$1,
   raycaster: raycaster,
-  sphere: sphere$1,
+  sphere: sphere,
   textured: textured,
   v3: v3$1
 };
@@ -16459,7 +16459,7 @@ var liveAPI = Object.freeze({
 	ring: ring,
 	shell: shell$1,
 	raycaster: raycaster,
-	sphere: sphere$1,
+	sphere: sphere,
 	textured: textured,
 	v3: v3$1,
 	default: index$1
@@ -43205,8 +43205,6 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
           side: BackSide,
           useFog: false,
           unshaded: true,
-          transparent: true,
-          opacity: 1,
           resolve: resolve,
           progress: _this.options.progress
         });

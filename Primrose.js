@@ -12409,7 +12409,7 @@ function camera(index, options) {
       }
     });
   }).catch(console.error.bind(console, "ERR [getting media access]:>")).then(function (stream) {
-    return new Image(options).loadVideos([stream]);
+    return new Image(stream, options).ready;
   }).catch(console.error.bind(console, "ERR [creating image]:>")).then(function (image) {
     image._meshes.forEach(function (mesh) {
       return cam.add(mesh);
@@ -14112,7 +14112,7 @@ function SphereGeometry(radius, widthSegments, heightSegments, phiStart, phiLeng
 SphereGeometry.prototype = Object.create(Geometry.prototype);
 SphereGeometry.prototype.constructor = SphereGeometry;
 
-function sphere$1(r, slices, rings) {
+function sphere(r, slices, rings) {
   return cache("SphereGeometry(" + r + ", " + slices + ", " + rings + ")", function () {
     return new SphereGeometry(r, slices, rings);
   });
@@ -14140,7 +14140,7 @@ var index$1 = {
   ring: ring,
   shell: shell$1,
   raycaster: raycaster,
-  sphere: sphere$1,
+  sphere: sphere,
   textured: textured,
   v3: v3
 };
@@ -14163,7 +14163,7 @@ var liveAPI = Object.freeze({
 	ring: ring,
 	shell: shell$1,
 	raycaster: raycaster,
-	sphere: sphere$1,
+	sphere: sphere,
 	textured: textured,
 	v3: v3,
 	default: index$1
@@ -18677,7 +18677,7 @@ var Audio = {
 
 var packageName = "PrimroseVR";
 
-var version = "0.30.0";
+var version = "0.30.1";
 
 
 
@@ -19113,7 +19113,7 @@ var Pointer = function (_AbstractEventEmitter) {
     });
     _this.mesh.position.z = -1.5;
 
-    _this.disk = colored(sphere$1(TELEPORT_PAD_RADIUS, 128, 3), _this.color, {
+    _this.disk = colored(sphere(TELEPORT_PAD_RADIUS, 128, 3), _this.color, {
       unshaded: true
     });
     _this.disk.geometry.computeBoundingBox();
@@ -43722,8 +43722,6 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
           side: BackSide,
           useFog: false,
           unshaded: true,
-          transparent: true,
-          opacity: 1,
           resolve: resolve,
           progress: _this.options.progress
         });

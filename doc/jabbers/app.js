@@ -12409,7 +12409,7 @@ function camera(index, options) {
       }
     });
   }).catch(console.error.bind(console, "ERR [getting media access]:>")).then(function (stream) {
-    return new Image(options).loadVideos([stream]);
+    return new Image(stream, options).ready;
   }).catch(console.error.bind(console, "ERR [creating image]:>")).then(function (image) {
     image._meshes.forEach(function (mesh) {
       return cam.add(mesh);
@@ -18677,7 +18677,7 @@ var Audio = {
 
 var packageName = "PrimroseVR";
 
-var version = "0.30.0";
+var version = "0.30.1";
 
 
 
@@ -43712,7 +43712,7 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
 
         var skyGeom = null;
         if (typeof _this.options.skyTexture === "string") {
-          skyGeom = sphere(_this.options.drawDistance, 18, 9);
+          skyGeom = sphere$1(_this.options.drawDistance, 18, 9);
         } else {
           var skyDim = _this.options.drawDistance / Math.sqrt(2);
           skyGeom = box(skyDim, skyDim, skyDim);
@@ -43722,8 +43722,6 @@ var BrowserEnvironment = function (_AbstractEventEmitter) {
           side: BackSide,
           useFog: false,
           unshaded: true,
-          transparent: true,
-          opacity: 1,
           resolve: resolve,
           progress: _this.options.progress
         });
