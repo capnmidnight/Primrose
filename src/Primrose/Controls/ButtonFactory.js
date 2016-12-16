@@ -20,7 +20,10 @@ pliny.class({
 var buttonCount = 0;
 
 import Button3D from "./Button3D";
+import colored from "../../live-api/colored";
+import box from "../../live-api/box";
 export default class ButtonFactory {
+
   constructor(templateFile, options) {
     pliny.property({
       parent: "Primrose.Controls.Button3D",
@@ -57,4 +60,14 @@ export default class ButtonFactory {
     var btn = new Button3D(obj, name, this.options, toggle);
     return btn;
   }
+
 }
+
+ButtonFactory.DEFAULT = new ButtonFactory(
+  colored(box(1, 1, 1), 0xff0000), {
+    maxThrow: 0.1,
+    minDeflection: 10,
+    colorUnpressed: 0x7f0000,
+    colorPressed: 0x007f00,
+    toggle: true
+  });

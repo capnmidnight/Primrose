@@ -11,6 +11,7 @@ import isGearVR from "./isGearVR";
 import isIE from "./isIE";
 import isInIFrame from "./isInIFrame";
 import isiOS from "./isiOS";
+import isLandscape from "./isLandscape";
 import isMacOS from "./isMacOS";
 import isMobile from "./isMobile";
 import isOpera from "./isOpera";
@@ -25,6 +26,7 @@ export {
   isIE,
   isInIFrame,
   isiOS,
+  isLandscape,
   isMacOS,
   isMobile,
   isOpera,
@@ -40,6 +42,7 @@ export default {
   isIE,
   isInIFrame,
   isiOS,
+  isLandscape,
   isMacOS,
   isMobile,
   isOpera,

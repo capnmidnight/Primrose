@@ -26,7 +26,7 @@ export {
   XHR
 };
 
-const obj = {
+export default {
   del,
   delObject,
   get,
@@ -37,5 +37,3 @@ const obj = {
   postObject,
   XHR
 };
-
-export default obj;

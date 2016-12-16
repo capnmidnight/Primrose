@@ -308,10 +308,10 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
 
     const update = (dt) => {
       dt *= MILLISECONDS_TO_SECONDS;
-      movePlayer(dt);
-      moveUI();
+      this.input.update(dt);
       doPicking();
       moveGround();
+      moveUI();
       if(this.network){
         this.network.update(dt);
       }
@@ -322,29 +322,6 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
         description: "Fires after every animation update."
       });
       this.emit("update", dt);
-    };
-
-    const movePlayer = (dt) => {
-      this.input.update(dt);
-    };
-
-    pliny.property({
-      parent: "Primrose.BrowserEnvironment",
-      name: "turns",
-      type: "Primrose.Angle",
-      description: "A slewing angle that loosely follows the user around."
-    });
-    this.turns = new Angle(0);
-    const followEuler = new Euler(),
-      maxX = -Math.PI / 4,
-      maxY = Math.PI / 6;
-
-    const moveUI = (dt) => {
-      this.ui.position.copy(this.input.stage.position);
-      followEuler.setFromQuaternion(this.input.head.quaternion);
-      this.turns.radians = followEuler.y;
-      followEuler.set(maxX, this.turns.radians, 0, "YXZ");
-      this.ui.quaternion.setFromEuler(followEuler);
     };
 
     const doPicking = () => {
@@ -364,10 +341,7 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
 
     const moveGround = () => {
       if(this.sky) {
-        this.sky.position.set(
-          this.input.head.position.x,
-          0,
-          this.input.head.position.z);
+        this.sky.position.copy(this.input.head.position);
       }
 
       if (this.ground) {
@@ -379,6 +353,25 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
           this.ground.material.needsUpdate = true;
         }
       }
+    };
+
+    pliny.property({
+      parent: "Primrose.BrowserEnvironment",
+      name: "turns",
+      type: "Primrose.Angle",
+      description: "A slewing angle that loosely follows the user around."
+    });
+    this.turns = new Angle(0);
+    const followEuler = new Euler(),
+      maxX = -Math.PI / 4,
+      maxY = Math.PI / 6;
+
+    const moveUI = (dt) => {
+      this.ui.position.copy(this.input.stage.position);
+      followEuler.setFromQuaternion(this.input.head.quaternion);
+      this.turns.radians = followEuler.y;
+      followEuler.set(maxX, this.turns.radians, 0, "YXZ");
+      this.ui.quaternion.setFromEuler(followEuler);
     };
 
     var animate = (t) => {
@@ -402,7 +395,7 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
       for (var n = 0; trans && n < trans.length; ++n) {
         var eye = this.options.eyeRenderOrder[n],
           i = EYE_INDICES[eye],
-          st = trans[i] || trans[1 - i],
+          st = trans[i],
           v = st.viewport;
         Entity.eyeBlankAll(i);
 
@@ -584,30 +577,9 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
             models.button,
             this.options.button.options);
         }
-        else {
-          this.buttonFactory = new ButtonFactory(
-            colored(box(1, 1, 1), 0xff0000), {
-              maxThrow: 0.1,
-              minDeflection: 10,
-              colorUnpressed: 0x7f0000,
-              colorPressed: 0x007f00,
-              toggle: true
-            });
-        }
       })
-      .catch((err) => {
-        console.error(err);
-        if (!this.buttonFactory) {
-          this.buttonFactory = new ButtonFactory(
-            colored(box(1, 1, 1), 0xff0000), {
-              maxThrow: 0.1,
-              minDeflection: 10,
-              colorUnpressed: 0x7f0000,
-              colorPressed: 0x007f00,
-              toggle: true
-            });
-        }
-      });
+      .catch((err) => console.error(err))
+      .then(() => this.buttonFactory = this.buttonFactory || ButtonFactory.DEFAULT);
 
     //
     // Initialize public properties

@@ -39,7 +39,7 @@ export {
   Text
 };
 
-const obj = {
+export default {
   AbstractEventEmitter,
   Angle,
   Audio,
@@ -56,5 +56,3 @@ const obj = {
   Random,
   Text
 };
-
-export default obj;

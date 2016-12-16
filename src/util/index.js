@@ -10,6 +10,8 @@ import deleteSetting from "./deleteSetting";
 import findProperty from "./findProperty";
 import getSetting from "./getSetting";
 import identity from "./identity";
+import immutable from "./immutable";
+import mutable from "./mutable";
 import setSetting from "./setSetting";
 import Workerize from "./Workerize";
 
@@ -19,6 +21,8 @@ export {
   findProperty,
   getSetting,
   identity,
+  immutable,
+  mutable,
   setSetting,
   Workerize
 };
@@ -29,6 +33,8 @@ export default {
   findProperty,
   getSetting,
   identity,
+  immutable,
+  mutable,
   setSetting,
   Workerize
 };
