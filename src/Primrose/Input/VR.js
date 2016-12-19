@@ -21,11 +21,12 @@ import PoseInputProcessor from "./PoseInputProcessor";
 import isChrome from "../../flags/isChrome";
 import isiOS from "../../flags/isiOS";
 import isMobile from "../../flags/isMobile";
-import "webvr-min-polyfill";
-import PointerLock from "webvr-standard-monitor/src/PointerLock";
-import { unlock as unlockOrientation } from "webvr-standard-monitor/src/Orientation";
-import installWebVRStandardMonitor from "webvr-standard-monitor/src/install";
-import WebVRStandardMonitor from "webvr-standard-monitor/src/WebVRStandardMonitor";
+import PointerLock from "../../util/PointerLock";
+import Orientation from "../../util/Orientation";
+import standardFullScreenBehavior from "../../util/standardFullScreenBehavior";
+import standardLockBehavior from "../../util/standardLockBehavior";
+import installPolyfills from "../Displays/install";
+import StandardMonitorVRDisplay from "../Displays/StandardMonitorVRDisplay";
 export default class VR extends PoseInputProcessor {
 
   static isStereoDisplay(display) {
@@ -49,8 +50,7 @@ export default class VR extends PoseInputProcessor {
     this.lastStageWidth = null;
     this.lastStageDepth = null;
     this.isStereo = false;
-    WebVRStandardMonitor.DEFAULT_FOV = this.options.defaultFOV;
-    installWebVRStandardMonitor();
+    installPolyfills(options);
     this.ready = navigator.getVRDisplays()
       .then((displays) => {
         this.displays.push.apply(this.displays, displays);
@@ -99,11 +99,11 @@ export default class VR extends PoseInputProcessor {
       else if(this.currentDevice.capabilities.hasExternalDisplay){
         // PCs with HMD should also make the browser window on the main
         // display full-screen, so we can then also lock pointer.
-        promise = WebVRStandardMonitor.standardFullScreenBehavior(elem)
+        promise = standardFullScreenBehavior(elem)
           .then(() => rp(layers));
       }
       else {
-        promise = rp(layers).then(WebVRStandardMonitor.standardLockBehavior);
+        promise = rp(layers).then(standardLockBehavior);
       }
       return promise;
     }
@@ -122,7 +122,7 @@ export default class VR extends PoseInputProcessor {
     }
 
     if (this.isNativeMobileWebVR) {
-      promise = promise.then(unlockOrientation);
+      promise = promise.then(Orientation.unlock);
     }
 
     return promise

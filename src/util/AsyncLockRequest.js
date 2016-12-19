@@ -34,7 +34,7 @@ pliny.class({
   }]
 });
 
-import findProperty from "../../Util/findProperty";
+import findProperty from "./findProperty";
 
 export default class AsyncLockRequest {
   constructor(name, elementOpts, changeEventOpts, errorEventOpts, requestMethodOpts, exitMethodOpts, testExtraParam) {
@@ -53,6 +53,11 @@ export default class AsyncLockRequest {
       change: this._changeEventName,
       error: this._errorEventName
     };
+
+    this._testExtraParam = testExtraParam;
+
+    this.exit = this.exit.bind(this);
+    this.request = this.request.bind(this);
   }
 
   get element(){
@@ -132,8 +137,8 @@ export default class AsyncLockRequest {
   }
 
   request(elem, extraParam){
-    if (testExtraParam) {
-      extraParam = testExtraParam(extraParam);
+    if (this._testExtraParam) {
+      extraParam = this._testExtraParam(extraParam);
     }
     return this._withChange(() => {
       if (!this._requestMethodName) {

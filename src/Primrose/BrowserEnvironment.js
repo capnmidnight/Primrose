@@ -194,9 +194,7 @@ const MILLISECONDS_TO_SECONDS = 0.001,
   GROUND_HEIGHT = -0.07,
   EYE_INDICES = { "left": 0, "right": 1 };
 
-import PointerLock from "webvr-standard-monitor/src/PointerLock";
-import WebVRStandardMonitor from "webvr-standard-monitor/src/WebVRStandardMonitor";
-
+import PointerLock from "../util/PointerLock";
 
 import isMobile from "../flags/isMobile";
 import isiOS from "../flags/isiOS";
@@ -228,6 +226,8 @@ import ButtonFactory from "./Controls/ButtonFactory";
 import Image from "./Controls/Image";
 import Surface from "./Controls/Surface";
 import TextBox from "./Controls/TextBox";
+
+import StandardMonitorVRDisplay from "./Displays/StandardMonitorVRDisplay";
 
 import cascadeElement from "./DOM/cascadeElement";
 import makeHidingContainer from "./DOM/makeHidingContainer";
@@ -1528,7 +1528,7 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
   }
 
   set fieldOfView(v){
-    this.options.defaultFOV = WebVRStandardMonitor.DEFAULT_FOV = v;
+    this.options.defaultFOV = StandardMonitorVRDisplay.DEFAULT_FOV = v;
   }
 
   setAudioFromUser(userName, audioElement){

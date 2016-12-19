@@ -1,5 +1,5 @@
 import AsyncLockRequest from "./AsyncLockRequest";
-export default AsyncLockRequest(
+export default new AsyncLockRequest(
   "Fullscreen",
   ["fullscreenElement", "mozFullScreenElement", "webkitFullscreenElement", "msFullscreenElement"],
   ["onfullscreenchange", "onmozfullscreenchange", "onwebkitfullscreenchange", "onmsfullscreenchange"],

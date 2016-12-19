@@ -13,25 +13,24 @@
  * limitations under the License.
  */
 
-import SensorSample from "./sensor-sample.js";
-import MathUtil from "../math-util.js";
-import Util from "../util.js";
+import SensorSample from "./SensorSample";
+import { _Math } from "three/src/math/Math";
+import { Quaternion } from "three/src/math/Quaternion";
+import { Vector3 } from "three/src/math/Vector3";
+import isTimestampDeltaValid from "../../../util/isTimestampDeltaValid";
+import isiOS from "../../../flags/isiOS";
 
-var DEBUG = false;
+const { RAD2DEG } = _Math;
 
 /**
- * An implementation of a simple complementary filter, which fuses gyroscope and
- * accelerometer data from the 'devicemotion' event.
+ * An implementation of a simple complementary filter, which fuses gyroscope and accelerometer data from the 'devicemotion' event.
  *
- * Accelerometer data is very noisy, but stable over the long term.
- * Gyroscope data is smooth, but tends to drift over the long term.
+ * Accelerometer data is very noisy, but stable over the long term. Gyroscope data is smooth, but tends to drift over the long term.
  *
  * This fusion is relatively simple:
- * 1. Get orientation estimates from accelerometer by applying a low-pass filter
- *    on that data.
+ * 1. Get orientation estimates from accelerometer by applying a low-pass filter on that data.
  * 2. Get orientation estimates from gyroscope by integrating over time.
- * 3. Combine the two estimates, weighing (1) in the long term, but (2) for the
- *    short term.
+ * 3. Combine the two estimates, weighing (1) in the long term, but (2) for the short term.
  */
 export default class ComplementaryFilter {
   constructor(kFilter) {
@@ -43,25 +42,25 @@ export default class ComplementaryFilter {
     this.previousGyroMeasurement = new SensorSample();
 
     // Set default look direction to be in the correct direction.
-    if (Util.isIOS()) {
-      this.filterQ = new MathUtil.Quaternion(-1, 0, 0, 1);
+    if (isiOS) {
+      this.filterQ = new Quaternion(-1, 0, 0, 1);
     } else {
-      this.filterQ = new MathUtil.Quaternion(1, 0, 0, 1);
+      this.filterQ = new Quaternion(1, 0, 0, 1);
     }
-    this.previousFilterQ = new MathUtil.Quaternion();
+    this.previousFilterQ = new Quaternion();
     this.previousFilterQ.copy(this.filterQ);
 
     // Orientation based on the accelerometer.
-    this.accelQ = new MathUtil.Quaternion();
+    this.accelQ = new Quaternion();
     // Whether or not the orientation has been initialized.
     this.isOrientationInitialized = false;
     // Running estimate of gravity based on the current orientation.
-    this.estimatedGravity = new MathUtil.Vector3();
+    this.estimatedGravity = new Vector3();
     // Measured gravity based on accelerometer.
-    this.measuredGravity = new MathUtil.Vector3();
+    this.measuredGravity = new Vector3();
 
     // Debug only quaternion of gyro-based orientation.
-    this.gyroIntegralQ = new MathUtil.Quaternion();
+    this.gyroIntegralQ = new Quaternion();
   }
 
   addAccelMeasurement(vector, timestampS) {
@@ -72,7 +71,7 @@ export default class ComplementaryFilter {
     this.currentGyroMeasurement.set(vector, timestampS);
 
     var deltaT = timestampS - this.previousGyroMeasurement.timestampS;
-    if (Util.isTimestampDeltaValid(deltaT)) {
+    if (isTimestampDeltaValid(deltaT)) {
       this.run_();
     }
 
@@ -101,7 +100,7 @@ export default class ComplementaryFilter {
 
     // Calculate the delta between the current estimated gravity and the real
     // gravity vector from accelerometer.
-    var invFilterQ = new MathUtil.Quaternion();
+    var invFilterQ = new Quaternion();
     invFilterQ.copy(this.filterQ);
     invFilterQ.inverse();
 
@@ -114,24 +113,13 @@ export default class ComplementaryFilter {
 
     // Compare estimated gravity with measured gravity, get the delta quaternion
     // between the two.
-    var deltaQ = new MathUtil.Quaternion();
+    var deltaQ = new Quaternion();
     deltaQ.setFromUnitVectors(this.estimatedGravity, this.measuredGravity);
     deltaQ.inverse();
 
-    if (DEBUG) {
-      console.log('Delta: %d deg, G_est: (%s, %s, %s), G_meas: (%s, %s, %s)',
-                  MathUtil.radToDeg * Util.getQuaternionAngle(deltaQ),
-                  (this.estimatedGravity.x).toFixed(1),
-                  (this.estimatedGravity.y).toFixed(1),
-                  (this.estimatedGravity.z).toFixed(1),
-                  (this.measuredGravity.x).toFixed(1),
-                  (this.measuredGravity.y).toFixed(1),
-                  (this.measuredGravity.z).toFixed(1));
-    }
-
     // Calculate the SLERP target: current orientation plus the measured-estimated
     // quaternion delta.
-    var targetQ = new MathUtil.Quaternion();
+    var targetQ = new Quaternion();
     targetQ.copy(this.filterQ);
     targetQ.multiply(deltaQ);
 
@@ -146,19 +134,19 @@ export default class ComplementaryFilter {
   }
 
   accelToQuaternion_(accel) {
-    var normAccel = new MathUtil.Vector3();
+    var normAccel = new Vector3();
     normAccel.copy(accel);
     normAccel.normalize();
-    var quat = new MathUtil.Quaternion();
-    quat.setFromUnitVectors(new MathUtil.Vector3(0, 0, -1), normAccel);
+    var quat = new Quaternion();
+    quat.setFromUnitVectors(new Vector3(0, 0, -1), normAccel);
     quat.inverse();
     return quat;
   }
 
   gyroToQuaternionDelta_(gyro, dt) {
     // Extract axis and angle from the gyroscope data.
-    var quat = new MathUtil.Quaternion();
-    var axis = new MathUtil.Vector3();
+    var quat = new Quaternion();
+    var axis = new Vector3();
     axis.copy(gyro);
     axis.normalize();
     quat.setFromAxisAngle(axis, gyro.length() * dt);

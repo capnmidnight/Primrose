@@ -15,54 +15,43 @@
 
 import frameDataFromPose from "./frameDataFromPose";
 import VRFrameData from "./VRFrameData";
+import isiOS from "../../flags/isiOS";
+import FullScreen from "../../util/FullScreen";
+import standardFullScreenBehavior from "../../util/standardFullScreenBehavior";
+import standardExitFullScreenBehavior from "../../util/standardExitFullScreenBehavior";
+
+const defaultLeftBounds = [0, 0, 0.5, 1],
+  defaultRightBounds = [0.5, 0, 0.5, 1];
 
 // Start at a higher number to reduce chance of conflict.
-var nextDisplayId = 1000;
-var hasShowDeprecationWarning = false;
-
-var defaultLeftBounds = [0, 0, 0.5, 1];
-var defaultRightBounds = [0.5, 0, 0.5, 1];
-
-/**
- * The base class for all VR frame data.
- */
+let nextDisplayId = 1000,
+  hasShowDeprecationWarning = false;
 
 
-
-/**
- * The base class for all VR displays.
- */
 export default class VRDisplay {
-  constructor() {
-    this.isPolyfilled = true;
-    this.displayId = nextDisplayId++;
-    this.displayName = 'webvr-polyfill displayName';
+  constructor(name, isPolyfilled) {
+    this._currentLayers = [];
 
-    this.depthNear = 0.01;
-    this.depthFar = 10000.0;
+    Object.defineProperties(this, {
+      capabilities: immutable(Object.defineProperties({}, {
+        hasPosition: immutable(false),
+        hasOrientation: immutable(isMobile),
+        hasExternalDisplay: immutable(false),
+        canPresent: immutable(true),
+        maxLayers: immutable(1)
+      })),
+      isPolyfilled: immutable(isPolyfilled),
+      displayId: immutable(nextDisplayId++),
+      displayName: immutable(name),
+      isConnected: immutable(true),
+      stageParameters: immutable(null),
+      isPresenting: immutable(() => FullScreen.isActive ),
 
-    this.isConnected = true;
-    this.isPresenting = false;
-    this.capabilities = {
-      hasPosition: false,
-      hasOrientation: false,
-      hasExternalDisplay: false,
-      canPresent: false,
-      maxLayers: 1
-    }
-    this.stageParameters = null;
+      depthNear: mutable(0.01, "number"),
+      depthFar: mutable(10000.0, "number"),
 
-    // "Private" members.
-    this.waitingForPresent_ = false;
-    this.layer_ = null;
-
-    this.fullscreenElement_ = null;
-    this.fullscreenWrapper_ = null;
-    this.fullscreenElementCachedStyle_ = null;
-
-    this.fullscreenEventTarget_ = null;
-    this.fullscreenChangeHandler_ = null;
-    this.fullscreenErrorHandler_ = null;
+      isPolyfilled: immutable(true)
+    });
 
     this._frameData = null;
     this._poseData = null;
@@ -76,8 +65,12 @@ export default class VRDisplay {
   }
 
   getPose() {
+    return this.getImmediatePose();
+  }
+
+  getImmediatePose() {
     if(!this._poseData){
-      this._poseData = this.getImmediatePose();
+      this._poseData = this._getImmediatePose();
     }
     return this._poseData;
   }
@@ -90,245 +83,22 @@ export default class VRDisplay {
     return window.cancelAnimationFrame(id);
   }
 
-  wrapForFullscreen(element) {
-    // Don't wrap in iOS.
-    if (Util.isIOS()) {
-      return element;
-    }
-    if (!this.fullscreenWrapper_) {
-      this.fullscreenWrapper_ = document.createElement('div');
-      var cssProperties = [
-        'height: ' + Math.min(screen.height, screen.width) + 'px !important',
-        'top: 0 !important',
-        'left: 0 !important',
-        'right: 0 !important',
-        'border: 0',
-        'margin: 0',
-        'padding: 0',
-        'z-index: 999999 !important',
-        'position: fixed',
-      ];
-      this.fullscreenWrapper_.setAttribute('style', cssProperties.join('; ') + ';');
-      this.fullscreenWrapper_.classList.add('webvr-polyfill-fullscreen-wrapper');
-    }
-
-    if (this.fullscreenElement_ == element) {
-      return this.fullscreenWrapper_;
-    }
-
-    // Remove any previously applied wrappers
-    this.removeFullscreenWrapper();
-
-    this.fullscreenElement_ = element;
-    var parent = this.fullscreenElement_.parentElement;
-    parent.insertBefore(this.fullscreenWrapper_, this.fullscreenElement_);
-    parent.removeChild(this.fullscreenElement_);
-    this.fullscreenWrapper_.insertBefore(this.fullscreenElement_, this.fullscreenWrapper_.firstChild);
-    this.fullscreenElementCachedStyle_ = this.fullscreenElement_.getAttribute('style');
-
-    var self = this;
-    function applyFullscreenElementStyle() {
-      if (!self.fullscreenElement_) {
-        return;
-      }
-
-      var cssProperties = [
-        'position: absolute',
-        'top: 0',
-        'left: 0',
-        'width: ' + Math.max(screen.width, screen.height) + 'px',
-        'height: ' + Math.min(screen.height, screen.width) + 'px',
-        'border: 0',
-        'margin: 0',
-        'padding: 0',
-      ];
-      self.fullscreenElement_.setAttribute('style', cssProperties.join('; ') + ';');
-    }
-
-    applyFullscreenElementStyle();
-
-    return this.fullscreenWrapper_;
-  }
-
-  removeFullscreenWrapper() {
-    if (!this.fullscreenElement_) {
-      return;
-    }
-
-    var element = this.fullscreenElement_;
-    if (this.fullscreenElementCachedStyle_) {
-      element.setAttribute('style', this.fullscreenElementCachedStyle_);
-    } else {
-      element.removeAttribute('style');
-    }
-    this.fullscreenElement_ = null;
-    this.fullscreenElementCachedStyle_ = null;
-
-    var parent = this.fullscreenWrapper_.parentElement;
-    this.fullscreenWrapper_.removeChild(element);
-    parent.insertBefore(element, this.fullscreenWrapper_);
-    parent.removeChild(this.fullscreenWrapper_);
-
-    return element;
-  }
-
   requestPresent(layers) {
-    var wasPresenting = this.isPresenting;
-    var self = this;
-
-    if (!(layers instanceof Array)) {
-      if (!hasShowDeprecationWarning) {
-        console.warn("Using a deprecated form of requestPresent. Should pass in an array of VRLayers.");
-        hasShowDeprecationWarning = true;
-      }
-      layers = [layers];
+    for (var i = 0; i < this.capabilities.maxLayers && i < layers.length; ++i) {
+      this._currentLayers[i] = layers[i];
     }
-
-    return new Promise(function(resolve, reject) {
-      if (!self.capabilities.canPresent) {
-        reject(new Error('VRDisplay is not capable of presenting.'));
-        return;
-      }
-
-      if (layers.length == 0 || layers.length > self.capabilities.maxLayers) {
-        reject(new Error('Invalid number of layers.'));
-        return;
-      }
-
-      var incomingLayer = layers[0];
-      if (!incomingLayer.source) {
-        /*
-        todo: figure out the correct behavior if the source is not provided.
-        see https://github.com/w3c/webvr/issues/58
-        */
-        resolve();
-        return;
-      }
-
-      var leftBounds = incomingLayer.leftBounds || defaultLeftBounds;
-      var rightBounds = incomingLayer.rightBounds || defaultRightBounds;
-      if (wasPresenting) {
-        // Already presenting, just changing configuration
-        var changed = false;
-        var layer = self.layer_;
-        if (layer.source !== incomingLayer.source) {
-          layer.source = incomingLayer.source;
-          changed = true;
-        }
-
-        for (var i = 0; i < 4; i++) {
-          if (layer.leftBounds[i] !== leftBounds[i]) {
-            layer.leftBounds[i] = leftBounds[i];
-            changed = true;
-          }
-          if (layer.rightBounds[i] !== rightBounds[i]) {
-            layer.rightBounds[i] = rightBounds[i];
-            changed = true;
-          }
-        }
-
-        if (changed) {
-          self.fireVRDisplayPresentChange_();
-        }
-        resolve();
-        return;
-      }
-
-      // Was not already presenting.
-      self.layer_ = {
-        predistorted: incomingLayer.predistorted,
-        source: incomingLayer.source,
-        leftBounds: leftBounds.slice(0),
-        rightBounds: rightBounds.slice(0)
-      }
-
-      self.waitingForPresent_ = false;
-      if (self.layer_ && self.layer_.source) {
-        var fullscreenElement = self.wrapForFullscreen(self.layer_.source);
-
-        function onFullscreenChange() {
-          var actualFullscreenElement = Util.getFullscreenElement();
-
-          self.isPresenting = (fullscreenElement === actualFullscreenElement);
-          if (self.isPresenting) {
-            if (screen.orientation && screen.orientation.lock) {
-              screen.orientation.lock('landscape-primary').catch(function(error){
-                      console.error('screen.orientation.lock() failed due to', error.message)
-              });
-            }
-            self.waitingForPresent_ = false;
-            self.beginPresent_();
-            resolve();
-          } else {
-            if (screen.orientation && screen.orientation.unlock) {
-              screen.orientation.unlock();
-            }
-            self.removeFullscreenWrapper();
-            self.endPresent_();
-            self.removeFullscreenListeners_();
-          }
-          self.fireVRDisplayPresentChange_();
-        }
-        function onFullscreenError() {
-          if (!self.waitingForPresent_) {
-            return;
-          }
-
-          self.removeFullscreenWrapper();
-          self.removeFullscreenListeners_();
-
-          self.waitingForPresent_ = false;
-          self.isPresenting = false;
-
-          reject(new Error('Unable to present.'));
-        }
-
-        self.addFullscreenListeners_(fullscreenElement,
-            onFullscreenChange, onFullscreenError);
-
-        if (Util.requestFullscreen(fullscreenElement)) {
-          self.waitingForPresent_ = true;
-        } else if (Util.isIOS()) {
-          // *sigh* Just fake it.
-          self.isPresenting = true;
-          self.beginPresent_();
-          self.fireVRDisplayPresentChange_();
-          resolve();
-        }
-      }
-
-      if (!self.waitingForPresent_ && !Util.isIOS()) {
-        Util.exitFullscreen();
-        reject(new Error('Unable to present.'));
-      }
-    });
+    const elem = layers[0].source;
+    FullScreen.addChangeListener((evt) => this.fireVRDisplayPresentChange_());
+    return standardFullScreenBehavior(elem);
   }
 
   exitPresent() {
-    var wasPresenting = this.isPresenting;
-    var self = this;
-    this.isPresenting = false;
-    this.layer_ = null;
-
-    return new Promise(function(resolve, reject) {
-      if (wasPresenting) {
-        if (!Util.exitFullscreen() && Util.isIOS()) {
-          self.endPresent_();
-          self.fireVRDisplayPresentChange_();
-        }
-
-        resolve();
-      } else {
-        reject(new Error('Was not presenting to VRDisplay.'));
-      }
-    });
+    this._currentLayers.splice(0);
+    return standardExitFullScreenBehavior();
   }
 
   getLayers() {
-    if (this.layer_) {
-      return [this.layer_];
-    }
-    return [];
+    return this._currentLayers.slice();
   }
 
   fireVRDisplayPresentChange_() {
@@ -336,80 +106,9 @@ export default class VRDisplay {
     window.dispatchEvent(event);
   }
 
-  addFullscreenListeners_(element, changeHandler, errorHandler) {
-    this.removeFullscreenListeners_();
-
-    this.fullscreenEventTarget_ = element;
-    this.fullscreenChangeHandler_ = changeHandler;
-    this.fullscreenErrorHandler_ = errorHandler;
-
-    if (changeHandler) {
-      if (document.fullscreenEnabled) {
-        element.addEventListener('fullscreenchange', changeHandler, false);
-      } else if (document.webkitFullscreenEnabled) {
-        element.addEventListener('webkitfullscreenchange', changeHandler, false);
-      } else if (document.mozFullScreenEnabled) {
-        document.addEventListener('mozfullscreenchange', changeHandler, false);
-      } else if (document.msFullscreenEnabled) {
-        element.addEventListener('msfullscreenchange', changeHandler, false);
-      }
-    }
-
-    if (errorHandler) {
-      if (document.fullscreenEnabled) {
-        element.addEventListener('fullscreenerror', errorHandler, false);
-      } else if (document.webkitFullscreenEnabled) {
-        element.addEventListener('webkitfullscreenerror', errorHandler, false);
-      } else if (document.mozFullScreenEnabled) {
-        document.addEventListener('mozfullscreenerror', errorHandler, false);
-      } else if (document.msFullscreenEnabled) {
-        element.addEventListener('msfullscreenerror', errorHandler, false);
-      }
-    }
-  }
-
-  removeFullscreenListeners_() {
-    if (!this.fullscreenEventTarget_)
-      return;
-
-    var element = this.fullscreenEventTarget_;
-
-    if (this.fullscreenChangeHandler_) {
-      var changeHandler = this.fullscreenChangeHandler_;
-      element.removeEventListener('fullscreenchange', changeHandler, false);
-      element.removeEventListener('webkitfullscreenchange', changeHandler, false);
-      document.removeEventListener('mozfullscreenchange', changeHandler, false);
-      element.removeEventListener('msfullscreenchange', changeHandler, false);
-    }
-
-    if (this.fullscreenErrorHandler_) {
-      var errorHandler = this.fullscreenErrorHandler_;
-      element.removeEventListener('fullscreenerror', errorHandler, false);
-      element.removeEventListener('webkitfullscreenerror', errorHandler, false);
-      document.removeEventListener('mozfullscreenerror', errorHandler, false);
-      element.removeEventListener('msfullscreenerror', errorHandler, false);
-    }
-
-    this.fullscreenEventTarget_ = null;
-    this.fullscreenChangeHandler_ = null;
-    this.fullscreenErrorHandler_ = null;
-  }
-
-  beginPresent_() {
-    // Override to add custom behavior when presentation begins.
-  }
-
-  endPresent_() {
-    // Override to add custom behavior when presentation ends.
-  }
-
   submitFrame(pose) {
     this._frameData = null;
     this._poseData = null;
   }
 
-  getEyeParameters(whichEye) {
-    // Override to return accurate eye parameters if canPresent is true.
-    return null;
-  }
 };

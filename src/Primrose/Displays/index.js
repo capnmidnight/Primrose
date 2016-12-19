@@ -1,24 +1,24 @@
-import installWebVRStandardMonitor from "./install";
-import FullScreen from "./FullScreen";
-import Orientation from "./Orientation";
-import PointerLock from "./PointerLock";
-import WebVRStandardMonitor from "./WebVRStandardMonitor";
-import SensorFusion from "./SensorFusion";
+import CardboardVRDisplay from "./CardboardVRDisplay";
+import frameDataFromPose from "./frameDataFromPose";
+import install from "./install";
+import StandardMonitorVRDisplay from "./StandardMonitorVRDisplay";
+import VRDisplay from "./VRDisplay";
+import VRFrameData from "./VRFrameData";
 
 export {
-  installWebVRStandardMonitor,
-  FullScreen,
-  Orientation,
-  PointerLock,
-  WebVRStandardMonitor,
-  SensorFusion
+  CardboardVRDisplay,
+  frameDataFromPose,
+  install,
+  StandardMonitorVRDisplay,
+  VRDisplay,
+  VRFrameData
 };
 
 export default {
-  installWebVRStandardMonitor,
-  FullScreen,
-  Orientation,
-  PointerLock,
-  WebVRStandardMonitor,
-  SensorFusion
+  CardboardVRDisplay,
+  frameDataFromPose,
+  install,
+  StandardMonitorVRDisplay,
+  VRDisplay,
+  VRFrameData
 };

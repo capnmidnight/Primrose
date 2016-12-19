@@ -6,4 +6,4 @@ pliny.value({
 });
 
 export default Object.prototype.toString.call(window.HTMLElement)
-  .indexOf('Constructor') > 0;
+  .indexOf("Constructor") > 0;

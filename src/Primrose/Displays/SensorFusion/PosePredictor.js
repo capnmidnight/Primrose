@@ -26,8 +26,11 @@ pliny.class({
 
 import { Quaternion } from "three/src/math/Quaternion";
 import { Vector3 } from "three/src/math/Vector3";
-import { DEG2RAD, RAD2DEG } from "three/src/math/Math";
+import { _Math } from "three/src/math/Math";
+
+const { DEG2RAD, RAD2DEG } = _Math;
 const AXIS = new Vector3();
+
 export default class PosePredictor {
   constructor(predictionTimeS) {
     this.predictionTimeS = predictionTimeS;

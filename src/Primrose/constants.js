@@ -93,11 +93,10 @@ export const NAMES = [
   "Blackhaw"
 ];
 
-const constants = {
+export default {
   PIXEL_SCALES,
   SKINS,
   SYS_FONTS,
   NAMES,
   Quality
 };
-export default constants;
