@@ -1,41 +1,54 @@
-const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
-      dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-      primaryColor = 0xb09000,
-      secondaryColor = 0x303030,
-      todayColor = 0x306080,
-      angleThreshold = 15,
-      primaryMaterial = material({color:primaryColor}),
-      secondaryMaterial = material({color:secondaryColor}),
-      todayMaterial = material({color:todayColor}),
-      objs = [],
-      dim = 50,
-      boxSize = dim / 300,
-      boxSpacing = boxSize * 50,
-      textSize = boxSize * 0.333,
-      hDim = dim / 2,
-      deg2rad = (a) => Math.PI * a / 180,
-      rad2deg = (r) => 180 * r / Math.PI,
-      rand = () => Primrose.Random.number(0, dim),
-      randDegree = () => Primrose.Random.number(-Math.PI, Math.PI),
-      env = new Primrose.BrowserEnvironment({
-        groundTexture: "../images/deck.png",
-        font: "../fonts/helvetiker_regular.typeface.json",
-        backgroundColor: 0x000000,
-        useFog: true,
-        drawDistance: hDim / 2,
-        enableShadows: true,
-        fullScreenButtonContainer: "#fullScreenButtonContainer"
-      });
+var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+  dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+  months = null,
+  currentMonth = new Date().getMonth(),
+  primaryColor = 0xb09000,
+  secondaryColor = 0x303030,
+  todayColor = 0x306080,
+  angleThreshold = 15,
+  primaryMaterial = material({color:primaryColor}),
+  secondaryMaterial = material({color:secondaryColor}),
+  todayMaterial = material({color:todayColor}),
+  objs = [],
+  dim = 50,
+  boxSize = dim / 300,
+  boxSpacing = boxSize * 50,
+  textSize = boxSize * 0.333,
+  hDim = dim / 2,
+  env = new Primrose.BrowserEnvironment({
+    groundTexture: "../images/deck.png",
+    font: "../fonts/helvetiker_regular.typeface.json",
+    backgroundColor: 0x000000,
+    useFog: true,
+    drawDistance: hDim / 2,
+    enableShadows: true,
+    fullScreenButtonContainer: "#fullScreenButtonContainer"
+  });
 
-let months = null,
-    currentMonth = new Date().getMonth();
+
+function deg2rad(a) {
+  return Math.PI * a / 180;
+}
+
+function rad2deg(r) {
+  return 180 * r / Math.PI;
+}
+
+function rand() {
+  Primrose.Random.number(0, dim);
+}
+
+function randDegree() {
+  Primrose.Random.number(-Math.PI, Math.PI);
+}
 
 function setColor(){
   var date = new Date(),
       month = date.getMonth(),
-      d = date.getDate() - 1;
-  objs.forEach((o, i) => {
-    if(o.box === this){
+      d = date.getDate() - 1,
+      _this = this;
+  objs.forEach(function(o, i) {
+    if(o.box === _this){
       o.box.material = primaryMaterial;
       o.lbl.material = secondaryMaterial;
       o.bev.material = secondaryMaterial;
@@ -75,8 +88,8 @@ function showMonth(month){
 
   date.setDate(1);
   var x = 0,
-      y = 0,
-      lastDay = 0;
+    y = 0,
+    lastDay = 0;
   env.ui.add(months[month].latLon(-72, 0));
   while(date.getMonth() === month){
     x = date.getDay();
@@ -84,8 +97,8 @@ function showMonth(month){
       ++y;
     }
 
-    const d = date.getDate(),
-          o = objs[d-1];
+    var d = date.getDate(),
+      o = objs[d-1];
     if(today == d){
       o.box.material = todayMaterial;
     }
@@ -105,21 +118,23 @@ function showMonth(month){
 env.addEventListener("ready", function(){
   env.insertFullScreenButtons("body");
   months = monthNames
-    .map((month) => text(month, 3.5)
-    .colored(primaryColor)
-    .named(month));
+    .map(function(month){
+      return text(month, 3.5)
+        .colored(primaryColor)
+        .named(month);
+    });
 
-  for(let d = 0; d < 31; ++d){
-    const o = hub(),
-          b = box(boxSize)
-            .colored(secondaryColor)
-            .named("box" + (d+1)),
-          bev = box(boxSize * 1.1,boxSize * 1.1,boxSize * 0.9)
-            .colored(primaryColor)
-            .named("bev" + (d+1)),
-          t = text((d + 1).toString())
-            .colored(primaryColor)
-            .named("txt" + (d + 1));
+  for(var d = 0; d < 31; ++d){
+    var o = hub(),
+      b = box(boxSize)
+        .colored(secondaryColor)
+        .named("box" + (d+1)),
+      bev = box(boxSize * 1.1,boxSize * 1.1,boxSize * 0.9)
+        .colored(primaryColor)
+        .named("bev" + (d+1)),
+      t = text((d + 1).toString())
+        .colored(primaryColor)
+        .named("txt" + (d + 1));
 
     t.castShadow = true;
     b.receiveShadow = true;
@@ -147,9 +162,9 @@ env.addEventListener("ready", function(){
     .latLon(-17, 0, 1));
 });
 
-let lt = 0;
+var lt = 0;
 env.addEventListener("update", function(){
-  const dt = env.turns.degrees - lt;
+  var dt = env.turns.degrees - lt;
   if(Math.abs(dt) > angleThreshold){
     currentMonth = currentMonth + (dt < 0 ? 1 : -1);
     if(currentMonth < 0) {

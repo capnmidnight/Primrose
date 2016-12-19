@@ -61,10 +61,12 @@ env.addEventListener("ready", function(){
     env.options.fullScreenElement.addEventListener("keydown", fixAudio);
   }
   env.insertFullScreenButtons("body");
-  Promise.all(range(10, () => new Primrose.Audio.Sound(env.audio, "../audio/exp.ogg").ready))
+  Promise.all(range(10, function() {
+    return new Primrose.Audio.Sound(env.audio, "../audio/exp.ogg").ready;
+  }))
     .then(function(snds) {
       sounds = snds;
-      range(10, () => {
+      range(10, function(){
         var b = asteroid[0].clone();
         b.nextSize = 1;
         b.position.copy(Primrose.Random.vector(-15, 15));

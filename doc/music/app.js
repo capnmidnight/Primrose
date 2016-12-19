@@ -76,9 +76,9 @@ Board.prototype.play = function(i, dt) {
 
 Board.prototype.update = function() {
   if(measure !== lastMeasure){
-    const time = env.audio.context.currentTime,
-          measureTime = perMeasure * Math.ceil(time / perMeasure),
-          dt = measureTime - time;
+    var time = env.audio.context.currentTime,
+      measureTime = perMeasure * Math.ceil(time / perMeasure),
+      dt = measureTime - time;
     for(var y = 0; y < width; ++y){
       var i = y * height + measure;
       if(this.btnState[i]){
@@ -105,7 +105,7 @@ Board.prototype.select = function(i, evt) {
 };
 
 env.addEventListener("ready", function () {
-  const types = Primrose.Audio.Music.TYPES,
+  var types = Primrose.Audio.Music.TYPES,
     nTypes = types.length;
   types.forEach(function(type, t) {
     var board = new Board(type);
@@ -122,10 +122,14 @@ env.addEventListener("update", function(dt){
       t -= perMeasure;
       measure = (measure + 1) % height;
     }
-    boards.forEach((board) => board.update());
+    boards.forEach(function (board) {
+      board.update();
+    });
     lastMeasure = measure;
   }
   skipOne = false;
 });
 
-window.addEventListener("focus", () =>  skipOne = true);
+window.addEventListener("focus", function() {
+  skipOne = true;
+});
