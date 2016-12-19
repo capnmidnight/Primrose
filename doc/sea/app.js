@@ -24,7 +24,7 @@ env.sky.add(moon);
 moon.latLon(-30, 30, 7);
 moon.lookAt(env.scene.position);
 
-Primrose.Graphics.ModelLoader.loadModel("../models/kermit/kermit.obj")
+Primrose.Graphics.ModelLoader.loadModel("../models/dolphin.obj")
   .then(function(dolphinTemplate) {
     range(3, function(i) {
       var dolphin = dolphinTemplate.clone();

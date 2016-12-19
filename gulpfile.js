@@ -63,63 +63,17 @@ var gulp = require("gulp"),
     return collect;
   }, { format: null, default: null, debug: [], release: [] }),
 
-  demos = glob("doc/**/src/index.js").map(function(file) {
+  demos = glob("doc/*/app.js").map(function(file) {
 
-    var name = file.match(/doc\/(\w+)\/src\/index\.js/)[1],
+    var name = file.match(/doc\/(\w+)\/app\.js/)[1],
       parts = path.parse(file),
       taskName = "Demo:" + name,
-      inFile = path.join(parts.dir, "../appWithDoc.js"),
-      outFile = inFile.replace("WithDoc", ""),
-      docFile = inFile.replace("WithDoc", "Documentation"),
+      min = nt.min(taskName, file);
 
-      js = nt.js(taskName, parts.dir, {
-        moduleName: name,
-        fileName: inFile,
-        format: "umd",
-        watch: ["src/**/*.js"],
-        post: (_, cb) => pliny.carve(inFile, outFile, docFile, cb)
-      }),
-
-      min = nt.min(taskName, outFile, [{
-        debug: js.debug,
-        release: js.release
-      }]);
-
-    const demoTasks = tasks.default.slice();
-    demoTasks.push(js.default, min.default);
-
-    const demoTaskName = "Demo:" + name;
-    gulp.task(demoTaskName, demoTasks);
-
-    return {
-      name: name,
-      format: js.format,
-      default: demoTaskName,
-      debug: min.debug,
-      release: min.release
-    };
+    return min;
   });
 
-tasks.format.push.apply(tasks.format, demos.map(d=>d.format));
-tasks.debug.push.apply(tasks.debug, demos.map(d=>d.debug));
 tasks.release.push.apply(tasks.release, demos.map(d=>d.release));
-
-gulp.task("format", tasks.format);
-gulp.task("js", tasks.default);
-
-const demoTasks = tasks.default.slice();
-demoTasks.push.apply(demoTasks, demos.map(d=>d.default));
-
-gulp.task("demos", demoTasks);
-gulp.task("js:debug", tasks.debug);
-gulp.task("js:release", tasks.release);
-gulp.task("html", [html.default]);
-gulp.task("css", [css.default]);
-
-gulp.task("clean", [nt.clean("Primrose:full", [
-  "Primrose*.js",
-  "doc/Primrose*.js"
-])]);
 
 const tidyFiles = [
   "PrimroseWithDoc*.js",
@@ -127,28 +81,26 @@ const tidyFiles = [
   "doc/*/appDocumentation.js",
   "doc/PrimroseDocumentation.modules.js"
 ];
-gulp.task("tidy", [nt.clean("Primrose", tidyFiles, ["js:release"])]);
+gulp.task("tidy", [nt.clean("Primrose", tidyFiles, tasks.release)]);
 gulp.task("tidy:only", [nt.clean("Primrose:only", tidyFiles)]);
 
 gulp.task("copy", ["tidy"], () => gulp.src(["Primrose.min.js"])
   .pipe(gulp.dest("quickstart")));
 
-gulp.task("default", [
-  "js",
-  html.default,
-  css.default
-]);
 
-gulp.task("debug", [
-  "js:debug",
-  html.debug,
-  css.debug
-]);
+gulp.task("format", tasks.format);
+gulp.task("js", tasks.default);
+gulp.task("js:debug", tasks.debug);
+gulp.task("js:release", ["copy"]);
+gulp.task("html", [html.default]);
+gulp.task("html:debug", [html.debug]);
+gulp.task("html:release", [html.release]);
+gulp.task("css", [css.default]);
+gulp.task("css:debug", [css.debug]);
+gulp.task("css:release", [css.release]);
 
-gulp.task("release",  [
-  "copy",
-  html.release,
-  css.release
-]);
+gulp.task("default", [ "js", "html", "css" ]);
+gulp.task("debug", ["js:debug", "html:debug", "css:debug"]);
+gulp.task("release",  ["js:release", "html:release", "css:release"]);
 
 gulp.task("kablamo", build.exec("gulp bump && gulp yolo && cd ../Primrose-Site && gulp kablamo && cd ../Primrose && gulp trololo && npm publish"));
