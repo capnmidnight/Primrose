@@ -47,6 +47,13 @@ pliny.value({
   description: "Flag indicating the current system is a device running the Apple iOS operating system: iPad, iPod Touch, iPhone. Useful for invoking optional code paths necessary to deal with deficiencies in Apple's implementation of web standards."
 });
 
+pliny.function({
+  parent: "Flags",
+  name: "isLandscape",
+  returns: "Boolean",
+  description: "Indicates whether or not the phone has been flipped to landscape mode."
+});
+
 pliny.value({
   parent: "Flags",
   name: "isMacOS",
@@ -1684,6 +1691,37 @@ code should persist between reloads whatever the user writes in the text area:\n
 
 pliny.function({
   parent: "Util",
+  name: "immutable",
+  description: "Define an enumerable property that cannot be modified.",
+  returns: "Property",
+  parameters: [{
+    name: "value",
+    type: "Object",
+    optional: true,
+    description: "The initial value for the property."
+  }]
+});
+
+pliny.function({
+  parent: "Util",
+  name: "mutable",
+  description: "Define an enumerable property that can be modified, with type optional checking.",
+  returns: "Property",
+  parameters: [{
+    name: "value",
+    type: "Object",
+    optional: true,
+    description: "The initial value for the property."
+  }, {
+    name: "type",
+    type: "string or Function",
+    optional: true
+
+  }]
+});
+
+pliny.function({
+  parent: "Util",
   name: "setSetting",
   parameters: [{
     name: "settingName",
@@ -2273,6 +2311,42 @@ pliny.namespace({
   parent: "Primrose",
   name: "Audio",
   description: "The audio namespace contains classes that handle output to devices other than the screen (e.g. Audio, Music, etc.)."
+});
+
+pliny.class({
+  parent: "Util",
+  name: "AsyncLockRequest",
+  description: "Searches a set of properties from a list of potential browser-vendor-prefixed options for a set of related functions that can be used to make certain types of Full Screen and Orientation Locking requests.",
+  parameters: [{
+    name: "name ",
+    type: "String",
+    description: "A friendly name to use in error messages emitted by this locking object."
+  }, {
+    name: "elementOpts",
+    type: "Array",
+    description: "An array of potential element names to search the document object that indicate to which DOM element the lock has been acquired."
+  }, {
+    name: "changeEventOpts",
+    type: "Array",
+    description: "An array of potential event names for the callback when the lock is acquired."
+  }, {
+    name: "errorEventOpts",
+    type: "Array",
+    description: "An array of potential event names for the callback when the lock has failed to be acquired."
+  }, {
+    name: "requestMethodOpts",
+    type: "Array",
+    description: "An array of potential method names for initiating the lock request."
+  }, {
+    name: "exitMethodOpts",
+    type: "Array",
+    description: "An array of potential method names for canceling the lock."
+  }, {
+    name: "testExtraParam",
+    type: "Array",
+    optional: true,
+    description: "An optional, extra parameter to pass to the request method when it is called."
+  }]
 });
 
 pliny.class({
@@ -2919,7 +2993,43 @@ pliny.class({
   }]
 });
 
-pliny.function({
+pliny.class({
+  parent: "Primrose.Displays",
+  name: "VRFrameData",
+  description: "A polyfill for the WebVR standard VRFrameData object."
+});
+
+pliny.property({
+    parent: "Primrose.Displays.VRFrameData",
+    name: "leftProjectionMatrix",
+    type: "Float32Array",
+    description: "The projection matrix for the left eye."
+  });
+  pliny.property({
+    parent: "Primrose.Displays.VRFrameData",
+    name: "rightProjectionMatrix",
+    type: "Float32Array",
+    description: "The projection matrix for the right eye."
+  });
+  pliny.property({
+    parent: "Primrose.Displays.VRFrameData",
+    name: "leftViewMatrix",
+    type: "Float32Array",
+    description: "The view matrix for the left eye."
+  });
+  pliny.property({
+    parent: "Primrose.Displays.VRFrameData",
+    name: "rightViewMatrix",
+    type: "Float32Array",
+    description: "The view matrix for the right eye."
+  });
+  pliny.property({
+    parent: "Primrose.Displays.VRFrameData",
+    name: "pose",
+    type: "VRPose",
+    description: "Legacy VRPose data."
+  });
+  pliny.function({
   parent: "Primrose.DOM",
   name: "makeHidingContainer",
   description: "Takes an element and shoves it into a containing element that\n\
@@ -3349,6 +3459,69 @@ Each command entry is a simple object following the pattern:\n\
 The `keywords` property is an array of strings for which SpeechInput will listen. If any of the words or phrases in the array matches matches the heard command, the associated callbackFunction will be executed.\n\
 \n\
 The `command` property is the callback function that will be executed. It takes no parameters."
+  }]
+});
+
+pliny.class({
+  parent: "Primrose.Displays.SensorFusion",
+  name: "SensorSample",
+  description: "A combination of a sensor reading and a timestamp.",
+  parameters: [{
+    name: "sample",
+    type: "Object",
+    description: "The sensor reading we want to record. Can be any value, really, as it's just read back out again, correlated with a timestamp."
+  }, {
+    name: "timestampS",
+    type: "Number",
+    description: "The time at which the sensor sample was recorded. It's important that all timestamps between values that are meant to be compared together be recorded from the source, as there are multiple sources of \"time\" in the browser, with subtly different meanings, precisions, and starting points."
+  }]
+});
+
+pliny.method({
+        parent: "Primrose.Displays.SensorFusion.SensorSample",
+        name: "set",
+        description: "Mutably set the current state of the object.",
+        parameters: [{
+          name: "sample",
+          type: "Object",
+          description: "The sensor reading we want to record. Can be any value, really, as it's just read back out again, correlated with a timestamp."
+        }, {
+          name: "timestampS",
+          type: "Number",
+          description: "The time at which the sensor sample was recorded. It's important that all timestamps between values that are meant to be compared together be recorded from the source, as there are multiple sources of \"time\" in the browser, with subtly different meanings, precisions, and starting points."
+        }]
+      });
+
+      pliny.method({
+        parent: "Primrose.Displays.SensorFusion.SensorSample",
+        name: "copy",
+        description: "Mutably copy the current state of the object from another `SensorSample` object.",
+        parameters: [{
+          name: "sensorSample",
+          type: "Primrose.Displays.SensorFusion.SensorSample",
+          description: "The object to copy."
+        }]
+      });
+
+      pliny.function({
+  parent: "Util",
+  name: "isTimestampDeltaValid",
+  returns: "Boolean",
+  description: "Helper method to validate the time steps of sensor timestamps.",
+  parameters: [{
+    name: "timestampDeltaS",
+    type: "Number",
+    description: "The timestamp to check."
+  }]
+});
+pliny.class({
+  parent: "Primrose.Displays",
+  name: "PosePredictor",
+  description: "Given an orientation and the gyroscope data, predicts the future orientation of the head. This makes rendering appear faster. Also see: http://msl.cs.uiuc.edu/~lavalle/papers/LavYerKatAnt14.pdf",
+  parameters: [{
+    name: "predictionTimeS",
+    type: "Number",
+    description: "time from head movement to the appearance of the corresponding image."
   }]
 });
 
@@ -4489,7 +4662,131 @@ pliny.namespace({
   description: "The Input namespace contains classes that handle user input, for use in navigating the 3D environment."
 });
 
-pliny.namespace({
+pliny.class({
+  parent: "Primrose",
+  name: "WebRTCSocket",
+  baseClass: "Primrose.AbstractEventEmitter",
+  description: "Manages the negotiation between peer users to set up bidirectional audio between the two.",
+  parameters: [{
+    name: "requestICEPath",
+    type: "string",
+    description: "A request path at which to retrieve the extra ICE servers to use with the connection."
+  }, {
+    name: "fromUserName",
+    type: "String",
+    description: "The name of the local user, from which the peering is being initiated."
+  }, {
+    name: "fromUserIndex",
+    type: "Number",
+    description: "For users with multiple devices logged in at one time, this is the index of the device that is performing the peering operation."
+  }, {
+    name: "toUserName",
+    type: "String",
+    description: "The name of the remote user, to which the peering is being requested."
+  }, {
+    name: "toUserIndex",
+    type: "Number",
+    description: "For users with multiple devices logged in at one time, this is the index of the device that is receiving the peering operation."
+  }]
+});
+
+pliny.method({
+        parent: "Primrose.WebRTCSocket",
+        name: "recordProgress",
+        description: "mark that we made progress towards our goals.",
+        parameters: [{
+          name: "description",
+          type: "RTCSessionDescription",
+          description: "An answer or offer object."
+        }, {
+          name: "method",
+          type: "String",
+          description: "Whether or not the description had been 'created' or 'received' here."
+        }]
+      });
+      pliny.method({
+        parent: "Primrose.WebRTCSocket",
+        name: "close",
+        description: "shut down the peer connection, if it was succesful in being created."
+      });
+      pliny.method({
+        parent: "Primrose.WebRTCSocket",
+        name: "teardown",
+        description: "Whether ending succesfully or failing, the processing is mostly the same: teardown all the event handlers."
+      });
+
+      pliny.property({
+        parent: "Primrose.WebRTCSocket",
+        name: "issueRequest",
+        description: "Override this method in subClasses to trigger the peering process."
+      });
+
+      pliny.property({
+        parent: "Primrose.WebRTCSocket",
+        name: "complete",
+        returns: "Boolean",
+        description: "Override this method in subClasses to indicate when the peering process is complete. The peering process is complete when all offers are answered."
+      });
+
+      pliny.class({
+  parent: "Primrose.Network",
+  name: "AudioChannel",
+  baseClass: "Primrose.WebRTCSocket",
+  description: "Manages the negotiation between peer users to set up bidirectional audio between the two.",
+  parameters: [{
+    name: "requestICEPath",
+    type: "string",
+    description: "A request path at which to retrieve the extra ICE servers to use with the connection."
+  }, {
+    name: "fromUserName",
+    type: "String",
+    description: "The name of the local user, from which the peering is being initiated."
+  }, {
+    name: "toUserName",
+    type: "String",
+    description: "The name of the remote user, to which the peering is being requested."
+  }, {
+    name: "outAudio",
+    type: "Promise",
+    description: "An audio stream from the local user to send to the remote user."
+  }]
+});
+
+pliny.class({
+  parent: "Primrose.Network",
+  name: "DataChannel",
+  baseClass: "Primrose.WebRTCSocket",
+  description: "Manages the negotiation between peer users to set up bidirectional audio between the two.",
+  parameters: [{
+    name: "requestICEPath",
+    type: "string",
+    description: "A request path at which to retrieve the extra ICE servers to use with the connection."
+  }, {
+    name: "fromUserName",
+    type: "String",
+    description: "The name of the local user, from which the peering is being initiated."
+  }, {
+    name: "fromUserIndex",
+    type: "Number",
+    description: "For users with multiple devices logged in at one time, this is the index of the device that is performing the peering operation."
+  }, {
+    name: "toUserName",
+    type: "String",
+    description: "The name of the remote user, to which the peering is being requested."
+  }, {
+    name: "toUserIndex",
+    type: "Number",
+    description: "For users with multiple devices logged in at one time, this is the index of the device that is receiving the peering operation."
+  }]
+});
+
+pliny.property({
+      parent: "Primrose.Network.DataChannel",
+      name: "dataChannel",
+      type: "RTCDataChannel",
+      description: "A bidirectional data channel from the remote user to the local user."
+    });
+    pliny.namespace({
   parent: "Primrose",
   name: "Network",
   description: "The Network namespace contains classes for communicating events between entities in a graph relationship across different types of communication boundaries: in-thread, cross-thread, cross-WAN, and cross-LAN."
