@@ -3,6 +3,8 @@ import { Quaternion } from "three/src/math/Quaternion";
 import { Vector2 } from "three/src/math/Vector2";
 import { Vector3 } from "three/src/math/Vector3";
 import { Vector4 } from "three/src/math/Vector4";
+import { Matrix3 } from "three/src/math/Matrix3";
+import { Matrix4 } from "three/src/math/Matrix4";
 
 Euler.prototype.toString =
 Quaternion.prototype.toString =
@@ -30,6 +32,8 @@ Quaternion.prototype.debug =
 Vector2.prototype.debug =
 Vector3.prototype.debug =
 Vector4.prototype.debug =
+Matrix3.prototype.debug =
+Matrix4.prototype.debug =
   function(label, digits) {
     var val = this.toString(digits);
     if (val !== cache[label]) {
