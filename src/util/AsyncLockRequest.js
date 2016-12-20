@@ -26,18 +26,13 @@ pliny.class({
     name: "exitMethodOpts",
     type: "Array",
     description: "An array of potential method names for canceling the lock."
-  }, {
-    name: "testExtraParam",
-    type: "Array",
-    optional: true,
-    description: "An optional, extra parameter to pass to the request method when it is called."
   }]
 });
 
 import findProperty from "./findProperty";
 
 export default class AsyncLockRequest {
-  constructor(name, elementOpts, changeEventOpts, errorEventOpts, requestMethodOpts, exitMethodOpts, testExtraParam) {
+  constructor(name, elementOpts, changeEventOpts, errorEventOpts, requestMethodOpts, exitMethodOpts) {
 
     this._elementName = findProperty(document, elementOpts);
     this._requestMethodName = findProperty(document.documentElement, requestMethodOpts);
@@ -53,8 +48,6 @@ export default class AsyncLockRequest {
       change: this._changeEventName,
       error: this._errorEventName
     };
-
-    this._testExtraParam = testExtraParam;
 
     this.exit = this.exit.bind(this);
     this.request = this.request.bind(this);
@@ -137,9 +130,6 @@ export default class AsyncLockRequest {
   }
 
   request(elem, extraParam){
-    if (this._testExtraParam) {
-      extraParam = this._testExtraParam(extraParam);
-    }
     return this._withChange(() => {
       if (!this._requestMethodName) {
         throw new Error("No " + name + " API support.");
