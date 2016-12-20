@@ -6,13 +6,15 @@ var env = new Primrose.BrowserEnvironment({
   drawDistance: 25,
   gazeLength: 0.25,
   showHeadPointer: isMobile,
-  fullScreenButtonContainer: "#fullScreenButtonContainer"
+  fullScreenButtonContainer: "#fullScreenButtonContainer",
+  progress: Preloader.thunk
 }),
 
   moon = textured(circle(1, 45), "moon.jpg", {
     unshaded: true,
     useFog: false,
-    color: 0xffef9f
+    color: 0xffef9f,
+    progress: Preloader.thunk
   }),
 
   pod = hub();
@@ -24,7 +26,7 @@ env.sky.add(moon);
 moon.latLon(-30, 30, 7);
 moon.lookAt(env.scene.position);
 
-Primrose.Graphics.ModelLoader.loadModel("../models/dolphin.obj")
+var modelPromise = Primrose.Graphics.ModelLoader.loadModel("../models/dolphin.obj", null, Preloader.thunk)
   .then(function(dolphinTemplate) {
     range(3, function(i) {
       var dolphin = dolphinTemplate.clone();
@@ -33,6 +35,10 @@ Primrose.Graphics.ModelLoader.loadModel("../models/dolphin.obj")
       pod.add(dolphin);
     });
   });
+
+env.addEventListener("ready", function(){
+  modelPromise.then(Preloader.hide);
+});
 
 env.addEventListener("update", function(dt) {
   pod.rotation.set(0, 0, performance.now() / 1000, "ZYX");

@@ -7,7 +7,8 @@ var cube = range(6, function(i) { return "../images/space" + i + ".jpg"; }),
     gazeLength: 0.25,
     showHeadPointer: isMobile,
     ambientSound: "../audio/space.ogg",
-    fullScreenButtonContainer: "#fullScreenButtonContainer"
+    fullScreenButtonContainer: "#fullScreenButtonContainer",
+    progress: Preloader.thunk
   }),
   blocks = [],
   shots = [],
@@ -74,6 +75,8 @@ env.addEventListener("ready", function(){
         blocks.push(b);
         env.scene.add(b);
       });
+
+      Preloader.hide();
     });
 });
 

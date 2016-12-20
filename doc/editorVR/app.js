@@ -10,7 +10,8 @@ window.env = new Primrose.BrowserEnvironment({
   skyTexture: "../images/bg2.jpg",
   groundTexture: GRASS,
   font: "../fonts/helvetiker_regular.typeface.json",
-  fullScreenButtonContainer: "#fullScreenButtonContainer"
+  fullScreenButtonContainer: "#fullScreenButtonContainer",
+  progress: Preloader.thunk
 });
 
 var subScene = null,
@@ -61,6 +62,8 @@ env.addEventListener("ready", function () {
   console.log(" - " + cmdPre + "+X to reload original demo code");
   console.log(" - Z to reset position/sensor");
   console.log();
+
+  Preloader.hide();
 });
 
 env.addEventListener("update", function (dt) {

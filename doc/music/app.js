@@ -23,7 +23,8 @@ var height = 8,
       useFog: true,
       useGaze: isMobile,
       drawDistance: 10,
-      fullScreenButtonContainer: "#fullScreenButtonContainer"
+      fullScreenButtonContainer: "#fullScreenButtonContainer",
+      progress: Preloader.thunk
     });
 
 function text(size, text) {
@@ -113,6 +114,8 @@ env.addEventListener("ready", function () {
     env.scene.add(board.object);
     board.object.latLon(0, (t - (nTypes - 1) / 2) * 100 / nTypes);
   });
+
+  Preloader.hide();
 });
 
 env.addEventListener("update", function(dt){

@@ -22,7 +22,8 @@ var monthNames = ["January", "February", "March", "April", "May", "June", "July"
     useFog: true,
     drawDistance: hDim / 2,
     enableShadows: true,
-    fullScreenButtonContainer: "#fullScreenButtonContainer"
+    fullScreenButtonContainer: "#fullScreenButtonContainer",
+    progress: Preloader.thunk
   });
 
 
@@ -160,6 +161,8 @@ env.addEventListener("ready", function(){
     .colored(primaryColor)
     .named("inst2")
     .latLon(-17, 0, 1));
+
+  Preloader.hide();
 });
 
 var lt = 0;

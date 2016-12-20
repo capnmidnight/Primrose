@@ -10,7 +10,8 @@ var GRASS = "../images/grass.png",
     skyTexture: DECK,
     groundTexture: DECK,
     font: "../fonts/helvetiker_regular.typeface.json",
-    fullScreenButtonContainer: "#fullScreenButtonContainer"
+    fullScreenButtonContainer: "#fullScreenButtonContainer",
+    progress: Preloader.thunk
   }),
 
   editor = null,
@@ -59,6 +60,8 @@ env.addEventListener("ready", function () {
   editorFrameMesh.position.set(0, env.options.avatarHeight, 0);
   editorFrameMesh.visible = false;
   editorFrameMesh.disabled = true;
+
+  Preloader.hide();
 }, false);
 
 window.addEventListener("beforeunload", function (evt) {

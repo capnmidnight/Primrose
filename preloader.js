@@ -72,29 +72,37 @@ var prog = {
 };
 var curScripts = document.querySelectorAll("script");
 var curScript = curScripts[curScripts.length - 1];
+var scripts = [];
 
-function getNextScript(files) {
-  if (files.length > 0) {
-    (function () {
-      var file = files.shift();
-      get(file, function (contents) {
-        var s = document.createElement("script");
-        s.type = "text/javascript";
-        if (window.DEBUG) {
-          s.src = file;
-          s.onload = getNextScript.bind(null, files);
-        } else {
-          s.innerHTML = contents;
-          setTimeout(getNextScript, 0, files);
-        }
-        document.body.appendChild(s);
-      });
-    })();
+function installScripts() {
+  if (scripts.length > 0 && scripts[0] !== undefined) {
+    var s = document.createElement("script"),
+        file = scripts.shift();
+    s.type = "text/javascript";
+    if (window.DEBUG) {
+      s.src = file;
+      s.onload = installScripts;
+    } else {
+      s.innerHTML = file;
+      setTimeout(installScripts);
+    }
+    document.body.appendChild(s);
   }
 }
 
+function getNextScript(file, i) {
+  get(file, function (contents) {
+    if (window.DEBUG) {
+      scripts[i] = file;
+    } else {
+      scripts[i] = contents;
+    }
+    installScripts();
+  });
+}
+
 if (curScript && curScript.dataset.files) {
-  getNextScript(curScript.dataset.files.split(","));
+  curScript.dataset.files.split(",").forEach(getNextScript);
 }
 
 return prog;

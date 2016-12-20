@@ -18,7 +18,8 @@ var GRASS = "../images/grass.png",
     skyTexture: "../images/bg.jpg",
     groundTexture: DECK,
     useFog: true,
-    fullScreenButtonContainer: "#fullScreenButtonContainer"
+    fullScreenButtonContainer: "#fullScreenButtonContainer",
+    progress: Preloader.thunk
   });
 
 env.addEventListener("ready", function () {
@@ -89,6 +90,8 @@ env.addEventListener("ready", function () {
     column(0.5, 0.5, 11, x, 6, z);
     column(2, 0.5, 1, x, 12, z);
   }
+
+  Preloader.hide();
 }.bind(env));
 
 env.addEventListener("update", function (dt) {

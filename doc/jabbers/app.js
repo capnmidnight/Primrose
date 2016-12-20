@@ -14,7 +14,8 @@ var WIDTH = 100,
     font: "../fonts/helvetiker_regular.typeface.json",
     useFog: true,
     drawDistance: 100,
-    fullScreenButtonContainer: "#fullScreenButtonContainer"
+    fullScreenButtonContainer: "#fullScreenButtonContainer",
+    progress: Preloader.thunk
   });
 
 // and clicking on the objects in the scene
@@ -113,6 +114,8 @@ env.addEventListener("ready", function () {
     env.appendChild(jab);
     env.registerPickableObject(jab);
   }
+
+  Preloader.hide();
 });
 
 env.addEventListener("update", function (dt) {

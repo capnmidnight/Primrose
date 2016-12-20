@@ -5,7 +5,8 @@ var skyColor = 0xffff7f,
     useFog: true,
     fullScreenButtonContainer: "#fullScreenButtonContainer",
     enableShadows: true,
-    shadowMapSize: 2048
+    shadowMapSize: 2048,
+    progress: Preloader.thunk
   }),
 
   sunDistance = 20,
@@ -15,7 +16,7 @@ var skyColor = 0xffff7f,
 
   t = function(name, rt, rb, h, sr){
     return cylinder(rt, rb, h, sr, 1)
-      .textured("../images/rock.png", { shadow: true })
+      .textured("../images/rock.png", { shadow: true, progress: Preloader.thunk })
       .named(name);
   },
 
@@ -50,6 +51,8 @@ base.position.y += (baseHeight - standHeight) / 2;
 
 dial.add(hand);
 hand.position.y += handHeight / 2;
+
+env.addEventListener("ready", Preloader.hide);
 
 env.addEventListener("update", function(dt) {
   time += dt;

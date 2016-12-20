@@ -3,5 +3,8 @@ const env = new Primrose.BrowserEnvironment({
   groundTexture: "../images/deck.png",
   useFog: true,
   drawDistance: 100,
-  fullScreenButtonContainer: "#fullScreenButtonContainer"
+  fullScreenButtonContainer: "#fullScreenButtonContainer",
+  progress: Preloader.thunk
 });
+
+env.addEventListener("ready", Preloader.hide);
