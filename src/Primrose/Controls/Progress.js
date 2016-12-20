@@ -10,7 +10,8 @@ const SIZE = 1,
   SIZE_SMALL = SIZE / PROPORTION,
   INSET_LARGE = (1 - (1 - INSET) / PROPORTION);
 
-import { colored, box } from "../../live-api";
+import colored from "../../live-api/colored";
+import box from "../../live-api/box";
 import { BackSide } from "three/src/constants";
 export default class Progress {
 

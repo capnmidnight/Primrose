@@ -8,7 +8,8 @@ pliny.class({
 var COUNTER = 0;
 
 import Surface from "./Surface";
-import { textured, quad } from "../../live-api";
+import textured from "../../live-api/textured";
+import quad from "../../live-api/quad";
 export default class Form extends Surface {
 
   static create() {

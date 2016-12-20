@@ -32,6 +32,8 @@ import isChrome from "../../flags/isChrome";
 import Entity from "./Entity";
 import Rectangle from "../Text/Rectangle";
 import textured from "../../live-api/textured";
+import quad from "../../live-api/quad";
+import shell from "../../live-api/shell";
 export default class Surface extends Entity {
 
   static create() {

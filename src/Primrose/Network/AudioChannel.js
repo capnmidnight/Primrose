@@ -25,6 +25,7 @@ pliny.class({
 });
 
 import WebRTCSocket from "./WebRTCSocket";
+import isIE from "../../flags/isIE";
 
 const ENABLE_OPUS_HACK = true;
 

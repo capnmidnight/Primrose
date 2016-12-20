@@ -1,12 +1,3 @@
-import Orientation from "../../util/Orientation";
-import PointerLock from "../../util/PointerLock";
-import FullScreen from "../../util/FullScreen";
-import immutable from "../../util/immutable";
-import mutable from "../../util/mutable";
-import standardFullScreenBehavior from "../../util/standardFullScreenBehavior";
-import standardExitFullScreenBehavior from "../../util/standardExitFullScreenBehavior";
-import standardLockBehavior from "../../util/standardLockBehavior";
-import standardUnlockBehavior from "../../util/standardUnlockBehavior";
 import isMobile from "../../flags/isMobile";
 import VRDisplay from "./VRDisplay";
 

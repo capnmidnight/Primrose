@@ -29,7 +29,8 @@ import isIE from "../../flags/isIE";
 import isOpera from "../../flags/isOpera";
 import isSafari from "../../flags/isSafari";
 import isMacOS from "../../flags/isMacOS";
-import { Windows, macOS } from "../Text/OperatingSystems"
+import Windows from "../Text/OperatingSystems/Windows";
+import macOS from "../Text/OperatingSystems/macOS";
 import CodePages from "../Text/CodePages";
 export default class Keyboard extends InputProcessor {
   constructor(input, commands) {

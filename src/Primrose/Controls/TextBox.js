@@ -26,7 +26,14 @@ import Rectangle from "../Text/Rectangle";
 import TextEditor from "../Text/CommandPacks/TextEditor";
 import DefaultTheme from "../Text/Themes/Default";
 import JavaScript from "../Text/Grammars/JavaScript";
-import { isFirefox, isChrome, isIE, isOpera, isSafari, isMobile} from "../../flags";
+
+import isFirefox from "../../flags/isFirefox";
+import isChrome from "../../flags/isChrome";
+import isIE from "../../flags/isIE";
+import isOpera from "../../flags/isOpera";
+import isSafari from "../../flags/isSafari";
+import isMobile from "../../flags/isMobile";
+
 export default class TextBox extends Surface {
 
   static create() {

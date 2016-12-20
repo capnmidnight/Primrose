@@ -11,6 +11,7 @@ import Audio from "./Audio";
 import BrowserEnvironment from "./BrowserEnvironment";
 import Constants from "./Constants";
 import Controls from "./Controls";
+import Displays from "./Displays";
 import DOM from "./DOM";
 import Graphics from "./Graphics";
 import HTTP from "./HTTP";
@@ -28,6 +29,7 @@ export {
   BrowserEnvironment,
   Constants,
   Controls,
+  Displays,
   DOM,
   Graphics,
   HTTP,
@@ -46,6 +48,7 @@ export default {
   BrowserEnvironment,
   Constants,
   Controls,
+  Displays,
   DOM,
   Graphics,
   HTTP,

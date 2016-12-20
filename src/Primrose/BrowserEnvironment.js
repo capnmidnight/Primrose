@@ -196,7 +196,6 @@ const MILLISECONDS_TO_SECONDS = 0.001,
 
 import PointerLock from "../util/PointerLock";
 
-import isMobile from "../flags/isMobile";
 import isiOS from "../flags/isiOS";
 
 import box from "../live-api/box";

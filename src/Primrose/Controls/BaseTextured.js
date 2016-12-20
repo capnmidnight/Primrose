@@ -13,7 +13,9 @@ pliny.class({
 let COUNTER = 0;
 
 import Entity from "./Entity";
-import { quad, shell, hub } from "../../live-api";
+import quad from "../../live-api/quad";
+import shell from "../../live-api/shell";
+import hub from "../../live-api/hub";
 export default class BaseTextured extends Entity {
 
   constructor(files, options) {

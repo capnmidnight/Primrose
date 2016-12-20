@@ -4,10 +4,13 @@ import VRFrameData from "./VRFrameData";
 import frameDataFromPose from "./frameDataFromPose";
 import isMobile from "../../flags/isMobile";
 import isGearVR from "../../flags/isGearVR";
+import isiOS from "../../flags/isiOS";
 import StandardMonitorVRDisplay from "./StandardMonitorVRDisplay";
+import FullScreen from "../../util/FullScreen";
 
 const hasNativeWebVR = "getVRDisplays" in navigator,
-  allDisplays = [];
+  allDisplays = [],
+  isCardboardCompatible = isMobile && !isGearVR;
 
 let polyFillDevicesPopulated = false,
   standardMonitorPopulated = false;
@@ -36,7 +39,7 @@ function upgrade1_0_to_1_1(){
 
 function getPolyfillDisplays(options) {
   if (!polyFillDevicesPopulated) {
-    if (isMobile || options.FORCE_ENABLE_VR) {
+    if (isCardboardCompatible || options.FORCE_ENABLE_VR) {
       allDisplays.push(new CardboardVRDisplay(options));
     }
 
@@ -61,14 +64,10 @@ function installPolyfill(options){
     window.VRDisplay = VRDisplay;
 
     // Provide navigator.vrEnabled.
-    var self = this;
     Object.defineProperty(navigator, "vrEnabled", {
       get: function () {
-        return self.isCardboardCompatible() &&
-          (document.fullscreenEnabled ||
-            document.mozFullScreenEnabled ||
-            document.webkitFullscreenEnabled ||
-            false);
+        return isCardboardCompatible() &&
+          (FullScreen.available || isiOS); // just fake it for iOS
       }
     });
 
@@ -89,6 +88,9 @@ function installStandardMonitor(options) {
             created = dsp instanceof StandardMonitorVRDisplay;
           }
           if (!created) {
+            if(options && options.defaultFOV) {
+              StandardMonitorVRDisplay.DEFAULT_FOV = options.defaultFOV;
+            }
             displays.unshift(new StandardMonitorVRDisplay(displays[0]));
           }
           return displays;
