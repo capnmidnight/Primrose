@@ -20,6 +20,7 @@ import Keys from "./Keys";
 import Network from "./Network";
 import Pointer from "./Pointer";
 import Random from "./Random";
+import Replay from "./Replay";
 import Text from "./Text";
 
 export {
@@ -38,6 +39,7 @@ export {
   Network,
   Pointer,
   Random,
+  Replay,
   Text
 };
 
@@ -57,5 +59,6 @@ export default {
   Network,
   Pointer,
   Random,
+  Replay,
   Text
 };

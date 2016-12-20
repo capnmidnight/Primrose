@@ -1,4 +1,12 @@
-class Record extends Replay.Obj {
+pliny.class({
+  parent: "Primrose.Replay",
+  name: "Record",
+  description: "| [under construction]"
+});
+
+import Obj from "./Obj";
+
+export default class Record extends Obj {
 
   constructor(path, value, root) {
     super(path, root);
@@ -10,4 +18,4 @@ class Record extends Replay.Obj {
       this.set(this.value);
     }
   }
-}
+};

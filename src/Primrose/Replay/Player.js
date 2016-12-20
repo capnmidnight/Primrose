@@ -1,4 +1,13 @@
-class Player extends Replay.Automator {
+pliny.class({
+  parent: "Primrose.Replay",
+  name: "Player",
+  description: "| [under construction]"
+});
+
+import Automator from "./Automator";
+import Frame from "./Frame";
+
+export default class Player extends Automator {
 
   constructor(root) {
     super(root);
@@ -13,7 +22,7 @@ class Player extends Replay.Automator {
     const frames = [];
 
     for (var t in objs) {
-      frames.push(Replay.Frame.parse(t, objs[t], this.root));
+      frames.push(Frame.parse(t, objs[t], this.root));
     }
 
     this.append(frames);
@@ -63,4 +72,4 @@ class Player extends Replay.Automator {
   get done() {
     return this.frameIndex >= this.frames.length - 1;
   }
-}
+};

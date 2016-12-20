@@ -904,7 +904,218 @@ pliny.function({
         type: "Primrose.Controls.Entity",
         description: "Searches the deepest leaf-node of the control graph for a control that has its `focused` property set to `true`."
       });
-      pliny.class({
+      pliny.function({
+  parent: "Primrose.Graphics",
+  name: "fixGeometry",
+  description: "Performs some changes to the geometry's UV coordinates to make them work better.",
+  returns: "THREE.Geometry",
+  parameters: [{
+    name: "geometry",
+    type: "THREE.Geometry",
+    description: "The geometry to fix."
+  }, {
+    name: "options",
+    type: "Primrose.Graphics.fixGeometry.optionsHash",
+    optional: true,
+    description: "Options for changing the UV coordinates. See [`Primrose.Graphics.fixGeometry.optionsHash`](#Primrose_Graphics_fixGeometry_optionsHash) for more information."
+  }]
+});
+
+pliny.record({
+  parent: "Primrose.Graphics.fixGeometry",
+  name: "optionsHash",
+  description: "Options for changing the UV coordinates.",
+  parameters: [{
+    name: "maxU",
+    type: "Number",
+    optional: true,
+    default: 1,
+    description: "The value by which to scale the U component of the texture coordinate."
+  }, {
+    name: "maxV",
+    type: "Number",
+    optional: true,
+    default: 1,
+    description: "The value by which to scale the V component of the texture coordinate."
+  }]
+});
+pliny.function({
+  parent: "Live API",
+  name: "quad",
+  description: "A shortcut function for the THREE.PlaneBufferGeometry class. Creates a flat rectangle, oriented in the XY plane.",
+  parameters: [{
+    name: "width",
+    type: "Number",
+    description: "The width of the rectangle."
+  }, {
+    name: "height",
+    type: "Number",
+    description: "The height of the rectangle.",
+    optional: true,
+    default: "The value of the `width` parameter."
+  }, {
+    name: "options",
+    type: "Live API.quad.optionsHash",
+    optional: true,
+    description: "Optional settings for creating the quad geometry. See [`Live API.quad.optionsHash`](#LiveAPI_quad_optionsHash) for more information."
+  }],
+  returns: "THREE.CircleBufferGeometry",
+  examples: [{
+    name: "Basic usage",
+    description: "Three.js separates geometry from materials, so you can create shared materials and geometry that recombine in different ways. To create a simple circle geometry object that you can then add a material to create a mesh:\n\
+  \n\
+    grammar(\"JavaScript\");\n\
+    var geom = quad(1, 2),\n\
+      mesh = colored(geom, 0xff0000);\n\
+    put(mesh)\n\
+      .on(scene)\n\
+      .at(-2, 1, -5);\n\
+\n\
+It should look something like this:\n\
+<img src=\"images/quad.jpg\">"
+  }]
+});
+
+pliny.record({
+  parent: "Live API.quad",
+  name: "optionsHash",
+  description: "Optional options to alter how the quad is built.",
+  parameters: [{
+    name: "s",
+    type: "Number",
+    description: "The number of sub-quads in which to divide the quad horizontally.",
+    optional: true,
+    default: 1
+  }, {
+    name: "t",
+    type: "Number",
+    description: "The number of sub-quads in which to divide the quad vertically.",
+    optional: true,
+    default: 1
+  }, {
+    name: "maxU",
+    type: "Number",
+    description: "A scalar value for the texture coordinate U component.",
+    optional: true,
+    default: 1
+  }, {
+    name: "maxV",
+    type: "Number",
+    description: "A scalar value for the texture coordinate V component.",
+    optional: true,
+    default: 1
+  }]
+});
+
+pliny.class({
+  parent: "Primrose.Graphics",
+  name: "InsideSphereGeometry",
+  parameters: [{
+    name: "radius",
+    type: "Number",
+    description: "How far the sphere should extend away from a center point."
+  }, {
+    name: "widthSegments",
+    type: "Number",
+    description: "The number of faces wide in which to slice the geometry."
+  }, {
+    name: "heightSegments",
+    type: "Number",
+    description: "The number of faces tall in which to slice the geometry."
+  }, {
+    name: "phiStart",
+    type: "Number",
+    description: "The angle in radians around the Y-axis at which the sphere starts."
+  }, {
+    name: "phiLength",
+    type: "Number",
+    description: "The change of angle in radians around the Y-axis to which the sphere ends."
+  }, {
+    name: "thetaStart",
+    type: "Number",
+    description: "The angle in radians around the Z-axis at which the sphere starts."
+  }, {
+    name: "thetaLength",
+    type: "Number",
+    description: "The change of angle in radians around the Z-axis to which the sphere ends."
+  }],
+  description: "The InsideSphereGeometry is basically an inside-out Sphere. Or\n\
+more accurately, it's a Sphere where the face winding order is reversed, so that\n\
+textures appear on the inside of the sphere, rather than the outside. I know, that's\n\
+not exactly helpful.\n\
+\n\
+Say you want a to model the sky as a sphere, or the inside of a helmet. You don't\n\
+care anything about the outside of this sphere, only the inside. You would use\n\
+InsideSphereGeometry in this case. Or its alias, [`shell()`](#LiveAPI_shell)."
+});
+
+pliny.function({
+  parent: "Live API",
+  name: "shell",
+  parameters: [{
+    name: "radius",
+    type: "Number",
+    description: "How far the sphere should extend away from a center point."
+  }, {
+    name: "widthSegments",
+    type: "Number",
+    description: "The number of faces wide in which to slice the geometry."
+  }, {
+    name: "heightSegments",
+    type: "Number",
+    description: "The number of faces tall in which to slice the geometry."
+  }, {
+    name: "phi",
+    type: "Number",
+    optional: true,
+    description: "The angle in radians around the Y-axis of the sphere.",
+    default: "80 degrees."
+  }, {
+    name: "theta",
+    type: "Number",
+    optional: true,
+    description: "The angle in radians around the Z-axis of the sphere.",
+    default: "48 degrees."
+  }],
+  description: "The shell is basically an inside-out sphere. Say you want a to model\n\
+the sky as a sphere, or the inside of a helmet. You don't care anything about the\n\
+outside of this sphere, only the inside. You would use InsideSphereGeometry in this\n\
+case. It is mostly an alias for [`InsideSphereGeometry`](#LiveAPI_InsideSphereGeometry).",
+  examples: [{
+    name: "Create a sky sphere",
+    description: "To create a sphere that hovers around the user at a\n\
+far distance, showing a sky of some kind, you can use the `shell()` function in\n\
+combination with the [`textured()`](#LiveAPI_textured) function. Assuming you have an image\n\
+file to use as the texture, execute code as such:\n\
+\n\
+    grammar(\"JavaScript\");\n\
+    var sky = textured(\n\
+      shell(\n\
+          // The radius value should be less than your draw distance.\n\
+          1000,\n\
+          // The number of slices defines how smooth the sphere will be in the\n\
+          // horizontal direction. Think of it like lines of longitude.\n\
+          18,\n\
+          // The number of rings defines how smooth the sphere will be in the\n\
+          // vertical direction. Think of it like lines of latitude.\n\
+          9,\n\
+          // The phi angle is the number or radians around the 'belt' of the sphere\n\
+          // to sweep out the geometry. To make a full circle, you'll need 2 * PI\n\
+          // radians.\n\
+          Math.PI * 2,\n\
+          // The theta angle is the number of radians above and below the 'belt'\n\
+          // of the sphere to sweep out the geometry. Since the belt sweeps a full\n\
+          // 360 degrees, theta only needs to sweep a half circle, or PI radians.\n\
+          Math.PI ),\n\
+      // Specify the texture image next.\n\
+      \"skyTexture.jpg\",\n\
+      // Specify that the material should be shadeless, i.e. no shadows. This\n\
+      // works best for skymaps.\n\
+      {unshaded: true} );"
+  }]
+});
+
+pliny.class({
   parent: "Primrose.Controls",
   name: "BaseTextured",
   baseClass: "Primrose.Controls.Surface",
@@ -1156,109 +1367,6 @@ pliny.function({
 });
 
 pliny.function({
-  parent: "Primrose.Graphics",
-  name: "fixGeometry",
-  description: "Performs some changes to the geometry's UV coordinates to make them work better.",
-  returns: "THREE.Geometry",
-  parameters: [{
-    name: "geometry",
-    type: "THREE.Geometry",
-    description: "The geometry to fix."
-  }, {
-    name: "options",
-    type: "Primrose.Graphics.fixGeometry.optionsHash",
-    optional: true,
-    description: "Options for changing the UV coordinates. See [`Primrose.Graphics.fixGeometry.optionsHash`](#Primrose_Graphics_fixGeometry_optionsHash) for more information."
-  }]
-});
-
-pliny.record({
-  parent: "Primrose.Graphics.fixGeometry",
-  name: "optionsHash",
-  description: "Options for changing the UV coordinates.",
-  parameters: [{
-    name: "maxU",
-    type: "Number",
-    optional: true,
-    default: 1,
-    description: "The value by which to scale the U component of the texture coordinate."
-  }, {
-    name: "maxV",
-    type: "Number",
-    optional: true,
-    default: 1,
-    description: "The value by which to scale the V component of the texture coordinate."
-  }]
-});
-pliny.function({
-  parent: "Live API",
-  name: "quad",
-  description: "A shortcut function for the THREE.PlaneBufferGeometry class. Creates a flat rectangle, oriented in the XY plane.",
-  parameters: [{
-    name: "width",
-    type: "Number",
-    description: "The width of the rectangle."
-  }, {
-    name: "height",
-    type: "Number",
-    description: "The height of the rectangle.",
-    optional: true,
-    default: "The value of the `width` parameter."
-  }, {
-    name: "options",
-    type: "Live API.quad.optionsHash",
-    optional: true,
-    description: "Optional settings for creating the quad geometry. See [`Live API.quad.optionsHash`](#LiveAPI_quad_optionsHash) for more information."
-  }],
-  returns: "THREE.CircleBufferGeometry",
-  examples: [{
-    name: "Basic usage",
-    description: "Three.js separates geometry from materials, so you can create shared materials and geometry that recombine in different ways. To create a simple circle geometry object that you can then add a material to create a mesh:\n\
-  \n\
-    grammar(\"JavaScript\");\n\
-    var geom = quad(1, 2),\n\
-      mesh = colored(geom, 0xff0000);\n\
-    put(mesh)\n\
-      .on(scene)\n\
-      .at(-2, 1, -5);\n\
-\n\
-It should look something like this:\n\
-<img src=\"images/quad.jpg\">"
-  }]
-});
-
-pliny.record({
-  parent: "Live API.quad",
-  name: "optionsHash",
-  description: "Optional options to alter how the quad is built.",
-  parameters: [{
-    name: "s",
-    type: "Number",
-    description: "The number of sub-quads in which to divide the quad horizontally.",
-    optional: true,
-    default: 1
-  }, {
-    name: "t",
-    type: "Number",
-    description: "The number of sub-quads in which to divide the quad vertically.",
-    optional: true,
-    default: 1
-  }, {
-    name: "maxU",
-    type: "Number",
-    description: "A scalar value for the texture coordinate U component.",
-    optional: true,
-    default: 1
-  }, {
-    name: "maxV",
-    type: "Number",
-    description: "A scalar value for the texture coordinate V component.",
-    optional: true,
-    default: 1
-  }]
-});
-
-pliny.function({
   parent: "Util",
   name: "identity",
   description: "The identity function takes a single parameter and returns out again that parameter.",
@@ -1418,114 +1526,6 @@ It should look something like this:\n\
   }]
 });
 
-pliny.class({
-  parent: "Primrose.Graphics",
-  name: "InsideSphereGeometry",
-  parameters: [{
-    name: "radius",
-    type: "Number",
-    description: "How far the sphere should extend away from a center point."
-  }, {
-    name: "widthSegments",
-    type: "Number",
-    description: "The number of faces wide in which to slice the geometry."
-  }, {
-    name: "heightSegments",
-    type: "Number",
-    description: "The number of faces tall in which to slice the geometry."
-  }, {
-    name: "phiStart",
-    type: "Number",
-    description: "The angle in radians around the Y-axis at which the sphere starts."
-  }, {
-    name: "phiLength",
-    type: "Number",
-    description: "The change of angle in radians around the Y-axis to which the sphere ends."
-  }, {
-    name: "thetaStart",
-    type: "Number",
-    description: "The angle in radians around the Z-axis at which the sphere starts."
-  }, {
-    name: "thetaLength",
-    type: "Number",
-    description: "The change of angle in radians around the Z-axis to which the sphere ends."
-  }],
-  description: "The InsideSphereGeometry is basically an inside-out Sphere. Or\n\
-more accurately, it's a Sphere where the face winding order is reversed, so that\n\
-textures appear on the inside of the sphere, rather than the outside. I know, that's\n\
-not exactly helpful.\n\
-\n\
-Say you want a to model the sky as a sphere, or the inside of a helmet. You don't\n\
-care anything about the outside of this sphere, only the inside. You would use\n\
-InsideSphereGeometry in this case. Or its alias, [`shell()`](#LiveAPI_shell)."
-});
-
-pliny.function({
-  parent: "Live API",
-  name: "shell",
-  parameters: [{
-    name: "radius",
-    type: "Number",
-    description: "How far the sphere should extend away from a center point."
-  }, {
-    name: "widthSegments",
-    type: "Number",
-    description: "The number of faces wide in which to slice the geometry."
-  }, {
-    name: "heightSegments",
-    type: "Number",
-    description: "The number of faces tall in which to slice the geometry."
-  }, {
-    name: "phi",
-    type: "Number",
-    optional: true,
-    description: "The angle in radians around the Y-axis of the sphere.",
-    default: "80 degrees."
-  }, {
-    name: "theta",
-    type: "Number",
-    optional: true,
-    description: "The angle in radians around the Z-axis of the sphere.",
-    default: "48 degrees."
-  }],
-  description: "The shell is basically an inside-out sphere. Say you want a to model\n\
-the sky as a sphere, or the inside of a helmet. You don't care anything about the\n\
-outside of this sphere, only the inside. You would use InsideSphereGeometry in this\n\
-case. It is mostly an alias for [`InsideSphereGeometry`](#LiveAPI_InsideSphereGeometry).",
-  examples: [{
-    name: "Create a sky sphere",
-    description: "To create a sphere that hovers around the user at a\n\
-far distance, showing a sky of some kind, you can use the `shell()` function in\n\
-combination with the [`textured()`](#LiveAPI_textured) function. Assuming you have an image\n\
-file to use as the texture, execute code as such:\n\
-\n\
-    grammar(\"JavaScript\");\n\
-    var sky = textured(\n\
-      shell(\n\
-          // The radius value should be less than your draw distance.\n\
-          1000,\n\
-          // The number of slices defines how smooth the sphere will be in the\n\
-          // horizontal direction. Think of it like lines of longitude.\n\
-          18,\n\
-          // The number of rings defines how smooth the sphere will be in the\n\
-          // vertical direction. Think of it like lines of latitude.\n\
-          9,\n\
-          // The phi angle is the number or radians around the 'belt' of the sphere\n\
-          // to sweep out the geometry. To make a full circle, you'll need 2 * PI\n\
-          // radians.\n\
-          Math.PI * 2,\n\
-          // The theta angle is the number of radians above and below the 'belt'\n\
-          // of the sphere to sweep out the geometry. Since the belt sweeps a full\n\
-          // 360 degrees, theta only needs to sweep a half circle, or PI radians.\n\
-          Math.PI ),\n\
-      // Specify the texture image next.\n\
-      \"skyTexture.jpg\",\n\
-      // Specify that the material should be shadeless, i.e. no shadows. This\n\
-      // works best for skymaps.\n\
-      {unshaded: true} );"
-  }]
-});
-
 pliny.function({
   parent: "Live API",
   name: "raycaster",
@@ -1611,28 +1611,6 @@ When including Primrose as a `script` tag, the Live API is imported directly ont
 
 pliny.function({
   parent: "Util",
-  name: "deleteSetting",
-  parameters: [{
-    name: "settingName",
-    type: "string",
-    description: "The name of the setting to delete."
-  }],
-  description: "Removes an object from localStorage",
-  examples: [{
-    name: "Basic usage",
-    description: "\
-\n\
-    grammar(\"JavaScript\");\n\
-    console.assert(getSetting(\"A\", \"default-A\") === \"default-A\");\n\
-    setSetting(\"A\", \"modified-A\");\n\
-    console.assert(getSetting(\"A\", \"default-A\") === \"modified-A\");\n\
-    deleteSetting(\"A\");\n\
-    console.assert(getSetting(\"A\", \"default-A\") === \"default-A\");"
-  }]
-});
-
-pliny.function({
-  parent: "Util",
   name: "findProperty",
   description: "Searches an object for a property that might go by different names in different browsers.",
   parameters: [{
@@ -1652,6 +1630,59 @@ pliny.function({
     console.assert(!isFirefox || elementName === \"mozFullScreenElement\");\n\
     console.assert(!isChrome || elementName === \"webkitFullscreenElement\");\n\
     console.assert(!isIE || elementName === \"msFullscreenElement\");"
+  }]
+});
+
+pliny.class({
+  parent: "Util",
+  name: "AsyncLockRequest",
+  description: "Searches a set of properties from a list of potential browser-vendor-prefixed options for a set of related functions that can be used to make certain types of Full Screen and Orientation Locking requests.",
+  parameters: [{
+    name: "name ",
+    type: "String",
+    description: "A friendly name to use in error messages emitted by this locking object."
+  }, {
+    name: "elementOpts",
+    type: "Array",
+    description: "An array of potential element names to search the document object that indicate to which DOM element the lock has been acquired."
+  }, {
+    name: "changeEventOpts",
+    type: "Array",
+    description: "An array of potential event names for the callback when the lock is acquired."
+  }, {
+    name: "errorEventOpts",
+    type: "Array",
+    description: "An array of potential event names for the callback when the lock has failed to be acquired."
+  }, {
+    name: "requestMethodOpts",
+    type: "Array",
+    description: "An array of potential method names for initiating the lock request."
+  }, {
+    name: "exitMethodOpts",
+    type: "Array",
+    description: "An array of potential method names for canceling the lock."
+  }]
+});
+
+pliny.function({
+  parent: "Util",
+  name: "deleteSetting",
+  parameters: [{
+    name: "settingName",
+    type: "string",
+    description: "The name of the setting to delete."
+  }],
+  description: "Removes an object from localStorage",
+  examples: [{
+    name: "Basic usage",
+    description: "\
+\n\
+    grammar(\"JavaScript\");\n\
+    console.assert(getSetting(\"A\", \"default-A\") === \"default-A\");\n\
+    setSetting(\"A\", \"modified-A\");\n\
+    console.assert(getSetting(\"A\", \"default-A\") === \"modified-A\");\n\
+    deleteSetting(\"A\");\n\
+    console.assert(getSetting(\"A\", \"default-A\") === \"default-A\");"
   }]
 });
 
@@ -1702,6 +1733,17 @@ pliny.function({
   }]
 });
 
+pliny.function({
+  parent: "Util",
+  name: "isTimestampDeltaValid",
+  returns: "Boolean",
+  description: "Helper method to validate the time steps of sensor timestamps.",
+  parameters: [{
+    name: "timestampDeltaS",
+    type: "Number",
+    description: "The timestamp to check."
+  }]
+});
 pliny.function({
   parent: "Util",
   name: "mutable",
@@ -2311,42 +2353,6 @@ pliny.namespace({
   parent: "Primrose",
   name: "Audio",
   description: "The audio namespace contains classes that handle output to devices other than the screen (e.g. Audio, Music, etc.)."
-});
-
-pliny.class({
-  parent: "Util",
-  name: "AsyncLockRequest",
-  description: "Searches a set of properties from a list of potential browser-vendor-prefixed options for a set of related functions that can be used to make certain types of Full Screen and Orientation Locking requests.",
-  parameters: [{
-    name: "name ",
-    type: "String",
-    description: "A friendly name to use in error messages emitted by this locking object."
-  }, {
-    name: "elementOpts",
-    type: "Array",
-    description: "An array of potential element names to search the document object that indicate to which DOM element the lock has been acquired."
-  }, {
-    name: "changeEventOpts",
-    type: "Array",
-    description: "An array of potential event names for the callback when the lock is acquired."
-  }, {
-    name: "errorEventOpts",
-    type: "Array",
-    description: "An array of potential event names for the callback when the lock has failed to be acquired."
-  }, {
-    name: "requestMethodOpts",
-    type: "Array",
-    description: "An array of potential method names for initiating the lock request."
-  }, {
-    name: "exitMethodOpts",
-    type: "Array",
-    description: "An array of potential method names for canceling the lock."
-  }, {
-    name: "testExtraParam",
-    type: "Array",
-    optional: true,
-    description: "An optional, extra parameter to pass to the request method when it is called."
-  }]
 });
 
 pliny.class({
@@ -3298,20 +3304,8 @@ pliny.value({
 
 pliny.value({
   parent: "Primrose.Text.OperatingSystems",
-  name: "Linux",
-  description: "Keyboard shortcuts for the Linux operating system (actually just a reference to the Windows shortcuts)."
-});
-
-pliny.value({
-  parent: "Primrose.Text.OperatingSystems",
   name: "macOS",
   description: "Keyboard shortcuts for Apple macOS nee OSX."
-});
-
-pliny.namespace({
-  parent: "Primrose.Text",
-  name: "OperatingSystems",
-  description: "The OperatingSystems namespace contains sets of keyboard shortcuts for different operating systems."
 });
 
 pliny.class({
@@ -3503,18 +3497,7 @@ pliny.method({
         }]
       });
 
-      pliny.function({
-  parent: "Util",
-  name: "isTimestampDeltaValid",
-  returns: "Boolean",
-  description: "Helper method to validate the time steps of sensor timestamps.",
-  parameters: [{
-    name: "timestampDeltaS",
-    type: "Number",
-    description: "The timestamp to check."
-  }]
-});
-pliny.class({
+      pliny.class({
   parent: "Primrose.Displays",
   name: "PosePredictor",
   description: "Given an orientation and the gyroscope data, predicts the future orientation of the head. This makes rendering appear faster. Also see: http://msl.cs.uiuc.edu/~lavalle/papers/LavYerKatAnt14.pdf",
@@ -3522,6 +3505,57 @@ pliny.class({
     name: "predictionTimeS",
     type: "Number",
     description: "time from head movement to the appearance of the corresponding image."
+  }]
+});
+
+pliny.class({
+  parent: "Primrose.Replay",
+  name: "Automator",
+  description: "| [under construction]"
+});
+
+pliny.class({
+  parent: "Primrose.Replay",
+  name: "Obj",
+  description: "| [under construction]"
+});
+
+pliny.class({
+  parent: "Primrose.Replay",
+  name: "Record",
+  description: "| [under construction]"
+});
+
+pliny.class({
+  parent: "Primrose.Replay",
+  name: "Frame",
+  description: "| [under construction]"
+});
+
+pliny.class({
+  parent: "Primrose.Replay",
+  name: "Player",
+  description: "| [under construction]"
+});
+
+pliny.function({
+  parent: "Primrose.HTTP",
+  name: "getObject",
+  description: "Get a JSON object from a server.",
+  returns: "Promise",
+  parameters: [{
+    name: "url",
+    type: "String",
+    description: "The resource to which the request is being sent."
+  }, {
+    name: "options",
+    type: "Primrose.HTTP.XHR.optionsHash",
+    optional: true,
+    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information."
+  }],
+  examples: [{
+    name: "Make a GET request for a JSON object.",
+    description: "Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.\n\n## Code:\n\n    grammar(\"JavaScript\");\n    Primrose.HTTP.getObject(\"localFile.json\", {\n        progress: console.log.bind(console, \"progress\")\n      })\n      .then(console.log.bind(console, \"done\"))\n      .catch(console.error.bind(console)));\n\n## Results:\n> Object {field1: 1, field2: \"Field2\"}"
   }]
 });
 
@@ -4564,27 +4598,6 @@ pliny.function({
 
 pliny.function({
   parent: "Primrose.HTTP",
-  name: "getObject",
-  description: "Get a JSON object from a server.",
-  returns: "Promise",
-  parameters: [{
-    name: "url",
-    type: "String",
-    description: "The resource to which the request is being sent."
-  }, {
-    name: "options",
-    type: "Primrose.HTTP.XHR.optionsHash",
-    optional: true,
-    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information."
-  }],
-  examples: [{
-    name: "Make a GET request for a JSON object.",
-    description: "Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.\n\n## Code:\n\n    grammar(\"JavaScript\");\n    Primrose.HTTP.getObject(\"localFile.json\", {\n        progress: console.log.bind(console, \"progress\")\n      })\n      .then(console.log.bind(console, \"done\"))\n      .catch(console.error.bind(console)));\n\n## Results:\n> Object {field1: 1, field2: \"Field2\"}"
-  }]
-});
-
-pliny.function({
-  parent: "Primrose.HTTP",
   name: "getText",
   description: "Get plain text from a server. Returns a promise that will be resolve with the text retrieved from the server.",
   returns: "Promise",
@@ -4945,6 +4958,24 @@ pliny.namespace({
   description: "Functions for handling random numbers of different criteria, or selecting random elements of arrays."
 });
 
+pliny.class({
+  parent: "Primrose.Replay",
+  name: "Watcher",
+  description: "| [under construction]"
+});
+
+pliny.class({
+  parent: "Primrose.Replay",
+  name: "Recorder",
+  description: "| [under construction]"
+});
+
+pliny.namespace({
+  parent: "Primrose",
+  name: "Replay",
+  description: "Record and playback data."
+});
+
 pliny.namespace({
   parent: "Primrose.Text",
   name: "CommandPacks",
@@ -4973,6 +5004,18 @@ pliny.namespace({
   parent: "Primrose.Text",
   name: "Grammars",
   description: "The Grammars namespace contains grammar parsers for different types of programming languages, to enable syntax highlighting."
+});
+
+pliny.value({
+  parent: "Primrose.Text.OperatingSystems",
+  name: "Linux",
+  description: "Keyboard shortcuts for the Linux operating system (actually just a reference to the Windows shortcuts)."
+});
+
+pliny.namespace({
+  parent: "Primrose.Text",
+  name: "OperatingSystems",
+  description: "The OperatingSystems namespace contains sets of keyboard shortcuts for different operating systems."
 });
 
 pliny.class({

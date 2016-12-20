@@ -12,7 +12,7 @@ var isFirefox = typeof window.InstallTrigger !== "undefined";
 
 var isGearVR = navigator.userAgent.indexOf("Mobile VR") > -1;
 
-var isIE$1 = false || !!document.documentMode;
+var isIE = false || !!document.documentMode;
 
 var isInIFrame = window.self !== window.top;
 
@@ -29,7 +29,7 @@ function testUserAgent(a) {
   );
 }
 
-var isMobile$1 = testUserAgent(navigator.userAgent || navigator.vendor || window.opera);
+var isMobile = testUserAgent(navigator.userAgent || navigator.vendor || window.opera);
 
 var isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf("Constructor") > 0;
 
@@ -41,12 +41,12 @@ var index = {
   isChrome: isChrome,
   isFirefox: isFirefox,
   isGearVR: isGearVR,
-  isIE: isIE$1,
+  isIE: isIE,
   isInIFrame: isInIFrame,
   isiOS: isiOS,
   isLandscape: isLandscape,
   isMacOS: isMacOS,
-  isMobile: isMobile$1,
+  isMobile: isMobile,
   isOpera: isOpera,
   isSafari: isSafari,
   isWebKit: isWebKit,
@@ -57,12 +57,12 @@ var flags = Object.freeze({
 	isChrome: isChrome,
 	isFirefox: isFirefox,
 	isGearVR: isGearVR,
-	isIE: isIE$1,
+	isIE: isIE,
 	isInIFrame: isInIFrame,
 	isiOS: isiOS,
 	isLandscape: isLandscape,
 	isMacOS: isMacOS,
-	isMobile: isMobile$1,
+	isMobile: isMobile,
 	isOpera: isOpera,
 	isSafari: isSafari,
 	isWebKit: isWebKit,
@@ -12251,6 +12251,286 @@ var Entity = function (_AbstractEventEmitter) {
   return Entity;
 }(AbstractEventEmitter);
 
+function fixGeometry(geometry, options) {
+  options = options || {};
+  var maxU = options.maxU || 1,
+      maxV = options.maxV || 1,
+      attrs = geometry.attributes || geometry._bufferGeometry && geometry._bufferGeometry.attributes;
+  if (attrs && attrs.uv && attrs.uv.array) {
+    var uv = attrs.uv,
+        arr = uv.array;
+    for (var j = 0; j < arr.length; j += uv.itemSize) {
+      arr[j] *= maxU;
+    }
+    for (var _j = 1; _j < arr.length; _j += uv.itemSize) {
+      arr[_j] = 1 - (1 - arr[_j]) * maxV;
+    }
+  } else if (geometry.faceVertexUvs) {
+    var faces = geometry.faceVertexUvs;
+    for (var i = 0; i < faces.length; ++i) {
+      var face = faces[i];
+      for (var _j2 = 0; _j2 < face.length; ++_j2) {
+        var uvs = face[_j2];
+        for (var k = 0; k < uvs.length; ++k) {
+          var _uv = uvs[k];
+          _uv.x *= maxU;
+          _uv.y = 1 - (1 - _uv.y) * maxV;
+        }
+      }
+    }
+  }
+
+  return geometry;
+}
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * based on http://papervision3d.googlecode.com/svn/trunk/as3/trunk/src/org/papervision3d/objects/primitives/Plane.as
+ */
+
+function PlaneBufferGeometry(width, height, widthSegments, heightSegments) {
+
+	BufferGeometry.call(this);
+
+	this.type = 'PlaneBufferGeometry';
+
+	this.parameters = {
+		width: width,
+		height: height,
+		widthSegments: widthSegments,
+		heightSegments: heightSegments
+	};
+
+	var width_half = width / 2;
+	var height_half = height / 2;
+
+	var gridX = Math.floor(widthSegments) || 1;
+	var gridY = Math.floor(heightSegments) || 1;
+
+	var gridX1 = gridX + 1;
+	var gridY1 = gridY + 1;
+
+	var segment_width = width / gridX;
+	var segment_height = height / gridY;
+
+	var vertices = new Float32Array(gridX1 * gridY1 * 3);
+	var normals = new Float32Array(gridX1 * gridY1 * 3);
+	var uvs = new Float32Array(gridX1 * gridY1 * 2);
+
+	var offset = 0;
+	var offset2 = 0;
+
+	for (var iy = 0; iy < gridY1; iy++) {
+
+		var y = iy * segment_height - height_half;
+
+		for (var ix = 0; ix < gridX1; ix++) {
+
+			var x = ix * segment_width - width_half;
+
+			vertices[offset] = x;
+			vertices[offset + 1] = -y;
+
+			normals[offset + 2] = 1;
+
+			uvs[offset2] = ix / gridX;
+			uvs[offset2 + 1] = 1 - iy / gridY;
+
+			offset += 3;
+			offset2 += 2;
+		}
+	}
+
+	offset = 0;
+
+	var indices = new (vertices.length / 3 > 65535 ? Uint32Array : Uint16Array)(gridX * gridY * 6);
+
+	for (var iy = 0; iy < gridY; iy++) {
+
+		for (var ix = 0; ix < gridX; ix++) {
+
+			var a = ix + gridX1 * iy;
+			var b = ix + gridX1 * (iy + 1);
+			var c = ix + 1 + gridX1 * (iy + 1);
+			var d = ix + 1 + gridX1 * iy;
+
+			indices[offset] = a;
+			indices[offset + 1] = b;
+			indices[offset + 2] = d;
+
+			indices[offset + 3] = b;
+			indices[offset + 4] = c;
+			indices[offset + 5] = d;
+
+			offset += 6;
+		}
+	}
+
+	this.setIndex(new BufferAttribute(indices, 1));
+	this.addAttribute('position', new BufferAttribute(vertices, 3));
+	this.addAttribute('normal', new BufferAttribute(normals, 3));
+	this.addAttribute('uv', new BufferAttribute(uvs, 2));
+}
+
+PlaneBufferGeometry.prototype = Object.create(BufferGeometry.prototype);
+PlaneBufferGeometry.prototype.constructor = PlaneBufferGeometry;
+
+function quad(width, height, options) {
+
+  if (width === undefined) {
+    width = 1;
+  }
+
+  if (height === undefined) {
+    height = width;
+  }
+
+  options = Object.assign({}, {
+    s: 1,
+    t: 1
+  }, options);
+
+  return cache("PlaneBufferGeometry(" + width + ", " + height + ", " + options.s + ", " + options.t + ", " + options.maxU + ", " + options.maxV + ")", function () {
+    return fixGeometry(new PlaneBufferGeometry(width, height, options.s, options.t), options);
+  });
+}
+
+var InsideSphereGeometry = function (_Geometry) {
+  inherits(InsideSphereGeometry, _Geometry);
+
+  function InsideSphereGeometry(radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength) {
+    classCallCheck(this, InsideSphereGeometry);
+
+    var _this = possibleConstructorReturn(this, (InsideSphereGeometry.__proto__ || Object.getPrototypeOf(InsideSphereGeometry)).call(this));
+
+    _this.type = 'InsideSphereGeometry';
+
+    _this.parameters = {
+      radius: radius,
+      widthSegments: widthSegments,
+      heightSegments: heightSegments,
+      phiStart: phiStart,
+      phiLength: phiLength,
+      thetaStart: thetaStart,
+      thetaLength: thetaLength
+    };
+
+    radius = radius || 50;
+
+    widthSegments = Math.max(3, Math.floor(widthSegments) || 8);
+    heightSegments = Math.max(2, Math.floor(heightSegments) || 6);
+
+    phiStart = phiStart !== undefined ? phiStart : 0;
+    phiLength = phiLength !== undefined ? phiLength : Math.PI * 2;
+
+    thetaStart = thetaStart !== undefined ? thetaStart : 0;
+    thetaLength = thetaLength !== undefined ? thetaLength : Math.PI;
+
+    var x,
+        y,
+        vertices = [],
+        uvs = [];
+
+    for (y = 0; y <= heightSegments; y++) {
+
+      var verticesRow = [];
+      var uvsRow = [];
+
+      for (x = widthSegments; x >= 0; x--) {
+
+        var u = x / widthSegments;
+
+        var v = y / heightSegments;
+
+        var vertex = new Vector3();
+        vertex.x = -radius * Math.cos(phiStart + u * phiLength) * Math.sin(thetaStart + v * thetaLength);
+        vertex.y = radius * Math.cos(thetaStart + v * thetaLength);
+        vertex.z = radius * Math.sin(phiStart + u * phiLength) * Math.sin(thetaStart + v * thetaLength);
+
+        _this.vertices.push(vertex);
+
+        verticesRow.push(_this.vertices.length - 1);
+        uvsRow.push(new Vector2(1 - u, 1 - v));
+      }
+
+      vertices.push(verticesRow);
+      uvs.push(uvsRow);
+    }
+
+    for (y = 0; y < heightSegments; y++) {
+
+      for (x = 0; x < widthSegments; x++) {
+
+        var v1 = vertices[y][x + 1];
+        var v2 = vertices[y][x];
+        var v3 = vertices[y + 1][x];
+        var v4 = vertices[y + 1][x + 1];
+
+        var n1 = _this.vertices[v1].clone().normalize();
+        var n2 = _this.vertices[v2].clone().normalize();
+        var n3 = _this.vertices[v3].clone().normalize();
+        var n4 = _this.vertices[v4].clone().normalize();
+
+        var uv1 = uvs[y][x + 1].clone();
+        var uv2 = uvs[y][x].clone();
+        var uv3 = uvs[y + 1][x].clone();
+        var uv4 = uvs[y + 1][x + 1].clone();
+
+        if (Math.abs(_this.vertices[v1].y) === radius) {
+
+          uv1.x = (uv1.x + uv2.x) / 2;
+          _this.faces.push(new Face3(v1, v3, v4, [n1, n3, n4]));
+          _this.faceVertexUvs[0].push([uv1, uv3, uv4]);
+        } else if (Math.abs(_this.vertices[v3].y) === radius) {
+
+          uv3.x = (uv3.x + uv4.x) / 2;
+          _this.faces.push(new Face3(v1, v2, v3, [n1, n2, n3]));
+          _this.faceVertexUvs[0].push([uv1, uv2, uv3]);
+        } else {
+
+          _this.faces.push(new Face3(v1, v2, v4, [n1, n2, n4]));
+          _this.faceVertexUvs[0].push([uv1, uv2, uv4]);
+
+          _this.faces.push(new Face3(v2, v3, v4, [n2.clone(), n3, n4.clone()]));
+          _this.faceVertexUvs[0].push([uv2.clone(), uv3, uv4.clone()]);
+        }
+      }
+    }
+
+    _this.computeFaceNormals();
+
+    for (var i = 0; i < _this.faces.length; ++i) {
+      var f = _this.faces[i];
+      f.normal.multiplyScalar(-1);
+      for (var j = 0; j < f.vertexNormals.length; ++j) {
+        f.vertexNormals[j].multiplyScalar(-1);
+      }
+    }
+
+    _this.boundingSphere = new Sphere(new Vector3(), radius);
+
+    return _this;
+  }
+
+  return InsideSphereGeometry;
+}(Geometry);
+
+function shell(r, slices, rings, phi, theta, options) {
+  var SLICE = 0.45;
+  if (phi === undefined) {
+    phi = Math.PI * SLICE;
+  }
+  if (theta === undefined) {
+    theta = Math.PI * SLICE * 0.6;
+  }
+  var phiStart = 1.5 * Math.PI - phi * 0.5,
+      thetaStart = (Math.PI - theta) * 0.5;
+  options = options || {};
+  return cache("InsideSphereGeometry(" + r + ", " + slices + ", " + rings + ", " + phi + ", " + theta + ")", function () {
+    return fixGeometry(new InsideSphereGeometry(r, slices, rings, phiStart, phi, thetaStart, theta, true), options);
+  });
+}
+
 var BaseTextured = function (_Entity) {
   inherits(BaseTextured, _Entity);
 
@@ -12276,7 +12556,7 @@ var BaseTextured = function (_Entity) {
 
     if (!_this.options.geometry) {
       if (_this.options.radius) {
-        _this.options.geometry = shell$1(_this.options.radius, 72, 36, Math.PI * 2, Math.PI, options);
+        _this.options.geometry = shell(_this.options.radius, 72, 36, Math.PI * 2, Math.PI, options);
       } else {
         if (!_this.options.width) {
           _this.options.width = 0.5;
@@ -12284,7 +12564,7 @@ var BaseTextured = function (_Entity) {
         if (!_this.options.height) {
           _this.options.height = 0.5;
         }
-        _this.options.geometry = quad$1(_this.options.width, _this.options.height, options);
+        _this.options.geometry = quad(_this.options.width, _this.options.height, options);
       }
     }
 
@@ -13443,150 +13723,6 @@ function light(color, intensity, distance, decay) {
   return new PointLight(color, intensity, distance, decay);
 }
 
-function fixGeometry(geometry, options) {
-  options = options || {};
-  var maxU = options.maxU || 1,
-      maxV = options.maxV || 1,
-      attrs = geometry.attributes || geometry._bufferGeometry && geometry._bufferGeometry.attributes;
-  if (attrs && attrs.uv && attrs.uv.array) {
-    var uv = attrs.uv,
-        arr = uv.array;
-    for (var j = 0; j < arr.length; j += uv.itemSize) {
-      arr[j] *= maxU;
-    }
-    for (var _j = 1; _j < arr.length; _j += uv.itemSize) {
-      arr[_j] = 1 - (1 - arr[_j]) * maxV;
-    }
-  } else if (geometry.faceVertexUvs) {
-    var faces = geometry.faceVertexUvs;
-    for (var i = 0; i < faces.length; ++i) {
-      var face = faces[i];
-      for (var _j2 = 0; _j2 < face.length; ++_j2) {
-        var uvs = face[_j2];
-        for (var k = 0; k < uvs.length; ++k) {
-          var _uv = uvs[k];
-          _uv.x *= maxU;
-          _uv.y = 1 - (1 - _uv.y) * maxV;
-        }
-      }
-    }
-  }
-
-  return geometry;
-}
-
-/**
- * @author mrdoob / http://mrdoob.com/
- * based on http://papervision3d.googlecode.com/svn/trunk/as3/trunk/src/org/papervision3d/objects/primitives/Plane.as
- */
-
-function PlaneBufferGeometry(width, height, widthSegments, heightSegments) {
-
-	BufferGeometry.call(this);
-
-	this.type = 'PlaneBufferGeometry';
-
-	this.parameters = {
-		width: width,
-		height: height,
-		widthSegments: widthSegments,
-		heightSegments: heightSegments
-	};
-
-	var width_half = width / 2;
-	var height_half = height / 2;
-
-	var gridX = Math.floor(widthSegments) || 1;
-	var gridY = Math.floor(heightSegments) || 1;
-
-	var gridX1 = gridX + 1;
-	var gridY1 = gridY + 1;
-
-	var segment_width = width / gridX;
-	var segment_height = height / gridY;
-
-	var vertices = new Float32Array(gridX1 * gridY1 * 3);
-	var normals = new Float32Array(gridX1 * gridY1 * 3);
-	var uvs = new Float32Array(gridX1 * gridY1 * 2);
-
-	var offset = 0;
-	var offset2 = 0;
-
-	for (var iy = 0; iy < gridY1; iy++) {
-
-		var y = iy * segment_height - height_half;
-
-		for (var ix = 0; ix < gridX1; ix++) {
-
-			var x = ix * segment_width - width_half;
-
-			vertices[offset] = x;
-			vertices[offset + 1] = -y;
-
-			normals[offset + 2] = 1;
-
-			uvs[offset2] = ix / gridX;
-			uvs[offset2 + 1] = 1 - iy / gridY;
-
-			offset += 3;
-			offset2 += 2;
-		}
-	}
-
-	offset = 0;
-
-	var indices = new (vertices.length / 3 > 65535 ? Uint32Array : Uint16Array)(gridX * gridY * 6);
-
-	for (var iy = 0; iy < gridY; iy++) {
-
-		for (var ix = 0; ix < gridX; ix++) {
-
-			var a = ix + gridX1 * iy;
-			var b = ix + gridX1 * (iy + 1);
-			var c = ix + 1 + gridX1 * (iy + 1);
-			var d = ix + 1 + gridX1 * iy;
-
-			indices[offset] = a;
-			indices[offset + 1] = b;
-			indices[offset + 2] = d;
-
-			indices[offset + 3] = b;
-			indices[offset + 4] = c;
-			indices[offset + 5] = d;
-
-			offset += 6;
-		}
-	}
-
-	this.setIndex(new BufferAttribute(indices, 1));
-	this.addAttribute('position', new BufferAttribute(vertices, 3));
-	this.addAttribute('normal', new BufferAttribute(normals, 3));
-	this.addAttribute('uv', new BufferAttribute(uvs, 2));
-}
-
-PlaneBufferGeometry.prototype = Object.create(BufferGeometry.prototype);
-PlaneBufferGeometry.prototype.constructor = PlaneBufferGeometry;
-
-function quad$1(width, height, options) {
-
-  if (width === undefined) {
-    width = 1;
-  }
-
-  if (height === undefined) {
-    height = width;
-  }
-
-  options = Object.assign({}, {
-    s: 1,
-    t: 1
-  }, options);
-
-  return cache("PlaneBufferGeometry(" + width + ", " + height + ", " + options.s + ", " + options.t + ", " + options.maxU + ", " + options.maxV + ")", function () {
-    return fixGeometry(new PlaneBufferGeometry(width, height, options.s, options.t), options);
-  });
-}
-
 function identity$1(obj) {
   return obj;
 }
@@ -13745,142 +13881,6 @@ function ring(rInner, rOuter, sectors, rings, start, end) {
   end = end || 2 * Math.PI;
   return cache("RingBufferGeometry(" + rInner + ", " + rOuter + ", " + sectors + ", " + rings + ", " + start + ", " + end + ")", function () {
     return new RingBufferGeometry(rInner, rOuter, sectors, rings, start, end);
-  });
-}
-
-var InsideSphereGeometry = function (_Geometry) {
-  inherits(InsideSphereGeometry, _Geometry);
-
-  function InsideSphereGeometry(radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength) {
-    classCallCheck(this, InsideSphereGeometry);
-
-    var _this = possibleConstructorReturn(this, (InsideSphereGeometry.__proto__ || Object.getPrototypeOf(InsideSphereGeometry)).call(this));
-
-    _this.type = 'InsideSphereGeometry';
-
-    _this.parameters = {
-      radius: radius,
-      widthSegments: widthSegments,
-      heightSegments: heightSegments,
-      phiStart: phiStart,
-      phiLength: phiLength,
-      thetaStart: thetaStart,
-      thetaLength: thetaLength
-    };
-
-    radius = radius || 50;
-
-    widthSegments = Math.max(3, Math.floor(widthSegments) || 8);
-    heightSegments = Math.max(2, Math.floor(heightSegments) || 6);
-
-    phiStart = phiStart !== undefined ? phiStart : 0;
-    phiLength = phiLength !== undefined ? phiLength : Math.PI * 2;
-
-    thetaStart = thetaStart !== undefined ? thetaStart : 0;
-    thetaLength = thetaLength !== undefined ? thetaLength : Math.PI;
-
-    var x,
-        y,
-        vertices = [],
-        uvs = [];
-
-    for (y = 0; y <= heightSegments; y++) {
-
-      var verticesRow = [];
-      var uvsRow = [];
-
-      for (x = widthSegments; x >= 0; x--) {
-
-        var u = x / widthSegments;
-
-        var v = y / heightSegments;
-
-        var vertex = new Vector3();
-        vertex.x = -radius * Math.cos(phiStart + u * phiLength) * Math.sin(thetaStart + v * thetaLength);
-        vertex.y = radius * Math.cos(thetaStart + v * thetaLength);
-        vertex.z = radius * Math.sin(phiStart + u * phiLength) * Math.sin(thetaStart + v * thetaLength);
-
-        _this.vertices.push(vertex);
-
-        verticesRow.push(_this.vertices.length - 1);
-        uvsRow.push(new Vector2(1 - u, 1 - v));
-      }
-
-      vertices.push(verticesRow);
-      uvs.push(uvsRow);
-    }
-
-    for (y = 0; y < heightSegments; y++) {
-
-      for (x = 0; x < widthSegments; x++) {
-
-        var v1 = vertices[y][x + 1];
-        var v2 = vertices[y][x];
-        var v3 = vertices[y + 1][x];
-        var v4 = vertices[y + 1][x + 1];
-
-        var n1 = _this.vertices[v1].clone().normalize();
-        var n2 = _this.vertices[v2].clone().normalize();
-        var n3 = _this.vertices[v3].clone().normalize();
-        var n4 = _this.vertices[v4].clone().normalize();
-
-        var uv1 = uvs[y][x + 1].clone();
-        var uv2 = uvs[y][x].clone();
-        var uv3 = uvs[y + 1][x].clone();
-        var uv4 = uvs[y + 1][x + 1].clone();
-
-        if (Math.abs(_this.vertices[v1].y) === radius) {
-
-          uv1.x = (uv1.x + uv2.x) / 2;
-          _this.faces.push(new Face3(v1, v3, v4, [n1, n3, n4]));
-          _this.faceVertexUvs[0].push([uv1, uv3, uv4]);
-        } else if (Math.abs(_this.vertices[v3].y) === radius) {
-
-          uv3.x = (uv3.x + uv4.x) / 2;
-          _this.faces.push(new Face3(v1, v2, v3, [n1, n2, n3]));
-          _this.faceVertexUvs[0].push([uv1, uv2, uv3]);
-        } else {
-
-          _this.faces.push(new Face3(v1, v2, v4, [n1, n2, n4]));
-          _this.faceVertexUvs[0].push([uv1, uv2, uv4]);
-
-          _this.faces.push(new Face3(v2, v3, v4, [n2.clone(), n3, n4.clone()]));
-          _this.faceVertexUvs[0].push([uv2.clone(), uv3, uv4.clone()]);
-        }
-      }
-    }
-
-    _this.computeFaceNormals();
-
-    for (var i = 0; i < _this.faces.length; ++i) {
-      var f = _this.faces[i];
-      f.normal.multiplyScalar(-1);
-      for (var j = 0; j < f.vertexNormals.length; ++j) {
-        f.vertexNormals[j].multiplyScalar(-1);
-      }
-    }
-
-    _this.boundingSphere = new Sphere(new Vector3(), radius);
-
-    return _this;
-  }
-
-  return InsideSphereGeometry;
-}(Geometry);
-
-function shell$1(r, slices, rings, phi, theta, options) {
-  var SLICE = 0.45;
-  if (phi === undefined) {
-    phi = Math.PI * SLICE;
-  }
-  if (theta === undefined) {
-    theta = Math.PI * SLICE * 0.6;
-  }
-  var phiStart = 1.5 * Math.PI - phi * 0.5,
-      thetaStart = (Math.PI - theta) * 0.5;
-  options = options || {};
-  return cache("InsideSphereGeometry(" + r + ", " + slices + ", " + rings + ", " + phi + ", " + theta + ")", function () {
-    return fixGeometry(new InsideSphereGeometry(r, slices, rings, phiStart, phi, thetaStart, theta, true), options);
   });
 }
 
@@ -14154,10 +14154,10 @@ var index$1 = {
   light: light,
   material: material,
   put: put,
-  quad: quad$1,
+  quad: quad,
   range: range,
   ring: ring,
-  shell: shell$1,
+  shell: shell,
   raycaster: raycaster,
   sphere: sphere,
   textured: textured,
@@ -14177,22 +14177,16 @@ var liveAPI = Object.freeze({
 	light: light,
 	material: material,
 	put: put,
-	quad: quad$1,
+	quad: quad,
 	range: range,
 	ring: ring,
-	shell: shell$1,
+	shell: shell,
 	raycaster: raycaster,
 	sphere: sphere,
 	textured: textured,
 	v3: v3,
 	default: index$1
 });
-
-function deleteSetting(settingName) {
-  if (window.localStorage) {
-    window.localStorage.removeItem(settingName);
-  }
-}
 
 function findProperty(elem, arr) {
   for (var i = 0; i < arr.length; ++i) {
@@ -14201,6 +14195,183 @@ function findProperty(elem, arr) {
     }
   }
 }
+
+var AsyncLockRequest = function () {
+  function AsyncLockRequest(name, elementOpts, changeEventOpts, errorEventOpts, requestMethodOpts, exitMethodOpts) {
+    classCallCheck(this, AsyncLockRequest);
+
+
+    this._elementName = findProperty(document, elementOpts);
+    this._requestMethodName = findProperty(document.documentElement, requestMethodOpts);
+    this._exitMethodName = findProperty(document, exitMethodOpts);
+    this._changeTimeout = null;
+
+    this._changeEventName = findProperty(document, changeEventOpts);
+    this._errorEventName = findProperty(document, errorEventOpts);
+    this._changeEventName = this._changeEventName && this._changeEventName.substring(2);
+    this._errorEventName = this._errorEventName && this._errorEventName.substring(2);
+
+    this._events = {
+      change: this._changeEventName,
+      error: this._errorEventName
+    };
+
+    this.exit = this.exit.bind(this);
+    this.request = this.request.bind(this);
+  }
+
+  createClass(AsyncLockRequest, [{
+    key: "addEventListener",
+    value: function addEventListener(name, thunk, bubbles) {
+      if (this._events[name]) {
+        document.addEventListener(this._events[name], thunk, bubbles);
+      }
+    }
+  }, {
+    key: "removeEventListener",
+    value: function removeEventListener(name, thunk) {
+      if (this._events[name]) {
+        document.removeEventListener(this._events[name], thunk);
+      }
+    }
+  }, {
+    key: "addChangeListener",
+    value: function addChangeListener(thunk, bubbles) {
+      this.addEventListener("change", thunk, bubbles);
+    }
+  }, {
+    key: "removeChangeListener",
+    value: function removeChangeListener(thunk) {
+      this.removeEventListener("change", thunk);
+    }
+  }, {
+    key: "addErrorListener",
+    value: function addErrorListener(thunk, bubbles) {
+      this.addEventListener("error", thunk, bubbles);
+    }
+  }, {
+    key: "removeErrorListener",
+    value: function removeErrorListener(thunk) {
+      this.removeEventListener("error", thunk);
+    }
+  }, {
+    key: "_withChange",
+    value: function _withChange(act) {
+      var _this = this;
+
+      return new Promise(function (resolve, reject) {
+        var onSuccess = function onSuccess() {
+          setTimeout(tearDown);
+          resolve(_this.element);
+        },
+            onError = function onError(evt) {
+          setTimeout(tearDown);
+          reject(evt);
+        },
+            stop = function stop() {
+          if (_this._changeTimeout) {
+            clearTimeout(_this._changeTimeout);
+            _this._changeTimeout = null;
+          }
+        },
+            tearDown = function tearDown() {
+          stop();
+          _this.removeChangeListener(onSuccess);
+          _this.removeErrorListener(onError);
+        };
+
+        _this.addChangeListener(onSuccess, false);
+        _this.addErrorListener(onError, false);
+
+        if (act()) {
+          // we've already gotten lock, so don't wait for it.
+          onSuccess();
+        } else {
+          // Timeout waiting on the lock to happen, for systems like iOS that
+          // don't properly support it, even though they say they do.
+          stop();
+          _this._changeTimeout = setTimeout(function () {
+            return onError(name + " state did not change in allotted time");
+          }, 1000);
+        }
+      });
+    }
+  }, {
+    key: "request",
+    value: function request(elem, extraParam) {
+      var _this2 = this;
+
+      return this._withChange(function () {
+        if (!_this2._requestMethodName) {
+          throw new Error("No " + name + " API support.");
+        } else if (_this2.isActive) {
+          return true;
+        } else if (extraParam) {
+          elem[_this2._requestMethodName](extraParam);
+        } else {
+          elem[_this2._requestMethodName]();
+        }
+      });
+    }
+  }, {
+    key: "exit",
+    value: function exit() {
+      var _this3 = this;
+
+      return this._withChange(function () {
+        if (!_this3._exitMethodName) {
+          throw new Error("No " + name + " API support.");
+        } else if (!_this3.isActive) {
+          return true;
+        } else {
+          document[_this3._exitMethodName]();
+        }
+      });
+    }
+  }, {
+    key: "element",
+    get: function get() {
+      return document[this._elementName];
+    }
+  }, {
+    key: "isActive",
+    get: function get() {
+      return !!this.element;
+    }
+  }]);
+  return AsyncLockRequest;
+}();
+
+function deleteSetting(settingName) {
+  if (window.localStorage) {
+    window.localStorage.removeItem(settingName);
+  }
+}
+
+var FullScreenLockRequest = function (_AsyncLockRequest) {
+  inherits(FullScreenLockRequest, _AsyncLockRequest);
+
+  function FullScreenLockRequest() {
+    classCallCheck(this, FullScreenLockRequest);
+
+    var _this = possibleConstructorReturn(this, (FullScreenLockRequest.__proto__ || Object.getPrototypeOf(FullScreenLockRequest)).call(this, "Fullscreen", ["fullscreenElement", "msFullscreenElement", "mozFullScreenElement", "webkitFullscreenElement"], ["onfullscreenchange", "onmsfullscreenchange", "onmozfullscreenchange", "onwebkitfullscreenchange"], ["onfullscreenerror", "onmsfullscreenerror", "onmozfullscreenerror", "onwebkitfullscreenerror"], ["requestFullscreen", "msRequestFullscreen", "mozRequestFullScreen", "webkitRequestFullscreen"], ["exitFullscreen", "msExitFullscreen", "mozExitFullScreen", "webkitExitFullscreen"]));
+    // Notice the spelling difference for the Mozilla cases. They require a capital S for Screen.
+
+
+    _this._fullScreenEnabledProperty = findProperty(document, ["fullscreenEnabled", "msFullscreenEnabled", "mozFullScreenEnabled", "webkitFullscreenEnabled"]);
+    return _this;
+  }
+
+  createClass(FullScreenLockRequest, [{
+    key: "available",
+    get: function get() {
+      return !!(this._fullScreenEnabledProperty && document[this._fullScreenEnabledProperty]);
+    }
+  }]);
+  return FullScreenLockRequest;
+}(AsyncLockRequest);
+
+var FullScreen = new FullScreenLockRequest();
 
 function getSetting(settingName, defValue) {
   if (window.localStorage) {
@@ -14218,7 +14389,7 @@ function getSetting(settingName, defValue) {
   return defValue;
 }
 
-function immutable$1(value) {
+function immutable(value) {
   var getter = typeof value === "function" ? value : function () {
     return value;
   };
@@ -14231,7 +14402,14 @@ function immutable$1(value) {
   };
 }
 
-function mutable$1(value, type) {
+var MIN_TIMESTEP = 0.001;
+var MAX_TIMESTEP = 1;
+
+function isTimestampDeltaValid(timestampDeltaS) {
+  return !isNaN(timestampDeltaS) && MIN_TIMESTEP < timestampDeltaS && timestampDeltaS <= MAX_TIMESTEP;
+}
+
+function mutable(value, type) {
   if (!type) {
     return {
       enumerable: true,
@@ -14272,6 +14450,38 @@ function mutable$1(value, type) {
   }
 }
 
+function lock(element) {
+  var type = screen.orientation && screen.orientation.type || screen.mozOrientation || "";
+  if (type.indexOf("landscape") === -1) {
+    type = "landscape-primary";
+  }
+  if (screen.orientation && screen.orientation.lock) {
+    return screen.orientation.lock(type);
+  } else if (screen.mozLockOrientation) {
+    var locked = screen.mozLockOrientation(type);
+    if (locked) {
+      return Promise.resolve(element);
+    }
+  } else {
+    return Promise.reject(new Error("Pointer lock not supported."));
+  }
+}
+
+function unlock() {
+  if (screen.orientation && screen.orientation.unlock) {
+    screen.orientation.unlock();
+  } else if (screen.mozUnlockOrientation) {
+    screen.mozUnlockOrientation();
+  }
+}
+
+var Orientation = {
+  lock: lock,
+  unlock: unlock
+};
+
+var PointerLock = new AsyncLockRequest("Pointer Lock", ["pointerLockElement", "mozPointerLockElement", "webkitPointerLockElement"], ["onpointerlockchange", "onmozpointerlockchange", "onwebkitpointerlockchange"], ["onpointerlockerror", "onmozpointerlockerror", "onwebkitpointerlockerror"], ["requestPointerLock", "mozRequestPointerLock", "webkitRequestPointerLock", "webkitRequestPointerLock"], ["exitPointerLock", "mozExitPointerLock", "webkitExitPointerLock", "webkitExitPointerLock"]);
+
 function setSetting(settingName, val) {
   if (window.localStorage && val) {
     try {
@@ -14280,6 +14490,43 @@ function setSetting(settingName, val) {
       console.error("setSetting", settingName, val, typeof val === "undefined" ? "undefined" : _typeof(val), exp);
     }
   }
+}
+
+function standardUnlockBehavior() {
+  if (isMobile) {
+    Orientation.unlock();
+    return Promise.resolve();
+  } else {
+    return PointerLock.exit().catch(function (exp) {
+      return console.warn("PointerLock exit failed", exp);
+    });
+  }
+}
+
+function standardExitFullScreenBehavior() {
+  return standardUnlockBehavior().then(function () {
+    return FullScreen.exit();
+  }).catch(function (exp) {
+    return console.warn("FullScreen failed", exp);
+  });
+}
+
+function standardLockBehavior(elem) {
+  if (isMobile) {
+    return Orientation.lock(elem).catch(function (exp) {
+      return console.warn("OrientationLock failed", exp);
+    });
+  } else {
+    return PointerLock.request(elem).catch(function (exp) {
+      return console.warn("PointerLock failed", exp);
+    });
+  }
+}
+
+function standardFullScreenBehavior(elem) {
+  return FullScreen.request(elem).catch(function (exp) {
+    return console.warn("FullScreen failed", exp);
+  }).then(standardLockBehavior);
 }
 
 var Workerize = function (_AbstractEventEmitter) {
@@ -14386,26 +14633,44 @@ var Workerize = function (_AbstractEventEmitter) {
 }(AbstractEventEmitter);
 
 var index$2 = {
+  AsyncLockRequest: AsyncLockRequest,
   cache: cache,
   deleteSetting: deleteSetting,
   findProperty: findProperty,
+  FullScreen: FullScreen,
   getSetting: getSetting,
   identity: identity$1,
-  immutable: immutable$1,
-  mutable: mutable$1,
+  immutable: immutable,
+  isTimestampDeltaValid: isTimestampDeltaValid,
+  mutable: mutable,
+  Orientation: Orientation,
+  PointerLock: PointerLock,
   setSetting: setSetting,
+  standardExitFullScreenBehavior: standardExitFullScreenBehavior,
+  standardFullScreenBehavior: standardFullScreenBehavior,
+  standardLockBehavior: standardLockBehavior,
+  standardUnlockBehavior: standardUnlockBehavior,
   Workerize: Workerize
 };
 
 var util = Object.freeze({
+	AsyncLockRequest: AsyncLockRequest,
 	cache: cache,
 	deleteSetting: deleteSetting,
 	findProperty: findProperty,
+	FullScreen: FullScreen,
 	getSetting: getSetting,
 	identity: identity$1,
-	immutable: immutable$1,
-	mutable: mutable$1,
+	immutable: immutable,
+	isTimestampDeltaValid: isTimestampDeltaValid,
+	mutable: mutable,
+	Orientation: Orientation,
+	PointerLock: PointerLock,
 	setSetting: setSetting,
+	standardExitFullScreenBehavior: standardExitFullScreenBehavior,
+	standardFullScreenBehavior: standardFullScreenBehavior,
+	standardLockBehavior: standardLockBehavior,
+	standardUnlockBehavior: standardUnlockBehavior,
 	Workerize: Workerize,
 	default: index$2
 });
@@ -14429,7 +14694,8 @@ CubeTextureLoader.prototype.load = function (urls, onLoad, onProgress, onError) 
   loader.setCrossOrigin(this.crossOrigin);
   loader.setPath(this.path);
   var loaded = 0;
-  function loadTexture(i) {
+
+  for (var i = 0; i < urls.length; ++i) {
     loader.load(urls[i], function (image) {
       texture.images[i] = image;
       ++loaded;
@@ -14437,11 +14703,7 @@ CubeTextureLoader.prototype.load = function (urls, onLoad, onProgress, onError) 
         texture.needsUpdate = true;
         if (onLoad) onLoad(texture);
       }
-    }, onProgress, onError);
-  }
-
-  for (var i = 0; i < urls.length; ++i) {
-    loadTexture(i);
+    }.bind(null, i), onProgress, onError);
   }
 
   return texture;
@@ -18760,159 +19022,6 @@ var version = "0.30.2";
 
 var homepage = "https://www.primrosevr.com";
 
-var AsyncLockRequest = function () {
-  function AsyncLockRequest(name, elementOpts, changeEventOpts, errorEventOpts, requestMethodOpts, exitMethodOpts, testExtraParam) {
-    classCallCheck(this, AsyncLockRequest);
-
-
-    this._elementName = findProperty(document, elementOpts);
-    this._requestMethodName = findProperty(document.documentElement, requestMethodOpts);
-    this._exitMethodName = findProperty(document, exitMethodOpts);
-    this._changeTimeout = null;
-
-    this._changeEventName = findProperty(document, changeEventOpts);
-    this._errorEventName = findProperty(document, errorEventOpts);
-    this._changeEventName = this._changeEventName && this._changeEventName.substring(2);
-    this._errorEventName = this._errorEventName && this._errorEventName.substring(2);
-
-    this._events = {
-      change: this._changeEventName,
-      error: this._errorEventName
-    };
-
-    this._testExtraParam = testExtraParam;
-
-    this.exit = this.exit.bind(this);
-    this.request = this.request.bind(this);
-  }
-
-  createClass(AsyncLockRequest, [{
-    key: "addEventListener",
-    value: function addEventListener(name, thunk, bubbles) {
-      if (this._events[name]) {
-        document.addEventListener(this._events[name], thunk, bubbles);
-      }
-    }
-  }, {
-    key: "removeEventListener",
-    value: function removeEventListener(name, thunk) {
-      if (this._events[name]) {
-        document.removeEventListener(this._events[name], thunk);
-      }
-    }
-  }, {
-    key: "addChangeListener",
-    value: function addChangeListener(thunk, bubbles) {
-      this.addEventListener("change", thunk, bubbles);
-    }
-  }, {
-    key: "removeChangeListener",
-    value: function removeChangeListener(thunk) {
-      this.removeEventListener("change", thunk);
-    }
-  }, {
-    key: "addErrorListener",
-    value: function addErrorListener(thunk, bubbles) {
-      this.addEventListener("error", thunk, bubbles);
-    }
-  }, {
-    key: "removeErrorListener",
-    value: function removeErrorListener(thunk) {
-      this.removeEventListener("error", thunk);
-    }
-  }, {
-    key: "_withChange",
-    value: function _withChange(act) {
-      var _this = this;
-
-      return new Promise(function (resolve, reject) {
-        var onSuccess = function onSuccess() {
-          setTimeout(tearDown);
-          resolve(_this.element);
-        },
-            onError = function onError(evt) {
-          setTimeout(tearDown);
-          reject(evt);
-        },
-            stop = function stop() {
-          if (_this._changeTimeout) {
-            clearTimeout(_this._changeTimeout);
-            _this._changeTimeout = null;
-          }
-        },
-            tearDown = function tearDown() {
-          stop();
-          _this.removeChangeListener(onSuccess);
-          _this.removeErrorListener(onError);
-        };
-
-        _this.addChangeListener(onSuccess, false);
-        _this.addErrorListener(onError, false);
-
-        if (act()) {
-          // we've already gotten lock, so don't wait for it.
-          onSuccess();
-        } else {
-          // Timeout waiting on the lock to happen, for systems like iOS that
-          // don't properly support it, even though they say they do.
-          stop();
-          _this._changeTimeout = setTimeout(function () {
-            return onError(name + " state did not change in allotted time");
-          }, 1000);
-        }
-      });
-    }
-  }, {
-    key: "request",
-    value: function request(elem, extraParam) {
-      var _this2 = this;
-
-      if (this._testExtraParam) {
-        extraParam = this._testExtraParam(extraParam);
-      }
-      return this._withChange(function () {
-        if (!_this2._requestMethodName) {
-          throw new Error("No " + name + " API support.");
-        } else if (_this2.isActive) {
-          return true;
-        } else if (extraParam) {
-          elem[_this2._requestMethodName](extraParam);
-        } else {
-          elem[_this2._requestMethodName]();
-        }
-      });
-    }
-  }, {
-    key: "exit",
-    value: function exit() {
-      var _this3 = this;
-
-      return this._withChange(function () {
-        if (!_this3._exitMethodName) {
-          throw new Error("No " + name + " API support.");
-        } else if (!_this3.isActive) {
-          return true;
-        } else {
-          document[_this3._exitMethodName]();
-        }
-      });
-    }
-  }, {
-    key: "element",
-    get: function get() {
-      return document[this._elementName];
-    }
-  }, {
-    key: "isActive",
-    get: function get() {
-      return !!this.element;
-    }
-  }]);
-  return AsyncLockRequest;
-}();
-
-var PointerLock = new AsyncLockRequest("Pointer Lock", ["pointerLockElement", "mozPointerLockElement", "webkitPointerLockElement"], ["onpointerlockchange", "onmozpointerlockchange", "onwebkitpointerlockchange"], ["onpointerlockerror", "onmozpointerlockerror", "onwebkitpointerlockerror"], ["requestPointerLock", "mozRequestPointerLock", "webkitRequestPointerLock", "webkitRequestPointerLock"], ["exitPointerLock", "mozExitPointerLock", "webkitExitPointerLock", "webkitExitPointerLock"]);
-
 var TELEPORT_PAD_RADIUS = 0.4;
 var FORWARD = new Vector3(0, 0, -1);
 var LASER_WIDTH = 0.01;
@@ -20391,7 +20500,7 @@ ButtonFactory.DEFAULT = new ButtonFactory(colored(box(1, 1, 1), 0xff0000), {
 });
 
 // unicode-aware string reverse
-var reverse = function () {
+var reverse$1 = function () {
   var combiningMarks = /(<%= allExceptCombiningMarks %>)(<%= combiningMarks %>+)/g,
       surrogatePair = /(<%= highSurrogates %>)(<%= lowSurrogates %>)/g;
 
@@ -20484,7 +20593,7 @@ var Cursor = function () {
       } else {
         var x = this.x - 1;
         var line = lines[this.y];
-        var word = reverse(line.substring(0, x));
+        var word = reverse$1(line.substring(0, x));
         var m = word.match(/(\s|\W)+/);
         var dx = m ? m.index + m[0].length + 1 : word.length;
         this.i -= dx;
@@ -21047,7 +21156,7 @@ var TextBox = function (_Surface) {
       _this.options = options || {};
     }
 
-    _this.useCaching = !isFirefox || !isMobile$1;
+    _this.useCaching = !isFirefox || !isMobile;
 
     var makeCursorCommand = function makeCursorCommand(name) {
       var method = name.toLowerCase();
@@ -21089,7 +21198,7 @@ var TextBox = function (_Surface) {
 
     // different browsers have different sets of keycodes for less-frequently
     // used keys like curly brackets.
-    _this._browser = isChrome ? "CHROMIUM" : isFirefox ? "FIREFOX" : isIE$1 ? "IE" : isOpera ? "OPERA" : isSafari ? "SAFARI" : "UNKNOWN";
+    _this._browser = isChrome ? "CHROMIUM" : isFirefox ? "FIREFOX" : isIE ? "IE" : isOpera ? "OPERA" : isSafari ? "SAFARI" : "UNKNOWN";
     _this._pointer = new Point();
     _this._deadKeyState = "";
     _this._history = [];
@@ -21940,77 +22049,6 @@ var TextBox = function (_Surface) {
   return TextBox;
 }(Surface);
 
-function lock(element) {
-  var type = screen.orientation && screen.orientation.type || screen.mozOrientation || "";
-  if (type.indexOf("landscape") === -1) {
-    type = "landscape-primary";
-  }
-  if (screen.orientation && screen.orientation.lock) {
-    return screen.orientation.lock(type);
-  } else if (screen.mozLockOrientation) {
-    var locked = screen.mozLockOrientation(type);
-    if (locked) {
-      return Promise.resolve(element);
-    }
-  } else {
-    return Promise.reject(new Error("Pointer lock not supported."));
-  }
-}
-
-function unlock() {
-  if (screen.orientation && screen.orientation.unlock) {
-    screen.orientation.unlock();
-  } else if (screen.mozUnlockOrientation) {
-    screen.mozUnlockOrientation();
-  }
-}
-
-var Orientation = {
-  lock: lock,
-  unlock: unlock
-};
-
-var FullScreen = new AsyncLockRequest("Fullscreen", ["fullscreenElement", "mozFullScreenElement", "webkitFullscreenElement", "msFullscreenElement"], ["onfullscreenchange", "onmozfullscreenchange", "onwebkitfullscreenchange", "onmsfullscreenchange"], ["onfullscreenerror", "onmozfullscreenerror", "onwebkitfullscreenerror", "onmsfullscreenerror"], ["requestFullscreen", "mozRequestFullScreen", "webkitRequestFullscreen", "webkitRequestFullScreen", "msRequestFullscreen"], ["exitFullscreen", "mozExitFullScreen", "webkitExitFullscreen", "webkitExitFullScreen", "msExitFullscreen"], function (arg) {
-  return arg || window.Element && window.Element.ALLOW_KEYBOARD_INPUT || undefined;
-});
-
-function standardLockBehavior(elem) {
-  if (isMobile$1) {
-    return Orientation.lock(elem).catch(function (exp) {
-      return console.warn("OrientationLock failed", exp);
-    });
-  } else {
-    return PointerLock.request(elem).catch(function (exp) {
-      return console.warn("PointerLock failed", exp);
-    });
-  }
-}
-
-function standardFullScreenBehavior(elem) {
-  return FullScreen.request(elem).catch(function (exp) {
-    return console.warn("FullScreen failed", exp);
-  }).then(standardLockBehavior);
-}
-
-function standardUnlockBehavior() {
-  if (isMobile$1) {
-    Orientation.unlock();
-    return Promise.resolve();
-  } else {
-    return PointerLock.exit().catch(function (exp) {
-      return console.warn("PointerLock exit failed", exp);
-    });
-  }
-}
-
-function standardExitFullScreenBehavior() {
-  return standardUnlockBehavior().then(function () {
-    return FullScreen.exit();
-  }).catch(function (exp) {
-    return console.warn("FullScreen failed", exp);
-  });
-}
-
 var piOver180 = Math.PI / 180.0;
 var rad45 = Math.PI * 0.25;
 var defaultOrientation = new Float32Array([0, 0, 0, 1]);
@@ -22386,7 +22424,7 @@ var StandardMonitorVRDisplay = function (_VRDisplay) {
   }, {
     key: "getImmediatePose",
     value: function getImmediatePose() {
-      var display = isMobile$1 && this._display;
+      var display = isMobile && this._display;
       if (display) {
         return display.getImmediatePose();
       } else {
@@ -22396,7 +22434,7 @@ var StandardMonitorVRDisplay = function (_VRDisplay) {
   }, {
     key: "getPose",
     value: function getPose() {
-      var display = isMobile$1 && this._display;
+      var display = isMobile && this._display;
       if (display) {
         return display.getPose();
       } else {
@@ -22406,7 +22444,7 @@ var StandardMonitorVRDisplay = function (_VRDisplay) {
   }, {
     key: "resetPose",
     value: function resetPose() {
-      var display = isMobile$1 && this._display;
+      var display = isMobile && this._display;
       if (display) {
         return display.resetPose();
       }
@@ -31576,13 +31614,6 @@ var Windows = new OperatingSystem("Windows", "CTRL", "CTRL", "CTRL_y", "", "HOME
 
 var macOS = new OperatingSystem("macOS", "META", "ALT", "METASHIFT_z", "META", "LEFTARROW", "RIGHTARROW", "META", "UPARROW", "DOWNARROW");
 
-var OperatingSystems = {
-  Linux: Windows,
-  macOS: macOS,
-  OperatingSystem: OperatingSystem,
-  Windows: Windows
-};
-
 var CodePage = function CodePage(codePageName, lang, options) {
   classCallCheck(this, CodePage);
 
@@ -32071,7 +32102,7 @@ var Keyboard = function (_InputProcessor) {
     var _this = possibleConstructorReturn(this, (Keyboard.__proto__ || Object.getPrototypeOf(Keyboard)).call(this, "Keyboard", commands));
 
     _this._operatingSystem = null;
-    _this.browser = isChrome ? "CHROMIUM" : isFirefox ? "FIREFOX" : isIE$1 ? "IE" : isOpera ? "OPERA" : isSafari ? "SAFARI" : "UNKNOWN";
+    _this.browser = isChrome ? "CHROMIUM" : isFirefox ? "FIREFOX" : isIE ? "IE" : isOpera ? "OPERA" : isSafari ? "SAFARI" : "UNKNOWN";
     _this._codePage = null;
     return _this;
   }
@@ -32246,7 +32277,7 @@ var PoseInputProcessor = function (_InputProcessor) {
             pos = this.currentPose && this.currentPose.position;
         if (orient) {
           this.poseQuaternion.fromArray(orient);
-          if (isMobile$1 && isIE$1) {
+          if (isMobile && isIE) {
             this.poseQuaternion.multiply(IE_CORRECTION);
           }
         } else {
@@ -32791,13 +32822,6 @@ var SensorSample = function () {
   return SensorSample;
 }();
 
-var MIN_TIMESTEP = 0.001;
-var MAX_TIMESTEP = 1;
-
-function isTimestampDeltaValid(timestampDeltaS) {
-  return !isNaN(timestampDeltaS) && MIN_TIMESTEP < timestampDeltaS && timestampDeltaS <= MAX_TIMESTEP;
-}
-
 /*
  * Copyright 2015 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -33036,7 +33060,7 @@ var PosePredictor = function () {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var isFirefoxAndroid = isFirefox && isMobile$1;
+var isFirefoxAndroid = isFirefox && isMobile;
 var DEG2RAD$1 = _Math.DEG2RAD;
 
 /**
@@ -33297,8 +33321,369 @@ var CardboardVRDisplay = function (_VRDisplay) {
   return CardboardVRDisplay;
 }(VRDisplay);
 
+var Automator = function (_AbstractEventEmitter) {
+  inherits(Automator, _AbstractEventEmitter);
+
+  function Automator() {
+    var root = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : window;
+    classCallCheck(this, Automator);
+
+    var _this = possibleConstructorReturn(this, (Automator.__proto__ || Object.getPrototypeOf(Automator)).call(this));
+
+    _this.root = root;
+    _this.frames = [];
+    _this.startT = null;
+    return _this;
+  }
+
+  createClass(Automator, [{
+    key: "update",
+    value: function update(t) {
+      if (this.startT === null) {
+        this.startT = t;
+      }
+    }
+  }, {
+    key: "reset",
+    value: function reset() {
+      this.frames.splice(0);
+      this.startT = null;
+    }
+  }, {
+    key: "length",
+    get: function get() {
+      return this.frames.length;
+    }
+  }]);
+  return Automator;
+}(AbstractEventEmitter);
+
+var Obj = function Obj(path) {
+  var root = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : window;
+  classCallCheck(this, Obj);
+
+  this.path = path;
+
+  var parts = path.split("."),
+      key = parts[parts.length - 1];
+
+  var find = function find(fill) {
+    var head = root;
+
+    for (var i = 0; i < parts.length - 1; ++i) {
+      var part = parts[i];
+      if (head[part] === undefined || head[part] === null) {
+        if (fill) {
+          if (/^\d+$/.test(parts[i + 1])) {
+            head[part] = [];
+          } else {
+            head[part] = {};
+          }
+        } else {
+          head = null;
+          break;
+        }
+      }
+      head = head[part];
+    }
+
+    return head;
+  };
+
+  this.get = function () {
+    var obj = find(false);
+    return obj && obj[key];
+  };
+
+  this.set = function (v) {
+    var obj = find(true);
+    if (obj) {
+      obj[key] = v;
+    }
+  };
+};
+
+var Record = function (_Obj) {
+  inherits(Record, _Obj);
+
+  function Record(path, value, root) {
+    classCallCheck(this, Record);
+
+    var _this = possibleConstructorReturn(this, (Record.__proto__ || Object.getPrototypeOf(Record)).call(this, path, root));
+
+    _this.value = value;
+    return _this;
+  }
+
+  createClass(Record, [{
+    key: "write",
+    value: function write() {
+      if (this.value !== this.get()) {
+        this.set(this.value);
+      }
+    }
+  }]);
+  return Record;
+}(Obj);
+
+/*
+  A collection of all the recorded state values at a single point in time.
+*/
+
+var Frame = function () {
+  createClass(Frame, null, [{
+    key: "parse",
+    value: function parse(timestamp, obj, root) {
+      var stack = [{
+        path: "",
+        value: obj
+      }],
+          records = [];
+
+      while (stack.length > 0) {
+        var _stack$shift = stack.shift(),
+            path = _stack$shift.path,
+            value = _stack$shift.value;
+
+        if ((typeof value === "undefined" ? "undefined" : _typeof(value)) === "object") {
+          for (var key in value) {
+            var newPath = path;
+            if (path.length > 0) {
+              newPath += ".";
+            }
+            newPath += key;
+            stack.push({
+              path: newPath,
+              value: value[key]
+            });
+          }
+        } else {
+          records.push(new Record(path, value, root));
+        }
+      }
+
+      return new Frame(timestamp, records);
+    }
+  }]);
+
+  function Frame(timestamp, records) {
+    classCallCheck(this, Frame);
+
+    this.t = timestamp;
+    this.records = records;
+  }
+
+  createClass(Frame, [{
+    key: "write",
+    value: function write() {
+      for (var i = 0; i < this.records.length; ++i) {
+        this.records[i].write();
+      }
+    }
+  }]);
+  return Frame;
+}();
+
+var Player = function (_Automator) {
+  inherits(Player, _Automator);
+
+  function Player(root) {
+    classCallCheck(this, Player);
+
+    var _this = possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, root));
+
+    _this.frameIndex = -1;
+    return _this;
+  }
+
+  createClass(Player, [{
+    key: "parse",
+    value: function parse(json) {
+      this.load(JSON.parse(json));
+    }
+  }, {
+    key: "load",
+    value: function load(objs) {
+      var frames = [];
+
+      for (var t in objs) {
+        frames.push(Frame.parse(t, objs[t], this.root));
+      }
+
+      this.append(frames);
+    }
+  }, {
+    key: "reset",
+    value: function reset() {
+      get$1(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), "reset", this).call(this);
+      this.frameIndex = -1;
+    }
+  }, {
+    key: "update",
+    value: function update(t) {
+      get$1(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), "update", this).call(this, t);
+
+      t += this.minT - this.startT;
+
+      var oldFrameIndex = this.frameIndex;
+      while (this.frameIndex < this.frames.length - 1 && t >= this.frames[this.frameIndex + 1].t) {
+        ++this.frameIndex;
+      }
+
+      if (this.frameIndex !== oldFrameIndex && 0 <= this.frameIndex && this.frameIndex < this.frames.length) {
+        var frame = this.frames[this.frameIndex];
+        frame.write();
+        this.emit("frame", frame);
+      }
+    }
+  }, {
+    key: "append",
+    value: function append(frames) {
+      if (frames) {
+        this.frames.push.apply(this.frames, frames);
+        this.minT = this.frames.map(function (f) {
+          return f.t;
+        }).reduce(function (a, b) {
+          return Math.min(a, b);
+        }, Number.MAX_VALUE);
+      }
+    }
+  }, {
+    key: "reverse",
+    value: function reverse() {
+      var maxT = this.frames.map(function (f) {
+        return f.t;
+      }).reduce(function (a, b) {
+        return Math.max(a, b);
+      }, Number.MIN_VALUE);
+      this.frames.reverse();
+      for (var i = 0; i < this.frames.length; ++i) {
+        var frame = this.frames[i];
+        frame.t = maxT - frame.t + this.minT;
+      }
+    }
+  }, {
+    key: "done",
+    get: function get() {
+      return this.frameIndex >= this.frames.length - 1;
+    }
+  }]);
+  return Player;
+}(Automator);
+
+var MockVRDisplay = function () {
+  function MockVRDisplay(data) {
+    classCallCheck(this, MockVRDisplay);
+
+
+    var timestamp = null,
+        displayName = null,
+        startOn = null;
+
+    Object.defineProperties(this, {
+      displayName: {
+        get: function get() {
+          return "Mock " + displayName;
+        },
+        set: function set(v) {
+          return displayName = v;
+        }
+      }
+    });
+
+    var dataPack = {
+      currentDisplay: this,
+      currentEyeParams: {
+        left: {
+          fieldOfView: {
+            downDegrees: null,
+            leftDegrees: null,
+            rightDegrees: null,
+            upDegrees: null
+          },
+          renderWidth: null,
+          renderHeight: null,
+          offset: null
+        },
+        right: {
+          fieldOfView: {
+            downDegrees: null,
+            leftDegrees: null,
+            rightDegrees: null,
+            upDegrees: null
+          },
+          renderWidth: null,
+          renderHeight: null,
+          offset: null
+        }
+      },
+      currentPose: {
+        timestamp: null,
+        orientation: null,
+        position: null
+      }
+    };
+
+    Object.defineProperties(dataPack.currentPose, {
+      timestamp: {
+        get: function get() {
+          return timestamp;
+        },
+        set: function set(v) {
+          return timestamp = v;
+        }
+      },
+      timeStamp: {
+        get: function get() {
+          return timestamp;
+        },
+        set: function set(v) {
+          return timestamp = v;
+        }
+      }
+    });
+
+    var player = new Player(dataPack);
+    player.load(data);
+    player.update(0);
+
+    this.requestAnimationFrame = function (thunk) {
+      return window.requestAnimationFrame(function (t) {
+        if (startOn === null) {
+          startOn = t;
+        }
+        player.update(t - startOn);
+        thunk(t);
+      });
+    };
+    this.getImmediatePose = function () {
+      return dataPack.currentPose;
+    };
+    this.getPose = function () {
+      return dataPack.currentPose;
+    };
+    this.getEyeParameters = function (side) {
+      return dataPack.currentEyeParams[side];
+    };
+    this.resetPose = function () {};
+  }
+
+  createClass(MockVRDisplay, [{
+    key: "cancelAnimationFrame",
+    value: function cancelAnimationFrame(handle) {
+      window.cancelAnimationFrame(handle);
+    }
+  }]);
+  return MockVRDisplay;
+}();
+
+function getObject(url, options) {
+  return get$2("json", url, options);
+}
+
 var hasNativeWebVR = "getVRDisplays" in navigator;
 var allDisplays = [];
+var isCardboardCompatible = isMobile && !isGearVR;
 
 var polyFillDevicesPopulated = false;
 var standardMonitorPopulated = false;
@@ -33327,7 +33712,7 @@ function upgrade1_0_to_1_1() {
 
 function getPolyfillDisplays(options) {
   if (!polyFillDevicesPopulated) {
-    if (isMobile$1 || options.FORCE_ENABLE_VR) {
+    if (isCardboardCompatible || options.FORCE_ENABLE_VR) {
       allDisplays.push(new CardboardVRDisplay(options));
     }
 
@@ -33352,10 +33737,9 @@ function installPolyfill(options) {
     window.VRDisplay = VRDisplay;
 
     // Provide navigator.vrEnabled.
-    var self = this;
     Object.defineProperty(navigator, "vrEnabled", {
       get: function get() {
-        return self.isCardboardCompatible() && (document.fullscreenEnabled || document.mozFullScreenEnabled || document.webkitFullscreenEnabled || false);
+        return isCardboardCompatible() && (FullScreen.available || isiOS); // just fake it for iOS
       }
     });
 
@@ -33375,6 +33759,9 @@ function installStandardMonitor(options) {
           created = dsp instanceof StandardMonitorVRDisplay;
         }
         if (!created) {
+          if (options && options.defaultFOV) {
+            StandardMonitorVRDisplay.DEFAULT_FOV = options.defaultFOV;
+          }
           displays.unshift(new StandardMonitorVRDisplay(displays[0]));
         }
         return displays;
@@ -33382,6 +33769,39 @@ function installStandardMonitor(options) {
     };
 
     standardMonitorPopulated = true;
+  }
+}
+
+function installMockDisplay(options) {
+  var data = options && options.replayData;
+  if (data) {
+    var oldGetVRDisplays = navigator.getVRDisplays;
+    navigator.getVRDisplays = function () {
+      return oldGetVRDisplays.call(navigator).then(function (displays) {
+        var mockDeviceExists = displays.map(function (d) {
+          return d instanceof MockVRDisplay;
+        }).reduce(function (a, b) {
+          return a || b;
+        }, false);
+
+        if (mockDeviceExists) {
+          return displays;
+        } else {
+          var done = function done(obj) {
+            displays.push(new MockVRDisplay(obj));
+            resolve(displays);
+          };
+
+          if ((typeof data === "undefined" ? "undefined" : _typeof(data)) === "object") {
+            return Promise.resolve(data);
+          } else if (/\.json$/.test(data)) {
+            return getObject(data);
+          } else {
+            return Promise.resolve(JSON.parse(data));
+          }
+        }
+      });
+    };
   }
 }
 
@@ -33393,6 +33813,7 @@ function install(options) {
 
   installPolyfill(options);
   installStandardMonitor(options);
+  installMockDisplay(options);
   upgrade1_0_to_1_1();
 }
 
@@ -33582,7 +34003,7 @@ var VR = function (_PoseInputProcessor) {
   }, {
     key: "isNativeMobileWebVR",
     get: function get() {
-      return !(this.currentDevice && this.currentDevice.isPolyfilled) && isChrome && isMobile$1;
+      return !(this.currentDevice && this.currentDevice.isPolyfilled) && isChrome && isMobile;
     }
   }, {
     key: "hasStage",
@@ -43121,7 +43542,7 @@ var Form = function (_Surface) {
       id: "Primrose.Controls.Form[" + COUNTER$6++ + "]"
     }, options)));
 
-    _this._mesh = textured(quad$1(1, _this.bounds.height / _this.bounds.width), _this);
+    _this._mesh = textured(quad(1, _this.bounds.height / _this.bounds.width), _this);
     _this._mesh.name = _this.id + "-mesh";
     Object.defineProperties(_this.style, {
       display: {
@@ -43434,6 +43855,16 @@ var Controls = {
   TextInput: TextInput
 };
 
+var Displays = {
+  CardboardVRDisplay: CardboardVRDisplay,
+  frameDataFromPose: frameDataFromPose,
+  install: install,
+  MockVRDisplay: MockVRDisplay,
+  StandardMonitorVRDisplay: StandardMonitorVRDisplay,
+  VRDisplay: VRDisplay,
+  VRFrameData: VRFrameData
+};
+
 function findEverything(elem, obj) {
   elem = elem || document;
   obj = obj || {};
@@ -43469,10 +43900,6 @@ function del(type, url, options) {
 
 function delObject(url, options) {
   return del("json", url, options);
-}
-
-function getObject(url, options) {
-  return get$2("json", url, options);
 }
 
 function getText(url, options) {
@@ -44092,6 +44519,103 @@ var Random = {
   vector: vector
 };
 
+var Watcher = function (_Obj) {
+  inherits(Watcher, _Obj);
+
+  function Watcher(path, root) {
+    classCallCheck(this, Watcher);
+
+    var _this = possibleConstructorReturn(this, (Watcher.__proto__ || Object.getPrototypeOf(Watcher)).call(this, path, root));
+
+    var lastValue = null;
+    _this.read = function () {
+      var value = _this.get();
+      if (value !== _this.lastValue) {
+        _this.lastValue = value;
+        return new Record(_this.path, value, root);
+      } else {
+        return null;
+      }
+    };
+    return _this;
+  }
+
+  return Watcher;
+}(Obj);
+
+var Recorder = function (_Automator) {
+  inherits(Recorder, _Automator);
+
+  function Recorder(watchers, root) {
+    classCallCheck(this, Recorder);
+
+    var _this = possibleConstructorReturn(this, (Recorder.__proto__ || Object.getPrototypeOf(Recorder)).call(this, root));
+
+    _this.watchers = watchers.map(function (path) {
+      return new Watcher(path, _this.root);
+    });
+    return _this;
+  }
+
+  createClass(Recorder, [{
+    key: "update",
+    value: function update(t) {
+      get$1(Recorder.prototype.__proto__ || Object.getPrototypeOf(Recorder.prototype), "update", this).call(this, t);
+      var records = this.watchers.map(function (w) {
+        return w.read();
+      }).filter(function (r) {
+        return r;
+      });
+
+      var frame = new Frame(t - this.startT, records);
+      this.frames.push(frame);
+      this.emit("frame", frame);
+    }
+  }, {
+    key: "toJSON",
+    value: function toJSON() {
+      var output = {};
+
+      this.frames.forEach(function (frame) {
+        output[frame.t] = {};
+        for (var i = 0; i < frame.records.length; ++i) {
+          var record = frame.records[i];
+          if (record.value !== null) {
+            var parts = record.path.split("."),
+                key = parts[parts.length - 1];
+            var head = output[frame.t];
+            for (var j = 0; j < parts.length - 1; ++j) {
+              var part = parts[j];
+              if (head[part] === undefined || head[part] === null) {
+                if (/^\d+$/.test(parts[j + 1])) {
+                  head[part] = [];
+                } else {
+                  head[part] = {};
+                }
+              }
+              head = head[part];
+            }
+            head[key] = record.value;
+          }
+        }
+      });
+
+      return JSON.stringify(output);
+    }
+  }]);
+  return Recorder;
+}(Automator);
+
+var Replay = {
+  Automator: Automator,
+  Frame: Frame,
+  Obj: Obj,
+  Player: Player,
+  Record: Record,
+  Recorder: Recorder,
+  Watcher: Watcher
+};
+
 var CommandPacks = {
   BasicTextInput: BasicTextInput,
   CommandPack: CommandPack,
@@ -44709,6 +45233,13 @@ var Grammars = {
   TestResults: TestResults
 };
 
+var OperatingSystems = {
+  Linux: Windows,
+  macOS: macOS,
+  OperatingSystem: OperatingSystem,
+  Windows: Windows
+};
+
 var Terminal = function Terminal(inputEditor, outputEditor) {
   classCallCheck(this, Terminal);
 
@@ -44897,6 +45428,7 @@ var index$3 = {
   BrowserEnvironment: BrowserEnvironment,
   Constants: Constants,
   Controls: Controls,
+  Displays: Displays,
   DOM: DOM,
   Graphics: Graphics,
   HTTP: HTTP,
@@ -44905,6 +45437,7 @@ var index$3 = {
   Network: Network,
   Pointer: Pointer,
   Random: Random,
+  Replay: Replay,
   Text: Text
 };
 

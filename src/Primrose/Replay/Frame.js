@@ -1,7 +1,15 @@
+pliny.class({
+  parent: "Primrose.Replay",
+  name: "Frame",
+  description: "| [under construction]"
+});
+
+import Record from "./Record";
+
 /*
   A collection of all the recorded state values at a single point in time.
 */
-class Frame {
+export default class Frame {
 
   static parse(timestamp, obj, root) {
     const stack = [{
@@ -30,7 +38,7 @@ class Frame {
         }
       }
       else {
-        records.push(new Replay.Record(path, value, root));
+        records.push(new Record(path, value, root));
       }
     }
 
@@ -47,4 +55,4 @@ class Frame {
       this.records[i].write();
     }
   }
-}
+};

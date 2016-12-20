@@ -2,8 +2,8 @@
 html
   head
     meta(charset="utf-8")
-    block viewport
-      meta(name="viewport", content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1")
+
+    meta(name="viewport", content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1")
 
     meta(name="web-app-capable", content="yes")
     meta(name="theme-color", content="black")
@@ -37,6 +37,9 @@ html
     block head
       link(type="text/css", rel="stylesheet", href=fileRoot + "doc/demoUI" + cssExt)
       style #frontBuffer { background-image:url(screenshot.jpg); }
+
+    if debug
+      script window.DEBUG = true;
   body
     <!-- start demoIFrame.pug main block -->
     block main
@@ -44,6 +47,5 @@ html
       #controls
         #fullScreenButtonContainer
         block controls
-    script(src= fileRoot + "Primrose" + jsExt)
-    script(src="app" + jsExt)
+    script(src= fileRoot + "preloader" + jsExt, data-files= fileRoot + "Primrose" + jsExt + ",app" + jsExt)
     <!-- end demoIFrame.pug main block -->

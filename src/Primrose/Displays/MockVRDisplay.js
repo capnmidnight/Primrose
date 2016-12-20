@@ -1,74 +1,82 @@
-function MockVRDisplay(data) {
+import Player from "../Replay/Player";
 
-  var timestamp = null,
-    displayName = null,
-    startOn = null;
+export default class MockVRDisplay {
+  constructor(data) {
 
-  Object.defineProperties(this, {
-    displayName: {
-      get: () => "Mock " + displayName + " (replay-telemetry-webvr)",
-      set: (v) => displayName = v
-    }
-  });
+    var timestamp = null,
+      displayName = null,
+      startOn = null;
 
-  const dataPack = {
-    currentDisplay: this,
-    currentEyeParams: {
-      left: {
-        fieldOfView: {
-          downDegrees: null,
-          leftDegrees: null,
-          rightDegrees: null,
-          upDegrees: null
-        },
-        renderWidth: null,
-        renderHeight: null,
-        offset: null
-      },
-      right: {
-        fieldOfView: {
-          downDegrees: null,
-          leftDegrees: null,
-          rightDegrees: null,
-          upDegrees: null
-        },
-        renderWidth: null,
-        renderHeight: null,
-        offset: null
+    Object.defineProperties(this, {
+      displayName: {
+        get: () => "Mock " + displayName,
+        set: (v) => displayName = v
       }
-    },
-    currentPose: {
-      timestamp: null,
-      orientation: null,
-      position: null
-    }
-  };
+    });
 
-  Object.defineProperties(dataPack.currentPose, {
-    timestamp: {
-      get: () => timestamp,
-      set: (v) => timestamp = v
-    },
-    timeStamp: {
-      get: () => timestamp,
-      set: (v) => timestamp = v
-    }
-  });
+    const dataPack = {
+      currentDisplay: this,
+      currentEyeParams: {
+        left: {
+          fieldOfView: {
+            downDegrees: null,
+            leftDegrees: null,
+            rightDegrees: null,
+            upDegrees: null
+          },
+          renderWidth: null,
+          renderHeight: null,
+          offset: null
+        },
+        right: {
+          fieldOfView: {
+            downDegrees: null,
+            leftDegrees: null,
+            rightDegrees: null,
+            upDegrees: null
+          },
+          renderWidth: null,
+          renderHeight: null,
+          offset: null
+        }
+      },
+      currentPose: {
+        timestamp: null,
+        orientation: null,
+        position: null
+      }
+    };
 
-  const player = new Replay.Player(dataPack);
-  player.load(data);
-  player.update(0);
+    Object.defineProperties(dataPack.currentPose, {
+      timestamp: {
+        get: () => timestamp,
+        set: (v) => timestamp = v
+      },
+      timeStamp: {
+        get: () => timestamp,
+        set: (v) => timestamp = v
+      }
+    });
 
-  this.requestAnimationFrame = (thunk) => requestAnimationFrame((t) => {
-    if (startOn === null) {
-      startOn = t;
-    }
-    player.update(t - startOn);
-    thunk(t);
-  });
-  this.cancelAnimationFrame = (handle) => cancelAnimationFrame(handle);
-  this.getImmediatePose = () => dataPack.currentPose;
-  this.getPose = () => dataPack.currentPose;
-  this.getEyeParameters = (side) => dataPack.currentEyeParams[side];
-  this.resetPose = () => {};
-}
+    const player = new Player(dataPack);
+    player.load(data);
+    player.update(0);
+
+    this.requestAnimationFrame = (thunk) => window.requestAnimationFrame((t) => {
+      if (startOn === null) {
+        startOn = t;
+      }
+      player.update(t - startOn);
+      thunk(t);
+    });
+    this.getImmediatePose = () => dataPack.currentPose;
+    this.getPose = () => dataPack.currentPose;
+    this.getEyeParameters = (side) => dataPack.currentEyeParams[side];
+    this.resetPose = () => {};
+  }
+
+
+  cancelAnimationFrame(handle) {
+    window.cancelAnimationFrame(handle);
+  }
+};

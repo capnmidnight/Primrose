@@ -1,4 +1,10 @@
-class Obj {
+pliny.class({
+  parent: "Primrose.Replay",
+  name: "Obj",
+  description: "| [under construction]"
+});
+
+export default class Obj {
   constructor(path, root = window) {
     this.path = path;
 
@@ -42,4 +48,4 @@ class Obj {
       }
     };
   }
-}
+};

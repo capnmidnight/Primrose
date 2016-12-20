@@ -14,6 +14,27 @@ var gulp = require("gulp"),
 
   formats = ["umd", "es"],
 
+  preloaderJS = nt.js("preloader", "preloader", {
+    advertise: false,
+    format: "umd",
+    fileName: "preloader.js"
+  }),
+
+  preloaderMin = nt.min(
+    "preloader",  [
+    "preloader.js"
+  ], [{
+    debug: preloaderJS.debug,
+    release: preloaderJS.debug
+  }]),
+
+  preloader = {
+    format: preloaderJS.format,
+    default: preloaderJS.default,
+    debug: preloaderJS.debug,
+    release: preloaderMin.release
+  },
+
   tasks = formats.map((format) => {
 
     ext = "";
@@ -34,7 +55,6 @@ var gulp = require("gulp"),
       fileName: inFile,
       dependencies: ["format"],
       format: format,
-      watch: ["../webvr-standard-monitor/src/**/*.js"],
       post: (_, cb) => {
         // removes the documentation objects from the concatenated library.
         pliny.carve(inFile, outFile, docFile, cb);
@@ -44,8 +64,8 @@ var gulp = require("gulp"),
     var min;
     if(format === "umd") {
       min = nt.min("Primrose", [
-        "doc/PrimroseDocumentation" + ext,
-        "Primrose" + ext], [{
+        "doc/PrimroseDocumentation.js",
+        "Primrose.js"], [{
         debug: js.debug,
         release: js.debug
       }]);
@@ -74,6 +94,10 @@ var gulp = require("gulp"),
   });
 
 tasks.release.push.apply(tasks.release, demos.map(d=>d.release));
+tasks.format.push(preloader.format);
+tasks.default.push(preloader.default);
+tasks.debug.push(preloader.debug);
+tasks.release.push(preloader.release);
 
 const tidyFiles = [
   "PrimroseWithDoc*.js",

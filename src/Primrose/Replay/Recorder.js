@@ -1,7 +1,17 @@
-class Recorder extends Replay.Automator {
+pliny.class({
+  parent: "Primrose.Replay",
+  name: "Recorder",
+  description: "| [under construction]"
+});
+
+import Automator from "./Automator";
+import Watcher from "./Watcher";
+import Frame from "./Frame";
+
+export default class Recorder extends Automator {
   constructor(watchers, root) {
     super(root);
-    this.watchers = watchers.map((path) => new Replay.Watcher(path, this.root));
+    this.watchers = watchers.map((path) => new Watcher(path, this.root));
   }
 
   update(t) {
@@ -10,7 +20,7 @@ class Recorder extends Replay.Automator {
       .map((w) => w.read())
       .filter((r) => r);
 
-    var frame = new Replay.Frame(t - this.startT, records);
+    var frame = new Frame(t - this.startT, records);
     this.frames.push(frame);
     this.emit("frame", frame);
   }
@@ -45,4 +55,4 @@ class Recorder extends Replay.Automator {
 
     return JSON.stringify(output);
   }
-}
+};
