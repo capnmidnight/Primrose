@@ -74,6 +74,11 @@ pliny.record({
     default: 1024,
     description: "The size to use for the width and height of the shadow map that will be generated."
   }, {
+    name: "progress",
+    type: "Function",
+    optional: true,
+    description: "Callback function for recording model download progress."
+  }, {
     name: "gravity",
     type: "Number",
     optional: true,
@@ -1608,6 +1613,7 @@ BrowserEnvironment.DEFAULTS = {
   disableKeyboard: false,
   enableShadows: false,
   shadowMapSize: 1024,
+  progress: null,
   // The acceleration applied to falling objects.
   gravity: 9.8,
   // The amount of time in seconds to require gazes on objects before triggering the gaze event.
