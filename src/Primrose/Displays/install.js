@@ -1,12 +1,17 @@
+import frameDataFromPose from "./frameDataFromPose";
 import CardboardVRDisplay from "./CardboardVRDisplay";
+import MockVRDisplay from "./MockVRDisplay";
+import StandardMonitorVRDisplay from "./StandardMonitorVRDisplay";
 import VRDisplay from "./VRDisplay";
 import VRFrameData from "./VRFrameData";
-import frameDataFromPose from "./frameDataFromPose";
+
 import isMobile from "../../flags/isMobile";
 import isGearVR from "../../flags/isGearVR";
 import isiOS from "../../flags/isiOS";
-import StandardMonitorVRDisplay from "./StandardMonitorVRDisplay";
+
 import FullScreen from "../../util/FullScreen";
+
+import getObject from "../HTTP/getObject";
 
 const hasNativeWebVR = "getVRDisplays" in navigator,
   allDisplays = [],
@@ -101,6 +106,39 @@ function installStandardMonitor(options) {
   }
 }
 
+function installMockDisplay(options) {
+  var data = options && options.replayData;
+  if(data){
+    var oldGetVRDisplays = navigator.getVRDisplays;
+    navigator.getVRDisplays = () => oldGetVRDisplays.call(navigator)
+      .then((displays) => {
+        const mockDeviceExists = displays
+          .map((d) => d instanceof MockVRDisplay)
+          .reduce((a, b) => a || b, false);
+
+        if (mockDeviceExists) {
+          return displays;
+        }
+        else {
+          var done = (obj) => {
+            displays.push(new MockVRDisplay(obj));
+            resolve(displays);
+          };
+
+          if (typeof data === "object") {
+            return Promise.resolve(data);
+          }
+          else if (/\.json$/.test(data)) {
+            return getObject(data);
+          }
+          else {
+            return Promise.resolve(JSON.parse(data));
+          }
+        }
+      });
+  }
+}
+
 export default function install(options) {
   options = Object.assign({
       // Forces availability of VR mode, even for non-mobile devices.
@@ -109,5 +147,6 @@ export default function install(options) {
 
   installPolyfill(options);
   installStandardMonitor(options);
+  installMockDisplay(options);
   upgrade1_0_to_1_1();
 };
