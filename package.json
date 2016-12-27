@@ -57,7 +57,7 @@
     "three": "^0.82.0"
   },
   "devDependencies": {
-    "notion-node": "0.0.4",
-    "notiontheory-basic-build": "^4.0.1"
+    "notion-node": "^0.0.5",
+    "notiontheory-basic-build": "^5.0.0"
   }
 }

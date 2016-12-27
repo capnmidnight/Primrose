@@ -14,11 +14,7 @@ var gulp = require("gulp"),
 
   formats = ["umd", "es"],
 
-  preloaderJS = nt.js("preloader", "preloader", {
-    advertise: false,
-    format: "umd",
-    fileName: "preloader.js"
-  }),
+  preloaderJS = nt.js("preloader", "preloader/index.js"),
 
   preloaderMin = nt.min(
     "preloader",  [
@@ -49,7 +45,7 @@ var gulp = require("gulp"),
     var inFile = "PrimroseWithDoc" + ext,
       outFile = inFile.replace("WithDoc", ""),
       docFile = "doc/" + inFile.replace("WithDoc", "Documentation"),
-      js = nt.js("PrimroseWithDoc:" + format, "src", {
+      js = nt.js("PrimroseWithDoc:" + format, "src/index.js", {
       advertise: true,
       moduleName: "Primrose",
       fileName: inFile,
