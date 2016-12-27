@@ -7,6 +7,15 @@ KEY:
 * **Windows** - Windows 10.
 * **Android** - Android 6.0.1 running on the Samsung Galaxy S7
 
+## v0.26.0
+* Features
+  * Vive Motion Controller support.
+  * Unified movement from gamepads and stage teleporting into one coherent system.
+* Defect Fixes
+* Admin
+  * Cleaned up VR position handling.
+  * Moved network handling code into its own manager class.
+
 ## v0.25.3
 
 * Features
