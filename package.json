@@ -34,7 +34,8 @@
   "main": "Primrose.js",
   "browser": "Primrose.min.js",
   "scripts": {
-    "start": "node StartHere.js --url doc/"
+    "start": "node StartHere.js --url doc/",
+    "test": "node node_modules/notion-node/default"
   },
   "keywords": [
     "virtual reality",
