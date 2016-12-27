@@ -18,13 +18,16 @@ import light from "./light";
 import material from "./material";
 import put from "./put";
 import quad from "./quad";
+import quat from "./quat";
 import range from "./range";
 import ring from "./ring";
 import shell from "./shell";
 import raycaster from "./raycaster";
 import sphere from "./sphere";
 import textured from "./textured";
+import v2 from "./v2";
 import v3 from "./v3";
+import v4 from "./v4";
 
 export {
   axis,
@@ -40,13 +43,16 @@ export {
   material,
   put,
   quad,
+  quat,
   range,
   ring,
   shell,
   raycaster,
   sphere,
   textured,
-  v3
+  v2,
+  v3,
+  v4
 };
 
 export default {
@@ -63,11 +69,14 @@ export default {
   material,
   put,
   quad,
+  quat,
   range,
   ring,
   shell,
   raycaster,
   sphere,
   textured,
-  v3
+  v2,
+  v3,
+  v4
 };
