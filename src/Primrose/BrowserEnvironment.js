@@ -1442,14 +1442,14 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
         if (!newFunction) {
           newFunction = function () {};
         }
-        return () => {
-          if (this.input.VR.isPresenting) {
+        return (function () {
+          if (this.input && this.input.VR && this.input.VR.isPresenting) {
             newFunction();
           }
           else {
             oldFunction.apply(window, arguments);
           }
-        };
+        }).bind(this);
       };
 
       window.alert = rerouteDialog(window.alert);
