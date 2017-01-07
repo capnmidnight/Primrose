@@ -99,7 +99,7 @@ export default class Video extends BaseTextured {
         const loadOptions = Object.assign({}, this.options, {
           resolve: (function(oldResolve, i, txt) {
             this._textures[i] = txt;
-            this.object.add(this._meshes[i]);
+            this.add(this._meshes[i]);
             if(typeof oldResolve === "function"){
               oldResolve(txt);
             }

@@ -37,7 +37,7 @@ export default class Image extends BaseTextured {
           progress: progress,
           resolve: (txt) => {
             this._textures[i] = txt;
-            this.object.add(this._meshes[i]);
+            this.add(this._meshes[i]);
           }
         });
 
