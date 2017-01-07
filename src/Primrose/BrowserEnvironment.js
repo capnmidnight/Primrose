@@ -399,8 +399,12 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
       for (var n = 0; trans && n < trans.length; ++n) {
         var eye = this.options.eyeRenderOrder[n],
           i = EYE_INDICES[eye],
-          st = trans[i],
-          v = st.viewport;
+          st = trans[i] || trans[1 - i];
+        if(!st) {
+          i = 1 - i;
+          st = trans[i];
+        }
+        var v = st.viewport;
         Entity.eyeBlankAll(i);
 
         if(trans.length > 1) {
