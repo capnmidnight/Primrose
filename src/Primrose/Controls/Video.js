@@ -58,6 +58,7 @@ export default class Video extends BaseTextured {
   }
 
   _loadFiles(videos, progress) {
+    this._elements = [];
     return Promise.all(Array.prototype.map.call(videos, (spec, i) => new Promise((resolve, reject) => {
       let video = null;
       if(typeof spec === "string"){
