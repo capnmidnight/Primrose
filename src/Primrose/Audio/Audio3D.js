@@ -66,13 +66,13 @@ export default class Audio3D {
                 const source = this.context.createBufferSource();
                 source.buffer = this.createRawSound([[0]]);
                 source.connect(this.context.destination);
-                source.sine(0, 0);
+                source.start();
                 setTimeout(() => {
                   if((source.playbackState === source.PLAYING_STATE || source.playbackState === source.FINISHED_STATE)) {
                     window.removeEventListener("mouseup", unlock);
                     window.removeEventListener("touchend", unlock);
                     window.removeEventListener("keyup", unlock);
-                      finishSetup();
+                    finishSetup();
                   }
                 }, 0);
               }
