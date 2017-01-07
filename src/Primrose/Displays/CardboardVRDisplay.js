@@ -30,11 +30,6 @@ export default class CardboardVRDisplay extends VRDisplay {
 
     // "Private" members.
     this.poseSensor_ = new FusionPoseSensor(options);
-
-    if (isiOS) {
-      // Listen for resize events to workaround this awful Safari bug.
-      window.addEventListener("resize", this.onResize_.bind(this));
-    }
   }
 
   _getImmediatePose() {
