@@ -35,7 +35,6 @@ export default function camera(index, options) {
   options = Object.assign({
       width: 1,
       height: 768/1280,
-      disableVideoCopying: false,
       unshaded: true,
       transparent: true,
       opacity: 0.5
