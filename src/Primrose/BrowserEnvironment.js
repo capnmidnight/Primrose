@@ -1587,14 +1587,16 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
 
     const buttons = this.displays
       // We skip the Standard Monitor and Magic Window on iOS because we can't go full screen on those systems.
-      .filter((display) => !isiOS || VR.isStereoDisplay(display))
       .map((display, i) => {
-        const enterVR = this.goFullScreen.bind(this, i),
-          btn = newButton(display.displayName, display.displayName, enterVR),
-          isStereo = VR.isStereoDisplay(display);
-        btn.className = isStereo ? "stereo" : "mono";
-        return btn;
-      });
+        if(!isiOS || VR.isStereoDisplay(display)) {
+          const enterVR = this.goFullScreen.bind(this, i),
+            btn = newButton(display.displayName, display.displayName, enterVR),
+            isStereo = VR.isStereoDisplay(display);
+          btn.className = isStereo ? "stereo" : "mono";
+          return btn;
+        }
+      })
+      .filter(identity);
 
     if(!/(www\.)?primrosevr.com/.test(document.location.hostname) && !this.options.disableAdvertising) {
       buttons.push(newButton("Primrose", "✿", () => open("https://www.primrosevr.com", "_blank")));
