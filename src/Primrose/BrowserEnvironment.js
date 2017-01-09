@@ -1539,6 +1539,10 @@ export default class BrowserEnvironment extends EventDispatcher {
     this.options.defaultFOV = StandardMonitorVRDisplay.DEFAULT_FOV = v;
   }
 
+  get currentTime() {
+    return this.audio.context.currentTime;
+  }
+
   setAudioFromUser(userName, audioElement){
 
     pliny.method({
