@@ -20,6 +20,7 @@ import Sky from "./Sky";
 import Surface from "./Surface";
 import TextBox from "./TextBox";
 import TextInput from "./TextInput";
+import Video from "./Video";
 
 export {
   BaseControl,
@@ -37,7 +38,8 @@ export {
   Sky,
   Surface,
   TextBox,
-  TextInput
+  TextInput,
+  Video
 };
 
 export default {
@@ -56,5 +58,6 @@ export default {
   Sky,
   Surface,
   TextBox,
-  TextInput
+  TextInput,
+  Video
 };
