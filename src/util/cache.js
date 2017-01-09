@@ -38,7 +38,6 @@ export default function cache(hash, makeObject, onCacheHit) {
     _cache[hash] = makeObject();
   }
   else if(onCacheHit) {
-    console.log(hash);
     onCacheHit(_cache[hash]);
   }
   return _cache[hash];
