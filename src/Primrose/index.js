@@ -21,6 +21,7 @@ import Pointer from "./Pointer";
 import Random from "./Random";
 import Replay from "./Replay";
 import Text from "./Text";
+import Tools from "./Tools";
 
 export {
   Angle,
@@ -38,7 +39,8 @@ export {
   Pointer,
   Random,
   Replay,
-  Text
+  Text,
+  Tools
 };
 
 export default {
@@ -57,5 +59,6 @@ export default {
   Pointer,
   Random,
   Replay,
-  Text
+  Text,
+  Tools
 };

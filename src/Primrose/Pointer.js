@@ -1,7 +1,6 @@
 pliny.class({
   parent: "Primrose",
   name: "Pointer",
-  baseClass: "THREE.EventDispatcher",
   description: "An object that points into the scene somewhere, casting a ray at objects for picking operations.",
   parameters: [{
     name: "pointerName",
@@ -28,7 +27,6 @@ pliny.class({
     }]
 });
 
-import { EventDispatcher } from "three/src/core/EventDispatcher";
 import { Vector3 } from "three/src/math/Vector3";
 import { Euler } from "three/src/math/Euler";
 import { Quaternion } from "three/src/math/Quaternion";
@@ -64,9 +62,8 @@ function hasGazeEvent(obj){
     obj.button && hasGazeEvent(obj.button);
 }
 
-export default class Pointer extends EventDispatcher {
+export default class Pointer {
   constructor(pointerName, color, highlight, s, devices, triggerDevices, options) {
-    super();
     this.name = pointerName;
     this.devices = devices.filter(identity);
     this.triggerDevices = triggerDevices && triggerDevices.filter(identity) || this.devices.slice();
@@ -246,6 +243,7 @@ export default class Pointer extends EventDispatcher {
       this.picker.set(VECTOR_TEMP, FORWARD);
       const hits = this.picker.intersectObjects(objects, true),
         currentHit = hits[0],
+        obj = currentHit && currentHit.object,
         lastHit = this.lastHit,
         moved = lastHit && currentHit &&
           (currentHit.point.x !== lastHit.point.x ||
@@ -303,55 +301,67 @@ export default class Pointer extends EventDispatcher {
       leaveEvt.buttons = enterEvt.buttons;
 
       if(changed){
-        if(lastHit){
-          this.emit("exit", leaveEvt);
+        if(lastHit && lastHit.object) {
+          lastHit.object.emit("exit", leaveEvt);
         }
-        if(currentHit){
-          this.emit("enter", enterEvt);
+        if(obj) {
+          obj.emit("enter", enterEvt);
         }
       }
 
       let selected = false;
       if(dButtons){
         if(enterEvt.buttons){
-          this.emit("pointerstart", enterEvt);
+          if(obj) {
+            obj.emit("pointerstart", enterEvt);
+          }
           if(lastHit){
             lastHit.time = performance.now();
           }
         }
         else{
           selected = !!currentHit;
-          this.emit("pointerend", enterEvt);
+          if(obj) {
+            obj.emit("pointerend", enterEvt);
+          }
         }
       }
-      else if(moved) {
-        this.emit("pointermove", enterEvt);
+      else if(moved && obj) {
+        obj.emit("pointermove", enterEvt);
       }
 
       if(this.useGaze){
         if(changed) {
           if(dt !== null && dt < this.gazeTimeout){
             this.gazeOuter.visible = false;
-            this.emit("gazecancel", leaveEvt);
+            if(obj) {
+              obj.emit("gazecancel", leaveEvt);
+            } else if(lastHit && lastHit.object) {
+              lastHit.object.emit("gazecancel", leaveEvt);
+            }
           }
           if(currentHit){
             this.gazeOuter.visible = true;
-            this.emit("gazestart", enterEvt);
+            if(obj) {
+              obj.emit("gazestart", enterEvt);
+            }
           }
         }
         else if(dt !== null) {
           if(dt >= this.gazeTimeout){
             this.gazeOuter.visible = false;
             selected = !!currentHit;
-            this.emit("gazecomplete", enterEvt);
+            if(obj) {
+              obj.emit("gazecomplete", enterEvt);
+            }
             lastHit.time = null;
           }
           else if(currentHit && currentHit.object && hasGazeEvent(currentHit.object)){
             var p = Math.round(36 * dt / this.gazeTimeout),
               a = 2 * Math.PI * p / 36;
             this.gazeOuter.geometry = ring(GAZE_RING_INNER, GAZE_RING_OUTER, 36, p, 0, a);
-            if(moved) {
-              this.emit("gazemove", enterEvt);
+            if(moved && obj) {
+              obj.emit("gazemove", enterEvt);
             }
           }
           else{
@@ -363,8 +373,8 @@ export default class Pointer extends EventDispatcher {
         }
       }
 
-      if(selected){
-        this.emit("select", enterEvt);
+      if(selected && obj){
+        obj.emit("select", enterEvt);
       }
 
       if(changed){

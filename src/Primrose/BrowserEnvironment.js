@@ -959,30 +959,10 @@ export default class BrowserEnvironment extends EventDispatcher {
       type: "THREE.Object3D",
       description: "If a `groundTexture` option is provided, it will be a flat plane extending to infinity. As the user moves, the ground will shift under them by whole texture repeats, making the ground look infinite."
     });
-    let groundReady = null;
-    if (this.options.groundTexture !== null) {
-      groundReady = new Promise((resolve, reject) => {
-        const dim = 2 * this.options.drawDistance;
-        this.ground = brick(this.options.groundTexture, dim * 5, 0.1, dim * 5, {
-          txtRepeatX: dim * 5,
-          txtRepeatY: dim * 5,
-          anisotropy: 8,
-          resolve: resolve,
-          transparent: false,
-          progress: this.options.progress
-        });
-        this.registerPickableObject(this.ground);
-      });
-    }
-    else{
-      this.ground = hub();
-      groundReady = Promise.resolve();
-    }
+    this.ground = new Ground(this.options);
+    this.appendChild(this.ground);
 
-    groundReady = groundReady.then(() => {
-      this.ground.name = "Ground";
-      this.scene.add(this.ground);
-    });
+    this.teleporter = new Teleporter(this, this.ground);
 
 
     pliny.property({

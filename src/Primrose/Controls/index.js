@@ -10,6 +10,7 @@ import Button3D from "./Button3D";
 import ButtonFactory from "./ButtonFactory";
 import Entity from "./Entity";
 import Form from "./Form";
+import Ground from "./Ground";
 import Image from "./Image";
 import Label from "./Label";
 import PlainText from "./PlainText";
@@ -25,6 +26,7 @@ export {
   ButtonFactory,
   Entity,
   Form,
+  Ground,
   Image,
   Label,
   PlainText,
@@ -41,6 +43,7 @@ export default {
   ButtonFactory,
   Entity,
   Form,
+  Ground,
   Image,
   Label,
   PlainText,
