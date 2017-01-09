@@ -1,7 +1,7 @@
 pliny.class({
   parent: "Primrose",
   name: "Pointer",
-  baseClass: "Primrose.AbstractEventEmitter",
+  baseClass: "THREE.EventDispatcher",
   description: "An object that points into the scene somewhere, casting a ray at objects for picking operations.",
   parameters: [{
     name: "pointerName",
@@ -28,12 +28,13 @@ pliny.class({
     }]
 });
 
-import AbstractEventEmitter from "./AbstractEventEmitter"
+import { EventDispatcher } from "three/src/core/EventDispatcher";
 import { Vector3 } from "three/src/math/Vector3";
 import { Euler } from "three/src/math/Euler";
 import { Quaternion } from "three/src/math/Quaternion";
 import { Raycaster } from "three/src/core/Raycaster";
 import { Object3D } from "three/src/core/Object3D";
+
 import identity from "../util/identity";
 import colored from "../live-api/colored";
 import box from "../live-api/box";
@@ -56,14 +57,14 @@ const TELEPORT_PAD_RADIUS = 0.4,
 
 function hasGazeEvent(obj){
   return !!obj.ongazecomplete || !!obj.onselect || !!obj.onclick ||
-     obj._handlers && (
-      (obj._handlers.gazecomplete && obj._handlers.gazecomplete.length > 0) ||
-      (obj._handlers.select && obj._handlers.select.length > 0) ||
-      (obj._handlers.click && obj._handlers.click.length > 0)) ||
+     obj._listeners && (
+      (obj._listeners.gazecomplete && obj._listeners.gazecomplete.length > 0) ||
+      (obj._listeners.select && obj._listeners.select.length > 0) ||
+      (obj._listeners.click && obj._listeners.click.length > 0)) ||
     obj.button && hasGazeEvent(obj.button);
 }
 
-export default class Pointer extends AbstractEventEmitter {
+export default class Pointer extends EventDispatcher {
   constructor(pointerName, color, highlight, s, devices, triggerDevices, options) {
     super();
     this.name = pointerName;

@@ -1,13 +1,13 @@
 pliny.class({
   parent: "Primrose.Input",
   name: "GamepadManager",
-  baseClass: "Primrose.AbstractEventEmitter",
+  baseClass: "THREE.EventDispatcher",
   description: "| [under construction]"
 });
 
-import AbstractEventEmitter from "../AbstractEventEmitter";
+import { EventDispatcher } from "three/src/core/EventDispatcher";
 import Gamepad from "./Gamepad";
-export default class GamepadManager extends AbstractEventEmitter {
+export default class GamepadManager extends EventDispatcher {
 
   static get isAvailable() {
     return !!navigator.getGamepads;

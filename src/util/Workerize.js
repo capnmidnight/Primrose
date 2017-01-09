@@ -115,8 +115,9 @@ Then we can create and use an automatically workerized version of it as follows.
     }]
 });
 
-import AbstractEventEmitter from "../Primrose/AbstractEventEmitter";
-export default class Workerize extends AbstractEventEmitter {
+import { EventDispatcher } from "three/src/core/EventDispatcher";
+
+export default class Workerize extends EventDispatcher {
 
   static createWorker(script, stripFunc) {
 

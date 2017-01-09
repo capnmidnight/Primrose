@@ -1,6 +1,7 @@
 import "./center";
 import "./colored";
 import "./CubeTextureLoader";
+import "./EventDispatcher";
 import "./Matrix4";
 export * from "./MTLLoader";
 import "./Object3D";

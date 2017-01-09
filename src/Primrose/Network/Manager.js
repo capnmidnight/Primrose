@@ -1,24 +1,26 @@
 pliny.class({
   parent: "Primrose.Network",
-    name: "Manager",
-    parameters: [{
-      name: "localUser",
-      type: "Primrose.Input.FPSInput",
-      description: "The object that represents the player's location in the scene."
-    }, {
-      name: "audio",
-      type: "Primrose.Output.Audio3D",
-      description: "The audio manager being used in the current Environment."
-    }, {
-      name: "factories",
-      type: "Primrose.Controls.ModelLoader",
-      description: "Model factory for creating avatars for new remote users."
-    }]
+  name: "Manager",
+  baseClass: "THREE.EventDispatcher",
+  parameters: [{
+    name: "localUser",
+    type: "Primrose.Input.FPSInput",
+    description: "The object that represents the player's location in the scene."
+  }, {
+    name: "audio",
+    type: "Primrose.Output.Audio3D",
+    description: "The audio manager being used in the current Environment."
+  }, {
+    name: "factories",
+    type: "Primrose.Controls.ModelLoader",
+    description: "Model factory for creating avatars for new remote users."
+  }]
 });
 
-import AbstractEventEmitter from "../AbstractEventEmitter";
+import { EventDispatcher } from "three/src/core/EventDispatcher";
 import RemoteUser from "./RemoteUser";
-export default class Manager extends AbstractEventEmitter {
+
+export default class Manager extends EventDispatcher {
   constructor(localUser, audio, factories, options) {
     super();
     this.localUser = localUser;

@@ -1,6 +1,6 @@
 pliny.class({
   parent: "Primrose.Controls",
-  baseClass: "Primrose.AbstractEventEmitter",
+  baseClass: "THREE.EventDispatcher",
   name: "BaseControl",
   description: "The BaseControl class is the parent class for all 3D controls.\n\
 It manages a unique ID for every new control, the focus state of the control, and\n\
@@ -23,8 +23,9 @@ var ID = 1,
   TEMP_VECTOR = new Vector3();
 
 import { Vector3 } from "three/src/math/Vector3";
-import AbstractEventEmitter from "../AbstractEventEmitter";
-export default class BaseControl extends AbstractEventEmitter {
+import { EventDispatcher } from "three/src/core/EventDispatcher";
+
+export default class BaseControl extends EventDispatcher {
   constructor() {
     super();
 

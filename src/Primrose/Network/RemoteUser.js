@@ -1,7 +1,7 @@
 pliny.class({
   parent: "Primrose.Network",
   name: "RemoteUser",
-  baseClass: "Primrose.AbstractEventEmitter",
+  baseClass: "THREE.EventDispatcher",
   description: "A networked user.",
   parameters: [{
     name: "userName",
@@ -30,13 +30,14 @@ pliny.class({
   }]
 });
 
-import AbstractEventEmitter from "../AbstractEventEmitter";
+import { EventDispatcher } from "three/src/core/EventDispatcher";
 import randColor from "../Random/color";
 import colored from "../../live-api/colored";
 import Audio3D from "../Audio/Audio3D";
 import { Quaternion } from "three/src/math/Quaternion";
 import { Vector3 } from "three/src/math/Vector3";
-export default class RemoteUser extends AbstractEventEmitter {
+
+export default class RemoteUser extends EventDispatcher {
 
   constructor(userName, modelFactory, nameMaterial, disableWebRTC, requestICEPath, microphone, localUserName, goSecond) {
     super();

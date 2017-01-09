@@ -4,9 +4,10 @@ pliny.class({
   description: "| [under construction]"
 });
 
-import AbstractEventEmitter from "../AbstractEventEmitter";
+import { EventDispatcher } from "three/src/core/EventDispatcher";
 
-export default class Automator extends AbstractEventEmitter {
+export default class Automator extends EventDispatcher {
+
   constructor(root = window) {
     super();
     this.root = root;

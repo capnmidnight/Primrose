@@ -97,8 +97,9 @@ class CommandState{
 }
 
 import Keys from "../Keys";
-import AbstractEventEmitter from "../AbstractEventEmitter";
-export default class InputProcessor extends AbstractEventEmitter {
+import { EventDispatcher } from "three/src/core/EventDispatcher";
+
+export default class InputProcessor extends EventDispatcher {
 
   constructor(name, commands, axisNames) {
     super();

@@ -1,7 +1,7 @@
 pliny.class({
   parent: "Primrose",
   name: "WebRTCSocket",
-  baseClass: "Primrose.AbstractEventEmitter",
+  baseClass: "THREE.EventDispatcher",
   description: "Manages the negotiation between peer users to set up bidirectional audio between the two.",
   parameters: [{
     name: "requestICEPath",
@@ -26,7 +26,7 @@ pliny.class({
   }]
 });
 
-import AbstractEventEmitter from "../AbstractEventEmitter";
+import { EventDispatcher } from "three/src/core/EventDispatcher";
 
 
 const PEERING_TIMEOUT_LENGTH = 30000;
@@ -48,7 +48,7 @@ let ICE_SERVERS = [{
 let INSTANCE_COUNT = 0;
 
 
-export default class WebRTCSocket extends AbstractEventEmitter {
+export default class WebRTCSocket extends EventDispatcher {
   // Be forewarned, the WebRTC lifecycle is very complex and editing this class is likely to break it.
   constructor(requestICEPath, fromUserName, fromUserIndex, toUserName, toUserIndex, goSecond) {
     super();

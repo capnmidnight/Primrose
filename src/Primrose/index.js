@@ -5,7 +5,6 @@ pliny.namespace({
 This top-level namespace contains classes for manipulating and viewing 3D environments."
 });
 
-import AbstractEventEmitter from "./AbstractEventEmitter";
 import Angle from "./Angle";
 import Audio from "./Audio";
 import BrowserEnvironment from "./BrowserEnvironment";
@@ -24,7 +23,6 @@ import Replay from "./Replay";
 import Text from "./Text";
 
 export {
-  AbstractEventEmitter,
   Angle,
   Audio,
   BrowserEnvironment,
@@ -44,7 +42,6 @@ export {
 };
 
 export default {
-  AbstractEventEmitter,
   Angle,
   Audio,
   BrowserEnvironment,

@@ -215,7 +215,6 @@ import sphere from "../live-api/sphere";
 import identity from "../util/identity";
 
 import Angle from "./Angle";
-import AbstractEventEmitter from "./AbstractEventEmitter";
 import Pointer from "./Pointer";
 import Keys from "./Keys";
 
@@ -248,6 +247,7 @@ import PlainText from "./Text/Grammars/PlainText";
 import { Quality, PIXEL_SCALES } from "./Constants";
 
 
+import { EventDispatcher } from "three/src/core/EventDispatcher";
 import { BackSide, PCFSoftShadowMap } from "three/src/constants";
 import { FogExp2 } from "three/src/scenes/FogExp2";
 import { Scene } from "three/src/scenes/Scene";
@@ -260,7 +260,7 @@ import { Euler } from "three/src/math/Euler";
 import { Vector3 } from "three/src/math/Vector3";
 import { WebGLRenderer } from "three/src/renderers/WebGLRenderer";
 
-export default class BrowserEnvironment extends AbstractEventEmitter {
+export default class BrowserEnvironment extends EventDispatcher {
   constructor(options) {
     super();
 
@@ -325,7 +325,7 @@ export default class BrowserEnvironment extends AbstractEventEmitter {
         name: "update",
         description: "Fires after every animation update."
       });
-      this.emit("update", dt);
+      this.emit("update");
     };
 
     const doPicking = () => {

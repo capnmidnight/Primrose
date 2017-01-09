@@ -1,7 +1,7 @@
 pliny.class({
   parent: "Primrose.Input",
   name: "FPSInput",
-  baseClass: "Primrose.AbstractEventEmitter",
+  baseClass: "THREE.EventDispatcher",
   description: "A massive hairball of a class that handles all of the input abstraction.",
   parameters: [{
     name: "DOMElement",
@@ -25,7 +25,8 @@ import { Vector3 } from "three/src/math/Vector3";
 import { Euler } from "three/src/math/Euler";
 import { Quaternion } from "three/src/math/Quaternion";
 import { Matrix4 } from "three/src/math/Matrix4";
-import AbstractEventEmitter from "../AbstractEventEmitter";
+import { EventDispatcher } from "three/src/core/EventDispatcher";
+
 import identity from "../../util/identity";
 import hub from "../../live-api/hub";
 import colored from "../../live-api/colored";
@@ -39,15 +40,12 @@ import Speech from "./Speech";
 import VR from "./VR";
 import Keys from "../Keys";
 import Pointer from "../Pointer";
-export default class FPSInput extends AbstractEventEmitter {
+
+export default class FPSInput extends EventDispatcher {
   constructor(DOMElement, options) {
     super();
 
     this.options = options;
-    this._handlers.zero = [];
-    this._handlers.motioncontroller = [];
-    this._handlers.gamepad = [];
-
     this.managers = [];
     this.newState = [];
     this.pointers = [];
