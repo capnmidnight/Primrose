@@ -222,7 +222,7 @@ import Text2Speech from "./Audio/Speech";
 import Audio3D from "./Audio/Audio3D";
 import Music from "./Audio/Music";
 
-import Entity from "./Controls/Entity";
+import { eyeBlankAll, default as Entity } from "./Controls/Entity";
 import Button2D from "./Controls/Button2D";
 import Button3D from "./Controls/Button3D";
 import ButtonFactory from "./Controls/ButtonFactory";
@@ -405,7 +405,7 @@ export default class BrowserEnvironment extends EventDispatcher {
           st = trans[i];
         }
         var v = st.viewport;
-        Entity.eyeBlankAll(i);
+        eyeBlankAll(i);
 
         if(trans.length > 1) {
           var side = (2 * i) - 1;

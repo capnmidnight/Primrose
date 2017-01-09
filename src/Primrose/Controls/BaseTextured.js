@@ -16,6 +16,7 @@ import Entity from "./Entity";
 import quad from "../../live-api/quad";
 import shell from "../../live-api/shell";
 import hub from "../../live-api/hub";
+
 export default class BaseTextured extends Entity {
 
   constructor(files, options) {
@@ -23,17 +24,12 @@ export default class BaseTextured extends Entity {
 
     this.options = options;
 
-    Entity.registerEntity(this);
-
     ////////////////////////////////////////////////////////////////////////
     // initialization
     ///////////////////////////////////////////////////////////////////////
     this._meshes = [];
     this._textures = [];
     this._currentImageIndex = 0;
-    this._environment = null;
-    this._pickableRegistered = false;
-    this.object = hub();
 
     if(!this.options.geometry){
       if(this.options.radius){
@@ -66,52 +62,63 @@ export default class BaseTextured extends Entity {
     }
   }
 
-  add(child){
-    this.object.add(child);
+  _getFirstProp(name){
+    return this._meshes && this._meshes.length > 0 && this._meshes[0][name];
   }
 
-  get matrixWorld() {
-    return this.object.matrixWorld;
-  }
-
-  get position(){
-    return this.object.position;
-  }
-
-  get quaternion(){
-    return this.object.quaternion;
-  }
-
-  get scale(){
-    return this.object.scale;
-  }
-
-  get visible(){
-    return this.object.visible;
-  }
-
-  set visible(v){
-    this.object.visible = v;
-  }
-
-  addToBrowserEnvironment(env, scene) {
-    scene.add(this.object);
-    this._environment = env;
-    this._registerPickableObjects();
-  }
-
-  _registerPickableObjects(){
-    if(this._environment && this.options.pickable && this._meshes.length > 0 && !this._pickableRegistered){
-      this._environment.registerPickableObject(this._meshes[0]);
-      this._pickableRegistered = true;
+  _setFirstProp(name, value){
+    if(this._meshes && this._meshes.length > 0) {
+      this._meshes[0][name] = value;
     }
   }
 
+  get disabled() {
+    return this._getFirstProp("disabled");
+  }
+
+  set disabled(v) {
+    this._setFirstProp("disabled", v);
+  }
+
+  get onselect(){
+    return this._getFirstProp("onselect");
+  }
+
+  set onselect(v){
+    this._setFirstProp("onselect", v);
+  }
+
+  get onenter(){
+    return this._getFirstProp("onenter");
+  }
+
+  set onenter(v){
+    this._setFirstProp("onenter", v);
+  }
+
+  get onexit(){
+    return this._getFirstProp("onexit");
+  }
+
+  set onexit(v){
+    this._setFirstProp("onexit", v);
+  }
+
+  addToBrowserEnvironment(env, scene) {
+    scene.add(this);
+    this.n = 10;
+    return this.ready.then(() => {
+      if(this.options.pickable && this._meshes.length > 0) {
+        env.registerPickableObject(this._meshes[0]);
+      }
+    });
+  }
+
   eyeBlank(eye) {
-    if(this._meshes) {
+    if(this._meshes && this._meshes.length > 0) {
       this._currentImageIndex = eye % this._meshes.length;
       for(let i = 0; i < this._meshes.length; ++i){
-        this._meshes[i].visible = i === this._currentImageIndex;
+        this._meshes[i].visible = (i === this._currentImageIndex);
       }
     }
   }

@@ -1,76 +1,34 @@
 pliny.class({
   parent: "Primrose.Controls",
   name: "Entity",
+  baseClass: "THREE.Object3D",
   description: "The Entity class is the parent class for all 3D controls. It manages a unique ID for every new control, the focus state of the control, and performs basic conversions from DOM elements to the internal Control format."
 });
 
-var entityKeys = [],
-  entities = new WeakMap(),
-  lastEye = 0;
+var entities = [];
 
-import AbstractEventEmitter from "../AbstractEventEmitter"
-export default class Entity extends AbstractEventEmitter {
+pliny.function({
+  parent: "Primrose.Controls.Entity",
+  name: "eyeBlankAll",
+  description: "Trigger the eyeBlank event for all registered entities.",
+  parameters: [{
+    name: "eye",
+    type: "Number",
+    description: "The eye to switch to: -1 for left, +1 for right."
+  }]
+});
+export function eyeBlankAll(eye) {
+  entities.forEach((entity) => entity.eyeBlank(eye));
+}
 
-  static registerEntity(e) {
-    pliny.function({
-      parent: "Primrose.Controls.Entity",
-      name: "registerEntity",
-      description: "Register an entity to be able to receive eyeBlank events.",
-      parameters: [{
-        name: "e",
-        type: "Primrose.Controls.Entity",
-        description: "The entity to register."
-      }]
-    });
-    entities.set(e._idObj, e);
-    entityKeys.push(e._idObj);
-    e.addEventListener("_idchanged", (evt) => {
-      entityKeys.splice(entityKeys.indexOf(evt.oldID), 1);
-      entities.delete(evt.oldID);
-      entities.set(evt.entity._idObj, evt.entity);
-      entityKeys.push(evt.entity._idObj);
-    }, false);
-  }
+import { Object3D } from "three/src/core/Object3D";
 
-  static eyeBlankAll(eye) {
-    pliny.function({
-      parent: "Primrose.Controls.Entity",
-      name: "eyeBlankAll",
-      description: "Trigger the eyeBlank event for all registered entities.",
-      parameters: [{
-        name: "eye",
-        type: "Number",
-        description: "The eye to switch to: -1 for left, +1 for right."
-      }]
-    });
-    if(eye !== lastEye) {
-      entityKeys.forEach((id) => {
-        entities.get(id)
-          .eyeBlank(eye);
-      });
-      lastEye = eye;
-    }
-  }
+export default class Entity extends Object3D {
 
   constructor(id) {
     super();
-    this.id = id;
-
-    pliny.property({
-      parent: "Primrose.Controls.Entity",
-      name: "parent ",
-      type: "Primrose.Controls.Entity",
-      description: "The parent element of this element, if this element has been added as a child to another element."
-    });
-    this.parent = null;
-
-    pliny.property({
-      parent: "Primrose.Controls.Entity",
-      name: "children",
-      type: "Array",
-      description: "The child elements of this element."
-    });
-    this.children = [];
+    this.isEntity = true;
+    this.name = id;
 
     pliny.property({
       parent: "Primrose.Controls.Entity",
@@ -97,29 +55,8 @@ export default class Entity extends AbstractEventEmitter {
     pliny.event({ parent: "Primrose.Controls.Entity", name: "cut", description: "Occurs when the user activates the clipboard's `cut` command while focused on the element." });
     pliny.event({ parent: "Primrose.Controls.Entity", name: "copy", description: "Occurs when the user activates the clipboard's `copy` command while focused on the element." });
     pliny.event({ parent: "Primrose.Controls.Entity", name: "wheel", description: "Occurs when the user scrolls the mouse wheel while focused on the element." });
-  }
 
-  get id() {
-    pliny.property({
-      parent: "Primrose.Controls.Entity",
-      name: "id ",
-      type: "String",
-      description: "Get or set the id for the control."
-    });
-    return this._id;
-  }
-
-  set id(v) {
-    if(this._id !== v){
-      var oldID = this._idObj;
-      this._id = v;
-      this._idObj = new Object(v);
-      // this `_idchanged` event is necessary to update the related ID in the WeakMap of entities for eye-blanking.
-      this.emit("_idchanged", {
-        oldID: oldID,
-        entity: this
-      });
-    }
+    entities.push(this);
   }
 
   focus() {
@@ -201,68 +138,6 @@ export default class Entity extends AbstractEventEmitter {
     }
   }
 
-  appendChild(child) {
-    pliny.method({
-      parent: "Primrose.Controls.Entity",
-      name: "appendChild",
-      description: "Adds an Entity as a child entity of this entity.",
-      parameters: [{
-        name: "child",
-        type: "Primrose.Controls.Entity",
-        description: "The object to add. Will only succeed if `child.parent` is not set to a value."
-      }],
-      examples: [{
-        name: "Add an entity to another entity",
-        description: "Entities can be arranged in parent-child relationships.\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  var a = new Primrose.Controls.Entity(),\n\
-  b = new Primrose.Controls.Entity();\n\
-  a.appendChild(b);\n\
-  console.assert(a.children.length === 1);\n\
-  console.assert(a.children[0] === b);\n\
-  console.assert(b.parent === a);"
-      }]
-    });
-    if (child && !child.parent) {
-      child.parent = this;
-      this.children.push(child);
-    }
-  }
-
-  removeChild(child) {
-    pliny.method({
-      parent: "Primrose.Controls.Entity",
-      name: "removeChild",
-      description: "Removes an Entity from another Entity of this entity.",
-      parameters: [{
-        name: "child",
-        type: "Primrose.Controls.Entity",
-        description: "The object to remove. Will only succeed if `child.parent` is this object."
-      }],
-      examples: [{
-        name: "Remove an entity from another entity",
-        description: "Entities can be arranged in parent-child relationships.\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  var a = new Primrose.Controls.Entity(),\n\
-  b = new Primrose.Controls.Entity();\n\
-  a.appendChild(b);\n\
-  console.assert(a.children.length === 1);\n\
-  console.assert(a.children[0] === b);\n\
-  console.assert(b.parent === a);\n\
-  a.removeChild(b);\n\
-  console.assert(a.children.length === 0)\n\
-  console.assert(b.parent === null);"
-      }]
-    });
-    const i = this.children.indexOf(child);
-    if (0 <= i && i < this.children.length) {
-      this.children.splice(i, 1);
-      child.parent = null;
-    }
-  }
-
   get theme() {
     pliny.property({
       parent: "Primrose.Controls.Entity",
@@ -328,7 +203,9 @@ export default class Entity extends AbstractEventEmitter {
       description: "Instructs any stereoscopically rendered surfaces to change their rendering offset."
     });
     for (var i = 0; i < this.children.length; ++i) {
-      this.children[i].eyeBlank(eye);
+      if(this.children[i].isEntity) {
+        this.children[i].eyeBlank(eye);
+      }
     }
   }
 
