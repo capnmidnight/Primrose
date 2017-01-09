@@ -5,7 +5,10 @@ pliny.value({
 });
 
 import Grammar from "./Grammar";
-import Token from "../Token"
+import Token from "../Token";
+
+const eval2 = eval;
+
 const Basic = new Grammar("BASIC",
   // Grammar rules are applied in the order they are specified.
   [
@@ -208,7 +211,7 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next,
     }
     //with ( state ) { // jshint ignore:line
     try {
-      return eval(script); // jshint ignore:line
+      return eval2(script); // jshint ignore:line
     }
     catch (exp) {
       console.error(exp);
@@ -604,7 +607,7 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next,
     name = "FN" + name;
     var script = "(function " + name + signature + "{ return " + body +
       "; })";
-    state[name] = eval(script); // jshint ignore:line
+    state[name] = eval2(script); // jshint ignore:line
     return true;
   }
 
