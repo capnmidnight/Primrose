@@ -192,9 +192,6 @@ pliny.record({
 });
 
 const MILLISECONDS_TO_SECONDS = 0.001,
-  MAX_MOVE_DISTANCE = 5,
-  MAX_MOVE_DISTANCE_SQ = MAX_MOVE_DISTANCE * MAX_MOVE_DISTANCE,
-  TELEPORT_COOLDOWN = 250,
   TELEPORT_DISPLACEMENT = new Vector3(),
   GROUND_HEIGHT = -0.07,
   EYE_INDICES = { "left": 0, "right": 1 };
@@ -207,8 +204,6 @@ import box from "../live-api/box";
 import brick from "../live-api/brick";
 import colored from "../live-api/colored";
 import hub from "../live-api/hub";
-import light from "../live-api/light";
-import put from "../live-api/put";
 import textured from "../live-api/textured";
 import sphere from "../live-api/sphere";
 
@@ -222,10 +217,13 @@ import Text2Speech from "./Audio/Speech";
 import Audio3D from "./Audio/Audio3D";
 import Music from "./Audio/Music";
 
-import { eyeBlankAll, default as Entity } from "./Controls/Entity";
+import { eyeBlankAll } from "./Controls/BaseTextured";
 import Button2D from "./Controls/Button2D";
 import Button3D from "./Controls/Button3D";
 import ButtonFactory from "./Controls/ButtonFactory";
+import Entity from "./Controls/Entity";
+import Ground from "./Controls/Ground";
+import Sky from "./Controls/Sky";
 import Image from "./Controls/Image";
 import Surface from "./Controls/Surface";
 import TextBox from "./Controls/TextBox";
@@ -235,7 +233,7 @@ import StandardMonitorVRDisplay from "./Displays/StandardMonitorVRDisplay";
 import cascadeElement from "./DOM/cascadeElement";
 import makeHidingContainer from "./DOM/makeHidingContainer";
 
-import ModelLoader from "./Graphics/ModelLoader";
+import ModelFactory from "./Graphics/ModelFactory";
 
 import FPSInput from "./Input/FPSInput";
 import VR from "./Input/VR";
@@ -243,6 +241,8 @@ import VR from "./Input/VR";
 import NetworkManager from "./Network/Manager";
 
 import PlainText from "./Text/Grammars/PlainText";
+
+import Teleporter from "./Tools/Teleporter";
 
 import { Quality, PIXEL_SCALES } from "./Constants";
 
@@ -252,7 +252,6 @@ import { BackSide, PCFSoftShadowMap } from "three/src/constants";
 import { FogExp2 } from "three/src/scenes/FogExp2";
 import { Scene } from "three/src/scenes/Scene";
 import { PerspectiveCamera } from "three/src/cameras/PerspectiveCamera";
-import { AmbientLight } from "three/src/lights/AmbientLight";
 import { TextGeometry } from "three/src/geometries/TextGeometry";
 import { Quaternion } from "three/src/math/Quaternion";
 import { Color } from "three/src/math/Color";
@@ -662,7 +661,11 @@ export default class BrowserEnvironment extends EventDispatcher {
         description: "The object to make pickable."
       }]
     });
-    this.registerPickableObject = this.pickableObjects.push.bind(this.pickableObjects);
+    this.registerPickableObject = (obj) => {
+      if(obj) {
+        this.pickableObjects.push(obj);
+      }
+    };
 
     pliny.property({
       parent: "Primrose.BrowserEnvironment",
@@ -770,10 +773,6 @@ export default class BrowserEnvironment extends EventDispatcher {
         .length() > 0.2,
       immediate);
 
-    const POSITION = new Vector3(),
-      START_POINT = new Vector3();
-
-
     pliny.method({
       parent: "Primrose.BrowserEnvironment",
       name: "selectControl",
@@ -787,45 +786,7 @@ export default class BrowserEnvironment extends EventDispatcher {
     this.selectControl = (evt) => {
       const hit = evt.hit,
         obj = hit && hit.object;
-
-      if(this.ground && obj === this.ground) {
-        if(evt.type === "exit"){
-          evt.pointer.disk.visible = false;
-        }
-        else if(evt.type !== "exit") {
-          POSITION.copy(evt.hit.point)
-            .sub(this.input.head.position);
-
-          var distSq = POSITION.x * POSITION.x + POSITION.z * POSITION.z;
-          if (distSq > MAX_MOVE_DISTANCE_SQ) {
-            var dist = Math.sqrt(distSq),
-              factor = MAX_MOVE_DISTANCE / dist,
-              y = POSITION.y;
-            POSITION.y = 0;
-            POSITION.multiplyScalar(factor);
-            POSITION.y = y;
-          }
-
-          POSITION.add(this.input.head.position);
-
-          if(evt.type === "enter") {
-            evt.pointer.disk.visible = true;
-          }
-          else if(evt.type === "pointerstart" || evt.type === "gazestart") {
-            START_POINT.copy(POSITION);
-          }
-          else if(evt.type === "pointermove" || evt.type === "gazemove"){
-            evt.pointer.moveTeleportPad(POSITION);
-          }
-          else if(evt.type === "pointerend" || evt.type === "gazecomplete") {
-            START_POINT.sub(POSITION);
-            const len = START_POINT.lengthSq();
-            if(len < 0.01){
-              this.teleport(POSITION);
-            }
-          }
-        }
-      }
+        console.log(evt.type, obj);
 
       if(evt.type === "pointerstart" || evt.type === "gazecomplete"){
         const ctrl = obj && (obj.surface || obj.button);
@@ -888,69 +849,8 @@ export default class BrowserEnvironment extends EventDispatcher {
       type: "THREE.Object3D",
       description: "If a `skyTexture` option is provided, it will be a texture cube or photosphere. If no `skyTexture` option is provided, there will only be a THREE.Object3D, to create an anchor point on which implementing scripts can add objects that follow the user's position."
     });
-    let skyReady = null;
-    if (this.options.skyTexture !== null) {
-      skyReady = new Promise((resolve, reject) => {
-        const skyFunc = (typeof this.options.skyTexture === "number") ? colored : textured;
-
-        let skyGeom = null;
-        if(typeof this.options.skyTexture === "string"){
-          skyGeom = sphere(this.options.drawDistance, 18, 9);
-        }
-        else {
-          const skyDim = this.options.drawDistance / Math.sqrt(2);
-          skyGeom = box(skyDim, skyDim, skyDim);
-        }
-
-        this.sky = skyFunc(skyGeom, this.options.skyTexture, {
-          side: BackSide,
-          useFog: false,
-          unshaded: true,
-          resolve: resolve,
-          progress: this.options.progress
-        });
-      });
-    }
-    else {
-      this.sky = hub();
-      skyReady = Promise.resolve();
-    }
-
-    if(this.options.disableDefaultLighting) {
-      this.ambient = null;
-      this.sun = null;
-    }
-    else{
-
-      pliny.property({
-        parent: "Primrose.BrowserEnvironment",
-        name: "ambient",
-        type: "THREE.AmbientLight",
-        description: "If the `disableDefaultLighting` option is not present, the ambient light provides a fill light so that dark shadows do not completely obscure object details."
-      });
-      this.ambient = new AmbientLight(0xffffff, 0.5);
-
-      pliny.property({
-        parent: "Primrose.BrowserEnvironment",
-        name: "sun",
-        type: "THREE.PointLight",
-        description: "If the `disableDefaultLighting` option is not present, the sun light provides a key light so that objects have shading and relief."
-      });
-      this.sun = light(0xffffff, 1, 50);
-    }
-
-    skyReady = skyReady.then(() => {
-      this.sky.name = "Sky";
-      this.scene.add(this.sky);
-
-
-      if(!this.options.disableDefaultLighting) {
-        this.sky.add(this.ambient);
-        put(this.sun)
-          .on(this.sky)
-          .at(0, 10, 10);
-      }
-    });
+    this.sky = new Sky(this.options);
+    this.appendChild(this.sky);
 
 
     pliny.property({
@@ -1320,20 +1220,21 @@ export default class BrowserEnvironment extends EventDispatcher {
       return this.input.ready;
     });
 
-    var allReady = Promise.all([
-        skyReady,
-        groundReady,
-        modelsReady,
-        documentReady
-      ])
+    this._readyParts = [
+      this.sky.ready,
+      this.ground.ready,
+      modelsReady,
+      documentReady
+    ];
+    this.ready = Promise.all(this._readyParts)
       .then(() => {
         this.renderer.domElement.style.cursor = "default";
-        if(this.options.enableShadows && this.sun) {
+        if(this.options.enableShadows && this.sky.sun) {
           this.renderer.shadowMap.enabled = true;
           this.renderer.shadowMap.type = PCFSoftShadowMap;
-          this.sun.castShadow = true;
-          this.sun.shadow.mapSize.width =
-          this.sun.shadow.mapSize.height = this.options.shadowMapSize;
+          this.sky.sun.castShadow = true;
+          this.sky.sun.shadow.mapSize.width =
+          this.sky.sun.shadow.mapSize.height = this.options.shadowMapSize;
           if(this.ground.material){
             this.ground.receiveShadow = true;
             this.ground.castShadow = true;
@@ -1371,12 +1272,11 @@ export default class BrowserEnvironment extends EventDispatcher {
       description: "Restart animation after it has been stopped."
     });
     this.start = () => {
-      allReady
-        .then(() => {
-          this.audio.start();
-          lt = performance.now() * MILLISECONDS_TO_SECONDS;
-          RAF(animate);
-        });
+      this.ready.then(() => {
+        this.audio.start();
+        lt = performance.now() * MILLISECONDS_TO_SECONDS;
+        RAF(animate);
+      });
     };
 
 
@@ -1407,7 +1307,7 @@ export default class BrowserEnvironment extends EventDispatcher {
             this.options.quality = v;
             resolutionScale = PIXEL_SCALES[v];
           }
-          allReady.then(modifyScreen);
+          this.ready.then(modifyScreen);
         }
       }
     });

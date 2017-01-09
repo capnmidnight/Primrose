@@ -17,23 +17,47 @@ import quad from "../../live-api/quad";
 import shell from "../../live-api/shell";
 import hub from "../../live-api/hub";
 
+var entities = [];
+
+pliny.function({
+  parent: "Primrose.Controls.Entity",
+  name: "eyeBlankAll",
+  description: "Trigger the eyeBlank event for all registered entities.",
+  parameters: [{
+    name: "eye",
+    type: "Number",
+    description: "The eye to switch to: -1 for left, +1 for right."
+  }]
+});
+export function eyeBlankAll(eye) {
+  entities.forEach((entity) => entity.eyeBlank(eye));
+}
+
 export default class BaseTextured extends Entity {
 
   constructor(files, options) {
-    super(options.id);
+    options = Object.assign({
+      id: files.join()
+    }, options);
 
-    this.options = options;
+    super(options);
+
+    entities.push(this);
 
     ////////////////////////////////////////////////////////////////////////
     // initialization
     ///////////////////////////////////////////////////////////////////////
+    this._files = files;
     this._meshes = [];
     this._textures = [];
     this._currentImageIndex = 0;
 
-    if(!this.options.geometry){
+    if(this.options.geometry){
+      this._geometry = this.options.geometry;
+    }
+    else {
       if(this.options.radius){
-        this.options.geometry = shell(
+        this._geometry = shell(
           this.options.radius,
           72,
           36,
@@ -48,27 +72,31 @@ export default class BaseTextured extends Entity {
         if(!this.options.height){
           this.options.height = 0.5;
         }
-        this.options.geometry = quad(this.options.width, this.options.height, options);
+        this._geometry = quad(this.options.width, this.options.height, options);
       }
-    }
 
-    if(files) {
-      this.ready = this._loadFiles(files, this.options.progress)
-        .then(() => this._meshes.forEach((mesh) => this.add(mesh)))
-        .then(() => this);
+      this.options.geometry = this._geometry;
     }
-    else{
-      this.ready = Promise.resolve(this);
-    }
+  }
+
+  get _ready() {
+    return super._ready
+      .then(() => this._loadFiles(this._files, this.options.progress))
+      .then(() => this._meshes.forEach((mesh) =>
+        this.add(mesh)));
+  }
+
+  get _pickingObject() {
+    return this._meshes && this._meshes.length > 0 && this._meshes[0];
   }
 
   _getFirstProp(name){
-    return this._meshes && this._meshes.length > 0 && this._meshes[0][name];
+    return this._pickingObject && this._pickingObject[name];
   }
 
   _setFirstProp(name, value){
-    if(this._meshes && this._meshes.length > 0) {
-      this._meshes[0][name] = value;
+    if(this._pickingObject) {
+      this._pickingObject[name] = value;
     }
   }
 
@@ -102,16 +130,6 @@ export default class BaseTextured extends Entity {
 
   set onexit(v){
     this._setFirstProp("onexit", v);
-  }
-
-  addToBrowserEnvironment(env, scene) {
-    scene.add(this);
-    this.n = 10;
-    return this.ready.then(() => {
-      if(this.options.pickable && this._meshes.length > 0) {
-        env.registerPickableObject(this._meshes[0]);
-      }
-    });
   }
 
   eyeBlank(eye) {

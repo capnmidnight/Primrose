@@ -13,8 +13,10 @@ import Form from "./Form";
 import Ground from "./Ground";
 import Image from "./Image";
 import Label from "./Label";
+import Model from "./Model";
 import PlainText from "./PlainText";
 import Progress from "./Progress";
+import Sky from "./Sky";
 import Surface from "./Surface";
 import TextBox from "./TextBox";
 import TextInput from "./TextInput";
@@ -29,8 +31,10 @@ export {
   Ground,
   Image,
   Label,
+  Model,
   PlainText,
   Progress,
+  Sky,
   Surface,
   TextBox,
   TextInput
@@ -46,8 +50,10 @@ export default {
   Ground,
   Image,
   Label,
+  Model,
   PlainText,
   Progress,
+  Sky,
   Surface,
   TextBox,
   TextInput
