@@ -32,8 +32,8 @@ pliny.function({
                     R(-0.5 * HEIGHT, 0.5 * HEIGHT),\n\
                     R(-0.5 * DEPTH, 0.5 * DEPTH)));\n\
     }\n\
-    put(cloud(verts, 0x7f7f7f 0.05))\n\
-      .on(scene)\n\
+    cloud(verts, 0x7f7f7f 0.05)\n\
+      .addTo(scene)\n\
       .at(WIDTH / 2 , HEIGHT / 2, DEPTH / 2);\n\
 \n\
 The results should look like this:\n\

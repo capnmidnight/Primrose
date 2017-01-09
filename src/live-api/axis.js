@@ -30,12 +30,10 @@ The result should appear as:\n\
 });
 
 import hub from "./hub";
-import put from "./put";
 import brick from "./brick";
 export default function axis(length, width) {
-  const center = hub();
-  put(brick(0xff0000, length, width, width)).on(center);
-  put(brick(0x00ff00, width, length, width)).on(center);
-  put(brick(0x0000ff, width, width, length)).on(center);
-  return center;
+  return hub()
+    .add(brick(0xff0000, length, width, width))
+    .add(brick(0x00ff00, width, length, width))
+    .add(brick(0x0000ff, width, width, length));
 };

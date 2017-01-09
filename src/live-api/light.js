@@ -31,7 +31,9 @@ pliny.function({
   examples: [{
     name: "Basic usage",
     description: "    grammar(\"JavaScript\");\n\
-    put(light(0xffff00)).on(scene).at(0, 100, 0);"
+    light(0xffff00)\n\
+      .addTo(scene)\n\
+      .at(0, 100, 0);"
   }]
 });
 

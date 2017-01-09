@@ -36,9 +36,8 @@ pliny.function({
     description: "To create a textured brick with the `brick()` function.:\n\
 \n\
     grammar(\"JavaScript\");\n\
-    var mesh = brick(DECK, 1, 2, 3);\n\
-    put(mesh)\n\
-      .on(scene)\n\
+    var mesh = brick(DECK, 1, 2, 3)\n\
+      .addTo(scene)\n\
       .at(-2, 1, -5);\n\
 \n\
 The result should appear as:\n\

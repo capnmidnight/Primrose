@@ -55,3 +55,23 @@ Object3D.prototype.named = function(name){
   this.name = name;
   return this;
 };
+
+Object3D.prototype.addTo = function(obj) {
+  obj.add(this);
+  return this;
+};
+
+Object3D.prototype.at = function(x, y, z) {
+  this.position.set(x, y, z);
+  return this;
+};
+
+Object3D.prototype.rot = function(x, y, z) {
+  this.rotation.set(x, y, z);
+  return this;
+};
+
+Object3D.prototype.scl = function(x, y, z) {
+  this.scale.set(x, y, z);
+  return this;
+};

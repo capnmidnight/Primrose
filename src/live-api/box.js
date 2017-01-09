@@ -43,8 +43,8 @@ pliny.function({
     grammar(\"JavaScript\");\n\
     var geom = box(1, 2, 3),\n\
       mesh = colored(geom, 0xff0000);\n\
-    put(mesh)\n\
-      .on(scene)\n\
+    mesh\n\
+      .addTo(scene)\n\
       .at(-2, 1, -5);\n\
 \n\
 It should look something like this:\n\

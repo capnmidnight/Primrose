@@ -57,10 +57,9 @@ pliny.function({
     description: "Three.js separates geometry from materials, so you can create shared materials and geometry that recombine in different ways. To create a simple cylinder geometry object that you can then add a material to create a mesh: \n\
   \n\
     grammar(\"JavaScript\");\n\
-    var geom = cylinder(),\n\
-      mesh = colored(geom, 0xff0000);\n\
-    put(mesh)\n\
-      .on(scene)\n\
+    var mesh = cylinder()\n\
+      .colored(0xff0000)\n\
+      .addTo(scene)\n\
       .at(-2, 1, -5);\n\
 \n\
 It should look something like this:\n\

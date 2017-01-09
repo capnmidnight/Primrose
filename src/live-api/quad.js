@@ -18,16 +18,15 @@ pliny.function({
     optional: true,
     description: "Optional settings for creating the quad geometry. See [`Live API.quad.optionsHash`](#LiveAPI_quad_optionsHash) for more information."
   }],
-  returns: "THREE.CircleBufferGeometry",
+  returns: "THREE.PlaneBufferGeometry",
   examples: [{
     name: "Basic usage",
     description: "Three.js separates geometry from materials, so you can create shared materials and geometry that recombine in different ways. To create a simple circle geometry object that you can then add a material to create a mesh:\n\
   \n\
     grammar(\"JavaScript\");\n\
-    var geom = quad(1, 2),\n\
-      mesh = colored(geom, 0xff0000);\n\
-    put(mesh)\n\
-      .on(scene)\n\
+    var mesh = quad(1, 2)\n\
+      .colored(0xff0000)\n\
+      .addTo(scene)\n\
       .at(-2, 1, -5);\n\
 \n\
 It should look something like this:\n\

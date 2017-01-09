@@ -45,10 +45,9 @@ pliny.function({
     description: "Three.js separates geometry from materials, so you can create shared materials and geometry that recombine in different ways. To create a simple circle geometry object that you can then add a material to create a mesh:\n\
   \n\
     grammar(\"JavaScript\");\n\
-    var geom = ring(0.5, 1, 18, 1, 0, 2 * Math.PI),\n\
-      mesh = colored(geom, 0xff0000);\n\
-    put(mesh)\n\
-      .on(scene)\n\
+    var mesh = ring(0.5, 1, 18, 1, 0, 2 * Math.PI)\n\
+      .colored(0xff0000)\n\
+      .addTo(scene)\n\
       .at(-2, 1, -5);\n\
 \n\
 It should look something like this:\n\
