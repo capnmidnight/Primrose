@@ -115,11 +115,18 @@ const seenElements = new WeakMap();
 let seenElementCount = 0;
 
 export default function textured(geometry, txt, options) {
-  options = Object.assign({}, {
-    txtRepeatX: 1,
-    txtRepeatY: 1,
-    anisotropy: 1
-  }, options);
+  if(!options){
+    options = {};
+  }
+  if(!options.txtRepeatX){
+    options.txtRepeatX = 1;
+  }
+  if(!options.txtRepeatY){
+    options.txtRepeatY = 1;
+  }
+  if(!options.anisotropy){
+    options.anisotropy = 1;
+  }
 
   let txtType = typeof txt,
     txtID = null;
@@ -245,7 +252,7 @@ export default function textured(geometry, txt, options) {
     }
   }
 
-  texturePromise.then((texture) => {
+  options.promise = texturePromise.then((texture) => {
     if (options.txtRepeatX * options.txtRepeatY > 1) {
       texture.wrapS = texture.wrapT = RepeatWrapping;
       texture.repeat.set(options.txtRepeatX, options.txtRepeatY);
@@ -263,10 +270,7 @@ export default function textured(geometry, txt, options) {
     mat.needsUpdate = true;
     texture.needsUpdate = true;
     return texture;
-  }).then(options.resolve)
-    .catch(options.reject);
-
-  options.promise = texturePromise;
+  });
 
   return obj;
 }

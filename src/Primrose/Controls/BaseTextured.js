@@ -56,9 +56,14 @@ export default class BaseTextured extends Entity {
       }
     }
 
-    this.ready = this._loadFiles(files, this.options.progress)
-    .then(() => this._registerPickableObjects())
-    .then(() => this);
+    if(files) {
+      this.ready = this._loadFiles(files, this.options.progress)
+        .then(() => this._meshes.forEach((mesh) => this.add(mesh)))
+        .then(() => this);
+    }
+    else{
+      this.ready = Promise.resolve(this);
+    }
   }
 
   add(child){
