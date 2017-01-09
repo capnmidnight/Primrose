@@ -29,24 +29,24 @@ var COUNTER = 0;
 
 import { Texture } from "three/src/textures/Texture";
 import isChrome from "../../flags/isChrome";
-import Entity from "./Entity";
+import BaseTextured from "./BaseTextured";
 import Rectangle from "../Text/Rectangle";
 import textured from "../../live-api/textured";
 import quad from "../../live-api/quad";
 import shell from "../../live-api/shell";
-export default class Surface extends Entity {
+export default class Surface extends BaseTextured {
 
   static create() {
     return new Surface();
   }
 
   constructor(options) {
-    super();
-    this.isSurface = true;
-    this.options = Object.assign({}, {
+    options = Object.assign({}, {
       id: "Primrose.Controls.Surface[" + (COUNTER++) + "]",
       bounds: new Rectangle()
     }, options);
+    super(null, options);
+    this.isSurface = true;
     this.bounds = this.options.bounds;
     this.canvas = null;
     this.context = null;
@@ -182,14 +182,13 @@ export default class Surface extends Entity {
 
   addToBrowserEnvironment(env, scene) {
     this._environment = env;
-    var geom = this.className === "shell" ? shell(3, 10, 10) : quad(2, 2),
-      mesh = textured(geom, this, {
-        opacity: this._opacity
-      });
-    console.log(mesh, scene, env);
-    scene.add(mesh);
-    env.registerPickableObject(mesh);
-    return mesh;
+    var geom = this.className === "shell" ? shell(3, 10, 10) : quad(2, 2);
+    this._meshes[0] = textured(geom, this, {
+      opacity: this._opacity
+    });
+    scene.add(this._meshes[0]);
+    env.registerPickableObject(this._meshes[0]);
+    return this._meshes[0];
   }
 
   invalidate(bounds) {
