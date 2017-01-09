@@ -26,15 +26,15 @@ env.sky.add(moon);
 moon.latLon(-30, 30, 7);
 moon.lookAt(env.scene.position);
 
-var modelPromise = Primrose.Graphics.ModelLoader.loadModel("../models/dolphin.obj", null, Preloader.thunk)
-  .then(function(dolphinTemplate) {
-    range(3, function(i) {
-      var dolphin = dolphinTemplate.clone();
-      dolphin.rotation.set(0, 0, i * 1.1, "ZYX");
-      dolphin.position.set(0, 0, -i);
-      pod.add(dolphin);
-    });
+modelPromise = Promise.all(range(3, function(i) {
+  var dolphin = new Primrose.Controls.Model("../models/dolphin.obj", {
+    progress: Preloader.thunk
   });
+  dolphin.rotation.set(0, 0, i * 1.1, "ZYX");
+  dolphin.position.set(0, 0, -i);
+  pod.add(dolphin);
+  return dolphin.ready;
+}));
 
 env.addEventListener("ready", function(){
   modelPromise.then(Preloader.hide);

@@ -98,7 +98,7 @@ export default class ModelFactory {
         while(scene && scene.type === "Group"){
           scene = scene.children[0];
         }
-        new ModelFactory(scene);
+        return new ModelFactory(scene);
       });
   }
 

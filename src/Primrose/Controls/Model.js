@@ -25,7 +25,7 @@ export default class Model extends Entity {
 
   get _ready() {
     return super._ready.then(() => cache(this._file, () =>
-      ModelFactory.loadModel(this._file, options.type, options.progress))
+      ModelFactory.loadModel(this._file, this.options.type, this.options.progress))
     .then((factory) => {
       this._model = factory.clone();
       this.add(this._model);
