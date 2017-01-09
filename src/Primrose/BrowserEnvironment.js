@@ -329,6 +329,7 @@ export default class BrowserEnvironment extends EventDispatcher {
     };
 
     const doPicking = () => {
+      eyeBlankAll(0);
       for(let i = this.pickableObjects.length - 1; i >= 0; --i){
         let inScene = false;
         for(let head = this.pickableObjects[i].parent; head !== null; head = head.parent){
