@@ -97,7 +97,15 @@ function getNextScript(file, i) {
     } else {
       scripts[i] = contents;
     }
-    installScripts();
+    if (document.readyState !== "loading") {
+      installScripts();
+    } else {
+      var existing = document.onreadystatechange || function () {};
+      document.onreadystatechange = function (evt) {
+        existing(evt);
+        installScripts(evt);
+      };
+    }
   });
 }
 
