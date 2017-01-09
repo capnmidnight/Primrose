@@ -1170,9 +1170,6 @@ export default class BrowserEnvironment extends EventDispatcher {
       this.fader.visible = false;
       this.input.head.root.add(this.fader);
 
-      Pointer.EVENTS.forEach((evt) => this.input.addEventListener(evt, this.selectControl.bind(this), false));
-
-
       pliny.event({
         parent: "Primrose.BrowserEnvironment",
         name: "select",
@@ -1233,8 +1230,6 @@ export default class BrowserEnvironment extends EventDispatcher {
         description: "Fired when a pointer hovers over an object."
       });
 
-
-      this.input.forward(this, Pointer.EVENTS);
 
       if(!this.options.disableKeyboard) {
         const keyDown =  (evt) => {

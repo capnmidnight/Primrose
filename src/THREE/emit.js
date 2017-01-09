@@ -1,6 +1,7 @@
 import { EventDispatcher } from "three/src/core/EventDispatcher";
+import { Object3D } from "three/src/core/Object3D";
 
-EventDispatcher.prototype.emit = function(evt, obj) {
+Object3D.prototype.emit = EventDispatcher.prototype.emit = function(evt, obj) {
   if(!obj) {
     obj = {};
   }
@@ -15,9 +16,4 @@ EventDispatcher.prototype.emit = function(evt, obj) {
   }
 
   this.dispatchEvent(obj);
-};
-
-EventDispatcher.prototype.forward = function(obj, evts) {
-  evts.forEach((type) =>
-    this.addEventListener(type, obj.emit.bind(obj, type)));
 };

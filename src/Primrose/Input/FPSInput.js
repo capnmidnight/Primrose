@@ -218,7 +218,6 @@ export default class FPSInput extends EventDispatcher {
 
             this.pointers.push(ptr);
             ptr.addToBrowserEnvironment(null, this.options.scene);
-            ptr.forward(this, Pointer.EVENTS);
           }
           else {
             mgr = new Gamepad(this.gamepadMgr, pad, 0, {
@@ -255,7 +254,7 @@ export default class FPSInput extends EventDispatcher {
               },
               zero: {
                 buttons: [Gamepad.XBOX_ONE_BUTTONS.BACK],
-                commandUp: emit.bind(this, "zero")
+                commandUp: this.emit.bind(this, "zero")
               }
             });
             this.add(mgr);
@@ -292,7 +291,6 @@ export default class FPSInput extends EventDispatcher {
     this.options.scene.add(this.mousePointer.disk);
 
 
-    this.pointers.forEach((ptr) => ptr.forward(this, Pointer.EVENTS));
     this.ready = Promise.all(this.managers
       .map((mgr) => mgr.ready)
       .filter(identity));
