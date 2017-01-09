@@ -217,7 +217,7 @@ import Text2Speech from "./Audio/Speech";
 import Audio3D from "./Audio/Audio3D";
 import Music from "./Audio/Music";
 
-import { eyeBlankAll } from "./Controls/BaseTextured";
+import { updateAll, eyeBlankAll } from "./Controls/BaseTextured";
 import Button2D from "./Controls/Button2D";
 import Button3D from "./Controls/Button3D";
 import ButtonFactory from "./Controls/ButtonFactory";
@@ -328,7 +328,7 @@ export default class BrowserEnvironment extends EventDispatcher {
     };
 
     const doPicking = () => {
-      eyeBlankAll(0);
+      updateAll();
       for(let i = this.pickableObjects.length - 1; i >= 0; --i){
         let inScene = false;
         for(let head = this.pickableObjects[i].parent; head !== null; head = head.parent){

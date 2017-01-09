@@ -21,7 +21,7 @@ var entities = [];
 
 pliny.function({
   parent: "Primrose.Controls.Entity",
-  name: "eyeBlankAll",
+  name: "updateAll",
   description: "Trigger the eyeBlank event for all registered entities.",
   parameters: [{
     name: "eye",
@@ -29,9 +29,17 @@ pliny.function({
     description: "The eye to switch to: -1 for left, +1 for right."
   }]
 });
+export function updateAll(){
+  entities.forEach((entity) => {
+    entity.eyeBlank(0);
+    entity.update();
+  });
+};
+
 export function eyeBlankAll(eye) {
-  entities.forEach((entity) => entity.eyeBlank(eye));
-}
+  entities.forEach((entity) =>
+    entity.eyeBlank(0));
+};
 
 export default class BaseTextured extends Entity {
 
@@ -90,46 +98,14 @@ export default class BaseTextured extends Entity {
     return this._meshes && this._meshes.length > 0 && this._meshes[0];
   }
 
-  _getFirstProp(name){
-    return this._pickingObject && this._pickingObject[name];
-  }
-
-  _setFirstProp(name, value){
-    if(this._pickingObject) {
-      this._pickingObject[name] = value;
-    }
-  }
-
   get disabled() {
-    return this._getFirstProp("disabled");
+    return this._pickingObject && this._pickingObject.disabled;
   }
 
   set disabled(v) {
-    this._setFirstProp("disabled", v);
-  }
-
-  get onselect(){
-    return this._getFirstProp("onselect");
-  }
-
-  set onselect(v){
-    this._setFirstProp("onselect", v);
-  }
-
-  get onenter(){
-    return this._getFirstProp("onenter");
-  }
-
-  set onenter(v){
-    this._setFirstProp("onenter", v);
-  }
-
-  get onexit(){
-    return this._getFirstProp("onexit");
-  }
-
-  set onexit(v){
-    this._setFirstProp("onexit", v);
+    if(this._pickingObject) {
+      this._pickingObject.disabled = v;
+    }
   }
 
   eyeBlank(eye) {
@@ -141,6 +117,7 @@ export default class BaseTextured extends Entity {
     }
   }
 
-  update(){
+  update() {
+
   }
 }
