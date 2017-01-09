@@ -1,9 +1,9 @@
 pliny.class({
   parent: "Primrose",
-    name: "ModelLoader",
+    name: "ModelFactory",
     description: "Creates an interface for cloning 3D models loaded from files, to instance those objects.\n\
 \n\
-> NOTE: You don't instantiate this class directly. Call `ModelLoader.loadModel`.",
+> NOTE: You don't instantiate this class directly. Call `ModelFactory.loadModel`.",
     parameters: [{
       name: "template",
       type: "THREE.Object3D",
@@ -11,7 +11,7 @@ pliny.class({
     }],
     examples: [{
       name: "Load a basic model.",
-      description: "When Blender exports the Three.js JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.Controls.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
+      description: "When Blender exports the Three.js JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.Controls.ModelFactory object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
 \n\
 ## Code:\n\
 \n\
@@ -90,17 +90,22 @@ function setProperties(object) {
   return object;
 }
 
-export default class ModelLoader {
+export default class ModelFactory {
 
   static loadModel(src, type, progress) {
-    return ModelLoader.loadObject(src, type, progress)
-      .then((scene) => new ModelLoader(scene));
+    return ModelFactory.loadObject(src, type, progress)
+      .then((scene) => {
+        while(scene && scene.type === "Group"){
+          scene = scene.children[0];
+        }
+        new ModelFactory(scene);
+      });
   }
 
   static loadObject(src, type, progress) {
 
     pliny.function({
-      parent: "Primrose.Controls.ModelLoader",
+      parent: "Primrose.Controls.ModelFactory",
       name: "loadObject",
       description: "Asynchronously loads a JSON, OBJ, or MTL file as a Three.js object. It processes the scene for attributes, creates new properties on the scene to give us\n\
     faster access to some of the elements within it. It uses callbacks to tell you when loading progresses. It uses a Promise to tell you when it's complete, or when an error occurred.\n\
@@ -123,7 +128,7 @@ export default class ModelLoader {
       }],
       examples: [{
         name: "Load a basic model.",
-        description: "When Blender exports the Three.js JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.Controls.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
+        description: "When Blender exports the Three.js JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.Controls.ModelFactory object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
     \n\
     ## Code:\n\
     \n\
@@ -134,7 +139,7 @@ export default class ModelLoader {
           camera = new THREE.PerspectiveCamera();\n\
        \n\
       // Load up the file\n\
-      Primrose.Controls.ModelLoader.loadObject(\n\
+      Primrose.Controls.ModelFactory.loadObject(\n\
         \"path/to/model.json\",\n\
         null,\n\
         console.log.bind(console, \"Progress:\"))\n\
@@ -177,7 +182,7 @@ export default class ModelLoader {
         if (extension === ".obj") {
           var newPath = src.replace(EXTENSION_PATTERN, ".mtl");
           promise = promise
-            .then(() => ModelLoader.loadObject(newPath, "mtl", progress))
+            .then(() => ModelFactory.loadObject(newPath, "mtl", progress))
             .then((materials) => {
               materials.preload();
               Loader.setMaterials(materials);
@@ -223,13 +228,13 @@ export default class ModelLoader {
   static loadObjects(map) {
 
     pliny.function({
-      parent: "Primrose.Controls.ModelLoader",
+      parent: "Primrose.Controls.ModelFactory",
       name: "loadObjects",
       description: "Asynchronously loads an array of JSON, OBJ, or MTL file as a Three.js object. It processes the objects for attributes, creating new properties on each object to give us\n\
     faster access to some of the elements within it. It uses callbacks to tell you when loading progresses. It uses a Promise to tell you when it's complete, or when an error occurred.\n\
     Useful for static models.\n\
     \n\
-    See [`Primrose.Controls.ModelLoader.loadObject()`](#Primrose_Controls_ModelLoader_loadObject) for more details on how individual models are loaded.",
+    See [`Primrose.Controls.ModelFactory.loadObject()`](#Primrose_Controls_ModelFactory_loadObject) for more details on how individual models are loaded.",
       returns: "Promise",
       parameters: [{
         name: "arr",
@@ -261,7 +266,7 @@ export default class ModelLoader {
           allModels = null;\n\
        \n\
       // Load up the file\n\
-      Primrose.Controls.ModelLoader.loadObjects(\n\
+      Primrose.Controls.ModelFactory.loadObjects(\n\
         [\"path/to/model1.json\",\n\
           \"path/to/model2.obj\",\n\
           \"path/to/model3.obj\",\n\
@@ -301,7 +306,7 @@ export default class ModelLoader {
 
   constructor(template) {
     pliny.property({
-      parent: "Primrose.Graphics.ModelLoader",
+      parent: "Primrose.Graphics.ModelFactory",
       name: "template",
       type: "THREE.Object3D",
       description: "When a model is loaded, stores a reference to the model so it can be cloned in the future."
@@ -312,13 +317,13 @@ export default class ModelLoader {
   clone() {
 
     pliny.method({
-      parent: "Primrose.Controls.ModelLoader",
+      parent: "Primrose.Controls.ModelFactory",
       name: "clone",
       description: "Creates a copy of the stored template model.",
       returns: "A THREE.Object3D that is a copy of the stored template.",
       examples: [{
         name: "Load a basic model.",
-        description: "When Blender exports the Three.js JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.Controls.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
+        description: "When Blender exports the Three.js JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.Controls.ModelFactory object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
     \n\
     ## Code:\n\
     \n\
@@ -327,7 +332,7 @@ export default class ModelLoader {
       var scene = new THREE.Scene(),\n\
       \n\
       // Load up the file, optionally \"check it out\"\n\
-        modelFactory = new Primrose.Controls.ModelLoader(\"path/to/model.json\", function(model){\n\
+        modelFactory = new Primrose.Controls.ModelFactory(\"path/to/model.json\", function(model){\n\
           model.traverse(function(child){\n\
             // Do whatever you want to the individual child objects of the scene.\n\
           });\n\
@@ -363,7 +368,7 @@ export default class ModelLoader {
 }
 
 function loader(map, key) {
-  return (obj) => ModelLoader.loadObject(map[key])
+  return (obj) => ModelFactory.loadObject(map[key])
     .then((model) => {
       obj[key] = model;
       return obj;

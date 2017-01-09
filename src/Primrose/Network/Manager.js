@@ -12,7 +12,7 @@ pliny.class({
     description: "The audio manager being used in the current Environment."
   }, {
     name: "factories",
-    type: "Primrose.Controls.ModelLoader",
+    type: "Primrose.Controls.ModelFactory",
     description: "Model factory for creating avatars for new remote users."
   }]
 });

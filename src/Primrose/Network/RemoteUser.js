@@ -9,7 +9,7 @@ pliny.class({
     description: "The name of the user."
   }, {
     name: "modelFactory",
-    type: "Primrose.Controls.ModelLoader",
+    type: "Primrose.Controls.ModelFactory",
     description: "The factory for creating avatars for the user."
   }, {
     name: "nameMaterial",

@@ -553,7 +553,7 @@ export default class BrowserEnvironment extends EventDispatcher {
       return rgb;
     }
 
-    var modelsReady = ModelLoader.loadObjects(modelFiles)
+    var modelsReady = ModelFactory.loadObjects(modelFiles)
       .then((models) => {
         window.text3D = function (font, size, text) {
           var geom = new TextGeometry(text, {
@@ -572,7 +572,7 @@ export default class BrowserEnvironment extends EventDispatcher {
         }
 
         if (models.avatar) {
-          this.factories.avatar = new ModelLoader(models.avatar);
+          this.factories.avatar = new ModelFactory(models.avatar);
         }
 
         pliny.property({
