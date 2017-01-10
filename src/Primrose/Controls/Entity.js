@@ -16,6 +16,16 @@ export default class Entity extends Object3D {
     this.ready = this._ready.then(() => this);
   }
 
+  get disabled() {
+    return this._pickingObject && this._pickingObject.disabled;
+  }
+
+  set disabled(v) {
+    if(this._pickingObject) {
+      this._pickingObject.disabled = v;
+    }
+  }
+
   get _ready() {
     return Promise.resolve();
   }
