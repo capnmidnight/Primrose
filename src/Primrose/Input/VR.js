@@ -91,16 +91,16 @@ export default class VR extends PoseInputProcessor {
         layers = layers[0];
       }
 
-      const rp = this._requestPresent;
       var promise = null;
       if(this.currentDevice.capabilities.hasExternalDisplay){
         // PCs with HMD should also make the browser window on the main
         // display full-screen, so we can then also lock pointer.
         promise = standardFullScreenBehavior(elem)
-          .then(() => rp(layers));
+          .then(() => this._requestPresent(layers));
       }
       else {
-        promise = rp(layers).then(standardLockBehavior);
+        promise = this._requestPresent(layers)
+          .then(standardLockBehavior);
       }
       return promise;
     }
