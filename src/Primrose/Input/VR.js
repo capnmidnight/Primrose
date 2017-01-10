@@ -60,7 +60,11 @@ export default class VR extends PoseInputProcessor {
   }
 
   get isNativeMobileWebVR() {
-    return !(this.currentDevice && this.currentDevice.isPolyfilled) && isChrome && isMobile;
+    return this.isNativeWebVR && isChrome && isMobile;
+  }
+
+  get isNativeWebVR() {
+    return this.currentDevice && !this.currentDevice.isPolyfilled;
   }
 
   connect(selectedIndex) {

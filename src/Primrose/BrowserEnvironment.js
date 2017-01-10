@@ -932,7 +932,7 @@ export default class BrowserEnvironment extends EventDispatcher {
     this.goFullScreen = (index, evt) => {
       if (evt !== "Gaze") {
         let elem = null;
-        if(evt === "force" || this.input.VR.canMirror || this.input.VR.isNativeMobileWebVR) {
+        if(evt === "force" || this.input.VR.canMirror || this.input.VR.isNativeWebVR) {
           elem = this.renderer.domElement;
         }
         else{
