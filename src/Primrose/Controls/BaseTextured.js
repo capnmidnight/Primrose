@@ -108,6 +108,14 @@ export default class BaseTextured extends Entity {
     }
   }
 
+  get blending() {
+    return this._pickingObject && this._pickingObject.material.blending;
+  }
+
+  set blending(v){
+    this._meshes.forEach((mesh) => mesh.material.blending = v);
+  }
+
   eyeBlank(eye) {
     if(this._meshes && this._meshes.length > 0) {
       this._currentImageIndex = eye % this._meshes.length;
