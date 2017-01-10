@@ -371,7 +371,10 @@ export default class BrowserEnvironment extends EventDispatcher {
       maxY = Math.PI / 6;
 
     const moveUI = (dt) => {
-      this.ui.position.copy(this.input.stage.position);
+      var y = this.vicinity.position.y;
+      this.vicinity.position.lerp(this.input.head.position, this.options.vicinityFollowRate);
+      this.vicinity.position.y = y;
+
       followEuler.setFromQuaternion(this.input.head.quaternion);
       this.turns.radians = followEuler.y;
       followEuler.set(maxX, this.turns.radians, 0, "YXZ");
@@ -871,8 +874,8 @@ export default class BrowserEnvironment extends EventDispatcher {
       type: "THREE.Object3D",
       description: "An anchor point on which objects can be added that follows the user around in both position and orientation. The orientation lags following the user, so if the UI is ever in the way, the user can turn slightly and it won't follow them."
     });
-    this.ui = hub().named("UI");
-    this.scene.add(this.ui);
+    this.vicinity = hub().named("Vicinity").addTo(this.scene);
+    this.ui = hub().named("UI").addTo(this.vicinity);
 
     var buildScene = (sceneGraph) => {
       sceneGraph.buttons = [];
@@ -1500,6 +1503,7 @@ BrowserEnvironment.DEFAULTS = {
   enableShadows: false,
   shadowMapSize: 1024,
   progress: null,
+  vicinityFollowRate: 0.02,
   // The acceleration applied to falling objects.
   gravity: 9.8,
   // The amount of time in seconds to require gazes on objects before triggering the gaze event.
