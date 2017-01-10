@@ -107,6 +107,17 @@ export default class FusionPoseSensor {
     return this.orientationOut_;
   }
 
+  getImmediatePose() {
+    return {
+      position: this.getPosition(),
+      orientation: this.getOrientation(),
+      linearVelocity: null,
+      linearAcceleration: null,
+      angularVelocity: null,
+      angularAcceleration: null
+    };
+  }
+
   resetPose() {
     // Reduce to inverted yaw-only.
     this.resetQ.copy(this.filter.getOrientation());

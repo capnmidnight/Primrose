@@ -91,7 +91,6 @@ export default class VRDisplay {
       this._currentLayers[i] = layers[i];
     }
     const elem = layers[0].source;
-    FullScreen.addChangeListener((evt) => this.fireVRDisplayPresentChange_());
     return standardFullScreenBehavior(elem);
   }
 
@@ -102,11 +101,6 @@ export default class VRDisplay {
 
   getLayers() {
     return this._currentLayers.slice();
-  }
-
-  fireVRDisplayPresentChange_() {
-    var event = new CustomEvent('vrdisplaypresentchange', {detail: {vrdisplay: this}});
-    window.dispatchEvent(event);
   }
 
   submitFrame(pose) {

@@ -29,18 +29,11 @@ export default class CardboardVRDisplay extends VRDisplay {
     this.DOMElement = null;
 
     // "Private" members.
-    this.poseSensor_ = new FusionPoseSensor(options);
+    this.poseSensor_ = options && options.overrideOrientation || new FusionPoseSensor(options);
   }
 
   _getImmediatePose() {
-    return {
-      position: this.poseSensor_.getPosition(),
-      orientation: this.poseSensor_.getOrientation(),
-      linearVelocity: null,
-      linearAcceleration: null,
-      angularVelocity: null,
-      angularAcceleration: null
-    }
+    return this.poseSensor_.getImmediatePose();
   }
 
   resetPose() {

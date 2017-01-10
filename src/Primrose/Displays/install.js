@@ -44,7 +44,10 @@ function upgrade1_0_to_1_1(){
 
 function getPolyfillDisplays(options) {
   if (!polyFillDevicesPopulated) {
-    if (isCardboardCompatible || options.FORCE_ENABLE_VR) {
+    if (isCardboardCompatible) {
+      FullScreen.addChangeListener((evt) => {
+        fireVRDisplayPresentChange();
+      });
       allDisplays.push(new CardboardVRDisplay(options));
     }
 
@@ -60,25 +63,44 @@ function getPolyfillDisplays(options) {
   });
 }
 
+function fireVRDisplayPresentChange() {
+  var event = new CustomEvent('vrdisplaypresentchange', {detail: {vrdisplay: this}});
+  window.dispatchEvent(event);
+}
+
 function installPolyfill(options){
-  if (!hasNativeWebVR) {
-    // Provide navigator.getVRDisplays.
-    navigator.getVRDisplays = getPolyfillDisplays.bind(window, options);
-
-    // Provide the VRDisplay object.
-    window.VRDisplay = VRDisplay;
-
-    // Provide navigator.vrEnabled.
-    Object.defineProperty(navigator, "vrEnabled", {
-      get: function () {
-        return isCardboardCompatible() &&
-          (FullScreen.available || isiOS); // just fake it for iOS
-      }
-    });
-
-    // Provide the VRFrameData object.
-    window.VRFrameData = VRFrameData;
+  let oldGetVRDisplays = null;
+  if(hasNativeWebVR) {
+    oldGetVRDisplays = navigator.getVRDisplays;
   }
+  else{
+    oldGetVRDisplays = () => Promise.resolve([]);
+  }
+
+  // Provide navigator.getVRDisplays.
+  navigator.getVRDisplays = function () {
+    return oldGetVRDisplays.call(navigator)
+      .then((displays) => {
+        if(displays.length === 0 || navigator.userAgent === "Mozilla/5.0 (Linux; Android 6.0.1; SM-G930V Build/MMB29M) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2664.0 Mobile Safari/537.36") {
+          options.overrideOrientation = displays[0];
+          return getPolyfillDisplays(options);
+        }
+        else {
+          return displays;
+        }
+      });
+    };
+
+  // Provide the VRDisplay object.
+  window.VRDisplay = window.VRDisplay || VRDisplay;
+
+  // Provide navigator.vrEnabled.
+  Object.defineProperty(navigator, "vrEnabled", {
+    get: function () {
+      return isCardboardCompatible &&
+        (FullScreen.available || isiOS); // just fake it for iOS
+    }
+  });
 }
 
 function installStandardMonitor(options) {
