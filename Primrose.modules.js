@@ -1,3 +1,28 @@
+if (typeof Object.assign != 'function') {
+  Object.assign = function (target, varArgs) {
+    if (target == null) {
+      throw new TypeError('Cannot convert undefined or null to object');
+    }
+
+    var to = Object(target);
+
+    for (var index = 1; index < arguments.length; index++) {
+      var nextSource = arguments[index];
+
+      if (nextSource != null) {
+        // Skip over if undefined or null
+        for (var nextKey in nextSource) {
+          // Avoid bugs when hasOwnProperty is shadowed
+          if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
+            to[nextKey] = nextSource[nextKey];
+          }
+        }
+      }
+    }
+    return to;
+  };
+}
+
 var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
 
 var isChrome = !!window.chrome && !isOpera;
@@ -13157,6 +13182,16 @@ var Entity = function (_Object3D) {
       }
     }
   }, {
+    key: "disabled",
+    get: function get() {
+      return this._pickingObject && this._pickingObject.disabled;
+    },
+    set: function set(v) {
+      if (this._pickingObject) {
+        this._pickingObject.disabled = v;
+      }
+    }
+  }, {
     key: "_ready",
     get: function get() {
       return Promise.resolve();
@@ -13552,6 +13587,16 @@ var BaseTextured = function (_Entity) {
       if (this._pickingObject) {
         this._pickingObject.disabled = v;
       }
+    }
+  }, {
+    key: "blending",
+    get: function get() {
+      return this._pickingObject && this._pickingObject.material.blending;
+    },
+    set: function set(v) {
+      this._meshes.forEach(function (mesh) {
+        return mesh.material.blending = v;
+      });
     }
   }]);
   return BaseTextured;
@@ -15221,6 +15266,8 @@ var AsyncLockRequest = function () {
     classCallCheck(this, AsyncLockRequest);
 
 
+    this.name = name;
+
     this._elementName = findProperty(document, elementOpts);
     this._requestMethodName = findProperty(document.documentElement, requestMethodOpts);
     this._exitMethodName = findProperty(document, exitMethodOpts);
@@ -15323,7 +15370,7 @@ var AsyncLockRequest = function () {
 
       return this._withChange(function () {
         if (!_this2._requestMethodName) {
-          throw new Error("No " + name + " API support.");
+          throw new Error("No " + _this2.name + " API support.");
         } else if (_this2.isActive) {
           return true;
         } else if (extraParam) {
@@ -15532,7 +15579,7 @@ function standardExitFullScreenBehavior() {
 }
 
 function standardLockBehavior(elem) {
-  if (isMobile) {
+  if (isiOS) {
     return Promise.resolve(elem);
   } else if (isMobile) {
     return Orientation.lock(elem).catch(function (exp) {
@@ -23780,15 +23827,10 @@ var VRDisplay = function () {
   }, {
     key: "requestPresent",
     value: function requestPresent(layers) {
-      var _this = this;
-
       for (var i = 0; i < this.capabilities.maxLayers && i < layers.length; ++i) {
         this._currentLayers[i] = layers[i];
       }
       var elem = layers[0].source;
-      FullScreen.addChangeListener(function (evt) {
-        return _this.fireVRDisplayPresentChange_();
-      });
       return standardFullScreenBehavior(elem);
     }
   }, {
@@ -23801,12 +23843,6 @@ var VRDisplay = function () {
     key: "getLayers",
     value: function getLayers() {
       return this._currentLayers.slice();
-    }
-  }, {
-    key: "fireVRDisplayPresentChange_",
-    value: function fireVRDisplayPresentChange_() {
-      var event = new CustomEvent('vrdisplaypresentchange', { detail: { vrdisplay: this } });
-      window.dispatchEvent(event);
     }
   }, {
     key: "submitFrame",
@@ -23855,7 +23891,7 @@ var StandardMonitorVRDisplay = function (_VRDisplay) {
   createClass(StandardMonitorVRDisplay, [{
     key: "submitFrame",
     value: function submitFrame(pose) {
-      if (this._display) {
+      if (this._display && this._display.isPolyfilled) {
         this._display.submitFrame(pose);
       }
     }
@@ -35566,6 +35602,18 @@ var FusionPoseSensor = function () {
       return this.orientationOut_;
     }
   }, {
+    key: "getImmediatePose",
+    value: function getImmediatePose() {
+      return {
+        position: this.getPosition(),
+        orientation: this.getOrientation(),
+        linearVelocity: null,
+        linearAcceleration: null,
+        angularVelocity: null,
+        angularAcceleration: null
+      };
+    }
+  }, {
     key: "resetPose",
     value: function resetPose() {
       // Reduce to inverted yaw-only.
@@ -35673,21 +35721,14 @@ var CardboardVRDisplay = function (_VRDisplay) {
     _this.DOMElement = null;
 
     // "Private" members.
-    _this.poseSensor_ = new FusionPoseSensor(options);
+    _this.poseSensor_ = options && options.overrideOrientation || new FusionPoseSensor(options);
     return _this;
   }
 
   createClass(CardboardVRDisplay, [{
     key: "_getImmediatePose",
     value: function _getImmediatePose() {
-      return {
-        position: this.poseSensor_.getPosition(),
-        orientation: this.poseSensor_.getOrientation(),
-        linearVelocity: null,
-        linearAcceleration: null,
-        angularVelocity: null,
-        angularAcceleration: null
-      };
+      return this.poseSensor_.getImmediatePose();
     }
   }, {
     key: "resetPose",
@@ -36125,7 +36166,10 @@ function upgrade1_0_to_1_1() {
 
 function getPolyfillDisplays(options) {
   if (!polyFillDevicesPopulated) {
-    if (isCardboardCompatible || options.FORCE_ENABLE_VR) {
+    if (isCardboardCompatible) {
+      FullScreen.addChangeListener(function (evt) {
+        fireVRDisplayPresentChange();
+      });
       allDisplays.push(new CardboardVRDisplay(options));
     }
 
@@ -36141,24 +36185,42 @@ function getPolyfillDisplays(options) {
   });
 }
 
+function fireVRDisplayPresentChange() {
+  var event = new CustomEvent('vrdisplaypresentchange', { detail: { vrdisplay: this } });
+  window.dispatchEvent(event);
+}
+
 function installPolyfill(options) {
-  if (!hasNativeWebVR) {
-    // Provide navigator.getVRDisplays.
-    navigator.getVRDisplays = getPolyfillDisplays.bind(window, options);
+  var oldGetVRDisplays = null;
+  if (hasNativeWebVR) {
+    oldGetVRDisplays = navigator.getVRDisplays;
+  } else {
+    oldGetVRDisplays = function oldGetVRDisplays() {
+      return Promise.resolve([]);
+    };
+  }
 
-    // Provide the VRDisplay object.
-    window.VRDisplay = VRDisplay;
-
-    // Provide navigator.vrEnabled.
-    Object.defineProperty(navigator, "vrEnabled", {
-      get: function get() {
-        return isCardboardCompatible() && (FullScreen.available || isiOS); // just fake it for iOS
+  // Provide navigator.getVRDisplays.
+  navigator.getVRDisplays = function () {
+    return oldGetVRDisplays.call(navigator).then(function (displays) {
+      if (displays.length === 0 || navigator.userAgent === "Mozilla/5.0 (Linux; Android 6.0.1; SM-G930V Build/MMB29M) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2664.0 Mobile Safari/537.36") {
+        options.overrideOrientation = displays[0];
+        return getPolyfillDisplays(options);
+      } else {
+        return displays;
       }
     });
+  };
 
-    // Provide the VRFrameData object.
-    window.VRFrameData = VRFrameData;
-  }
+  // Provide the VRDisplay object.
+  window.VRDisplay = window.VRDisplay || VRDisplay;
+
+  // Provide navigator.vrEnabled.
+  Object.defineProperty(navigator, "vrEnabled", {
+    get: function get() {
+      return isCardboardCompatible && (FullScreen.available || isiOS); // just fake it for iOS
+    }
+  });
 }
 
 function installStandardMonitor(options) {
@@ -36305,17 +36367,16 @@ var VR = function (_PoseInputProcessor) {
             layers = layers[0];
           }
 
-          var rp = _this2._requestPresent;
           promise = null;
 
           if (_this2.currentDevice.capabilities.hasExternalDisplay) {
             // PCs with HMD should also make the browser window on the main
             // display full-screen, so we can then also lock pointer.
             promise = standardFullScreenBehavior(elem).then(function () {
-              return rp(layers);
+              return _this2._requestPresent(layers);
             });
           } else {
-            promise = rp(layers).then(standardLockBehavior);
+            promise = _this2._requestPresent(layers).then(standardLockBehavior);
           }
           return {
             v: promise
@@ -36414,7 +36475,12 @@ var VR = function (_PoseInputProcessor) {
   }, {
     key: "isNativeMobileWebVR",
     get: function get() {
-      return !(this.currentDevice && this.currentDevice.isPolyfilled) && isChrome && isMobile;
+      return this.isNativeWebVR && isChrome && isMobile;
+    }
+  }, {
+    key: "isNativeWebVR",
+    get: function get() {
+      return this.currentDevice && !this.currentDevice.isPolyfilled;
     }
   }, {
     key: "hasStage",
@@ -46516,7 +46582,10 @@ var BrowserEnvironment = function (_EventDispatcher) {
         maxY = Math.PI / 6;
 
     var moveUI = function moveUI(dt) {
-      _this.ui.position.copy(_this.input.stage.position);
+      var y = _this.vicinity.position.y;
+      _this.vicinity.position.lerp(_this.input.head.position, _this.options.vicinityFollowRate);
+      _this.vicinity.position.y = y;
+
       followEuler.setFromQuaternion(_this.input.head.quaternion);
       _this.turns.radians = followEuler.y;
       followEuler.set(maxX, _this.turns.radians, 0, "YXZ");
@@ -46839,8 +46908,8 @@ var BrowserEnvironment = function (_EventDispatcher) {
 
     _this.teleporter = new Teleporter(_this, _this.ground);
 
-    _this.ui = hub().named("UI");
-    _this.scene.add(_this.ui);
+    _this.vicinity = hub().named("Vicinity").addTo(_this.scene);
+    _this.ui = hub().named("UI").addTo(_this.vicinity);
 
     var buildScene = function buildScene(sceneGraph) {
       sceneGraph.buttons = [];
@@ -46889,7 +46958,7 @@ var BrowserEnvironment = function (_EventDispatcher) {
       if (evt !== "Gaze") {
         var _ret = function () {
           var elem = null;
-          if (evt === "force" || _this.input.VR.canMirror || _this.input.VR.isNativeMobileWebVR) {
+          if (evt === "force" || _this.input.VR.canMirror || _this.input.VR.isNativeWebVR) {
             elem = _this.renderer.domElement;
           } else {
             elem = _this.options.fullScreenElement;
@@ -47298,6 +47367,7 @@ BrowserEnvironment.DEFAULTS = {
   enableShadows: false,
   shadowMapSize: 1024,
   progress: null,
+  vicinityFollowRate: 0.02,
   // The acceleration applied to falling objects.
   gravity: 9.8,
   // The amount of time in seconds to require gazes on objects before triggering the gaze event.
@@ -49797,7 +49867,6 @@ var index$4 = {
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 Object.assign(window, flags, liveAPI, util);
 // Do this just for side effects, we are monkey-patching Three.js classes with our own utilities.
 

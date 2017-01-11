@@ -2,7 +2,7 @@
   "name": "primrose",
   "packageName": "PrimroseVR",
   "description": "Primrose is a framework for building Virtual Reality applications in Web browsers.",
-  "version": "0.30.3",
+  "version": "0.30.2",
   "engines": {
     "node": ">=4.0.0"
   },
