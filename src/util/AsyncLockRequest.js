@@ -34,6 +34,8 @@ import findProperty from "./findProperty";
 export default class AsyncLockRequest {
   constructor(name, elementOpts, changeEventOpts, errorEventOpts, requestMethodOpts, exitMethodOpts) {
 
+    this.name = name;
+
     this._elementName = findProperty(document, elementOpts);
     this._requestMethodName = findProperty(document.documentElement, requestMethodOpts);
     this._exitMethodName = findProperty(document, exitMethodOpts);
@@ -132,7 +134,7 @@ export default class AsyncLockRequest {
   request(elem, extraParam){
     return this._withChange(() => {
       if (!this._requestMethodName) {
-        throw new Error("No " + name + " API support.");
+        throw new Error("No " + this.name + " API support.");
       }
       else if (this.isActive) {
         return true;
