@@ -43,7 +43,7 @@ const prog = {
     }
 
     let total = 0, loaded = 0;
-    for(const key in prog.files){
+    for(var key in prog.files){
       const f = prog.files[key];
       loaded += f.loaded;
       total += f.total;
@@ -68,23 +68,25 @@ const prog = {
   scripts = [];
 
 function installScripts() {
-  if(scripts.length > 0 && scripts[0] !== undefined){
-    const s = document.createElement("script"),
-      file = scripts.shift();
-    s.type = "text/javascript";
-    if(window.DEBUG) {
+  if(!document.body){
+    setTimeout(installScripts, 0);
+  }
+  else if(window.DEBUG) {
+    scripts.forEach((file) => {
+      const s = document.createElement("script");
       s.src = file;
-      s.onload = installScripts;
-    }
-    else{
-      s.innerHTML = file;
-      setTimeout(installScripts);
-    }
+      document.body.appendChild(s);
+    });
+  }
+  else{
+    const s = document.createElement("script");
+    s.innerHTML = scripts.join("\n");
     document.body.appendChild(s);
   }
 }
 
-function getNextScript(file, i) {
+let loaded = 0;
+function getNextScript(file, i, arr) {
   get(file, (contents) => {
     if(window.DEBUG) {
       scripts[i] = file;
@@ -92,15 +94,9 @@ function getNextScript(file, i) {
     else{
       scripts[i] = contents;
     }
-    if(document.readyState !== "loading"){
+    ++loaded;
+    if(loaded === arr.length) {
       installScripts();
-    }
-    else{
-      var existing = document.onreadystatechange || function(){}
-      document.onreadystatechange = function(evt){
-        existing(evt);
-        installScripts(evt);
-      };
     }
   });
 }

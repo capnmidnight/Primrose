@@ -75,36 +75,32 @@ var curScript = curScripts[curScripts.length - 1];
 var scripts = [];
 
 function installScripts() {
-  if (scripts.length > 0 && scripts[0] !== undefined) {
-    var s = document.createElement("script"),
-        file = scripts.shift();
-    s.type = "text/javascript";
-    if (window.DEBUG) {
+  if (!document.body) {
+    setTimeout(installScripts, 0);
+  } else if (window.DEBUG) {
+    scripts.forEach(function (file) {
+      var s = document.createElement("script");
       s.src = file;
-      s.onload = installScripts;
-    } else {
-      s.innerHTML = file;
-      setTimeout(installScripts);
-    }
+      document.body.appendChild(s);
+    });
+  } else {
+    var s = document.createElement("script");
+    s.innerHTML = scripts.join("\n");
     document.body.appendChild(s);
   }
 }
 
-function getNextScript(file, i) {
+var loaded = 0;
+function getNextScript(file, i, arr) {
   get(file, function (contents) {
     if (window.DEBUG) {
       scripts[i] = file;
     } else {
       scripts[i] = contents;
     }
-    if (document.readyState !== "loading") {
+    ++loaded;
+    if (loaded === arr.length) {
       installScripts();
-    } else {
-      var existing = document.onreadystatechange || function () {};
-      document.onreadystatechange = function (evt) {
-        existing(evt);
-        installScripts(evt);
-      };
     }
   });
 }
