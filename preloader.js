@@ -36,7 +36,7 @@ var prog = {
       if (typeof evt.loaded === "number") {
         f.loaded = evt.loaded;
         f.total = evt.total;
-      } else {
+      } else if (evt.srcElement) {
         var bs = evt.srcElement.buffered;
         var min = Number.MAX_VALUE,
             max = Number.MIN_VALUE;
@@ -65,6 +65,7 @@ var prog = {
     }
 
     if (prog.bar && total) {
+      console.log(file, loaded, total);
       prog.bar.max = total;
       prog.bar.value = loaded;
     }
@@ -78,15 +79,17 @@ function installScripts() {
   if (!document.body) {
     setTimeout(installScripts, 0);
   } else if (window.DEBUG) {
-    scripts.forEach(function (file) {
-      var s = document.createElement("script");
+    if (scripts.length > 0) {
+      var file = scripts.shift(),
+          s = document.createElement("script");
       s.src = file;
+      s.onload = installScripts;
       document.body.appendChild(s);
-    });
+    }
   } else {
-    var s = document.createElement("script");
-    s.innerHTML = scripts.join("\n");
-    document.body.appendChild(s);
+    var _s = document.createElement("script");
+    _s.innerHTML = scripts.join("\n");
+    document.body.appendChild(_s);
   }
 }
 

@@ -20214,7 +20214,7 @@ var Audio$1 = {
 
 var packageName = "PrimroseVR";
 
-var version = "0.30.3";
+var version = "0.30.2";
 
 
 
@@ -48122,6 +48122,15 @@ enableInlineVideo.isWhitelisted = isWhitelisted;
 
 var COUNTER$9 = 0;
 
+function getNetworkStateName(state) {
+  for (var key in HTMLMediaElement) {
+    if (key.indexOf("NETWORK_") >= 0 && HTMLMediaElement[key] === state) {
+      return key;
+    }
+  }
+  return state;
+}
+
 // Videos don't auto-play on mobile devices, so let's make them all play whenever
 // we tap the screen.
 var processedVideos = [];
@@ -48174,10 +48183,14 @@ var Video = function (_BaseTextured) {
       this._elements = [];
       return Promise.all(Array.prototype.map.call(videos, function (spec, i) {
         return new Promise(function (resolve, reject) {
+          console.log(_this2.name + ": " + spec);
           var video = null;
           if (typeof spec === "string") {
             video = document.querySelector("video[src='" + spec + "']");
             if (!video) {
+              var src = document.createElement("source"),
+                  errorCount = 0,
+                  numSources = 1;
               video = document.createElement("video");
               video.src = spec;
             }
@@ -48189,7 +48202,14 @@ var Video = function (_BaseTextured) {
           }
           video.onprogress = progress;
           video.onloadedmetadata = progress;
-          video.onerror = reject;
+          video.onerror = function (evt) {
+            return reject({
+              type: "error",
+              source: "videoElement",
+              fileName: spec,
+              networkState: getNetworkStateName(video.networkState)
+            });
+          };
           video.muted = true;
           video.preload = "auto";
           video.autoplay = true;

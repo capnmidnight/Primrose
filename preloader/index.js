@@ -29,7 +29,7 @@ const prog = {
         f.loaded = evt.loaded;
         f.total = evt.total;
       }
-      else{
+      else if(evt.srcElement) {
         const bs = evt.srcElement.buffered;
         let min = Number.MAX_VALUE,
           max = Number.MIN_VALUE;
@@ -57,6 +57,7 @@ const prog = {
     }
 
     if(prog.bar && total){
+      console.log(file, loaded, total);
       prog.bar.max = total;
       prog.bar.value = loaded;
     }
@@ -72,11 +73,13 @@ function installScripts() {
     setTimeout(installScripts, 0);
   }
   else if(window.DEBUG) {
-    scripts.forEach((file) => {
-      const s = document.createElement("script");
+    if(scripts.length > 0) {
+      const file = scripts.shift(),
+        s = document.createElement("script");
       s.src = file;
+      s.onload = installScripts;
       document.body.appendChild(s);
-    });
+    }
   }
   else{
     const s = document.createElement("script");

@@ -35,7 +35,7 @@
   "browser": "Primrose.min.js",
   "scripts": {
     "start": "node StartHere.js --url doc/",
-    "test": "node node_modules/notion-node/default"
+    "test": "node node_modules/notion-node/default --url=Primrose/doc/empty"
   },
   "keywords": [
     "virtual reality",
@@ -58,7 +58,7 @@
     "three": "^0.82.0"
   },
   "devDependencies": {
-    "notion-node": "^0.0.5",
+    "notion-node": "^0.1.0",
     "notiontheory-basic-build": "^5.0.0"
   }
 }

@@ -12,6 +12,16 @@ pliny.class({
 
 let COUNTER = 0;
 
+
+function getNetworkStateName(state){
+  for(var key in HTMLMediaElement) {
+    if(key.indexOf("NETWORK_") >= 0 && HTMLMediaElement[key] === state) {
+      return key;
+    }
+  }
+  return state;
+}
+
 // Videos don't auto-play on mobile devices, so let's make them all play whenever
 // we tap the screen.
 const processedVideos = [];
@@ -77,7 +87,12 @@ export default class Video extends BaseTextured {
       }
       video.onprogress = progress;
       video.onloadedmetadata = progress;
-      video.onerror = reject;
+      video.onerror = (evt) => reject({
+        type: "error",
+        source: "videoElement",
+        fileName: spec,
+        networkState: getNetworkStateName(video.networkState)
+      });
       video.muted = true;
       video.preload = "auto";
       video.autoplay = true;
