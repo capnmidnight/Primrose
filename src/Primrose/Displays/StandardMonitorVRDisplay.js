@@ -30,7 +30,9 @@ export default class StandardMonitorVRDisplay extends VRDisplay {
   }
 
   submitFrame(pose) {
-    // do nothing
+    if(this._display && this._display.isPolyfilled) {
+      this._display.submitFrame(pose);
+    }
   }
 
   getImmediatePose() {
