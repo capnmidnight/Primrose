@@ -38,7 +38,7 @@ export default class Image extends BaseTextured {
         });
 
         this._meshes[i] = textured(
-          this.options.geometry,
+          this._geometry,
           src,
           loadOptions);
 

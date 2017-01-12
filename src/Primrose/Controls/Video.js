@@ -12,8 +12,6 @@ pliny.class({
 
 let COUNTER = 0;
 
-const processedVideos = [];
-
 function getNetworkStateName(state){
   for(var key in HTMLMediaElement) {
     if(key.indexOf("NETWORK_") >= 0 && HTMLMediaElement[key] === state) {
@@ -23,10 +21,35 @@ function getNetworkStateName(state){
   return state;
 }
 
-import makeVideoPlayableInline from "iphone-inline-video";
+// Videos don't auto-play on mobile devices, so let's make them all play whenever we tap the screen.
+const processedVideos = [];
+function findAndFixVideo(evt){
+  const vids = document.querySelectorAll("video");
+  for(let i = 0; i < vids.length; ++i){
+    fixVideo(vids[i]);
+  }
+  window.removeEventListener("touchend", findAndFixVideo);
+  window.removeEventListener("mouseup", findAndFixVideo);
+  window.removeEventListener("keyup", findAndFixVideo);
+}
+
+function fixVideo(vid) {
+  if(processedVideos.indexOf(vid) === -1){
+    processedVideos.push(vid);
+    enableInlineVideo(vid, false);
+  }
+}
+
+window.addEventListener("touchend", findAndFixVideo, false);
+window.addEventListener("mouseup", findAndFixVideo, false);
+window.addEventListener("keyup", findAndFixVideo, false);
+
+import enableInlineVideo from "iphone-inline-video";
 
 import BaseTextured from "./BaseTextured";
 import textured from "../../live-api/textured";
+import isiOS from "../../flags/isiOS";
+
 export default class Video extends BaseTextured {
 
   constructor(videos, options) {
@@ -45,8 +68,7 @@ export default class Video extends BaseTextured {
   }
 
   _loadFiles(videos, progress) {
-    this._elements = [];
-    return Promise.all(Array.prototype.map.call(videos, (spec, i) => new Promise((resolve, reject) => {
+    this._elements = Array.prototype.map.call(videos, (spec, i) => {
       let video = null;
       if(typeof spec === "string"){
         video = document.querySelector(`video[src='${spec}']`);
@@ -64,59 +86,48 @@ export default class Video extends BaseTextured {
       }
       video.onprogress = progress;
       video.onloadedmetadata = progress;
-      video.onerror = (evt) => reject({
-        type: "error",
-        source: "videoElement",
-        fileName: spec,
-        networkState: getNetworkStateName(video.networkState)
-      });
       video.muted = true;
-      video.preload = "auto";
-      video.autoplay = true;
       video.loop = true;
-      video.controls = true;
       video.setAttribute("playsinline", "");
       video.setAttribute("webkit-playsinline", "");
-      video.oncanplay = () => {
-        video.oncanplay = null;
-        video.onerror = null;
+      if(!isiOS) {
+        video.preload = "auto";
+      }
 
-        const width = video.videoWidth,
-          height = video.videoHeight,
-          p2Width = Math.pow(2, Math.ceil(Math.log2(width))),
-          p2Height = Math.pow(2, Math.ceil(Math.log2(height)));
+      this._meshes[i] = textured(
+        this._geometry,
+        video,
+        this.options);
 
-        this._elements[i] = video;
-
-        this._meshes[i] = textured(
-          this.options.geometry,
-          this._elements[i],
-          this.options);
-
-        this.options.promise.then((txt) => {
-          this._textures[i] = txt;
-          resolve();
-        });
-      };
       if(!video.parentElement){
         document.body.insertBefore(video, document.body.children[0]);
+        fixVideo(video);
       }
 
-      if(processedVideos.indexOf(video) === -1) {
-        processedVideos.push(video);
-        makeVideoPlayableInline(video);
-        video.play();
-      }
-    })));
+      this.options.promise.then((txt) => {
+        this._textures[i] = txt;
+      });
+
+      return video;
+    });
+    return Promise.resolve();
+  }
+
+  play() {
+    if(this._elements.length > 0) {
+      this._elements[0].play();
+    }
   }
 
   update(){
     super.update();
     for (let i = 0; i < this._textures.length; ++i) {
-      const elem = this._elements[i];
-      if(elem.currentTime !== this._lastTime){
-        this._textures[i].needsUpdate = true;
-        this._lastTime = elem.currentTime;
+      if(this._textures[i]) {
+        const elem = this._elements[i];
+        if(elem.currentTime !== this._lastTime){
+          this._textures[i].needsUpdate = true;
+          this._lastTime = elem.currentTime;
+        }
       }
     }
   }
