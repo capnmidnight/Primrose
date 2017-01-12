@@ -65,7 +65,6 @@ var prog = {
     }
 
     if (prog.bar && total) {
-      console.log(file, loaded, total);
       prog.bar.max = total;
       prog.bar.value = loaded;
     }
