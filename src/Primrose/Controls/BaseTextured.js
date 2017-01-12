@@ -63,27 +63,23 @@ export default class BaseTextured extends Entity {
     if(this.options.geometry){
       this._geometry = this.options.geometry;
     }
+    else if(this.options.radius){
+      this._geometry = shell(
+        this.options.radius,
+        72,
+        36,
+        Math.PI * 2,
+        Math.PI,
+        options);
+    }
     else {
-      if(this.options.radius){
-        this._geometry = shell(
-          this.options.radius,
-          72,
-          36,
-          Math.PI * 2,
-          Math.PI,
-          options);
+      if(!this.options.width){
+        this.options.width = 0.5;
       }
-      else {
-        if(!this.options.width){
-          this.options.width = 0.5;
-        }
-        if(!this.options.height){
-          this.options.height = 0.5;
-        }
-        this._geometry = quad(this.options.width, this.options.height, options);
+      if(!this.options.height){
+        this.options.height = 0.5;
       }
-
-      this.options.geometry = this._geometry;
+      this._geometry = quad(this.options.width, this.options.height, options);
     }
   }
 
