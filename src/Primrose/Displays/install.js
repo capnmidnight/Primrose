@@ -44,10 +44,8 @@ function upgrade1_0_to_1_1(){
 
 function getPolyfillDisplays(options) {
   if (!polyFillDevicesPopulated) {
-    if (isCardboardCompatible) {
-      FullScreen.addChangeListener((evt) => {
-        fireVRDisplayPresentChange();
-      });
+    if (isCardboardCompatible || options.forceStereo) {
+      FullScreen.addChangeListener(fireVRDisplayPresentChange);
       allDisplays.push(new CardboardVRDisplay(options));
     }
 

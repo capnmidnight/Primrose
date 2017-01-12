@@ -13509,20 +13509,16 @@ var BaseTextured = function (_Entity) {
 
     if (_this.options.geometry) {
       _this._geometry = _this.options.geometry;
+    } else if (_this.options.radius) {
+      _this._geometry = shell(_this.options.radius, 72, 36, Math.PI * 2, Math.PI, options);
     } else {
-      if (_this.options.radius) {
-        _this._geometry = shell(_this.options.radius, 72, 36, Math.PI * 2, Math.PI, options);
-      } else {
-        if (!_this.options.width) {
-          _this.options.width = 0.5;
-        }
-        if (!_this.options.height) {
-          _this.options.height = 0.5;
-        }
-        _this._geometry = quad(_this.options.width, _this.options.height, options);
+      if (!_this.options.width) {
+        _this.options.width = 0.5;
       }
-
-      _this.options.geometry = _this._geometry;
+      if (!_this.options.height) {
+        _this.options.height = 0.5;
+      }
+      _this._geometry = quad(_this.options.width, _this.options.height, options);
     }
     return _this;
   }
@@ -13614,7 +13610,7 @@ var Image = function (_BaseTextured) {
           progress: progress
         });
 
-        _this2._meshes[i] = textured(_this2.options.geometry, src, loadOptions);
+        _this2._meshes[i] = textured(_this2._geometry, src, loadOptions);
 
         return loadOptions.promise.then(function (txt) {
           return _this2._textures[i] = txt;
@@ -36146,10 +36142,8 @@ function upgrade1_0_to_1_1() {
 
 function getPolyfillDisplays(options) {
   if (!polyFillDevicesPopulated) {
-    if (isCardboardCompatible) {
-      FullScreen.addChangeListener(function (evt) {
-        fireVRDisplayPresentChange();
-      });
+    if (isCardboardCompatible || options.forceStereo) {
+      FullScreen.addChangeListener(fireVRDisplayPresentChange);
       allDisplays.push(new CardboardVRDisplay(options));
     }
 
@@ -48102,16 +48096,28 @@ enableInlineVideo.isWhitelisted = isWhitelisted;
 
 var COUNTER$9 = 0;
 
+// Videos don't auto-play on mobile devices, so let's make them all play whenever we tap the screen.
 var processedVideos = [];
-
-function getNetworkStateName(state) {
-  for (var key in HTMLMediaElement) {
-    if (key.indexOf("NETWORK_") >= 0 && HTMLMediaElement[key] === state) {
-      return key;
-    }
+function findAndFixVideo(evt) {
+  var vids = document.querySelectorAll("video");
+  for (var i = 0; i < vids.length; ++i) {
+    fixVideo(vids[i]);
   }
-  return state;
+  window.removeEventListener("touchend", findAndFixVideo);
+  window.removeEventListener("mouseup", findAndFixVideo);
+  window.removeEventListener("keyup", findAndFixVideo);
 }
+
+function fixVideo(vid) {
+  if (processedVideos.indexOf(vid) === -1) {
+    processedVideos.push(vid);
+    enableInlineVideo(vid, false);
+  }
+}
+
+window.addEventListener("touchend", findAndFixVideo, false);
+window.addEventListener("mouseup", findAndFixVideo, false);
+window.addEventListener("keyup", findAndFixVideo, false);
 
 var Video = function (_BaseTextured) {
   inherits(Video, _BaseTextured);
@@ -48138,78 +48144,63 @@ var Video = function (_BaseTextured) {
     value: function _loadFiles(videos, progress) {
       var _this2 = this;
 
-      this._elements = [];
-      return Promise.all(Array.prototype.map.call(videos, function (spec, i) {
-        return new Promise(function (resolve, reject) {
-          var video = null;
-          if (typeof spec === "string") {
-            video = document.querySelector("video[src='" + spec + "']");
-            if (!video) {
-              video = document.createElement("video");
-              video.src = spec;
-            }
-          } else if (spec instanceof HTMLVideoElement) {
-            video = spec;
-          } else if (spec.toString() === "[object MediaStream]" || spec.toString() === "[object LocalMediaStream]") {
+      this._elements = Array.prototype.map.call(videos, function (spec, i) {
+        var video = null;
+        if (typeof spec === "string") {
+          video = document.querySelector("video[src='" + spec + "']");
+          if (!video) {
             video = document.createElement("video");
-            video.srcObject = spec;
+            video.src = spec;
           }
-          video.onprogress = progress;
-          video.onloadedmetadata = progress;
-          video.onerror = function (evt) {
-            return reject({
-              type: "error",
-              source: "videoElement",
-              fileName: spec,
-              networkState: getNetworkStateName(video.networkState)
-            });
-          };
-          video.muted = true;
+        } else if (spec instanceof HTMLVideoElement) {
+          video = spec;
+        } else if (spec.toString() === "[object MediaStream]" || spec.toString() === "[object LocalMediaStream]") {
+          video = document.createElement("video");
+          video.srcObject = spec;
+        }
+        video.onprogress = progress;
+        video.onloadedmetadata = progress;
+        video.muted = true;
+        video.loop = true;
+        video.setAttribute("playsinline", "");
+        video.setAttribute("webkit-playsinline", "");
+        if (!isiOS) {
           video.preload = "auto";
-          video.autoplay = true;
-          video.loop = true;
-          video.controls = true;
-          video.setAttribute("playsinline", "");
-          video.setAttribute("webkit-playsinline", "");
-          video.oncanplay = function () {
-            video.oncanplay = null;
-            video.onerror = null;
+        }
 
-            var width = video.videoWidth,
-                height = video.videoHeight,
-                p2Width = Math.pow(2, Math.ceil(Math.log2(width))),
-                p2Height = Math.pow(2, Math.ceil(Math.log2(height)));
+        _this2._meshes[i] = textured(_this2._geometry, video, _this2.options);
 
-            _this2._elements[i] = video;
+        if (!video.parentElement) {
+          document.body.insertBefore(video, document.body.children[0]);
+          fixVideo(video);
+        }
 
-            _this2._meshes[i] = textured(_this2.options.geometry, _this2._elements[i], _this2.options);
-
-            _this2.options.promise.then(function (txt) {
-              _this2._textures[i] = txt;
-              resolve();
-            });
-          };
-          if (!video.parentElement) {
-            document.body.insertBefore(video, document.body.children[0]);
-          }
-
-          if (processedVideos.indexOf(video) === -1) {
-            processedVideos.push(video);
-            enableInlineVideo(video);
-            video.play();
-          }
+        _this2.options.promise.then(function (txt) {
+          _this2._textures[i] = txt;
         });
-      }));
+
+        return video;
+      });
+      return Promise.resolve();
+    }
+  }, {
+    key: "play",
+    value: function play() {
+      if (this._elements.length > 0) {
+        this._elements[0].play();
+      }
     }
   }, {
     key: "update",
     value: function update() {
       get$1(Video.prototype.__proto__ || Object.getPrototypeOf(Video.prototype), "update", this).call(this);
       for (var i = 0; i < this._textures.length; ++i) {
-        var elem = this._elements[i];
-        if (elem.currentTime !== this._lastTime) {
-          this._textures[i].needsUpdate = true;
-          this._lastTime = elem.currentTime;
+        if (this._textures[i]) {
+          var elem = this._elements[i];
+          if (elem.currentTime !== this._lastTime) {
+            this._textures[i].needsUpdate = true;
+            this._lastTime = elem.currentTime;
+          }
         }
       }
     }
