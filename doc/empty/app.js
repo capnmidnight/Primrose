@@ -16,7 +16,7 @@ var videos = [
   "kettle",
   "ocean"
 ].map(function(v) {
-  var file = "/notion-node/" + v + ".mp4";
+  var file = "../videos/" + v + ".mp4";
   console.log("loading " + file);
   return new Primrose.Controls.Video(file, {
     progress: Preloader.thunk

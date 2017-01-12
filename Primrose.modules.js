@@ -1,28 +1,3 @@
-if (typeof Object.assign != 'function') {
-  Object.assign = function (target, varArgs) {
-    if (target == null) {
-      throw new TypeError('Cannot convert undefined or null to object');
-    }
-
-    var to = Object(target);
-
-    for (var index = 1; index < arguments.length; index++) {
-      var nextSource = arguments[index];
-
-      if (nextSource != null) {
-        // Skip over if undefined or null
-        for (var nextKey in nextSource) {
-          // Avoid bugs when hasOwnProperty is shadowed
-          if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
-            to[nextKey] = nextSource[nextKey];
-          }
-        }
-      }
-    }
-    return to;
-  };
-}
-
 var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
 
 var isChrome = !!window.chrome && !isOpera;
@@ -13170,16 +13145,21 @@ var Entity = function (_Object3D) {
       });
     }
   }, {
-    key: "addToBrowserEnvironment",
-    value: function addToBrowserEnvironment(env, scene) {
+    key: "registerPickableObjects",
+    value: function registerPickableObjects(env) {
       var _this3 = this;
 
-      scene.add(this);
       if (this.options.pickable) {
         this.ready.then(function () {
           return env.registerPickableObject(_this3._pickingObject);
         });
       }
+    }
+  }, {
+    key: "addToBrowserEnvironment",
+    value: function addToBrowserEnvironment(env, scene) {
+      scene.add(this);
+      this.registerPickableObjects(env);
     }
   }, {
     key: "disabled",
@@ -48122,6 +48102,8 @@ enableInlineVideo.isWhitelisted = isWhitelisted;
 
 var COUNTER$9 = 0;
 
+var processedVideos = [];
+
 function getNetworkStateName(state) {
   for (var key in HTMLMediaElement) {
     if (key.indexOf("NETWORK_") >= 0 && HTMLMediaElement[key] === state) {
@@ -48130,30 +48112,6 @@ function getNetworkStateName(state) {
   }
   return state;
 }
-
-// Videos don't auto-play on mobile devices, so let's make them all play whenever
-// we tap the screen.
-var processedVideos = [];
-function findAndFixVideo(evt) {
-  var vids = document.querySelectorAll("video");
-  for (var i = 0; i < vids.length; ++i) {
-    fixVideo(vids[i]);
-  }
-  window.removeEventListener("touchend", findAndFixVideo);
-  window.removeEventListener("mouseup", findAndFixVideo);
-  window.removeEventListener("keyup", findAndFixVideo);
-}
-
-function fixVideo(vid) {
-  if (processedVideos.indexOf(vid) === -1) {
-    processedVideos.push(vid);
-    enableInlineVideo(vid, false);
-  }
-}
-
-window.addEventListener("touchend", findAndFixVideo, false);
-window.addEventListener("mouseup", findAndFixVideo, false);
-window.addEventListener("keyup", findAndFixVideo, false);
 
 var Video = function (_BaseTextured) {
   inherits(Video, _BaseTextured);
@@ -48183,14 +48141,10 @@ var Video = function (_BaseTextured) {
       this._elements = [];
       return Promise.all(Array.prototype.map.call(videos, function (spec, i) {
         return new Promise(function (resolve, reject) {
-          console.log(_this2.name + ": " + spec);
           var video = null;
           if (typeof spec === "string") {
             video = document.querySelector("video[src='" + spec + "']");
             if (!video) {
-              var src = document.createElement("source"),
-                  errorCount = 0,
-                  numSources = 1;
               video = document.createElement("video");
               video.src = spec;
             }
@@ -48239,7 +48193,11 @@ var Video = function (_BaseTextured) {
             document.body.insertBefore(video, document.body.children[0]);
           }
 
-          video.play();
+          if (processedVideos.indexOf(video) === -1) {
+            processedVideos.push(video);
+            enableInlineVideo(video);
+            video.play();
+          }
         });
       }));
     }

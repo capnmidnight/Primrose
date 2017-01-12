@@ -40,10 +40,14 @@ export default class Entity extends Object3D {
         child.addEventListener(event, listener)));
   }
 
-  addToBrowserEnvironment(env, scene) {
-    scene.add(this);
+  registerPickableObjects(env){
     if(this.options.pickable) {
       this.ready.then(() => env.registerPickableObject(this._pickingObject));
     }
+  }
+
+  addToBrowserEnvironment(env, scene) {
+    scene.add(this);
+    this.registerPickableObjects(env);
   }
 };

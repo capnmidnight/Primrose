@@ -12,6 +12,7 @@ pliny.class({
 
 let COUNTER = 0;
 
+const processedVideos = [];
 
 function getNetworkStateName(state){
   for(var key in HTMLMediaElement) {
@@ -22,31 +23,7 @@ function getNetworkStateName(state){
   return state;
 }
 
-// Videos don't auto-play on mobile devices, so let's make them all play whenever
-// we tap the screen.
-const processedVideos = [];
-function findAndFixVideo(evt){
-  const vids = document.querySelectorAll("video");
-  for(let i = 0; i < vids.length; ++i){
-    fixVideo(vids[i]);
-  }
-  window.removeEventListener("touchend", findAndFixVideo);
-  window.removeEventListener("mouseup", findAndFixVideo);
-  window.removeEventListener("keyup", findAndFixVideo);
-}
-
-function fixVideo(vid) {
-  if(processedVideos.indexOf(vid) === -1){
-    processedVideos.push(vid);
-    enableInlineVideo(vid, false);
-  }
-}
-
-window.addEventListener("touchend", findAndFixVideo, false);
-window.addEventListener("mouseup", findAndFixVideo, false);
-window.addEventListener("keyup", findAndFixVideo, false);
-
-import enableInlineVideo from "iphone-inline-video";
+import makeVideoPlayableInline from "iphone-inline-video";
 
 import BaseTextured from "./BaseTextured";
 import textured from "../../live-api/textured";
@@ -125,7 +102,11 @@ export default class Video extends BaseTextured {
         document.body.insertBefore(video, document.body.children[0]);
       }
 
-      video.play();
+      if(processedVideos.indexOf(video) === -1) {
+        processedVideos.push(video);
+        makeVideoPlayableInline(video);
+        video.play();
+      }
     })));
   }
 
