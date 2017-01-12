@@ -38,7 +38,7 @@ export function updateAll(){
 
 export function eyeBlankAll(eye) {
   entities.forEach((entity) =>
-    entity.eyeBlank(0));
+    entity.eyeBlank(eye));
 };
 
 export default class BaseTextured extends Entity {
