@@ -20190,7 +20190,7 @@ var Audio$1 = {
 
 var packageName = "PrimroseVR";
 
-var version = "0.30.4";
+var version = "0.30.5";
 
 
 
@@ -48109,7 +48109,7 @@ function findAndFixVideo(evt) {
 }
 
 function fixVideo(vid) {
-  if (processedVideos.indexOf(vid) === -1) {
+  if (isiOS && processedVideos.indexOf(vid) === -1) {
     processedVideos.push(vid);
     enableInlineVideo(vid, false);
   }
