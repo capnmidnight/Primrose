@@ -10,6 +10,12 @@ pliny.class({
   }]
 });
 
+import enableInlineVideo from "iphone-inline-video";
+
+import BaseTextured from "./BaseTextured";
+import textured from "../../live-api/textured";
+import isiOS from "../../flags/isiOS";
+
 let COUNTER = 0;
 
 function getNetworkStateName(state){
@@ -34,7 +40,7 @@ function findAndFixVideo(evt){
 }
 
 function fixVideo(vid) {
-  if(processedVideos.indexOf(vid) === -1){
+  if(isiOS && processedVideos.indexOf(vid) === -1){
     processedVideos.push(vid);
     enableInlineVideo(vid, false);
   }
@@ -43,12 +49,6 @@ function fixVideo(vid) {
 window.addEventListener("touchend", findAndFixVideo, false);
 window.addEventListener("mouseup", findAndFixVideo, false);
 window.addEventListener("keyup", findAndFixVideo, false);
-
-import enableInlineVideo from "iphone-inline-video";
-
-import BaseTextured from "./BaseTextured";
-import textured from "../../live-api/textured";
-import isiOS from "../../flags/isiOS";
 
 export default class Video extends BaseTextured {
 
