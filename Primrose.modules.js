@@ -13481,7 +13481,7 @@ function updateAll() {
 
 function eyeBlankAll(eye) {
   entities.forEach(function (entity) {
-    return entity.eyeBlank(0);
+    return entity.eyeBlank(eye);
   });
 }
 
@@ -20190,7 +20190,7 @@ var Audio$1 = {
 
 var packageName = "PrimroseVR";
 
-var version = "0.30.2";
+var version = "0.30.3";
 
 
 
