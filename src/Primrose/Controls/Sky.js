@@ -63,7 +63,7 @@ export default class Sky extends Entity {
       this.add(box(skyDim, skyDim, skyDim)
         .colored(this.options.texture, this.options));
     }
-    else if(type === "string") {
+    else if(type === "string" || (this.options.texture instanceof Array && this.options.texture.length === 6 && typeof this.options.texture[0] === "string")) {
       this._image = new Image(this.options.texture, this.options);
       this.add(this._image);
     }
