@@ -55,7 +55,9 @@ function fixAudio(){
   }
 }
 
+var lastTime = 0;
 env.addEventListener("ready", function(){
+  lastTime = env.currentTime;
   if(isMobile){
     env.options.fullScreenElement.addEventListener("mousedown", fixAudio);
     env.options.fullScreenElement.addEventListener("touchstart", fixAudio);
@@ -93,7 +95,9 @@ function updateObj(obj, dt) {
   }
 };
 
-env.addEventListener("update", function(dt){
+env.addEventListener("update", function(){
+  var dt = env.currentTime - lastTime;
+  lastTime = env.currentTime;
   for(var i = 0; i < blocks.length; ++i){
     var block = blocks[i];
     TEMP.copy(env.input.head.position)
@@ -196,5 +200,4 @@ function shoot(evt){
     .off(0.51);
 }
 
-env.addEventListener("pointerend", shoot);
-env.addEventListener("gazecomplete", shoot);
+env.sky.addEventListener("select", shoot);
