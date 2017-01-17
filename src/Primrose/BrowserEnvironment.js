@@ -371,14 +371,17 @@ export default class BrowserEnvironment extends EventDispatcher {
       maxY = Math.PI / 6;
 
     const moveUI = (dt) => {
-      var y = this.vicinity.position.y;
-      this.vicinity.position.lerp(this.input.head.position, this.options.vicinityFollowRate);
+      var y = this.vicinity.position.y,
+        p = this.options.vicinityFollowRate,
+        q = 1 - p;
+      this.vicinity.position.lerp(this.input.head.position, p);
       this.vicinity.position.y = y;
 
       followEuler.setFromQuaternion(this.input.head.quaternion);
       this.turns.radians = followEuler.y;
       followEuler.set(maxX, this.turns.radians, 0, "YXZ");
-      this.ui.quaternion.setFromEuler(followEuler);
+      this.ui.quaternion.setFromEuler(followEuler)
+      this.ui.position.y = this.ui.position.y * q + this.input.head.position.y * p;
     };
 
     var animate = (t) => {
