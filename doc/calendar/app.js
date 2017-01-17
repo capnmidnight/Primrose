@@ -43,23 +43,21 @@ function randDegree() {
   Primrose.Random.number(-Math.PI, Math.PI);
 }
 
-function setColor(){
+function setColor(isHighlighted){
   var date = new Date(),
       month = date.getMonth(),
-      d = date.getDate() - 1,
-      _this = this;
-  objs.forEach(function(o, i) {
-    if(o.box === _this){
-      o.box.material = primaryMaterial;
-      o.lbl.material = secondaryMaterial;
-      o.bev.material = secondaryMaterial;
-    }
-    else {
-      o.box.material = (month === currentMonth && i === d) ? todayMaterial : secondaryMaterial;
-      o.lbl.material = primaryMaterial;
-      o.bev.material = primaryMaterial;
-    }
-  });
+      d = date.getDate() - 1;
+
+  if(isHighlighted){
+    this.box.material = primaryMaterial;
+    this.lbl.material = secondaryMaterial;
+    this.bev.material = secondaryMaterial;
+  }
+  else {
+    this.box.material = secondaryMaterial;
+    this.lbl.material = primaryMaterial;
+    this.bev.material = primaryMaterial;
+  }
 }
 
 function text(text, size) {
@@ -71,7 +69,8 @@ function hitDate(month, date){
   var d = new Date();
   d.setMonth(month);
   d.setDate(date);
-  env.speech.speak(dayNames[d.getDay()] + ", " + monthNames[month] + " " + date + ", " + d.getFullYear());
+  var msg = dayNames[d.getDay()] + ", " + monthNames[month] + " " + date + ", " + d.getFullYear();
+  env.speech.speak(msg);
 }
 
 function showMonth(month){
@@ -106,14 +105,14 @@ function showMonth(month){
     else {
       o.box.material = secondaryMaterial;
     }
-    o.box.onenter = setColor.bind(o.box);
     env.registerPickableObject(o.box);
-    o.box.onselect = hitDate.bind(null, month, d);
+    o.box.addEventListener("enter", setColor.bind(o, true));
+    o.box.addEventListener("exit", setColor.bind(o, false));
+    o.box.addEventListener("select", hitDate.bind(null, month, d));
     env.ui.add(o.hub.latLon(boxSpacing * (y - 2) - 45, boxSpacing * (3 - x)));
     date.setDate(date.getDate() + 1);
     lastDay = x;
   }
-  env.ground.onenter = setColor.bind(env.ground);
 }
 
 env.addEventListener("ready", function(){
@@ -128,21 +127,24 @@ env.addEventListener("ready", function(){
   for(var d = 0; d < 31; ++d){
     var o = hub(),
       b = box(boxSize)
-        .colored(secondaryColor)
-        .named("box" + (d+1)),
+        .colored(secondaryColor, {
+          shadow: true,
+          pickable: true
+        })
+        .named("box" + (d+1))
+        .addTo(o),
       bev = box(boxSize * 1.1,boxSize * 1.1,boxSize * 0.9)
         .colored(primaryColor)
-        .named("bev" + (d+1)),
+        .named("bev" + (d+1))
+        .addTo(b),
       t = text((d + 1).toString())
-        .colored(primaryColor)
-        .named("txt" + (d + 1));
+        .colored(primaryColor, {
+          shadow: true
+        })
+        .named("txt" + (d + 1))
+        .addTo(b)
+        .at(0, 0, 0.08);
 
-    t.castShadow = true;
-    b.receiveShadow = true;
-    t.position.z = 0.08;
-    o.add(b);
-    b.add(bev);
-    b.add(t);
     objs.push({
       hub: o,
       box: b,
