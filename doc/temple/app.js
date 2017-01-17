@@ -24,24 +24,21 @@ var GRASS = "../images/grass.png",
 
 env.addEventListener("ready", function () {
 
-  var start = put(hub())
-    .on(this.scene)
-    .at(-MIDX, 0, -MIDZ)
-    .obj();
+  var start = hub()
+    .addTo(this.scene)
+    .at(-MIDX, 0, -MIDZ);
 
-  var ceiling = brick(DECK, WIDTH, 0.1, DEPTH, {
-    resolve: function(){
-      put(ceiling).on(start).at(WIDTH / 2, 12.5, DEPTH / 2);
-    }
-  }).named("Ceiling");
+  var ceiling = brick(DECK, WIDTH, 0.1, DEPTH)
+    .named("Ceiling")
+    .addTo(start)
+    .at(WIDTH / 2, 12.5, DEPTH / 2);
 
   var verts = [];
 
-  ball = brick(ROCK, 1, 1, 1, {
-    resolve: function(){
-      put(ball).on(start).at(0, 0, 0);
-    }
-  }).named("Ball");
+  ball = brick(ROCK, 1, 1, 1)
+    .named("Ball")
+    .addTo(start)
+    .at(0, 0, 0);
 
   for (var i = 0; i < 5000; ++i) {
     verts.push(v3(Primrose.Random.number(-0.5 * WIDTH, 0.5 * WIDTH),
@@ -49,8 +46,8 @@ env.addEventListener("ready", function () {
       Primrose.Random.number(-0.5 * DEPTH, 0.5 * DEPTH)));
   }
 
-  put(cloud(verts, this.options.backgroundColor, 0.05))
-    .on(start)
+  cloud(verts, this.options.backgroundColor, 0.05)
+    .addTo(start)
     .at(MIDX, MIDY, MIDZ);
 
 
@@ -68,19 +65,18 @@ env.addEventListener("ready", function () {
         }
       }
     }
-    put(cloud(verts, 0xff0000, p * Math.sqrt(2)))
-      .on(start)
+    cloud(verts, 0xff0000, p * Math.sqrt(2))
+      .addTo(start)
       .at(MIDX - r, r, MIDZ - r);
   }
 
   makeSphere(10, 0.1);
 
   function column(a, b, h, x, y, z) {
-    var obj = textured(cylinder(a, b, h, 6, 1), SAND, {
-      resolve: function(){
-        put(obj).on(start).at(x, y, z);
-      }
-    });
+    var obj = cylinder(a, b, h, 6, 1)
+      .textured(SAND)
+      .addTo(start)
+      .at(x, y, z);
   }
 
   for (var i = 0; i < 100; ++i) {
