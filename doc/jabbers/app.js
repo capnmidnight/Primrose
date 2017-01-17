@@ -14,6 +14,7 @@ var WIDTH = 100,
     font: "../fonts/helvetiker_regular.typeface.json",
     useFog: true,
     drawDistance: 100,
+    enableShadows: true,
     fullScreenButtonContainer: "#fullScreenButtonContainer",
     progress: Preloader.thunk
   });
@@ -28,29 +29,30 @@ env.addEventListener("gazecomplete", makeJabJump);
 env.addEventListener("pointerend", makeJabJump);
 
 function eye(side, body) {
-  var ball = put(colored(sphere(0.05, 6, 3), 0xffffff))
-    .on(body)
-    .at(side * 0.07, 0.05, 0.16)
-    .obj();
-  put(colored(sphere(0.01, 3, 2), 0))
-    .on(ball)
+  var ball = sphere(0.05, 6, 3)
+    .colored(0xffffff)
+    .addTo(body)
+    .at(side * 0.07, 0.05, 0.16);
+  sphere(0.01, 3, 2)
+    .colored(0)
+    .addTo(ball)
     .at(0, 0, 0.045);
   return ball;
 }
 
 function Jabber(w, h, s) {
   var skin = R.item(Primrose.Constants.SKINS),
-    body = colored(sphere(0.2, 14, 7), skin),
+    body = sphere(0.2, 14, 7)
+      .colored(skin, {
+        shadow: true
+      })
+      .at(R.number(-w, w), 1, R.number(-h, h)),
+
     velocity = v3(
       R.number(-s, s),
       0,
       R.number(-s, s)),
     v = v3(0, 0, 0);
-
-  body.position.set(
-    R.number(-w, w),
-    1,
-    R.number(-h, h));
 
   eye(-1, body);
   eye(1, body);
@@ -105,8 +107,11 @@ function Jabber(w, h, s) {
 // downloaded and validated all of model files, and constructed
 // the basic scene hierarchy out of it, the "ready" event is fired,
 // indicating that we may make additional changes to the scene now.
+
+var lastTime = 0;
 env.addEventListener("ready", function () {
-  for (var i = 0; i < 1; ++i) {
+  lastTime = env.currentTime;
+  for (var i = 0; i < 100; ++i) {
     var jab = Jabber(
       MIDX / 5,
       MIDZ / 5, 1);
@@ -118,7 +123,9 @@ env.addEventListener("ready", function () {
   Preloader.hide();
 });
 
-env.addEventListener("update", function (dt) {
+env.addEventListener("update", function () {
+  var dt = env.currentTime - lastTime;
+  lastTime = env.currentTime;
   for (var id in jabs) {
     jabs[id].update(dt);
   }
