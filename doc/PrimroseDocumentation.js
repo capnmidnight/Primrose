@@ -1691,29 +1691,15 @@ When including Primrose as a `script` tag, the Util functions are imported direc
 
 pliny.method({
   parent: "THREE.Object3D",
-  name: "addToBrowserEnvironment",
-  description: "A polyfill method for being able to add the object to a `Primrose.BrowserEnvironment` using `appendChild()` and to add other elements to the Object3D using `appendChild()` such that they may be pickable in the scene. This half of the polyfill implements the visitor pattern, so that individual objects can define their own processing for this action.",
+  name: "appendChild",
+  description: "An alias for `Object3D::add`, to mirror DOM.",
   parameters: [{
-    name: "env",
-    type: "Primrose.BrowserEnvironment",
-    description: "The environment (with collision detection and ray-picking capability) to which to register objects"
-  }, {
-    name: "scene",
+    name: "child",
     type: "THREE.Object3D",
-    description: "The true parent element for `this` object"
+    description: "The object to add."
   }]
 });
-pliny.method({
-    parent: "THREE.Object3D",
-    name: "appendChild",
-    description: "A polyfill method for being able to add the object to a `Primrose.BrowserEnvironment` using `appendChild()` and to add other elements to the Object3D using `appendChild()` such that they may be pickable in the scene.",
-    parameters: [{
-      name: "child",
-      type: "Object",
-      description: "Any Primrose.Controls.Entity or THREE.Object3D to add to this object."
-    }]
-  });
-  pliny.class({
+pliny.class({
   parent: "Primrose",
   name: "Angle",
   description: "The Angle class smooths out the jump from 360 to 0 degrees. It\n\
@@ -2107,21 +2093,7 @@ pliny.class({
   }]
 });
 
-pliny.method({
-        parent: "Primrose.Pointer",
-        name: "addToBrowserEnvironment",
-        description: "Add this meshes that give the visual representation of the pointer, to the scene.",
-        parameters: [{
-          name: "env",
-          type: "Primrose.BrowserEnvironment",
-          description: "Not used, just here to fulfill a common interface in the framework."
-        }, {
-          name: "scene",
-          type: "THREE.Scene",
-          description: "The scene to which to add the 3D cursor."
-        }]
-      });
-      pliny.enumeration({
+pliny.enumeration({
   parent: "Primrose",
   name: "Keys",
   description: "Keycode values for system keys that are the same across all international standards"
@@ -2399,111 +2371,6 @@ pliny.class({
 
 pliny.class({
   parent: "Primrose.Controls",
-  baseClass: "THREE.EventDispatcher",
-  name: "BaseControl",
-  description: "The BaseControl class is the parent class for all 3D controls.\n\
-It manages a unique ID for every new control, the focus state of the control, and\n\
-performs basic conversions from DOM elements to the internal Control format."
-});
-
-pliny.property({
-      parent: "Primrose.Controls.BaseControl",
-      name: "controlID",
-      type: "Number",
-      description: "Automatically incrementing counter for controls, to make sure there is a distinct differentiator between them all."
-    });
-    pliny.property({
-      parent: "Primrose.Controls.BaseControl",
-      name: "focused",
-      type: "Boolean",
-      description: "Flag indicating this control has received focus. You should theoretically only read it."
-    });
-    pliny.method({
-        parent: "Primrose.Controls.BaseControl",
-        name: "focus",
-        description: "Sets the focus property of the control, does not change the focus property of any other control.",
-        examples: [{
-          name: "Focus on one control, blur all the rest",
-          description: "When we have a list of controls and we are trying to track\n\
-    focus between them all, we must coordinate calls between `focus()` and `blur()`.\n\
-    \n\
-      grammar(\"JavaScript\");\n\
-      var ctrls = [\n\
-        new Primrose.Controls.TextBox(),\n\
-        new Primrose.Controls.TextBox(),\n\
-        new Primrose.Controls.Button()\n\
-      ];\n\
-    \n\
-      function focusOn(id){\n\
-        for(var i = 0; i < ctrls.length; ++i){\n\
-          var c = ctrls[i];\n\
-          if(c.controlID === id){\n\
-            c.focus();\n\
-          }\n\
-          else{\n\
-            c.blur();\n\
-          }\n\
-        }\n\
-      }"
-        }]
-      });
-
-      pliny.method({
-        parent: "Primrose.Controls.BaseControl",
-        name: "blur",
-        description: "Unsets the focus property of the control, does not change the focus property of any other control.",
-        examples: [{
-          name: "Focus on one control, blur all the rest",
-          description: "When we have a list of controls and we are trying to track\n\
-    focus between them all, we must coordinate calls between `focus()` and `blur()`.\n\
-    \n\
-      grammar(\"JavaScript\");\n\
-      var ctrls = [\n\
-        new Primrose.Controls.TextBox(),\n\
-        new Primrose.Controls.TextBox(),\n\
-        new Primrose.Controls.Button()\n\
-      ];\n\
-      \n\
-      function focusOn(id){\n\
-        for(var i = 0; i < ctrls.length; ++i){\n\
-          var c = ctrls[i];\n\
-          if(c.controlID === id){\n\
-            c.focus();\n\
-          }\n\
-          else{\n\
-            c.blur();\n\
-          }\n\
-        }\n\
-      }"
-        }]
-      });
-
-      pliny.method({
-        parent: "Primrose.Controls.BaseControl",
-        name: "copyElement",
-        description: "Copies properties from a DOM element that the control is supposed to match.",
-        parameters: [{
-          name: "elem",
-          type: "Element",
-          description: "The element--e.g. a button or textarea--to copy."
-        }],
-        examples: [{
-          name: "Rough concept",
-          description: "The class is not used directly. Its methods would be used in a base\n\
-    class that implements its functionality.\n\
-    \n\
-    The `copyElement()` method gets used when a DOM element is getting \"converted\"\n\
-    to a 3D element on-the-fly.\n\
-    \n\
-      grammar(\"JavaScript\");\n\
-      var myDOMButton = document.querySelector(\"button[type='button']\"),\n\
-        my3DButton = new Primrose.Controls.Button3D();\n\
-      my3DButton.copyElement(myDOMButton);"
-        }]
-      });
-
-      pliny.class({
-  parent: "Primrose.Controls",
   name: "Button3D",
   baseClass: "Primrose.Controls.BaseControl",
   parameters: [{
@@ -2522,13 +2389,7 @@ pliny.property({
   description: "A 3D button control, with a separate cap from a stand that it sits on. You click and depress the cap on top of the stand to actuate."
 });
 
-pliny.property({
-      parent: "Primrose.Controls.Button3D",
-      name: "options",
-      type: "Object",
-      description: "Options for how buttons are handled."
-    });
-    pliny.event({
+pliny.event({
       parent: "Primrose.Controls.Button3D",
       name: "click",
       description: "Occurs when the button is activated."
@@ -2551,12 +2412,6 @@ pliny.property({
       name: "base",
       type: "THREE.Object3D",
       description: "The moveable part of the button, that triggers the click event."
-    });
-    pliny.property({
-      parent: "Primrose.Controls.Button3D",
-      name: "container",
-      type: "THREE.Object3D",
-      description: "A grouping collection for the base and cap."
     });
     pliny.property({
       parent: "Primrose.Controls.Button3D",
@@ -2610,27 +2465,6 @@ pliny.property({
         }]
       });
 
-      pliny.method({
-        parent: "Primrose.Controls.Button3D",
-        name: "addToBrowserEnvironment",
-        description: "Add the button to the scene, registering it as a pickable object in the environment.",
-        parameters: [{
-          name: "env",
-          type: "Primrose.BrowserEnvironment",
-          description: "The environment in which to register the pickable object."
-        }, {
-          name: "scene",
-          type: "THREE.Object3D",
-          description: "The position in the scene graph in which to insert the button."
-        }]
-      });
-
-      pliny.property({
-        parent: "Primrose.Controls.Button3D",
-        name: "position",
-        type: "THREE.Vector3",
-        description: "The location of the button."
-      });
       pliny.record({
   parent: "Primrose.Controls.Button3D",
   name: "DEFAULTS",
@@ -4009,7 +3843,7 @@ pliny.property({
     pliny.method({
       parent: "Primrose.BrowserEnvironment",
       name: "appendChild",
-      description: "Add an object to the scene, potentially informing the object so that it may perform other tasks during the transition.",
+      description: "Add an object to the scene.",
       returns: "THREE.Object3D",
       parameters: [{
         name: "elem",
@@ -4040,22 +3874,6 @@ pliny.property({
       name: "music",
       type: "Primrose.Audio.Music",
       description: "A primitive sort of synthesizer for making simple music."
-    });
-    pliny.property({
-      parent: "Primrose.BrowserEnvironment",
-      name: "pickableObjects",
-      type: "Array",
-      description: "The objects to raycast against to check for clicks."
-    });
-    pliny.method({
-      parent: "Primrose.BrowserEnvironment",
-      name: "registerPickableObject",
-      description: "Add an object to the list of pickable objects.",
-      parameters: [{
-        name: "obj",
-        type: "Any",
-        description: "The object to make pickable."
-      }]
     });
     pliny.property({
       parent: "Primrose.BrowserEnvironment",
@@ -4319,6 +4137,111 @@ pliny.property({
         name: "displays",
         type: "Array of VRDisplay",
         description: "The VRDisplays available on the system."
+      });
+
+      pliny.class({
+  parent: "Primrose.Controls",
+  baseClass: "THREE.EventDispatcher",
+  name: "BaseControl",
+  description: "The BaseControl class is the parent class for all 3D controls.\n\
+It manages a unique ID for every new control, the focus state of the control, and\n\
+performs basic conversions from DOM elements to the internal Control format."
+});
+
+pliny.property({
+      parent: "Primrose.Controls.BaseControl",
+      name: "controlID",
+      type: "Number",
+      description: "Automatically incrementing counter for controls, to make sure there is a distinct differentiator between them all."
+    });
+    pliny.property({
+      parent: "Primrose.Controls.BaseControl",
+      name: "focused",
+      type: "Boolean",
+      description: "Flag indicating this control has received focus. You should theoretically only read it."
+    });
+    pliny.method({
+        parent: "Primrose.Controls.BaseControl",
+        name: "focus",
+        description: "Sets the focus property of the control, does not change the focus property of any other control.",
+        examples: [{
+          name: "Focus on one control, blur all the rest",
+          description: "When we have a list of controls and we are trying to track\n\
+    focus between them all, we must coordinate calls between `focus()` and `blur()`.\n\
+    \n\
+      grammar(\"JavaScript\");\n\
+      var ctrls = [\n\
+        new Primrose.Controls.TextBox(),\n\
+        new Primrose.Controls.TextBox(),\n\
+        new Primrose.Controls.Button()\n\
+      ];\n\
+    \n\
+      function focusOn(id){\n\
+        for(var i = 0; i < ctrls.length; ++i){\n\
+          var c = ctrls[i];\n\
+          if(c.controlID === id){\n\
+            c.focus();\n\
+          }\n\
+          else{\n\
+            c.blur();\n\
+          }\n\
+        }\n\
+      }"
+        }]
+      });
+
+      pliny.method({
+        parent: "Primrose.Controls.BaseControl",
+        name: "blur",
+        description: "Unsets the focus property of the control, does not change the focus property of any other control.",
+        examples: [{
+          name: "Focus on one control, blur all the rest",
+          description: "When we have a list of controls and we are trying to track\n\
+    focus between them all, we must coordinate calls between `focus()` and `blur()`.\n\
+    \n\
+      grammar(\"JavaScript\");\n\
+      var ctrls = [\n\
+        new Primrose.Controls.TextBox(),\n\
+        new Primrose.Controls.TextBox(),\n\
+        new Primrose.Controls.Button()\n\
+      ];\n\
+      \n\
+      function focusOn(id){\n\
+        for(var i = 0; i < ctrls.length; ++i){\n\
+          var c = ctrls[i];\n\
+          if(c.controlID === id){\n\
+            c.focus();\n\
+          }\n\
+          else{\n\
+            c.blur();\n\
+          }\n\
+        }\n\
+      }"
+        }]
+      });
+
+      pliny.method({
+        parent: "Primrose.Controls.BaseControl",
+        name: "copyElement",
+        description: "Copies properties from a DOM element that the control is supposed to match.",
+        parameters: [{
+          name: "elem",
+          type: "Element",
+          description: "The element--e.g. a button or textarea--to copy."
+        }],
+        examples: [{
+          name: "Rough concept",
+          description: "The class is not used directly. Its methods would be used in a base\n\
+    class that implements its functionality.\n\
+    \n\
+    The `copyElement()` method gets used when a DOM element is getting \"converted\"\n\
+    to a 3D element on-the-fly.\n\
+    \n\
+      grammar(\"JavaScript\");\n\
+      var myDOMButton = document.querySelector(\"button[type='button']\"),\n\
+        my3DButton = new Primrose.Controls.Button3D();\n\
+      my3DButton.copyElement(myDOMButton);"
+        }]
       });
 
       pliny.class({
