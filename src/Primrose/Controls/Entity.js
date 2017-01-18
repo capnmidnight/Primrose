@@ -11,6 +11,7 @@ export default class Entity extends Object3D {
 
   constructor(options) {
     super();
+    this.isEntity = true;
     this.options = options || {};
     this.name = this.options && this.options.id || "";
     this.ready = this._ready.then(() => this);
@@ -38,16 +39,5 @@ export default class Entity extends Object3D {
     this.ready.then(() =>
       this.children.forEach((child) =>
         child.addEventListener(event, listener)));
-  }
-
-  registerPickableObjects(env){
-    if(this.options.pickable) {
-      this.ready.then(() => env.registerPickableObject(this._pickingObject));
-    }
-  }
-
-  addToBrowserEnvironment(env, scene) {
-    scene.add(this);
-    this.registerPickableObjects(env);
   }
 };

@@ -41,12 +41,6 @@ export default class Form extends Surface {
     });
   }
 
-  addToBrowserEnvironment(env, scene) {
-    scene.add(this._mesh);
-    env.registerPickableObject(this._mesh);
-    return this._mesh;
-  }
-
   get position() {
     return this._mesh.position;
   }

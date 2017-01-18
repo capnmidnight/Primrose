@@ -1,3 +1,6 @@
+/// NOTE: maybe BrowserEnvironment should be a subclass of THREE.Scene.
+
+
 import { packageName, version, homepage } from "../../package.json";
 console.info(`[${packageName} v${version}]:> see ${homepage} for more information.`);
 
@@ -248,6 +251,7 @@ import { Quality, PIXEL_SCALES } from "./Constants";
 
 
 import { EventDispatcher } from "three/src/core/EventDispatcher";
+import { Object3D } from "three/src/core/Object3D";
 import { BackSide, PCFSoftShadowMap } from "three/src/constants";
 import { FogExp2 } from "three/src/scenes/FogExp2";
 import { Scene } from "three/src/scenes/Scene";
@@ -329,18 +333,7 @@ export default class BrowserEnvironment extends EventDispatcher {
 
     const doPicking = () => {
       updateAll();
-      for(let i = this.pickableObjects.length - 1; i >= 0; --i){
-        let inScene = false;
-        for(let head = this.pickableObjects[i].parent; head !== null; head = head.parent){
-          if(head === this.scene){
-            inScene = true;
-          }
-        }
-        if(!inScene) {
-          this.pickableObjects.splice(i, 1);
-        }
-      }
-      this.input.resolvePicking(this.pickableObjects.filter((obj) => !obj.disabled));
+      this.input.resolvePicking(this.scene);
     };
 
     const moveGround = () => {
@@ -527,7 +520,7 @@ export default class BrowserEnvironment extends EventDispatcher {
     pliny.method({
       parent: "Primrose.BrowserEnvironment",
       name: "appendChild",
-      description: "Add an object to the scene, potentially informing the object so that it may perform other tasks during the transition.",
+      description: "Add an object to the scene.",
       returns: "THREE.Object3D",
       parameters: [{
         name: "elem",
@@ -536,12 +529,7 @@ export default class BrowserEnvironment extends EventDispatcher {
       }]
     });
     this.appendChild = (elem) => {
-      if (elem.isMesh) {
-        this.scene.add(elem);
-      }
-      else {
-        return elem.addToBrowserEnvironment(this, this.scene);
-      }
+      this.scene.add(elem);
     };
 
     function setColor(model, color) {
@@ -647,31 +635,6 @@ export default class BrowserEnvironment extends EventDispatcher {
       description: "A primitive sort of synthesizer for making simple music."
     });
     this.music = new Music(this.audio);
-
-    pliny.property({
-      parent: "Primrose.BrowserEnvironment",
-      name: "pickableObjects",
-      type: "Array",
-      description: "The objects to raycast against to check for clicks."
-    });
-    this.pickableObjects = [];
-
-
-    pliny.method({
-      parent: "Primrose.BrowserEnvironment",
-      name: "registerPickableObject",
-      description: "Add an object to the list of pickable objects.",
-      parameters: [{
-        name: "obj",
-        type: "Any",
-        description: "The object to make pickable."
-      }]
-    });
-    this.registerPickableObject = (obj) => {
-      if(obj) {
-        this.pickableObjects.push(obj);
-      }
-    };
 
     pliny.property({
       parent: "Primrose.BrowserEnvironment",
@@ -1054,7 +1017,7 @@ export default class BrowserEnvironment extends EventDispatcher {
         side: BackSide
       });
       this.fader.visible = false;
-      this.input.head.root.add(this.fader);
+      this.input.head.add(this.fader);
 
       pliny.event({
         parent: "Primrose.BrowserEnvironment",

@@ -17,7 +17,6 @@ export default class Sky extends Entity {
       unshaded: true,
       radius: options.drawDistance,
       texture: options.skyTexture,
-      pickable: true,
       progress: options.progress
     });
 

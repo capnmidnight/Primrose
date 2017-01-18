@@ -31,12 +31,6 @@ export default class Button2D extends Label {
     this._lastActivated = null;
   }
 
-  addToBrowserEnvironment(env, scene) {
-    var btn3d = env.buttonFactory.create();
-    btn3d._listeners = this._listeners;
-    return env.appendChild(btn3d);
-  }
-
   startPointer(x, y) {
     this.focus();
     this._activated = true;

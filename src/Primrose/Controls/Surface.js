@@ -211,17 +211,6 @@ export default class Surface extends BaseTextured {
     this._environment = null;
   }
 
-  addToBrowserEnvironment(env, scene) {
-    this._environment = env;
-    var geom = this.className === "shell" ? shell(3, 10, 10) : quad(2, 2);
-    this._meshes[0] = textured(geom, this, {
-      opacity: this._opacity
-    });
-    scene.add(this._meshes[0]);
-    env.registerPickableObject(this._meshes[0]);
-    return this._meshes[0];
-  }
-
   invalidate(bounds) {
     var useDefault = !bounds;
     if (!bounds) {

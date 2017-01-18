@@ -105,7 +105,7 @@ function showMonth(month){
     else {
       o.box.material = secondaryMaterial;
     }
-    env.registerPickableObject(o.box);
+
     o.box.addEventListener("enter", setColor.bind(o, true));
     o.box.addEventListener("exit", setColor.bind(o, false));
     o.box.addEventListener("select", hitDate.bind(null, month, d));
@@ -128,8 +128,7 @@ env.addEventListener("ready", function(){
     var o = hub(),
       b = box(boxSize)
         .colored(secondaryColor, {
-          shadow: true,
-          pickable: true
+          shadow: true
         })
         .named("box" + (d+1))
         .addTo(o),

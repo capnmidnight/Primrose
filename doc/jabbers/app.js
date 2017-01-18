@@ -19,14 +19,6 @@ var WIDTH = 100,
     progress: Preloader.thunk
   });
 
-// and clicking on the objects in the scene
-function makeJabJump(evt) {
-  if(evt.hit && jabs[evt.hit.object.uuid]) {
-    jabs[evt.hit.object.uuid].jump(evt.hit.face.normal);
-  }
-}
-env.addEventListener("gazecomplete", makeJabJump);
-env.addEventListener("pointerend", makeJabJump);
 
 function eye(side, body) {
   var ball = sphere(0.05, 6, 3)
@@ -94,11 +86,12 @@ function Jabber(w, h, s) {
     }
   };
 
-  body.jump = function (normal) {
-    v.copy(normal);
+
+  body.addEventListener("select", function(evt) {
+    v.copy(evt.hit.face.normal);
     v.y = env.options.gravity / 2;
     velocity.add(v);
-  };
+  });
 
   return body;
 }
@@ -117,7 +110,6 @@ env.addEventListener("ready", function () {
       MIDZ / 5, 1);
     jabs[jab.uuid] = jab;
     env.appendChild(jab);
-    env.registerPickableObject(jab);
   }
 
   Preloader.hide();

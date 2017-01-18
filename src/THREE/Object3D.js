@@ -2,44 +2,33 @@ import { Object3D } from "three/src/core/Object3D";
 
 pliny.method({
   parent: "THREE.Object3D",
-  name: "addToBrowserEnvironment",
-  description: "A polyfill method for being able to add the object to a `Primrose.BrowserEnvironment` using `appendChild()` and to add other elements to the Object3D using `appendChild()` such that they may be pickable in the scene. This half of the polyfill implements the visitor pattern, so that individual objects can define their own processing for this action.",
-  parameters: [{
-    name: "env",
-    type: "Primrose.BrowserEnvironment",
-    description: "The environment (with collision detection and ray-picking capability) to which to register objects"
-  }, {
-    name: "scene",
+  name: "appendChild",
+  description: "An alias for `Object3D::add`, to mirror DOM.",
+  parameters: [ {
+    name: "child",
     type: "THREE.Object3D",
-    description: "The true parent element for `this` object"
+    description: "The object to add."
   }]
 });
-Object3D.prototype.addToBrowserEnvironment = function(env, scene) {
-  scene.add(this);
-  // this has to be done as a lambda expression because it needs to capture the
-  // env variable provided in the addToBrowserEnvironment call;
+Object3D.prototype.appendChild = function(child) {
+  return this.add(child);
+};
 
-  pliny.method({
-    parent: "THREE.Object3D",
-    name: "appendChild",
-    description: "A polyfill method for being able to add the object to a `Primrose.BrowserEnvironment` using `appendChild()` and to add other elements to the Object3D using `appendChild()` such that they may be pickable in the scene.",
-    parameters: [{
-      name: "child",
-      type: "Object",
-      description: "Any Primrose.Controls.Entity or THREE.Object3D to add to this object."
-    }]
-  });
-  this.appendChild = (child) => {
-    if (child.addToBrowserEnvironment) {
-      return child.addToBrowserEnvironment(env, this);
-    }
-    else {
-      this.add(child);
-      env.registerPickableObject(child);
-      return child;
-    }
-  };
-}
+Object.defineProperty(Object3D.prototype, "pickable", {
+  get: function() {
+    return this._listeners && (
+         (this._listeners.enter && this._listeners.enter.length > 0)
+      || (this._listeners.exit && this._listeners.exit.length > 0)
+      || (this._listeners.select && this._listeners.select.length > 0)
+      || (this._listeners.pointerstart && this._listeners.pointerstart.length > 0)
+      || (this._listeners.pointerend && this._listeners.pointerend.length > 0)
+      || (this._listeners.pointermove && this._listeners.pointermove.length > 0)
+      || (this._listeners.gazestart && this._listeners.gazestart.length > 0)
+      || (this._listeners.gazecancel && this._listeners.gazecancel.length > 0)
+      || (this._listeners.gazemove && this._listeners.gazemove.length > 0)
+      || (this._listeners.gazecomplete && this._listeners.gazecomplete.length > 0));
+  }
+});
 
 Object3D.prototype.latLon = function(lat, lon, r) {
   lat = -Math.PI * (lat || 0) / 180;

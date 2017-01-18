@@ -8,7 +8,6 @@ export default class Ground extends Entity {
     super({
       id: "Ground",
       transparent: false,
-      pickable: true,
       dim: options.drawDistance,
       texture: options.groundTexture,
       progress: options.progress

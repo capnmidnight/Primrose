@@ -217,7 +217,7 @@ export default class FPSInput extends EventDispatcher {
             }));
 
             this.pointers.push(ptr);
-            ptr.addToBrowserEnvironment(null, this.options.scene);
+            this.options.scene.add(ptr);
           }
           else {
             mgr = new Gamepad(this.gamepadMgr, pad, 0, {
@@ -279,16 +279,14 @@ export default class FPSInput extends EventDispatcher {
     this.head.rotation.order = "YXZ";
     this.head.useGaze = this.options.useGaze;
     this.pointers.push(this.head);
-    this.options.scene.add(this.head.root);
-    this.options.scene.add(this.head.disk);
+    this.options.scene.add(this.head);
 
     this.mousePointer = new Pointer("MousePointer", 0xff0000, 0x00ff00, 1, [
       this.Mouse
     ], null, this.options);
     this.mousePointer.unproject = new Matrix4();
     this.pointers.push(this.mousePointer);
-    this.head.add(this.mousePointer.root);
-    this.options.scene.add(this.mousePointer.disk);
+    this.head.add(this.mousePointer);
 
 
     this.ready = Promise.all(this.managers
@@ -418,7 +416,7 @@ export default class FPSInput extends EventDispatcher {
     if(this.hasMouse) {
       let mouseHeading = null;
       if (this.VR.hasOrientation) {
-        mouseHeading = this.mousePointer.root.rotation.y;
+        mouseHeading = this.mousePointer.rotation.y;
         const newMouseHeading = WEDGE * Math.floor((mouseHeading / WEDGE) + 0.5);
         if(newMouseHeading !== 0){
           this.Mouse.commands.U.offset -= this.Mouse.getValue("U") - 1;

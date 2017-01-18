@@ -57,7 +57,7 @@ function Board(type){
       .colored(colorPlay)
       .named("bevel" + i)
       .addTo(btn);
-    env.registerPickableObject(btn);
+
     btn.addEventListener("select", this.select.bind(this, i));
     btn.addEventListener("enter", this.play.bind(this, i, 0));
     this.object.add(btn);

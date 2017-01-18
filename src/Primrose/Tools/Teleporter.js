@@ -4,6 +4,7 @@ const POSITION = new Vector3(),
   START_POINT = new Vector3(),
   MAX_MOVE_DISTANCE = 5,
   MAX_MOVE_DISTANCE_SQ = MAX_MOVE_DISTANCE * MAX_MOVE_DISTANCE,
+  TELEPORT_PAD_RADIUS = 0.4,
   TELEPORT_COOLDOWN = 250;
 
 export default class Teleporter {
@@ -30,18 +31,31 @@ export default class Teleporter {
 
     ground.addEventListener("pointerend", this._end);
     ground.addEventListener("gazecomplete", this._end);
+
+
+    this.disk = sphere(TELEPORT_PAD_RADIUS, 128, 3)
+      .colored(0xff0000, {
+        unshaded: true
+      })
+      .addTo(env.scene);
+    this.disk.geometry.computeBoundingBox();
+    this.disk.geometry.vertices.forEach((v) => {
+      v.y = 0.1 * (v.y - this.disk.geometry.boundingBox.min.y);
+    });
+    this.disk.visible = false;
+    this.disk.geometry.computeBoundingBox();
   }
 
   _enter(evt) {
     if(this.enabled) {
-      evt.pointer.disk.visible = false;
+      this.disk.visible = false;
     }
   }
 
   _exit(evt) {
     if(this.enabled) {
       this._updatePosition(evt);
-      evt.pointer.disk.visible = true;
+      this.disk.visible = true;
     }
   }
 
@@ -55,7 +69,8 @@ export default class Teleporter {
   _move(evt) {
     if(this.enabled) {
       this._updatePosition(evt);
-      evt.pointer.moveTeleportPad(POSITION);
+      this.disk.position
+        .copy(POSITION);
     }
   }
 

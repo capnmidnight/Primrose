@@ -20,24 +20,21 @@ export default class Progress {
     minorColor = minorColor || 0x000000;
     var geom = box(SIZE, SIZE_SMALL, SIZE_SMALL);
 
-    this.totalBar = colored(geom, minorColor, {
-      unshaded: true,
-      side: BackSide
-    });
+    this.totalBar = geom
+      .colored(minorColor, {
+        unshaded: true,
+        side: BackSide
+      });
 
-    this.valueBar = colored(geom, majorColor, {
-      unshaded: true
-    });
-    this.valueBar.scale.set(0, INSET, INSET);
-
-    this.totalBar.add(this.valueBar);
+    this.valueBar = geom
+      .colored(majorColor, {
+        unshaded: true
+      })
+      .scl(0, INSET, INSET)
+      .addTo(this.totalBar);
 
     this.fileState = null;
     this.reset();
-  }
-
-  addToBrowserEnvironment(env, scene){
-    scene.add(this.totalBar);
   }
 
   reset(){
