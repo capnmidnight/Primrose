@@ -27,7 +27,8 @@ var subScene = null,
 
   scriptUpdateTimeout,
   lastScript = null,
-  scriptAnimate = null;
+  scriptAnimate = null,
+  lastTime = 0;
 
 env.addEventListener("ready", function () {
   subScene = hub();
@@ -61,10 +62,14 @@ env.addEventListener("ready", function () {
   console.log(" - Z to reset position/sensor");
   console.log();
 
+  lastTime = env.currentTime;
+
   Preloader.hide();
 });
 
-env.addEventListener("update", function (dt) {
+env.addEventListener("update", function () {
+  var dt = env.currentTime - lastTime;
+  lastTime = env.currentTime;
   if (!scriptUpdateTimeout) {
     scriptUpdateTimeout = setTimeout(updateScript, 500);
   }
