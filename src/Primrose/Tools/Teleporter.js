@@ -37,7 +37,9 @@ export default class Teleporter {
       .colored(0xff0000, {
         unshaded: true
       })
+      .named("disk")
       .addTo(env.scene);
+
     this.disk.geometry.computeBoundingBox();
     this.disk.geometry.vertices.forEach((v) => {
       v.y = 0.1 * (v.y - this.disk.geometry.boundingBox.min.y);

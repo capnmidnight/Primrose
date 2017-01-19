@@ -26,7 +26,8 @@ export default class Ground extends Entity {
 
     if(type === "number") {
       this.add(quad(dim, dim)
-        .colored(this.options.texture, this.options));
+        .colored(this.options.texture, this.options)
+        .named(this.name + "-" + this.options.texture));
     }
     else if(type === "string") {
       this._image = new Image(this.options.texture, Object.assign({}, this.options, {

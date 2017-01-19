@@ -33,16 +33,14 @@ export default class Image extends BaseTextured {
 
   _loadFiles(images, progress) {
     return Promise.all(Array.prototype.map.call(images, (src, i) => {
-        const loadOptions = Object.assign({}, this.options, {
-          progress: progress
-        });
+      const loadOptions = Object.assign({}, this.options, {
+        progress: progress
+      });
 
-        this._meshes[i] = textured(
-          this._geometry,
-          src,
-          loadOptions);
+      this._meshes[i] = this._geometry.textured(src, loadOptions)
+        .named(this.name + "-mesh-" + i);
 
-        return loadOptions.promise.then((txt) => this._textures[i] = txt);
-      }));
+      return loadOptions.promise.then((txt) => this._textures[i] = txt);
+    }));
   }
 }
