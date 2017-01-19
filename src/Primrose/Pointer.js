@@ -85,6 +85,7 @@ export default class Pointer extends Entity {
       .colored(this.color, {
         unshaded: true
       })
+      .named(pointerName + "-pointer")
       .addTo(this)
       .at(0, 0, -1.5);
 
@@ -171,6 +172,151 @@ export default class Pointer extends Entity {
     this.updateMatrixWorld();
   }
 
+  _check(currentHit) {
+    const lastHit = this.lastHit,
+      obj = currentHit && currentHit.object,
+      lastObj = lastHit && lastHit.object;
+    if(obj && obj.name === "disk") {
+      console.log(currentHit);
+    }
+    if(obj || lastObj) {
+      const moved = lastHit && currentHit &&
+        (currentHit.point.x !== lastHit.point.x ||
+        currentHit.point.y !== lastHit.point.y ||
+        currentHit.point.z !== lastHit.point.z),
+      dt = lastHit && lastHit.time && (performance.now() - lastHit.time),
+      changed = !lastHit && currentHit ||
+        lastHit && !currentHit ||
+        lastHit && currentHit && currentHit.object.id !== lastHit.object.id,
+      enterEvt = {
+        pointer: this,
+        buttons: 0,
+        hit: currentHit
+      },
+      leaveEvt = {
+        pointer: this,
+        buttons: 0,
+        hit: lastHit
+      };
+
+
+      if(currentHit){
+        this.gazeInner.position.z = 0.02 - currentHit.distance;
+      }
+      else{
+         this.gazeInner.position.z = GAZE_RING_DISTANCE;
+      }
+      this.mesh.position.z = this.gazeInner.position.z - 0.02;
+
+      if(currentHit){
+        currentHit.time = performance.now();
+
+        this.mesh.material = material("", {
+          color: this.highlight,
+          unshaded: true
+        });
+      }
+
+      if(moved){
+        lastHit.point.copy(currentHit.point);
+      }
+
+      this.gazeInner.visible = this.useGaze;
+      this.mesh.visible = !this.useGaze;
+
+      var dButtons = 0;
+      for(let i = 0; i < this.triggerDevices.length; ++i) {
+        const obj = this.triggerDevices[i];
+        if(obj.enabled){
+          enterEvt.buttons |= obj.getValue("buttons");
+          dButtons |= obj.getValue("dButtons");
+        }
+      }
+
+      leaveEvt.buttons = enterEvt.buttons;
+
+      if(changed){
+        if(lastHit && lastHit.object) {
+          lastHit.object.emit("exit", leaveEvt);
+        }
+        if(obj) {
+          obj.emit("enter", enterEvt);
+        }
+      }
+
+      let selected = false;
+      if(dButtons){
+        if(enterEvt.buttons){
+          if(obj) {
+            obj.emit("pointerstart", enterEvt);
+          }
+          if(lastHit){
+            lastHit.time = performance.now();
+          }
+        }
+        else{
+          selected = !!currentHit;
+          if(obj) {
+            obj.emit("pointerend", enterEvt);
+          }
+        }
+      }
+      else if(moved && obj) {
+        obj.emit("pointermove", enterEvt);
+      }
+
+      if(this.useGaze){
+        if(changed) {
+          if(dt !== null && dt < this.gazeTimeout){
+            this.gazeOuter.visible = false;
+            if(obj) {
+              obj.emit("gazecancel", leaveEvt);
+            } else if(lastHit && lastHit.object) {
+              lastHit.object.emit("gazecancel", leaveEvt);
+            }
+          }
+          if(currentHit){
+            this.gazeOuter.visible = true;
+            if(obj) {
+              obj.emit("gazestart", enterEvt);
+            }
+          }
+        }
+        else if(dt !== null) {
+          if(dt >= this.gazeTimeout){
+            this.gazeOuter.visible = false;
+            selected = !!currentHit;
+            if(obj) {
+              obj.emit("gazecomplete", enterEvt);
+            }
+            lastHit.time = null;
+          }
+          else if(currentHit && currentHit.object && hasGazeEvent(currentHit.object)){
+            var p = Math.round(36 * dt / this.gazeTimeout),
+              a = 2 * Math.PI * p / 36;
+            this.gazeOuter.geometry = ring(GAZE_RING_INNER, GAZE_RING_OUTER, 36, p, 0, a);
+            if(moved && obj) {
+              obj.emit("gazemove", enterEvt);
+            }
+          }
+          else{
+            this.gazeOuter.visible = false;
+          }
+        }
+      }
+
+      if(selected && obj){
+        obj.emit("select", enterEvt);
+      }
+
+      if(changed){
+        this.lastHit = currentHit;
+      }
+      return true;
+    }
+    return false;
+  }
+
   resolvePicking(objects) {
     this.mesh.visible = false;
     this.gazeInner.visible = false;
@@ -187,146 +333,16 @@ export default class Pointer extends Entity {
         .sub(VECTOR_TEMP);
       this.picker.set(VECTOR_TEMP, FORWARD);
       const hits = this.picker.intersectObject(objects, true);
-      for(let j = 0; j < hits.length; ++j) {
-        let currentHit = hits[j].object.pickable && hits[j],
-          lastHit = this.lastHit,
-          obj = currentHit && currentHit.object,
-          lastObj = lastHit && lastHit.object;
-        if(obj || lastObj) {
-          const moved = lastHit && currentHit &&
-            (currentHit.point.x !== lastHit.point.x ||
-            currentHit.point.y !== lastHit.point.y ||
-            currentHit.point.z !== lastHit.point.z),
-          dt = lastHit && lastHit.time && (performance.now() - lastHit.time),
-          changed = !lastHit && currentHit ||
-            lastHit && !currentHit ||
-            lastHit && currentHit && currentHit.object.id !== lastHit.object.id,
-          enterEvt = {
-            pointer: this,
-            buttons: 0,
-            hit: currentHit
-          },
-          leaveEvt = {
-            pointer: this,
-            buttons: 0,
-            hit: lastHit
-          };
-
-
-          if(currentHit){
-            this.gazeInner.position.z = 0.02 - currentHit.distance;
-          }
-          else{
-             this.gazeInner.position.z = GAZE_RING_DISTANCE;
-          }
-          this.mesh.position.z = this.gazeInner.position.z - 0.02;
-
-          if(currentHit){
-            currentHit.time = performance.now();
-
-            this.mesh.material = material("", {
-              color: this.highlight,
-              unshaded: true
-            });
-          }
-
-          if(moved){
-            lastHit.point.copy(currentHit.point);
-          }
-
-          this.gazeInner.visible = this.useGaze;
-          this.mesh.visible = !this.useGaze;
-
-          var dButtons = 0;
-          for(let i = 0; i < this.triggerDevices.length; ++i) {
-            const obj = this.triggerDevices[i];
-            if(obj.enabled){
-              enterEvt.buttons |= obj.getValue("buttons");
-              dButtons |= obj.getValue("dButtons");
-            }
-          }
-
-          leaveEvt.buttons = enterEvt.buttons;
-
-          if(changed){
-            if(lastHit && lastHit.object) {
-              lastHit.object.emit("exit", leaveEvt);
-            }
-            if(obj) {
-              obj.emit("enter", enterEvt);
-            }
-          }
-
-          let selected = false;
-          if(dButtons){
-            if(enterEvt.buttons){
-              if(obj) {
-                obj.emit("pointerstart", enterEvt);
-              }
-              if(lastHit){
-                lastHit.time = performance.now();
-              }
-            }
-            else{
-              selected = !!currentHit;
-              if(obj) {
-                obj.emit("pointerend", enterEvt);
-              }
-            }
-          }
-          else if(moved && obj) {
-            obj.emit("pointermove", enterEvt);
-          }
-
-          if(this.useGaze){
-            if(changed) {
-              if(dt !== null && dt < this.gazeTimeout){
-                this.gazeOuter.visible = false;
-                if(obj) {
-                  obj.emit("gazecancel", leaveEvt);
-                } else if(lastHit && lastHit.object) {
-                  lastHit.object.emit("gazecancel", leaveEvt);
-                }
-              }
-              if(currentHit){
-                this.gazeOuter.visible = true;
-                if(obj) {
-                  obj.emit("gazestart", enterEvt);
-                }
-              }
-            }
-            else if(dt !== null) {
-              if(dt >= this.gazeTimeout){
-                this.gazeOuter.visible = false;
-                selected = !!currentHit;
-                if(obj) {
-                  obj.emit("gazecomplete", enterEvt);
-                }
-                lastHit.time = null;
-              }
-              else if(currentHit && currentHit.object && hasGazeEvent(currentHit.object)){
-                var p = Math.round(36 * dt / this.gazeTimeout),
-                  a = 2 * Math.PI * p / 36;
-                this.gazeOuter.geometry = ring(GAZE_RING_INNER, GAZE_RING_OUTER, 36, p, 0, a);
-                if(moved && obj) {
-                  obj.emit("gazemove", enterEvt);
-                }
-              }
-              else{
-                this.gazeOuter.visible = false;
-              }
-            }
-          }
-
-          if(selected && obj){
-            obj.emit("select", enterEvt);
-          }
-
-          if(changed){
-            this.lastHit = currentHit;
-          }
-          break;
+      let found = false;
+      for(let i = 0; i < hits.length && !found; ++i) {
+        const hit = hits[i];
+        if(hit.object.pickable && this._check(hit)) {
+          found = true;
         }
+      }
+
+      if(!found){
+        this._check();
       }
     }
   }
