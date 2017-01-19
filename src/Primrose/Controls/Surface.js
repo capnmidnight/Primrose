@@ -53,11 +53,56 @@ export default class Surface extends BaseTextured {
       id: "Primrose.Controls.Surface[" + (COUNTER++) + "]",
       bounds: new Rectangle()
     }, options);
-    super(null, options);
+
+    if(options.width) {
+      options.bounds.width = options.width;
+    }
+
+    if(options.height) {
+      options.bounds.height = options.height;
+    }
+
+    let canvas = null,
+      context = null;
+
+    if (options.id instanceof Surface) {
+      throw new Error("Object is already a Surface. Please don't try to wrap them.");
+    }
+    else if (options.id instanceof CanvasRenderingContext2D) {
+      context = options.id;
+      canvas = context.canvas;
+    }
+    else if (options.id instanceof HTMLCanvasElement) {
+      canvas = options.id;
+    }
+    else if (typeof (options.id) === "string" || options.id instanceof String) {
+      canvas = document.getElementById(options.id);
+      if (canvas === null) {
+        canvas = document.createElement("canvas");
+        canvas.id = options.id;
+      }
+      else if (canvas.tagName !== "CANVAS") {
+        canvas = null;
+      }
+    }
+
+    if (canvas === null) {
+      pliny.error({
+        parent: "Primrose.Controls.Surface",
+        name: "Invalid element",
+        type: "Error",
+        description: "If the element could not be found, could not be created, or one of the appropriate ID was found but did not match the expected type, an error is thrown to halt operation."
+      });
+      console.error(typeof (options.id));
+      console.error(options.id);
+      throw new Error(options.id + " does not refer to a valid canvas element.");
+    }
+
+    super([canvas], options);
     this.isSurface = true;
     this.bounds = this.options.bounds;
-    this.canvas = null;
-    this.context = null;
+    this.canvas = canvas;
+    this.context = context || this.canvas.getContext("2d");
     this._opacity = 1;
 
     pliny.property({
@@ -147,42 +192,6 @@ export default class Surface extends BaseTextured {
       }
     });
 
-
-    if (this.options.id.isSurface) {
-      throw new Error("Object is already a Surface. Please don't try to wrap them.");
-    }
-    else if (this.options.id instanceof CanvasRenderingContext2D) {
-      this.context = this.options.id;
-      this.canvas = this.context.canvas;
-    }
-    else if (this.options.id instanceof HTMLCanvasElement) {
-      this.canvas = this.options.id;
-    }
-    else if (typeof (this.options.id) === "string" || this.options.id instanceof String) {
-      this.canvas = document.getElementById(this.options.id);
-      if (this.canvas === null) {
-        this.canvas = document.createElement("canvas");
-        this.canvas.id = this.options.id;
-      }
-      else if (this.canvas.tagName !== "CANVAS") {
-        this.canvas = null;
-      }
-    }
-
-    if (this.canvas === null) {
-      pliny.error({
-        parent: "Primrose.Controls.Surface",
-        name: "Invalid element",
-        type: "Error",
-        description: "If the element could not be found, could not be created, or one of the appropriate ID was found but did not match the expected type, an error is thrown to halt operation."
-      });
-      console.error(typeof (this.options.id));
-      console.error(this.options.id);
-      throw new Error(this.options.id + " does not refer to a valid canvas element.");
-    }
-
-    this.id = this.canvas.id;
-
     if (this.bounds.width === 0) {
       this.bounds.width = this.imageWidth;
       this.bounds.height = this.imageHeight;
@@ -191,17 +200,20 @@ export default class Surface extends BaseTextured {
     this.imageWidth = this.bounds.width;
     this.imageHeight = this.bounds.height;
 
-    if (this.context === null) {
-      this.context = this.canvas.getContext("2d");
-    }
-
     this.canvas.style.imageRendering = isChrome ? "pixelated" : "optimizespeed";
     this.context.imageSmoothingEnabled = false;
     this.context.textBaseline = "top";
 
-    this._texture = null;
-    this._material = null;
-    this._environment = null;
+    this.render();
+  }
+
+
+  _loadFiles(canvases, progress) {
+    return Promise.all(canvases.map((canvas, i) => {
+      const loadOptions = Object.assign({}, this.options);
+      this._meshes[i] = this._geometry.textured(canvas, loadOptions);
+      return loadOptions.promise.then((txt) => this._textures[i] = txt);
+    }));
   }
 
   invalidate(bounds) {
@@ -226,13 +238,13 @@ export default class Surface extends BaseTextured {
           overlap.x, overlap.y, overlap.width, overlap.height);
       }
     }
-    if (this._texture) {
-      this._texture.needsUpdate = true;
+    if (this._textures[0]) {
+      this._textures[0].needsUpdate = true;
     }
-    if (this._material) {
-      this._material.needsUpdate = true;
+    if (this._meshes[0]) {
+      this._meshes[0].material.needsUpdate = true;
     }
-    if (this.parent && this.parent.invalidate) {
+    if (this.parent instanceof Surface) {
       bounds.left += this.bounds.left;
       bounds.top += this.bounds.top;
       this.parent.invalidate(bounds);
@@ -302,13 +314,6 @@ export default class Surface extends BaseTextured {
 
     this.context.textBaseline = oldTextBaseline;
     this.context.textAlign = oldTextAlign;
-  }
-
-  get texture() {
-    if (!this._texture) {
-      this._texture = new Texture(this.canvas);
-    }
-    return this._texture;
   }
 
   get environment() {
@@ -495,6 +500,7 @@ export default class Surface extends BaseTextured {
   }"
       }]
     });
+    console.log(this.focusable, this.focused);
     if (this.focusable) {
       this.focused = true;
       this.emit("focus", {

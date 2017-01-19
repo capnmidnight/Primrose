@@ -37,6 +37,13 @@ import isMobile from "../../flags/isMobile";
 export default class TextBox extends Surface {
 
   constructor(options) {
+
+    if (typeof options === "string") {
+      options = {
+        value: options
+      };
+    }
+
     super(Object.assign({}, {
       id: "Primrose.Controls.TextBox[" + (COUNTER++) + "]"
     }, options));
@@ -45,15 +52,6 @@ export default class TextBox extends Surface {
     ////////////////////////////////////////////////////////////////////////
     // normalize input parameters
     ////////////////////////////////////////////////////////////////////////
-
-    if (typeof options === "string") {
-      this.options = {
-        value: this.options
-      };
-    }
-    else {
-      this.options = options || {};
-    }
 
     this.useCaching = !isFirefox || !isMobile;
 

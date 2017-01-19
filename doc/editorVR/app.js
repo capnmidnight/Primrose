@@ -4,20 +4,16 @@ var GRASS = "../images/grass.png",
   ROCK = "../images/rock.png",
   SAND = "../images/sand.png",
   WATER = "../images/water.png",
-  DECK = "../images/deck.png";
-
-window.env = new Primrose.BrowserEnvironment({
-  skyTexture: "../images/bg2.jpg",
-  groundTexture: GRASS,
-  font: "../fonts/helvetiker_regular.typeface.json",
-  fullScreenButtonContainer: "#fullScreenButtonContainer",
-  progress: Preloader.thunk
-});
-
-var subScene = null,
+  DECK = "../images/deck.png",
+  env = new Primrose.BrowserEnvironment({
+    skyTexture: "../images/bg2.jpg",
+    groundTexture: GRASS,
+    font: "../fonts/helvetiker_regular.typeface.json",
+    fullScreenButtonContainer: "#fullScreenButtonContainer",
+    progress: Preloader.thunk
+  }),
+  subScene = null,
   editor = null,
-  editorFrame = null,
-  editorFrameMesh = null,
 
   modA = isMacOS ? "metaKey" : "ctrlKey",
   modB = isMacOS ? "altKey" : "shiftKey",
@@ -37,24 +33,20 @@ env.addEventListener("ready", function () {
   var editorSize = isMobile ? 512 : 1024,
     fontSize = isMobile ? 10 : 20;
 
-  editorFrame = new Primrose.Controls.Surface({
-      id: "EditorFrame",
-      className: "shell",
-      width: editorSize,
-      height: editorSize
-    })
-    .addTo(env.scene)
-    .at(0, env.options.avatarHeight, 0);
-
   editor = new Primrose.Controls.TextBox({
       id: "Editor",
-      width: editorFrame.surfaceWidth,
-      height: editorFrame.surfaceHeight,
+      width: editorSize,
+      height: editorSize,
+      geometry: shell(1.5, 25, 25),
       fontSize: fontSize,
       tokenizer: Primrose.Text.Grammars.JavaScript,
       value: getSourceCode(isInIFrame)
     })
-    .addTo(editorFrame);
+    .addTo(env.scene)
+    .at(0, env.options.avatarHeight, -2);
+
+  editor.addEventListener("select", editor.focus.bind(editor));
+  editor.addEventListener("exit", editor.blur.bind(editor));
 
   console.log("INSTRUCTIONS:");
   console.log(" - " + cmdPre + "+E to show/hide editor");
@@ -90,8 +82,8 @@ env.addEventListener("update", function () {
 env.addEventListener("keydown", function (evt) {
   if (evt[modA] && evt[modB]) {
     if (evt.keyCode === Primrose.Keys.E) {
-      editorFrameMesh.visible = !editorFrameMesh.visible;
-      if (!editorFrameMesh.visible && env.currentControl && env.currentControl.focused) {
+      editor.visible = !editor.visible;
+      if (!editor.visible && env.currentControl && env.currentControl.focused) {
         env.currentControl.blur();
         env.currentControl = null;
       }
