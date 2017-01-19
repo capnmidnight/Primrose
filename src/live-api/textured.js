@@ -162,42 +162,7 @@ export default function textured(geometry, txt, options) {
       }
       else {
         let retValue = null;
-        if (txt.isSurface) {
-          if (!options.scaleTextureWidth || !options.scaleTextureHeight) {
-            var imgWidth = txt.imageWidth,
-              imgHeight = txt.imageHeight,
-              dimX = Math.ceil(Math.log(imgWidth) / Math.LN2),
-              dimY = Math.ceil(Math.log(imgHeight) / Math.LN2),
-              newWidth = Math.pow(2, dimX),
-              newHeight = Math.pow(2, dimY);
-
-            if(options.scaleTexture){
-              newWidth *= options.scaleTexture;
-              newHeight *= options.scaleTexture;
-            }
-
-            var scaleX = imgWidth / newWidth,
-              scaleY = imgHeight / newHeight;
-
-            if (scaleX !== 1 || scaleY !== 1) {
-              if (scaleX !== 1) {
-                options.scaleTextureWidth = scaleX;
-              }
-
-              if (scaleY !== 1) {
-                options.scaleTextureHeight = scaleY;
-              }
-
-              txt.bounds.width = newWidth;
-              txt.bounds.height = newHeight;
-              txt.resize();
-              txt.render(true);
-            }
-          }
-          txt._material = mat;
-          retValue = txt.texture;
-        }
-        else if (txt instanceof HTMLCanvasElement || txt instanceof HTMLVideoElement || txt instanceof HTMLImageElement) {
+        if (txt instanceof HTMLCanvasElement || txt instanceof HTMLVideoElement || txt instanceof HTMLImageElement) {
           retValue = new Texture(txt);
         }
         else if(txt.isTexture) {
@@ -220,10 +185,6 @@ export default function textured(geometry, txt, options) {
     obj = geometry;
     obj.material = mat;
     geometry = obj.geometry;
-  }
-
-  if (txt.isSurface) {
-    obj.surface = txt;
   }
 
   if(options.shadow){
