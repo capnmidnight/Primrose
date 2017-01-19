@@ -36,10 +36,6 @@ import isMobile from "../../flags/isMobile";
 
 export default class TextBox extends Surface {
 
-  static create() {
-    return new TextBox();
-  }
-
   constructor(options) {
     super(Object.assign({}, {
       id: "Primrose.Controls.TextBox[" + (COUNTER++) + "]"

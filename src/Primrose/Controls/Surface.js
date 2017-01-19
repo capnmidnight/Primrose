@@ -36,14 +36,7 @@ import quad from "../../live-api/quad";
 import shell from "../../live-api/shell";
 export default class Surface extends BaseTextured {
 
-  static create() {
-    return new Surface();
-  }
-
   constructor(options) {
-
-
-
     pliny.event({ parent: "Primrose.Controls.Surface", name: "focus", description: "If the element is focusable, occurs when the user clicks on an element for the first time, or when a program calls the `focus()` method." });
     pliny.event({ parent: "Primrose.Controls.Surface", name: "blur", description: "If the element is focused (which implies it is also focusable), occurs when the user clicks off of an element, or when a program calls the `blur()` method." });
     pliny.event({ parent: "Primrose.Controls.Surface", name: "click", description: "Occurs whenever the user clicks on an element." });
@@ -331,12 +324,16 @@ export default class Surface extends BaseTextured {
     }
   }
 
-  appendChild(child) {
-    if (!(child.isSurface)) {
+  add(child) {
+    if(child.isSurface) {
+      this.invalidate();
+    }
+    else if (child.isObject3D) {
+      super.add(child);
+    }
+    else {
       throw new Error("Can only append other Surfaces to a Surface. You gave: " + child);
     }
-    super.appendChild(child);
-    this.invalidate();
   }
 
   mapUV(point) {

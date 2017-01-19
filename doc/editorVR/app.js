@@ -36,26 +36,24 @@ env.addEventListener("ready", function () {
   var editorSize = isMobile ? 512 : 1024,
     fontSize = isMobile ? 10 : 20;
 
-  editorFrame = env.createElement("section");
-  editorFrame.id = "EditorFrame";
-  editorFrame.className = "shell";
-  editorFrame.style.width = editorSize;
-  editorFrame.style.height = editorSize;
+  editorFrame = new Primrose.Controls.Surface({
+      id: "EditorFrame",
+      className: "shell",
+      width: editorSize,
+      height: editorSize
+    })
+    .addTo(env.scene)
+    .at(0, env.options.avatarHeight, 0);
 
-  editor = env.createElement("textarea");
-  editor.id = "Editor";
-  editor.style.width = editorFrame.surfaceWidth;
-  editor.style.height = editorFrame.surfaceHeight;
-  editor.style.fontSize = fontSize;
-  editor.tokenizer = Primrose.Text.Grammars.JavaScript;
-  editor.value = getSourceCode(isInIFrame);
-
-
-  editorFrame.appendChild(editor);
-
-  editorFrameMesh = env.appendChild(editorFrame);
-  editorFrameMesh.name = "MyWindow";
-  editorFrameMesh.position.set(0, env.options.avatarHeight, 0);
+  editor = new Primrose.Controls.TextBox({
+      id: "Editor",
+      width: editorFrame.surfaceWidth,
+      height: editorFrame.surfaceHeight,
+      fontSize: fontSize,
+      tokenizer: Primrose.Text.Grammars.JavaScript,
+      value: getSourceCode(isInIFrame)
+    })
+    .addTo(editorFrame);
 
   console.log("INSTRUCTIONS:");
   console.log(" - " + cmdPre + "+E to show/hide editor");
@@ -194,20 +192,18 @@ function testDemo(scene) {
     MIDY = HEIGHT / 2,
     MIDZ = DEPTH / 2,
     t = 0,
-    start = put(hub())
-    .on(scene)
-    .at(-MIDX, 0, -DEPTH - 2)
-    .obj();
+    start = hub()
+    .addTo(scene)
+    .at(-MIDX, 0, -DEPTH - 2);
 
   var balls = [];
 
   for (var i = 0; i < 10; ++i) {
-    balls.push(put(brick(DECK))
-      .on(start)
+    balls.push(brick(DECK)
+      .addTo(start)
       .at(number(WIDTH),
         number(HEIGHT),
-        number(DEPTH))
-      .obj());
+        number(DEPTH)));
 
     balls[i].velocity = v3(
       number(WIDTH),

@@ -19,10 +19,6 @@ var COUNTER = 0;
 import Label from "./Label";
 export default class Button2D extends Label {
 
-  static create() {
-    return new Button2D();
-  }
-
   constructor(options) {
     super(Object.assign({}, {
       id: "Primrose.Controls.Button2D[" + (COUNTER++) + "]",

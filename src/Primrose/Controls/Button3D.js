@@ -1,7 +1,7 @@
 pliny.class({
   parent: "Primrose.Controls",
   name: "Button3D",
-  baseClass: "Primrose.Controls.BaseControl",
+  baseClass: "Primrose.Controls.Entity",
   parameters: [{
     name: "model",
     type: "THREE.Object3D",

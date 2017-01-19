@@ -486,50 +486,7 @@ export default class BrowserEnvironment extends EventDispatcher {
       description: "A database of object factories, generally used to create 3D models."
     });
     this.factories = {
-      button: Button2D,
-      img: Image,
-      section: Surface,
-      textarea: TextBox,
-      avatar: null,
-      pre: {
-        create: () => new TextBox({
-          tokenizer: PlainText,
-          hideLineNumbers: true,
-          readOnly: true
-        })
-      }
-    };
-
-    pliny.method({
-      parent: "Primrose.BrowserEnvironment",
-      name: "createElement",
-      description: "Different types of HTML elements are represented by different types of 3D elements. This method provides a DOM-like interface for creating them.",
-      returns: "Primrose.Entity",
-      parameters: [{
-        name: "type",
-        type: "String",
-        description: "The type of object to create."
-      }]
-    });
-    this.createElement = (type) => {
-      if (this.factories[type]) {
-        return this.factories[type].create();
-      }
-    };
-
-    pliny.method({
-      parent: "Primrose.BrowserEnvironment",
-      name: "appendChild",
-      description: "Add an object to the scene.",
-      returns: "THREE.Object3D",
-      parameters: [{
-        name: "elem",
-        type: "THREE.Object3D",
-        description: "The object to add to the scene."
-      }]
-    });
-    this.appendChild = (elem) => {
-      this.scene.add(elem);
+      avatar: null
     };
 
     function setColor(model, color) {
@@ -639,7 +596,7 @@ export default class BrowserEnvironment extends EventDispatcher {
     pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "currentControl",
-      type: "Primrose.Control.BaseControl",
+      type: "Primrose.Control.Entity",
       description: "The currently selected control, by a user-click or some other function."
     });
     this.currentControl = null;
@@ -819,7 +776,7 @@ export default class BrowserEnvironment extends EventDispatcher {
       description: "If a `skyTexture` option is provided, it will be a texture cube or photosphere. If no `skyTexture` option is provided, there will only be a THREE.Object3D, to create an anchor point on which implementing scripts can add objects that follow the user's position."
     });
     this.sky = new Sky(this.options);
-    this.appendChild(this.sky);
+    this.scene.add(this.sky);
 
 
     pliny.property({
@@ -829,7 +786,7 @@ export default class BrowserEnvironment extends EventDispatcher {
       description: "If a `groundTexture` option is provided, it will be a flat plane extending to infinity. As the user moves, the ground will shift under them by whole texture repeats, making the ground look infinite."
     });
     this.ground = new Ground(this.options);
-    this.appendChild(this.ground);
+    this.scene.add(this.ground);
 
     this.teleporter = new Teleporter(this, this.ground);
 

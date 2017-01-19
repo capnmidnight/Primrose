@@ -33,8 +33,8 @@ var GRASS = "../images/grass.png",
   editorCenter = hub();
 
 env.addEventListener("ready", function () {
-  env.appendChild(editorCenter);
-  env.appendChild(subScene);
+  env.scene.add(editorCenter);
+  env.scene.add(subScene);
 
   var editorSize = isMobile ? 512 : 1024,
     fontSize = 40 / env.quality;
@@ -53,7 +53,7 @@ env.addEventListener("ready", function () {
   editor.tokenizer = Primrose.Text.Grammars.JavaScript;
   editor.value = getSourceCode(isInIFrame);
 
-  editorFrame.appendChild(editor);
+  editorFrame.add(editor);
 
   editorFrameMesh = editorCenter.appendChild(editorFrame);
   editorFrameMesh.name = "EditorFrameMesh";
@@ -228,8 +228,9 @@ function pacman() {
 
   function C(n, x, y) {
     if (n !== 0) {
-      put(colored(cylinder(0.5, 0.5, T), 0x0000ff))
-        .on(scene)
+      cylinder(0.5, 0.5, T)
+        .colored(0x0000ff)
+        .addTo(scene)
         .rot(0, n * Math.PI / 2, Math.PI / 2)
         .at(T * x - W / 2, env.options.avatarHeight, T * y - H / 2);
     }
