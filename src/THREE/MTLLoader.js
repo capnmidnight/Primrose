@@ -10,7 +10,7 @@ import { EventDispatcher } from "three/src/core/EventDispatcher";
 import { DefaultLoadingManager } from "three/src/loaders/LoadingManager";
 import { Loader } from "three/src/loaders/Loader";
 import { RepeatWrapping } from "three/src/constants";
-import { XHRLoader } from "three/src/loaders/XHRLoader";
+import { FileLoader } from "three/src/loaders/FileLoader";
 import { TextureLoader } from "three/src/loaders/TextureLoader";
 import { FrontSide } from "three/src/constants";
 import { MeshPhongMaterial } from "three/src/materials/MeshPhongMaterial";
@@ -45,7 +45,7 @@ export class MTLLoader extends EventDispatcher {
 
     var scope = this;
 
-    var loader = new XHRLoader( this.manager );
+    var loader = new FileLoader( this.manager );
     loader.setPath( this.path );
     loader.load( url, function ( text ) {
 

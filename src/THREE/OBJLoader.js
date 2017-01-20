@@ -6,7 +6,7 @@ import { DefaultLoadingManager } from "three/src/loaders/LoadingManager";
 import { BufferGeometry } from "three/src/core/BufferGeometry";
 import { BufferAttribute } from "three/src/core/BufferAttribute";
 import { LineSegments } from "three/src/objects/LineSegments";
-import { XHRLoader } from "three/src/loaders/XHRLoader";
+import { FileLoader } from "three/src/loaders/FileLoader";
 import { Group } from "three/src/objects/Group";
 import { LineBasicMaterial } from "three/src/materials/LineBasicMaterial";
 import { MeshPhongMaterial } from "three/src/materials/MeshPhongMaterial";
@@ -53,7 +53,7 @@ export class OBJLoader {
 
 		var scope = this;
 
-		var loader = new XHRLoader( scope.manager );
+		var loader = new FileLoader( scope.manager );
 		loader.setPath( this.path );
 		loader.load( url, function ( text ) {
 
