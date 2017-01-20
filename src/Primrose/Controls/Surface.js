@@ -204,6 +204,8 @@ export default class Surface extends BaseTextured {
     this.context.imageSmoothingEnabled = false;
     this.context.textBaseline = "top";
 
+    this.subSurfaces = [];
+
     this.render();
   }
 
@@ -226,14 +228,14 @@ export default class Surface extends BaseTextured {
     else if (bounds.isRectangle) {
       bounds = bounds.clone();
     }
-    for (var i = 0; i < this.children.length; ++i) {
-      var child = this.children[i],
-        overlap = bounds.overlap(child.bounds);
+    for (var i = 0; i < this.subSurfaces.length; ++i) {
+      var subSurface = this.subSurfaces[i],
+        overlap = bounds.overlap(subSurface.bounds);
       if (overlap) {
-        var x = overlap.left - child.bounds.left,
-          y = overlap.top - child.bounds.top;
+        var x = overlap.left - subSurface.bounds.left,
+          y = overlap.top - subSurface.bounds.top;
         this.context.drawImage(
-          child.canvas,
+          subSurface.canvas,
           x, y, overlap.width, overlap.height,
           overlap.x, overlap.y, overlap.width, overlap.height);
       }
@@ -331,6 +333,7 @@ export default class Surface extends BaseTextured {
 
   add(child) {
     if(child.isSurface) {
+      this.subSurfaces.push(child);
       this.invalidate();
     }
     else if (child.isObject3D) {
@@ -360,16 +363,16 @@ export default class Surface extends BaseTextured {
     return [point.x / this.imageWidth, (1 - point.y / this.imageHeight)];
   }
 
-  _findChild(x, y, thunk) {
+  _findSubSurface(x, y, thunk) {
     var here = this.inBounds(x, y),
       found = null;
-    for (var i = this.children.length - 1; i >= 0; --i) {
-      var child = this.children[i];
-      if (!found && child.inBounds(x - this.bounds.left, y - this.bounds.top)) {
-        found = child;
+    for (var i = this.subSurfaces.length - 1; i >= 0; --i) {
+      var subSurface = this.subSurfaces[i];
+      if (!found && subSurface.inBounds(x - this.bounds.left, y - this.bounds.top)) {
+        found = subSurface;
       }
-      else if (child.focused) {
-        child.blur();
+      else if (subSurface.focused) {
+        subSurface.blur();
       }
     }
     return found || here && this;
@@ -381,7 +384,7 @@ export default class Surface extends BaseTextured {
 
   startPointer(x, y) {
     if (this.inBounds(x, y)) {
-      var target = this._findChild(x, y, (child, x2, y2) => child.startPointer(x2, y2));
+      var target = this._findSubSurface(x, y, (subSurface, x2, y2) => subSurface.startPointer(x2, y2));
       if (target) {
         if (!this.focused) {
           this.focus();
@@ -402,7 +405,7 @@ export default class Surface extends BaseTextured {
   }
 
   movePointer(x, y) {
-    var target = this._findChild(x, y, (child, x2, y2) => child.startPointer(x2, y2));
+    var target = this._findSubSurface(x, y, (subSurface, x2, y2) => subSurface.startPointer(x2, y2));
     if (target) {
       this.emit("move", {
         target,
@@ -415,7 +418,7 @@ export default class Surface extends BaseTextured {
     }
   }
 
-  _forFocusedChild(name, evt) {
+  _forFocusedSubSurface(name, evt) {
     var elem = this.focusedElement;
     if (elem && elem !== this) {
       elem[name](evt);
@@ -431,9 +434,9 @@ export default class Surface extends BaseTextured {
         type: "Event",
         description: "The pointer event to read"
       }],
-      description: "Hooks up to the window's `mouseDown` and `touchStart` events, with coordinates translated to tangent-space UV coordinates, and propagates it to any of its focused children."
+      description: "Hooks up to the window's `mouseDown` and `touchStart` events, with coordinates translated to tangent-space UV coordinates, and propagates it to any of its focused subSurfaces."
     });
-    this._forFocusedChild("startUV", evt);
+    this._forFocusedSubSurface("startUV", evt);
   }
 
   moveUV(evt) {
@@ -445,18 +448,18 @@ export default class Surface extends BaseTextured {
         type: "Event",
         description: "The pointer event to read"
       }],
-      description: "Hooks up to the window's `mouseMove` and `touchMove` events, with coordinates translated to tangent-space UV coordinates, and propagates it to any of its focused children."
+      description: "Hooks up to the window's `mouseMove` and `touchMove` events, with coordinates translated to tangent-space UV coordinates, and propagates it to any of its focused subSurfaces."
     });
-    this._forFocusedChild("moveUV", evt);
+    this._forFocusedSubSurface("moveUV", evt);
   }
 
   endPointer(evt) {
     pliny.method({
       parent: "Primrose.Controls.Surface",
       name: "endPointer",
-      description: "Hooks up to the window's `mouseUp` and `toucheEnd` events and propagates it to any of its focused children."
+      description: "Hooks up to the window's `mouseUp` and `toucheEnd` events and propagates it to any of its focused subSurfaces."
     });
-    this._forFocusedChild("endPointer", evt);
+    this._forFocusedSubSurface("endPointer", evt);
   }
 
   startUV2(point) {
@@ -500,12 +503,10 @@ export default class Surface extends BaseTextured {
   }"
       }]
     });
-    console.log(this.focusable, this.focused);
-    if (this.focusable) {
+
+    if (this.focusable && !this.focused) {
       this.focused = true;
-      this.emit("focus", {
-        target: this
-      });
+      this.emit("focus");
     }
   }
 
@@ -540,14 +541,12 @@ export default class Surface extends BaseTextured {
     });
     if (this.focused) {
       this.focused = false;
-      for (var i = 0; i < this.children.length; ++i) {
-        if (this.children[i].focused) {
-          this.children[i].blur();
+      for (var i = 0; i < this.subSurfaces.length; ++i) {
+        if (this.subSurfaces[i].focused) {
+          this.subSurfaces[i].blur();
         }
       }
-      this.emit("blur", {
-        target: this
-      });
+      this.emit("blur");
     }
   }
 
@@ -562,8 +561,8 @@ export default class Surface extends BaseTextured {
   }
 
   set theme(v) {
-    for (var i = 0; i < this.children.length; ++i) {
-      this.children[i].theme = v;
+    for (var i = 0; i < this.subSurfaces.length; ++i) {
+      this.subSurfaces[i].theme = v;
     }
   }
 
@@ -575,8 +574,8 @@ export default class Surface extends BaseTextured {
       description: "Recursively searches the deepest leaf-node of the control graph for a control that has its `lockMovement` property set to `true`, indicating that key events should not be used to navigate the user, because they are being interpreted as typing commands."
     });
     var lock = false;
-    for (var i = 0; i < this.children.length && !lock; ++i) {
-      lock = lock || this.children[i].lockMovement;
+    for (var i = 0; i < this.subSurfaces.length && !lock; ++i) {
+      lock = lock || this.subSurfaces[i].lockMovement;
     }
     return lock;
   }
@@ -592,12 +591,12 @@ export default class Surface extends BaseTextured {
       head = this;
     while (head && head.focused) {
       result = head;
-      var children = head.children;
+      var subSurfaces = head.subSurfaces;
       head = null;
-      for (var i = 0; i < children.length; ++i) {
-        var child = children[i];
-        if (child.focused) {
-          head = child;
+      for (var i = 0; i < subSurfaces.length; ++i) {
+        var subSurface = subSurfaces[i];
+        if (subSurface.focused) {
+          head = subSurface;
         }
       }
     }
@@ -632,9 +631,9 @@ export default class Surface extends BaseTextured {
         type: "Event",
         description: "The key event to read"
       }],
-      description: "Hooks up to the window's `keyDown` event and propagates it to any of its focused children."
+      description: "Hooks up to the window's `keyDown` event and propagates it to any of its focused subSurfaces."
     });
-    this._forFocusedChild("keyDown", evt);
+    this._forFocusedSubSurface("keyDown", evt);
   }
 
   keyUp(evt) {
@@ -646,9 +645,9 @@ export default class Surface extends BaseTextured {
         type: "Event",
         description: "The key event to read"
       }],
-      description: "Hooks up to the window's `keyUp` event and propagates it to any of its focused children."
+      description: "Hooks up to the window's `keyUp` event and propagates it to any of its focused subSurfaces."
     });
-    this._forFocusedChild("keyUp", evt);
+    this._forFocusedSubSurface("keyUp", evt);
   }
 
   readClipboard(evt) {
@@ -660,9 +659,9 @@ export default class Surface extends BaseTextured {
         type: "Event",
         description: "The clipboard event to read"
       }],
-      description: "Hooks up to the clipboard's `paste` event and propagates it to any of its focused children."
+      description: "Hooks up to the clipboard's `paste` event and propagates it to any of its focused subSurfaces."
     });
-    this._forFocusedChild("readClipboard", evt);
+    this._forFocusedSubSurface("readClipboard", evt);
   }
 
   copySelectedText(evt) {
@@ -674,9 +673,9 @@ export default class Surface extends BaseTextured {
         type: "Event",
         description: "The clipboard event to read"
       }],
-      description: "Hooks up to the clipboard's `copy` event and propagates it to any of its focused children."
+      description: "Hooks up to the clipboard's `copy` event and propagates it to any of its focused subSurfaces."
     });
-    this._forFocusedChild("copySelectedText", evt);
+    this._forFocusedSubSurface("copySelectedText", evt);
   }
 
   cutSelectedText(evt) {
@@ -688,9 +687,9 @@ export default class Surface extends BaseTextured {
         type: "Event",
         description: "The clipboard event to read"
       }],
-      description: "Hooks up to the clipboard's `cut` event and propagates it to any of its focused children."
+      description: "Hooks up to the clipboard's `cut` event and propagates it to any of its focused subSurfaces."
     });
-    this._forFocusedChild("cutSelectedText", evt);
+    this._forFocusedSubSurface("cutSelectedText", evt);
   }
 
   readWheel(evt) {
@@ -702,8 +701,8 @@ export default class Surface extends BaseTextured {
         type: "Event",
         description: "The wheel event to read"
       }],
-      description: "Hooks up to the window's `wheel` event and propagates it to any of its focused children."
+      description: "Hooks up to the window's `wheel` event and propagates it to any of its focused subSurfaces."
     });
-    this._forFocusedChild("readWheel", evt);
+    this._forFocusedSubSurface("readWheel", evt);
   }
 }

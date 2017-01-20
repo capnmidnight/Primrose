@@ -333,7 +333,10 @@ export default class BrowserEnvironment extends EventDispatcher {
 
     const doPicking = () => {
       updateAll();
-      this.input.resolvePicking(this.scene);
+      const hit = this.input.resolvePicking(this.scene);
+      if(hit && hit.object.isSurface) {
+        this.selectControl(hit);
+      }
     };
 
     const moveGround = () => {
@@ -709,10 +712,14 @@ export default class BrowserEnvironment extends EventDispatcher {
         description: "A pointer click event that triggered."
       }]
     });
-    this.selectControl = (evt) => {
-      const hit = evt.hit,
-        obj = hit && hit.object;
-        console.log(evt.type, obj);
+    this.selectControl = (hit) => {
+      console.log("selectControl", hit);
+
+      const obj = hit && hit.object;
+
+      const evt = {};
+
+      console.log(evt.type, obj);
 
       if(evt.type === "pointerstart" || evt.type === "gazecomplete"){
         const ctrl = obj && (obj.surface || obj.button);

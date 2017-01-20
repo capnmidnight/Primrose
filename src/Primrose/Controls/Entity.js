@@ -35,9 +35,24 @@ export default class Entity extends Object3D {
     return this.children[0];
   }
 
+  _forward(child, event) {
+    child.addEventListener(event, (evt) =>
+      this.dispatchEvent(evt));
+  }
+
+  add(child){
+    super.add(child);
+    if(this._listeners) {
+      for(let event in this._listeners) {
+        this._forward(child, event);
+      }
+    }
+  }
+
   addEventListener(event, listener) {
+    super.addEventListener(event, listener);
     this.ready.then(() =>
       this.children.forEach((child) =>
-        child.addEventListener(event, listener)));
+        this._forward(child, event)));
   }
 };

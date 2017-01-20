@@ -333,17 +333,14 @@ export default class Pointer extends Entity {
         .sub(VECTOR_TEMP);
       this.picker.set(VECTOR_TEMP, FORWARD);
       const hits = this.picker.intersectObject(objects, true);
-      let found = false;
-      for(let i = 0; i < hits.length && !found; ++i) {
+      for(let i = 0; i < hits.length; ++i) {
         const hit = hits[i];
         if(hit.object.pickable && this._check(hit)) {
-          found = true;
+          return hit;
         }
       }
 
-      if(!found){
-        this._check();
-      }
+      this._check();
     }
   }
 }

@@ -490,8 +490,11 @@ export default class FPSInput extends EventDispatcher {
 
   resolvePicking(objects) {
     for (let i = 0; i < this.pointers.length; ++i) {
-      const ptr = this.pointers[i];
-      ptr.resolvePicking(objects);
+      const ptr = this.pointers[i],
+        hit = ptr.resolvePicking(objects);
+      if(hit) {
+        return hit;
+      }
     }
   }
 };

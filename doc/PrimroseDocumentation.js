@@ -2180,7 +2180,7 @@ pliny.event({ parent: "Primrose.Controls.Surface", name: "focus", description: "
           type: "Event",
           description: "The pointer event to read"
         }],
-        description: "Hooks up to the window's `mouseDown` and `touchStart` events, with coordinates translated to tangent-space UV coordinates, and propagates it to any of its focused children."
+        description: "Hooks up to the window's `mouseDown` and `touchStart` events, with coordinates translated to tangent-space UV coordinates, and propagates it to any of its focused subSurfaces."
       });
       pliny.method({
         parent: "Primrose.Controls.Surface",
@@ -2190,12 +2190,12 @@ pliny.event({ parent: "Primrose.Controls.Surface", name: "focus", description: "
           type: "Event",
           description: "The pointer event to read"
         }],
-        description: "Hooks up to the window's `mouseMove` and `touchMove` events, with coordinates translated to tangent-space UV coordinates, and propagates it to any of its focused children."
+        description: "Hooks up to the window's `mouseMove` and `touchMove` events, with coordinates translated to tangent-space UV coordinates, and propagates it to any of its focused subSurfaces."
       });
       pliny.method({
         parent: "Primrose.Controls.Surface",
         name: "endPointer",
-        description: "Hooks up to the window's `mouseUp` and `toucheEnd` events and propagates it to any of its focused children."
+        description: "Hooks up to the window's `mouseUp` and `toucheEnd` events and propagates it to any of its focused subSurfaces."
       });
       pliny.method({
         parent: "Primrose.Controls.Surface",
@@ -2225,6 +2225,7 @@ pliny.event({ parent: "Primrose.Controls.Surface", name: "focus", description: "
   }"
         }]
       });
+
       pliny.method({
         parent: "Primrose.Controls.Surface",
         name: "blur",
@@ -2261,7 +2262,7 @@ pliny.event({ parent: "Primrose.Controls.Surface", name: "focus", description: "
           type: "Event",
           description: "The key event to read"
         }],
-        description: "Hooks up to the window's `keyDown` event and propagates it to any of its focused children."
+        description: "Hooks up to the window's `keyDown` event and propagates it to any of its focused subSurfaces."
       });
       pliny.method({
         parent: "Primrose.Controls.Surface",
@@ -2271,7 +2272,7 @@ pliny.event({ parent: "Primrose.Controls.Surface", name: "focus", description: "
           type: "Event",
           description: "The key event to read"
         }],
-        description: "Hooks up to the window's `keyUp` event and propagates it to any of its focused children."
+        description: "Hooks up to the window's `keyUp` event and propagates it to any of its focused subSurfaces."
       });
       pliny.method({
         parent: "Primrose.Controls.Surface",
@@ -2281,7 +2282,7 @@ pliny.event({ parent: "Primrose.Controls.Surface", name: "focus", description: "
           type: "Event",
           description: "The clipboard event to read"
         }],
-        description: "Hooks up to the clipboard's `paste` event and propagates it to any of its focused children."
+        description: "Hooks up to the clipboard's `paste` event and propagates it to any of its focused subSurfaces."
       });
       pliny.method({
         parent: "Primrose.Controls.Surface",
@@ -2291,7 +2292,7 @@ pliny.event({ parent: "Primrose.Controls.Surface", name: "focus", description: "
           type: "Event",
           description: "The clipboard event to read"
         }],
-        description: "Hooks up to the clipboard's `copy` event and propagates it to any of its focused children."
+        description: "Hooks up to the clipboard's `copy` event and propagates it to any of its focused subSurfaces."
       });
       pliny.method({
         parent: "Primrose.Controls.Surface",
@@ -2301,7 +2302,7 @@ pliny.event({ parent: "Primrose.Controls.Surface", name: "focus", description: "
           type: "Event",
           description: "The clipboard event to read"
         }],
-        description: "Hooks up to the clipboard's `cut` event and propagates it to any of its focused children."
+        description: "Hooks up to the clipboard's `cut` event and propagates it to any of its focused subSurfaces."
       });
       pliny.method({
         parent: "Primrose.Controls.Surface",
@@ -2311,7 +2312,7 @@ pliny.event({ parent: "Primrose.Controls.Surface", name: "focus", description: "
           type: "Event",
           description: "The wheel event to read"
         }],
-        description: "Hooks up to the window's `wheel` event and propagates it to any of its focused children."
+        description: "Hooks up to the window's `wheel` event and propagates it to any of its focused subSurfaces."
       });
       pliny.property({
         parent: "Primrose.Controls.Surface",
