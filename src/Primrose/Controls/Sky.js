@@ -10,8 +10,7 @@ import { BackSide } from "three/src/constants";
 export default class Sky extends Entity {
 
   constructor(options) {
-    super({
-      id: "Sky",
+    super("Sky", {
       transparent: false,
       useFog: false,
       unshaded: true,

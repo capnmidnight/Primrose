@@ -65,9 +65,7 @@ function hasGazeEvent(obj){
 
 export default class Pointer extends Entity {
   constructor(pointerName, color, highlight, s, devices, triggerDevices, options) {
-    super(Object.assign({}, options, {
-      id: pointerName
-    }));
+    super(pointerName, options);
 
     this.devices = devices.filter(identity);
     this.triggerDevices = triggerDevices && triggerDevices.filter(identity) || this.devices.slice();
@@ -183,34 +181,26 @@ export default class Pointer extends Entity {
 
     if(curObj || lastObj) {
       const moved = lastHit && curHit &&
-        (curHit.point.x !== lastHit.point.x ||
-        curHit.point.y !== lastHit.point.y ||
-        curHit.point.z !== lastHit.point.z),
-      dt = lastHit && lastHit.time && (performance.now() - lastHit.time),
-      curID = curObj && curObj.id,
-      lastID = lastObj && lastObj.id,
-      changed = curID !== lastID,
-      enterEvt = {
-        pointer: this,
-        buttons: 0,
-        hit: curHit
-      },
-      leaveEvt = {
-        pointer: this,
-        buttons: 0,
-        hit: lastHit
-      };
-
+          (curHit.point.x !== lastHit.point.x ||
+          curHit.point.y !== lastHit.point.y ||
+          curHit.point.z !== lastHit.point.z),
+        dt = lastHit && lastHit.time && (performance.now() - lastHit.time),
+        curID = curObj && curObj.id,
+        lastID = lastObj && lastObj.id,
+        changed = curID !== lastID,
+        enterEvt = {
+          pointer: this,
+          buttons: 0,
+          hit: curHit
+        },
+        leaveEvt = {
+          pointer: this,
+          buttons: 0,
+          hit: lastHit
+        };
 
       if(curHit){
         this.gazeInner.position.z = 0.02 - curHit.distance;
-      }
-      else{
-         this.gazeInner.position.z = GAZE_RING_DISTANCE;
-      }
-      this.mesh.position.z = this.gazeInner.position.z - 0.02;
-
-      if(curHit){
         curHit.time = performance.now();
 
         this.mesh.material = material("", {
@@ -218,6 +208,11 @@ export default class Pointer extends Entity {
           unshaded: true
         });
       }
+      else{
+        this.gazeInner.position.z = GAZE_RING_DISTANCE;
+      }
+
+      this.mesh.position.z = this.gazeInner.position.z - 0.02;
 
       if(moved){
         lastHit.point.copy(curHit.point);
@@ -256,11 +251,9 @@ export default class Pointer extends Entity {
             lastHit.time = performance.now();
           }
         }
-        else{
+        else if(curObj) {
           selected = !!curHit;
-          if(curObj) {
-            this.emit("pointerend", enterEvt);
-          }
+          this.emit("pointerend", enterEvt);
         }
       }
       else if(moved && curObj) {
@@ -285,8 +278,8 @@ export default class Pointer extends Entity {
         else if(dt !== null) {
           if(dt >= this.gazeTimeout){
             this.gazeOuter.visible = false;
-            selected = !!curHit;
             if(curObj) {
+              selected = !!curHit;
               this.emit("gazecomplete", enterEvt);
             }
             lastHit.time = null;
@@ -305,7 +298,7 @@ export default class Pointer extends Entity {
         }
       }
 
-      if(selected && curObj){
+      if(selected){
         this.emit("select", enterEvt);
       }
       return true;
@@ -359,9 +352,8 @@ export default class Pointer extends Entity {
     }
   }
 
-  forward(obj) {
-    Pointer.EVENTS.forEach((event) =>
-      obj.watch(this, event));
+  forward(child) {
+    child.watch(this, Pointer.EVENTS);
   }
 }
 

@@ -4025,16 +4025,6 @@ pliny.property({
       });
 
       pliny.event({
-            parent: "Primrose.BrowserEnvironment",
-            name: "keydown",
-            description: "Standard browser KeyDown event. Bind to this version, rather than the window or document, as certain checks involving user state and locking movement to text boxes are performed."
-          });
-          pliny.event({
-            parent: "Primrose.BrowserEnvironment",
-            name: "keyup",
-            description: "Standard browser KeyUp event. Bind to this version, rather than the window or document, as certain checks involving user state and locking movement to text boxes are performed."
-          });
-          pliny.event({
         parent: "Primrose.BrowserEnvironment",
         name: "ready",
         description: "Fires after the initial assets have been downloaded and the scene initialized, just before animation starts."

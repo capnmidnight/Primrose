@@ -15,10 +15,8 @@ let COUNTER = 0;
 export default class Model extends Entity {
 
   constructor(file, options) {
-    options = Object.assign({
-      id: "Primrose.Controls.Model[" + (COUNTER++) + "]"
-    }, options);
-    super(options);
+    name = options && options.id || "Primrose.Controls.Model[" + (COUNTER++) + "]";
+    super(name, options);
     this._file = file;
     this._model = null;
   }

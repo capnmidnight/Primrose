@@ -784,6 +784,7 @@ export default class BrowserEnvironment extends EventDispatcher {
     this.consumeEvent = (evt) => {
       const obj = evt.hit && evt.hit.object,
         cancel = evt.type === "exit" || evt.cmdName === "NORMAL_ESCAPE";
+      
       if(evt.type === "select" || cancel) {
         
         if(obj !== this.currentControl || cancel){
@@ -807,8 +808,6 @@ export default class BrowserEnvironment extends EventDispatcher {
               this.input.Mouse.commands.heading.disabled = !this.input.VR.isPresenting;
             }
           }
-
-          console.log(this.input.Keyboard.enabled);
         }
       }
 
@@ -818,6 +817,8 @@ export default class BrowserEnvironment extends EventDispatcher {
       else if(this.currentControl){
         this.currentControl.dispatchEvent(evt);
       }
+
+      this.dispatchEvent(evt);
     };
 
     pliny.property({
@@ -846,8 +847,8 @@ export default class BrowserEnvironment extends EventDispatcher {
       type: "THREE.Object3D",
       description: "If a `skyTexture` option is provided, it will be a texture cube or photosphere. If no `skyTexture` option is provided, there will only be a THREE.Object3D, to create an anchor point on which implementing scripts can add objects that follow the user's position."
     });
-    this.sky = new Sky(this.options);
-    this.scene.add(this.sky);
+    this.sky = new Sky(this.options)
+      .addTo(this.scene);
 
 
     pliny.property({
@@ -856,10 +857,10 @@ export default class BrowserEnvironment extends EventDispatcher {
       type: "THREE.Object3D",
       description: "If a `groundTexture` option is provided, it will be a flat plane extending to infinity. As the user moves, the ground will shift under them by whole texture repeats, making the ground look infinite."
     });
-    this.ground = new Ground(this.options);
-    this.scene.add(this.ground);
+    this.ground = new Ground(this.options)
+      .addTo(this.scene);
 
-    this.teleporter = new Teleporter(this, this.ground);
+    this.teleporter = new Teleporter(this);
 
 
     pliny.property({
@@ -1119,25 +1120,11 @@ export default class BrowserEnvironment extends EventDispatcher {
 
             this.input.Keyboard.consumeEvent(evt);
             this.consumeEvent(evt);
-
-            pliny.event({
-              parent: "Primrose.BrowserEnvironment",
-              name: "keydown",
-              description: "Standard browser KeyDown event. Bind to this version, rather than the window or document, as certain checks involving user state and locking movement to text boxes are performed."
-            });
-            this.emit("keydown", evt);
           },
 
           keyUp = (evt) => {
             this.input.Keyboard.consumeEvent(evt);
             this.consumeEvent(evt);
-
-            pliny.event({
-              parent: "Primrose.BrowserEnvironment",
-              name: "keyup",
-              description: "Standard browser KeyUp event. Bind to this version, rather than the window or document, as certain checks involving user state and locking movement to text boxes are performed."
-            });
-            this.emit("keyup", evt);
           },
 
           withCurrentControl = (name) => {
@@ -1225,10 +1212,6 @@ export default class BrowserEnvironment extends EventDispatcher {
           this.sky.sun.castShadow = true;
           this.sky.sun.shadow.mapSize.width =
           this.sky.sun.shadow.mapSize.height = this.options.shadowMapSize;
-          if(this.ground.material){
-            this.ground.receiveShadow = true;
-            this.ground.castShadow = true;
-          }
         }
 
         this.input.VR.displays.forEach((display) => {

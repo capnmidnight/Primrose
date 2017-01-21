@@ -44,11 +44,9 @@ export function eyeBlankAll(eye) {
 export default class BaseTextured extends Entity {
 
   constructor(files, options) {
-    options = Object.assign({
-      id: files.join()
-    }, options);
-
-    super(options);
+    name = options && options.id || files.join();
+    
+    super(name, options);
 
     entities.push(this);
 

@@ -9,11 +9,11 @@ import { Object3D } from "three/src/core/Object3D";
 
 export default class Entity extends Object3D {
 
-  constructor(options) {
+  constructor(name, options) {
     super();
     this.isEntity = true;
+    this.name = name;
     this.options = options || {};
-    this.name = this.options && this.options.id || "";
     this.ready = this._ready.then(() => this);
     this.disabled = false;
   }

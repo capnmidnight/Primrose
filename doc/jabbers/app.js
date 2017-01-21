@@ -34,13 +34,18 @@ function eye(side, body) {
 
 function Jabber(w, h, s) {
   var skin = R.item(Primrose.Constants.SKINS),
-    body = sphere(0.2, 14, 7)
-      .colored(skin, {
-        shadow: true
-      })
-      .at(R.number(-w, w), 1, R.number(-h, h)),
+    root = hub()
+      .at(R.number(-w, w), 0, R.number(-h, h));
 
-    velocity = v3(
+
+  var body = sphere(0.2, 14, 7)
+    .colored(skin, {
+      shadow: true
+    })
+    .addTo(root)
+    .at(0, 0.125, 0);
+
+  var velocity = v3(
       R.number(-s, s),
       0,
       R.number(-s, s)),
@@ -49,24 +54,24 @@ function Jabber(w, h, s) {
   eye(-1, body);
   eye(1, body);
 
-  body.rotation.y = Math.PI;
-  body.update = function (dt) {
+  root.rotation.y = Math.PI;
+  root.update = function (dt) {
     velocity.y -= env.options.gravity * dt;
-    body.position.add(v.copy(velocity)
+    root.position.add(v.copy(velocity)
       .multiplyScalar(dt));
-    if (velocity.x > 0 && body.position.x >= w ||
-      velocity.x < 0 && body.position.x <= -w) {
+    if (velocity.x > 0 && root.position.x >= w ||
+      velocity.x < 0 && root.position.x <= -w) {
       velocity.x *= -1;
     }
-    if (velocity.z > 0 && body.position.z >= h ||
-      velocity.z < 0 && body.position.z <= -h) {
+    if (velocity.z > 0 && root.position.z >= h ||
+      velocity.z < 0 && root.position.z <= -h) {
       velocity.z *= -1;
     }
-    if (velocity.y < 0 && body.position.y < 1) {
+    if (velocity.y < 0 && root.position.y < 0) {
       velocity.y = 0;
-      body.position.y = 1;
+      root.position.y = 0;
     }
-    v.copy(body.position)
+    v.copy(root.position)
       .sub(env.input.head.position);
     var d = v.length();
     if (d < 3) {
@@ -77,12 +82,12 @@ function Jabber(w, h, s) {
         R.number(-0.01, 0.01),
         R.number(-0.01, 0.01),
         R.number(-0.01, 0.01));
-      body.position.add(v);
-      body.lookAt(env.input.head.position);
+      root.position.add(v);
+      root.lookAt(env.input.head.position);
     }
     else {
-      body.lookAt(
-        v.copy(velocity).add(body.position));
+      root.lookAt(
+        v.copy(velocity).add(root.position));
     }
   };
 
@@ -93,7 +98,7 @@ function Jabber(w, h, s) {
     velocity.add(v);
   });
 
-  return body;
+  return root;
 }
 
 // Once Primrose has setup the WebGL context, setup Three.js,

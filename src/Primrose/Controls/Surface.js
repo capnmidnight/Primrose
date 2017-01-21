@@ -206,18 +206,20 @@ export default class Surface extends BaseTextured {
 
     this.subSurfaces = [];
 
-    this.addEventListener("focus", this.render.bind(this));
-    this.addEventListener("blur", this.render.bind(this));
-    this.addEventListener("pointerstart", this.startUV.bind(this));
-    this.addEventListener("pointermove", this.moveUV.bind(this));
-    this.addEventListener("gazemove", this.moveUV.bind(this));
-    this.addEventListener("pointerend", this.endPointer.bind(this));
-    this.addEventListener("gazecomplete", (evt) => {
-      this.startUV(evt);
-      setTimeout(() => this.endPointer(evt), 100);
-    });
-    this.addEventListener("keydown", this.keyDown.bind(this));
-    this.addEventListener("keyup", this.keyUp.bind(this));
+    this.render = this.render.bind(this);
+
+    this.on("focus", this.render)
+      .on("blur", this.render)
+      .on("pointerstart", this.startUV.bind(this))
+      .on("pointermove", this.moveUV.bind(this))
+      .on("gazemove", this.moveUV.bind(this))
+      .on("pointerend", this.endPointer.bind(this))
+      .on("gazecomplete", (evt) => {
+        this.startUV(evt);
+        setTimeout(() => this.endPointer(evt), 100);
+      })
+      .on("keydown", this.keyDown.bind(this))
+      .on("keyup", this.keyUp.bind(this));
 
     this.render();
   }
