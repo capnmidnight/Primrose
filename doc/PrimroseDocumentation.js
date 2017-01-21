@@ -3781,12 +3781,6 @@ pliny.record({
     type: "Number",
     optional: true,
     description: "When creating a neck model, this is the how far apart to set the eyes. I highly suggest you don't go down the road that requires setting this. I will not help you understand what it does, because I would rather you just not use it."
-  }, {
-    name: "eyeRenderOrder",
-    type: "Array of String",
-    optional: true,
-    default: "[\"left\", \"right\"]",
-    description: "The order in which to draw the stereo view. I highly suggest you don't go down the road that requires setting this. I will not help you understand what it does, because I would rather you just not use it."
   }]
 });
 

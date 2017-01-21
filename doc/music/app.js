@@ -21,7 +21,7 @@ var height = 8,
       font: "../fonts/helvetiker_regular.typeface.json",
       backgroundColor: 0x000000,
       useFog: true,
-      useGaze: isMobile,
+      useGaze: true,
       drawDistance: 10,
       fullScreenButtonContainer: "#fullScreenButtonContainer",
       progress: Preloader.thunk
