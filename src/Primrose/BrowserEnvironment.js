@@ -650,17 +650,26 @@ export default class BrowserEnvironment extends EventDispatcher {
       returns: "Promise",
       description: "Causes the fully rendered view fade out to the color provided `options.backgroundColor`"
     });
-    const FADE_SPEED = 0.1;
+    let fadeOutPromise = null,
+      fadeOutPromiseResolver = null,
+      fadeInPromise = null,
+      fadeInPromiseResolver = null;
     this.fadeOut = () => {
-      return new Promise((resolve, reject) => {
-        var timer = setInterval(() => {
-          this.fader.material.opacity += FADE_SPEED;
-          if(this.fader.material.opacity >= 1){
-            clearInterval(timer);
-            resolve();
-          }
-        }, 10);
-      });
+      if(fadeInPromise) {
+        return Promise.reject("Currently fading in.");
+      }
+      if(!fadeOutPromise) {
+        this.fader.visible = true;
+        this.fader.material.opacity = 0;
+        this.fader.material.needsUpdate = true;
+        fadeOutPromise = new Promise((resolve, reject) =>
+          fadeOutPromiseResolver = (obj) => {
+            fadeOutPromise = null;
+            fadeOutPromiseResolver = null;
+            resolve(obj);
+          });
+      }
+      return fadeOutPromise;
     };
 
 
@@ -671,15 +680,41 @@ export default class BrowserEnvironment extends EventDispatcher {
       description: "Causes the faded out cube to disappear."
     });
     this.fadeIn = () => {
-      return new Promise((resolve, reject) => {
-        var timer = setInterval(() => {
-          this.fader.material.opacity -= FADE_SPEED;
-          if(this.fader.material.opacity <= 0){
-            clearInterval(timer);
-            resolve();
+      if(fadeOutPromise) {
+        return Promise.reject("Currently fading out.");
+      }
+      if(!fadeInPromise){
+        fadeInPromise = new Promise((resolve, reject) =>
+          fadeInPromiseResolver = (obj) => {
+            fadeInPromise = null;
+            fadeInPromiseResolver = null;
+            this.fader.visible = false;
+            resolve(obj);
+          });
+      }
+      return fadeInPromise;
+    };
+
+    const updateFade = (dt) => {
+      if(fadeOutPromise || fadeInPromise) {
+        const m = this.fader.material,
+          f = this.options.fadeRate * dt;
+        m.needsUpdate = true;
+        if(fadeOutPromise) {
+          m.opacity += f;
+          if(1 <= m.opacity){
+            m.opacity = 1;
+            fadeOutPromiseResolver();
           }
-        }, 10);
-      });
+        }
+        else {
+          m.opacity -= f;
+          if(m.opacity <= 0){
+            m.opacity = 0;
+            fadeInPromiseResolver();
+          }
+        }
+      }
     };
 
     pliny.property({
@@ -707,12 +742,10 @@ export default class BrowserEnvironment extends EventDispatcher {
         return Promise.resolve();
       }
       else if(!check || check()){
-        this.fader.visible = true;
         return this.fadeOut()
           .then(thunk)
-          .then(() => this.fadeIn())
-          .catch(console.warn.bind(console, "Error while transitioning"))
-          .then(() => this.fader.visible = false);
+          .then(this.fadeIn)
+          .catch(console.warn.bind(console, "Error transitioning"));
       }
     };
 
@@ -1472,6 +1505,9 @@ BrowserEnvironment.DEFAULTS = {
   enableShadows: false,
   shadowMapSize: 1024,
   progress: null,
+  // The rate at which the view fades in and out.
+  fadeRate: 5,
+  // The rate at which the UI shell catches up with the user's movement.
   vicinityFollowRate: 0.02,
   // The acceleration applied to falling objects.
   gravity: 9.8,
