@@ -185,19 +185,11 @@ pliny.record({
     type: "Number",
     optional: true,
     description: "When creating a neck model, this is the how far apart to set the eyes. I highly suggest you don't go down the road that requires setting this. I will not help you understand what it does, because I would rather you just not use it."
-  }, {
-    name: "eyeRenderOrder",
-    type: "Array of String",
-    optional: true,
-    default: `["left", "right"]`,
-    description: "The order in which to draw the stereo view. I highly suggest you don't go down the road that requires setting this. I will not help you understand what it does, because I would rather you just not use it."
   }]
 });
 
 const MILLISECONDS_TO_SECONDS = 0.001,
-  TELEPORT_DISPLACEMENT = new Vector3(),
-  GROUND_HEIGHT = -0.07,
-  EYE_INDICES = { "left": 0, "right": 1 };
+  TELEPORT_DISPLACEMENT = new Vector3();
 
 import PointerLock from "../util/PointerLock";
 
@@ -383,7 +375,7 @@ export default class BrowserEnvironment extends EventDispatcher {
       if (this.ground) {
         this.ground.position.set(
           Math.floor(this.input.head.position.x),
-          GROUND_HEIGHT,
+          0,
           Math.floor(this.input.head.position.z));
         if(this.ground.material){
           this.ground.material.needsUpdate = true;
@@ -434,21 +426,17 @@ export default class BrowserEnvironment extends EventDispatcher {
       var trans = this.input.VR.getTransforms(
         this.options.nearPlane,
         this.options.nearPlane + this.options.drawDistance);
-      for (var n = 0; trans && n < trans.length; ++n) {
-        var eye = this.options.eyeRenderOrder[n],
-          i = EYE_INDICES[eye],
-          st = trans[i] || trans[1 - i];
-        if(!st) {
-          i = 1 - i;
-          st = trans[i];
-        }
-        var v = st.viewport;
+      for (var i = 0; trans && i < trans.length; ++i) {
         eyeBlankAll(i);
 
-        if(trans.length > 1) {
-          var side = (2 * i) - 1;
-          if(this.options.nonstandardIPD !== null && st.translation.x !== 0){
-            st.translation.x = Math.sign(st.translation.x) * this.options.nonstandardIPD;
+        var st = trans[i],
+          v = st.viewport;
+
+        // if we're rendering with an eye offset
+        if(st.translation.x !== 0) {
+          // ... and we have non-standard offset values to use:
+          if(this.options.nonstandardIPD !== null){
+            st.translation.x *= this.options.nonstandardIPD / Math.abs(st.translation.x);
           }
           if(this.options.nonstandardNeckLength !== null){
             st.translation.y = this.options.nonstandardNeckLength;
@@ -457,11 +445,13 @@ export default class BrowserEnvironment extends EventDispatcher {
             st.translation.z = this.options.nonstandardNeckDepth;
           }
         }
+
         this.renderer.setViewport(
           v.left * resolutionScale,
           v.top * resolutionScale,
           v.width * resolutionScale,
           v.height * resolutionScale);
+
         this.camera.projectionMatrix.copy(st.projection);
         if (this.input.mousePointer.unproject) {
           this.input.mousePointer.unproject.getInverse(st.projection);
@@ -1512,7 +1502,6 @@ BrowserEnvironment.DEFAULTS = {
   nonstandardNeckDepth: null,
   showHeadPointer: true,
   // WARNING: I highly suggest you don't go down the road that requires the following settings this. I will not help you understand what they do, because I would rather you just not use them.
-  eyeRenderOrder: ["left", "right"],
   nonstandardIPD: null,
   disableAdvertising: false
 };
