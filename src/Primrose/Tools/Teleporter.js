@@ -3,6 +3,7 @@ import { Vector3 } from "three/src/math/Vector3";
 const DIFF = new Vector3(),
   MAX_MOVE_DISTANCE = 5,
   MAX_MOVE_DISTANCE_SQ = MAX_MOVE_DISTANCE * MAX_MOVE_DISTANCE,
+  MAX_TELEPORT_WAGGLE = 0.2,
   TELEPORT_PAD_RADIUS = 0.4,
   TELEPORT_COOLDOWN = 250;
 
@@ -72,7 +73,7 @@ export default class Teleporter {
   _end(evt) {
     if(this.enabled) {
       this._updatePosition(evt);
-      if(this._moveDistance < 0.1) {
+      if(this._moveDistance < MAX_TELEPORT_WAGGLE) {
         this._environment.teleport(this.disk.position);
       }
     }
