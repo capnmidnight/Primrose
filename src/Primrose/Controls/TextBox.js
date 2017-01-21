@@ -148,6 +148,8 @@ export default class TextBox extends Surface {
     this.commandPack = this.options.commands || TextEditor;
     this.value = this.options.value;
     this.padding = this.options.padding || 1;
+
+    this.addEventListener("visiblechanged", this.blur.bind(this));
   }
 
   cursorPageUp(lines, cursor) {

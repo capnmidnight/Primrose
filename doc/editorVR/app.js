@@ -13,7 +13,7 @@ var SCRIPT_UPDATE_TIME = 1000,
     fullScreenButtonContainer: "#fullScreenButtonContainer",
     progress: Preloader.thunk
   }),
-  subScene = null,
+  subScene = hub(),
   editor = null,
 
   modA = isMacOS ? "metaKey" : "ctrlKey",
@@ -27,7 +27,6 @@ var SCRIPT_UPDATE_TIME = 1000,
   scriptAnimate = null;
 
 env.addEventListener("ready", function () {
-  subScene = hub();
   env.scene.add(subScene);
 
   var editorSize = isMobile ? 512 : 1024,
@@ -42,7 +41,7 @@ env.addEventListener("ready", function () {
       tokenizer: Primrose.Text.Grammars.JavaScript,
       value: getSourceCode(isInIFrame)
     })
-    .addTo(env.scene)
+    .addTo(env.vicinity)
     .at(0, env.options.avatarHeight, 0);
 
   console.log("INSTRUCTIONS:");
@@ -82,10 +81,6 @@ env.addEventListener("keydown", function (evt) {
   if (evt[modA] && evt[modB]) {
     if (evt.keyCode === Primrose.Keys.E) {
       editor.visible = !editor.visible;
-      if (!editor.visible && env.currentControl && env.currentControl.focused) {
-        env.currentControl.blur();
-        env.currentControl = null;
-      }
     }
     else if (evt.keyCode === Primrose.Keys.X) {
       editor.value = getSourceCode(true);
@@ -98,7 +93,7 @@ env.addEventListener("keydown", function (evt) {
   }
 });
 
-window.addEventListener("_beforeunload", function (evt) {
+window.addEventListener("beforeunload", function (evt) {
   return evt.returnValue = "Are you sure you want to leave?";
 }, false);
 

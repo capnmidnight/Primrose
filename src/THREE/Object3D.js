@@ -64,3 +64,16 @@ Object3D.prototype.scl = function(x, y, z) {
   this.scale.set(x, y, z);
   return this;
 };
+
+Object.defineProperty(Object3D.prototype, "visible", {
+  get: function() {
+    return this._visible;
+  },
+  set: function(v) {
+    var oldV = this._visible;
+    this._visible = v;
+    if(oldV !== v){
+      this.emit("visiblechanged");
+    }
+  }
+});

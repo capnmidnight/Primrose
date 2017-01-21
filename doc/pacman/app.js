@@ -15,9 +15,6 @@ var GRASS = "../images/grass.png",
   }),
 
   editor = null,
-  output = null,
-  editorFrame = null,
-  editorFrameMesh = null,
 
   modA = isMacOS ? "metaKey" : "ctrlKey",
   modB = isMacOS ? "altKey" : "shiftKey",
@@ -29,37 +26,25 @@ var GRASS = "../images/grass.png",
   lastScript = null,
   scriptAnimate = null,
 
-  subScene = hub(),
-  editorCenter = hub();
+  subScene = hub();
 
 env.addEventListener("ready", function () {
-  env.scene.add(editorCenter);
   env.scene.add(subScene);
 
   var editorSize = isMobile ? 512 : 1024,
-    fontSize = 40 / env.quality;
+    fontSize = isMobile ? 10 : 20;
 
-  editorFrame = env.createElement("section");
-  editorFrame.id = "EditorFrame";
-  editorFrame.className = "shell";
-  editorFrame.style.width = editorSize;
-  editorFrame.style.height = editorSize;
-
-  editor = env.createElement("textarea");
-  editor.id = "Editor";
-  editor.style.width = editorFrame.surfaceWidth;
-  editor.style.height = editorFrame.surfaceHeight;
-  editor.style.fontSize = fontSize;
-  editor.tokenizer = Primrose.Text.Grammars.JavaScript;
-  editor.value = getSourceCode(isInIFrame);
-
-  editorFrame.add(editor);
-
-  editorFrameMesh = editorCenter.appendChild(editorFrame);
-  editorFrameMesh.name = "EditorFrameMesh";
-  editorFrameMesh.position.set(0, env.options.avatarHeight, 0);
-  editorFrameMesh.visible = false;
-  editorFrameMesh.disabled = true;
+  editor = new Primrose.Controls.TextBox({
+      id: "Editor",
+      width: editorSize,
+      height: editorSize,
+      geometry: shell(1.5, 25, 25),
+      fontSize: fontSize,
+      tokenizer: Primrose.Text.Grammars.JavaScript,
+      value: getSourceCode(isInIFrame)
+    })
+    .addTo(env.vicinity)
+    .at(0, env.options.avatarHeight, 0);
 
   Preloader.hide();
 }, false);
@@ -77,7 +62,7 @@ window.addEventListener("unload", function (evt) {
   }
 }, false);
 
-env.addEventListener("update", function (dt) {
+env.addEventListener("update", function () {
   if (!scriptUpdateTimeout) {
     scriptUpdateTimeout = setTimeout(updateScript, 500);
   }
@@ -91,7 +76,7 @@ env.addEventListener("update", function (dt) {
     }
     else {
       try {
-        scriptAnimate.call(env, dt);
+        scriptAnimate.call(env, env.deltaTime);
       }
       catch (exp) {
         console.error(exp);
@@ -120,24 +105,10 @@ function getSourceCode(skipReload) {
   return src.trim();
 }
 
-window.addEventListener("keydown", function (evt) {
+env.addEventListener("keydown", function (evt) {
   if (evt[modA] && evt[modB]) {
     if (evt.keyCode === Primrose.Keys.E) {
-      if (editorFrameMesh.visible && env.currentControl && env.currentControl.focused) {
-        env.currentControl.blur();
-        env.currentControl = null;
-      }
-      editorFrameMesh.visible = !editorFrameMesh.visible;
-      editorFrameMesh.disabled = !editorFrameMesh.disabled;
-    }
-    else if (evt.keyCode === Primrose.Keys.E && editor) {
-      Primrose.HTTP.postObject("saveScript", {
-        "Content-Type": "application/json",
-        data: {
-          fileName: "pacman",
-          content: editor.value
-        }
-      });
+      editor.visible = !editor.visible;
     }
     else if (evt.keyCode === Primrose.Keys.X) {
       editor.value = getSourceCode(true);
@@ -156,46 +127,42 @@ function wipeScene() {
   }
 }
 
+var first = true;
 function updateScript() {
   var newScript = editor.value,
     exp;
   if (newScript !== lastScript) {
-    scriptUpdateTimeout = null;
-    lastScript = newScript;
-    if (newScript.indexOf("function update") >= 0 &&
-      newScript.indexOf("return update") < 0) {
-      newScript += "\nreturn update;";
-    }
-    try {
+    env.transition(function() {
+      scriptUpdateTimeout = null;
+      lastScript = newScript;
+      if (newScript.indexOf("function update") >= 0 &&
+        newScript.indexOf("return update") < 0) {
+        newScript += "\nreturn update;";
+      }
       console.log("----- loading new script -----");
-      var scriptUpdate = new Function("scene", newScript);
-      wipeScene();
-      scriptAnimate = scriptUpdate.call(env, subScene);
-      if (scriptAnimate) {
-        scriptAnimate(0);
-      }
-      console.log("----- script loaded -----");
-      if (!scriptAnimate) {
-        console.log("----- No update script provided -----");
-      }
-      else if (env.quality === Primrose.Constants.Quality.NONE) {
-        env.quality = Primrose.Constants.Quality.MEDIUM;
-      }
-    }
-    catch (exp) {
-      console.error(exp);
       scriptAnimate = null;
-      throw exp;
-    }
-  }
-}
-
-function clrscr() {
-  if (output) {
-    var t = output;
-    t.value = "";
-    t.selectionStart = t.selectionEnd = t.value.length;
-    t.scrollIntoView(t.frontCursor);
+      try{
+        var scriptUpdate = new Function("scene", newScript);
+        wipeScene();
+        scriptAnimate = scriptUpdate.call(env, subScene);
+        if (scriptAnimate) {
+          scriptAnimate(0);
+        }
+        console.log("----- script loaded -----");
+        if (!scriptAnimate) {
+          console.log("----- No update script provided -----");
+        }
+        else if (env.quality === Primrose.Constants.Quality.NONE) {
+          env.quality = Primrose.Constants.Quality.MEDIUM;
+        }
+      }
+      catch(exp){
+        scriptUpdate = null;
+        console.error(exp);
+        console.error(newScript);
+      }
+    }, null, first);
+    first = false;
   }
 }
 
@@ -203,7 +170,7 @@ function clrscr() {
 
 function pacman() {
   var R = Primrose.Random.int,
-    L = Primrose.Graphics.ModelLoader.loadObject,
+    L = Primrose.Graphics.ModelFactory.loadObject,
     T = 3,
     W = 30,
     H = 30,

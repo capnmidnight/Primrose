@@ -771,6 +771,17 @@ export default class BrowserEnvironment extends EventDispatcher {
         .length() > 0.2,
       immediate);
 
+    const delesectControl = () => {
+      if(this.currentControl) {
+        this.currentControl.removeEventListener("blur", delesectControl);
+        this.input.Keyboard.enabled = true;
+        this.input.Mouse.commands.pitch.disabled =
+        this.input.Mouse.commands.heading.disabled = this.input.VR.isPresenting;
+        this.currentControl.blur();
+        this.currentControl = null;
+      }
+    };
+
     pliny.method({
       parent: "Primrose.BrowserEnvironment",
       name: "consumeEvent",
@@ -789,19 +800,12 @@ export default class BrowserEnvironment extends EventDispatcher {
         
         if(obj !== this.currentControl || cancel){
 
-          if(this.currentControl){
-            if(this.currentControl.lockMovement) {
-              this.input.Keyboard.enabled = true;
-              this.input.Mouse.commands.pitch.disabled =
-              this.input.Mouse.commands.heading.disabled = this.input.VR.isPresenting;
-            }
-            this.currentControl.blur();
-            this.currentControl = null;
-          }
+          delesectControl();
 
           if(!cancel && obj.isSurface){
             this.currentControl = obj;
             this.currentControl.focus();
+            this.currentControl.addEventListener("blur", delesectControl);
             if(this.currentControl.lockMovement) {
               this.input.Keyboard.enabled = false;
               this.input.Mouse.commands.pitch.disabled =

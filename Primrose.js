@@ -18175,6 +18175,19 @@ Object3D.prototype.scl = function (x, y, z) {
   return this;
 };
 
+Object.defineProperty(Object3D.prototype, "visible", {
+  get: function get() {
+    return this._visible;
+  },
+  set: function set(v) {
+    var oldV = this._visible;
+    this._visible = v;
+    if (oldV !== v) {
+      this.emit("visiblechanged");
+    }
+  }
+});
+
 function Line( geometry, material, mode ) {
 
 	if ( mode === 1 ) {
@@ -22385,6 +22398,8 @@ var TextBox = function (_Surface) {
     _this.commandPack = _this.options.commands || TextEditor;
     _this.value = _this.options.value;
     _this.padding = _this.options.padding || 1;
+
+    _this.addEventListener("visiblechanged", _this.blur.bind(_this));
     return _this;
   }
 
@@ -36525,6 +36540,7 @@ var PlainText = new Grammar("PlainText", [["newlines", /(?:\r\n|\r|\n)/]]);
 var DIFF = new Vector3();
 var MAX_MOVE_DISTANCE = 5;
 var MAX_MOVE_DISTANCE_SQ = MAX_MOVE_DISTANCE * MAX_MOVE_DISTANCE;
+var MAX_TELEPORT_WAGGLE = 0.2;
 var TELEPORT_PAD_RADIUS = 0.4;
 var TELEPORT_COOLDOWN = 250;
 
@@ -36588,7 +36604,7 @@ var Teleporter = function () {
     value: function _end(evt) {
       if (this.enabled) {
         this._updatePosition(evt);
-        if (this._moveDistance < 0.1) {
+        if (this._moveDistance < MAX_TELEPORT_WAGGLE) {
           this._environment.teleport(this.disk.position);
         }
       }
@@ -46083,6 +46099,16 @@ var BrowserEnvironment = function (_EventDispatcher) {
       }, immediate);
     };
 
+    var delesectControl = function delesectControl() {
+      if (_this.currentControl) {
+        _this.currentControl.removeEventListener("blur", delesectControl);
+        _this.input.Keyboard.enabled = true;
+        _this.input.Mouse.commands.pitch.disabled = _this.input.Mouse.commands.heading.disabled = _this.input.VR.isPresenting;
+        _this.currentControl.blur();
+        _this.currentControl = null;
+      }
+    };
+
     _this.consumeEvent = function (evt) {
       var obj = evt.hit && evt.hit.object,
           cancel = evt.type === "exit" || evt.cmdName === "NORMAL_ESCAPE";
@@ -46091,18 +46117,12 @@ var BrowserEnvironment = function (_EventDispatcher) {
 
         if (obj !== _this.currentControl || cancel) {
 
-          if (_this.currentControl) {
-            if (_this.currentControl.lockMovement) {
-              _this.input.Keyboard.enabled = true;
-              _this.input.Mouse.commands.pitch.disabled = _this.input.Mouse.commands.heading.disabled = _this.input.VR.isPresenting;
-            }
-            _this.currentControl.blur();
-            _this.currentControl = null;
-          }
+          delesectControl();
 
           if (!cancel && obj.isSurface) {
             _this.currentControl = obj;
             _this.currentControl.focus();
+            _this.currentControl.addEventListener("blur", delesectControl);
             if (_this.currentControl.lockMovement) {
               _this.input.Keyboard.enabled = false;
               _this.input.Mouse.commands.pitch.disabled = _this.input.Mouse.commands.heading.disabled = !_this.input.VR.isPresenting;
