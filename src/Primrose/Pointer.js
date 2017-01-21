@@ -55,12 +55,10 @@ const FORWARD = new Vector3(0, 0, -1),
 
 
 function hasGazeEvent(obj){
-  return obj && (!!obj.ongazecomplete || !!obj.onselect || !!obj.onclick ||
-     obj._listeners && (
+  return obj && obj._listeners && (
       (obj._listeners.gazecomplete && obj._listeners.gazecomplete.length > 0) ||
       (obj._listeners.select && obj._listeners.select.length > 0) ||
-      (obj._listeners.click && obj._listeners.click.length > 0)) ||
-    obj.button && hasGazeEvent(obj.button));
+      (obj._listeners.click && obj._listeners.click.length > 0));
 }
 
 export default class Pointer extends Entity {
@@ -218,9 +216,6 @@ export default class Pointer extends Entity {
         lastHit.point.copy(curHit.point);
       }
 
-      this.gazeInner.visible = this.useGaze;
-      this.mesh.visible = !this.useGaze;
-
       var dButtons = 0;
       for(let i = 0; i < this.triggerDevices.length; ++i) {
         const obj = this.triggerDevices[i];
@@ -301,8 +296,13 @@ export default class Pointer extends Entity {
       if(selected){
         this.emit("select", enterEvt);
       }
+
+      if(!changed && curHit && lastHit) {
+        curHit.time = lastHit.time;
+      }
       return true;
     }
+    
     return false;
   }
 
@@ -321,6 +321,8 @@ export default class Pointer extends Entity {
         .applyMatrix4(this.matrixWorld)
         .sub(VECTOR_TEMP);
       this.picker.set(VECTOR_TEMP, FORWARD);
+      this.gazeInner.visible = this.useGaze;
+      this.mesh.visible = !this.useGaze;
       const hits = this.picker.intersectObject(objects, true);
       for(let i = 0; i < hits.length; ++i) {
         const hit = hits[i];
@@ -343,7 +345,7 @@ export default class Pointer extends Entity {
 
         if(obj && this._check(hit)) {
           this.lastHit = hit;
-          return hit;
+          return;
         }
       }
 
