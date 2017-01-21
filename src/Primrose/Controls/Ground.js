@@ -23,7 +23,6 @@ export default class Ground extends Entity {
   }
 
   get _ready() {
-    console.log(this);
     const dim = this.options.dim,
       type = typeof  this.options.texture;
 
@@ -41,11 +40,13 @@ export default class Ground extends Entity {
       }));
     }
 
-    this._image
-      .named(this.name + "-" + this.options.texture)
-      .addTo(this);
+    if(this._image) {
+      this._image
+        .named(this.name + "-" + this.options.texture)
+        .addTo(this);
 
-    this.watch(this._image, Pointer.EVENTS);
+      this.watch(this._image, Pointer.EVENTS);
+    }
 
     return this._image && this._image.ready || super._ready;
   }
