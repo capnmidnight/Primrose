@@ -314,11 +314,13 @@ export default class BrowserEnvironment extends EventDispatcher {
         const fps = Math.round(1 / dt);
         dt = 1 / fps;
         this.deltaTime = Math.min(this.deltaTime, dt);
+        
+
+        // if we missed way too many frames in one go, just update once, otherwise we'll end up locking up the system.    
         let numFrames = dt / this.deltaTime;
         if(numFrames > 1) {
           missedFrames += numFrames;
           if(numFrames > 10) {
-            // if we missed way too many frames in one go, just update once, otherwise we'll end up locking up the system.
             numFrames = 1;
           }
         }
@@ -327,12 +329,12 @@ export default class BrowserEnvironment extends EventDispatcher {
         }
 
         if(missedFrames >= 10) {
-          console.warn("too many missed frames.", this.deltaTime, dt, numFrames, missedFrames);
           this.deltaTime = dt;
           missedFrames = 0;
         }
 
         updateFade(dt);
+
         for(let frame = 0; frame < numFrames; ++frame) {
           this.input.update(this.deltaTime);
           
