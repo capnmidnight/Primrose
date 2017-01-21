@@ -236,6 +236,19 @@ var _Math = {
 
 };
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author supereggbert / http://www.paulbrunt.co.uk/
+ * @author philogb / http://blog.thejit.org/
+ * @author jordi_ros / http://plattsoft.com
+ * @author D1plo1d / http://github.com/D1plo1d
+ * @author alteredq / http://alteredqualia.com/
+ * @author mikael emtinger / http://gomo.se/
+ * @author timknip / http://www.floorplanner.com/
+ * @author bhouston / http://clara.io
+ * @author WestLangley / http://github.com/WestLangley
+ */
+
 function Matrix4() {
 
 	this.elements = new Float32Array( [
@@ -1163,6 +1176,15 @@ Matrix4.prototype = {
 
 };
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author *kile / http://kile.stravaganza.org/
+ * @author philogb / http://blog.thejit.org/
+ * @author mikael emtinger / http://gomo.se/
+ * @author egraether / http://egraether.com/
+ * @author WestLangley / http://github.com/WestLangley
+ */
+
 function Vector3( x, y, z ) {
 
 	this.x = x || 0;
@@ -1914,6 +1936,13 @@ Vector3.prototype = {
 
 };
 
+/**
+ * @author mikael emtinger / http://gomo.se/
+ * @author alteredq / http://alteredqualia.com/
+ * @author WestLangley / http://github.com/WestLangley
+ * @author bhouston / http://clara.io
+ */
+
 function Quaternion( x, y, z, w ) {
 
 	this._x = x || 0;
@@ -2584,6 +2613,12 @@ EventDispatcher.prototype = {
 
 };
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author WestLangley / http://github.com/WestLangley
+ * @author bhouston / http://clara.io
+ */
+
 function Euler( x, y, z, order ) {
 
 	this._x = x || 0;
@@ -2953,6 +2988,13 @@ Layers.prototype = {
 
 };
 
+/**
+ * @author alteredq / http://alteredqualia.com/
+ * @author WestLangley / http://github.com/WestLangley
+ * @author bhouston / http://clara.io
+ * @author tschw
+ */
+
 function Matrix3() {
 
 	this.elements = new Float32Array( [
@@ -3221,6 +3263,14 @@ Matrix3.prototype = {
 	}
 
 };
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author mikael emtinger / http://gomo.se/
+ * @author alteredq / http://alteredqualia.com/
+ * @author WestLangley / http://github.com/WestLangley
+ * @author elephantatwork / www.elephantatwork.ch
+ */
 
 var object3DId = 0;
 
@@ -4081,6 +4131,11 @@ var RGBDEncoding = 3006;
 var BasicDepthPacking = 3200;
 var RGBADepthPacking = 3201;
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ */
+
 var materialId = 0;
 
 function Material() {
@@ -4910,6 +4965,10 @@ Vector2.prototype = {
 
 };
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function Color( r, g, b ) {
 
 	if ( g === undefined && b === undefined ) {
@@ -5427,6 +5486,57 @@ var ColorKeywords = { 'aliceblue': 0xF0F8FF, 'antiquewhite': 0xFAEBD7, 'aqua': 0
 'springgreen': 0x00FF7F, 'steelblue': 0x4682B4, 'tan': 0xD2B48C, 'teal': 0x008080, 'thistle': 0xD8BFD8, 'tomato': 0xFF6347, 'turquoise': 0x40E0D0,
 'violet': 0xEE82EE, 'wheat': 0xF5DEB3, 'white': 0xFFFFFF, 'whitesmoke': 0xF5F5F5, 'yellow': 0xFFFF00, 'yellowgreen': 0x9ACD32 };
 
+/**
+ * @author WestLangley / http://github.com/WestLangley
+ *
+ * parameters = {
+ *  color: <hex>,
+ *  roughness: <float>,
+ *  metalness: <float>,
+ *  opacity: <float>,
+ *
+ *  map: new THREE.Texture( <Image> ),
+ *
+ *  lightMap: new THREE.Texture( <Image> ),
+ *  lightMapIntensity: <float>
+ *
+ *  aoMap: new THREE.Texture( <Image> ),
+ *  aoMapIntensity: <float>
+ *
+ *  emissive: <hex>,
+ *  emissiveIntensity: <float>
+ *  emissiveMap: new THREE.Texture( <Image> ),
+ *
+ *  bumpMap: new THREE.Texture( <Image> ),
+ *  bumpScale: <float>,
+ *
+ *  normalMap: new THREE.Texture( <Image> ),
+ *  normalScale: <Vector2>,
+ *
+ *  displacementMap: new THREE.Texture( <Image> ),
+ *  displacementScale: <float>,
+ *  displacementBias: <float>,
+ *
+ *  roughnessMap: new THREE.Texture( <Image> ),
+ *
+ *  metalnessMap: new THREE.Texture( <Image> ),
+ *
+ *  alphaMap: new THREE.Texture( <Image> ),
+ *
+ *  envMap: new THREE.CubeTexture( [posx, negx, posy, negy, posz, negz] ),
+ *  envMapIntensity: <float>
+ *
+ *  refractionRatio: <float>,
+ *
+ *  wireframe: <boolean>,
+ *  wireframeLinewidth: <float>,
+ *
+ *  skinning: <bool>,
+ *  morphTargets: <bool>,
+ *  morphNormals: <bool>
+ * }
+ */
+
 function MeshStandardMaterial( parameters ) {
 
 	Material.call( this );
@@ -5545,6 +5655,42 @@ MeshStandardMaterial.prototype.copy = function ( source ) {
 	return this;
 
 };
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ *
+ * parameters = {
+ *  color: <hex>,
+ *  opacity: <float>,
+ *  map: new THREE.Texture( <Image> ),
+ *
+ *  lightMap: new THREE.Texture( <Image> ),
+ *  lightMapIntensity: <float>
+ *
+ *  aoMap: new THREE.Texture( <Image> ),
+ *  aoMapIntensity: <float>
+ *
+ *  specularMap: new THREE.Texture( <Image> ),
+ *
+ *  alphaMap: new THREE.Texture( <Image> ),
+ *
+ *  envMap: new THREE.TextureCube( [posx, negx, posy, negy, posz, negz] ),
+ *  combine: THREE.Multiply,
+ *  reflectivity: <float>,
+ *  refractionRatio: <float>,
+ *
+ *  shading: THREE.SmoothShading,
+ *  depthTest: <bool>,
+ *  depthWrite: <bool>,
+ *
+ *  wireframe: <boolean>,
+ *  wireframeLinewidth: <float>,
+ *
+ *  skinning: <bool>,
+ *  morphTargets: <bool>
+ * }
+ */
 
 function MeshBasicMaterial( parameters ) {
 
@@ -5672,6 +5818,11 @@ function material(textureDescription, options) {
     return mat;
   });
 }
+
+/**
+ * @author bhouston / http://clara.io
+ * @author WestLangley / http://github.com/WestLangley
+ */
 
 function Box3( min, max ) {
 
@@ -6152,6 +6303,11 @@ Box3.prototype = {
 
 };
 
+/**
+ * @author bhouston / http://clara.io
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function Sphere( center, radius ) {
 
 	this.center = ( center !== undefined ) ? center : new Vector3();
@@ -6323,6 +6479,10 @@ Sphere.prototype = {
 	}
 
 };
+
+/**
+ * @author bhouston / http://clara.io
+ */
 
 function Ray( origin, direction ) {
 
@@ -6856,6 +7016,10 @@ Ray.prototype = {
 
 };
 
+/**
+ * @author bhouston / http://clara.io
+ */
+
 function Line3( start, end ) {
 
 	this.start = ( start !== undefined ) ? start : new Vector3();
@@ -6978,6 +7142,10 @@ Line3.prototype = {
 	}
 
 };
+
+/**
+ * @author bhouston / http://clara.io
+ */
 
 function Plane( normal, constant ) {
 
@@ -7207,6 +7375,11 @@ Plane.prototype = {
 	}
 
 };
+
+/**
+ * @author bhouston / http://clara.io
+ * @author mrdoob / http://mrdoob.com/
+ */
 
 function Triangle( a, b, c ) {
 
@@ -7458,6 +7631,11 @@ Triangle.prototype = {
 	}
 
 };
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ */
 
 function Face3( a, b, c, normal, color, materialIndex ) {
 
@@ -8146,6 +8324,10 @@ Vector4.prototype = {
 
 };
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function BufferAttribute( array, itemSize, normalized ) {
 
 	if ( Array.isArray( array ) ) {
@@ -8475,8 +8657,6 @@ BufferAttribute.prototype = {
 
 };
 
-//
-
 function Uint16BufferAttribute( array, itemSize ) {
 
 	BufferAttribute.call( this, new Uint16Array( array ), itemSize );
@@ -8784,6 +8964,15 @@ function arrayMax( array ) {
 	return max;
 
 }
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author kile / http://kile.stravaganza.org/
+ * @author alteredq / http://alteredqualia.com/
+ * @author mikael emtinger / http://gomo.se/
+ * @author zz85 / http://www.lab4games.net/zz85/blog
+ * @author bhouston / http://clara.io
+ */
 
 var count = 0;
 function GeometryIdCount() { return count++; }
@@ -10208,6 +10397,11 @@ Geometry.prototype = {
 
 Object.assign( Geometry.prototype, EventDispatcher.prototype );
 
+/**
+ * @author alteredq / http://alteredqualia.com/
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function BufferGeometry() {
 
 	Object.defineProperty( this, 'id', { value: GeometryIdCount() } );
@@ -11307,6 +11501,13 @@ BufferGeometry.MaxIndex = 65535;
 
 Object.assign( BufferGeometry.prototype, EventDispatcher.prototype );
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ * @author mikael emtinger / http://gomo.se/
+ * @author jonobr1 / http://jonobr1.com/
+ */
+
 function Mesh( geometry, material ) {
 
 	Object3D.call( this );
@@ -11639,6 +11840,12 @@ Mesh.prototype = Object.assign( Object.create( Object3D.prototype ), {
 	}
 
 } );
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ * @author szimek / https://github.com/szimek/
+ */
 
 var textureId = 0;
 
@@ -12124,6 +12331,10 @@ Object.assign( ImageLoader.prototype, {
 
 } );
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function CubeTexture( images, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy, encoding ) {
 
 	images = images !== undefined ? images : [];
@@ -12155,6 +12366,10 @@ Object.defineProperty( CubeTexture.prototype, 'images', {
 	}
 
 } );
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
 
 function CubeTextureLoader( manager ) {
 
@@ -12825,59 +13040,14 @@ var Entity = function (_Object3D) {
     _this.ready = _this._ready.then(function () {
       return _this;
     });
+    _this.disabled = false;
     return _this;
   }
 
   createClass(Entity, [{
-    key: "_forward",
-    value: function _forward(child, event) {
-      var _this2 = this;
-
-      child.addEventListener(event, function (evt) {
-        return _this2.dispatchEvent(evt);
-      });
-    }
-  }, {
-    key: "add",
-    value: function add(child) {
-      get$1(Entity.prototype.__proto__ || Object.getPrototypeOf(Entity.prototype), "add", this).call(this, child);
-      if (this._listeners) {
-        for (var event in this._listeners) {
-          this._forward(child, event);
-        }
-      }
-    }
-  }, {
-    key: "addEventListener",
-    value: function addEventListener(event, listener) {
-      var _this3 = this;
-
-      get$1(Entity.prototype.__proto__ || Object.getPrototypeOf(Entity.prototype), "addEventListener", this).call(this, event, listener);
-      this.ready.then(function () {
-        return _this3.children.forEach(function (child) {
-          return _this3._forward(child, event);
-        });
-      });
-    }
-  }, {
-    key: "disabled",
-    get: function get() {
-      return this._pickingObject && this._pickingObject.disabled;
-    },
-    set: function set(v) {
-      if (this._pickingObject) {
-        this._pickingObject.disabled = v;
-      }
-    }
-  }, {
     key: "_ready",
     get: function get() {
       return Promise.resolve();
-    }
-  }, {
-    key: "_pickingObject",
-    get: function get() {
-      return this.children[0];
     }
   }]);
   return Entity;
@@ -13270,24 +13440,9 @@ var BaseTextured = function (_Entity) {
       });
     }
   }, {
-    key: "_pickingObject",
-    get: function get() {
-      return this._meshes && this._meshes.length > 0 && this._meshes[0];
-    }
-  }, {
-    key: "disabled",
-    get: function get() {
-      return this._pickingObject && this._pickingObject.disabled;
-    },
-    set: function set(v) {
-      if (this._pickingObject) {
-        this._pickingObject.disabled = v;
-      }
-    }
-  }, {
     key: "blending",
     get: function get() {
-      return this._pickingObject && this._pickingObject.material.blending;
+      return this._meshes && this._meshes.length > 0 && this._meshes[0] && this._meshes[0].material.blending;
     },
     set: function set(v) {
       this._meshes.forEach(function (mesh) {
@@ -13493,6 +13648,20 @@ function circle(r, sections, start, end) {
   });
 }
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ *
+ * parameters = {
+ *  color: <hex>,
+ *  opacity: <float>,
+ *  map: new THREE.Texture( <Image> ),
+ *
+ *  size: <float>,
+ *  sizeAttenuation: <bool>
+ * }
+ */
+
 function PointsMaterial( parameters ) {
 
 	Material.call( this );
@@ -13531,6 +13700,10 @@ PointsMaterial.prototype.copy = function ( source ) {
 	return this;
 
 };
+
+/**
+ * @author alteredq / http://alteredqualia.com/
+ */
 
 function Points( geometry, material ) {
 
@@ -14001,6 +14174,11 @@ function cylinder(rT, rB, height, rS, hS, openEnded, thetaStart, thetaEnd) {
   });
 }
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ */
+
 function Light( color, intensity ) {
 
 	Object3D.call( this );
@@ -14052,6 +14230,12 @@ Light.prototype = Object.assign( Object.create( Object3D.prototype ), {
 	}
 
 } );
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author mikael emtinger / http://gomo.se/
+ * @author WestLangley / http://github.com/WestLangley
+*/
 
 function Camera() {
 
@@ -14117,6 +14301,13 @@ Camera.prototype.copy = function ( source ) {
 	return this;
 
 };
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author greggman / http://games.greggman.com/
+ * @author zz85 / http://www.lab4games.net/zz85/blog
+ * @author tschw
+ */
 
 function PerspectiveCamera( fov, aspect, near, far ) {
 
@@ -14330,6 +14521,10 @@ PerspectiveCamera.prototype = Object.assign( Object.create( Camera.prototype ), 
 
 } );
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function LightShadow( camera ) {
 
 	this.camera = camera;
@@ -14381,6 +14576,11 @@ Object.assign( LightShadow.prototype, {
 	}
 
 } );
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 
 function PointLight( color, intensity, distance, decay ) {
 
@@ -14622,6 +14822,12 @@ function ring(rInner, rOuter, sectors, rings, start, end) {
     return new RingBufferGeometry(rInner, rOuter, sectors, rings, start, end);
   });
 }
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author bhouston / http://clara.io/
+ * @author stephomi / http://stephaneginier.com/
+ */
 
 function Raycaster( origin, direction, near, far ) {
 
@@ -15526,6 +15732,9 @@ Object3D.prototype.dispatchEvent = EventDispatcher.prototype.dispatchEvent = fun
     var array = [],
         i = 0;
     var length = listenerArray.length;
+    if (evt.type === "exit" && length > 1) {
+      console.trace("dispatch", length, this, evt);
+    }
 
     for (i = 0; i < length; i++) {
 
@@ -15537,6 +15746,18 @@ Object3D.prototype.dispatchEvent = EventDispatcher.prototype.dispatchEvent = fun
       array[i].call(this, evt);
     }
   }
+};
+
+Object3D.prototype.watch = EventDispatcher.prototype.watch = function (child, event) {
+  child.addEventListener(event, this.dispatchEvent.bind(this));
+};
+
+Object3D.prototype.route = EventDispatcher.prototype.route = function (events, listener) {
+  var _this = this;
+
+  events.forEach(function (event) {
+    return _this.addEventListener(event, listener);
+  });
 };
 
 Matrix4.prototype.toString = function (digits) {
@@ -15864,6 +16085,27 @@ var UniformsUtils = {
 	}
 
 };
+
+/**
+ * @author alteredq / http://alteredqualia.com/
+ *
+ * parameters = {
+ *  defines: { "label" : "value" },
+ *  uniforms: { "parameter1": { value: 1.0 }, "parameter2": { value2: 2 } },
+ *
+ *  fragmentShader: <string>,
+ *  vertexShader: <string>,
+ *
+ *  wireframe: <boolean>,
+ *  wireframeLinewidth: <float>,
+ *
+ *  lights: <bool>,
+ *
+ *  skinning: <bool>,
+ *  morphTargets: <bool>,
+ *  morphNormals: <bool>
+ * }
+ */
 
 function ShaderMaterial( parameters ) {
 
@@ -16294,6 +16536,10 @@ var ShaderChunk = {
 	shadow_vert: shadow_vert
 };
 
+/**
+ * @author alteredq / http://alteredqualia.com/
+ */
+
 function DataTexture( data, width, height, format, type, mapping, wrapS, wrapT, magFilter, minFilter, anisotropy, encoding ) {
 
 	Texture.call( this, null, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy, encoding );
@@ -16313,6 +16559,10 @@ DataTexture.prototype = Object.create( Texture.prototype );
 DataTexture.prototype.constructor = DataTexture;
 
 DataTexture.prototype.isDataTexture = true;
+
+/**
+ * Uniforms library for shared webgl shaders
+ */
 
 var UniformsLib = {
 
@@ -16482,6 +16732,10 @@ var UniformsLib = {
 
 };
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function ShadowMaterial() {
 
 	ShaderMaterial.call( this, {
@@ -16517,6 +16771,19 @@ ShadowMaterial.prototype.constructor = ShadowMaterial;
 
 ShadowMaterial.prototype.isShadowMaterial = true;
 
+/**
+ * @author alteredq / http://alteredqualia.com/
+ *
+ * parameters = {
+ *  color: <hex>,
+ *  opacity: <float>,
+ *  map: new THREE.Texture( <Image> ),
+ *
+ *	uvOffset: new THREE.Vector2(),
+ *	uvScale: new THREE.Vector2()
+ * }
+ */
+
 function SpriteMaterial( parameters ) {
 
 	Material.call( this );
@@ -16551,6 +16818,10 @@ SpriteMaterial.prototype.copy = function ( source ) {
 
 };
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function RawShaderMaterial( parameters ) {
 
 	ShaderMaterial.call( this, parameters );
@@ -16563,6 +16834,10 @@ RawShaderMaterial.prototype = Object.create( ShaderMaterial.prototype );
 RawShaderMaterial.prototype.constructor = RawShaderMaterial;
 
 RawShaderMaterial.prototype.isRawShaderMaterial = true;
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
 
 function MultiMaterial( materials ) {
 
@@ -16630,6 +16905,14 @@ MultiMaterial.prototype = {
 
 };
 
+/**
+ * @author WestLangley / http://github.com/WestLangley
+ *
+ * parameters = {
+ *  reflectivity: <float>
+ * }
+ */
+
 function MeshPhysicalMaterial( parameters ) {
 
 	MeshStandardMaterial.call( this );
@@ -16666,6 +16949,56 @@ MeshPhysicalMaterial.prototype.copy = function ( source ) {
 	return this;
 
 };
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ *
+ * parameters = {
+ *  color: <hex>,
+ *  specular: <hex>,
+ *  shininess: <float>,
+ *  opacity: <float>,
+ *
+ *  map: new THREE.Texture( <Image> ),
+ *
+ *  lightMap: new THREE.Texture( <Image> ),
+ *  lightMapIntensity: <float>
+ *
+ *  aoMap: new THREE.Texture( <Image> ),
+ *  aoMapIntensity: <float>
+ *
+ *  emissive: <hex>,
+ *  emissiveIntensity: <float>
+ *  emissiveMap: new THREE.Texture( <Image> ),
+ *
+ *  bumpMap: new THREE.Texture( <Image> ),
+ *  bumpScale: <float>,
+ *
+ *  normalMap: new THREE.Texture( <Image> ),
+ *  normalScale: <Vector2>,
+ *
+ *  displacementMap: new THREE.Texture( <Image> ),
+ *  displacementScale: <float>,
+ *  displacementBias: <float>,
+ *
+ *  specularMap: new THREE.Texture( <Image> ),
+ *
+ *  alphaMap: new THREE.Texture( <Image> ),
+ *
+ *  envMap: new THREE.TextureCube( [posx, negx, posy, negy, posz, negz] ),
+ *  combine: THREE.Multiply,
+ *  reflectivity: <float>,
+ *  refractionRatio: <float>,
+ *
+ *  wireframe: <boolean>,
+ *  wireframeLinewidth: <float>,
+ *
+ *  skinning: <bool>,
+ *  morphTargets: <bool>,
+ *  morphNormals: <bool>
+ * }
+ */
 
 function MeshPhongMaterial( parameters ) {
 
@@ -16778,6 +17111,14 @@ MeshPhongMaterial.prototype.copy = function ( source ) {
 
 };
 
+/**
+ * @author takahirox / http://github.com/takahirox
+ *
+ * parameters = {
+ *  gradientMap: new THREE.Texture( <Image> )
+ * }
+ */
+
 function MeshToonMaterial( parameters ) {
 
 	MeshPhongMaterial.call( this );
@@ -16806,6 +17147,32 @@ MeshToonMaterial.prototype.copy = function ( source ) {
 	return this;
 
 };
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author WestLangley / http://github.com/WestLangley
+ *
+ * parameters = {
+ *  opacity: <float>,
+ *
+ *  bumpMap: new THREE.Texture( <Image> ),
+ *  bumpScale: <float>,
+ *
+ *  normalMap: new THREE.Texture( <Image> ),
+ *  normalScale: <Vector2>,
+ *
+ *  displacementMap: new THREE.Texture( <Image> ),
+ *  displacementScale: <float>,
+ *  displacementBias: <float>,
+ *
+ *  wireframe: <boolean>,
+ *  wireframeLinewidth: <float>
+ *
+ *  skinning: <bool>,
+ *  morphTargets: <bool>,
+ *  morphNormals: <bool>
+ * }
+ */
 
 function MeshNormalMaterial( parameters ) {
 
@@ -16866,6 +17233,44 @@ MeshNormalMaterial.prototype.copy = function ( source ) {
 	return this;
 
 };
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ *
+ * parameters = {
+ *  color: <hex>,
+ *  opacity: <float>,
+ *
+ *  map: new THREE.Texture( <Image> ),
+ *
+ *  lightMap: new THREE.Texture( <Image> ),
+ *  lightMapIntensity: <float>
+ *
+ *  aoMap: new THREE.Texture( <Image> ),
+ *  aoMapIntensity: <float>
+ *
+ *  emissive: <hex>,
+ *  emissiveIntensity: <float>
+ *  emissiveMap: new THREE.Texture( <Image> ),
+ *
+ *  specularMap: new THREE.Texture( <Image> ),
+ *
+ *  alphaMap: new THREE.Texture( <Image> ),
+ *
+ *  envMap: new THREE.TextureCube( [posx, negx, posy, negy, posz, negz] ),
+ *  combine: THREE.Multiply,
+ *  reflectivity: <float>,
+ *  refractionRatio: <float>,
+ *
+ *  wireframe: <boolean>,
+ *  wireframeLinewidth: <float>,
+ *
+ *  skinning: <bool>,
+ *  morphTargets: <bool>,
+ *  morphNormals: <bool>
+ * }
+ */
 
 function MeshLambertMaterial( parameters ) {
 
@@ -16954,6 +17359,29 @@ MeshLambertMaterial.prototype.copy = function ( source ) {
 
 };
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ * @author bhouston / https://clara.io
+ * @author WestLangley / http://github.com/WestLangley
+ *
+ * parameters = {
+ *
+ *  opacity: <float>,
+ *
+ *  map: new THREE.Texture( <Image> ),
+ *
+ *  alphaMap: new THREE.Texture( <Image> ),
+ *
+ *  displacementMap: new THREE.Texture( <Image> ),
+ *  displacementScale: <float>,
+ *  displacementBias: <float>,
+ *
+ *  wireframe: <boolean>,
+ *  wireframeLinewidth: <float>
+ * }
+ */
+
 function MeshDepthMaterial( parameters ) {
 
 	Material.call( this );
@@ -17012,6 +17440,21 @@ MeshDepthMaterial.prototype.copy = function ( source ) {
 
 };
 
+/**
+ * @author alteredq / http://alteredqualia.com/
+ *
+ * parameters = {
+ *  color: <hex>,
+ *  opacity: <float>,
+ *
+ *  linewidth: <float>,
+ *
+ *  scale: <float>,
+ *  dashSize: <float>,
+ *  gapSize: <float>
+ * }
+ */
+
 function LineDashedMaterial( parameters ) {
 
 	Material.call( this );
@@ -17052,6 +17495,20 @@ LineDashedMaterial.prototype.copy = function ( source ) {
 	return this;
 
 };
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ *
+ * parameters = {
+ *  color: <hex>,
+ *  opacity: <float>,
+ *
+ *  linewidth: <float>,
+ *  linecap: "round",
+ *  linejoin: "round"
+ * }
+ */
 
 function LineBasicMaterial( parameters ) {
 
@@ -17111,6 +17568,10 @@ var Materials = Object.freeze({
 	LineBasicMaterial: LineBasicMaterial,
 	Material: Material
 });
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
 
 function MaterialLoader( manager ) {
 
@@ -17266,6 +17727,10 @@ Object.assign( MaterialLoader.prototype, {
 	}
 
 } );
+
+/**
+ * @author alteredq / http://alteredqualia.com/
+ */
 
 function Loader() {
 
@@ -18211,6 +18676,10 @@ Object3D.prototype.scl = function (x, y, z) {
   return this;
 };
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function Line( geometry, material, mode ) {
 
 	if ( mode === 1 ) {
@@ -18392,6 +18861,10 @@ Line.prototype = Object.assign( Object.create( Object3D.prototype ), {
 
 } );
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function LineSegments( geometry, material ) {
 
 	Line.call( this, geometry, material );
@@ -18407,6 +18880,10 @@ LineSegments.prototype = Object.assign( Object.create( Line.prototype ), {
 	isLineSegments: true
 
 } );
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
 
 function Group() {
 
@@ -20076,7 +20553,7 @@ var EULER_TEMP = new Euler();
 var QUAT_TEMP = new Quaternion();
 
 function hasGazeEvent(obj) {
-  return !!obj.ongazecomplete || !!obj.onselect || !!obj.onclick || obj._listeners && (obj._listeners.gazecomplete && obj._listeners.gazecomplete.length > 0 || obj._listeners.select && obj._listeners.select.length > 0 || obj._listeners.click && obj._listeners.click.length > 0) || obj.button && hasGazeEvent(obj.button);
+  return obj && (!!obj.ongazecomplete || !!obj.onselect || !!obj.onclick || obj._listeners && (obj._listeners.gazecomplete && obj._listeners.gazecomplete.length > 0 || obj._listeners.select && obj._listeners.select.length > 0 || obj._listeners.click && obj._listeners.click.length > 0) || obj.button && hasGazeEvent(obj.button));
 }
 
 var Pointer = function (_Entity) {
@@ -20174,21 +20651,21 @@ var Pointer = function (_Entity) {
     }
   }, {
     key: "_check",
-    value: function _check(currentHit) {
-      var lastHit = this.lastHit,
-          obj = currentHit && currentHit.object,
+    value: function _check(curHit) {
+      var curObj = curHit && curHit.object,
+          lastHit = this.lastHit,
           lastObj = lastHit && lastHit.object;
-      if (obj && obj.name === "disk") {
-        console.log(currentHit);
-      }
-      if (obj || lastObj) {
-        var moved = lastHit && currentHit && (currentHit.point.x !== lastHit.point.x || currentHit.point.y !== lastHit.point.y || currentHit.point.z !== lastHit.point.z),
+
+      if (curObj || lastObj) {
+        var moved = lastHit && curHit && (curHit.point.x !== lastHit.point.x || curHit.point.y !== lastHit.point.y || curHit.point.z !== lastHit.point.z),
             dt = lastHit && lastHit.time && performance.now() - lastHit.time,
-            changed = !lastHit && currentHit || lastHit && !currentHit || lastHit && currentHit && currentHit.object.id !== lastHit.object.id,
+            curID = curObj && curObj.id,
+            lastID = lastObj && lastObj.id,
+            changed = curID !== lastID,
             enterEvt = {
           pointer: this,
           buttons: 0,
-          hit: currentHit
+          hit: curHit
         },
             leaveEvt = {
           pointer: this,
@@ -20196,15 +20673,15 @@ var Pointer = function (_Entity) {
           hit: lastHit
         };
 
-        if (currentHit) {
-          this.gazeInner.position.z = 0.02 - currentHit.distance;
+        if (curHit) {
+          this.gazeInner.position.z = 0.02 - curHit.distance;
         } else {
           this.gazeInner.position.z = GAZE_RING_DISTANCE;
         }
         this.mesh.position.z = this.gazeInner.position.z - 0.02;
 
-        if (currentHit) {
-          currentHit.time = performance.now();
+        if (curHit) {
+          curHit.time = performance.now();
 
           this.mesh.material = material("", {
             color: this.highlight,
@@ -20213,7 +20690,7 @@ var Pointer = function (_Entity) {
         }
 
         if (moved) {
-          lastHit.point.copy(currentHit.point);
+          lastHit.point.copy(curHit.point);
         }
 
         this.gazeInner.visible = this.useGaze;
@@ -20221,73 +20698,71 @@ var Pointer = function (_Entity) {
 
         var dButtons = 0;
         for (var i = 0; i < this.triggerDevices.length; ++i) {
-          var _obj2 = this.triggerDevices[i];
-          if (_obj2.enabled) {
-            enterEvt.buttons |= _obj2.getValue("buttons");
-            dButtons |= _obj2.getValue("dButtons");
+          var obj = this.triggerDevices[i];
+          if (obj.enabled) {
+            enterEvt.buttons |= obj.getValue("buttons");
+            dButtons |= obj.getValue("dButtons");
           }
         }
 
         leaveEvt.buttons = enterEvt.buttons;
 
         if (changed) {
-          if (lastHit && lastHit.object) {
-            lastHit.object.emit("exit", leaveEvt);
+          if (lastObj) {
+            this.emit("exit", leaveEvt);
           }
-          if (obj) {
-            obj.emit("enter", enterEvt);
+          if (curObj) {
+            this.emit("enter", enterEvt);
           }
         }
 
         var selected = false;
         if (dButtons) {
           if (enterEvt.buttons) {
-            if (obj) {
-              obj.emit("pointerstart", enterEvt);
+            if (curObj) {
+              this.emit("pointerstart", enterEvt);
             }
             if (lastHit) {
               lastHit.time = performance.now();
             }
           } else {
-            selected = !!currentHit;
-            if (obj) {
-              obj.emit("pointerend", enterEvt);
+            selected = !!curHit;
+            if (curObj) {
+              this.emit("pointerend", enterEvt);
             }
           }
-        } else if (moved && obj) {
-          obj.emit("pointermove", enterEvt);
+        } else if (moved && curObj) {
+          this.emit("pointermove", enterEvt);
         }
 
         if (this.useGaze) {
           if (changed) {
             if (dt !== null && dt < this.gazeTimeout) {
               this.gazeOuter.visible = false;
-              if (obj) {
-                obj.emit("gazecancel", leaveEvt);
-              } else if (lastHit && lastHit.object) {
-                lastHit.object.emit("gazecancel", leaveEvt);
+              if (lastObj) {
+                this.emit("gazecancel", leaveEvt);
               }
             }
-            if (currentHit) {
+            if (curHit) {
               this.gazeOuter.visible = true;
-              if (obj) {
-                obj.emit("gazestart", enterEvt);
+              if (curObj) {
+                this.emit("gazestart", enterEvt);
               }
             }
           } else if (dt !== null) {
             if (dt >= this.gazeTimeout) {
               this.gazeOuter.visible = false;
-              selected = !!currentHit;
-              if (obj) {
-                obj.emit("gazecomplete", enterEvt);
+              selected = !!curHit;
+              if (curObj) {
+                this.emit("gazecomplete", enterEvt);
               }
               lastHit.time = null;
-            } else if (currentHit && currentHit.object && hasGazeEvent(currentHit.object)) {
+            } else if (hasGazeEvent(curObj)) {
               var p = Math.round(36 * dt / this.gazeTimeout),
                   a = 2 * Math.PI * p / 36;
               this.gazeOuter.geometry = ring(GAZE_RING_INNER, GAZE_RING_OUTER, 36, p, 0, a);
-              if (moved && obj) {
-                obj.emit("gazemove", enterEvt);
+              if (moved && curObj) {
+                this.emit("gazemove", enterEvt);
               }
             } else {
               this.gazeOuter.visible = false;
@@ -20295,12 +20770,8 @@ var Pointer = function (_Entity) {
           }
         }
 
-        if (selected && obj) {
-          obj.emit("select", enterEvt);
-        }
-
-        if (changed) {
-          this.lastHit = currentHit;
+        if (selected && curObj) {
+          this.emit("select", enterEvt);
         }
         return true;
       }
@@ -20323,13 +20794,46 @@ var Pointer = function (_Entity) {
         var hits = this.picker.intersectObject(objects, true);
         for (var i = 0; i < hits.length; ++i) {
           var hit = hits[i];
-          if (hit.object.pickable && this._check(hit)) {
+          var obj = hit.object;
+          var origObj = obj;
+
+          while (obj && !obj.isEntity) {
+            obj = obj.parent;
+          }
+
+          if (!obj) {
+            obj = origObj;
+          }
+
+          if (obj && !obj.pickable) {
+            obj = null;
+          }
+
+          hit.object = obj;
+
+          if (obj && this._check(hit)) {
+            this.lastHit = hit;
             return hit;
           }
         }
 
         this._check();
+        this.lastHit = null;
       }
+    }
+  }, {
+    key: "forward",
+    value: function forward(obj) {
+      var _this2 = this;
+
+      Pointer.EVENTS.forEach(function (event) {
+        return obj.watch(_this2, event);
+      });
+    }
+  }, {
+    key: "pickable",
+    get: function get() {
+      return false;
     }
   }, {
     key: "material",
@@ -20811,6 +21315,21 @@ var Surface = function (_BaseTextured) {
 
     _this.subSurfaces = [];
 
+    _this.addEventListener("focus", _this.render.bind(_this));
+    _this.addEventListener("blur", _this.render.bind(_this));
+    _this.addEventListener("pointerstart", _this.startUV.bind(_this));
+    _this.addEventListener("pointermove", _this.moveUV.bind(_this));
+    _this.addEventListener("gazemove", _this.moveUV.bind(_this));
+    _this.addEventListener("pointerend", _this.endPointer.bind(_this));
+    _this.addEventListener("gazecomplete", function (evt) {
+      _this.startUV(evt);
+      setTimeout(function () {
+        return _this.endPointer(evt);
+      }, 100);
+    });
+    _this.addEventListener("keydown", _this.keyDown.bind(_this));
+    _this.addEventListener("keyup", _this.keyUp.bind(_this));
+
     _this.render();
     return _this;
   }
@@ -20980,34 +21499,30 @@ var Surface = function (_BaseTextured) {
       var elem = this.focusedElement;
       if (elem && elem !== this) {
         elem[name](evt);
+        return true;
       }
+      return false;
     }
   }, {
     key: "startUV",
     value: function startUV(evt) {
-      this._forFocusedSubSurface("startUV", evt);
+      if (!this._forFocusedSubSurface("startUV", evt)) {
+        var p = this.mapUV(evt.hit.uv);
+        this.startPointer(p.x, p.y);
+      }
     }
   }, {
     key: "moveUV",
     value: function moveUV(evt) {
-      this._forFocusedSubSurface("moveUV", evt);
+      if (!this._forFocusedSubSurface("moveUV", evt)) {
+        var p = this.mapUV(evt.hit.uv);
+        this.movePointer(p.x, p.y);
+      }
     }
   }, {
     key: "endPointer",
     value: function endPointer(evt) {
       this._forFocusedSubSurface("endPointer", evt);
-    }
-  }, {
-    key: "startUV2",
-    value: function startUV2(point) {
-      var p = this.mapUV(point);
-      this.startPointer(p.x, p.y);
-    }
-  }, {
-    key: "moveUV2",
-    value: function moveUV2(point) {
-      var p = this.mapUV(point);
-      this.movePointer(p.x, p.y);
     }
   }, {
     key: "focus",
@@ -21028,30 +21543,6 @@ var Surface = function (_BaseTextured) {
           }
         }
         this.emit("blur");
-      }
-    }
-  }, {
-    key: "dispatchEvent2",
-    value: function dispatchEvent2(evt) {
-      var _this3 = this;
-
-      switch (evt.type) {
-        case "pointerstart":
-          this.startUV(evt.hit.uv);
-          break;
-        case "pointerend":
-          this.endPointer(evt);
-          break;
-        case "pointermove":
-        case "gazemove":
-          this.moveUV(evt.hit.uv);
-          break;
-        case "gazecomplete":
-          this.startUV(evt.hit.uv);
-          setTimeout(function () {
-            return _this3.endPointer(evt);
-          }, 100);
-          break;
       }
     }
   }, {
@@ -21083,6 +21574,11 @@ var Surface = function (_BaseTextured) {
     key: "readWheel",
     value: function readWheel(evt) {
       this._forFocusedSubSurface("readWheel", evt);
+    }
+  }, {
+    key: "pickable",
+    get: function get() {
+      return true;
     }
   }, {
     key: "imageWidth",
@@ -21490,8 +21986,8 @@ var Button3D = function (_Entity) {
       this.emit("release", { source: this });
     }
   }, {
-    key: "dispatchEvent",
-    value: function dispatchEvent(evt) {
+    key: "consumeEvent",
+    value: function consumeEvent(evt) {
       var _this2 = this;
 
       switch (evt.type) {
@@ -21597,14 +22093,13 @@ var Ground = function (_Entity) {
 
       return this._image && this._image.ready || get$1(Ground.prototype.__proto__ || Object.getPrototypeOf(Ground.prototype), "_ready", this);
     }
-  }, {
-    key: "_pickingObject",
-    get: function get() {
-      return this._image && this._image._pickingObject || this.children[0];
-    }
   }]);
   return Ground;
 }(Entity);
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
 
 function AmbientLight( color, intensity ) {
 
@@ -22374,7 +22869,6 @@ var TextBox = function (_Surface) {
     // used keys like curly brackets.
     _this._browser = isChrome ? "CHROMIUM" : isFirefox ? "FIREFOX" : isIE ? "IE" : isOpera ? "OPERA" : isSafari ? "SAFARI" : "UNKNOWN";
     _this._pointer = new Point();
-    _this._deadKeyState = "";
     _this._history = [];
     _this._historyFrame = -1;
     _this._topLeftGutter = new Size();
@@ -22421,9 +22915,6 @@ var TextBox = function (_Surface) {
     _this.commandPack = _this.options.commands || TextEditor;
     _this.value = _this.options.value;
     _this.padding = _this.options.padding || 1;
-
-    _this.addEventListener("focus", _this.render.bind(_this), false);
-    _this.addEventListener("blur", _this.render.bind(_this), false);
     return _this;
   }
 
@@ -22438,11 +22929,6 @@ var TextBox = function (_Surface) {
     value: function cursorPageDown(lines, cursor) {
       cursor.incY(this.gridBounds.height, lines);
       this.scrollIntoView(cursor);
-    }
-  }, {
-    key: "setDeadKeyState",
-    value: function setDeadKeyState(st) {
-      this._deadKeyState = st || "";
     }
   }, {
     key: "pushUndo",
@@ -22543,23 +23029,15 @@ var TextBox = function (_Surface) {
   }, {
     key: "keyDown",
     value: function keyDown(evt) {
-      this.environment.input.Keyboard.doTyping(this, evt);
-    }
-  }, {
-    key: "execCommand",
-    value: function execCommand(browser, codePage, commandName) {
-      if (commandName && this.focused && !this.readOnly) {
-        var altCommandName = browser + "_" + commandName,
-            func = this.commandPack[altCommandName] || this.commandPack[commandName] || codePage[altCommandName] || codePage[commandName];
+      if (this.focused && !this.readOnly) {
+        var func = this.commandPack[evt.altCmdName] || this.commandPack[evt.cmdName] || evt.altCmdText || evt.cmdText;
 
         if (func instanceof String || typeof func === "string") {
-          console.log("okay");
+          console.warn("This shouldn't have happened.");
           func = this.commandPack[func] || this.commandPack[func] || func;
         }
 
-        if (func === undefined) {
-          return false;
-        } else {
+        if (func) {
           this.frontCursor.moved = false;
           this.backCursor.moved = false;
           if (func instanceof Function) {
@@ -22568,12 +23046,14 @@ var TextBox = function (_Surface) {
             console.log(func);
             this.selectedText = func;
           }
+          evt.resetDeadKeyState();
+          evt.preventDefault();
+
           if (this.frontCursor.moved && !this.backCursor.moved) {
             this.backCursor.copy(this.frontCursor);
           }
           this.clampScroll();
           this.render();
-          return true;
         }
       }
     }
@@ -23447,6 +23927,7 @@ var VRFrameData = function VRFrameData() {
  * limitations under the License.
  */
 
+// Start at a higher number to reduce chance of conflict.
 var nextDisplayId = 1000;
 
 var VRDisplay = function () {
@@ -23654,6 +24135,11 @@ function makeHidingContainer(id, obj) {
   return elem;
 }
 
+/**
+ * @author mikael emtinger / http://gomo.se/
+ * @author alteredq / http://alteredqualia.com/
+ */
+
 function Sprite( material ) {
 
 	Object3D.call( this );
@@ -23707,6 +24193,12 @@ Sprite.prototype = Object.assign( Object.create( Object3D.prototype ), {
 	}
 
 } );
+
+/**
+ * @author mikael emtinger / http://gomo.se/
+ * @author alteredq / http://alteredqualia.com/
+ * @author mrdoob / http://mrdoob.com/
+ */
 
 function LOD() {
 
@@ -23873,6 +24365,13 @@ LOD.prototype = Object.assign( Object.create( Object3D.prototype ), {
 	}
 
 } );
+
+/**
+ * @author mikael emtinger / http://gomo.se/
+ * @author alteredq / http://alteredqualia.com/
+ * @author michael guerrero / http://realitymeltdown.com
+ * @author ikerr / http://verold.com
+ */
 
 function Skeleton( bones, boneInverses, useVertexTexture ) {
 
@@ -24048,6 +24547,12 @@ Object.assign( Skeleton.prototype, {
 
 } );
 
+/**
+ * @author mikael emtinger / http://gomo.se/
+ * @author alteredq / http://alteredqualia.com/
+ * @author ikerr / http://verold.com
+ */
+
 function Bone() {
 
 	Object3D.call( this );
@@ -24063,6 +24568,12 @@ Bone.prototype = Object.assign( Object.create( Object3D.prototype ), {
 	isBone: true
 
 } );
+
+/**
+ * @author mikael emtinger / http://gomo.se/
+ * @author alteredq / http://alteredqualia.com/
+ * @author ikerr / http://verold.com
+ */
 
 function SkinnedMesh( geometry, material, useVertexTexture ) {
 
@@ -24240,6 +24751,11 @@ SkinnedMesh.prototype = Object.assign( Object.create( Mesh.prototype ), {
 
 } );
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ */
+
 function Fog ( color, near, far ) {
 
 	this.name = '';
@@ -24270,6 +24786,11 @@ Fog.prototype.toJSON = function ( meta ) {
 
 };
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ */
+
 function FogExp2 ( color, density ) {
 
 	this.name = '';
@@ -24296,6 +24817,10 @@ FogExp2.prototype.toJSON = function ( meta ) {
 	};
 
 };
+
+/**
+ * @author alteredq / http://alteredqualia.com/
+ */
 
 function HemisphereLight( skyColor, groundColor, intensity ) {
 
@@ -24330,6 +24855,10 @@ HemisphereLight.prototype = Object.assign( Object.create( Light.prototype ), {
 
 } );
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function SpotLightShadow() {
 
 	LightShadow.call( this, new PerspectiveCamera( 50, 1, 0.5, 500 ) );
@@ -24362,6 +24891,10 @@ SpotLightShadow.prototype = Object.assign( Object.create( LightShadow.prototype 
 	}
 
 } );
+
+/**
+ * @author alteredq / http://alteredqualia.com/
+ */
 
 function SpotLight( color, intensity, distance, angle, penumbra, decay ) {
 
@@ -24420,6 +24953,11 @@ SpotLight.prototype = Object.assign( Object.create( Light.prototype ), {
 	}
 
 } );
+
+/**
+ * @author alteredq / http://alteredqualia.com/
+ * @author arose / http://github.com/arose
+ */
 
 function OrthographicCamera( left, right, top, bottom, near, far ) {
 
@@ -24538,6 +25076,10 @@ OrthographicCamera.prototype = Object.assign( Object.create( Camera.prototype ),
 
 } );
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function DirectionalLightShadow( ) {
 
 	LightShadow.call( this, new OrthographicCamera( - 5, 5, 5, - 5, 0.5, 500 ) );
@@ -24549,6 +25091,11 @@ DirectionalLightShadow.prototype = Object.assign( Object.create( LightShadow.pro
 	constructor: DirectionalLightShadow
 
 } );
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ */
 
 function DirectionalLight( color, intensity ) {
 
@@ -24584,6 +25131,10 @@ DirectionalLight.prototype = Object.assign( Object.create( Light.prototype ), {
 	}
 
 } );
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
 
 function Scene () {
 
@@ -25047,6 +25598,16 @@ Object.assign( Interpolant.prototype, {
 
 } );
 
+/**
+ * Fast and simple cubic spline interpolant.
+ *
+ * It was derived from a Hermitian construction setting the first derivative
+ * at each sample position to the linear slope between neighboring positions
+ * over their parameter interval.
+ *
+ * @author tschw
+ */
+
 function CubicInterpolant(
 		parameterPositions, sampleValues, sampleSize, resultBuffer ) {
 
@@ -25190,6 +25751,10 @@ CubicInterpolant.prototype =
 
 } );
 
+/**
+ * @author tschw
+ */
+
 function LinearInterpolant(
 		parameterPositions, sampleValues, sampleSize, resultBuffer ) {
 
@@ -25228,6 +25793,14 @@ LinearInterpolant.prototype =
 	}
 
 } );
+
+/**
+ *
+ * Interpolant that evaluates to the sample value at the position preceeding
+ * the parameter.
+ *
+ * @author tschw
+ */
 
 function DiscreteInterpolant(
 		parameterPositions, sampleValues, sampleSize, resultBuffer ) {
@@ -25628,6 +26201,16 @@ function KeyframeTrackConstructor( name, times, values, interpolation ) {
 
 }
 
+/**
+ *
+ * A Track of vectored keyframe values.
+ *
+ *
+ * @author Ben Houston / http://clara.io/
+ * @author David Sarno / http://lighthaus.us/
+ * @author tschw
+ */
+
 function VectorKeyframeTrack( name, times, values, interpolation ) {
 
 	KeyframeTrackConstructor.call( this, name, times, values, interpolation );
@@ -25646,6 +26229,12 @@ VectorKeyframeTrack.prototype =
 	// DefaultInterpolation is inherited
 
 } );
+
+/**
+ * Spherical linear unit quaternion interpolant.
+ *
+ * @author tschw
+ */
 
 function QuaternionLinearInterpolant(
 		parameterPositions, sampleValues, sampleSize, resultBuffer ) {
@@ -25683,6 +26272,15 @@ QuaternionLinearInterpolant.prototype =
 
 } );
 
+/**
+ *
+ * A Track of quaternion keyframe values.
+ *
+ * @author Ben Houston / http://clara.io/
+ * @author David Sarno / http://lighthaus.us/
+ * @author tschw
+ */
+
 function QuaternionKeyframeTrack( name, times, values, interpolation ) {
 
 	KeyframeTrackConstructor.call( this, name, times, values, interpolation );
@@ -25711,6 +26309,15 @@ QuaternionKeyframeTrack.prototype =
 
 } );
 
+/**
+ *
+ * A Track of numeric keyframe values.
+ *
+ * @author Ben Houston / http://clara.io/
+ * @author David Sarno / http://lighthaus.us/
+ * @author tschw
+ */
+
 function NumberKeyframeTrack( name, times, values, interpolation ) {
 
 	KeyframeTrackConstructor.call( this, name, times, values, interpolation );
@@ -25729,6 +26336,16 @@ NumberKeyframeTrack.prototype =
 	// DefaultInterpolation is inherited
 
 } );
+
+/**
+ *
+ * A Track that interpolates Strings
+ *
+ *
+ * @author Ben Houston / http://clara.io/
+ * @author David Sarno / http://lighthaus.us/
+ * @author tschw
+ */
 
 function StringKeyframeTrack( name, times, values, interpolation ) {
 
@@ -25751,6 +26368,16 @@ StringKeyframeTrack.prototype =
 	InterpolantFactoryMethodSmooth: undefined
 
 } );
+
+/**
+ *
+ * A Track of Boolean keyframe values.
+ *
+ *
+ * @author Ben Houston / http://clara.io/
+ * @author David Sarno / http://lighthaus.us/
+ * @author tschw
+ */
 
 function BooleanKeyframeTrack( name, times, values ) {
 
@@ -25777,6 +26404,16 @@ BooleanKeyframeTrack.prototype =
 
 } );
 
+/**
+ *
+ * A Track of keyframe values that represent color.
+ *
+ *
+ * @author Ben Houston / http://clara.io/
+ * @author David Sarno / http://lighthaus.us/
+ * @author tschw
+ */
+
 function ColorKeyframeTrack( name, times, values, interpolation ) {
 
 	KeyframeTrackConstructor.call( this, name, times, values, interpolation );
@@ -25799,6 +26436,16 @@ ColorKeyframeTrack.prototype =
 	// However, this is the place for color space parameterization.
 
 } );
+
+/**
+ *
+ * A timed sequence of keyframes for a specific property.
+ *
+ *
+ * @author Ben Houston / http://clara.io/
+ * @author David Sarno / http://lighthaus.us/
+ * @author tschw
+ */
 
 function KeyframeTrack( name, times, values, interpolation ) {
 
@@ -25933,6 +26580,14 @@ Object.assign( KeyframeTrack, {
 	}
 
 } );
+
+/**
+ *
+ * Reusable set of Tracks that represent an animation.
+ *
+ * @author Ben Houston / http://clara.io/
+ * @author David Sarno / http://lighthaus.us/
+ */
 
 function AnimationClip( name, duration, tracks ) {
 
@@ -26280,6 +26935,10 @@ Object.assign( AnimationClip, {
 
 } );
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function BufferGeometryLoader( manager ) {
 
 	this.manager = ( manager !== undefined ) ? manager : DefaultLoadingManager;
@@ -26372,6 +27031,11 @@ Object.assign( BufferGeometryLoader.prototype, {
 	}
 
 } );
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ */
 
 function JSONLoader( manager ) {
 
@@ -26906,6 +27570,11 @@ Object.assign( JSONLoader.prototype, {
 	}
 
 } );
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author Mugen87 / https://github.com/Mugen87
+ */
 
 function WireframeGeometry( geometry ) {
 
@@ -28983,6 +29652,30 @@ var ShapeUtils = {
 
 };
 
+/**
+ * @author zz85 / http://www.lab4games.net/zz85/blog
+ *
+ * Creates extruded geometry from a path shape.
+ *
+ * parameters = {
+ *
+ *  curveSegments: <int>, // number of points on the curves
+ *  steps: <int>, // number of points for z-side extrusions / used for subdividing segments of extrude spline too
+ *  amount: <int>, // Depth to extrude the shape
+ *
+ *  bevelEnabled: <bool>, // turn on bevel
+ *  bevelThickness: <float>, // how deep into the original shape bevel goes
+ *  bevelSize: <float>, // how far from shape outline is bevel
+ *  bevelSegments: <int>, // number of bevel layers
+ *
+ *  extrudePath: <THREE.Curve> // curve to extrude shape along
+ *  frames: <Object> // containing arrays of tangents, normals, binormals
+ *
+ *  uvGenerator: <Object> // object that provides UV generator functions
+ *
+ * }
+ **/
+
 function ExtrudeGeometry( shapes, options ) {
 
 	if ( typeof( shapes ) === "undefined" ) {
@@ -29659,6 +30352,25 @@ ExtrudeGeometry.WorldUVGenerator = {
 	}
 };
 
+/**
+ * @author zz85 / http://www.lab4games.net/zz85/blog
+ * @author alteredq / http://alteredqualia.com/
+ *
+ * Text = 3D Text
+ *
+ * parameters = {
+ *  font: <THREE.Font>, // font
+ *
+ *  size: <float>, // size of the text
+ *  height: <float>, // thickness to extrude text
+ *  curveSegments: <int>, // number of points on the curves
+ *
+ *  bevelEnabled: <bool>, // turn on bevel
+ *  bevelThickness: <float>, // how deep into text bevel goes
+ *  bevelSize: <float> // how far from text outline is bevel
+ * }
+ */
+
 function TextGeometry( text, parameters ) {
 
 	parameters = parameters || {};
@@ -29699,6 +30411,13 @@ TextGeometry.prototype.constructor = TextGeometry;
  * @author bhouston / http://clara.io
  */
 
+// points - to create a closed torus, one must use a set of points
+//    like so: [ a, b, c, d, a ], see first is the same as last.
+// segments - the number of circumference segments to create
+// phiStart - the starting radian
+// phiLength - the radian (0 to 2PI) range of the lathed section
+//    2PI is a closed lathe, less than 2PI is a portion.
+
 function LatheGeometry( points, segments, phiStart, phiLength ) {
 
 	Geometry.call( this );
@@ -29719,6 +30438,10 @@ function LatheGeometry( points, segments, phiStart, phiLength ) {
 
 LatheGeometry.prototype = Object.create( Geometry.prototype );
 LatheGeometry.prototype.constructor = LatheGeometry;
+
+/**
+ * @author Mugen87 / https://github.com/Mugen87
+ */
 
 function LatheBufferGeometry( points, segments, phiStart, phiLength ) {
 
@@ -30034,6 +30757,11 @@ function ShapeBufferGeometry( shapes, curveSegments ) {
 ShapeBufferGeometry.prototype = Object.create( BufferGeometry.prototype );
 ShapeBufferGeometry.prototype.constructor = ShapeBufferGeometry;
 
+/**
+ * @author WestLangley / http://github.com/WestLangley
+ * @author Mugen87 / https://github.com/Mugen87
+ */
+
 function EdgesGeometry( geometry, thresholdAngle ) {
 
 	BufferGeometry.call( this );
@@ -30236,6 +30964,10 @@ var Geometries = Object.freeze({
 	BoxGeometry: BoxGeometry,
 	BoxBufferGeometry: BoxBufferGeometry
 });
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
 
 function ObjectLoader( manager ) {
 
@@ -31033,6 +31765,41 @@ function CubicBezier( t, p0, p1, p2, p3 ) {
 
 }
 
+/**
+ * @author zz85 / http://www.lab4games.net/zz85/blog
+ * Extensible curve object
+ *
+ * Some common of Curve methods
+ * .getPoint(t), getTangent(t)
+ * .getPointAt(u), getTangentAt(u)
+ * .getPoints(), .getSpacedPoints()
+ * .getLength()
+ * .updateArcLengths()
+ *
+ * This following classes subclasses THREE.Curve:
+ *
+ * -- 2d classes --
+ * THREE.LineCurve
+ * THREE.QuadraticBezierCurve
+ * THREE.CubicBezierCurve
+ * THREE.SplineCurve
+ * THREE.ArcCurve
+ * THREE.EllipseCurve
+ *
+ * -- 3d classes --
+ * THREE.LineCurve3
+ * THREE.QuadraticBezierCurve3
+ * THREE.CubicBezierCurve3
+ * THREE.CatmullRomCurve3
+ *
+ * A series of curves can be represented as a THREE.CurvePath
+ *
+ **/
+
+/**************************************************************
+ *	Abstract Curve base class
+ **************************************************************/
+
 function Curve() {}
 
 Curve.prototype = {
@@ -31422,6 +32189,16 @@ LineCurve.prototype.getTangent = function ( t ) {
 	return tangent.normalize();
 
 };
+
+/**
+ * @author zz85 / http://www.lab4games.net/zz85/blog
+ *
+ **/
+
+/**************************************************************
+ *	Curved Path - a curve path is simply a array of connected
+ *  curves, but retains the api of a curve
+ **************************************************************/
 
 function CurvePath() {
 
@@ -31946,6 +32723,17 @@ function Path( points ) {
 Path.prototype = PathPrototype;
 PathPrototype.constructor = Path;
 
+/**
+ * @author zz85 / http://www.lab4games.net/zz85/blog
+ * Defines a 2d shape plane using paths.
+ **/
+
+// STEP 1 Create a path.
+// STEP 2 Turn path into shape.
+// STEP 3 ExtrudeGeometry takes in Shape/Shapes
+// STEP 3a - Extract points from each shape, turn to vertices
+// STEP 3b - Triangulate each shape, add faces.
+
 function Shape() {
 
 	Path.apply( this, arguments );
@@ -32447,6 +33235,10 @@ Object.assign( Font.prototype, {
 
 } );
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 function FontLoader( manager ) {
 
 	this.manager = ( manager !== undefined ) ? manager : DefaultLoadingManager;
@@ -32491,6 +33283,8 @@ Object.assign( FontLoader.prototype, {
 
 } );
 
+// The JSON format object loader is not always included in the Three.js distribution,
+// so we have to first check for it.
 var loaders = null;
 var PATH_PATTERN = /((?:https?:\/\/)?(?:[^/]+\/)+)(\w+)(\.(?:\w+))$/;
 var EXTENSION_PATTERN = /(\.(?:\w+))+$/;
@@ -33219,8 +34013,6 @@ var OperatingSystem = function () {
     this[pre5 + "SHIFT_HOME"] = "CTRLSHIFT_HOME";
     this[pre5 + "_END"] = "CTRL_END";
     this[pre5 + "SHIFT_END"] = "CTRLSHIFT_END";
-
-    this._deadKeyState = "";
   }
 
   createClass(OperatingSystem, [{
@@ -33229,8 +34021,7 @@ var OperatingSystem = function () {
       var key = evt.keyCode;
       if (key !== Keys.CTRL && key !== Keys.ALT && key !== Keys.META_L && key !== Keys.META_R && key !== Keys.SHIFT) {
 
-        var oldDeadKeyState = this._deadKeyState,
-            commandName = this._deadKeyState;
+        var commandName = codePage.deadKeyState;
 
         if (evt.ctrlKey) {
           commandName += "CTRL";
@@ -33244,7 +34035,7 @@ var OperatingSystem = function () {
         if (evt.shiftKey) {
           commandName += "SHIFT";
         }
-        if (commandName === this._deadKeyState) {
+        if (commandName === codePage.deadKeyState) {
           commandName += "NORMAL";
         }
 
@@ -33261,131 +34052,146 @@ var Windows = new OperatingSystem("Windows", "CTRL", "CTRL", "CTRL_y", "", "HOME
 
 var macOS = new OperatingSystem("macOS", "META", "ALT", "METASHIFT_z", "META", "LEFTARROW", "RIGHTARROW", "META", "UPARROW", "DOWNARROW");
 
-var CodePage = function CodePage(codePageName, lang, options) {
-  classCallCheck(this, CodePage);
+var CodePage = function () {
+  function CodePage(codePageName, lang, options) {
+    classCallCheck(this, CodePage);
 
-  this.name = codePageName;
-  this.language = lang;
+    this.name = codePageName;
+    this.language = lang;
 
-  var commands = {
-    NORMAL: {
-      "65": "a",
-      "66": "b",
-      "67": "c",
-      "68": "d",
-      "69": "e",
-      "70": "f",
-      "71": "g",
-      "72": "h",
-      "73": "i",
-      "74": "j",
-      "75": "k",
-      "76": "l",
-      "77": "m",
-      "78": "n",
-      "79": "o",
-      "80": "p",
-      "81": "q",
-      "82": "r",
-      "83": "s",
-      "84": "t",
-      "85": "u",
-      "86": "v",
-      "87": "w",
-      "88": "x",
-      "89": "y",
-      "90": "z"
-    },
-    SHIFT: {
-      "65": "A",
-      "66": "B",
-      "67": "C",
-      "68": "D",
-      "69": "E",
-      "70": "F",
-      "71": "G",
-      "72": "H",
-      "73": "I",
-      "74": "J",
-      "75": "K",
-      "76": "L",
-      "77": "M",
-      "78": "N",
-      "79": "O",
-      "80": "P",
-      "81": "Q",
-      "82": "R",
-      "83": "S",
-      "84": "T",
-      "85": "U",
-      "86": "V",
-      "87": "W",
-      "88": "X",
-      "89": "Y",
-      "90": "Z"
+    var commands = {
+      NORMAL: {
+        "65": "a",
+        "66": "b",
+        "67": "c",
+        "68": "d",
+        "69": "e",
+        "70": "f",
+        "71": "g",
+        "72": "h",
+        "73": "i",
+        "74": "j",
+        "75": "k",
+        "76": "l",
+        "77": "m",
+        "78": "n",
+        "79": "o",
+        "80": "p",
+        "81": "q",
+        "82": "r",
+        "83": "s",
+        "84": "t",
+        "85": "u",
+        "86": "v",
+        "87": "w",
+        "88": "x",
+        "89": "y",
+        "90": "z"
+      },
+      SHIFT: {
+        "65": "A",
+        "66": "B",
+        "67": "C",
+        "68": "D",
+        "69": "E",
+        "70": "F",
+        "71": "G",
+        "72": "H",
+        "73": "I",
+        "74": "J",
+        "75": "K",
+        "76": "L",
+        "77": "M",
+        "78": "N",
+        "79": "O",
+        "80": "P",
+        "81": "Q",
+        "82": "R",
+        "83": "S",
+        "84": "T",
+        "85": "U",
+        "86": "V",
+        "87": "W",
+        "88": "X",
+        "89": "Y",
+        "90": "Z"
+      }
+    };
+
+    for (var key in options) {
+      commands[key] = Object.assign({}, commands[key], options[key]);
     }
-  };
 
-  for (var key in options) {
-    commands[key] = Object.assign({}, commands[key], options[key]);
-  }
-
-  var char, code, cmdName;
-  for (var i = 0; i <= 9; ++i) {
-    code = Keys["NUMPAD" + i];
-    commands.NORMAL[code] = i.toString();
-  }
-
-  commands.NORMAL[Keys.MULTIPLY] = "*";
-  commands.NORMAL[Keys.ADD] = "+";
-  commands.NORMAL[Keys.SUBTRACT] = "-";
-  commands.NORMAL[Keys.DECIMALPOINT] = ".";
-  commands.NORMAL[Keys.DIVIDE] = "/";
-
-  this.keyNames = {};
-  this.commandNames = [];
-  for (char in Keys) {
-    code = Keys[char];
-    if (!isNaN(code)) {
-      this.keyNames[code] = char;
+    var char, code, cmdName;
+    for (var i = 0; i <= 9; ++i) {
+      code = Keys["NUMPAD" + i];
+      commands.NORMAL[code] = i.toString();
     }
-  }
 
-  function overwriteText(txt, prim, lines) {
-    prim.selectedText = txt;
-  }
+    commands.NORMAL[Keys.MULTIPLY] = "*";
+    commands.NORMAL[Keys.ADD] = "+";
+    commands.NORMAL[Keys.SUBTRACT] = "-";
+    commands.NORMAL[Keys.DECIMALPOINT] = ".";
+    commands.NORMAL[Keys.DIVIDE] = "/";
 
-  for (var type in commands) {
-    var codes = commands[type];
-    if ((typeof codes === "undefined" ? "undefined" : _typeof(codes)) === "object") {
-      for (code in codes) {
-        if (code.indexOf("_") > -1) {
-          var parts = code.split(' '),
-              browser = parts[0];
-          code = parts[1];
-          char = commands.NORMAL[code];
-          cmdName = browser + "_" + type + " " + char;
-        } else {
-          char = commands.NORMAL[code];
-          cmdName = type + "_" + char;
-        }
-        this.commandNames.push(cmdName);
+    this.keyNames = {};
+    this.commandNames = [];
+    for (char in Keys) {
+      code = Keys[char];
+      if (!isNaN(code)) {
         this.keyNames[code] = char;
-        var func = codes[code];
-        if (typeof func !== "function") {
-          func = overwriteText.bind(null, func);
-        }
-        this[cmdName] = func;
       }
     }
+
+    function overwriteText(txt, prim, lines) {
+      prim.selectedText = txt;
+    }
+
+    for (var type in commands) {
+      var codes = commands[type];
+      if ((typeof codes === "undefined" ? "undefined" : _typeof(codes)) === "object") {
+        for (code in codes) {
+          if (code.indexOf("_") > -1) {
+            var parts = code.split(' '),
+                browser = parts[0];
+            code = parts[1];
+            char = commands.NORMAL[code];
+            cmdName = browser + "_" + type + " " + char;
+          } else {
+            char = commands.NORMAL[code];
+            cmdName = type + "_" + char;
+          }
+          this.commandNames.push(cmdName);
+          this.keyNames[code] = char;
+          var func = codes[code];
+          if (typeof func !== "function") {
+            func = overwriteText.bind(null, func);
+          }
+          this[cmdName] = func.bind(this);
+        }
+      }
+    }
+
+    this.lastDeadKeyState = this.deadKeyState = "";
   }
-};
+
+  createClass(CodePage, [{
+    key: "resetDeadKeyState",
+    value: function resetDeadKeyState() {
+      if (this.deadKeyState === this.lastDeadKeyState) {
+        this.deadKeyState = "";
+      }
+    }
+  }]);
+  return CodePage;
+}();
 
 
 
 CodePage.DEAD = function (key) {
   return function (prim) {
-    prim.setDeadKeyState("DEAD" + key);
+    this.lastDeadKeyState = this.deadKeyState;
+    this.deadKeyState = "DEAD" + key;
   };
 };
 
@@ -33751,26 +34557,23 @@ var Keyboard = function (_InputProcessor) {
     _this._operatingSystem = null;
     _this.browser = isChrome ? "CHROMIUM" : isFirefox ? "FIREFOX" : isIE ? "IE" : isOpera ? "OPERA" : isSafari ? "SAFARI" : "UNKNOWN";
     _this._codePage = null;
+    _this.resetDeadKeyState = function () {
+      return _this.codePage.resetDeadKeyState();
+    };
     return _this;
   }
 
   createClass(Keyboard, [{
-    key: "dispatchEvent",
-    value: function dispatchEvent(evt) {
-      this.setButton(evt.keyCode, evt.type === "keydown");
-    }
-  }, {
-    key: "doTyping",
-    value: function doTyping(elem, evt) {
-      if (elem && elem.execCommand && this.operatingSystem && this.browser && this.codePage) {
-        var oldDeadKeyState = this.operatingSystem._deadKeyState,
-            cmdName = this.operatingSystem.makeCommandName(evt, this.codePage);
-        if (elem.execCommand(this.browser, this.codePage, cmdName)) {
-          evt.preventDefault();
-        }
-        if (this.operatingSystem._deadKeyState === oldDeadKeyState) {
-          this.operatingSystem._deadKeyState = "";
-        }
+    key: "consumeEvent",
+    value: function consumeEvent(evt) {
+      var isKeyDown = evt.type === "keydown";
+      this.setButton(evt.keyCode, isKeyDown);
+      if (isKeyDown) {
+        evt.cmdName = this.operatingSystem.makeCommandName(evt, this.codePage);
+        evt.altCmdName = this.browser + "_" + evt.cmdName;
+        evt.cmdText = this.codePage[evt.cmdName];
+        evt.altCmdText = this.codePage[evt.altCmdName];
+        evt.resetDeadKeyState = this.resetDeadKeyState;
       }
     }
   }, {
@@ -34484,6 +35287,17 @@ var SensorSample = function () {
  * limitations under the License.
  */
 
+/**
+ * An implementation of a simple complementary filter, which fuses gyroscope and accelerometer data from the 'devicemotion' event.
+ *
+ * Accelerometer data is very noisy, but stable over the long term. Gyroscope data is smooth, but tends to drift over the long term.
+ *
+ * This fusion is relatively simple:
+ * 1. Get orientation estimates from accelerometer by applying a low-pass filter on that data.
+ * 2. Get orientation estimates from gyroscope by integrating over time.
+ * 3. Combine the two estimates, weighing (1) in the long term, but (2) for the short term.
+ */
+
 var ComplementaryFilter = function () {
   function ComplementaryFilter(kFilter) {
     classCallCheck(this, ComplementaryFilter);
@@ -35061,6 +35875,10 @@ var Record = function (_Obj) {
   }]);
   return Record;
 }(Obj);
+
+/*
+  A collection of all the recorded state values at a single point in time.
+*/
 
 var Frame = function () {
   createClass(Frame, null, [{
@@ -35936,6 +36754,8 @@ var FPSInput = function (_EventDispatcher) {
               emissive: highlight
             }));
 
+            ptr.forward(_this);
+
             _this.pointers.push(ptr);
             _this.options.scene.add(ptr);
           } else {
@@ -35989,12 +36809,16 @@ var FPSInput = function (_EventDispatcher) {
 
     _this.head = new Pointer("GazePointer", 0xffff00, 0x0000ff, 0.8, [_this.VR], [_this.Mouse, _this.Touch, _this.Keyboard], _this.options);
 
+    _this.head.forward(_this);
+
     _this.head.rotation.order = "YXZ";
     _this.head.useGaze = _this.options.useGaze;
     _this.pointers.push(_this.head);
     _this.options.scene.add(_this.head);
 
     _this.mousePointer = new Pointer("MousePointer", 0xff0000, 0x00ff00, 1, [_this.Mouse], null, _this.options);
+
+    _this.mousePointer.forward(_this);
     _this.mousePointer.unproject = new Matrix4();
     _this.pointers.push(_this.mousePointer);
     _this.head.add(_this.mousePointer);
@@ -36057,12 +36881,8 @@ var FPSInput = function (_EventDispatcher) {
       this.head.showPointer = this.VR.hasOrientation && this.options.showHeadPointer;
       this.mousePointer.showPointer = (this.hasMouse || this.hasGamepad) && !this.hasMotionControllers;
 
-      if (this.Keyboard) {
-        this.Keyboard.enabled = this.Touch.enabled = this.Mouse.enabled = !this.hasMotionControllers;
-      }
-
-      if (this.Gamepad_0) {
-        this.Gamepad_0.enabled = !this.hasMotionControllers;
+      if (this.hasTouch) {
+        this.Touch.enabled = !this.hasMotionControllers;
       }
 
       this.updateStage(dt);
@@ -36176,11 +36996,7 @@ var FPSInput = function (_EventDispatcher) {
     key: "resolvePicking",
     value: function resolvePicking(objects) {
       for (var i = 0; i < this.pointers.length; ++i) {
-        var ptr = this.pointers[i],
-            hit = ptr.resolvePicking(objects);
-        if (hit) {
-          return hit;
-        }
+        this.pointers[i].resolvePicking(objects);
       }
     }
   }, {
@@ -36218,6 +37034,10 @@ var FPSInput = function (_EventDispatcher) {
   }]);
   return FPSInput;
 }(EventDispatcher);
+
+
+
+FPSInput.EVENTS = Pointer.EVENTS.slice();
 
 function number(min, max, power) {
   power = power || 1;
@@ -37236,6 +38056,12 @@ WebGLUniforms.seqWithValue = function( seq, values ) {
 
 };
 
+/**
+ * @author alteredq / http://alteredqualia.com/
+ * @author mrdoob / http://mrdoob.com/
+ * @author mikael emtinger / http://gomo.se/
+ */
+
 var ShaderLib = {
 
 	basic: {
@@ -37441,6 +38267,10 @@ ShaderLib.physical = {
 	fragmentShader: ShaderChunk.meshphysical_frag
 
 };
+
+/**
+ * @author bhouston / http://clara.io
+ */
 
 function Box2( min, max ) {
 
@@ -37655,6 +38485,11 @@ Box2.prototype = {
 	}
 
 };
+
+/**
+ * @author mikael emtinger / http://gomo.se/
+ * @author alteredq / http://alteredqualia.com/
+ */
 
 function LensFlarePlugin( renderer, flares ) {
 
@@ -38034,6 +38869,11 @@ function LensFlarePlugin( renderer, flares ) {
 
 }
 
+/**
+ * @author mikael emtinger / http://gomo.se/
+ * @author alteredq / http://alteredqualia.com/
+ */
+
 function SpritePlugin( renderer, sprites ) {
 
 	var gl = renderer.context;
@@ -38403,6 +39243,17 @@ function SpritePlugin( renderer, sprites ) {
 
 }
 
+/**
+ * @author szimek / https://github.com/szimek/
+ * @author alteredq / http://alteredqualia.com/
+ * @author Marius Kintel / https://github.com/kintel
+ */
+
+/*
+ In options, we can specify:
+ * Texture parameters for an auto-generated target texture
+ * depthBuffer/stencilBuffer: Booleans to indicate if we should generate these buffers
+*/
 function WebGLRenderTarget( width, height, options ) {
 
 	this.uuid = _Math.generateUUID();
@@ -38481,6 +39332,12 @@ WebGLRenderTarget.prototype = {
 };
 
 Object.assign( WebGLRenderTarget.prototype, EventDispatcher.prototype );
+
+/**
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ * @author bhouston / http://clara.io
+ */
 
 function Frustum( p0, p1, p2, p3, p4, p5 ) {
 
@@ -42907,6 +43764,14 @@ function WebGLClipping() {
 
 }
 
+/**
+ * @author supereggbert / http://www.paulbrunt.co.uk/
+ * @author mrdoob / http://mrdoob.com/
+ * @author alteredq / http://alteredqualia.com/
+ * @author szimek / https://github.com/szimek/
+ * @author tschw
+ */
+
 function WebGLRenderer( parameters ) {
 
 	console.log( 'THREE.WebGLRenderer', REVISION );
@@ -45774,6 +46639,8 @@ var BrowserEnvironment = function (_EventDispatcher) {
 
     _this.options.foregroundColor = _this.options.foregroundColor || complementColor(new Color(_this.options.backgroundColor)).getHex();
 
+    _this.deltaTime = 1;
+
     _this.network = null;
 
     if (_this.options.nonstandardIPD !== null) {
@@ -45791,25 +46658,57 @@ var BrowserEnvironment = function (_EventDispatcher) {
       }
     };
 
+    var missedFrames = 0;
     var update = function update(dt) {
       dt *= MILLISECONDS_TO_SECONDS;
-      _this.input.update(dt);
-      doPicking();
-      moveGround();
-      moveUI();
-      if (_this.network) {
-        _this.network.update(dt);
-      }
+      if (dt > 0) {
+        var fps = Math.round(1 / dt);
+        dt = 1 / fps;
+        _this.deltaTime = Math.min(_this.deltaTime, dt);
+        var numFrames = dt / _this.deltaTime;
+        if (numFrames > 1) {
+          missedFrames += numFrames;
+          if (numFrames > 10) {
+            // if we missed way too many frames in one go, just update once, otherwise we'll end up locking up the system.
+            numFrames = 1;
+          }
+        } else if (missedFrames > 0) {
+          missedFrames -= 0.1;
+        }
 
-      _this.emit("update");
+        if (missedFrames >= 10) {
+          console.warn("too many missed frames.", _this.deltaTime, dt, numFrames, missedFrames);
+          _this.deltaTime = dt;
+          missedFrames = 0;
+        }
+
+        updateFade(dt);
+        for (var frame = 0; frame < numFrames; ++frame) {
+          _this.input.update(_this.deltaTime);
+
+          if (frame === 0) {
+            doPicking();
+            moveGround();
+            moveUI();
+          }
+
+          try {
+            _this.emit("update");
+          } catch (exp) {
+            // don't let user script kill the runtime
+            console.error("User update errored", exp);
+          }
+
+          if (frame === 0 && _this.network) {
+            _this.network.update(dt);
+          }
+        }
+      }
     };
 
     var doPicking = function doPicking() {
       updateAll();
-      var hit = _this.input.resolvePicking(_this.scene);
-      if (hit && hit.object.isSurface) {
-        _this.selectControl(hit);
-      }
+      _this.input.resolvePicking(_this.scene);
     };
 
     var moveGround = function moveGround() {
@@ -46024,29 +46923,65 @@ var BrowserEnvironment = function (_EventDispatcher) {
 
     _this.currentControl = null;
 
-    var FADE_SPEED = 0.1;
+    var fadeOutPromise = null,
+        _fadeOutPromiseResolver = null,
+        fadeInPromise = null,
+        _fadeInPromiseResolver = null;
     _this.fadeOut = function () {
-      return new Promise(function (resolve, reject) {
-        var timer = setInterval(function () {
-          _this.fader.material.opacity += FADE_SPEED;
-          if (_this.fader.material.opacity >= 1) {
-            clearInterval(timer);
-            resolve();
-          }
-        }, 10);
-      });
+      if (fadeInPromise) {
+        return Promise.reject("Currently fading in.");
+      }
+      if (!fadeOutPromise) {
+        _this.fader.visible = true;
+        _this.fader.material.opacity = 0;
+        _this.fader.material.needsUpdate = true;
+        fadeOutPromise = new Promise(function (resolve, reject) {
+          return _fadeOutPromiseResolver = function fadeOutPromiseResolver(obj) {
+            fadeOutPromise = null;
+            _fadeOutPromiseResolver = null;
+            resolve(obj);
+          };
+        });
+      }
+      return fadeOutPromise;
     };
 
     _this.fadeIn = function () {
-      return new Promise(function (resolve, reject) {
-        var timer = setInterval(function () {
-          _this.fader.material.opacity -= FADE_SPEED;
-          if (_this.fader.material.opacity <= 0) {
-            clearInterval(timer);
-            resolve();
+      if (fadeOutPromise) {
+        return Promise.reject("Currently fading out.");
+      }
+      if (!fadeInPromise) {
+        fadeInPromise = new Promise(function (resolve, reject) {
+          return _fadeInPromiseResolver = function fadeInPromiseResolver(obj) {
+            fadeInPromise = null;
+            _fadeInPromiseResolver = null;
+            _this.fader.visible = false;
+            resolve(obj);
+          };
+        });
+      }
+      return fadeInPromise;
+    };
+
+    var updateFade = function updateFade(dt) {
+      if (fadeOutPromise || fadeInPromise) {
+        var m = _this.fader.material,
+            f = _this.options.fadeRate * dt;
+        m.needsUpdate = true;
+        if (fadeOutPromise) {
+          m.opacity += f;
+          if (1 <= m.opacity) {
+            m.opacity = 1;
+            _fadeOutPromiseResolver();
           }
-        }, 10);
-      });
+        } else {
+          m.opacity -= f;
+          if (m.opacity <= 0) {
+            m.opacity = 0;
+            _fadeInPromiseResolver();
+          }
+        }
+      }
     };
 
     _this.teleportAvailable = true;
@@ -46056,12 +46991,7 @@ var BrowserEnvironment = function (_EventDispatcher) {
         thunk();
         return Promise.resolve();
       } else if (!check || check()) {
-        _this.fader.visible = true;
-        return _this.fadeOut().then(thunk).then(function () {
-          return _this.fadeIn();
-        }).catch(console.warn.bind(console, "Error while transitioning")).then(function () {
-          return _this.fader.visible = false;
-        });
+        return _this.fadeOut().then(thunk).then(_this.fadeIn).catch(console.warn.bind(console, "Error transitioning"));
       }
     };
 
@@ -46073,43 +47003,39 @@ var BrowserEnvironment = function (_EventDispatcher) {
       }, immediate);
     };
 
-    _this.selectControl = function (hit) {
-      console.log("selectControl", hit);
+    _this.consumeEvent = function (evt) {
+      var obj = evt.hit && evt.hit.object,
+          cancel = evt.type === "exit" || evt.cmdName === "NORMAL_ESCAPE";
+      if (evt.type === "select" || cancel) {
 
-      var obj = hit && hit.object;
+        if (obj !== _this.currentControl || cancel) {
 
-      var evt = {};
-
-      console.log(evt.type, obj);
-
-      if (evt.type === "pointerstart" || evt.type === "gazecomplete") {
-        var ctrl = obj && (obj.surface || obj.button);
-        if (ctrl !== _this.currentControl) {
           if (_this.currentControl) {
+            if (_this.currentControl.lockMovement) {
+              _this.input.Keyboard.enabled = true;
+              _this.input.Mouse.commands.pitch.disabled = _this.input.Mouse.commands.heading.disabled = _this.input.VR.isPresenting;
+            }
             _this.currentControl.blur();
-            _this.input.Mouse.commands.pitch.disabled = _this.input.Mouse.commands.heading.disabled = false;
+            _this.currentControl = null;
           }
-          _this.currentControl = ctrl;
-          if (_this.currentControl) {
+
+          if (!cancel && obj.isSurface) {
+            _this.currentControl = obj;
             _this.currentControl.focus();
-            if (obj.surface) {
+            if (_this.currentControl.lockMovement) {
+              _this.input.Keyboard.enabled = false;
               _this.input.Mouse.commands.pitch.disabled = _this.input.Mouse.commands.heading.disabled = !_this.input.VR.isPresenting;
             }
           }
+
+          console.log(_this.input.Keyboard.enabled);
         }
       }
 
-      if (_this.currentControl) {
-        if (_this.currentControl.dispatchEvent) {
-          _this.currentControl.dispatchEvent(evt);
-        } else {
-          console.log(_this.currentControl);
-        }
-      } else if (obj) {
-        var handler = obj["on" + evt.type];
-        if (handler) {
-          handler(evt);
-        }
+      if (obj) {
+        obj.dispatchEvent(evt);
+      } else if (_this.currentControl) {
+        _this.currentControl.dispatchEvent(evt);
       }
     };
 
@@ -46267,7 +47193,8 @@ var BrowserEnvironment = function (_EventDispatcher) {
       _this.renderer.domElement.addEventListener('webglcontextrestored', _this.start, false);
 
       _this.input = new FPSInput(_this.options.fullScreenElement, _this.options);
-      _this.input.addEventListener("zero", _this.zero, false);
+      _this.input.addEventListener("zero", _this.zero);
+      _this.input.route(FPSInput.EVENTS, _this.consumeEvent.bind(_this));
       _this.input.VR.ready.then(function (displays) {
         return displays.forEach(function (display, i) {
           window.addEventListener("vrdisplayactivate", function (evt) {
@@ -46307,20 +47234,14 @@ var BrowserEnvironment = function (_EventDispatcher) {
             }
           }
 
-          if (!_this.lockMovement) {
-            _this.input.Keyboard.dispatchEvent(evt);
-          } else if (_this.currentControl) {
-            _this.currentControl.keyDown(evt);
-          }
+          _this.input.Keyboard.consumeEvent(evt);
+          _this.consumeEvent(evt);
 
           _this.emit("keydown", evt);
         },
             keyUp = function keyUp(evt) {
-          if (!_this.lockMovement) {
-            _this.input.Keyboard.dispatchEvent(evt);
-          } else if (_this.currentControl) {
-            _this.currentControl.keyUp(evt);
-          }
+          _this.input.Keyboard.consumeEvent(evt);
+          _this.consumeEvent(evt);
 
           _this.emit("keyup", evt);
         },
@@ -46415,9 +47336,6 @@ var BrowserEnvironment = function (_EventDispatcher) {
       _this.input.VR.connect(0);
 
       _this.emit("ready");
-      window.dispatchEvent(new CustomEvent("vrbrowserenvironmentready", {
-        detail: _this
-      }));
     });
 
     _this.start = function () {
@@ -46588,6 +47506,9 @@ BrowserEnvironment.DEFAULTS = {
   enableShadows: false,
   shadowMapSize: 1024,
   progress: null,
+  // The rate at which the view fades in and out.
+  fadeRate: 5,
+  // The rate at which the UI shell catches up with the user's movement.
   vicinityFollowRate: 0.02,
   // The acceleration applied to falling objects.
   gravity: 9.8,
@@ -46661,11 +47582,6 @@ var Model = function (_Entity) {
           return _this2;
         });
       });
-    }
-  }, {
-    key: "_pickingObject",
-    get: function get() {
-      return this._model;
     }
   }]);
   return Model;
@@ -47238,6 +48154,7 @@ enableInlineVideo.isWhitelisted = isWhitelisted;
 
 var COUNTER$8 = 0;
 
+// Videos don't auto-play on mobile devices, so let's make them all play whenever we tap the screen.
 var processedVideos = [];
 function findAndFixVideo(evt) {
   var vids = document.querySelectorAll("video");

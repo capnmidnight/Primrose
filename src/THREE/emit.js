@@ -49,3 +49,12 @@ Object3D.prototype.dispatchEvent = EventDispatcher.prototype.dispatchEvent = fun
 
   }
 };
+
+Object3D.prototype.watch = EventDispatcher.prototype.watch = function(child, event) {
+  child.addEventListener(event, this.dispatchEvent.bind(this));
+};
+
+Object3D.prototype.route = EventDispatcher.prototype.route = function(events, listener) {
+  events.forEach((event) =>
+    this.addEventListener(event, listener));
+};

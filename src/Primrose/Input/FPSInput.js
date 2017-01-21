@@ -216,6 +216,8 @@ export default class FPSInput extends EventDispatcher {
               emissive: highlight
             }));
 
+            ptr.forward(this);
+
             this.pointers.push(ptr);
             this.options.scene.add(ptr);
           }
@@ -276,6 +278,8 @@ export default class FPSInput extends EventDispatcher {
       this.Keyboard
     ], this.options);
 
+    this.head.forward(this);
+
     this.head.rotation.order = "YXZ";
     this.head.useGaze = this.options.useGaze;
     this.pointers.push(this.head);
@@ -284,6 +288,8 @@ export default class FPSInput extends EventDispatcher {
     this.mousePointer = new Pointer("MousePointer", 0xff0000, 0x00ff00, 1, [
       this.Mouse
     ], null, this.options);
+
+    this.mousePointer.forward(this);
     this.mousePointer.unproject = new Matrix4();
     this.pointers.push(this.mousePointer);
     this.head.add(this.mousePointer);
@@ -357,12 +363,8 @@ export default class FPSInput extends EventDispatcher {
     this.head.showPointer = this.VR.hasOrientation && this.options.showHeadPointer;
     this.mousePointer.showPointer = (this.hasMouse || this.hasGamepad) && !this.hasMotionControllers;
 
-    if(this.Keyboard) {
-      this.Keyboard.enabled = this.Touch.enabled = this.Mouse.enabled = !this.hasMotionControllers;
-    }
-
-    if (this.Gamepad_0) {
-      this.Gamepad_0.enabled = !this.hasMotionControllers;
+    if(this.hasTouch) {
+      this.Touch.enabled = !this.hasMotionControllers;
     }
 
     this.updateStage(dt);
@@ -490,11 +492,9 @@ export default class FPSInput extends EventDispatcher {
 
   resolvePicking(objects) {
     for (let i = 0; i < this.pointers.length; ++i) {
-      const ptr = this.pointers[i],
-        hit = ptr.resolvePicking(objects);
-      if(hit) {
-        return hit;
-      }
+      this.pointers[i].resolvePicking(objects);
     }
   }
 };
+
+FPSInput.EVENTS = Pointer.EVENTS.slice();

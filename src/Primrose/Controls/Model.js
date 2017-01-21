@@ -33,8 +33,4 @@ export default class Model extends Entity {
     }))
   }
 
-  get _pickingObject() {
-    return this._model;
-  }
-
 };

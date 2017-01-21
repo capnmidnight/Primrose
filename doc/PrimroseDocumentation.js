@@ -2457,7 +2457,7 @@ pliny.event({
 
       pliny.method({
         parent: "Primrose.Controls.Button3D",
-        name: "dispatchEvent",
+        name: "consumeEvent",
         description: "Route events.",
         parameters: [{
           name: "evt",
@@ -3814,11 +3814,11 @@ pliny.property({
       description: "Zero and reset sensor data."
     });
     pliny.event({
-        parent: "Primrose.BrowserEnvironment",
-        name: "update",
-        description: "Fires after every animation update."
-      });
-      pliny.property({
+            parent: "Primrose.BrowserEnvironment",
+            name: "update",
+            description: "Fires after every animation update."
+          });
+          pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "turns",
       type: "Primrose.Angle",
@@ -3908,7 +3908,7 @@ pliny.property({
     });
     pliny.method({
       parent: "Primrose.BrowserEnvironment",
-      name: "selectControl",
+      name: "consumeEvent",
       description: "Handles pointer interactions and differentiates between teleportation and selecting controls on the screen.",
       parameters: [{
         name: "evt",

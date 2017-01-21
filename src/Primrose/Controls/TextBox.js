@@ -102,7 +102,6 @@ export default class TextBox extends Surface {
     // used keys like curly brackets.
     this._browser = isChrome ? "CHROMIUM" : (isFirefox ? "FIREFOX" : (isIE ? "IE" : (isOpera ? "OPERA" : (isSafari ? "SAFARI" : "UNKNOWN"))));
     this._pointer = new Point();
-    this._deadKeyState = "";
     this._history = [];
     this._historyFrame = -1;
     this._topLeftGutter = new Size();
@@ -149,9 +148,6 @@ export default class TextBox extends Surface {
     this.commandPack = this.options.commands || TextEditor;
     this.value = this.options.value;
     this.padding = this.options.padding || 1;
-
-    this.addEventListener("focus", this.render.bind(this), false);
-    this.addEventListener("blur", this.render.bind(this), false);
   }
 
   cursorPageUp(lines, cursor) {
@@ -162,10 +158,6 @@ export default class TextBox extends Surface {
   cursorPageDown(lines, cursor) {
     cursor.incY(this.gridBounds.height, lines);
     this.scrollIntoView(cursor);
-  }
-
-  setDeadKeyState(st) {
-    this._deadKeyState = st || "";
   }
 
   get value() {
@@ -425,29 +417,21 @@ export default class TextBox extends Surface {
   }
 
   keyDown(evt){
-    this.environment.input.Keyboard.doTyping(this, evt);
-  }
-
-  execCommand(browser, codePage, commandName) {
-    if (commandName && this.focused && !this.readOnly) {
-      var altCommandName = browser + "_" + commandName,
-        func = this.commandPack[altCommandName] ||
-        this.commandPack[commandName] ||
-        codePage[altCommandName] ||
-        codePage[commandName];
+    if (this.focused && !this.readOnly) {
+      var func = this.commandPack[evt.altCmdName] ||
+        this.commandPack[evt.cmdName] ||
+        evt.altCmdText ||
+        evt.cmdText;
 
 
       if (func instanceof String || typeof func === "string") {
-        console.log("okay");
+        console.warn("This shouldn't have happened.");
         func = this.commandPack[func] ||
           this.commandPack[func] ||
           func;
       }
 
-      if (func === undefined) {
-        return false;
-      }
-      else {
+      if (func) {
         this.frontCursor.moved = false;
         this.backCursor.moved = false;
         if (func instanceof Function) {
@@ -457,12 +441,14 @@ export default class TextBox extends Surface {
           console.log(func);
           this.selectedText = func;
         }
+        evt.resetDeadKeyState();
+        evt.preventDefault();
+
         if (this.frontCursor.moved && !this.backCursor.moved) {
           this.backCursor.copy(this.frontCursor);
         }
         this.clampScroll();
         this.render();
-        return true;
       }
     }
   }

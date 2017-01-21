@@ -55,12 +55,12 @@ const FORWARD = new Vector3(0, 0, -1),
 
 
 function hasGazeEvent(obj){
-  return !!obj.ongazecomplete || !!obj.onselect || !!obj.onclick ||
+  return obj && (!!obj.ongazecomplete || !!obj.onselect || !!obj.onclick ||
      obj._listeners && (
       (obj._listeners.gazecomplete && obj._listeners.gazecomplete.length > 0) ||
       (obj._listeners.select && obj._listeners.select.length > 0) ||
       (obj._listeners.click && obj._listeners.click.length > 0)) ||
-    obj.button && hasGazeEvent(obj.button);
+    obj.button && hasGazeEvent(obj.button));
 }
 
 export default class Pointer extends Entity {
@@ -112,6 +112,10 @@ export default class Pointer extends Entity {
 
     this.useGaze = this.options.useGaze;
     this.lastHit = null;
+  }
+
+  get pickable() {
+    return false;
   }
 
   get material(){
@@ -172,26 +176,24 @@ export default class Pointer extends Entity {
     this.updateMatrixWorld();
   }
 
-  _check(currentHit) {
-    const lastHit = this.lastHit,
-      obj = currentHit && currentHit.object,
+  _check(curHit) {
+    const curObj = curHit && curHit.object,
+      lastHit = this.lastHit,
       lastObj = lastHit && lastHit.object;
-    if(obj && obj.name === "disk") {
-      console.log(currentHit);
-    }
-    if(obj || lastObj) {
-      const moved = lastHit && currentHit &&
-        (currentHit.point.x !== lastHit.point.x ||
-        currentHit.point.y !== lastHit.point.y ||
-        currentHit.point.z !== lastHit.point.z),
+
+    if(curObj || lastObj) {
+      const moved = lastHit && curHit &&
+        (curHit.point.x !== lastHit.point.x ||
+        curHit.point.y !== lastHit.point.y ||
+        curHit.point.z !== lastHit.point.z),
       dt = lastHit && lastHit.time && (performance.now() - lastHit.time),
-      changed = !lastHit && currentHit ||
-        lastHit && !currentHit ||
-        lastHit && currentHit && currentHit.object.id !== lastHit.object.id,
+      curID = curObj && curObj.id,
+      lastID = lastObj && lastObj.id,
+      changed = curID !== lastID,
       enterEvt = {
         pointer: this,
         buttons: 0,
-        hit: currentHit
+        hit: curHit
       },
       leaveEvt = {
         pointer: this,
@@ -200,16 +202,16 @@ export default class Pointer extends Entity {
       };
 
 
-      if(currentHit){
-        this.gazeInner.position.z = 0.02 - currentHit.distance;
+      if(curHit){
+        this.gazeInner.position.z = 0.02 - curHit.distance;
       }
       else{
          this.gazeInner.position.z = GAZE_RING_DISTANCE;
       }
       this.mesh.position.z = this.gazeInner.position.z - 0.02;
 
-      if(currentHit){
-        currentHit.time = performance.now();
+      if(curHit){
+        curHit.time = performance.now();
 
         this.mesh.material = material("", {
           color: this.highlight,
@@ -218,7 +220,7 @@ export default class Pointer extends Entity {
       }
 
       if(moved){
-        lastHit.point.copy(currentHit.point);
+        lastHit.point.copy(curHit.point);
       }
 
       this.gazeInner.visible = this.useGaze;
@@ -236,67 +238,65 @@ export default class Pointer extends Entity {
       leaveEvt.buttons = enterEvt.buttons;
 
       if(changed){
-        if(lastHit && lastHit.object) {
-          lastHit.object.emit("exit", leaveEvt);
+        if(lastObj) {
+          this.emit("exit", leaveEvt);
         }
-        if(obj) {
-          obj.emit("enter", enterEvt);
+        if(curObj) {
+          this.emit("enter", enterEvt);
         }
       }
 
       let selected = false;
       if(dButtons){
         if(enterEvt.buttons){
-          if(obj) {
-            obj.emit("pointerstart", enterEvt);
+          if(curObj) {
+            this.emit("pointerstart", enterEvt);
           }
           if(lastHit){
             lastHit.time = performance.now();
           }
         }
         else{
-          selected = !!currentHit;
-          if(obj) {
-            obj.emit("pointerend", enterEvt);
+          selected = !!curHit;
+          if(curObj) {
+            this.emit("pointerend", enterEvt);
           }
         }
       }
-      else if(moved && obj) {
-        obj.emit("pointermove", enterEvt);
+      else if(moved && curObj) {
+        this.emit("pointermove", enterEvt);
       }
 
       if(this.useGaze){
         if(changed) {
           if(dt !== null && dt < this.gazeTimeout){
             this.gazeOuter.visible = false;
-            if(obj) {
-              obj.emit("gazecancel", leaveEvt);
-            } else if(lastHit && lastHit.object) {
-              lastHit.object.emit("gazecancel", leaveEvt);
+            if(lastObj) {
+              this.emit("gazecancel", leaveEvt);
             }
           }
-          if(currentHit){
+          if(curHit){
             this.gazeOuter.visible = true;
-            if(obj) {
-              obj.emit("gazestart", enterEvt);
+            if(curObj) {
+              this.emit("gazestart", enterEvt);
             }
           }
         }
         else if(dt !== null) {
           if(dt >= this.gazeTimeout){
             this.gazeOuter.visible = false;
-            selected = !!currentHit;
-            if(obj) {
-              obj.emit("gazecomplete", enterEvt);
+            selected = !!curHit;
+            if(curObj) {
+              this.emit("gazecomplete", enterEvt);
             }
             lastHit.time = null;
           }
-          else if(currentHit && currentHit.object && hasGazeEvent(currentHit.object)){
+          else if(hasGazeEvent(curObj)){
             var p = Math.round(36 * dt / this.gazeTimeout),
               a = 2 * Math.PI * p / 36;
             this.gazeOuter.geometry = ring(GAZE_RING_INNER, GAZE_RING_OUTER, 36, p, 0, a);
-            if(moved && obj) {
-              obj.emit("gazemove", enterEvt);
+            if(moved && curObj) {
+              this.emit("gazemove", enterEvt);
             }
           }
           else{
@@ -305,12 +305,8 @@ export default class Pointer extends Entity {
         }
       }
 
-      if(selected && obj){
-        obj.emit("select", enterEvt);
-      }
-
-      if(changed){
-        this.lastHit = currentHit;
+      if(selected && curObj){
+        this.emit("select", enterEvt);
       }
       return true;
     }
@@ -335,13 +331,37 @@ export default class Pointer extends Entity {
       const hits = this.picker.intersectObject(objects, true);
       for(let i = 0; i < hits.length; ++i) {
         const hit = hits[i];
-        if(hit.object.pickable && this._check(hit)) {
+        let obj = hit.object;
+        const origObj = obj;
+    
+        while(obj && !obj.isEntity) {
+          obj = obj.parent;
+        }
+
+        if(!obj) {
+          obj = origObj;
+        }
+
+        if(obj && !obj.pickable) {
+          obj = null;
+        }
+
+        hit.object = obj;
+
+        if(obj && this._check(hit)) {
+          this.lastHit = hit;
           return hit;
         }
       }
 
       this._check();
+      this.lastHit = null;
     }
+  }
+
+  forward(obj) {
+    Pointer.EVENTS.forEach((event) =>
+      obj.watch(this, event));
   }
 }
 

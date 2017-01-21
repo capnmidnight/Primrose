@@ -128,11 +128,11 @@ export default class Button3D extends Entity {
     this.emit("release", { source: this });
   }
 
-  dispatchEvent(evt) {
+  consumeEvent(evt) {
 
     pliny.method({
       parent: "Primrose.Controls.Button3D",
-      name: "dispatchEvent",
+      name: "consumeEvent",
       description: "Route events.",
       parameters: [{
         name: "evt",

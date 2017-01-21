@@ -206,7 +206,24 @@ export default class Surface extends BaseTextured {
 
     this.subSurfaces = [];
 
+    this.addEventListener("focus", this.render.bind(this));
+    this.addEventListener("blur", this.render.bind(this));
+    this.addEventListener("pointerstart", this.startUV.bind(this));
+    this.addEventListener("pointermove", this.moveUV.bind(this));
+    this.addEventListener("gazemove", this.moveUV.bind(this));
+    this.addEventListener("pointerend", this.endPointer.bind(this));
+    this.addEventListener("gazecomplete", (evt) => {
+      this.startUV(evt);
+      setTimeout(() => this.endPointer(evt), 100);
+    });
+    this.addEventListener("keydown", this.keyDown.bind(this));
+    this.addEventListener("keyup", this.keyUp.bind(this));
+
     this.render();
+  }
+
+  get pickable() {
+    return true;
   }
 
 
@@ -422,7 +439,9 @@ export default class Surface extends BaseTextured {
     var elem = this.focusedElement;
     if (elem && elem !== this) {
       elem[name](evt);
+      return true;
     }
+    return false;
   }
 
   startUV(evt) {
@@ -436,7 +455,10 @@ export default class Surface extends BaseTextured {
       }],
       description: "Hooks up to the window's `mouseDown` and `touchStart` events, with coordinates translated to tangent-space UV coordinates, and propagates it to any of its focused subSurfaces."
     });
-    this._forFocusedSubSurface("startUV", evt);
+    if(!this._forFocusedSubSurface("startUV", evt)){
+      var p = this.mapUV(evt.hit.uv);
+      this.startPointer(p.x, p.y);
+    }
   }
 
   moveUV(evt) {
@@ -450,7 +472,10 @@ export default class Surface extends BaseTextured {
       }],
       description: "Hooks up to the window's `mouseMove` and `touchMove` events, with coordinates translated to tangent-space UV coordinates, and propagates it to any of its focused subSurfaces."
     });
-    this._forFocusedSubSurface("moveUV", evt);
+    if(!this._forFocusedSubSurface("moveUV", evt)) {
+      var p = this.mapUV(evt.hit.uv);
+      this.movePointer(p.x, p.y);
+    }
   }
 
   endPointer(evt) {
@@ -461,18 +486,6 @@ export default class Surface extends BaseTextured {
     });
     this._forFocusedSubSurface("endPointer", evt);
   }
-
-  startUV2(point) {
-    var p = this.mapUV(point);
-    this.startPointer(p.x, p.y);
-  }
-
-  moveUV2(point) {
-    var p = this.mapUV(point);
-    this.movePointer(p.x, p.y);
-  }
-
-
 
   focus() {
     pliny.method({
@@ -601,25 +614,6 @@ export default class Surface extends BaseTextured {
       }
     }
     return result;
-  }
-
-  dispatchEvent2(evt) {
-    switch(evt.type){
-      case "pointerstart":
-        this.startUV(evt.hit.uv);
-      break;
-      case "pointerend":
-        this.endPointer(evt);
-      break;
-      case "pointermove":
-      case "gazemove":
-        this.moveUV(evt.hit.uv);
-      break;
-      case "gazecomplete":
-        this.startUV(evt.hit.uv);
-        setTimeout(() => this.endPointer(evt), 100);
-      break;
-    }
   }
 
   keyDown(evt) {

@@ -15,44 +15,10 @@ export default class Entity extends Object3D {
     this.options = options || {};
     this.name = this.options && this.options.id || "";
     this.ready = this._ready.then(() => this);
-  }
-
-  get disabled() {
-    return this._pickingObject && this._pickingObject.disabled;
-  }
-
-  set disabled(v) {
-    if(this._pickingObject) {
-      this._pickingObject.disabled = v;
-    }
+    this.disabled = false;
   }
 
   get _ready() {
     return Promise.resolve();
-  }
-
-  get _pickingObject() {
-    return this.children[0];
-  }
-
-  _forward(child, event) {
-    child.addEventListener(event, (evt) =>
-      this.dispatchEvent(evt));
-  }
-
-  add(child){
-    super.add(child);
-    if(this._listeners) {
-      for(let event in this._listeners) {
-        this._forward(child, event);
-      }
-    }
-  }
-
-  addEventListener(event, listener) {
-    super.addEventListener(event, listener);
-    this.ready.then(() =>
-      this.children.forEach((child) =>
-        this._forward(child, event)));
   }
 };

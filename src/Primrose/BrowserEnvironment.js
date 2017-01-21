@@ -372,10 +372,7 @@ export default class BrowserEnvironment extends EventDispatcher {
 
     const doPicking = () => {
       updateAll();
-      const hit = this.input.resolvePicking(this.scene);
-      if(hit && hit.object.isSurface) {
-        this.selectControl(hit);
-      }
+      this.input.resolvePicking(this.scene);
     };
 
     const moveGround = () => {
@@ -776,7 +773,7 @@ export default class BrowserEnvironment extends EventDispatcher {
 
     pliny.method({
       parent: "Primrose.BrowserEnvironment",
-      name: "selectControl",
+      name: "consumeEvent",
       description: "Handles pointer interactions and differentiates between teleportation and selecting controls on the screen.",
       parameters: [{
         name: "evt",
@@ -784,47 +781,42 @@ export default class BrowserEnvironment extends EventDispatcher {
         description: "A pointer click event that triggered."
       }]
     });
-    this.selectControl = (hit) => {
-      console.log("selectControl", hit);
+    this.consumeEvent = (evt) => {
+      const obj = evt.hit && evt.hit.object,
+        cancel = evt.type === "exit" || evt.cmdName === "NORMAL_ESCAPE";
+      if(evt.type === "select" || cancel) {
+        
+        if(obj !== this.currentControl || cancel){
 
-      const obj = hit && hit.object;
-
-      const evt = {};
-
-      console.log(evt.type, obj);
-
-      if(evt.type === "pointerstart" || evt.type === "gazecomplete"){
-        const ctrl = obj && (obj.surface || obj.button);
-        if(ctrl !== this.currentControl){
           if(this.currentControl){
+            if(this.currentControl.lockMovement) {
+              this.input.Keyboard.enabled = true;
+              this.input.Mouse.commands.pitch.disabled =
+              this.input.Mouse.commands.heading.disabled = this.input.VR.isPresenting;
+            }
             this.currentControl.blur();
-            this.input.Mouse.commands.pitch.disabled =
-            this.input.Mouse.commands.heading.disabled = false;
+            this.currentControl = null;
           }
-          this.currentControl = ctrl;
-          if(this.currentControl){
+
+          if(!cancel && obj.isSurface){
+            this.currentControl = obj;
             this.currentControl.focus();
-            if(obj.surface){
+            if(this.currentControl.lockMovement) {
+              this.input.Keyboard.enabled = false;
               this.input.Mouse.commands.pitch.disabled =
               this.input.Mouse.commands.heading.disabled = !this.input.VR.isPresenting;
             }
           }
+
+          console.log(this.input.Keyboard.enabled);
         }
       }
 
-      if(this.currentControl){
-        if(this.currentControl.dispatchEvent){
-          this.currentControl.dispatchEvent(evt);
-        }
-        else{
-          console.log(this.currentControl);
-        }
+      if(obj) {
+        obj.dispatchEvent(evt);
       }
-      else if(obj) {
-        const handler = obj["on" + evt.type];
-        if(handler){
-          handler(evt);
-        }
+      else if(this.currentControl){
+        this.currentControl.dispatchEvent(evt);
       }
     };
 
@@ -1031,7 +1023,8 @@ export default class BrowserEnvironment extends EventDispatcher {
         description: "The input manager."
       });
       this.input = new FPSInput(this.options.fullScreenElement, this.options);
-      this.input.addEventListener("zero", this.zero, false);
+      this.input.addEventListener("zero", this.zero);
+      this.input.route(FPSInput.EVENTS, this.consumeEvent.bind(this));
       this.input.VR.ready.then((displays) => displays.forEach((display, i) => {
         window.addEventListener("vrdisplayactivate", (evt) => {
           if(evt.display === display) {
@@ -1124,12 +1117,8 @@ export default class BrowserEnvironment extends EventDispatcher {
               }
             }
 
-            if(!this.lockMovement){
-              this.input.Keyboard.dispatchEvent(evt);
-            }
-            else if(this.currentControl){
-              this.currentControl.keyDown(evt);
-            }
+            this.input.Keyboard.consumeEvent(evt);
+            this.consumeEvent(evt);
 
             pliny.event({
               parent: "Primrose.BrowserEnvironment",
@@ -1140,12 +1129,8 @@ export default class BrowserEnvironment extends EventDispatcher {
           },
 
           keyUp = (evt) => {
-            if(!this.lockMovement){
-              this.input.Keyboard.dispatchEvent(evt);
-            }
-            else if(this.currentControl){
-              this.currentControl.keyUp(evt);
-            }
+            this.input.Keyboard.consumeEvent(evt);
+            this.consumeEvent(evt);
 
             pliny.event({
               parent: "Primrose.BrowserEnvironment",

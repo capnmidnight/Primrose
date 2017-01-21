@@ -42,8 +42,4 @@ export default class Ground extends Entity {
 
     return this._image && this._image.ready || super._ready;
   }
-
-  get _pickingObject() {
-    return this._image && this._image._pickingObject || this.children[0];
-  }
 };
