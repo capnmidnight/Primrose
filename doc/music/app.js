@@ -105,7 +105,6 @@ Board.prototype.select = function(i, evt) {
   }
 };
 
-var lastTime = 0;
 env.addEventListener("ready", function () {
 
   var types = Primrose.Audio.Music.TYPES,
@@ -117,15 +116,12 @@ env.addEventListener("ready", function () {
     board.object.latLon(0, (t - (nTypes - 1) / 2) * 100 / nTypes);
   });
 
-  lastTime = env.currentTime;
   Preloader.hide();
 });
 
 env.addEventListener("update", function(){
-  var dt = env.currentTime - lastTime;
-  lastTime = env.currentTime;
   if(!skipOne){
-    t += dt;
+    t += env.deltaTime;
     if(t > perMeasure){
       t -= perMeasure;
       measure = (measure + 1) % height;

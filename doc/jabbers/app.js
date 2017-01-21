@@ -100,10 +100,7 @@ function Jabber(w, h, s) {
 // downloaded and validated all of model files, and constructed
 // the basic scene hierarchy out of it, the "ready" event is fired,
 // indicating that we may make additional changes to the scene now.
-
-var lastTime = 0;
 env.addEventListener("ready", function () {
-  lastTime = env.currentTime;
   for (var i = 0; i < 100; ++i) {
     var jab = Jabber(
       MIDX / 5,
@@ -116,9 +113,7 @@ env.addEventListener("ready", function () {
 });
 
 env.addEventListener("update", function () {
-  var dt = env.currentTime - lastTime;
-  lastTime = env.currentTime;
   for (var id in jabs) {
-    jabs[id].update(dt);
+    jabs[id].update(env.deltaTime);
   }
 });

@@ -55,9 +55,7 @@ function fixAudio(){
   }
 }
 
-var lastTime = 0;
 env.addEventListener("ready", function(){
-  lastTime = env.currentTime;
   if(isMobile){
     env.options.fullScreenElement.addEventListener("mousedown", fixAudio);
     env.options.fullScreenElement.addEventListener("touchstart", fixAudio);
@@ -96,8 +94,7 @@ function updateObj(obj, dt) {
 };
 
 env.addEventListener("update", function(){
-  var dt = env.currentTime - lastTime;
-  lastTime = env.currentTime;
+  const dt = env.deltaTime;
   for(var i = 0; i < blocks.length; ++i){
     var block = blocks[i];
     TEMP.copy(env.input.head.position)

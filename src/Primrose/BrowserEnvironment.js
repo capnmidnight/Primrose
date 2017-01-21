@@ -278,6 +278,8 @@ export default class BrowserEnvironment extends EventDispatcher {
     this.options.foregroundColor = this.options.foregroundColor || complementColor(new Color(this.options.backgroundColor))
       .getHex();
 
+    this.deltaTime = 1;
+
     pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "network",
@@ -313,22 +315,59 @@ export default class BrowserEnvironment extends EventDispatcher {
       }
     };
 
+    let missedFrames = 0;
     const update = (dt) => {
       dt *= MILLISECONDS_TO_SECONDS;
-      this.input.update(dt);
-      doPicking();
-      moveGround();
-      moveUI();
-      if(this.network){
-        this.network.update(dt);
-      }
+      if(dt > 0) {
+        const fps = Math.round(1 / dt);
+        dt = 1 / fps;
+        this.deltaTime = Math.min(this.deltaTime, dt);
+        let numFrames = dt / this.deltaTime;
+        if(numFrames > 1) {
+          missedFrames += numFrames;
+          if(numFrames > 10) {
+            // if we missed way too many frames in one go, just update once, otherwise we'll end up locking up the system.
+            numFrames = 1;
+          }
+        }
+        else if(missedFrames > 0) {
+          missedFrames -= 0.1;
+        }
 
-      pliny.event({
-        parent: "Primrose.BrowserEnvironment",
-        name: "update",
-        description: "Fires after every animation update."
-      });
-      this.emit("update");
+        if(missedFrames >= 10) {
+          console.warn("too many missed frames.", this.deltaTime, dt, numFrames, missedFrames);
+          this.deltaTime = dt;
+          missedFrames = 0;
+        }
+
+        updateFade(dt);
+        for(let frame = 0; frame < numFrames; ++frame) {
+          this.input.update(this.deltaTime);
+          
+          if(frame === 0) {
+            doPicking();
+            moveGround();
+            moveUI();
+          }
+
+          pliny.event({
+            parent: "Primrose.BrowserEnvironment",
+            name: "update",
+            description: "Fires after every animation update."
+          });
+          try {
+            this.emit("update");
+          }
+          catch(exp){
+            // don't let user script kill the runtime
+            console.error("User update errored", exp);
+          }
+
+          if(frame === 0 && this.network){
+            this.network.update(dt);
+          }
+        }
+      }
     };
 
     const doPicking = () => {

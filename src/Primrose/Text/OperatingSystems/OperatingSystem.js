@@ -78,20 +78,17 @@ export default class OperatingSystem {
     this[pre5 + "SHIFT_HOME"] = "CTRLSHIFT_HOME";
     this[pre5 + "_END"] = "CTRL_END";
     this[pre5 + "SHIFT_END"] = "CTRLSHIFT_END";
-
-    this._deadKeyState = "";
   }
 
   makeCommandName(evt, codePage) {
-    var key = evt.keyCode;
+    const key = evt.keyCode;
     if (key !== Keys.CTRL &&
       key !== Keys.ALT &&
       key !== Keys.META_L &&
       key !== Keys.META_R &&
       key !== Keys.SHIFT) {
 
-      var oldDeadKeyState = this._deadKeyState,
-        commandName = this._deadKeyState;
+      let commandName = codePage.deadKeyState;
 
       if (evt.ctrlKey) {
         commandName += "CTRL";
@@ -105,7 +102,7 @@ export default class OperatingSystem {
       if (evt.shiftKey) {
         commandName += "SHIFT";
       }
-      if (commandName === this._deadKeyState) {
+      if (commandName === codePage.deadKeyState) {
         commandName += "NORMAL";
       }
 

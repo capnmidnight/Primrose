@@ -134,15 +134,24 @@ export default class CodePage {
           if (typeof func !== "function") {
             func = overwriteText.bind(null, func);
           }
-          this[cmdName] = func;
+          this[cmdName] = func.bind(this);
         }
       }
+    }
+
+    this.lastDeadKeyState = this.deadKeyState = "";
+  }
+
+  resetDeadKeyState() {
+    if(this.deadKeyState === this.lastDeadKeyState) {
+      this.deadKeyState = "";
     }
   }
 };
 
 CodePage.DEAD = function (key) {
   return function (prim) {
-    prim.setDeadKeyState("DEAD" + key);
+    this.lastDeadKeyState = this.deadKeyState;
+    this.deadKeyState = "DEAD" + key;
   };
 };

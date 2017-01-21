@@ -1,6 +1,7 @@
 Object.assign(window, Primrose.Random);
 
-var GRASS = "../images/grass.png",
+var SCRIPT_UPDATE_TIME = 1000,
+  GRASS = "../images/grass.png",
   ROCK = "../images/rock.png",
   SAND = "../images/sand.png",
   WATER = "../images/water.png",
@@ -23,8 +24,7 @@ var GRASS = "../images/grass.png",
 
   scriptUpdateTimeout,
   lastScript = null,
-  scriptAnimate = null,
-  lastTime = 0;
+  scriptAnimate = null;
 
 env.addEventListener("ready", function () {
   subScene = hub();
@@ -43,10 +43,7 @@ env.addEventListener("ready", function () {
       value: getSourceCode(isInIFrame)
     })
     .addTo(env.scene)
-    .at(0, env.options.avatarHeight, -2);
-
-  editor.addEventListener("select", editor.focus.bind(editor));
-  editor.addEventListener("exit", editor.blur.bind(editor));
+    .at(0, env.options.avatarHeight, 0);
 
   console.log("INSTRUCTIONS:");
   console.log(" - " + cmdPre + "+E to show/hide editor");
@@ -54,16 +51,12 @@ env.addEventListener("ready", function () {
   console.log(" - Z to reset position/sensor");
   console.log();
 
-  lastTime = env.currentTime;
-
   Preloader.hide();
 });
 
 env.addEventListener("update", function () {
-  var dt = env.currentTime - lastTime;
-  lastTime = env.currentTime;
   if (!scriptUpdateTimeout) {
-    scriptUpdateTimeout = setTimeout(updateScript, 500);
+    scriptUpdateTimeout = setTimeout(updateScript, SCRIPT_UPDATE_TIME)
   }
 
   if (scriptAnimate) {
@@ -74,7 +67,13 @@ env.addEventListener("update", function () {
       wipeScene();
     }
     else {
-      scriptAnimate.call(env, dt);
+      try{
+        scriptAnimate.call(env, env.deltaTime);
+      }
+      catch(exp){
+        scriptAnimate = null;
+        console.error(exp);
+      }
     }
   }
 });
@@ -99,7 +98,7 @@ env.addEventListener("keydown", function (evt) {
   }
 });
 
-window.addEventListener("beforeunload", function (evt) {
+window.addEventListener("_beforeunload", function (evt) {
   return evt.returnValue = "Are you sure you want to leave?";
 }, false);
 
@@ -149,6 +148,7 @@ function updateScript() {
         }
       }
       catch(exp){
+        scriptUpdate = null;
         console.error(exp);
         console.error(newScript);
       }
@@ -188,10 +188,9 @@ function testDemo(scene) {
     MIDX = WIDTH / 2 - 5,
     MIDY = HEIGHT / 2,
     MIDZ = DEPTH / 2,
-    t = 0,
     start = hub()
-    .addTo(scene)
-    .at(-MIDX, 0, -DEPTH - 2);
+      .addTo(scene)
+      .at(-MIDX, 0, -DEPTH - 2);
 
   var balls = [];
 
@@ -209,7 +208,6 @@ function testDemo(scene) {
   }
 
   function update(dt) {
-    t += dt;
     for (var i = 0; i < balls.length; ++i) {
       var ball = balls[i],
         p = ball.position,
