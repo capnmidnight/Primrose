@@ -1,5 +1,7 @@
 import { Vector3 } from "three/src/math/Vector3";
 
+import sphere from "../../live-api/sphere"
+
 const DIFF = new Vector3(),
   MAX_MOVE_DISTANCE = 5,
   MAX_MOVE_DISTANCE_SQ = MAX_MOVE_DISTANCE * MAX_MOVE_DISTANCE,
