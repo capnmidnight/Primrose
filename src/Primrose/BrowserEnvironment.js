@@ -1264,9 +1264,6 @@ export default class BrowserEnvironment extends EventDispatcher {
           description: "Fires after the initial assets have been downloaded and the scene initialized, just before animation starts."
         });
         this.emit("ready");
-        window.dispatchEvent(new CustomEvent("vrbrowserenvironmentready", {
-          detail: this
-        }));
       });
 
 
