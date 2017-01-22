@@ -1,23 +1,37 @@
-KEY:
-* [**Chromium** - The WebVR-enabled builds of Chromium provided by Brandon Jones](https://webvr.info/get-chrome/).
-* [**Chrome** - The latest release version of Google Chrome](https://www.google.com/chrome/)
-* [**Nightly** - The nightly development builds of Mozilla Firefox](https://nightly.mozilla.org/)
-* [**Firefox** - The latest release version of Mozilla Firefox](https://www.mozilla.org/en-US/firefox/products/)
-* [**Gear VR** - The "Samsung Internet for Gear VR" app in the Samsung Store on the Gear VR](http://developer.samsung.com/technical-doc/view.do?v=T000000270L)
-* **Windows** - Windows 10.
-* **Android** - Android 6.0.1 running on the Samsung Galaxy S7.
-* **iOS** - iOS 10.2 running on the iPad Mini 4.
-
-* Open issues
-  * Windows
-    * No known issues!!! It even works surprisingly well in Edge.
-  * iOS
-    * No full screen modes!!! Nothing I can do about that!!!
-  * Android
-    * Gear VR - Works as far as Primrose is concerned, but Samsung's browser for Gear VR currently has a number of defects:
-      * Orientation tracking is pretty bad, making the overall experience very bad.
-
 ## v0.31.0
+
+Over the last year, a lot of work went into making the Primrose WebVR framework much more reliable, easier to use, and with more complete documentation. This is the first CHANGELOG we've written since May 2016, but that doesn't mean we haven't been working. Indeed, the lack of CHANGELOGs has specifically been because of how busy we've been in building Primrose.
+
+The big highlights are:
+* Primrose works on just about any platform you could want.
+* We spent a lot of time getting Video to work on iOS. You can have one video element running at a time, if it's muted. It's better than nothing.
+* We also have pretty good tracking and stereo rendering on iOS now. While iOS doesn't support the HTML5 Full Screen API, it's still pretty usable without it in most Google Cardboard scenarios.
+* One of our clients was featured on <a href="https://www.bloomberg.com/news/articles/2016-12-06/goldman-sachs-alum-turns-to-virtual-reality-to-sell-57-million-mansion">Bloomberg.com</a> for the <a href="http://rex.legend3d.com">real-estate tour app</a> we built for them (hence the iOS focus for so long).
+* It even works on MS Edge, in case you happen to find yourself there for some reason.
+* Firefox is no longer a second-class citizen. If they get motion controller support anytime soon, it will even be the most stable platform for full VR.
+* ES2016 modules, Rollup, and vertically integrating many of the project dependencies have given way to very small download payloads. Some of our demos have been as small as 650KB, with GZIPing getting it even further down to a slender 150KB (of course, your mileage will vary, depending on how many model, texture, and audio assets you load).
+* The documentation is about 80% complete, making us one of the most completely documented WebVR frameworks available.
+
+### The Future
+
+If you have ideas of your own, or are looking for an established open source project to join, <a href="mailto:sean+primrose@notiontheory.com?Subject=Contributing to Primrose">please contact us at NotionTheory</a> and let's chat! We'd like to bring on anyone of any background or experience level, so long as you're willing to learn. The last two years have been a blast and we can't wait to bring more people on board.
+
+Thankfully, there is still a lot of fun code left to be written.
+* Updated Gear VR support and support for Facebook's Carmel browser are right around the corner.
+* We'll be looking to integrate more features in support of Augmented Reality in the near future, both in the areas of GPS tracking and marker tracking. You could theoretically re-build Pokemon GO in Primrose already.
+* We're experimenting with stereo 360 video support for a client right now.
+* As soon as Microsoft releases WebVR for Edge on the Hololens (which everyone expects to be very soon, considering their work on <a href="https://github.com/Microsoft/HoloJS">HoloJS</a>), we'll be there to get your apps running in AR.
+* With Vive announcing <a href="http://www.roadtovr.com/htc-vive-tracker-enables-a-bevy-of-bats-guns-gloves-and-other-tracked-accessories/">the generic tracking puck</a>, we've been <a href="https://www.youtube.com/watch?v=hi9FL66SAo4">experimenting with foot-based UIs</a> and will be incorporating support for using motion controllers on the feet directly.
+* There's still no physics system, as we've not yet built anything that requires it, but it's certainly a desirable thing to have. That would be an excellent area for a new contributor to jump in.
+* Performance is already pretty good just from not doing anything obviously wrong like `new`-ing objects in the render path, but no specific work has gone into optimization yet.
+* The live-programming environment is still a big goal for us, with some exciting prospects for doing research into novel text input systems.
+* The meeting room demo has languished under an expired TokBox account, so now that this big release push is done, we'll be getting back to live, face-to-face teleconferencing with collaborative editing tools.
+* A number of social VR platforms like AltspaceVR and High-Fidelity have JavaScript APIs for building apps that run in-client. Primrose's architecture was designed from the beginning to eventually accommodate them, but we've just not yet done the work.
+* There's a huge opportunity to use Primrose for infographics.
+* We'd love to see some work in AI chatter-bots presented in WebVR.
+
+
+### And now... the CHANGELOG
 * Features
   * Upgrade to Three.js r84.
   * Drastically simplified process for making objects selectable. Just add them to the scene and add event listeners to them! No need to "registerPickableObject" anymore. In fact, it's now gone!
