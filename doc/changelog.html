@@ -8,74 +8,241 @@
 <li><a href="https://www.mozilla.org/en-US/firefox/products/"><strong>Firefox</strong> - The latest release version of Mozilla Firefox</a></li>
 <li><a href="http://developer.samsung.com/technical-doc/view.do?v=T000000270L"><strong>Gear VR</strong> - The &quot;Samsung Internet for Gear VR&quot; app in the Samsung Store on the Gear VR</a></li>
 <li><strong>Windows</strong> - Windows 10.</li>
-<li><strong>Android</strong> - Android 6.0.1 running on the Samsung Galaxy S7</li>
-</ul>
-<h2 id="v0-26-0">v0.26.0</h2>
+<li><strong>Android</strong> - Android 6.0.1 running on the Samsung Galaxy S7.</li>
+<li><p><strong>iOS</strong> - iOS 10.2 running on the iPad Mini 4.</p>
+</li>
+<li><p>Open issues</p>
 <ul>
-<li>Features<ul>
-<li>Vive Motion Controller support.</li>
-<li>Unified movement from gamepads and stage teleporting into one coherent system.</li>
+<li>Windows<ul>
+<li>No known issues!!! It even works surprisingly well in Edge.</li>
 </ul>
 </li>
-<li>Defect Fixes</li>
+<li>iOS<ul>
+<li>No full screen modes!!! Nothing I can do about that!!!</li>
+</ul>
+</li>
+<li>Android<ul>
+<li>Gear VR - Works as far as Primrose is concerned, but Samsung&#39;s browser for Gear VR currently has a number of defects:<ul>
+<li>Orientation tracking is pretty bad, making the overall experience very bad.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="v0-31-0">v0.31.0</h2>
+<ul>
+<li>Features<ul>
+<li>Upgrade to Three.js r84.</li>
+<li>Drastically simplified process for making objects selectable. Just add them to the scene and add event listeners to them! No need to &quot;registerPickableObject&quot; anymore. In fact, it&#39;s now gone!</li>
+<li>Report deltaTime directly from environment variable, rather than through the update function.</li>
+<li>Shadows in the Jabber Yabs demo.</li>
+</ul>
+</li>
+<li>Defect Fixes.<ul>
+<li>Prevent errors in user script from killing the Editor VR demo.</li>
+<li>Fix text editors, which got broken in the v0.30 push for a client.</li>
+<li>Preventing teleporting if the user waggles their input device too much, i.e. they were actually just dragging the mouse to move the view.</li>
+<li>Prevent invisible controls from holding on to input focus.</li>
+</ul>
+</li>
 <li>Admin<ul>
-<li>Cleaned up VR position handling.</li>
-<li>Moved network handling code into its own manager class.</li>
+<li>Fader is no longer using its own timer object, it now gets updated as part of the normal animation process.</li>
 </ul>
 </li>
 </ul>
-<h2 id="v0-25-3">v0.25.3</h2>
+<h2 id="v0-30">v0.30</h2>
 <ul>
 <li>Features<ul>
-<li>HMD position is now visible in remote users, in addition to the previous orientation, for users that have the data available.</li>
-<li>Better pointer graphics, indicating to the user better what is about to happen.<ul>
-<li>Ground pointer is now a flat disk, with the cursor ball above it.</li>
-<li>Ground pointer is limited to a max distance away of 5 meters.</li>
-</ul>
-</li>
-<li>New <a href="index.html#Primrose_Random_ID"><code>Primrose.Random.ID()</code></a> function.</li>
-<li>BrowserEnvironment can now manage the login process on its own. Client apps don&#39;t need to know how it works, they just pass on a user name and password.</li>
+<li>Pass-through camera is back!</li>
+<li>A ready-to-use preloader script.</li>
+<li>A default web server for users importing from NPM.</li>
+<li>Out-of-order eye rendering (for a client).</li>
+<li>new Teleporter tool.</li>
+<li>Configurable UI follow rate.</li>
 </ul>
 </li>
 <li>Defect Fixes<ul>
-<li>When first logging in, if adding one of the remote users fails, it now doesn&#39;t prevent the other users from attempting to load.</li>
-<li>The login form no longer shows before the 3D models have parsed. This was causing an issue where people logging in very quickly were receiving a list of users and attempting to create an avatar out of a model that didn&#39;t yet exist.</li>
-<li>The &quot;close&quot; link on the login form no longer causes the page to reload.</li>
-<li>Typing in 2D forms on top of the BrowserEnvironment canvas no longer causes pointerlock to trigger.</li>
-<li>Fixed issue where display selector buttons weren&#39;t being hidden after entering VR mode.</li>
-<li>Login form is no longer editable after &quot;log in&quot; or &quot;sign up&quot; have been clicked.</li>
-<li>A wait cursor now appears during the authentication process.</li>
+<li>Fix transparent object sorting, again.</li>
+<li>Fixes for loading progress tracker.</li>
+<li>Fixes for audio, VRDisplays, and video on iOS.</li>
+<li>Fixes for orientation locking on Android.</li>
+<li>Fixes for eye blanking.</li>
 </ul>
 </li>
 <li>Admin<ul>
-<li>Better documentation for WebRTCSocket</li>
-<li>Separate Audio and Data WebRTC handlers that use a base WebRTCSocket class</li>
-<li>Moved IconManager to it&#39;s correct location</li>
-<li>Got strict about &quot;use strict&quot;.</li>
-<li>Removed the 3D loggin form from the meeting demo, because it was kind of a pain in the ass.</li>
+<li>Fully integrated WebVR-Polyfill into project, discarding tons of unused code, simplifying build process, and decoupling full screen management.</li>
+<li>Renamed ModelLoader class to ModelFactory.</li>
 </ul>
 </li>
 </ul>
-<h2 id="v0-25-2">v0.25.2</h2>
-<ul>
-<li>Defect fixes<ul>
-<li>More than two users can be in the same room at one time.</li>
-<li>Users can leave and return to a room without crashing the room.</li>
-</ul>
-</li>
-</ul>
-<h2 id="v0-25-1">v0.25.1</h2>
+<h2 id="v0-29">v0.29</h2>
 <ul>
 <li>Features<ul>
-<li>Spatialized audio in <code>meeting</code> demo.</li>
+<li>Ability to use fog and sky maps together.</li>
+<li>Anisotropic filtering for ground texture.</li>
+<li>New demo page in documentation.</li>
+<li>Syntax highlighting grammar for HTML.</li>
+<li>Auto-added fullscreen buttons now include link back to Primrose homepage.</li>
 </ul>
 </li>
-<li>Defect fixes<ul>
-<li>Fixed multiplayer server on primrosevr.com.</li>
+<li>Defect Fixes<ul>
+<li>More consistent audio timing.</li>
+<li>Fix image sizing issues in vertical mode.</li>
+<li>Fixed texture repeat on large objects.</li>
+<li>Fixes for VR view on Google Cardboard.</li>
+<li>Fixes for geometry of videos that don&#39;t get copied to Canvas before being used as a texture.</li>
+<li>Fixes to support the latest API version with respect to Motion Controllers.</li>
+<li>Make mouse movement independent of user&#39;s selected view zoom value.</li>
+</ul>
+</li>
+<li>Admin<ul>
+<li>Overhaul of build process, yet again, this time with Rollup and ES2016 imports.</li>
+<li>Removed the Commodore demo, as the model file no longer loads and I don&#39;t want to spend the time fixing it.</li>
+<li>Gigantic documentation dump.</li>
+<li>Single-rendering-path for all display types.</li>
 </ul>
 </li>
 </ul>
-<h2 id="v0-25-0">v0.25.0</h2>
+<h2 id="v0-28">v0.28</h2>
+<ul>
+<li>Features<ul>
+<li>Option to disable peering.</li>
+<li>Option to use TokBox for WebRTC.</li>
+<li>Spatialized audio when using TokBox.</li>
+<li>Using a fork of WebVR Polyfill to remove features we don&#39;t use and drastically reduce the download size.</li>
+<li>Unified &quot;select&quot; event, that occurs alongside both pointerend and gazecomplete.</li>
+<li>Automatically enter VR mode when the user puts on their headset.</li>
+<li>&quot;environment.ui&quot; scene mounting point that follows the user around as they move.</li>
+<li>Option to disable keyboard and gamepad input.</li>
+<li>New, default ambient light.</li>
+<li>Forked and added support to THREE.MTLLoader for OBJ&#39;s <code>illum</code> property.</li>
+<li>Non-standard neck-model in setup options.</li>
+<li>Calendar demo.</li>
+<li>New music demo.</li>
+<li>Shooter demo.</li>
+<li>Sea demo.</li>
+<li>Sundial demo.</li>
+<li>Option to hide head pointer.</li>
+</ul>
+</li>
+<li>Defect Fixes<ul>
+<li>Fixed avatars &quot;bowing&quot; at their feet when the user looks down.</li>
+<li>Fixes for pointers, once again.</li>
+<li>Prevent moving while dragging across text editor.</li>
+<li>Fixed rendering flicker when transparent objects are in the scene.</li>
+<li>Make iOS continue on without audio.</li>
+<li>Fix bottom of page being truncated on iOS.</li>
+<li>Fix audio orientation.</li>
+<li>Fix video playing on iOS.</li>
+<li>Fix touch panning on iOS.</li>
+<li>Fix issue where missing input devices caused app to crash.</li>
+<li>Better touch panning.</li>
+<li>Only update video frames when the video has actually progressed.</li>
+<li>Don&#39;t spin up gaze cursor on pickable elements that have no gaze events.</li>
+<li>Fix being able to trigger 3D buttons with gaze.</li>
+<li>Fixes for audio code when running in a CodePen session.</li>
+<li>Wait until all displays are found before adding full screen buttons.</li>
+</ul>
+</li>
+<li>Admin<ul>
+<li>Removed manifest feature in favor of using standard progress tracking events and automatically discovering the full download size.</li>
+<li>Converted stylesheets to use Stylus.</li>
+<li>Removed SSAO and FXAA for better rendering performance.</li>
+<li>Removed html2canvas. The feature just didn&#39;t get used that much and it was kind of buggy.</li>
+<li>Remove the Full Screen button from iOS devices, because they can&#39;t do a standard full screen view.</li>
+<li>Automatic standard monitor setup, rather than deferring the decision to apps.</li>
+<li>Removed automatic quality scaling completely. It was buggy and would cause GPU crashes on certain devices.</li>
+<li>Removed the wakelock from WebVR-Polyfill.</li>
+<li>Cleaned out unused dependencies.</li>
+<li>Removed old, unused haptic glove code.</li>
+<li>Network manager doesn&#39;t get created until it&#39;s needed, now.</li>
+<li>Default to an empty object for ground and sky when no ground or sky description are provided, so that there is always a ground and sky object on which to add UI elements.</li>
+</ul>
+</li>
+</ul>
+<h2 id="v0-27">v0.27</h2>
+<ul>
+<li>Features<ul>
+<li>Smaller, further away gaze pointer.</li>
+<li>Option on mobile devices to use elements other than the canvas as the fullscreen element.</li>
+<li>Text-to-speech rendering.</li>
+<li>Buttons can now be a criteria for input systems to read axes.</li>
+<li>Add a basic &quot;hand&quot; model to the motion controllers.</li>
+<li>Option to retrieve WebRTC ICE servers from a network resource.</li>
+</ul>
+</li>
+<li>Defect Fixes<ul>
+<li>Prevent right-click menu from appearing when using the second mouse button.</li>
+<li>Fixes to input zeroing.</li>
+<li>Don&#39;t teleport if the user has been dragging the mouse.</li>
+<li>Hide the in-scene pointer when the app is not in full-screen mode.</li>
+<li>Fix a whole frame of latency in reading the headset pose.</li>
+<li>Use left-click instead of right-click to rotate view.</li>
+<li>Keep clients that fail to connect to the application from crashing the room and preventing other clients from connecting.</li>
+<li>Fix mouse input for apps in fullscreen mode when they aren&#39;t use the canvas as the fullscreen element.</li>
+</ul>
+</li>
+<li>Admin<ul>
+<li>Polyfill WebRTC to its latest version.</li>
+</ul>
+</li>
+</ul>
+<h2 id="v0-26">v0.26</h2>
+<ul>
+<li>Features<ul>
+<li>Upgraded to Three.js r80.</li>
+<li>Vive Motion Controller support.</li>
+<li>Unified movement from gamepads and stage teleporting into one coherent system.</li>
+<li>Unique colors per pointer.</li>
+<li>Use a mouse button press to move the orientation on mobile devices that don&#39;t have Pointer Lock.</li>
+<li>Gaze can now trigger 3D buttons.</li>
+<li>Basic support for 2D video elements.</li>
+<li>A 3D Progress meter control.</li>
+<li>Image loading progress tracking.</li>
+<li>Expose teleporting as a function a user script may call at any time.</li>
+<li>Cubemaps as option for the sky.</li>
+<li>Fade in/out on teleport.</li>
+<li>FXAA and SSAO.</li>
+</ul>
+</li>
+<li>Defect Fixes<ul>
+<li>Fixes for full-screen workflow on mobile Firefox.</li>
+<li>Detect motion controllers by the presence of a pose property, not by explicit name.</li>
+<li>Re-hide WebVR-Polyfill&#39;s &quot;Mouse and Keyboard&quot; display, because I can&#39;t seem to make changes stick.</li>
+<li>Only teleport on left-mouse click, not any-button.</li>
+<li>Detect Android tablets as &quot;mobile&quot; devices.</li>
+<li>Hide WebVR-Polyfill&#39;s &quot;Mouse and Keyboard&quot; display, as it doesn&#39;t mesh with our input system.</li>
+<li>Fix touch input triggering on mobile Firefox.</li>
+<li>Make sure gaze pointer always shows in the headset.</li>
+<li>Enforce a cool-down between teleports to prevent too fast of movement with rapid clicking.</li>
+<li>Fixed many issues with pointers not reliably picking objects.</li>
+<li>Fixed stereo eye offset.</li>
+<li>Better locomotion on Google Cardboard.</li>
+<li>Fixed assumptions about headset orientation that were wrong for the Vive.</li>
+<li>A bunch of other stuff that probably nobody remembers.</li>
+<li>Fix clipboard operations.</li>
+<li>Fixes for stereo image rendering.</li>
+<li>Fix archiving of build results.</li>
+<li>Slow down quality detection so it doesn&#39;t kick in right away.</li>
+<li>Fix issue where Vive controllers were crashing the app.</li>
+</ul>
+</li>
+<li>Admin<ul>
+<li>New build script, and managing the deployment errors I made as a result.</li>
+<li>Print version number in console and on website.</li>
+<li>Update to latest WebVR-Standard-Monitor and WebVR-Bootstrapper.</li>
+<li>Make apps hide their own fullscreen buttons.</li>
+<li>Cleaned up VR position handling.</li>
+<li>Moved network handling code into its own manager class.</li>
+<li>Removed 3D icons, because they just didn&#39;t work in a generic way.</li>
+<li>Cleaned up the documentation site quite a bit.</li>
+<li>Running all dependencies through NPM now.</li>
+</ul>
+</li>
+</ul>
+<h2 id="v0-25">v0.25</h2>
 <ul>
 <li>Features<ul>
 <li>New <code>disableDefaultLighting</code> option for <code>BrowserEnvironment</code> to use in cases of models with baked-lighting in their textures.</li>
@@ -107,52 +274,100 @@
 <li>Updated documentation for <code>Entity</code>.</li>
 <li><code>Form</code>s don&#39;t expose their underlying mesh directly now.</li>
 <li>Fixed documentation of return types for the randomizer functions.</li>
+<li>Spatialized audio in <code>meeting</code> demo.</li>
+<li>HMD position is now visible in remote users, in addition to the previous orientation, for users that have the data available.</li>
+<li>Better pointer graphics, indicating to the user better what is about to happen.<ul>
+<li>Ground pointer is now a flat disk, with the cursor ball above it.</li>
+<li>Ground pointer is limited to a max distance away of 5 meters.</li>
 </ul>
 </li>
-<li>Open issues<ul>
-<li>Windows<ul>
-<li>Nightly<ul>
-<li>HMD support is broken (Le sigh. I think I&#39;m just going to wait for Mozilla to upgrade to WebVR 1.0)</li>
+<li>New <a href="index.html#Primrose_Random_ID"><code>Primrose.Random.ID()</code></a> function.</li>
+<li>BrowserEnvironment can now manage the login process on its own. Client apps don&#39;t need to know how it works, they just pass on a user name and password.</li>
+</ul>
+</li>
+<li>Defect Fixes<ul>
+<li>Fixed multiplayer server on primrosevr.com.</li>
+<li>More than two users can be in the same room at one time.</li>
+<li>Users can leave and return to a room without crashing the room.</li>
+<li>When first logging in, if adding one of the remote users fails, it now doesn&#39;t prevent the other users from attempting to load.</li>
+<li>The login form no longer shows before the 3D models have parsed. This was causing an issue where people logging in very quickly were receiving a list of users and attempting to create an avatar out of a model that didn&#39;t yet exist.</li>
+<li>The &quot;close&quot; link on the login form no longer causes the page to reload.</li>
+<li>Typing in 2D forms on top of the BrowserEnvironment canvas no longer causes pointerlock to trigger.</li>
+<li>Fixed issue where display selector buttons weren&#39;t being hidden after entering VR mode.</li>
+<li>Login form is no longer editable after &quot;log in&quot; or &quot;sign up&quot; have been clicked.</li>
+<li>A wait cursor now appears during the authentication process.</li>
+</ul>
+</li>
+<li>Admin<ul>
+<li>Better documentation for WebRTCSocket</li>
+<li>Separate Audio and Data WebRTC handlers that use a base WebRTCSocket class</li>
+<li>Moved IconManager to it&#39;s correct location</li>
+<li>Got strict about &quot;use strict&quot;.</li>
+<li>Removed the 3D loggin form from the meeting demo, because it was kind of a pain in the ass.</li>
 </ul>
 </li>
 </ul>
-</li>
-<li>Android<ul>
-<li>Nightly<ul>
-<li>HMD support is broken (Le sigh. I think I&#39;m just going to wait for Mozilla to upgrade to WebVR 1.0)</li>
-<li>Low frame rate in fullscreen mode.</li>
-</ul>
-</li>
-<li>Firefox<ul>
-<li>Device Orientation fallback has some problems with drift.</li>
-<li>Image inverts under certain tilt conditions.</li>
-<li>Low frame rate in fullscreen mode.</li>
-</ul>
-</li>
-<li>Gear VR - Works as far as Primrose is concerned, but Samsung&#39;s browser for Gear VR currently has a number of defects:<ul>
-<li>Orientation tracking is pretty bad, making the overall experience very bad.</li>
-<li>The touchpad doesn&#39;t work, so interactions are not working.</li>
-<li>Attaching a Bluetooth keyboard seems to make the browser unable to enter fullscreen mode.</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h2 id="v0-24-1-2016-05-25">v0.24.1 - 2016/05/25</h2>
+<h2 id="v0-24">v0.24</h2>
 <ul>
 <li>Features<ul>
+<li><a href="pacman.html">&quot;Pacman&quot; demo</a>! Ready for <a href="http://www.meetup.com/Virtual-Reality-DCVR/events/230911574/">the DCVR class I&#39;m teaching</a>.</li>
+<li>New WebVR-Bootstrapper project, a very small library useful for polyfilling the WebVR 1.0 API and getting a page up and running quickly to load additional dependencies with a progress bar. Eventually, it will allow you to get on to the headset very quickly and display a 3D progress bar with head tracking.</li>
+<li>Progress bar showing time to load dependencies for a demo.</li>
+<li>Be able to use <code>BrowserEnvironment::appendChild()</code> with Three.js objects.</li>
+<li>DOM-ified interface for adding elements to the scene and manipulating Primrose.Entity properties.</li>
+<li>Made demos able to open in a new, larger window separate from the documentation site.</li>
+<li>Exposing more WebGL elements as configuration options when initializing Three.js in <code>BrowserEnvironment</code>:<ul>
+<li>scene: a THREE.Scene, if the implementing developer already defined one.</li>
+<li>renderer: a THREE.WebGLRenderer, if the implementing developer already defined one.</li>
+<li>context: a WebGLRenderingContext, if the implementing developer already defined one.</li>
+</ul>
+</li>
+<li>New <code>Primrose.Controls.HtmlDoc</code> surface, using <a href="https://html2canvas.hertzen.com">html2canvas</a> to render HTML content. NOTE: html2canvas has some limitations on how it can be used. It&#39;s at least useful for displaying formatted documentation in-scene.</li>
 <li>Scaling font size in &quot;pacman&quot; demo to account for rendering quality.</li>
 </ul>
 </li>
 <li>Defect fixes<ul>
+<li>Fixed an issue where switching display types would cause an error for a single frame, and that error would cause the editor demo to bomb out of the user&#39;s live-coded script.</li>
+<li>Mobile devices show they are head tracking right away again.</li>
+<li>Fixed visual issue where the highlight of a row of text would overlap the line above it slightly.</li>
+<li>Errors in the user&#39;s live-coded script now cause the script to stop running, rather than continuing to try to run and killing the framerate with thrown exceptions that get caught by the catch-all handler.</li>
+<li>Fixed an issue where objects were getting removed from the projector, but were still active in the scene.</li>
+<li>Prevent easily backspacing out of the demo while the user thinks they should be editing code.</li>
+<li>Fixed an issue where the <code>ready</code> event was getting fired before the <code>BrowserEnvironment</code> was truly ready.</li>
+<li>Inverted the direction of the mousewheel scroll-to-zoom, to match the browser&#39;s behavior. Wheel forward =&gt; bigger text.</li>
+<li>Fixed styling of <code>blockquote</code> elements in statically gen&#39;d documentation pages.</li>
+<li>Fix for material for pointer taking over all red objects.</li>
+<li>More specific caching for materials so they don&#39;t clobber each other on opacity and metalness changes.</li>
+<li>Fixes for not properly using WeakMap for non-GC-preventing references to entities in the scene.</li>
+<li>Fixed an issue where changing the ID of an element would break the projector.</li>
+<li>Made demos easier to see on mobile devices.</li>
+<li>Fixed gamepad slewing. There is a deadzone for gamepad input that needs to be configurable per user still.</li>
+<li>Fixed an issue were attempting to load an unsupported audio format without providing a fallback would prevent demos from loading.</li>
 <li>Fixes for Quick Start demo missing WebVR-Bootstrapper.</li>
 <li>Fix for <code>put()</code> regression in v0.24.0 that made it impossible to use with THREE.js objects.</li>
 <li>Fix for &quot;EditorVR&quot; demo causing an &quot;undefined function&quot; error</li>
 </ul>
 </li>
 <li>Admin<ul>
+<li>WebVR-Bootstrapper also allows for single full-screen code path for all types of displays, both mono and stereo, minimizing some of the confusion in BrowserEnvironment.</li>
+<li>documentation for <code>light()</code> function.</li>
+<li>documentation for <code>findProperty()</code> function.</li>
+<li>documentation for <code>emit()</code> function.</li>
+<li>documentation for <code>copyObject()</code> function.</li>
+<li>documentation for <code>cylinder()</code> function.</li>
+<li>documentation for <code>box()</code> function.</li>
+<li>documentation for <code>hub()</code> function.</li>
+<li>documentation for <code>brick()</code> function.</li>
+<li>documentation for <code>cloud()</code> function.</li>
+<li>documentation for <code>cache()</code> function.</li>
+<li>Better pointer size and colors.</li>
+<li>Decreased the default tab width to 2, rather than 4.</li>
+<li>Edits to setup and installation documentation.</li>
+<li>Converted FullScreen to ES6 class syntax.</li>
+<li>Renamed <code>BrowserEnvironment</code> instances from <code>app</code> to <code>env</code>, to be a little clearer as to purpose.</li>
+<li>Renamed <code>Primrose.Controls.Button</code> to <code>Primrose.Controls.Button3D</code>.</li>
+<li>Moved demos out to an IFRAME in the documentation pages, so they don&#39;t execute in the context of the documentation page.</li>
+<li>All dependencies now come out of NPM, rather than files saved in the repository.</li>
 <li>Better labels for Quick Start &quot;StartHere&quot; scripts to differentiate the platform-specific cases.</li>
 <li>Dev build scripts now run off of direct file references, rather than piping everything through Git and NPM.</li>
 <li>Documentation for <code>put()</code> function.</li>
@@ -200,101 +415,18 @@
 </ul>
 </li>
 </ul>
-<h2 id="v0-24-0-2016-05-23">v0.24.0 - 2016/05/23</h2>
-<ul>
-<li>Features<ul>
-<li><a href="pacman.html">&quot;Pacman&quot; demo</a>! Ready for <a href="http://www.meetup.com/Virtual-Reality-DCVR/events/230911574/">the DCVR class I&#39;m teaching</a>.</li>
-<li>New WebVR-Bootstrapper project, a very small library useful for polyfilling the WebVR 1.0 API and getting a page up and running quickly to load additional dependencies with a progress bar. Eventually, it will allow you to get on to the headset very quickly and display a 3D progress bar with head tracking.</li>
-<li>Progress bar showing time to load dependencies for a demo.</li>
-<li>Be able to use <code>BrowserEnvironment::appendChild()</code> with Three.js objects.</li>
-<li>DOM-ified interface for adding elements to the scene and manipulating Primrose.Entity properties.</li>
-<li>Made demos able to open in a new, larger window separate from the documentation site.</li>
-<li>Exposing more WebGL elements as configuration options when initializing Three.js in <code>BrowserEnvironment</code>:<ul>
-<li>scene: a THREE.Scene, if the implementing developer already defined one.</li>
-<li>renderer: a THREE.WebGLRenderer, if the implementing developer already defined one.</li>
-<li>context: a WebGLRenderingContext, if the implementing developer already defined one.</li>
-</ul>
-</li>
-<li>New <code>Primrose.Controls.HtmlDoc</code> surface, using <a href="https://html2canvas.hertzen.com">html2canvas</a> to render HTML content. NOTE: html2canvas has some limitations on how it can be used. It&#39;s at least useful for displaying formatted documentation in-scene.</li>
-</ul>
-</li>
-<li>Defect fixes<ul>
-<li>Fixed an issue where switching display types would cause an error for a single frame, and that error would cause the editor demo to bomb out of the user&#39;s live-coded script.</li>
-<li>Mobile devices show they are head tracking right away again.</li>
-<li>Fixed visual issue where the highlight of a row of text would overlap the line above it slightly.</li>
-<li>Errors in the user&#39;s live-coded script now cause the script to stop running, rather than continuing to try to run and killing the framerate with thrown exceptions that get caught by the catch-all handler.</li>
-<li>Fixed an issue where objects were getting removed from the projector, but were still active in the scene.</li>
-<li>Prevent easily backspacing out of the demo while the user thinks they should be editing code.</li>
-<li>Fixed an issue where the <code>ready</code> event was getting fired before the <code>BrowserEnvironment</code> was truly ready.</li>
-<li>Inverted the direction of the mousewheel scroll-to-zoom, to match the browser&#39;s behavior. Wheel forward =&gt; bigger text.</li>
-<li>Fixed styling of <code>blockquote</code> elements in statically gen&#39;d documentation pages.</li>
-<li>Fix for material for pointer taking over all red objects.</li>
-<li>More specific caching for materials so they don&#39;t clobber each other on opacity and metalness changes.</li>
-<li>Fixes for not properly using WeakMap for non-GC-preventing references to entities in the scene.</li>
-<li>Fixed an issue where changing the ID of an element would break the projector.</li>
-<li>Made demos easier to see on mobile devices.</li>
-<li>Fixed gamepad slewing. There is a deadzone for gamepad input that needs to be configurable per user still.</li>
-<li>Fixed an issue were attempting to load an unsupported audio format without providing a fallback would prevent demos from loading.</li>
-</ul>
-</li>
-<li>Admin<ul>
-<li>WebVR-Bootstrapper also allows for single full-screen code path for all types of displays, both mono and stereo, minimizing some of the confusion in BrowserEnvironment.</li>
-<li>documentation for <code>light()</code> function.</li>
-<li>documentation for <code>findProperty()</code> function.</li>
-<li>documentation for <code>emit()</code> function.</li>
-<li>documentation for <code>copyObject()</code> function.</li>
-<li>documentation for <code>cylinder()</code> function.</li>
-<li>documentation for <code>box()</code> function.</li>
-<li>documentation for <code>hub()</code> function.</li>
-<li>documentation for <code>brick()</code> function.</li>
-<li>documentation for <code>cloud()</code> function.</li>
-<li>documentation for <code>cache()</code> function.</li>
-<li>Better pointer size and colors.</li>
-<li>Decreased the default tab width to 2, rather than 4.</li>
-<li>Edits to setup and installation documentation.</li>
-<li>Converted FullScreen to ES6 class syntax.</li>
-<li>Renamed <code>BrowserEnvironment</code> instances from <code>app</code> to <code>env</code>, to be a little clearer as to purpose.</li>
-<li>Renamed <code>Primrose.Controls.Button</code> to <code>Primrose.Controls.Button3D</code>.</li>
-<li>Moved demos out to an IFRAME in the documentation pages, so they don&#39;t execute in the context of the documentation page.</li>
-<li>All dependencies now come out of NPM, rather than files saved in the repository.</li>
-</ul>
-</li>
-</ul>
-<h2 id="v0-23-4-2016-05-11">v0.23.4 - 2016/05/11</h2>
+<h2 id="v0-23">v0.23</h2>
 <p>This was an intermediate release, specifically focused on carving the primrosevr.com website bits out of the Primrose VR Github repository.</p>
 <ul>
 <li>Features<ul>
-<li>None</li>
-</ul>
-</li>
-<li>Defect fixes<ul>
-<li>Yet another fix to fullscreen workflow</li>
-</ul>
-</li>
-<li>Admin<ul>
-<li>Abstracted commonalities between CardboardVRDisplay and LegacyVRDisplay to a common base class.</li>
-<li>Removed all the stuff that was specific to the Primrose website and not the Primrose framework.</li>
-</ul>
-</li>
-</ul>
-<h2 id="v0-23-3-2016-05-09">v0.23.3 - 2016/05/09</h2>
-<ul>
-<li>Feature<ul>
-<li>None</li>
-</ul>
-</li>
-<li>Admin<ul>
-<li>None</li>
-</ul>
-</li>
-<li>Defect fixes<ul>
-<li>Fix for critical Firefox issue! Any DOM elements that are acquired before <code>document.readState === &quot;complete&quot;</code> will not be the same object references as those acquired after. It&#39;s like Firefox throws away the DOM and rebuilds it from scratch after the <code>DOMContentLoaded</code> event.</li>
-</ul>
-</li>
-</ul>
-<h2 id="v0-23-2-2016-05-08">v0.23.2 - 2016/05/08</h2>
-<ul>
-<li>Features<ul>
+<li>Simplified the audio loading interface, so it can use the best file automatically.</li>
+<li>Models may be embeded in HTML files now, using <code>&lt;script&gt;</code> tags.</li>
+<li>Now activating the &quot;wait&quot; cursor when demos first start loading.</li>
+<li>Changed &quot;EditorVR&quot; demo to use logging proxy to display console.log calls, rather than supplying its own log function.</li>
+<li>If user touches a demo on a mobile device, it automatically jumps to fullscreen.</li>
+<li>If user touches a demo on Gear VR, it automatically jumps to VR mode.</li>
+<li>Muting audio when the tab loses focus.</li>
+<li>Upgraded to Three.js r76. Well, I didn&#39;t have to do anything other than bump the version number.</li>
 <li>Made the editor in the &quot;editorVR&quot; demo follow the user, so it&#39;s easier to find.</li>
 <li>Auto quality scaling:<ul>
 <li>If the animation falls under 45FPS, the resolution of the rendering is automatically degraded.</li>
@@ -309,40 +441,6 @@
 </li>
 <li>Multiple HMDs connected to the machine (for those rare people with both the Rift and the Vive) now each have their own &quot;Go VR&quot; button, listing which device they will connect to.</li>
 <li>New <a href="/PrimroseQuickstart.zip">quickstart</a> template package.</li>
-</ul>
-</li>
-<li>Defect fixes<ul>
-<li>Fixed documentation TOC hider for Firefox.</li>
-<li>Fixed transparency for the most part.</li>
-<li>Fixed error that would occur in the &quot;editorVR&quot; demo when the user elected to not return an update function from their script.</li>
-<li>Fixed &quot;any key&quot; behavior.</li>
-<li>Fixed an issue where entering fullscreen on mobile would fail because requesting pointerlock would fail.</li>
-<li>Added JSON MIME type for web server. I have no idea why my testing was working before.</li>
-<li>Fixed an issue where stereo images did not render in mono-view.</li>
-<li>Fixed an error when hiding the editor in the &quot;editorVR&quot; demo.</li>
-</ul>
-</li>
-<li>Admin<ul>
-<li>Now showing menu on main page on mobile.</li>
-<li>Turned fog off by default. It&#39;s still an option.</li>
-<li>Removed the mailing list from the front page. It was breaking in some browsers and I don&#39;t have time to figure it out right now.</li>
-<li>Documentation now gets carved out to a separate file when releases are built, to make for a smaller main script file if you don&#39;t want to also load the documentation.</li>
-<li>Updated documentation for <a href="index.html#axis"><code>axis()</code></a>.</li>
-<li>Automatically hide TOC on mobile.</li>
-</ul>
-</li>
-</ul>
-<h2 id="v0-23-1-2016-04-29">v0.23.1 - 2016/04/29</h2>
-<ul>
-<li>Features<ul>
-<li>Simplified the audio loading interface, so it can use the best file automatically.</li>
-<li>Models may be embeded in HTML files now, using <code>&lt;script&gt;</code> tags.</li>
-<li>Now activating the &quot;wait&quot; cursor when demos first start loading.</li>
-<li>Changed &quot;EditorVR&quot; demo to use logging proxy to display console.log calls, rather than supplying its own log function.</li>
-<li>If user touches a demo on a mobile device, it automatically jumps to fullscreen.</li>
-<li>If user touches a demo on Gear VR, it automatically jumps to VR mode.</li>
-<li>Muting audio when the tab loses focus.</li>
-<li>Upgraded to Three.js r76. Well, I didn&#39;t have to do anything other than bump the version number.</li>
 </ul>
 </li>
 <li>Defect fixes<ul>
@@ -361,6 +459,16 @@
 <li>Fixed the layout of the main site header menu on the documentation site.</li>
 <li>Added a <code>Promise</code> polyfill for IE/Edge support.</li>
 <li>Fixed &quot;undefined variable&quot; error in <code>Primrose.Output.Music</code>.</li>
+<li>Fixed documentation TOC hider for Firefox.</li>
+<li>Fixed transparency for the most part.</li>
+<li>Fixed error that would occur in the &quot;editorVR&quot; demo when the user elected to not return an update function from their script.</li>
+<li>Fixed &quot;any key&quot; behavior.</li>
+<li>Fixed an issue where entering fullscreen on mobile would fail because requesting pointerlock would fail.</li>
+<li>Added JSON MIME type for web server. I have no idea why my testing was working before.</li>
+<li>Fixed an issue where stereo images did not render in mono-view.</li>
+<li>Fixed an error when hiding the editor in the &quot;editorVR&quot; demo.</li>
+<li>Fix for critical Firefox issue! Any DOM elements that are acquired before <code>document.readState === &quot;complete&quot;</code> will not be the same object references as those acquired after. It&#39;s like Firefox throws away the DOM and rebuilds it from scratch after the <code>DOMContentLoaded</code> event.</li>
+<li>Yet another fix to fullscreen workflow</li>
 </ul>
 </li>
 <li>Admin<ul>
@@ -372,16 +480,24 @@
 <li>Carved the &quot;logger&quot; console logging proxying library out to <a href="its own project">https://www.github.com/capnmidnight/logger</a>.</li>
 <li>Moved demos to the documentation folder, and embeded them in the documentation template.</li>
 <li>Rewrote how the site is generated.</li>
+<li>Now showing menu on main page on mobile.</li>
+<li>Turned fog off by default. It&#39;s still an option.</li>
+<li>Removed the mailing list from the front page. It was breaking in some browsers and I don&#39;t have time to figure it out right now.</li>
+<li>Documentation now gets carved out to a separate file when releases are built, to make for a smaller main script file if you don&#39;t want to also load the documentation.</li>
+<li>Updated documentation for <a href="index.html#axis"><code>axis()</code></a>.</li>
+<li>Automatically hide TOC on mobile.</li>
+<li>Abstracted commonalities between CardboardVRDisplay and LegacyVRDisplay to a common base class.</li>
+<li>Removed all the stuff that was specific to the Primrose website and not the Primrose framework.</li>
 </ul>
 </li>
 </ul>
-<h2 id="v0-23-0-2016-04-21">v0.23.0 - 2016/04/21</h2>
 <h3 id="what-happened-to-v0-22-0-">What happened to v0.22.0?</h3>
 <p>v0.22.0 got lost in the weeds. I bought a lawnmower to go find it, but that also got lost in the weeds.</p>
 <p>Seriously though, I got really busy and just never got around to making a production deployment. Then I bumped the version number and made a commit, so I felt I was stuck with v0.23.0. Because v0.22.0 never got properly released, I&#39;m including all of it&#39;s changelog in v0.23.0</p>
-<h3 id="v0-23-0">v0.23.0</h3>
+<h3 id="v0-21">v0.21</h3>
 <ul>
 <li>Features<ul>
+<li>WebVR API 1.0 support!!! With backwards compatability to draft APIs.</li>
 <li>New 2D GUI system, drawn to HTML Canvas elements and used as textures on 3D elements.<ul>
 <li>Surfaces can be sub-classed to more specific controls.</li>
 <li>Surfaces can be children of other Surfaces, to render in subsections of the parent Surface.</li>
@@ -428,6 +544,15 @@
 </ul>
 </li>
 <li>Defect fixes<ul>
+<li>Fixes for WebVR API fallback on current Firefox Nightly</li>
+<li>Fix for zeroing sensor on new WebVR API</li>
+<li>Don&#39;t resize canvas to full screen dimensions on desktop. This is only necessary on mobile devices, to support scrolling to remove browser chrome.</li>
+<li>Fixed having to make dev-to-production changes manually. Using full static site generation now.</li>
+<li>Fixed lighting for Three.js r74.</li>
+<li>Got off of DreamHost, finally. Now on Azure.</li>
+<li>Don&#39;t move the camera view by orientation until the user hits the &quot;go VR&quot; button.</li>
+<li>Fixed out-of-bounds array access in projector (though ultimately, seems I broke the projector for buffered geometry)</li>
+<li>Fix for loading a texture more than once into multiple materials. Probably should cache the material, though.</li>
 <li>Fixed styling issues with documentation pages.</li>
 <li>Fix for Device Orientation API-based VR view on passive stereo viewers like Google Cardboard that are running in browsers that do not support WebVR. Now the scene doesn&#39;t skew when you tilt your head.</li>
 <li>Made sure TextBoxes weren&#39;t running their own key event listeners, because it conflicts with the other events key events for navigation that BrowserEnvironment must control. This makes it more difficult to use the Primrose text editor in a 2D environment, but Primrose isn&#39;t really meant for that.</li>
@@ -488,120 +613,18 @@
 </ul>
 </li>
 </ul>
-<h2 id="v0-21-2-2016-03-11">v0.21.2 - 2016/03/11</h2>
-<ul>
-<li>Features<ul>
-<li>None</li>
-</ul>
-</li>
-<li>Admin<ul>
-<li>None</li>
-</ul>
-</li>
-<li>Defect fixes<ul>
-<li>Fixed having to make dev-to-production changes manually. Using full static site generation now.</li>
-<li>Fixed lighting for Three.js r74.</li>
-<li>Got off of DreamHost, finally. Now on Azure.</li>
-<li>Don&#39;t move the camera view by orientation until the user hits the &quot;go VR&quot; button.</li>
-<li>Fixed out-of-bounds array access in projector (though ultimately, seems I broke the projector for buffered geometry)</li>
-<li>Fix for loading a texture more than once into multiple materials. Probably should cache the material, though.</li>
-</ul>
-</li>
-</ul>
-<h2 id="v0-21-1-2016-03-06">v0.21.1 - 2016/03/06</h2>
-<ul>
-<li>Features<ul>
-<li>None</li>
-</ul>
-</li>
-<li>Admin<ul>
-<li>None</li>
-</ul>
-</li>
-<li>Defect fixes<ul>
-<li>Fixes for WebVR API fallback on current Firefox Nightly</li>
-<li>Fix for zeroing sensor on new WebVR API</li>
-<li>Don&#39;t resize canvas to full screen dimensions on desktop. This is only necessary on mobile devices, to support scrolling to remove browser chrome.</li>
-</ul>
-</li>
-</ul>
-<h2 id="v0-21-0-2016-03-05">v0.21.0 - 2016/03/05</h2>
-<ul>
-<li>Features<ul>
-<li>WebVR API 1.0 support!!! With backwards compatability to draft APIs.</li>
-</ul>
-</li>
-<li>Admin<ul>
-<li>None</li>
-</ul>
-</li>
-<li>Defect fixes<ul>
-<li>None</li>
-</ul>
-</li>
-</ul>
-<h2 id="v0-20-6-2016-02-27">v0.20.6 - 2016/02/27</h2>
+<h2 id="v0-20">v0.20</h2>
 <p>It&#39;s going to be nothing but documentation for a while.</p>
 <ul>
 <li>Features<ul>
 <li>None</li>
 </ul>
 </li>
-<li>Defect fixes<ul>
-<li>Prevent <code>alert()</code>, <code>confirm()</code>, and <code>prompt()</code> while in full screen mode.</li>
-<li>Fixed issue where multiple newline characters in a row were only incrementing the row display once, causing blank lines of text to get truncated.</li>
-</ul>
-</li>
-<li>Admin<ul>
-<li>Use <code>grammar(&quot;JavaScript&quot;);</code> at the top of your code blocks to indicate syntax highlighting preference.</li>
-<li>This CHANGELOG page.</li>
-<li>More documentation</li>
-</ul>
-</li>
-</ul>
-<h2 id="v0-20-5-2016-02-15">v0.20.5 - 2016/02/15</h2>
-<p>It&#39;s going to be nothing but documentation for a while.</p>
-<ul>
-<li>Features<ul>
-<li>None</li>
-</ul>
-</li>
-<li>Defect fixes<ul>
-<li>Fixed issue where using the &quot;top&quot; link at the bottom of a documentation page would cause the page to reset to the introduction.</li>
-</ul>
-</li>
-<li>Admin<ul>
-<li>Per-document table-of-contents in documentation page.</li>
-<li>&quot;Using the VR Development Environment&quot; documentation.</li>
-<li>Started CHANGELOG.</li>
-</ul>
-</li>
-</ul>
-<h2 id="v0-20-4-2016-02-12">v0.20.4 - 2016/02/12</h2>
-<p>It&#39;s going to be nothing but documentation for a while.</p>
-<ul>
-<li>Features<ul>
-<li>None</li>
-</ul>
-</li>
-<li>Defect fixes<ul>
-<li>Don&#39;t attempt to support <kbd>CTRL+Up/Down Arrow</kbd> movement on OS X.</li>
-<li>Fix issue where some links into internal documentation were opening in a new window.</li>
-</ul>
-</li>
-<li>Admin<ul>
-<li>&quot;Using the VR Development Environment&quot; documentation.</li>
-</ul>
-</li>
-</ul>
-<h2 id="v0-20-3-2016-02-11">v0.20.3 - 2016/02/11</h2>
-<p>It&#39;s going to be nothing but documentation for a while.</p>
-<ul>
-<li>Features<ul>
-<li>None</li>
-</ul>
-</li>
-<li>Defect fixes<ul>
+<li>Defect Fixes<ul>
+<li>Simplified <a href="index.html#WritingnewdocumentationwithPliny"><code>pliny</code></a> interface.</li>
+<li>Cleaned up dependencies.</li>
+<li>Set NPM startup script.</li>
+<li>Better use of screen width for documentation page.</li>
 <li>Creating a <a href="index.html#Primrose_BrowserEnvironment"><code>Primrose.BrowserEnvironment</code></a> no longer spams the console with an inconsequential error (because the error is fixed!).</li>
 <li>Code samples on documentation page now resize with the page.</li>
 <li>Cleaner font rendering.</li>
@@ -609,31 +632,11 @@
 <li>Long descriptions get shortened now, when displayed as part of a list of features on a parent object.</li>
 <li>Better Markdown document parsing.</li>
 <li>All functions and classes should now be included in documentation (though details not yet written).</li>
-</ul>
-</li>
-<li>Admin<ul>
-<li>Documentation page can now load Markdown documents.</li>
-<li><a href="index.html#Primrose_ModelLoader"><code>Primrose.ModelLoader</code></a> documentation.</li>
-<li>Auto-generate <code>target=&quot;_blank&quot;</code> for links that go away from the documentation page.</li>
-<li>Incomplete documents rendered with greyed-out links (though they are also viewable).</li>
-<li>semi-repsonsive layout for documentation page.</li>
-<li>Styling for KBD, CODE, and BLOCKQUOTE blocks.</li>
-<li><a href="index.html#InstallationandSetup">&quot;Installation and Setup&quot;</a> documentation.</li>
-<li><a href="index.html#FrequentlyAskedQuestions">&quot;Frequently Asked Question&quot;</a> documentation.</li>
-</ul>
-</li>
-</ul>
-<h2 id="v0-20-2-2016-02-01">v0.20.2 - 2016/02/01</h2>
-<ul>
-<li>Features<ul>
-<li>None</li>
-</ul>
-</li>
-<li>Defect fixes<ul>
-<li>Simplified <a href="index.html#WritingnewdocumentationwithPliny"><code>pliny</code></a> interface.</li>
-<li>Cleaned up dependencies.</li>
-<li>Set NPM startup script.</li>
-<li>Better use of screen width for documentation page.</li>
+<li>Don&#39;t attempt to support <kbd>CTRL+Up/Down Arrow</kbd> movement on OS X.</li>
+<li>Fix issue where some links into internal documentation were opening in a new window.</li>
+<li>Fixed issue where using the &quot;top&quot; link at the bottom of a documentation page would cause the page to reset to the introduction.</li>
+<li>Prevent <code>alert()</code>, <code>confirm()</code>, and <code>prompt()</code> while in full screen mode.</li>
+<li>Fixed issue where multiple newline characters in a row were only incrementing the row display once, causing blank lines of text to get truncated.</li>
 </ul>
 </li>
 <li>Admin<ul>
@@ -661,6 +664,21 @@
 <li><a href="index.html#writeForm"><code>writeForm()</code></a> documentation.</li>
 <li>Hashed issue ID.</li>
 <li>Issue count in issue header.</li>
+<li>Documentation page can now load Markdown documents.</li>
+<li><a href="index.html#Primrose_ModelLoader"><code>Primrose.ModelLoader</code></a> documentation.</li>
+<li>Auto-generate <code>target=&quot;_blank&quot;</code> for links that go away from the documentation page.</li>
+<li>Incomplete documents rendered with greyed-out links (though they are also viewable).</li>
+<li>semi-repsonsive layout for documentation page.</li>
+<li>Styling for KBD, CODE, and BLOCKQUOTE blocks.</li>
+<li><a href="index.html#InstallationandSetup">&quot;Installation and Setup&quot;</a> documentation.</li>
+<li><a href="index.html#FrequentlyAskedQuestions">&quot;Frequently Asked Question&quot;</a> documentation.</li>
+<li>&quot;Using the VR Development Environment&quot; documentation.</li>
+<li>Per-document table-of-contents in documentation page.</li>
+<li>&quot;Using the VR Development Environment&quot; documentation.</li>
+<li>Started CHANGELOG.</li>
+<li>Use <code>grammar(&quot;JavaScript&quot;);</code> at the top of your code blocks to indicate syntax highlighting preference.</li>
+<li>This CHANGELOG page.</li>
+<li>More documentation.</li>
 </ul>
 </li>
 </ul>
