@@ -1,23 +1,20 @@
 Object.assign(window, Primrose.Random);
 
-var GRASS = "../images/grass.png",
+var SCRIPT_UPDATE_TIME = 1000,
+  GRASS = "../images/grass.png",
   ROCK = "../images/rock.png",
   SAND = "../images/sand.png",
   WATER = "../images/water.png",
-  DECK = "../images/deck.png";
-
-window.env = new Primrose.BrowserEnvironment({
-  skyTexture: "../images/bg2.jpg",
-  groundTexture: GRASS,
-  font: "../fonts/helvetiker_regular.typeface.json",
-  fullScreenButtonContainer: "#fullScreenButtonContainer",
-  progress: Preloader.thunk
-});
-
-var subScene = null,
+  DECK = "../images/deck.png",
+  env = new Primrose.BrowserEnvironment({
+    skyTexture: "../images/bg2.jpg",
+    groundTexture: GRASS,
+    font: "../fonts/helvetiker_regular.typeface.json",
+    fullScreenButtonContainer: "#fullScreenButtonContainer",
+    progress: Preloader.thunk
+  }),
+  subScene = hub(),
   editor = null,
-  editorFrame = null,
-  editorFrameMesh = null,
 
   modA = isMacOS ? "metaKey" : "ctrlKey",
   modB = isMacOS ? "altKey" : "shiftKey",
@@ -30,32 +27,22 @@ var subScene = null,
   scriptAnimate = null;
 
 env.addEventListener("ready", function () {
-  subScene = hub();
   env.scene.add(subScene);
 
   var editorSize = isMobile ? 512 : 1024,
     fontSize = isMobile ? 10 : 20;
 
-  editorFrame = env.createElement("section");
-  editorFrame.id = "EditorFrame";
-  editorFrame.className = "shell";
-  editorFrame.style.width = editorSize;
-  editorFrame.style.height = editorSize;
-
-  editor = env.createElement("textarea");
-  editor.id = "Editor";
-  editor.style.width = editorFrame.surfaceWidth;
-  editor.style.height = editorFrame.surfaceHeight;
-  editor.style.fontSize = fontSize;
-  editor.tokenizer = Primrose.Text.Grammars.JavaScript;
-  editor.value = getSourceCode(isInIFrame);
-
-
-  editorFrame.appendChild(editor);
-
-  editorFrameMesh = env.appendChild(editorFrame);
-  editorFrameMesh.name = "MyWindow";
-  editorFrameMesh.position.set(0, env.options.avatarHeight, 0);
+  editor = new Primrose.Controls.TextBox({
+      id: "Editor",
+      width: editorSize,
+      height: editorSize,
+      geometry: shell(1.5, 25, 25),
+      fontSize: fontSize,
+      tokenizer: Primrose.Text.Grammars.JavaScript,
+      value: getSourceCode(isInIFrame)
+    })
+    .addTo(env.vicinity)
+    .at(0, env.options.avatarHeight, 0);
 
   console.log("INSTRUCTIONS:");
   console.log(" - " + cmdPre + "+E to show/hide editor");
@@ -66,9 +53,9 @@ env.addEventListener("ready", function () {
   Preloader.hide();
 });
 
-env.addEventListener("update", function (dt) {
+env.addEventListener("update", function () {
   if (!scriptUpdateTimeout) {
-    scriptUpdateTimeout = setTimeout(updateScript, 500);
+    scriptUpdateTimeout = setTimeout(updateScript, SCRIPT_UPDATE_TIME)
   }
 
   if (scriptAnimate) {
@@ -79,7 +66,13 @@ env.addEventListener("update", function (dt) {
       wipeScene();
     }
     else {
-      scriptAnimate.call(env, dt);
+      try{
+        scriptAnimate.call(env, env.deltaTime);
+      }
+      catch(exp){
+        scriptAnimate = null;
+        console.error(exp);
+      }
     }
   }
 });
@@ -87,11 +80,7 @@ env.addEventListener("update", function (dt) {
 env.addEventListener("keydown", function (evt) {
   if (evt[modA] && evt[modB]) {
     if (evt.keyCode === Primrose.Keys.E) {
-      editorFrameMesh.visible = !editorFrameMesh.visible;
-      if (!editorFrameMesh.visible && env.currentControl && env.currentControl.focused) {
-        env.currentControl.blur();
-        env.currentControl = null;
-      }
+      editor.visible = !editor.visible;
     }
     else if (evt.keyCode === Primrose.Keys.X) {
       editor.value = getSourceCode(true);
@@ -154,6 +143,7 @@ function updateScript() {
         }
       }
       catch(exp){
+        scriptUpdate = null;
         console.error(exp);
         console.error(newScript);
       }
@@ -173,8 +163,10 @@ function getSourceCode(skipReload) {
       .split("\n");
     lines.pop();
     lines.shift();
+    var numSpaces = lines[0].match(/^\s+/)[0].length;
+    console.log(numSpaces);
     for (var i = 0; i < lines.length; ++i) {
-      lines[i] = lines[i].substring(2);
+      lines[i] = lines[i].substring(numSpaces);
     }
     src = lines.join("\n");
   }

@@ -68,7 +68,7 @@ It should look something like this:\n\
 });
 
 import cache from "../util/cache";
-import { CylinderBufferGeometry } from "three/src/geometries/CylinderBufferGeometry";
+import { CylinderBufferGeometry } from "three/src/geometries/CylinderGeometry";
 export default function cylinder(rT, rB, height, rS, hS, openEnded, thetaStart, thetaEnd) {
   if (rT === undefined) {
     rT = 0.5;

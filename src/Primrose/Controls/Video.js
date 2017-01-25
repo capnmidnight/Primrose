@@ -94,19 +94,18 @@ export default class Video extends BaseTextured {
         video.preload = "auto";
       }
 
+      const loadOptions = Object.assign({}, this.options);
       this._meshes[i] = textured(
         this._geometry,
         video,
-        this.options);
+        loadOptions);
 
       if(!video.parentElement){
         document.body.insertBefore(video, document.body.children[0]);
         fixVideo(video);
       }
 
-      this.options.promise.then((txt) => {
-        this._textures[i] = txt;
-      });
+      loadOptions.promise.then((txt) => this._textures[i] = txt);
 
       return video;
     });

@@ -35,14 +35,15 @@ import { Object3D } from "three/src/core/Object3D";
 
 import identity from "../util/identity";
 import colored from "../live-api/colored";
+import hub from "../live-api/hub";
 import box from "../live-api/box";
 import sphere from "../live-api/sphere";
 import circle from "../live-api/circle";
 import ring from "../live-api/ring";
 import material from "../live-api/material";
+import Entity from "./Controls/Entity";
 
-const TELEPORT_PAD_RADIUS = 0.4,
-  FORWARD = new Vector3(0, 0, -1),
+const FORWARD = new Vector3(0, 0, -1),
   LASER_WIDTH = 0.01,
   LASER_LENGTH = 3 * LASER_WIDTH,
   GAZE_RING_DISTANCE  = -1.25,
@@ -54,20 +55,18 @@ const TELEPORT_PAD_RADIUS = 0.4,
 
 
 function hasGazeEvent(obj){
-  return !!obj.ongazecomplete || !!obj.onselect || !!obj.onclick ||
-     obj._listeners && (
+  return obj && obj._listeners && (
       (obj._listeners.gazecomplete && obj._listeners.gazecomplete.length > 0) ||
       (obj._listeners.select && obj._listeners.select.length > 0) ||
-      (obj._listeners.click && obj._listeners.click.length > 0)) ||
-    obj.button && hasGazeEvent(obj.button);
+      (obj._listeners.click && obj._listeners.click.length > 0));
 }
 
-export default class Pointer {
+export default class Pointer extends Entity {
   constructor(pointerName, color, highlight, s, devices, triggerDevices, options) {
-    this.name = pointerName;
+    super(pointerName, options);
+
     this.devices = devices.filter(identity);
     this.triggerDevices = triggerDevices && triggerDevices.filter(identity) || this.devices.slice();
-    this.options = options;
     this.gazeTimeout = (this.options.gazeLength || 1.5) * 1000;
 
     this.unproject = null;
@@ -77,42 +76,42 @@ export default class Pointer {
     this.color = color;
     this.highlight = highlight;
     this.velocity = new Vector3();
-    this.mesh = colored(box(LASER_WIDTH / s, LASER_WIDTH / s, LASER_LENGTH * s), this.color, {
-      unshaded: true
-    });
-    this.mesh.position.z = -1.5;
 
-    this.disk = colored(sphere(TELEPORT_PAD_RADIUS, 128, 3), this.color, {
-      unshaded: true
-    });
-    this.disk.geometry.computeBoundingBox();
-    this.disk.geometry.vertices.forEach((v) => {
-      v.y = 0.1 * (v.y - this.disk.geometry.boundingBox.min.y);
-    });
-    this.disk.visible = false;
-    this.disk.geometry.computeBoundingBox();
+    this.mesh = box(LASER_WIDTH / s, LASER_WIDTH / s, LASER_LENGTH * s)
+      .colored(this.color, {
+        unshaded: true
+      })
+      .named(pointerName + "-pointer")
+      .addTo(this)
+      .at(0, 0, -1.5);
 
-    this.gazeInner = colored(circle(GAZE_RING_INNER / 2, 10), 0xc0c0c0, {
-      unshaded: true
-    });
-    this.gazeInner.position.set(0, 0, GAZE_RING_DISTANCE);
+    this.gazeInner = circle(GAZE_RING_INNER / 2, 10)
+      .colored(0xc0c0c0, {
+        unshaded: true
+      })
+      .addTo(this)
+      .at(0, 0, GAZE_RING_DISTANCE);
 
-    this.gazeInner.add(colored(ring(GAZE_RING_INNER * 0.5, GAZE_RING_INNER * 0.75, 10, 36, 0, 2 * Math.PI), 0xffffff, {
-      unshaded: true
-    }));
+    this.gazeReference = ring(GAZE_RING_INNER * 0.5, GAZE_RING_INNER * 0.75, 10, 36, 0, 2 * Math.PI)
+      .colored(0xffffff, {
+        unshaded: true
+      })
+      .addTo(this.gazeInner);
 
-    this.gazeOuter = colored(ring(GAZE_RING_INNER, GAZE_RING_OUTER, 10, 36, 0, 2 * Math.PI), 0xffffff, {
-      unshaded: true
-    });
+    this.gazeOuter = ring(GAZE_RING_INNER, GAZE_RING_OUTER, 10, 36, 0, 2 * Math.PI)
+      .colored(0xffffff, {
+        unshaded: true
+      })
+      .addTo(this.gazeInner);
+
     this.gazeOuter.visible = false;
-    this.gazeInner.add(this.gazeOuter);
-
-    this.root = new Object3D();
-    this.root.add(this.mesh);
-    this.root.add(this.gazeInner);
 
     this.useGaze = this.options.useGaze;
     this.lastHit = null;
+  }
+
+  get pickable() {
+    return false;
   }
 
   get material(){
@@ -121,13 +120,8 @@ export default class Pointer {
 
   set material(v){
     this.mesh.material = v;
-    this.disk.material = v;
     this.gazeInner.material = v;
     this.gazeOuter.material = v;
-  }
-
-  add(obj) {
-    this.root.add(obj);
   }
 
   addDevice(orientation, trigger){
@@ -138,49 +132,6 @@ export default class Pointer {
     if(trigger){
       this.triggerDevices.push(trigger);
     }
-  }
-
-  addToBrowserEnvironment(env, scene) {
-    pliny.method({
-      parent: "Primrose.Pointer",
-      name: "addToBrowserEnvironment",
-      description: "Add this meshes that give the visual representation of the pointer, to the scene.",
-      parameters: [{
-        name: "env",
-        type: "Primrose.BrowserEnvironment",
-        description: "Not used, just here to fulfill a common interface in the framework."
-      }, {
-        name: "scene",
-        type: "THREE.Scene",
-        description: "The scene to which to add the 3D cursor."
-      }]
-    });
-    scene.add(this.root);
-    scene.add(this.disk);
-  }
-
-  get position() {
-    return this.root.position;
-  }
-
-  get quaternion() {
-    return this.root.quaternion;
-  }
-
-  get rotation(){
-    return this.root.rotation;
-  }
-
-  get matrix() {
-    return this.root.matrix;
-  }
-
-  updateMatrix() {
-    return this.root.updateMatrix();
-  }
-
-  applyMatrix(m) {
-    return this.root.applyMatrix(m);
   }
 
   update() {
@@ -198,7 +149,7 @@ export default class Pointer {
       }
       VECTOR_TEMP.applyMatrix4(this.unproject)
         .applyQuaternion(QUAT_TEMP);
-      this.root.lookAt(VECTOR_TEMP);
+      this.lookAt(VECTOR_TEMP);
     }
     else {
       this.quaternion.set(0, 0, 0, 1);
@@ -218,45 +169,27 @@ export default class Pointer {
       QUAT_TEMP.setFromEuler(EULER_TEMP);
       this.quaternion.multiply(QUAT_TEMP);
     }
-    this.root.updateMatrixWorld();
+    this.updateMatrixWorld();
   }
 
-  moveTeleportPad(point){
-    this.disk.position
-      .copy(point);
-  }
+  _check(curHit) {
+    const curObj = curHit && curHit.object,
+      lastHit = this.lastHit,
+      lastObj = lastHit && lastHit.object;
 
-  resolvePicking(objects) {
-    this.mesh.visible = false;
-    this.gazeInner.visible = false;
-    this.mesh.material = material("", {
-      color: this.color,
-      unshaded: true
-    });
-
-    if(this.showPointer){
-      VECTOR_TEMP.set(0, 0, 0)
-        .applyMatrix4(this.root.matrixWorld);
-      FORWARD.set(0, 0, -1)
-        .applyMatrix4(this.root.matrixWorld)
-        .sub(VECTOR_TEMP);
-      this.picker.set(VECTOR_TEMP, FORWARD);
-      const hits = this.picker.intersectObjects(objects, true),
-        currentHit = hits[0],
-        obj = currentHit && currentHit.object,
-        lastHit = this.lastHit,
-        moved = lastHit && currentHit &&
-          (currentHit.point.x !== lastHit.point.x ||
-          currentHit.point.y !== lastHit.point.y ||
-          currentHit.point.z !== lastHit.point.z),
+    if(curObj || lastObj) {
+      const moved = lastHit && curHit &&
+          (curHit.point.x !== lastHit.point.x ||
+          curHit.point.y !== lastHit.point.y ||
+          curHit.point.z !== lastHit.point.z),
         dt = lastHit && lastHit.time && (performance.now() - lastHit.time),
-        changed = !lastHit && currentHit ||
-          lastHit && !currentHit ||
-          lastHit && currentHit && currentHit.object.id !== lastHit.object.id,
+        curID = curObj && curObj.id,
+        lastID = lastObj && lastObj.id,
+        changed = curID !== lastID,
         enterEvt = {
           pointer: this,
           buttons: 0,
-          hit: currentHit
+          hit: curHit
         },
         leaveEvt = {
           pointer: this,
@@ -264,30 +197,24 @@ export default class Pointer {
           hit: lastHit
         };
 
-
-      if(currentHit){
-        this.gazeInner.position.z = 0.02 - currentHit.distance;
-      }
-      else{
-         this.gazeInner.position.z = GAZE_RING_DISTANCE;
-      }
-      this.mesh.position.z = this.gazeInner.position.z - 0.02;
-
-      if(currentHit){
-        currentHit.time = performance.now();
+      if(curHit){
+        this.gazeInner.position.z = 0.02 - curHit.distance;
+        curHit.time = performance.now();
 
         this.mesh.material = material("", {
           color: this.highlight,
           unshaded: true
         });
       }
-
-      if(moved){
-        lastHit.point.copy(currentHit.point);
+      else{
+        this.gazeInner.position.z = GAZE_RING_DISTANCE;
       }
 
-      this.gazeInner.visible = this.useGaze;
-      this.mesh.visible = !this.useGaze;
+      this.mesh.position.z = this.gazeInner.position.z - 0.02;
+
+      if(moved){
+        lastHit.point.copy(curHit.point);
+      }
 
       var dButtons = 0;
       for(let i = 0; i < this.triggerDevices.length; ++i) {
@@ -301,86 +228,134 @@ export default class Pointer {
       leaveEvt.buttons = enterEvt.buttons;
 
       if(changed){
-        if(lastHit && lastHit.object) {
-          lastHit.object.emit("exit", leaveEvt);
+        if(lastObj) {
+          this.emit("exit", leaveEvt);
         }
-        if(obj) {
-          obj.emit("enter", enterEvt);
+        if(curObj) {
+          this.emit("enter", enterEvt);
         }
       }
 
       let selected = false;
       if(dButtons){
         if(enterEvt.buttons){
-          if(obj) {
-            obj.emit("pointerstart", enterEvt);
+          if(curObj) {
+            this.emit("pointerstart", enterEvt);
           }
           if(lastHit){
             lastHit.time = performance.now();
           }
         }
-        else{
-          selected = !!currentHit;
-          if(obj) {
-            obj.emit("pointerend", enterEvt);
-          }
+        else if(curObj) {
+          selected = !!curHit;
+          this.emit("pointerend", enterEvt);
         }
       }
-      else if(moved && obj) {
-        obj.emit("pointermove", enterEvt);
+      else if(moved && curObj) {
+        this.emit("pointermove", enterEvt);
       }
 
       if(this.useGaze){
         if(changed) {
           if(dt !== null && dt < this.gazeTimeout){
             this.gazeOuter.visible = false;
-            if(obj) {
-              obj.emit("gazecancel", leaveEvt);
-            } else if(lastHit && lastHit.object) {
-              lastHit.object.emit("gazecancel", leaveEvt);
+            if(lastObj) {
+              this.emit("gazecancel", leaveEvt);
             }
           }
-          if(currentHit){
+          if(curHit){
             this.gazeOuter.visible = true;
-            if(obj) {
-              obj.emit("gazestart", enterEvt);
+            if(curObj) {
+              this.emit("gazestart", enterEvt);
             }
           }
         }
         else if(dt !== null) {
           if(dt >= this.gazeTimeout){
             this.gazeOuter.visible = false;
-            selected = !!currentHit;
-            if(obj) {
-              obj.emit("gazecomplete", enterEvt);
+            if(curObj) {
+              selected = !!curHit;
+              this.emit("gazecomplete", enterEvt);
             }
             lastHit.time = null;
           }
-          else if(currentHit && currentHit.object && hasGazeEvent(currentHit.object)){
+          else if(hasGazeEvent(curObj)){
             var p = Math.round(36 * dt / this.gazeTimeout),
               a = 2 * Math.PI * p / 36;
             this.gazeOuter.geometry = ring(GAZE_RING_INNER, GAZE_RING_OUTER, 36, p, 0, a);
-            if(moved && obj) {
-              obj.emit("gazemove", enterEvt);
+            if(moved && curObj) {
+              this.emit("gazemove", enterEvt);
             }
           }
           else{
-            if(currentHit && currentHit.object) {
-              hasGazeEvent(currentHit.object);
-            }
             this.gazeOuter.visible = false;
           }
         }
       }
 
-      if(selected && obj){
-        obj.emit("select", enterEvt);
+      if(selected){
+        this.emit("select", enterEvt);
       }
 
-      if(changed){
-        this.lastHit = currentHit;
+      if(!changed && curHit && lastHit) {
+        curHit.time = lastHit.time;
       }
+      return true;
     }
+    
+    return false;
+  }
+
+  resolvePicking(objects) {
+    this.mesh.visible = false;
+    this.gazeInner.visible = false;
+    this.mesh.material = material("", {
+      color: this.color,
+      unshaded: true
+    });
+
+    if(this.showPointer){
+      VECTOR_TEMP.set(0, 0, 0)
+        .applyMatrix4(this.matrixWorld);
+      FORWARD.set(0, 0, -1)
+        .applyMatrix4(this.matrixWorld)
+        .sub(VECTOR_TEMP);
+      this.picker.set(VECTOR_TEMP, FORWARD);
+      this.gazeInner.visible = this.useGaze;
+      this.mesh.visible = !this.useGaze;
+      const hits = this.picker.intersectObject(objects, true);
+      for(let i = 0; i < hits.length; ++i) {
+        const hit = hits[i];
+        let obj = hit.object;
+        const origObj = obj;
+    
+        while(obj && !obj.isEntity) {
+          obj = obj.parent;
+        }
+
+        if(!obj) {
+          obj = origObj;
+        }
+
+        if(obj && !obj.pickable) {
+          obj = null;
+        }
+
+        hit.object = obj;
+
+        if(obj && this._check(hit)) {
+          this.lastHit = hit;
+          return;
+        }
+      }
+
+      this._check();
+      this.lastHit = null;
+    }
+  }
+
+  forward(child) {
+    child.watch(this, Pointer.EVENTS);
   }
 }
 

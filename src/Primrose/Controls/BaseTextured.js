@@ -44,11 +44,9 @@ export function eyeBlankAll(eye) {
 export default class BaseTextured extends Entity {
 
   constructor(files, options) {
-    options = Object.assign({
-      id: files.join()
-    }, options);
-
-    super(options);
+    name = options && options.id || files.join();
+    
+    super(name, options);
 
     entities.push(this);
 
@@ -90,22 +88,8 @@ export default class BaseTextured extends Entity {
         this.add(mesh)));
   }
 
-  get _pickingObject() {
-    return this._meshes && this._meshes.length > 0 && this._meshes[0];
-  }
-
-  get disabled() {
-    return this._pickingObject && this._pickingObject.disabled;
-  }
-
-  set disabled(v) {
-    if(this._pickingObject) {
-      this._pickingObject.disabled = v;
-    }
-  }
-
   get blending() {
-    return this._pickingObject && this._pickingObject.material.blending;
+    return this._meshes && this._meshes.length > 0 && this._meshes[0] && this._meshes[0].material.blending;
   }
 
   set blending(v){

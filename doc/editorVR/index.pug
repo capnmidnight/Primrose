@@ -14,21 +14,18 @@ prepend main
         MIDX = WIDTH / 2 - 5,
         MIDY = HEIGHT / 2,
         MIDZ = DEPTH / 2,
-        t = 0,
-        start = put(hub())
-        .on(scene)
-        .at(-MIDX, 0, -DEPTH - 2)
-        .obj();
+        start = hub()
+          .addTo(scene)
+          .at(-MIDX, 0, -DEPTH - 2);
 
       var balls = [];
 
       for (var i = 0; i < 10; ++i) {
-        balls.push(put(brick(DECK))
-          .on(start)
+        balls.push(brick(DECK)
+          .addTo(start)
           .at(number(WIDTH),
             number(HEIGHT),
-            number(DEPTH))
-          .obj());
+            number(DEPTH)));
 
         balls[i].velocity = v3(
           number(WIDTH),
@@ -37,7 +34,6 @@ prepend main
       }
 
       function update(dt) {
-        t += dt;
         for (var i = 0; i < balls.length; ++i) {
           var ball = balls[i],
             p = ball.position,

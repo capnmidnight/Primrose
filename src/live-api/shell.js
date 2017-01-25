@@ -67,8 +67,8 @@ file to use as the texture, execute code as such:\n\
 import cache from "../util/cache";
 import InsideSphereGeometry from "../Primrose/Graphics/InsideSphereGeometry";
 import fixGeometry from "../Primrose/Graphics/fixGeometry";
+const SLICE = 0.45;
 export default function shell(r, slices, rings, phi, theta, options) {
-  var SLICE = 0.45;
   if (phi === undefined) {
     phi = Math.PI * SLICE;
   }

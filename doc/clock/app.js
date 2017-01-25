@@ -30,9 +30,7 @@ var skyColor = 0xffff7f,
   stand = t("stand", 0.1, 0.3, standHeight, 4),
 
   baseHeight = 0.10,
-  base = t("base", 0.35, 0.35, baseHeight, 4),
-
-  time = 0;
+  base = t("base", 0.35, 0.35, baseHeight, 4);
 
 env.sky.add(sun);
 sun.material.fog = false;
@@ -52,15 +50,15 @@ base.position.y += (baseHeight - standHeight) / 2;
 dial.add(hand);
 hand.position.y += handHeight / 2;
 
+
 env.addEventListener("ready", Preloader.hide);
 
-env.addEventListener("update", function(dt) {
-  time += dt;
-  env.sun.latLon(10 - time, 30, sunDistance);
-  sun.position.copy(env.sun.position);
+env.addEventListener("update", function() {
+  env.sky.sun.latLon(10 - env.currentTime, 30, sunDistance);
+  sun.position.copy(env.sky.sun.position);
   sun.lookAt(env.sky.position);
   var s = (1 + sun.position.y / sunDistance) / 2;
-  env.ambient.intensity = 0.5 * s;
+  env.sky.ambient.intensity = 0.5 * s;
   env.scene.fog.color
     .setHex(skyColor)
     .multiplyScalar(s);

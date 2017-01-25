@@ -21,7 +21,7 @@ var height = 8,
       font: "../fonts/helvetiker_regular.typeface.json",
       backgroundColor: 0x000000,
       useFog: true,
-      useGaze: isMobile,
+      useGaze: true,
       drawDistance: 10,
       fullScreenButtonContainer: "#fullScreenButtonContainer",
       progress: Preloader.thunk
@@ -34,13 +34,12 @@ function text(size, text) {
 
 function Board(type){
   this.object = hub();
-  this.title = put(text3D(0.15, type)
+  this.title = text3D(0.15, type)
       .center()
       .colored(colorPlay)
-      .named("text" + type))
-    .on(this.object)
-    .at(0, 0.7, -1.3)
-    .obj();
+      .addTo(this.object)
+      .named("text" + type)
+      .at(0, 0.7, -1.3);
   this.btns = [];
   this.btnState = [];
   this.type = type;
@@ -53,13 +52,14 @@ function Board(type){
         .colored(colorOff)
         .named("btn" + i)
         .latLon(lat, lon);
-    put(box(padSize * 1.1, padSize * 1.1, padDepth * 0.9)
-        .colored(colorPlay)
-        .named("bevel" + i))
-      .on(btn);
-    env.registerPickableObject(btn);
-    btn.onselect = this.select.bind(this, i);
-    btn.onenter = this.play.bind(this, i, 0);
+
+    box(padSize * 1.1, padSize * 1.1, padDepth * 0.9)
+      .colored(colorPlay)
+      .named("bevel" + i)
+      .addTo(btn);
+
+    btn.addEventListener("select", this.select.bind(this, i));
+    btn.addEventListener("enter", this.play.bind(this, i, 0));
     this.object.add(btn);
     this.btns.push(btn);
   }.bind(this));
@@ -106,6 +106,7 @@ Board.prototype.select = function(i, evt) {
 };
 
 env.addEventListener("ready", function () {
+
   var types = Primrose.Audio.Music.TYPES,
     nTypes = types.length;
   types.forEach(function(type, t) {
@@ -118,9 +119,9 @@ env.addEventListener("ready", function () {
   Preloader.hide();
 });
 
-env.addEventListener("update", function(dt){
+env.addEventListener("update", function(){
   if(!skipOne){
-    t += dt;
+    t += env.deltaTime;
     if(t > perMeasure){
       t -= perMeasure;
       measure = (measure + 1) % height;

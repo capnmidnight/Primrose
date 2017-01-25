@@ -9,45 +9,16 @@ import { Object3D } from "three/src/core/Object3D";
 
 export default class Entity extends Object3D {
 
-  constructor(options) {
+  constructor(name, options) {
     super();
+    this.isEntity = true;
+    this.name = name;
     this.options = options || {};
-    this.name = this.options && this.options.id || "";
     this.ready = this._ready.then(() => this);
-  }
-
-  get disabled() {
-    return this._pickingObject && this._pickingObject.disabled;
-  }
-
-  set disabled(v) {
-    if(this._pickingObject) {
-      this._pickingObject.disabled = v;
-    }
+    this.disabled = false;
   }
 
   get _ready() {
     return Promise.resolve();
-  }
-
-  get _pickingObject() {
-    return this.children[0];
-  }
-
-  addEventListener(event, listener) {
-    this.ready.then(() =>
-      this.children.forEach((child) =>
-        child.addEventListener(event, listener)));
-  }
-
-  registerPickableObjects(env){
-    if(this.options.pickable) {
-      this.ready.then(() => env.registerPickableObject(this._pickingObject));
-    }
-  }
-
-  addToBrowserEnvironment(env, scene) {
-    scene.add(this);
-    this.registerPickableObjects(env);
   }
 };

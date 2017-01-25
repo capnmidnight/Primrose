@@ -19,22 +19,12 @@ var COUNTER = 0;
 import Label from "./Label";
 export default class Button2D extends Label {
 
-  static create() {
-    return new Button2D();
-  }
-
   constructor(options) {
     super(Object.assign({}, {
       id: "Primrose.Controls.Button2D[" + (COUNTER++) + "]",
       textAlign: "center"
     }, options));
     this._lastActivated = null;
-  }
-
-  addToBrowserEnvironment(env, scene) {
-    var btn3d = env.buttonFactory.create();
-    btn3d._listeners = this._listeners;
-    return env.appendChild(btn3d);
   }
 
   startPointer(x, y) {

@@ -36,11 +36,14 @@ import isMobile from "../../flags/isMobile";
 
 export default class TextBox extends Surface {
 
-  static create() {
-    return new TextBox();
-  }
-
   constructor(options) {
+
+    if (typeof options === "string") {
+      options = {
+        value: options
+      };
+    }
+
     super(Object.assign({}, {
       id: "Primrose.Controls.TextBox[" + (COUNTER++) + "]"
     }, options));
@@ -49,15 +52,6 @@ export default class TextBox extends Surface {
     ////////////////////////////////////////////////////////////////////////
     // normalize input parameters
     ////////////////////////////////////////////////////////////////////////
-
-    if (typeof options === "string") {
-      this.options = {
-        value: this.options
-      };
-    }
-    else {
-      this.options = options || {};
-    }
 
     this.useCaching = !isFirefox || !isMobile;
 
@@ -108,7 +102,6 @@ export default class TextBox extends Surface {
     // used keys like curly brackets.
     this._browser = isChrome ? "CHROMIUM" : (isFirefox ? "FIREFOX" : (isIE ? "IE" : (isOpera ? "OPERA" : (isSafari ? "SAFARI" : "UNKNOWN"))));
     this._pointer = new Point();
-    this._deadKeyState = "";
     this._history = [];
     this._historyFrame = -1;
     this._topLeftGutter = new Size();
@@ -156,8 +149,7 @@ export default class TextBox extends Surface {
     this.value = this.options.value;
     this.padding = this.options.padding || 1;
 
-    this.addEventListener("focus", this.render.bind(this), false);
-    this.addEventListener("blur", this.render.bind(this), false);
+    this.addEventListener("visiblechanged", this.blur.bind(this));
   }
 
   cursorPageUp(lines, cursor) {
@@ -168,10 +160,6 @@ export default class TextBox extends Surface {
   cursorPageDown(lines, cursor) {
     cursor.incY(this.gridBounds.height, lines);
     this.scrollIntoView(cursor);
-  }
-
-  setDeadKeyState(st) {
-    this._deadKeyState = st || "";
   }
 
   get value() {
@@ -431,29 +419,21 @@ export default class TextBox extends Surface {
   }
 
   keyDown(evt){
-    this.environment.input.Keyboard.doTyping(this, evt);
-  }
-
-  execCommand(browser, codePage, commandName) {
-    if (commandName && this.focused && !this.readOnly) {
-      var altCommandName = browser + "_" + commandName,
-        func = this.commandPack[altCommandName] ||
-        this.commandPack[commandName] ||
-        codePage[altCommandName] ||
-        codePage[commandName];
+    if (this.focused && !this.readOnly) {
+      var func = this.commandPack[evt.altCmdName] ||
+        this.commandPack[evt.cmdName] ||
+        evt.altCmdText ||
+        evt.cmdText;
 
 
       if (func instanceof String || typeof func === "string") {
-        console.log("okay");
+        console.warn("This shouldn't have happened.");
         func = this.commandPack[func] ||
           this.commandPack[func] ||
           func;
       }
 
-      if (func === undefined) {
-        return false;
-      }
-      else {
+      if (func) {
         this.frontCursor.moved = false;
         this.backCursor.moved = false;
         if (func instanceof Function) {
@@ -463,12 +443,14 @@ export default class TextBox extends Surface {
           console.log(func);
           this.selectedText = func;
         }
+        evt.resetDeadKeyState();
+        evt.preventDefault();
+
         if (this.frontCursor.moved && !this.backCursor.moved) {
           this.backCursor.copy(this.frontCursor);
         }
         this.clampScroll();
         this.render();
-        return true;
       }
     }
   }

@@ -216,8 +216,10 @@ export default class FPSInput extends EventDispatcher {
               emissive: highlight
             }));
 
+            ptr.forward(this);
+
             this.pointers.push(ptr);
-            ptr.addToBrowserEnvironment(null, this.options.scene);
+            this.options.scene.add(ptr);
           }
           else {
             mgr = new Gamepad(this.gamepadMgr, pad, 0, {
@@ -276,19 +278,21 @@ export default class FPSInput extends EventDispatcher {
       this.Keyboard
     ], this.options);
 
+    this.head.forward(this);
+
     this.head.rotation.order = "YXZ";
     this.head.useGaze = this.options.useGaze;
     this.pointers.push(this.head);
-    this.options.scene.add(this.head.root);
-    this.options.scene.add(this.head.disk);
+    this.options.scene.add(this.head);
 
     this.mousePointer = new Pointer("MousePointer", 0xff0000, 0x00ff00, 1, [
       this.Mouse
     ], null, this.options);
+
+    this.mousePointer.forward(this);
     this.mousePointer.unproject = new Matrix4();
     this.pointers.push(this.mousePointer);
-    this.head.add(this.mousePointer.root);
-    this.options.scene.add(this.mousePointer.disk);
+    this.head.add(this.mousePointer);
 
 
     this.ready = Promise.all(this.managers
@@ -359,12 +363,8 @@ export default class FPSInput extends EventDispatcher {
     this.head.showPointer = this.VR.hasOrientation && this.options.showHeadPointer;
     this.mousePointer.showPointer = (this.hasMouse || this.hasGamepad) && !this.hasMotionControllers;
 
-    if(this.Keyboard) {
-      this.Keyboard.enabled = this.Touch.enabled = this.Mouse.enabled = !this.hasMotionControllers;
-    }
-
-    if (this.Gamepad_0) {
-      this.Gamepad_0.enabled = !this.hasMotionControllers;
+    if(this.hasTouch) {
+      this.Touch.enabled = !this.hasMotionControllers;
     }
 
     this.updateStage(dt);
@@ -418,7 +418,7 @@ export default class FPSInput extends EventDispatcher {
     if(this.hasMouse) {
       let mouseHeading = null;
       if (this.VR.hasOrientation) {
-        mouseHeading = this.mousePointer.root.rotation.y;
+        mouseHeading = this.mousePointer.rotation.y;
         const newMouseHeading = WEDGE * Math.floor((mouseHeading / WEDGE) + 0.5);
         if(newMouseHeading !== 0){
           this.Mouse.commands.U.offset -= this.Mouse.getValue("U") - 1;
@@ -492,8 +492,9 @@ export default class FPSInput extends EventDispatcher {
 
   resolvePicking(objects) {
     for (let i = 0; i < this.pointers.length; ++i) {
-      const ptr = this.pointers[i];
-      ptr.resolvePicking(objects);
+      this.pointers[i].resolvePicking(objects);
     }
   }
 };
+
+FPSInput.EVENTS = Pointer.EVENTS.slice();

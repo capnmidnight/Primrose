@@ -1,24 +1,25 @@
 import quad from "../../live-api/quad";
 import Entity from "./Entity";
 import Image from "./Image";
+import Pointer from "../Pointer";
 
 export default class Ground extends Entity {
 
   constructor(options) {
-    super({
-      id: "Ground",
+    super("Ground", {
       transparent: false,
-      pickable: true,
       dim: options.drawDistance,
       texture: options.groundTexture,
+      shadow: options.enableShadows,
       progress: options.progress
     });
 
     this._image = null;
 
-    this.ready = this.ready.then(() =>
+    this.ready = this.ready.then(() => {
       this.children.forEach((mesh) =>
-        mesh.rot(-Math.PI / 2, 0, 0)));
+        mesh.rot(-Math.PI / 2, 0, 0));
+    });
   }
 
   get _ready() {
@@ -26,8 +27,8 @@ export default class Ground extends Entity {
       type = typeof  this.options.texture;
 
     if(type === "number") {
-      this.add(quad(dim, dim)
-        .colored(this.options.texture, this.options));
+      this._image = quad(dim, dim)
+        .colored(this.options.texture, this.options);
     }
     else if(type === "string") {
       this._image = new Image(this.options.texture, Object.assign({}, this.options, {
@@ -37,13 +38,16 @@ export default class Ground extends Entity {
         txtRepeatY: dim,
         anisotropy: 8
       }));
-      this.add(this._image);
+    }
+
+    if(this._image) {
+      this._image
+        .named(this.name + "-" + this.options.texture)
+        .addTo(this);
+
+      this.watch(this._image, Pointer.EVENTS);
     }
 
     return this._image && this._image.ready || super._ready;
-  }
-
-  get _pickingObject() {
-    return this._image && this._image._pickingObject || this.children[0];
   }
 };

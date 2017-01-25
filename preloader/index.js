@@ -12,6 +12,12 @@ const prog = {
   loaded: 0,
   total: 0,
 
+  shrink: (size) => {
+    if(prog.bar) {
+      prog.bar.style.height = size;
+    }
+  },
+
   hide: () => {
     if(prog.bar) {
       prog.bar.style.display = "none";

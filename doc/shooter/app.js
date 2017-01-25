@@ -93,7 +93,8 @@ function updateObj(obj, dt) {
   }
 };
 
-env.addEventListener("update", function(dt){
+env.addEventListener("update", function(){
+  const dt = env.deltaTime;
   for(var i = 0; i < blocks.length; ++i){
     var block = blocks[i];
     TEMP.copy(env.input.head.position)
@@ -196,5 +197,4 @@ function shoot(evt){
     .off(0.51);
 }
 
-env.addEventListener("pointerend", shoot);
-env.addEventListener("gazecomplete", shoot);
+env.sky.addEventListener("select", shoot);

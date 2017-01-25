@@ -1,89 +1,106 @@
 import { Vector3 } from "three/src/math/Vector3";
 
-const POSITION = new Vector3(),
-  START_POINT = new Vector3(),
+import sphere from "../../live-api/sphere"
+
+const DIFF = new Vector3(),
   MAX_MOVE_DISTANCE = 5,
   MAX_MOVE_DISTANCE_SQ = MAX_MOVE_DISTANCE * MAX_MOVE_DISTANCE,
+  MAX_TELEPORT_WAGGLE = 0.2,
+  TELEPORT_PAD_RADIUS = 0.4,
   TELEPORT_COOLDOWN = 250;
 
 export default class Teleporter {
-  constructor(env, ground) {
+  constructor(env) {
 
     this.enabled = true;
     this._environment = env;
-    this._ground = ground;
 
-    this._enter = this._enter.bind(this);
-    this._exit = this._exit.bind(this);
+    this._startPoint = new Vector3();
+    this._moveDistance = 0;
+
     this._start = this._start.bind(this);
+    this._exit = this._exit.bind(this);
     this._move = this._move.bind(this);
     this._end = this._end.bind(this);
 
-    ground.addEventListener("exit", this._enter);
-    ground.addEventListener("enter", this._exit);
+    env.ground.on("exit", this._exit)
+      .on("gazecancel", this._exit)
+      .on("gazecomplete", this._exit)
+      .on("pointerend", this._exit)
 
-    ground.addEventListener("pointerstart", this._start);
-    ground.addEventListener("gazestart", this._start);
+      .on("pointerstart", this._start)
+      .on("gazestart", this._start)
 
-    ground.addEventListener("pointermove", this._move);
-    ground.addEventListener("gazemove", this._move);
+      .on("pointermove", this._move)
+      .on("gazemove", this._move)
 
-    ground.addEventListener("pointerend", this._end);
-    ground.addEventListener("gazecomplete", this._end);
-  }
+      .on("select", this._end);
 
-  _enter(evt) {
-    if(this.enabled) {
-      evt.pointer.disk.visible = false;
-    }
+
+    this.disk = sphere(TELEPORT_PAD_RADIUS, 128, 3)
+      .colored(0xff0000, {
+        unshaded: true
+      })
+      .named("disk")
+      .addTo(env.scene);
+
+    this.disk.geometry.computeBoundingBox();
+    this.disk.geometry.vertices.forEach((v) => {
+      v.y = 0.1 * (v.y - this.disk.geometry.boundingBox.min.y);
+    });
+    this.disk.geometry.computeBoundingBox();
+
+    this.disk.visible = false;
   }
 
   _exit(evt) {
-    if(this.enabled) {
-      this._updatePosition(evt);
-      evt.pointer.disk.visible = true;
-    }
+    this.disk.visible = false;
   }
 
-  _start(evt) {
-    if(this.enabled) {
+  _start(evt){
+    if(this.enabled){
       this._updatePosition(evt);
-      START_POINT.copy(POSITION);
+      this.disk.visible = true;
+      this._moveDistance = 0;
     }
   }
 
   _move(evt) {
     if(this.enabled) {
       this._updatePosition(evt);
-      evt.pointer.moveTeleportPad(POSITION);
+      this.disk.visible = true;
     }
   }
 
   _end(evt) {
     if(this.enabled) {
       this._updatePosition(evt);
-      START_POINT.sub(POSITION);
-      const len = START_POINT.lengthSq();
-      if(len < 0.01){
-        this._environment.teleport(POSITION);
+      if(this._moveDistance < MAX_TELEPORT_WAGGLE) {
+        this._environment.teleport(this.disk.position);
       }
     }
   }
 
   _updatePosition(evt) {
-    POSITION.copy(evt.hit.point)
+    this._startPoint.copy(this.disk.position);
+    this.disk.position.copy(evt.hit.point)
       .sub(this._environment.input.head.position);
 
-    var distSq = POSITION.x * POSITION.x + POSITION.z * POSITION.z;
+    var distSq = this.disk.position.x * this.disk.position.x + this.disk.position.z * this.disk.position.z;
     if (distSq > MAX_MOVE_DISTANCE_SQ) {
       var dist = Math.sqrt(distSq),
         factor = MAX_MOVE_DISTANCE / dist,
-        y = POSITION.y;
-      POSITION.y = 0;
-      POSITION.multiplyScalar(factor);
-      POSITION.y = y;
+        y = this.disk.position.y;
+      this.disk.position.y = 0;
+      this.disk.position.multiplyScalar(factor);
+      this.disk.position.y = y;
     }
 
-    POSITION.add(this._environment.input.head.position);
+    this.disk.position.add(this._environment.input.head.position);
+
+    const len = DIFF.copy(this.disk.position)
+      .sub(this._startPoint)
+      .length();
+    this._moveDistance += len;
   }
 };

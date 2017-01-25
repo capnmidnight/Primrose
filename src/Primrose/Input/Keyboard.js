@@ -39,22 +39,18 @@ export default class Keyboard extends InputProcessor {
     this._operatingSystem = null;
     this.browser = isChrome ? "CHROMIUM" : (isFirefox ? "FIREFOX" : (isIE ? "IE" : (isOpera ? "OPERA" : (isSafari ? "SAFARI" : "UNKNOWN"))));
     this._codePage = null;
+    this.resetDeadKeyState = () => this.codePage.resetDeadKeyState();
   }
 
-  dispatchEvent(evt) {
-    this.setButton(evt.keyCode, evt.type === "keydown");
-  }
-
-  doTyping(elem, evt) {
-    if (elem && elem.execCommand && this.operatingSystem && this.browser && this.codePage) {
-      var oldDeadKeyState = this.operatingSystem._deadKeyState,
-        cmdName = this.operatingSystem.makeCommandName(evt, this.codePage);
-      if (elem.execCommand(this.browser, this.codePage, cmdName)) {
-        evt.preventDefault();
-      }
-      if (this.operatingSystem._deadKeyState === oldDeadKeyState) {
-        this.operatingSystem._deadKeyState = "";
-      }
+  consumeEvent(evt) {
+    const isKeyDown = evt.type === "keydown";
+    this.setButton(evt.keyCode, isKeyDown);
+    if(isKeyDown) {
+      evt.cmdName = this.operatingSystem.makeCommandName(evt, this.codePage);
+      evt.altCmdName = this.browser + "_" + evt.cmdName;
+      evt.cmdText = this.codePage[evt.cmdName];
+      evt.altCmdText = this.codePage[evt.altCmdName];
+      evt.resetDeadKeyState = this.resetDeadKeyState;
     }
   }
 

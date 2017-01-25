@@ -1,7 +1,7 @@
 pliny.class({
   parent: "Primrose.Controls",
   name: "Button3D",
-  baseClass: "Primrose.Controls.BaseControl",
+  baseClass: "Primrose.Controls.Entity",
   parameters: [{
     name: "model",
     type: "THREE.Object3D",
@@ -18,20 +18,12 @@ pliny.class({
   description: "A 3D button control, with a separate cap from a stand that it sits on. You click and depress the cap on top of the stand to actuate."
 });
 
-import BaseControl from "./BaseControl";
+import Entity from "./Entity";
 import { Color } from "three/src/math/Color";
-import { Object3D } from "three/src/core/Object3D";
-export default class Button3D extends BaseControl {
+export default class Button3D extends Entity {
   constructor(model, buttonName, options) {
-    super();
+    super(buttonName, Object.assign({}, Button3D.DEFAULTS, options));
 
-    pliny.property({
-      parent: "Primrose.Controls.Button3D",
-      name: "options",
-      type: "Object",
-      description: "Options for how buttons are handled."
-    });
-    this.options = Object.assign({}, Button3D, options);
     this.options.minDeflection = Math.cos(this.options.minDeflection);
     this.options.colorUnpressed = new Color(this.options.colorUnpressed);
     this.options.colorPressed = new Color(this.options.colorPressed);
@@ -68,15 +60,8 @@ export default class Button3D extends BaseControl {
     this.cap.button = this;
     this.cap.base = this.base;
 
-    pliny.property({
-      parent: "Primrose.Controls.Button3D",
-      name: "container",
-      type: "THREE.Object3D",
-      description: "A grouping collection for the base and cap."
-    });
-    this.container = new Object3D();
-    this.container.add(this.base);
-    this.container.add(this.cap);
+    this.add(this.base);
+    this.add(this.cap);
 
     pliny.property({
       parent: "Primrose.Controls.Button3D",
@@ -143,11 +128,11 @@ export default class Button3D extends BaseControl {
     this.emit("release", { source: this });
   }
 
-  dispatchEvent(evt) {
+  consumeEvent(evt) {
 
     pliny.method({
       parent: "Primrose.Controls.Button3D",
-      name: "dispatchEvent",
+      name: "consumeEvent",
       description: "Route events.",
       parameters: [{
         name: "evt",
@@ -168,39 +153,6 @@ export default class Button3D extends BaseControl {
         setTimeout(() => this.endPointer(evt), 100);
       break;
     }
-  }
-
-  get position() {
-
-    pliny.property({
-      parent: "Primrose.Controls.Button3D",
-      name: "position",
-      type: "THREE.Vector3",
-      description: "The location of the button."
-    });
-    return this.container.position;
-  }
-
-  addToBrowserEnvironment(env, scene) {
-
-    pliny.method({
-      parent: "Primrose.Controls.Button3D",
-      name: "addToBrowserEnvironment",
-      description: "Add the button to the scene, registering it as a pickable object in the environment.",
-      parameters: [{
-        name: "env",
-        type: "Primrose.BrowserEnvironment",
-        description: "The environment in which to register the pickable object."
-      }, {
-        name: "scene",
-        type: "THREE.Object3D",
-        description: "The position in the scene graph in which to insert the button."
-      }]
-    });
-
-    scene.add(this.container);
-    env.registerPickableObject(this.cap);
-    return this.container;
   }
 }
 

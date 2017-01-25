@@ -67,7 +67,7 @@ pliny.record({
 
 import cache from "../util/cache";
 import fixGeometry from "../Primrose/Graphics/fixGeometry";
-import { PlaneBufferGeometry } from "three/src/geometries/PlaneBufferGeometry";
+import { PlaneBufferGeometry } from "three/src/geometries/PlaneGeometry";
 export default function quad(width, height, options) {
 
   if (width === undefined) {

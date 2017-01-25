@@ -1,3 +1,6 @@
+/// NOTE: maybe BrowserEnvironment should be a subclass of THREE.Scene.
+
+
 import { packageName, version, homepage } from "../../package.json";
 console.info(`[${packageName} v${version}]:> see ${homepage} for more information.`);
 
@@ -182,23 +185,16 @@ pliny.record({
     type: "Number",
     optional: true,
     description: "When creating a neck model, this is the how far apart to set the eyes. I highly suggest you don't go down the road that requires setting this. I will not help you understand what it does, because I would rather you just not use it."
-  }, {
-    name: "eyeRenderOrder",
-    type: "Array of String",
-    optional: true,
-    default: `["left", "right"]`,
-    description: "The order in which to draw the stereo view. I highly suggest you don't go down the road that requires setting this. I will not help you understand what it does, because I would rather you just not use it."
   }]
 });
 
 const MILLISECONDS_TO_SECONDS = 0.001,
-  TELEPORT_DISPLACEMENT = new Vector3(),
-  GROUND_HEIGHT = -0.07,
-  EYE_INDICES = { "left": 0, "right": 1 };
+  TELEPORT_DISPLACEMENT = new Vector3();
 
 import PointerLock from "../util/PointerLock";
 
 import isiOS from "../flags/isiOS";
+import isMobile from "../flags/isMobile";
 
 import box from "../live-api/box";
 import brick from "../live-api/brick";
@@ -248,6 +244,7 @@ import { Quality, PIXEL_SCALES } from "./Constants";
 
 
 import { EventDispatcher } from "three/src/core/EventDispatcher";
+import { Object3D } from "three/src/core/Object3D";
 import { BackSide, PCFSoftShadowMap } from "three/src/constants";
 import { FogExp2 } from "three/src/scenes/FogExp2";
 import { Scene } from "three/src/scenes/Scene";
@@ -273,6 +270,8 @@ export default class BrowserEnvironment extends EventDispatcher {
 
     this.options.foregroundColor = this.options.foregroundColor || complementColor(new Color(this.options.backgroundColor))
       .getHex();
+
+    this.deltaTime = 1;
 
     pliny.property({
       parent: "Primrose.BrowserEnvironment",
@@ -309,38 +308,66 @@ export default class BrowserEnvironment extends EventDispatcher {
       }
     };
 
+    let missedFrames = 0;
     const update = (dt) => {
       dt *= MILLISECONDS_TO_SECONDS;
-      this.input.update(dt);
-      doPicking();
-      moveGround();
-      moveUI();
-      if(this.network){
-        this.network.update(dt);
-      }
+      if(dt > 0) {
+        const fps = Math.round(1 / dt);
+        dt = 1 / fps;
+        this.deltaTime = Math.min(this.deltaTime, dt);
+        
 
-      pliny.event({
-        parent: "Primrose.BrowserEnvironment",
-        name: "update",
-        description: "Fires after every animation update."
-      });
-      this.emit("update");
+        // if we missed way too many frames in one go, just update once, otherwise we'll end up locking up the system.    
+        let numFrames = dt / this.deltaTime;
+        if(numFrames > 1) {
+          missedFrames += numFrames;
+          if(numFrames > 10) {
+            numFrames = 1;
+          }
+        }
+        else if(missedFrames > 0) {
+          missedFrames -= 0.1;
+        }
+
+        if(missedFrames >= 10) {
+          this.deltaTime = dt;
+          missedFrames = 0;
+        }
+
+        updateFade(dt);
+
+        for(let frame = 0; frame < numFrames; ++frame) {
+          this.input.update(this.deltaTime);
+          
+          if(frame === 0) {
+            doPicking();
+            moveGround();
+            moveUI();
+          }
+
+          pliny.event({
+            parent: "Primrose.BrowserEnvironment",
+            name: "update",
+            description: "Fires after every animation update."
+          });
+          try {
+            this.emit("update");
+          }
+          catch(exp){
+            // don't let user script kill the runtime
+            console.error("User update errored", exp);
+          }
+
+          if(frame === 0 && this.network){
+            this.network.update(dt);
+          }
+        }
+      }
     };
 
     const doPicking = () => {
       updateAll();
-      for(let i = this.pickableObjects.length - 1; i >= 0; --i){
-        let inScene = false;
-        for(let head = this.pickableObjects[i].parent; head !== null; head = head.parent){
-          if(head === this.scene){
-            inScene = true;
-          }
-        }
-        if(!inScene) {
-          this.pickableObjects.splice(i, 1);
-        }
-      }
-      this.input.resolvePicking(this.pickableObjects.filter((obj) => !obj.disabled));
+      this.input.resolvePicking(this.scene);
     };
 
     const moveGround = () => {
@@ -351,7 +378,7 @@ export default class BrowserEnvironment extends EventDispatcher {
       if (this.ground) {
         this.ground.position.set(
           Math.floor(this.input.head.position.x),
-          GROUND_HEIGHT,
+          0,
           Math.floor(this.input.head.position.z));
         if(this.ground.material){
           this.ground.material.needsUpdate = true;
@@ -371,14 +398,17 @@ export default class BrowserEnvironment extends EventDispatcher {
       maxY = Math.PI / 6;
 
     const moveUI = (dt) => {
-      var y = this.vicinity.position.y;
-      this.vicinity.position.lerp(this.input.head.position, this.options.vicinityFollowRate);
+      var y = this.vicinity.position.y,
+        p = this.options.vicinityFollowRate,
+        q = 1 - p;
+      this.vicinity.position.lerp(this.input.head.position, p);
       this.vicinity.position.y = y;
 
       followEuler.setFromQuaternion(this.input.head.quaternion);
       this.turns.radians = followEuler.y;
       followEuler.set(maxX, this.turns.radians, 0, "YXZ");
-      this.ui.quaternion.setFromEuler(followEuler);
+      this.ui.quaternion.setFromEuler(followEuler)
+      this.ui.position.y = this.ui.position.y * q + this.input.head.position.y * p;
     };
 
     var animate = (t) => {
@@ -399,21 +429,17 @@ export default class BrowserEnvironment extends EventDispatcher {
       var trans = this.input.VR.getTransforms(
         this.options.nearPlane,
         this.options.nearPlane + this.options.drawDistance);
-      for (var n = 0; trans && n < trans.length; ++n) {
-        var eye = this.options.eyeRenderOrder[n],
-          i = EYE_INDICES[eye],
-          st = trans[i] || trans[1 - i];
-        if(!st) {
-          i = 1 - i;
-          st = trans[i];
-        }
-        var v = st.viewport;
+      for (var i = 0; trans && i < trans.length; ++i) {
         eyeBlankAll(i);
 
-        if(trans.length > 1) {
-          var side = (2 * i) - 1;
-          if(this.options.nonstandardIPD !== null && st.translation.x !== 0){
-            st.translation.x = Math.sign(st.translation.x) * this.options.nonstandardIPD;
+        var st = trans[i],
+          v = st.viewport;
+
+        // if we're rendering with an eye offset
+        if(st.translation.x !== 0) {
+          // ... and we have non-standard offset values to use:
+          if(this.options.nonstandardIPD !== null){
+            st.translation.x *= this.options.nonstandardIPD / Math.abs(st.translation.x);
           }
           if(this.options.nonstandardNeckLength !== null){
             st.translation.y = this.options.nonstandardNeckLength;
@@ -422,11 +448,13 @@ export default class BrowserEnvironment extends EventDispatcher {
             st.translation.z = this.options.nonstandardNeckDepth;
           }
         }
+
         this.renderer.setViewport(
           v.left * resolutionScale,
           v.top * resolutionScale,
           v.width * resolutionScale,
           v.height * resolutionScale);
+
         this.camera.projectionMatrix.copy(st.projection);
         if (this.input.mousePointer.unproject) {
           this.input.mousePointer.unproject.getInverse(st.projection);
@@ -490,55 +518,7 @@ export default class BrowserEnvironment extends EventDispatcher {
       description: "A database of object factories, generally used to create 3D models."
     });
     this.factories = {
-      button: Button2D,
-      img: Image,
-      section: Surface,
-      textarea: TextBox,
-      avatar: null,
-      pre: {
-        create: () => new TextBox({
-          tokenizer: PlainText,
-          hideLineNumbers: true,
-          readOnly: true
-        })
-      }
-    };
-
-    pliny.method({
-      parent: "Primrose.BrowserEnvironment",
-      name: "createElement",
-      description: "Different types of HTML elements are represented by different types of 3D elements. This method provides a DOM-like interface for creating them.",
-      returns: "Primrose.Entity",
-      parameters: [{
-        name: "type",
-        type: "String",
-        description: "The type of object to create."
-      }]
-    });
-    this.createElement = (type) => {
-      if (this.factories[type]) {
-        return this.factories[type].create();
-      }
-    };
-
-    pliny.method({
-      parent: "Primrose.BrowserEnvironment",
-      name: "appendChild",
-      description: "Add an object to the scene, potentially informing the object so that it may perform other tasks during the transition.",
-      returns: "THREE.Object3D",
-      parameters: [{
-        name: "elem",
-        type: "THREE.Object3D",
-        description: "The object to add to the scene."
-      }]
-    });
-    this.appendChild = (elem) => {
-      if (elem.isMesh) {
-        this.scene.add(elem);
-      }
-      else {
-        return elem.addToBrowserEnvironment(this, this.scene);
-      }
+      avatar: null
     };
 
     function setColor(model, color) {
@@ -647,33 +627,8 @@ export default class BrowserEnvironment extends EventDispatcher {
 
     pliny.property({
       parent: "Primrose.BrowserEnvironment",
-      name: "pickableObjects",
-      type: "Array",
-      description: "The objects to raycast against to check for clicks."
-    });
-    this.pickableObjects = [];
-
-
-    pliny.method({
-      parent: "Primrose.BrowserEnvironment",
-      name: "registerPickableObject",
-      description: "Add an object to the list of pickable objects.",
-      parameters: [{
-        name: "obj",
-        type: "Any",
-        description: "The object to make pickable."
-      }]
-    });
-    this.registerPickableObject = (obj) => {
-      if(obj) {
-        this.pickableObjects.push(obj);
-      }
-    };
-
-    pliny.property({
-      parent: "Primrose.BrowserEnvironment",
       name: "currentControl",
-      type: "Primrose.Control.BaseControl",
+      type: "Primrose.Control.Entity",
       description: "The currently selected control, by a user-click or some other function."
     });
     this.currentControl = null;
@@ -685,17 +640,26 @@ export default class BrowserEnvironment extends EventDispatcher {
       returns: "Promise",
       description: "Causes the fully rendered view fade out to the color provided `options.backgroundColor`"
     });
-    const FADE_SPEED = 0.1;
+    let fadeOutPromise = null,
+      fadeOutPromiseResolver = null,
+      fadeInPromise = null,
+      fadeInPromiseResolver = null;
     this.fadeOut = () => {
-      return new Promise((resolve, reject) => {
-        var timer = setInterval(() => {
-          this.fader.material.opacity += FADE_SPEED;
-          if(this.fader.material.opacity >= 1){
-            clearInterval(timer);
-            resolve();
-          }
-        }, 10);
-      });
+      if(fadeInPromise) {
+        return Promise.reject("Currently fading in.");
+      }
+      if(!fadeOutPromise) {
+        this.fader.visible = true;
+        this.fader.material.opacity = 0;
+        this.fader.material.needsUpdate = true;
+        fadeOutPromise = new Promise((resolve, reject) =>
+          fadeOutPromiseResolver = (obj) => {
+            fadeOutPromise = null;
+            fadeOutPromiseResolver = null;
+            resolve(obj);
+          });
+      }
+      return fadeOutPromise;
     };
 
 
@@ -706,15 +670,41 @@ export default class BrowserEnvironment extends EventDispatcher {
       description: "Causes the faded out cube to disappear."
     });
     this.fadeIn = () => {
-      return new Promise((resolve, reject) => {
-        var timer = setInterval(() => {
-          this.fader.material.opacity -= FADE_SPEED;
-          if(this.fader.material.opacity <= 0){
-            clearInterval(timer);
-            resolve();
+      if(fadeOutPromise) {
+        return Promise.reject("Currently fading out.");
+      }
+      if(!fadeInPromise){
+        fadeInPromise = new Promise((resolve, reject) =>
+          fadeInPromiseResolver = (obj) => {
+            fadeInPromise = null;
+            fadeInPromiseResolver = null;
+            this.fader.visible = false;
+            resolve(obj);
+          });
+      }
+      return fadeInPromise;
+    };
+
+    const updateFade = (dt) => {
+      if(fadeOutPromise || fadeInPromise) {
+        const m = this.fader.material,
+          f = this.options.fadeRate * dt;
+        m.needsUpdate = true;
+        if(fadeOutPromise) {
+          m.opacity += f;
+          if(1 <= m.opacity){
+            m.opacity = 1;
+            fadeOutPromiseResolver();
           }
-        }, 10);
-      });
+        }
+        else {
+          m.opacity -= f;
+          if(m.opacity <= 0){
+            m.opacity = 0;
+            fadeInPromiseResolver();
+          }
+        }
+      }
     };
 
     pliny.property({
@@ -742,12 +732,10 @@ export default class BrowserEnvironment extends EventDispatcher {
         return Promise.resolve();
       }
       else if(!check || check()){
-        this.fader.visible = true;
         return this.fadeOut()
           .then(thunk)
-          .then(() => this.fadeIn())
-          .catch(console.warn.bind(console, "Error while transitioning"))
-          .then(() => this.fader.visible = false);
+          .then(this.fadeIn)
+          .catch(console.warn.bind(console, "Error transitioning"));
       }
     };
 
@@ -776,9 +764,20 @@ export default class BrowserEnvironment extends EventDispatcher {
         .length() > 0.2,
       immediate);
 
+    const delesectControl = () => {
+      if(this.currentControl) {
+        this.currentControl.removeEventListener("blur", delesectControl);
+        this.input.Keyboard.enabled = true;
+        this.input.Mouse.commands.pitch.disabled =
+        this.input.Mouse.commands.heading.disabled = this.input.VR.isPresenting;
+        this.currentControl.blur();
+        this.currentControl = null;
+      }
+    };
+
     pliny.method({
       parent: "Primrose.BrowserEnvironment",
-      name: "selectControl",
+      name: "consumeEvent",
       description: "Handles pointer interactions and differentiates between teleportation and selecting controls on the screen.",
       parameters: [{
         name: "evt",
@@ -786,23 +785,22 @@ export default class BrowserEnvironment extends EventDispatcher {
         description: "A pointer click event that triggered."
       }]
     });
-    this.selectControl = (evt) => {
-      const hit = evt.hit,
-        obj = hit && hit.object;
-        console.log(evt.type, obj);
+    this.consumeEvent = (evt) => {
+      const obj = evt.hit && evt.hit.object,
+        cancel = evt.type === "exit" || evt.cmdName === "NORMAL_ESCAPE";
+      
+      if(evt.type === "select" || cancel) {
+        
+        if(obj !== this.currentControl || cancel){
 
-      if(evt.type === "pointerstart" || evt.type === "gazecomplete"){
-        const ctrl = obj && (obj.surface || obj.button);
-        if(ctrl !== this.currentControl){
-          if(this.currentControl){
-            this.currentControl.blur();
-            this.input.Mouse.commands.pitch.disabled =
-            this.input.Mouse.commands.heading.disabled = false;
-          }
-          this.currentControl = ctrl;
-          if(this.currentControl){
+          delesectControl();
+
+          if(!cancel && obj.isSurface){
+            this.currentControl = obj;
             this.currentControl.focus();
-            if(obj.surface){
+            this.currentControl.addEventListener("blur", delesectControl);
+            if(this.currentControl.lockMovement) {
+              this.input.Keyboard.enabled = false;
               this.input.Mouse.commands.pitch.disabled =
               this.input.Mouse.commands.heading.disabled = !this.input.VR.isPresenting;
             }
@@ -810,20 +808,14 @@ export default class BrowserEnvironment extends EventDispatcher {
         }
       }
 
-      if(this.currentControl){
-        if(this.currentControl.dispatchEvent){
-          this.currentControl.dispatchEvent(evt);
-        }
-        else{
-          console.log(this.currentControl);
-        }
+      if(obj) {
+        obj.dispatchEvent(evt);
       }
-      else if(obj) {
-        const handler = obj["on" + evt.type];
-        if(handler){
-          handler(evt);
-        }
+      else if(this.currentControl){
+        this.currentControl.dispatchEvent(evt);
       }
+
+      this.dispatchEvent(evt);
     };
 
     pliny.property({
@@ -852,8 +844,8 @@ export default class BrowserEnvironment extends EventDispatcher {
       type: "THREE.Object3D",
       description: "If a `skyTexture` option is provided, it will be a texture cube or photosphere. If no `skyTexture` option is provided, there will only be a THREE.Object3D, to create an anchor point on which implementing scripts can add objects that follow the user's position."
     });
-    this.sky = new Sky(this.options);
-    this.appendChild(this.sky);
+    this.sky = new Sky(this.options)
+      .addTo(this.scene);
 
 
     pliny.property({
@@ -862,10 +854,10 @@ export default class BrowserEnvironment extends EventDispatcher {
       type: "THREE.Object3D",
       description: "If a `groundTexture` option is provided, it will be a flat plane extending to infinity. As the user moves, the ground will shift under them by whole texture repeats, making the ground look infinite."
     });
-    this.ground = new Ground(this.options);
-    this.appendChild(this.ground);
+    this.ground = new Ground(this.options)
+      .addTo(this.scene);
 
-    this.teleporter = new Teleporter(this, this.ground);
+    this.teleporter = new Teleporter(this);
 
 
     pliny.property({
@@ -1029,7 +1021,8 @@ export default class BrowserEnvironment extends EventDispatcher {
         description: "The input manager."
       });
       this.input = new FPSInput(this.options.fullScreenElement, this.options);
-      this.input.addEventListener("zero", this.zero, false);
+      this.input.addEventListener("zero", this.zero);
+      this.input.route(FPSInput.EVENTS, this.consumeEvent.bind(this));
       this.input.VR.ready.then((displays) => displays.forEach((display, i) => {
         window.addEventListener("vrdisplayactivate", (evt) => {
           if(evt.display === display) {
@@ -1051,7 +1044,7 @@ export default class BrowserEnvironment extends EventDispatcher {
         side: BackSide
       });
       this.fader.visible = false;
-      this.input.head.root.add(this.fader);
+      this.input.head.add(this.fader);
 
       pliny.event({
         parent: "Primrose.BrowserEnvironment",
@@ -1122,35 +1115,13 @@ export default class BrowserEnvironment extends EventDispatcher {
               }
             }
 
-            if(!this.lockMovement){
-              this.input.Keyboard.dispatchEvent(evt);
-            }
-            else if(this.currentControl){
-              this.currentControl.keyDown(evt);
-            }
-
-            pliny.event({
-              parent: "Primrose.BrowserEnvironment",
-              name: "keydown",
-              description: "Standard browser KeyDown event. Bind to this version, rather than the window or document, as certain checks involving user state and locking movement to text boxes are performed."
-            });
-            this.emit("keydown", evt);
+            this.input.Keyboard.consumeEvent(evt);
+            this.consumeEvent(evt);
           },
 
           keyUp = (evt) => {
-            if(!this.lockMovement){
-              this.input.Keyboard.dispatchEvent(evt);
-            }
-            else if(this.currentControl){
-              this.currentControl.keyUp(evt);
-            }
-
-            pliny.event({
-              parent: "Primrose.BrowserEnvironment",
-              name: "keyup",
-              description: "Standard browser KeyUp event. Bind to this version, rather than the window or document, as certain checks involving user state and locking movement to text boxes are performed."
-            });
-            this.emit("keyup", evt);
+            this.input.Keyboard.consumeEvent(evt);
+            this.consumeEvent(evt);
           },
 
           withCurrentControl = (name) => {
@@ -1238,10 +1209,6 @@ export default class BrowserEnvironment extends EventDispatcher {
           this.sky.sun.castShadow = true;
           this.sky.sun.shadow.mapSize.width =
           this.sky.sun.shadow.mapSize.height = this.options.shadowMapSize;
-          if(this.ground.material){
-            this.ground.receiveShadow = true;
-            this.ground.castShadow = true;
-          }
         }
 
         this.input.VR.displays.forEach((display) => {
@@ -1262,9 +1229,6 @@ export default class BrowserEnvironment extends EventDispatcher {
           description: "Fires after the initial assets have been downloaded and the scene initialized, just before animation starts."
         });
         this.emit("ready");
-        window.dispatchEvent(new CustomEvent("vrbrowserenvironmentready", {
-          detail: this
-        }));
       });
 
 
@@ -1495,7 +1459,7 @@ export default class BrowserEnvironment extends EventDispatcher {
 BrowserEnvironment.DEFAULTS = {
   antialias: true,
   quality: Quality.MAXIMUM,
-  useGaze: false,
+  useGaze: isMobile,
   useFog: false,
   avatarHeight: 1.65,
   walkSpeed: 2,
@@ -1503,6 +1467,9 @@ BrowserEnvironment.DEFAULTS = {
   enableShadows: false,
   shadowMapSize: 1024,
   progress: null,
+  // The rate at which the view fades in and out.
+  fadeRate: 5,
+  // The rate at which the UI shell catches up with the user's movement.
   vicinityFollowRate: 0.02,
   // The acceleration applied to falling objects.
   gravity: 9.8,
@@ -1538,7 +1505,6 @@ BrowserEnvironment.DEFAULTS = {
   nonstandardNeckDepth: null,
   showHeadPointer: true,
   // WARNING: I highly suggest you don't go down the road that requires the following settings this. I will not help you understand what they do, because I would rather you just not use them.
-  eyeRenderOrder: ["left", "right"],
   nonstandardIPD: null,
   disableAdvertising: false
 };
