@@ -1,17 +1,24 @@
 <!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, shrink-to-fit=0, initial-scale=1.0"><meta name="apple-touch-fullscreen" content="yes"><meta name="web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="theme-color" content="black"><meta name="description" content="A WebVR application framework."><meta name="keywords" content="WebGL, WebVR, HTML5, JavaScript, text editor, source code editor, virtual reality, Primrose"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@Primrose_VR"><meta property="og:site_name" content="Primrose VR"><meta property="og:description" content="Primrose: Framework for WebVR Applications"><meta name="twitter:description" content="Primrose: Framework for WebVR Applications"><meta property="og:url" content="http://www.primrosevr.com/undefined"><!-- start main.pug meta block --><meta name="twitter:image" content="http://www.primrosevr.com/images/screenshot.jpg"><meta property="og:image" content="http://www.primrosevr.com/images/screenshot.jpg"><!-- end main.pug meta block -->
 <!-- start main.pug title block --><meta property="og:title" content="Primrose VR: WebVR Application Framework"><meta name="twitter:title" content="Primrose VR: WebVR Application Framework"><title>Primrose VR: WebVR Application Framework</title><!-- end main.pug title block --><link type="text/css" rel="stylesheet" href="../doc/style.min.css"><!-- start documentation.pug head append --><script src="../node_modules/lavu-details-polyfill/lib/index.min.js"></script><script src="../node_modules/pliny/pliny.min.js"></script><script src="../Primrose.min.js"></script><script src="../doc/PrimroseDocumentation.min.js"></script><!-- end documentation.pug head append --><script src="../ga.js"></script></head><body><header role="banner"><a id="logo" href="../"><img src="../doc/images/primrose40.png" alt="logo" title="Primrose logo"><span class="version-number">v0.31.0</span></a><nav role="navigation"><ul><li><a href="../doc/">Docs</a></li><li><a href="../doc/faq.html">FAQ</a></li><li><a href="../doc/community.html">Community</a></li><li><a href="https://github.com/NotionTheory/Primrose/" target="_blank">Github</a></li></ul></nav><h1>README</h1></header><!-- start main.pug banner block --><!-- end main.pug banner block -->
 <!-- start main.pug main block --><main><!-- start documentation.pug main block --><div id="top"></div><div id="contents"><nav><ul><li><a href="../doc/readme.html">Installation &amp; Setup</a></li><li><a href="../doc/contributing.html">Contributing</a></li><li><a href="../doc/demos.html">Demos</a></li><li><a href="../doc/changelog.html">Change Log</a></li><li><a href="../doc/steamVRDongles.html">Pairing Multiple SteamVR Controllers</a></li></ul></nav></div><div id="documentation"><section><article><!-- start documentation.pug documentation block --><h1 id="primrose">Primrose</h1>
-<p>Primrose is a WebVR framework that allows web developers to create virtual reality experiences for standard web browsers on desktop and mobile devices alike.</p>
+<p>Primrose is a WebVR framework that lets web developers create virtual reality experiences for standard web browsers on desktop and mobile devices alike.</p>
 <p>WebVR is an <a href="https://developer.mozilla.org/en-US/docs/Web/API/WebVR_API">experimental Javascript API</a> that provides access to Virtual Reality devices and peripherals in the browser. See <a href="https://webvr.info/">WebVR.info</a> for more information and resources.</p>
 <h1 id="getting-started-with-primrose">Getting started with Primrose</h1>
-<h3 id="contributing">Contributing</h3>
-<p>If you&#39;re interested in contributing to the framework, we&#39;d love to have you involved. Please <a href="https://github.com/NotionTheory/Primrose/blob/master/CONTRIBUTING.md">read the guidelines</a> for contributing before doing so.</p>
-<h3 id="project-setup">Project Setup</h3>
+<h2 id="contributing">Contributing</h2>
+<p>If you&#39;re interested in contributing to the framework, we&#39;d love to have you involved. Primrose is open to contributors of all skill levels and we are ready and willing to help beginners work through issues. Please <a href="https://github.com/NotionTheory/Primrose/blob/master/CONTRIBUTING.md">read the guidelines</a> for contributing before doing so.</p>
+<p>If you don&#39;t want to write code or you don&#39;t have a lot of spare time, you still can help! Testing the various demos to make sure we haven&#39;t broken any features and filing issues when we do is very important.</p>
+<p>Our GitHub contributors so far:</p>
+<p><a href="https://github.com/NotionTheory/Primrose/contributors">https://github.com/NotionTheory/Primrose/contributors</a>
+You can add your name to it! :)</p>
+<p>The easiest way to get started is to check the issues list for issues with the <code>first-timers-only</code> label.</p>
+<h2 id="issues">Issues</h2>
+<p>Our <a href="https://github.com/NotionTheory/Primrose/issues">Issues List</a> is here on GitHub. If you&#39;re a brand new developer, please take a look at our Issues List and find an issue labeled <code>first-timers-only</code>. These are introductory tasks that we have reserved that will gently guide you into getting the project setup on your machine and get used to working on the code base.</p>
+<p><a href="http://www.firsttimersonly.com/"><img src="http://img.shields.io/badge/first--timers--only-friendly-blue.svg?style=flat-square" alt="first-timers-only"></a></p>
+<h2 id="project-setup">Project Setup</h2>
 <p>You first want to setup a new project using <code>npm init</code>, and then follow the prompts.</p>
 <p>Once you have created your new project, install Primrose using the following command: <code>npm install --save primrose</code></p>
 <p>Next create a basic <code>index.html</code> file in your project directory and include the <code>node_modules/primrose/Primrose.min.js</code> script, like so:</p>
-<pre><code>grammar(&quot;HTML&quot;);
-// index.html
+<pre><code class="lang-html">// index.html
 &lt;!DOCTYPE html&gt;
 &lt;html&gt;
   &lt;head&gt;
@@ -23,86 +30,60 @@
     &lt;h2&gt;hello world&lt;/h2&gt;
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre><p>Then create an <code>app.js</code> script page that creates a new <code>Primrose.BrowserEnvironment</code>, like so:</p>
-<pre><code>grammar(&quot;JavaScript&quot;);
-// app.js
-&quot;use strict&quot;;
-var env = new Primrose.BrowserEnvironment({
-  autoScaleQuality: false,
-  skyTexture: &quot;../images/bg.jpg&quot;,
-  groundTexture: &quot;../images/deck.png&quot;,
-  font: &quot;../fonts/helvetiker_regular.typeface.json&quot;
-});
+</code></pre>
+<p>Then create an <code>app.js</code> script page that creates a new <code>Primrose.BrowserEnvironment</code>, like so:</p>
+<pre><code class="lang-javascript">// app.js
+var time = 0,
 
-env.addEventListener(&quot;ready&quot;, function () {
-  // Perform any post-initialization setup. Once this event fires, the Primrose
-  // framework is ready and will start animation as soon as this function returns.
-});
+  boxes = [],
 
-env.addEventListener(&quot;update&quot;, function (dt) {
-  // Perform per-frame updates here, like moving objects around according to your
-  // own rules.
-});
-</code></pre><p>Finally, to get our project up and running live in the browser, we need to set up a server. For the purposes of this basic demo, we&#39;re going to be using a <a href="https://github.com/NotionTheory/notion-node">static HTML server</a> which can be included by running the command <code>npm install --save notion-node</code> (you can replace with Express or equivalent). Then make a <code>server.js</code> file and include the following:</p>
-<pre><code>grammar(&quot;JavaScript&quot;);
-// server.js
-var startServer = require(&quot;notion-node&quot;);
-startServer();
-</code></pre><p>Run <code>node server.js --mode=dev</code> in your terminal to see your application live. If your browser doesn&#39;t automatically open, just navigate to <a href="http://localhost/">localhost</a> and you should see your page.</p>
-<h2 id="example">Example</h2>
-<pre><code>grammar(&quot;JavaScript&quot;);
-// different operating systems have different keyboard shortcuts.
-var modA = isOSX ? &quot;metaKey&quot; : &quot;ctrlKey&quot;,
-    modB = isOSX ? &quot;altKey&quot; : &quot;shiftKey&quot;,
-    execKey = isOSX ? &quot;E&quot; : &quot;SPACE&quot;,
+  env = new Primrose.BrowserEnvironment({
+    useGaze: isMobile,
+    useFog: true,
+    enableShadows: true,
+    groundTexture: 0x606060,
+    backgroundColor: 0xd0d0d0,
+    fullScreenButtonContainer: &quot;body&quot;
+  }).on(&quot;ready&quot;, function() {
 
-    // a place to stow an object we will modify out of the loaded scene file
-    terminal = null,
-
-    // setup the VR environment
-    app = new Primrose.BrowserEnvironment({
-      sceneModel: &quot;commodore_pet.json&quot;,
-      skyTexture: &quot;images/bg2.jpg&quot;,
-      groundTexture: &quot;images/deck.png&quot;
-    });
-
-function isExecuteCommand ( evt ) {
-  return evt[modA] &amp;&amp; evt[modB] &amp;&amp; evt.keyCode === Primrose.Keys[execKey];
-}
-
-app.addEventListener( &quot;keydown&quot;, function ( evt ) {
-  if ( terminal.running &amp;&amp;
-      terminal.waitingForInput &amp;&amp;
-      evt.keyCode === Primrose.Keys.ENTER ) {
-    terminal.sendInput( evt );
-  }
-  else if ( !terminal.running &amp;&amp;
-      isExecuteCommand( evt ) ) {
-    terminal.execute();
-  }
-} );
-
-app.addEventListener( &quot;ready&quot;, function () {
-
-  // A hack to reposition the objects in the scene because the model file is a little janky
-  app.scene.traverse( function ( obj ) {
-    if ( obj.name &amp;&amp; obj.parent &amp;&amp; obj.parent.uuid === app.scene.uuid ) {
-      obj.position.y += app.avatarHeight * 0.9;
-      obj.position.z -= 1;
+    // Perform any post-initialization setup. Once this event fires, the
+    // Primrose framework is ready and will start animation as soon as this
+    // function returns.
+    for(var i = 0; i &lt; 100; ++i) {
+      boxes.push(box(0.125)
+        .colored(Primrose.Random.color(), {
+          shadow: true
+        })
+        .named(&quot;box&quot; + i)
+        .addTo(env.scene)
+        .on(&quot;select&quot;, function() {
+          this.visible = false;
+        }));
     }
-  } );
 
-  // the `convertToEditor` method makes an editor out of existing geometry.
-  var editor = app.convertToEditor( app.scene.Screen );
-  editor.padding = 10;
-  terminal = new Primrose.Text.Terminal( app.scene.Screen.textarea );
-  terminal.loadFile( &quot;oregon.bas&quot; );
-} );
-</code></pre><h2 id="issues">Issues</h2>
-<p>The issues list is available on <a href="https://github.com/NotionTheory/Primrose/issues">GitHub</a></p>
-<h2 id="licensing">Licensing</h2>
-<p>Primrose is free, open source software (GPLv3) and may readily bewith other FOSS projects.</p>
-<h2 id="contributions">Contributions</h2>
-<p>To simplify licensing issues, contributions to Primrose require a copyright assignment to me, Sean T. McBeth. Please include your name and email address in the CONTRIBUTORS.md file with your pull request. This will serve as your copyright assignment.</p>
+  })
+  .on(&quot;update&quot;, function() {
+
+    // Perform per-frame updates here, like moving objects around according to
+    // your own rules. The field env.deltaTime tells you how much time passed
+    // since the last update, in seconds.
+    time += env.deltaTime;
+    if(time &gt; 1) {
+      time -= 1;
+      boxes[Primrose.Random.int(boxes.length)].at(
+          Primrose.Random.number(-1, 1),
+          Primrose.Random.number(0, 2),
+          Primrose.Random.number(-1, -3));
+    }
+
+  });
+</code></pre>
+<p>Finally, to get our project up and running live in the browser, we need to set up a server. For the purposes of this basic demo, we&#39;re going to be using a <a href="https://github.com/NotionTheory/notion-node">static HTML server</a> which can be included by running the command <code>npm install --save-dev notion-node</code> (you can replace with Express or equivalent). Then add a line to the <code>scripts</code> section of your <code>package.json</code> file, where <code>&lt;your-project-directory&gt;</code> is the name of the directory in which you are building your project:</p>
+<pre><code>&quot;scripts&quot;: {
+  &quot;start&quot;: &quot;node node_modules/notion-node/default --path=.. --url=&lt;your-project-directory&gt;/ --port=9001&quot;
+}
+</code></pre><p>Run <code>npm start</code> in your terminal to see your application live. If your browser doesn&#39;t automatically open, just navigate to <code>http://localhost:9001/&lt;your-project-directory&gt;</code> and you should see your page.</p>
+<h1 id="licensing">Licensing</h1>
+<p>Primrose is free, open source software (GPLv3) and may readily be used with other FOSS projects.</p>
 <!-- end documentation.pug documentation block --></article></section></div><!-- end documentation.pug main block --></main><!-- end main.pug main block -->
 <!-- start main.pug footer block --><footer><div id="footerWrapper"><a href="../doc/readme.html">About</a><a href="../doc/license.html">License</a><a href="../doc/changelog.html">Changelog</a><a href="https://notiontheory.typeform.com/to/QzZmAD" target="_blank">Slack</a><a class="small icon github" href="https://www.github.com/NotionTheory/Primrose" target="_blank">&nbsp;</a><a class="small icon twitter" href="https://www.twitter.com/Primrose_VR" target="_blank">&nbsp;</a><a href="http://www.notiontheory.com/team" target="_blank" style="color:#ec2471">Made (with love) by NotionTheory</a></div><script src="app.js"></script></footer><!-- end main.pug footer block --></body></html>
