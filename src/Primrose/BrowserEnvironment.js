@@ -194,6 +194,7 @@ const MILLISECONDS_TO_SECONDS = 0.001,
 import PointerLock from "../util/PointerLock";
 
 import isiOS from "../flags/isiOS";
+import isMobile from "../flags/isMobile";
 
 import box from "../live-api/box";
 import brick from "../live-api/brick";
@@ -1458,7 +1459,7 @@ export default class BrowserEnvironment extends EventDispatcher {
 BrowserEnvironment.DEFAULTS = {
   antialias: true,
   quality: Quality.MAXIMUM,
-  useGaze: false,
+  useGaze: isMobile,
   useFog: false,
   avatarHeight: 1.65,
   walkSpeed: 2,
