@@ -302,7 +302,7 @@ export default class Pointer extends Entity {
       }
       return true;
     }
-    
+
     return false;
   }
 
@@ -323,24 +323,32 @@ export default class Pointer extends Entity {
       this.picker.set(VECTOR_TEMP, FORWARD);
       this.gazeInner.visible = this.useGaze;
       this.mesh.visible = !this.useGaze;
+
+      // Fire phasers
       const hits = this.picker.intersectObject(objects, true);
       for(let i = 0; i < hits.length; ++i) {
-        const hit = hits[i];
-        let obj = hit.object;
-        const origObj = obj;
-    
+
+        const hit = hits[i],
+          origObj = hit.object;
+
+        let obj = origObj;
+
+        // Try to find a Primrose Entity
         while(obj && !obj.isEntity) {
           obj = obj.parent;
         }
 
+        // If we didn't find a Primrose Entity, go back to using the Three.js mesh.
         if(!obj) {
           obj = origObj;
         }
 
+        // Check to see if the object has any event handlers that we care about.
         if(obj && !obj.pickable) {
           obj = null;
         }
 
+        // Save the setting, necessary for checking against the last value, to check for changes in which object was pointed at.
         hit.object = obj;
 
         if(obj && this._check(hit)) {
@@ -349,6 +357,7 @@ export default class Pointer extends Entity {
         }
       }
 
+      // If we got this far, it means we didn't find any good objects, and the _check method never ran. So run the check again with no object and it will fire the necessary "end" event handlers.
       this._check();
       this.lastHit = null;
     }
