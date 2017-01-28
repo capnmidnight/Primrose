@@ -47491,7 +47491,7 @@ var BrowserEnvironment = function (_EventDispatcher) {
 BrowserEnvironment.DEFAULTS = {
   antialias: true,
   quality: Quality.MAXIMUM,
-  useGaze: false,
+  useGaze: isMobile,
   useFog: false,
   avatarHeight: 1.65,
   walkSpeed: 2,

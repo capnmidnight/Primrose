@@ -20,6 +20,12 @@ var prog = {
   loaded: 0,
   total: 0,
 
+  shrink: function shrink(size) {
+    if (prog.bar) {
+      prog.bar.style.height = size;
+    }
+  },
+
   hide: function hide() {
     if (prog.bar) {
       prog.bar.style.display = "none";

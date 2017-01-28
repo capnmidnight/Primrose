@@ -68,7 +68,7 @@ export default class Teleporter {
   _move(evt) {
     if(this.enabled) {
       this._updatePosition(evt);
-      this.disk.visible = true;
+      this.disk.visible = this._moveDistance < MAX_TELEPORT_WAGGLE;
     }
   }
 
