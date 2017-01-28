@@ -32,7 +32,7 @@ You first want to setup a new project using `npm init`, and then follow the prom
 
 Once you have created your new project, install Primrose using the following command: `npm install --save primrose`
 
-Next create a basic `index.html` file in your project directory and include the `node_modules/primrose/Primrose.min.js` script, like so:
+Next create a basic `index.html` file in your project directory and include the `node_modules/primrose/Primrose.min.js` script and the `app.js` script , like so:
 
 ````html
 // index.html
@@ -42,6 +42,7 @@ Next create a basic `index.html` file in your project directory and include the 
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script type="text/javascript" src="node_modules/primrose/Primrose.min.js"></script>
+	<script type="text/javascript" src="app.js"></script>
     <title>My Primrose VR Application</title>
   <body>
     <h2>hello world</h2>
