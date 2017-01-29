@@ -341,7 +341,8 @@ export default class BrowserEnvironment extends EventDispatcher {
           
           if(frame === 0) {
             doPicking();
-            moveGround();
+            moveGround(); 
+            this.sky.position.copy(this.input.head.position);
             moveUI();
           }
 
@@ -366,16 +367,11 @@ export default class BrowserEnvironment extends EventDispatcher {
     };
 
     const doPicking = () => {
-      updateAll();
+      updateAll();  
       this.input.resolvePicking(this.scene);
     };
 
-    const moveGround = () => {
-      if(this.sky) {
-        this.sky.position.copy(this.input.head.position);
-      }
-
-      if (this.ground) {
+      if (this.ground) { 
         this.ground.position.set(
           Math.floor(this.input.head.position.x),
           0,
