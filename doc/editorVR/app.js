@@ -1,15 +1,15 @@
 Object.assign(window, Primrose.Random);
 
 var SCRIPT_UPDATE_TIME = 1000,
-  GRASS = "../images/grass.png",
-  ROCK = "../images/rock.png",
-  SAND = "../images/sand.png",
-  WATER = "../images/water.png",
-  DECK = "../images/deck.png",
+  GRASS = "../shared_assets/images/grass.png",
+  ROCK = "../shared_assets/images/rock.png",
+  SAND = "../shared_assets/images/sand.png",
+  WATER = "../shared_assets/images/water.png",
+  DECK = "../shared_assets/images/deck.png",
   env = new Primrose.BrowserEnvironment({
-    skyTexture: "../images/bg2.jpg",
+    skyTexture: "../shared_assets/images/bg2.jpg",
     groundTexture: GRASS,
-    font: "../fonts/helvetiker_regular.typeface.json",
+    font: "../shared_assets/fonts/helvetiker_regular.typeface.json",
     fullScreenButtonContainer: "#fullScreenButtonContainer",
     progress: Preloader.thunk
   }),

@@ -16,8 +16,8 @@ var monthNames = ["January", "February", "March", "April", "May", "June", "July"
   textSize = boxSize * 0.333,
   hDim = dim / 2,
   env = new Primrose.BrowserEnvironment({
-    groundTexture: "../images/deck.png",
-    font: "../fonts/helvetiker_regular.typeface.json",
+    groundTexture: "../shared_assets/images/deck.png",
+    font: "../shared_assets/fonts/helvetiker_regular.typeface.json",
     backgroundColor: 0x000000,
     useFog: true,
     drawDistance: hDim / 2,

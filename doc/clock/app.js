@@ -1,7 +1,7 @@
 var skyColor = 0xffff7f,
   env = new Primrose.BrowserEnvironment({
     backgroundColor: skyColor,
-    groundTexture: "../images/sand.png",
+    groundTexture: "../shared_assets/images/sand.png",
     useFog: true,
     fullScreenButtonContainer: "#fullScreenButtonContainer",
     enableShadows: true,
@@ -16,7 +16,7 @@ var skyColor = 0xffff7f,
 
   t = function(name, rt, rb, h, sr){
     return cylinder(rt, rb, h, sr, 1)
-      .textured("../images/rock.png", { shadow: true, progress: Preloader.thunk })
+      .textured("../shared_assets/images/rock.png", { shadow: true, progress: Preloader.thunk })
       .named(name);
   },
 
