@@ -315,9 +315,9 @@ export default class BrowserEnvironment extends EventDispatcher {
         const fps = Math.round(1 / dt);
         dt = 1 / fps;
         this.deltaTime = Math.min(this.deltaTime, dt);
-        
 
-        // if we missed way too many frames in one go, just update once, otherwise we'll end up locking up the system.    
+
+        // if we missed way too many frames in one go, just update once, otherwise we'll end up locking up the system.
         let numFrames = dt / this.deltaTime;
         if(numFrames > 1) {
           missedFrames += numFrames;
@@ -338,10 +338,10 @@ export default class BrowserEnvironment extends EventDispatcher {
 
         for(let frame = 0; frame < numFrames; ++frame) {
           this.input.update(this.deltaTime);
-          
+
           if(frame === 0) {
             doPicking();
-            moveGround(); 
+            moveGround();
             this.sky.position.copy(this.input.head.position);
             moveUI();
           }
@@ -367,11 +367,13 @@ export default class BrowserEnvironment extends EventDispatcher {
     };
 
     const doPicking = () => {
-      updateAll();  
+      updateAll();
       this.input.resolvePicking(this.scene);
+      const moveGround = () => {
     };
 
-      if (this.ground) { 
+
+      if (this.ground) {
         this.ground.position.set(
           Math.floor(this.input.head.position.x),
           0,
@@ -784,9 +786,9 @@ export default class BrowserEnvironment extends EventDispatcher {
     this.consumeEvent = (evt) => {
       const obj = evt.hit && evt.hit.object,
         cancel = evt.type === "exit" || evt.cmdName === "NORMAL_ESCAPE";
-      
+
       if(evt.type === "select" || cancel) {
-        
+
         if(obj !== this.currentControl || cancel){
 
           delesectControl();
