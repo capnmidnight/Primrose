@@ -5,3 +5,4 @@
 * Jeffrey Zitelli - @jzitelli
 * Atte Niemi - @hurbraa
 * Marko Papp - @markopp
+* Upo - @upodroid
