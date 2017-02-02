@@ -1,12 +1,12 @@
-var cube = range(6, function(i) { return "../images/space" + i + ".jpg"; }),
+var cube = range(6, function(i) { return "../shared_assets/images/space" + i + ".jpg"; }),
   env = new Primrose.BrowserEnvironment({
-    font: "../fonts/helvetiker_regular.typeface.json",
+    font: "../shared_assets/fonts/helvetiker_regular.typeface.json",
     skyTexture: cube,
     backgroundColor: 0x000000,
     drawDistance: 100,
     gazeLength: 0.25,
     showHeadPointer: isMobile,
-    ambientSound: "../audio/space.ogg",
+    ambientSound: "../shared_assets/audio/space.ogg",
     fullScreenButtonContainer: "#fullScreenButtonContainer",
     progress: Preloader.thunk
   }),
@@ -63,7 +63,7 @@ env.addEventListener("ready", function(){
   }
   env.insertFullScreenButtons("body");
   Promise.all(range(10, function() {
-    return new Primrose.Audio.Sound(env.audio, "../audio/exp.ogg").ready;
+    return new Primrose.Audio.Sound(env.audio, "../shared_assets/audio/exp.ogg").ready;
   }))
     .then(function(snds) {
       sounds = snds;

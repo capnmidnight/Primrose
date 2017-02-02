@@ -2,8 +2,8 @@ var monthNames = ["January", "February", "March", "April", "May", "June", "July"
   dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
   months = null,
   currentMonth = new Date().getMonth(),
-  primaryColor = 0xb09000,
-  secondaryColor = 0x303030,
+  primaryColor = 0xec2471,
+  secondaryColor = 0xe0e0e0,
   todayColor = 0x306080,
   angleThreshold = 15,
   primaryMaterial = material({color:primaryColor}),
@@ -16,11 +16,11 @@ var monthNames = ["January", "February", "March", "April", "May", "June", "July"
   textSize = boxSize * 0.333,
   hDim = dim / 2,
   env = new Primrose.BrowserEnvironment({
-    groundTexture: "../images/deck.png",
-    font: "../fonts/helvetiker_regular.typeface.json",
-    backgroundColor: 0x000000,
+    groundTexture: "../shared_assets/images/ideck.png",
+    font: "../shared_assets/fonts/helvetiker_regular.typeface.json",
+    backgroundColor: secondaryColor,
     useFog: true,
-    drawDistance: hDim / 2,
+    drawDistance: hDim,
     enableShadows: true,
     fullScreenButtonContainer: "#fullScreenButtonContainer",
     progress: Preloader.thunk
@@ -120,26 +120,26 @@ env.addEventListener("ready", function(){
   months = monthNames
     .map(function(month){
       return text(month, 3.5)
-        .colored(primaryColor)
+        .colored(primaryColor, {
+          shadow: true
+        })
         .named(month);
     });
 
   for(var d = 0; d < 31; ++d){
     var o = hub(),
       b = box(boxSize)
-        .colored(secondaryColor, {
-          shadow: true
-        })
+        .colored(secondaryColor)
         .named("box" + (d+1))
         .addTo(o),
       bev = box(boxSize * 1.1,boxSize * 1.1,boxSize * 0.9)
-        .colored(primaryColor)
-        .named("bev" + (d+1))
-        .addTo(b),
-      t = text((d + 1).toString())
         .colored(primaryColor, {
           shadow: true
         })
+        .named("bev" + (d+1))
+        .addTo(b),
+      t = text((d + 1).toString())
+        .colored(primaryColor)
         .named("txt" + (d + 1))
         .addTo(b)
         .at(0, 0, 0.08);

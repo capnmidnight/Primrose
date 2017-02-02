@@ -1,15 +1,15 @@
-var GRASS = "../images/grass.png",
-  ROCK = "../images/rock.png",
-  SAND = "../images/sand.png",
-  WATER = "../images/water.png",
-  DECK = "../images/deck.png",
+var GRASS = "../shared_assets/images/grass.png",
+  ROCK = "../shared_assets/images/rock.png",
+  SAND = "../shared_assets/images/sand.png",
+  WATER = "../shared_assets/images/water.png",
+  DECK = "../shared_assets/images/deck.png",
   CODE_KEY = "Pacman code",
 
   env = new Primrose.BrowserEnvironment({
     backgroundColor: 0x000000,
     skyTexture: DECK,
     groundTexture: DECK,
-    font: "../fonts/helvetiker_regular.typeface.json",
+    font: "../shared_assets/fonts/helvetiker_regular.typeface.json",
     fullScreenButtonContainer: "#fullScreenButtonContainer",
     progress: Preloader.thunk
   }),
@@ -210,7 +210,7 @@ function pacman() {
     }
   }
   console.log("Here we go");
-  L("../models/ghost.obj")
+  L("../shared_assets/models/ghost.obj")
     .then(function (ghost) {
       console.log("ghost", ghost);
       ghosts = colors.map(function (color, i) {

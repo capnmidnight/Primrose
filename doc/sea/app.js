@@ -1,7 +1,7 @@
 var env = new Primrose.BrowserEnvironment({
-  font: "../fonts/helvetiker_regular.typeface.json",
+  font: "../shared_assets/fonts/helvetiker_regular.typeface.json",
   backgroundColor: 0x07001f,
-  groundTexture: "../images/water.png",
+  groundTexture: "../shared_assets/images/water.png",
   useFog: true,
   drawDistance: 25,
   gazeLength: 0.25,
@@ -27,7 +27,7 @@ moon.latLon(-30, 30, 7);
 moon.lookAt(env.scene.position);
 
 modelPromise = Promise.all(range(3, function(i) {
-  var dolphin = new Primrose.Controls.Model("../models/dolphin.obj", {
+  var dolphin = new Primrose.Controls.Model("../shared_assets/models/dolphin.obj", {
     progress: Preloader.thunk
   });
   dolphin.rotation.set(0, 0, i * 1.1, "ZYX");

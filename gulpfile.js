@@ -5,6 +5,9 @@ var gulp = require("gulp"),
   path = require("path"),
   pliny = require("pliny"),
   pkg = require("./package.json"),
+
+  startServer = require("notion-node"),
+
   build = require("notiontheory-basic-build"),
   nt = build.setup(gulp, pkg),
 
@@ -119,7 +122,7 @@ gulp.task("css", [css.default]);
 gulp.task("css:debug", [css.debug]);
 gulp.task("css:release", [css.release]);
 
-gulp.task("default", [ "js", "html", "css" ]);
+gulp.task("default", [ "js", "html", "css" ], () => startServer({ mode: "dev" }));
 gulp.task("debug", ["js:debug", "html:debug", "css:debug"]);
 gulp.task("release",  ["js:release", "html:release", "css:release"]);
 
