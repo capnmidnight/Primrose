@@ -82,7 +82,7 @@ var gulp = require("gulp"),
     return collect;
   }, { format: null, default: null, debug: [], release: [] }),
 
-  demos = glob("demos/*/app.js").map(function(file) {
+  demos = glob("doc/*/app.js").map(function(file) {
 
     var name = file.match(/doc\/(\w+)\/app\.js/)[1],
       parts = path.parse(file),

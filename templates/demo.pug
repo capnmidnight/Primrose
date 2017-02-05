@@ -4,7 +4,7 @@ block document
   <!-- start demo.pug banner block -->
   h1= demoTitle
   p Click on the image below to lock mouse cursor to demo. #[a(href=fileRoot + "doc/" + fileName, target="_blank") Open demo in new window].
-  iframe#demo(src = fileRoot + "demos/" + name)
+  iframe#demo(src= fileRoot + "doc/" + name, role="application", allowfullscreen, allowvr)
   if fileName
     h2 Source
-    pre#editorContainer= "grammar(\"JavaScript\");\n" + readFile(fileRoot + "demos/" + fileName + "/app.js")
+    pre#editorContainer= "grammar(\"JavaScript\");\n" + readFile(fileRoot + "doc/" + fileName + "/app.js")
