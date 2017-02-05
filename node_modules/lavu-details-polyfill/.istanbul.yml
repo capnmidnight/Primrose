@@ -1,0 +1,9 @@
+verbose: false
+instrumentation:
+    includes: ['src/**/*.js']
+    excludes: ['node_modules/*', 'lib/*', 'webpack.config.js', '__test__/*']
+    include-all-sources: true
+    es-modules: true
+reporting:
+hooks:
+check:

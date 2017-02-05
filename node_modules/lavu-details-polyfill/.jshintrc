@@ -1,0 +1,24 @@
+// https://github.com/jshint/jshint/blob/master/examples/.jshintrc
+
+{
+  "node": true,
+  "browser": true,
+  "bitwise": false,
+  "curly": true,
+  "eqeqeq": true,
+  "immed": true,
+  "indent": 4,
+  "latedef": "nofunc",
+  "newcap": true,
+  "noarg": true,
+  "quotmark": "single",
+  "undef": true,
+  "unused": "vars",
+  "strict": true,
+  "sub": true,
+  "laxbreak" : true,
+  "esversion": 6,
+  "globals": {
+    "componentHandler": true
+  }
+}

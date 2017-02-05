@@ -1,0 +1,25 @@
+# EditorConfig helps developers define and maintain consistent
+# coding styles between different editors and IDEs
+# More information at http://editorconfig.org
+
+# A special property that should be specified at the top of the file outside of
+# any sections. Set to true to stop .editor config file search on current file
+root = true
+
+[*]
+
+# Change these settings to your own preference
+indent_style = space
+indent_size = 2
+
+# We recommend you to keep these unchanged
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.md]
+trim_trailing_whitespace = false
+
+[package.json]
+indent_size = 2

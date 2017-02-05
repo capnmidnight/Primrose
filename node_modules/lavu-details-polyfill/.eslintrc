@@ -1,0 +1,54 @@
+// ESLint Reset - A starter .eslintrc file that resets all rules to off and includes a description of what each rule does.
+// From here, enable the rules that you care about by changing the 0 to a 1 or 2.
+// 1 means warning (will not affect exit code) and 2 means error (will affect exit code).
+// See: https://gist.github.com/ghostwords/40936f11091b87987e56
+// See: http://eslint.org/docs/rules/
+// See: https://github.com/feross/eslint-config-standard
+
+{
+  "extends":  "eslint:recommended",
+
+  "parser": "babel-eslint",
+
+  "parserOptions": {
+    "ecmaVersion": 6,
+    "ecmaFeatures": {
+      "experimentalObjectRestSpread": true,
+      "globalReturn": true,
+      "jsx": true,
+      "modules": true
+    },
+    "sourceType": "module"
+  },
+
+  "env": {
+    "browser": true,     // browser global variables
+    "node": true,        // Node.js global variables and Node.js-specific rules
+    "mocha": true,       // adds all of the Mocha testing global variables
+    "es6": true          // ECMAScript 6
+  },
+
+  "plugins": [
+    // e.g. "react" (must run `npm install eslint-plugin-react` first)
+  ],
+
+  "settings": {
+    "ecmascript": 7,
+    "jsx": true
+  },
+
+  "rules": {
+    "strict": 0,
+    "indent": [2, 2, {"SwitchCase": 1}],
+    "quotes": [2, "single"],
+    "linebreak-style": [2, "unix"],
+    "semi": [1, "always"],
+    "no-var": 1,
+    "prefer-const": 1,
+    "prefer-rest-params": 1,
+    "prefer-spread": 1,
+    "prefer-template": 1
+  },
+  "globals": {
+  }
+}
