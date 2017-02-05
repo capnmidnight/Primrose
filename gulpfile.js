@@ -122,7 +122,7 @@ gulp.task("css", [css.default]);
 gulp.task("css:debug", [css.debug]);
 gulp.task("css:release", [css.release]);
 
-gulp.task("default", [ "js", "html", "css" ], () => startServer({ mode: "dev" }));
+gulp.task("default", [ "js", "html", "css" ], () => startServer({ mode: "dev", port: 8080 }));
 gulp.task("debug", ["js:debug", "html:debug", "css:debug"]);
 gulp.task("release",  ["js:release", "html:release", "css:release"]);
 
