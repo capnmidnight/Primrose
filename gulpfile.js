@@ -84,7 +84,7 @@ var gulp = require("gulp"),
 
   demos = glob("demos/*/app.js").map(function(file) {
 
-    var name = file.match(/doc\/(\w+)\/app\.js/)[1],
+    var name = file.match(/demos\/(\w+)\/app\.js/)[1],
       parts = path.parse(file),
       taskName = "Demo:" + name,
       min = nt.min(taskName, file);

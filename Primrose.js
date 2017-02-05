@@ -20811,24 +20811,32 @@ var Pointer = function (_Entity) {
         this.picker.set(VECTOR_TEMP, FORWARD);
         this.gazeInner.visible = this.useGaze;
         this.mesh.visible = !this.useGaze;
+
+        // Fire phasers
         var hits = this.picker.intersectObject(objects, true);
         for (var i = 0; i < hits.length; ++i) {
-          var hit = hits[i];
-          var obj = hit.object;
-          var origObj = obj;
 
+          var hit = hits[i],
+              origObj = hit.object;
+
+          var obj = origObj;
+
+          // Try to find a Primrose Entity
           while (obj && !obj.isEntity) {
             obj = obj.parent;
           }
 
+          // If we didn't find a Primrose Entity, go back to using the Three.js mesh.
           if (!obj) {
             obj = origObj;
           }
 
+          // Check to see if the object has any event handlers that we care about.
           if (obj && !obj.pickable) {
             obj = null;
           }
 
+          // Save the setting, necessary for checking against the last value, to check for changes in which object was pointed at.
           hit.object = obj;
 
           if (obj && this._check(hit)) {
@@ -20837,6 +20845,7 @@ var Pointer = function (_Entity) {
           }
         }
 
+        // If we got this far, it means we didn't find any good objects, and the _check method never ran. So run the check again with no object and it will fire the necessary "end" event handlers.
         this._check();
         this.lastHit = null;
       }
@@ -37456,7 +37465,7 @@ var Teleporter = function () {
     value: function _move(evt) {
       if (this.enabled) {
         this._updatePosition(evt);
-        this.disk.visible = true;
+        this.disk.visible = this._moveDistance < MAX_TELEPORT_WAGGLE;
       }
     }
   }, {
@@ -46665,7 +46674,7 @@ var BrowserEnvironment = function (_EventDispatcher) {
         dt = 1 / fps;
         _this.deltaTime = Math.min(_this.deltaTime, dt);
 
-        // if we missed way too many frames in one go, just update once, otherwise we'll end up locking up the system.    
+        // if we missed way too many frames in one go, just update once, otherwise we'll end up locking up the system.
         var numFrames = dt / _this.deltaTime;
         if (numFrames > 1) {
           missedFrames += numFrames;
@@ -46689,6 +46698,7 @@ var BrowserEnvironment = function (_EventDispatcher) {
           if (frame === 0) {
             doPicking();
             moveGround();
+            _this.sky.position.copy(_this.input.head.position);
             moveUI();
           }
 
@@ -46709,12 +46719,7 @@ var BrowserEnvironment = function (_EventDispatcher) {
     var doPicking = function doPicking() {
       updateAll();
       _this.input.resolvePicking(_this.scene);
-    };
-
-    var moveGround = function moveGround() {
-      if (_this.sky) {
-        _this.sky.position.copy(_this.input.head.position);
-      }
+      var moveGround = function moveGround() {};
 
       if (_this.ground) {
         _this.ground.position.set(Math.floor(_this.input.head.position.x), 0, Math.floor(_this.input.head.position.z));
