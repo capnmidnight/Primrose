@@ -57,8 +57,6 @@
     "three": "^0.84.0"
   },
   "devDependencies": {
-    "babel-preset-es2015": "^6.22.0",
-    "babel-preset-stage-0": "^6.22.0",
     "gulp": "^3.9.1",
     "notion-node": "^0.3.0",
     "notiontheory-basic-build": "^5.0.0"
