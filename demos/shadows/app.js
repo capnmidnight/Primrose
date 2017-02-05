@@ -8,7 +8,7 @@ const env = new Primrose.BrowserEnvironment({
     progress: Preloader.thunk
   }).on("ready", function() {
 
-    for(var i = 0; i < 100; ++i) {
+    for(var i = 0; i < 10; ++i) {
       box(0.125)
         .colored(Primrose.Random.color(), {
           shadow: true
