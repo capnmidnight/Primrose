@@ -2,7 +2,7 @@ import quad from "../../live-api/quad";
 import Entity from "./Entity";
 import Image from "./Image";
 
-import light from "../../live-api/light";
+import { DirectionalLight } from "three/src/lights/DirectionalLight";
 
 import { AmbientLight } from "three/src/lights/AmbientLight";
 import { BackSide } from "three/src/constants";
@@ -42,9 +42,10 @@ export default class Sky extends Entity {
         type: "THREE.PointLight",
         description: "If the `disableDefaultLighting` option is not present, the sun light provides a key light so that objects have shading and relief."
       });
-      this.sun = light(0xffffff, 1, 50)
+      this.sun = new DirectionalLight(0xffffff, 1)
         .addTo(this)
-        .at(0, 10, 10);
+        .at(0, 1, 1);
+        this.add(this.sun.target);
     }
   }
 
