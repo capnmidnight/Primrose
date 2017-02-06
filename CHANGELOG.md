@@ -17,7 +17,7 @@ The big highlights are:
 If you have ideas of your own, or are looking for an established open source project to join, <a href="mailto:sean+primrose@notiontheory.com?Subject=Contributing to Primrose">please contact us at NotionTheory</a> and let's chat! We'd like to bring on anyone of any background or experience level, so long as you're willing to learn. The last two years have been a blast and we can't wait to bring more people on board.
 
 Thankfully, there is still a lot of fun code left to be written.
-* Updated Gear VR support and support for Facebook's Carmel browser are right around the corner.
+* Updated Gear VR support and support for Oculus' Carmel browser are right around the corner.
 * We'll be looking to integrate more features in support of Augmented Reality in the near future, both in the areas of GPS tracking and marker tracking. You could theoretically re-build Pokemon GO in Primrose already.
 * We're experimenting with stereo 360 video support for a client right now.
 * As soon as Microsoft releases WebVR for Edge on the Hololens (which everyone expects to be very soon, considering their work on <a href="https://github.com/Microsoft/HoloJS">HoloJS</a>), we'll be there to get your apps running in AR.
