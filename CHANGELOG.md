@@ -1,3 +1,44 @@
+## v0.31.1
+
+This is the first release with significant contributions from folks new to Primrose!
+
+It's been less than two weeks since <a href="https://twitter.com/Sean_McBeth/status/824301628446699521">I announced we were starting a mentoring program through Primrose</a>. The response has been amazing. Much more than I anticipated. I had *hopes* that one *one* person *might* join. And in that time, we've had seven people make significant contributions to the project.
+
+This is super exciting. I've been writing pretty much non-stop, trying to get everything up to speed so folks aren't lost. We really want to make the Primrose project fit anyone, be it in training new developers in making VR experiences, in programming in general by working on the Primrose framework and associate tools themselves, or even anything else that isn't programming. The idea is to kind of make it a "practice company", in a way, as there is a lot more than just programming that goes into any project.
+
+### The Future
+
+If you have ideas of your own, or are looking for an established open source project to join, <a href="mailto:sean+primrose@notiontheory.com?Subject=Contributing to Primrose">please contact us at NotionTheory</a> and let's chat! We'd like to bring on anyone of any background or experience level, so long as you're willing to learn. The last two years have been a blast and we can't wait to bring more people on board.
+
+Thankfully, there is still a lot of fun work left to do:
+* If you're looking to break into the language translation industry, you could get a lot of experience in translating our documentation to your language.
+* There is a lot of front-end design work to be done in making the official website look nice, respond well to different devices, and be accessible to differently-abled people.
+* I'd love to get a monthly or bi-weekly event together online where we can all hack together. Managing those meetings and making fun SWAG materials to go along would be a great service. We have a small budget for t-shirts and pins and such. We'd like to have something to give everyone who contributes.
+* Project management is up for grabs, as writing good issue tickets and organizing people is important, hard work.
+* Even if you're not interested in front-end or VR programming, there are lots of back-end tasks to be done in managing the build system, building out a user showcase site, building multiplayer features that folks can easily import into their projects, integrating with other services, you name it.
+
+### And now, the CHANGELOG
+
+* BrowserEnvironment now defaults to using gaze cursors on mobile devices, rather than requiring apps to set that explicity, thanks to Atte Niemi (<a href="https://github.com/hurbraa" target="_blank">@hurbraa</a>).
+* Cleaned up the FAQ a bit.
+* The Preloader now has a method for shrinking the progress bar, rather than requiring user scripts manually edit the CSS. Eventually, we'll have a 3D object with an identical API to take over the progress indicator once the BrowserEnvironment is ready to execute, but still waiting on assets to load.
+* Lots and of new documentation in the <a href="https://github.com/NotionTheory/Primrose/wiki" target="_blank">GitHub Wiki</a>.
+* <a href="https://www.primrosevr.com/demos/shadows/">A new demo showing off shadows</a>.
+* A fix for <a href="https://www.primrosevr.com/demos/editorVR/">the VR Live Programming Environment</a> to make sure the demo script always loads.
+* The teleport feature now gets disabled if you've dragged the mouse very far, i.e. are probably just trying to rotate the view, thanks to Marko Papp (<a href="https://github.com/markopp" target="_blank">@markopp</a>).
+* The README now tells you that you need to import your application script, clearing up confusion about why first-time setup wasn't working as expected, thanks to Atte Niemi (<a href="https://github.com/hurbraa" target="_blank">@hurbraa</a>).
+* BrowserEnvironment no longer wastes cycles on checking if the Sky object exists, since it will always exist, thanks to Upo (<a href="https://github.com/upodroid" target="_blank">@upodroid</a>).
+* The demos now have their asset files separate from the main documentation, to make sure they are easier to keep track of.
+* The DEV server now starts as a part of running the default `gulp` task, clearing up a point of confusion for first-time setup.
+* The music demo now uses the new, default gaze cursor setting of BrowserEnvironment, thanks to Corey Hobbs (<a href="https://github.com/chobberoni" target="_blank">@chobberoni</a>).
+* The shadows demo doesn't bring mobile devices completely to their knees now, thanks to Toby Maritz (<a href="https://github.com/tmaritz" target="_blank">@tmaritz</a>).
+* The demos now live in their own directory, instead of being hidden inside the doc directory, thanks to Marko Papp (<a href="https://github.com/markopp" target="_blank">@markopp</a>).
+* The DEV server no longer requires root access to start properly on non-Windows systems, thanks to Kristian Bouw (<a href="https://github.com/kbouw" target="_blank">@kbouw</a>).
+* The README now references the new setup guide, rather than duplicating information, thanks to Kristian Bouw (<a href="https://github.com/kbouw" target="_blank">@kbouw</a>).
+* And the shadows from the default "Sun" are stable with respect to user position, thanks to Micah Bales (<a href="https://github.com/micahbales" target="_blank">@micahbales</a>).
+
+Wow, that's a lot for less than two weeks. Thanks everyone!
+
 ## v0.31.0
 
 Over the last year, a lot of work went into making the Primrose WebVR framework much more reliable, easier to use, and with more complete documentation. This is the first CHANGELOG we've written since May 2016, but that doesn't mean we haven't been working. Indeed, the lack of CHANGELOGs has specifically been because of how busy we've been in building Primrose.
