@@ -340,8 +340,12 @@ export default class BrowserEnvironment extends EventDispatcher {
           this.input.update(this.deltaTime);
 
           if(frame === 0) {
-            doPicking();
-            moveGround();
+            updateAll();
+            this.input.resolvePicking(this.scene);
+            this.ground.position.set(
+              Math.floor(this.input.head.position.x),
+              0,
+              Math.floor(this.input.head.position.z));
             this.sky.position.copy(this.input.head.position);
             moveUI();
           }
@@ -362,24 +366,6 @@ export default class BrowserEnvironment extends EventDispatcher {
           if(frame === 0 && this.network){
             this.network.update(dt);
           }
-        }
-      }
-    };
-
-    const doPicking = () => {
-      updateAll();
-      this.input.resolvePicking(this.scene);
-      const moveGround = () => {
-    };
-
-
-      if (this.ground) {
-        this.ground.position.set(
-          Math.floor(this.input.head.position.x),
-          0,
-          Math.floor(this.input.head.position.z));
-        if(this.ground.material){
-          this.ground.material.needsUpdate = true;
         }
       }
     };
