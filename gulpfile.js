@@ -102,7 +102,8 @@ const tidyFiles = [
   "PrimroseWithDoc*.js",
   "doc/*/appWithDoc.js",
   "doc/*/appDocumentation.js",
-  "doc/PrimroseDocumentation.modules.js"
+  "doc/PrimroseDocumentation.modules.js",
+  "templates/*.html"
 ];
 gulp.task("tidy", [nt.clean("Primrose", tidyFiles, tasks.release)]);
 gulp.task("tidy:only", [nt.clean("Primrose:only", tidyFiles)]);
