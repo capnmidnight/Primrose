@@ -11,9 +11,9 @@ var gulp = require("gulp"),
   build = require("notiontheory-basic-build"),
   nt = build.setup(gulp, pkg),
 
-  html = nt.html("Primrose", ["*.pug", "doc/**/*.pug", "templates/**/*.pug"], "src"),
+  html = nt.html("Primrose", ["*.pug", "demos/**/*.pug", "doc/**/*.pug", "templates/**/*.pug"], "src"),
 
-  css = nt.css("Primrose", ["*.styl", "doc/**/*.styl"]),
+  css = nt.css("Primrose", ["*.styl", "demos/**/*.styl", "doc/**/*.styl"]),
 
   formats = ["umd", "es"],
 
