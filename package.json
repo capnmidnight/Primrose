@@ -28,7 +28,8 @@
     "README.md",
     "quickstart/",
     "src/",
-    "doc/"
+    "doc/",
+    "demos/"
   ],
   "jsnext:main": "src/index",
   "main": "Primrose.js",
