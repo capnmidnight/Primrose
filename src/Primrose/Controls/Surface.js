@@ -27,7 +27,7 @@ pliny.record({
 
 var COUNTER = 0;
 
-import { Texture } from "three/src/textures/Texture";
+import { Texture } from "three";
 import isChrome from "../../flags/isChrome";
 import BaseTextured from "./BaseTextured";
 import Rectangle from "../Text/Rectangle";

@@ -24,9 +24,8 @@ pliny.class({
   }]
 });
 
-import { Quaternion } from "three/src/math/Quaternion";
-import { Vector3 } from "three/src/math/Vector3";
-import { _Math } from "three/src/math/Math";
+import { Quaternion, Vector3 } from "three";
+import { Math as _Math } from "three";
 
 const { DEG2RAD, RAD2DEG } = _Math;
 const AXIS = new Vector3();

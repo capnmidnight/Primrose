@@ -43,9 +43,7 @@ The results should look like this:\n\
 });
 
 import cache from "../util/cache";
-import { Geometry } from "three/src/core/Geometry";
-import { PointsMaterial } from "three/src/materials/PointsMaterial";
-import { Points } from "three/src/objects/Points";
+import { Geometry, PointsMaterial, Points } from "three";
 export default function cloud(verts, c, s) {
   var geom = new Geometry();
   for (var i = 0; i < verts.length; ++i) {

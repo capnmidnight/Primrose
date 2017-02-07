@@ -40,11 +40,7 @@ care anything about the outside of this sphere, only the inside. You would use\n
 InsideSphereGeometry in this case. Or its alias, [`shell()`](#LiveAPI_shell)."
 });
 
-import { Geometry } from "three/src/core/Geometry";
-import { Vector3 } from "three/src/math/Vector3";
-import { Vector2 } from "three/src/math/Vector2";
-import { Face3 } from "three/src/core/Face3";
-import { Sphere } from "three/src/math/Sphere";
+import { Geometry, Vector3, Vector2, Face3, Sphere } from "three";
 export default class InsideSphereGeometry extends Geometry {
   constructor(radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength) {
     super();

@@ -22,7 +22,7 @@ pliny.function({
   }]
 });
 
-import { Quaternion } from "three/src/math/Quaternion";
+import { Quaternion } from "three";
 export default function quat(x, y, z, w) {
   return new Quaternion(x, y, z, w);
 }

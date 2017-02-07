@@ -1,5 +1,4 @@
-import { Geometry } from "three/src/core/Geometry";
-import { BufferGeometry } from "three/src/core/BufferGeometry";
+import { Geometry, BufferGeometry } from "three";
 
 BufferGeometry.prototype.center =
 Geometry.prototype.center =

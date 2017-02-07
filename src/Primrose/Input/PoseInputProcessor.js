@@ -12,9 +12,7 @@ const DEFAULT_POSE = {
   EMPTY_SCALE = new Vector3(),
   IE_CORRECTION = new Quaternion(1, 0, 0, 0);
 
-import { Vector3 } from "three/src/math/Vector3";
-import { Quaternion } from "three/src/math/Quaternion";
-import { Matrix4 } from "three/src/math/Matrix4";
+import { Vector3, Quaternion, Matrix4 } from "three";
 import InputProcessor from "./InputProcessor";
 import isMobile from "../../flags/isMobile";
 import isIE from "../../flags/isIE";

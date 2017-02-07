@@ -6,17 +6,7 @@
  * Converted to ES2015 by @capnmidnight
  *
  */
-import { EventDispatcher } from "three/src/core/EventDispatcher";
-import { DefaultLoadingManager } from "three/src/loaders/LoadingManager";
-import { Loader } from "three/src/loaders/Loader";
-import { RepeatWrapping } from "three/src/constants";
-import { FileLoader } from "three/src/loaders/FileLoader";
-import { TextureLoader } from "three/src/loaders/TextureLoader";
-import { FrontSide } from "three/src/constants";
-import { MeshPhongMaterial } from "three/src/materials/MeshPhongMaterial";
-import { MeshBasicMaterial } from "three/src/materials/MeshBasicMaterial";
-import { Color } from "three/src/math/Color";
-import { Vector2 } from "three/src/math/Vector2";
+import { EventDispatcher, DefaultLoadingManager, Loader, RepeatWrapping, FileLoader, TextureLoader, FrontSide, MeshPhongMaterial, MeshBasicMaterial, Color, Vector2 } from "three";
 
 export class MTLLoader extends EventDispatcher {
 

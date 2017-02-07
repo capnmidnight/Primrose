@@ -2,18 +2,7 @@
  * @author mrdoob / http://mrdoob.com/
  */
 
-import { DefaultLoadingManager } from "three/src/loaders/LoadingManager";
-import { BufferGeometry } from "three/src/core/BufferGeometry";
-import { BufferAttribute } from "three/src/core/BufferAttribute";
-import { LineSegments } from "three/src/objects/LineSegments";
-import { FileLoader } from "three/src/loaders/FileLoader";
-import { Group } from "three/src/objects/Group";
-import { LineBasicMaterial } from "three/src/materials/LineBasicMaterial";
-import { MeshPhongMaterial } from "three/src/materials/MeshPhongMaterial";
-import { SmoothShading } from "three/src/constants";
-import { FlatShading } from "three/src/constants";
-import { MultiMaterial } from "three/src/materials/MultiMaterial";
-import { Mesh } from "three/src/objects/Mesh";
+import { DefaultLoadingManager, BufferGeometry, BufferAttribute, LineSegments, FileLoader, Group, LineBasicMaterial, MeshPhongMaterial, SmoothShading, FlatShading, MultiMaterial, Mesh } from "three";
 
 export class OBJLoader {
 	constructor ( manager ) {

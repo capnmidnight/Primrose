@@ -19,9 +19,7 @@ pliny.function({
   }]
 })
 
-import { CubeTextureLoader } from "three/src/loaders/CubeTextureLoader";
-import { TextureLoader } from "three/src/loaders/TextureLoader";
-import { Texture } from "three/src/textures/Texture";
+import { CubeTextureLoader, TextureLoader, Texture } from "three";
 import cache from "../../util/cache";
 
 export default function loadTexture(id, url, progress) {

@@ -2,10 +2,9 @@ import quad from "../../live-api/quad";
 import Entity from "./Entity";
 import Image from "./Image";
 
-import { DirectionalLight } from "three/src/lights/DirectionalLight";
+import { DirectionalLight } from "three";
 
-import { AmbientLight } from "three/src/lights/AmbientLight";
-import { BackSide } from "three/src/constants";
+import { AmbientLight, BackSide } from "three";
 
 export default class Sky extends Entity {
 

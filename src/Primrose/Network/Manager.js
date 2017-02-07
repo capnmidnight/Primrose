@@ -17,7 +17,7 @@ pliny.class({
   }]
 });
 
-import { EventDispatcher } from "three/src/core/EventDispatcher";
+import { EventDispatcher } from "three";
 import RemoteUser from "./RemoteUser";
 
 export default class Manager extends EventDispatcher {

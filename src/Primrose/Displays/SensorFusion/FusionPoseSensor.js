@@ -14,9 +14,8 @@
  */
 import ComplementaryFilter from "./ComplementaryFilter";
 import PosePredictor from "./PosePredictor";
-import { Quaternion } from "three/src/math/Quaternion";
-import { Vector3 } from "three/src/math/Vector3";
-import { _Math } from "three/src/math/Math";
+import { Quaternion, Vector3 } from "three";
+import { Math as _Math } from "three";
 import isTimestampDeltaValid from "../../../util/isTimestampDeltaValid";
 import isLandscape from "../../../flags/isLandscape";
 import isiOS from "../../../flags/isiOS";

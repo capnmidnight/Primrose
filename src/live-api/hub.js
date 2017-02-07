@@ -13,7 +13,7 @@ pliny.function({
   }]
 });
 
-import { Object3D } from "three/src/core/Object3D";
+import { Object3D } from "three";
 export default function hub() {
   return new Object3D();
 };

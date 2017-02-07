@@ -97,7 +97,7 @@ class CommandState{
 }
 
 import Keys from "../Keys";
-import { EventDispatcher } from "three/src/core/EventDispatcher";
+import { EventDispatcher } from "three";
 
 export default class InputProcessor extends EventDispatcher {
 

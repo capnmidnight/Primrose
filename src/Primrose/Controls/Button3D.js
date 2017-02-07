@@ -19,7 +19,7 @@ pliny.class({
 });
 
 import Entity from "./Entity";
-import { Color } from "three/src/math/Color";
+import { Color } from "three";
 export default class Button3D extends Entity {
   constructor(model, buttonName, options) {
     super(buttonName, Object.assign({}, Button3D.DEFAULTS, options));

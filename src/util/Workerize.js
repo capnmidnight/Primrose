@@ -115,7 +115,7 @@ Then we can create and use an automatically workerized version of it as follows.
     }]
 });
 
-import { EventDispatcher } from "three/src/core/EventDispatcher";
+import { EventDispatcher } from "three";
 
 export default class Workerize extends EventDispatcher {
 

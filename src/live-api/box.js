@@ -53,7 +53,7 @@ It should look something like this:\n\
 });
 
 import cache from "../util/cache";
-import { BoxBufferGeometry } from "three/src/geometries/BoxGeometry";
+import { BoxBufferGeometry } from "three";
 export default function box(width, height, length, t, u, v) {
   if (height === undefined) {
     height = width;

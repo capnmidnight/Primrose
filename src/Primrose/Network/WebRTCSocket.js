@@ -26,7 +26,7 @@ pliny.class({
   }]
 });
 
-import { EventDispatcher } from "three/src/core/EventDispatcher";
+import { EventDispatcher } from "three";
 
 
 const PEERING_TIMEOUT_LENGTH = 30000;

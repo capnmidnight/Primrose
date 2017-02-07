@@ -14,9 +14,7 @@
  */
 
 import SensorSample from "./SensorSample";
-import { _Math } from "three/src/math/Math";
-import { Quaternion } from "three/src/math/Quaternion";
-import { Vector3 } from "three/src/math/Vector3";
+import { Math as _Math, Quaternion, Vector3 } from "three";
 import isTimestampDeltaValid from "../../../util/isTimestampDeltaValid";
 import isiOS from "../../../flags/isiOS";
 

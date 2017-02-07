@@ -1,6 +1,4 @@
-import { BufferGeometry } from "three/src/core/BufferGeometry";
-import { Geometry } from "three/src/core/Geometry";
-import { Mesh } from "three/src/objects/Mesh";
+import { BufferGeometry, Geometry, Mesh } from "three";
 import textured from "../live-api/textured";
 
 BufferGeometry.prototype.textured =

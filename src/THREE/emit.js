@@ -1,5 +1,4 @@
-import { EventDispatcher } from "three/src/core/EventDispatcher";
-import { Object3D } from "three/src/core/Object3D";
+import { EventDispatcher, Object3D } from "three";
 
 Object3D.prototype.emit = EventDispatcher.prototype.emit = function(evt, obj) {
   if(!obj) {
@@ -54,7 +53,7 @@ Object3D.prototype.watch = EventDispatcher.prototype.watch = function(child, eve
   if(!(events instanceof Array)) {
     events = [events];
   }
-  events.forEach((event) => 
+  events.forEach((event) =>
     child.addEventListener(event, this.dispatchEvent.bind(this)));
   return this;
 };

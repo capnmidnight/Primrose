@@ -36,16 +36,22 @@ var gulp = require("gulp"),
 
   tasks = formats.map((format) => {
 
-    ext = "";
+    var extension = "",
+      external = ["three"],
+      globals = null;
+
     if(format === "es") {
-      ext += ".modules";
+      extension += ".modules";
     }
     else if(format !== "umd"){
-      ext += "." + format;
+      extension += "." + format;
     }
-    ext += ".js";
+    else{
+      globals = {three: "THREE"};
+    }
+    extension += ".js";
 
-    var inFile = "PrimroseWithDoc" + ext,
+    var inFile = "PrimroseWithDoc" + extension,
       outFile = inFile.replace("WithDoc", ""),
       docFile = "doc/" + inFile.replace("WithDoc", "Documentation"),
       js = nt.js("PrimroseWithDoc:" + format, "src/index.js", {
@@ -53,6 +59,8 @@ var gulp = require("gulp"),
       moduleName: "Primrose",
       fileName: inFile,
       dependencies: ["format"],
+      external: external,
+      globals: globals,
       format: format,
       post: (_, cb) => {
         // removes the documentation objects from the concatenated library.

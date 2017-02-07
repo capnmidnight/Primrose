@@ -15,8 +15,7 @@ let VECTOR = new Vector3(),
   UP = new Vector3(),
   TEMP = new Matrix4();
 
-import { Vector3 } from "three/src/math/Vector3";
-import { Matrix4 } from "three/src/math/Matrix4";
+import { Vector3, Matrix4 } from "three";
 import isiOS from "../../flags/isiOS";
 import getBuffer from "../HTTP/getBuffer";
 import cascadeElement from "../DOM/cascadeElement"

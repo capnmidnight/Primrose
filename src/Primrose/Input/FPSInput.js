@@ -21,11 +21,7 @@ const DISPLACEMENT = new Vector3(),
   QUAT_TEMP = new Quaternion(),
   WEDGE = Math.PI / 3;
 
-import { Vector3 } from "three/src/math/Vector3";
-import { Euler } from "three/src/math/Euler";
-import { Quaternion } from "three/src/math/Quaternion";
-import { Matrix4 } from "three/src/math/Matrix4";
-import { EventDispatcher } from "three/src/core/EventDispatcher";
+import { Vector3, Euler, Quaternion, Matrix4, EventDispatcher } from "three";
 
 import identity from "../../util/identity";
 import hub from "../../live-api/hub";

@@ -4,7 +4,7 @@ pliny.class({
   description: "| [under construction]"
 });
 
-import { EventDispatcher } from "three/src/core/EventDispatcher";
+import { EventDispatcher } from "three";
 
 export default class Automator extends EventDispatcher {
 

@@ -31,7 +31,7 @@ pliny.function({
 });
 
 import randNum from "./number";
-import { Vector3 } from "three/src/math/Vector3";
+import { Vector3 } from "three";
 export default function vector(min, max){
   return new Vector3().set(
     randNum(min, max),

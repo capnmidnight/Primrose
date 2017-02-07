@@ -12,7 +12,7 @@ const SIZE = 1,
 
 import colored from "../../live-api/colored";
 import box from "../../live-api/box";
-import { BackSide } from "three/src/constants";
+import { BackSide } from "three";
 export default class Progress {
 
   constructor(majorColor, minorColor) {

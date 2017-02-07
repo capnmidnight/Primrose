@@ -27,11 +27,7 @@ pliny.class({
     }]
 });
 
-import { Vector3 } from "three/src/math/Vector3";
-import { Euler } from "three/src/math/Euler";
-import { Quaternion } from "three/src/math/Quaternion";
-import { Raycaster } from "three/src/core/Raycaster";
-import { Object3D } from "three/src/core/Object3D";
+import { Vector3, Euler, Quaternion, Raycaster, Object3D } from "three";
 
 import identity from "../util/identity";
 import colored from "../live-api/colored";

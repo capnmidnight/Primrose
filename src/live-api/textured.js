@@ -106,9 +106,7 @@ pliny.record({
 
 import cache from "../util/cache";
 import material from "./material";
-import { Mesh } from "three/src/objects/Mesh";
-import { RepeatWrapping } from "three/src/constants";
-import { Texture } from "three/src/textures/Texture";
+import { Mesh, RepeatWrapping, Texture } from "three";
 import loadTexture from "../Primrose/Graphics/loadTexture";
 
 const seenElements = new WeakMap();

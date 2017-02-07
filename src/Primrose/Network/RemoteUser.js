@@ -30,12 +30,11 @@ pliny.class({
   }]
 });
 
-import { EventDispatcher } from "three/src/core/EventDispatcher";
+import { EventDispatcher } from "three";
 import randColor from "../Random/color";
 import colored from "../../live-api/colored";
 import Audio3D from "../Audio/Audio3D";
-import { Quaternion } from "three/src/math/Quaternion";
-import { Vector3 } from "three/src/math/Vector3";
+import { Quaternion, Vector3 } from "three";
 
 export default class RemoteUser extends EventDispatcher {
 

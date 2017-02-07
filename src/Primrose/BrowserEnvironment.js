@@ -243,18 +243,7 @@ import Teleporter from "./Tools/Teleporter";
 import { Quality, PIXEL_SCALES } from "./Constants";
 
 
-import { EventDispatcher } from "three/src/core/EventDispatcher";
-import { Object3D } from "three/src/core/Object3D";
-import { BackSide, PCFSoftShadowMap } from "three/src/constants";
-import { FogExp2 } from "three/src/scenes/FogExp2";
-import { Scene } from "three/src/scenes/Scene";
-import { PerspectiveCamera } from "three/src/cameras/PerspectiveCamera";
-import { TextGeometry } from "three/src/geometries/TextGeometry";
-import { Quaternion } from "three/src/math/Quaternion";
-import { Color } from "three/src/math/Color";
-import { Euler } from "three/src/math/Euler";
-import { Vector3 } from "three/src/math/Vector3";
-import { WebGLRenderer } from "three/src/renderers/WebGLRenderer";
+import { EventDispatcher, Object3D, BackSide, PCFSoftShadowMap, FogExp2, Scene, PerspectiveCamera, TextGeometry, Quaternion, Color, Euler, Vector3, WebGLRenderer } from "three";
 
 export default class BrowserEnvironment extends EventDispatcher {
   constructor(options) {

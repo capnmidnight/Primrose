@@ -40,7 +40,7 @@ pliny.function({
 });
 
 import cache from "../util/cache";
-import { SphereGeometry } from "three/src/geometries/SphereGeometry";
+import { SphereGeometry } from "three";
 export default function sphere(r, slices, rings) {
   return cache(
     `SphereGeometry(${r}, ${slices}, ${rings})`,

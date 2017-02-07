@@ -7,7 +7,7 @@ pliny.class({
 
 const TEMP = new Vector2();
 
-import { Vector2 } from "three/src/math/Vector2";
+import { Vector2 } from "three";
 import InputProcessor from "./InputProcessor";
 export default class Touch extends InputProcessor {
   constructor(DOMElement, commands) {

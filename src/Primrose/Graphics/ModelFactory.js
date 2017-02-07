@@ -38,9 +38,7 @@ pliny.class({
     }]
 });
 
-import { ObjectLoader } from "three/src/loaders/ObjectLoader";
-import { FontLoader } from "three/src/loaders/FontLoader";
-import { AnimationClip } from "three/src/animation/AnimationClip";
+import { ObjectLoader, FontLoader, AnimationClip } from "three";
 
 import { MTLLoader, OBJLoader } from "../../THREE"
 

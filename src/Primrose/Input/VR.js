@@ -15,8 +15,7 @@ const DEFAULT_POSE = {
     orientation: [0, 0, 0, 1]
   };
 
-import { Vector3 } from "three/src/math/Vector3";
-import { Matrix4 } from "three/src/math/Matrix4";
+import { Vector3, Matrix4 } from "three";
 import PoseInputProcessor from "./PoseInputProcessor";
 import isChrome from "../../flags/isChrome";
 import isiOS from "../../flags/isiOS";
