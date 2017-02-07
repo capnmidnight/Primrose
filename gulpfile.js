@@ -90,13 +90,16 @@ var gulp = require("gulp"),
       min = nt.min(taskName, file);
 
     return min;
-  });
+  }),
+
+  minDocApp = nt.min("DocApp", "doc/app.js");
 
 tasks.release.push.apply(tasks.release, demos.map(d=>d.release));
 tasks.format.push(preloader.format);
 tasks.default.push(preloader.default);
 tasks.debug.push(preloader.debug);
 tasks.release.push(preloader.release);
+tasks.release.push(minDocApp.release);
 
 const tidyFiles = [
   "PrimroseWithDoc*.js",
@@ -126,5 +129,6 @@ gulp.task("css:release", [css.release]);
 gulp.task("default", [ "js", "html", "css" ], () => startServer({ mode: "dev", port: 8080 }));
 gulp.task("debug", ["js:debug", "html:debug", "css:debug"]);
 gulp.task("release",  ["js:release", "html:release", "css:release"]);
+gulp.task("test", [ "release" ], () => startServer({ mode: "dev", port: 8080 }));
 
 gulp.task("kablamo", build.exec("gulp bump && gulp yolo && cd ../Primrose-Site && gulp kablamo && cd ../Primrose && gulp trololo && npm publish"));

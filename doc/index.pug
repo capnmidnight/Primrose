@@ -15,7 +15,7 @@ block document
     grammar("JavaScript");
     var env = new Primrose.BrowserEnvironment({
       backgroundColor: 0x000000,
-      groundTexture: "shared_assets/images/deck.png",
+      groundTexture: "deck.png",
       useFog: true
     });
 
@@ -30,5 +30,5 @@ block document
       // to your own rules.
     });
 
-  p If you have the asset file for the floor texture and everything worked correctly, it should look something like this:
-  img(src=fileRoot + "doc/empty/screenshot.jpg", alt="screenshot", title="Blank scene")
+  p If you have #[a(href= fileRoot + "demos/shared_assets/images/deck.png", target="_blank") the asset file for the floor texture] and everything worked correctly, it should look something like this:
+  img(src=fileRoot + "demos/empty/screenshot.jpg", alt="screenshot", title="Blank scene")

@@ -3,11 +3,7 @@
 append head
   <!-- start documentation.pug head append -->
   script(src= fileRoot + "node_modules/lavu-details-polyfill/lib/index" + jsExt)
-  if debug
-    script(src= fileRoot + "../pliny/node_modules/marked/marked.min.js")
-    script(src= fileRoot + "../pliny/src/pliny.js")
-  else
-    script(src= fileRoot + "node_modules/pliny/pliny" + jsExt)
+  script(src= fileRoot + "node_modules/pliny/pliny" + jsExt)
   script(src= fileRoot + "Primrose" + jsExt)
   script(src= fileRoot + "doc/PrimroseDocumentation" + jsExt)
   <!-- end documentation.pug head append -->
@@ -23,7 +19,6 @@ block main
       ul
         li: a(href=fileRoot + "doc/readme.html") Installation &amp; Setup
         li: a(href=fileRoot + "doc/contributing.html") Contributing
-        li: a(href=fileRoot + "demos") Demos
         li: a(href=fileRoot + "doc/changelog.html") Change Log
         li: a(href=fileRoot + "doc/steamVRDongles.html") Pairing Multiple SteamVR Controllers
   #documentation: section: article

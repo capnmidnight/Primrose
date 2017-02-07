@@ -1,0 +1,266 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, shrink-to-fit=0, initial-scale=1.0"><meta name="apple-touch-fullscreen" content="yes"><meta name="web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="theme-color" content="black"><meta name="description" content="A WebVR application framework."><meta name="keywords" content="WebGL, WebVR, HTML5, JavaScript, text editor, source code editor, virtual reality, Primrose"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@Primrose_VR"><meta property="og:site_name" content="Primrose VR"><meta property="og:description" content="Primrose: Framework for WebVR Applications"><meta name="twitter:description" content="Primrose: Framework for WebVR Applications"><meta property="og:url" content="http://www.primrosevr.com/undefined"><!-- start main.pug meta block --><meta name="twitter:image" content="http://www.primrosevr.com/images/screenshot.jpg"><meta property="og:image" content="http://www.primrosevr.com/images/screenshot.jpg"><!-- end main.pug meta block -->
+<!-- start main.pug title block --><meta property="og:title" content="Primrose VR: WebVR Application Framework"><meta name="twitter:title" content="Primrose VR: WebVR Application Framework"><title>Primrose VR: WebVR Application Framework</title><!-- end main.pug title block --><link type="text/css" rel="stylesheet" href="../doc/style.min.css"><script src="../node_modules/pliny/pliny.min.js"></script><script src="../Primrose.min.js"></script><script src="../doc/app.min.js"></script><script src="../ga.js"></script></head><body><header role="banner"><a id="logo" href="../"><img src="../doc/images/primrose40.png" alt="logo" title="Primrose logo"><span class="version-number">v0.31.1</span></a><nav role="navigation"><ul><li><a href="../demos/">Demos</a></li><li><a href="../doc/">Docs</a></li><li><a href="../doc/faq.html">FAQ</a></li><li><a href="../doc/community.html">Community</a></li><li><a href="https://github.com/NotionTheory/Primrose/" target="_blank">Github</a></li></ul></nav><h1>Demo: pacman</h1></header><!-- start main.pug banner block --><!-- end main.pug banner block -->
+<!-- start main.pug main block --><main><!-- start demo.pug banner block --><p>Click on the image below to lock mouse cursor to demo. <a href="../demos/pacman" target="_blank">Open demo in new window</a>.</p><iframe id="demo" src="../demos/pacman" style="width: 100%;height: 50vw;" allowfullscreen allowvr></iframe><h2>Source</h2><pre id="editorContainer">grammar(&quot;JavaScript&quot;);
+var GRASS = &quot;../shared_assets/images/grass.png&quot;,
+  ROCK = &quot;../shared_assets/images/rock.png&quot;,
+  SAND = &quot;../shared_assets/images/sand.png&quot;,
+  WATER = &quot;../shared_assets/images/water.png&quot;,
+  DECK = &quot;../shared_assets/images/deck.png&quot;,
+  CODE_KEY = &quot;Pacman code&quot;,
+
+  env = new Primrose.BrowserEnvironment({
+    backgroundColor: 0x000000,
+    skyTexture: DECK,
+    groundTexture: DECK,
+    font: &quot;../shared_assets/fonts/helvetiker_regular.typeface.json&quot;,
+    fullScreenButtonContainer: &quot;#fullScreenButtonContainer&quot;,
+    progress: Preloader.thunk
+  }),
+
+  editor = null,
+
+  modA = isMacOS ? &quot;metaKey&quot; : &quot;ctrlKey&quot;,
+  modB = isMacOS ? &quot;altKey&quot; : &quot;shiftKey&quot;,
+  cmdA = isMacOS ? &quot;CMD&quot; : &quot;CTRL&quot;,
+  cmdB = isMacOS ? &quot;OPT&quot; : &quot;SHIFT&quot;,
+  cmdPre = cmdA + &quot;+&quot; + cmdB,
+
+  scriptUpdateTimeout,
+  lastScript = null,
+  scriptAnimate = null,
+
+  subScene = hub();
+
+env.addEventListener(&quot;ready&quot;, function () {
+  env.scene.add(subScene);
+
+  var editorSize = isMobile ? 512 : 1024,
+    fontSize = isMobile ? 10 : 20;
+
+  editor = new Primrose.Controls.TextBox({
+      id: &quot;Editor&quot;,
+      width: editorSize,
+      height: editorSize,
+      geometry: shell(1.5, 25, 25),
+      fontSize: fontSize,
+      tokenizer: Primrose.Text.Grammars.JavaScript,
+      value: getSourceCode(isInIFrame)
+    })
+    .addTo(env.vicinity)
+    .at(0, env.options.avatarHeight, 0);
+
+  Preloader.hide();
+}, false);
+
+window.addEventListener(&quot;beforeunload&quot;, function (evt) {
+  if (false &amp;&amp; editor &amp;&amp; editor.value !== getSourceCode(true)) {
+    return evt.returnValue = &quot;Are you sure you want to leave?&quot;;
+  }
+}, false);
+
+window.addEventListener(&quot;unload&quot;, function (evt) {
+  var script = editor &amp;&amp; editor.value;
+  if (script &amp;&amp; script.length &gt; 0) {
+    setSetting(CODE_KEY, script);
+  }
+}, false);
+
+env.addEventListener(&quot;update&quot;, function () {
+  if (!scriptUpdateTimeout) {
+    scriptUpdateTimeout = setTimeout(updateScript, 500);
+  }
+
+  if (scriptAnimate) {
+    // If quality has degraded, it's likely because the user bombed on a script.
+    // Let's help them not lose their lunch.
+    if (env.quality === Primrose.Constants.Quality.NONE) {
+      scriptAnimate = null;
+      wipeScene();
+    }
+    else {
+      try {
+        scriptAnimate.call(env, env.deltaTime);
+      }
+      catch (exp) {
+        console.error(exp);
+        scriptAnimate = null;
+      }
+    }
+  }
+});
+
+function getSourceCode(skipReload) {
+  var defaultDemo = pacman.toString(),
+    src = skipReload &amp;&amp; defaultDemo || getSetting(CODE_KEY, defaultDemo);
+  // If there was no source code stored in local storage,
+  // we use the script from a saved function and assume
+  // it has been formatted with 2 spaces per-line.
+  if (src === defaultDemo) {
+    var lines = src.replace(&quot;\r\n&quot;, &quot;\n&quot;)
+      .split(&quot;\n&quot;);
+    lines.pop();
+    lines.shift();
+    for (var i = 0; i &lt; lines.length; ++i) {
+      lines[i] = lines[i].substring(2);
+    }
+    src = lines.join(&quot;\n&quot;);
+  }
+  return src.trim();
+}
+
+env.addEventListener(&quot;keydown&quot;, function (evt) {
+  if (evt[modA] &amp;&amp; evt[modB]) {
+    if (evt.keyCode === Primrose.Keys.E) {
+      editor.visible = !editor.visible;
+    }
+    else if (evt.keyCode === Primrose.Keys.X) {
+      editor.value = getSourceCode(true);
+    }
+  }
+
+  if (scriptUpdateTimeout) {
+    clearTimeout(scriptUpdateTimeout);
+    scriptUpdateTimeout = null;
+  }
+});
+
+function wipeScene() {
+  for (var i = subScene.children.length - 1; i &gt;= 0; --i) {
+    subScene.remove(subScene.children[i]);
+  }
+}
+
+var first = true;
+function updateScript() {
+  var newScript = editor.value,
+    exp;
+  if (newScript !== lastScript) {
+    env.transition(function() {
+      scriptUpdateTimeout = null;
+      lastScript = newScript;
+      if (newScript.indexOf(&quot;function update&quot;) &gt;= 0 &amp;&amp;
+        newScript.indexOf(&quot;return update&quot;) &lt; 0) {
+        newScript += &quot;\nreturn update;&quot;;
+      }
+      console.log(&quot;----- loading new script -----&quot;);
+      scriptAnimate = null;
+      try{
+        var scriptUpdate = new Function(&quot;scene&quot;, newScript);
+        wipeScene();
+        scriptAnimate = scriptUpdate.call(env, subScene);
+        if (scriptAnimate) {
+          scriptAnimate(0);
+        }
+        console.log(&quot;----- script loaded -----&quot;);
+        if (!scriptAnimate) {
+          console.log(&quot;----- No update script provided -----&quot;);
+        }
+        else if (env.quality === Primrose.Constants.Quality.NONE) {
+          env.quality = Primrose.Constants.Quality.MEDIUM;
+        }
+      }
+      catch(exp){
+        scriptUpdate = null;
+        console.error(exp);
+        console.error(newScript);
+      }
+    }, null, first);
+    first = false;
+  }
+}
+
+
+
+function pacman() {
+  var R = Primrose.Random.int,
+    L = Primrose.Graphics.ModelFactory.loadObject,
+    T = 3,
+    W = 30,
+    H = 30,
+    colors = [
+      0xff0000,
+      0xffff00,
+      0xff00ff,
+      0x00ffff
+    ],
+    ghosts,
+    map = [
+      &quot;12222222221&quot;,
+      &quot;10000000001&quot;,
+      &quot;10222022201&quot;,
+      &quot;10001000001&quot;,
+      &quot;10101022201&quot;,
+      &quot;10100010101&quot;,
+      &quot;10222220101&quot;,
+      &quot;10000000001&quot;,
+      &quot;12222222221&quot;
+    ];
+
+  function C(n, x, y) {
+    if (n !== 0) {
+      cylinder(0.5, 0.5, T)
+        .colored(0x0000ff)
+        .addTo(scene)
+        .rot(0, n * Math.PI / 2, Math.PI / 2)
+        .at(T * x - W / 2, env.options.avatarHeight, T * y - H / 2);
+    }
+  }
+
+  for (var y = 0; y &lt; map.length; ++y) {
+    var row = map[y];
+    for (var x = 0; x &lt; row.length; ++x) {
+      C(row[x] | 0, x, y);
+    }
+  }
+  console.log(&quot;Here we go&quot;);
+  L(&quot;../shared_assets/models/ghost.obj&quot;)
+    .then(function (ghost) {
+      console.log(&quot;ghost&quot;, ghost);
+      ghosts = colors.map(function (color, i) {
+        var g = ghost.clone(),
+          body = g.children[0];
+        colored(body, color);
+        scene.appendChild(g);
+        g.position.set(i * 3 - 4, 0, -5);
+        g.velocity = v3(0, 0, 0);
+        g.velocity.x = R(-1, 2);
+        if (g.velocity.x === 0 &amp;&amp; g.velocity.z === 0) {
+          g.velocity.z = R(-1, 2);
+        }
+        return g;
+      });
+    });
+
+  function collisionCheck(dt, a, t) {
+    var x = Math.floor((a.position.x + W / 2 + 1) / T),
+      y = Math.floor((a.position.z + H / 2 + 1) / T),
+      row = map[y],
+      tile = row &amp;&amp; row[x] | 0;
+    var v = a.velocity.clone()
+      .multiplyScalar(-dt * 1.5);
+    if (tile &gt; 0) {
+      if (t || a.isOnGround) {
+        a.position.add(v);
+      }
+      if (t) {
+        a.velocity.set(
+          a.velocity.z,
+          0, -a.velocity.x
+        );
+      }
+    }
+  }
+
+  return function (dt) {
+    if (ghosts) {
+      ghosts.forEach(function (g) {
+        g.position.add(g.velocity.clone()
+          .multiplyScalar(dt));
+        collisionCheck(dt, g, env.input.head);
+      });
+    }
+    collisionCheck(dt, env.input.head, null);
+  }
+}
+</pre></main><!-- end main.pug main block -->
+<!-- start main.pug footer block --><footer><div id="footerWrapper"><a href="../doc/readme.html">About</a><a href="../doc/license.html">License</a><a href="../doc/changelog.html">Changelog</a><a href="https://notiontheory.typeform.com/to/QzZmAD" target="_blank">Slack</a><a class="small icon github" href="https://www.github.com/NotionTheory/Primrose" target="_blank">&nbsp;</a><a class="small icon twitter" href="https://www.twitter.com/Primrose_VR" target="_blank">&nbsp;</a><a href="http://www.notiontheory.com/team" target="_blank" style="color:#ec2471;">Made (with love) by NotionTheory</a></div></footer><!-- end main.pug footer block --></body></html>
