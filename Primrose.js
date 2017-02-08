@@ -3917,7 +3917,7 @@ var Audio$1 = {
 
 var packageName = "PrimroseVR";
 
-var version = "0.31.1";
+var version = "0.31.2";
 
 
 
@@ -7585,11 +7585,13 @@ var ModelFactory = function () {
               Loader$$1.setMaterials(materials);
             });
           } else if (extension === ".mtl") {
-            var match = src.match(PATH_PATTERN),
-                dir = match[1];
-            src = match[2] + match[3];
-            Loader$$1.setTexturePath(dir);
-            Loader$$1.setPath(dir);
+            var match = src.match(PATH_PATTERN);
+            if (match) {
+              var dir = match[1];
+              src = match[2] + match[3];
+              Loader$$1.setTexturePath(dir);
+              Loader$$1.setPath(dir);
+            }
           }
 
           if (elem) {
