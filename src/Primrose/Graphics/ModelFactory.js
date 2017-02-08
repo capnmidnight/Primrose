@@ -187,19 +187,19 @@ export default class ModelFactory {
             });
         }
         else if (extension === ".mtl") {
-          var match = src.match(PATH_PATTERN),
-            dir = match[1];
-          src = match[2] + match[3];
-          Loader.setTexturePath(dir);
-          Loader.setPath(dir);
+          var match = src.match(PATH_PATTERN);
+          if(match) {
+            var dir = match[1];
+            src = match[2] + match[3];
+            Loader.setTexturePath(dir);
+            Loader.setPath(dir);
+          }
         }
 
         if (elem) {
           var elemSource = elem.innerHTML
             .split(/\r?\n/g)
-            .map(function (s) {
-              return s.trim();
-            })
+            .map((s) => s.trim())
             .join("\n");
           promise = promise.then(() => Loader.parse(elemSource));
         }
