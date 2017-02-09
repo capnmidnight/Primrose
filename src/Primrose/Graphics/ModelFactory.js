@@ -184,7 +184,8 @@ export default class ModelFactory {
             .then((materials) => {
               materials.preload();
               Loader.setMaterials(materials);
-            });
+            })
+            .catch(console.error.bind(console, "Error loading MTL file: " + newPath));
         }
         else if (extension === ".mtl") {
           var match = src.match(PATH_PATTERN);
