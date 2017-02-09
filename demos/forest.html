@@ -3,9 +3,10 @@
 <!-- start main.pug main block --><main><!-- start demo.pug banner block --><p>Click on the image below to lock mouse cursor to demo. <a href="../demos/forest" target="_blank">Open demo in new window</a>.</p><iframe id="demo" src="../demos/forest" style="width: 100%;height: 50vw;" allowfullscreen allowvr></iframe><h2>Source</h2><pre id="editorContainer">grammar(&quot;JavaScript&quot;);
 var env = new Primrose.BrowserEnvironment({
   font: &quot;../shared_assets/fonts/helvetiker_regular.typeface.json&quot;,
-  backgroundColor: 0x07001f,
+  backgroundColor: 0xC9E6EE,
   groundTexture: &quot;../shared_assets/images/grass.png&quot;,
   useFog: true,
+  enableShadows: true,
   fullScreenButtonContainer: &quot;#fullScreenButtonContainer&quot;,
   progress: Preloader.thunk
 });
@@ -14,6 +15,8 @@ var treeReady = Primrose.Graphics.ModelFactory.loadModel(&quot;tree.obj&quot;);
 
 env.addEventListener(&quot;ready&quot;, function() {
   treeReady.then(function(treeModel) {
+    treeModel.template.castShadow = true;
+    treeModel.template.receiveShadow = true;
     for(var i = 0; i &lt; 100; ++i) {
       treeModel.clone()
         .named(&quot;tree&quot; + i)
@@ -21,7 +24,15 @@ env.addEventListener(&quot;ready&quot;, function() {
         .at(
           Primrose.Random.number(-25, 25),
           0,
-          Primrose.Random.number(-25, 25));
+          Primrose.Random.number(-25, 25))
+        .rot(
+          0,
+          Primrose.Random.number(0, Math.PI),
+          0)
+        .scl(
+          1,
+          Primrose.Random.number(0.7, 1.3),
+          1);
     }
     Preloader.hide();
   });
