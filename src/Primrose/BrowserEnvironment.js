@@ -67,7 +67,7 @@ pliny.record({
     description: "Set to true to disable keyboard-based input."
   }, {
     name: "enableShadows",
-    type: "",
+    type: "Boolean",
     optional: true,
     description: "Set to true to enable the use of shadows on objects in the scene."
   }, {
@@ -1179,9 +1179,6 @@ export default class BrowserEnvironment extends EventDispatcher {
         if(this.options.enableShadows && this.sky.sun) {
           this.renderer.shadowMap.enabled = true;
           this.renderer.shadowMap.type = PCFSoftShadowMap;
-          this.sky.sun.castShadow = true;
-          this.sky.sun.shadow.mapSize.width =
-          this.sky.sun.shadow.mapSize.height = this.options.shadowMapSize;
         }
 
         this.input.VR.displays.forEach((display) => {
@@ -1439,6 +1436,7 @@ BrowserEnvironment.DEFAULTS = {
   disableKeyboard: false,
   enableShadows: false,
   shadowMapSize: 1024,
+  shadowCameraSize: 20,
   progress: null,
   // The rate at which the view fades in and out.
   fadeRate: 5,

@@ -3663,7 +3663,7 @@ pliny.record({
     description: "Set to true to disable keyboard-based input."
   }, {
     name: "enableShadows",
-    type: "",
+    type: "Boolean",
     optional: true,
     description: "Set to true to enable the use of shadows on objects in the scene."
   }, {

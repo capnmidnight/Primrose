@@ -1,4 +1,5 @@
 import quad from "../../live-api/quad";
+import isMobile from "../../flags/isMobile";
 import Entity from "./Entity";
 import Image from "./Image";
 
@@ -15,7 +16,9 @@ export default class Sky extends Entity {
       unshaded: true,
       radius: options.drawDistance,
       texture: options.skyTexture,
-      progress: options.progress
+      progress: options.progress,
+      enableShadows: options.enableShadows,
+      shadowMapSize: options.shadowMapSize
     });
 
     this._image = null;
@@ -43,9 +46,26 @@ export default class Sky extends Entity {
       });
       this.sun = new DirectionalLight(0xffffff, 1)
         .addTo(this)
-        .at(0, 1, 1);
-        this.add(this.sun.target);
+        .at(0, 100, 100);
+
+      console.log(options.shadowMapSize, options.shadowCameraSize);
+      if(options.enableShadows) {
+        this.sun.castShadow = true;
+        this.sun.shadow.mapSize.width =
+        this.sun.shadow.mapSize.height = options.shadowMapSize * (isMobile ? 1 : 2);
+        this.sun.shadow.bias = 0.01;
+        this.sun.shadow.radius = isMobile ? 1 : 3;
+        this.sun.shadow.camera.top = this.sun.shadow.camera.right = options.shadowCameraSize;
+        this.sun.shadow.camera.bottom = this.sun.shadow.camera.left = -options.shadowCameraSize;
+        this.sun.shadow.camera.updateProjectionMatrix();
+      }
     }
+  }
+
+  addTo(obj) {
+    var res = super.addTo(obj);
+    obj.add(this.sun);
+    return res;
   }
 
   replace(files){

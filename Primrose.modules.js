@@ -5488,7 +5488,9 @@ var Sky = function (_Entity) {
       unshaded: true,
       radius: options.drawDistance,
       texture: options.skyTexture,
-      progress: options.progress
+      progress: options.progress,
+      enableShadows: options.enableShadows,
+      shadowMapSize: options.shadowMapSize
     }));
 
     _this._image = null;
@@ -5500,13 +5502,30 @@ var Sky = function (_Entity) {
 
       _this.ambient = new AmbientLight(0xffffff, 0.5).addTo(_this);
 
-      _this.sun = new DirectionalLight(0xffffff, 1).addTo(_this).at(0, 1, 1);
-      _this.add(_this.sun.target);
+      _this.sun = new DirectionalLight(0xffffff, 1).addTo(_this).at(0, 100, 100);
+
+      console.log(options.shadowMapSize, options.shadowCameraSize);
+      if (options.enableShadows) {
+        _this.sun.castShadow = true;
+        _this.sun.shadow.mapSize.width = _this.sun.shadow.mapSize.height = options.shadowMapSize * (isMobile ? 1 : 2);
+        _this.sun.shadow.bias = 0.01;
+        _this.sun.shadow.radius = isMobile ? 1 : 3;
+        _this.sun.shadow.camera.top = _this.sun.shadow.camera.right = options.shadowCameraSize;
+        _this.sun.shadow.camera.bottom = _this.sun.shadow.camera.left = -options.shadowCameraSize;
+        _this.sun.shadow.camera.updateProjectionMatrix();
+      }
     }
     return _this;
   }
 
   createClass(Sky, [{
+    key: "addTo",
+    value: function addTo(obj) {
+      var res = get$1(Sky.prototype.__proto__ || Object.getPrototypeOf(Sky.prototype), "addTo", this).call(this, obj);
+      obj.add(this.sun);
+      return res;
+    }
+  }, {
     key: "replace",
     value: function replace(files) {
       this.options.texture = files;
@@ -7579,7 +7598,7 @@ var ModelFactory = function () {
             }).then(function (materials) {
               materials.preload();
               Loader$$1.setMaterials(materials);
-            });
+            }).catch(console.error.bind(console, "Error loading MTL file: " + newPath));
           } else if (extension === ".mtl") {
             var match = src.match(PATH_PATTERN);
             if (match) {
@@ -12394,8 +12413,6 @@ var BrowserEnvironment = function (_EventDispatcher) {
       if (_this.options.enableShadows && _this.sky.sun) {
         _this.renderer.shadowMap.enabled = true;
         _this.renderer.shadowMap.type = PCFSoftShadowMap;
-        _this.sky.sun.castShadow = true;
-        _this.sky.sun.shadow.mapSize.width = _this.sky.sun.shadow.mapSize.height = _this.options.shadowMapSize;
       }
 
       _this.input.VR.displays.forEach(function (display) {
@@ -12580,6 +12597,7 @@ BrowserEnvironment.DEFAULTS = {
   disableKeyboard: false,
   enableShadows: false,
   shadowMapSize: 1024,
+  shadowCameraSize: 20,
   progress: null,
   // The rate at which the view fades in and out.
   fadeRate: 5,
