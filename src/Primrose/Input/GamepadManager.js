@@ -5,12 +5,21 @@ pliny.class({
   description: "| [under construction]"
 });
 
+const blackList = [
+"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2910.0 Safari/537.36"
+];
+
+
+navigator.getGamepads = navigator.getGamepads ||
+  navigator.webkitGetGamepads;
+
 import { EventDispatcher } from "three";
 import Gamepad from "./Gamepad";
 export default class GamepadManager extends EventDispatcher {
 
   static get isAvailable() {
-    return !!navigator.getGamepads;
+    return blackList.indexOf(navigator.userAgent) === -1
+     && !!navigator.getGamepads;
   }
 
   constructor(){

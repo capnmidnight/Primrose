@@ -5,9 +5,6 @@ pliny.class({
   description: "| [under construction]"
 });
 
-navigator.getGamepads = navigator.getGamepads ||
-  navigator.webkitGetGamepads;
-
 function playPattern(devices, pattern, pause){
   if(pattern.length > 0){
     const length = pattern.shift();
