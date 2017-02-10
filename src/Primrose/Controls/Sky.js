@@ -14,11 +14,13 @@ export default class Sky extends Entity {
       transparent: false,
       useFog: false,
       unshaded: true,
-      radius: options.drawDistance,
+      skyRadius: options.drawDistance,
       texture: options.skyTexture,
       progress: options.progress,
       enableShadows: options.enableShadows,
-      shadowMapSize: options.shadowMapSize
+      shadowMapSize: options.shadowMapSize,
+      shadowCameraSize: options.shadowCameraSize,
+      shadowRadius: options.shadowRadius
     });
 
     this._image = null;
@@ -48,24 +50,19 @@ export default class Sky extends Entity {
         .addTo(this)
         .at(0, 100, 100);
 
-      console.log(options.shadowMapSize, options.shadowCameraSize);
-      if(options.enableShadows) {
+      this.add(this.sun.target);
+
+      if(this.options.enableShadows) {
         this.sun.castShadow = true;
         this.sun.shadow.mapSize.width =
-        this.sun.shadow.mapSize.height = options.shadowMapSize * (isMobile ? 1 : 2);
+        this.sun.shadow.mapSize.height = this.options.shadowMapSize;
         this.sun.shadow.bias = 0.01;
-        this.sun.shadow.radius = isMobile ? 1 : 3;
-        this.sun.shadow.camera.top = this.sun.shadow.camera.right = options.shadowCameraSize;
-        this.sun.shadow.camera.bottom = this.sun.shadow.camera.left = -options.shadowCameraSize;
+        this.sun.shadow.radius = this.options.shadowRadius;
+        this.sun.shadow.camera.top = this.sun.shadow.camera.right = this.options.shadowCameraSize;
+        this.sun.shadow.camera.bottom = this.sun.shadow.camera.left = -this.options.shadowCameraSize;
         this.sun.shadow.camera.updateProjectionMatrix();
       }
     }
-  }
-
-  addTo(obj) {
-    var res = super.addTo(obj);
-    obj.add(this.sun);
-    return res;
   }
 
   replace(files){
@@ -77,7 +74,7 @@ export default class Sky extends Entity {
   get _ready() {
     const type = typeof  this.options.texture;
     if(type === "number") {
-      const skyDim = this.options.radius / Math.sqrt(2);
+      const skyDim = this.options.skyRadius / Math.sqrt(2);
       this.options.side = BackSide;
       this.add(box(skyDim, skyDim, skyDim)
         .colored(this.options.texture, this.options));
