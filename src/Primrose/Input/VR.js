@@ -172,7 +172,7 @@ export default class VR extends PoseInputProcessor {
   }
 
   submitFrame() {
-    if (this.currentDevice) {
+    if(this.currentDevice) {
       this.currentDevice.submitFrame(this.currentPose);
     }
   }

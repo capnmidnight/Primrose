@@ -1001,6 +1001,7 @@ export default class BrowserEnvironment extends EventDispatcher {
       });
       this.input = new FPSInput(this.options.fullScreenElement, this.options);
       this.input.addEventListener("zero", this.zero);
+      this.watch(this.input, ["motioncontrollerfound"]);
       this.input.route(FPSInput.EVENTS, this.consumeEvent.bind(this));
       this.input.VR.ready.then((displays) => displays.forEach((display, i) => {
         window.addEventListener("vrdisplayactivate", (evt) => {
@@ -1231,7 +1232,7 @@ export default class BrowserEnvironment extends EventDispatcher {
     this.stop = () => {
       if (currentTimerObject) {
         currentTimerObject.cancelAnimationFrame(this.timer);
-        this.audio.stop();
+      this.audio.stop();
         this.timer = null;
       }
     };

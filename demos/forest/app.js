@@ -4,6 +4,7 @@ var env = new Primrose.BrowserEnvironment({
   groundTexture: "../shared_assets/images/grass.png",
   useFog: true,
   enableShadows: true,
+  shadowRadius: 3,
   fullScreenButtonContainer: "#fullScreenButtonContainer",
   progress: Preloader.thunk
 });
@@ -33,4 +34,10 @@ env.addEventListener("ready", function() {
     }
     Preloader.hide();
   });
+
+  env.displays[0].enableMotion = true;
+});
+
+env.addEventListener("motioncontrollerfound", function(ctrl){
+  env.displays[0].motionDevice = ctrl;
 });

@@ -216,6 +216,8 @@ export default class FPSInput extends EventDispatcher {
 
             this.pointers.push(ptr);
             this.options.scene.add(ptr);
+
+            this.emit("motioncontrollerfound", mgr);
           }
           else {
             mgr = new Gamepad(this.gamepadMgr, pad, 0, {
