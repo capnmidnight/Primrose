@@ -442,7 +442,7 @@ export default class BrowserEnvironment extends EventDispatcher {
         this.renderer.render(this.scene, this.camera);
         this.camera.translateOnAxis(st.translation, -1);
       }
-      this.input.submitFrame();
+      this.input.VR.submitFrame();
     };
 
     var modifyScreen = () => {

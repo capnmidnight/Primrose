@@ -339,10 +339,6 @@ export default class FPSInput extends EventDispatcher {
     return !!(this.Touch && this.Touch.enabled && this.Touch.inPhysicalUse);
   }
 
-  submitFrame() {
-    this.VR.submitFrame();
-  }
-
   update(dt) {
     const hadGamepad = this.hasGamepad;
     if(this.gamepadMgr) {
