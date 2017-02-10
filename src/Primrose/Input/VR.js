@@ -38,11 +38,12 @@ export default class VR extends PoseInputProcessor {
     super("VR");
 
     this.options = options;
-    this._requestPresent = (layers) => this.currentDevice.requestPresent(layers)
-          .catch((exp) => console.warn("requstPresent", exp));
-
     this.displays = [];
     this._transformers = [];
+    this.lastLastTimerDevice = null;
+    this.lastTimerDevice = null;
+    this.timerDevice = null;
+    this.timer = null;
     this.currentDeviceIndex = -1;
     this.movePlayer = new Matrix4();
     this.stage = null;
@@ -94,16 +95,9 @@ export default class VR extends PoseInputProcessor {
         layers = layers[0];
       }
 
-      var promise = null;
-      if(this.currentDevice.capabilities.hasExternalDisplay){
-        // PCs with HMD should also make the browser window on the main
-        // display full-screen, so we can then also lock pointer.
-        promise = standardFullScreenBehavior(elem)
-          .then(() => this._requestPresent(layers));
-      }
-      else {
-        promise = this._requestPresent(layers)
-          .then(standardLockBehavior);
+      var promise = this.currentDevice.requestPresent(layers);
+      if(isMobile || !isFirefox) {
+        promise = promise.then(standardLockBehavior);
       }
       return promise;
     }
@@ -180,6 +174,23 @@ export default class VR extends PoseInputProcessor {
   submitFrame() {
     if (this.currentDevice) {
       this.currentDevice.submitFrame(this.currentPose);
+    }
+  }
+
+  startAnimation(callback){
+    if(this.currentDevice) {
+      this.lastLastTimerDevice = this.lastTimerDevice;
+      this.lastTimerDevice = this.timerDevice;
+      this.timerDevice = this.currentDevice;
+      this.timer = this.currentDevice.requestAnimationFrame(callback);
+      return this.timer;
+    }
+  }
+
+  cancelAnimation() {
+    if(this.timerDevice && this.timer) {
+      this.timerDevice.cancelAnimationFrame(this.timer);
+      this.timer = null;
     }
   }
 
