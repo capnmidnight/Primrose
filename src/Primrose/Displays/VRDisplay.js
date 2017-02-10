@@ -32,7 +32,7 @@ let nextDisplayId = 1000,
 
 
 export default class VRDisplay {
-  constructor(name, isPolyfilled) {
+  constructor(name) {
     this._currentLayers = [];
 
     Object.defineProperties(this, {

@@ -25,7 +25,7 @@ export default class StandardMonitorVRDisplay extends VRDisplay {
   }
 
   constructor(display) {
-    super("Full Screen", display && display.isPolyfilled);
+    super("Full Screen");
     this._display = display;
   }
 

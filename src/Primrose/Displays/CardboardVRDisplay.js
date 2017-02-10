@@ -25,7 +25,7 @@ var Eye = {
 
 export default class CardboardVRDisplay extends VRDisplay {
   constructor(options) {
-    super("Google Cardboard", true);
+    super("Google Cardboard");
     this.DOMElement = null;
 
     // "Private" members.
