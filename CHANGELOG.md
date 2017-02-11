@@ -1,3 +1,13 @@
+## v0.31.2
+
+I had to make a few quick changes to the last release, as I got too excited by the user contributions that I didn't double-check that all of the package settings were up to date.
+
+* Made sure the demos get published to NPM with the package.
+* Fixed the demo pages so the display their source code correctly.
+* Fix for creating the package bundle to make sure Three.js doesn't get included.
+* Fix for loading OBJ models that don't have MTL files associated with them, allowing us to add a material at runtime.
+
+
 ## v0.31.1
 
 This is the first release with significant contributions from folks new to Primrose!
