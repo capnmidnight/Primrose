@@ -20,6 +20,7 @@ export default function mutable(value, type) {
   if(!type) {
     return {
       enumerable: true,
+      configurable: true,
       get: function() {
         return value;
       },
@@ -31,6 +32,7 @@ export default function mutable(value, type) {
   else if(typeof type === "function") {
     return {
       enumerable: true,
+      configurable: true,
       get: function() {
         return value;
       },
@@ -45,6 +47,7 @@ export default function mutable(value, type) {
   else {
     return {
       enumerable: true,
+      configurable: true,
       get: function() {
         return value;
       },
