@@ -89,7 +89,7 @@ export default class Audio3D {
       catch(exp){
         reject(exp);
       }
-    }).then(() => console.log("Audio ready"));
+    });
   }
 
   setVelocity(x, y, z) {
