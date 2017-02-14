@@ -1,5 +1,4 @@
 const env = new Primrose.BrowserEnvironment({
-    useGaze: isMobile,
     useFog: true,
     enableShadows: true,
     groundTexture: 0x606060,
