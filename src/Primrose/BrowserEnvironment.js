@@ -342,10 +342,7 @@ export default class BrowserEnvironment extends EventDispatcher {
           if(frame === 0) {
             updateAll();
             this.input.resolvePicking(this.scene);
-            this.ground.position.set(
-              Math.floor(this.input.head.position.x),
-              0,
-              Math.floor(this.input.head.position.z));
+            this.ground.moveTo(this.input.head.position);
             this.sky.position.copy(this.input.head.position);
             moveUI();
           }

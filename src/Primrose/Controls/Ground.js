@@ -68,5 +68,13 @@ export default class Ground extends Entity {
 
     return promise;
   }
+
+  moveTo(pos) {
+    if(this.isInfinite) {
+      this.position.set(
+        Math.floor(pos.x),
+        0,
+        Math.floor(pos.z))
+    }
   }
 };
