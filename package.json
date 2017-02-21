@@ -35,8 +35,7 @@
   "main": "Primrose.js",
   "browser": "Primrose.min.js",
   "scripts": {
-    "start": "node node_modules/notion-node/default --url=Primrose/doc/editorVR",
-    "test": "node -e \"require('notion-node')({ mode: 'dev', port: 8080 });\""
+    "start": "gulp"
   },
   "keywords": [
     "virtual reality",
