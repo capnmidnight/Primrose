@@ -3673,6 +3673,12 @@ pliny.record({
     default: 1024,
     description: "The size to use for the width and height of the shadow map that will be generated."
   }, {
+    name: "shadowRadius",
+    type: "Number",
+    optional: true,
+    default: 1,
+    description: "The number of pixels of blurring to perform at the edge of the shadows."
+  }, {
     name: "progress",
     type: "Function",
     optional: true,

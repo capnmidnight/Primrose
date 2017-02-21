@@ -41,127 +41,13 @@
           <li><a href="https://github.com/NotionTheory/Primrose/" target="_blank">Github</a></li>
         </ul>
       </nav>
-      <h1>Demo: temple
+      <h1>Demo: demo
       </h1>
     </header><!-- start main.pug banner block --><!-- end main.pug banner block -->
 <!-- start main.pug main block -->
     <main><!-- start demo.pug banner block -->
-      <p>Click on the image below to lock mouse cursor to demo. <a href="../demos/temple" target="_blank">Open demo in new window</a>.</p>
-      <iframe id="demo" src="../demos/temple" style="width: 100%;height: 50vw;" allowfullscreen allowvr></iframe>
-      <h2>Source</h2>
-      <pre id="editorContainer">grammar(&quot;JavaScript&quot;);
-var GRASS = &quot;../shared_assets/images/grass.png&quot;,
-  ROCK = &quot;../shared_assets/images/rock.png&quot;,
-  SAND = &quot;../shared_assets/images/sand.png&quot;,
-  WATER = &quot;../shared_assets/images/water.png&quot;,
-  DECK = &quot;../shared_assets/images/deck.png&quot;,
-  WIDTH = 100,
-  HEIGHT = 11,
-  DEPTH = 100,
-  MIDX = WIDTH / 2,
-  MIDY = HEIGHT / 2,
-  MIDZ = DEPTH / 2,
-  ball = null,
-  t = 0,
-  dx = 7,
-  dy = 2.5,
-  dz = 4,
-  env = new Primrose.BrowserEnvironment({
-    skyTexture: &quot;../shared_assets/images/bg.jpg&quot;,
-    groundTexture: DECK,
-    useFog: true,
-    fullScreenButtonContainer: &quot;#fullScreenButtonContainer&quot;,
-    progress: Preloader.thunk
-  });
-
-env.addEventListener(&quot;ready&quot;, function () {
-
-  var start = hub()
-    .addTo(this.scene)
-    .at(-MIDX, 0, -MIDZ);
-
-  var ceiling = brick(DECK, WIDTH, 0.1, DEPTH)
-    .named(&quot;Ceiling&quot;)
-    .addTo(start)
-    .at(WIDTH / 2, 12.5, DEPTH / 2);
-
-  var verts = [];
-
-  ball = brick(ROCK, 1, 1, 1)
-    .named(&quot;Ball&quot;)
-    .addTo(start)
-    .at(0, 0, 0);
-
-  for (var i = 0; i &lt; 5000; ++i) {
-    verts.push(v3(Primrose.Random.number(-0.5 * WIDTH, 0.5 * WIDTH),
-      Primrose.Random.number(-0.5 * HEIGHT, 0.5 * HEIGHT),
-      Primrose.Random.number(-0.5 * DEPTH, 0.5 * DEPTH)));
-  }
-
-  cloud(verts, this.options.backgroundColor, 0.05)
-    .addTo(start)
-    .at(MIDX, MIDY, MIDZ);
-
-
-  function makeSphere(r, p) {
-    verts.splice(0);
-    var rr = r * r;
-    for (var x = -r; x &lt;= r; x += p) {
-      var dx = x * x;
-      for (var y = -r; y &lt;= r; y += p) {
-        var dy = y * y;
-        if ((dx + dy) &lt; rr) {
-          var z = Math.sqrt(rr - dx - dy);
-          verts.push(v3(x, z, y));
-          verts.push(v3(x, -z, y));
-        }
-      }
-    }
-    cloud(verts, 0xff0000, p * Math.sqrt(2))
-      .addTo(start)
-      .at(MIDX - r, r, MIDZ - r);
-  }
-
-  makeSphere(10, 0.1);
-
-  function column(a, b, h, x, y, z) {
-    var obj = cylinder(a, b, h, 6, 1)
-      .textured(SAND)
-      .addTo(start)
-      .at(x, y, z);
-  }
-
-  for (var i = 0; i &lt; 100; ++i) {
-    var x = Primrose.Random.int(WIDTH),
-      z = Primrose.Random.int(DEPTH);
-    column(0.5, 1, 1, x, 0, z);
-    column(0.5, 0.5, 11, x, 6, z);
-    column(2, 0.5, 1, x, 12, z);
-  }
-
-  Preloader.hide();
-}.bind(env));
-
-env.addEventListener(&quot;update&quot;, function (dt) {
-  t += dt;
-
-  ball.position.x += dx * dt;
-  ball.position.y += dy * dt;
-  ball.position.z += dz * dt;
-  if (ball.position.x &lt; 0 &amp;&amp; dx &lt; 0 ||
-    WIDTH &lt;= ball.position.x &amp;&amp; dx &gt; 0) {
-    dx *= -1;
-  }
-  if (ball.position.y &lt; 1 &amp;&amp; dy &lt; 0 ||
-    HEIGHT &lt;= ball.position.y &amp;&amp; dy &gt; 0) {
-    dy *= -1;
-  }
-  if (ball.position.z &lt; 0 &amp;&amp; dz &lt; 0 ||
-    DEPTH &lt;= ball.position.z &amp;&amp; dz &gt; 0) {
-    dz *= -1;
-  }
-});
-</pre>
+      <p>Click on the image below to lock mouse cursor to demo. <a href="../demos/demo" target="_blank">Open demo in new window</a>.</p>
+      <iframe id="demo" src="../demos/demo" style="width: 100%;height: 50vw;" allowfullscreen allowvr></iframe>
     </main><!-- end main.pug main block -->
 <!-- start main.pug footer block -->
     <footer>

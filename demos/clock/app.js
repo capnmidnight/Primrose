@@ -56,7 +56,7 @@ env.addEventListener("ready", Preloader.hide);
 env.addEventListener("update", function() {
   env.sky.sun.latLon(10 - env.currentTime, 30, sunDistance);
   sun.position.copy(env.sky.sun.position);
-  sun.lookAt(env.sky.position);
+  sun.lookAt(env.input.head);
   var s = (1 + sun.position.y / sunDistance) / 2;
   env.sky.ambient.intensity = 0.5 * s;
   env.scene.fog.color
