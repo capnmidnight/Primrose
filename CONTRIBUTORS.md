@@ -9,3 +9,4 @@
 * Corey Hobbs (<a href="https://github.com/chobberoni" target="_blank">@chobberoni</a>)
 * Toby Maritz (<a href="https://github.com/tmaritz" target="_blank">@tmaritz</a>)
 * Micah Bales (<a href="https://github.com/micahbales" target="_blank">@micahbales</a>)
+* Kehinde Ayanleye (<a href="https://github.com/KehindeAyanleye" target="_blank">@KehindeAyanleye</a>)
