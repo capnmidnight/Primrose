@@ -43,7 +43,6 @@ export default class VRDisplay {
         canPresent: immutable(true),
         maxLayers: immutable(1)
       })),
-      isPolyfilled: immutable(isPolyfilled),
       displayId: immutable(nextDisplayId++),
       displayName: immutable(name),
       isConnected: immutable(true),
