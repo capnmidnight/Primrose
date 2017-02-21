@@ -64,12 +64,21 @@ export default class StandardMonitorVRDisplay extends VRDisplay {
 
   getEyeParameters (side) {
     if (side === "left") {
-      var curLayer = this.getLayers()[0],
+      const curLayer = this.getLayers()[0],
         elem = curLayer && curLayer.source || document.body,
         width = elem.clientWidth,
-        height = elem.clientHeight,
-        vFOV = defaultFieldOfView / 2,
+        height = elem.clientHeight;
+
+      let vFOV, hFOV;
+      if(height > width) {
+        vFOV = defaultFieldOfView,
         hFOV = calcFoV(vFOV, width, height);
+      }
+      else {
+        hFOV = defaultFieldOfView,
+        vFOV = calcFoV(hFOV, height, width);
+      }
+
       return {
         renderWidth: width * devicePixelRatio,
         renderHeight: height * devicePixelRatio,
