@@ -2,6 +2,7 @@ import quad from "../../live-api/quad";
 import Entity from "./Entity";
 import Image from "./Image";
 import Pointer from "../Pointer";
+import ModelFactory from "../Graphics/ModelFactory";
 
 export default class Ground extends Entity {
 
@@ -10,44 +11,62 @@ export default class Ground extends Entity {
       transparent: false,
       dim: options.drawDistance,
       texture: options.groundTexture,
+      model: options.groundModel,
       shadow: options.enableShadows,
       progress: options.progress
     });
 
-    this._image = null;
-
-    this.ready = this.ready.then(() => {
-      this.children.forEach((mesh) =>
-        mesh.rot(-Math.PI / 2, 0, 0));
-    });
+    this.model = null;
+    this.isInfinite = true;
   }
 
   get _ready() {
     const dim = this.options.dim,
       type = typeof  this.options.texture;
 
-    if(type === "number") {
-      this._image = quad(dim, dim)
-        .colored(this.options.texture, this.options);
+    let promise = null;
+
+    if(this.options.model) {
+      promise = ModelFactory.loadObject(this.options.model)
+        .then((model) => {
+          this.model = model;
+          this.isInfinite = false;
+        });
     }
-    else if(type === "string") {
-      this._image = new Image(this.options.texture, Object.assign({}, this.options, {
-        width: dim,
-        height: dim,
-        txtRepeatX: dim,
-        txtRepeatY: dim,
-        anisotropy: 8
-      }));
+    else {
+      if(type === "number") {
+        this.model = quad(dim, dim)
+          .colored(this.options.texture, this.options);
+        promise = Promise.resolve();
+      }
+      else if(type === "string") {
+        this.model = new Image(this.options.texture, Object.assign({}, this.options, {
+          width: dim,
+          height: dim,
+          txtRepeatX: dim,
+          txtRepeatY: dim,
+          anisotropy: 8
+        }));
+
+        promise = this.model.ready;
+      }
+
+      promise = promise.then(() => {
+        this.children.forEach((mesh) =>
+          mesh.rot(-Math.PI / 2, 0, 0));
+      });
     }
 
-    if(this._image) {
-      this._image
-        .named(this.name + "-" + this.options.texture)
+    promise = promise.then(() => {
+      this.model.receiveShadow = this.options.shadow;
+      this.model
+        .named(this.name + "-" + (this.options.model || this.options.texture))
         .addTo(this);
 
-      this.watch(this._image, Pointer.EVENTS);
-    }
+      this.watch(this.model, Pointer.EVENTS);
+    });
 
-    return this._image && this._image.ready || super._ready;
+    return promise;
+  }
   }
 };

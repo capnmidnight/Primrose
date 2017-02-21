@@ -126,6 +126,11 @@ pliny.record({
     optional: true,
     description: "The texture to use for the ground."
   }, {
+    name: "groundModel",
+    type: "String",
+    optional: true,
+    description: "A model file to use for the ground."
+  }, {
     name: "nearPlane",
     type: "Number",
     optional: true,
