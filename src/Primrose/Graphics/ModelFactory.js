@@ -53,6 +53,14 @@ var loaders = null,
   EXTENSION_PATTERN = /(\.(?:\w+))+$/,
   NAME_PATTERN = /([^/]+)\.\w+$/;
 
+function loader(map, key) {
+  return (obj) => ModelFactory.loadObject(map[key])
+    .then((model) => {
+      obj[key] = model;
+      return obj;
+    });
+}
+
 // Sometimes, the properties that export out of Blender and into Three.js don't
 // come out correctly, so we need to do a correction.
 function fixJSONScene(json) {
@@ -63,6 +71,13 @@ function fixJSONScene(json) {
     }
   });
   return json;
+}
+
+function fixOBJScene(group) {
+  if(group.type === "Group" && group.children.length === 1 && group.children[0].isMesh) {
+    return group.children[0];
+  }
+  return group;
 }
 
 var propertyTests = {
@@ -168,12 +183,13 @@ export default class ModelFactory {
           ".typeface.json": FontLoader
         }
       }
-      var Loader = new loaders[extension]();
-      if (!Loader) {
+      var LoaderType = loaders[extension];
+      if (!LoaderType) {
         return Promise.reject("There is no loader type for the file extension: " + extension);
       }
       else {
-        var name = src.substring(0, extMatch.index),
+        var loader = new LoaderType(),
+          name = src.substring(0, extMatch.index),
           elemID = name + "_" + extension.toLowerCase(),
           elem = document.getElementById(elemID),
           promise = Promise.resolve();
@@ -183,7 +199,7 @@ export default class ModelFactory {
             .then(() => ModelFactory.loadObject(newPath, "mtl", progress))
             .then((materials) => {
               materials.preload();
-              Loader.setMaterials(materials);
+              loader.setMaterials(materials);
             })
             .catch(console.error.bind(console, "Error loading MTL file: " + newPath));
         }
@@ -192,8 +208,8 @@ export default class ModelFactory {
           if(match) {
             var dir = match[1];
             src = match[2] + match[3];
-            Loader.setTexturePath(dir);
-            Loader.setPath(dir);
+            loader.setTexturePath(dir);
+            loader.setPath(dir);
           }
         }
 
@@ -202,13 +218,17 @@ export default class ModelFactory {
             .split(/\r?\n/g)
             .map((s) => s.trim())
             .join("\n");
-          promise = promise.then(() => Loader.parse(elemSource));
+          promise = promise.then(() => loader.parse(elemSource));
         }
         else {
-          if (Loader.setCrossOrigin) {
-            Loader.setCrossOrigin("anonymous");
+          if (loader.setCrossOrigin) {
+            loader.setCrossOrigin("anonymous");
           }
-          promise = promise.then(() => new Promise((resolve, reject) => Loader.load(src, resolve, progress, reject)));
+          promise = promise.then(() => new Promise((resolve, reject) => loader.load(src, resolve, progress, reject)));
+        }
+
+        if (extension === ".obj") {
+          promise = promise.then(fixOBJScene);
         }
 
         if (extension === ".json") {
@@ -364,12 +384,4 @@ export default class ModelFactory {
     return obj;
   }
 
-}
-
-function loader(map, key) {
-  return (obj) => ModelFactory.loadObject(map[key])
-    .then((model) => {
-      obj[key] = model;
-      return obj;
-    });
 }
