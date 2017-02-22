@@ -1,7 +1,7 @@
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('three')) :
-	typeof define === 'function' && define.amd ? define(['three'], factory) :
-	(global.Primrose = factory(global.THREE));
+    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('three')) :
+    typeof define === 'function' && define.amd ? define(['three'], factory) :
+    (global.Primrose = factory(global.THREE));
 }(this, (function (three) { 'use strict';
 
 var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
@@ -205,20 +205,7 @@ var createClass = function () {
 
 
 
-var defineProperty = function (obj, key, value) {
-  if (key in obj) {
-    Object.defineProperty(obj, key, {
-      value: value,
-      enumerable: true,
-      configurable: true,
-      writable: true
-    });
-  } else {
-    obj[key] = value;
-  }
 
-  return obj;
-};
 
 var get$1 = function get$1(object, property, receiver) {
   if (object === null) object = Function.prototype;
@@ -1667,174 +1654,174 @@ three.Matrix4.prototype.toString = function (digits) {
  *
  */
 var MTLLoader = function (_EventDispatcher) {
-  inherits(MTLLoader, _EventDispatcher);
+    inherits(MTLLoader, _EventDispatcher);
 
-  function MTLLoader(manager) {
-    classCallCheck(this, MTLLoader);
+    function MTLLoader(manager) {
+        classCallCheck(this, MTLLoader);
 
-    var _this = possibleConstructorReturn(this, (MTLLoader.__proto__ || Object.getPrototypeOf(MTLLoader)).call(this));
+        var _this = possibleConstructorReturn(this, (MTLLoader.__proto__ || Object.getPrototypeOf(MTLLoader)).call(this));
 
-    _this.manager = manager !== undefined ? manager : three.DefaultLoadingManager;
+        _this.manager = manager !== undefined ? manager : three.DefaultLoadingManager;
 
-    return _this;
-  }
-
-  /**
-   * Loads and parses a MTL asset from a URL.
-   *
-   * @param {String} url - URL to the MTL file.
-   * @param {Function} [onLoad] - Callback invoked with the loaded object.
-   * @param {Function} [onProgress] - Callback for download progress.
-   * @param {Function} [onError] - Callback for download errors.
-   *
-   * @see setPath setTexturePath
-   *
-   * @note In order for relative texture references to resolve correctly
-   * you must call setPath and/or setTexturePath explicitly prior to load.
-   */
-
-
-  createClass(MTLLoader, [{
-    key: 'load',
-    value: function load(url, onLoad, onProgress, onError) {
-
-      var scope = this;
-
-      var loader = new three.FileLoader(this.manager);
-      loader.setPath(this.path);
-      loader.load(url, function (text) {
-
-        onLoad(scope.parse(text));
-      }, onProgress, onError);
+        return _this;
     }
 
     /**
-     * Set base path for resolving references.
-     * If set this path will be prepended to each loaded and found reference.
+     * Loads and parses a MTL asset from a URL.
      *
-     * @see setTexturePath
-     * @param {String} path
-     *
-     * @example
-     *     mtlLoader.setPath( 'assets/obj/' );
-     *     mtlLoader.load( 'my.mtl', ... );
-     */
-
-  }, {
-    key: 'setPath',
-    value: function setPath(path) {
-
-      this.path = path;
-    }
-
-    /**
-     * Set base path for resolving texture references.
-     * If set this path will be prepended found texture reference.
-     * If not set and setPath is, it will be used as texture base path.
-     *
-     * @see setPath
-     * @param {String} path
-     *
-     * @example
-     *     mtlLoader.setPath( 'assets/obj/' );
-     *     mtlLoader.setTexturePath( 'assets/textures/' );
-     *     mtlLoader.load( 'my.mtl', ... );
-     */
-
-  }, {
-    key: 'setTexturePath',
-    value: function setTexturePath(path) {
-
-      this.texturePath = path;
-    }
-  }, {
-    key: 'setBaseUrl',
-    value: function setBaseUrl(path) {
-
-      console.warn('MTLLoader: .setBaseUrl() is deprecated. Use .setTexturePath( path ) for texture path or .setPath( path ) for general base path instead.');
-
-      this.setTexturePath(path);
-    }
-  }, {
-    key: 'setCrossOrigin',
-    value: function setCrossOrigin(value) {
-
-      this.crossOrigin = value;
-    }
-  }, {
-    key: 'setMaterialOptions',
-    value: function setMaterialOptions(value) {
-
-      this.materialOptions = value;
-    }
-
-    /**
-     * Parses a MTL file.
-     *
-     * @param {String} text - Content of MTL file
-     * @return {MTLLoader.MaterialCreator}
+     * @param {String} url - URL to the MTL file.
+     * @param {Function} [onLoad] - Callback invoked with the loaded object.
+     * @param {Function} [onProgress] - Callback for download progress.
+     * @param {Function} [onError] - Callback for download errors.
      *
      * @see setPath setTexturePath
      *
      * @note In order for relative texture references to resolve correctly
-     * you must call setPath and/or setTexturePath explicitly prior to parse.
+     * you must call setPath and/or setTexturePath explicitly prior to load.
      */
 
-  }, {
-    key: 'parse',
-    value: function parse(text) {
 
-      var lines = text.split('\n');
-      var info = {};
-      var delimiter_pattern = /\s+/;
-      var materialsInfo = {};
+    createClass(MTLLoader, [{
+        key: 'load',
+        value: function load(url, onLoad, onProgress, onError) {
 
-      for (var i = 0; i < lines.length; i++) {
+            var scope = this;
 
-        var line = lines[i];
-        line = line.trim();
+            var loader = new three.FileLoader(this.manager);
+            loader.setPath(this.path);
+            loader.load(url, function (text) {
 
-        if (line.length === 0 || line.charAt(0) === '#') {
-
-          // Blank line or comment ignore
-          continue;
+                onLoad(scope.parse(text));
+            }, onProgress, onError);
         }
 
-        var pos = line.indexOf(' ');
+        /**
+         * Set base path for resolving references.
+         * If set this path will be prepended to each loaded and found reference.
+         *
+         * @see setTexturePath
+         * @param {String} path
+         *
+         * @example
+         *     mtlLoader.setPath( 'assets/obj/' );
+         *     mtlLoader.load( 'my.mtl', ... );
+         */
 
-        var key = pos >= 0 ? line.substring(0, pos) : line;
-        key = key.toLowerCase();
+    }, {
+        key: 'setPath',
+        value: function setPath(path) {
 
-        var value = pos >= 0 ? line.substring(pos + 1) : '';
-        value = value.trim();
-
-        if (key === 'newmtl') {
-
-          // New material
-
-          info = { name: value };
-          materialsInfo[value] = info;
-        } else if (info) {
-
-          if (key === 'ka' || key === 'kd' || key === 'ks') {
-
-            var ss = value.split(delimiter_pattern, 3);
-            info[key] = [parseFloat(ss[0]), parseFloat(ss[1]), parseFloat(ss[2])];
-          } else {
-
-            info[key] = value;
-          }
+            this.path = path;
         }
-      }
 
-      var materialCreator = new MaterialCreator(this.texturePath || this.path, this.materialOptions);
-      materialCreator.setCrossOrigin(this.crossOrigin);
-      materialCreator.setManager(this.manager);
-      materialCreator.setMaterials(materialsInfo);
-      return materialCreator;
-    }
-  }]);
-  return MTLLoader;
+        /**
+         * Set base path for resolving texture references.
+         * If set this path will be prepended found texture reference.
+         * If not set and setPath is, it will be used as texture base path.
+         *
+         * @see setPath
+         * @param {String} path
+         *
+         * @example
+         *     mtlLoader.setPath( 'assets/obj/' );
+         *     mtlLoader.setTexturePath( 'assets/textures/' );
+         *     mtlLoader.load( 'my.mtl', ... );
+         */
+
+    }, {
+        key: 'setTexturePath',
+        value: function setTexturePath(path) {
+
+            this.texturePath = path;
+        }
+    }, {
+        key: 'setBaseUrl',
+        value: function setBaseUrl(path) {
+
+            console.warn('MTLLoader: .setBaseUrl() is deprecated. Use .setTexturePath( path ) for texture path or .setPath( path ) for general base path instead.');
+
+            this.setTexturePath(path);
+        }
+    }, {
+        key: 'setCrossOrigin',
+        value: function setCrossOrigin(value) {
+
+            this.crossOrigin = value;
+        }
+    }, {
+        key: 'setMaterialOptions',
+        value: function setMaterialOptions(value) {
+
+            this.materialOptions = value;
+        }
+
+        /**
+         * Parses a MTL file.
+         *
+         * @param {String} text - Content of MTL file
+         * @return {MTLLoader.MaterialCreator}
+         *
+         * @see setPath setTexturePath
+         *
+         * @note In order for relative texture references to resolve correctly
+         * you must call setPath and/or setTexturePath explicitly prior to parse.
+         */
+
+    }, {
+        key: 'parse',
+        value: function parse(text) {
+
+            var lines = text.split('\n');
+            var info = {};
+            var delimiter_pattern = /\s+/;
+            var materialsInfo = {};
+
+            for (var i = 0; i < lines.length; i++) {
+
+                var line = lines[i];
+                line = line.trim();
+
+                if (line.length === 0 || line.charAt(0) === '#') {
+
+                    // Blank line or comment ignore
+                    continue;
+                }
+
+                var pos = line.indexOf(' ');
+
+                var key = pos >= 0 ? line.substring(0, pos) : line;
+                key = key.toLowerCase();
+
+                var value = pos >= 0 ? line.substring(pos + 1) : '';
+                value = value.trim();
+
+                if (key === 'newmtl') {
+
+                    // New material
+
+                    info = { name: value };
+                    materialsInfo[value] = info;
+                } else if (info) {
+
+                    if (key === 'ka' || key === 'kd' || key === 'ks') {
+
+                        var ss = value.split(delimiter_pattern, 3);
+                        info[key] = [parseFloat(ss[0]), parseFloat(ss[1]), parseFloat(ss[2])];
+                    } else {
+
+                        info[key] = value;
+                    }
+                }
+            }
+
+            var materialCreator = new MaterialCreator(this.texturePath || this.path, this.materialOptions);
+            materialCreator.setCrossOrigin(this.crossOrigin);
+            materialCreator.setManager(this.manager);
+            materialCreator.setMaterials(materialsInfo);
+            return materialCreator;
+        }
+    }]);
+    return MTLLoader;
 }(three.EventDispatcher);
 
 /**
@@ -1853,377 +1840,377 @@ var MTLLoader = function (_EventDispatcher) {
  */
 
 var MaterialCreator = function () {
-  function MaterialCreator(baseUrl, options) {
-    classCallCheck(this, MaterialCreator);
+    function MaterialCreator(baseUrl, options) {
+        classCallCheck(this, MaterialCreator);
 
 
-    this.baseUrl = baseUrl || '';
-    this.options = options;
-    this.materialsInfo = {};
-    this.materials = {};
-    this.materialsArray = [];
-    this.nameLookup = {};
+        this.baseUrl = baseUrl || '';
+        this.options = options;
+        this.materialsInfo = {};
+        this.materials = {};
+        this.materialsArray = [];
+        this.nameLookup = {};
 
-    this.side = this.options && this.options.side ? this.options.side : three.FrontSide;
-    this.wrap = this.options && this.options.wrap ? this.options.wrap : three.RepeatWrapping;
-  }
-
-  createClass(MaterialCreator, [{
-    key: 'setCrossOrigin',
-    value: function setCrossOrigin(value) {
-
-      this.crossOrigin = value;
+        this.side = this.options && this.options.side ? this.options.side : three.FrontSide;
+        this.wrap = this.options && this.options.wrap ? this.options.wrap : three.RepeatWrapping;
     }
-  }, {
-    key: 'setManager',
-    value: function setManager(value) {
 
-      this.manager = value;
-    }
-  }, {
-    key: 'setMaterials',
-    value: function setMaterials(materialsInfo) {
+    createClass(MaterialCreator, [{
+        key: 'setCrossOrigin',
+        value: function setCrossOrigin(value) {
 
-      this.materialsInfo = this.convert(materialsInfo);
-      this.materials = {};
-      this.materialsArray = [];
-      this.nameLookup = {};
-    }
-  }, {
-    key: 'convert',
-    value: function convert(materialsInfo) {
+            this.crossOrigin = value;
+        }
+    }, {
+        key: 'setManager',
+        value: function setManager(value) {
 
-      if (!this.options) return materialsInfo;
+            this.manager = value;
+        }
+    }, {
+        key: 'setMaterials',
+        value: function setMaterials(materialsInfo) {
 
-      var converted = {};
+            this.materialsInfo = this.convert(materialsInfo);
+            this.materials = {};
+            this.materialsArray = [];
+            this.nameLookup = {};
+        }
+    }, {
+        key: 'convert',
+        value: function convert(materialsInfo) {
 
-      for (var mn in materialsInfo) {
+            if (!this.options) return materialsInfo;
 
-        // Convert materials info into normalized form based on options
+            var converted = {};
 
-        var mat = materialsInfo[mn];
+            for (var mn in materialsInfo) {
 
-        var covmat = {};
+                // Convert materials info into normalized form based on options
 
-        converted[mn] = covmat;
+                var mat = materialsInfo[mn];
 
-        for (var prop in mat) {
+                var covmat = {};
 
-          var save = true;
-          var value = mat[prop];
-          var lprop = prop.toLowerCase();
+                converted[mn] = covmat;
 
-          switch (lprop) {
+                for (var prop in mat) {
 
-            case 'kd':
-            case 'ka':
-            case 'ks':
+                    var save = true;
+                    var value = mat[prop];
+                    var lprop = prop.toLowerCase();
 
-              // Diffuse color (color under white light) using RGB values
+                    switch (lprop) {
 
-              if (this.options && this.options.normalizeRGB) {
+                        case 'kd':
+                        case 'ka':
+                        case 'ks':
 
-                value = [value[0] / 255, value[1] / 255, value[2] / 255];
-              }
+                            // Diffuse color (color under white light) using RGB values
 
-              if (this.options && this.options.ignoreZeroRGBs) {
+                            if (this.options && this.options.normalizeRGB) {
 
-                if (value[0] === 0 && value[1] === 0 && value[2] === 0) {
+                                value = [value[0] / 255, value[1] / 255, value[2] / 255];
+                            }
 
-                  // ignore
+                            if (this.options && this.options.ignoreZeroRGBs) {
 
-                  save = false;
+                                if (value[0] === 0 && value[1] === 0 && value[2] === 0) {
+
+                                    // ignore
+
+                                    save = false;
+                                }
+                            }
+
+                            break;
+
+                        default:
+
+                            break;
+                    }
+
+                    if (save) {
+
+                        covmat[lprop] = value;
+                    }
                 }
-              }
-
-              break;
-
-            default:
-
-              break;
-          }
-
-          if (save) {
-
-            covmat[lprop] = value;
-          }
-        }
-      }
-
-      return converted;
-    }
-  }, {
-    key: 'preload',
-    value: function preload() {
-
-      for (var mn in this.materialsInfo) {
-
-        this.create(mn);
-      }
-    }
-  }, {
-    key: 'getIndex',
-    value: function getIndex(materialName) {
-
-      return this.nameLookup[materialName];
-    }
-  }, {
-    key: 'getAsArray',
-    value: function getAsArray() {
-
-      var index = 0;
-
-      for (var mn in this.materialsInfo) {
-
-        this.materialsArray[index] = this.create(mn);
-        this.nameLookup[mn] = index;
-        index++;
-      }
-
-      return this.materialsArray;
-    }
-  }, {
-    key: 'create',
-    value: function create(materialName) {
-
-      if (this.materials[materialName] === undefined) {
-
-        this.createMaterial_(materialName);
-      }
-
-      return this.materials[materialName];
-    }
-  }, {
-    key: 'createMaterial_',
-    value: function createMaterial_(materialName) {
-
-      // Create material
-
-      var TMaterial = three.MeshPhongMaterial;
-      var scope = this;
-      var mat = this.materialsInfo[materialName];
-      var params = {
-
-        name: materialName,
-        side: this.side
-
-      };
-
-      var resolveURL = function resolveURL(baseUrl, url) {
-
-        if (typeof url !== 'string' || url === '') return '';
-
-        // Absolute URL
-        if (/^https?:\/\//i.test(url)) {
-          return url;
-        }
-
-        return baseUrl + url;
-      };
-
-      function setMapForType(mapType, value) {
-
-        if (params[mapType]) return; // Keep the first encountered texture
-
-        var texParams = scope.getTextureParams(value, params);
-        var map = scope.loadTexture(resolveURL(scope.baseUrl, texParams.url));
-
-        map.repeat.copy(texParams.scale);
-        map.offset.copy(texParams.offset);
-
-        map.wrapS = scope.wrap;
-        map.wrapT = scope.wrap;
-
-        params[mapType] = map;
-      }
-
-      for (var prop in mat) {
-
-        var value = mat[prop];
-
-        if (value === '') continue;
-
-        switch (prop.toLowerCase()) {
-
-          // Ns is material specular exponent
-
-          case 'kd':
-
-            // Diffuse color (color under white light) using RGB values
-
-            params.color = new three.Color().fromArray(value);
-
-            break;
-
-          case 'ks':
-
-            // Specular color (color when light is reflected from shiny surface) using RGB values
-            params.specular = new three.Color().fromArray(value);
-
-            break;
-
-          case 'map_kd':
-
-            // Diffuse texture map
-
-            setMapForType("map", value);
-
-            break;
-
-          case 'map_ks':
-
-            // Specular map
-
-            setMapForType("specularMap", value);
-
-            break;
-
-          case 'map_bump':
-          case 'bump':
-
-            // Bump texture map
-
-            setMapForType("bumpMap", value);
-
-            break;
-
-          case 'ns':
-
-            // The specular exponent (defines the focus of the specular highlight)
-            // A high exponent results in a tight, concentrated highlight. Ns values normally range from 0 to 1000.
-
-            params.shininess = parseFloat(value);
-
-            break;
-
-          case 'd':
-
-            if (value < 1) {
-
-              params.opacity = value;
-              params.transparent = true;
             }
 
-            break;
-
-          case 'illum':
-
-            value = parseFloat(value);
-
-            if (value === MTLLoader.COLOR_ON_AND_AMBIENT_OFF) {
-
-              TMaterial = three.MeshBasicMaterial;
-            }
-
-            break;
-
-          case 'Tr':
-
-            if (value > 0) {
-
-              params.opacity = 1 - value;
-              params.transparent = true;
-            }
-
-            break;
-
-          default:
-            break;
-
+            return converted;
         }
-      }
+    }, {
+        key: 'preload',
+        value: function preload() {
 
-      if (TMaterial === three.MeshBasicMaterial) {
+            for (var mn in this.materialsInfo) {
 
-        ["shininess", "specular"].forEach(function (attribute) {
+                this.create(mn);
+            }
+        }
+    }, {
+        key: 'getIndex',
+        value: function getIndex(materialName) {
 
-          if (attribute in params) {
+            return this.nameLookup[materialName];
+        }
+    }, {
+        key: 'getAsArray',
+        value: function getAsArray() {
 
-            delete params[attribute];
-          }
-        });
-      }
+            var index = 0;
 
-      this.materials[materialName] = new TMaterial(params);
-      return this.materials[materialName];
-    }
-  }, {
-    key: 'getTextureParams',
-    value: function getTextureParams(value, matParams) {
+            for (var mn in this.materialsInfo) {
 
-      var texParams = {
+                this.materialsArray[index] = this.create(mn);
+                this.nameLookup[mn] = index;
+                index++;
+            }
 
-        scale: new three.Vector2(1, 1),
-        offset: new three.Vector2(0, 0)
+            return this.materialsArray;
+        }
+    }, {
+        key: 'create',
+        value: function create(materialName) {
 
-      };
+            if (this.materials[materialName] === undefined) {
 
-      var items = value.split(/\s+/);
-      var pos;
+                this.createMaterial_(materialName);
+            }
 
-      pos = items.indexOf('-bm');
-      if (pos >= 0) {
+            return this.materials[materialName];
+        }
+    }, {
+        key: 'createMaterial_',
+        value: function createMaterial_(materialName) {
 
-        matParams.bumpScale = parseFloat(items[pos + 1]);
-        items.splice(pos, 2);
-      }
+            // Create material
 
-      pos = items.indexOf('-s');
-      if (pos >= 0) {
+            var TMaterial = three.MeshPhongMaterial;
+            var scope = this;
+            var mat = this.materialsInfo[materialName];
+            var params = {
 
-        texParams.scale.set(parseFloat(items[pos + 1]), parseFloat(items[pos + 2]));
-        items.splice(pos, 4); // we expect 3 parameters here!
-      }
+                name: materialName,
+                side: this.side
 
-      pos = items.indexOf('-o');
-      if (pos >= 0) {
+            };
 
-        texParams.offset.set(parseFloat(items[pos + 1]), parseFloat(items[pos + 2]));
-        items.splice(pos, 4); // we expect 3 parameters here!
-      }
+            var resolveURL = function resolveURL(baseUrl, url) {
 
-      texParams.url = items.join(' ').trim();
-      return texParams;
-    }
-  }, {
-    key: 'loadTexture',
-    value: function loadTexture(url, mapping, onLoad, onProgress, onError) {
+                if (typeof url !== 'string' || url === '') return '';
 
-      var texture;
-      var loader = three.Loader.Handlers.get(url);
-      var manager = this.manager !== undefined ? this.manager : three.DefaultLoadingManager;
+                // Absolute URL
+                if (/^https?:\/\//i.test(url)) {
+                    return url;
+                }
 
-      if (loader === null) {
+                return baseUrl + url;
+            };
 
-        loader = new three.TextureLoader(manager);
-      }
+            function setMapForType(mapType, value) {
 
-      if (loader.setCrossOrigin) loader.setCrossOrigin(this.crossOrigin);
-      texture = loader.load(url, onLoad, onProgress, onError);
+                if (params[mapType]) return; // Keep the first encountered texture
 
-      if (mapping !== undefined) texture.mapping = mapping;
+                var texParams = scope.getTextureParams(value, params);
+                var map = scope.loadTexture(resolveURL(scope.baseUrl, texParams.url));
 
-      return texture;
-    }
-  }]);
-  return MaterialCreator;
+                map.repeat.copy(texParams.scale);
+                map.offset.copy(texParams.offset);
+
+                map.wrapS = scope.wrap;
+                map.wrapT = scope.wrap;
+
+                params[mapType] = map;
+            }
+
+            for (var prop in mat) {
+
+                var value = mat[prop];
+
+                if (value === '') continue;
+
+                switch (prop.toLowerCase()) {
+
+                    // Ns is material specular exponent
+
+                    case 'kd':
+
+                        // Diffuse color (color under white light) using RGB values
+
+                        params.color = new three.Color().fromArray(value);
+
+                        break;
+
+                    case 'ks':
+
+                        // Specular color (color when light is reflected from shiny surface) using RGB values
+                        params.specular = new three.Color().fromArray(value);
+
+                        break;
+
+                    case 'map_kd':
+
+                        // Diffuse texture map
+
+                        setMapForType("map", value);
+
+                        break;
+
+                    case 'map_ks':
+
+                        // Specular map
+
+                        setMapForType("specularMap", value);
+
+                        break;
+
+                    case 'map_bump':
+                    case 'bump':
+
+                        // Bump texture map
+
+                        setMapForType("bumpMap", value);
+
+                        break;
+
+                    case 'ns':
+
+                        // The specular exponent (defines the focus of the specular highlight)
+                        // A high exponent results in a tight, concentrated highlight. Ns values normally range from 0 to 1000.
+
+                        params.shininess = parseFloat(value);
+
+                        break;
+
+                    case 'd':
+
+                        if (value < 1) {
+
+                            params.opacity = value;
+                            params.transparent = true;
+                        }
+
+                        break;
+
+                    case 'illum':
+
+                        value = parseFloat(value);
+
+                        if (value === MTLLoader.COLOR_ON_AND_AMBIENT_OFF) {
+
+                            TMaterial = three.MeshBasicMaterial;
+                        }
+
+                        break;
+
+                    case 'Tr':
+
+                        if (value > 0) {
+
+                            params.opacity = 1 - value;
+                            params.transparent = true;
+                        }
+
+                        break;
+
+                    default:
+                        break;
+
+                }
+            }
+
+            if (TMaterial === three.MeshBasicMaterial) {
+
+                ["shininess", "specular"].forEach(function (attribute) {
+
+                    if (attribute in params) {
+
+                        delete params[attribute];
+                    }
+                });
+            }
+
+            this.materials[materialName] = new TMaterial(params);
+            return this.materials[materialName];
+        }
+    }, {
+        key: 'getTextureParams',
+        value: function getTextureParams(value, matParams) {
+
+            var texParams = {
+
+                scale: new three.Vector2(1, 1),
+                offset: new three.Vector2(0, 0)
+
+            };
+
+            var items = value.split(/\s+/);
+            var pos;
+
+            pos = items.indexOf('-bm');
+            if (pos >= 0) {
+
+                matParams.bumpScale = parseFloat(items[pos + 1]);
+                items.splice(pos, 2);
+            }
+
+            pos = items.indexOf('-s');
+            if (pos >= 0) {
+
+                texParams.scale.set(parseFloat(items[pos + 1]), parseFloat(items[pos + 2]));
+                items.splice(pos, 4); // we expect 3 parameters here!
+            }
+
+            pos = items.indexOf('-o');
+            if (pos >= 0) {
+
+                texParams.offset.set(parseFloat(items[pos + 1]), parseFloat(items[pos + 2]));
+                items.splice(pos, 4); // we expect 3 parameters here!
+            }
+
+            texParams.url = items.join(' ').trim();
+            return texParams;
+        }
+    }, {
+        key: 'loadTexture',
+        value: function loadTexture(url, mapping, onLoad, onProgress, onError) {
+
+            var texture;
+            var loader = three.Loader.Handlers.get(url);
+            var manager = this.manager !== undefined ? this.manager : three.DefaultLoadingManager;
+
+            if (loader === null) {
+
+                loader = new three.TextureLoader(manager);
+            }
+
+            if (loader.setCrossOrigin) loader.setCrossOrigin(this.crossOrigin);
+            texture = loader.load(url, onLoad, onProgress, onError);
+
+            if (mapping !== undefined) texture.mapping = mapping;
+
+            return texture;
+        }
+    }]);
+    return MaterialCreator;
 }();
 
 
 
 // http://paulbourke.net/dataformats/mtl/
 Object.assign(MTLLoader, {
-  COLOR_ON_AND_AMBIENT_OFF: 0,
-  COLOR_ON_AND_AMBIENT_ON: 1,
-  HIGHLIGHT_ON: 2,
-  REFLECTION_ON_AND_RAY_TRACE_ON: 3,
-  TRANSPARENCY_GLASS_ON_REFLECTION_RAY_TRACE_ON: 4,
-  REFLECTION_FRESNEL_ON_AND_RAY_TRACE_ON: 5,
-  TRANSPARENCY_REFRACTION_ON_REFLECTION_FRESNEL_OFF_AND_RAY_TRACE_ON: 6,
-  TRANSPARENCY_REFRACTION_ON_REFLECTION_FRESNEL_ON_AND_RAY_TRACE_ON: 7,
-  REFLECTION_ON_AND_RAY_TRACE_OFF: 8,
-  TRANSPARENCY_GLASS_ON_REFLECTION_RAY_TRACE_OFF: 9,
-  CASTS_SHADOWS_ONTO_INVISIBLE_SURFACES: 10
+    COLOR_ON_AND_AMBIENT_OFF: 0,
+    COLOR_ON_AND_AMBIENT_ON: 1,
+    HIGHLIGHT_ON: 2,
+    REFLECTION_ON_AND_RAY_TRACE_ON: 3,
+    TRANSPARENCY_GLASS_ON_REFLECTION_RAY_TRACE_ON: 4,
+    REFLECTION_FRESNEL_ON_AND_RAY_TRACE_ON: 5,
+    TRANSPARENCY_REFRACTION_ON_REFLECTION_FRESNEL_OFF_AND_RAY_TRACE_ON: 6,
+    TRANSPARENCY_REFRACTION_ON_REFLECTION_FRESNEL_ON_AND_RAY_TRACE_ON: 7,
+    REFLECTION_ON_AND_RAY_TRACE_OFF: 8,
+    TRANSPARENCY_GLASS_ON_REFLECTION_RAY_TRACE_OFF: 9,
+    CASTS_SHADOWS_ONTO_INVISIBLE_SURFACES: 10
 });
 
 three.Object3D.prototype.appendChild = function (child) {
@@ -2289,665 +2276,665 @@ Object.defineProperty(three.Object3D.prototype, "visible", {
  */
 
 var OBJLoader = function () {
-	function OBJLoader(manager) {
-		classCallCheck(this, OBJLoader);
+		function OBJLoader(manager) {
+				classCallCheck(this, OBJLoader);
 
 
-		this.manager = manager !== undefined ? manager : three.DefaultLoadingManager;
+				this.manager = manager !== undefined ? manager : three.DefaultLoadingManager;
 
-		this.materials = null;
+				this.materials = null;
 
-		this.regexp = {
-			// v float float float
-			vertex_pattern: /^v\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)/,
-			// vn float float float
-			normal_pattern: /^vn\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)/,
-			// vt float float
-			uv_pattern: /^vt\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)/,
-			// f vertex vertex vertex
-			face_vertex: /^f\s+(-?\d+)\s+(-?\d+)\s+(-?\d+)(?:\s+(-?\d+))?/,
-			// f vertex/uv vertex/uv vertex/uv
-			face_vertex_uv: /^f\s+(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)(?:\s+(-?\d+)\/(-?\d+))?/,
-			// f vertex/uv/normal vertex/uv/normal vertex/uv/normal
-			face_vertex_uv_normal: /^f\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)(?:\s+(-?\d+)\/(-?\d+)\/(-?\d+))?/,
-			// f vertex//normal vertex//normal vertex//normal
-			face_vertex_normal: /^f\s+(-?\d+)\/\/(-?\d+)\s+(-?\d+)\/\/(-?\d+)\s+(-?\d+)\/\/(-?\d+)(?:\s+(-?\d+)\/\/(-?\d+))?/,
-			// o object_name | g group_name
-			object_pattern: /^[og]\s*(.+)?/,
-			// s boolean
-			smoothing_pattern: /^s\s+(\d+|on|off)/,
-			// mtllib file_reference
-			material_library_pattern: /^mtllib /,
-			// usemtl material_name
-			material_use_pattern: /^usemtl /
-		};
-	}
-
-	createClass(OBJLoader, [{
-		key: 'load',
-		value: function load(url, onLoad, onProgress, onError) {
-
-			var scope = this;
-
-			var loader = new three.FileLoader(scope.manager);
-			loader.setPath(this.path);
-			loader.load(url, function (text) {
-
-				onLoad(scope.parse(text));
-			}, onProgress, onError);
-		}
-	}, {
-		key: 'setPath',
-		value: function setPath(value) {
-
-			this.path = value;
-		}
-	}, {
-		key: 'setMaterials',
-		value: function setMaterials(materials) {
-
-			this.materials = materials;
-		}
-	}, {
-		key: '_createParserState',
-		value: function _createParserState() {
-
-			var state = new OBJParserState();
-
-			state.startObject('', false);
-
-			return state;
-		}
-	}, {
-		key: 'parse',
-		value: function parse(text) {
-
-			console.time('OBJLoader');
-
-			var state = this._createParserState();
-
-			if (text.indexOf('\r\n') !== -1) {
-
-				// This is faster than String.split with regex that splits on both
-				text = text.replace('\r\n', '\n');
-			}
-
-			var lines = text.split('\n');
-			var line = '',
-			    lineFirstChar = '',
-			    lineSecondChar = '';
-			var lineLength = 0;
-			var result = [];
-
-			// Faster to just trim left side of the line. Use if available.
-			var trimLeft = typeof ''.trimLeft === 'function';
-
-			for (var i = 0, l = lines.length; i < l; i++) {
-
-				line = lines[i];
-
-				line = trimLeft ? line.trimLeft() : line.trim();
-
-				lineLength = line.length;
-
-				if (lineLength === 0) continue;
-
-				lineFirstChar = line.charAt(0);
-
-				// @todo invoke passed in handler if any
-				if (lineFirstChar === '#') continue;
-
-				if (lineFirstChar === 'v') {
-
-					lineSecondChar = line.charAt(1);
-
-					if (lineSecondChar === ' ' && (result = this.regexp.vertex_pattern.exec(line)) !== null) {
-
-						// 0                  1      2      3
-						// ["v 1.0 2.0 3.0", "1.0", "2.0", "3.0"]
-
-						state.vertices.push(parseFloat(result[1]), parseFloat(result[2]), parseFloat(result[3]));
-					} else if (lineSecondChar === 'n' && (result = this.regexp.normal_pattern.exec(line)) !== null) {
-
-						// 0                   1      2      3
-						// ["vn 1.0 2.0 3.0", "1.0", "2.0", "3.0"]
-
-						state.normals.push(parseFloat(result[1]), parseFloat(result[2]), parseFloat(result[3]));
-					} else if (lineSecondChar === 't' && (result = this.regexp.uv_pattern.exec(line)) !== null) {
-
-						// 0               1      2
-						// ["vt 0.1 0.2", "0.1", "0.2"]
-
-						state.uvs.push(parseFloat(result[1]), parseFloat(result[2]));
-					} else {
-
-						throw new Error("Unexpected vertex/normal/uv line: '" + line + "'");
-					}
-				} else if (lineFirstChar === "f") {
-
-					if ((result = this.regexp.face_vertex_uv_normal.exec(line)) !== null) {
-
-						// f vertex/uv/normal vertex/uv/normal vertex/uv/normal
-						// 0                        1    2    3    4    5    6    7    8    9   10         11         12
-						// ["f 1/1/1 2/2/2 3/3/3", "1", "1", "1", "2", "2", "2", "3", "3", "3", undefined, undefined, undefined]
-
-						state.addFace(result[1], result[4], result[7], result[10], result[2], result[5], result[8], result[11], result[3], result[6], result[9], result[12]);
-					} else if ((result = this.regexp.face_vertex_uv.exec(line)) !== null) {
-
-						// f vertex/uv vertex/uv vertex/uv
-						// 0                  1    2    3    4    5    6   7          8
-						// ["f 1/1 2/2 3/3", "1", "1", "2", "2", "3", "3", undefined, undefined]
-
-						state.addFace(result[1], result[3], result[5], result[7], result[2], result[4], result[6], result[8]);
-					} else if ((result = this.regexp.face_vertex_normal.exec(line)) !== null) {
-
-						// f vertex//normal vertex//normal vertex//normal
-						// 0                     1    2    3    4    5    6   7          8
-						// ["f 1//1 2//2 3//3", "1", "1", "2", "2", "3", "3", undefined, undefined]
-
-						state.addFace(result[1], result[3], result[5], result[7], undefined, undefined, undefined, undefined, result[2], result[4], result[6], result[8]);
-					} else if ((result = this.regexp.face_vertex.exec(line)) !== null) {
-
+				this.regexp = {
+						// v float float float
+						vertex_pattern: /^v\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)/,
+						// vn float float float
+						normal_pattern: /^vn\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)/,
+						// vt float float
+						uv_pattern: /^vt\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)/,
 						// f vertex vertex vertex
-						// 0            1    2    3   4
-						// ["f 1 2 3", "1", "2", "3", undefined]
-
-						state.addFace(result[1], result[2], result[3], result[4]);
-					} else {
-
-						throw new Error("Unexpected face line: '" + line + "'");
-					}
-				} else if (lineFirstChar === "l") {
-
-					var lineParts = line.substring(1).trim().split(" ");
-					var lineVertices = [],
-					    lineUVs = [];
-
-					if (line.indexOf("/") === -1) {
-
-						lineVertices = lineParts;
-					} else {
-
-						for (var li = 0, llen = lineParts.length; li < llen; li++) {
-
-							var parts = lineParts[li].split("/");
-
-							if (parts[0] !== "") lineVertices.push(parts[0]);
-							if (parts[1] !== "") lineUVs.push(parts[1]);
-						}
-					}
-					state.addLineGeometry(lineVertices, lineUVs);
-				} else if ((result = this.regexp.object_pattern.exec(line)) !== null) {
-
-					// o object_name
-					// or
-					// g group_name
-
-					var name = result[0].substr(1).trim();
-					state.startObject(name);
-				} else if (this.regexp.material_use_pattern.test(line)) {
-
-					// material
-
-					state.object.startMaterial(line.substring(7).trim(), state.materialLibraries);
-				} else if (this.regexp.material_library_pattern.test(line)) {
-
-					// mtl file
-
-					state.materialLibraries.push(line.substring(7).trim());
-				} else if ((result = this.regexp.smoothing_pattern.exec(line)) !== null) {
-
-					// smooth shading
-
-					// @todo Handle files that have varying smooth values for a set of faces inside one geometry,
-					// but does not define a usemtl for each face set.
-					// This should be detected and a dummy material created (later MultiMaterial and geometry groups).
-					// This requires some care to not create extra material on each smooth value for "normal" obj files.
-					// where explicit usemtl defines geometry groups.
-					// Example asset: examples/models/obj/cerberus/Cerberus.obj
-
-					var value = result[1].trim().toLowerCase();
-					state.object.smooth = value === '1' || value === 'on';
-
-					var material = state.object.currentMaterial();
-					if (material) {
-
-						material.smooth = state.object.smooth;
-					}
-				} else {
-
-					// Handle null terminated files without exception
-					if (line === '\0') continue;
-
-					throw new Error("Unexpected line: '" + line + "'");
-				}
-			}
-
-			state.finalize();
-
-			var container = new three.Group();
-			container.materialLibraries = [].concat(state.materialLibraries);
-
-			for (var i = 0, l = state.objects.length; i < l; i++) {
-
-				var object = state.objects[i];
-				var geometry = object.geometry;
-				var materials = object.materials;
-				var isLine = geometry.type === 'Line';
-
-				// Skip o/g line declarations that did not follow with any faces
-				if (geometry.vertices.length === 0) continue;
-
-				var buffergeometry = new three.BufferGeometry();
-
-				buffergeometry.addAttribute('position', new three.BufferAttribute(new Float32Array(geometry.vertices), 3));
-
-				if (geometry.normals.length > 0) {
-
-					buffergeometry.addAttribute('normal', new three.BufferAttribute(new Float32Array(geometry.normals), 3));
-				} else {
-
-					buffergeometry.computeVertexNormals();
-				}
-
-				if (geometry.uvs.length > 0) {
-
-					buffergeometry.addAttribute('uv', new three.BufferAttribute(new Float32Array(geometry.uvs), 2));
-				}
-
-				// Create materials
-
-				var createdMaterials = [];
-
-				for (var mi = 0, miLen = materials.length; mi < miLen; mi++) {
-
-					var sourceMaterial = materials[mi];
-					var material = undefined;
-
-					if (this.materials !== null) {
-
-						material = this.materials.create(sourceMaterial.name);
-
-						// mtl etc. loaders probably can't create line materials correctly, copy properties to a line material.
-						if (isLine && material && !material.isLineBasicMaterial) {
-
-							var materialLine = new three.LineBasicMaterial();
-							materialLine.copy(material);
-							material = materialLine;
-						}
-					}
-
-					if (!material) {
-
-						material = !isLine ? new three.MeshPhongMaterial() : new three.LineBasicMaterial();
-						material.name = sourceMaterial.name;
-					}
-
-					material.shading = sourceMaterial.smooth ? three.SmoothShading : three.FlatShading;
-
-					createdMaterials.push(material);
-				}
-
-				// Create mesh
-
-				var mesh;
-
-				if (createdMaterials.length > 1) {
-
-					for (var mi = 0, miLen = materials.length; mi < miLen; mi++) {
-
-						var sourceMaterial = materials[mi];
-						buffergeometry.addGroup(sourceMaterial.groupStart, sourceMaterial.groupCount, mi);
-					}
-
-					var multiMaterial = new three.MultiMaterial(createdMaterials);
-					mesh = !isLine ? new three.Mesh(buffergeometry, multiMaterial) : new three.LineSegments(buffergeometry, multiMaterial);
-				} else {
-
-					mesh = !isLine ? new three.Mesh(buffergeometry, createdMaterials[0]) : new three.LineSegments(buffergeometry, createdMaterials[0]);
-				}
-
-				mesh.name = object.name;
-
-				container.add(mesh);
-			}
-
-			console.timeEnd('OBJLoader');
-
-			return container;
+						face_vertex: /^f\s+(-?\d+)\s+(-?\d+)\s+(-?\d+)(?:\s+(-?\d+))?/,
+						// f vertex/uv vertex/uv vertex/uv
+						face_vertex_uv: /^f\s+(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)(?:\s+(-?\d+)\/(-?\d+))?/,
+						// f vertex/uv/normal vertex/uv/normal vertex/uv/normal
+						face_vertex_uv_normal: /^f\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)(?:\s+(-?\d+)\/(-?\d+)\/(-?\d+))?/,
+						// f vertex//normal vertex//normal vertex//normal
+						face_vertex_normal: /^f\s+(-?\d+)\/\/(-?\d+)\s+(-?\d+)\/\/(-?\d+)\s+(-?\d+)\/\/(-?\d+)(?:\s+(-?\d+)\/\/(-?\d+))?/,
+						// o object_name | g group_name
+						object_pattern: /^[og]\s*(.+)?/,
+						// s boolean
+						smoothing_pattern: /^s\s+(\d+|on|off)/,
+						// mtllib file_reference
+						material_library_pattern: /^mtllib /,
+						// usemtl material_name
+						material_use_pattern: /^usemtl /
+				};
 		}
-	}]);
-	return OBJLoader;
+
+		createClass(OBJLoader, [{
+				key: 'load',
+				value: function load(url, onLoad, onProgress, onError) {
+
+						var scope = this;
+
+						var loader = new three.FileLoader(scope.manager);
+						loader.setPath(this.path);
+						loader.load(url, function (text) {
+
+								onLoad(scope.parse(text));
+						}, onProgress, onError);
+				}
+		}, {
+				key: 'setPath',
+				value: function setPath(value) {
+
+						this.path = value;
+				}
+		}, {
+				key: 'setMaterials',
+				value: function setMaterials(materials) {
+
+						this.materials = materials;
+				}
+		}, {
+				key: '_createParserState',
+				value: function _createParserState() {
+
+						var state = new OBJParserState();
+
+						state.startObject('', false);
+
+						return state;
+				}
+		}, {
+				key: 'parse',
+				value: function parse(text) {
+
+						console.time('OBJLoader');
+
+						var state = this._createParserState();
+
+						if (text.indexOf('\r\n') !== -1) {
+
+								// This is faster than String.split with regex that splits on both
+								text = text.replace('\r\n', '\n');
+						}
+
+						var lines = text.split('\n');
+						var line = '',
+						    lineFirstChar = '',
+						    lineSecondChar = '';
+						var lineLength = 0;
+						var result = [];
+
+						// Faster to just trim left side of the line. Use if available.
+						var trimLeft = typeof ''.trimLeft === 'function';
+
+						for (var i = 0, l = lines.length; i < l; i++) {
+
+								line = lines[i];
+
+								line = trimLeft ? line.trimLeft() : line.trim();
+
+								lineLength = line.length;
+
+								if (lineLength === 0) continue;
+
+								lineFirstChar = line.charAt(0);
+
+								// @todo invoke passed in handler if any
+								if (lineFirstChar === '#') continue;
+
+								if (lineFirstChar === 'v') {
+
+										lineSecondChar = line.charAt(1);
+
+										if (lineSecondChar === ' ' && (result = this.regexp.vertex_pattern.exec(line)) !== null) {
+
+												// 0                  1      2      3
+												// ["v 1.0 2.0 3.0", "1.0", "2.0", "3.0"]
+
+												state.vertices.push(parseFloat(result[1]), parseFloat(result[2]), parseFloat(result[3]));
+										} else if (lineSecondChar === 'n' && (result = this.regexp.normal_pattern.exec(line)) !== null) {
+
+												// 0                   1      2      3
+												// ["vn 1.0 2.0 3.0", "1.0", "2.0", "3.0"]
+
+												state.normals.push(parseFloat(result[1]), parseFloat(result[2]), parseFloat(result[3]));
+										} else if (lineSecondChar === 't' && (result = this.regexp.uv_pattern.exec(line)) !== null) {
+
+												// 0               1      2
+												// ["vt 0.1 0.2", "0.1", "0.2"]
+
+												state.uvs.push(parseFloat(result[1]), parseFloat(result[2]));
+										} else {
+
+												throw new Error("Unexpected vertex/normal/uv line: '" + line + "'");
+										}
+								} else if (lineFirstChar === "f") {
+
+										if ((result = this.regexp.face_vertex_uv_normal.exec(line)) !== null) {
+
+												// f vertex/uv/normal vertex/uv/normal vertex/uv/normal
+												// 0                        1    2    3    4    5    6    7    8    9   10         11         12
+												// ["f 1/1/1 2/2/2 3/3/3", "1", "1", "1", "2", "2", "2", "3", "3", "3", undefined, undefined, undefined]
+
+												state.addFace(result[1], result[4], result[7], result[10], result[2], result[5], result[8], result[11], result[3], result[6], result[9], result[12]);
+										} else if ((result = this.regexp.face_vertex_uv.exec(line)) !== null) {
+
+												// f vertex/uv vertex/uv vertex/uv
+												// 0                  1    2    3    4    5    6   7          8
+												// ["f 1/1 2/2 3/3", "1", "1", "2", "2", "3", "3", undefined, undefined]
+
+												state.addFace(result[1], result[3], result[5], result[7], result[2], result[4], result[6], result[8]);
+										} else if ((result = this.regexp.face_vertex_normal.exec(line)) !== null) {
+
+												// f vertex//normal vertex//normal vertex//normal
+												// 0                     1    2    3    4    5    6   7          8
+												// ["f 1//1 2//2 3//3", "1", "1", "2", "2", "3", "3", undefined, undefined]
+
+												state.addFace(result[1], result[3], result[5], result[7], undefined, undefined, undefined, undefined, result[2], result[4], result[6], result[8]);
+										} else if ((result = this.regexp.face_vertex.exec(line)) !== null) {
+
+												// f vertex vertex vertex
+												// 0            1    2    3   4
+												// ["f 1 2 3", "1", "2", "3", undefined]
+
+												state.addFace(result[1], result[2], result[3], result[4]);
+										} else {
+
+												throw new Error("Unexpected face line: '" + line + "'");
+										}
+								} else if (lineFirstChar === "l") {
+
+										var lineParts = line.substring(1).trim().split(" ");
+										var lineVertices = [],
+										    lineUVs = [];
+
+										if (line.indexOf("/") === -1) {
+
+												lineVertices = lineParts;
+										} else {
+
+												for (var li = 0, llen = lineParts.length; li < llen; li++) {
+
+														var parts = lineParts[li].split("/");
+
+														if (parts[0] !== "") lineVertices.push(parts[0]);
+														if (parts[1] !== "") lineUVs.push(parts[1]);
+												}
+										}
+										state.addLineGeometry(lineVertices, lineUVs);
+								} else if ((result = this.regexp.object_pattern.exec(line)) !== null) {
+
+										// o object_name
+										// or
+										// g group_name
+
+										var name = result[0].substr(1).trim();
+										state.startObject(name);
+								} else if (this.regexp.material_use_pattern.test(line)) {
+
+										// material
+
+										state.object.startMaterial(line.substring(7).trim(), state.materialLibraries);
+								} else if (this.regexp.material_library_pattern.test(line)) {
+
+										// mtl file
+
+										state.materialLibraries.push(line.substring(7).trim());
+								} else if ((result = this.regexp.smoothing_pattern.exec(line)) !== null) {
+
+										// smooth shading
+
+										// @todo Handle files that have varying smooth values for a set of faces inside one geometry,
+										// but does not define a usemtl for each face set.
+										// This should be detected and a dummy material created (later MultiMaterial and geometry groups).
+										// This requires some care to not create extra material on each smooth value for "normal" obj files.
+										// where explicit usemtl defines geometry groups.
+										// Example asset: examples/models/obj/cerberus/Cerberus.obj
+
+										var value = result[1].trim().toLowerCase();
+										state.object.smooth = value === '1' || value === 'on';
+
+										var material = state.object.currentMaterial();
+										if (material) {
+
+												material.smooth = state.object.smooth;
+										}
+								} else {
+
+										// Handle null terminated files without exception
+										if (line === '\0') continue;
+
+										throw new Error("Unexpected line: '" + line + "'");
+								}
+						}
+
+						state.finalize();
+
+						var container = new three.Group();
+						container.materialLibraries = [].concat(state.materialLibraries);
+
+						for (var i = 0, l = state.objects.length; i < l; i++) {
+
+								var object = state.objects[i];
+								var geometry = object.geometry;
+								var materials = object.materials;
+								var isLine = geometry.type === 'Line';
+
+								// Skip o/g line declarations that did not follow with any faces
+								if (geometry.vertices.length === 0) continue;
+
+								var buffergeometry = new three.BufferGeometry();
+
+								buffergeometry.addAttribute('position', new three.BufferAttribute(new Float32Array(geometry.vertices), 3));
+
+								if (geometry.normals.length > 0) {
+
+										buffergeometry.addAttribute('normal', new three.BufferAttribute(new Float32Array(geometry.normals), 3));
+								} else {
+
+										buffergeometry.computeVertexNormals();
+								}
+
+								if (geometry.uvs.length > 0) {
+
+										buffergeometry.addAttribute('uv', new three.BufferAttribute(new Float32Array(geometry.uvs), 2));
+								}
+
+								// Create materials
+
+								var createdMaterials = [];
+
+								for (var mi = 0, miLen = materials.length; mi < miLen; mi++) {
+
+										var sourceMaterial = materials[mi];
+										var material = undefined;
+
+										if (this.materials !== null) {
+
+												material = this.materials.create(sourceMaterial.name);
+
+												// mtl etc. loaders probably can't create line materials correctly, copy properties to a line material.
+												if (isLine && material && !material.isLineBasicMaterial) {
+
+														var materialLine = new three.LineBasicMaterial();
+														materialLine.copy(material);
+														material = materialLine;
+												}
+										}
+
+										if (!material) {
+
+												material = !isLine ? new three.MeshPhongMaterial() : new three.LineBasicMaterial();
+												material.name = sourceMaterial.name;
+										}
+
+										material.shading = sourceMaterial.smooth ? three.SmoothShading : three.FlatShading;
+
+										createdMaterials.push(material);
+								}
+
+								// Create mesh
+
+								var mesh;
+
+								if (createdMaterials.length > 1) {
+
+										for (var mi = 0, miLen = materials.length; mi < miLen; mi++) {
+
+												var sourceMaterial = materials[mi];
+												buffergeometry.addGroup(sourceMaterial.groupStart, sourceMaterial.groupCount, mi);
+										}
+
+										var multiMaterial = new three.MultiMaterial(createdMaterials);
+										mesh = !isLine ? new three.Mesh(buffergeometry, multiMaterial) : new three.LineSegments(buffergeometry, multiMaterial);
+								} else {
+
+										mesh = !isLine ? new three.Mesh(buffergeometry, createdMaterials[0]) : new three.LineSegments(buffergeometry, createdMaterials[0]);
+								}
+
+								mesh.name = object.name;
+
+								container.add(mesh);
+						}
+
+						console.timeEnd('OBJLoader');
+
+						return container;
+				}
+		}]);
+		return OBJLoader;
 }();
 
 var OBJParserState = function () {
-	function OBJParserState() {
-		classCallCheck(this, OBJParserState);
+		function OBJParserState() {
+				classCallCheck(this, OBJParserState);
 
-		this.objects = [];
-		this.object = {};
+				this.objects = [];
+				this.object = {};
 
-		this.vertices = [];
-		this.normals = [];
-		this.uvs = [];
+				this.vertices = [];
+				this.normals = [];
+				this.uvs = [];
 
-		this.materialLibraries = [];
-	}
-
-	createClass(OBJParserState, [{
-		key: 'startObject',
-		value: function startObject(name, fromDeclaration) {
-
-			// If the current object (initial from reset) is not from a g/o declaration in the parsed
-			// file. We need to use it for the first parsed g/o to keep things in sync.
-			if (this.object && this.object.fromDeclaration === false) {
-
-				this.object.name = name;
-				this.object.fromDeclaration = fromDeclaration !== false;
-				return;
-			}
-
-			if (this.object && typeof this.object._finalize === 'function') {
-
-				this.object._finalize();
-			}
-
-			var previousMaterial = this.object && typeof this.object.currentMaterial === 'function' ? this.object.currentMaterial() : undefined;
-
-			this.object = new OBJ(name, fromDeclaration);
-
-			// Inherit previous objects material.
-			// Spec tells us that a declared material must be set to all objects until a new material is declared.
-			// If a usemtl declaration is encountered while this new object is being parsed, it will
-			// overwrite the inherited material. Exception being that there was already face declarations
-			// to the inherited material, then it will be preserved for proper MultiMaterial continuation.
-
-			if (previousMaterial && previousMaterial.name && typeof previousMaterial.clone === "function") {
-
-				var declared = previousMaterial.clone(0);
-				declared.inherited = true;
-				this.object.materials.push(declared);
-			}
-
-			this.objects.push(this.object);
+				this.materialLibraries = [];
 		}
-	}, {
-		key: 'finalize',
-		value: function finalize() {
 
-			if (this.object && typeof this.object._finalize === 'function') {
+		createClass(OBJParserState, [{
+				key: 'startObject',
+				value: function startObject(name, fromDeclaration) {
 
-				this.object._finalize();
-			}
-		}
-	}, {
-		key: 'parseVertexIndex',
-		value: function parseVertexIndex(value, len) {
+						// If the current object (initial from reset) is not from a g/o declaration in the parsed
+						// file. We need to use it for the first parsed g/o to keep things in sync.
+						if (this.object && this.object.fromDeclaration === false) {
 
-			var index = parseInt(value, 10);
-			return (index >= 0 ? index - 1 : index + len / 3) * 3;
-		}
-	}, {
-		key: 'parseNormalIndex',
-		value: function parseNormalIndex(value, len) {
+								this.object.name = name;
+								this.object.fromDeclaration = fromDeclaration !== false;
+								return;
+						}
 
-			var index = parseInt(value, 10);
-			return (index >= 0 ? index - 1 : index + len / 3) * 3;
-		}
-	}, {
-		key: 'parseUVIndex',
-		value: function parseUVIndex(value, len) {
+						if (this.object && typeof this.object._finalize === 'function') {
 
-			var index = parseInt(value, 10);
-			return (index >= 0 ? index - 1 : index + len / 2) * 2;
-		}
-	}, {
-		key: 'addVertex',
-		value: function addVertex(a, b, c) {
+								this.object._finalize();
+						}
 
-			var src = this.vertices;
-			var dst = this.object.geometry.vertices;
+						var previousMaterial = this.object && typeof this.object.currentMaterial === 'function' ? this.object.currentMaterial() : undefined;
 
-			dst.push(src[a + 0]);
-			dst.push(src[a + 1]);
-			dst.push(src[a + 2]);
-			dst.push(src[b + 0]);
-			dst.push(src[b + 1]);
-			dst.push(src[b + 2]);
-			dst.push(src[c + 0]);
-			dst.push(src[c + 1]);
-			dst.push(src[c + 2]);
-		}
-	}, {
-		key: 'addVertexLine',
-		value: function addVertexLine(a) {
+						this.object = new OBJ(name, fromDeclaration);
 
-			var src = this.vertices;
-			var dst = this.object.geometry.vertices;
+						// Inherit previous objects material.
+						// Spec tells us that a declared material must be set to all objects until a new material is declared.
+						// If a usemtl declaration is encountered while this new object is being parsed, it will
+						// overwrite the inherited material. Exception being that there was already face declarations
+						// to the inherited material, then it will be preserved for proper MultiMaterial continuation.
 
-			dst.push(src[a + 0]);
-			dst.push(src[a + 1]);
-			dst.push(src[a + 2]);
-		}
-	}, {
-		key: 'addNormal',
-		value: function addNormal(a, b, c) {
+						if (previousMaterial && previousMaterial.name && typeof previousMaterial.clone === "function") {
 
-			var src = this.normals;
-			var dst = this.object.geometry.normals;
+								var declared = previousMaterial.clone(0);
+								declared.inherited = true;
+								this.object.materials.push(declared);
+						}
 
-			dst.push(src[a + 0]);
-			dst.push(src[a + 1]);
-			dst.push(src[a + 2]);
-			dst.push(src[b + 0]);
-			dst.push(src[b + 1]);
-			dst.push(src[b + 2]);
-			dst.push(src[c + 0]);
-			dst.push(src[c + 1]);
-			dst.push(src[c + 2]);
-		}
-	}, {
-		key: 'addUV',
-		value: function addUV(a, b, c) {
-
-			var src = this.uvs;
-			var dst = this.object.geometry.uvs;
-
-			dst.push(src[a + 0]);
-			dst.push(src[a + 1]);
-			dst.push(src[b + 0]);
-			dst.push(src[b + 1]);
-			dst.push(src[c + 0]);
-			dst.push(src[c + 1]);
-		}
-	}, {
-		key: 'addUVLine',
-		value: function addUVLine(a) {
-
-			var src = this.uvs;
-			var dst = this.object.geometry.uvs;
-
-			dst.push(src[a + 0]);
-			dst.push(src[a + 1]);
-		}
-	}, {
-		key: 'addFace',
-		value: function addFace(a, b, c, d, ua, ub, uc, ud, na, nb, nc, nd) {
-
-			var vLen = this.vertices.length;
-
-			var ia = this.parseVertexIndex(a, vLen);
-			var ib = this.parseVertexIndex(b, vLen);
-			var ic = this.parseVertexIndex(c, vLen);
-			var id;
-
-			if (d === undefined) {
-
-				this.addVertex(ia, ib, ic);
-			} else {
-
-				id = this.parseVertexIndex(d, vLen);
-
-				this.addVertex(ia, ib, id);
-				this.addVertex(ib, ic, id);
-			}
-
-			if (ua !== undefined) {
-
-				var uvLen = this.uvs.length;
-
-				ia = this.parseUVIndex(ua, uvLen);
-				ib = this.parseUVIndex(ub, uvLen);
-				ic = this.parseUVIndex(uc, uvLen);
-
-				if (d === undefined) {
-
-					this.addUV(ia, ib, ic);
-				} else {
-
-					id = this.parseUVIndex(ud, uvLen);
-
-					this.addUV(ia, ib, id);
-					this.addUV(ib, ic, id);
+						this.objects.push(this.object);
 				}
-			}
+		}, {
+				key: 'finalize',
+				value: function finalize() {
 
-			if (na !== undefined) {
+						if (this.object && typeof this.object._finalize === 'function') {
 
-				// Normals are many times the same. If so, skip function call and parseInt.
-				var nLen = this.normals.length;
-				ia = this.parseNormalIndex(na, nLen);
-
-				ib = na === nb ? ia : this.parseNormalIndex(nb, nLen);
-				ic = na === nc ? ia : this.parseNormalIndex(nc, nLen);
-
-				if (d === undefined) {
-
-					this.addNormal(ia, ib, ic);
-				} else {
-
-					id = this.parseNormalIndex(nd, nLen);
-
-					this.addNormal(ia, ib, id);
-					this.addNormal(ib, ic, id);
+								this.object._finalize();
+						}
 				}
-			}
-		}
-	}, {
-		key: 'addLineGeometry',
-		value: function addLineGeometry(vertices, uvs) {
+		}, {
+				key: 'parseVertexIndex',
+				value: function parseVertexIndex(value, len) {
 
-			this.object.geometry.type = 'Line';
+						var index = parseInt(value, 10);
+						return (index >= 0 ? index - 1 : index + len / 3) * 3;
+				}
+		}, {
+				key: 'parseNormalIndex',
+				value: function parseNormalIndex(value, len) {
 
-			var vLen = this.vertices.length;
-			var uvLen = this.uvs.length;
+						var index = parseInt(value, 10);
+						return (index >= 0 ? index - 1 : index + len / 3) * 3;
+				}
+		}, {
+				key: 'parseUVIndex',
+				value: function parseUVIndex(value, len) {
 
-			for (var vi = 0, l = vertices.length; vi < l; vi++) {
+						var index = parseInt(value, 10);
+						return (index >= 0 ? index - 1 : index + len / 2) * 2;
+				}
+		}, {
+				key: 'addVertex',
+				value: function addVertex(a, b, c) {
 
-				this.addVertexLine(this.parseVertexIndex(vertices[vi], vLen));
-			}
+						var src = this.vertices;
+						var dst = this.object.geometry.vertices;
 
-			for (var uvi = 0, l = uvs.length; uvi < l; uvi++) {
+						dst.push(src[a + 0]);
+						dst.push(src[a + 1]);
+						dst.push(src[a + 2]);
+						dst.push(src[b + 0]);
+						dst.push(src[b + 1]);
+						dst.push(src[b + 2]);
+						dst.push(src[c + 0]);
+						dst.push(src[c + 1]);
+						dst.push(src[c + 2]);
+				}
+		}, {
+				key: 'addVertexLine',
+				value: function addVertexLine(a) {
 
-				this.addUVLine(this.parseUVIndex(uvs[uvi], uvLen));
-			}
-		}
-	}]);
-	return OBJParserState;
+						var src = this.vertices;
+						var dst = this.object.geometry.vertices;
+
+						dst.push(src[a + 0]);
+						dst.push(src[a + 1]);
+						dst.push(src[a + 2]);
+				}
+		}, {
+				key: 'addNormal',
+				value: function addNormal(a, b, c) {
+
+						var src = this.normals;
+						var dst = this.object.geometry.normals;
+
+						dst.push(src[a + 0]);
+						dst.push(src[a + 1]);
+						dst.push(src[a + 2]);
+						dst.push(src[b + 0]);
+						dst.push(src[b + 1]);
+						dst.push(src[b + 2]);
+						dst.push(src[c + 0]);
+						dst.push(src[c + 1]);
+						dst.push(src[c + 2]);
+				}
+		}, {
+				key: 'addUV',
+				value: function addUV(a, b, c) {
+
+						var src = this.uvs;
+						var dst = this.object.geometry.uvs;
+
+						dst.push(src[a + 0]);
+						dst.push(src[a + 1]);
+						dst.push(src[b + 0]);
+						dst.push(src[b + 1]);
+						dst.push(src[c + 0]);
+						dst.push(src[c + 1]);
+				}
+		}, {
+				key: 'addUVLine',
+				value: function addUVLine(a) {
+
+						var src = this.uvs;
+						var dst = this.object.geometry.uvs;
+
+						dst.push(src[a + 0]);
+						dst.push(src[a + 1]);
+				}
+		}, {
+				key: 'addFace',
+				value: function addFace(a, b, c, d, ua, ub, uc, ud, na, nb, nc, nd) {
+
+						var vLen = this.vertices.length;
+
+						var ia = this.parseVertexIndex(a, vLen);
+						var ib = this.parseVertexIndex(b, vLen);
+						var ic = this.parseVertexIndex(c, vLen);
+						var id;
+
+						if (d === undefined) {
+
+								this.addVertex(ia, ib, ic);
+						} else {
+
+								id = this.parseVertexIndex(d, vLen);
+
+								this.addVertex(ia, ib, id);
+								this.addVertex(ib, ic, id);
+						}
+
+						if (ua !== undefined) {
+
+								var uvLen = this.uvs.length;
+
+								ia = this.parseUVIndex(ua, uvLen);
+								ib = this.parseUVIndex(ub, uvLen);
+								ic = this.parseUVIndex(uc, uvLen);
+
+								if (d === undefined) {
+
+										this.addUV(ia, ib, ic);
+								} else {
+
+										id = this.parseUVIndex(ud, uvLen);
+
+										this.addUV(ia, ib, id);
+										this.addUV(ib, ic, id);
+								}
+						}
+
+						if (na !== undefined) {
+
+								// Normals are many times the same. If so, skip function call and parseInt.
+								var nLen = this.normals.length;
+								ia = this.parseNormalIndex(na, nLen);
+
+								ib = na === nb ? ia : this.parseNormalIndex(nb, nLen);
+								ic = na === nc ? ia : this.parseNormalIndex(nc, nLen);
+
+								if (d === undefined) {
+
+										this.addNormal(ia, ib, ic);
+								} else {
+
+										id = this.parseNormalIndex(nd, nLen);
+
+										this.addNormal(ia, ib, id);
+										this.addNormal(ib, ic, id);
+								}
+						}
+				}
+		}, {
+				key: 'addLineGeometry',
+				value: function addLineGeometry(vertices, uvs) {
+
+						this.object.geometry.type = 'Line';
+
+						var vLen = this.vertices.length;
+						var uvLen = this.uvs.length;
+
+						for (var vi = 0, l = vertices.length; vi < l; vi++) {
+
+								this.addVertexLine(this.parseVertexIndex(vertices[vi], vLen));
+						}
+
+						for (var uvi = 0, l = uvs.length; uvi < l; uvi++) {
+
+								this.addUVLine(this.parseUVIndex(uvs[uvi], uvLen));
+						}
+				}
+		}]);
+		return OBJParserState;
 }();
 
 var OBJ = function () {
-	function OBJ(name, fromDeclaration) {
-		classCallCheck(this, OBJ);
+		function OBJ(name, fromDeclaration) {
+				classCallCheck(this, OBJ);
 
 
-		this.name = name || '';
-		this.fromDeclaration = fromDeclaration !== false;
+				this.name = name || '';
+				this.fromDeclaration = fromDeclaration !== false;
 
-		this.geometry = {
-			vertices: [],
-			normals: [],
-			uvs: []
-		};
-		this.materials = [];
-		this.smooth = true;
-	}
+				this.geometry = {
+						vertices: [],
+						normals: [],
+						uvs: []
+				};
+				this.materials = [];
+				this.smooth = true;
+		}
 
-	createClass(OBJ, [{
-		key: 'startMaterial',
-		value: function startMaterial(name, libraries) {
+		createClass(OBJ, [{
+				key: 'startMaterial',
+				value: function startMaterial(name, libraries) {
 
-			var previous = this._finalize(false);
+						var previous = this._finalize(false);
 
-			// New usemtl declaration overwrites an inherited material, except if faces were declared
-			// after the material, then it must be preserved for proper MultiMaterial continuation.
-			if (previous && (previous.inherited || previous.groupCount <= 0)) {
+						// New usemtl declaration overwrites an inherited material, except if faces were declared
+						// after the material, then it must be preserved for proper MultiMaterial continuation.
+						if (previous && (previous.inherited || previous.groupCount <= 0)) {
 
-				this.materials.splice(previous.index, 1);
-			}
+								this.materials.splice(previous.index, 1);
+						}
 
-			var material = {
-				index: this.materials.length,
-				name: name || '',
-				mtllib: Array.isArray(libraries) && libraries.length > 0 ? libraries[libraries.length - 1] : '',
-				smooth: previous !== undefined ? previous.smooth : this.smooth,
-				groupStart: previous !== undefined ? previous.groupEnd : 0,
-				groupEnd: -1,
-				groupCount: -1,
-				inherited: false,
+						var material = {
+								index: this.materials.length,
+								name: name || '',
+								mtllib: Array.isArray(libraries) && libraries.length > 0 ? libraries[libraries.length - 1] : '',
+								smooth: previous !== undefined ? previous.smooth : this.smooth,
+								groupStart: previous !== undefined ? previous.groupEnd : 0,
+								groupEnd: -1,
+								groupCount: -1,
+								inherited: false,
 
-				clone: function clone(index) {
-					return {
-						index: typeof index === 'number' ? index : this.index,
-						name: this.name,
-						mtllib: this.mtllib,
-						smooth: this.smooth,
-						groupStart: this.groupEnd,
-						groupEnd: -1,
-						groupCount: -1,
-						inherited: false
-					};
+								clone: function clone(index) {
+										return {
+												index: typeof index === 'number' ? index : this.index,
+												name: this.name,
+												mtllib: this.mtllib,
+												smooth: this.smooth,
+												groupStart: this.groupEnd,
+												groupEnd: -1,
+												groupCount: -1,
+												inherited: false
+										};
+								}
+						};
+
+						this.materials.push(material);
+
+						return material;
 				}
-			};
+		}, {
+				key: 'currentMaterial',
+				value: function currentMaterial() {
 
-			this.materials.push(material);
+						if (this.materials.length > 0) {
+								return this.materials[this.materials.length - 1];
+						}
 
-			return material;
-		}
-	}, {
-		key: 'currentMaterial',
-		value: function currentMaterial() {
+						return undefined;
+				}
+		}, {
+				key: '_finalize',
+				value: function _finalize(end) {
 
-			if (this.materials.length > 0) {
-				return this.materials[this.materials.length - 1];
-			}
+						var lastMultiMaterial = this.currentMaterial();
+						if (lastMultiMaterial && lastMultiMaterial.groupEnd === -1) {
 
-			return undefined;
-		}
-	}, {
-		key: '_finalize',
-		value: function _finalize(end) {
+								lastMultiMaterial.groupEnd = this.geometry.vertices.length / 3;
+								lastMultiMaterial.groupCount = lastMultiMaterial.groupEnd - lastMultiMaterial.groupStart;
+								lastMultiMaterial.inherited = false;
+						}
 
-			var lastMultiMaterial = this.currentMaterial();
-			if (lastMultiMaterial && lastMultiMaterial.groupEnd === -1) {
+						// Guarantee at least one empty material, this makes the creation later more straight forward.
+						if (end !== false && this.materials.length === 0) {
+								this.materials.push({
+										name: '',
+										smooth: this.smooth
+								});
+						}
 
-				lastMultiMaterial.groupEnd = this.geometry.vertices.length / 3;
-				lastMultiMaterial.groupCount = lastMultiMaterial.groupEnd - lastMultiMaterial.groupStart;
-				lastMultiMaterial.inherited = false;
-			}
-
-			// Guarantee at least one empty material, this makes the creation later more straight forward.
-			if (end !== false && this.materials.length === 0) {
-				this.materials.push({
-					name: '',
-					smooth: this.smooth
-				});
-			}
-
-			return lastMultiMaterial;
-		}
-	}]);
-	return OBJ;
+						return lastMultiMaterial;
+				}
+		}]);
+		return OBJ;
 }();
 
 three.Geometry.prototype.offset = function (x, y, z) {
@@ -3418,45 +3405,51 @@ var Audio3D = function () {
     this.ready = new Promise(function (resolve, reject) {
       try {
         if (Audio3D.isAvailable) {
-          var finishSetup = function finishSetup() {
-            try {
-              _this.sampleRate = _this.context.sampleRate;
-              _this.mainVolume = _this.context.createGain();
-              _this.start();
-              resolve();
-            } catch (exp) {
-              reject(exp);
-            }
-          };
-
-          if (!isiOS) {
-            _this.context = new AudioContext();
-            finishSetup();
-          } else {
-            var unlock = function unlock() {
+          (function () {
+            var finishSetup = function finishSetup() {
               try {
-                _this.context = _this.context || new AudioContext();
-                var source = _this.context.createBufferSource();
-                source.buffer = _this.createRawSound([[0]]);
-                source.connect(_this.context.destination);
-                source.start();
-                setTimeout(function () {
-                  if (source.playbackState === source.PLAYING_STATE || source.playbackState === source.FINISHED_STATE) {
-                    window.removeEventListener("mouseup", unlock);
-                    window.removeEventListener("touchend", unlock);
-                    window.removeEventListener("keyup", unlock);
-                    finishSetup();
-                  }
-                }, 0);
+                _this.sampleRate = _this.context.sampleRate;
+                _this.mainVolume = _this.context.createGain();
+                _this.start();
+                resolve();
               } catch (exp) {
                 reject(exp);
               }
             };
 
-            window.addEventListener("mouseup", unlock, false);
-            window.addEventListener("touchend", unlock, false);
-            window.addEventListener("keyup", unlock, false);
-          }
+            if (!isiOS) {
+              _this.context = new AudioContext();
+              finishSetup();
+            } else {
+              (function () {
+                var unlock = function unlock() {
+                  try {
+                    (function () {
+                      _this.context = _this.context || new AudioContext();
+                      var source = _this.context.createBufferSource();
+                      source.buffer = _this.createRawSound([[0]]);
+                      source.connect(_this.context.destination);
+                      source.start();
+                      setTimeout(function () {
+                        if (source.playbackState === source.PLAYING_STATE || source.playbackState === source.FINISHED_STATE) {
+                          window.removeEventListener("mouseup", unlock);
+                          window.removeEventListener("touchend", unlock);
+                          window.removeEventListener("keyup", unlock);
+                          finishSetup();
+                        }
+                      }, 0);
+                    })();
+                  } catch (exp) {
+                    reject(exp);
+                  }
+                };
+
+                window.addEventListener("mouseup", unlock, false);
+                window.addEventListener("touchend", unlock, false);
+                window.addEventListener("keyup", unlock, false);
+              })();
+            }
+          })();
         }
       } catch (exp) {
         reject(exp);
@@ -5422,55 +5415,289 @@ ButtonFactory.DEFAULT = new ButtonFactory(colored(box$1(1, 1, 1), 0xff0000), {
   toggle: true
 });
 
+// The JSON format object loader is not always included in the Three.js distribution,
+// so we have to first check for it.
+var loaders = null;
+var PATH_PATTERN = /((?:https?:\/\/)?(?:[^/]+\/)+)(\w+)(\.(?:\w+))$/;
+var EXTENSION_PATTERN = /(\.(?:\w+))+$/;
+
+function loader(map, key) {
+  return function (obj) {
+    return ModelFactory.loadObject(map[key]).then(function (model) {
+      obj[key] = model;
+      return obj;
+    });
+  };
+}
+
+// Sometimes, the properties that export out of Blender and into Three.js don't
+// come out correctly, so we need to do a correction.
+function fixJSONScene(json) {
+  json.traverse(function (obj) {
+    if (obj.geometry) {
+      obj.geometry.computeBoundingSphere();
+      obj.geometry.computeBoundingBox();
+    }
+  });
+  return json;
+}
+
+function fixOBJScene(group) {
+  if (group.type === "Group" && group.children.length === 1 && group.children[0].isMesh) {
+    return group.children[0];
+  }
+  return group;
+}
+
+var propertyTests = {
+  isButton: function isButton(obj) {
+    return obj.material && obj.material.name.match(/^button\d+$/);
+  },
+  isSolid: function isSolid(obj) {
+    return !obj.name.match(/^(water|sky)/);
+  },
+  isGround: function isGround(obj) {
+    return obj.material && obj.material.name && obj.material.name.match(/\bground\b/);
+  }
+};
+
+function setProperties(object) {
+  object.traverse(function (obj) {
+    if (obj.isMesh) {
+      for (var prop in propertyTests) {
+        obj[prop] = obj[prop] || propertyTests[prop](obj);
+      }
+    }
+  });
+  return object;
+}
+
+var ModelFactory = function () {
+  createClass(ModelFactory, null, [{
+    key: "loadModel",
+    value: function loadModel(src, type, progress) {
+      return ModelFactory.loadObject(src, type, progress).then(function (scene) {
+        while (scene && scene.type === "Group") {
+          scene = scene.children[0];
+        }
+        return new ModelFactory(scene);
+      });
+    }
+  }, {
+    key: "loadObject",
+    value: function loadObject(src, type, progress) {
+
+      var extMatch = src.match(EXTENSION_PATTERN),
+          extension = type && "." + type || extMatch[0];
+      if (!extension) {
+        return Promise.reject("File path `" + src + "` does not have a file extension, and a type was not provided as a parameter, so we can't determine the type.");
+      } else {
+        extension = extension.toLowerCase();
+        if (loaders === null) {
+          loaders = {
+            ".json": three.ObjectLoader,
+            ".mtl": MTLLoader,
+            ".obj": OBJLoader,
+            ".typeface.json": three.FontLoader
+          };
+        }
+        var LoaderType = loaders[extension];
+        if (!LoaderType) {
+          return Promise.reject("There is no loader type for the file extension: " + extension);
+        } else {
+          var loader = new LoaderType(),
+              name = src.substring(0, extMatch.index),
+              elemID = name + "_" + extension.toLowerCase(),
+              elem = document.getElementById(elemID),
+              promise = Promise.resolve();
+          if (extension === ".obj") {
+            var newPath = src.replace(EXTENSION_PATTERN, ".mtl");
+            promise = promise.then(function () {
+              return ModelFactory.loadObject(newPath, "mtl", progress);
+            }).then(function (materials) {
+              materials.preload();
+              loader.setMaterials(materials);
+            }).catch(console.error.bind(console, "Error loading MTL file: " + newPath));
+          } else if (extension === ".mtl") {
+            var match = src.match(PATH_PATTERN);
+            if (match) {
+              var dir = match[1];
+              src = match[2] + match[3];
+              loader.setTexturePath(dir);
+              loader.setPath(dir);
+            }
+          }
+
+          if (elem) {
+            var elemSource = elem.innerHTML.split(/\r?\n/g).map(function (s) {
+              return s.trim();
+            }).join("\n");
+            promise = promise.then(function () {
+              return loader.parse(elemSource);
+            });
+          } else {
+            if (loader.setCrossOrigin) {
+              loader.setCrossOrigin("anonymous");
+            }
+            promise = promise.then(function () {
+              return new Promise(function (resolve, reject) {
+                return loader.load(src, resolve, progress, reject);
+              });
+            });
+          }
+
+          if (extension === ".obj") {
+            promise = promise.then(fixOBJScene);
+          }
+
+          if (extension === ".json") {
+            promise = promise.then(fixJSONScene);
+          }
+
+          if (extension !== ".mtl" && extension !== ".typeface.json") {
+            promise = promise.then(setProperties);
+          }
+          promise = promise.catch(console.error.bind(console, "MODEL_ERR", src));
+          return promise;
+        }
+      }
+    }
+  }, {
+    key: "loadObjects",
+    value: function loadObjects(map) {
+
+      var output = {},
+          promise = Promise.resolve(output);
+      for (var key in map) {
+        if (map[key]) {
+          promise = promise.then(loader(map, key));
+        }
+      }
+      return promise;
+    }
+  }]);
+
+  function ModelFactory(template) {
+    classCallCheck(this, ModelFactory);
+
+    this.template = template;
+  }
+
+  createClass(ModelFactory, [{
+    key: "clone",
+    value: function clone() {
+      var _this = this;
+
+      var obj = this.template.clone();
+
+      obj.traverse(function (child) {
+        if (child.isSkinnedMesh) {
+          obj.animation = new three.AnimationClip(child, child.geometry.animation);
+          if (!_this.template.originalAnimationClipData && obj.animation.data) {
+            _this.template.originalAnimationClipData = obj.animation.data;
+          }
+          if (!obj.animation.data) {
+            obj.animation.data = _this.template.originalAnimationClipData;
+          }
+        }
+      });
+
+      setProperties(obj);
+      return obj;
+    }
+  }]);
+  return ModelFactory;
+}();
+
+var heightTester = new three.Raycaster();
+
+heightTester.ray.direction.set(0, -1, 0);
+
 var Ground = function (_Entity) {
   inherits(Ground, _Entity);
 
   function Ground(options) {
     classCallCheck(this, Ground);
-
-    var _this = possibleConstructorReturn(this, (Ground.__proto__ || Object.getPrototypeOf(Ground)).call(this, "Ground", {
+    return possibleConstructorReturn(this, (Ground.__proto__ || Object.getPrototypeOf(Ground)).call(this, "Ground", {
       transparent: false,
       dim: options.drawDistance,
       texture: options.groundTexture,
+      model: options.groundModel,
       shadow: options.enableShadows,
       progress: options.progress
     }));
-
-    _this._image = null;
-
-    _this.ready = _this.ready.then(function () {
-      _this.children.forEach(function (mesh) {
-        return mesh.rot(-Math.PI / 2, 0, 0);
-      });
-    });
-    return _this;
   }
 
   createClass(Ground, [{
+    key: "moveTo",
+    value: function moveTo(pos) {
+      if (this.isInfinite) {
+        this.position.set(Math.floor(pos.x), 0, Math.floor(pos.z));
+      }
+    }
+  }, {
+    key: "getHeightAt",
+    value: function getHeightAt(pos) {
+      if (this.model) {
+        heightTester.ray.origin.copy(pos);
+        heightTester.ray.origin.y = 100;
+        var hits = heightTester.intersectObject(this.model);
+        if (hits.length > 0) {
+          var hit = hits[0];
+          return 100 - hit.distance;
+        }
+      }
+    }
+  }, {
     key: "_ready",
     get: function get() {
+      var _this2 = this;
+
       var dim = this.options.dim,
           type = _typeof(this.options.texture);
 
-      if (type === "number") {
-        this._image = quad(dim, dim).colored(this.options.texture, this.options);
-      } else if (type === "string") {
-        this._image = new Image(this.options.texture, Object.assign({}, this.options, {
-          width: dim,
-          height: dim,
-          txtRepeatX: dim,
-          txtRepeatY: dim,
-          anisotropy: 8
-        }));
+      var promise = null;
+
+      this.model = null;
+      this.isInfinite = null;
+
+      if (this.options.model) {
+        promise = ModelFactory.loadObject(this.options.model).then(function (model) {
+          _this2.model = model;
+          _this2.isInfinite = false;
+        });
+      } else {
+        if (type === "number") {
+          this.model = quad(dim, dim).colored(this.options.texture, this.options).rot(-Math.PI / 2, 0, 0);
+          promise = Promise.resolve();
+        } else if (type === "string") {
+          this.model = new Image(this.options.texture, Object.assign({}, this.options, {
+            width: dim,
+            height: dim,
+            txtRepeatX: dim,
+            txtRepeatY: dim,
+            anisotropy: 8
+          })).rot(-Math.PI / 2, 0, 0);
+          console.log("A", !!this.model);
+
+          promise = this.model.ready;
+        }
+
+        if (promise) {
+          this.isInfinite = true;
+        } else {
+          promise = Promise.reject("Couldn't figure out how to make the ground out of " + this.options.texture);
+        }
       }
 
-      if (this._image) {
-        this._image.named(this.name + "-" + this.options.texture).addTo(this);
+      promise = promise.then(function () {
+        _this2.model.receiveShadow = _this2.options.shadow;
+        _this2.model.named(_this2.name + "-" + (_this2.options.model || _this2.options.texture)).addTo(_this2);
 
-        this.watch(this._image, Pointer.EVENTS);
-      }
+        _this2.watch(_this2.model, Pointer.EVENTS);
+      });
 
-      return this._image && this._image.ready || get$1(Ground.prototype.__proto__ || Object.getPrototypeOf(Ground.prototype), "_ready", this);
+      return promise;
     }
   }]);
   return Ground;
@@ -7310,7 +7537,7 @@ var VRDisplay = function () {
 
     this._currentLayers = [];
 
-    Object.defineProperties(this, defineProperty({
+    Object.defineProperties(this, {
       capabilities: immutable(Object.defineProperties({}, {
         hasPosition: immutable(false),
         hasOrientation: immutable(isMobile),
@@ -7318,7 +7545,6 @@ var VRDisplay = function () {
         canPresent: immutable(true),
         maxLayers: immutable(1)
       })),
-      isPolyfilled: immutable(isPolyfilled),
       displayId: immutable(nextDisplayId++),
       displayName: immutable(name),
       isConnected: immutable(true),
@@ -7328,9 +7554,10 @@ var VRDisplay = function () {
       }),
 
       depthNear: mutable(0.01, "number"),
-      depthFar: mutable(10000.0, "number")
+      depthFar: mutable(10000.0, "number"),
 
-    }, "isPolyfilled", immutable(true)));
+      isPolyfilled: immutable(true)
+    });
 
     this._frameData = null;
     this._poseData = null;
@@ -7473,9 +7700,16 @@ var StandardMonitorVRDisplay = function (_VRDisplay) {
         var curLayer = this.getLayers()[0],
             elem = curLayer && curLayer.source || document.body,
             width = elem.clientWidth,
-            height = elem.clientHeight,
-            vFOV = defaultFieldOfView / 2,
-            hFOV = calcFoV(vFOV, width, height);
+            height = elem.clientHeight;
+
+        var vFOV = void 0,
+            hFOV = void 0;
+        if (height > width) {
+          vFOV = defaultFieldOfView, hFOV = calcFoV(vFOV, width, height);
+        } else {
+          hFOV = defaultFieldOfView, vFOV = calcFoV(hFOV, height, width);
+        }
+
         return {
           renderWidth: width * devicePixelRatio,
           renderHeight: height * devicePixelRatio,
@@ -7507,188 +7741,6 @@ function makeHidingContainer(id, obj) {
   elem.style.overflow = "hidden";
   elem.appendChild(obj);
   return elem;
-}
-
-// The JSON format object loader is not always included in the Three.js distribution,
-// so we have to first check for it.
-var loaders = null;
-var PATH_PATTERN = /((?:https?:\/\/)?(?:[^/]+\/)+)(\w+)(\.(?:\w+))$/;
-var EXTENSION_PATTERN = /(\.(?:\w+))+$/;
-
-// Sometimes, the properties that export out of Blender and into Three.js don't
-// come out correctly, so we need to do a correction.
-function fixJSONScene(json) {
-  json.traverse(function (obj) {
-    if (obj.geometry) {
-      obj.geometry.computeBoundingSphere();
-      obj.geometry.computeBoundingBox();
-    }
-  });
-  return json;
-}
-
-var propertyTests = {
-  isButton: function isButton(obj) {
-    return obj.material && obj.material.name.match(/^button\d+$/);
-  },
-  isSolid: function isSolid(obj) {
-    return !obj.name.match(/^(water|sky)/);
-  },
-  isGround: function isGround(obj) {
-    return obj.material && obj.material.name && obj.material.name.match(/\bground\b/);
-  }
-};
-
-function setProperties(object) {
-  object.traverse(function (obj) {
-    if (obj.isMesh) {
-      for (var prop in propertyTests) {
-        obj[prop] = obj[prop] || propertyTests[prop](obj);
-      }
-    }
-  });
-  return object;
-}
-
-var ModelFactory = function () {
-  createClass(ModelFactory, null, [{
-    key: "loadModel",
-    value: function loadModel(src, type, progress) {
-      return ModelFactory.loadObject(src, type, progress).then(function (scene) {
-        while (scene && scene.type === "Group") {
-          scene = scene.children[0];
-        }
-        return new ModelFactory(scene);
-      });
-    }
-  }, {
-    key: "loadObject",
-    value: function loadObject(src, type, progress) {
-
-      var extMatch = src.match(EXTENSION_PATTERN),
-          extension = type && "." + type || extMatch[0];
-      if (!extension) {
-        return Promise.reject("File path `" + src + "` does not have a file extension, and a type was not provided as a parameter, so we can't determine the type.");
-      } else {
-        extension = extension.toLowerCase();
-        if (loaders === null) {
-          loaders = {
-            ".json": three.ObjectLoader,
-            ".mtl": MTLLoader,
-            ".obj": OBJLoader,
-            ".typeface.json": three.FontLoader
-          };
-        }
-        var Loader$$1 = new loaders[extension]();
-        if (!Loader$$1) {
-          return Promise.reject("There is no loader type for the file extension: " + extension);
-        } else {
-          var name = src.substring(0, extMatch.index),
-              elemID = name + "_" + extension.toLowerCase(),
-              elem = document.getElementById(elemID),
-              promise = Promise.resolve();
-          if (extension === ".obj") {
-            var newPath = src.replace(EXTENSION_PATTERN, ".mtl");
-            promise = promise.then(function () {
-              return ModelFactory.loadObject(newPath, "mtl", progress);
-            }).then(function (materials) {
-              materials.preload();
-              Loader$$1.setMaterials(materials);
-            }).catch(console.error.bind(console, "Error loading MTL file: " + newPath));
-          } else if (extension === ".mtl") {
-            var match = src.match(PATH_PATTERN);
-            if (match) {
-              var dir = match[1];
-              src = match[2] + match[3];
-              Loader$$1.setTexturePath(dir);
-              Loader$$1.setPath(dir);
-            }
-          }
-
-          if (elem) {
-            var elemSource = elem.innerHTML.split(/\r?\n/g).map(function (s) {
-              return s.trim();
-            }).join("\n");
-            promise = promise.then(function () {
-              return Loader$$1.parse(elemSource);
-            });
-          } else {
-            if (Loader$$1.setCrossOrigin) {
-              Loader$$1.setCrossOrigin("anonymous");
-            }
-            promise = promise.then(function () {
-              return new Promise(function (resolve, reject) {
-                return Loader$$1.load(src, resolve, progress, reject);
-              });
-            });
-          }
-
-          if (extension === ".json") {
-            promise = promise.then(fixJSONScene);
-          }
-
-          if (extension !== ".mtl" && extension !== ".typeface.json") {
-            promise = promise.then(setProperties);
-          }
-          promise = promise.catch(console.error.bind(console, "MODEL_ERR", src));
-          return promise;
-        }
-      }
-    }
-  }, {
-    key: "loadObjects",
-    value: function loadObjects(map) {
-
-      var output = {},
-          promise = Promise.resolve(output);
-      for (var key in map) {
-        if (map[key]) {
-          promise = promise.then(loader(map, key));
-        }
-      }
-      return promise;
-    }
-  }]);
-
-  function ModelFactory(template) {
-    classCallCheck(this, ModelFactory);
-
-    this.template = template;
-  }
-
-  createClass(ModelFactory, [{
-    key: "clone",
-    value: function clone() {
-      var _this = this;
-
-      var obj = this.template.clone();
-
-      obj.traverse(function (child) {
-        if (child.isSkinnedMesh) {
-          obj.animation = new three.AnimationClip(child, child.geometry.animation);
-          if (!_this.template.originalAnimationClipData && obj.animation.data) {
-            _this.template.originalAnimationClipData = obj.animation.data;
-          }
-          if (!obj.animation.data) {
-            obj.animation.data = _this.template.originalAnimationClipData;
-          }
-        }
-      });
-
-      setProperties(obj);
-      return obj;
-    }
-  }]);
-  return ModelFactory;
-}();
-
-function loader(map, key) {
-  return function (obj) {
-    return ModelFactory.loadObject(map[key]).then(function (model) {
-      obj[key] = model;
-      return obj;
-    });
-  };
 }
 
 function initState() {
@@ -10859,10 +10911,6 @@ var FPSInput = function (_EventDispatcher) {
         strafe: {
           commands: ["strafeLeft", "strafeRight"]
         },
-        lift: {
-          buttons: [Keys.E],
-          scale: 12
-        },
         driveForward: {
           buttons: [-Keys.W, -Keys.UPARROW]
         },
@@ -11102,7 +11150,7 @@ var FPSInput = function (_EventDispatcher) {
     }
   }, {
     key: "update",
-    value: function update(dt) {
+    value: function update(dt, ground) {
       var hadGamepad = this.hasGamepad;
       if (this.gamepadMgr) {
         this.gamepadMgr.poll();
@@ -11122,8 +11170,8 @@ var FPSInput = function (_EventDispatcher) {
         this.Touch.enabled = !this.hasMotionControllers;
       }
 
-      this.updateStage(dt);
-      this.stage.position.y = this.options.avatarHeight;
+      this.updateStage(dt, ground);
+      this.stage.position.y += this.options.avatarHeight;
       for (var _i = 0; _i < this.motionDevices.length; ++_i) {
         this.motionDevices[_i].posePosition.y -= this.options.avatarHeight;
       }
@@ -11151,13 +11199,12 @@ var FPSInput = function (_EventDispatcher) {
     }
   }, {
     key: "updateStage",
-    value: function updateStage(dt) {
+    value: function updateStage(dt, ground) {
       // get the linear movement from the mouse/keyboard/gamepad
       var heading = 0,
           pitch = 0,
           strafe = 0,
-          drive = 0,
-          lift = 0;
+          drive = 0;
       for (var i = 0; i < this.managers.length; ++i) {
         var mgr = this.managers[i];
         if (mgr.enabled) {
@@ -11167,7 +11214,6 @@ var FPSInput = function (_EventDispatcher) {
           pitch += mgr.getValue("pitch");
           strafe += mgr.getValue("strafe");
           drive += mgr.getValue("drive");
-          lift += mgr.getValue("lift");
         }
       }
 
@@ -11194,20 +11240,7 @@ var FPSInput = function (_EventDispatcher) {
       this.stage.quaternion.setFromEuler(EULER_TEMP$1);
 
       // update the stage's velocity
-      this.velocity.set(strafe, lift, drive);
-
-      if (this.stage.isOnGround) {
-        if (this.velocity.y > 0) {
-          this.stage.isOnGround = false;
-        }
-      } else {
-        this.velocity.y -= this.options.gravity;
-        if (this.stage.position.y < 0) {
-          this.velocity.y = 0;
-          this.stage.position.y = 0;
-          this.stage.isOnGround = true;
-        }
-      }
+      this.velocity.set(strafe, 0, drive);
 
       QUAT_TEMP$1.copy(this.head.quaternion);
       EULER_TEMP$1.setFromQuaternion(QUAT_TEMP$1);
@@ -11216,6 +11249,8 @@ var FPSInput = function (_EventDispatcher) {
       QUAT_TEMP$1.setFromEuler(EULER_TEMP$1);
 
       this.moveStage(DISPLACEMENT.copy(this.velocity).multiplyScalar(dt).applyQuaternion(QUAT_TEMP$1).add(this.head.position));
+
+      this.stage.position.y = ground.getHeightAt(this.stage.position) || 0;
     }
   }, {
     key: "cancelVR",
@@ -11227,6 +11262,7 @@ var FPSInput = function (_EventDispatcher) {
     key: "moveStage",
     value: function moveStage(position) {
       DISPLACEMENT.copy(position).sub(this.head.position);
+
       this.stage.position.add(DISPLACEMENT);
     }
   }, {
@@ -11621,7 +11657,7 @@ var PlainText = new Grammar("PlainText", [["newlines", /(?:\r\n|\r|\n)/]]);
 var DIFF = new three.Vector3();
 var MAX_MOVE_DISTANCE = 5;
 var MAX_MOVE_DISTANCE_SQ = MAX_MOVE_DISTANCE * MAX_MOVE_DISTANCE;
-var MAX_TELEPORT_WAGGLE = 0.2;
+var MAX_TELEPORT_WAGGLE = 0.5;
 var TELEPORT_PAD_RADIUS = 0.4;
 var TELEPORT_COOLDOWN = 250;
 
@@ -11806,12 +11842,12 @@ var BrowserEnvironment = function (_EventDispatcher) {
         updateFade(dt);
 
         for (var frame = 0; frame < numFrames; ++frame) {
-          _this.input.update(_this.deltaTime);
+          _this.input.update(_this.deltaTime, _this.ground);
 
           if (frame === 0) {
             updateAll();
             _this.input.resolvePicking(_this.scene);
-            _this.ground.position.set(Math.floor(_this.input.head.position.x), 0, Math.floor(_this.input.head.position.z));
+            _this.ground.moveTo(_this.input.head.position);
             _this.sky.position.copy(_this.input.head.position);
             moveUI();
           }
@@ -12210,20 +12246,26 @@ var BrowserEnvironment = function (_EventDispatcher) {
 
     _this.goFullScreen = function (index, evt) {
       if (evt !== "Gaze") {
-        var elem = null;
-        if (evt === "force" || _this.input.VR.canMirror || _this.input.VR.isNativeWebVR) {
-          elem = _this.renderer.domElement;
-        } else {
-          elem = _this.options.fullScreenElement;
-        }
-        _this.input.VR.connect(index);
-        return _this.input.VR.requestPresent([{
-          source: elem
-        }]).catch(function (exp) {
-          return console.error("whaaat", exp);
-        }).then(function () {
-          return elem.focus();
-        });
+        var _ret = function () {
+          var elem = null;
+          if (evt === "force" || _this.input.VR.canMirror || _this.input.VR.isNativeWebVR) {
+            elem = _this.renderer.domElement;
+          } else {
+            elem = _this.options.fullScreenElement;
+          }
+          _this.input.VR.connect(index);
+          return {
+            v: _this.input.VR.requestPresent([{
+              source: elem
+            }]).catch(function (exp) {
+              return console.error("whaaat", exp);
+            }).then(function () {
+              return elem.focus();
+            })
+          };
+        }();
+
+        if ((typeof _ret === "undefined" ? "undefined" : _typeof(_ret)) === "object") return _ret.v;
       }
     };
 
@@ -12301,12 +12343,14 @@ var BrowserEnvironment = function (_EventDispatcher) {
         return displays.forEach(function (display, i) {
           window.addEventListener("vrdisplayactivate", function (evt) {
             if (evt.display === display) {
-              var exitVR = function exitVR() {
-                window.removeEventListener("vrdisplaydeactivate", exitVR);
-                _this.input.cancelVR();
-              };
-              window.addEventListener("vrdisplaydeactivate", exitVR, false);
-              _this.goFullScreen(i);
+              (function () {
+                var exitVR = function exitVR() {
+                  window.removeEventListener("vrdisplaydeactivate", exitVR);
+                  _this.input.cancelVR();
+                };
+                window.addEventListener("vrdisplaydeactivate", exitVR, false);
+                _this.goFullScreen(i);
+              })();
             }
           }, false);
         });
