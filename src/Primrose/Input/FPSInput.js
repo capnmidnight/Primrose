@@ -66,10 +66,6 @@ export default class FPSInput extends EventDispatcher {
         strafe: {
           commands: ["strafeLeft", "strafeRight"]
         },
-        lift: {
-          buttons: [Keys.E],
-          scale: 12
-        },
         driveForward: {
           buttons: [
             -Keys.W,
@@ -394,8 +390,7 @@ export default class FPSInput extends EventDispatcher {
     let heading = 0,
       pitch = 0,
       strafe = 0,
-      drive = 0,
-      lift = 0;
+      drive = 0;
     for (let i = 0; i < this.managers.length; ++i) {
       const mgr = this.managers[i];
       if(mgr.enabled){
@@ -405,7 +400,6 @@ export default class FPSInput extends EventDispatcher {
         pitch += mgr.getValue("pitch");
         strafe += mgr.getValue("strafe");
         drive += mgr.getValue("drive");
-        lift += mgr.getValue("lift");
       }
     }
 
@@ -433,24 +427,7 @@ export default class FPSInput extends EventDispatcher {
     this.stage.quaternion.setFromEuler(EULER_TEMP);
 
     // update the stage's velocity
-    this.velocity.set(strafe, lift, drive);
-
-    const y = ground.getHeightAt(this.stage.position);
-
-    if (this.stage.isFlying) {
-      this.velocity.y -= this.options.gravity;
-      if (this.stage.position.y < y) {
-        this.velocity.y = 0;
-        this.stage.position.y = y;
-        this.stage.isOnGround = true;
-      }
-    }
-    else {
-      this.stage.position.y = y;
-      if(this.velocity.y > 0){
-        this.stage.isOnGround = false;
-      }
-    }
+    this.velocity.set(strafe, 0, drive);
 
     QUAT_TEMP.copy(this.head.quaternion);
     EULER_TEMP.setFromQuaternion(QUAT_TEMP);
@@ -463,6 +440,8 @@ export default class FPSInput extends EventDispatcher {
       .multiplyScalar(dt)
       .applyQuaternion(QUAT_TEMP)
       .add(this.head.position));
+
+    this.stage.position.y = ground.getHeightAt(this.stage.position) || 0;
   }
 
   cancelVR() {
