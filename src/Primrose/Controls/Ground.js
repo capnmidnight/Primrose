@@ -98,7 +98,5 @@ export default class Ground extends Entity {
         return 100 - hit.distance;
       }
     }
-
-    return 0;
   }
 };

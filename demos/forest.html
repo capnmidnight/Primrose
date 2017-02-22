@@ -53,7 +53,7 @@
 var env = new Primrose.BrowserEnvironment({
   font: &quot;../shared_assets/fonts/helvetiker_regular.typeface.json&quot;,
   backgroundColor: 0xC9E6EE,
-  groundTexture: &quot;../shared_assets/images/grass.png&quot;,
+  groundModel: &quot;Ground.obj&quot;,
   useFog: true,
   enableShadows: true,
   shadowRadius: 3,
@@ -61,37 +61,37 @@ var env = new Primrose.BrowserEnvironment({
   progress: Preloader.thunk
 });
 
-var treeReady = Primrose.Graphics.ModelFactory.loadModel(&quot;tree.obj&quot;);
+var MF = Primrose.Graphics.ModelFactory,
+  treeReady = MF.loadModel(&quot;tree.obj&quot;),
+  waterReady = MF.loadObject(&quot;Water.obj&quot;);
 
 env.addEventListener(&quot;ready&quot;, function() {
-  treeReady.then(function(treeModel) {
-    treeModel.template.castShadow = true;
-    treeModel.template.receiveShadow = true;
-    for(var i = 0; i &lt; 100; ++i) {
-      treeModel.clone()
-        .named(&quot;tree&quot; + i)
-        .addTo(env.scene)
-        .at(
-          Primrose.Random.number(-25, 25),
-          0,
-          Primrose.Random.number(-25, 25))
-        .rot(
-          0,
-          Primrose.Random.number(0, Math.PI),
-          0)
-        .scl(
-          1,
-          Primrose.Random.number(0.7, 1.3),
-          1);
-    }
-    Preloader.hide();
-  });
+  Promise.all([
+    treeReady.then(function(treeFactory) {
+      treeFactory.template.castShadow = true;
+      treeFactory.template.receiveShadow = true;
+      for(var i = 0; i &lt; 100; ++i) {
+        treeFactory.clone()
+          .named(&quot;tree&quot; + i)
+          .addTo(env.scene)
+          .at(
+            Primrose.Random.number(-25, 25),
+            0,
+            Primrose.Random.number(-25, 25))
+          .rot(
+            0,
+            Primrose.Random.number(0, Math.PI),
+            0)
+          .scl(
+            1,
+            Primrose.Random.number(0.7, 1.3),
+            1);
+      }
+    }),
 
-  env.displays[0].enableMotion = true;
-});
-
-env.addEventListener(&quot;motioncontrollerfound&quot;, function(ctrl){
-  env.displays[0].motionDevice = ctrl;
+    waterReady.then(function(waterModel) {
+      waterModel.addTo(env.scene);
+    })]).then(Preloader.hide);
 });
 </pre>
     </main><!-- end main.pug main block -->
