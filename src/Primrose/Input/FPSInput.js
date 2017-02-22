@@ -341,7 +341,7 @@ export default class FPSInput extends EventDispatcher {
     return !!(this.Touch && this.Touch.enabled && this.Touch.inPhysicalUse);
   }
 
-  update(dt) {
+  update(dt, ground) {
     const hadGamepad = this.hasGamepad;
     if(this.gamepadMgr) {
       this.gamepadMgr.poll();
@@ -361,8 +361,8 @@ export default class FPSInput extends EventDispatcher {
       this.Touch.enabled = !this.hasMotionControllers;
     }
 
-    this.updateStage(dt);
-    this.stage.position.y = this.options.avatarHeight;
+    this.updateStage(dt, ground);
+    this.stage.position.y += this.options.avatarHeight;
     for (let i = 0; i < this.motionDevices.length; ++i) {
       this.motionDevices[i].posePosition.y -= this.options.avatarHeight;
     }
@@ -389,7 +389,7 @@ export default class FPSInput extends EventDispatcher {
     this.head.quaternion.toArray(this.newState, 3);
   }
 
-  updateStage(dt) {
+  updateStage(dt, ground) {
     // get the linear movement from the mouse/keyboard/gamepad
     let heading = 0,
       pitch = 0,
@@ -435,17 +435,20 @@ export default class FPSInput extends EventDispatcher {
     // update the stage's velocity
     this.velocity.set(strafe, lift, drive);
 
-    if (this.stage.isOnGround) {
-      if(this.velocity.y > 0){
-        this.stage.isOnGround = false;
+    const y = ground.getHeightAt(this.stage.position);
+
+    if (this.stage.isFlying) {
+      this.velocity.y -= this.options.gravity;
+      if (this.stage.position.y < y) {
+        this.velocity.y = 0;
+        this.stage.position.y = y;
+        this.stage.isOnGround = true;
       }
     }
     else {
-      this.velocity.y -= this.options.gravity;
-      if (this.stage.position.y < 0) {
-        this.velocity.y = 0;
-        this.stage.position.y = 0;
-        this.stage.isOnGround = true;
+      this.stage.position.y = y;
+      if(this.velocity.y > 0){
+        this.stage.isOnGround = false;
       }
     }
 
@@ -470,6 +473,7 @@ export default class FPSInput extends EventDispatcher {
   moveStage(position) {
     DISPLACEMENT.copy(position)
       .sub(this.head.position);
+
     this.stage.position.add(DISPLACEMENT);
   }
 

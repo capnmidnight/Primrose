@@ -4,6 +4,12 @@ import Image from "./Image";
 import Pointer from "../Pointer";
 import ModelFactory from "../Graphics/ModelFactory";
 
+import { Raycaster, Vector3 } from "three";
+
+const heightTester = new Raycaster();
+
+heightTester.ray.direction.set(0, -1, 0);
+
 export default class Ground extends Entity {
 
   constructor(options) {
@@ -15,9 +21,6 @@ export default class Ground extends Entity {
       shadow: options.enableShadows,
       progress: options.progress
     });
-
-    this.model = null;
-    this.isInfinite = true;
   }
 
   get _ready() {
@@ -25,6 +28,9 @@ export default class Ground extends Entity {
       type = typeof  this.options.texture;
 
     let promise = null;
+
+    this.model = null;
+    this.isInfinite = null;
 
     if(this.options.model) {
       promise = ModelFactory.loadObject(this.options.model)
@@ -36,7 +42,8 @@ export default class Ground extends Entity {
     else {
       if(type === "number") {
         this.model = quad(dim, dim)
-          .colored(this.options.texture, this.options);
+          .colored(this.options.texture, this.options)
+          .rot(-Math.PI / 2, 0, 0);
         promise = Promise.resolve();
       }
       else if(type === "string") {
@@ -46,15 +53,18 @@ export default class Ground extends Entity {
           txtRepeatX: dim,
           txtRepeatY: dim,
           anisotropy: 8
-        }));
+        })).rot(-Math.PI / 2, 0, 0);
+        console.log("A", !!this.model);
 
         promise = this.model.ready;
       }
 
-      promise = promise.then(() => {
-        this.children.forEach((mesh) =>
-          mesh.rot(-Math.PI / 2, 0, 0));
-      });
+      if(promise) {
+        this.isInfinite = true;
+      }
+      else{
+        promise = Promise.reject("Couldn't figure out how to make the ground out of " + this.options.texture);
+      }
     }
 
     promise = promise.then(() => {
@@ -76,5 +86,19 @@ export default class Ground extends Entity {
         0,
         Math.floor(pos.z))
     }
+  }
+
+  getHeightAt(pos) {
+    if(this.model) {
+      heightTester.ray.origin.copy(pos);
+      heightTester.ray.origin.y = 100;
+      const hits = heightTester.intersectObject(this.model);
+      if(hits.length > 0) {
+        const hit = hits[0];
+        return 100 - hit.distance;
+      }
+    }
+
+    return 0;
   }
 };

@@ -337,7 +337,7 @@ export default class BrowserEnvironment extends EventDispatcher {
         updateFade(dt);
 
         for(let frame = 0; frame < numFrames; ++frame) {
-          this.input.update(this.deltaTime);
+          this.input.update(this.deltaTime, this.ground);
 
           if(frame === 0) {
             updateAll();
