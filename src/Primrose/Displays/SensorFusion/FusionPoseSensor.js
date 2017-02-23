@@ -106,7 +106,7 @@ export default class FusionPoseSensor {
     return this.orientationOut_;
   }
 
-  getImmediatePose() {
+  getPose() {
     return {
       position: this.getPosition(),
       orientation: this.getOrientation(),

@@ -101,16 +101,6 @@ export default class MixedRealityVRDisplay extends VRDisplay {
     }
   }
 
-
-  getImmediatePose() {
-    if(this.motionDevice){
-      return this.motionDevice.getImmediatePose();
-    }
-    else{
-      return defaultPose();
-    }
-  }
-
   getPose() {
     if(this.motionDevice){
       return this.motionDevice.getPose();

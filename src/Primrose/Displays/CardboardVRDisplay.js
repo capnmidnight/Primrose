@@ -32,8 +32,8 @@ export default class CardboardVRDisplay extends VRDisplay {
     this.poseSensor_ = options && options.overrideOrientation || new FusionPoseSensor(options);
   }
 
-  _getImmediatePose() {
-    return this.poseSensor_.getImmediatePose();
+  _getPose() {
+    return this.poseSensor_.getPose();
   }
 
   resetPose() {

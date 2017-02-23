@@ -35,16 +35,6 @@ export default class StandardMonitorVRDisplay extends VRDisplay {
     }
   }
 
-  getImmediatePose() {
-    var display = isMobile && this._display;
-    if(display){
-      return display.getImmediatePose();
-    }
-    else{
-      return defaultPose();
-    }
-  }
-
   getPose() {
     var display = isMobile && this._display;
     if(display){

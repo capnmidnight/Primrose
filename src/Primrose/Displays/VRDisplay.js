@@ -67,12 +67,8 @@ export default class VRDisplay {
   }
 
   getPose() {
-    return this.getImmediatePose();
-  }
-
-  getImmediatePose() {
     if(!this._poseData){
-      this._poseData = this._getImmediatePose();
+      this._poseData = this._getPose();
     }
     return this._poseData;
   }
