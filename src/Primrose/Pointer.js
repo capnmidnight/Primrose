@@ -349,7 +349,7 @@ export default class Pointer extends Entity {
 
         if(obj && this._check(hit)) {
           this.lastHit = hit;
-          return;
+          return hit.object._listeners.useraction;
         }
       }
 
@@ -360,4 +360,4 @@ export default class Pointer extends Entity {
   }
 }
 
-Pointer.EVENTS = ["pointerstart", "pointerend", "pointermove", "gazestart", "gazemove", "gazecomplete", "gazecancel", "exit", "enter", "select"];
+Pointer.EVENTS = ["pointerstart", "pointerend", "pointermove", "gazestart", "gazemove", "gazecomplete", "gazecancel", "exit", "enter", "select", "useraction"];

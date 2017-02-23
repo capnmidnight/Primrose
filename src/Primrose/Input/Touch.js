@@ -20,7 +20,7 @@ export default class Touch extends InputProcessor {
       axes.push("DX" + i);
       axes.push("DY" + i);
     }
-    super("Touch", commands, axes);
+    super("Touch", commands, axes, "touchstart");
 
     var setState = (stateChange, setAxis, event) => {
       // We have to find the minimum identifier value because iOS uses a very

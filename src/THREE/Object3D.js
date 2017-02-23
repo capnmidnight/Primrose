@@ -20,6 +20,7 @@ Object.defineProperty(Object3D.prototype, "pickable", {
          (this._listeners.enter && this._listeners.enter.length > 0)
       || (this._listeners.exit && this._listeners.exit.length > 0)
       || (this._listeners.select && this._listeners.select.length > 0)
+      || (this._listeners.useraction && this._listeners.useraction.length > 0)
       || (this._listeners.pointerstart && this._listeners.pointerstart.length > 0)
       || (this._listeners.pointerend && this._listeners.pointerend.length > 0)
       || (this._listeners.pointermove && this._listeners.pointermove.length > 0)

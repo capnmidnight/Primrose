@@ -101,7 +101,7 @@ import { EventDispatcher } from "three";
 
 export default class InputProcessor extends EventDispatcher {
 
-  constructor(name, commands, axisNames) {
+  constructor(name, commands, axisNames, userActionEvent) {
     super();
     this.name = name;
     this.commands = {};
@@ -135,6 +135,18 @@ export default class InputProcessor extends EventDispatcher {
 
     for (let i = 0; i < Keys.MODIFIER_KEYS.length; ++i) {
       this.inputState[Keys.MODIFIER_KEYS[i]] = false;
+    }
+
+    this.userActionHandlers = null;
+    if(userActionEvent){
+      window.addEventListener(userActionEvent, (evt) => {
+        console.log("userAction", evt.type);
+        if(this.userActionHandlers) {
+          for (let i = 0; i < this.userActionHandlers.length; ++i) {
+            this.userActionHandlers[i](evt);
+          }
+        }
+      });
     }
   }
 

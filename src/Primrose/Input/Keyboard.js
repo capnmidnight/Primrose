@@ -34,7 +34,7 @@ import macOS from "../Text/OperatingSystems/macOS";
 import CodePages from "../Text/CodePages";
 export default class Keyboard extends InputProcessor {
   constructor(input, commands) {
-    super("Keyboard", commands);
+    super("Keyboard", commands, null, "keydown");
 
     this._operatingSystem = null;
     this.browser = isChrome ? "CHROMIUM" : (isFirefox ? "FIREFOX" : (isIE ? "IE" : (isOpera ? "OPERA" : (isSafari ? "SAFARI" : "UNKNOWN"))));

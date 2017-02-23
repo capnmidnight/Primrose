@@ -448,7 +448,13 @@ export default class BrowserEnvironment extends EventDispatcher {
 
           if(frame === 0) {
             updateAll();
-            this.resolvePicking(this.scene);
+            let userActionHandlers = null;
+            for (let i = 0; i < this.pointers.length; ++i) {
+              userActionHandlers = this.pointers[i].resolvePicking(this.scene);
+            }
+            for (let i = 0; i < this.managers.length; ++i) {
+              this.managers[i].userActionHandlers = userActionHandlers;
+            }
             this.ground.moveTo(this.head.position);
             this.sky.position.copy(this.head.position);
             moveUI();
@@ -1739,12 +1745,6 @@ export default class BrowserEnvironment extends EventDispatcher {
   cancelVR() {
     this.VR.cancel();
     this.Mouse.commands.U.offset = 0;
-  }
-
-  resolvePicking(objects) {
-    for (let i = 0; i < this.pointers.length; ++i) {
-      this.pointers[i].resolvePicking(objects);
-    }
   }
 
   get hasMotionControllers() {
