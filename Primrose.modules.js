@@ -3902,7 +3902,7 @@ var Audio$1 = {
 
 var packageName = "PrimroseVR";
 
-var version = "0.31.2";
+var version = "0.31.3";
 
 
 

@@ -1,4 +1,23 @@
-## v0.31.2
+## v0.31.3 - Feb 22, 2017
+
+* We have a new demo, called <a href="../demos/forest.html">Forest</a>.
+* OBJ model files can now be loaded even if there is no MTL material file to match them.
+* There are more options for the shadow map setting in BrowserEnvironment, including:
+  * `shadowMapSize`: the length of one side of the square image to use for the shadow map.
+  * `shadowCameraSize`: the radius of the square shadow map camera viewport.
+  * `shadowRadius`: the number of pixels to blur for the shadow map.
+* A specific version of Chromium with WebVR extensions crashes-to-desktop when you attempt to read the attached gamepads, so that version is blacklisted from supporting motion controllers.
+* The `immutable` and `mutable` property generating functions now create properties that can be overridden in subclasses.
+* The <a href="../demos/shadows.html">Shadows demo</a> now uses the default setting for `useGaze`, thanks to Pete Nellius (<a href="https://github.com/pdnellius" target="_blank">@pdneliius</a>).
+* The <a href="../demos/clock.html">Sundial demo</a> now has a sun that properly faces the user when the user moves, thanks to Kehinde Ayanleye (<a href="https://github.com/KehindeAyanleye" target="_blank">@KehindeAyanleye</a>)
+* Removed the confusing `npm start` script from `package.json`. It just runs the default `gulp` task now.
+* The standard monitor's rendering changes aspect ratio correctly now, when resizing the window very narrow or very tall.
+* If an OBJ file exports only a single child element out of its Group, the ModelFactory class now strips the surrounding Group out before giving you the model.
+* There is now support for loading a model file as the ground, with the user riding the top of the ground and not falling through.
+* Increased the max allowable amount you can waggle the controller before the teleport pad deactivates, to make it a little easier to use.
+* Deleted the buggy "jump" feature.
+
+## v0.31.2 - Feb 7, 2017
 
 I had to make a few quick changes to the last release, as I got too excited by the user contributions that I didn't double-check that all of the package settings were up to date.
 
@@ -8,7 +27,7 @@ I had to make a few quick changes to the last release, as I got too excited by t
 * Fix for loading OBJ models that don't have MTL files associated with them, allowing us to add a material at runtime.
 
 
-## v0.31.1
+## v0.31.1 - Feb 6, 2017
 
 This is the first release with significant contributions from folks new to Primrose!
 
@@ -21,6 +40,7 @@ This is super exciting. I've been writing pretty much non-stop, trying to get ev
 If you have ideas of your own, or are looking for an established open source project to join, <a href="mailto:sean+primrose@notiontheory.com?Subject=Contributing to Primrose">please contact us at NotionTheory</a> and let's chat! We'd like to bring on anyone of any background or experience level, so long as you're willing to learn. The last two years have been a blast and we can't wait to bring more people on board.
 
 Thankfully, there is still a lot of fun work left to do:
+
 * If you're looking to break into the language translation industry, you could get a lot of experience in translating our documentation to your language.
 * There is a lot of front-end design work to be done in making the official website look nice, respond well to different devices, and be accessible to differently-abled people.
 * I'd love to get a monthly or bi-weekly event together online where we can all hack together. Managing those meetings and making fun SWAG materials to go along would be a great service. We have a small budget for t-shirts and pins and such. We'd like to have something to give everyone who contributes.
@@ -49,7 +69,7 @@ Thankfully, there is still a lot of fun work left to do:
 
 Wow, that's a lot for less than two weeks. Thanks everyone!
 
-## v0.31.0
+## v0.31.0 - Jan 21, 2017
 
 Over the last year, a lot of work went into making the Primrose WebVR framework much more reliable, easier to use, and with more complete documentation. This is the first CHANGELOG we've written since May 2016, but that doesn't mean we haven't been working. Indeed, the lack of CHANGELOGs has specifically been because of how busy we've been in building Primrose.
 
