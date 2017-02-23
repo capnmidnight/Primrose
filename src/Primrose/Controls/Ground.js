@@ -54,7 +54,6 @@ export default class Ground extends Entity {
           txtRepeatY: dim,
           anisotropy: 8
         })).rot(-Math.PI / 2, 0, 0);
-        console.log("A", !!this.model);
 
         promise = this.model.ready;
       }
