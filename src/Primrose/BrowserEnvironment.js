@@ -1869,7 +1869,7 @@ BrowserEnvironment.DEFAULTS = {
   // the far plane of the camera.
   drawDistance: 100,
   // the field of view to use in non-VR settings.
-  defaultFOV: 55,
+  defaultFOV: StandardMonitorVRDisplay.DEFAULT_FOV,
   // The sound to play on loop in the background.
   ambientSound: null,
   // HTML5 canvas element, if one had already been created.

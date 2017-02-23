@@ -1,7 +1,7 @@
 import isMobile from "../../flags/isMobile";
 import VRDisplay from "./VRDisplay";
 
-let defaultFieldOfView = 50;
+let defaultFieldOfView = 100;
 
 function defaultPose() {
   return {
@@ -71,11 +71,11 @@ export default class StandardMonitorVRDisplay extends VRDisplay {
 
       let vFOV, hFOV;
       if(height > width) {
-        vFOV = defaultFieldOfView,
+        vFOV = defaultFieldOfView / 2,
         hFOV = calcFoV(vFOV, width, height);
       }
       else {
-        hFOV = defaultFieldOfView,
+        hFOV = defaultFieldOfView / 2,
         vFOV = calcFoV(hFOV, height, width);
       }
 
@@ -95,5 +95,5 @@ export default class StandardMonitorVRDisplay extends VRDisplay {
 }
 
 function calcFoV(aFoV, aDim, bDim){
-  return 360 * Math.atan(Math.tan(aFoV * Math.PI / 360) * aDim / bDim) / Math.PI;
+  return 180 * Math.atan(Math.tan(aFoV * Math.PI / 180) * aDim / bDim) / Math.PI;
 }
