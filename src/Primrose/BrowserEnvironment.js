@@ -199,11 +199,6 @@ pliny.record({
   }]
 });
 
-const MILLISECONDS_TO_SECONDS = 0.001,
-  TELEPORT_DISPLACEMENT = new Vector3();
-
-import PointerLock from "../util/PointerLock";
-
 import isiOS from "../flags/isiOS";
 import isMobile from "../flags/isMobile";
 
@@ -214,6 +209,7 @@ import hub from "../live-api/hub";
 import textured from "../live-api/textured";
 import sphere from "../live-api/sphere";
 
+import PointerLock from "../util/PointerLock";
 import identity from "../util/identity";
 
 import Angle from "./Angle";
@@ -242,7 +238,12 @@ import makeHidingContainer from "./DOM/makeHidingContainer";
 
 import ModelFactory from "./Graphics/ModelFactory";
 
-import FPSInput from "./Input/FPSInput";
+import Keyboard from "./Input/Keyboard";
+import Mouse from "./Input/Mouse";
+import Gamepad from "./Input/Gamepad";
+import GamepadManager from "./Input/GamepadManager";
+import Touch from "./Input/Touch";
+import Speech from "./Input/Speech";
 import VR from "./Input/VR";
 
 import NetworkManager from "./Network/Manager";
@@ -254,7 +255,14 @@ import Teleporter from "./Tools/Teleporter";
 import { Quality, PIXEL_SCALES } from "./Constants";
 
 
-import { EventDispatcher, Object3D, BackSide, PCFSoftShadowMap, FogExp2, Scene, PerspectiveCamera, TextGeometry, Quaternion, Color, Euler, Vector3, WebGLRenderer } from "three";
+import { EventDispatcher, Object3D, BackSide, PCFSoftShadowMap, FogExp2, Scene, PerspectiveCamera, TextGeometry, Quaternion, Color, Euler, Vector3, Matrix4, WebGLRenderer } from "three";
+
+const MILLISECONDS_TO_SECONDS = 0.001,
+  TELEPORT_DISPLACEMENT = new Vector3(),
+  DISPLACEMENT = new Vector3(),
+  EULER_TEMP = new Euler(),
+  QUAT_TEMP = new Quaternion(),
+  WEDGE = Math.PI / 3;
 
 export default class BrowserEnvironment extends EventDispatcher {
   constructor(options) {
@@ -301,7 +309,9 @@ export default class BrowserEnvironment extends EventDispatcher {
     });
     this.zero = () => {
       if (!this.lockMovement) {
-        this.input.zero();
+        for (let i = 0; i < this.managers.length; ++i) {
+          this.managers[i].zero();
+        }
         if (this.quality === Quality.NONE) {
           this.quality = Quality.HIGH;
         }
@@ -336,14 +346,111 @@ export default class BrowserEnvironment extends EventDispatcher {
 
         updateFade(dt);
 
-        for(let frame = 0; frame < numFrames; ++frame) {
-          this.input.update(this.deltaTime, this.ground);
+        for(let frame = 0; frame < numFrames; ++frame) {const hadGamepad = this.hasGamepad;
+          if(this.gamepadMgr) {
+            this.gamepadMgr.poll();
+          }
+          for (let i = 0; i < this.managers.length; ++i) {
+            this.managers[i].update(dt);
+          }
+
+          if (!hadGamepad && this.hasGamepad) {
+            this.Mouse.inPhysicalUse = false;
+          }
+
+          this.head.showPointer = this.VR.hasOrientation && this.options.showHeadPointer;
+          this.mousePointer.showPointer = (this.hasMouse || this.hasGamepad) && !this.hasMotionControllers;
+
+          if(this.hasTouch) {
+            this.Touch.enabled = !this.hasMotionControllers;
+          }
+
+          let heading = 0,
+            pitch = 0,
+            strafe = 0,
+            drive = 0;
+          for (let i = 0; i < this.managers.length; ++i) {
+            const mgr = this.managers[i];
+            if(mgr.enabled){
+              if(mgr.name !== "Mouse"){
+                heading += mgr.getValue("heading");
+              }
+              pitch += mgr.getValue("pitch");
+              strafe += mgr.getValue("strafe");
+              drive += mgr.getValue("drive");
+            }
+          }
+
+          if(this.hasMouse) {
+            let mouseHeading = null;
+            if (this.VR.hasOrientation) {
+              mouseHeading = this.mousePointer.rotation.y;
+              const newMouseHeading = WEDGE * Math.floor((mouseHeading / WEDGE) + 0.5);
+              if(newMouseHeading !== 0){
+                this.Mouse.commands.U.offset -= this.Mouse.getValue("U") - 1;
+              }
+              mouseHeading = newMouseHeading + this.Mouse.commands.U.offset * 2;
+            }
+            else{
+              mouseHeading = this.Mouse.getValue("heading");
+            }
+            heading += mouseHeading;
+          }
+          if (this.VR.hasOrientation) {
+            pitch = 0;
+          }
+
+          // move stage according to heading and thrust
+          EULER_TEMP.set(pitch, heading, 0, "YXZ");
+          this.stage.quaternion.setFromEuler(EULER_TEMP);
+
+          // update the stage's velocity
+          this.velocity.set(strafe, 0, drive);
+
+          QUAT_TEMP.copy(this.head.quaternion);
+          EULER_TEMP.setFromQuaternion(QUAT_TEMP);
+          EULER_TEMP.x = 0;
+          EULER_TEMP.z = 0;
+          QUAT_TEMP.setFromEuler(EULER_TEMP);
+
+          this.moveStage(DISPLACEMENT
+            .copy(this.velocity)
+            .multiplyScalar(dt)
+            .applyQuaternion(QUAT_TEMP)
+            .add(this.head.position));
+
+          this.stage.position.y = this.ground.getHeightAt(this.stage.position) || 0;
+          this.stage.position.y += this.options.avatarHeight;
+          for (let i = 0; i < this.motionDevices.length; ++i) {
+            this.motionDevices[i].posePosition.y -= this.options.avatarHeight;
+          }
+
+          // update the motionDevices
+          this.stage.updateMatrix();
+          this.matrix.multiplyMatrices(this.stage.matrix, this.VR.stage.matrix);
+          for (let i = 0; i < this.motionDevices.length; ++i) {
+            this.motionDevices[i].updateStage(this.matrix);
+          }
+
+          for (let i = 0; i < this.pointers.length; ++i) {
+            this.pointers[i].update();
+          }
+
+          // record the position and orientation of the user
+          this.newState = [];
+          this.head.updateMatrix();
+          this.stage.rotation.x = 0;
+          this.stage.rotation.z = 0;
+          this.stage.quaternion.setFromEuler(this.stage.rotation);
+          this.stage.updateMatrix();
+          this.head.position.toArray(this.newState, 0);
+          this.head.quaternion.toArray(this.newState, 3);
 
           if(frame === 0) {
             updateAll();
-            this.input.resolvePicking(this.scene);
-            this.ground.moveTo(this.input.head.position);
-            this.sky.position.copy(this.input.head.position);
+            this.resolvePicking(this.scene);
+            this.ground.moveTo(this.head.position);
+            this.sky.position.copy(this.head.position);
             moveUI();
           }
 
@@ -382,14 +489,14 @@ export default class BrowserEnvironment extends EventDispatcher {
       var y = this.vicinity.position.y,
         p = this.options.vicinityFollowRate,
         q = 1 - p;
-      this.vicinity.position.lerp(this.input.head.position, p);
+      this.vicinity.position.lerp(this.head.position, p);
       this.vicinity.position.y = y;
 
-      followEuler.setFromQuaternion(this.input.head.quaternion);
+      followEuler.setFromQuaternion(this.head.quaternion);
       this.turns.radians = followEuler.y;
       followEuler.set(maxX, this.turns.radians, 0, "YXZ");
       this.ui.quaternion.setFromEuler(followEuler)
-      this.ui.position.y = this.ui.position.y * q + this.input.head.position.y * p;
+      this.ui.position.y = this.ui.position.y * q + this.head.position.y * p;
     };
 
     var animate = (t) => {
@@ -404,10 +511,10 @@ export default class BrowserEnvironment extends EventDispatcher {
     var render = () => {
       this.camera.position.set(0, 0, 0);
       this.camera.quaternion.set(0, 0, 0, 1);
-      this.audio.setPlayer(this.input.head.mesh);
+      this.audio.setPlayer(this.head.mesh);
       this.renderer.clear(true, true, true);
 
-      var trans = this.input.VR.getTransforms(
+      var trans = this.VR.getTransforms(
         this.options.nearPlane,
         this.options.nearPlane + this.options.drawDistance);
       for (var i = 0; trans && i < trans.length; ++i) {
@@ -437,20 +544,20 @@ export default class BrowserEnvironment extends EventDispatcher {
           v.height * resolutionScale);
 
         this.camera.projectionMatrix.copy(st.projection);
-        if (this.input.mousePointer.unproject) {
-          this.input.mousePointer.unproject.getInverse(st.projection);
+        if (this.mousePointer.unproject) {
+          this.mousePointer.unproject.getInverse(st.projection);
         }
         this.camera.translateOnAxis(st.translation, 1);
         this.renderer.render(this.scene, this.camera);
         this.camera.translateOnAxis(st.translation, -1);
       }
-      this.input.VR.submitFrame();
+      this.VR.submitFrame();
     };
 
     var modifyScreen = () => {
       var near = this.options.nearPlane,
         far = near + this.options.drawDistance,
-        p = this.input && this.input.VR && this.input.VR.getTransforms(near, far);
+        p = this.VR && this.VR.getTransforms(near, far);
 
       if (p) {
         var canvasWidth = 0,
@@ -461,8 +568,8 @@ export default class BrowserEnvironment extends EventDispatcher {
           canvasHeight = Math.max(canvasHeight, p[i].viewport.height);
         }
 
-        this.input.Mouse.commands.U.scale = devicePixelRatio * 2 / canvasWidth;
-        this.input.Mouse.commands.V.scale = devicePixelRatio * 2 / canvasHeight;
+        this.Mouse.commands.U.scale = devicePixelRatio * 2 / canvasWidth;
+        this.Mouse.commands.V.scale = devicePixelRatio * 2 / canvasHeight;
 
         canvasWidth = Math.floor(canvasWidth * resolutionScale);
         canvasHeight = Math.floor(canvasHeight * resolutionScale);
@@ -739,18 +846,18 @@ export default class BrowserEnvironment extends EventDispatcher {
       }]
     });
     this.teleport = (pos, immediate) => this.transition(
-      () => this.input.moveStage(pos),
+      () => this.moveStage(pos),
       () => this.teleportAvailable && TELEPORT_DISPLACEMENT.copy(pos)
-        .sub(this.input.head.position)
+        .sub(this.head.position)
         .length() > 0.2,
       immediate);
 
     const delesectControl = () => {
       if(this.currentControl) {
         this.currentControl.removeEventListener("blur", delesectControl);
-        this.input.Keyboard.enabled = true;
-        this.input.Mouse.commands.pitch.disabled =
-        this.input.Mouse.commands.heading.disabled = this.input.VR.isPresenting;
+        this.Keyboard.enabled = true;
+        this.Mouse.commands.pitch.disabled =
+        this.Mouse.commands.heading.disabled = this.VR.isPresenting;
         this.currentControl.blur();
         this.currentControl = null;
       }
@@ -781,9 +888,9 @@ export default class BrowserEnvironment extends EventDispatcher {
             this.currentControl.focus();
             this.currentControl.addEventListener("blur", delesectControl);
             if(this.currentControl.lockMovement) {
-              this.input.Keyboard.enabled = false;
-              this.input.Mouse.commands.pitch.disabled =
-              this.input.Mouse.commands.heading.disabled = !this.input.VR.isPresenting;
+              this.Keyboard.enabled = false;
+              this.Mouse.commands.pitch.disabled =
+              this.Mouse.commands.heading.disabled = !this.VR.isPresenting;
             }
           }
         }
@@ -889,7 +996,7 @@ export default class BrowserEnvironment extends EventDispatcher {
     var currentTimerObject = null;
     this.timer = 0;
     var RAF = (callback) => {
-      currentTimerObject = this.input.VR.currentDevice || window;
+      currentTimerObject = this.VR.currentDevice || window;
       if (this.timer !== null) {
         this.timer = currentTimerObject.requestAnimationFrame(callback);
       }
@@ -905,14 +1012,14 @@ export default class BrowserEnvironment extends EventDispatcher {
     this.goFullScreen = (index, evt) => {
       if (evt !== "Gaze") {
         let elem = null;
-        if(evt === "force" || this.input.VR.canMirror || this.input.VR.isNativeWebVR) {
+        if(evt === "force" || this.VR.canMirror || this.VR.isNativeWebVR) {
           elem = this.renderer.domElement;
         }
         else{
           elem = this.options.fullScreenElement;
         }
-        this.input.VR.connect(index);
-        return this.input.VR.requestPresent([{
+        this.VR.connect(index);
+        return this.VR.requestPresent([{
             source: elem
           }])
           .catch((exp) => console.error("whaaat", exp))
@@ -932,22 +1039,22 @@ export default class BrowserEnvironment extends EventDispatcher {
     };
 
     PointerLock.addChangeListener((evt) => {
-      if (this.input.VR.isPresenting && !PointerLock.isActive) {
-        this.input.cancelVR();
+      if (this.VR.isPresenting && !PointerLock.isActive) {
+        this.cancelVR();
       }
     });
 
     const fullScreenChange = (evt) => {
-      const presenting = !!this.input.VR.isPresenting,
+      const presenting = !!this.VR.isPresenting,
         cmd = (presenting ? "remove" : "add") + "Button";
-      this.input.Mouse[cmd]("dx", 0);
-      this.input.Mouse[cmd]("dy", 0);
-      this.input.Mouse.commands.U.disabled =
-        this.input.Mouse.commands.V.disabled = presenting && !this.input.VR.isStereo;
-      this.input.Mouse.commands.heading.scale = presenting ? -1 : 1;
-      this.input.Mouse.commands.pitch.scale = presenting ? -1 : 1;
+      this.Mouse[cmd]("dx", 0);
+      this.Mouse[cmd]("dy", 0);
+      this.Mouse.commands.U.disabled =
+        this.Mouse.commands.V.disabled = presenting && !this.VR.isStereo;
+      this.Mouse.commands.heading.scale = presenting ? -1 : 1;
+      this.Mouse.commands.pitch.scale = presenting ? -1 : 1;
       if (!presenting) {
-        this.input.cancelVR();
+        this.cancelVR();
       }
       modifyScreen();
     };
@@ -994,23 +1101,258 @@ export default class BrowserEnvironment extends EventDispatcher {
       this.renderer.domElement.addEventListener('webglcontextlost', this.stop, false);
       this.renderer.domElement.addEventListener('webglcontextrestored', this.start, false);
 
+      this.managers = [];
+      this.newState = [];
+      this.pointers = [];
+      this.motionDevices = [];
+      this.velocity = new Vector3();
+      this.matrix = new Matrix4();
 
-      pliny.property({
-        parent: "Primrose.BrowserEnvironment",
-        name: "input",
-        type: "Primrose.Input.FPSInput",
-        description: "The input manager."
-      });
-      this.input = new FPSInput(this.options.fullScreenElement, this.options);
-      this.input.addEventListener("zero", this.zero);
-      this.watch(this.input, ["motioncontrollerfound"]);
-      this.input.route(FPSInput.EVENTS, this.consumeEvent.bind(this));
-      this.input.VR.ready.then((displays) => displays.forEach((display, i) => {
+      if(!this.options.disableKeyboard) {
+        this.addInputManager(new Keyboard(this, {
+          strafeLeft: {
+            buttons: [
+              -Keys.A,
+              -Keys.LEFTARROW
+            ]
+          },
+          strafeRight: {
+            buttons: [
+              Keys.D,
+              Keys.RIGHTARROW
+            ]
+          },
+          strafe: {
+            commands: ["strafeLeft", "strafeRight"]
+          },
+          driveForward: {
+            buttons: [
+              -Keys.W,
+              -Keys.UPARROW
+            ]
+          },
+          driveBack: {
+            buttons: [
+              Keys.S,
+              Keys.DOWNARROW
+            ]
+          },
+          drive: {
+            commands: ["driveForward", "driveBack"]
+          },
+          select: {
+            buttons: [Keys.ENTER]
+          },
+          dSelect: {
+            buttons: [Keys.ENTER],
+            delta: true
+          },
+          zero: {
+            buttons: [Keys.Z],
+            metaKeys: [
+              -Keys.CTRL,
+              -Keys.ALT,
+              -Keys.SHIFT,
+              -Keys.META
+            ],
+            commandUp: this.emit.bind(this, "zero")
+          }
+        }));
+
+        this.Keyboard.operatingSystem = this.options.os;
+        this.Keyboard.codePage = this.options.language;
+      }
+
+      this.addInputManager(new Touch(this.options.fullScreenElement, {
+        buttons: {
+          axes: ["FINGERS"]
+        },
+        dButtons: {
+          axes: ["FINGERS"],
+          delta: true
+        },
+        heading: {
+          axes: ["DX0"],
+          integrate: true
+        },
+        pitch: {
+          axes: ["DY0"],
+          integrate: true,
+          min: -Math.PI * 0.5,
+          max: Math.PI * 0.5
+        }
+      }));
+
+      this.addInputManager(new Mouse(this.options.fullScreenElement, {
+        U: { axes: ["X"], min: 0, max: 2, offset: 0 },
+        V: { axes: ["Y"], min: 0, max: 2 },
+        buttons: {
+          axes: ["BUTTONS"]
+        },
+        dButtons: {
+          axes: ["BUTTONS"],
+          delta: true
+        },
+        _dx: {
+          axes: ["X"],
+          delta: true,
+          scale: 0.25
+        },
+        dx: {
+          buttons: [0],
+          commands: ["_dx"]
+        },
+        heading: {
+          commands: ["dx"],
+          integrate: true
+        },
+        _dy: {
+          axes: ["Y"],
+          delta: true,
+          scale: 0.25
+        },
+        dy: {
+          buttons: [0],
+          commands: ["_dy"]
+        },
+        pitch: {
+          commands: ["dy"],
+          integrate: true,
+          min: -Math.PI * 0.5,
+          max: Math.PI * 0.5
+        }
+      }));
+
+      this.addInputManager(new VR(this.options));
+
+      this.motionDevices.push(this.VR);
+
+      if(!this.options.disableGamepad && GamepadManager.isAvailable){
+        this.gamepadMgr = new GamepadManager();
+        this.gamepadMgr.addEventListener("gamepadconnected", (pad) => {
+          const padID = Gamepad.ID(pad);
+          let mgr = null;
+
+          if (padID !== "Unknown" && padID !== "Rift") {
+            if (Gamepad.isMotionController(pad)) {
+              let controllerNumber = 0;
+              for (let i = 0; i < this.managers.length; ++i) {
+                mgr = this.managers[i];
+                if (mgr.currentPad && mgr.currentPad.id === pad.id) {
+                  ++controllerNumber;
+                }
+              }
+
+              mgr = new Gamepad(this.gamepadMgr, pad, controllerNumber, {
+                buttons: {
+                  axes: ["BUTTONS"]
+                },
+                dButtons: {
+                  axes: ["BUTTONS"],
+                  delta: true
+                },
+                zero: {
+                  buttons: [Gamepad.VIVE_BUTTONS.GRIP_PRESSED],
+                  commandUp: this.emit.bind(this, "zero")
+                }
+              });
+
+              this.addInputManager(mgr);
+              this.motionDevices.push(mgr);
+
+              const shift = (this.motionDevices.length - 2) * 8,
+                color = 0x0000ff << shift,
+                highlight = 0xff0000 >> shift,
+                ptr = new Pointer(padID + "Pointer", color, 1, highlight, [mgr], null, this.options);
+              ptr.add(colored(box(0.1, 0.025, 0.2), color, {
+                emissive: highlight
+              }));
+
+              ptr.route(Pointer.EVENTS, this.consumeEvent.bind(this));
+
+              this.pointers.push(ptr);
+              this.scene.add(ptr);
+
+              this.emit("motioncontrollerfound", mgr);
+            }
+            else {
+              mgr = new Gamepad(this.gamepadMgr, pad, 0, {
+                buttons: {
+                  axes: ["BUTTONS"]
+                },
+                dButtons: {
+                  axes: ["BUTTONS"],
+                  delta: true
+                },
+                strafe: {
+                  axes: ["LSX"],
+                  deadzone: 0.2
+                },
+                drive: {
+                  axes: ["LSY"],
+                  deadzone: 0.2
+                },
+                heading: {
+                  axes: ["RSX"],
+                  scale: -1,
+                  deadzone: 0.2,
+                  integrate: true
+                },
+                dHeading: {
+                  commands: ["heading"],
+                  delta: true
+                },
+                pitch: {
+                  axes: ["RSY"],
+                  scale: -1,
+                  deadzone: 0.2,
+                  integrate: true
+                },
+                zero: {
+                  buttons: [Gamepad.XBOX_ONE_BUTTONS.BACK],
+                  commandUp: this.emit.bind(this, "zero")
+                }
+              });
+              this.addInputManager(mgr);
+              this.mousePointer.addDevice(mgr, mgr);
+            }
+          }
+        });
+
+        this.gamepadMgr.addEventListener("gamepaddisconnected", this.removeInputManager.bind(this));
+      }
+
+      this.stage = hub();
+
+      this.head = new Pointer("GazePointer", 0xffff00, 0x0000ff, 0.8, [
+        this.VR
+      ], [
+        this.Mouse,
+        this.Touch,
+        this.Keyboard
+      ], this.options);
+
+      this.head.route(Pointer.EVENTS, this.consumeEvent.bind(this));
+
+      this.head.rotation.order = "YXZ";
+      this.head.useGaze = this.options.useGaze;
+      this.pointers.push(this.head);
+      this.options.scene.add(this.head);
+
+      this.mousePointer = new Pointer("MousePointer", 0xff0000, 0x00ff00, 1, [
+        this.Mouse
+      ], null, this.options);
+      this.mousePointer.route(Pointer.EVENTS, this.consumeEvent.bind(this));
+      this.mousePointer.unproject = new Matrix4();
+      this.pointers.push(this.mousePointer);
+      this.head.add(this.mousePointer);
+
+      this.VR.ready.then((displays) => displays.forEach((display, i) => {
         window.addEventListener("vrdisplayactivate", (evt) => {
           if(evt.display === display) {
             const exitVR = () => {
               window.removeEventListener("vrdisplaydeactivate", exitVR);
-              this.input.cancelVR();
+              this.cancelVR();
             };
             window.addEventListener("vrdisplaydeactivate", exitVR, false);
             this.goFullScreen(i);
@@ -1026,7 +1368,7 @@ export default class BrowserEnvironment extends EventDispatcher {
         side: BackSide
       });
       this.fader.visible = false;
-      this.input.head.add(this.fader);
+      this.head.add(this.fader);
 
       pliny.event({
         parent: "Primrose.BrowserEnvironment",
@@ -1091,18 +1433,18 @@ export default class BrowserEnvironment extends EventDispatcher {
 
       if(!this.options.disableKeyboard) {
         const keyDown =  (evt) => {
-            if (this.input.VR.isPresenting) {
-              if (evt.keyCode === Keys.ESCAPE && !this.input.VR.isPolyfilled) {
-                this.input.cancelVR();
+            if (this.VR.isPresenting) {
+              if (evt.keyCode === Keys.ESCAPE && !this.VR.isPolyfilled) {
+                this.cancelVR();
               }
             }
 
-            this.input.Keyboard.consumeEvent(evt);
+            this.Keyboard.consumeEvent(evt);
             this.consumeEvent(evt);
           },
 
           keyUp = (evt) => {
-            this.input.Keyboard.consumeEvent(evt);
+            this.Keyboard.consumeEvent(evt);
             this.consumeEvent(evt);
           },
 
@@ -1130,7 +1472,7 @@ export default class BrowserEnvironment extends EventDispatcher {
 
         const focusClipboard = (evt) => {
           if (this.lockMovement) {
-            var cmdName = this.input.Keyboard.operatingSystem.makeCommandName(evt, this.input.Keyboard.codePage);
+            var cmdName = this.Keyboard.operatingSystem.makeCommandName(evt, this.Keyboard.codePage);
             if (cmdName === "CUT" || cmdName === "COPY") {
               surrogate.style.display = "block";
               surrogate.focus();
@@ -1171,9 +1513,11 @@ export default class BrowserEnvironment extends EventDispatcher {
         window.addEventListener("keydown", focusClipboard, true);
       }
 
-      this.input.head.add(this.camera);
+      this.head.add(this.camera);
 
-      return this.input.ready;
+      return Promise.all(this.managers
+        .map((mgr) => mgr.ready)
+        .filter(identity));;
     });
 
     this._readyParts = [
@@ -1190,7 +1534,7 @@ export default class BrowserEnvironment extends EventDispatcher {
           this.renderer.shadowMap.type = PCFSoftShadowMap;
         }
 
-        this.input.VR.displays.forEach((display) => {
+        this.VR.displays.forEach((display) => {
           if(display.DOMElement !== undefined) {
             display.DOMElement = this.renderer.domElement;
           }
@@ -1200,7 +1544,7 @@ export default class BrowserEnvironment extends EventDispatcher {
           this.insertFullScreenButtons(this.options.fullScreenButtonContainer);
         }
 
-        this.input.VR.connect(0);
+        this.VR.connect(0);
 
         pliny.event({
           parent: "Primrose.BrowserEnvironment",
@@ -1269,7 +1613,7 @@ export default class BrowserEnvironment extends EventDispatcher {
           newFunction = function () {};
         }
         return (function () {
-          if (this.input && this.input.VR && this.input.VR.isPresenting) {
+          if (this.VR && this.VR.isPresenting) {
             newFunction();
           }
           else {
@@ -1316,7 +1660,7 @@ export default class BrowserEnvironment extends EventDispatcher {
     });
 
     if(!this.network){
-      this.network = new NetworkManager(this.input, this.audio, this.factories, this.options);
+      this.network = new NetworkManager(this, this.audio, this.factories, this.options);
       this.network.addEventListener("addavatar", this.addAvatar);
       this.network.addEventListener("removeavatar", this.removeAvatar);
     }
@@ -1343,11 +1687,11 @@ export default class BrowserEnvironment extends EventDispatcher {
       description: "The VRDisplays available on the system."
     });
 
-    return this.input.VR.displays;
+    return this.VR.displays;
   }
 
   get fieldOfView() {
-    var d = this.input.VR.currentDevice,
+    var d = this.VR.currentDevice,
       eyes = [
       d && d.getEyeParameters("left"),
       d && d.getEyeParameters("right")
@@ -1363,6 +1707,61 @@ export default class BrowserEnvironment extends EventDispatcher {
 
   get currentTime() {
     return this.audio.context.currentTime;
+  }
+
+  addInputManager(mgr) {
+    for (let i = this.managers.length - 1; i >= 0; --i) {
+      if (this.managers[i].name === mgr.name) {
+        this.managers.splice(i, 1);
+      }
+    }
+    this.managers.push(mgr);
+    this[mgr.name] = mgr;
+  }
+
+  removeInputManager(id) {
+    const mgr = this[id],
+      mgrIdx = this.managers.indexOf(mgr);
+    if (mgrIdx > -1) {
+      this.managers.splice(mgrIdx, 1);
+      delete this[id];
+    }
+    console.log("removed", mgr);
+  }
+
+  moveStage(position) {
+    DISPLACEMENT.copy(position)
+      .sub(this.head.position);
+
+    this.stage.position.add(DISPLACEMENT);
+  }
+
+  cancelVR() {
+    this.VR.cancel();
+    this.Mouse.commands.U.offset = 0;
+  }
+
+  resolvePicking(objects) {
+    for (let i = 0; i < this.pointers.length; ++i) {
+      this.pointers[i].resolvePicking(objects);
+    }
+  }
+
+  get hasMotionControllers() {
+    return !!(this.Vive_0 && this.Vive_0.enabled && this.Vive_0.inPhysicalUse ||
+      this.Vive_1 && this.Vive_1.enabled && this.Vive_1.inPhysicalUse);
+  }
+
+  get hasGamepad() {
+    return !!(this.Gamepad_0 && this.Gamepad_0.enabled && this.Gamepad_0.inPhysicalUse);
+  }
+
+  get hasMouse() {
+    return !this.hasTouch && !!(this.Mouse && this.Mouse.enabled && this.Mouse.inPhysicalUse);
+  }
+
+  get hasTouch() {
+    return !!(this.Touch && this.Touch.enabled && this.Touch.inPhysicalUse);
   }
 
   setAudioFromUser(userName, audioElement){

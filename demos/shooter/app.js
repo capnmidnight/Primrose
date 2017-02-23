@@ -97,7 +97,7 @@ env.addEventListener("update", function(){
   const dt = env.deltaTime;
   for(var i = 0; i < blocks.length; ++i){
     var block = blocks[i];
-    TEMP.copy(env.input.head.position)
+    TEMP.copy(env.head.position)
       .sub(block.position);
     var dist = TEMP.lengthSq();
     block.velocity.add(TEMP.normalize()

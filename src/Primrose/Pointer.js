@@ -358,10 +358,6 @@ export default class Pointer extends Entity {
       this.lastHit = null;
     }
   }
-
-  forward(child) {
-    child.watch(this, Pointer.EVENTS);
-  }
 }
 
 Pointer.EVENTS = ["pointerstart", "pointerend", "pointermove", "gazestart", "gazemove", "gazecomplete", "gazecancel", "exit", "enter", "select"];

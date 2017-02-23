@@ -4,7 +4,6 @@ pliny.namespace({
   description: "The Input namespace contains classes that handle user input, for use in navigating the 3D environment."
 });
 
-import FPSInput from "./FPSInput";
 import Gamepad from "./Gamepad";
 import GamepadManager from "./GamepadManager";
 import InputProcessor from "./InputProcessor";
@@ -17,7 +16,6 @@ import Touch from "./Touch";
 import VR from "./VR";
 
 export {
-  FPSInput,
   Gamepad,
   InputProcessor,
   Keyboard,
@@ -30,7 +28,6 @@ export {
 };
 
 export default {
-  FPSInput,
   Gamepad,
   InputProcessor,
   Keyboard,

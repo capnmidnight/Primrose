@@ -86,7 +86,7 @@ Board.prototype.update = function() {
       }
     }
   }
-  DIST.set(this.object.position.x, env.input.head.position.y, this.object.position.z);
+  DIST.set(this.object.position.x, env.head.position.y, this.object.position.z);
   this.object.position.lerp(DIST, 0.01);
 };
 
@@ -98,7 +98,7 @@ Board.prototype.highlight = function(i, color) {
 };
 
 Board.prototype.select = function(i, evt) {
-  if(!env.input.hasMouse || evt.pointer.name === "MousePointer") {
+  if(!env.hasMouse || evt.pointer.name === "MousePointer") {
     this.btnState[i] = !this.btnState[i];
     this.highlight(i);
   }
