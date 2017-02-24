@@ -20,7 +20,7 @@ export default class Touch extends InputProcessor {
       axes.push("DX" + i);
       axes.push("DY" + i);
     }
-    super("Touch", commands, axes, "touchstart");
+    super("Touch", commands, axes, "touchend");
 
     var setState = (stateChange, setAxis, event) => {
       this.inPhysicalUse = true;
