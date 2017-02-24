@@ -64,6 +64,7 @@ export default class Gamepad extends PoseInputProcessor {
   }
 
   checkDevice(pad) {
+    this.inPhysicalUse = true;
     var i, j, buttonMap = 0;
     this.currentDevice = pad;
     this.currentPose = this.hasOrientation && this.currentDevice.pose;

@@ -23,6 +23,7 @@ export default class Touch extends InputProcessor {
     super("Touch", commands, axes, "touchstart");
 
     var setState = (stateChange, setAxis, event) => {
+      this.inPhysicalUse = true;
       // We have to find the minimum identifier value because iOS uses a very
       // large number that changes after every gesture. Every other platform
       // just numbers them 0 through 9.

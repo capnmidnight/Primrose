@@ -14,6 +14,7 @@ export default class Mouse extends InputProcessor {
     this.timer = null;
 
     var setState = (stateChange, event) => {
+      this.inPhysicalUse = true;
       var state = event.buttons;
       for(let button = 0; button < Mouse.NUM_BUTTONS; ++button) {
         var isDown = state & 0x1 !== 0;

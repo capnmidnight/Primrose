@@ -43,6 +43,7 @@ export default class Keyboard extends InputProcessor {
   }
 
   consumeEvent(evt) {
+    this.inPhysicalUse = true;
     const isKeyDown = evt.type === "keydown";
     this.setButton(evt.keyCode, isKeyDown);
     if(isKeyDown) {

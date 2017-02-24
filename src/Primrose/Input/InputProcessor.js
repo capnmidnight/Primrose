@@ -140,13 +140,24 @@ export default class InputProcessor extends EventDispatcher {
     this.userActionHandlers = null;
     if(userActionEvent){
       window.addEventListener(userActionEvent, (evt) => {
-        console.log("userAction", evt.type);
         if(this.userActionHandlers) {
           for (let i = 0; i < this.userActionHandlers.length; ++i) {
             this.userActionHandlers[i](evt);
           }
         }
       });
+    }
+  }
+
+  get inPhysicalUse() {
+    return this._inPhysicalUse;
+  }
+
+  set inPhysicalUse(v) {
+    const wasInPhysicalUse = this._inPhysicalUse;
+    this._inPhysicalUse = v;
+    if(!wasInPhysicalUse && v){
+      this.emit("activate");
     }
   }
 
@@ -477,14 +488,12 @@ export default class InputProcessor extends EventDispatcher {
   setAxis(name, value) {
     var i = this.axisNames.indexOf(name);
     if (i > -1 && (this.inPhysicalUse || value !== 0)) {
-      this.inPhysicalUse = true;
       this.inputState.axes[i] = value;
     }
   }
 
   setButton(index, pressed) {
     if(this.inPhysicalUse || pressed){
-      this.inPhysicalUse = true;
       this.inputState.buttons[index] = pressed;
     }
   }

@@ -22,6 +22,7 @@ export default class Location extends InputProcessor {
   }
 
   setState(location) {
+    this.inPhysicalUse = true;
     for (var p in location.coords) {
       var k = p.toUpperCase();
       if (this.axisNames.indexOf(k) > -1) {
