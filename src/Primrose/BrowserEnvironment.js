@@ -1229,6 +1229,10 @@ export default class BrowserEnvironment extends EventDispatcher {
         }
       }));
 
+      // toggle back and forth between touch and mouse
+      this.Touch.addEventListener("activate", (evt) => this.Mouse.inPhysicalUse = false);
+      this.Mouse.addEventListener("activate", (evt) => this.Touch.inPhysicalUse = false);
+
       this.addInputManager(new VR(this.options));
 
       this.motionDevices.push(this.VR);
