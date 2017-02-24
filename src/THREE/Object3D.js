@@ -31,7 +31,7 @@ Object.defineProperty(Object3D.prototype, "pickable", {
   }
 });
 
-Object3D.prototype.latLon = function(lat, lon, r) {
+Object3D.prototype.latLng = function(lat, lon, r) {
   lat = -Math.PI * (lat || 0) / 180;
   lon = Math.PI * (lon || 0) / 180;
   r = r || 1.5;

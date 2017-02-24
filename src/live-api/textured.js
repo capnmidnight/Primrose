@@ -34,7 +34,7 @@ pliny.function({
     });\n\
     \n\
     env.sky.add(moon); // assuming we have a `Primrose.BrowserEnvironment` named `env`\n\
-    moon.latLon(-30, 30, 7);\n\
+    moon.latLng(-30, 30, 7);\n\
     moon.lookAt(env.scene.position);\n\
 \n\
 The result should appear as:\n\
