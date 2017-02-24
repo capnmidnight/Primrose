@@ -359,11 +359,7 @@ export default class BrowserEnvironment extends EventDispatcher {
           }
 
           this.head.showPointer = this.VR.hasOrientation && this.options.showHeadPointer;
-          this.mousePointer.showPointer = (this.hasMouse || this.hasGamepad) && !this.hasMotionControllers;
-
-          if(this.hasTouch) {
-            this.Touch.enabled = !this.hasMotionControllers;
-          }
+          this.mousePointer.showPointer = !this.hasMotionControllers;
 
           let heading = 0,
             pitch = 0,
@@ -381,7 +377,7 @@ export default class BrowserEnvironment extends EventDispatcher {
             }
           }
 
-          if(this.hasMouse) {
+          if(this.hasMouse || this.hasTouch) {
             let mouseHeading = null;
             if (this.VR.hasOrientation) {
               mouseHeading = this.mousePointer.rotation.y;
@@ -574,8 +570,7 @@ export default class BrowserEnvironment extends EventDispatcher {
           canvasHeight = Math.max(canvasHeight, p[i].viewport.height);
         }
 
-        this.Mouse.commands.U.scale = devicePixelRatio * 2 / canvasWidth;
-        this.Mouse.commands.V.scale = devicePixelRatio * 2 / canvasHeight;
+        this.mousePointer.setSize(canvasWidth, canvasHeight);
 
         canvasWidth = Math.floor(canvasWidth * resolutionScale);
         canvasHeight = Math.floor(canvasHeight * resolutionScale);
@@ -1170,6 +1165,8 @@ export default class BrowserEnvironment extends EventDispatcher {
       }
 
       this.addInputManager(new Touch(this.options.fullScreenElement, {
+        U: { axes: ["X0"], min: 0, max: 2, offset: 0 },
+        V: { axes: ["Y0"], min: 0, max: 2 },
         buttons: {
           axes: ["FINGERS"]
         },
@@ -1188,6 +1185,7 @@ export default class BrowserEnvironment extends EventDispatcher {
           max: Math.PI * 0.5
         }
       }));
+
 
       this.addInputManager(new Mouse(this.options.fullScreenElement, {
         U: { axes: ["X"], min: 0, max: 2, offset: 0 },
@@ -1340,17 +1338,18 @@ export default class BrowserEnvironment extends EventDispatcher {
         this.Mouse,
         this.Touch,
         this.Keyboard
-      ], this.options);
+      ], this.options)
+        .addTo(this.scene);
 
       this.head.route(Pointer.EVENTS, this.consumeEvent.bind(this));
 
       this.head.rotation.order = "YXZ";
       this.head.useGaze = this.options.useGaze;
       this.pointers.push(this.head);
-      this.options.scene.add(this.head);
 
       this.mousePointer = new Pointer("MousePointer", 0xff0000, 0x00ff00, 1, [
-        this.Mouse
+        this.Mouse,
+        this.Touch
       ], null, this.options);
       this.mousePointer.route(Pointer.EVENTS, this.consumeEvent.bind(this));
       this.mousePointer.unproject = new Matrix4();
@@ -1748,7 +1747,7 @@ export default class BrowserEnvironment extends EventDispatcher {
 
   cancelVR() {
     this.VR.cancel();
-    this.Mouse.commands.U.offset = 0;
+    this.Touch.commands.U.offset = this.Mouse.commands.U.offset = 0;
   }
 
   get hasMotionControllers() {
@@ -1761,7 +1760,7 @@ export default class BrowserEnvironment extends EventDispatcher {
   }
 
   get hasMouse() {
-    return !this.hasTouch && !!(this.Mouse && this.Mouse.enabled && this.Mouse.inPhysicalUse);
+    return !!(this.Mouse && this.Mouse.enabled && this.Mouse.inPhysicalUse);
   }
 
   get hasTouch() {
