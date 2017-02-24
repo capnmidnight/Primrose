@@ -61,6 +61,7 @@ export default class Pointer extends Entity {
   constructor(pointerName, color, highlight, s, devices, triggerDevices, options) {
     super(pointerName, options);
 
+    this.isPointer = true;
     this.devices = devices.filter(identity);
     this.triggerDevices = triggerDevices && triggerDevices.filter(identity) || this.devices.slice();
     this.gazeTimeout = (this.options.gazeLength || 1.5) * 1000;
@@ -326,11 +327,10 @@ export default class Pointer extends Entity {
 
         const hit = hits[i],
           origObj = hit.object;
-
         let obj = origObj;
 
         // Try to find a Primrose Entity
-        while(obj && !obj.isEntity) {
+        while(obj && (!obj.isEntity || obj.isPointer)) {
           obj = obj.parent;
         }
 
