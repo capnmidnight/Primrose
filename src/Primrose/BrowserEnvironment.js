@@ -359,6 +359,7 @@ export default class BrowserEnvironment extends EventDispatcher {
           }
 
           this.head.showPointer = this.VR.hasOrientation && this.options.showHeadPointer;
+          this.mousePointer.visible = this.VR.isPresenting;
           this.mousePointer.showPointer = !this.hasMotionControllers;
 
           let heading = 0,
