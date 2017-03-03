@@ -1,9 +1,10 @@
-import frameDataFromPose from "./frameDataFromPose";
 import CardboardVRDisplay from "./CardboardVRDisplay";
+import MixedRealityVRDisplay from "./MixedRealityVRDisplay";
 import MockVRDisplay from "./MockVRDisplay";
+import NativeVRDisplay from "./NativeVRDisplay";
 import StandardMonitorVRDisplay from "./StandardMonitorVRDisplay";
-import VRDisplay from "./VRDisplay";
-import VRFrameData from "./VRFrameData";
+import PolyfilledVRDisplay from "./PolyfilledVRDisplay";
+import PolyfilledVRFrameData from "./PolyfilledVRFrameData";
 
 import isMobile from "../../flags/isMobile";
 import isGearVR from "../../flags/isGearVR";
@@ -19,28 +20,6 @@ const hasNativeWebVR = "getVRDisplays" in navigator,
 
 let polyFillDevicesPopulated = false,
   standardMonitorPopulated = false;
-
-function upgrade1_0_to_1_1(){
-  // Put a shim in place to update the API to 1.1 if needed.
-  if ("VRDisplay" in window && !("VRFrameData" in window)) {
-    // Provide the VRFrameData object.
-    window.VRFrameData = VRFrameData;
-
-    // A lot of Chrome builds don't have depthNear and depthFar, even
-    // though they're in the WebVR 1.0 spec. Patch them in if they're not present.
-    if(!("depthNear" in window.VRDisplay.prototype)) {
-      window.VRDisplay.prototype.depthNear = 0.01;
-    }
-
-    if(!("depthFar" in window.VRDisplay.prototype)) {
-      window.VRDisplay.prototype.depthFar = 10000.0;
-    }
-
-    window.VRDisplay.prototype.getFrameData = function(frameData) {
-      return frameDataFromPose(frameData, this.getPose(), this);
-    };
-  }
-}
 
 function getPolyfillDisplays(options) {
   if (!polyFillDevicesPopulated) {
@@ -66,6 +45,8 @@ function fireVRDisplayPresentChange() {
   window.dispatchEvent(event);
 }
 
+const isExperimentalChromium51 = navigator.userAgent.indexOf("Chrome/51.0.2664.0") > -1;
+
 function installPolyfill(options){
   let oldGetVRDisplays = null;
   if(hasNativeWebVR) {
@@ -79,7 +60,7 @@ function installPolyfill(options){
   navigator.getVRDisplays = function () {
     return oldGetVRDisplays.call(navigator)
       .then((displays) => {
-        if(displays.length === 0 || navigator.userAgent === "Mozilla/5.0 (Linux; Android 6.0.1; SM-G930V Build/MMB29M) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2664.0 Mobile Safari/537.36") {
+        if(displays.length === 0 || isExperimentalChromium51) {
           options.overrideOrientation = displays[0];
           return getPolyfillDisplays(options);
         }
@@ -89,9 +70,6 @@ function installPolyfill(options){
       });
     };
 
-  // Provide the VRDisplay object.
-  window.VRDisplay = window.VRDisplay || VRDisplay;
-
   // Provide navigator.vrEnabled.
   Object.defineProperty(navigator, "vrEnabled", {
     get: function () {
@@ -99,63 +77,58 @@ function installPolyfill(options){
         (FullScreen.available || isiOS); // just fake it for iOS
     }
   });
+
+  // Provide the VRDisplay object.
+  window.VRDisplay = window.VRDisplay || PolyfilledVRDisplay;
+  window.VRFrameData = window.VRFrameData || PolyfilledVRFrameData;
+
+  // A lot of Chrome builds don't have depthNear and depthFar, even
+  // though they're in the WebVR 1.0 spec. Patch them in if they're not present.
+  if(!("depthNear" in window.VRDisplay.prototype)) {
+    window.VRDisplay.prototype.depthNear = 0.01;
+  }
+
+  if(!("depthFar" in window.VRDisplay.prototype)) {
+    window.VRDisplay.prototype.depthFar = 10000.0;
+  }
 }
 
-function installStandardMonitor(options) {
+function installDisplays(options) {
   if(!standardMonitorPopulated && !isGearVR){
     var oldGetVRDisplays = navigator.getVRDisplays;
     navigator.getVRDisplays = function () {
       return oldGetVRDisplays.call(navigator)
         .then((displays) => {
-          var created = false;
-          for(var i = 0; i < displays.length && !created; ++i){
+          var stdDeviceExists = false,
+            mockDeviceExists = false,
+            data = options && options.replayData;
+          for(var i = 0; i < displays.length; ++i){
             var dsp = displays[i];
-            created = dsp instanceof StandardMonitorVRDisplay;
+            stdDeviceExists = stdDeviceExists || dsp instanceof StandardMonitorVRDisplay;
+            mockDeviceExists = mockDeviceExists || dsp instanceof MockVRDisplay;
           }
-          if (!created) {
+
+          if (!stdDeviceExists) {
             if(options && options.defaultFOV) {
               StandardMonitorVRDisplay.DEFAULT_FOV = options.defaultFOV;
             }
-            displays.unshift(new StandardMonitorVRDisplay(displays[0]));
+            const nativeDisplay = displays[0];
+            if(nativeDisplay) {
+              displays[0] = new NativeVRDisplay(nativeDisplay);
+              displays.unshift(new MixedRealityVRDisplay(nativeDisplay));
+            }
+            displays.unshift(new StandardMonitorVRDisplay(nativeDisplay));
           }
+
+          if(data && !mockDeviceExists){
+            displays.push(new MockVRDisplay(data));
+          }
+
           return displays;
         });
     };
 
     standardMonitorPopulated = true;
-  }
-}
-
-function installMockDisplay(options) {
-  var data = options && options.replayData;
-  if(data){
-    var oldGetVRDisplays = navigator.getVRDisplays;
-    navigator.getVRDisplays = () => oldGetVRDisplays.call(navigator)
-      .then((displays) => {
-        const mockDeviceExists = displays
-          .map((d) => d instanceof MockVRDisplay)
-          .reduce((a, b) => a || b, false);
-
-        if (mockDeviceExists) {
-          return displays;
-        }
-        else {
-          var done = (obj) => {
-            displays.push(new MockVRDisplay(obj));
-            resolve(displays);
-          };
-
-          if (typeof data === "object") {
-            return Promise.resolve(data);
-          }
-          else if (/\.json$/.test(data)) {
-            return getObject(data);
-          }
-          else {
-            return Promise.resolve(JSON.parse(data));
-          }
-        }
-      });
   }
 }
 
@@ -166,7 +139,5 @@ export default function install(options) {
     }, options);
 
   installPolyfill(options);
-  installStandardMonitor(options);
-  installMockDisplay(options);
-  upgrade1_0_to_1_1();
+  installDisplays(options);
 };

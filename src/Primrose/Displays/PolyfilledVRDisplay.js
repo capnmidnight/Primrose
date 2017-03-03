@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
+import BaseVRDisplay from "./BaseVRDisplay";
 import frameDataFromPose from "./frameDataFromPose";
-import VRFrameData from "./VRFrameData";
-import isiOS from "../../flags/isiOS";
+import PolyfilledVRFrameData from "./PolyfilledVRFrameData";
 import isMobile from "../../flags/isMobile";
 import immutable from "../../util/immutable";
 import mutable from "../../util/mutable";
@@ -30,9 +30,20 @@ const defaultLeftBounds = [0, 0, 0.5, 1],
 let nextDisplayId = 1000,
   hasShowDeprecationWarning = false;
 
+function defaultPose() {
+  return {
+    position: [0, 0, 0],
+    orientation: [0, 0, 0, 1],
+    linearVelocity: null,
+    linearAcceleration: null,
+    angularVelocity: null,
+    angularAcceleration: null
+  };
+}
 
-export default class VRDisplay {
+export default class PolyfilledVRDisplay extends BaseVRDisplay {
   constructor(name) {
+    super(PolyfilledVRFrameData);
     this._currentLayers = [];
 
     Object.defineProperties(this, {
@@ -55,20 +66,16 @@ export default class VRDisplay {
       isPolyfilled: immutable(true)
     });
 
-    this._frameData = null;
     this._poseData = null;
   }
 
   getFrameData(frameData) {
-    if(!this._frameData) {
-      this._frameData = frameDataFromPose(frameData, this.getPose(), this);
-    }
-    return this._frameData;
+    frameDataFromPose(frameData, this.getPose(), this);
   }
 
   getPose() {
     if(!this._poseData){
-      this._poseData = this._getPose();
+      this._poseData = this._getPose() || defaultPose();
     }
     return this._poseData;
   }
@@ -99,7 +106,6 @@ export default class VRDisplay {
   }
 
   submitFrame(pose) {
-    this._frameData = null;
     this._poseData = null;
   }
 

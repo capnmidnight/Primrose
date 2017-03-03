@@ -14,7 +14,7 @@
  */
 
 import FusionPoseSensor from "./SensorFusion/FusionPoseSensor";
-import VRDisplay from "./VRDisplay";
+import PolyfilledVRDisplay from "./PolyfilledVRDisplay";
 import isiOS from "../../flags/isiOS";
 import isLandscape from "../../flags/isLandscape";
 
@@ -25,6 +25,9 @@ let Eye = {
   ipd = 0.03,
   neckLength = 0,
   neckDepth = 0;
+
+export default class CardboardVRDisplay extends PolyfilledVRDisplay {
+
   static get IPD() {
     return ipd;
   }
@@ -49,7 +52,6 @@ let Eye = {
     neckDepth = v;
   }
 
-export default class CardboardVRDisplay extends VRDisplay {
   constructor(options) {
     super("Google Cardboard");
     this.DOMElement = null;

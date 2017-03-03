@@ -164,12 +164,14 @@ export default function frameDataFromPose(frameData, pose, vrDisplay) {
   frameData.pose = pose;
   frameData.timestamp = pose.timestamp;
 
-  updateEyeMatrices(
-      frameData.leftProjectionMatrix, frameData.leftViewMatrix,
-      pose, vrDisplay.getEyeParameters("left"), vrDisplay);
-  updateEyeMatrices(
-      frameData.rightProjectionMatrix, frameData.rightViewMatrix,
-      pose, vrDisplay.getEyeParameters("right"), vrDisplay);
+  if(vrDisplay) {
+    updateEyeMatrices(
+        frameData.leftProjectionMatrix, frameData.leftViewMatrix,
+        pose, vrDisplay.getEyeParameters("left"), vrDisplay);
+    updateEyeMatrices(
+        frameData.rightProjectionMatrix, frameData.rightViewMatrix,
+        pose, vrDisplay.getEyeParameters("right"), vrDisplay);
+  }
 
   return true;
 };

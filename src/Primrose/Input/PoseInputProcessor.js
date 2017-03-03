@@ -22,7 +22,6 @@ export default class PoseInputProcessor extends InputProcessor {
 
     this.currentDevice = null;
     this.lastPose = null;
-    this.currentPose = null;
     this.posePosition = new Vector3();
     this.poseQuaternion = new Quaternion();
     this.position = new Vector3();
@@ -30,19 +29,15 @@ export default class PoseInputProcessor extends InputProcessor {
     this.matrix = new Matrix4();
   }
 
-  get hasPose() {
-    return !!this.currentPose;
-  }
-
   update(dt) {
     super.update(dt);
 
     if (this.currentDevice) {
-      var pose = this.currentPose || this.lastPose || DEFAULT_POSE;
+      var pose = this.currentDevice.frameData.pose || this.lastPose || DEFAULT_POSE;
       this.lastPose = pose;
       this.inPhysicalUse = this.hasOrientation || this.inPhysicalUse;
-      var orient = this.currentPose && this.currentPose.orientation,
-        pos = this.currentPose && this.currentPose.position;
+      var orient = pose && pose.orientation,
+        pos = pose && pose.position;
       if (orient) {
         this.poseQuaternion.fromArray(orient);
         if(isMobile && isIE){

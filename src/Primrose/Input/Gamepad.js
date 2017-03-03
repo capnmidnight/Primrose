@@ -17,7 +17,10 @@ function playPattern(devices, pattern, pause){
   }
 }
 
-import PoseInputProcessor from "./PoseInputProcessor"
+import PolyfilledVRFrameData from "../Displays/PolyfilledVRFrameData";
+import frameDataFromPose from "../Displays/frameDataFromPose";
+import PoseInputProcessor from "./PoseInputProcessor";
+
 export default class Gamepad extends PoseInputProcessor {
   static ID(pad) {
     var id = pad.id;
@@ -53,6 +56,7 @@ export default class Gamepad extends PoseInputProcessor {
 
     this.currentDevice = pad;
     this.axisOffset = axisOffset;
+    this.frameData = new PolyfilledVRFrameData();
   }
 
   get hasOrientation() {
@@ -63,11 +67,22 @@ export default class Gamepad extends PoseInputProcessor {
     return this.currentPose;
   }
 
+  getFrameData(frameData) {
+    frameDataFromPose(frameData, this.getPose());
+  }
+
+  updateFrameData() {
+    this.getFrameData(this.frameData);
+  }
+
+
   checkDevice(pad) {
     this.inPhysicalUse = true;
     var i, j, buttonMap = 0;
     this.currentDevice = pad;
-    this.currentPose = this.hasOrientation && this.currentDevice.pose;
+    if(this.hasOrientation) {
+      this.updateFrameData();
+    }
     for (i = 0, j = pad.buttons.length; i < pad.buttons.length; ++i, ++j) {
       var btn = pad.buttons[i];
       this.setButton(i, btn.pressed);

@@ -1,20 +1,14 @@
 import isMobile from "../../flags/isMobile";
-import VRDisplay from "./VRDisplay";
+import PolyfilledVRDisplay from "./PolyfilledVRDisplay";
+import PolyfilledVRFrameData from "./PolyfilledVRFrameData";
 
 let defaultFieldOfView = 100;
 
-function defaultPose() {
-  return {
-    position: [0, 0, 0],
-    orientation: [0, 0, 0, 1],
-    linearVelocity: null,
-    linearAcceleration: null,
-    angularVelocity: null,
-    angularAcceleration: null
-  };
+function calcFoV(aFoV, aDim, bDim){
+  return 180 * Math.atan(Math.tan(aFoV * Math.PI / 180) * aDim / bDim) / Math.PI;
 }
 
-export default class StandardMonitorVRDisplay extends VRDisplay {
+export default class StandardMonitorVRDisplay extends PolyfilledVRDisplay {
 
   static get DEFAULT_FOV () {
     return defaultFieldOfView;
@@ -24,24 +18,19 @@ export default class StandardMonitorVRDisplay extends VRDisplay {
     defaultFieldOfView = v;
   }
 
-  constructor(display) {
-    super("Full Screen");
+  constructor(display, name) {
+    super(name || "Full Screen");
+    this.isStandardMonitorVRDisplay = true;
     this._display = display;
   }
 
-  submitFrame(pose) {
-    if(this._display && this._display.isPolyfilled) {
-      this._display.submitFrame(pose);
-    }
+  submitFrame() {
   }
 
-  getPose() {
+  _getPose() {
     var display = isMobile && this._display;
     if(display){
       return display.getPose();
-    }
-    else{
-      return defaultPose();
     }
   }
 
@@ -82,8 +71,4 @@ export default class StandardMonitorVRDisplay extends VRDisplay {
       };
     }
   }
-}
-
-function calcFoV(aFoV, aDim, bDim){
-  return 180 * Math.atan(Math.tan(aFoV * Math.PI / 180) * aDim / bDim) / Math.PI;
 }
