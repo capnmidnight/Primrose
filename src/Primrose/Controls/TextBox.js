@@ -14,10 +14,6 @@ pliny.class({
     }]
 });
 
-var SCROLL_SCALE = isFirefox ? 3 : 100,
-  COUNTER = 0,
-  OFFSET = 0;
-
 import Surface from "./Surface";
 import Cursor from "../Text/Cursor";
 import Point from "../Text/Point";
@@ -33,6 +29,10 @@ import isIE from "../../flags/isIE";
 import isOpera from "../../flags/isOpera";
 import isSafari from "../../flags/isSafari";
 import isMobile from "../../flags/isMobile";
+
+var SCROLL_SCALE = isFirefox ? 3 : 100,
+  COUNTER = 0,
+  OFFSET = 0;
 
 export default class TextBox extends Surface {
 

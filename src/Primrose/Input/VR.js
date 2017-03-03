@@ -18,6 +18,7 @@ const DEFAULT_POSE = {
 import { Vector3, Matrix4 } from "three";
 import PoseInputProcessor from "./PoseInputProcessor";
 import isChrome from "../../flags/isChrome";
+import isFirefox from "../../flags/isFirefox";
 import isiOS from "../../flags/isiOS";
 import isMobile from "../../flags/isMobile";
 import PointerLock from "../../util/PointerLock";
