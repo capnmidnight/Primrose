@@ -191,16 +191,11 @@ export default class VR extends PoseInputProcessor {
   }
 
   startAnimation(callback){
-    if(this.currentDevice) {
-      this.lastLastTimerDevice = this.lastTimerDevice;
-      this.lastTimerDevice = this.timerDevice;
-      this.timerDevice = this.currentDevice;
-      this.timer = this.currentDevice.requestAnimationFrame(callback);
-      return this.timer;
-    }
+    this.timerDevice = this.currentDevice || window;
+    this.timer = this.timerDevice.requestAnimationFrame(callback);
   }
 
-  cancelAnimation() {
+  stopAnimation(id) {
     if(this.timerDevice && this.timer) {
       this.timerDevice.cancelAnimationFrame(this.timer);
       this.timer = null;

@@ -508,7 +508,7 @@ export default class BrowserEnvironment extends EventDispatcher {
       lt = t;
       update(dt);
       render();
-      RAF(animate);
+      this.VR.startAnimation(animate);
     };
 
     var render = () => {
@@ -564,9 +564,6 @@ export default class BrowserEnvironment extends EventDispatcher {
 
         this.renderer.domElement.width = canvasWidth;
         this.renderer.domElement.height = canvasHeight;
-        if (!this.timer) {
-          render();
-        }
       }
     };
 
@@ -979,15 +976,6 @@ export default class BrowserEnvironment extends EventDispatcher {
         this.camera.quaternion.copy(sceneGraph.Camera.quaternion);
       }
       return sceneGraph;
-    };
-
-    var currentTimerObject = null;
-    this.timer = 0;
-    var RAF = (callback) => {
-      currentTimerObject = this.VR.currentDevice || window;
-      if (this.timer !== null) {
-        this.timer = currentTimerObject.requestAnimationFrame(callback);
-      }
     };
 
 
@@ -1561,7 +1549,7 @@ export default class BrowserEnvironment extends EventDispatcher {
       this.ready.then(() => {
         this.audio.start();
         lt = performance.now() * MILLISECONDS_TO_SECONDS;
-        RAF(animate);
+        this.VR.startAnimation(animate);
       });
     };
 
@@ -1572,11 +1560,8 @@ export default class BrowserEnvironment extends EventDispatcher {
       description: "Pause animation."
     });
     this.stop = () => {
-      if (currentTimerObject) {
-        currentTimerObject.cancelAnimationFrame(this.timer);
+      this.VR.stopAnimation();
       this.audio.stop();
-        this.timer = null;
-      }
     };
 
     pliny.property({
