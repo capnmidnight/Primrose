@@ -20,7 +20,7 @@ Vector4.prototype.toString =
     return "<" + parts.join(", ") + ">";
   };
 
-const cache = {};
+const debugOutputCache = {};
 Euler.prototype.debug =
 Quaternion.prototype.debug =
 Vector2.prototype.debug =
@@ -30,8 +30,8 @@ Matrix3.prototype.debug =
 Matrix4.prototype.debug =
   function(label, digits) {
     var val = this.toString(digits);
-    if (val !== cache[label]) {
-      cache[label] = val;
+    if (val !== debugOutputCache[label]) {
+      debugOutputCache[label] = val;
       console.log(label + "\n" + val);
     }
     return this;

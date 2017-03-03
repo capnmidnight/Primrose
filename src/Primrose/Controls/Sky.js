@@ -1,4 +1,5 @@
 import quad from "../../live-api/quad";
+import box from "../../live-api/box";
 import isMobile from "../../flags/isMobile";
 import Entity from "./Entity";
 import Image from "./Image";
