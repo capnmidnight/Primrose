@@ -18,10 +18,36 @@ import VRDisplay from "./VRDisplay";
 import isiOS from "../../flags/isiOS";
 import isLandscape from "../../flags/isLandscape";
 
-var Eye = {
+let Eye = {
   LEFT: "left",
   RIGHT: "right"
-};
+},
+  ipd = 0.03,
+  neckLength = 0,
+  neckDepth = 0;
+  static get IPD() {
+    return ipd;
+  }
+
+  static set IPD(v) {
+    ipd = v;
+  }
+
+  static get NECK_LENGTH() {
+    return neckLength;
+  }
+
+  static set NECK_LENGTH(v) {
+    neckLength = v;
+  }
+
+  static get NECK_DEPTH() {
+    return neckDepth;
+  }
+
+  static set NECK_DEPTH(v) {
+    neckDepth = v;
+  }
 
 export default class CardboardVRDisplay extends VRDisplay {
   constructor(options) {
@@ -41,7 +67,7 @@ export default class CardboardVRDisplay extends VRDisplay {
   }
 
   getEyeParameters(whichEye) {
-    var offset = [0.03, 0.0, 0.0];
+    var offset = [ipd, neckLength, neckDepth];
 
     if (whichEye == Eye.LEFT) {
       offset[0] *= -1.0;

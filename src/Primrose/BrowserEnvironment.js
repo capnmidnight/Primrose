@@ -526,20 +526,6 @@ export default class BrowserEnvironment extends EventDispatcher {
         var st = trans[i],
           v = st.viewport;
 
-        // if we're rendering with an eye offset
-        if(st.translation.x !== 0) {
-          // ... and we have non-standard offset values to use:
-          if(this.options.nonstandardIPD !== null){
-            st.translation.x *= this.options.nonstandardIPD / Math.abs(st.translation.x);
-          }
-          if(this.options.nonstandardNeckLength !== null){
-            st.translation.y = this.options.nonstandardNeckLength;
-          }
-          if(this.options.nonstandardNeckDepth !== null){
-            st.translation.z = this.options.nonstandardNeckDepth;
-          }
-        }
-
         this.renderer.setViewport(
           v.left * resolutionScale,
           v.top * resolutionScale,
