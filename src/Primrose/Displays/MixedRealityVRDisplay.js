@@ -12,10 +12,6 @@ export default class MixedRealityVRDisplay extends StandardMonitorVRDisplay {
     });
   }
 
-  set motionDevice(device) {
-    this._motionDevice = device;
-  }
-
   _getPose() {
     return this.motionDevice.getPose();
   }
