@@ -1781,6 +1781,8 @@ export default class BrowserEnvironment extends EventDispatcher {
       return btn;
     };
 
+    let mixedReality = null;
+
     const buttons = this.displays
       // We skip the Standard Monitor and Magic Window on iOS because we can't go full screen on those systems.
       .map((display, i) => {
@@ -1789,10 +1791,26 @@ export default class BrowserEnvironment extends EventDispatcher {
             btn = newButton(display.displayName, display.displayName, enterVR),
             isStereo = VR.isStereoDisplay(display);
           btn.className = isStereo ? "stereo" : "mono";
+          if(display.isMixedRealityVRDisplay){
+
+            mixedReality = {
+              display,
+              btn
+            };
+
+            btn.style.display = "none";
+          }
           return btn;
         }
       })
       .filter(identity);
+
+    if(mixedReality) {
+      this.addEventListener("motioncontrollerfound", (mgr) => {
+        mixedReality.display.motionDevice = mgr;
+        mixedReality.btn.style.display = "";
+      });
+    }
 
     if(!/(www\.)?primrosevr.com/.test(document.location.hostname) && !this.options.disableAdvertising) {
       buttons.push(newButton("Primrose", "✿", () => open("https://www.primrosevr.com", "_blank")));
