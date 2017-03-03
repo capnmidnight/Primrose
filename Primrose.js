@@ -8,7 +8,7 @@ var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
 
 var isChrome = !!window.chrome && !isOpera;
 
-var isFirefox$1 = typeof window.InstallTrigger !== "undefined";
+var isFirefox = typeof window.InstallTrigger !== "undefined";
 
 var isGearVR = navigator.userAgent.indexOf("Mobile VR") > -1;
 
@@ -39,7 +39,7 @@ var isWindows = /Windows/.test(navigator.userAgent || "");
 
 var index$1 = {
   isChrome: isChrome,
-  isFirefox: isFirefox$1,
+  isFirefox: isFirefox,
   isGearVR: isGearVR,
   isIE: isIE,
   isInIFrame: isInIFrame,
@@ -55,7 +55,7 @@ var index$1 = {
 
 var flags = Object.freeze({
 	isChrome: isChrome,
-	isFirefox: isFirefox$1,
+	isFirefox: isFirefox,
 	isGearVR: isGearVR,
 	isIE: isIE,
 	isInIFrame: isInIFrame,
@@ -430,7 +430,7 @@ function colored(geometry, color, options) {
   return obj;
 }
 
-function box$1(width, height, length, t, u, v) {
+function box(width, height, length, t, u, v) {
   if (height === undefined) {
     height = width;
   }
@@ -454,7 +454,7 @@ function brick(txt, width, height, length, options) {
     opacity: 1
   }, options);
   var m = typeof txt === "number" ? colored : textured,
-      obj = m(box$1(width, height, length), txt, options);
+      obj = m(box(width, height, length), txt, options);
   return obj;
 }
 
@@ -956,7 +956,7 @@ function v4(x, y, z, w) {
 
 var index$2 = {
   axis: axis,
-  box: box$1,
+  box: box,
   brick: brick,
   camera: camera,
   circle: circle,
@@ -981,7 +981,7 @@ var index$2 = {
 
 var liveAPI = Object.freeze({
 	axis: axis,
-	box: box$1,
+	box: box,
 	brick: brick,
 	camera: camera,
 	circle: circle,
@@ -1208,7 +1208,7 @@ function getSetting(settingName, defValue) {
   return defValue;
 }
 
-function immutable(value) {
+function immutable$1(value) {
   var getter = typeof value === "function" ? value : function () {
     return value;
   };
@@ -1349,9 +1349,9 @@ function standardLockBehavior(elem) {
 }
 
 function standardFullScreenBehavior(elem) {
-  return FullScreen.request(elem).catch(function (exp) {
+  return FullScreen.request(elem).then(standardLockBehavior).catch(function (exp) {
     return console.warn("FullScreen failed", exp);
-  }).then(standardLockBehavior);
+  });
 }
 
 var Workerize = function (_EventDispatcher) {
@@ -1465,7 +1465,7 @@ var index$3 = {
   FullScreen: FullScreen,
   getSetting: getSetting,
   identity: identity,
-  immutable: immutable,
+  immutable: immutable$1,
   isTimestampDeltaValid: isTimestampDeltaValid,
   mutable: mutable,
   Orientation: Orientation,
@@ -1486,7 +1486,7 @@ var util = Object.freeze({
 	FullScreen: FullScreen,
 	getSetting: getSetting,
 	identity: identity,
-	immutable: immutable,
+	immutable: immutable$1,
 	isTimestampDeltaValid: isTimestampDeltaValid,
 	mutable: mutable,
 	Orientation: Orientation,
@@ -2219,11 +2219,11 @@ three.Object3D.prototype.appendChild = function (child) {
 
 Object.defineProperty(three.Object3D.prototype, "pickable", {
   get: function get() {
-    return this._listeners && (this._listeners.enter && this._listeners.enter.length > 0 || this._listeners.exit && this._listeners.exit.length > 0 || this._listeners.select && this._listeners.select.length > 0 || this._listeners.pointerstart && this._listeners.pointerstart.length > 0 || this._listeners.pointerend && this._listeners.pointerend.length > 0 || this._listeners.pointermove && this._listeners.pointermove.length > 0 || this._listeners.gazestart && this._listeners.gazestart.length > 0 || this._listeners.gazecancel && this._listeners.gazecancel.length > 0 || this._listeners.gazemove && this._listeners.gazemove.length > 0 || this._listeners.gazecomplete && this._listeners.gazecomplete.length > 0);
+    return this._listeners && (this._listeners.enter && this._listeners.enter.length > 0 || this._listeners.exit && this._listeners.exit.length > 0 || this._listeners.select && this._listeners.select.length > 0 || this._listeners.useraction && this._listeners.useraction.length > 0 || this._listeners.pointerstart && this._listeners.pointerstart.length > 0 || this._listeners.pointerend && this._listeners.pointerend.length > 0 || this._listeners.pointermove && this._listeners.pointermove.length > 0 || this._listeners.gazestart && this._listeners.gazestart.length > 0 || this._listeners.gazecancel && this._listeners.gazecancel.length > 0 || this._listeners.gazemove && this._listeners.gazemove.length > 0 || this._listeners.gazecomplete && this._listeners.gazecomplete.length > 0);
   }
 });
 
-three.Object3D.prototype.latLon = function (lat, lon, r) {
+three.Object3D.prototype.latLng = function (lat, lon, r) {
   lat = -Math.PI * (lat || 0) / 180;
   lon = Math.PI * (lon || 0) / 180;
   r = r || 1.5;
@@ -2977,11 +2977,11 @@ three.Euler.prototype.toString = three.Quaternion.prototype.toString = three.Vec
   return "<" + parts.join(", ") + ">";
 };
 
-var cache$1 = {};
+var debugOutputCache = {};
 three.Euler.prototype.debug = three.Quaternion.prototype.debug = three.Vector2.prototype.debug = three.Vector3.prototype.debug = three.Vector4.prototype.debug = three.Matrix3.prototype.debug = three.Matrix4.prototype.debug = function (label, digits) {
   var val = this.toString(digits);
-  if (val !== cache$1[label]) {
-    cache$1[label] = val;
+  if (val !== debugOutputCache[label]) {
+    debugOutputCache[label] = val;
     console.log(label + "\n" + val);
   }
   return this;
@@ -3229,8 +3229,8 @@ var promise = createCommonjsModule(function (module) {
 })(commonjsGlobal);
 });
 
-var DEG2RAD = Math.PI / 180;
-var RAD2DEG = 180 / Math.PI;
+var DEG2RAD = three.Math.DEG2RAD;
+var RAD2DEG = three.Math.RAD2DEG;
 
 var Angle = function () {
   function Angle(v) {
@@ -3405,51 +3405,45 @@ var Audio3D = function () {
     this.ready = new Promise(function (resolve, reject) {
       try {
         if (Audio3D.isAvailable) {
-          (function () {
-            var finishSetup = function finishSetup() {
+          var finishSetup = function finishSetup() {
+            try {
+              _this.sampleRate = _this.context.sampleRate;
+              _this.mainVolume = _this.context.createGain();
+              _this.start();
+              resolve();
+            } catch (exp) {
+              reject(exp);
+            }
+          };
+
+          if (!isiOS) {
+            _this.context = new AudioContext();
+            finishSetup();
+          } else {
+            var unlock = function unlock() {
               try {
-                _this.sampleRate = _this.context.sampleRate;
-                _this.mainVolume = _this.context.createGain();
-                _this.start();
-                resolve();
+                _this.context = _this.context || new AudioContext();
+                var source = _this.context.createBufferSource();
+                source.buffer = _this.createRawSound([[0]]);
+                source.connect(_this.context.destination);
+                source.start();
+                setTimeout(function () {
+                  if (source.playbackState === source.PLAYING_STATE || source.playbackState === source.FINISHED_STATE) {
+                    window.removeEventListener("mouseup", unlock);
+                    window.removeEventListener("touchend", unlock);
+                    window.removeEventListener("keyup", unlock);
+                    finishSetup();
+                  }
+                }, 0);
               } catch (exp) {
                 reject(exp);
               }
             };
 
-            if (!isiOS) {
-              _this.context = new AudioContext();
-              finishSetup();
-            } else {
-              (function () {
-                var unlock = function unlock() {
-                  try {
-                    (function () {
-                      _this.context = _this.context || new AudioContext();
-                      var source = _this.context.createBufferSource();
-                      source.buffer = _this.createRawSound([[0]]);
-                      source.connect(_this.context.destination);
-                      source.start();
-                      setTimeout(function () {
-                        if (source.playbackState === source.PLAYING_STATE || source.playbackState === source.FINISHED_STATE) {
-                          window.removeEventListener("mouseup", unlock);
-                          window.removeEventListener("touchend", unlock);
-                          window.removeEventListener("keyup", unlock);
-                          finishSetup();
-                        }
-                      }, 0);
-                    })();
-                  } catch (exp) {
-                    reject(exp);
-                  }
-                };
-
-                window.addEventListener("mouseup", unlock, false);
-                window.addEventListener("touchend", unlock, false);
-                window.addEventListener("keyup", unlock, false);
-              })();
-            }
-          })();
+            window.addEventListener("mouseup", unlock, false);
+            window.addEventListener("touchend", unlock, false);
+            window.addEventListener("keyup", unlock, false);
+          }
         }
       } catch (exp) {
         reject(exp);
@@ -3919,8 +3913,8 @@ var GAZE_RING_DISTANCE = -1.25;
 var GAZE_RING_INNER = 0.015;
 var GAZE_RING_OUTER = 0.03;
 var VECTOR_TEMP = new three.Vector3();
-var EULER_TEMP = new three.Euler();
-var QUAT_TEMP = new three.Quaternion();
+var EULER_TEMP$1 = new three.Euler();
+var QUAT_TEMP$1 = new three.Quaternion();
 
 function hasGazeEvent(obj) {
   return obj && obj._listeners && (obj._listeners.gazecomplete && obj._listeners.gazecomplete.length > 0 || obj._listeners.select && obj._listeners.select.length > 0 || obj._listeners.click && obj._listeners.click.length > 0);
@@ -3934,6 +3928,7 @@ var Pointer = function (_Entity) {
 
     var _this = possibleConstructorReturn(this, (Pointer.__proto__ || Object.getPrototypeOf(Pointer)).call(this, pointerName, options));
 
+    _this.isPointer = true;
     _this.devices = devices.filter(identity);
     _this.triggerDevices = triggerDevices && triggerDevices.filter(identity) || _this.devices.slice();
     _this.gazeTimeout = (_this.options.gazeLength || 1.5) * 1000;
@@ -3946,7 +3941,7 @@ var Pointer = function (_Entity) {
     _this.highlight = highlight;
     _this.velocity = new three.Vector3();
 
-    _this.mesh = box$1(LASER_WIDTH / s, LASER_WIDTH / s, LASER_LENGTH * s).colored(_this.color, {
+    _this.mesh = box(LASER_WIDTH / s, LASER_WIDTH / s, LASER_LENGTH * s).colored(_this.color, {
       unshaded: true
     }).named(pointerName + "-pointer").addTo(_this).at(0, 0, -1.5);
 
@@ -3981,25 +3976,36 @@ var Pointer = function (_Entity) {
       }
     }
   }, {
+    key: "setSize",
+    value: function setSize(width, height) {
+      var w = devicePixelRatio * 2 / width,
+          h = devicePixelRatio * 2 / height;
+      for (var i = 0; i < this.devices.length; ++i) {
+        var device = this.devices[i];
+        device.commands.U.scale = w;
+        device.commands.V.scale = h;
+      }
+    }
+  }, {
     key: "update",
     value: function update() {
       this.position.set(0, 0, 0);
 
       if (this.unproject) {
-        QUAT_TEMP.set(0, 1, 0, 0);
+        QUAT_TEMP$1.set(0, 1, 0, 0);
         VECTOR_TEMP.set(0, 0, 0);
         for (var i = 0; i < this.devices.length; ++i) {
           var obj = this.devices[i];
-          if (obj.enabled && !obj.commands.U.disabled && !obj.commands.V.disabled) {
+          if (obj.enabled && obj.inPhysicalUse && !obj.commands.U.disabled && !obj.commands.V.disabled) {
             VECTOR_TEMP.x += obj.getValue("U") - 1;
             VECTOR_TEMP.y += obj.getValue("V") - 1;
           }
         }
-        VECTOR_TEMP.applyMatrix4(this.unproject).applyQuaternion(QUAT_TEMP);
+        VECTOR_TEMP.applyMatrix4(this.unproject).applyQuaternion(QUAT_TEMP$1);
         this.lookAt(VECTOR_TEMP);
       } else {
         this.quaternion.set(0, 0, 0, 1);
-        EULER_TEMP.set(0, 0, 0, "YXZ");
+        EULER_TEMP$1.set(0, 0, 0, "YXZ");
         for (var _i = 0; _i < this.devices.length; ++_i) {
           var _obj = this.devices[_i];
           if (_obj.enabled) {
@@ -4012,8 +4018,8 @@ var Pointer = function (_Entity) {
           }
         }
 
-        QUAT_TEMP.setFromEuler(EULER_TEMP);
-        this.quaternion.multiply(QUAT_TEMP);
+        QUAT_TEMP$1.setFromEuler(EULER_TEMP$1);
+        this.quaternion.multiply(QUAT_TEMP$1);
       }
       this.updateMatrixWorld();
     }
@@ -4166,11 +4172,10 @@ var Pointer = function (_Entity) {
 
           var hit = hits[i],
               origObj = hit.object;
-
           var obj = origObj;
 
           // Try to find a Primrose Entity
-          while (obj && !obj.isEntity) {
+          while (obj && (!obj.isEntity || obj.isPointer)) {
             obj = obj.parent;
           }
 
@@ -4189,7 +4194,7 @@ var Pointer = function (_Entity) {
 
           if (obj && this._check(hit)) {
             this.lastHit = hit;
-            return;
+            return hit.object._listeners.useraction;
           }
         }
 
@@ -4197,11 +4202,6 @@ var Pointer = function (_Entity) {
         this._check();
         this.lastHit = null;
       }
-    }
-  }, {
-    key: "forward",
-    value: function forward(child) {
-      child.watch(this, Pointer.EVENTS);
     }
   }, {
     key: "pickable",
@@ -4222,7 +4222,7 @@ var Pointer = function (_Entity) {
   return Pointer;
 }(Entity);
 
-Pointer.EVENTS = ["pointerstart", "pointerend", "pointermove", "gazestart", "gazemove", "gazecomplete", "gazecancel", "exit", "enter", "select"];
+Pointer.EVENTS = ["pointerstart", "pointerend", "pointermove", "gazestart", "gazemove", "gazecomplete", "gazecancel", "exit", "enter", "select", "useraction"];
 
 var Keys = {
   ANY: Number.MAX_VALUE,
@@ -5407,7 +5407,7 @@ var ButtonFactory = function () {
   return ButtonFactory;
 }();
 
-ButtonFactory.DEFAULT = new ButtonFactory(colored(box$1(1, 1, 1), 0xff0000), {
+ButtonFactory.DEFAULT = new ButtonFactory(colored(box(1, 1, 1), 0xff0000), {
   maxThrow: 0.1,
   minDeflection: 10,
   colorUnpressed: 0x7f0000,
@@ -5415,8 +5415,6 @@ ButtonFactory.DEFAULT = new ButtonFactory(colored(box$1(1, 1, 1), 0xff0000), {
   toggle: true
 });
 
-// The JSON format object loader is not always included in the Three.js distribution,
-// so we have to first check for it.
 var loaders = null;
 var PATH_PATTERN = /((?:https?:\/\/)?(?:[^/]+\/)+)(\w+)(\.(?:\w+))$/;
 var EXTENSION_PATTERN = /(\.(?:\w+))+$/;
@@ -5678,7 +5676,6 @@ var Ground = function (_Entity) {
             txtRepeatY: dim,
             anisotropy: 8
           })).rot(-Math.PI / 2, 0, 0);
-          console.log("A", !!this.model);
 
           promise = this.model.ready;
         }
@@ -6398,7 +6395,7 @@ var Grammar = function () {
 
 var JavaScript = new Grammar("JavaScript", [["newlines", /(?:\r\n|\r|\n)/], ["startBlockComments", /\/\*/], ["endBlockComments", /\*\//], ["regexes", /(?:^|,|;|\(|\[|\{)(?:\s*)(\/(?:\\\/|[^\n\/])+\/)/], ["stringDelim", /("|')/], ["startLineComments", /\/\/.*$/m], ["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/], ["keywords", /\b(?:break|case|catch|class|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/], ["functions", /(\w+)(?:\s*\()/], ["members", /(\w+)\./], ["members", /((\w+\.)+)(\w+)/]]);
 
-var SCROLL_SCALE = isFirefox$1 ? 3 : 100;
+var SCROLL_SCALE = isFirefox ? 3 : 100;
 var COUNTER$5 = 0;
 var OFFSET = 0;
 
@@ -6424,7 +6421,7 @@ var TextBox = function (_Surface) {
     // normalize input parameters
     ////////////////////////////////////////////////////////////////////////
 
-    _this.useCaching = !isFirefox$1 || !isMobile;
+    _this.useCaching = !isFirefox || !isMobile;
 
     var makeCursorCommand = function makeCursorCommand(name) {
       var method = name.toLowerCase();
@@ -6466,7 +6463,7 @@ var TextBox = function (_Surface) {
 
     // different browsers have different sets of keycodes for less-frequently
     // used keys like curly brackets.
-    _this._browser = isChrome ? "CHROMIUM" : isFirefox$1 ? "FIREFOX" : isIE ? "IE" : isOpera ? "OPERA" : isSafari ? "SAFARI" : "UNKNOWN";
+    _this._browser = isChrome ? "CHROMIUM" : isFirefox ? "FIREFOX" : isIE ? "IE" : isOpera ? "OPERA" : isSafari ? "SAFARI" : "UNKNOWN";
     _this._pointer = new Point();
     _this._history = [];
     _this._historyFrame = -1;
@@ -7304,6 +7301,32 @@ var TextBox = function (_Surface) {
   return TextBox;
 }(Surface);
 
+var BaseVRDisplay = function () {
+  function BaseVRDisplay(VRFrameDataType) {
+    classCallCheck(this, BaseVRDisplay);
+
+    this.frameData = new VRFrameDataType();
+  }
+
+  createClass(BaseVRDisplay, [{
+    key: "updateFrameData",
+    value: function updateFrameData() {
+      this.getFrameData(this.frameData);
+    }
+  }, {
+    key: "startAnimation",
+    value: function startAnimation(callback) {
+      this.timer = this.requestAnimationFrame(callback);
+    }
+  }, {
+    key: "stopAnimation",
+    value: function stopAnimation() {
+      this.cancelAnimationFrame(this.timer);
+    }
+  }]);
+  return BaseVRDisplay;
+}();
+
 var piOver180 = Math.PI / 180.0;
 var rad45 = Math.PI * 0.25;
 var defaultOrientation = new Float32Array([0, 0, 0, 1]);
@@ -7492,14 +7515,16 @@ function frameDataFromPose(frameData, pose, vrDisplay) {
   frameData.pose = pose;
   frameData.timestamp = pose.timestamp;
 
-  updateEyeMatrices(frameData.leftProjectionMatrix, frameData.leftViewMatrix, pose, vrDisplay.getEyeParameters("left"), vrDisplay);
-  updateEyeMatrices(frameData.rightProjectionMatrix, frameData.rightViewMatrix, pose, vrDisplay.getEyeParameters("right"), vrDisplay);
+  if (vrDisplay) {
+    updateEyeMatrices(frameData.leftProjectionMatrix, frameData.leftViewMatrix, pose, vrDisplay.getEyeParameters("left"), vrDisplay);
+    updateEyeMatrices(frameData.rightProjectionMatrix, frameData.rightViewMatrix, pose, vrDisplay.getEyeParameters("right"), vrDisplay);
+  }
 
   return true;
 }
 
-var VRFrameData = function VRFrameData() {
-  classCallCheck(this, VRFrameData);
+var PolyfilledVRFrameData = function PolyfilledVRFrameData() {
+  classCallCheck(this, PolyfilledVRFrameData);
 
 
   this.leftProjectionMatrix = new Float32Array(16);
@@ -7528,59 +7553,65 @@ var VRFrameData = function VRFrameData() {
  * limitations under the License.
  */
 
-// Start at a higher number to reduce chance of conflict.
 var nextDisplayId = 1000;
 
-var VRDisplay = function () {
-  function VRDisplay(name) {
-    classCallCheck(this, VRDisplay);
+function defaultPose() {
+  return {
+    position: [0, 0, 0],
+    orientation: [0, 0, 0, 1],
+    linearVelocity: null,
+    linearAcceleration: null,
+    angularVelocity: null,
+    angularAcceleration: null
+  };
+}
 
-    this._currentLayers = [];
+var PolyfilledVRDisplay = function (_BaseVRDisplay) {
+  inherits(PolyfilledVRDisplay, _BaseVRDisplay);
 
-    Object.defineProperties(this, {
-      capabilities: immutable(Object.defineProperties({}, {
-        hasPosition: immutable(false),
-        hasOrientation: immutable(isMobile),
-        hasExternalDisplay: immutable(false),
-        canPresent: immutable(true),
-        maxLayers: immutable(1)
+  function PolyfilledVRDisplay(name) {
+    classCallCheck(this, PolyfilledVRDisplay);
+
+    var _this = possibleConstructorReturn(this, (PolyfilledVRDisplay.__proto__ || Object.getPrototypeOf(PolyfilledVRDisplay)).call(this, PolyfilledVRFrameData));
+
+    _this._currentLayers = [];
+
+    Object.defineProperties(_this, {
+      capabilities: immutable$1(Object.defineProperties({}, {
+        hasPosition: immutable$1(false),
+        hasOrientation: immutable$1(isMobile),
+        hasExternalDisplay: immutable$1(false),
+        canPresent: immutable$1(true),
+        maxLayers: immutable$1(1)
       })),
-      displayId: immutable(nextDisplayId++),
-      displayName: immutable(name),
-      isConnected: immutable(true),
-      stageParameters: immutable(null),
-      isPresenting: immutable(function () {
+      displayId: immutable$1(nextDisplayId++),
+      displayName: immutable$1(name),
+      isConnected: immutable$1(true),
+      stageParameters: immutable$1(null),
+      isPresenting: immutable$1(function () {
         return FullScreen.isActive;
       }),
 
       depthNear: mutable(0.01, "number"),
       depthFar: mutable(10000.0, "number"),
 
-      isPolyfilled: immutable(true)
+      isPolyfilled: immutable$1(true)
     });
 
-    this._frameData = null;
-    this._poseData = null;
+    _this._poseData = null;
+    return _this;
   }
 
-  createClass(VRDisplay, [{
+  createClass(PolyfilledVRDisplay, [{
     key: "getFrameData",
     value: function getFrameData(frameData) {
-      if (!this._frameData) {
-        this._frameData = frameDataFromPose(frameData, this.getPose(), this);
-      }
-      return this._frameData;
+      frameDataFromPose(frameData, this.getPose(), this);
     }
   }, {
     key: "getPose",
     value: function getPose() {
-      return this.getImmediatePose();
-    }
-  }, {
-    key: "getImmediatePose",
-    value: function getImmediatePose() {
       if (!this._poseData) {
-        this._poseData = this._getImmediatePose();
+        this._poseData = this._getPose() || defaultPose();
       }
       return this._poseData;
     }
@@ -7617,28 +7648,20 @@ var VRDisplay = function () {
   }, {
     key: "submitFrame",
     value: function submitFrame(pose) {
-      this._frameData = null;
       this._poseData = null;
     }
   }]);
-  return VRDisplay;
-}();
+  return PolyfilledVRDisplay;
+}(BaseVRDisplay);
 
-var defaultFieldOfView = 50;
+var defaultFieldOfView = 100;
 
-function defaultPose() {
-  return {
-    position: [0, 0, 0],
-    orientation: [0, 0, 0, 1],
-    linearVelocity: null,
-    linearAcceleration: null,
-    angularVelocity: null,
-    angularAcceleration: null
-  };
+function calcFoV(aFoV, aDim, bDim) {
+  return 180 * Math.atan(Math.tan(aFoV * Math.PI / 180) * aDim / bDim) / Math.PI;
 }
 
-var StandardMonitorVRDisplay = function (_VRDisplay) {
-  inherits(StandardMonitorVRDisplay, _VRDisplay);
+var StandardMonitorVRDisplay = function (_PolyfilledVRDisplay) {
+  inherits(StandardMonitorVRDisplay, _PolyfilledVRDisplay);
   createClass(StandardMonitorVRDisplay, null, [{
     key: "DEFAULT_FOV",
     get: function get() {
@@ -7649,40 +7672,25 @@ var StandardMonitorVRDisplay = function (_VRDisplay) {
     }
   }]);
 
-  function StandardMonitorVRDisplay(display) {
+  function StandardMonitorVRDisplay(display, name) {
     classCallCheck(this, StandardMonitorVRDisplay);
 
-    var _this = possibleConstructorReturn(this, (StandardMonitorVRDisplay.__proto__ || Object.getPrototypeOf(StandardMonitorVRDisplay)).call(this, "Full Screen"));
+    var _this = possibleConstructorReturn(this, (StandardMonitorVRDisplay.__proto__ || Object.getPrototypeOf(StandardMonitorVRDisplay)).call(this, name || "Full Screen"));
 
+    _this.isStandardMonitorVRDisplay = true;
     _this._display = display;
     return _this;
   }
 
   createClass(StandardMonitorVRDisplay, [{
     key: "submitFrame",
-    value: function submitFrame(pose) {
-      if (this._display && this._display.isPolyfilled) {
-        this._display.submitFrame(pose);
-      }
-    }
+    value: function submitFrame() {}
   }, {
-    key: "getImmediatePose",
-    value: function getImmediatePose() {
-      var display = isMobile && this._display;
-      if (display) {
-        return display.getImmediatePose();
-      } else {
-        return defaultPose();
-      }
-    }
-  }, {
-    key: "getPose",
-    value: function getPose() {
+    key: "_getPose",
+    value: function _getPose() {
       var display = isMobile && this._display;
       if (display) {
         return display.getPose();
-      } else {
-        return defaultPose();
       }
     }
   }, {
@@ -7705,9 +7713,9 @@ var StandardMonitorVRDisplay = function (_VRDisplay) {
         var vFOV = void 0,
             hFOV = void 0;
         if (height > width) {
-          vFOV = defaultFieldOfView, hFOV = calcFoV(vFOV, width, height);
+          vFOV = defaultFieldOfView / 2, hFOV = calcFoV(vFOV, width, height);
         } else {
-          hFOV = defaultFieldOfView, vFOV = calcFoV(hFOV, height, width);
+          hFOV = defaultFieldOfView / 2, vFOV = calcFoV(hFOV, height, width);
         }
 
         return {
@@ -7723,13 +7731,24 @@ var StandardMonitorVRDisplay = function (_VRDisplay) {
         };
       }
     }
+  }, {
+    key: "isStereo",
+    get: function get() {
+      return false;
+    }
+  }, {
+    key: "targetName",
+    get: function get() {
+      return "Full Screen";
+    }
+  }, {
+    key: "renderOrder",
+    get: function get() {
+      return 1;
+    }
   }]);
   return StandardMonitorVRDisplay;
-}(VRDisplay);
-
-function calcFoV(aFoV, aDim, bDim) {
-  return 360 * Math.atan(Math.tan(aFoV * Math.PI / 360) * aDim / bDim) / Math.PI;
-}
+}(PolyfilledVRDisplay);
 
 function makeHidingContainer(id, obj) {
   var elem = cascadeElement(id, "div", window.HTMLDivElement);
@@ -7834,7 +7853,7 @@ var CommandState = function CommandState() {
 var InputProcessor = function (_EventDispatcher) {
   inherits(InputProcessor, _EventDispatcher);
 
-  function InputProcessor(name, commands, axisNames) {
+  function InputProcessor(name, commands, axisNames, userActionEvent) {
     classCallCheck(this, InputProcessor);
 
     var _this = possibleConstructorReturn(this, (InputProcessor.__proto__ || Object.getPrototypeOf(InputProcessor)).call(this));
@@ -7871,6 +7890,17 @@ var InputProcessor = function (_EventDispatcher) {
 
     for (var _i3 = 0; _i3 < Keys.MODIFIER_KEYS.length; ++_i3) {
       _this.inputState[Keys.MODIFIER_KEYS[_i3]] = false;
+    }
+
+    _this.userActionHandlers = null;
+    if (userActionEvent) {
+      window.addEventListener(userActionEvent, function (evt) {
+        if (_this.userActionHandlers) {
+          for (var _i4 = 0; _i4 < _this.userActionHandlers.length; ++_i4) {
+            _this.userActionHandlers[_i4](evt);
+          }
+        }
+      });
     }
     return _this;
   }
@@ -8223,7 +8253,6 @@ var InputProcessor = function (_EventDispatcher) {
     value: function setAxis(name, value) {
       var i = this.axisNames.indexOf(name);
       if (i > -1 && (this.inPhysicalUse || value !== 0)) {
-        this.inPhysicalUse = true;
         this.inputState.axes[i] = value;
       }
     }
@@ -8231,7 +8260,6 @@ var InputProcessor = function (_EventDispatcher) {
     key: "setButton",
     value: function setButton(index, pressed) {
       if (this.inPhysicalUse || pressed) {
-        this.inPhysicalUse = true;
         this.inputState.buttons[index] = pressed;
       }
     }
@@ -8258,6 +8286,18 @@ var InputProcessor = function (_EventDispatcher) {
         this.setAxis(name, value);
       } else if (this.commands[name] && !this.commands[name].disabled) {
         this.commands[name].state.value = value;
+      }
+    }
+  }, {
+    key: "inPhysicalUse",
+    get: function get() {
+      return this._inPhysicalUse;
+    },
+    set: function set(v) {
+      var wasInPhysicalUse = this._inPhysicalUse;
+      this._inPhysicalUse = v;
+      if (!wasInPhysicalUse && v) {
+        this.emit("activate");
       }
     }
   }]);
@@ -8835,7 +8875,7 @@ var Keyboard = function (_InputProcessor) {
     var _this = possibleConstructorReturn(this, (Keyboard.__proto__ || Object.getPrototypeOf(Keyboard)).call(this, "Keyboard", commands));
 
     _this._operatingSystem = null;
-    _this.browser = isChrome ? "CHROMIUM" : isFirefox$1 ? "FIREFOX" : isIE ? "IE" : isOpera ? "OPERA" : isSafari ? "SAFARI" : "UNKNOWN";
+    _this.browser = isChrome ? "CHROMIUM" : isFirefox ? "FIREFOX" : isIE ? "IE" : isOpera ? "OPERA" : isSafari ? "SAFARI" : "UNKNOWN";
     _this._codePage = null;
     _this.resetDeadKeyState = function () {
       return _this.codePage.resetDeadKeyState();
@@ -8846,6 +8886,7 @@ var Keyboard = function (_InputProcessor) {
   createClass(Keyboard, [{
     key: "consumeEvent",
     value: function consumeEvent(evt) {
+      this.inPhysicalUse = true;
       var isKeyDown = evt.type === "keydown";
       this.setButton(evt.keyCode, isKeyDown);
       if (isKeyDown) {
@@ -8902,11 +8943,12 @@ var Mouse = function (_InputProcessor) {
   function Mouse(DOMElement, commands) {
     classCallCheck(this, Mouse);
 
-    var _this = possibleConstructorReturn(this, (Mouse.__proto__ || Object.getPrototypeOf(Mouse)).call(this, "Mouse", commands, ["BUTTONS", "X", "Y", "Z", "W"]));
+    var _this = possibleConstructorReturn(this, (Mouse.__proto__ || Object.getPrototypeOf(Mouse)).call(this, "Mouse", commands, ["BUTTONS", "X", "Y", "Z", "W"], "mousedown"));
 
     _this.timer = null;
 
     var setState = function setState(stateChange, event) {
+      _this.inPhysicalUse = true;
       var state = event.buttons;
       for (var button = 0; button < Mouse.NUM_BUTTONS; ++button) {
         var isDown = state & 0x1 !== 0;
@@ -8985,7 +9027,6 @@ var PoseInputProcessor = function (_InputProcessor) {
 
     _this.currentDevice = null;
     _this.lastPose = null;
-    _this.currentPose = null;
     _this.posePosition = new three.Vector3();
     _this.poseQuaternion = new three.Quaternion();
     _this.position = new three.Vector3();
@@ -9000,11 +9041,11 @@ var PoseInputProcessor = function (_InputProcessor) {
       get$1(PoseInputProcessor.prototype.__proto__ || Object.getPrototypeOf(PoseInputProcessor.prototype), "update", this).call(this, dt);
 
       if (this.currentDevice) {
-        var pose = this.currentPose || this.lastPose || DEFAULT_POSE;
+        var pose = this.currentDevice.frameData.pose || this.lastPose || DEFAULT_POSE;
         this.lastPose = pose;
         this.inPhysicalUse = this.hasOrientation || this.inPhysicalUse;
-        var orient = this.currentPose && this.currentPose.orientation,
-            pos = this.currentPose && this.currentPose.position;
+        var orient = pose && pose.orientation,
+            pos = pose && pose.position;
         if (orient) {
           this.poseQuaternion.fromArray(orient);
           if (isMobile && isIE) {
@@ -9027,11 +9068,6 @@ var PoseInputProcessor = function (_InputProcessor) {
       this.matrix.setPosition(this.posePosition);
       this.matrix.multiplyMatrices(stageMatrix, this.matrix);
       this.matrix.decompose(this.position, this.quaternion, EMPTY_SCALE);
-    }
-  }, {
-    key: "hasPose",
-    get: function get() {
-      return !!this.currentPose;
     }
   }]);
   return PoseInputProcessor;
@@ -9089,27 +9125,36 @@ var Gamepad = function (_PoseInputProcessor) {
 
     _this.currentDevice = pad;
     _this.axisOffset = axisOffset;
+    _this.frameData = new PolyfilledVRFrameData();
     return _this;
   }
 
   createClass(Gamepad, [{
-    key: "getImmediatePose",
-    value: function getImmediatePose() {
-      return this.currentPose;
-    }
-  }, {
     key: "getPose",
     value: function getPose() {
       return this.currentPose;
     }
   }, {
+    key: "getFrameData",
+    value: function getFrameData(frameData) {
+      frameDataFromPose(frameData, this.getPose());
+    }
+  }, {
+    key: "updateFrameData",
+    value: function updateFrameData() {
+      this.getFrameData(this.frameData);
+    }
+  }, {
     key: "checkDevice",
     value: function checkDevice(pad) {
+      this.inPhysicalUse = true;
       var i,
           j,
           buttonMap = 0;
       this.currentDevice = pad;
-      this.currentPose = this.hasOrientation && this.currentDevice.pose;
+      if (this.hasOrientation) {
+        this.updateFrameData();
+      }
       for (i = 0, j = pad.buttons.length; i < pad.buttons.length; ++i, ++j) {
         var btn = pad.buttons[i];
         this.setButton(i, btn.pressed);
@@ -9309,9 +9354,10 @@ var Touch = function (_InputProcessor) {
       axes.push("DY" + i);
     }
 
-    var _this = possibleConstructorReturn(this, (Touch.__proto__ || Object.getPrototypeOf(Touch)).call(this, "Touch", commands, axes));
+    var _this = possibleConstructorReturn(this, (Touch.__proto__ || Object.getPrototypeOf(Touch)).call(this, "Touch", commands, axes, "touchend"));
 
     var setState = function setState(stateChange, setAxis, event) {
+      _this.inPhysicalUse = true;
       // We have to find the minimum identifier value because iOS uses a very
       // large number that changes after every gesture. Every other platform
       // just numbers them 0 through 9.
@@ -9579,17 +9625,6 @@ var SensorSample = function () {
  * limitations under the License.
  */
 
-/**
- * An implementation of a simple complementary filter, which fuses gyroscope and accelerometer data from the 'devicemotion' event.
- *
- * Accelerometer data is very noisy, but stable over the long term. Gyroscope data is smooth, but tends to drift over the long term.
- *
- * This fusion is relatively simple:
- * 1. Get orientation estimates from accelerometer by applying a low-pass filter on that data.
- * 2. Get orientation estimates from gyroscope by integrating over time.
- * 3. Combine the two estimates, weighing (1) in the long term, but (2) for the short term.
- */
-
 var ComplementaryFilter = function () {
   function ComplementaryFilter(kFilter) {
     classCallCheck(this, ComplementaryFilter);
@@ -9802,7 +9837,7 @@ var PosePredictor = function () {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var isFirefoxAndroid = isFirefox$1 && isMobile;
+var isFirefoxAndroid = isFirefox && isMobile;
 var DEG2RAD$1 = three.Math.DEG2RAD;
 
 /**
@@ -9890,8 +9925,8 @@ var FusionPoseSensor = function () {
       return this.orientationOut_;
     }
   }, {
-    key: "getImmediatePose",
-    value: function getImmediatePose() {
+    key: "getPose",
+    value: function getPose() {
       return {
         position: this.getPosition(),
         orientation: this.getOrientation(),
@@ -9997,9 +10032,37 @@ var Eye = {
   LEFT: "left",
   RIGHT: "right"
 };
+var ipd = 0.03;
+var neckLength = 0;
+var neckDepth = 0;
 
-var CardboardVRDisplay = function (_VRDisplay) {
-  inherits(CardboardVRDisplay, _VRDisplay);
+var CardboardVRDisplay = function (_PolyfilledVRDisplay) {
+  inherits(CardboardVRDisplay, _PolyfilledVRDisplay);
+  createClass(CardboardVRDisplay, null, [{
+    key: "IPD",
+    get: function get() {
+      return ipd;
+    },
+    set: function set(v) {
+      ipd = v;
+    }
+  }, {
+    key: "NECK_LENGTH",
+    get: function get() {
+      return neckLength;
+    },
+    set: function set(v) {
+      neckLength = v;
+    }
+  }, {
+    key: "NECK_DEPTH",
+    get: function get() {
+      return neckDepth;
+    },
+    set: function set(v) {
+      neckDepth = v;
+    }
+  }]);
 
   function CardboardVRDisplay(options) {
     classCallCheck(this, CardboardVRDisplay);
@@ -10009,24 +10072,24 @@ var CardboardVRDisplay = function (_VRDisplay) {
     _this.DOMElement = null;
 
     // "Private" members.
-    _this.poseSensor_ = options && options.overrideOrientation || new FusionPoseSensor(options);
+    _this._poseSensor = options && options.overrideOrientation || new FusionPoseSensor(options);
     return _this;
   }
 
   createClass(CardboardVRDisplay, [{
-    key: "_getImmediatePose",
-    value: function _getImmediatePose() {
-      return this.poseSensor_.getImmediatePose();
+    key: "_getPose",
+    value: function _getPose() {
+      return this._poseSensor.getPose();
     }
   }, {
     key: "resetPose",
     value: function resetPose() {
-      this.poseSensor_.resetPose();
+      this._poseSensor.resetPose();
     }
   }, {
     key: "getEyeParameters",
     value: function getEyeParameters(whichEye) {
-      var offset = [0.03, 0.0, 0.0];
+      var offset = [ipd, neckLength, neckDepth];
 
       if (whichEye == Eye.LEFT) {
         offset[0] *= -1.0;
@@ -10059,9 +10122,109 @@ var CardboardVRDisplay = function (_VRDisplay) {
         renderHeight: height
       };
     }
+  }, {
+    key: "isCardboardVRDisplay",
+    get: function get() {
+      return true;
+    }
+  }, {
+    key: "isStereo",
+    get: function get() {
+      return true;
+    }
+  }, {
+    key: "targetName",
+    get: function get() {
+      return "Full Screen";
+    }
+  }, {
+    key: "renderOrder",
+    get: function get() {
+      return 0;
+    }
   }]);
   return CardboardVRDisplay;
-}(VRDisplay);
+}(PolyfilledVRDisplay);
+
+var MixedRealityVRDisplay = function (_StandardMonitorVRDis) {
+  inherits(MixedRealityVRDisplay, _StandardMonitorVRDis);
+
+  function MixedRealityVRDisplay(display) {
+    classCallCheck(this, MixedRealityVRDisplay);
+
+    var _this = possibleConstructorReturn(this, (MixedRealityVRDisplay.__proto__ || Object.getPrototypeOf(MixedRealityVRDisplay)).call(this, display, "Mixed Reality"));
+
+    _this.isMixedRealityVRDisplay = true;
+    _this.motionDevice = null;
+
+    Object.defineProperties(_this.capabilities, {
+      hasPosition: immutable(function () {
+        return _this.motionDevice && _this.motionDevice.hasPosition;
+      }),
+      hasOrientation: immutable(function () {
+        return _this.motionDevice && _this.motionDevice.hasOrientation;
+      })
+    });
+    return _this;
+  }
+
+  createClass(MixedRealityVRDisplay, [{
+    key: "_getPose",
+    value: function _getPose() {
+      return this.motionDevice.getPose();
+    }
+  }, {
+    key: "getFrameData",
+    value: function getFrameData(frameData) {
+      this.motionDevice.getFrameData(frameData);
+    }
+  }, {
+    key: "resetPose",
+    value: function resetPose() {
+      return this.motionDevice.resetPose();
+    }
+  }, {
+    key: "_getPose",
+    value: function _getPose() {
+      if (this.motionDevice) {
+        return this.motionDevice.getPose();
+      }
+    }
+  }, {
+    key: "resetPose",
+    value: function resetPose() {
+      if (this.motionDevice) {
+        return this.motionDevice.resetPose();
+      }
+    }
+  }, {
+    key: "motionDevice",
+    set: function set(device) {
+      this._motionDevice = device;
+    }
+  }, {
+    key: "isMixedRealityVRDisplay",
+    get: function get() {
+      return true;
+    }
+  }, {
+    key: "isStereo",
+    get: function get() {
+      return false;
+    }
+  }, {
+    key: "targetName",
+    get: function get() {
+      return "Full Screen";
+    }
+  }, {
+    key: "renderOrder",
+    get: function get() {
+      return 1;
+    }
+  }]);
+  return MixedRealityVRDisplay;
+}(StandardMonitorVRDisplay);
 
 var Automator = function (_EventDispatcher) {
   inherits(Automator, _EventDispatcher);
@@ -10167,10 +10330,6 @@ var Record = function (_Obj) {
   }]);
   return Record;
 }(Obj);
-
-/*
-  A collection of all the recorded state values at a single point in time.
-*/
 
 var Frame = function () {
   createClass(Frame, null, [{
@@ -10398,9 +10557,7 @@ var MockVRDisplay = function () {
         thunk(t);
       });
     };
-    this.getImmediatePose = function () {
-      return dataPack.currentPose;
-    };
+
     this.getPose = function () {
       return dataPack.currentPose;
     };
@@ -10419,6 +10576,157 @@ var MockVRDisplay = function () {
   return MockVRDisplay;
 }();
 
+var NativeVRDisplay = function (_BaseVRDisplay) {
+  inherits(NativeVRDisplay, _BaseVRDisplay);
+
+  function NativeVRDisplay(display) {
+    classCallCheck(this, NativeVRDisplay);
+
+    var _this = possibleConstructorReturn(this, (NativeVRDisplay.__proto__ || Object.getPrototypeOf(NativeVRDisplay)).call(this, VRFrameData));
+
+    _this.isNativeVRDisplay = true;
+    _this.display = display;
+    return _this;
+  }
+
+  createClass(NativeVRDisplay, [{
+    key: "getFrameData",
+    value: function getFrameData(frameData) {
+      this.display.getFrameData(frameData);
+    }
+  }, {
+    key: "_getPose",
+    value: function _getPose() {
+      return this._display.getPose();
+    }
+  }, {
+    key: "getPose",
+    value: function getPose() {
+      return this.display.getPose();
+    }
+  }, {
+    key: "resetPose",
+    value: function resetPose() {
+      return this.display.resetPose();
+    }
+  }, {
+    key: "getEyeParameters",
+    value: function getEyeParameters(side) {
+      return this.display.getEyeParameters(side);
+    }
+  }, {
+    key: "requestAnimationFrame",
+    value: function requestAnimationFrame(callback) {
+      if (this.isPresenting) {
+        return this.display.requestAnimationFrame(callback);
+      } else {
+        return window.requestAnimationFrame(callback);
+      }
+    }
+  }, {
+    key: "cancelAnimationFrame",
+    value: function cancelAnimationFrame(id) {
+      if (this.isPresenting) {
+        return this.display.cancelAnimationFrame(id);
+      } else {
+        return window.cancelAnimationFrame(id);
+      }
+    }
+  }, {
+    key: "requestPresent",
+    value: function requestPresent(layers) {
+      return this.display.requestPresent(layers);
+    }
+  }, {
+    key: "exitPresent",
+    value: function exitPresent() {
+      return this.display.exitPresent();
+    }
+  }, {
+    key: "getLayers",
+    value: function getLayers() {
+      return this.display.getLayers();
+    }
+  }, {
+    key: "submitFrame",
+    value: function submitFrame() {
+      return this.display.submitFrame();
+    }
+  }, {
+    key: "capabilities",
+    get: function get() {
+      return this.display.capabilities;
+    }
+  }, {
+    key: "displayId",
+    get: function get() {
+      return this.display.displayId;
+    }
+  }, {
+    key: "displayName",
+    get: function get() {
+      return this.display.displayName;
+    }
+  }, {
+    key: "isConnected",
+    get: function get() {
+      return this.display.isConnected;
+    }
+  }, {
+    key: "stageParameters",
+    get: function get() {
+      return this.display.stageParameters;
+    }
+  }, {
+    key: "isPresenting",
+    get: function get() {
+      return this.display.isPresenting;
+    }
+  }, {
+    key: "depthNear",
+    get: function get() {
+      return this.display.depthNear;
+    },
+    set: function set(v) {
+      this.display.depthNear = v;
+    }
+  }, {
+    key: "depthFar",
+    get: function get() {
+      return this.display.depthFar;
+    },
+    set: function set(v) {
+      this.display.depthFar = v;
+    }
+  }, {
+    key: "isNativeVRDisplay",
+    get: function get() {
+      return true;
+    }
+  }, {
+    key: "isStereo",
+    get: function get() {
+      return true;
+    }
+  }, {
+    key: "_stageParameters",
+    get: function get() {
+      return this._display.stageParameters;
+    }
+  }, {
+    key: "targetName",
+    get: function get() {
+      return this._display.displayName;
+    }
+  }, {
+    key: "renderOrder",
+    get: function get() {
+      return 0;
+    }
+  }]);
+  return NativeVRDisplay;
+}(BaseVRDisplay);
+
 function getObject(url, options) {
   return get$2("json", url, options);
 }
@@ -10429,28 +10737,6 @@ var isCardboardCompatible = isMobile && !isGearVR;
 
 var polyFillDevicesPopulated = false;
 var standardMonitorPopulated = false;
-
-function upgrade1_0_to_1_1() {
-  // Put a shim in place to update the API to 1.1 if needed.
-  if ("VRDisplay" in window && !("VRFrameData" in window)) {
-    // Provide the VRFrameData object.
-    window.VRFrameData = VRFrameData;
-
-    // A lot of Chrome builds don't have depthNear and depthFar, even
-    // though they're in the WebVR 1.0 spec. Patch them in if they're not present.
-    if (!("depthNear" in window.VRDisplay.prototype)) {
-      window.VRDisplay.prototype.depthNear = 0.01;
-    }
-
-    if (!("depthFar" in window.VRDisplay.prototype)) {
-      window.VRDisplay.prototype.depthFar = 10000.0;
-    }
-
-    window.VRDisplay.prototype.getFrameData = function (frameData) {
-      return frameDataFromPose(frameData, this.getPose(), this);
-    };
-  }
-}
 
 function getPolyfillDisplays(options) {
   if (!polyFillDevicesPopulated) {
@@ -10476,6 +10762,8 @@ function fireVRDisplayPresentChange() {
   window.dispatchEvent(event);
 }
 
+var isExperimentalChromium51 = navigator.userAgent.indexOf("Chrome/51.0.2664.0") > -1;
+
 function installPolyfill(options) {
   var oldGetVRDisplays = null;
   if (hasNativeWebVR) {
@@ -10489,7 +10777,7 @@ function installPolyfill(options) {
   // Provide navigator.getVRDisplays.
   navigator.getVRDisplays = function () {
     return oldGetVRDisplays.call(navigator).then(function (displays) {
-      if (displays.length === 0 || navigator.userAgent === "Mozilla/5.0 (Linux; Android 6.0.1; SM-G930V Build/MMB29M) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2664.0 Mobile Safari/537.36") {
+      if (displays.length === 0 || isExperimentalChromium51) {
         options.overrideOrientation = displays[0];
         return getPolyfillDisplays(options);
       } else {
@@ -10498,71 +10786,63 @@ function installPolyfill(options) {
     });
   };
 
-  // Provide the VRDisplay object.
-  window.VRDisplay = window.VRDisplay || VRDisplay;
-
   // Provide navigator.vrEnabled.
   Object.defineProperty(navigator, "vrEnabled", {
     get: function get() {
       return isCardboardCompatible && (FullScreen.available || isiOS); // just fake it for iOS
     }
   });
+
+  // Provide the VRDisplay object.
+  window.VRDisplay = window.VRDisplay || PolyfilledVRDisplay;
+  window.VRFrameData = window.VRFrameData || PolyfilledVRFrameData;
+
+  // A lot of Chrome builds don't have depthNear and depthFar, even
+  // though they're in the WebVR 1.0 spec. Patch them in if they're not present.
+  if (!("depthNear" in window.VRDisplay.prototype)) {
+    window.VRDisplay.prototype.depthNear = 0.01;
+  }
+
+  if (!("depthFar" in window.VRDisplay.prototype)) {
+    window.VRDisplay.prototype.depthFar = 10000.0;
+  }
 }
 
-function installStandardMonitor(options) {
+function installDisplays(options) {
   if (!standardMonitorPopulated && !isGearVR) {
     var oldGetVRDisplays = navigator.getVRDisplays;
     navigator.getVRDisplays = function () {
       return oldGetVRDisplays.call(navigator).then(function (displays) {
-        var created = false;
-        for (var i = 0; i < displays.length && !created; ++i) {
+        var stdDeviceExists = false,
+            mockDeviceExists = false,
+            data = options && options.replayData;
+        for (var i = 0; i < displays.length; ++i) {
           var dsp = displays[i];
-          created = dsp instanceof StandardMonitorVRDisplay;
+          stdDeviceExists = stdDeviceExists || dsp instanceof StandardMonitorVRDisplay;
+          mockDeviceExists = mockDeviceExists || dsp instanceof MockVRDisplay;
         }
-        if (!created) {
+
+        if (!stdDeviceExists) {
           if (options && options.defaultFOV) {
             StandardMonitorVRDisplay.DEFAULT_FOV = options.defaultFOV;
           }
-          displays.unshift(new StandardMonitorVRDisplay(displays[0]));
+          var nativeDisplay = displays[0];
+          if (nativeDisplay) {
+            displays[0] = new NativeVRDisplay(nativeDisplay);
+            displays.unshift(new MixedRealityVRDisplay(nativeDisplay));
+          }
+          displays.unshift(new StandardMonitorVRDisplay(nativeDisplay));
         }
+
+        if (data && !mockDeviceExists) {
+          displays.push(new MockVRDisplay(data));
+        }
+
         return displays;
       });
     };
 
     standardMonitorPopulated = true;
-  }
-}
-
-function installMockDisplay(options) {
-  var data = options && options.replayData;
-  if (data) {
-    var oldGetVRDisplays = navigator.getVRDisplays;
-    navigator.getVRDisplays = function () {
-      return oldGetVRDisplays.call(navigator).then(function (displays) {
-        var mockDeviceExists = displays.map(function (d) {
-          return d instanceof MockVRDisplay;
-        }).reduce(function (a, b) {
-          return a || b;
-        }, false);
-
-        if (mockDeviceExists) {
-          return displays;
-        } else {
-          var done = function done(obj) {
-            displays.push(new MockVRDisplay(obj));
-            resolve(displays);
-          };
-
-          if ((typeof data === "undefined" ? "undefined" : _typeof(data)) === "object") {
-            return Promise.resolve(data);
-          } else if (/\.json$/.test(data)) {
-            return getObject(data);
-          } else {
-            return Promise.resolve(JSON.parse(data));
-          }
-        }
-      });
-    };
   }
 }
 
@@ -10573,9 +10853,7 @@ function install(options) {
   }, options);
 
   installPolyfill(options);
-  installStandardMonitor(options);
-  installMockDisplay(options);
-  upgrade1_0_to_1_1();
+  installDisplays(options);
 }
 
 var VR = function (_PoseInputProcessor) {
@@ -10597,8 +10875,6 @@ var VR = function (_PoseInputProcessor) {
     _this.options = options;
     _this.displays = [];
     _this._transformers = [];
-    _this.lastLastTimerDevice = null;
-    _this.lastTimerDevice = null;
     _this.timerDevice = null;
     _this.timer = null;
     _this.currentDeviceIndex = -1;
@@ -10608,9 +10884,21 @@ var VR = function (_PoseInputProcessor) {
     _this.lastStageDepth = null;
     _this.isStereo = false;
     install(options);
+
+    if (_this.options.nonstandardIPD !== null) {
+      CardboardVRDisplay.IPD = _this.options.nonstandardIPD;
+    }
+    if (_this.options.nonstandardNeckLength !== null) {
+      CardboardVRDisplay.NECK_LENGTH = _this.options.nonstandardNeckLength;
+    }
+    if (_this.options.nonstandardNeckDepth !== null) {
+      CardboardVRDisplay.NECK_DEPTH = _this.options.nonstandardNeckDepth;
+    }
+
+    _this.currentDevice = null;
     _this.ready = navigator.getVRDisplays().then(function (displays) {
       _this.displays.push.apply(_this.displays, displays);
-      _this.connect(0);
+      _this.currentDevice = _this.displays[0];
       return _this.displays;
     });
     return _this;
@@ -10621,10 +10909,9 @@ var VR = function (_PoseInputProcessor) {
     value: function connect(selectedIndex) {
       this.currentDevice = null;
       this.currentDeviceIndex = selectedIndex;
-      this.currentPose = null;
       if (0 <= selectedIndex && selectedIndex <= this.displays.length) {
         this.currentDevice = this.displays[selectedIndex];
-        this.currentPose = this.currentDevice.getPose();
+        this.currentDevice.updateFrameData();
         this.isStereo = VR.isStereoDisplay(this.currentDevice);
       }
     }
@@ -10647,7 +10934,7 @@ var VR = function (_PoseInputProcessor) {
         }
 
         var promise = this.currentDevice.requestPresent(layers);
-        if (isMobile || !isFirefox) {
+        if (isMobile) {
           promise = promise.then(standardLockBehavior);
         }
         return promise;
@@ -10663,7 +10950,6 @@ var VR = function (_PoseInputProcessor) {
         promise = this.currentDevice.exitPresent();
         this.currentDevice = null;
         this.currentDeviceIndex = -1;
-        this.currentPose = null;
       } else {
         promise = Promise.resolve();
       }
@@ -10692,12 +10978,11 @@ var VR = function (_PoseInputProcessor) {
       var x, z, stage;
 
       if (this.currentDevice) {
-        this.currentPose = this.currentDevice.getPose();
+        this.currentDevice.updateFrameData();
         stage = this.currentDevice.stageParameters;
       } else {
         stage = null;
       }
-
       get$1(VR.prototype.__proto__ || Object.getPrototypeOf(VR.prototype), "update", this).call(this, dt);
 
       if (stage) {
@@ -10723,24 +11008,19 @@ var VR = function (_PoseInputProcessor) {
   }, {
     key: "submitFrame",
     value: function submitFrame() {
-      if (this.currentDevice) {
-        this.currentDevice.submitFrame(this.currentPose);
+      if (this.currentDevice && this.currentDevice === this.timerDevice) {
+        this.currentDevice.submitFrame();
       }
     }
   }, {
     key: "startAnimation",
     value: function startAnimation(callback) {
-      if (this.currentDevice) {
-        this.lastLastTimerDevice = this.lastTimerDevice;
-        this.lastTimerDevice = this.timerDevice;
-        this.timerDevice = this.currentDevice;
-        this.timer = this.currentDevice.requestAnimationFrame(callback);
-        return this.timer;
-      }
+      this.timerDevice = this.currentDevice || window;
+      this.timer = this.timerDevice.requestAnimationFrame(callback);
     }
   }, {
-    key: "cancelAnimation",
-    value: function cancelAnimation() {
+    key: "stopAnimation",
+    value: function stopAnimation(id) {
       if (this.timerDevice && this.timer) {
         this.timerDevice.cancelAnimationFrame(this.timer);
         this.timer = null;
@@ -10766,7 +11046,7 @@ var VR = function (_PoseInputProcessor) {
   }, {
     key: "isNativeWebVR",
     get: function get() {
-      return this.currentDevice && !this.currentDevice.isPolyfilled;
+      return this.currentDevice && this.currentDevice.isNativeVRDisplay;
     }
   }, {
     key: "hasStage",
@@ -10781,7 +11061,7 @@ var VR = function (_PoseInputProcessor) {
   }, {
     key: "isPolyfilled",
     get: function get() {
-      return this.currentDevice && this.currentDevice.isPolyfilled;
+      return this.currentDevice && !this.currentDevice.isNativeVRDisplay;
     }
   }, {
     key: "isPresenting",
@@ -10808,53 +11088,20 @@ var VR = function (_PoseInputProcessor) {
   return VR;
 }(PoseInputProcessor);
 
+function makeTransform(view, projection, eye) {
+  return {
+    view: view,
+    projection: projection,
+    viewport: {
+      left: 0,
+      top: 0,
+      width: eye.renderWidth,
+      height: eye.renderHeight
+    }
+  };
+}
+
 var ViewCameraTransform = function () {
-  createClass(ViewCameraTransform, null, [{
-    key: "makeTransform",
-    value: function makeTransform(eye, near, far) {
-      return {
-        translation: new three.Vector3().fromArray(eye.offset),
-        projection: ViewCameraTransform.fieldOfViewToProjectionMatrix(eye.fieldOfView, near, far),
-        viewport: {
-          left: 0,
-          top: 0,
-          width: eye.renderWidth,
-          height: eye.renderHeight
-        }
-      };
-    }
-  }, {
-    key: "fieldOfViewToProjectionMatrix",
-    value: function fieldOfViewToProjectionMatrix(fov, zNear, zFar) {
-      var upTan = Math.tan(fov.upDegrees * Math.PI / 180.0),
-          downTan = Math.tan(fov.downDegrees * Math.PI / 180.0),
-          leftTan = Math.tan(fov.leftDegrees * Math.PI / 180.0),
-          rightTan = Math.tan(fov.rightDegrees * Math.PI / 180.0),
-          xScale = 2.0 / (leftTan + rightTan),
-          yScale = 2.0 / (upTan + downTan),
-          matrix = new three.Matrix4();
-
-      matrix.elements[0] = xScale;
-      matrix.elements[1] = 0.0;
-      matrix.elements[2] = 0.0;
-      matrix.elements[3] = 0.0;
-      matrix.elements[4] = 0.0;
-      matrix.elements[5] = yScale;
-      matrix.elements[6] = 0.0;
-      matrix.elements[7] = 0.0;
-      matrix.elements[8] = -((leftTan - rightTan) * xScale * 0.5);
-      matrix.elements[9] = (upTan - downTan) * yScale * 0.5;
-      matrix.elements[10] = -(zNear + zFar) / (zFar - zNear);
-      matrix.elements[11] = -1.0;
-      matrix.elements[12] = 0.0;
-      matrix.elements[13] = 0.0;
-      matrix.elements[14] = -(2.0 * zFar * zNear) / (zFar - zNear);
-      matrix.elements[15] = 0.0;
-
-      return matrix;
-    }
-  }]);
-
   function ViewCameraTransform(display) {
     classCallCheck(this, ViewCameraTransform);
 
@@ -10864,11 +11111,15 @@ var ViewCameraTransform = function () {
   createClass(ViewCameraTransform, [{
     key: "getTransforms",
     value: function getTransforms(near, far) {
+      this.display.depthNear = near;
+      this.display.depthFar = far;
+
       var l = this.display.getEyeParameters("left"),
           r = this.display.getEyeParameters("right"),
-          params = [ViewCameraTransform.makeTransform(l, near, far)];
+          f = this.display.frameData,
+          params = [makeTransform(f.leftViewMatrix, f.leftProjectionMatrix, l)];
       if (r) {
-        params.push(ViewCameraTransform.makeTransform(r, near, far));
+        params.push(makeTransform(f.rightViewMatrix, f.rightProjectionMatrix, r));
       }
       for (var i = 1; i < params.length; ++i) {
         params[i].viewport.left = params[i - 1].viewport.left + params[i - 1].viewport.width;
@@ -10878,439 +11129,6 @@ var ViewCameraTransform = function () {
   }]);
   return ViewCameraTransform;
 }();
-
-var DISPLACEMENT = new three.Vector3();
-var EULER_TEMP$1 = new three.Euler();
-var QUAT_TEMP$1 = new three.Quaternion();
-var WEDGE = Math.PI / 3;
-
-var FPSInput = function (_EventDispatcher) {
-  inherits(FPSInput, _EventDispatcher);
-
-  function FPSInput(DOMElement, options) {
-    classCallCheck(this, FPSInput);
-
-    var _this = possibleConstructorReturn(this, (FPSInput.__proto__ || Object.getPrototypeOf(FPSInput)).call(this));
-
-    _this.options = options;
-    _this.managers = [];
-    _this.newState = [];
-    _this.pointers = [];
-    _this.motionDevices = [];
-    _this.velocity = new three.Vector3();
-    _this.matrix = new three.Matrix4();
-
-    if (!_this.options.disableKeyboard) {
-      _this.add(new Keyboard(_this, {
-        strafeLeft: {
-          buttons: [-Keys.A, -Keys.LEFTARROW]
-        },
-        strafeRight: {
-          buttons: [Keys.D, Keys.RIGHTARROW]
-        },
-        strafe: {
-          commands: ["strafeLeft", "strafeRight"]
-        },
-        driveForward: {
-          buttons: [-Keys.W, -Keys.UPARROW]
-        },
-        driveBack: {
-          buttons: [Keys.S, Keys.DOWNARROW]
-        },
-        drive: {
-          commands: ["driveForward", "driveBack"]
-        },
-        select: {
-          buttons: [Keys.ENTER]
-        },
-        dSelect: {
-          buttons: [Keys.ENTER],
-          delta: true
-        },
-        zero: {
-          buttons: [Keys.Z],
-          metaKeys: [-Keys.CTRL, -Keys.ALT, -Keys.SHIFT, -Keys.META],
-          commandUp: _this.emit.bind(_this, "zero")
-        }
-      }));
-
-      _this.Keyboard.operatingSystem = _this.options.os;
-      _this.Keyboard.codePage = _this.options.language;
-    }
-
-    _this.add(new Touch(DOMElement, {
-      buttons: {
-        axes: ["FINGERS"]
-      },
-      dButtons: {
-        axes: ["FINGERS"],
-        delta: true
-      },
-      heading: {
-        axes: ["DX0"],
-        integrate: true
-      },
-      pitch: {
-        axes: ["DY0"],
-        integrate: true,
-        min: -Math.PI * 0.5,
-        max: Math.PI * 0.5
-      }
-    }));
-
-    _this.add(new Mouse(DOMElement, {
-      U: { axes: ["X"], min: 0, max: 2, offset: 0 },
-      V: { axes: ["Y"], min: 0, max: 2 },
-      buttons: {
-        axes: ["BUTTONS"]
-      },
-      dButtons: {
-        axes: ["BUTTONS"],
-        delta: true
-      },
-      _dx: {
-        axes: ["X"],
-        delta: true,
-        scale: 0.25
-      },
-      dx: {
-        buttons: [0],
-        commands: ["_dx"]
-      },
-      heading: {
-        commands: ["dx"],
-        integrate: true
-      },
-      _dy: {
-        axes: ["Y"],
-        delta: true,
-        scale: 0.25
-      },
-      dy: {
-        buttons: [0],
-        commands: ["_dy"]
-      },
-      pitch: {
-        commands: ["dy"],
-        integrate: true,
-        min: -Math.PI * 0.5,
-        max: Math.PI * 0.5
-      }
-    }));
-
-    _this.add(new VR(_this.options));
-    _this.motionDevices.push(_this.VR);
-
-    if (!_this.options.disableGamepad && GamepadManager.isAvailable) {
-      _this.gamepadMgr = new GamepadManager();
-      _this.gamepadMgr.addEventListener("gamepadconnected", function (pad) {
-        var padID = Gamepad.ID(pad);
-        var mgr = null;
-
-        if (padID !== "Unknown" && padID !== "Rift") {
-          if (Gamepad.isMotionController(pad)) {
-            var controllerNumber = 0;
-            for (var i = 0; i < _this.managers.length; ++i) {
-              mgr = _this.managers[i];
-              if (mgr.currentPad && mgr.currentPad.id === pad.id) {
-                ++controllerNumber;
-              }
-            }
-
-            mgr = new Gamepad(_this.gamepadMgr, pad, controllerNumber, {
-              buttons: {
-                axes: ["BUTTONS"]
-              },
-              dButtons: {
-                axes: ["BUTTONS"],
-                delta: true
-              },
-              zero: {
-                buttons: [Gamepad.VIVE_BUTTONS.GRIP_PRESSED],
-                commandUp: _this.emit.bind(_this, "zero")
-              }
-            });
-
-            _this.add(mgr);
-            _this.motionDevices.push(mgr);
-
-            var shift = (_this.motionDevices.length - 2) * 8,
-                color = 0x0000ff << shift,
-                highlight = 0xff0000 >> shift,
-                ptr = new Pointer(padID + "Pointer", color, 1, highlight, [mgr], null, _this.options);
-            ptr.add(colored(box$1(0.1, 0.025, 0.2), color, {
-              emissive: highlight
-            }));
-
-            ptr.forward(_this);
-
-            _this.pointers.push(ptr);
-            _this.options.scene.add(ptr);
-
-            _this.emit("motioncontrollerfound", mgr);
-          } else {
-            mgr = new Gamepad(_this.gamepadMgr, pad, 0, {
-              buttons: {
-                axes: ["BUTTONS"]
-              },
-              dButtons: {
-                axes: ["BUTTONS"],
-                delta: true
-              },
-              strafe: {
-                axes: ["LSX"],
-                deadzone: 0.2
-              },
-              drive: {
-                axes: ["LSY"],
-                deadzone: 0.2
-              },
-              heading: {
-                axes: ["RSX"],
-                scale: -1,
-                deadzone: 0.2,
-                integrate: true
-              },
-              dHeading: {
-                commands: ["heading"],
-                delta: true
-              },
-              pitch: {
-                axes: ["RSY"],
-                scale: -1,
-                deadzone: 0.2,
-                integrate: true
-              },
-              zero: {
-                buttons: [Gamepad.XBOX_ONE_BUTTONS.BACK],
-                commandUp: _this.emit.bind(_this, "zero")
-              }
-            });
-            _this.add(mgr);
-            _this.mousePointer.addDevice(mgr, mgr);
-          }
-        }
-      });
-
-      _this.gamepadMgr.addEventListener("gamepaddisconnected", _this.remove.bind(_this));
-    }
-
-    _this.stage = hub();
-
-    _this.head = new Pointer("GazePointer", 0xffff00, 0x0000ff, 0.8, [_this.VR], [_this.Mouse, _this.Touch, _this.Keyboard], _this.options);
-
-    _this.head.forward(_this);
-
-    _this.head.rotation.order = "YXZ";
-    _this.head.useGaze = _this.options.useGaze;
-    _this.pointers.push(_this.head);
-    _this.options.scene.add(_this.head);
-
-    _this.mousePointer = new Pointer("MousePointer", 0xff0000, 0x00ff00, 1, [_this.Mouse], null, _this.options);
-
-    _this.mousePointer.forward(_this);
-    _this.mousePointer.unproject = new three.Matrix4();
-    _this.pointers.push(_this.mousePointer);
-    _this.head.add(_this.mousePointer);
-
-    _this.ready = Promise.all(_this.managers.map(function (mgr) {
-      return mgr.ready;
-    }).filter(identity));
-    return _this;
-  }
-
-  createClass(FPSInput, [{
-    key: "remove",
-    value: function remove(id) {
-      var mgr = this[id],
-          mgrIdx = this.managers.indexOf(mgr);
-      if (mgrIdx > -1) {
-        this.managers.splice(mgrIdx, 1);
-        delete this[id];
-      }
-      console.log("removed", mgr);
-    }
-  }, {
-    key: "add",
-    value: function add(mgr) {
-      for (var i = this.managers.length - 1; i >= 0; --i) {
-        if (this.managers[i].name === mgr.name) {
-          this.managers.splice(i, 1);
-        }
-      }
-      this.managers.push(mgr);
-      this[mgr.name] = mgr;
-    }
-  }, {
-    key: "zero",
-    value: function zero() {
-      for (var i = 0; i < this.managers.length; ++i) {
-        this.managers[i].zero();
-      }
-    }
-  }, {
-    key: "update",
-    value: function update(dt, ground) {
-      var hadGamepad = this.hasGamepad;
-      if (this.gamepadMgr) {
-        this.gamepadMgr.poll();
-      }
-      for (var i = 0; i < this.managers.length; ++i) {
-        this.managers[i].update(dt);
-      }
-
-      if (!hadGamepad && this.hasGamepad) {
-        this.Mouse.inPhysicalUse = false;
-      }
-
-      this.head.showPointer = this.VR.hasOrientation && this.options.showHeadPointer;
-      this.mousePointer.showPointer = (this.hasMouse || this.hasGamepad) && !this.hasMotionControllers;
-
-      if (this.hasTouch) {
-        this.Touch.enabled = !this.hasMotionControllers;
-      }
-
-      this.updateStage(dt, ground);
-      this.stage.position.y += this.options.avatarHeight;
-      for (var _i = 0; _i < this.motionDevices.length; ++_i) {
-        this.motionDevices[_i].posePosition.y -= this.options.avatarHeight;
-      }
-
-      // update the motionDevices
-      this.stage.updateMatrix();
-      this.matrix.multiplyMatrices(this.stage.matrix, this.VR.stage.matrix);
-      for (var _i2 = 0; _i2 < this.motionDevices.length; ++_i2) {
-        this.motionDevices[_i2].updateStage(this.matrix);
-      }
-
-      for (var _i3 = 0; _i3 < this.pointers.length; ++_i3) {
-        this.pointers[_i3].update();
-      }
-
-      // record the position and orientation of the user
-      this.newState = [];
-      this.head.updateMatrix();
-      this.stage.rotation.x = 0;
-      this.stage.rotation.z = 0;
-      this.stage.quaternion.setFromEuler(this.stage.rotation);
-      this.stage.updateMatrix();
-      this.head.position.toArray(this.newState, 0);
-      this.head.quaternion.toArray(this.newState, 3);
-    }
-  }, {
-    key: "updateStage",
-    value: function updateStage(dt, ground) {
-      // get the linear movement from the mouse/keyboard/gamepad
-      var heading = 0,
-          pitch = 0,
-          strafe = 0,
-          drive = 0;
-      for (var i = 0; i < this.managers.length; ++i) {
-        var mgr = this.managers[i];
-        if (mgr.enabled) {
-          if (mgr.name !== "Mouse") {
-            heading += mgr.getValue("heading");
-          }
-          pitch += mgr.getValue("pitch");
-          strafe += mgr.getValue("strafe");
-          drive += mgr.getValue("drive");
-        }
-      }
-
-      if (this.hasMouse) {
-        var mouseHeading = null;
-        if (this.VR.hasOrientation) {
-          mouseHeading = this.mousePointer.rotation.y;
-          var newMouseHeading = WEDGE * Math.floor(mouseHeading / WEDGE + 0.5);
-          if (newMouseHeading !== 0) {
-            this.Mouse.commands.U.offset -= this.Mouse.getValue("U") - 1;
-          }
-          mouseHeading = newMouseHeading + this.Mouse.commands.U.offset * 2;
-        } else {
-          mouseHeading = this.Mouse.getValue("heading");
-        }
-        heading += mouseHeading;
-      }
-      if (this.VR.hasOrientation) {
-        pitch = 0;
-      }
-
-      // move stage according to heading and thrust
-      EULER_TEMP$1.set(pitch, heading, 0, "YXZ");
-      this.stage.quaternion.setFromEuler(EULER_TEMP$1);
-
-      // update the stage's velocity
-      this.velocity.set(strafe, 0, drive);
-
-      QUAT_TEMP$1.copy(this.head.quaternion);
-      EULER_TEMP$1.setFromQuaternion(QUAT_TEMP$1);
-      EULER_TEMP$1.x = 0;
-      EULER_TEMP$1.z = 0;
-      QUAT_TEMP$1.setFromEuler(EULER_TEMP$1);
-
-      this.moveStage(DISPLACEMENT.copy(this.velocity).multiplyScalar(dt).applyQuaternion(QUAT_TEMP$1).add(this.head.position));
-
-      this.stage.position.y = ground.getHeightAt(this.stage.position) || 0;
-    }
-  }, {
-    key: "cancelVR",
-    value: function cancelVR() {
-      this.VR.cancel();
-      this.Mouse.commands.U.offset = 0;
-    }
-  }, {
-    key: "moveStage",
-    value: function moveStage(position) {
-      DISPLACEMENT.copy(position).sub(this.head.position);
-
-      this.stage.position.add(DISPLACEMENT);
-    }
-  }, {
-    key: "resolvePicking",
-    value: function resolvePicking(objects) {
-      for (var i = 0; i < this.pointers.length; ++i) {
-        this.pointers[i].resolvePicking(objects);
-      }
-    }
-  }, {
-    key: "hasMotionControllers",
-    get: function get() {
-      return !!(this.Vive_0 && this.Vive_0.enabled && this.Vive_0.inPhysicalUse || this.Vive_1 && this.Vive_1.enabled && this.Vive_1.inPhysicalUse);
-    }
-  }, {
-    key: "hasGamepad",
-    get: function get() {
-      return !!(this.Gamepad_0 && this.Gamepad_0.enabled && this.Gamepad_0.inPhysicalUse);
-    }
-  }, {
-    key: "hasMouse",
-    get: function get() {
-      return !this.hasTouch && !!(this.Mouse && this.Mouse.enabled && this.Mouse.inPhysicalUse);
-    }
-  }, {
-    key: "hasTouch",
-    get: function get() {
-      return !!(this.Touch && this.Touch.enabled && this.Touch.inPhysicalUse);
-    }
-  }, {
-    key: "segments",
-    get: function get() {
-      var segments = [];
-      for (var i = 0; i < this.pointers.length; ++i) {
-        var seg = this.pointers[i].segment;
-        if (seg) {
-          segments.push(seg);
-        }
-      }
-      return segments;
-    }
-  }]);
-  return FPSInput;
-}(three.EventDispatcher);
-
-
-
-FPSInput.EVENTS = Pointer.EVENTS.slice();
 
 function number(min, max, power) {
   power = power || 1;
@@ -11730,7 +11548,7 @@ var Teleporter = function () {
     key: "_updatePosition",
     value: function _updatePosition(evt) {
       this._startPoint.copy(this.disk.position);
-      this.disk.position.copy(evt.hit.point).sub(this._environment.input.head.position);
+      this.disk.position.copy(evt.hit.point).sub(this._environment.head.position);
 
       var distSq = this.disk.position.x * this.disk.position.x + this.disk.position.z * this.disk.position.z;
       if (distSq > MAX_MOVE_DISTANCE_SQ) {
@@ -11742,7 +11560,7 @@ var Teleporter = function () {
         this.disk.position.y = y;
       }
 
-      this.disk.position.add(this._environment.input.head.position);
+      this.disk.position.add(this._environment.head.position);
 
       var len = DIFF.copy(this.disk.position).sub(this._startPoint).length();
       this._moveDistance += len;
@@ -11783,6 +11601,10 @@ console.info("[" + packageName + " v" + version + "]:> see " + homepage + " for 
 
 var MILLISECONDS_TO_SECONDS = 0.001;
 var TELEPORT_DISPLACEMENT = new three.Vector3();
+var DISPLACEMENT = new three.Vector3();
+var EULER_TEMP = new three.Euler();
+var QUAT_TEMP = new three.Quaternion();
+var WEDGE = Math.PI / 3;
 
 var BrowserEnvironment = function (_EventDispatcher) {
   inherits(BrowserEnvironment, _EventDispatcher);
@@ -11808,7 +11630,9 @@ var BrowserEnvironment = function (_EventDispatcher) {
 
     _this.zero = function () {
       if (!_this.lockMovement) {
-        _this.input.zero();
+        for (var i = 0; i < _this.managers.length; ++i) {
+          _this.managers[i].zero();
+        }
         if (_this.quality === Quality.NONE) {
           _this.quality = Quality.HIGH;
         }
@@ -11842,13 +11666,109 @@ var BrowserEnvironment = function (_EventDispatcher) {
         updateFade(dt);
 
         for (var frame = 0; frame < numFrames; ++frame) {
-          _this.input.update(_this.deltaTime, _this.ground);
+          var hadGamepad = _this.hasGamepad;
+          if (_this.gamepadMgr) {
+            _this.gamepadMgr.poll();
+          }
+          for (var i = 0; i < _this.managers.length; ++i) {
+            _this.managers[i].update(dt);
+          }
+
+          if (!hadGamepad && _this.hasGamepad) {
+            _this.Mouse.inPhysicalUse = false;
+          }
+
+          _this.head.showPointer = _this.VR.hasOrientation && _this.options.showHeadPointer;
+          _this.mousePointer.visible = _this.VR.isPresenting;
+          _this.mousePointer.showPointer = !_this.hasMotionControllers;
+
+          var heading = 0,
+              pitch = 0,
+              strafe = 0,
+              drive = 0;
+          for (var _i = 0; _i < _this.managers.length; ++_i) {
+            var mgr = _this.managers[_i];
+            if (mgr.enabled) {
+              if (mgr.name !== "Mouse") {
+                heading += mgr.getValue("heading");
+              }
+              pitch += mgr.getValue("pitch");
+              strafe += mgr.getValue("strafe");
+              drive += mgr.getValue("drive");
+            }
+          }
+
+          if (_this.hasMouse || _this.hasTouch) {
+            var mouseHeading = null;
+            if (_this.VR.hasOrientation) {
+              mouseHeading = _this.mousePointer.rotation.y;
+              var newMouseHeading = WEDGE * Math.floor(mouseHeading / WEDGE + 0.5);
+              if (newMouseHeading !== 0) {
+                _this.Mouse.commands.U.offset -= _this.Mouse.getValue("U") - 1;
+              }
+              mouseHeading = newMouseHeading + _this.Mouse.commands.U.offset * 2;
+            } else {
+              mouseHeading = _this.Mouse.getValue("heading");
+            }
+            heading += mouseHeading;
+          }
+          if (_this.VR.hasOrientation) {
+            pitch = 0;
+          }
+
+          // move stage according to heading and thrust
+          EULER_TEMP.set(pitch, heading, 0, "YXZ");
+          _this.stage.quaternion.setFromEuler(EULER_TEMP);
+
+          // update the stage's velocity
+          _this.velocity.set(strafe, 0, drive);
+
+          QUAT_TEMP.copy(_this.head.quaternion);
+          EULER_TEMP.setFromQuaternion(QUAT_TEMP);
+          EULER_TEMP.x = 0;
+          EULER_TEMP.z = 0;
+          QUAT_TEMP.setFromEuler(EULER_TEMP);
+
+          _this.moveStage(DISPLACEMENT.copy(_this.velocity).multiplyScalar(dt).applyQuaternion(QUAT_TEMP).add(_this.head.position));
+
+          _this.stage.position.y = _this.ground.getHeightAt(_this.stage.position) || 0;
+          _this.stage.position.y += _this.options.avatarHeight;
+          for (var _i2 = 0; _i2 < _this.motionDevices.length; ++_i2) {
+            _this.motionDevices[_i2].posePosition.y -= _this.options.avatarHeight;
+          }
+
+          // update the motionDevices
+          _this.stage.updateMatrix();
+          _this.matrix.multiplyMatrices(_this.stage.matrix, _this.VR.stage.matrix);
+          for (var _i3 = 0; _i3 < _this.motionDevices.length; ++_i3) {
+            _this.motionDevices[_i3].updateStage(_this.matrix);
+          }
+
+          for (var _i4 = 0; _i4 < _this.pointers.length; ++_i4) {
+            _this.pointers[_i4].update();
+          }
+
+          // record the position and orientation of the user
+          _this.newState = [];
+          _this.head.updateMatrix();
+          _this.stage.rotation.x = 0;
+          _this.stage.rotation.z = 0;
+          _this.stage.quaternion.setFromEuler(_this.stage.rotation);
+          _this.stage.updateMatrix();
+          _this.head.position.toArray(_this.newState, 0);
+          _this.head.quaternion.toArray(_this.newState, 3);
 
           if (frame === 0) {
             updateAll();
-            _this.input.resolvePicking(_this.scene);
-            _this.ground.moveTo(_this.input.head.position);
-            _this.sky.position.copy(_this.input.head.position);
+            var userActionHandlers = null;
+            for (var _i5 = 0; _i5 < _this.pointers.length; ++_i5) {
+              userActionHandlers = _this.pointers[_i5].resolvePicking(_this.scene);
+            }
+            for (var _i6 = 0; _i6 < _this.managers.length; ++_i6) {
+              _this.managers[_i6].userActionHandlers = userActionHandlers;
+            }
+            _this.ground.moveTo(_this.head.position);
+            _this.sky.position.copy(_this.head.position);
             moveUI();
           }
 
@@ -11875,14 +11795,14 @@ var BrowserEnvironment = function (_EventDispatcher) {
       var y = _this.vicinity.position.y,
           p = _this.options.vicinityFollowRate,
           q = 1 - p;
-      _this.vicinity.position.lerp(_this.input.head.position, p);
+      _this.vicinity.position.lerp(_this.head.position, p);
       _this.vicinity.position.y = y;
 
-      followEuler.setFromQuaternion(_this.input.head.quaternion);
+      followEuler.setFromQuaternion(_this.head.quaternion);
       _this.turns.radians = followEuler.y;
       followEuler.set(maxX, _this.turns.radians, 0, "YXZ");
       _this.ui.quaternion.setFromEuler(followEuler);
-      _this.ui.position.y = _this.ui.position.y * q + _this.input.head.position.y * p;
+      _this.ui.position.y = _this.ui.position.y * q + _this.head.position.y * p;
     };
 
     var animate = function animate(t) {
@@ -11892,53 +11812,38 @@ var BrowserEnvironment = function (_EventDispatcher) {
       lt = t;
       update(dt);
       render();
-      RAF(animate);
+      _this.VR.startAnimation(animate);
     };
 
     var render = function render() {
       _this.camera.position.set(0, 0, 0);
       _this.camera.quaternion.set(0, 0, 0, 1);
-      _this.audio.setPlayer(_this.input.head.mesh);
+      _this.audio.setPlayer(_this.head.mesh);
       _this.renderer.clear(true, true, true);
 
-      var trans = _this.input.VR.getTransforms(_this.options.nearPlane, _this.options.nearPlane + _this.options.drawDistance);
+      var trans = _this.VR.getTransforms(_this.options.nearPlane, _this.options.nearPlane + _this.options.drawDistance);
       for (var i = 0; trans && i < trans.length; ++i) {
         eyeBlankAll(i);
 
         var st = trans[i],
             v = st.viewport;
 
-        // if we're rendering with an eye offset
-        if (st.translation.x !== 0) {
-          // ... and we have non-standard offset values to use:
-          if (_this.options.nonstandardIPD !== null) {
-            st.translation.x *= _this.options.nonstandardIPD / Math.abs(st.translation.x);
-          }
-          if (_this.options.nonstandardNeckLength !== null) {
-            st.translation.y = _this.options.nonstandardNeckLength;
-          }
-          if (_this.options.nonstandardNeckDepth !== null) {
-            st.translation.z = _this.options.nonstandardNeckDepth;
-          }
-        }
-
         _this.renderer.setViewport(v.left * resolutionScale, v.top * resolutionScale, v.width * resolutionScale, v.height * resolutionScale);
 
-        _this.camera.projectionMatrix.copy(st.projection);
-        if (_this.input.mousePointer.unproject) {
-          _this.input.mousePointer.unproject.getInverse(st.projection);
+        _this.camera.projectionMatrix.elements = st.projection;
+        _this.camera.modelViewMatrix.elements = st.view;
+        if (_this.mousePointer.unproject) {
+          _this.mousePointer.unproject.getInverse(_this.camera.projectionMatrix);
         }
-        _this.camera.translateOnAxis(st.translation, 1);
         _this.renderer.render(_this.scene, _this.camera);
-        _this.camera.translateOnAxis(st.translation, -1);
       }
-      _this.input.VR.submitFrame();
+      _this.VR.submitFrame();
     };
 
     var modifyScreen = function modifyScreen() {
       var near = _this.options.nearPlane,
           far = near + _this.options.drawDistance,
-          p = _this.input && _this.input.VR && _this.input.VR.getTransforms(near, far);
+          p = _this.VR && _this.VR.getTransforms(near, far);
 
       if (p) {
         var canvasWidth = 0,
@@ -11949,17 +11854,13 @@ var BrowserEnvironment = function (_EventDispatcher) {
           canvasHeight = Math.max(canvasHeight, p[i].viewport.height);
         }
 
-        _this.input.Mouse.commands.U.scale = devicePixelRatio * 2 / canvasWidth;
-        _this.input.Mouse.commands.V.scale = devicePixelRatio * 2 / canvasHeight;
+        _this.mousePointer.setSize(canvasWidth, canvasHeight);
 
         canvasWidth = Math.floor(canvasWidth * resolutionScale);
         canvasHeight = Math.floor(canvasHeight * resolutionScale);
 
         _this.renderer.domElement.width = canvasWidth;
         _this.renderer.domElement.height = canvasHeight;
-        if (!_this.timer) {
-          render();
-        }
       }
     };
 
@@ -12137,17 +12038,17 @@ var BrowserEnvironment = function (_EventDispatcher) {
 
     _this.teleport = function (pos, immediate) {
       return _this.transition(function () {
-        return _this.input.moveStage(pos);
+        return _this.moveStage(pos);
       }, function () {
-        return _this.teleportAvailable && TELEPORT_DISPLACEMENT.copy(pos).sub(_this.input.head.position).length() > 0.2;
+        return _this.teleportAvailable && TELEPORT_DISPLACEMENT.copy(pos).sub(_this.head.position).length() > 0.2;
       }, immediate);
     };
 
     var delesectControl = function delesectControl() {
       if (_this.currentControl) {
         _this.currentControl.removeEventListener("blur", delesectControl);
-        _this.input.Keyboard.enabled = true;
-        _this.input.Mouse.commands.pitch.disabled = _this.input.Mouse.commands.heading.disabled = _this.input.VR.isPresenting;
+        _this.Keyboard.enabled = true;
+        _this.Mouse.commands.pitch.disabled = _this.Mouse.commands.heading.disabled = _this.VR.isPresenting;
         _this.currentControl.blur();
         _this.currentControl = null;
       }
@@ -12168,8 +12069,8 @@ var BrowserEnvironment = function (_EventDispatcher) {
             _this.currentControl.focus();
             _this.currentControl.addEventListener("blur", delesectControl);
             if (_this.currentControl.lockMovement) {
-              _this.input.Keyboard.enabled = false;
-              _this.input.Mouse.commands.pitch.disabled = _this.input.Mouse.commands.heading.disabled = !_this.input.VR.isPresenting;
+              _this.Keyboard.enabled = false;
+              _this.Mouse.commands.pitch.disabled = _this.Mouse.commands.heading.disabled = !_this.VR.isPresenting;
             }
           }
         }
@@ -12235,37 +12136,22 @@ var BrowserEnvironment = function (_EventDispatcher) {
       return sceneGraph;
     };
 
-    var currentTimerObject = null;
-    _this.timer = 0;
-    var RAF = function RAF(callback) {
-      currentTimerObject = _this.input.VR.currentDevice || window;
-      if (_this.timer !== null) {
-        _this.timer = currentTimerObject.requestAnimationFrame(callback);
-      }
-    };
-
     _this.goFullScreen = function (index, evt) {
       if (evt !== "Gaze") {
-        var _ret = function () {
-          var elem = null;
-          if (evt === "force" || _this.input.VR.canMirror || _this.input.VR.isNativeWebVR) {
-            elem = _this.renderer.domElement;
-          } else {
-            elem = _this.options.fullScreenElement;
-          }
-          _this.input.VR.connect(index);
-          return {
-            v: _this.input.VR.requestPresent([{
-              source: elem
-            }]).catch(function (exp) {
-              return console.error("whaaat", exp);
-            }).then(function () {
-              return elem.focus();
-            })
-          };
-        }();
-
-        if ((typeof _ret === "undefined" ? "undefined" : _typeof(_ret)) === "object") return _ret.v;
+        var elem = null;
+        if (evt === "force" || _this.VR.canMirror || _this.VR.isNativeWebVR) {
+          elem = _this.renderer.domElement;
+        } else {
+          elem = _this.options.fullScreenElement;
+        }
+        _this.VR.connect(index);
+        return _this.VR.requestPresent([{
+          source: elem
+        }]).catch(function (exp) {
+          return console.error("whaaat", exp);
+        }).then(function () {
+          return elem.focus();
+        });
       }
     };
 
@@ -12281,21 +12167,21 @@ var BrowserEnvironment = function (_EventDispatcher) {
     };
 
     PointerLock.addChangeListener(function (evt) {
-      if (_this.input.VR.isPresenting && !PointerLock.isActive) {
-        _this.input.cancelVR();
+      if (_this.VR.isPresenting && !PointerLock.isActive) {
+        _this.cancelVR();
       }
     });
 
     var fullScreenChange = function fullScreenChange(evt) {
-      var presenting = !!_this.input.VR.isPresenting,
+      var presenting = !!_this.VR.isPresenting,
           cmd = (presenting ? "remove" : "add") + "Button";
-      _this.input.Mouse[cmd]("dx", 0);
-      _this.input.Mouse[cmd]("dy", 0);
-      _this.input.Mouse.commands.U.disabled = _this.input.Mouse.commands.V.disabled = presenting && !_this.input.VR.isStereo;
-      _this.input.Mouse.commands.heading.scale = presenting ? -1 : 1;
-      _this.input.Mouse.commands.pitch.scale = presenting ? -1 : 1;
+      _this.Mouse[cmd]("dx", 0);
+      _this.Mouse[cmd]("dy", 0);
+      _this.Mouse.commands.U.disabled = _this.Mouse.commands.V.disabled = presenting && !_this.VR.isStereo;
+      _this.Mouse.commands.heading.scale = presenting ? -1 : 1;
+      _this.Mouse.commands.pitch.scale = presenting ? -1 : 1;
       if (!presenting) {
-        _this.input.cancelVR();
+        _this.cancelVR();
       }
       modifyScreen();
     };
@@ -12335,28 +12221,251 @@ var BrowserEnvironment = function (_EventDispatcher) {
       _this.renderer.domElement.addEventListener('webglcontextlost', _this.stop, false);
       _this.renderer.domElement.addEventListener('webglcontextrestored', _this.start, false);
 
-      _this.input = new FPSInput(_this.options.fullScreenElement, _this.options);
-      _this.input.addEventListener("zero", _this.zero);
-      _this.watch(_this.input, ["motioncontrollerfound"]);
-      _this.input.route(FPSInput.EVENTS, _this.consumeEvent.bind(_this));
-      _this.input.VR.ready.then(function (displays) {
+      _this.managers = [];
+      _this.newState = [];
+      _this.pointers = [];
+      _this.motionDevices = [];
+      _this.velocity = new three.Vector3();
+      _this.matrix = new three.Matrix4();
+
+      if (!_this.options.disableKeyboard) {
+        _this.addInputManager(new Keyboard(_this, {
+          strafeLeft: {
+            buttons: [-Keys.A, -Keys.LEFTARROW]
+          },
+          strafeRight: {
+            buttons: [Keys.D, Keys.RIGHTARROW]
+          },
+          strafe: {
+            commands: ["strafeLeft", "strafeRight"]
+          },
+          driveForward: {
+            buttons: [-Keys.W, -Keys.UPARROW]
+          },
+          driveBack: {
+            buttons: [Keys.S, Keys.DOWNARROW]
+          },
+          drive: {
+            commands: ["driveForward", "driveBack"]
+          },
+          select: {
+            buttons: [Keys.ENTER]
+          },
+          dSelect: {
+            buttons: [Keys.ENTER],
+            delta: true
+          },
+          zero: {
+            buttons: [Keys.Z],
+            metaKeys: [-Keys.CTRL, -Keys.ALT, -Keys.SHIFT, -Keys.META],
+            commandUp: _this.emit.bind(_this, "zero")
+          }
+        }));
+
+        _this.Keyboard.operatingSystem = _this.options.os;
+        _this.Keyboard.codePage = _this.options.language;
+      }
+
+      _this.addInputManager(new Touch(_this.options.fullScreenElement, {
+        U: { axes: ["X0"], min: 0, max: 2, offset: 0 },
+        V: { axes: ["Y0"], min: 0, max: 2 },
+        buttons: {
+          axes: ["FINGERS"]
+        },
+        dButtons: {
+          axes: ["FINGERS"],
+          delta: true
+        },
+        heading: {
+          axes: ["DX0"],
+          integrate: true
+        },
+        pitch: {
+          axes: ["DY0"],
+          integrate: true,
+          min: -Math.PI * 0.5,
+          max: Math.PI * 0.5
+        }
+      }));
+
+      _this.addInputManager(new Mouse(_this.options.fullScreenElement, {
+        U: { axes: ["X"], min: 0, max: 2, offset: 0 },
+        V: { axes: ["Y"], min: 0, max: 2 },
+        buttons: {
+          axes: ["BUTTONS"]
+        },
+        dButtons: {
+          axes: ["BUTTONS"],
+          delta: true
+        },
+        _dx: {
+          axes: ["X"],
+          delta: true,
+          scale: 0.25
+        },
+        dx: {
+          buttons: [0],
+          commands: ["_dx"]
+        },
+        heading: {
+          commands: ["dx"],
+          integrate: true
+        },
+        _dy: {
+          axes: ["Y"],
+          delta: true,
+          scale: 0.25
+        },
+        dy: {
+          buttons: [0],
+          commands: ["_dy"]
+        },
+        pitch: {
+          commands: ["dy"],
+          integrate: true,
+          min: -Math.PI * 0.5,
+          max: Math.PI * 0.5
+        }
+      }));
+
+      // toggle back and forth between touch and mouse
+      _this.Touch.addEventListener("activate", function (evt) {
+        return _this.Mouse.inPhysicalUse = false;
+      });
+      _this.Mouse.addEventListener("activate", function (evt) {
+        return _this.Touch.inPhysicalUse = false;
+      });
+
+      _this.addInputManager(new VR(_this.options));
+
+      _this.motionDevices.push(_this.VR);
+
+      if (!_this.options.disableGamepad && GamepadManager.isAvailable) {
+        _this.gamepadMgr = new GamepadManager();
+        _this.gamepadMgr.addEventListener("gamepadconnected", function (pad) {
+          var padID = Gamepad.ID(pad);
+          var mgr = null;
+
+          if (padID !== "Unknown" && padID !== "Rift") {
+            if (Gamepad.isMotionController(pad)) {
+              var controllerNumber = 0;
+              for (var _i7 = 0; _i7 < _this.managers.length; ++_i7) {
+                mgr = _this.managers[_i7];
+                if (mgr.currentPad && mgr.currentPad.id === pad.id) {
+                  ++controllerNumber;
+                }
+              }
+
+              mgr = new Gamepad(_this.gamepadMgr, pad, controllerNumber, {
+                buttons: {
+                  axes: ["BUTTONS"]
+                },
+                dButtons: {
+                  axes: ["BUTTONS"],
+                  delta: true
+                },
+                zero: {
+                  buttons: [Gamepad.VIVE_BUTTONS.GRIP_PRESSED],
+                  commandUp: _this.emit.bind(_this, "zero")
+                }
+              });
+
+              _this.addInputManager(mgr);
+              _this.motionDevices.push(mgr);
+
+              var shift = (_this.motionDevices.length - 2) * 8,
+                  color = 0x0000ff << shift,
+                  highlight = 0xff0000 >> shift,
+                  ptr = new Pointer(padID + "Pointer", color, 1, highlight, [mgr], null, _this.options);
+              ptr.add(colored(box(0.1, 0.025, 0.2), color, {
+                emissive: highlight
+              }));
+
+              ptr.route(Pointer.EVENTS, _this.consumeEvent.bind(_this));
+
+              _this.pointers.push(ptr);
+              _this.scene.add(ptr);
+
+              _this.emit("motioncontrollerfound", mgr);
+            } else {
+              mgr = new Gamepad(_this.gamepadMgr, pad, 0, {
+                buttons: {
+                  axes: ["BUTTONS"]
+                },
+                dButtons: {
+                  axes: ["BUTTONS"],
+                  delta: true
+                },
+                strafe: {
+                  axes: ["LSX"],
+                  deadzone: 0.2
+                },
+                drive: {
+                  axes: ["LSY"],
+                  deadzone: 0.2
+                },
+                heading: {
+                  axes: ["RSX"],
+                  scale: -1,
+                  deadzone: 0.2,
+                  integrate: true
+                },
+                dHeading: {
+                  commands: ["heading"],
+                  delta: true
+                },
+                pitch: {
+                  axes: ["RSY"],
+                  scale: -1,
+                  deadzone: 0.2,
+                  integrate: true
+                },
+                zero: {
+                  buttons: [Gamepad.XBOX_ONE_BUTTONS.BACK],
+                  commandUp: _this.emit.bind(_this, "zero")
+                }
+              });
+              _this.addInputManager(mgr);
+              _this.mousePointer.addDevice(mgr, mgr);
+            }
+          }
+        });
+
+        _this.gamepadMgr.addEventListener("gamepaddisconnected", _this.removeInputManager.bind(_this));
+      }
+
+      _this.stage = hub();
+
+      _this.head = new Pointer("GazePointer", 0xffff00, 0x0000ff, 0.8, [_this.VR], [_this.Mouse, _this.Touch, _this.Keyboard], _this.options).addTo(_this.scene);
+
+      _this.head.route(Pointer.EVENTS, _this.consumeEvent.bind(_this));
+
+      _this.head.rotation.order = "YXZ";
+      _this.head.useGaze = _this.options.useGaze;
+      _this.pointers.push(_this.head);
+
+      _this.mousePointer = new Pointer("MousePointer", 0xff0000, 0x00ff00, 1, [_this.Mouse, _this.Touch], null, _this.options);
+      _this.mousePointer.route(Pointer.EVENTS, _this.consumeEvent.bind(_this));
+      _this.mousePointer.unproject = new three.Matrix4();
+      _this.pointers.push(_this.mousePointer);
+      _this.head.add(_this.mousePointer);
+
+      _this.VR.ready.then(function (displays) {
         return displays.forEach(function (display, i) {
           window.addEventListener("vrdisplayactivate", function (evt) {
             if (evt.display === display) {
-              (function () {
-                var exitVR = function exitVR() {
-                  window.removeEventListener("vrdisplaydeactivate", exitVR);
-                  _this.input.cancelVR();
-                };
-                window.addEventListener("vrdisplaydeactivate", exitVR, false);
-                _this.goFullScreen(i);
-              })();
+              var exitVR = function exitVR() {
+                window.removeEventListener("vrdisplaydeactivate", exitVR);
+                _this.cancelVR();
+              };
+              window.addEventListener("vrdisplaydeactivate", exitVR, false);
+              _this.goFullScreen(i);
             }
           }, false);
         });
       });
 
-      _this.fader = colored(box$1(1, 1, 1), _this.options.backgroundColor, {
+      _this.fader = colored(box(1, 1, 1), _this.options.backgroundColor, {
         opacity: 0,
         useFog: false,
         transparent: true,
@@ -12364,7 +12473,7 @@ var BrowserEnvironment = function (_EventDispatcher) {
         side: three.BackSide
       });
       _this.fader.visible = false;
-      _this.input.head.add(_this.fader);
+      _this.head.add(_this.fader);
 
       if (!_this.options.disableKeyboard) {
         var setFalse = function setFalse(evt) {
@@ -12372,17 +12481,17 @@ var BrowserEnvironment = function (_EventDispatcher) {
         };
 
         var keyDown = function keyDown(evt) {
-          if (_this.input.VR.isPresenting) {
-            if (evt.keyCode === Keys.ESCAPE && !_this.input.VR.isPolyfilled) {
-              _this.input.cancelVR();
+          if (_this.VR.isPresenting) {
+            if (evt.keyCode === Keys.ESCAPE && !_this.VR.isPolyfilled) {
+              _this.cancelVR();
             }
           }
 
-          _this.input.Keyboard.consumeEvent(evt);
+          _this.Keyboard.consumeEvent(evt);
           _this.consumeEvent(evt);
         },
             keyUp = function keyUp(evt) {
-          _this.input.Keyboard.consumeEvent(evt);
+          _this.Keyboard.consumeEvent(evt);
           _this.consumeEvent(evt);
         },
             withCurrentControl = function withCurrentControl(name$$1) {
@@ -12406,7 +12515,7 @@ var BrowserEnvironment = function (_EventDispatcher) {
 
         var focusClipboard = function focusClipboard(evt) {
           if (_this.lockMovement) {
-            var cmdName = _this.input.Keyboard.operatingSystem.makeCommandName(evt, _this.input.Keyboard.codePage);
+            var cmdName = _this.Keyboard.operatingSystem.makeCommandName(evt, _this.Keyboard.codePage);
             if (cmdName === "CUT" || cmdName === "COPY") {
               surrogate.style.display = "block";
               surrogate.focus();
@@ -12444,9 +12553,11 @@ var BrowserEnvironment = function (_EventDispatcher) {
         window.addEventListener("keydown", focusClipboard, true);
       }
 
-      _this.input.head.add(_this.camera);
+      _this.head.add(_this.camera);
 
-      return _this.input.ready;
+      return Promise.all(_this.managers.map(function (mgr) {
+        return mgr.ready;
+      }).filter(identity));
     });
 
     _this._readyParts = [_this.sky.ready, _this.ground.ready, modelsReady, documentReady];
@@ -12457,7 +12568,7 @@ var BrowserEnvironment = function (_EventDispatcher) {
         _this.renderer.shadowMap.type = three.PCFSoftShadowMap;
       }
 
-      _this.input.VR.displays.forEach(function (display) {
+      _this.VR.displays.forEach(function (display) {
         if (display.DOMElement !== undefined) {
           display.DOMElement = _this.renderer.domElement;
         }
@@ -12467,7 +12578,7 @@ var BrowserEnvironment = function (_EventDispatcher) {
         _this.insertFullScreenButtons(_this.options.fullScreenButtonContainer);
       }
 
-      _this.input.VR.connect(0);
+      _this.VR.connect(0);
 
       _this.emit("ready");
     });
@@ -12476,16 +12587,13 @@ var BrowserEnvironment = function (_EventDispatcher) {
       _this.ready.then(function () {
         _this.audio.start();
         lt = performance.now() * MILLISECONDS_TO_SECONDS;
-        RAF(animate);
+        _this.VR.startAnimation(animate);
       });
     };
 
     _this.stop = function () {
-      if (currentTimerObject) {
-        currentTimerObject.cancelAnimationFrame(_this.timer);
-        _this.audio.stop();
-        _this.timer = null;
-      }
+      _this.VR.stopAnimation();
+      _this.audio.stop();
     };
 
     Object.defineProperties(_this, {
@@ -12514,7 +12622,7 @@ var BrowserEnvironment = function (_EventDispatcher) {
           newFunction = function newFunction() {};
         }
         return function () {
-          if (this.input && this.input.VR && this.input.VR.isPresenting) {
+          if (this.VR && this.VR.isPresenting) {
             newFunction();
           } else {
             oldFunction.apply(window, arguments);
@@ -12536,7 +12644,7 @@ var BrowserEnvironment = function (_EventDispatcher) {
     value: function connect(socket, userName) {
 
       if (!this.network) {
-        this.network = new Manager(this.input, this.audio, this.factories, this.options);
+        this.network = new Manager(this, this.audio, this.factories, this.options);
         this.network.addEventListener("addavatar", this.addAvatar);
         this.network.addEventListener("removeavatar", this.removeAvatar);
       }
@@ -12547,6 +12655,41 @@ var BrowserEnvironment = function (_EventDispatcher) {
     value: function disconnect() {
 
       return this.network && this.network.disconnect();
+    }
+  }, {
+    key: "addInputManager",
+    value: function addInputManager(mgr) {
+      for (var i = this.managers.length - 1; i >= 0; --i) {
+        if (this.managers[i].name === mgr.name) {
+          this.managers.splice(i, 1);
+        }
+      }
+      this.managers.push(mgr);
+      this[mgr.name] = mgr;
+    }
+  }, {
+    key: "removeInputManager",
+    value: function removeInputManager(id) {
+      var mgr = this[id],
+          mgrIdx = this.managers.indexOf(mgr);
+      if (mgrIdx > -1) {
+        this.managers.splice(mgrIdx, 1);
+        delete this[id];
+      }
+      console.log("removed", mgr);
+    }
+  }, {
+    key: "moveStage",
+    value: function moveStage(position) {
+      DISPLACEMENT.copy(position).sub(this.head.position);
+
+      this.stage.position.add(DISPLACEMENT);
+    }
+  }, {
+    key: "cancelVR",
+    value: function cancelVR() {
+      this.VR.cancel();
+      this.Touch.commands.U.offset = this.Mouse.commands.U.offset = 0;
     }
   }, {
     key: "setAudioFromUser",
@@ -12575,6 +12718,8 @@ var BrowserEnvironment = function (_EventDispatcher) {
         return btn;
       };
 
+      var mixedReality = null;
+
       var buttons = this.displays
       // We skip the Standard Monitor and Magic Window on iOS because we can't go full screen on those systems.
       .map(function (display, i) {
@@ -12583,9 +12728,25 @@ var BrowserEnvironment = function (_EventDispatcher) {
               btn = newButton(display.displayName, display.displayName, enterVR),
               isStereo = VR.isStereoDisplay(display);
           btn.className = isStereo ? "stereo" : "mono";
+          if (display.isMixedRealityVRDisplay) {
+
+            mixedReality = {
+              display: display,
+              btn: btn
+            };
+
+            btn.style.display = "none";
+          }
           return btn;
         }
       }).filter(identity);
+
+      if (mixedReality) {
+        this.addEventListener("motioncontrollerfound", function (mgr) {
+          mixedReality.display.motionDevice = mgr;
+          mixedReality.btn.style.display = "";
+        });
+      }
 
       if (!/(www\.)?primrosevr.com/.test(document.location.hostname) && !this.options.disableAdvertising) {
         buttons.push(newButton("Primrose", "✿", function () {
@@ -12604,18 +12765,12 @@ var BrowserEnvironment = function (_EventDispatcher) {
     key: "displays",
     get: function get() {
 
-      return this.input.VR.displays;
+      return this.VR.displays;
     }
   }, {
     key: "fieldOfView",
     get: function get() {
-      var d = this.input.VR.currentDevice,
-          eyes = [d && d.getEyeParameters("left"), d && d.getEyeParameters("right")].filter(identity);
-      if (eyes.length > 0) {
-        return eyes.reduce(function (fov, eye) {
-          return Math.max(fov, eye.fieldOfView.upDegrees + eye.fieldOfView.downDegrees);
-        }, 0);
-      }
+      return StandardMonitorVRDisplay.DEFAULT_FOV;
     },
     set: function set(v) {
       this.options.defaultFOV = StandardMonitorVRDisplay.DEFAULT_FOV = v;
@@ -12624,6 +12779,26 @@ var BrowserEnvironment = function (_EventDispatcher) {
     key: "currentTime",
     get: function get() {
       return this.audio.context.currentTime;
+    }
+  }, {
+    key: "hasMotionControllers",
+    get: function get() {
+      return !!(this.Vive_0 && this.Vive_0.enabled && this.Vive_0.inPhysicalUse || this.Vive_1 && this.Vive_1.enabled && this.Vive_1.inPhysicalUse);
+    }
+  }, {
+    key: "hasGamepad",
+    get: function get() {
+      return !!(this.Gamepad_0 && this.Gamepad_0.enabled && this.Gamepad_0.inPhysicalUse);
+    }
+  }, {
+    key: "hasMouse",
+    get: function get() {
+      return !!(this.Mouse && this.Mouse.enabled && this.Mouse.inPhysicalUse);
+    }
+  }, {
+    key: "hasTouch",
+    get: function get() {
+      return !!(this.Touch && this.Touch.enabled && this.Touch.inPhysicalUse);
     }
   }]);
   return BrowserEnvironment;
@@ -12664,7 +12839,7 @@ BrowserEnvironment.DEFAULTS = {
   // the far plane of the camera.
   drawDistance: 100,
   // the field of view to use in non-VR settings.
-  defaultFOV: 55,
+  defaultFOV: StandardMonitorVRDisplay.DEFAULT_FOV,
   // The sound to play on loop in the background.
   ambientSound: null,
   // HTML5 canvas element, if one had already been created.
@@ -12784,7 +12959,7 @@ var Progress = function () {
 
     majorColor = majorColor || 0xffffff;
     minorColor = minorColor || 0x000000;
-    var geom = box$1(SIZE, SIZE_SMALL, SIZE_SMALL);
+    var geom = box(SIZE, SIZE_SMALL, SIZE_SMALL);
 
     this.totalBar = geom.colored(minorColor, {
       unshaded: true,
@@ -13287,7 +13462,6 @@ enableInlineVideo.isWhitelisted = isWhitelisted;
 
 var COUNTER$8 = 0;
 
-// Videos don't auto-play on mobile devices, so let's make them all play whenever we tap the screen.
 var processedVideos = [];
 function findAndFixVideo(evt) {
   var vids = document.querySelectorAll("video");
@@ -13419,13 +13593,15 @@ var Controls = {
 };
 
 var Displays = {
+  BaseVRDisplay: BaseVRDisplay,
   CardboardVRDisplay: CardboardVRDisplay,
   frameDataFromPose: frameDataFromPose,
   install: install,
   MockVRDisplay: MockVRDisplay,
-  StandardMonitorVRDisplay: StandardMonitorVRDisplay,
-  VRDisplay: VRDisplay,
-  VRFrameData: VRFrameData
+  NativeVRDisplay: NativeVRDisplay,
+  PolyfilledVRDisplay: PolyfilledVRDisplay,
+  PolyfilledVRFrameData: PolyfilledVRFrameData,
+  StandardMonitorVRDisplay: StandardMonitorVRDisplay
 };
 
 function findEverything(elem, obj) {
@@ -13511,6 +13687,7 @@ var Location = function (_InputProcessor) {
   createClass(Location, [{
     key: "setState",
     value: function setState(location) {
+      this.inPhysicalUse = true;
       for (var p in location.coords) {
         var k = p.toUpperCase();
         if (this.axisNames.indexOf(k) > -1) {
@@ -13532,7 +13709,6 @@ Location.DEFAULTS = {
 };
 
 var Input = {
-  FPSInput: FPSInput,
   Gamepad: Gamepad,
   InputProcessor: InputProcessor,
   Keyboard: Keyboard,
