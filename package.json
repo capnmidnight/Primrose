@@ -53,13 +53,10 @@
     "iphone-inline-video": "^1.9.3",
     "jstransformer-marked": "^1.0.1",
     "lavu-details-polyfill": "^0.1.0",
-    "pliny": "^3.2.6",
     "promise-polyfill": "^5.2.1",
     "three": "^0.84.0"
   },
   "devDependencies": {
-    "gulp": "^3.9.1",
-    "notion-node": "^0.3.0",
-    "notiontheory-basic-build": "^5.0.0"
+    "notiontheory-basic-build": "^6.0.0"
   }
 }

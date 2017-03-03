@@ -1,25 +1,17 @@
 var gulp = require("gulp"),
-  exec = require("child_process").exec,
   glob = require("glob").sync,
-  fs = require("fs"),
-  path = require("path"),
-  pliny = require("pliny"),
   pkg = require("./package.json"),
+  nt = require("notiontheory-basic-build"),
 
-  startServer = require("notion-node"),
+  builder = nt.setup(gulp, pkg),
 
-  build = require("notiontheory-basic-build"),
-  nt = build.setup(gulp, pkg),
+  html = builder.html("Primrose", ["*.pug", "demos/**/*.pug", "doc/**/*.pug", "templates/**/*.pug"], "src"),
 
-  html = nt.html("Primrose", ["*.pug", "demos/**/*.pug", "doc/**/*.pug", "templates/**/*.pug"], "src"),
+  css = builder.css("Primrose", ["*.styl", "demos/**/*.styl", "doc/**/*.styl"]),
 
-  css = nt.css("Primrose", ["*.styl", "demos/**/*.styl", "doc/**/*.styl"]),
+  preloaderJS = builder.js("preloader", "preloader/index.js"),
 
-  formats = ["umd", "es"],
-
-  preloaderJS = nt.js("preloader", "preloader/index.js"),
-
-  preloaderMin = nt.min(
+  preloaderMin = builder.min(
     "preloader",  [
     "preloader.js"
   ], [{
@@ -34,94 +26,65 @@ var gulp = require("gulp"),
     release: preloaderMin.release
   },
 
-  tasks = formats.map((format) => {
+  umdJSTask = builder.js("Primrose", "src/index.js", {
+    advertise: true,
+    extractDocumentation: true,
+    dependencies: ["format"],
+    external: ["three"],
+    globals: {three: "THREE"},
+    format: "umd"
+  }),
 
-    var extension = "",
-      external = ["three"],
-      globals = null;
+  umdMinTask = builder.min("Primrose", [
+    "doc/PrimroseDocumentation.js",
+    "Primrose.js"], [{
+    debug: umdJSTask.debug,
+    release: umdJSTask.debug
+  }]),
 
-    if(format === "es") {
-      extension += ".modules";
-    }
-    else if(format !== "umd"){
-      extension += "." + format;
-    }
-    else{
-      globals = {three: "THREE"};
-    }
-    extension += ".js";
-
-    var inFile = "PrimroseWithDoc" + extension,
-      outFile = inFile.replace("WithDoc", ""),
-      docFile = "doc/" + inFile.replace("WithDoc", "Documentation"),
-      js = nt.js("PrimroseWithDoc:" + format, "src/index.js", {
-      advertise: true,
-      moduleName: "Primrose",
-      fileName: inFile,
-      dependencies: ["format"],
-      external: external,
-      globals: globals,
-      format: format,
-      post: (_, cb) => {
-        // removes the documentation objects from the concatenated library.
-        pliny.carve(inFile, outFile, docFile, cb);
-      }
-    });
-
-    var min;
-    if(format === "umd") {
-      min = nt.min("Primrose", [
-        "doc/PrimroseDocumentation.js",
-        "Primrose.js"], [{
-        debug: js.debug,
-        release: js.debug
-      }]);
-    }
-
-    return { js, min };
-  }).reduce((collect, task) => {
-    if(!collect.format) {
-      collect.format = [task.js.format];
-      collect.default = [task.js.default];
-    }
-    collect.debug.push(task.js.debug);
-    var releaseTask = (task.min || task.js).release;
-    collect.release.push(releaseTask);
-    return collect;
-  }, { format: null, default: null, debug: [], release: [] }),
+  modulesJSTask = builder.js("Primrose", "src/index.js", {
+    advertise: true,
+    extractDocumentation: true,
+    moduleName: "Primrose",
+    dependencies: ["format"],
+    external: ["three"],
+    format: "es"
+  }),
 
   demos = glob("demos/*/app.js").map(function(file) {
 
     var name = file.match(/demos\/(\w+)\/app\.js/)[1],
-      parts = path.parse(file),
       taskName = "Demo:" + name,
-      min = nt.min(taskName, file);
+      min = builder.min(taskName, file);
 
-    return min;
+    return min.release;
   }),
 
-  minDocApp = nt.min("DocApp", "doc/app.js");
+  minDocApp = builder.min("DocApp", "doc/app.js"),
 
-tasks.release.push.apply(tasks.release, demos.map(d=>d.release));
-tasks.format.push(preloader.format);
-tasks.default.push(preloader.default);
-tasks.debug.push(preloader.debug);
-tasks.release.push(preloader.release);
-tasks.release.push(minDocApp.release);
+  tasks = {
+    format: [preloader.format, umdJSTask.format],
+    default: [preloader.default, umdJSTask.default],
+    debug: [preloader.debug, umdJSTask.debug, modulesJSTask.debug],
+    release: [preloader.release, umdMinTask.release, modulesJSTask.release, minDocApp.release]
+      .concat(demos)
+  },
 
-const tidyFiles = [
-  "PrimroseWithDoc*.js",
-  "doc/*/appWithDoc.js",
-  "doc/*/appDocumentation.js",
-  "doc/PrimroseDocumentation.modules.js",
-  "templates/*.html"
-];
-gulp.task("tidy", [nt.clean("Primrose", tidyFiles, tasks.release)]);
-gulp.task("tidy:only", [nt.clean("Primrose:only", tidyFiles)]);
+  tidyFiles = [
+    "PrimroseWithDoc*.js",
+    "doc/*/appWithDoc.js",
+    "doc/*/appDocumentation.js",
+    "PrimroseDocumentation.modules.js",
+    "templates/*.html"
+  ],
 
+  devServer = () => nt.startServer({ mode: "dev", port: 8080 });
+
+
+gulp.task("tidy", [builder.clean("Primrose", tidyFiles, tasks.release)]);
+gulp.task("tidy:only", [builder.clean("Primrose:only", tidyFiles)]);
 gulp.task("copy", ["tidy"], () => gulp.src(["Primrose.min.js"])
   .pipe(gulp.dest("quickstart")));
-
 
 gulp.task("format", tasks.format);
 gulp.task("js", tasks.default);
@@ -134,9 +97,16 @@ gulp.task("css", [css.default]);
 gulp.task("css:debug", [css.debug]);
 gulp.task("css:release", [css.release]);
 
-gulp.task("default", [ "js", "html", "css" ], () => startServer({ mode: "dev", port: 8080 }));
+gulp.task("default", [ "js", "html", "css" ], devServer);
+gulp.task("test", [ "release" ], devServer);
+
 gulp.task("debug", ["js:debug", "html:debug", "css:debug"]);
 gulp.task("release",  ["js:release", "html:release", "css:release"]);
-gulp.task("test", [ "release" ], () => startServer({ mode: "dev", port: 8080 }));
 
-gulp.task("kablamo", build.exec("gulp bump && gulp yolo && cd ../Primrose-Site && gulp kablamo && cd ../Primrose && gulp trololo && npm publish"));
+gulp.task("kablamo", nt.exec("gulp bump\
+ && gulp yolo\
+ && cd ../Primrose-Site\
+ && gulp yolo\
+ && cd ../Primrose\
+ && git push\
+ && npm publish"));
