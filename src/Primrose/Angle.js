@@ -70,8 +70,9 @@ For more information, see [Radian - Wikipedia, the free encyclopedia](https://en
     }]
 });
 
-var DEG2RAD = Math.PI / 180,
-  RAD2DEG = 180 / Math.PI;
+import { Math as _Math } from "three";
+
+const { DEG2RAD, RAD2DEG } = _Math;
 
 export default class Angle {
   constructor (v) {
