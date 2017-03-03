@@ -90,7 +90,7 @@ function showMonth(month){
   var x = 0,
     y = 0,
     lastDay = 0;
-  env.ui.add(months[month].latLon(-72, 0));
+  env.ui.add(months[month].latLng(-72, 0));
   while(date.getMonth() === month){
     x = date.getDay();
     if(x < lastDay){
@@ -109,7 +109,7 @@ function showMonth(month){
     o.box.addEventListener("enter", setColor.bind(o, true));
     o.box.addEventListener("exit", setColor.bind(o, false));
     o.box.addEventListener("select", hitDate.bind(null, month, d));
-    env.ui.add(o.hub.latLon(boxSpacing * (y - 2) - 45, boxSpacing * (3 - x)));
+    env.ui.add(o.hub.latLng(boxSpacing * (y - 2) - 45, boxSpacing * (3 - x)));
     date.setDate(date.getDate() + 1);
     lastDay = x;
   }
@@ -157,11 +157,11 @@ env.addEventListener("ready", function(){
   env.ui.add(text("Turn left or right to change month", 0.5)
     .colored(primaryColor)
     .named("inst1")
-    .latLon(-20, 0, 1));
+    .latLng(-20, 0, 1));
   env.ui.add(text("Click on dates.", 0.5)
     .colored(primaryColor)
     .named("inst2")
-    .latLon(-17, 0, 1));
+    .latLng(-17, 0, 1));
 
   Preloader.hide();
 });

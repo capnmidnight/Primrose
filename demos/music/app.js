@@ -50,7 +50,7 @@ function Board(type){
       btn = box(padSize, padSize, padDepth)
         .colored(colorOff)
         .named("btn" + i)
-        .latLon(lat, lon);
+        .latLng(lat, lon);
 
     box(padSize * 1.1, padSize * 1.1, padDepth * 0.9)
       .colored(colorPlay)
@@ -112,7 +112,7 @@ env.addEventListener("ready", function () {
     var board = new Board(type);
     boards.push(board);
     env.scene.add(board.object);
-    board.object.latLon(0, (t - (nTypes - 1) / 2) * 100 / nTypes);
+    board.object.latLng(0, (t - (nTypes - 1) / 2) * 100 / nTypes);
   });
 
   Preloader.hide();
