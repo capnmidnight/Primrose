@@ -52,6 +52,18 @@ export default class VR extends PoseInputProcessor {
     this.lastStageDepth = null;
     this.isStereo = false;
     installPolyfills(options);
+
+
+    if(this.options.nonstandardIPD !== null){
+      CardboardVRDisplay.IPD = this.options.nonstandardIPD;
+    }
+    if(this.options.nonstandardNeckLength !== null){
+      CardboardVRDisplay.NECK_LENGTH = this.options.nonstandardNeckLength;
+    }
+    if(this.options.nonstandardNeckDepth !== null){
+      CardboardVRDisplay.NECK_DEPTH = this.options.nonstandardNeckDepth;
+    }
+
     this.ready = navigator.getVRDisplays()
       .then((displays) => {
         this.displays.push.apply(this.displays, displays);
