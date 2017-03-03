@@ -1672,14 +1672,7 @@ export default class BrowserEnvironment extends EventDispatcher {
   }
 
   get fieldOfView() {
-    var d = this.VR.currentDevice,
-      eyes = [
-      d && d.getEyeParameters("left"),
-      d && d.getEyeParameters("right")
-    ].filter(identity);
-    if(eyes.length > 0){
-      return eyes.reduce((fov, eye) => Math.max(fov, eye.fieldOfView.upDegrees + eye.fieldOfView.downDegrees), 0);
-    }
+    return StandardMonitorVRDisplay.DEFAULT_FOV;
   }
 
   set fieldOfView(v){
