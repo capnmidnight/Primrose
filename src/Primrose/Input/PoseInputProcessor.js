@@ -33,7 +33,7 @@ export default class PoseInputProcessor extends InputProcessor {
     super.update(dt);
 
     if (this.currentDevice) {
-      var pose = this.currentDevice.frameData.pose || this.lastPose || DEFAULT_POSE;
+      var pose = this.currentDevice && this.currentDevice.frameData && this.currentDevice.frameData.pose || this.lastPose || DEFAULT_POSE;
       this.lastPose = pose;
       this.inPhysicalUse = this.hasOrientation || this.inPhysicalUse;
       var orient = pose && pose.orientation,
