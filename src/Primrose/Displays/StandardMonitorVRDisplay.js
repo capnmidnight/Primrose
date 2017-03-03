@@ -24,13 +24,10 @@ export default class StandardMonitorVRDisplay extends PolyfilledVRDisplay {
     this._display = display;
   }
 
-  submitFrame() {
-  }
-
   _getPose() {
     var display = isMobile && this._display;
     if(display){
-      return display.getPose();
+      return display._getPose();
     }
   }
 

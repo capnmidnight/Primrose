@@ -4,7 +4,6 @@ export default class MixedRealityVRDisplay extends StandardMonitorVRDisplay {
 
   constructor(display) {
     super(display, "Mixed Reality");
-    this.isMixedRealityVRDisplay = true;
     this.motionDevice = null;
 
     Object.defineProperties(this.capabilities, {

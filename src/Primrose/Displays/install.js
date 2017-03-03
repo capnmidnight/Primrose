@@ -15,30 +15,9 @@ import FullScreen from "../../util/FullScreen";
 import getObject from "../HTTP/getObject";
 
 const hasNativeWebVR = "getVRDisplays" in navigator,
-  allDisplays = [],
   isCardboardCompatible = isMobile && !isGearVR;
 
-let polyFillDevicesPopulated = false,
-  standardMonitorPopulated = false;
-
-function getPolyfillDisplays(options) {
-  if (!polyFillDevicesPopulated) {
-    if (isCardboardCompatible || options.forceStereo) {
-      FullScreen.addChangeListener(fireVRDisplayPresentChange);
-      allDisplays.push(new CardboardVRDisplay(options));
-    }
-
-    polyFillDevicesPopulated = true;
-  }
-
-  return new Promise(function(resolve, reject) {
-    try {
-      resolve(allDisplays);
-    } catch (e) {
-      reject(e);
-    }
-  });
-}
+let standardMonitorPopulated = false;
 
 function fireVRDisplayPresentChange() {
   var event = new CustomEvent('vrdisplaypresentchange', {detail: {vrdisplay: this}});
@@ -55,28 +34,6 @@ function installPolyfill(options){
   else{
     oldGetVRDisplays = () => Promise.resolve([]);
   }
-
-  // Provide navigator.getVRDisplays.
-  navigator.getVRDisplays = function () {
-    return oldGetVRDisplays.call(navigator)
-      .then((displays) => {
-        if(displays.length === 0 || isExperimentalChromium51) {
-          options.overrideOrientation = displays[0];
-          return getPolyfillDisplays(options);
-        }
-        else {
-          return displays;
-        }
-      });
-    };
-
-  // Provide navigator.vrEnabled.
-  Object.defineProperty(navigator, "vrEnabled", {
-    get: function () {
-      return isCardboardCompatible &&
-        (FullScreen.available || isiOS); // just fake it for iOS
-    }
-  });
 
   // Provide the VRDisplay object.
   window.VRDisplay = window.VRDisplay || PolyfilledVRDisplay;
@@ -99,24 +56,33 @@ function installDisplays(options) {
     navigator.getVRDisplays = function () {
       return oldGetVRDisplays.call(navigator)
         .then((displays) => {
+
           var stdDeviceExists = false,
             mockDeviceExists = false,
             data = options && options.replayData;
+
           for(var i = 0; i < displays.length; ++i){
             var dsp = displays[i];
             stdDeviceExists = stdDeviceExists || dsp instanceof StandardMonitorVRDisplay;
             mockDeviceExists = mockDeviceExists || dsp instanceof MockVRDisplay;
           }
 
+          if (isCardboardCompatible || options.forceStereo) {
+            FullScreen.addChangeListener(fireVRDisplayPresentChange);
+            displays.push(new CardboardVRDisplay(options));
+          }
+
           if (!stdDeviceExists) {
             if(options && options.defaultFOV) {
               StandardMonitorVRDisplay.DEFAULT_FOV = options.defaultFOV;
             }
+
             const nativeDisplay = displays[0];
-            if(nativeDisplay) {
+            if(nativeDisplay && !nativeDisplay.isPolyfilled) {
               displays[0] = new NativeVRDisplay(nativeDisplay);
               displays.unshift(new MixedRealityVRDisplay(nativeDisplay));
             }
+
             displays.unshift(new StandardMonitorVRDisplay(nativeDisplay));
           }
 

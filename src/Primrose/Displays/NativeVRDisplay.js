@@ -3,7 +3,6 @@ import BaseVRDisplay from "./BaseVRDisplay";
 export default class NativeVRDisplay extends BaseVRDisplay {
   constructor(display) {
     super(VRFrameData);
-    this.isNativeVRDisplay = true;
     this.display = display;
   }
 
