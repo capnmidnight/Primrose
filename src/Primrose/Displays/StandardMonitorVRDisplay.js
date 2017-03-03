@@ -41,6 +41,10 @@ export default class StandardMonitorVRDisplay extends PolyfilledVRDisplay {
     }
   }
 
+  get isStereo() {
+    return false;
+  }
+
   getEyeParameters (side) {
     if (side === "left") {
       const curLayer = this.getLayers()[0],
@@ -70,5 +74,13 @@ export default class StandardMonitorVRDisplay extends PolyfilledVRDisplay {
         }
       };
     }
+  }
+
+  get targetName () {
+    return "Full Screen";
+  }
+
+  get renderOrder() {
+    return 1;
   }
 }

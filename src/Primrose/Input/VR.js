@@ -11,11 +11,10 @@ pliny.class({
 });
 
 const DEFAULT_POSE = {
-    position: [0, 0, 0],
-    orientation: [0, 0, 0, 1]
-  };
+  position: [0, 0, 0],
+  orientation: [0, 0, 0, 1]
+};
 
-import { Vector3, Matrix4 } from "three";
 import PoseInputProcessor from "./PoseInputProcessor";
 import isChrome from "../../flags/isChrome";
 import isFirefox from "../../flags/isFirefox";
@@ -28,6 +27,7 @@ import standardLockBehavior from "../../util/standardLockBehavior";
 import installPolyfills from "../Displays/install";
 import StandardMonitorVRDisplay from "../Displays/StandardMonitorVRDisplay";
 import CardboardVRDisplay from "../Displays/CardboardVRDisplay";
+import { Matrix4 } from "three";
 
 export default class VR extends PoseInputProcessor {
 
@@ -64,10 +64,11 @@ export default class VR extends PoseInputProcessor {
       CardboardVRDisplay.NECK_DEPTH = this.options.nonstandardNeckDepth;
     }
 
+    this.currentDevice = null;
     this.ready = navigator.getVRDisplays()
       .then((displays) => {
         this.displays.push.apply(this.displays, displays);
-        this.connect(0);
+        this.currentDevice = this.displays[0];
         return this.displays;
       });
   }
@@ -153,7 +154,6 @@ export default class VR extends PoseInputProcessor {
     else{
       stage = null;
     }
-
     super.update(dt);
 
     if (stage) {

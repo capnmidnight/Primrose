@@ -28,4 +28,32 @@ export default class MixedRealityVRDisplay extends StandardMonitorVRDisplay {
   resetPose(){
     return this.motionDevice.resetPose();
   }
+
+  get isMixedRealityVRDisplay() {
+    return true;
+  }
+
+  get isStereo() {
+    return false;
+  }
+
+  get targetName() {
+    return "Full Screen";
+  }
+
+  get renderOrder() {
+    return 1;
+  }
+
+  _getPose() {
+    if(this.motionDevice) {
+      return this.motionDevice.getPose();
+    }
+  }
+
+  resetPose(){
+    if(this.motionDevice) {
+      return this.motionDevice.resetPose();
+    }
+  }
 }

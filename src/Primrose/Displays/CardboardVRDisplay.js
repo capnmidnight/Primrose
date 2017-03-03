@@ -57,15 +57,23 @@ export default class CardboardVRDisplay extends PolyfilledVRDisplay {
     this.DOMElement = null;
 
     // "Private" members.
-    this.poseSensor_ = options && options.overrideOrientation || new FusionPoseSensor(options);
+    this._poseSensor = options && options.overrideOrientation || new FusionPoseSensor(options);
+  }
+
+  get isCardboardVRDisplay() {
+    return true;
+  }
+
+  get isStereo() {
+    return true;
   }
 
   _getPose() {
-    return this.poseSensor_.getPose();
+    return this._poseSensor.getPose();
   }
 
   resetPose() {
-    this.poseSensor_.resetPose();
+    this._poseSensor.resetPose();
   }
 
   getEyeParameters(whichEye) {
@@ -102,5 +110,13 @@ export default class CardboardVRDisplay extends PolyfilledVRDisplay {
       renderWidth: 0.5 * width,
       renderHeight: height,
     }
+  }
+
+  get targetName () {
+    return "Full Screen";
+  }
+
+  get renderOrder() {
+    return 0;
   }
 };

@@ -51,6 +51,10 @@ export default class NativeVRDisplay extends BaseVRDisplay {
     this.display.getFrameData(frameData);
   }
 
+  _getPose() {
+    return this._display.getPose();
+  }
+
   getPose() {
     return this.display.getPose();
   }
@@ -95,5 +99,25 @@ export default class NativeVRDisplay extends BaseVRDisplay {
 
   submitFrame() {
     return this.display.submitFrame();
+  }
+
+  get isNativeVRDisplay() {
+    return true;
+  }
+
+  get isStereo() {
+    return true;
+  }
+
+  get _stageParameters() {
+    return this._display.stageParameters;
+  }
+
+  get targetName() {
+    return this._display.displayName;
+  }
+
+  get renderOrder() {
+    return 0;
   }
 };
