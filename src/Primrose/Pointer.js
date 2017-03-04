@@ -136,8 +136,10 @@ export default class Pointer extends Entity {
       h = devicePixelRatio * 2 / height;
     for(let i = 0; i < this.devices.length; ++i) {
       const device = this.devices[i];
-      device.commands.U.scale = w;
-      device.commands.V.scale = h;
+      if(device.commands.U && device.commands.V) {
+        device.commands.U.scale = w;
+        device.commands.V.scale = h;
+      }
     }
   }
 
@@ -149,7 +151,7 @@ export default class Pointer extends Entity {
       VECTOR_TEMP.set(0, 0, 0);
       for(let i = 0; i < this.devices.length; ++i) {
         const obj = this.devices[i];
-        if(obj.enabled && obj.inPhysicalUse && !obj.commands.U.disabled && !obj.commands.V.disabled) {
+        if(obj.enabled && obj.inPhysicalUse && obj.commands.U && obj.commands.V && !obj.commands.U.disabled && !obj.commands.V.disabled) {
           VECTOR_TEMP.x += obj.getValue("U") - 1;
           VECTOR_TEMP.y += obj.getValue("V") - 1;
         }
