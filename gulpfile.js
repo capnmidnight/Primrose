@@ -26,13 +26,37 @@ var gulp = require("gulp"),
     release: preloaderMin.release
   },
 
+  clients = [],
+
+  devServer = () => nt.startServer({ 
+    mode: "dev",
+    port: 8080,
+    webSocketServer: (client) => {
+      clients.push(client);
+      console.log("new client connection. Total clients:", clients.length);
+      client.on("disconnect", () => {
+        const index = clients.indexOf(client);
+        console.log("disconnecting client", index);
+        clients.splice(index, 1);
+      });
+    }
+  }),
+
+  reload = (_, cb) => {
+    console.log("reloading " + clients.length + " clients");
+    clients.forEach((client) => 
+      client.emit("reload"));
+    cb();
+  },
+
   umdJSTask = builder.js("Primrose", "src/index.js", {
     advertise: true,
     extractDocumentation: true,
     dependencies: ["format"],
     external: ["three"],
     globals: {three: "THREE"},
-    format: "umd"
+    format: "umd",
+    post: reload
   }),
 
   umdMinTask = builder.min("Primrose", [
@@ -76,9 +100,7 @@ var gulp = require("gulp"),
     "doc/*/appDocumentation.js",
     "PrimroseDocumentation.modules.js",
     "templates/*.html"
-  ],
-
-  devServer = () => nt.startServer({ mode: "dev", port: 8080 });
+  ];
 
 
 gulp.task("tidy", [builder.clean("Primrose", tidyFiles, tasks.release)]);

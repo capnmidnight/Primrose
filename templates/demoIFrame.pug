@@ -50,4 +50,15 @@ html
         progress
         block controls
     script(src= fileRoot + "preloader" + jsExt, data-files= fileRoot + "node_modules/three/build/three" + jsExt + "," + fileRoot + "Primrose" + jsExt + ",app" + jsExt)
+    if debug
+      script(src= fileRoot + "node_modules/socket.io-client/dist/socket.io.js")
+      script.
+        const serverPath = location.origin.replace(/^http/, "ws");
+        console.log("Attempting to connect to", serverPath);
+        const server = io(serverPath);
+        server.on("reload", () => {
+          console.log("Server told us to reload");
+          location.reload();
+        });
+        server.on("connected", console.log.bind(console, "Connected to server", serverPath));
     <!-- end demoIFrame.pug main block -->
