@@ -81,6 +81,7 @@ export default class Gamepad extends PoseInputProcessor {
     var i, j, buttonMap = 0;
     this.currentDevice = pad;
     if(this.hasOrientation) {
+      this.currentPose = pad.pose;
       this.updateFrameData();
     }
     for (i = 0, j = pad.buttons.length; i < pad.buttons.length; ++i, ++j) {

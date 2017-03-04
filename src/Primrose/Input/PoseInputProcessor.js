@@ -33,11 +33,14 @@ export default class PoseInputProcessor extends InputProcessor {
     super.update(dt);
 
     if (this.currentDevice) {
-      var pose = this.currentDevice && this.currentDevice.frameData && this.currentDevice.frameData.pose || this.lastPose || DEFAULT_POSE;
+      const frame = this.currentDevice && this.currentDevice.frameData || this.frameData,
+        pose = frame && frame.pose || this.lastPose || DEFAULT_POSE;
       this.lastPose = pose;
       this.inPhysicalUse = this.hasOrientation || this.inPhysicalUse;
-      var orient = pose && pose.orientation,
-        pos = pose && pose.position;
+
+      const orient = pose && pose.orientation;
+      const pos = pose && pose.position;
+
       if (orient) {
         this.poseQuaternion.fromArray(orient);
         if(isMobile && isIE){
@@ -47,6 +50,7 @@ export default class PoseInputProcessor extends InputProcessor {
       else {
         this.poseQuaternion.set(0, 0, 0, 1);
       }
+
       if (pos) {
         this.posePosition.fromArray(pos);
       }
