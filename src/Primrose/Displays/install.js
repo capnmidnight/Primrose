@@ -27,14 +27,6 @@ function fireVRDisplayPresentChange() {
 const isExperimentalChromium51 = navigator.userAgent.indexOf("Chrome/51.0.2664.0") > -1;
 
 function installPolyfill(options){
-  let oldGetVRDisplays = null;
-  if(hasNativeWebVR) {
-    oldGetVRDisplays = navigator.getVRDisplays;
-  }
-  else{
-    oldGetVRDisplays = () => Promise.resolve([]);
-  }
-
   // Provide the VRDisplay object.
   window.VRDisplay = window.VRDisplay || PolyfilledVRDisplay;
   window.VRFrameData = window.VRFrameData || PolyfilledVRFrameData;
@@ -52,7 +44,14 @@ function installPolyfill(options){
 
 function installDisplays(options) {
   if(!standardMonitorPopulated && !isGearVR){
-    var oldGetVRDisplays = navigator.getVRDisplays;
+    let oldGetVRDisplays = null;
+    if(hasNativeWebVR) {
+      oldGetVRDisplays = navigator.getVRDisplays;
+    }
+    else{
+      oldGetVRDisplays = () => Promise.resolve([]);
+    }
+    
     navigator.getVRDisplays = function () {
       return oldGetVRDisplays.call(navigator)
         .then((displays) => {
