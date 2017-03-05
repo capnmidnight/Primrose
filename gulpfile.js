@@ -5,6 +5,19 @@ var gulp = require("gulp"),
 
   builder = nt.setup(gulp, pkg),
 
+  devServer = builder.devServer([
+    "*.js",
+    "!gulpfile.js",
+    "*.css", 
+    "*.html", 
+    "demos/**/*.js",
+    "demos/**/*.css",
+    "demos/**/*.html",
+    "doc/**/*.js",
+    "doc/**/*.css",
+    "doc/**/*.html"
+  ]),
+
   html = builder.html("Primrose", ["*.pug", "demos/**/*.pug", "doc/**/*.pug", "templates/**/*.pug"], "src"),
 
   css = builder.css("Primrose", ["*.styl", "demos/**/*.styl", "doc/**/*.styl"]),
@@ -26,37 +39,13 @@ var gulp = require("gulp"),
     release: preloaderMin.release
   },
 
-  clients = [],
-
-  devServer = () => nt.startServer({ 
-    mode: "dev",
-    port: 8080,
-    webSocketServer: (client) => {
-      clients.push(client);
-      console.log("new client connection. Total clients:", clients.length);
-      client.on("disconnect", () => {
-        const index = clients.indexOf(client);
-        console.log("disconnecting client", index);
-        clients.splice(index, 1);
-      });
-    }
-  }),
-
-  reload = (_, cb) => {
-    console.log("reloading " + clients.length + " clients");
-    clients.forEach((client) => 
-      client.emit("reload"));
-    cb();
-  },
-
   umdJSTask = builder.js("Primrose", "src/index.js", {
     advertise: true,
     extractDocumentation: true,
     dependencies: ["format"],
     external: ["three"],
     globals: {three: "THREE"},
-    format: "umd",
-    post: reload
+    format: "umd"
   }),
 
   umdMinTask = builder.min("Primrose", [
@@ -101,7 +90,6 @@ var gulp = require("gulp"),
     "PrimroseDocumentation.modules.js",
     "templates/*.html"
   ];
-
 
 gulp.task("tidy", [builder.clean("Primrose", tidyFiles, tasks.release)]);
 gulp.task("tidy:only", [builder.clean("Primrose:only", tidyFiles)]);
