@@ -27,6 +27,7 @@ import standardFullScreenBehavior from "../../util/standardFullScreenBehavior";
 import standardLockBehavior from "../../util/standardLockBehavior";
 import installPolyfills from "../Displays/install";
 import StandardMonitorVRDisplay from "../Displays/StandardMonitorVRDisplay";
+import CardboardVRDisplay from "../Displays/CardboardVRDisplay";
 export default class VR extends PoseInputProcessor {
 
   static isStereoDisplay(display) {

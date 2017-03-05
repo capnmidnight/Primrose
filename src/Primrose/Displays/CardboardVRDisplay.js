@@ -25,6 +25,9 @@ let Eye = {
   ipd = 0.03,
   neckLength = 0,
   neckDepth = 0;
+
+export default class CardboardVRDisplay extends VRDisplay {
+
   static get IPD() {
     return ipd;
   }
@@ -49,7 +52,6 @@ let Eye = {
     neckDepth = v;
   }
 
-export default class CardboardVRDisplay extends VRDisplay {
   constructor(options) {
     super("Google Cardboard");
     this.DOMElement = null;
