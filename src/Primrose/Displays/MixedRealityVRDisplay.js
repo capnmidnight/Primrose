@@ -12,18 +12,6 @@ export default class MixedRealityVRDisplay extends StandardMonitorVRDisplay {
     });
   }
 
-  _getPose() {
-    return this.motionDevice.getPose();
-  }
-
-  getFrameData(frameData) {
-    this.motionDevice.getFrameData(frameData);
-  }
-
-  resetPose(){
-    return this.motionDevice.resetPose();
-  }
-
   get isMixedRealityVRDisplay() {
     return true;
   }
@@ -49,6 +37,12 @@ export default class MixedRealityVRDisplay extends StandardMonitorVRDisplay {
   resetPose(){
     if(this.motionDevice) {
       return this.motionDevice.resetPose();
+    }
+  }
+
+  getFrameData(frameData) {
+    if(this.motionDevice) {
+      this.motionDevice.getFrameData(frameData);
     }
   }
 }
