@@ -9,13 +9,10 @@ const DEFAULT_POSE = {
     position: [0, 0, 0],
     orientation: [0, 0, 0, 1]
   },
-  EMPTY_SCALE = new Vector3(),
-  IE_CORRECTION = new Quaternion(1, 0, 0, 0);
+  EMPTY_SCALE = new Vector3();
 
 import { Vector3, Quaternion, Matrix4 } from "three";
 import InputProcessor from "./InputProcessor";
-import isMobile from "../../flags/isMobile";
-import isIE from "../../flags/isIE";
 export default class PoseInputProcessor extends InputProcessor {
   constructor(name, commands, axisNames) {
     super(name, commands, axisNames);
@@ -43,9 +40,6 @@ export default class PoseInputProcessor extends InputProcessor {
 
       if (orient) {
         this.poseQuaternion.fromArray(orient);
-        if(isMobile && isIE){
-          this.poseQuaternion.multiply(IE_CORRECTION);
-        }
       }
       else {
         this.poseQuaternion.set(0, 0, 0, 1);
