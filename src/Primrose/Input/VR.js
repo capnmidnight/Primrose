@@ -151,14 +151,31 @@ export default class VR extends PoseInputProcessor {
 
   update(dt) {
     this.updateFrameData();
+    var x, z, stage;
+
+    if (this.currentDevice) {
+      stage = this.currentDevice.stageParameters;
+    }
+    else{
+      stage = null;
+    }
     super.update(dt);
 
-    this.movePlayer.makeTranslation(0, this.options.avatarHeight, 0);
+    if (stage) {
+      this.movePlayer.fromArray(stage.sittingToStandingTransform);
+      x = stage.sizeX;
+      z = stage.sizeZ;
+    }
+    else {
+      this.movePlayer.makeTranslation(0, this.options.avatarHeight, 0);
+      x = 0;
+      z = 0;
+    }
 
     var s = {
       matrix: this.movePlayer,
-      sizeX: 0,
-      sizeZ: 0
+      sizeX: x,
+      sizeZ: z
     };
 
     if (!this.stage || s.sizeX !== this.stage.sizeX || s.sizeZ !== this.stage.sizeZ) {
