@@ -446,7 +446,7 @@ export default class BrowserEnvironment extends EventDispatcher {
           if(frame === 0) {
             updateAll();
             let userActionHandlers = null;
-            for (let i = 0; i < this.pointers.length; ++i) {
+            for (let i = 0; i < this.pointers.length && userActionHandlers === null; ++i) {
               userActionHandlers = this.pointers[i].resolvePicking(this.scene);
             }
             for (let i = 0; i < this.managers.length; ++i) {
