@@ -512,8 +512,6 @@ export default class BrowserEnvironment extends EventDispatcher {
     };
 
     var render = () => {
-      this.camera.position.set(0, 0, 0);
-      this.camera.quaternion.set(0, 0, 0, 1);
       this.audio.setPlayer(this.head.mesh);
       this.renderer.clear(true, true, true);
 
@@ -532,8 +530,10 @@ export default class BrowserEnvironment extends EventDispatcher {
           v.width * resolutionScale,
           v.height * resolutionScale);
 
-        this.camera.projectionMatrix.elements = st.projection;
-        this.camera.modelViewMatrix.elements = st.view;
+        this.camera.projectionMatrix.fromArray(st.projection);
+        this.camera.matrix.elements = st.view;
+        this.camera.matrix.getInverse(this.camera.matrix);
+        this.camera.updateMatrixWorld(true);
         if (this.mousePointer.unproject) {
           this.mousePointer.unproject.getInverse(this.camera.projectionMatrix);
         }
@@ -909,6 +909,7 @@ export default class BrowserEnvironment extends EventDispatcher {
       description: "The camera used to render the view."
     });
     this.camera = new PerspectiveCamera(75, 1, this.options.nearPlane, this.options.nearPlane + this.options.drawDistance);
+    this.camera.matrixAutoUpdate = false;
 
     pliny.property({
       parent: "Primrose.BrowserEnvironment",
