@@ -4,10 +4,6 @@ export default class BaseVRDisplay {
     this.frameData = new VRFrameDataType();
   }
 
-  updateFrameData() {
-    this.getFrameData(this.frameData);
-  }
-
   startAnimation(callback) {
     this.timer = this.requestAnimationFrame(callback);
   }

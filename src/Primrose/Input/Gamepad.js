@@ -63,16 +63,8 @@ export default class Gamepad extends PoseInputProcessor {
     return Gamepad.isMotionController(this.currentDevice);
   }
 
-  getPose() {
-    return this.currentPose;
-  }
-
-  getFrameData(frameData) {
-    frameDataFromPose(frameData, this.getPose());
-  }
-
   updateFrameData() {
-    this.getFrameData(this.frameData);
+    frameDataFromPose(frameData, this.currentPose);
   }
 
 

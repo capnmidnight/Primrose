@@ -81,12 +81,17 @@ export default class VR extends PoseInputProcessor {
     return this.currentDevice && this.currentDevice.isNativeVRDisplay;
   }
 
+  updateFrameData() {
+    this.currentDevice.getFrameData(this.frameData);
+  }
+
   connect(selectedIndex) {
     this.currentDevice = null;
     this.currentDeviceIndex = selectedIndex;
     if (0 <= selectedIndex && selectedIndex <= this.displays.length) {
       this.currentDevice = this.displays[selectedIndex];
-      this.currentDevice.updateFrameData();
+      this.frameData = this.currentDevice.frameData;
+      this.updateFrameData();
       this.isStereo = VR.isStereoDisplay(this.currentDevice);
     }
   }
@@ -145,32 +150,15 @@ export default class VR extends PoseInputProcessor {
   }
 
   update(dt) {
-    var x, z, stage;
-
-    if (this.currentDevice) {
-      this.currentDevice.updateFrameData();
-      stage = this.currentDevice.stageParameters;
-    }
-    else{
-      stage = null;
-    }
+    this.updateFrameData();
     super.update(dt);
 
-    if (stage) {
-      this.movePlayer.fromArray(stage.sittingToStandingTransform);
-      x = stage.sizeX;
-      z = stage.sizeZ;
-    }
-    else {
-      this.movePlayer.makeTranslation(0, this.options.avatarHeight, 0);
-      x = 0;
-      z = 0;
-    }
+    this.movePlayer.makeTranslation(0, this.options.avatarHeight, 0);
 
     var s = {
       matrix: this.movePlayer,
-      sizeX: x,
-      sizeZ: z
+      sizeX: 0,
+      sizeZ: 0
     };
 
     if (!this.stage || s.sizeX !== this.stage.sizeX || s.sizeZ !== this.stage.sizeZ) {
