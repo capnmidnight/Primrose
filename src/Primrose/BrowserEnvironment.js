@@ -434,7 +434,6 @@ export default class BrowserEnvironment extends EventDispatcher {
           }
 
           // record the position and orientation of the user
-          this.newState = [];
           this.head.updateMatrix();
           this.stage.rotation.x = 0;
           this.stage.rotation.z = 0;
