@@ -3982,8 +3982,10 @@ var Pointer = function (_Entity) {
           h = devicePixelRatio * 2 / height;
       for (var i = 0; i < this.devices.length; ++i) {
         var device = this.devices[i];
-        device.commands.U.scale = w;
-        device.commands.V.scale = h;
+        if (device.commands.U && device.commands.V) {
+          device.commands.U.scale = w;
+          device.commands.V.scale = h;
+        }
       }
     }
   }, {
@@ -3996,7 +3998,7 @@ var Pointer = function (_Entity) {
         VECTOR_TEMP.set(0, 0, 0);
         for (var i = 0; i < this.devices.length; ++i) {
           var obj = this.devices[i];
-          if (obj.enabled && obj.inPhysicalUse && !obj.commands.U.disabled && !obj.commands.V.disabled) {
+          if (obj.enabled && obj.inPhysicalUse && obj.commands.U && obj.commands.V && !obj.commands.U.disabled && !obj.commands.V.disabled) {
             VECTOR_TEMP.x += obj.getValue("U") - 1;
             VECTOR_TEMP.y += obj.getValue("V") - 1;
           }
@@ -5415,6 +5417,8 @@ ButtonFactory.DEFAULT = new ButtonFactory(colored(box(1, 1, 1), 0xff0000), {
   toggle: true
 });
 
+// The JSON format object loader is not always included in the Three.js distribution,
+// so we have to first check for it.
 var loaders = null;
 var PATH_PATTERN = /((?:https?:\/\/)?(?:[^/]+\/)+)(\w+)(\.(?:\w+))$/;
 var EXTENSION_PATTERN = /(\.(?:\w+))+$/;
@@ -7553,6 +7557,7 @@ var PolyfilledVRFrameData = function PolyfilledVRFrameData() {
  * limitations under the License.
  */
 
+// Start at a higher number to reduce chance of conflict.
 var nextDisplayId = 1000;
 
 function defaultPose() {
@@ -7683,14 +7688,11 @@ var StandardMonitorVRDisplay = function (_PolyfilledVRDisplay) {
   }
 
   createClass(StandardMonitorVRDisplay, [{
-    key: "submitFrame",
-    value: function submitFrame() {}
-  }, {
     key: "_getPose",
     value: function _getPose() {
       var display = isMobile && this._display;
       if (display) {
-        return display.getPose();
+        return display._getPose();
       }
     }
   }, {
@@ -9041,11 +9043,14 @@ var PoseInputProcessor = function (_InputProcessor) {
       get$1(PoseInputProcessor.prototype.__proto__ || Object.getPrototypeOf(PoseInputProcessor.prototype), "update", this).call(this, dt);
 
       if (this.currentDevice) {
-        var pose = this.currentDevice.frameData.pose || this.lastPose || DEFAULT_POSE;
+        var frame = this.currentDevice && this.currentDevice.frameData || this.frameData,
+            pose = frame && frame.pose || this.lastPose || DEFAULT_POSE;
         this.lastPose = pose;
         this.inPhysicalUse = this.hasOrientation || this.inPhysicalUse;
-        var orient = pose && pose.orientation,
-            pos = pose && pose.position;
+
+        var orient = pose && pose.orientation;
+        var pos = pose && pose.position;
+
         if (orient) {
           this.poseQuaternion.fromArray(orient);
           if (isMobile && isIE) {
@@ -9054,6 +9059,7 @@ var PoseInputProcessor = function (_InputProcessor) {
         } else {
           this.poseQuaternion.set(0, 0, 0, 1);
         }
+
         if (pos) {
           this.posePosition.fromArray(pos);
         } else {
@@ -9153,6 +9159,7 @@ var Gamepad = function (_PoseInputProcessor) {
           buttonMap = 0;
       this.currentDevice = pad;
       if (this.hasOrientation) {
+        this.currentPose = pad.pose;
         this.updateFrameData();
       }
       for (i = 0, j = pad.buttons.length; i < pad.buttons.length; ++i, ++j) {
@@ -9623,6 +9630,17 @@ var SensorSample = function () {
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ */
+
+/**
+ * An implementation of a simple complementary filter, which fuses gyroscope and accelerometer data from the 'devicemotion' event.
+ *
+ * Accelerometer data is very noisy, but stable over the long term. Gyroscope data is smooth, but tends to drift over the long term.
+ *
+ * This fusion is relatively simple:
+ * 1. Get orientation estimates from accelerometer by applying a low-pass filter on that data.
+ * 2. Get orientation estimates from gyroscope by integrating over time.
+ * 3. Combine the two estimates, weighing (1) in the long term, but (2) for the short term.
  */
 
 var ComplementaryFilter = function () {
@@ -10154,7 +10172,6 @@ var MixedRealityVRDisplay = function (_StandardMonitorVRDis) {
 
     var _this = possibleConstructorReturn(this, (MixedRealityVRDisplay.__proto__ || Object.getPrototypeOf(MixedRealityVRDisplay)).call(this, display, "Mixed Reality"));
 
-    _this.isMixedRealityVRDisplay = true;
     _this.motionDevice = null;
 
     Object.defineProperties(_this.capabilities, {
@@ -10196,11 +10213,6 @@ var MixedRealityVRDisplay = function (_StandardMonitorVRDis) {
       if (this.motionDevice) {
         return this.motionDevice.resetPose();
       }
-    }
-  }, {
-    key: "motionDevice",
-    set: function set(device) {
-      this._motionDevice = device;
     }
   }, {
     key: "isMixedRealityVRDisplay",
@@ -10330,6 +10342,10 @@ var Record = function (_Obj) {
   }]);
   return Record;
 }(Obj);
+
+/*
+  A collection of all the recorded state values at a single point in time.
+*/
 
 var Frame = function () {
   createClass(Frame, null, [{
@@ -10584,7 +10600,6 @@ var NativeVRDisplay = function (_BaseVRDisplay) {
 
     var _this = possibleConstructorReturn(this, (NativeVRDisplay.__proto__ || Object.getPrototypeOf(NativeVRDisplay)).call(this, VRFrameData));
 
-    _this.isNativeVRDisplay = true;
     _this.display = display;
     return _this;
   }
@@ -10732,30 +10747,9 @@ function getObject(url, options) {
 }
 
 var hasNativeWebVR = "getVRDisplays" in navigator;
-var allDisplays = [];
 var isCardboardCompatible = isMobile && !isGearVR;
 
-var polyFillDevicesPopulated = false;
 var standardMonitorPopulated = false;
-
-function getPolyfillDisplays(options) {
-  if (!polyFillDevicesPopulated) {
-    if (isCardboardCompatible || options.forceStereo) {
-      FullScreen.addChangeListener(fireVRDisplayPresentChange);
-      allDisplays.push(new CardboardVRDisplay(options));
-    }
-
-    polyFillDevicesPopulated = true;
-  }
-
-  return new Promise(function (resolve, reject) {
-    try {
-      resolve(allDisplays);
-    } catch (e) {
-      reject(e);
-    }
-  });
-}
 
 function fireVRDisplayPresentChange() {
   var event = new CustomEvent('vrdisplaypresentchange', { detail: { vrdisplay: this } });
@@ -10765,34 +10759,6 @@ function fireVRDisplayPresentChange() {
 var isExperimentalChromium51 = navigator.userAgent.indexOf("Chrome/51.0.2664.0") > -1;
 
 function installPolyfill(options) {
-  var oldGetVRDisplays = null;
-  if (hasNativeWebVR) {
-    oldGetVRDisplays = navigator.getVRDisplays;
-  } else {
-    oldGetVRDisplays = function oldGetVRDisplays() {
-      return Promise.resolve([]);
-    };
-  }
-
-  // Provide navigator.getVRDisplays.
-  navigator.getVRDisplays = function () {
-    return oldGetVRDisplays.call(navigator).then(function (displays) {
-      if (displays.length === 0 || isExperimentalChromium51) {
-        options.overrideOrientation = displays[0];
-        return getPolyfillDisplays(options);
-      } else {
-        return displays;
-      }
-    });
-  };
-
-  // Provide navigator.vrEnabled.
-  Object.defineProperty(navigator, "vrEnabled", {
-    get: function get() {
-      return isCardboardCompatible && (FullScreen.available || isiOS); // just fake it for iOS
-    }
-  });
-
   // Provide the VRDisplay object.
   window.VRDisplay = window.VRDisplay || PolyfilledVRDisplay;
   window.VRFrameData = window.VRFrameData || PolyfilledVRFrameData;
@@ -10810,27 +10776,44 @@ function installPolyfill(options) {
 
 function installDisplays(options) {
   if (!standardMonitorPopulated && !isGearVR) {
-    var oldGetVRDisplays = navigator.getVRDisplays;
+    var oldGetVRDisplays = null;
+    if (hasNativeWebVR) {
+      oldGetVRDisplays = navigator.getVRDisplays;
+    } else {
+      oldGetVRDisplays = function oldGetVRDisplays() {
+        return Promise.resolve([]);
+      };
+    }
+
     navigator.getVRDisplays = function () {
       return oldGetVRDisplays.call(navigator).then(function (displays) {
+
         var stdDeviceExists = false,
             mockDeviceExists = false,
             data = options && options.replayData;
+
         for (var i = 0; i < displays.length; ++i) {
           var dsp = displays[i];
           stdDeviceExists = stdDeviceExists || dsp instanceof StandardMonitorVRDisplay;
           mockDeviceExists = mockDeviceExists || dsp instanceof MockVRDisplay;
         }
 
+        if (isCardboardCompatible || options.forceStereo) {
+          FullScreen.addChangeListener(fireVRDisplayPresentChange);
+          displays.push(new CardboardVRDisplay(options));
+        }
+
         if (!stdDeviceExists) {
           if (options && options.defaultFOV) {
             StandardMonitorVRDisplay.DEFAULT_FOV = options.defaultFOV;
           }
+
           var nativeDisplay = displays[0];
-          if (nativeDisplay) {
+          if (nativeDisplay && !nativeDisplay.isPolyfilled) {
             displays[0] = new NativeVRDisplay(nativeDisplay);
             displays.unshift(new MixedRealityVRDisplay(nativeDisplay));
           }
+
           displays.unshift(new StandardMonitorVRDisplay(nativeDisplay));
         }
 
@@ -13462,6 +13445,7 @@ enableInlineVideo.isWhitelisted = isWhitelisted;
 
 var COUNTER$8 = 0;
 
+// Videos don't auto-play on mobile devices, so let's make them all play whenever we tap the screen.
 var processedVideos = [];
 function findAndFixVideo(evt) {
   var vids = document.querySelectorAll("video");
