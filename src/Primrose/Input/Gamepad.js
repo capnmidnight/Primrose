@@ -64,7 +64,7 @@ export default class Gamepad extends PoseInputProcessor {
   }
 
   updateFrameData() {
-    frameDataFromPose(frameData, this.currentPose);
+    frameDataFromPose(this.frameData, this.currentPose);
   }
 
 

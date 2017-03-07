@@ -30,8 +30,7 @@ export default class PoseInputProcessor extends InputProcessor {
     super.update(dt);
 
     if (this.currentDevice) {
-      const frame = this.currentDevice && this.currentDevice.frameData || this.frameData,
-        pose = frame && frame.pose || this.lastPose || DEFAULT_POSE;
+      const pose = this.frameData && this.frameData.pose || this.lastPose || DEFAULT_POSE;
       this.lastPose = pose;
       this.inPhysicalUse = this.hasOrientation || this.inPhysicalUse;
 
@@ -52,12 +51,5 @@ export default class PoseInputProcessor extends InputProcessor {
         this.posePosition.set(0, 0, 0);
       }
     }
-  }
-
-  updateStage(stageMatrix) {
-    this.matrix.makeRotationFromQuaternion(this.poseQuaternion);
-    this.matrix.setPosition(this.posePosition);
-    this.matrix.multiplyMatrices(stageMatrix, this.matrix);
-    this.matrix.decompose(this.position, this.quaternion, EMPTY_SCALE);
   }
 };

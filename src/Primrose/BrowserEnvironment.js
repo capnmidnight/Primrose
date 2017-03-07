@@ -424,13 +424,6 @@ export default class BrowserEnvironment extends EventDispatcher {
             this.motionDevices[i].posePosition.y -= this.options.avatarHeight;
           }
 
-          // update the motionDevices
-          this.stage.updateMatrix();
-          this.matrix.multiplyMatrices(this.stage.matrix, this.VR.stage.matrix);
-          for (let i = 0; i < this.motionDevices.length; ++i) {
-            this.motionDevices[i].updateStage(this.matrix);
-          }
-
           for (let i = 0; i < this.pointers.length; ++i) {
             this.pointers[i].update();
           }
