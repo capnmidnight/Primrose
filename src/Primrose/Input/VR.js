@@ -243,37 +243,56 @@ export default class VR extends PoseInputProcessor {
   }
 }
 
-function makeTransform(view, projection, eye) {
-  return {
-    view: view,
-    projection: projection,
-    viewport: {
-      left: 0,
-      top: 0,
-      width: eye.renderWidth,
-      height: eye.renderHeight
-    }
-  };
+class Transform {
+  constructor() {
+    this.view = null;
+    this.projection = null;
+    this.viewport = {
+      left: null,
+      top: null,
+      width: null,
+      height: null
+    };
+    Object.defineProperty(this.viewport, "right", {
+      get: () => this.left + this.width
+    });
+  }
 }
 
 class ViewCameraTransform {
   constructor(display) {
     this.display = display;
+    this.params = [new Transform()];
   }
 
   getTransforms(near, far) {
     this.display.depthNear = near;
     this.display.depthFar = far;
 
-    const l = this.display.getEyeParameters("left"),
+    const f = this.display.frameData,
+      l = this.display.getEyeParameters("left"),
       r = this.display.getEyeParameters("right"),
-      f = this.display.frameData,
-      params = [makeTransform(f.leftViewMatrix, f.leftProjectionMatrix, l)];
+      lt = this.params[0];
+
+    lt.view = f.leftViewMatrix;
+    lt.projection = f.leftProjectionMatrix;
+    lt.viewport.width = l.renderWidth;
+    lt.viewport.height = l.renderHeight;
+
     if (r) {
-      params.push(makeTransform(f.rightViewMatrix, f.rightProjectionMatrix, r));
+      if(this.params.length === 1) {
+        this.params.push(new Transform());
+      }
+
+      const rt = this.params[1];
+      rt.view = f.rightViewMatrix;
+      rt.projection = f.rightProjectionMatrix;
+      rt.viewport.width = r.renderWidth;
+      rt.viewport.height = r.renderHeight;
     }
-    for (let i = 1; i < params.length; ++i) {
-      params[i].viewport.left = params[i - 1].viewport.left + params[i - 1].viewport.width;
+
+    for (let i = 1; i < this.params.length; ++i) {
+      this.params[i].viewport.left = this.params[i - 1].viewport.right;
     }
     return params;
   }
