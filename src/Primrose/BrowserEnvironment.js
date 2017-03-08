@@ -1248,7 +1248,7 @@ export default class BrowserEnvironment extends EventDispatcher {
               ptr.route(Pointer.EVENTS, this.consumeEvent.bind(this));
 
               this.pointers.push(ptr);
-              this.scene.add(ptr);
+              this.head.add(ptr);
 
               this.emit("motioncontrollerfound", mgr);
             }
@@ -1301,14 +1301,12 @@ export default class BrowserEnvironment extends EventDispatcher {
 
       this.stage = hub();
 
-      this.head = new Pointer("GazePointer", 0xffff00, 0x0000ff, 0.8, [
-        this.VR
-      ], [
+      this.head = new Pointer("GazePointer", 0xffff00, 0x0000ff, 0.8, [], [
         this.Mouse,
         this.Touch,
         this.Keyboard
       ], this.options)
-        .addTo(this.scene);
+        .addTo(this.stage);
 
       this.head.route(Pointer.EVENTS, this.consumeEvent.bind(this));
 
