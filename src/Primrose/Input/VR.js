@@ -294,6 +294,6 @@ class ViewCameraTransform {
     for (let i = 1; i < this.params.length; ++i) {
       this.params[i].viewport.left = this.params[i - 1].viewport.right;
     }
-    return params;
+    return this.params;
   }
 }
