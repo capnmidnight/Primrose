@@ -928,16 +928,6 @@ export default class BrowserEnvironment extends EventDispatcher {
 
     this.teleporter = new Teleporter(this);
 
-
-    pliny.property({
-      parent: "Primrose.BrowserEnvironment",
-      name: "ui",
-      type: "THREE.Object3D",
-      description: "An anchor point on which objects can be added that follows the user around in both position and orientation. The orientation lags following the user, so if the UI is ever in the way, the user can turn slightly and it won't follow them."
-    });
-    this.vicinity = hub().named("Vicinity").addTo(this.scene);
-    this.ui = hub().named("UI").addTo(this.vicinity);
-
     var buildScene = (sceneGraph) => {
       sceneGraph.buttons = [];
       sceneGraph.traverse(function (child) {
@@ -1233,15 +1223,19 @@ export default class BrowserEnvironment extends EventDispatcher {
               const shift = (this.motionDevices.length - 2) * 8,
                 color = 0x0000ff << shift,
                 highlight = 0xff0000 >> shift,
-                ptr = new Pointer(padID + "Pointer", color, 1, highlight, [mgr], null, this.options);
-              ptr.add(colored(box(0.1, 0.025, 0.2), color, {
-                emissive: highlight
-              }));
+                ptr = new Pointer(padID + "Pointer", color, 1, highlight, [mgr], null, this.options)
+                  .addTo(this.head);
+
+              box(0.1, 0.025, 0.2)
+                .named(padID + "Laser")
+                .colored(color, {
+                  emissive: highlight
+                })
+                .addTo(ptr);
 
               ptr.route(Pointer.EVENTS, this.consumeEvent.bind(this));
 
               this.pointers.push(ptr);
-              this.head.add(ptr);
 
               this.emit("motioncontrollerfound", mgr);
             }
@@ -1292,9 +1286,22 @@ export default class BrowserEnvironment extends EventDispatcher {
         this.gamepadMgr.addEventListener("gamepaddisconnected", this.removeInputManager.bind(this));
       }
 
-      this.body = hub();
 
-      this.head = new Pointer("GazePointer", 0xffff00, 0x0000ff, 0.8, [], [
+      this.stage = hub().named("Stage").addTo(this.scene);
+
+
+      pliny.property({
+        parent: "Primrose.BrowserEnvironment",
+        name: "ui",
+        type: "THREE.Object3D",
+        description: "An anchor point on which objects can be added that follows the user around in both position and orientation. The orientation lags following the user, so if the UI is ever in the way, the user can turn slightly and it won't follow them."
+      });
+      this.vicinity = hub().named("Vicinity").addTo(this.stage);
+      this.ui = hub().named("UI").addTo(this.vicinity);
+
+      this.body = hub().named("Body").addTo(this.stage);
+
+      this.head = new Pointer("Head", 0xffff00, 0x0000ff, 0.8, [], [
         this.Mouse,
         this.Touch,
         this.Keyboard
@@ -1310,11 +1317,11 @@ export default class BrowserEnvironment extends EventDispatcher {
       this.mousePointer = new Pointer("MousePointer", 0xff0000, 0x00ff00, 1, [
         this.Mouse,
         this.Touch
-      ], null, this.options);
+      ], null, this.options)
+        .addTo(this.head);
       this.mousePointer.route(Pointer.EVENTS, this.consumeEvent.bind(this));
       this.mousePointer.unproject = new Matrix4();
       this.pointers.push(this.mousePointer);
-      this.head.add(this.mousePointer);
 
       this.VR.ready.then((displays) => displays.forEach((display, i) => {
         window.addEventListener("vrdisplayactivate", (evt) => {
@@ -1335,9 +1342,10 @@ export default class BrowserEnvironment extends EventDispatcher {
         transparent: true,
         unshaded: true,
         side: BackSide
-      });
+      }).named("Fader")
+        .addTo(this.head);
+
       this.fader.visible = false;
-      this.head.add(this.fader);
 
       pliny.event({
         parent: "Primrose.BrowserEnvironment",
