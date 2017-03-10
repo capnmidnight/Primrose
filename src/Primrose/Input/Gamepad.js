@@ -64,7 +64,23 @@ export default class Gamepad extends PoseInputProcessor {
   }
 
   updateFrameData() {
-    frameDataFromPose(this.frameData, this.currentPose);
+    if(this.currentPose) {
+      frameDataFromPose(this.frameData, this.currentPose);
+
+      if (this.currentPose.orientation) {
+        this.poseQuaternion.fromArray(this.currentPose.orientation);
+      }
+      else {
+        this.poseQuaternion.set(0, 0, 0, 1);
+      }
+
+      if (this.currentPose.position) {
+        this.posePosition.fromArray(this.currentPose.position);
+      }
+      else {
+        this.posePosition.set(0, 0, 0);
+      }
+    }
   }
 
 
