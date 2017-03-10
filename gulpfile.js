@@ -5,23 +5,13 @@ var gulp = require("gulp"),
 
   builder = nt.setup(gulp, pkg),
 
-  devServer = builder.devServer([
-    "*.js",
-    "!gulpfile.js",
-    "*.css", 
-    "*.html", 
-    "demos/**/*.js",
-    "demos/**/*.css",
-    "demos/**/*.html",
-    "doc/**/*.js",
-    "doc/**/*.css",
-    "doc/**/*.html"
-  ]),
+  pugFiles = ["*.pug", "demos/**/*.pug", "doc/**/*.pug", "templates/**/*.pug"],
+  html = builder.html("Primrose", pugFiles, "src"),
 
-  html = builder.html("Primrose", ["*.pug", "demos/**/*.pug", "doc/**/*.pug", "templates/**/*.pug"], "src"),
+  stylusFiles = ["*.styl", "demos/**/*.styl", "doc/**/*.styl"],
+  css = builder.css("Primrose", stylusFiles),
 
-  css = builder.css("Primrose", ["*.styl", "demos/**/*.styl", "doc/**/*.styl"]),
-
+  preloaderFiles = ["preloader/**/*.js"],
   preloaderJS = builder.js("preloader", "preloader/index.js"),
 
   preloaderMin = builder.min(
@@ -39,6 +29,7 @@ var gulp = require("gulp"),
     release: preloaderMin.release
   },
 
+  srcFiles = ["src/**/*.js"],
   umdJSTask = builder.js("Primrose", "src/index.js", {
     advertise: true,
     extractDocumentation: true,
@@ -89,7 +80,28 @@ var gulp = require("gulp"),
     "doc/*/appDocumentation.js",
     "PrimroseDocumentation.modules.js",
     "templates/*.html"
-  ];
+  ],
+
+  stopOnFiles = []
+    .concat(pugFiles)
+    .concat(stylusFiles)
+    .concat(preloaderFiles)
+    .concat(srcFiles),
+
+  reloadOnFiles = [
+    "*.js",
+    "!gulpfile.js",
+    "*.css",
+    "*.html",
+    "demos/**/*.js",
+    "demos/**/*.css",
+    "demos/**/*.html",
+    "doc/**/*.js",
+    "doc/**/*.css",
+    "doc/**/*.html"
+  ],
+
+  devServer = builder.devServer(stopOnFiles, reloadOnFiles);
 
 gulp.task("tidy", [builder.clean("Primrose", tidyFiles, tasks.release)]);
 gulp.task("tidy:only", [builder.clean("Primrose:only", tidyFiles)]);

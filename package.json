@@ -53,6 +53,7 @@
     "iphone-inline-video": "^1.9.3",
     "jstransformer-marked": "^1.0.1",
     "lavu-details-polyfill": "^0.1.0",
+    "notiontheory-basic-build": "^6.3.0",
     "promise-polyfill": "^5.2.1",
     "three": "^0.84.0"
   },

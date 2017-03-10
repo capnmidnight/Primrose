@@ -42,6 +42,10 @@
     console.log("Server told us to reload");
     location.reload();
   });
+  server.on("stop", () => {
+    console.log("Server told us to stop");
+    env.stop();
+  });
   server.on("connected", console.log.bind(console, "Connected to server", serverPath));
 </script><!-- end demoIFrame.pug main block -->
   </body>
