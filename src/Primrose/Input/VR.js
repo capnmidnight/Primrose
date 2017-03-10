@@ -90,7 +90,7 @@ export default class VR extends PoseInputProcessor {
     VIEW.fromArray(this.frameData.leftViewMatrix);
     LEFT.multiplyMatrices(PROJ, VIEW);
     if(this.isStereo) {
-      PROJ.fromArray(this.frameData.righttProjectionMatrix);
+      PROJ.fromArray(this.frameData.rightProjectionMatrix);
       VIEW.fromArray(this.frameData.rightViewMatrix);
       RIGHT.multiplyMatrices(PROJ, VIEW);
       if(PROC.length === 1) {
@@ -108,7 +108,10 @@ export default class VR extends PoseInputProcessor {
       PROJ.elements[i] /= PROC.length;
     }
 
+    LEFT.debug("left", 3);
+    RIGHT.debug("right", 3);
     PROJ.debug("projection", 3);
+    this.cam = PROJ;
   }
 
   connect(selectedIndex) {
