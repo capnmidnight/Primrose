@@ -46,8 +46,8 @@ export default class RemoteUser extends EventDispatcher {
     this.peeringError = null;
     this.peering = false;
     this.peered = false;
-    this.stage = modelFactory.clone();
-    this.stage.traverse((obj) => {
+    this.body = modelFactory.clone();
+    this.body.traverse((obj) => {
       if (obj.name === "AvatarBelt") {
         colored(obj, randColor());
       }
@@ -62,11 +62,11 @@ export default class RemoteUser extends EventDispatcher {
     this.nameObject.position.set(bounds.x / 2, bounds.y, 0);
     this.head.add(this.nameObject);
 
-    this.dStageQuaternion = new Quaternion();
+    this.dBodyQuaternion = new Quaternion();
     this.dHeadPosition = new Vector3();
     this.dHeadQuaternion = new Quaternion();
 
-    this.lastStageQuaternion = new Quaternion();
+    this.lastBodyQuaternion = new Quaternion();
     this.lastHeadPosition = new Vector3();
     this.lastHeadQuaternion = new Quaternion();
 
@@ -176,14 +176,14 @@ export default class RemoteUser extends EventDispatcher {
     var fade = this.time >= RemoteUser.NETWORK_DT;
     this._updateV(this.headPosition, dt, fade);
     this._updateV(this.headQuaternion, dt, fade);
-    this.stage.rotation.setFromQuaternion(this.headQuaternion.curr);
-    this.stage.rotation.x = 0;
-    this.stage.rotation.z = 0;
-    this.stage.position.copy(this.headPosition.curr);
-    this.stage.position.y = 0;
+    this.body.rotation.setFromQuaternion(this.headQuaternion.curr);
+    this.body.rotation.x = 0;
+    this.body.rotation.z = 0;
+    this.body.position.copy(this.headPosition.curr);
+    this.body.position.y = 0;
     if (this.panner) {
-      this.panner.setPosition(this.stage.position.x, this.stage.position.y, this.stage.position.z);
-      this.panner.setOrientation(Math.sin(this.stage.rotation.y), 0, Math.cos(this.stage.rotation.y));
+      this.panner.setPosition(this.body.position.x, this.body.position.y, this.body.position.z);
+      this.panner.setOrientation(Math.sin(this.body.rotation.y), 0, Math.cos(this.body.rotation.y));
     }
   }
 
@@ -205,7 +205,7 @@ export default class RemoteUser extends EventDispatcher {
   }
 
   toString(digits) {
-    return this.stage.position.curr.toString(digits) + " " + this.headPosition.curr.toString(digits);
+    return this.body.position.curr.toString(digits) + " " + this.headPosition.curr.toString(digits);
   }
 }
 

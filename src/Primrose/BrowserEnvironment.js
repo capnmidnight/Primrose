@@ -399,11 +399,11 @@ export default class BrowserEnvironment extends EventDispatcher {
             pitch = 0;
           }
 
-          // move stage according to heading and thrust
+          // move body according to heading and thrust
           EULER_TEMP.set(pitch, heading, 0, "YXZ");
-          this.stage.quaternion.setFromEuler(EULER_TEMP);
+          this.body.quaternion.setFromEuler(EULER_TEMP);
 
-          // update the stage's velocity
+          // update the body's velocity
           this.velocity.set(strafe, 0, drive);
 
           QUAT_TEMP.copy(this.head.quaternion);
@@ -412,14 +412,14 @@ export default class BrowserEnvironment extends EventDispatcher {
           EULER_TEMP.z = 0;
           QUAT_TEMP.setFromEuler(EULER_TEMP);
 
-          this.moveStage(DISPLACEMENT
+          this.moveBody(DISPLACEMENT
             .copy(this.velocity)
             .multiplyScalar(dt)
             .applyQuaternion(QUAT_TEMP)
             .add(this.head.position));
 
-          this.stage.position.y = this.ground.getHeightAt(this.stage.position) || 0;
-          this.stage.position.y += this.options.avatarHeight;
+          this.body.position.y = this.ground.getHeightAt(this.body.position) || 0;
+          this.body.position.y += this.options.avatarHeight;
           for (let i = 0; i < this.motionDevices.length; ++i) {
             this.motionDevices[i].posePosition.y -= this.options.avatarHeight;
           }
@@ -430,10 +430,10 @@ export default class BrowserEnvironment extends EventDispatcher {
 
           // record the position and orientation of the user
           this.head.updateMatrix();
-          this.stage.rotation.x = 0;
-          this.stage.rotation.z = 0;
-          this.stage.quaternion.setFromEuler(this.stage.rotation);
-          this.stage.updateMatrix();
+          this.body.rotation.x = 0;
+          this.body.rotation.z = 0;
+          this.body.quaternion.setFromEuler(this.body.rotation);
+          this.body.updateMatrix();
           this.head.position.toArray(this.newState, 0);
           this.head.quaternion.toArray(this.newState, 3);
 
@@ -824,7 +824,7 @@ export default class BrowserEnvironment extends EventDispatcher {
       }]
     });
     this.teleport = (pos, immediate) => this.transition(
-      () => this.moveStage(pos),
+      () => this.moveBody(pos),
       () => this.teleportAvailable && TELEPORT_DISPLACEMENT.copy(pos)
         .sub(this.head.position)
         .length() > 0.2,
@@ -999,12 +999,12 @@ export default class BrowserEnvironment extends EventDispatcher {
 
     this.addAvatar = (user) => {
       console.log(user);
-      this.scene.add(user.stage);
+      this.scene.add(user.body);
       this.scene.add(user.head);
     };
 
     this.removeAvatar = (user) => {
-      this.scene.remove(user.stage);
+      this.scene.remove(user.body);
       this.scene.remove(user.head);
     };
 
@@ -1299,14 +1299,14 @@ export default class BrowserEnvironment extends EventDispatcher {
         this.gamepadMgr.addEventListener("gamepaddisconnected", this.removeInputManager.bind(this));
       }
 
-      this.stage = hub();
+      this.body = hub();
 
       this.head = new Pointer("GazePointer", 0xffff00, 0x0000ff, 0.8, [], [
         this.Mouse,
         this.Touch,
         this.Keyboard
       ], this.options)
-        .addTo(this.stage);
+        .addTo(this.body);
 
       this.head.route(Pointer.EVENTS, this.consumeEvent.bind(this));
 
@@ -1695,11 +1695,11 @@ export default class BrowserEnvironment extends EventDispatcher {
     console.log("removed", mgr);
   }
 
-  moveStage(position) {
+  moveBody(position) {
     DISPLACEMENT.copy(position)
       .sub(this.head.position);
 
-    this.stage.position.add(DISPLACEMENT);
+    this.body.position.add(DISPLACEMENT);
   }
 
   cancelVR() {
