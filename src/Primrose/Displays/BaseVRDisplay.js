@@ -11,5 +11,4 @@ export default class BaseVRDisplay {
   stopAnimation() {
     this.cancelAnimationFrame(this.timer);
   }
-
 };

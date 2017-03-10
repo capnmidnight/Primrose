@@ -10,11 +10,6 @@ pliny.class({
   }]
 });
 
-const DEFAULT_POSE = {
-  position: [0, 0, 0],
-  orientation: [0, 0, 0, 1]
-};
-
 import PoseInputProcessor from "./PoseInputProcessor";
 import isChrome from "../../flags/isChrome";
 import isFirefox from "../../flags/isFirefox";
@@ -230,16 +225,6 @@ export default class VR extends PoseInputProcessor {
 
   get hasOrientation() {
     return this.currentDevice && this.currentDevice.capabilities.hasOrientation;
-  }
-
-  get currentCanvas() {
-    if(this.isPresenting) {
-      var layers = this.currentDevice.getLayers();
-      if(layers.length > 0){
-        return layers[0].source;
-      }
-    }
-    return null;
   }
 }
 

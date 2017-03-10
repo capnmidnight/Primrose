@@ -1068,7 +1068,6 @@ export default class BrowserEnvironment extends EventDispatcher {
       this.pointers = [];
       this.motionDevices = [];
       this.velocity = new Vector3();
-      this.matrix = new Matrix4();
 
       if(!this.options.disableKeyboard) {
         this.addInputManager(new Keyboard(this, {
