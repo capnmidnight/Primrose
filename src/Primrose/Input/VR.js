@@ -24,6 +24,12 @@ import StandardMonitorVRDisplay from "../Displays/StandardMonitorVRDisplay";
 import CardboardVRDisplay from "../Displays/CardboardVRDisplay";
 import { Matrix4 } from "three";
 
+const PROJ = new Matrix4(),
+  VIEW = new Matrix4(),
+  LEFT = new Matrix4(),
+  RIGHT = new Matrix4(),
+  PROC = [LEFT];
+
 export default class VR extends PoseInputProcessor {
 
   static isStereoDisplay(display) {
@@ -58,6 +64,8 @@ export default class VR extends PoseInputProcessor {
       CardboardVRDisplay.NECK_DEPTH = this.options.nonstandardNeckDepth;
     }
 
+    installPolyfills(options);
+
     this.currentDevice = null;
     this.ready = navigator.getVRDisplays()
       .then((displays) => {
@@ -77,6 +85,30 @@ export default class VR extends PoseInputProcessor {
 
   updateFrameData() {
     this.currentDevice.getFrameData(this.frameData);
+
+    PROJ.fromArray(this.frameData.leftProjectionMatrix);
+    VIEW.fromArray(this.frameData.leftViewMatrix);
+    LEFT.multiplyMatrices(PROJ, VIEW);
+    if(this.isStereo) {
+      PROJ.fromArray(this.frameData.righttProjectionMatrix);
+      VIEW.fromArray(this.frameData.rightViewMatrix);
+      RIGHT.multiplyMatrices(PROJ, VIEW);
+      if(PROC.length === 1) {
+        PROC.push(RIGHT);
+      }
+    } else if(PROC.length === 2) {
+      PROC.pop();
+    }
+
+    for(let i = 0; i < 16; ++i) {
+      PROJ.elements[i] = 0;
+      for(let j = 0; j < PROC.length; ++j) {
+        PROJ.elements[i] += PROC[j].elements[i];
+      }
+      PROJ.elements[i] /= PROC.length;
+    }
+
+    PROJ.debug("projection", 3);
   }
 
   connect(selectedIndex) {
@@ -84,9 +116,9 @@ export default class VR extends PoseInputProcessor {
     this.currentDeviceIndex = selectedIndex;
     if (0 <= selectedIndex && selectedIndex <= this.displays.length) {
       this.currentDevice = this.displays[selectedIndex];
+      this.isStereo = VR.isStereoDisplay(this.currentDevice);
       this.frameData = this.currentDevice.frameData;
       this.updateFrameData();
-      this.isStereo = VR.isStereoDisplay(this.currentDevice);
     }
   }
 
