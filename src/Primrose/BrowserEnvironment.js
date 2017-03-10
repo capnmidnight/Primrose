@@ -527,7 +527,7 @@ export default class BrowserEnvironment extends EventDispatcher {
             v.height * resolutionScale);
 
           this.camera.projectionMatrix.fromArray(st.projection);
-          this.camera.matrix.elements = st.view;
+          this.camera.matrix.fromArray(st.view);
           this.camera.matrix.getInverse(this.camera.matrix);
           this.camera.updateMatrixWorld(true);
           if (this.mousePointer.unproject) {
