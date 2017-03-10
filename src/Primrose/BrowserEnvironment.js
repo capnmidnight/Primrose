@@ -981,19 +981,12 @@ export default class BrowserEnvironment extends EventDispatcher {
     });
     this.goFullScreen = (index, evt) => {
       if (evt !== "Gaze") {
-        let elem = null;
-        if(evt === "force" || this.VR.canMirror || this.VR.isNativeWebVR) {
-          elem = this.renderer.domElement;
-        }
-        else{
-          elem = this.options.fullScreenElement;
-        }
         this.VR.connect(index);
         return this.VR.requestPresent([{
-            source: elem
+            source: this.renderer.domElement
           }])
           .catch((exp) => console.error("whaaat", exp))
-          .then(() => elem.focus());
+          .then(() => this.renderer.domElement.focus());
       }
     };
 
@@ -1060,7 +1053,6 @@ export default class BrowserEnvironment extends EventDispatcher {
         }
       }
 
-      this.options.fullScreenElement = document.querySelector(this.options.fullScreenElement) || this.renderer.domElement;
       let maxTabIndex = 0;
       const elementsWithTabIndex = document.querySelectorAll("[tabIndex]");
       for(let i = 0; i < elementsWithTabIndex.length; ++i){
@@ -1133,7 +1125,7 @@ export default class BrowserEnvironment extends EventDispatcher {
         this.Keyboard.codePage = this.options.language;
       }
 
-      this.addInputManager(new Touch(this.options.fullScreenElement, {
+      this.addInputManager(new Touch(this.renderer.domElement, {
         U: { axes: ["X0"], min: 0, max: 2, offset: 0 },
         V: { axes: ["Y0"], min: 0, max: 2 },
         buttons: {
@@ -1156,7 +1148,7 @@ export default class BrowserEnvironment extends EventDispatcher {
       }));
 
 
-      this.addInputManager(new Mouse(this.options.fullScreenElement, {
+      this.addInputManager(new Mouse(this.renderer.domElement, {
         U: { axes: ["X"], min: 0, max: 2, offset: 0 },
         V: { axes: ["Y"], min: 0, max: 2 },
         buttons: {
