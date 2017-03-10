@@ -41,13 +41,12 @@ export default class VR extends PoseInputProcessor {
     this.timerDevice = null;
     this.timer = null;
     this.currentDeviceIndex = -1;
-    this.movePlayer = new Matrix4();
-    this.stage = null;
-    this.lastStageWidth = null;
-    this.lastStageDepth = null;
+    this.stage = {
+      matrix: new Matrix4(),
+      sizeX: 0,
+      sizeZ: 0
+    };
     this.isStereo = false;
-    installPolyfills(options);
-
 
     if(this.options.nonstandardIPD !== null){
       CardboardVRDisplay.IPD = this.options.nonstandardIPD;
@@ -146,40 +145,20 @@ export default class VR extends PoseInputProcessor {
 
   update(dt) {
     this.updateFrameData();
-    var x, z, stage;
 
-    if (this.currentDevice) {
-      stage = this.currentDevice.stageParameters;
-    }
-    else{
-      stage = null;
-    }
-    super.update(dt);
-
+    let stage = this.currentDevice &&  this.currentDevice.stageParameters;
     if (stage) {
-      this.movePlayer.fromArray(stage.sittingToStandingTransform);
-      x = stage.sizeX;
-      z = stage.sizeZ;
+      this.stage.matrix.fromArray(stage.sittingToStandingTransform);
+      this.stage.sizeX = stage.sizeX;
+      this.stage.sizeZ = stage.sizeZ;
     }
     else {
-      this.movePlayer.makeTranslation(0, this.options.avatarHeight, 0);
-      x = 0;
-      z = 0;
+      this.stage.matrix.makeTranslation(0, this.options.avatarHeight, 0);
+      this.stage.sizeX = 0;
+      this.stage.sizeZ = 0;
     }
 
-    var s = {
-      matrix: this.movePlayer,
-      sizeX: x,
-      sizeZ: z
-    };
-
-    if (!this.stage || s.sizeX !== this.stage.sizeX || s.sizeZ !== this.stage.sizeZ) {
-      this.stage = s;
-    }
-  }
-
-  get hasStage() {
-    return this.stage && this.stage.sizeX * this.stage.sizeZ > 0;
+    super.update(dt);
   }
 
   submitFrame() {
