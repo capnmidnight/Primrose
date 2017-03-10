@@ -1552,8 +1552,11 @@ export default class BrowserEnvironment extends EventDispatcher {
       description: "Pause animation."
     });
     this.stop = () => {
-      this.VR.stopAnimation();
-      this.audio.stop();
+      if(this.VR.timer) {
+        this.VR.stopAnimation();
+        this.audio.stop();
+        console.log("stopped");
+      }
     };
 
     pliny.property({
