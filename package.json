@@ -58,6 +58,6 @@
     "three": "^0.84.0"
   },
   "devDependencies": {
-    "notiontheory-basic-build": "^6.2.0"
+    "marigold-build": "^1.0.0"
   }
 }

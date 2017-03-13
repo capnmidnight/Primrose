@@ -1,20 +1,18 @@
 var gulp = require("gulp"),
   glob = require("glob").sync,
   pkg = require("./package.json"),
-  nt = require("notiontheory-basic-build"),
-
-  builder = nt.setup(gulp, pkg),
+  marigold = require("marigold-build").setup(gulp, pkg),
 
   pugFiles = ["*.pug", "demos/**/*.pug", "doc/**/*.pug", "templates/**/*.pug"],
-  html = builder.html("Primrose", pugFiles, "src"),
+  html = marigold.html(pugFiles, { jsDir: "src" }),
 
   stylusFiles = ["*.styl", "demos/**/*.styl", "doc/**/*.styl"],
-  css = builder.css("Primrose", stylusFiles),
+  css = marigold.css(stylusFiles),
 
   preloaderFiles = ["preloader/**/*.js"],
-  preloaderJS = builder.js("preloader", "preloader/index.js"),
+  preloaderJS = marigold.js("preloader/index.js", { name: "preloader" }),
 
-  preloaderMin = builder.min(
+  preloaderMin = marigold.min(
     "preloader",  [
     "preloader.js"
   ], [{
@@ -30,7 +28,7 @@ var gulp = require("gulp"),
   },
 
   srcFiles = ["src/**/*.js"],
-  umdJSTask = builder.js("Primrose", "src/index.js", {
+  umdJSTask = marigold.js("src/index.js", {
     advertise: true,
     extractDocumentation: true,
     dependencies: ["format"],
@@ -39,14 +37,14 @@ var gulp = require("gulp"),
     format: "umd"
   }),
 
-  umdMinTask = builder.min("Primrose", [
+  umdMinTask = marigold.min([
     "doc/PrimroseDocumentation.js",
     "Primrose.js"], [{
     debug: umdJSTask.debug,
     release: umdJSTask.debug
   }]),
 
-  modulesJSTask = builder.js("Primrose", "src/index.js", {
+  modulesJSTask = marigold.js("src/index.js", {
     advertise: true,
     extractDocumentation: true,
     moduleName: "Primrose",
@@ -58,13 +56,12 @@ var gulp = require("gulp"),
   demos = glob("demos/*/app.js").map(function(file) {
 
     var name = file.match(/demos\/(\w+)\/app\.js/)[1],
-      taskName = "Demo:" + name,
-      min = builder.min(taskName, file);
+      min = marigold.min(file, [], { name: "Demo:" + name });
 
     return min.release;
   }),
 
-  minDocApp = builder.min("DocApp", "doc/app.js"),
+  minDocApp = marigold.min("doc/app.js", [], { name: "DocApp" }),
 
   tasks = {
     format: [preloader.format, umdJSTask.format],
@@ -101,10 +98,11 @@ var gulp = require("gulp"),
     "doc/**/*.html"
   ],
 
-  devServer = builder.devServer(stopOnFiles, reloadOnFiles);
+  devServer = marigold.devServer(stopOnFiles, reloadOnFiles);
 
-gulp.task("tidy", [builder.clean("Primrose", tidyFiles, tasks.release)]);
-gulp.task("tidy:only", [builder.clean("Primrose:only", tidyFiles)]);
+
+gulp.task("tidy", [marigold.clean("Primrose", tidyFiles, tasks.release)]);
+gulp.task("tidy:only", [marigold.clean("Primrose:only", tidyFiles)]);
 gulp.task("copy", ["tidy"], () => gulp.src(["Primrose.min.js"])
   .pipe(gulp.dest("quickstart")));
 
@@ -125,7 +123,7 @@ gulp.task("test", [ "release" ], devServer);
 gulp.task("debug", ["js:debug", "html:debug", "css:debug"]);
 gulp.task("release",  ["js:release", "html:release", "css:release"]);
 
-gulp.task("kablamo", nt.exec("gulp bump\
+gulp.task("kablamo", marigold.exec("gulp bump\
  && gulp yolo\
  && cd ../Primrose-Site\
  && gulp yolo\
