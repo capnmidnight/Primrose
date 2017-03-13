@@ -1,11 +1,10 @@
 var env = new Primrose.BrowserEnvironment({
   font: "../shared_assets/fonts/helvetiker_regular.typeface.json",
   backgroundColor: 0xC9E6EE,
-  //quality: isMobile ? Primrose.Constants.Quality.MEDIUM : Primrose.Constants.Quality.MAXIMUM,
+  quality: isMobile ? Primrose.Constants.Quality.MEDIUM : Primrose.Constants.Quality.HIGH,
   groundModel: "Ground.obj",
   useFog: true,
   enableShadows: true,
-  shadowRadius: 3,
   fullScreenButtonContainer: "#fullScreenButtonContainer",
   progress: Preloader.thunk
 });

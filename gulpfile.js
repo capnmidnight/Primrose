@@ -73,7 +73,7 @@ var gulp = require("gulp"),
     "doc/*/appDocumentation.js",
     "PrimroseDocumentation.modules.js",
     "templates/*.html"
-  ],
+  ];
 
   devServer = () => marigold.startServer({ mode: "dev", port: 8080 });
 

@@ -19,12 +19,14 @@ import { Math as _Math } from "three";
 import isTimestampDeltaValid from "../../../util/isTimestampDeltaValid";
 import isLandscape from "../../../flags/isLandscape";
 import isiOS from "../../../flags/isiOS";
+import isIE from "../../../flags/isIE";
 import isFirefox from "../../../flags/isFirefox";
 import isMobile from "../../../flags/isMobile";
 
 
 const isFirefoxAndroid = isFirefox && isMobile;
 const { DEG2RAD } = _Math;
+const IE_CORRECTION = new Quaternion(1, 0, 0, 0);
 
 /**
  * The pose sensor, implemented using DeviceMotion APIs.
@@ -98,6 +100,9 @@ export default class FusionPoseSensor {
     out.multiply(this.resetQ);
     out.multiply(this.predictedQ);
     out.multiply(this.worldToScreenQ);
+    if(isMobile && isIE){
+      out.multiply(IE_CORRECTION);
+    }
 
     this.orientationOut_[0] = out.x;
     this.orientationOut_[1] = out.y;

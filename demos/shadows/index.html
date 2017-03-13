@@ -32,6 +32,17 @@
       <div id="fullScreenButtonContainer"></div>
       <progress></progress>
     </div>
-    <script src="../../preloader.js" data-files="../../node_modules/three/build/three.js,../../Primrose.js,app.js"></script><!-- end demoIFrame.pug main block -->
+    <script src="../../preloader.js" data-files="../../node_modules/three/build/three.js,../../Primrose.js,app.js"></script><!-- LIVE RELOADER -->
+<script src="../../node_modules/socket.io-client/dist/socket.io.js"></script>
+<script>
+  var serverPath = location.origin.replace(/^http/, "ws");
+  console.log("Attempting to connect to", serverPath);
+  var server = io(serverPath);
+  server.on("reload", () => {
+    console.log("Server told us to reload");
+    location.reload();
+  });
+  server.on("connected", console.log.bind(console, "Connected to server", serverPath));
+</script><!-- end demoIFrame.pug main block -->
   </body>
 </html>

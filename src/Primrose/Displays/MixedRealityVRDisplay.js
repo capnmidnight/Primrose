@@ -1,144 +1,48 @@
-import VRDisplay from "./VRDisplay";
+import StandardMonitorVRDisplay from "./StandardMonitorVRDisplay";
 
-let defaultFieldOfView = 50;
-function defaultPose() {
-  return {
-
-    position: [0, 0, 0],
-    orientation: [0, 0, 0, 1],
-    linearVelocity: null,
-    linearAcceleration: null,
-    angularVelocity: null,
-    angularAcceleration: null
-  };
-}
-
-export default class MixedRealityVRDisplay extends VRDisplay {
-
-  static get DEFAULT_FOV () {
-    return defaultFieldOfView;
-  }
-
-  static set DEFAULT_FOV (v) {
-    defaultFieldOfView = v;
-  }
+export default class MixedRealityVRDisplay extends StandardMonitorVRDisplay {
 
   constructor(display) {
-    super("Full Screen");
-    this._display = display;
+    super(display, "Mixed Reality");
     this.motionDevice = null;
 
-    Object.defineProperties(this, {
-      capabilities: { get: () => this._display.capabilities },
-      stageParameters: { get: () => this._display.stageParameters },
-      displayId: immutable(nextDisplayId++),
-      displayName: immutable(name),
-      isConnected: { get: () => this._display.isConnected },
-      isPresenting: { get: () => this._display.isPresenting },
-
-      depthNear: {
-        get: () => this._display.depthNear,
-        set: (v) => this._display.depthNear = v,
-      },
-      depthFar: {
-        get: () => this._display.depthFar,
-        set: (v) => this._display.depthFar = v,
-      },
-
-      isPolyfilled: immutable(true)
+    Object.defineProperties(this.capabilities, {
+      hasPosition: immutable(() => this.motionDevice && this.motionDevice.hasPosition),
+      hasOrientation: immutable(() => this.motionDevice && this.motionDevice.hasOrientation),
     });
   }
 
-  requestPresent(layers) {
-    return this._display.requestPresent(layers)
+  get isMixedRealityVRDisplay() {
+    return true;
   }
 
-  exitPresent() {
-    return this._display.exitPresent();
+  get isStereo() {
+    return false;
   }
 
-  getLayers() {
-    return this._display.getLayers();
+  get targetName() {
+    return "Full Screen";
   }
 
-  submitFrame(pose) {
-    // ?????
-    // probably do nothing
-    // probably need the real VRDisplay doing a rendering pass before this
-    if(this._display) {
-      this._display.submitFrame(pose);
-    }
-    else{
-      super.submitFrame(pose);
-    }
+  get renderOrder() {
+    return 1;
   }
 
-  set motionDevice(device) {
-    this.enableMotion = !!device;
-    this._motionDevice = device;
-    if(this.enableMotion) {
-      this.capabilities.hasPosition = true;
-      this.capabilities.hasOrientation = true;
-      this.stageParameters = this._display.stageParameters;
-    }
-  }
-
-  requestAnimationFrame(callback) {
+  _getPose() {
     if(this.motionDevice) {
-      return this._display.requestAnimationFrame(callback);
-    }
-    else {
-      return super.requestAnimationFrame(callback);
-    }
-  }
-
-  cancelAnimationFrame(id) {
-    if(this.motionDevice) {
-      return this._display.cancelAnimationFrame(id);
-    }
-    else {
-      return super.cancelAnimationFrame(id);
-    }
-  }
-
-  getPose() {
-    if(this.motionDevice){
       return this.motionDevice.getPose();
-    }
-    else{
-      return defaultPose();
     }
   }
 
   resetPose(){
-    if(this.motionDevice){
+    if(this.motionDevice) {
       return this.motionDevice.resetPose();
     }
   }
 
-  getEyeParameters (side) {
-    if (side === "left") {
-      var curLayer = this.getLayers()[0],
-        elem = curLayer && curLayer.source || document.body,
-        width = elem.clientWidth,
-        height = elem.clientHeight,
-        vFOV = defaultFieldOfView / 2,
-        hFOV = calcFoV(vFOV, width, height);
-      return {
-        renderWidth: width * devicePixelRatio,
-        renderHeight: height * devicePixelRatio,
-        offset: new Float32Array([0, 0, 0]),
-        fieldOfView: {
-          upDegrees: vFOV,
-          downDegrees: vFOV,
-          leftDegrees: hFOV,
-          rightDegrees: hFOV
-        }
-      };
+  getFrameData(frameData) {
+    if(this.motionDevice) {
+      this.motionDevice.getFrameData(frameData);
     }
   }
-}
-
-function calcFoV(aFoV, aDim, bDim){
-  return 360 * Math.atan(Math.tan(aFoV * Math.PI / 360) * aDim / bDim) / Math.PI;
 }

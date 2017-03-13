@@ -14,7 +14,7 @@
  */
 
 import FusionPoseSensor from "./SensorFusion/FusionPoseSensor";
-import VRDisplay from "./VRDisplay";
+import PolyfilledVRDisplay from "./PolyfilledVRDisplay";
 import isiOS from "../../flags/isiOS";
 import isLandscape from "../../flags/isLandscape";
 
@@ -25,6 +25,9 @@ let Eye = {
   ipd = 0.03,
   neckLength = 0,
   neckDepth = 0;
+
+export default class CardboardVRDisplay extends PolyfilledVRDisplay {
+
   static get IPD() {
     return ipd;
   }
@@ -49,21 +52,28 @@ let Eye = {
     neckDepth = v;
   }
 
-export default class CardboardVRDisplay extends VRDisplay {
   constructor(options) {
     super("Google Cardboard");
     this.DOMElement = null;
 
     // "Private" members.
-    this.poseSensor_ = options && options.overrideOrientation || new FusionPoseSensor(options);
+    this._poseSensor = options && options.overrideOrientation || new FusionPoseSensor(options);
+  }
+
+  get isCardboardVRDisplay() {
+    return true;
+  }
+
+  get isStereo() {
+    return true;
   }
 
   _getPose() {
-    return this.poseSensor_.getPose();
+    return this._poseSensor.getPose();
   }
 
   resetPose() {
-    this.poseSensor_.resetPose();
+    this._poseSensor.resetPose();
   }
 
   getEyeParameters(whichEye) {
@@ -100,5 +110,13 @@ export default class CardboardVRDisplay extends VRDisplay {
       renderWidth: 0.5 * width,
       renderHeight: height,
     }
+  }
+
+  get targetName () {
+    return "Full Screen";
+  }
+
+  get renderOrder() {
+    return 0;
   }
 };

@@ -346,7 +346,9 @@ export default class BrowserEnvironment extends EventDispatcher {
 
         updateFade(dt);
 
-        for(let frame = 0; frame < numFrames; ++frame) {const hadGamepad = this.hasGamepad;
+        for(let frame = 0; frame < numFrames; ++frame) {
+
+          const hadGamepad = this.hasGamepad;
           if(this.gamepadMgr) {
             this.gamepadMgr.poll();
           }
@@ -422,19 +424,11 @@ export default class BrowserEnvironment extends EventDispatcher {
             this.motionDevices[i].posePosition.y -= this.options.avatarHeight;
           }
 
-          // update the motionDevices
-          this.stage.updateMatrix();
-          this.matrix.multiplyMatrices(this.stage.matrix, this.VR.stage.matrix);
-          for (let i = 0; i < this.motionDevices.length; ++i) {
-            this.motionDevices[i].updateStage(this.matrix);
-          }
-
           for (let i = 0; i < this.pointers.length; ++i) {
             this.pointers[i].update();
           }
 
           // record the position and orientation of the user
-          this.newState = [];
           this.head.updateMatrix();
           this.stage.rotation.x = 0;
           this.stage.rotation.z = 0;
@@ -446,7 +440,7 @@ export default class BrowserEnvironment extends EventDispatcher {
           if(frame === 0) {
             updateAll();
             let userActionHandlers = null;
-            for (let i = 0; i < this.pointers.length; ++i) {
+            for (let i = 0; i < this.pointers.length && userActionHandlers === null; ++i) {
               userActionHandlers = this.pointers[i].resolvePicking(this.scene);
             }
             for (let i = 0; i < this.managers.length; ++i) {
@@ -486,86 +480,85 @@ export default class BrowserEnvironment extends EventDispatcher {
     this.turns = new Angle(0);
     const followEuler = new Euler(),
       maxX = -Math.PI / 4,
-      maxY = Math.PI / 6;
+      maxY = Math.PI / 6,
 
-    const moveUI = (dt) => {
-      var y = this.vicinity.position.y,
-        p = this.options.vicinityFollowRate,
-        q = 1 - p;
-      this.vicinity.position.lerp(this.head.position, p);
-      this.vicinity.position.y = y;
+      moveUI = (dt) => {
+        var y = this.vicinity.position.y,
+          p = this.options.vicinityFollowRate,
+          q = 1 - p;
+        this.vicinity.position.lerp(this.head.position, p);
+        this.vicinity.position.y = y;
 
-      followEuler.setFromQuaternion(this.head.quaternion);
-      this.turns.radians = followEuler.y;
-      followEuler.set(maxX, this.turns.radians, 0, "YXZ");
-      this.ui.quaternion.setFromEuler(followEuler)
-      this.ui.position.y = this.ui.position.y * q + this.head.position.y * p;
-    };
+        followEuler.setFromQuaternion(this.head.quaternion);
+        this.turns.radians = followEuler.y;
+        followEuler.set(maxX, this.turns.radians, 0, "YXZ");
+        this.ui.quaternion.setFromEuler(followEuler)
+        this.ui.position.y = this.ui.position.y * q + this.head.position.y * p;
+      },
 
-    var animate = (t) => {
-      var dt = t - lt,
-        i, j;
-      lt = t;
-      update(dt);
-      render();
-      this.VR.startAnimation(animate);
-    };
+      animate = (t) => {
+        var dt = t - lt,
+          i, j;
+        lt = t;
+        update(dt);
+        render();
+        this.VR.startAnimation(animate);
+      },
 
-    var render = () => {
-      this.camera.position.set(0, 0, 0);
-      this.camera.quaternion.set(0, 0, 0, 1);
-      this.audio.setPlayer(this.head.mesh);
-      this.renderer.clear(true, true, true);
+      getTrans = () => this.VR && this.VR.getTransforms(
+          this.options.nearPlane,
+          this.options.nearPlane + this.options.drawDistance),
 
-      var trans = this.VR.getTransforms(
-        this.options.nearPlane,
-        this.options.nearPlane + this.options.drawDistance);
-      for (var i = 0; trans && i < trans.length; ++i) {
-        eyeBlankAll(i);
+      render = () => {
+        this.audio.setPlayer(this.head.mesh);
+        this.renderer.clear(true, true, true);
 
-        var st = trans[i],
-          v = st.viewport;
+        var trans = getTrans();
+        for (var i = 0; trans && i < trans.length; ++i) {
+          eyeBlankAll(i);
 
-        this.renderer.setViewport(
-          v.left * resolutionScale,
-          v.top * resolutionScale,
-          v.width * resolutionScale,
-          v.height * resolutionScale);
+          var st = trans[i],
+            v = st.viewport;
 
-        this.camera.projectionMatrix.copy(st.projection);
-        if (this.mousePointer.unproject) {
-          this.mousePointer.unproject.getInverse(st.projection);
+          this.renderer.setViewport(
+            v.left * resolutionScale,
+            v.top * resolutionScale,
+            v.width * resolutionScale,
+            v.height * resolutionScale);
+
+          this.camera.projectionMatrix.fromArray(st.projection);
+          this.camera.matrix.elements = st.view;
+          this.camera.matrix.getInverse(this.camera.matrix);
+          this.camera.updateMatrixWorld(true);
+          if (this.mousePointer.unproject) {
+            this.mousePointer.unproject.getInverse(this.camera.projectionMatrix);
+          }
+          this.renderer.render(this.scene, this.camera);
         }
-        this.camera.translateOnAxis(st.translation, 1);
-        this.renderer.render(this.scene, this.camera);
-        this.camera.translateOnAxis(st.translation, -1);
-      }
-      this.VR.submitFrame();
-    };
+        this.VR.submitFrame();
+      },
 
-    var modifyScreen = () => {
-      var near = this.options.nearPlane,
-        far = near + this.options.drawDistance,
-        p = this.VR && this.VR.getTransforms(near, far);
+      modifyScreen = () => {
+        const p = getTrans();
 
-      if (p) {
-        var canvasWidth = 0,
-          canvasHeight = 0;
+        if (p) {
+          var canvasWidth = 0,
+            canvasHeight = 0;
 
-        for (var i = 0; i < p.length; ++i) {
-          canvasWidth += p[i].viewport.width;
-          canvasHeight = Math.max(canvasHeight, p[i].viewport.height);
+          for (var i = 0; i < p.length; ++i) {
+            canvasWidth += p[i].viewport.width;
+            canvasHeight = Math.max(canvasHeight, p[i].viewport.height);
+          }
+
+          this.mousePointer.setSize(canvasWidth, canvasHeight);
+
+          canvasWidth = Math.floor(canvasWidth * resolutionScale);
+          canvasHeight = Math.floor(canvasHeight * resolutionScale);
+
+          this.renderer.domElement.width = canvasWidth;
+          this.renderer.domElement.height = canvasHeight;
         }
-
-        this.mousePointer.setSize(canvasWidth, canvasHeight);
-
-        canvasWidth = Math.floor(canvasWidth * resolutionScale);
-        canvasHeight = Math.floor(canvasHeight * resolutionScale);
-
-        this.renderer.domElement.width = canvasWidth;
-        this.renderer.domElement.height = canvasHeight;
-      }
-    };
+      };
 
     //
     // Initialize local variables
@@ -910,6 +903,7 @@ export default class BrowserEnvironment extends EventDispatcher {
       description: "The camera used to render the view."
     });
     this.camera = new PerspectiveCamera(75, 1, this.options.nearPlane, this.options.nearPlane + this.options.drawDistance);
+    this.camera.matrixAutoUpdate = false;
 
     pliny.property({
       parent: "Primrose.BrowserEnvironment",
@@ -1782,6 +1776,8 @@ export default class BrowserEnvironment extends EventDispatcher {
       return btn;
     };
 
+    let mixedReality = null;
+
     const buttons = this.displays
       // We skip the Standard Monitor and Magic Window on iOS because we can't go full screen on those systems.
       .map((display, i) => {
@@ -1790,10 +1786,26 @@ export default class BrowserEnvironment extends EventDispatcher {
             btn = newButton(display.displayName, display.displayName, enterVR),
             isStereo = VR.isStereoDisplay(display);
           btn.className = isStereo ? "stereo" : "mono";
+          if(display.isMixedRealityVRDisplay){
+
+            mixedReality = {
+              display,
+              btn
+            };
+
+            btn.style.display = "none";
+          }
           return btn;
         }
       })
       .filter(identity);
+
+    if(mixedReality) {
+      this.addEventListener("motioncontrollerfound", (mgr) => {
+        mixedReality.display.motionDevice = mgr;
+        mixedReality.btn.style.display = "";
+      });
+    }
 
     if(!/(www\.)?primrosevr.com/.test(document.location.hostname) && !this.options.disableAdvertising) {
       buttons.push(newButton("Primrose", "✿", () => open("https://www.primrosevr.com", "_blank")));
