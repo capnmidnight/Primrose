@@ -32,7 +32,7 @@ Matrix4.prototype.debug =
     var val = this.toString(digits);
     if (val !== debugOutputCache[label]) {
       debugOutputCache[label] = val;
-      console.log(label + "\n" + val);
+      console.trace(label + "\n" + val);
     }
     return this;
   };
