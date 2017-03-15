@@ -53,12 +53,12 @@ var jsESModules = marigold.js(jsOptions("es")),
   },
 
   tidyFiles = [
-    "PrimroseWithDoc*.js",
     "doc/*/appWithDoc.js",
     "doc/*/appDocumentation.js",
     "PrimroseDocumentation*.js",
     "templates/*.html",
-    "*.js.map"
+    "Primrose*.modules.js.map",
+    "PrimroseWithDoc.modules.js"
   ],
 
   stopOnFiles = []
