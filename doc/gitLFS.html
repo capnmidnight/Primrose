@@ -7,7 +7,6 @@ git config &#39;lfs.https://github.com/[User-Name]/[Project-Name].git/info/lfs.l
 git config merge.tool &quot;unityyamlmerge&quot;
 git config mergetool.unityyamlmerge.cmd &quot;&#39;[Unity-Install-Directory]/Editor/Data/Tools/UnityYAMLMerge.exe&#39; merge -p $BASE $REMOTE $LOCAL $MERGED&quot;
 git config mergetool.unityyamlmerge.trustexitcode &quot;false&quot;
-false
 </code></pre><p>Remembering to substitute <code>[User-Name]</code> and <code>[Project-Name]</code>. Your <code>[Unity-Install-Directory]</code> is likely to be <code>C:/Program Files/Unity</code>.</p>
 <p>Then in the same directory create the file <code>.gitattributes</code> and copy the contents:</p>
 <pre><code>## Unity ##

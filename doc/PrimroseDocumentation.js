@@ -289,7 +289,7 @@ pliny.function({
     });\n\
     \n\
     env.sky.add(moon); // assuming we have a `Primrose.BrowserEnvironment` named `env`\n\
-    moon.latLon(-30, 30, 7);\n\
+    moon.latLng(-30, 30, 7);\n\
     moon.lookAt(env.scene.position);\n\
 \n\
 The result should appear as:\n\
@@ -2946,36 +2946,36 @@ pliny.class({
 
 pliny.class({
   parent: "Primrose.Displays",
-  name: "VRFrameData",
-  description: "A polyfill for the WebVR standard VRFrameData object."
+  name: "PolyfilledVRFrameData",
+  description: "A polyfill for the WebVR standard PolyfilledVRFrameData object."
 });
 
 pliny.property({
-    parent: "Primrose.Displays.VRFrameData",
+    parent: "Primrose.Displays.PolyfilledVRFrameData",
     name: "leftProjectionMatrix",
     type: "Float32Array",
     description: "The projection matrix for the left eye."
   });
   pliny.property({
-    parent: "Primrose.Displays.VRFrameData",
+    parent: "Primrose.Displays.PolyfilledVRFrameData",
     name: "rightProjectionMatrix",
     type: "Float32Array",
     description: "The projection matrix for the right eye."
   });
   pliny.property({
-    parent: "Primrose.Displays.VRFrameData",
+    parent: "Primrose.Displays.PolyfilledVRFrameData",
     name: "leftViewMatrix",
     type: "Float32Array",
     description: "The view matrix for the left eye."
   });
   pliny.property({
-    parent: "Primrose.Displays.VRFrameData",
+    parent: "Primrose.Displays.PolyfilledVRFrameData",
     name: "rightViewMatrix",
     type: "Float32Array",
     description: "The view matrix for the right eye."
   });
   pliny.property({
-    parent: "Primrose.Displays.VRFrameData",
+    parent: "Primrose.Displays.PolyfilledVRFrameData",
     name: "pose",
     type: "VRPose",
     description: "Legacy VRPose data."
@@ -3318,24 +3318,6 @@ pliny.class({
     name: "avatarHeight",
     type: "Number",
     description: "The default height to use for the user, if the HMD doesn't provide a stage transform."
-  }]
-});
-
-pliny.class({
-  parent: "Primrose.Input",
-  name: "FPSInput",
-  baseClass: "THREE.EventDispatcher",
-  description: "A massive hairball of a class that handles all of the input abstraction.",
-  parameters: [{
-    name: "DOMElement",
-    type: "Element",
-    description: "The DOM element on which to add most events.",
-    optional: true,
-    default: "window"
-  }, {
-    name: "options",
-    type: "Object",
-    description: "Optional setup: avatarHeight, gravity, and scene."
   }]
 });
 
@@ -3945,12 +3927,6 @@ pliny.property({
       type: "THREE.Object3D",
       description: "If a `groundTexture` option is provided, it will be a flat plane extending to infinity. As the user moves, the ground will shift under them by whole texture repeats, making the ground look infinite."
     });
-    pliny.property({
-      parent: "Primrose.BrowserEnvironment",
-      name: "ui",
-      type: "THREE.Object3D",
-      description: "An anchor point on which objects can be added that follows the user around in both position and orientation. The orientation lags following the user, so if the UI is ever in the way, the user can turn slightly and it won't follow them."
-    });
     pliny.method({
       parent: "Primrose.BrowserEnvironment",
       name: "goFullScreen",
@@ -3965,9 +3941,9 @@ pliny.property({
     });
     pliny.property({
         parent: "Primrose.BrowserEnvironment",
-        name: "input",
-        type: "Primrose.Input.FPSInput",
-        description: "The input manager."
+        name: "ui",
+        type: "THREE.Object3D",
+        description: "An anchor point on which objects can be added that follows the user around in both position and orientation. The orientation lags following the user, so if the UI is ever in the way, the user can turn slightly and it won't follow them."
       });
       pliny.event({
         parent: "Primrose.BrowserEnvironment",
@@ -4205,6 +4181,12 @@ pliny.namespace({
   parent: "Primrose",
   name: "Controls",
   description: "Various 3D control objects."
+});
+
+pliny.namespace({
+  parent: "Primrose",
+  name: "Displays",
+  description: "| under construction"
 });
 
 pliny.function({

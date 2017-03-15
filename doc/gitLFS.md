@@ -8,7 +8,6 @@ git config 'lfs.https://github.com/[User-Name]/[Project-Name].git/info/lfs.locks
 git config merge.tool "unityyamlmerge"
 git config mergetool.unityyamlmerge.cmd "'[Unity-Install-Directory]/Editor/Data/Tools/UnityYAMLMerge.exe' merge -p $BASE $REMOTE $LOCAL $MERGED"
 git config mergetool.unityyamlmerge.trustexitcode "false"
-false
 ````
 
 Remembering to substitute `[User-Name]` and `[Project-Name]`. Your `[Unity-Install-Directory]` is likely to be `C:/Program Files/Unity`.

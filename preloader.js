@@ -1,7 +1,7 @@
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-  typeof define === 'function' && define.amd ? define(factory) :
-  (global.Preloader = factory());
+	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+	typeof define === 'function' && define.amd ? define(factory) :
+	(global.Preloader = factory());
 }(this, (function () { 'use strict';
 
 function get(file, done) {
@@ -120,3 +120,4 @@ if (curScript && curScript.dataset.files) {
 return prog;
 
 })));
+//# sourceMappingURL=preloader.js.map
