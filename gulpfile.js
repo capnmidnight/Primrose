@@ -80,7 +80,9 @@ var jsESModules = marigold.js(jsOptions("es")),
     "doc/**/*.html"
   ],
 
-  devServer = marigold.devServer(stopOnFiles, reloadOnFiles);
+  devServer = marigold.devServer(stopOnFiles, reloadOnFiles, {
+    debounceDelay: 1500
+  });
 
 var tidy = marigold.clean(tidyFiles, tasks.release);
 gulp.task("copy", [tidy], () => gulp.src(["Primrose.min.js"])
