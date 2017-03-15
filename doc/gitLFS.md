@@ -59,6 +59,8 @@ Then in the same directory create the file `.gitattributes` and copy the content
 *.FBX filter=lfs diff=lfs merge=lfs -text
 *.fbx filter=lfs diff=lfs merge=lfs -text
 *.blend filter=lfs diff=lfs merge=lfs -text
+*.gltf filter=lfs diff=lfs merge=lfs -text
+*.dae filter=lfs diff=lfs merge=lfs -text
 *.obj filter=lfs diff=lfs merge=lfs -text
 *.asset filter=lfs diff=lfs merge=lfs -text
 
