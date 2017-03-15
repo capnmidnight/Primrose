@@ -229,8 +229,7 @@ body > div {
   margin-right: 2em;
 }
 #documentation {
-  display: inline-block;
-  max-width: calc(100% - 370px - 2em);
+  display: block;
   min-width: 340px;
 }
 #documentation img {
@@ -363,8 +362,8 @@ footer .icon {
   header,
   main,
   footer {
-    padding-left: 15em;
-    padding-right: 15em;
+    padding-left: 2em;
+    padding-right: 2em;
   }
   header > nav > ul > li > a,
   #footerWrapper > a {

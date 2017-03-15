@@ -4,13 +4,13 @@ var gulp = require("gulp"),
   marigold = require("marigold-build").setup(gulp, pkg),
 
   pugFiles = ["*.pug", "demos/**/*.pug", "doc/**/*.pug", "templates/**/*.pug"],
-  html = marigold.html(pugFiles, { jsDir: "src" }),
+  html = marigold.html(pugFiles, { watch: ["*.md" ,"doc/**/*.md"] }),
 
   stylusFiles = ["*.styl", "demos/**/*.styl", "doc/**/*.styl"],
   css = marigold.css(stylusFiles),
 
   preloaderFiles = ["preloader/**/*.js"],
-  preloader = marigold.js("preloader/index.js", { name: "preloader" }),
+  preloader = marigold.js({ entry: "preloader/index.js" }),
 
   jsOptions = (fmt) => {
     return {
@@ -18,20 +18,19 @@ var gulp = require("gulp"),
       advertise: true,
       extractDocumentation: true,
       dependencies: ["format"],
-      external: ["three"],
       globals: { three: "THREE" },
       format: fmt
     }
   },
 
   srcFiles = ["src/**/*.js"],
-  jsUMD = marigold.js("src/index.js", jsOptions("umd"));
+  jsUMD = marigold.js(jsOptions("umd"));
 
 
 gulp.task("move", [jsUMD.release], () => gulp.src(["PrimroseDocumentation.js"])
   .pipe(gulp.dest("doc")));
 
-var jsESModules = marigold.js("src/index.js", jsOptions("es")),
+var jsESModules = marigold.js(jsOptions("es")),
 
   minFiles = glob("demos/*/app.js").concat([
     "preloader.js",
@@ -40,9 +39,9 @@ var jsESModules = marigold.js("src/index.js", jsOptions("es")),
     "Primrose.js"
   ]),
   minDeps = [
-    preloader.release,
+    preloader,
     "move",
-    jsESModules.release
+    jsESModules
   ],
   min = marigold.min(minFiles, minDeps),
 
@@ -58,7 +57,8 @@ var jsESModules = marigold.js("src/index.js", jsOptions("es")),
     "doc/*/appWithDoc.js",
     "doc/*/appDocumentation.js",
     "PrimroseDocumentation*.js",
-    "templates/*.html"
+    "templates/*.html",
+    "*.js.map"
   ],
 
   stopOnFiles = []
@@ -82,9 +82,7 @@ var jsESModules = marigold.js("src/index.js", jsOptions("es")),
 
   devServer = marigold.devServer(stopOnFiles, reloadOnFiles);
 
-console.log(tasks.release);
-var tidy = marigold.clean("Primrose", tidyFiles, tasks.release);
-marigold.clean("Primrose:only", tidyFiles);
+var tidy = marigold.clean(tidyFiles, tasks.release);
 gulp.task("copy", [tidy], () => gulp.src(["Primrose.min.js"])
   .pipe(gulp.dest("quickstart")));
 

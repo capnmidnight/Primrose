@@ -1,0 +1,350 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, shrink-to-fit=0, initial-scale=1.0"><meta name="apple-touch-fullscreen" content="yes"><meta name="web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="theme-color" content="black"><meta name="description" content="A WebVR application framework."><meta name="keywords" content="WebGL, WebVR, HTML5, JavaScript, text editor, source code editor, virtual reality, Primrose"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@Primrose_VR"><meta property="og:site_name" content="Primrose VR"><meta property="og:description" content="Primrose: Framework for WebVR Applications"><meta name="twitter:description" content="Primrose: Framework for WebVR Applications"><meta property="og:url" content="http://www.primrosevr.com/undefined"><!-- start main.pug meta block --><meta name="twitter:image" content="http://www.primrosevr.com/images/screenshot.jpg"><meta property="og:image" content="http://www.primrosevr.com/images/screenshot.jpg"><!-- end main.pug meta block -->
+<!-- start main.pug title block --><meta property="og:title" content="Primrose VR: WebVR Application Framework"><meta name="twitter:title" content="Primrose VR: WebVR Application Framework"><title>Primrose VR: WebVR Application Framework</title><!-- end main.pug title block --><link type="text/css" rel="stylesheet" href="../doc/style.min.css"><!-- start documentation.pug head append --><script src="../node_modules/lavu-details-polyfill/lib/index.min.js"></script><script src="../node_modules/pliny/pliny.min.js"></script><script src="../node_modules/three/build/three.min.js"></script><script src="../Primrose.min.js"></script><script src="../doc/PrimroseDocumentation.min.js"></script><!-- end documentation.pug head append --><script src="../ga.js"></script></head><body><header role="banner"><a id="logo" href="../"><img src="../doc/images/primrose40.png" alt="logo" title="Primrose logo"><span class="version-number">v0.31.3</span></a><nav role="navigation"><ul><li><a href="../demos/">Demos</a></li><li><a href="../doc/">Docs</a></li><li><a href="../doc/faq.html">FAQ</a></li><li><a href="../doc/community.html">Community</a></li><li><a href="https://github.com/NotionTheory/Primrose/" target="_blank">Github</a></li></ul></nav><h1>Setting Up Git LFS (Large File System) for Unity</h1></header><!-- start main.pug banner block --><!-- end main.pug banner block -->
+<!-- start main.pug main block --><main><!-- start documentation.pug main block --><div id="top"></div><div id="contents"><nav><ul><li><a href="../doc/readme.html">Installation &amp; Setup</a></li><li><a href="../doc/contributing.html">Contributing</a></li><li><a href="../doc/changelog.html">Change Log</a></li><li><a href="../doc/steamVRDongles.html">Pairing Multiple SteamVR</a></li><li><a href="../doc/gitLFS.html">Setting up Git LFS</a></li></ul></nav></div><div id="documentation"><section><article><!-- start documentation.pug documentation block --><h1 id="install-git-lfs">Install Git LFS</h1>
+<p>Go to <a href="https://git-lfs.github.com/">this site</a> and install Git LFS. Then, open your terminal to the project in which you want to enable LFS and type:</p>
+<pre><code>git lfs install
+git config &#39;lfs.https://github.com/[User-Name]/[Project-Name].git/info/lfs.locksverify&#39;
+git config merge.tool &quot;unityyamlmerge&quot;
+git config mergetool.unityyamlmerge.cmd &quot;&#39;[Unity-Install-Directory]/Editor/Data/Tools/UnityYAMLMerge.exe&#39; merge -p $BASE $REMOTE $LOCAL $MERGED&quot;
+git config mergetool.unityyamlmerge.trustexitcode &quot;false&quot;
+false
+</code></pre><p>Remembering to substitute <code>[User-Name]</code> and <code>[Project-Name]</code>. Your <code>[Unity-Install-Directory]</code> is likely to be <code>C:/Program Files/Unity</code>.</p>
+<p>Then in the same directory create the file <code>.gitattributes</code> and copy the contents:</p>
+<pre><code>## Unity ##
+
+*.cs diff=csharp text
+*.cginc text
+*.shader text
+
+*.mat merge=unityyamlmerge eol=lf
+*.anim merge=unityyamlmerge eol=lf
+*.unity merge=unityyamlmerge eol=lf
+*.prefab merge=unityyamlmerge eol=lf
+*.physicsMaterial2D merge=unityyamlmerge eol=lf
+*.physicsMaterial merge=unityyamlmerge eol=lf
+*.asset merge=unityyamlmerge eol=lf
+*.meta merge=unityyamlmerge eol=lf
+*.controller merge=unityyamlmerge eol=lf
+
+
+## git-lfs ##
+
+#Image
+*.jpg filter=lfs diff=lfs merge=lfs -text
+*.jpeg filter=lfs diff=lfs merge=lfs -text
+*.png filter=lfs diff=lfs merge=lfs -text
+*.gif filter=lfs diff=lfs merge=lfs -text
+*.psd filter=lfs diff=lfs merge=lfs -text
+*.ai filter=lfs diff=lfs merge=lfs -text
+*.tif filter=lfs diff=lfs merge=lfs -text
+*.tiff filter=lfs diff=lfs merge=lfs -text
+
+#Audio
+*.mp3 filter=lfs diff=lfs merge=lfs -text
+*.wav filter=lfs diff=lfs merge=lfs -text
+*.ogg filter=lfs diff=lfs merge=lfs -text
+
+#Video
+*.mp4 filter=lfs diff=lfs merge=lfs -text
+*.mov filter=lfs diff=lfs merge=lfs -text
+*.mpg filter=lfs diff=lfs merge=lfs -text
+*.mpeg filter=lfs diff=lfs merge=lfs -text
+
+#3D Object
+*.FBX filter=lfs diff=lfs merge=lfs -text
+*.fbx filter=lfs diff=lfs merge=lfs -text
+*.blend filter=lfs diff=lfs merge=lfs -text
+*.obj filter=lfs diff=lfs merge=lfs -text
+*.asset filter=lfs diff=lfs merge=lfs -text
+
+#ETC
+*.a filter=lfs diff=lfs merge=lfs -text
+*.exr filter=lfs diff=lfs merge=lfs -text
+*.tga filter=lfs diff=lfs merge=lfs -text
+*.pdf filter=lfs diff=lfs merge=lfs -text
+*.zip filter=lfs diff=lfs merge=lfs -text
+*.dll filter=lfs diff=lfs merge=lfs -text
+*.unitypackage filter=lfs diff=lfs merge=lfs -text
+*.aif filter=lfs diff=lfs merge=lfs -text
+*.ttf filter=lfs diff=lfs merge=lfs -text
+*.rns filter=lfs diff=lfs merge=lfs -text
+*.reason filter=lfs diff=lfs merge=lfs -text
+*.lxo filter=lfs diff=lfs merge=lfs -text
+</code></pre><p>And also the file <code>.gitignore</code>, with the contents:</p>
+<pre><code>## Ignore Visual Studio temporary files, build results, and
+## files generated by popular Visual Studio add-ons.
+
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# User-specific files (MonoDevelop/Xamarin Studio)
+*.userprefs
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Tt]emp/
+[Bb]uild/
+[Bb]uilds/
+
+# Unity
+[Ll]ibrary/
+[Ll]ibraries/
+
+
+# Visual Studio 2015 cache/options directory
+.vs/
+# Uncomment if you have tasks that create the project&#39;s static files in wwwroot
+#wwwroot/
+
+# MSTest test Results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+
+# NUNIT
+*.VisualState.xml
+TestResult.xml
+
+# Build Results of an ATL Project
+[Dd]ebugPS/
+[Rr]eleasePS/
+dlldata.c
+
+# DNX
+project.lock.json
+artifacts/
+
+*_i.c
+*_p.c
+*_i.h
+*.ilk
+*.meta
+*.obj
+*.pch
+*.pdb
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.tmp
+*.tmp_proj
+*.log
+*.vspscc
+*.vssscc
+.builds
+*.pidb
+*.svclog
+*.scc
+
+# Chutzpah Test files
+_Chutzpah*
+
+# Visual C++ cache files
+ipch/
+*.aps
+*.ncb
+*.opendb
+*.opensdf
+*.sdf
+*.cachefile
+*.VC.db
+*.VC.VC.opendb
+
+# Visual Studio profiler
+*.psess
+*.vsp
+*.vspx
+*.sap
+
+# TFS 2012 Local Workspace
+$tf/
+
+# Guidance Automation Toolkit
+*.gpState
+
+# ReSharper is a .NET coding add-in
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# JustCode is a .NET coding add-in
+.JustCode
+
+# TeamCity is a build add-in
+_TeamCity*
+
+# DotCover is a Code Coverage Tool
+*.dotCover
+
+# NCrunch
+_NCrunch_*
+.*crunch*.local.xml
+nCrunchTemp_*
+
+# MightyMoose
+*.mm.*
+AutoTest.Net/
+
+# Web workbench (sass)
+.sass-cache/
+
+# Installshield output folder
+[Ee]xpress/
+
+# DocProject is a documentation generator add-in
+DocProject/buildhelp/
+DocProject/Help/*.HxT
+DocProject/Help/*.HxC
+DocProject/Help/*.hhc
+DocProject/Help/*.hhk
+DocProject/Help/*.hhp
+DocProject/Help/Html2
+DocProject/Help/html
+
+# Click-Once directory
+publish/
+
+# Publish Web Output
+*.[Pp]ublish.xml
+*.azurePubxml
+# TODO: Comment the next line if you want to checkin your web deploy settings
+# but database connection strings (with potential passwords) will be unencrypted
+*.pubxml
+*.publishproj
+
+# Microsoft Azure Web App publish settings. Comment the next line if you want to
+# checkin your Azure Web App publish settings, but sensitive information contained
+# in these scripts will be unencrypted
+PublishScripts/
+
+# NuGet Packages
+*.nupkg
+# The packages folder can be ignored because of Package Restore
+**/packages/*
+# except build/, which is used as an MSBuild target.
+!**/packages/build/
+# Uncomment if necessary however generally it will be regenerated when needed
+#!**/packages/repositories.config
+# NuGet v3&#39;s project.json files produces more ignoreable files
+*.nuget.props
+*.nuget.targets
+
+# Microsoft Azure Build Output
+csx/
+*.build.csdef
+
+# Microsoft Azure Emulator
+ecf/
+rcf/
+
+# Windows Store app package directories and files
+AppPackages/
+BundleArtifacts/
+Package.StoreAssociation.xml
+_pkginfo.txt
+
+# Visual Studio cache files
+# files ending in .cache can be ignored
+*.[Cc]ache
+# but keep track of directories ending in .cache
+!*.[Cc]ache/
+
+# Others
+ClientBin/
+~$*
+*~
+*.dbmdl
+*.dbproj.schemaview
+*.pfx
+*.publishsettings
+node_modules/
+orleans.codegen.cs
+
+# Since there are multiple workflows, uncomment next line to ignore bower_components
+# (https://github.com/github/gitignore/pull/1529#issuecomment-104372622)
+#bower_components/
+
+# RIA/Silverlight projects
+Generated_Code/
+
+# Backup &amp; report files from converting an old project file
+# to a newer Visual Studio version. Backup files are not needed,
+# because we have git ;-)
+_UpgradeReport_Files/
+Backup*/
+UpgradeLog*.XML
+UpgradeLog*.htm
+
+# SQL Server files
+*.mdf
+*.ldf
+
+# Business Intelligence projects
+*.rdl.data
+*.bim.layout
+*.bim_*.settings
+
+# Microsoft Fakes
+FakesAssemblies/
+
+# GhostDoc plugin setting file
+*.GhostDoc.xml
+
+# Node.js Tools for Visual Studio
+.ntvs_analysis.dat
+
+# Visual Studio 6 build log
+*.plg
+
+# Visual Studio 6 workspace options file
+*.opt
+
+# Visual Studio LightSwitch build output
+**/*.HTMLClient/GeneratedArtifacts
+**/*.DesktopClient/GeneratedArtifacts
+**/*.DesktopClient/ModelManifest.xml
+**/*.Server/GeneratedArtifacts
+**/*.Server/ModelManifest.xml
+_Pvt_Extensions
+
+# Paket dependency manager
+.paket/paket.exe
+paket-files/
+
+# FAKE - F# Make
+.fake/
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+
+
+# Visual Studio 2015 cache directory
+/.vs/
+
+# Unity3D generated meta files
+*.pidb.meta
+
+# Unity3D Generated File On Crash Reports
+sysinfo.txt
+
+# Builds
+*.apk
+*.unitypackage
+</code></pre><!-- end documentation.pug documentation block --></article></section></div><!-- end documentation.pug main block --></main><!-- end main.pug main block -->
+<!-- start main.pug footer block --><footer><div id="footerWrapper"><a href="../doc/readme.html">About</a><a href="../doc/license.html">License</a><a href="../doc/changelog.html">Changelog</a><a href="https://notiontheory.typeform.com/to/QzZmAD" target="_blank">Slack</a><a class="small icon github" href="https://www.github.com/NotionTheory/Primrose" target="_blank">&nbsp;</a><a class="small icon twitter" href="https://www.twitter.com/Primrose_VR" target="_blank">&nbsp;</a><a href="http://www.notiontheory.com/team" target="_blank" style="color:#ec2471;">Made (with love) by NotionTheory</a></div><script src="app.js"></script></footer><!-- end main.pug footer block --></body></html>
