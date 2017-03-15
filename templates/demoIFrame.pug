@@ -39,8 +39,15 @@ html
       style #frontBuffer { background-image:url(screenshot.jpg); }
 
     if debug
-      script(src= fileRoot + "node_modules/bare-bones-logger/bareBonesLogger.js")
       script window.DEBUG = true;
+      script(src= fileRoot + "node_modules/bare-bones-logger/bareBonesLogger.js")
+      script(src= fileRoot + "node_modules/pliny/pliny.js")
+      script(src= fileRoot + "preloader.js")
+      script(src= fileRoot + "node_modules/three/build/three.js")
+      script(src= fileRoot + "PrimroseWithDoc.js")
+      script(src= "app.js")
+    else
+      script(src= fileRoot + "preloader" + jsExt, data-files= fileRoot + "node_modules/three/build/three" + jsExt + "," + fileRoot + "Primrose" + jsExt + ",app" + jsExt)
   body
     <!-- start demoIFrame.pug main block -->
     block main
@@ -49,7 +56,6 @@ html
         #fullScreenButtonContainer
         progress
         block controls
-    script(src= fileRoot + "preloader" + jsExt, data-files= fileRoot + "node_modules/three/build/three" + jsExt + "," + fileRoot + "Primrose" + jsExt + ",app" + jsExt)
 
     != liveReload
     <!-- end demoIFrame.pug main block -->
