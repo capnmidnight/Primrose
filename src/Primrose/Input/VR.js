@@ -107,10 +107,7 @@ export default class VR extends PoseInputProcessor {
       }
       PROJ.elements[i] /= PROC.length;
     }
-
-    LEFT.debug("left", 3);
-    RIGHT.debug("right", 3);
-    PROJ.debug("projection", 3);
+    
     this.cam = PROJ;
   }
 
