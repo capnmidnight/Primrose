@@ -123,9 +123,15 @@ export default class Audio3D {
     if(this.mainVolume){
       this.mainVolume.connect(this.context.destination);
     }
+    if(this.context.resume) {
+      this.context.resume();
+    }
   }
 
   stop() {
+    if(this.context.suspend) {
+      this.context.suspend();
+    }
     if(this.mainVolume){
       this.mainVolume.disconnect();
     }
