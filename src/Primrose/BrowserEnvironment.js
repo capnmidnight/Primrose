@@ -1050,7 +1050,12 @@ export default class BrowserEnvironment extends EventDispatcher {
     window.addEventListener("vrdisplaypresentchange", fullScreenChange, false);
     window.addEventListener("resize", modifyScreen, false);
     window.addEventListener("blur", this.stop, false);
+    window.addEventListener("stop", this.stop, false);
     window.addEventListener("focus", this.start, false);
+    document.addEventListener("amazonPlatformReady", ()=>{
+      document.addEventListener("pause", this.stop, false);
+      document.addEventListener("resume", this.start, false);
+    }, false);
 
     pliny.property({
       parent: "Primrose.BrowserEnvironment",
