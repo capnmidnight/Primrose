@@ -26,7 +26,7 @@ var SCRIPT_UPDATE_TIME = 1000,
   scriptAnimate = null;
 
 env.addEventListener("ready", function () {
-  env.scene.add(subScene);
+  env.stage.add(subScene);
 
   var editorSize = isMobile ? 512 : 1024,
     fontSize = isMobile ? 10 : 20;

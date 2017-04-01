@@ -42,7 +42,7 @@ export default class Teleporter {
         unshaded: true
       })
       .named("disk")
-      .addTo(env.scene);
+      .addTo(env.stage);
 
     this.disk.geometry.computeBoundingBox();
     this.disk.geometry.vertices.forEach((v) => {

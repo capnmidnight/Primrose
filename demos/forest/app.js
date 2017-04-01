@@ -14,7 +14,7 @@ env.addEventListener("ready", function() {
   Promise.all([
 
     MF.loadObject("Water.obj").then(function(waterModel) {
-      waterModel.addTo(env.scene);
+      waterModel.addTo(env.stage);
     }),
 
     MF.loadModel("tree.obj").then(function(treeFactory) {
@@ -24,7 +24,7 @@ env.addEventListener("ready", function() {
 
         var tree = treeFactory.clone()
           .named("tree" + i)
-          .addTo(env.scene)
+          .addTo(env.stage)
           .rot(
             0,
             Primrose.Random.number(0, Math.PI),

@@ -110,7 +110,7 @@ env.addEventListener("ready", function () {
   types.forEach(function(type, t) {
     var board = new Board(type);
     boards.push(board);
-    env.scene.add(board.object);
+    env.stage.add(board.object);
     board.object.latLng(0, (t - (nTypes - 1) / 2) * 100 / nTypes);
   });
 

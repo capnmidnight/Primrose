@@ -35,7 +35,7 @@ env.sky.add(sun);
 sun.material.fog = false;
 sun.material.needsUpdate = true;
 
-env.scene.add(stand);
+env.stage.add(stand);
 stand.position.y += standHeight / 2;
 stand.position.z += -1.5;
 stand.rotation.y = Math.PI / 4;
@@ -58,8 +58,8 @@ env.addEventListener("update", function() {
   sun.lookAt(env.head);
   var s = (1 + sun.position.y / sunDistance) / 2;
   env.sky.ambient.intensity = 0.5 * s;
-  env.scene.fog.color
+  env.stage.fog.color
     .setHex(skyColor)
     .multiplyScalar(s);
-  env.renderer.setClearColor(env.scene.fog.color.getHex());
+  env.renderer.setClearColor(env.stage.fog.color.getHex());
 });

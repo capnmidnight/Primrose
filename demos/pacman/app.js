@@ -28,7 +28,7 @@ var GRASS = "../shared_assets/images/grass.png",
   subScene = hub();
 
 env.addEventListener("ready", function () {
-  env.scene.add(subScene);
+  env.stage.add(subScene);
 
   var editorSize = isMobile ? 512 : 1024,
     fontSize = isMobile ? 10 : 20;

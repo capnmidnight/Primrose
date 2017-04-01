@@ -886,16 +886,19 @@ export default class BrowserEnvironment extends EventDispatcher {
       this.dispatchEvent(evt);
     };
 
+    const scene = new Scene();
+
     pliny.property({
       parent: "Primrose.BrowserEnvironment",
-      name: "scene",
+      name: "stage",
       type: "THREE.Scene",
       description: "The 3D scene that gets displayed to the user."
     });
-    this.options.scene = this.scene = this.options.scene || new Scene();
+    this.stage = hub().named("Stage").addTo(scene);
+
 
     if (this.options.useFog) {
-      this.scene.fog = new FogExp2(this.options.backgroundColor, 1 / Math.sqrt(this.options.drawDistance));
+      scene.fog = new FogExp2(this.options.backgroundColor, 1 / Math.sqrt(this.options.drawDistance));
     }
 
     pliny.property({
@@ -914,7 +917,7 @@ export default class BrowserEnvironment extends EventDispatcher {
       description: "If a `skyTexture` option is provided, it will be a texture cube or photosphere. If no `skyTexture` option is provided, there will only be a THREE.Object3D, to create an anchor point on which implementing scripts can add objects that follow the user's position."
     });
     this.sky = new Sky(this.options)
-      .addTo(this.scene);
+      .addTo(scene);
 
 
     pliny.property({
@@ -924,7 +927,7 @@ export default class BrowserEnvironment extends EventDispatcher {
       description: "If a `groundTexture` option is provided, it will be a flat plane extending to infinity. As the user moves, the ground will shift under them by whole texture repeats, making the ground look infinite."
     });
     this.ground = new Ground(this.options)
-      .addTo(this.scene);
+      .addTo(scene);
 
     this.teleporter = new Teleporter(this);
 
@@ -939,8 +942,8 @@ export default class BrowserEnvironment extends EventDispatcher {
           sceneGraph[child.name] = child;
         }
       });
-      this.scene.add.apply(this.scene, sceneGraph.children);
-      this.scene.traverse((obj) => {
+      scene.add.apply(scene, sceneGraph.children);
+      scene.traverse((obj) => {
         if (this.options.disableDefaultLighting && obj.material) {
           if(obj.material.map){
             textured(obj, obj.material.map, {
@@ -954,7 +957,7 @@ export default class BrowserEnvironment extends EventDispatcher {
           }
         }
         if (obj.name) {
-          this.scene[obj.name] = obj;
+          scene[obj.name] = obj;
         }
       });
       if (sceneGraph.Camera) {
@@ -984,13 +987,13 @@ export default class BrowserEnvironment extends EventDispatcher {
 
     this.addAvatar = (user) => {
       console.log(user);
-      this.scene.add(user.body);
-      this.scene.add(user.head);
+      scene.add(user.body);
+      scene.add(user.head);
     };
 
     this.removeAvatar = (user) => {
-      this.scene.remove(user.body);
-      this.scene.remove(user.head);
+      scene.remove(user.body);
+      scene.remove(user.head);
     };
 
     PointerLock.addChangeListener((evt) => {
@@ -1290,9 +1293,6 @@ export default class BrowserEnvironment extends EventDispatcher {
 
         this.gamepadMgr.addEventListener("gamepaddisconnected", this.removeInputManager.bind(this));
       }
-
-
-      this.stage = hub().named("Stage").addTo(this.scene);
 
 
       pliny.property({
@@ -1870,8 +1870,6 @@ BrowserEnvironment.DEFAULTS = {
   renderer: null,
   // A WebGL context to use, if one had already been created.
   context: null,
-  // Three.js scene, if one had already been created.
-  scene: null,
   // This is an experimental feature for setting the height of a user's "neck" on orientation-only systems (such as Google Cardboard and Samsung Gear VR) to create a more realistic feel.
   nonstandardNeckLength: null,
   nonstandardNeckDepth: null,
