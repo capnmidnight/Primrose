@@ -405,18 +405,14 @@ export default class BrowserEnvironment extends EventDispatcher {
 
           // update the body's velocity
           this.velocity.set(strafe, 0, drive);
-
-          QUAT_TEMP.copy(this.head.quaternion);
-          EULER_TEMP.setFromQuaternion(QUAT_TEMP);
           EULER_TEMP.x = 0;
-          EULER_TEMP.z = 0;
           QUAT_TEMP.setFromEuler(EULER_TEMP);
 
           this.moveBody(DISPLACEMENT
             .copy(this.velocity)
             .multiplyScalar(dt)
             .applyQuaternion(QUAT_TEMP)
-            .add(this.head.position));
+            .add(this.body.position));
 
           this.body.position.y = this.ground.getHeightAt(this.body.position) || 0;
           this.body.position.y += this.options.avatarHeight;
