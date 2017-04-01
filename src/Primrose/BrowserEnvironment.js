@@ -1008,13 +1008,48 @@ export default class BrowserEnvironment extends EventDispatcher {
       modifyScreen();
     };
 
+    let allowRestart = true;
+    pliny.method({
+      parent: "Primrose.BrowserEnvironment",
+      name: "start",
+      returns: "Promise",
+      description: "Restart animation after it has been stopped."
+    });
+    this.start = () => {
+      if(allowRestart) {
+        this.ready.then(() => {
+          this.audio.start();
+          lt = performance.now() * MILLISECONDS_TO_SECONDS;
+          this.VR.startAnimation(animate);
+        });
+      }
+    };
+
+    pliny.method({
+      parent: "Primrose.BrowserEnvironment",
+      name: "stop",
+      description: "Pause animation."
+    });
+    this.stop = (isPause) => {
+      if(this.VR.timer) {
+        allowRestart = allowRestart && isPause === true;
+        this.VR.stopAnimation();
+        this.audio.stop();
+        if(!allowRestart) {
+          console.log("stopped");
+        }
+      }
+    };
+
+    this.pause = this.stop.bind(this, true);
+
     window.addEventListener("vrdisplaypresentchange", fullScreenChange, false);
     window.addEventListener("resize", modifyScreen, false);
-    window.addEventListener("blur", this.stop, false);
+    window.addEventListener("blur", this.pause, false);
     window.addEventListener("stop", this.stop, false);
     window.addEventListener("focus", this.start, false);
     document.addEventListener("amazonPlatformReady", ()=>{
-      document.addEventListener("pause", this.stop, false);
+      document.addEventListener("pause", this.pause, false);
       document.addEventListener("resume", this.start, false);
     }, false);
 
@@ -1051,7 +1086,7 @@ export default class BrowserEnvironment extends EventDispatcher {
       }
 
       this.renderer.domElement.tabIndex = maxTabIndex + 1;
-      this.renderer.domElement.addEventListener('webglcontextlost', this.stop, false);
+      this.renderer.domElement.addEventListener('webglcontextlost', this.pause, false);
       this.renderer.domElement.addEventListener('webglcontextrestored', this.start, false);
 
       this.managers = [];
@@ -1528,34 +1563,6 @@ export default class BrowserEnvironment extends EventDispatcher {
         this.emit("ready");
       });
 
-
-    pliny.method({
-      parent: "Primrose.BrowserEnvironment",
-      name: "start",
-      returns: "Promise",
-      description: "Restart animation after it has been stopped."
-    });
-    this.start = () => {
-      this.ready.then(() => {
-        this.audio.start();
-        lt = performance.now() * MILLISECONDS_TO_SECONDS;
-        this.VR.startAnimation(animate);
-      });
-    };
-
-
-    pliny.method({
-      parent: "Primrose.BrowserEnvironment",
-      name: "stop",
-      description: "Pause animation."
-    });
-    this.stop = () => {
-      if(this.VR.timer) {
-        this.VR.stopAnimation();
-        this.audio.stop();
-        console.log("stopped");
-      }
-    };
 
     pliny.property({
       parent: "Primrose.BrowserEnvironment",
