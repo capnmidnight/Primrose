@@ -6,7 +6,6 @@ var skyColor = 0xffff7f,
     fullScreenButtonContainer: "#fullScreenButtonContainer",
     enableShadows: true,
     shadowMapSize: 2048,
-    progress: Preloader.thunk
   }),
 
   sunDistance = 20,

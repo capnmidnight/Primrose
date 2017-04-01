@@ -11,7 +11,6 @@ var SCRIPT_UPDATE_TIME = 1000,
     groundTexture: GRASS,
     font: "../shared_assets/fonts/helvetiker_regular.typeface.json",
     fullScreenButtonContainer: "#fullScreenButtonContainer",
-    progress: Preloader.thunk
   }),
   subScene = hub(),
   editor = null,

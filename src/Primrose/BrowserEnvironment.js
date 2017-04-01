@@ -611,7 +611,7 @@ export default class BrowserEnvironment extends EventDispatcher {
       return rgb;
     }
 
-    var modelsReady = ModelFactory.loadObjects(modelFiles)
+    var modelsReady = ModelFactory.loadObjects(modelFiles, this.options.progress.thunk)
       .then((models) => {
         window.text3D = function (font, size, text) {
           var geom = new TextGeometry(text, {
@@ -1546,6 +1546,7 @@ export default class BrowserEnvironment extends EventDispatcher {
         }
 
         this.VR.connect(0);
+        this.options.progress.hide();
 
         pliny.event({
           parent: "Primrose.BrowserEnvironment",
@@ -1841,7 +1842,11 @@ BrowserEnvironment.DEFAULTS = {
   shadowMapSize: 2048,
   shadowCameraSize: 15,
   shadowRadius: 1,
-  progress: null,
+  progress: window.Preloader || {
+    thunk: function() {},
+    hide: function() {},
+    resize: function() {}
+  },
   // The rate at which the view fades in and out.
   fadeRate: 5,
   // The rate at which the UI shell catches up with the user's movement.

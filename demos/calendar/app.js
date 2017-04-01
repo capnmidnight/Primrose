@@ -23,7 +23,6 @@ var monthNames = ["January", "February", "March", "April", "May", "June", "July"
     drawDistance: hDim,
     enableShadows: true,
     fullScreenButtonContainer: "#fullScreenButtonContainer",
-    progress: Preloader.thunk
   });
 
 

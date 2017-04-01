@@ -18,8 +18,7 @@ var GRASS = "../shared_assets/images/grass.png",
     skyTexture: "../shared_assets/images/bg.jpg",
     groundTexture: DECK,
     useFog: true,
-    fullScreenButtonContainer: "#fullScreenButtonContainer",
-    progress: Preloader.thunk
+    fullScreenButtonContainer: "#fullScreenButtonContainer"
   });
 
 env.addEventListener("ready", function () {
