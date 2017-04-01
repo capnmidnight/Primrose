@@ -6,6 +6,12 @@ function get(file, done) {
   x.send();
 }
 
+function findProgressBar() {
+  if(!prog.bar){
+    prog.bar = document.querySelector("progress");
+  }
+}
+
 const prog = {
   bar: null,
   files: {},
@@ -13,12 +19,14 @@ const prog = {
   total: 0,
 
   shrink: (size) => {
+    findProgressBar();
     if(prog.bar) {
       prog.bar.style.height = size;
     }
   },
 
   hide: () => {
+    findProgressBar();
     if(prog.bar) {
       prog.bar.style.display = "none";
     }
@@ -58,9 +66,7 @@ const prog = {
     prog.loaded = loaded;
     prog.total = total;
 
-    if(!prog.bar){
-      prog.bar = document.querySelector("progress");
-    }
+    findProgressBar();
 
     if(prog.bar && total){
       prog.bar.max = total;
