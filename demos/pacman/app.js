@@ -10,8 +10,7 @@ var GRASS = "../shared_assets/images/grass.png",
     skyTexture: DECK,
     groundTexture: DECK,
     font: "../shared_assets/fonts/helvetiker_regular.typeface.json",
-    fullScreenButtonContainer: "#fullScreenButtonContainer",
-    progress: Preloader.thunk
+    fullScreenButtonContainer: "#fullScreenButtonContainer"
   }),
 
   editor = null,

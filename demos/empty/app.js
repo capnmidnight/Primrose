@@ -5,8 +5,5 @@ const env = new Primrose.BrowserEnvironment({
   drawDistance: 100,
   fullScreenButtonContainer: "#fullScreenButtonContainer",
   nonstandardNeckLength: 0.15,
-  nonstandardNeckDepth: 0.075,
-  progress: Preloader.thunk
+  nonstandardNeckDepth: 0.075
 });
-
-env.addEventListener("ready", Preloader.hide);

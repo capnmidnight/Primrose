@@ -22,8 +22,7 @@ var height = 8,
       backgroundColor: 0x000000,
       useFog: true,
       drawDistance: 10,
-      fullScreenButtonContainer: "#fullScreenButtonContainer",
-      progress: Preloader.thunk
+      fullScreenButtonContainer: "#fullScreenButtonContainer"
     });
 
 function text(size, text) {

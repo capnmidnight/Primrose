@@ -16,7 +16,6 @@ var WIDTH = 100,
     drawDistance: 100,
     enableShadows: true,
     fullScreenButtonContainer: "#fullScreenButtonContainer",
-    progress: Preloader.thunk
   });
 
 

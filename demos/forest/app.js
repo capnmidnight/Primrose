@@ -6,7 +6,6 @@ var env = new Primrose.BrowserEnvironment({
   useFog: true,
   enableShadows: true,
   fullScreenButtonContainer: "#fullScreenButtonContainer",
-  progress: Preloader.thunk
 });
 
 var MF = Primrose.Graphics.ModelFactory;

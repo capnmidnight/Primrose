@@ -3,8 +3,7 @@ const env = new Primrose.BrowserEnvironment({
     enableShadows: true,
     groundTexture: 0x606060,
     backgroundColor: 0xd0d0d0,
-    fullScreenButtonContainer: "#fullScreenButtonContainer",
-    progress: Preloader.thunk
+    fullScreenButtonContainer: "#fullScreenButtonContainer"
   }).on("ready", function() {
 
     for(var i = 0; i < 10; ++i) {
