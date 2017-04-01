@@ -526,16 +526,12 @@ export default class BrowserEnvironment extends EventDispatcher {
             v.width * resolutionScale,
             v.height * resolutionScale);
 
-          // this.camera.projectionMatrix.fromArray(st.projection);
-          // this.camera.matrix.fromArray(st.view);
-          // this.camera.matrix.getInverse(this.camera.matrix);
-          // this.camera.updateMatrixWorld(true);
+          this.camera.matrixWorld.copy(this.VR.matrices[i]);
+          this.renderer.render(scene, this.camera);
+        }
 
-          this.camera.matrixWorld.copy(this.VR.cam);
-          if (this.mousePointer.unproject) {
-            this.mousePointer.unproject.getInverse(this.camera.projectionMatrix);
-          }
-          this.renderer.render(this.scene, this.camera);
+        if (this.mousePointer.unproject) {
+          this.mousePointer.unproject.getInverse(this.VR.centerWorld);
         }
         this.VR.submitFrame();
       },

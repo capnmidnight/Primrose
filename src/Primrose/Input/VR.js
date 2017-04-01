@@ -24,12 +24,6 @@ import StandardMonitorVRDisplay from "../Displays/StandardMonitorVRDisplay";
 import CardboardVRDisplay from "../Displays/CardboardVRDisplay";
 import { Matrix4 } from "three";
 
-const PROJ = new Matrix4(),
-  VIEW = new Matrix4(),
-  LEFT = new Matrix4(),
-  RIGHT = new Matrix4(),
-  PROC = [LEFT];
-
 export default class VR extends PoseInputProcessor {
 
   static isStereoDisplay(display) {
@@ -53,6 +47,15 @@ export default class VR extends PoseInputProcessor {
       sizeZ: 0
     };
     this.isStereo = false;
+
+    this.centerWorld = new Matrix4();
+    this.leftProjection = new Matrix4();
+    this.rightProjection = new Matrix4();
+    this.leftView = new Matrix4();
+    this.rightView = new Matrix4();
+    this.leftWorld = new Matrix4();
+    this.rightWorld = new Matrix4();
+    this.matrices = [this.leftWorld, this.rightWorld];
 
     if(this.options.nonstandardIPD !== null){
       CardboardVRDisplay.IPD = this.options.nonstandardIPD;
@@ -86,29 +89,30 @@ export default class VR extends PoseInputProcessor {
   updateFrameData() {
     this.currentDevice.getFrameData(this.frameData);
 
-    PROJ.fromArray(this.frameData.leftProjectionMatrix);
-    VIEW.fromArray(this.frameData.leftViewMatrix);
-    LEFT.multiplyMatrices(PROJ, VIEW);
+    var len = 1;
+    this.leftProjection.fromArray(this.frameData.leftProjectionMatrix);
+    this.leftView.fromArray(this.frameData.leftViewMatrix);
+    this.leftView.getInverse(this.leftView);
+    this.leftWorld.multiplyMatrices(this.leftProjection, this.leftView);
     if(this.isStereo) {
-      PROJ.fromArray(this.frameData.rightProjectionMatrix);
-      VIEW.fromArray(this.frameData.rightViewMatrix);
-      RIGHT.multiplyMatrices(PROJ, VIEW);
-      if(PROC.length === 1) {
-        PROC.push(RIGHT);
-      }
-    } else if(PROC.length === 2) {
-      PROC.pop();
+      len = 2;
+      this.rightProjection.fromArray(this.frameData.rightProjectionMatrix);
+      this.rightView.fromArray(this.frameData.rightViewMatrix);
+      this.rightView.getInverse(this.rightView);
+      this.rightWorld.multiplyMatrices(this.rightProjection, this.rightView);
     }
 
     for(let i = 0; i < 16; ++i) {
-      PROJ.elements[i] = 0;
-      for(let j = 0; j < PROC.length; ++j) {
-        PROJ.elements[i] += PROC[j].elements[i];
+      this.centerWorld.elements[i] = 0;
+      for(let j = 0; j < len; ++j) {
+        this.centerWorld.elements[i] += this.matrices[j].elements[i];
       }
-      PROJ.elements[i] /= PROC.length;
+      this.centerWorld.elements[i] /= len;
     }
-    
-    this.cam = PROJ;
+
+    if(len === 2) {
+      this.centerWorld.debug("average of matrices", 3);
+    }
   }
 
   connect(selectedIndex) {
