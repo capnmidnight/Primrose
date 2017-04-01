@@ -427,46 +427,45 @@ export default class BrowserEnvironment extends EventDispatcher {
           for (let i = 0; i < this.pointers.length; ++i) {
             this.pointers[i].update();
           }
+        }
 
-          // record the position and orientation of the user
-          this.head.updateMatrix();
-          this.body.rotation.x = 0;
-          this.body.rotation.z = 0;
-          this.body.quaternion.setFromEuler(this.body.rotation);
-          this.body.updateMatrix();
-          this.head.position.toArray(this.newState, 0);
-          this.head.quaternion.toArray(this.newState, 3);
+        // record the position and orientation of the user
+        this.head.updateMatrix();
+        this.body.rotation.x = 0;
+        this.body.rotation.z = 0;
+        this.body.quaternion.setFromEuler(this.body.rotation);
+        this.body.updateMatrix();
+        this.head.position.toArray(this.newState, 0);
+        this.head.quaternion.toArray(this.newState, 3);
 
-          if(frame === 0) {
-            updateAll();
-            let userActionHandlers = null;
-            for (let i = 0; i < this.pointers.length && userActionHandlers === null; ++i) {
-              userActionHandlers = this.pointers[i].resolvePicking(this.scene);
-            }
-            for (let i = 0; i < this.managers.length; ++i) {
-              this.managers[i].userActionHandlers = userActionHandlers;
-            }
-            this.ground.moveTo(this.head.position);
-            this.sky.position.copy(this.head.position);
-            moveUI();
-          }
+        updateAll();
+        let userActionHandlers = null;
+        for (let i = 0; i < this.pointers.length && userActionHandlers === null; ++i) {
+          userActionHandlers = this.pointers[i].resolvePicking(scene);
+        }
+        for (let i = 0; i < this.managers.length; ++i) {
+          this.managers[i].userActionHandlers = userActionHandlers;
+        }
+        this.ground.moveTo(this.head.position);
+        this.sky.position.copy(this.head.position);
 
-          pliny.event({
-            parent: "Primrose.BrowserEnvironment",
-            name: "update",
-            description: "Fires after every animation update."
-          });
-          try {
-            this.emit("update");
-          }
-          catch(exp){
-            // don't let user script kill the runtime
-            console.error("User update errored", exp);
-          }
+        moveUI();
 
-          if(frame === 0 && this.network){
-            this.network.update(dt);
-          }
+        if(this.network){
+          this.network.update(dt);
+        }
+
+        pliny.event({
+          parent: "Primrose.BrowserEnvironment",
+          name: "update",
+          description: "Fires after every animation update."
+        });
+        try {
+          this.emit("update");
+        }
+        catch(exp){
+          // don't let user script kill the runtime
+          console.error("User update errored", exp);
         }
       }
     };
