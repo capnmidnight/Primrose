@@ -426,15 +426,6 @@ export default class BrowserEnvironment extends EventDispatcher {
           }
         }
 
-        // record the position and orientation of the user
-        this.head.updateMatrix();
-        this.body.rotation.x = 0;
-        this.body.rotation.z = 0;
-        this.body.quaternion.setFromEuler(this.body.rotation);
-        this.body.updateMatrix();
-        this.head.position.toArray(this.newState, 0);
-        this.head.quaternion.toArray(this.newState, 3);
-
         updateAll();
         let userActionHandlers = null;
         for (let i = 0; i < this.pointers.length && userActionHandlers === null; ++i) {
@@ -443,14 +434,22 @@ export default class BrowserEnvironment extends EventDispatcher {
         for (let i = 0; i < this.managers.length; ++i) {
           this.managers[i].userActionHandlers = userActionHandlers;
         }
-        this.ground.moveTo(this.head.position);
+        this.ground.moveTo(this.body.position);
         this.sky.position.copy(this.head.position);
 
         moveUI();
 
-        if(this.network){
-          this.network.update(dt);
-        }
+        // if(this.network){
+        //   // record the position and orientation of the user
+        //   this.head.updateMatrix();
+        //   this.body.rotation.x = 0;
+        //   this.body.rotation.z = 0;
+        //   this.body.quaternion.setFromEuler(this.body.rotation);
+        //   this.body.updateMatrix();
+        //   this.head.position.toArray(this.newState, 0);
+        //   this.head.quaternion.toArray(this.newState, 3);
+        //   this.network.update(dt);
+        // }
 
         pliny.event({
           parent: "Primrose.BrowserEnvironment",
