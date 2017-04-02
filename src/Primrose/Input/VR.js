@@ -138,11 +138,6 @@ export default class VR extends PoseInputProcessor {
         layers = [layers];
       }
 
-      // A hack to deal with a bug in the current build of Chromium
-      if (this.isNativeMobileWebVR && this.isStereo) {
-        layers = layers[0];
-      }
-
       var promise = this.currentDevice.requestPresent(layers);
       if(isMobile) {
         promise = promise.then(standardLockBehavior);

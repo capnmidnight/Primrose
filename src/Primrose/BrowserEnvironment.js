@@ -395,6 +395,7 @@ export default class BrowserEnvironment extends EventDispatcher {
             }
             heading += mouseHeading;
           }
+
           if (this.VR.hasOrientation) {
             pitch = 0;
           }
