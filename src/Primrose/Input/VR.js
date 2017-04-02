@@ -87,31 +87,33 @@ export default class VR extends PoseInputProcessor {
   }
 
   updateFrameData() {
-    this.currentDevice.getFrameData(this.frameData);
+    if(this.currentDevice) {
+      this.currentDevice.getFrameData(this.frameData);
 
-    var len = 1;
-    this.leftProjection.fromArray(this.frameData.leftProjectionMatrix);
-    this.leftView.fromArray(this.frameData.leftViewMatrix);
-    this.leftView.getInverse(this.leftView);
-    this.leftWorld.multiplyMatrices(this.leftProjection, this.leftView);
-    if(this.isStereo) {
-      len = 2;
-      this.rightProjection.fromArray(this.frameData.rightProjectionMatrix);
-      this.rightView.fromArray(this.frameData.rightViewMatrix);
-      this.rightView.getInverse(this.rightView);
-      this.rightWorld.multiplyMatrices(this.rightProjection, this.rightView);
-    }
-
-    for(let i = 0; i < 16; ++i) {
-      this.centerWorld.elements[i] = 0;
-      for(let j = 0; j < len; ++j) {
-        this.centerWorld.elements[i] += this.matrices[j].elements[i];
+      var len = 1;
+      this.leftProjection.fromArray(this.frameData.leftProjectionMatrix);
+      this.leftView.fromArray(this.frameData.leftViewMatrix);
+      this.leftView.getInverse(this.leftView);
+      this.leftWorld.multiplyMatrices(this.leftProjection, this.leftView);
+      if(this.isStereo) {
+        len = 2;
+        this.rightProjection.fromArray(this.frameData.rightProjectionMatrix);
+        this.rightView.fromArray(this.frameData.rightViewMatrix);
+        this.rightView.getInverse(this.rightView);
+        this.rightWorld.multiplyMatrices(this.rightProjection, this.rightView);
       }
-      this.centerWorld.elements[i] /= len;
-    }
 
-    if(len === 2) {
-      this.centerWorld.debug("average of matrices", 3);
+      for(let i = 0; i < 16; ++i) {
+        this.centerWorld.elements[i] = 0;
+        for(let j = 0; j < len; ++j) {
+          this.centerWorld.elements[i] += this.matrices[j].elements[i];
+        }
+        this.centerWorld.elements[i] /= len;
+      }
+
+      if(len === 2) {
+        this.centerWorld.debug("average of matrices", 3);
+      }
     }
   }
 
