@@ -56,7 +56,6 @@ export default class Sky extends Entity {
         this.sun.castShadow = true;
         this.sun.shadow.mapSize.width =
         this.sun.shadow.mapSize.height = this.options.shadowMapSize;
-        this.sun.shadow.bias = 0.01;
         this.sun.shadow.radius = this.options.shadowRadius;
         this.sun.shadow.camera.top = this.sun.shadow.camera.right = this.options.shadowCameraSize;
         this.sun.shadow.camera.bottom = this.sun.shadow.camera.left = -this.options.shadowCameraSize;
