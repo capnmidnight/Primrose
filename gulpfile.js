@@ -81,7 +81,8 @@ var jsESModules = marigold.js(jsOptions("es")),
   ],
 
   devServer = marigold.devServer(stopOnFiles, reloadOnFiles, {
-    debounceDelay: 1500
+    debounceDelay: 1500,
+    url: "Primrose/demos/empty/"
   });
 
 var tidy = marigold.clean(tidyFiles, tasks.release);
