@@ -57,6 +57,6 @@
     "three": "^0.84.0"
   },
   "devDependencies": {
-    "marigold-build": "^1.4.0"
+    "marigold-build": "^1.4.1"
   }
 }
