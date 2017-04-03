@@ -1571,6 +1571,9 @@ export default class BrowserEnvironment extends EventDispatcher {
       description: "The current render quality."
     });
     Object.defineProperties(this, {
+      fog: {
+        get: () => scene.fog
+      },
       quality: {
         get: () => this.options.quality,
         set: (v) => {

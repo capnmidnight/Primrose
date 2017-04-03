@@ -9,8 +9,8 @@ var skyColor = 0xffff7f,
   }),
 
   sunDistance = 20,
-  sun = circle(1, 45)
-    .colored(0xffffff, { unshaded: true })
+  sun = circle(1.5, 45)
+    .textured("sun.png", { unshaded: true })
     .named("sun"),
 
   t = function(name, rt, rb, h, sr){
@@ -33,6 +33,8 @@ var skyColor = 0xffff7f,
 
 env.sky.add(sun);
 sun.material.fog = false;
+sun.material.transparent = true;
+sun.material.blending = THREE.AdditiveBlending;
 sun.material.needsUpdate = true;
 
 env.stage.add(stand);
@@ -58,8 +60,8 @@ env.addEventListener("update", function() {
   sun.lookAt(env.head);
   var s = (1 + sun.position.y / sunDistance) / 2;
   env.sky.ambient.intensity = 0.5 * s;
-  env.stage.fog.color
+  env.fog.color
     .setHex(skyColor)
     .multiplyScalar(s);
-  env.renderer.setClearColor(env.stage.fog.color.getHex());
+  env.renderer.setClearColor(env.fog.color.getHex());
 });
