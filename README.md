@@ -1,9 +1,6 @@
 # Primrose
 
-Primrose is a WebVR framework that lets web developers create virtual reality experiences for standard web browsers on desktop and mobile devices alike.
-
-WebVR is an [experimental Javascript API](https://developer.mozilla.org/en-US/docs/Web/API/WebVR_API) that provides access to Virtual Reality devices and peripherals in the browser. See [WebVR.info](https://webvr.info/) for more information and resources.
-
+Primrose is an immersive environment for web browsers on desktop and mobile devices alike. Within this environment, web developers can be applications that progressively enhance to support users on a wide variety of form factors, including high-end VR headsets.
 
 # Getting started with Primrose
 
