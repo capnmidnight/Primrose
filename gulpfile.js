@@ -1,127 +1,93 @@
 var gulp = require("gulp"),
-  exec = require("child_process").exec,
   glob = require("glob").sync,
-  fs = require("fs"),
-  path = require("path"),
-  pliny = require("pliny"),
   pkg = require("./package.json"),
+  marigold = require("marigold-build").setup(gulp, pkg),
 
-  startServer = require("notion-node"),
+  pugFiles = ["*.pug", "demos/**/*.pug", "doc/**/*.pug", "templates/**/*.pug"],
+  html = marigold.html(pugFiles, { watch: ["*.md" ,"doc/**/*.md"] }),
 
-  build = require("notiontheory-basic-build"),
-  nt = build.setup(gulp, pkg),
+  stylusFiles = ["*.styl", "demos/**/*.styl", "doc/**/*.styl"],
+  css = marigold.css(stylusFiles),
 
-  html = nt.html("Primrose", ["*.pug", "demos/**/*.pug", "doc/**/*.pug", "templates/**/*.pug"], "src"),
+  preloaderFiles = ["preloader/**/*.js"],
+  preloader = marigold.js({ entry: "preloader/index.js" }),
 
-  css = nt.css("Primrose", ["*.styl", "demos/**/*.styl", "doc/**/*.styl"]),
-
-  formats = ["umd", "es"],
-
-  preloaderJS = nt.js("preloader", "preloader/index.js"),
-
-  preloaderMin = nt.min(
-    "preloader",  [
-    "preloader.js"
-  ], [{
-    debug: preloaderJS.debug,
-    release: preloaderJS.debug
-  }]),
-
-  preloader = {
-    format: preloaderJS.format,
-    default: preloaderJS.default,
-    debug: preloaderJS.debug,
-    release: preloaderMin.release
+  jsOptions = (fmt) => {
+    return {
+      name: "Primrose",
+      advertise: true,
+      extractDocumentation: true,
+      dependencies: ["format"],
+      globals: { three: "THREE" },
+      format: fmt
+    }
   },
 
-  tasks = formats.map((format) => {
+  srcFiles = ["src/**/*.js"],
+  jsUMD = marigold.js(jsOptions("umd"));
 
-    var extension = "",
-      external = ["three"],
-      globals = null;
 
-    if(format === "es") {
-      extension += ".modules";
-    }
-    else if(format !== "umd"){
-      extension += "." + format;
-    }
-    else{
-      globals = {three: "THREE"};
-    }
-    extension += ".js";
+gulp.task("move", [jsUMD.release], () => gulp.src(["PrimroseDocumentation.js"])
+  .pipe(gulp.dest("doc")));
 
-    var inFile = "PrimroseWithDoc" + extension,
-      outFile = inFile.replace("WithDoc", ""),
-      docFile = "doc/" + inFile.replace("WithDoc", "Documentation"),
-      js = nt.js("PrimroseWithDoc:" + format, "src/index.js", {
-      advertise: true,
-      moduleName: "Primrose",
-      fileName: inFile,
-      dependencies: ["format"],
-      external: external,
-      globals: globals,
-      format: format,
-      post: (_, cb) => {
-        // removes the documentation objects from the concatenated library.
-        pliny.carve(inFile, outFile, docFile, cb);
-      }
-    });
+var jsESModules = marigold.js(jsOptions("es")),
 
-    var min;
-    if(format === "umd") {
-      min = nt.min("Primrose", [
-        "doc/PrimroseDocumentation.js",
-        "Primrose.js"], [{
-        debug: js.debug,
-        release: js.debug
-      }]);
-    }
+  minFiles = glob("demos/*/app.js").concat([
+    "preloader.js",
+    "doc/PrimroseDocumentation.js",
+    "doc/app.js",
+    "Primrose.js"
+  ]),
+  minDeps = [
+    preloader,
+    "move",
+    jsESModules
+  ],
+  min = marigold.min(minFiles, minDeps),
 
-    return { js, min };
-  }).reduce((collect, task) => {
-    if(!collect.format) {
-      collect.format = [task.js.format];
-      collect.default = [task.js.default];
-    }
-    collect.debug.push(task.js.debug);
-    var releaseTask = (task.min || task.js).release;
-    collect.release.push(releaseTask);
-    return collect;
-  }, { format: null, default: null, debug: [], release: [] }),
+  tasks = {
+    format: [preloader.format, jsUMD.format],
+    default: [preloader.default, jsUMD.default],
+    debug: [preloader.debug, jsUMD.debug, jsESModules.debug],
+    release: [min.release]
+  },
 
-  demos = glob("demos/*/app.js").map(function(file) {
+  tidyFiles = [
+    "doc/*/appWithDoc.js",
+    "doc/*/appDocumentation.js",
+    "PrimroseDocumentation*.js",
+    "templates/*.html",
+    "Primrose*.modules.js.map",
+    "PrimroseWithDoc.modules.js"
+  ],
 
-    var name = file.match(/demos\/(\w+)\/app\.js/)[1],
-      parts = path.parse(file),
-      taskName = "Demo:" + name,
-      min = nt.min(taskName, file);
+  stopOnFiles = []
+    .concat(pugFiles)
+    .concat(stylusFiles)
+    .concat(preloaderFiles)
+    .concat(srcFiles),
 
-    return min;
-  }),
+  reloadOnFiles = [
+    "*.js",
+    "!gulpfile.js",
+    "*.css",
+    "*.html",
+    "demos/**/*.js",
+    "demos/**/*.css",
+    "demos/**/*.html",
+    "doc/**/*.js",
+    "doc/**/*.css",
+    "doc/**/*.html"
+  ],
 
-  minDocApp = nt.min("DocApp", "doc/app.js");
+  devServer = marigold.devServer(stopOnFiles, reloadOnFiles, {
+    debounceDelay: 1500,
+    url: "Primrose/demos/empty/"
+  });
 
-tasks.release.push.apply(tasks.release, demos.map(d=>d.release));
-tasks.format.push(preloader.format);
-tasks.default.push(preloader.default);
-tasks.debug.push(preloader.debug);
-tasks.release.push(preloader.release);
-tasks.release.push(minDocApp.release);
-
-const tidyFiles = [
-  "PrimroseWithDoc*.js",
-  "doc/*/appWithDoc.js",
-  "doc/*/appDocumentation.js",
-  "doc/PrimroseDocumentation.modules.js",
-  "templates/*.html"
-];
-gulp.task("tidy", [nt.clean("Primrose", tidyFiles, tasks.release)]);
-gulp.task("tidy:only", [nt.clean("Primrose:only", tidyFiles)]);
-
-gulp.task("copy", ["tidy"], () => gulp.src(["Primrose.min.js"])
+var tidy = marigold.clean(tidyFiles, tasks.release);
+gulp.task("copy", [tidy], () => gulp.src(["Primrose.min.js"])
   .pipe(gulp.dest("quickstart")));
-
 
 gulp.task("format", tasks.format);
 gulp.task("js", tasks.default);
@@ -134,9 +100,16 @@ gulp.task("css", [css.default]);
 gulp.task("css:debug", [css.debug]);
 gulp.task("css:release", [css.release]);
 
-gulp.task("default", [ "js", "html", "css" ], () => startServer({ mode: "dev", port: 8080 }));
+gulp.task("default", [ "js", "html", "css" ], devServer);
+gulp.task("test", [ "release" ], devServer);
+
 gulp.task("debug", ["js:debug", "html:debug", "css:debug"]);
 gulp.task("release",  ["js:release", "html:release", "css:release"]);
-gulp.task("test", [ "release" ], () => startServer({ mode: "dev", port: 8080 }));
 
-gulp.task("kablamo", build.exec("gulp bump && gulp yolo && cd ../Primrose-Site && gulp kablamo && cd ../Primrose && gulp trololo && npm publish"));
+gulp.task("kablamo", marigold.exec("gulp bump\
+ && gulp yolo\
+ && cd ../Primrose-Site\
+ && gulp yolo\
+ && cd ../Primrose\
+ && git push\
+ && npm publish"));

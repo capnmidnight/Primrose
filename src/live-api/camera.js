@@ -29,7 +29,7 @@ pliny.record({
 });
 
 import hub from "./hub";
-import Image from "../Primrose/Controls/Image";
+import Video from "../Primrose/Controls/Video";
 
 export default function camera(index, options) {
   options = Object.assign({
@@ -39,8 +39,7 @@ export default function camera(index, options) {
       transparent: true,
       opacity: 0.5
     }, options);
-  const cam = hub();
-  cam.ready = navigator.mediaDevices.enumerateDevices()
+  return navigator.mediaDevices.enumerateDevices()
     .catch(console.error.bind(console, "ERR [enumerating devices]:>"))
     .then((devices) => devices.filter((d) => d.kind === "videoinput")[index])
     .catch(console.error.bind(console, "ERR [filtering devices]:>"))
@@ -52,12 +51,6 @@ export default function camera(index, options) {
       }
     }))
     .catch(console.error.bind(console, "ERR [getting media access]:>"))
-    .then((stream) => new Image(stream, options).ready)
-    .catch(console.error.bind(console, "ERR [creating image]:>"))
-    .then((image) => {
-      image._meshes.forEach((mesh) => cam.add(mesh));
-      cam.image = image;
-      return cam;
-    });
-  return cam;
+    .then((stream) => new Video(stream, options).ready)
+    .catch(console.error.bind(console, "ERR [creating image]:>"));
 };

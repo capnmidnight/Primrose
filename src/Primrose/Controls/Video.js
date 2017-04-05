@@ -12,20 +12,13 @@ pliny.class({
 
 import enableInlineVideo from "iphone-inline-video";
 
+import { LinearFilter } from "three";
+
 import BaseTextured from "./BaseTextured";
 import textured from "../../live-api/textured";
 import isiOS from "../../flags/isiOS";
 
 let COUNTER = 0;
-
-function getNetworkStateName(state){
-  for(var key in HTMLMediaElement) {
-    if(key.indexOf("NETWORK_") >= 0 && HTMLMediaElement[key] === state) {
-      return key;
-    }
-  }
-  return state;
-}
 
 // Videos don't auto-play on mobile devices, so let's make them all play whenever we tap the screen.
 const processedVideos = [];
@@ -105,7 +98,11 @@ export default class Video extends BaseTextured {
         fixVideo(video);
       }
 
-      loadOptions.promise.then((txt) => this._textures[i] = txt);
+      loadOptions.promise.then((txt) => {
+        this._textures[i] = txt;
+        console.log(txt);
+        txt.minFilter = LinearFilter;
+      });
 
       return video;
     });
