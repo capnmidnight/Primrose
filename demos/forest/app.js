@@ -21,7 +21,7 @@ env.addEventListener("ready", function() {
     MF.loadModel("tree.obj").then(function(treeFactory) {
       treeFactory.template.castShadow = true;
       treeFactory.template.receiveShadow = true;
-      for(var i = 0; i < 500; ++i) {
+      for(var i = 0; i < 100; ++i) {
 
         var tree = treeFactory.clone()
           .named("tree" + i)
@@ -38,9 +38,9 @@ env.addEventListener("ready", function() {
 
         do {
           tree.position.set(
-            Primrose.Random.number(-25, 25),
+            Primrose.Random.number(-15, 15),
             0,
-            Primrose.Random.number(-25, 25));
+            Primrose.Random.number(-15, 15));
           tree.position.y = env.ground.getHeightAt(tree.position);
         } while(tree.position.y === undefined);
 
