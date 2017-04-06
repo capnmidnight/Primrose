@@ -289,7 +289,7 @@ pliny.function({
     });\n\
     \n\
     env.sky.add(moon); // assuming we have a `Primrose.BrowserEnvironment` named `env`\n\
-    moon.latLon(-30, 30, 7);\n\
+    moon.latLng(-30, 30, 7);\n\
     moon.lookAt(env.scene.position);\n\
 \n\
 The result should appear as:\n\
@@ -771,13 +771,13 @@ pliny.function({
 });
 pliny.class({
   parent: "Primrose.Controls",
-  name: "Image",
+  name: "Videa",
   baseClass: "Primrose.Controls.BaseTextured",
-  description: "A simple 2D image to put on a Surface.",
+  description: "A simple 2D video to put on a Surface.",
   parameters: [{
     name: "options",
     type: "Object",
-    description: "Named parameters for creating the Image."
+    description: "Named parameters for creating the Video."
   }]
 });
 
@@ -2545,6 +2545,18 @@ pliny.property({
       });
 
       pliny.class({
+  parent: "Primrose.Controls",
+  name: "Image",
+  baseClass: "Primrose.Controls.BaseTextured",
+  description: "A simple 2D image to put on a Surface.",
+  parameters: [{
+    name: "options",
+    type: "Object",
+    description: "Named parameters for creating the Image."
+  }]
+});
+
+pliny.class({
   parent: "Primrose",
   name: "ModelFactory",
   description: "Creates an interface for cloning 3D models loaded from files, to instance those objects.\n\
@@ -3321,24 +3333,6 @@ pliny.class({
   }]
 });
 
-pliny.class({
-  parent: "Primrose.Input",
-  name: "FPSInput",
-  baseClass: "THREE.EventDispatcher",
-  description: "A massive hairball of a class that handles all of the input abstraction.",
-  parameters: [{
-    name: "DOMElement",
-    type: "Element",
-    description: "The DOM element on which to add most events.",
-    optional: true,
-    default: "window"
-  }, {
-    name: "options",
-    type: "Object",
-    description: "Optional setup: avatarHeight, gravity, and scene."
-  }]
-});
-
 pliny.function({
   parent: "Primrose.Random",
   name: "number",
@@ -3957,19 +3951,24 @@ pliny.property({
       returns: "Promise",
       description: "Enter full-screen mode on one of the available displays. NOTE: due to a defect in iOS, this feature is not available on iPhones or iPads."
     });
+    pliny.method({
+      parent: "Primrose.BrowserEnvironment",
+      name: "start",
+      returns: "Promise",
+      description: "Restart animation after it has been stopped."
+    });
+    pliny.method({
+      parent: "Primrose.BrowserEnvironment",
+      name: "stop",
+      description: "Pause animation."
+    });
     pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "renderer",
       type: "THREE.WebGLRenderer",
       description: "The Three.js renderer being used to draw the scene."
     });
-    pliny.property({
-        parent: "Primrose.BrowserEnvironment",
-        name: "input",
-        type: "Primrose.Input.FPSInput",
-        description: "The input manager."
-      });
-      pliny.event({
+    pliny.event({
         parent: "Primrose.BrowserEnvironment",
         name: "select",
         description: "Fired when an object has been selected, either by a physical cursor or a gaze-based cursor. You will typically want to use this instead of pointerend or gazecomplete."
@@ -4186,18 +4185,6 @@ pliny.class({
     name: "options",
     type: "Object",
     description: "Named parameters for creating the TextInput."
-  }]
-});
-
-pliny.class({
-  parent: "Primrose.Controls",
-  name: "Videa",
-  baseClass: "Primrose.Controls.BaseTextured",
-  description: "A simple 2D video to put on a Surface.",
-  parameters: [{
-    name: "options",
-    type: "Object",
-    description: "Named parameters for creating the Video."
   }]
 });
 

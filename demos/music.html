@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, shrink-to-fit=0, initial-scale=1.0"><meta name="apple-touch-fullscreen" content="yes"><meta name="web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="theme-color" content="black"><meta name="description" content="A WebVR application framework."><meta name="keywords" content="WebGL, WebVR, HTML5, JavaScript, text editor, source code editor, virtual reality, Primrose"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@Primrose_VR"><meta property="og:site_name" content="Primrose VR"><meta property="og:description" content="Primrose: Framework for WebVR Applications"><meta name="twitter:description" content="Primrose: Framework for WebVR Applications"><meta property="og:url" content="http://www.primrosevr.com/undefined"><!-- start main.pug meta block --><meta name="twitter:image" content="http://www.primrosevr.com/images/screenshot.jpg"><meta property="og:image" content="http://www.primrosevr.com/images/screenshot.jpg"><!-- end main.pug meta block -->
-<!-- start main.pug title block --><meta property="og:title" content="Primrose VR: WebVR Application Framework"><meta name="twitter:title" content="Primrose VR: WebVR Application Framework"><title>Primrose VR: WebVR Application Framework</title><!-- end main.pug title block --><link type="text/css" rel="stylesheet" href="../doc/style.min.css"><script src="../node_modules/pliny/pliny.min.js"></script><script src="../node_modules/three/build/three.min.js"></script><script src="../Primrose.min.js"></script><script src="../doc/app.min.js"></script><script src="../ga.js"></script></head><body><header role="banner"><a id="logo" href="../"><img src="../doc/images/primrose40.png" alt="logo" title="Primrose logo"><span class="version-number">v0.31.3</span></a><nav role="navigation"><ul><li><a href="../demos/">Demos</a></li><li><a href="../doc/">Docs</a></li><li><a href="../doc/faq.html">FAQ</a></li><li><a href="../doc/community.html">Community</a></li><li><a href="https://github.com/NotionTheory/Primrose/" target="_blank">Github</a></li></ul></nav><h1>Demo: music</h1></header><!-- start main.pug banner block --><!-- end main.pug banner block -->
+<!-- start main.pug title block --><meta property="og:title" content="Primrose VR: WebVR Application Framework"><meta name="twitter:title" content="Primrose VR: WebVR Application Framework"><title>Primrose VR: WebVR Application Framework</title><!-- end main.pug title block --><link type="text/css" rel="stylesheet" href="../doc/style.min.css"><script src="../node_modules/pliny/pliny.min.js"></script><script src="../node_modules/three/build/three.min.js"></script><script src="../Primrose.min.js"></script><script src="../doc/app.min.js"></script><script src="../ga.js"></script></head><body><header role="banner"><a id="logo" href="../"><img src="../doc/images/primrose40.png" alt="logo" title="Primrose logo"><span class="version-number">v0.31.4</span></a><nav role="navigation"><ul><li><a href="../demos/">Demos</a></li><li><a href="../doc/">Docs</a></li><li><a href="../doc/faq.html">FAQ</a></li><li><a href="../doc/community.html">Community</a></li><li><a href="https://github.com/NotionTheory/Primrose/" target="_blank">Github</a></li></ul></nav><h1>Demo: music</h1></header><!-- start main.pug banner block --><!-- end main.pug banner block -->
 <!-- start main.pug main block --><main><!-- start demo.pug banner block --><p>Click on the image below to lock mouse cursor to demo. <a href="../demos/music" target="_blank">Open demo in new window</a>.</p><iframe id="demo" src="../demos/music" style="width: 100%;height: 50vw;" allowfullscreen allowvr></iframe><h2>Source</h2><pre id="editorContainer">grammar(&quot;JavaScript&quot;);
 var height = 8,
     width = 4,
@@ -25,8 +25,7 @@ var height = 8,
       backgroundColor: 0x000000,
       useFog: true,
       drawDistance: 10,
-      fullScreenButtonContainer: &quot;#fullScreenButtonContainer&quot;,
-      progress: Preloader.thunk
+      fullScreenButtonContainer: &quot;#fullScreenButtonContainer&quot;
     });
 
 function text(size, text) {
@@ -53,7 +52,7 @@ function Board(type){
       btn = box(padSize, padSize, padDepth)
         .colored(colorOff)
         .named(&quot;btn&quot; + i)
-        .latLon(lat, lon);
+        .latLng(lat, lon);
 
     box(padSize * 1.1, padSize * 1.1, padDepth * 0.9)
       .colored(colorPlay)
@@ -89,7 +88,7 @@ Board.prototype.update = function() {
       }
     }
   }
-  DIST.set(this.object.position.x, env.input.head.position.y, this.object.position.z);
+  DIST.set(this.object.position.x, env.head.position.y, this.object.position.z);
   this.object.position.lerp(DIST, 0.01);
 };
 
@@ -101,7 +100,7 @@ Board.prototype.highlight = function(i, color) {
 };
 
 Board.prototype.select = function(i, evt) {
-  if(!env.input.hasMouse || evt.pointer.name === &quot;MousePointer&quot;) {
+  if(!env.hasMouse || evt.pointer.name === &quot;MousePointer&quot;) {
     this.btnState[i] = !this.btnState[i];
     this.highlight(i);
   }
@@ -115,7 +114,7 @@ env.addEventListener(&quot;ready&quot;, function () {
     var board = new Board(type);
     boards.push(board);
     env.scene.add(board.object);
-    board.object.latLon(0, (t - (nTypes - 1) / 2) * 100 / nTypes);
+    board.object.latLng(0, (t - (nTypes - 1) / 2) * 100 / nTypes);
   });
 
   Preloader.hide();

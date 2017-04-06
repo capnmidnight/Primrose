@@ -1,14 +1,14 @@
-import { AmbientLight, AnimationClip, BackSide, BoxBufferGeometry, BufferAttribute, BufferGeometry, CircleBufferGeometry, Color, CubeTexture, CubeTextureLoader, CylinderBufferGeometry, DefaultLoadingManager, DirectionalLight, Euler, EventDispatcher, Face3, FileLoader, FlatShading, FogExp2, FontLoader, FrontSide, Geometry, Group, ImageLoader, LineBasicMaterial, LineSegments, Loader, Math as Math$1, Matrix3, Matrix4, Mesh, MeshBasicMaterial, MeshPhongMaterial, MeshStandardMaterial, MultiMaterial, Object3D, ObjectLoader, PCFSoftShadowMap, PerspectiveCamera, PlaneBufferGeometry, PlaneGeometry, PointLight, Points, PointsMaterial, Quaternion, Raycaster, RepeatWrapping, RingBufferGeometry, Scene, SmoothShading, Sphere, SphereGeometry, TextGeometry, Texture, TextureLoader, Vector2, Vector3, Vector4, WebGLRenderer } from 'three';
+import { AmbientLight, AnimationClip, BackSide, BoxBufferGeometry, BufferAttribute, BufferGeometry, CircleBufferGeometry, Color, CubeTexture, CubeTextureLoader, CylinderBufferGeometry, DefaultLoadingManager, DirectionalLight, Euler, EventDispatcher, Face3, FileLoader, FlatShading, FogExp2, FontLoader, FrontSide, Geometry, Group, ImageLoader, LineBasicMaterial, LineSegments, LinearFilter, Loader, Math as Math$1, Matrix3, Matrix4, Mesh, MeshBasicMaterial, MeshPhongMaterial, MeshStandardMaterial, MultiMaterial, Object3D, ObjectLoader, PCFSoftShadowMap, PerspectiveCamera, PlaneBufferGeometry, PlaneGeometry, PointLight, Points, PointsMaterial, Quaternion, Raycaster, RepeatWrapping, RingBufferGeometry, Scene, SmoothShading, Sphere, SphereGeometry, TextGeometry, Texture, TextureLoader, Vector2, Vector3, Vector4, WebGLRenderer } from 'three';
 
 var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
 
 var isChrome = !!window.chrome && !isOpera;
 
-var isFirefox$1 = typeof window.InstallTrigger !== "undefined";
+var isFirefox = typeof window.InstallTrigger !== "undefined";
 
 var isGearVR = navigator.userAgent.indexOf("Mobile VR") > -1;
 
-var isIE = false || !!document.documentMode;
+var isIE = /*@cc_on!@*/false || !!document.documentMode;
 
 var isInIFrame = window.self !== window.top;
 
@@ -35,7 +35,7 @@ var isWindows = /Windows/.test(navigator.userAgent || "");
 
 var index$1 = {
   isChrome: isChrome,
-  isFirefox: isFirefox$1,
+  isFirefox: isFirefox,
   isGearVR: isGearVR,
   isIE: isIE,
   isInIFrame: isInIFrame,
@@ -51,7 +51,7 @@ var index$1 = {
 
 var flags = Object.freeze({
 	isChrome: isChrome,
-	isFirefox: isFirefox$1,
+	isFirefox: isFirefox,
 	isGearVR: isGearVR,
 	isIE: isIE,
 	isInIFrame: isInIFrame,
@@ -128,7 +128,7 @@ function material(textureDescription, options) {
   });
 }
 
-function loadTexture$1(id, url, progress) {
+function loadTexture(id, url, progress) {
   var textureLoader = null;
   if (url instanceof Array && url.length === 6) {
     textureLoader = new CubeTextureLoader();
@@ -203,7 +203,7 @@ var createClass = function () {
 
 
 
-var get$1 = function get$1(object, property, receiver) {
+var get = function get(object, property, receiver) {
   if (object === null) object = Function.prototype;
   var desc = Object.getOwnPropertyDescriptor(object, property);
 
@@ -213,7 +213,7 @@ var get$1 = function get$1(object, property, receiver) {
     if (parent === null) {
       return undefined;
     } else {
-      return get$1(parent, property, receiver);
+      return get(parent, property, receiver);
     }
   } else if ("value" in desc) {
     return desc.value;
@@ -264,14 +264,14 @@ var possibleConstructorReturn = function (self, call) {
 
 
 
-var set$1 = function set$1(object, property, value, receiver) {
+var set = function set(object, property, value, receiver) {
   var desc = Object.getOwnPropertyDescriptor(object, property);
 
   if (desc === undefined) {
     var parent = Object.getPrototypeOf(object);
 
     if (parent !== null) {
-      set$1(parent, property, value, receiver);
+      set(parent, property, value, receiver);
     }
   } else if ("value" in desc && desc.writable) {
     desc.value = value;
@@ -329,7 +329,7 @@ function textured(geometry, txt, options) {
   var textureDescription = "Primrose.textured(" + txtID + ", " + options.txtRepeatX + ", " + options.txtRepeatY + ", " + options.anisotropy + ", " + options.scaleTextureWidth + ", " + options.scaleTextureHeight + ")";
   var texturePromise = cache(textureDescription, function () {
     if (typeof txt === "string" || txt instanceof Array || txt.length === 6) {
-      return loadTexture$1(textureDescription, txt, options.progress);
+      return loadTexture(textureDescription, txt, options.progress);
     } else {
       var retValue = null;
       if (txt instanceof HTMLCanvasElement || txt instanceof HTMLVideoElement || txt instanceof HTMLImageElement) {
@@ -426,7 +426,7 @@ function colored(geometry, color, options) {
   return obj;
 }
 
-function box$1(width, height, length, t, u, v) {
+function box(width, height, length, t, u, v) {
   if (height === undefined) {
     height = width;
   }
@@ -450,13 +450,368 @@ function brick(txt, width, height, length, options) {
     opacity: 1
   }, options);
   var m = typeof txt === "number" ? colored : textured,
-      obj = m(box$1(width, height, length), txt, options);
+      obj = m(box(width, height, length), txt, options);
   return obj;
 }
 
 function axis(length, width) {
   return hub().add(brick(0xff0000, length, width, width)).add(brick(0x00ff00, width, length, width)).add(brick(0x0000ff, width, width, length));
 }
+
+var index$3 = typeof Symbol === 'undefined' ? function (description) {
+	return '@' + (description || '@') + Math.random();
+} : Symbol;
+
+/*! npm.im/intervalometer */
+function intervalometer(cb, request, cancel, requestParameter) {
+	var requestId;
+	var previousLoopTime;
+	function loop(now) {
+		// must be requested before cb() because that might call .stop()
+		requestId = request(loop, requestParameter);
+
+		// called with "ms since last call". 0 on start()
+		cb(now - (previousLoopTime || now));
+
+		previousLoopTime = now;
+	}
+	return {
+		start: function start() {
+			if (!requestId) { // prevent double starts
+				loop(0);
+			}
+		},
+		stop: function stop() {
+			cancel(requestId);
+			requestId = null;
+			previousLoopTime = 0;
+		}
+	};
+}
+
+function frameIntervalometer(cb) {
+	return intervalometer(cb, requestAnimationFrame, cancelAnimationFrame);
+}
+
+/*! npm.im/iphone-inline-video */
+function preventEvent(element, eventName, toggleProperty, preventWithProperty) {
+	function handler(e) {
+		if (Boolean(element[toggleProperty]) === Boolean(preventWithProperty)) {
+			e.stopImmediatePropagation();
+			// console.log(eventName, 'prevented on', element);
+		}
+		delete element[toggleProperty];
+	}
+	element.addEventListener(eventName, handler, false);
+
+	// Return handler to allow to disable the prevention. Usage:
+	// const preventionHandler = preventEvent(el, 'click');
+	// el.removeEventHandler('click', preventionHandler);
+	return handler;
+}
+
+function proxyProperty(object, propertyName, sourceObject, copyFirst) {
+	function get() {
+		return sourceObject[propertyName];
+	}
+	function set(value) {
+		sourceObject[propertyName] = value;
+	}
+
+	if (copyFirst) {
+		set(object[propertyName]);
+	}
+
+	Object.defineProperty(object, propertyName, {get: get, set: set});
+}
+
+function proxyEvent(object, eventName, sourceObject) {
+	sourceObject.addEventListener(eventName, function () { return object.dispatchEvent(new Event(eventName)); });
+}
+
+function dispatchEventAsync(element, type) {
+	Promise.resolve().then(function () {
+		element.dispatchEvent(new Event(type));
+	});
+}
+
+// iOS 10 adds support for native inline playback + silent autoplay
+var isWhitelisted = 'object-fit' in document.head.style && /iPhone|iPod/i.test(navigator.userAgent) && !matchMedia('(-webkit-video-playable-inline)').matches;
+
+var ಠ = index$3();
+var ಠevent = index$3();
+var ಠplay = index$3('nativeplay');
+var ಠpause = index$3('nativepause');
+
+/**
+ * UTILS
+ */
+
+function getAudioFromVideo(video) {
+	var audio = new Audio();
+	proxyEvent(video, 'play', audio);
+	proxyEvent(video, 'playing', audio);
+	proxyEvent(video, 'pause', audio);
+	audio.crossOrigin = video.crossOrigin;
+
+	// 'data:' causes audio.networkState > 0
+	// which then allows to keep <audio> in a resumable playing state
+	// i.e. once you set a real src it will keep playing if it was if .play() was called
+	audio.src = video.src || video.currentSrc || 'data:';
+
+	// if (audio.src === 'data:') {
+	//   TODO: wait for video to be selected
+	// }
+	return audio;
+}
+
+var lastRequests = [];
+var requestIndex = 0;
+var lastTimeupdateEvent;
+
+function setTime(video, time, rememberOnly) {
+	// allow one timeupdate event every 200+ ms
+	if ((lastTimeupdateEvent || 0) + 200 < Date.now()) {
+		video[ಠevent] = true;
+		lastTimeupdateEvent = Date.now();
+	}
+	if (!rememberOnly) {
+		video.currentTime = time;
+	}
+	lastRequests[++requestIndex % 3] = time * 100 | 0 / 100;
+}
+
+function isPlayerEnded(player) {
+	return player.driver.currentTime >= player.video.duration;
+}
+
+function update(timeDiff) {
+	var player = this;
+	// console.log('update', player.video.readyState, player.video.networkState, player.driver.readyState, player.driver.networkState, player.driver.paused);
+	if (player.video.readyState >= player.video.HAVE_FUTURE_DATA) {
+		if (!player.hasAudio) {
+			player.driver.currentTime = player.video.currentTime + ((timeDiff * player.video.playbackRate) / 1000);
+			if (player.video.loop && isPlayerEnded(player)) {
+				player.driver.currentTime = 0;
+			}
+		}
+		setTime(player.video, player.driver.currentTime);
+	} else if (player.video.networkState === player.video.NETWORK_IDLE && !player.video.buffered.length) {
+		// this should happen when the source is available but:
+		// - it's potentially playing (.paused === false)
+		// - it's not ready to play
+		// - it's not loading
+		// If it hasAudio, that will be loaded in the 'emptied' handler below
+		player.video.load();
+		// console.log('Will load');
+	}
+
+	// console.assert(player.video.currentTime === player.driver.currentTime, 'Video not updating!');
+
+	if (player.video.ended) {
+		delete player.video[ಠevent]; // allow timeupdate event
+		player.video.pause(true);
+	}
+}
+
+/**
+ * METHODS
+ */
+
+function play() {
+	// console.log('play');
+	var video = this;
+	var player = video[ಠ];
+
+	// if it's fullscreen, use the native player
+	if (video.webkitDisplayingFullscreen) {
+		video[ಠplay]();
+		return;
+	}
+
+	if (player.driver.src !== 'data:' && player.driver.src !== video.src) {
+		// console.log('src changed on play', video.src);
+		setTime(video, 0, true);
+		player.driver.src = video.src;
+	}
+
+	if (!video.paused) {
+		return;
+	}
+	player.paused = false;
+
+	if (!video.buffered.length) {
+		// .load() causes the emptied event
+		// the alternative is .play()+.pause() but that triggers play/pause events, even worse
+		// possibly the alternative is preventing this event only once
+		video.load();
+	}
+
+	player.driver.play();
+	player.updater.start();
+
+	if (!player.hasAudio) {
+		dispatchEventAsync(video, 'play');
+		if (player.video.readyState >= player.video.HAVE_ENOUGH_DATA) {
+			// console.log('onplay');
+			dispatchEventAsync(video, 'playing');
+		}
+	}
+}
+function pause(forceEvents) {
+	// console.log('pause');
+	var video = this;
+	var player = video[ಠ];
+
+	player.driver.pause();
+	player.updater.stop();
+
+	// if it's fullscreen, the developer the native player.pause()
+	// This is at the end of pause() because it also
+	// needs to make sure that the simulation is paused
+	if (video.webkitDisplayingFullscreen) {
+		video[ಠpause]();
+	}
+
+	if (player.paused && !forceEvents) {
+		return;
+	}
+
+	player.paused = true;
+	if (!player.hasAudio) {
+		dispatchEventAsync(video, 'pause');
+	}
+	if (video.ended) {
+		video[ಠevent] = true;
+		dispatchEventAsync(video, 'ended');
+	}
+}
+
+/**
+ * SETUP
+ */
+
+function addPlayer(video, hasAudio) {
+	var player = video[ಠ] = {};
+	player.paused = true; // track whether 'pause' events have been fired
+	player.hasAudio = hasAudio;
+	player.video = video;
+	player.updater = frameIntervalometer(update.bind(player));
+
+	if (hasAudio) {
+		player.driver = getAudioFromVideo(video);
+	} else {
+		video.addEventListener('canplay', function () {
+			if (!video.paused) {
+				// console.log('oncanplay');
+				dispatchEventAsync(video, 'playing');
+			}
+		});
+		player.driver = {
+			src: video.src || video.currentSrc || 'data:',
+			muted: true,
+			paused: true,
+			pause: function () {
+				player.driver.paused = true;
+			},
+			play: function () {
+				player.driver.paused = false;
+				// media automatically goes to 0 if .play() is called when it's done
+				if (isPlayerEnded(player)) {
+					setTime(video, 0);
+				}
+			},
+			get ended() {
+				return isPlayerEnded(player);
+			}
+		};
+	}
+
+	// .load() causes the emptied event
+	video.addEventListener('emptied', function () {
+		// console.log('driver src is', player.driver.src);
+		var wasEmpty = !player.driver.src || player.driver.src === 'data:';
+		if (player.driver.src && player.driver.src !== video.src) {
+			// console.log('src changed to', video.src);
+			setTime(video, 0, true);
+			player.driver.src = video.src;
+			// playing videos will only keep playing if no src was present when .play()’ed
+			if (wasEmpty) {
+				player.driver.play();
+			} else {
+				player.updater.stop();
+			}
+		}
+	}, false);
+
+	// stop programmatic player when OS takes over
+	video.addEventListener('webkitbeginfullscreen', function () {
+		if (!video.paused) {
+			// make sure that the <audio> and the syncer/updater are stopped
+			video.pause();
+
+			// play video natively
+			video[ಠplay]();
+		} else if (hasAudio && !player.driver.buffered.length) {
+			// if the first play is native,
+			// the <audio> needs to be buffered manually
+			// so when the fullscreen ends, it can be set to the same current time
+			player.driver.load();
+		}
+	});
+	if (hasAudio) {
+		video.addEventListener('webkitendfullscreen', function () {
+			// sync audio to new video position
+			player.driver.currentTime = video.currentTime;
+			// console.assert(player.driver.currentTime === video.currentTime, 'Audio not synced');
+		});
+
+		// allow seeking
+		video.addEventListener('seeking', function () {
+			if (lastRequests.indexOf(video.currentTime * 100 | 0 / 100) < 0) {
+				// console.log('User-requested seeking');
+				player.driver.currentTime = video.currentTime;
+			}
+		});
+	}
+}
+
+function overloadAPI(video) {
+	var player = video[ಠ];
+	video[ಠplay] = video.play;
+	video[ಠpause] = video.pause;
+	video.play = play;
+	video.pause = pause;
+	proxyProperty(video, 'paused', player.driver);
+	proxyProperty(video, 'muted', player.driver, true);
+	proxyProperty(video, 'playbackRate', player.driver, true);
+	proxyProperty(video, 'ended', player.driver);
+	proxyProperty(video, 'loop', player.driver, true);
+	preventEvent(video, 'seeking');
+	preventEvent(video, 'seeked');
+	preventEvent(video, 'timeupdate', ಠevent, false);
+	preventEvent(video, 'ended', ಠevent, false); // prevent occasional native ended events
+}
+
+function enableInlineVideo(video, hasAudio, onlyWhitelisted) {
+	if ( hasAudio === void 0 ) hasAudio = true;
+	if ( onlyWhitelisted === void 0 ) onlyWhitelisted = true;
+
+	if ((onlyWhitelisted && !isWhitelisted) || video[ಠ]) {
+		return;
+	}
+	addPlayer(video, hasAudio);
+	overloadAPI(video);
+	video.classList.add('IIV');
+	if (!hasAudio && video.autoplay) {
+		video.play();
+	}
+	if (!/iPhone|iPod|iPad/.test(navigator.platform)) {
+		console.warn('iphone-inline-video is not guaranteed to work in emulated environments');
+	}
+}
+
+enableInlineVideo.isWhitelisted = isWhitelisted;
 
 var Entity = function (_Object3D) {
   inherits(Entity, _Object3D);
@@ -478,7 +833,7 @@ var Entity = function (_Object3D) {
 
   createClass(Entity, [{
     key: "_ready",
-    get: function get() {
+    get: function get$$1() {
       return Promise.resolve();
     }
   }]);
@@ -739,10 +1094,10 @@ var BaseTextured = function (_Entity) {
     value: function update() {}
   }, {
     key: "_ready",
-    get: function get() {
+    get: function get$$1() {
       var _this2 = this;
 
-      return get$1(BaseTextured.prototype.__proto__ || Object.getPrototypeOf(BaseTextured.prototype), "_ready", this).then(function () {
+      return get(BaseTextured.prototype.__proto__ || Object.getPrototypeOf(BaseTextured.prototype), "_ready", this).then(function () {
         return _this2._loadFiles(_this2._files, _this2.options.progress);
       }).then(function () {
         return _this2._meshes.forEach(function (mesh) {
@@ -752,10 +1107,10 @@ var BaseTextured = function (_Entity) {
     }
   }, {
     key: "blending",
-    get: function get() {
+    get: function get$$1() {
       return this._meshes && this._meshes.length > 0 && this._meshes[0] && this._meshes[0].material.blending;
     },
-    set: function set(v) {
+    set: function set$$1(v) {
       this._meshes.forEach(function (mesh) {
         return mesh.material.blending = v;
       });
@@ -766,45 +1121,119 @@ var BaseTextured = function (_Entity) {
 
 var COUNTER = 0;
 
-var Image = function (_BaseTextured) {
-  inherits(Image, _BaseTextured);
+// Videos don't auto-play on mobile devices, so let's make them all play whenever we tap the screen.
+var processedVideos = [];
+function findAndFixVideo(evt) {
+  var vids = document.querySelectorAll("video");
+  for (var i = 0; i < vids.length; ++i) {
+    fixVideo(vids[i]);
+  }
+  window.removeEventListener("touchend", findAndFixVideo);
+  window.removeEventListener("mouseup", findAndFixVideo);
+  window.removeEventListener("keyup", findAndFixVideo);
+}
 
-  function Image(images, options) {
-    classCallCheck(this, Image);
+function fixVideo(vid) {
+  if (isiOS && processedVideos.indexOf(vid) === -1) {
+    processedVideos.push(vid);
+    enableInlineVideo(vid, false);
+  }
+}
+
+window.addEventListener("touchend", findAndFixVideo, false);
+window.addEventListener("mouseup", findAndFixVideo, false);
+window.addEventListener("keyup", findAndFixVideo, false);
+
+var Video = function (_BaseTextured) {
+  inherits(Video, _BaseTextured);
+
+  function Video(videos, options) {
+    classCallCheck(this, Video);
 
     ////////////////////////////////////////////////////////////////////////
     // normalize input parameters
     ////////////////////////////////////////////////////////////////////////
-    if (!(images instanceof Array)) {
-      images = [images];
+    if (!(videos instanceof Array)) {
+      videos = [videos];
     }
 
     options = Object.assign({}, {
-      id: "Primrose.Controls.Image[" + COUNTER++ + "]"
+      id: "Primrose.Controls.Video[" + COUNTER++ + "]"
     }, options);
 
-    return possibleConstructorReturn(this, (Image.__proto__ || Object.getPrototypeOf(Image)).call(this, images, options));
+    return possibleConstructorReturn(this, (Video.__proto__ || Object.getPrototypeOf(Video)).call(this, videos, options));
   }
 
-  createClass(Image, [{
+  createClass(Video, [{
     key: "_loadFiles",
-    value: function _loadFiles(images, progress) {
+    value: function _loadFiles(videos, progress) {
       var _this2 = this;
 
-      return Promise.all(Array.prototype.map.call(images, function (src, i) {
-        var loadOptions = Object.assign({}, _this2.options, {
-          progress: progress
+      this._elements = Array.prototype.map.call(videos, function (spec, i) {
+        var video = null;
+        if (typeof spec === "string") {
+          video = document.querySelector("video[src='" + spec + "']");
+          if (!video) {
+            video = document.createElement("video");
+            video.src = spec;
+          }
+        } else if (spec instanceof HTMLVideoElement) {
+          video = spec;
+        } else if (spec.toString() === "[object MediaStream]" || spec.toString() === "[object LocalMediaStream]") {
+          video = document.createElement("video");
+          video.srcObject = spec;
+        }
+        video.onprogress = progress;
+        video.onloadedmetadata = progress;
+        video.muted = true;
+        video.loop = true;
+        video.setAttribute("playsinline", "");
+        video.setAttribute("webkit-playsinline", "");
+        if (!isiOS) {
+          video.preload = "auto";
+        }
+
+        var loadOptions = Object.assign({}, _this2.options);
+        _this2._meshes[i] = textured(_this2._geometry, video, loadOptions);
+
+        if (!video.parentElement) {
+          document.body.insertBefore(video, document.body.children[0]);
+          fixVideo(video);
+        }
+
+        loadOptions.promise.then(function (txt) {
+          _this2._textures[i] = txt;
+          console.log(txt);
+          txt.minFilter = LinearFilter;
         });
 
-        _this2._meshes[i] = _this2._geometry.textured(src, loadOptions).named(_this2.name + "-mesh-" + i);
-
-        return loadOptions.promise.then(function (txt) {
-          return _this2._textures[i] = txt;
-        });
-      }));
+        return video;
+      });
+      return Promise.resolve();
+    }
+  }, {
+    key: "play",
+    value: function play() {
+      if (this._elements.length > 0) {
+        this._elements[0].play();
+      }
+    }
+  }, {
+    key: "update",
+    value: function update() {
+      get(Video.prototype.__proto__ || Object.getPrototypeOf(Video.prototype), "update", this).call(this);
+      for (var i = 0; i < this._textures.length; ++i) {
+        if (this._textures[i]) {
+          var elem = this._elements[i];
+          if (elem.currentTime !== this._lastTime) {
+            this._textures[i].needsUpdate = true;
+            this._lastTime = elem.currentTime;
+          }
+        }
+      }
     }
   }]);
-  return Image;
+  return Video;
 }(BaseTextured);
 
 function camera(index, options) {
@@ -815,8 +1244,7 @@ function camera(index, options) {
     transparent: true,
     opacity: 0.5
   }, options);
-  var cam = hub();
-  cam.ready = navigator.mediaDevices.enumerateDevices().catch(console.error.bind(console, "ERR [enumerating devices]:>")).then(function (devices) {
+  return navigator.mediaDevices.enumerateDevices().catch(console.error.bind(console, "ERR [enumerating devices]:>")).then(function (devices) {
     return devices.filter(function (d) {
       return d.kind === "videoinput";
     })[index];
@@ -829,15 +1257,8 @@ function camera(index, options) {
       }
     });
   }).catch(console.error.bind(console, "ERR [getting media access]:>")).then(function (stream) {
-    return new Image(stream, options).ready;
-  }).catch(console.error.bind(console, "ERR [creating image]:>")).then(function (image) {
-    image._meshes.forEach(function (mesh) {
-      return cam.add(mesh);
-    });
-    cam.image = image;
-    return cam;
-  });
-  return cam;
+    return new Video(stream, options).ready;
+  }).catch(console.error.bind(console, "ERR [creating image]:>"));
 }
 
 function circle(r, sections, start, end) {
@@ -952,7 +1373,7 @@ function v4(x, y, z, w) {
 
 var index$2 = {
   axis: axis,
-  box: box$1,
+  box: box,
   brick: brick,
   camera: camera,
   circle: circle,
@@ -977,7 +1398,7 @@ var index$2 = {
 
 var liveAPI = Object.freeze({
 	axis: axis,
-	box: box$1,
+	box: box,
 	brick: brick,
 	camera: camera,
 	circle: circle,
@@ -1145,12 +1566,12 @@ var AsyncLockRequest = function () {
     }
   }, {
     key: "element",
-    get: function get() {
+    get: function get$$1() {
       return document[this._elementName];
     }
   }, {
     key: "isActive",
-    get: function get() {
+    get: function get$$1() {
       return !!this.element;
     }
   }]);
@@ -1179,7 +1600,7 @@ var FullScreenLockRequest = function (_AsyncLockRequest) {
 
   createClass(FullScreenLockRequest, [{
     key: "available",
-    get: function get() {
+    get: function get$$1() {
       return !!(this._fullScreenEnabledProperty && document[this._fullScreenEnabledProperty]);
     }
   }]);
@@ -1230,10 +1651,10 @@ function mutable(value, type) {
     return {
       enumerable: true,
       configurable: true,
-      get: function get() {
+      get: function get$$1() {
         return value;
       },
-      set: function set(v) {
+      set: function set$$1(v) {
         value = v;
       }
     };
@@ -1241,10 +1662,10 @@ function mutable(value, type) {
     return {
       enumerable: true,
       configurable: true,
-      get: function get() {
+      get: function get$$1() {
         return value;
       },
-      set: function set(v) {
+      set: function set$$1(v) {
         if (v instanceof type) {
           throw new Error("Value must be a " + type + ": " + v);
         }
@@ -1255,10 +1676,10 @@ function mutable(value, type) {
     return {
       enumerable: true,
       configurable: true,
-      get: function get() {
+      get: function get$$1() {
         return value;
       },
-      set: function set(v) {
+      set: function set$$1(v) {
         var t = typeof v === "undefined" ? "undefined" : _typeof(v);
         if (t !== type) {
           throw new Error("Value must be a " + type + ". An " + t + " was provided instead: " + v);
@@ -1453,7 +1874,7 @@ var Workerize = function (_EventDispatcher) {
   return Workerize;
 }(EventDispatcher);
 
-var index$3 = {
+var index$4 = {
   AsyncLockRequest: AsyncLockRequest,
   cache: cache,
   deleteSetting: deleteSetting,
@@ -1493,7 +1914,7 @@ var util = Object.freeze({
 	standardLockBehavior: standardLockBehavior,
 	standardUnlockBehavior: standardUnlockBehavior,
 	Workerize: Workerize,
-	default: index$3
+	default: index$4
 });
 
 BufferGeometry.prototype.center = Geometry.prototype.center = function () {
@@ -2215,11 +2636,11 @@ Object3D.prototype.appendChild = function (child) {
 
 Object.defineProperty(Object3D.prototype, "pickable", {
   get: function get() {
-    return this._listeners && (this._listeners.enter && this._listeners.enter.length > 0 || this._listeners.exit && this._listeners.exit.length > 0 || this._listeners.select && this._listeners.select.length > 0 || this._listeners.pointerstart && this._listeners.pointerstart.length > 0 || this._listeners.pointerend && this._listeners.pointerend.length > 0 || this._listeners.pointermove && this._listeners.pointermove.length > 0 || this._listeners.gazestart && this._listeners.gazestart.length > 0 || this._listeners.gazecancel && this._listeners.gazecancel.length > 0 || this._listeners.gazemove && this._listeners.gazemove.length > 0 || this._listeners.gazecomplete && this._listeners.gazecomplete.length > 0);
+    return this._listeners && (this._listeners.enter && this._listeners.enter.length > 0 || this._listeners.exit && this._listeners.exit.length > 0 || this._listeners.select && this._listeners.select.length > 0 || this._listeners.useraction && this._listeners.useraction.length > 0 || this._listeners.pointerstart && this._listeners.pointerstart.length > 0 || this._listeners.pointerend && this._listeners.pointerend.length > 0 || this._listeners.pointermove && this._listeners.pointermove.length > 0 || this._listeners.gazestart && this._listeners.gazestart.length > 0 || this._listeners.gazecancel && this._listeners.gazecancel.length > 0 || this._listeners.gazemove && this._listeners.gazemove.length > 0 || this._listeners.gazecomplete && this._listeners.gazecomplete.length > 0);
   }
 });
 
-Object3D.prototype.latLon = function (lat, lon, r) {
+Object3D.prototype.latLng = function (lat, lon, r) {
   lat = -Math.PI * (lat || 0) / 180;
   lon = Math.PI * (lon || 0) / 180;
   r = r || 1.5;
@@ -2973,12 +3394,12 @@ Euler.prototype.toString = Quaternion.prototype.toString = Vector2.prototype.toS
   return "<" + parts.join(", ") + ">";
 };
 
-var cache$1 = {};
+var debugOutputCache = {};
 Euler.prototype.debug = Quaternion.prototype.debug = Vector2.prototype.debug = Vector3.prototype.debug = Vector4.prototype.debug = Matrix3.prototype.debug = Matrix4.prototype.debug = function (label, digits) {
   var val = this.toString(digits);
-  if (val !== cache$1[label]) {
-    cache$1[label] = val;
-    console.log(label + "\n" + val);
+  if (val !== debugOutputCache[label]) {
+    debugOutputCache[label] = val;
+    console.trace(label + "\n" + val);
   }
   return this;
 };
@@ -3216,7 +3637,7 @@ var promise = createCommonjsModule(function (module) {
     onUnhandledRejection = fn;
   };
 
-  if (typeof module !== 'undefined' && module.exports) {
+  if ('object' !== 'undefined' && module.exports) {
     module.exports = Promise;
   } else if (!root.Promise) {
     root.Promise = Promise;
@@ -3225,8 +3646,8 @@ var promise = createCommonjsModule(function (module) {
 })(commonjsGlobal);
 });
 
-var DEG2RAD = Math.PI / 180;
-var RAD2DEG = 180 / Math.PI;
+var DEG2RAD = Math$1.DEG2RAD;
+var RAD2DEG = Math$1.RAD2DEG;
 
 var Angle = function () {
   function Angle(v) {
@@ -3245,10 +3666,10 @@ var Angle = function () {
 
   createClass(Angle, [{
     key: "degrees",
-    get: function get() {
+    get: function get$$1() {
       return this._value;
     },
-    set: function set(newValue) {
+    set: function set$$1(newValue) {
 
       do {
         // figure out if it is adding the raw value, or whole
@@ -3268,10 +3689,10 @@ var Angle = function () {
     }
   }, {
     key: "radians",
-    get: function get() {
+    get: function get$$1() {
       return this.degrees * DEG2RAD;
     },
-    set: function set(val) {
+    set: function set$$1(val) {
 
       this.degrees = val * RAD2DEG;
     }
@@ -3331,12 +3752,12 @@ function XHR(method, type, url, options) {
   });
 }
 
-function get$2(type, url, options) {
+function get$1(type, url, options) {
   return XHR("GET", type || "text", url, options);
 }
 
 function getBuffer(url, options) {
-  return get$2("arraybuffer", url, options);
+  return get$1("arraybuffer", url, options);
 }
 
 function cascadeElement(id, tag, DOMClass, add) {
@@ -3401,51 +3822,45 @@ var Audio3D = function () {
     this.ready = new Promise(function (resolve, reject) {
       try {
         if (Audio3D.isAvailable) {
-          (function () {
-            var finishSetup = function finishSetup() {
+          var finishSetup = function finishSetup() {
+            try {
+              _this.sampleRate = _this.context.sampleRate;
+              _this.mainVolume = _this.context.createGain();
+              _this.start();
+              resolve();
+            } catch (exp) {
+              reject(exp);
+            }
+          };
+
+          if (!isiOS) {
+            _this.context = new AudioContext();
+            finishSetup();
+          } else {
+            var unlock = function unlock() {
               try {
-                _this.sampleRate = _this.context.sampleRate;
-                _this.mainVolume = _this.context.createGain();
-                _this.start();
-                resolve();
+                _this.context = _this.context || new AudioContext();
+                var source = _this.context.createBufferSource();
+                source.buffer = _this.createRawSound([[0]]);
+                source.connect(_this.context.destination);
+                source.start();
+                setTimeout(function () {
+                  if (source.playbackState === source.PLAYING_STATE || source.playbackState === source.FINISHED_STATE) {
+                    window.removeEventListener("mouseup", unlock);
+                    window.removeEventListener("touchend", unlock);
+                    window.removeEventListener("keyup", unlock);
+                    finishSetup();
+                  }
+                }, 0);
               } catch (exp) {
                 reject(exp);
               }
             };
 
-            if (!isiOS) {
-              _this.context = new AudioContext();
-              finishSetup();
-            } else {
-              (function () {
-                var unlock = function unlock() {
-                  try {
-                    (function () {
-                      _this.context = _this.context || new AudioContext();
-                      var source = _this.context.createBufferSource();
-                      source.buffer = _this.createRawSound([[0]]);
-                      source.connect(_this.context.destination);
-                      source.start();
-                      setTimeout(function () {
-                        if (source.playbackState === source.PLAYING_STATE || source.playbackState === source.FINISHED_STATE) {
-                          window.removeEventListener("mouseup", unlock);
-                          window.removeEventListener("touchend", unlock);
-                          window.removeEventListener("keyup", unlock);
-                          finishSetup();
-                        }
-                      }, 0);
-                    })();
-                  } catch (exp) {
-                    reject(exp);
-                  }
-                };
-
-                window.addEventListener("mouseup", unlock, false);
-                window.addEventListener("touchend", unlock, false);
-                window.addEventListener("keyup", unlock, false);
-              })();
-            }
-          })();
+            window.addEventListener("mouseup", unlock, false);
+            window.addEventListener("touchend", unlock, false);
+            window.addEventListener("keyup", unlock, false);
+          }
         }
       } catch (exp) {
         reject(exp);
@@ -3484,10 +3899,16 @@ var Audio3D = function () {
       if (this.mainVolume) {
         this.mainVolume.connect(this.context.destination);
       }
+      if (this.context.resume) {
+        this.context.resume();
+      }
     }
   }, {
     key: "stop",
     value: function stop() {
+      if (this.context.suspend) {
+        this.context.suspend();
+      }
       if (this.mainVolume) {
         this.mainVolume.disconnect();
       }
@@ -3689,7 +4110,7 @@ var Note = function (_PositionalSound) {
     }
   }, {
     key: "ready",
-    get: function get() {
+    get: function get$$1() {
       return this.gn.gain.value === 0;
     }
   }]);
@@ -3756,10 +4177,10 @@ var Music = function () {
     }
   }, {
     key: "type",
-    get: function get() {
+    get: function get$$1() {
       return this._type;
     },
-    set: function set(v) {
+    set: function set$$1(v) {
       var _this2 = this;
 
       if (this.isAvailable) {
@@ -3879,12 +4300,12 @@ var Speech = function () {
     }
   }, {
     key: "speaking",
-    get: function get() {
+    get: function get$$1() {
       return Speech.isAvailable && speechSynthesis.speaking;
     }
   }], [{
     key: "isAvailable",
-    get: function get() {
+    get: function get$$1() {
       return !!window.speechSynthesis;
     }
   }]);
@@ -3902,7 +4323,7 @@ var Audio$1 = {
 
 var packageName = "PrimroseVR";
 
-var version = "0.31.3";
+var version = "0.31.4";
 
 
 
@@ -3915,8 +4336,8 @@ var GAZE_RING_DISTANCE = -1.25;
 var GAZE_RING_INNER = 0.015;
 var GAZE_RING_OUTER = 0.03;
 var VECTOR_TEMP = new Vector3();
-var EULER_TEMP = new Euler();
-var QUAT_TEMP = new Quaternion();
+var EULER_TEMP$1 = new Euler();
+var QUAT_TEMP$1 = new Quaternion();
 
 function hasGazeEvent(obj) {
   return obj && obj._listeners && (obj._listeners.gazecomplete && obj._listeners.gazecomplete.length > 0 || obj._listeners.select && obj._listeners.select.length > 0 || obj._listeners.click && obj._listeners.click.length > 0);
@@ -3930,6 +4351,7 @@ var Pointer = function (_Entity) {
 
     var _this = possibleConstructorReturn(this, (Pointer.__proto__ || Object.getPrototypeOf(Pointer)).call(this, pointerName, options));
 
+    _this.isPointer = true;
     _this.devices = devices.filter(identity);
     _this.triggerDevices = triggerDevices && triggerDevices.filter(identity) || _this.devices.slice();
     _this.gazeTimeout = (_this.options.gazeLength || 1.5) * 1000;
@@ -3942,7 +4364,7 @@ var Pointer = function (_Entity) {
     _this.highlight = highlight;
     _this.velocity = new Vector3();
 
-    _this.mesh = box$1(LASER_WIDTH / s, LASER_WIDTH / s, LASER_LENGTH * s).colored(_this.color, {
+    _this.mesh = box(LASER_WIDTH / s, LASER_WIDTH / s, LASER_LENGTH * s).colored(_this.color, {
       unshaded: true
     }).named(pointerName + "-pointer").addTo(_this).at(0, 0, -1.5);
 
@@ -3977,25 +4399,36 @@ var Pointer = function (_Entity) {
       }
     }
   }, {
+    key: "setSize",
+    value: function setSize(width, height) {
+      var w = devicePixelRatio * 2 / width,
+          h = devicePixelRatio * 2 / height;
+      for (var i = 0; i < this.devices.length; ++i) {
+        var device = this.devices[i];
+        device.commands.U.scale = w;
+        device.commands.V.scale = h;
+      }
+    }
+  }, {
     key: "update",
     value: function update() {
       this.position.set(0, 0, 0);
 
       if (this.unproject) {
-        QUAT_TEMP.set(0, 1, 0, 0);
+        QUAT_TEMP$1.set(0, 1, 0, 0);
         VECTOR_TEMP.set(0, 0, 0);
         for (var i = 0; i < this.devices.length; ++i) {
           var obj = this.devices[i];
-          if (obj.enabled && !obj.commands.U.disabled && !obj.commands.V.disabled) {
+          if (obj.enabled && obj.inPhysicalUse && !obj.commands.U.disabled && !obj.commands.V.disabled) {
             VECTOR_TEMP.x += obj.getValue("U") - 1;
             VECTOR_TEMP.y += obj.getValue("V") - 1;
           }
         }
-        VECTOR_TEMP.applyMatrix4(this.unproject).applyQuaternion(QUAT_TEMP);
+        VECTOR_TEMP.applyMatrix4(this.unproject).applyQuaternion(QUAT_TEMP$1);
         this.lookAt(VECTOR_TEMP);
       } else {
         this.quaternion.set(0, 0, 0, 1);
-        EULER_TEMP.set(0, 0, 0, "YXZ");
+        EULER_TEMP$1.set(0, 0, 0, "YXZ");
         for (var _i = 0; _i < this.devices.length; ++_i) {
           var _obj = this.devices[_i];
           if (_obj.enabled) {
@@ -4008,8 +4441,8 @@ var Pointer = function (_Entity) {
           }
         }
 
-        QUAT_TEMP.setFromEuler(EULER_TEMP);
-        this.quaternion.multiply(QUAT_TEMP);
+        QUAT_TEMP$1.setFromEuler(EULER_TEMP$1);
+        this.quaternion.multiply(QUAT_TEMP$1);
       }
       this.updateMatrixWorld();
     }
@@ -4162,11 +4595,10 @@ var Pointer = function (_Entity) {
 
           var hit = hits[i],
               origObj = hit.object;
-
           var obj = origObj;
 
           // Try to find a Primrose Entity
-          while (obj && !obj.isEntity) {
+          while (obj && (!obj.isEntity || obj.isPointer)) {
             obj = obj.parent;
           }
 
@@ -4185,7 +4617,7 @@ var Pointer = function (_Entity) {
 
           if (obj && this._check(hit)) {
             this.lastHit = hit;
-            return;
+            return hit.object._listeners.useraction;
           }
         }
 
@@ -4195,21 +4627,16 @@ var Pointer = function (_Entity) {
       }
     }
   }, {
-    key: "forward",
-    value: function forward(child) {
-      child.watch(this, Pointer.EVENTS);
-    }
-  }, {
     key: "pickable",
-    get: function get() {
+    get: function get$$1() {
       return false;
     }
   }, {
     key: "material",
-    get: function get() {
+    get: function get$$1() {
       return this.mesh.material;
     },
-    set: function set(v) {
+    set: function set$$1(v) {
       this.mesh.material = v;
       this.gazeInner.material = v;
       this.gazeOuter.material = v;
@@ -4218,7 +4645,7 @@ var Pointer = function (_Entity) {
   return Pointer;
 }(Entity);
 
-Pointer.EVENTS = ["pointerstart", "pointerend", "pointermove", "gazestart", "gazemove", "gazecomplete", "gazecancel", "exit", "enter", "select"];
+Pointer.EVENTS = ["pointerstart", "pointerend", "pointermove", "gazestart", "gazemove", "gazecomplete", "gazecancel", "exit", "enter", "select", "useraction"];
 
 var Keys = {
   ANY: Number.MAX_VALUE,
@@ -4362,7 +4789,7 @@ var Point = function () {
 
   createClass(Point, [{
     key: "set",
-    value: function set(x, y) {
+    value: function set$$1(x, y) {
       this.x = x;
       this.y = y;
     }
@@ -4397,7 +4824,7 @@ var Size = function () {
 
   createClass(Size, [{
     key: "set",
-    value: function set(width, height) {
+    value: function set$$1(width, height) {
       this.width = width;
       this.height = height;
     }
@@ -4434,7 +4861,7 @@ var Rectangle = function () {
 
   createClass(Rectangle, [{
     key: "set",
-    value: function set(x, y, width, height) {
+    value: function set$$1(x, y, width, height) {
       this.point.set(x, y);
       this.size.set(width, height);
     }
@@ -4469,71 +4896,71 @@ var Rectangle = function () {
     }
   }, {
     key: "x",
-    get: function get() {
+    get: function get$$1() {
       return this.point.x;
     },
-    set: function set(x) {
+    set: function set$$1(x) {
       this.point.x = x;
     }
   }, {
     key: "left",
-    get: function get() {
+    get: function get$$1() {
       return this.point.x;
     },
-    set: function set(x) {
+    set: function set$$1(x) {
       this.point.x = x;
     }
   }, {
     key: "width",
-    get: function get() {
+    get: function get$$1() {
       return this.size.width;
     },
-    set: function set(width) {
+    set: function set$$1(width) {
       this.size.width = width;
     }
   }, {
     key: "right",
-    get: function get() {
+    get: function get$$1() {
       return this.point.x + this.size.width;
     },
-    set: function set(right) {
+    set: function set$$1(right) {
       this.point.x = right - this.size.width;
     }
   }, {
     key: "y",
-    get: function get() {
+    get: function get$$1() {
       return this.point.y;
     },
-    set: function set(y) {
+    set: function set$$1(y) {
       this.point.y = y;
     }
   }, {
     key: "top",
-    get: function get() {
+    get: function get$$1() {
       return this.point.y;
     },
-    set: function set(y) {
+    set: function set$$1(y) {
       this.point.y = y;
     }
   }, {
     key: "height",
-    get: function get() {
+    get: function get$$1() {
       return this.size.height;
     },
-    set: function set(height) {
+    set: function set$$1(height) {
       this.size.height = height;
     }
   }, {
     key: "bottom",
-    get: function get() {
+    get: function get$$1() {
       return this.point.y + this.size.height;
     },
-    set: function set(bottom) {
+    set: function set$$1(bottom) {
       this.point.y = bottom - this.size.height;
     }
   }, {
     key: "area",
-    get: function get() {
+    get: function get$$1() {
       return this.width * this.height;
     }
   }]);
@@ -4603,68 +5030,68 @@ var Surface = function (_BaseTextured) {
 
     Object.defineProperties(_this.style, {
       width: {
-        get: function get() {
+        get: function get$$1() {
           return _this.bounds.width;
         },
-        set: function set(v) {
+        set: function set$$1(v) {
           _this.bounds.width = v;
           _this.resize();
         }
       },
       height: {
-        get: function get() {
+        get: function get$$1() {
           return _this.bounds.height;
         },
-        set: function set(v) {
+        set: function set$$1(v) {
           _this.bounds.height = v;
           _this.resize();
         }
       },
       left: {
-        get: function get() {
+        get: function get$$1() {
           return _this.bounds.left;
         },
-        set: function set(v) {
+        set: function set$$1(v) {
           _this.bounds.left = v;
         }
       },
       top: {
-        get: function get() {
+        get: function get$$1() {
           return _this.bounds.top;
         },
-        set: function set(v) {
+        set: function set$$1(v) {
           _this.bounds.top = v;
         }
       },
       opacity: {
-        get: function get() {
+        get: function get$$1() {
           return _this._opacity;
         },
-        set: function set(v) {
+        set: function set$$1(v) {
           _this._opacity = v;
         }
       },
       fontSize: {
-        get: function get() {
+        get: function get$$1() {
           return _this.fontSize;
         },
-        set: function set(v) {
+        set: function set$$1(v) {
           _this.fontSize = v;
         }
       },
       backgroundColor: {
-        get: function get() {
+        get: function get$$1() {
           return _this.backgroundColor;
         },
-        set: function set(v) {
+        set: function set$$1(v) {
           _this.backgroundColor = v;
         }
       },
       color: {
-        get: function get() {
+        get: function get$$1() {
           return _this.color;
         },
-        set: function set(v) {
+        set: function set$$1(v) {
           _this.color = v;
         }
       }
@@ -4770,7 +5197,7 @@ var Surface = function (_BaseTextured) {
         this.subSurfaces.push(child);
         this.invalidate();
       } else if (child.isObject3D) {
-        get$1(Surface.prototype.__proto__ || Object.getPrototypeOf(Surface.prototype), "add", this).call(this, child);
+        get(Surface.prototype.__proto__ || Object.getPrototypeOf(Surface.prototype), "add", this).call(this, child);
       } else {
         throw new Error("Can only append other Surfaces to a Surface. You gave: " + child);
       }
@@ -4940,61 +5367,61 @@ var Surface = function (_BaseTextured) {
     }
   }, {
     key: "pickable",
-    get: function get() {
+    get: function get$$1() {
       return true;
     }
   }, {
     key: "imageWidth",
-    get: function get() {
+    get: function get$$1() {
       return this.canvas.width;
     },
-    set: function set(v) {
+    set: function set$$1(v) {
       this.canvas.width = v;
       this.bounds.width = v;
     }
   }, {
     key: "imageHeight",
-    get: function get() {
+    get: function get$$1() {
       return this.canvas.height;
     },
-    set: function set(v) {
+    set: function set$$1(v) {
       this.canvas.height = v;
       this.bounds.height = v;
     }
   }, {
     key: "elementWidth",
-    get: function get() {
+    get: function get$$1() {
       return this.canvas.clientWidth * devicePixelRatio;
     },
-    set: function set(v) {
+    set: function set$$1(v) {
       this.canvas.style.width = v / devicePixelRatio + "px";
     }
   }, {
     key: "elementHeight",
-    get: function get() {
+    get: function get$$1() {
       return this.canvas.clientHeight * devicePixelRatio;
     },
-    set: function set(v) {
+    set: function set$$1(v) {
       this.canvas.style.height = v / devicePixelRatio + "px";
     }
   }, {
     key: "surfaceWidth",
-    get: function get() {
+    get: function get$$1() {
       return this.canvas.parentElement ? this.elementWidth : this.bounds.width;
     }
   }, {
     key: "surfaceHeight",
-    get: function get() {
+    get: function get$$1() {
       return this.canvas.parentElement ? this.elementHeight : this.bounds.height;
     }
   }, {
     key: "resized",
-    get: function get() {
+    get: function get$$1() {
       return this.imageWidth !== this.surfaceWidth || this.imageHeight !== this.surfaceHeight;
     }
   }, {
     key: "environment",
-    get: function get() {
+    get: function get$$1() {
       var head = this;
       while (head) {
         if (head._environment) {
@@ -5008,17 +5435,17 @@ var Surface = function (_BaseTextured) {
     }
   }, {
     key: "theme",
-    get: function get() {
+    get: function get$$1() {
       return null;
     },
-    set: function set(v) {
+    set: function set$$1(v) {
       for (var i = 0; i < this.subSurfaces.length; ++i) {
         this.subSurfaces[i].theme = v;
       }
     }
   }, {
     key: "lockMovement",
-    get: function get() {
+    get: function get$$1() {
       var lock = false;
       for (var i = 0; i < this.subSurfaces.length && !lock; ++i) {
         lock = lock || this.subSurfaces[i].lockMovement;
@@ -5027,7 +5454,7 @@ var Surface = function (_BaseTextured) {
     }
   }, {
     key: "focusedElement",
-    get: function get() {
+    get: function get$$1() {
       var result = null,
           head = this;
       while (head && head.focused) {
@@ -5214,29 +5641,29 @@ var Label = function (_Surface) {
     value: function renderCanvasTrim() {}
   }, {
     key: "textAlign",
-    get: function get() {
+    get: function get$$1() {
       return this.context.textAlign;
     },
-    set: function set(v) {
+    set: function set$$1(v) {
       this.context.textAlign = v;
       this.render();
     }
   }, {
     key: "value",
-    get: function get() {
+    get: function get$$1() {
       return this._value;
     },
-    set: function set(txt) {
+    set: function set$$1(txt) {
       txt = txt || "";
       this._value = txt.replace(/\r\n/g, "\n");
       this.render();
     }
   }, {
     key: "theme",
-    get: function get() {
+    get: function get$$1() {
       return this._theme;
     },
-    set: function set(t) {
+    set: function set$$1(t) {
       this._theme = Object.assign({}, Default, t);
       this._theme.fontSize = this.fontSize;
       this.refreshCharacter();
@@ -5285,7 +5712,7 @@ var Button2D = function (_Label) {
     key: "_isChanged",
     value: function _isChanged() {
       var activatedChanged = this._activated !== this._lastActivated,
-          changed = get$1(Button2D.prototype.__proto__ || Object.getPrototypeOf(Button2D.prototype), "_isChanged", this) || activatedChanged;
+          changed = get(Button2D.prototype.__proto__ || Object.getPrototypeOf(Button2D.prototype), "_isChanged", this) || activatedChanged;
       return changed;
     }
   }, {
@@ -5403,13 +5830,56 @@ var ButtonFactory = function () {
   return ButtonFactory;
 }();
 
-ButtonFactory.DEFAULT = new ButtonFactory(colored(box$1(1, 1, 1), 0xff0000), {
+ButtonFactory.DEFAULT = new ButtonFactory(colored(box(1, 1, 1), 0xff0000), {
   maxThrow: 0.1,
   minDeflection: 10,
   colorUnpressed: 0x7f0000,
   colorPressed: 0x007f00,
   toggle: true
 });
+
+var COUNTER$5 = 0;
+
+var Image = function (_BaseTextured) {
+  inherits(Image, _BaseTextured);
+
+  function Image(images, options) {
+    classCallCheck(this, Image);
+
+    ////////////////////////////////////////////////////////////////////////
+    // normalize input parameters
+    ////////////////////////////////////////////////////////////////////////
+    if (!(images instanceof Array)) {
+      images = [images];
+    }
+
+    options = Object.assign({}, {
+      id: "Primrose.Controls.Image[" + COUNTER$5++ + "]"
+    }, options);
+
+    return possibleConstructorReturn(this, (Image.__proto__ || Object.getPrototypeOf(Image)).call(this, images, options));
+  }
+
+  createClass(Image, [{
+    key: "_loadFiles",
+    value: function _loadFiles(images, progress) {
+      var _this2 = this;
+
+      return Promise.all(Array.prototype.map.call(images, function (src, i) {
+        var loadOptions = Object.assign({}, _this2.options, {
+          progress: progress
+        });
+
+        _this2._meshes[i] = _this2._geometry.textured(src, loadOptions).named(_this2.name + "-mesh-" + i);
+
+        return loadOptions.promise.then(function (txt) {
+          return _this2._textures[i] = txt;
+        });
+      }));
+    }
+  }]);
+  return Image;
+}(BaseTextured);
 
 // The JSON format object loader is not always included in the Three.js distribution,
 // so we have to first check for it.
@@ -5646,7 +6116,7 @@ var Ground = function (_Entity) {
     }
   }, {
     key: "_ready",
-    get: function get() {
+    get: function get$$1() {
       var _this2 = this;
 
       var dim = this.options.dim,
@@ -5674,7 +6144,6 @@ var Ground = function (_Entity) {
             txtRepeatY: dim,
             anisotropy: 8
           })).rot(-Math.PI / 2, 0, 0);
-          console.log("A", !!this.model);
 
           promise = this.model.ready;
         }
@@ -5734,7 +6203,6 @@ var Sky = function (_Entity) {
       if (_this.options.enableShadows) {
         _this.sun.castShadow = true;
         _this.sun.shadow.mapSize.width = _this.sun.shadow.mapSize.height = _this.options.shadowMapSize;
-        _this.sun.shadow.bias = 0.01;
         _this.sun.shadow.radius = _this.options.shadowRadius;
         _this.sun.shadow.camera.top = _this.sun.shadow.camera.right = _this.options.shadowCameraSize;
         _this.sun.shadow.camera.bottom = _this.sun.shadow.camera.left = -_this.options.shadowCameraSize;
@@ -5753,7 +6221,7 @@ var Sky = function (_Entity) {
     }
   }, {
     key: "_ready",
-    get: function get() {
+    get: function get$$1() {
       var type = _typeof(this.options.texture);
       if (type === "number") {
         var skyDim = this.options.skyRadius / Math.sqrt(2);
@@ -5764,14 +6232,14 @@ var Sky = function (_Entity) {
         this.add(this._image);
       }
 
-      return this._image && this._image.ready || get$1(Sky.prototype.__proto__ || Object.getPrototypeOf(Sky.prototype), "_ready", this);
+      return this._image && this._image.ready || get(Sky.prototype.__proto__ || Object.getPrototypeOf(Sky.prototype), "_ready", this);
     }
   }]);
   return Sky;
 }(Entity);
 
 // unicode-aware string reverse
-var reverse$1 = function () {
+var reverse = function () {
   var combiningMarks = /(<%= allExceptCombiningMarks %>)(<%= combiningMarks %>+)/g,
       surrogatePair = /(<%= highSurrogates %>)(<%= lowSurrogates %>)/g;
 
@@ -5864,7 +6332,7 @@ var Cursor = function () {
       } else {
         var x = this.x - 1;
         var line = lines[this.y];
-        var word = reverse$1(line.substring(0, x));
+        var word = reverse(line.substring(0, x));
         var m = word.match(/(\s|\W)+/);
         var dx = m ? m.index + m[0].length + 1 : word.length;
         this.i -= dx;
@@ -6394,8 +6862,8 @@ var Grammar = function () {
 
 var JavaScript = new Grammar("JavaScript", [["newlines", /(?:\r\n|\r|\n)/], ["startBlockComments", /\/\*/], ["endBlockComments", /\*\//], ["regexes", /(?:^|,|;|\(|\[|\{)(?:\s*)(\/(?:\\\/|[^\n\/])+\/)/], ["stringDelim", /("|')/], ["startLineComments", /\/\/.*$/m], ["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/], ["keywords", /\b(?:break|case|catch|class|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/], ["functions", /(\w+)(?:\s*\()/], ["members", /(\w+)\./], ["members", /((\w+\.)+)(\w+)/]]);
 
-var SCROLL_SCALE = isFirefox$1 ? 3 : 100;
-var COUNTER$5 = 0;
+var SCROLL_SCALE = isFirefox ? 3 : 100;
+var COUNTER$6 = 0;
 var OFFSET = 0;
 
 var TextBox = function (_Surface) {
@@ -6412,7 +6880,7 @@ var TextBox = function (_Surface) {
     }
 
     var _this = possibleConstructorReturn(this, (TextBox.__proto__ || Object.getPrototypeOf(TextBox)).call(this, Object.assign({}, {
-      id: "Primrose.Controls.TextBox[" + COUNTER$5++ + "]"
+      id: "Primrose.Controls.TextBox[" + COUNTER$6++ + "]"
     }, options)));
 
     _this.isTextBox = true;
@@ -6420,7 +6888,7 @@ var TextBox = function (_Surface) {
     // normalize input parameters
     ////////////////////////////////////////////////////////////////////////
 
-    _this.useCaching = !isFirefox$1 || !isMobile;
+    _this.useCaching = !isFirefox || !isMobile;
 
     var makeCursorCommand = function makeCursorCommand(name) {
       var method = name.toLowerCase();
@@ -6462,7 +6930,7 @@ var TextBox = function (_Surface) {
 
     // different browsers have different sets of keycodes for less-frequently
     // used keys like curly brackets.
-    _this._browser = isChrome ? "CHROMIUM" : isFirefox$1 ? "FIREFOX" : isIE ? "IE" : isOpera ? "OPERA" : isSafari ? "SAFARI" : "UNKNOWN";
+    _this._browser = isChrome ? "CHROMIUM" : isFirefox ? "FIREFOX" : isIE ? "IE" : isOpera ? "OPERA" : isSafari ? "SAFARI" : "UNKNOWN";
     _this._pointer = new Point();
     _this._history = [];
     _this._historyFrame = -1;
@@ -6585,7 +7053,7 @@ var TextBox = function (_Surface) {
   }, {
     key: "startPointer",
     value: function startPointer(x, y) {
-      if (!get$1(TextBox.prototype.__proto__ || Object.getPrototypeOf(TextBox.prototype), "startPointer", this).call(this, x, y)) {
+      if (!get(TextBox.prototype.__proto__ || Object.getPrototypeOf(TextBox.prototype), "startPointer", this).call(this, x, y)) {
         this._dragging = true;
         this.setCursorXY(this.frontCursor, x, y);
       }
@@ -6600,7 +7068,7 @@ var TextBox = function (_Surface) {
   }, {
     key: "endPointer",
     value: function endPointer() {
-      get$1(TextBox.prototype.__proto__ || Object.getPrototypeOf(TextBox.prototype), "endPointer", this).call(this);
+      get(TextBox.prototype.__proto__ || Object.getPrototypeOf(TextBox.prototype), "endPointer", this).call(this);
       this._dragging = false;
       this._scrolling = false;
     }
@@ -6669,7 +7137,7 @@ var TextBox = function (_Surface) {
   }, {
     key: "resize",
     value: function resize() {
-      get$1(TextBox.prototype.__proto__ || Object.getPrototypeOf(TextBox.prototype), "resize", this).call(this);
+      get(TextBox.prototype.__proto__ || Object.getPrototypeOf(TextBox.prototype), "resize", this).call(this);
       this._bg.setSize(this.surfaceWidth, this.surfaceHeight);
       this._fg.setSize(this.surfaceWidth, this.surfaceHeight);
       this._trim.setSize(this.surfaceWidth, this.surfaceHeight);
@@ -7125,10 +7593,10 @@ var TextBox = function (_Surface) {
     }
   }, {
     key: "value",
-    get: function get() {
+    get: function get$$1() {
       return this._history[this._historyFrame].join("\n");
     },
-    set: function set(txt) {
+    set: function set$$1(txt) {
       txt = txt || "";
       txt = txt.replace(/\r\n/g, "\n");
       if (!this.multiline) {
@@ -7143,12 +7611,12 @@ var TextBox = function (_Surface) {
     }
   }, {
     key: "selectedText",
-    get: function get() {
+    get: function get$$1() {
       var minCursor = Cursor.min(this.frontCursor, this.backCursor),
           maxCursor = Cursor.max(this.frontCursor, this.backCursor);
       return this.value.substring(minCursor.i, maxCursor.i);
     },
-    set: function set(str) {
+    set: function set$$1(str) {
       str = str || "";
       str = str.replace(/\r\n/g, "\n");
 
@@ -7174,46 +7642,46 @@ var TextBox = function (_Surface) {
     }
   }, {
     key: "padding",
-    get: function get() {
+    get: function get$$1() {
       return this._padding;
     },
-    set: function set(v) {
+    set: function set$$1(v) {
       this._padding = v;
       this.render();
     }
   }, {
     key: "wordWrap",
-    get: function get() {
+    get: function get$$1() {
       return this._wordWrap;
     },
-    set: function set(v) {
+    set: function set$$1(v) {
       this._wordWrap = v || false;
       this.setGutter();
     }
   }, {
     key: "showLineNumbers",
-    get: function get() {
+    get: function get$$1() {
       return this._showLineNumbers;
     },
-    set: function set(v) {
+    set: function set$$1(v) {
       this._showLineNumbers = v;
       this.setGutter();
     }
   }, {
     key: "showScrollBars",
-    get: function get() {
+    get: function get$$1() {
       return this._showScrollBars;
     },
-    set: function set(v) {
+    set: function set$$1(v) {
       this._showScrollBars = v;
       this.setGutter();
     }
   }, {
     key: "theme",
-    get: function get() {
+    get: function get$$1() {
       return this._theme;
     },
-    set: function set(t) {
+    set: function set$$1(t) {
       this._theme = Object.assign({}, Default, t);
       this._theme.fontSize = this.fontSize;
       this._rowCache = {};
@@ -7221,39 +7689,39 @@ var TextBox = function (_Surface) {
     }
   }, {
     key: "commandPack",
-    get: function get() {
+    get: function get$$1() {
       return this._commandPack;
     },
-    set: function set(v) {
+    set: function set$$1(v) {
       this._commandPack = v;
     }
   }, {
     key: "selectionStart",
-    get: function get() {
+    get: function get$$1() {
       return this.frontCursor.i;
     },
-    set: function set(i) {
+    set: function set$$1(i) {
       this.frontCursor.setI(i, this.lines);
     }
   }, {
     key: "selectionEnd",
-    get: function get() {
+    get: function get$$1() {
       return this.backCursor.i;
     },
-    set: function set(i) {
+    set: function set$$1(i) {
       this.backCursor.setI(i, this.lines);
     }
   }, {
     key: "selectionDirection",
-    get: function get() {
+    get: function get$$1() {
       return this.frontCursor.i <= this.backCursor.i ? "forward" : "backward";
     }
   }, {
     key: "tokenizer",
-    get: function get() {
+    get: function get$$1() {
       return this._tokenizer;
     },
-    set: function set(tk) {
+    set: function set$$1(tk) {
       this._tokenizer = tk || JavaScript;
       if (this._history && this._history.length > 0) {
         this.refreshTokens();
@@ -7262,10 +7730,10 @@ var TextBox = function (_Surface) {
     }
   }, {
     key: "tabWidth",
-    get: function get() {
+    get: function get$$1() {
       return this._tabWidth;
     },
-    set: function set(tw) {
+    set: function set$$1(tw) {
       this._tabWidth = tw || 2;
       this._tabString = "";
       for (var i = 0; i < this._tabWidth; ++i) {
@@ -7274,15 +7742,15 @@ var TextBox = function (_Surface) {
     }
   }, {
     key: "tabString",
-    get: function get() {
+    get: function get$$1() {
       return this._tabString;
     }
   }, {
     key: "fontSize",
-    get: function get() {
+    get: function get$$1() {
       return this._fontSize || 16;
     },
-    set: function set(v) {
+    set: function set$$1(v) {
       v = v || 16;
       this._fontSize = v;
       if (this.theme) {
@@ -7293,7 +7761,7 @@ var TextBox = function (_Surface) {
     }
   }, {
     key: "lockMovement",
-    get: function get() {
+    get: function get$$1() {
       return this.focused && !this.readOnly;
     }
   }]);
@@ -7570,13 +8038,8 @@ var VRDisplay = function () {
   }, {
     key: "getPose",
     value: function getPose() {
-      return this.getImmediatePose();
-    }
-  }, {
-    key: "getImmediatePose",
-    value: function getImmediatePose() {
       if (!this._poseData) {
-        this._poseData = this._getImmediatePose();
+        this._poseData = this._getPose();
       }
       return this._poseData;
     }
@@ -7620,7 +8083,7 @@ var VRDisplay = function () {
   return VRDisplay;
 }();
 
-var defaultFieldOfView = 50;
+var defaultFieldOfView = 100;
 
 function defaultPose() {
   return {
@@ -7637,10 +8100,10 @@ var StandardMonitorVRDisplay = function (_VRDisplay) {
   inherits(StandardMonitorVRDisplay, _VRDisplay);
   createClass(StandardMonitorVRDisplay, null, [{
     key: "DEFAULT_FOV",
-    get: function get() {
+    get: function get$$1() {
       return defaultFieldOfView;
     },
-    set: function set(v) {
+    set: function set$$1(v) {
       defaultFieldOfView = v;
     }
   }]);
@@ -7659,16 +8122,6 @@ var StandardMonitorVRDisplay = function (_VRDisplay) {
     value: function submitFrame(pose) {
       if (this._display && this._display.isPolyfilled) {
         this._display.submitFrame(pose);
-      }
-    }
-  }, {
-    key: "getImmediatePose",
-    value: function getImmediatePose() {
-      var display = isMobile && this._display;
-      if (display) {
-        return display.getImmediatePose();
-      } else {
-        return defaultPose();
       }
     }
   }, {
@@ -7701,9 +8154,9 @@ var StandardMonitorVRDisplay = function (_VRDisplay) {
         var vFOV = void 0,
             hFOV = void 0;
         if (height > width) {
-          vFOV = defaultFieldOfView, hFOV = calcFoV(vFOV, width, height);
+          vFOV = defaultFieldOfView / 2, hFOV = calcFoV(vFOV, width, height);
         } else {
-          hFOV = defaultFieldOfView, vFOV = calcFoV(hFOV, height, width);
+          hFOV = defaultFieldOfView / 2, vFOV = calcFoV(hFOV, height, width);
         }
 
         return {
@@ -7724,7 +8177,7 @@ var StandardMonitorVRDisplay = function (_VRDisplay) {
 }(VRDisplay);
 
 function calcFoV(aFoV, aDim, bDim) {
-  return 360 * Math.atan(Math.tan(aFoV * Math.PI / 360) * aDim / bDim) / Math.PI;
+  return 180 * Math.atan(Math.tan(aFoV * Math.PI / 180) * aDim / bDim) / Math.PI;
 }
 
 function makeHidingContainer(id, obj) {
@@ -7830,7 +8283,7 @@ var CommandState = function CommandState() {
 var InputProcessor = function (_EventDispatcher) {
   inherits(InputProcessor, _EventDispatcher);
 
-  function InputProcessor(name, commands, axisNames) {
+  function InputProcessor(name, commands, axisNames, userActionEvent) {
     classCallCheck(this, InputProcessor);
 
     var _this = possibleConstructorReturn(this, (InputProcessor.__proto__ || Object.getPrototypeOf(InputProcessor)).call(this));
@@ -7867,6 +8320,17 @@ var InputProcessor = function (_EventDispatcher) {
 
     for (var _i3 = 0; _i3 < Keys.MODIFIER_KEYS.length; ++_i3) {
       _this.inputState[Keys.MODIFIER_KEYS[_i3]] = false;
+    }
+
+    _this.userActionHandlers = null;
+    if (userActionEvent) {
+      window.addEventListener(userActionEvent, function (evt) {
+        if (_this.userActionHandlers) {
+          for (var _i4 = 0; _i4 < _this.userActionHandlers.length; ++_i4) {
+            _this.userActionHandlers[_i4](evt);
+          }
+        }
+      });
     }
     return _this;
   }
@@ -8219,7 +8683,6 @@ var InputProcessor = function (_EventDispatcher) {
     value: function setAxis(name, value) {
       var i = this.axisNames.indexOf(name);
       if (i > -1 && (this.inPhysicalUse || value !== 0)) {
-        this.inPhysicalUse = true;
         this.inputState.axes[i] = value;
       }
     }
@@ -8227,7 +8690,6 @@ var InputProcessor = function (_EventDispatcher) {
     key: "setButton",
     value: function setButton(index, pressed) {
       if (this.inPhysicalUse || pressed) {
-        this.inPhysicalUse = true;
         this.inputState.buttons[index] = pressed;
       }
     }
@@ -8254,6 +8716,18 @@ var InputProcessor = function (_EventDispatcher) {
         this.setAxis(name, value);
       } else if (this.commands[name] && !this.commands[name].disabled) {
         this.commands[name].state.value = value;
+      }
+    }
+  }, {
+    key: "inPhysicalUse",
+    get: function get$$1() {
+      return this._inPhysicalUse;
+    },
+    set: function set$$1(v) {
+      var wasInPhysicalUse = this._inPhysicalUse;
+      this._inPhysicalUse = v;
+      if (!wasInPhysicalUse && v) {
+        this.emit("activate");
       }
     }
   }]);
@@ -8831,7 +9305,7 @@ var Keyboard = function (_InputProcessor) {
     var _this = possibleConstructorReturn(this, (Keyboard.__proto__ || Object.getPrototypeOf(Keyboard)).call(this, "Keyboard", commands));
 
     _this._operatingSystem = null;
-    _this.browser = isChrome ? "CHROMIUM" : isFirefox$1 ? "FIREFOX" : isIE ? "IE" : isOpera ? "OPERA" : isSafari ? "SAFARI" : "UNKNOWN";
+    _this.browser = isChrome ? "CHROMIUM" : isFirefox ? "FIREFOX" : isIE ? "IE" : isOpera ? "OPERA" : isSafari ? "SAFARI" : "UNKNOWN";
     _this._codePage = null;
     _this.resetDeadKeyState = function () {
       return _this.codePage.resetDeadKeyState();
@@ -8842,6 +9316,7 @@ var Keyboard = function (_InputProcessor) {
   createClass(Keyboard, [{
     key: "consumeEvent",
     value: function consumeEvent(evt) {
+      this.inPhysicalUse = true;
       var isKeyDown = evt.type === "keydown";
       this.setButton(evt.keyCode, isKeyDown);
       if (isKeyDown) {
@@ -8854,18 +9329,18 @@ var Keyboard = function (_InputProcessor) {
     }
   }, {
     key: "operatingSystem",
-    get: function get() {
+    get: function get$$1() {
       return this._operatingSystem;
     },
-    set: function set(os) {
+    set: function set$$1(os) {
       this._operatingSystem = os || (isMacOS ? macOS : Windows);
     }
   }, {
     key: "codePage",
-    get: function get() {
+    get: function get$$1() {
       return this._codePage;
     },
-    set: function set(cp) {
+    set: function set$$1(cp) {
       var key, code, char, name;
       this._codePage = cp;
       if (!this._codePage) {
@@ -8898,11 +9373,12 @@ var Mouse = function (_InputProcessor) {
   function Mouse(DOMElement, commands) {
     classCallCheck(this, Mouse);
 
-    var _this = possibleConstructorReturn(this, (Mouse.__proto__ || Object.getPrototypeOf(Mouse)).call(this, "Mouse", commands, ["BUTTONS", "X", "Y", "Z", "W"]));
+    var _this = possibleConstructorReturn(this, (Mouse.__proto__ || Object.getPrototypeOf(Mouse)).call(this, "Mouse", commands, ["BUTTONS", "X", "Y", "Z", "W"], "mousedown"));
 
     _this.timer = null;
 
     var setState = function setState(stateChange, event) {
+      _this.inPhysicalUse = true;
       var state = event.buttons;
       for (var button = 0; button < Mouse.NUM_BUTTONS; ++button) {
         var isDown = state & 0x1 !== 0;
@@ -8993,7 +9469,7 @@ var PoseInputProcessor = function (_InputProcessor) {
   createClass(PoseInputProcessor, [{
     key: "update",
     value: function update(dt) {
-      get$1(PoseInputProcessor.prototype.__proto__ || Object.getPrototypeOf(PoseInputProcessor.prototype), "update", this).call(this, dt);
+      get(PoseInputProcessor.prototype.__proto__ || Object.getPrototypeOf(PoseInputProcessor.prototype), "update", this).call(this, dt);
 
       if (this.currentDevice) {
         var pose = this.currentPose || this.lastPose || DEFAULT_POSE;
@@ -9026,7 +9502,7 @@ var PoseInputProcessor = function (_InputProcessor) {
     }
   }, {
     key: "hasPose",
-    get: function get() {
+    get: function get$$1() {
       return !!this.currentPose;
     }
   }]);
@@ -9089,11 +9565,6 @@ var Gamepad = function (_PoseInputProcessor) {
   }
 
   createClass(Gamepad, [{
-    key: "getImmediatePose",
-    value: function getImmediatePose() {
-      return this.currentPose;
-    }
-  }, {
     key: "getPose",
     value: function getPose() {
       return this.currentPose;
@@ -9101,6 +9572,7 @@ var Gamepad = function (_PoseInputProcessor) {
   }, {
     key: "checkDevice",
     value: function checkDevice(pad) {
+      this.inPhysicalUse = true;
       var i,
           j,
           buttonMap = 0;
@@ -9138,12 +9610,12 @@ var Gamepad = function (_PoseInputProcessor) {
     }
   }, {
     key: "hasOrientation",
-    get: function get() {
+    get: function get$$1() {
       return Gamepad.isMotionController(this.currentDevice);
     }
   }, {
     key: "haptics",
-    get: function get() {
+    get: function get$$1() {
       return this.currentDevice && this.currentDevice.haptics;
     }
   }]);
@@ -9208,7 +9680,7 @@ var GamepadManager = function (_EventDispatcher) {
   inherits(GamepadManager, _EventDispatcher);
   createClass(GamepadManager, null, [{
     key: "isAvailable",
-    get: function get() {
+    get: function get$$1() {
       return blackList.indexOf(navigator.userAgent) === -1 && !!navigator.getGamepads;
     }
   }]);
@@ -9280,7 +9752,7 @@ var GamepadManager = function (_EventDispatcher) {
     }
   }, {
     key: "pads",
-    get: function get() {
+    get: function get$$1() {
       return this.currentDevices;
     }
   }]);
@@ -9305,9 +9777,10 @@ var Touch = function (_InputProcessor) {
       axes.push("DY" + i);
     }
 
-    var _this = possibleConstructorReturn(this, (Touch.__proto__ || Object.getPrototypeOf(Touch)).call(this, "Touch", commands, axes));
+    var _this = possibleConstructorReturn(this, (Touch.__proto__ || Object.getPrototypeOf(Touch)).call(this, "Touch", commands, axes, "touchend"));
 
     var setState = function setState(stateChange, setAxis, event) {
+      _this.inPhysicalUse = true;
       // We have to find the minimum identifier value because iOS uses a very
       // large number that changes after every gesture. Every other platform
       // just numbers them 0 through 9.
@@ -9359,7 +9832,7 @@ var Touch = function (_InputProcessor) {
   createClass(Touch, [{
     key: "update",
     value: function update(dt) {
-      get$1(Touch.prototype.__proto__ || Object.getPrototypeOf(Touch.prototype), "update", this).call(this, dt);
+      get(Touch.prototype.__proto__ || Object.getPrototypeOf(Touch.prototype), "update", this).call(this, dt);
       for (var id = 0; id < 10; ++id) {
         var x = this.getAxis("X" + id),
             y = this.getAxis("Y" + id),
@@ -9524,7 +9997,7 @@ var Speech$1 = function (_InputProcessor) {
   }, {
     key: "enable",
     value: function enable(k, v) {
-      get$1(Speech.prototype.__proto__ || Object.getPrototypeOf(Speech.prototype), "enable", this).call(this, k, v);
+      get(Speech.prototype.__proto__ || Object.getPrototypeOf(Speech.prototype), "enable", this).call(this, k, v);
       this.check();
     }
   }], [{
@@ -9545,7 +10018,7 @@ var SensorSample = function () {
 
   createClass(SensorSample, [{
     key: "set",
-    value: function set(sample, timestampS) {
+    value: function set$$1(sample, timestampS) {
 
       this.sample = sample;
       this.timestampS = timestampS;
@@ -9798,7 +10271,7 @@ var PosePredictor = function () {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var isFirefoxAndroid = isFirefox$1 && isMobile;
+var isFirefoxAndroid = isFirefox && isMobile;
 var DEG2RAD$1 = Math$1.DEG2RAD;
 
 /**
@@ -9886,8 +10359,8 @@ var FusionPoseSensor = function () {
       return this.orientationOut_;
     }
   }, {
-    key: "getImmediatePose",
-    value: function getImmediatePose() {
+    key: "getPose",
+    value: function getPose() {
       return {
         position: this.getPosition(),
         orientation: this.getOrientation(),
@@ -9993,9 +10466,37 @@ var Eye = {
   LEFT: "left",
   RIGHT: "right"
 };
+var ipd = 0.03;
+var neckLength = 0;
+var neckDepth = 0;
 
 var CardboardVRDisplay = function (_VRDisplay) {
   inherits(CardboardVRDisplay, _VRDisplay);
+  createClass(CardboardVRDisplay, null, [{
+    key: "IPD",
+    get: function get$$1() {
+      return ipd;
+    },
+    set: function set$$1(v) {
+      ipd = v;
+    }
+  }, {
+    key: "NECK_LENGTH",
+    get: function get$$1() {
+      return neckLength;
+    },
+    set: function set$$1(v) {
+      neckLength = v;
+    }
+  }, {
+    key: "NECK_DEPTH",
+    get: function get$$1() {
+      return neckDepth;
+    },
+    set: function set$$1(v) {
+      neckDepth = v;
+    }
+  }]);
 
   function CardboardVRDisplay(options) {
     classCallCheck(this, CardboardVRDisplay);
@@ -10010,9 +10511,9 @@ var CardboardVRDisplay = function (_VRDisplay) {
   }
 
   createClass(CardboardVRDisplay, [{
-    key: "_getImmediatePose",
-    value: function _getImmediatePose() {
-      return this.poseSensor_.getImmediatePose();
+    key: "_getPose",
+    value: function _getPose() {
+      return this.poseSensor_.getPose();
     }
   }, {
     key: "resetPose",
@@ -10022,7 +10523,7 @@ var CardboardVRDisplay = function (_VRDisplay) {
   }, {
     key: "getEyeParameters",
     value: function getEyeParameters(whichEye) {
-      var offset = [0.03, 0.0, 0.0];
+      var offset = [ipd, neckLength, neckDepth];
 
       if (whichEye == Eye.LEFT) {
         offset[0] *= -1.0;
@@ -10089,7 +10590,7 @@ var Automator = function (_EventDispatcher) {
     }
   }, {
     key: "length",
-    get: function get() {
+    get: function get$$1() {
       return this.frames.length;
     }
   }]);
@@ -10253,13 +10754,13 @@ var Player = function (_Automator) {
   }, {
     key: "reset",
     value: function reset() {
-      get$1(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), "reset", this).call(this);
+      get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), "reset", this).call(this);
       this.frameIndex = -1;
     }
   }, {
     key: "update",
     value: function update(t) {
-      get$1(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), "update", this).call(this, t);
+      get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), "update", this).call(this, t);
 
       t += this.minT - this.startT;
 
@@ -10302,7 +10803,7 @@ var Player = function (_Automator) {
     }
   }, {
     key: "done",
-    get: function get() {
+    get: function get$$1() {
       return this.frameIndex >= this.frames.length - 1;
     }
   }]);
@@ -10320,10 +10821,10 @@ var MockVRDisplay = function () {
 
     Object.defineProperties(this, {
       displayName: {
-        get: function get() {
+        get: function get$$1() {
           return "Mock " + displayName;
         },
-        set: function set(v) {
+        set: function set$$1(v) {
           return displayName = v;
         }
       }
@@ -10364,18 +10865,18 @@ var MockVRDisplay = function () {
 
     Object.defineProperties(dataPack.currentPose, {
       timestamp: {
-        get: function get() {
+        get: function get$$1() {
           return timestamp;
         },
-        set: function set(v) {
+        set: function set$$1(v) {
           return timestamp = v;
         }
       },
       timeStamp: {
-        get: function get() {
+        get: function get$$1() {
           return timestamp;
         },
-        set: function set(v) {
+        set: function set$$1(v) {
           return timestamp = v;
         }
       }
@@ -10394,9 +10895,7 @@ var MockVRDisplay = function () {
         thunk(t);
       });
     };
-    this.getImmediatePose = function () {
-      return dataPack.currentPose;
-    };
+
     this.getPose = function () {
       return dataPack.currentPose;
     };
@@ -10416,7 +10915,7 @@ var MockVRDisplay = function () {
 }();
 
 function getObject(url, options) {
-  return get$2("json", url, options);
+  return get$1("json", url, options);
 }
 
 var hasNativeWebVR = "getVRDisplays" in navigator;
@@ -10499,7 +10998,7 @@ function installPolyfill(options) {
 
   // Provide navigator.vrEnabled.
   Object.defineProperty(navigator, "vrEnabled", {
-    get: function get() {
+    get: function get$$1() {
       return isCardboardCompatible && (FullScreen.available || isiOS); // just fake it for iOS
     }
   });
@@ -10604,6 +11103,17 @@ var VR = function (_PoseInputProcessor) {
     _this.lastStageDepth = null;
     _this.isStereo = false;
     install(options);
+
+    if (_this.options.nonstandardIPD !== null) {
+      CardboardVRDisplay.IPD = _this.options.nonstandardIPD;
+    }
+    if (_this.options.nonstandardNeckLength !== null) {
+      CardboardVRDisplay.NECK_LENGTH = _this.options.nonstandardNeckLength;
+    }
+    if (_this.options.nonstandardNeckDepth !== null) {
+      CardboardVRDisplay.NECK_DEPTH = _this.options.nonstandardNeckDepth;
+    }
+
     _this.ready = navigator.getVRDisplays().then(function (displays) {
       _this.displays.push.apply(_this.displays, displays);
       _this.connect(0);
@@ -10677,7 +11187,7 @@ var VR = function (_PoseInputProcessor) {
   }, {
     key: "zero",
     value: function zero() {
-      get$1(VR.prototype.__proto__ || Object.getPrototypeOf(VR.prototype), "zero", this).call(this);
+      get(VR.prototype.__proto__ || Object.getPrototypeOf(VR.prototype), "zero", this).call(this);
       if (this.currentDevice) {
         this.currentDevice.resetPose();
       }
@@ -10694,7 +11204,7 @@ var VR = function (_PoseInputProcessor) {
         stage = null;
       }
 
-      get$1(VR.prototype.__proto__ || Object.getPrototypeOf(VR.prototype), "update", this).call(this, dt);
+      get(VR.prototype.__proto__ || Object.getPrototypeOf(VR.prototype), "update", this).call(this, dt);
 
       if (stage) {
         this.movePlayer.fromArray(stage.sittingToStandingTransform);
@@ -10756,42 +11266,42 @@ var VR = function (_PoseInputProcessor) {
     }
   }, {
     key: "isNativeMobileWebVR",
-    get: function get() {
+    get: function get$$1() {
       return this.isNativeWebVR && isChrome && isMobile;
     }
   }, {
     key: "isNativeWebVR",
-    get: function get() {
+    get: function get$$1() {
       return this.currentDevice && !this.currentDevice.isPolyfilled;
     }
   }, {
     key: "hasStage",
-    get: function get() {
+    get: function get$$1() {
       return this.stage && this.stage.sizeX * this.stage.sizeZ > 0;
     }
   }, {
     key: "canMirror",
-    get: function get() {
+    get: function get$$1() {
       return this.currentDevice && this.currentDevice.capabilities.hasExternalDisplay;
     }
   }, {
     key: "isPolyfilled",
-    get: function get() {
+    get: function get$$1() {
       return this.currentDevice && this.currentDevice.isPolyfilled;
     }
   }, {
     key: "isPresenting",
-    get: function get() {
+    get: function get$$1() {
       return this.currentDevice && this.currentDevice.isPresenting;
     }
   }, {
     key: "hasOrientation",
-    get: function get() {
+    get: function get$$1() {
       return this.currentDevice && this.currentDevice.capabilities.hasOrientation;
     }
   }, {
     key: "currentCanvas",
-    get: function get() {
+    get: function get$$1() {
       if (this.isPresenting) {
         var layers = this.currentDevice.getLayers();
         if (layers.length > 0) {
@@ -10874,439 +11384,6 @@ var ViewCameraTransform = function () {
   }]);
   return ViewCameraTransform;
 }();
-
-var DISPLACEMENT = new Vector3();
-var EULER_TEMP$1 = new Euler();
-var QUAT_TEMP$1 = new Quaternion();
-var WEDGE = Math.PI / 3;
-
-var FPSInput = function (_EventDispatcher) {
-  inherits(FPSInput, _EventDispatcher);
-
-  function FPSInput(DOMElement, options) {
-    classCallCheck(this, FPSInput);
-
-    var _this = possibleConstructorReturn(this, (FPSInput.__proto__ || Object.getPrototypeOf(FPSInput)).call(this));
-
-    _this.options = options;
-    _this.managers = [];
-    _this.newState = [];
-    _this.pointers = [];
-    _this.motionDevices = [];
-    _this.velocity = new Vector3();
-    _this.matrix = new Matrix4();
-
-    if (!_this.options.disableKeyboard) {
-      _this.add(new Keyboard(_this, {
-        strafeLeft: {
-          buttons: [-Keys.A, -Keys.LEFTARROW]
-        },
-        strafeRight: {
-          buttons: [Keys.D, Keys.RIGHTARROW]
-        },
-        strafe: {
-          commands: ["strafeLeft", "strafeRight"]
-        },
-        driveForward: {
-          buttons: [-Keys.W, -Keys.UPARROW]
-        },
-        driveBack: {
-          buttons: [Keys.S, Keys.DOWNARROW]
-        },
-        drive: {
-          commands: ["driveForward", "driveBack"]
-        },
-        select: {
-          buttons: [Keys.ENTER]
-        },
-        dSelect: {
-          buttons: [Keys.ENTER],
-          delta: true
-        },
-        zero: {
-          buttons: [Keys.Z],
-          metaKeys: [-Keys.CTRL, -Keys.ALT, -Keys.SHIFT, -Keys.META],
-          commandUp: _this.emit.bind(_this, "zero")
-        }
-      }));
-
-      _this.Keyboard.operatingSystem = _this.options.os;
-      _this.Keyboard.codePage = _this.options.language;
-    }
-
-    _this.add(new Touch(DOMElement, {
-      buttons: {
-        axes: ["FINGERS"]
-      },
-      dButtons: {
-        axes: ["FINGERS"],
-        delta: true
-      },
-      heading: {
-        axes: ["DX0"],
-        integrate: true
-      },
-      pitch: {
-        axes: ["DY0"],
-        integrate: true,
-        min: -Math.PI * 0.5,
-        max: Math.PI * 0.5
-      }
-    }));
-
-    _this.add(new Mouse(DOMElement, {
-      U: { axes: ["X"], min: 0, max: 2, offset: 0 },
-      V: { axes: ["Y"], min: 0, max: 2 },
-      buttons: {
-        axes: ["BUTTONS"]
-      },
-      dButtons: {
-        axes: ["BUTTONS"],
-        delta: true
-      },
-      _dx: {
-        axes: ["X"],
-        delta: true,
-        scale: 0.25
-      },
-      dx: {
-        buttons: [0],
-        commands: ["_dx"]
-      },
-      heading: {
-        commands: ["dx"],
-        integrate: true
-      },
-      _dy: {
-        axes: ["Y"],
-        delta: true,
-        scale: 0.25
-      },
-      dy: {
-        buttons: [0],
-        commands: ["_dy"]
-      },
-      pitch: {
-        commands: ["dy"],
-        integrate: true,
-        min: -Math.PI * 0.5,
-        max: Math.PI * 0.5
-      }
-    }));
-
-    _this.add(new VR(_this.options));
-    _this.motionDevices.push(_this.VR);
-
-    if (!_this.options.disableGamepad && GamepadManager.isAvailable) {
-      _this.gamepadMgr = new GamepadManager();
-      _this.gamepadMgr.addEventListener("gamepadconnected", function (pad) {
-        var padID = Gamepad.ID(pad);
-        var mgr = null;
-
-        if (padID !== "Unknown" && padID !== "Rift") {
-          if (Gamepad.isMotionController(pad)) {
-            var controllerNumber = 0;
-            for (var i = 0; i < _this.managers.length; ++i) {
-              mgr = _this.managers[i];
-              if (mgr.currentPad && mgr.currentPad.id === pad.id) {
-                ++controllerNumber;
-              }
-            }
-
-            mgr = new Gamepad(_this.gamepadMgr, pad, controllerNumber, {
-              buttons: {
-                axes: ["BUTTONS"]
-              },
-              dButtons: {
-                axes: ["BUTTONS"],
-                delta: true
-              },
-              zero: {
-                buttons: [Gamepad.VIVE_BUTTONS.GRIP_PRESSED],
-                commandUp: _this.emit.bind(_this, "zero")
-              }
-            });
-
-            _this.add(mgr);
-            _this.motionDevices.push(mgr);
-
-            var shift = (_this.motionDevices.length - 2) * 8,
-                color = 0x0000ff << shift,
-                highlight = 0xff0000 >> shift,
-                ptr = new Pointer(padID + "Pointer", color, 1, highlight, [mgr], null, _this.options);
-            ptr.add(colored(box$1(0.1, 0.025, 0.2), color, {
-              emissive: highlight
-            }));
-
-            ptr.forward(_this);
-
-            _this.pointers.push(ptr);
-            _this.options.scene.add(ptr);
-
-            _this.emit("motioncontrollerfound", mgr);
-          } else {
-            mgr = new Gamepad(_this.gamepadMgr, pad, 0, {
-              buttons: {
-                axes: ["BUTTONS"]
-              },
-              dButtons: {
-                axes: ["BUTTONS"],
-                delta: true
-              },
-              strafe: {
-                axes: ["LSX"],
-                deadzone: 0.2
-              },
-              drive: {
-                axes: ["LSY"],
-                deadzone: 0.2
-              },
-              heading: {
-                axes: ["RSX"],
-                scale: -1,
-                deadzone: 0.2,
-                integrate: true
-              },
-              dHeading: {
-                commands: ["heading"],
-                delta: true
-              },
-              pitch: {
-                axes: ["RSY"],
-                scale: -1,
-                deadzone: 0.2,
-                integrate: true
-              },
-              zero: {
-                buttons: [Gamepad.XBOX_ONE_BUTTONS.BACK],
-                commandUp: _this.emit.bind(_this, "zero")
-              }
-            });
-            _this.add(mgr);
-            _this.mousePointer.addDevice(mgr, mgr);
-          }
-        }
-      });
-
-      _this.gamepadMgr.addEventListener("gamepaddisconnected", _this.remove.bind(_this));
-    }
-
-    _this.stage = hub();
-
-    _this.head = new Pointer("GazePointer", 0xffff00, 0x0000ff, 0.8, [_this.VR], [_this.Mouse, _this.Touch, _this.Keyboard], _this.options);
-
-    _this.head.forward(_this);
-
-    _this.head.rotation.order = "YXZ";
-    _this.head.useGaze = _this.options.useGaze;
-    _this.pointers.push(_this.head);
-    _this.options.scene.add(_this.head);
-
-    _this.mousePointer = new Pointer("MousePointer", 0xff0000, 0x00ff00, 1, [_this.Mouse], null, _this.options);
-
-    _this.mousePointer.forward(_this);
-    _this.mousePointer.unproject = new Matrix4();
-    _this.pointers.push(_this.mousePointer);
-    _this.head.add(_this.mousePointer);
-
-    _this.ready = Promise.all(_this.managers.map(function (mgr) {
-      return mgr.ready;
-    }).filter(identity));
-    return _this;
-  }
-
-  createClass(FPSInput, [{
-    key: "remove",
-    value: function remove(id) {
-      var mgr = this[id],
-          mgrIdx = this.managers.indexOf(mgr);
-      if (mgrIdx > -1) {
-        this.managers.splice(mgrIdx, 1);
-        delete this[id];
-      }
-      console.log("removed", mgr);
-    }
-  }, {
-    key: "add",
-    value: function add(mgr) {
-      for (var i = this.managers.length - 1; i >= 0; --i) {
-        if (this.managers[i].name === mgr.name) {
-          this.managers.splice(i, 1);
-        }
-      }
-      this.managers.push(mgr);
-      this[mgr.name] = mgr;
-    }
-  }, {
-    key: "zero",
-    value: function zero() {
-      for (var i = 0; i < this.managers.length; ++i) {
-        this.managers[i].zero();
-      }
-    }
-  }, {
-    key: "update",
-    value: function update(dt, ground) {
-      var hadGamepad = this.hasGamepad;
-      if (this.gamepadMgr) {
-        this.gamepadMgr.poll();
-      }
-      for (var i = 0; i < this.managers.length; ++i) {
-        this.managers[i].update(dt);
-      }
-
-      if (!hadGamepad && this.hasGamepad) {
-        this.Mouse.inPhysicalUse = false;
-      }
-
-      this.head.showPointer = this.VR.hasOrientation && this.options.showHeadPointer;
-      this.mousePointer.showPointer = (this.hasMouse || this.hasGamepad) && !this.hasMotionControllers;
-
-      if (this.hasTouch) {
-        this.Touch.enabled = !this.hasMotionControllers;
-      }
-
-      this.updateStage(dt, ground);
-      this.stage.position.y += this.options.avatarHeight;
-      for (var _i = 0; _i < this.motionDevices.length; ++_i) {
-        this.motionDevices[_i].posePosition.y -= this.options.avatarHeight;
-      }
-
-      // update the motionDevices
-      this.stage.updateMatrix();
-      this.matrix.multiplyMatrices(this.stage.matrix, this.VR.stage.matrix);
-      for (var _i2 = 0; _i2 < this.motionDevices.length; ++_i2) {
-        this.motionDevices[_i2].updateStage(this.matrix);
-      }
-
-      for (var _i3 = 0; _i3 < this.pointers.length; ++_i3) {
-        this.pointers[_i3].update();
-      }
-
-      // record the position and orientation of the user
-      this.newState = [];
-      this.head.updateMatrix();
-      this.stage.rotation.x = 0;
-      this.stage.rotation.z = 0;
-      this.stage.quaternion.setFromEuler(this.stage.rotation);
-      this.stage.updateMatrix();
-      this.head.position.toArray(this.newState, 0);
-      this.head.quaternion.toArray(this.newState, 3);
-    }
-  }, {
-    key: "updateStage",
-    value: function updateStage(dt, ground) {
-      // get the linear movement from the mouse/keyboard/gamepad
-      var heading = 0,
-          pitch = 0,
-          strafe = 0,
-          drive = 0;
-      for (var i = 0; i < this.managers.length; ++i) {
-        var mgr = this.managers[i];
-        if (mgr.enabled) {
-          if (mgr.name !== "Mouse") {
-            heading += mgr.getValue("heading");
-          }
-          pitch += mgr.getValue("pitch");
-          strafe += mgr.getValue("strafe");
-          drive += mgr.getValue("drive");
-        }
-      }
-
-      if (this.hasMouse) {
-        var mouseHeading = null;
-        if (this.VR.hasOrientation) {
-          mouseHeading = this.mousePointer.rotation.y;
-          var newMouseHeading = WEDGE * Math.floor(mouseHeading / WEDGE + 0.5);
-          if (newMouseHeading !== 0) {
-            this.Mouse.commands.U.offset -= this.Mouse.getValue("U") - 1;
-          }
-          mouseHeading = newMouseHeading + this.Mouse.commands.U.offset * 2;
-        } else {
-          mouseHeading = this.Mouse.getValue("heading");
-        }
-        heading += mouseHeading;
-      }
-      if (this.VR.hasOrientation) {
-        pitch = 0;
-      }
-
-      // move stage according to heading and thrust
-      EULER_TEMP$1.set(pitch, heading, 0, "YXZ");
-      this.stage.quaternion.setFromEuler(EULER_TEMP$1);
-
-      // update the stage's velocity
-      this.velocity.set(strafe, 0, drive);
-
-      QUAT_TEMP$1.copy(this.head.quaternion);
-      EULER_TEMP$1.setFromQuaternion(QUAT_TEMP$1);
-      EULER_TEMP$1.x = 0;
-      EULER_TEMP$1.z = 0;
-      QUAT_TEMP$1.setFromEuler(EULER_TEMP$1);
-
-      this.moveStage(DISPLACEMENT.copy(this.velocity).multiplyScalar(dt).applyQuaternion(QUAT_TEMP$1).add(this.head.position));
-
-      this.stage.position.y = ground.getHeightAt(this.stage.position) || 0;
-    }
-  }, {
-    key: "cancelVR",
-    value: function cancelVR() {
-      this.VR.cancel();
-      this.Mouse.commands.U.offset = 0;
-    }
-  }, {
-    key: "moveStage",
-    value: function moveStage(position) {
-      DISPLACEMENT.copy(position).sub(this.head.position);
-
-      this.stage.position.add(DISPLACEMENT);
-    }
-  }, {
-    key: "resolvePicking",
-    value: function resolvePicking(objects) {
-      for (var i = 0; i < this.pointers.length; ++i) {
-        this.pointers[i].resolvePicking(objects);
-      }
-    }
-  }, {
-    key: "hasMotionControllers",
-    get: function get() {
-      return !!(this.Vive_0 && this.Vive_0.enabled && this.Vive_0.inPhysicalUse || this.Vive_1 && this.Vive_1.enabled && this.Vive_1.inPhysicalUse);
-    }
-  }, {
-    key: "hasGamepad",
-    get: function get() {
-      return !!(this.Gamepad_0 && this.Gamepad_0.enabled && this.Gamepad_0.inPhysicalUse);
-    }
-  }, {
-    key: "hasMouse",
-    get: function get() {
-      return !this.hasTouch && !!(this.Mouse && this.Mouse.enabled && this.Mouse.inPhysicalUse);
-    }
-  }, {
-    key: "hasTouch",
-    get: function get() {
-      return !!(this.Touch && this.Touch.enabled && this.Touch.inPhysicalUse);
-    }
-  }, {
-    key: "segments",
-    get: function get() {
-      var segments = [];
-      for (var i = 0; i < this.pointers.length; ++i) {
-        var seg = this.pointers[i].segment;
-        if (seg) {
-          segments.push(seg);
-        }
-      }
-      return segments;
-    }
-  }]);
-  return FPSInput;
-}(EventDispatcher);
-
-
-
-FPSInput.EVENTS = Pointer.EVENTS.slice();
 
 function number(min, max, power) {
   power = power || 1;
@@ -11726,7 +11803,7 @@ var Teleporter = function () {
     key: "_updatePosition",
     value: function _updatePosition(evt) {
       this._startPoint.copy(this.disk.position);
-      this.disk.position.copy(evt.hit.point).sub(this._environment.input.head.position);
+      this.disk.position.copy(evt.hit.point).sub(this._environment.head.position);
 
       var distSq = this.disk.position.x * this.disk.position.x + this.disk.position.z * this.disk.position.z;
       if (distSq > MAX_MOVE_DISTANCE_SQ) {
@@ -11738,7 +11815,7 @@ var Teleporter = function () {
         this.disk.position.y = y;
       }
 
-      this.disk.position.add(this._environment.input.head.position);
+      this.disk.position.add(this._environment.head.position);
 
       var len = DIFF.copy(this.disk.position).sub(this._startPoint).length();
       this._moveDistance += len;
@@ -11779,6 +11856,10 @@ console.info("[" + packageName + " v" + version + "]:> see " + homepage + " for 
 
 var MILLISECONDS_TO_SECONDS = 0.001;
 var TELEPORT_DISPLACEMENT = new Vector3();
+var DISPLACEMENT = new Vector3();
+var EULER_TEMP = new Euler();
+var QUAT_TEMP = new Quaternion();
+var WEDGE = Math.PI / 3;
 
 var BrowserEnvironment = function (_EventDispatcher) {
   inherits(BrowserEnvironment, _EventDispatcher);
@@ -11804,7 +11885,9 @@ var BrowserEnvironment = function (_EventDispatcher) {
 
     _this.zero = function () {
       if (!_this.lockMovement) {
-        _this.input.zero();
+        for (var i = 0; i < _this.managers.length; ++i) {
+          _this.managers[i].zero();
+        }
         if (_this.quality === Quality.NONE) {
           _this.quality = Quality.HIGH;
         }
@@ -11838,13 +11921,109 @@ var BrowserEnvironment = function (_EventDispatcher) {
         updateFade(dt);
 
         for (var frame = 0; frame < numFrames; ++frame) {
-          _this.input.update(_this.deltaTime, _this.ground);
+          var hadGamepad = _this.hasGamepad;
+          if (_this.gamepadMgr) {
+            _this.gamepadMgr.poll();
+          }
+          for (var i = 0; i < _this.managers.length; ++i) {
+            _this.managers[i].update(dt);
+          }
+
+          if (!hadGamepad && _this.hasGamepad) {
+            _this.Mouse.inPhysicalUse = false;
+          }
+
+          _this.head.showPointer = _this.VR.hasOrientation && _this.options.showHeadPointer;
+          _this.mousePointer.visible = _this.VR.isPresenting;
+          _this.mousePointer.showPointer = !_this.hasMotionControllers;
+
+          var heading = 0,
+              pitch = 0,
+              strafe = 0,
+              drive = 0;
+          for (var _i = 0; _i < _this.managers.length; ++_i) {
+            var mgr = _this.managers[_i];
+            if (mgr.enabled) {
+              if (mgr.name !== "Mouse") {
+                heading += mgr.getValue("heading");
+              }
+              pitch += mgr.getValue("pitch");
+              strafe += mgr.getValue("strafe");
+              drive += mgr.getValue("drive");
+            }
+          }
+
+          if (_this.hasMouse || _this.hasTouch) {
+            var mouseHeading = null;
+            if (_this.VR.hasOrientation) {
+              mouseHeading = _this.mousePointer.rotation.y;
+              var newMouseHeading = WEDGE * Math.floor(mouseHeading / WEDGE + 0.5);
+              if (newMouseHeading !== 0) {
+                _this.Mouse.commands.U.offset -= _this.Mouse.getValue("U") - 1;
+              }
+              mouseHeading = newMouseHeading + _this.Mouse.commands.U.offset * 2;
+            } else {
+              mouseHeading = _this.Mouse.getValue("heading");
+            }
+            heading += mouseHeading;
+          }
+          if (_this.VR.hasOrientation) {
+            pitch = 0;
+          }
+
+          // move stage according to heading and thrust
+          EULER_TEMP.set(pitch, heading, 0, "YXZ");
+          _this.stage.quaternion.setFromEuler(EULER_TEMP);
+
+          // update the stage's velocity
+          _this.velocity.set(strafe, 0, drive);
+
+          QUAT_TEMP.copy(_this.head.quaternion);
+          EULER_TEMP.setFromQuaternion(QUAT_TEMP);
+          EULER_TEMP.x = 0;
+          EULER_TEMP.z = 0;
+          QUAT_TEMP.setFromEuler(EULER_TEMP);
+
+          _this.moveStage(DISPLACEMENT.copy(_this.velocity).multiplyScalar(dt).applyQuaternion(QUAT_TEMP).add(_this.head.position));
+
+          _this.stage.position.y = _this.ground.getHeightAt(_this.stage.position) || 0;
+          _this.stage.position.y += _this.options.avatarHeight;
+          for (var _i2 = 0; _i2 < _this.motionDevices.length; ++_i2) {
+            _this.motionDevices[_i2].posePosition.y -= _this.options.avatarHeight;
+          }
+
+          // update the motionDevices
+          _this.stage.updateMatrix();
+          _this.matrix.multiplyMatrices(_this.stage.matrix, _this.VR.stage.matrix);
+          for (var _i3 = 0; _i3 < _this.motionDevices.length; ++_i3) {
+            _this.motionDevices[_i3].updateStage(_this.matrix);
+          }
+
+          for (var _i4 = 0; _i4 < _this.pointers.length; ++_i4) {
+            _this.pointers[_i4].update();
+          }
+
+          // record the position and orientation of the user
+          _this.newState = [];
+          _this.head.updateMatrix();
+          _this.stage.rotation.x = 0;
+          _this.stage.rotation.z = 0;
+          _this.stage.quaternion.setFromEuler(_this.stage.rotation);
+          _this.stage.updateMatrix();
+          _this.head.position.toArray(_this.newState, 0);
+          _this.head.quaternion.toArray(_this.newState, 3);
 
           if (frame === 0) {
             updateAll();
-            _this.input.resolvePicking(_this.scene);
-            _this.ground.moveTo(_this.input.head.position);
-            _this.sky.position.copy(_this.input.head.position);
+            var userActionHandlers = null;
+            for (var _i5 = 0; _i5 < _this.pointers.length; ++_i5) {
+              userActionHandlers = _this.pointers[_i5].resolvePicking(_this.scene);
+            }
+            for (var _i6 = 0; _i6 < _this.managers.length; ++_i6) {
+              _this.managers[_i6].userActionHandlers = userActionHandlers;
+            }
+            _this.ground.moveTo(_this.head.position);
+            _this.sky.position.copy(_this.head.position);
             moveUI();
           }
 
@@ -11871,14 +12050,14 @@ var BrowserEnvironment = function (_EventDispatcher) {
       var y = _this.vicinity.position.y,
           p = _this.options.vicinityFollowRate,
           q = 1 - p;
-      _this.vicinity.position.lerp(_this.input.head.position, p);
+      _this.vicinity.position.lerp(_this.head.position, p);
       _this.vicinity.position.y = y;
 
-      followEuler.setFromQuaternion(_this.input.head.quaternion);
+      followEuler.setFromQuaternion(_this.head.quaternion);
       _this.turns.radians = followEuler.y;
       followEuler.set(maxX, _this.turns.radians, 0, "YXZ");
       _this.ui.quaternion.setFromEuler(followEuler);
-      _this.ui.position.y = _this.ui.position.y * q + _this.input.head.position.y * p;
+      _this.ui.position.y = _this.ui.position.y * q + _this.head.position.y * p;
     };
 
     var animate = function animate(t) {
@@ -11894,47 +12073,33 @@ var BrowserEnvironment = function (_EventDispatcher) {
     var render = function render() {
       _this.camera.position.set(0, 0, 0);
       _this.camera.quaternion.set(0, 0, 0, 1);
-      _this.audio.setPlayer(_this.input.head.mesh);
+      _this.audio.setPlayer(_this.head.mesh);
       _this.renderer.clear(true, true, true);
 
-      var trans = _this.input.VR.getTransforms(_this.options.nearPlane, _this.options.nearPlane + _this.options.drawDistance);
+      var trans = _this.VR.getTransforms(_this.options.nearPlane, _this.options.nearPlane + _this.options.drawDistance);
       for (var i = 0; trans && i < trans.length; ++i) {
         eyeBlankAll(i);
 
         var st = trans[i],
             v = st.viewport;
 
-        // if we're rendering with an eye offset
-        if (st.translation.x !== 0) {
-          // ... and we have non-standard offset values to use:
-          if (_this.options.nonstandardIPD !== null) {
-            st.translation.x *= _this.options.nonstandardIPD / Math.abs(st.translation.x);
-          }
-          if (_this.options.nonstandardNeckLength !== null) {
-            st.translation.y = _this.options.nonstandardNeckLength;
-          }
-          if (_this.options.nonstandardNeckDepth !== null) {
-            st.translation.z = _this.options.nonstandardNeckDepth;
-          }
-        }
-
         _this.renderer.setViewport(v.left * resolutionScale, v.top * resolutionScale, v.width * resolutionScale, v.height * resolutionScale);
 
         _this.camera.projectionMatrix.copy(st.projection);
-        if (_this.input.mousePointer.unproject) {
-          _this.input.mousePointer.unproject.getInverse(st.projection);
+        if (_this.mousePointer.unproject) {
+          _this.mousePointer.unproject.getInverse(st.projection);
         }
         _this.camera.translateOnAxis(st.translation, 1);
         _this.renderer.render(_this.scene, _this.camera);
         _this.camera.translateOnAxis(st.translation, -1);
       }
-      _this.input.VR.submitFrame();
+      _this.VR.submitFrame();
     };
 
     var modifyScreen = function modifyScreen() {
       var near = _this.options.nearPlane,
           far = near + _this.options.drawDistance,
-          p = _this.input && _this.input.VR && _this.input.VR.getTransforms(near, far);
+          p = _this.VR && _this.VR.getTransforms(near, far);
 
       if (p) {
         var canvasWidth = 0,
@@ -11945,8 +12110,7 @@ var BrowserEnvironment = function (_EventDispatcher) {
           canvasHeight = Math.max(canvasHeight, p[i].viewport.height);
         }
 
-        _this.input.Mouse.commands.U.scale = devicePixelRatio * 2 / canvasWidth;
-        _this.input.Mouse.commands.V.scale = devicePixelRatio * 2 / canvasHeight;
+        _this.mousePointer.setSize(canvasWidth, canvasHeight);
 
         canvasWidth = Math.floor(canvasWidth * resolutionScale);
         canvasHeight = Math.floor(canvasHeight * resolutionScale);
@@ -11980,10 +12144,6 @@ var BrowserEnvironment = function (_EventDispatcher) {
       avatar: null
     };
 
-    function setColor(model, color) {
-      return model.children[0].material.color.set(color);
-    }
-
     function complementColor(color) {
       var rgb = color.clone();
       var hsl = rgb.getHSL();
@@ -11995,7 +12155,7 @@ var BrowserEnvironment = function (_EventDispatcher) {
       return rgb;
     }
 
-    var modelsReady = ModelFactory.loadObjects(modelFiles).then(function (models) {
+    var modelsReady = ModelFactory.loadObjects(modelFiles, _this.options.progress.thunk).then(function (models) {
       window.text3D = function (font, size, text) {
         var geom = new TextGeometry(text, {
           font: font,
@@ -12133,17 +12293,17 @@ var BrowserEnvironment = function (_EventDispatcher) {
 
     _this.teleport = function (pos, immediate) {
       return _this.transition(function () {
-        return _this.input.moveStage(pos);
+        return _this.moveStage(pos);
       }, function () {
-        return _this.teleportAvailable && TELEPORT_DISPLACEMENT.copy(pos).sub(_this.input.head.position).length() > 0.2;
+        return _this.teleportAvailable && TELEPORT_DISPLACEMENT.copy(pos).sub(_this.head.position).length() > 0.2;
       }, immediate);
     };
 
     var delesectControl = function delesectControl() {
       if (_this.currentControl) {
         _this.currentControl.removeEventListener("blur", delesectControl);
-        _this.input.Keyboard.enabled = true;
-        _this.input.Mouse.commands.pitch.disabled = _this.input.Mouse.commands.heading.disabled = _this.input.VR.isPresenting;
+        _this.Keyboard.enabled = true;
+        _this.Mouse.commands.pitch.disabled = _this.Mouse.commands.heading.disabled = _this.VR.isPresenting;
         _this.currentControl.blur();
         _this.currentControl = null;
       }
@@ -12164,8 +12324,8 @@ var BrowserEnvironment = function (_EventDispatcher) {
             _this.currentControl.focus();
             _this.currentControl.addEventListener("blur", delesectControl);
             if (_this.currentControl.lockMovement) {
-              _this.input.Keyboard.enabled = false;
-              _this.input.Mouse.commands.pitch.disabled = _this.input.Mouse.commands.heading.disabled = !_this.input.VR.isPresenting;
+              _this.Keyboard.enabled = false;
+              _this.Mouse.commands.pitch.disabled = _this.Mouse.commands.heading.disabled = !_this.VR.isPresenting;
             }
           }
         }
@@ -12234,7 +12394,7 @@ var BrowserEnvironment = function (_EventDispatcher) {
     var currentTimerObject = null;
     _this.timer = 0;
     var RAF = function RAF(callback) {
-      currentTimerObject = _this.input.VR.currentDevice || window;
+      currentTimerObject = _this.VR.currentDevice || window;
       if (_this.timer !== null) {
         _this.timer = currentTimerObject.requestAnimationFrame(callback);
       }
@@ -12242,26 +12402,20 @@ var BrowserEnvironment = function (_EventDispatcher) {
 
     _this.goFullScreen = function (index, evt) {
       if (evt !== "Gaze") {
-        var _ret = function () {
-          var elem = null;
-          if (evt === "force" || _this.input.VR.canMirror || _this.input.VR.isNativeWebVR) {
-            elem = _this.renderer.domElement;
-          } else {
-            elem = _this.options.fullScreenElement;
-          }
-          _this.input.VR.connect(index);
-          return {
-            v: _this.input.VR.requestPresent([{
-              source: elem
-            }]).catch(function (exp) {
-              return console.error("whaaat", exp);
-            }).then(function () {
-              return elem.focus();
-            })
-          };
-        }();
-
-        if ((typeof _ret === "undefined" ? "undefined" : _typeof(_ret)) === "object") return _ret.v;
+        var elem = null;
+        if (evt === "force" || _this.VR.canMirror || _this.VR.isNativeWebVR) {
+          elem = _this.renderer.domElement;
+        } else {
+          elem = _this.options.fullScreenElement;
+        }
+        _this.VR.connect(index);
+        return _this.VR.requestPresent([{
+          source: elem
+        }]).catch(function (exp) {
+          return console.error("whaaat", exp);
+        }).then(function () {
+          return elem.focus();
+        });
       }
     };
 
@@ -12277,29 +12431,58 @@ var BrowserEnvironment = function (_EventDispatcher) {
     };
 
     PointerLock.addChangeListener(function (evt) {
-      if (_this.input.VR.isPresenting && !PointerLock.isActive) {
-        _this.input.cancelVR();
+      if (_this.VR.isPresenting && !PointerLock.isActive) {
+        _this.cancelVR();
       }
     });
 
     var fullScreenChange = function fullScreenChange(evt) {
-      var presenting = !!_this.input.VR.isPresenting,
+      var presenting = !!_this.VR.isPresenting,
           cmd = (presenting ? "remove" : "add") + "Button";
-      _this.input.Mouse[cmd]("dx", 0);
-      _this.input.Mouse[cmd]("dy", 0);
-      _this.input.Mouse.commands.U.disabled = _this.input.Mouse.commands.V.disabled = presenting && !_this.input.VR.isStereo;
-      _this.input.Mouse.commands.heading.scale = presenting ? -1 : 1;
-      _this.input.Mouse.commands.pitch.scale = presenting ? -1 : 1;
+      _this.Mouse[cmd]("dx", 0);
+      _this.Mouse[cmd]("dy", 0);
+      _this.Mouse.commands.U.disabled = _this.Mouse.commands.V.disabled = presenting && !_this.VR.isStereo;
+      _this.Mouse.commands.heading.scale = presenting ? -1 : 1;
+      _this.Mouse.commands.pitch.scale = presenting ? -1 : 1;
       if (!presenting) {
-        _this.input.cancelVR();
+        _this.cancelVR();
       }
       modifyScreen();
     };
 
+    var allowRestart = true;
+    _this.start = function () {
+      if (allowRestart) {
+        _this.ready.then(function () {
+          _this.audio.start();
+          lt = performance.now() * MILLISECONDS_TO_SECONDS;
+          _this.VR.startAnimation(animate);
+        });
+      }
+    };
+
+    _this.stop = function (isPause) {
+      if (_this.VR.timer) {
+        allowRestart = allowRestart && isPause === true;
+        _this.VR.stopAnimation();
+        _this.audio.stop();
+        if (!allowRestart) {
+          console.log("stopped");
+        }
+      }
+    };
+
+    _this.pause = _this.stop.bind(_this, true);
+
     window.addEventListener("vrdisplaypresentchange", fullScreenChange, false);
     window.addEventListener("resize", modifyScreen, false);
-    window.addEventListener("blur", _this.stop, false);
+    window.addEventListener("blur", _this.pause, false);
+    window.addEventListener("stop", _this.stop, false);
     window.addEventListener("focus", _this.start, false);
+    document.addEventListener("amazonPlatformReady", function () {
+      document.addEventListener("pause", _this.pause, false);
+      document.addEventListener("resume", _this.start, false);
+    }, false);
 
     documentReady = documentReady.then(function () {
       if (_this.options.renderer) {
@@ -12328,31 +12511,254 @@ var BrowserEnvironment = function (_EventDispatcher) {
       }
 
       _this.renderer.domElement.tabIndex = maxTabIndex + 1;
-      _this.renderer.domElement.addEventListener('webglcontextlost', _this.stop, false);
+      _this.renderer.domElement.addEventListener('webglcontextlost', _this.pause, false);
       _this.renderer.domElement.addEventListener('webglcontextrestored', _this.start, false);
 
-      _this.input = new FPSInput(_this.options.fullScreenElement, _this.options);
-      _this.input.addEventListener("zero", _this.zero);
-      _this.watch(_this.input, ["motioncontrollerfound"]);
-      _this.input.route(FPSInput.EVENTS, _this.consumeEvent.bind(_this));
-      _this.input.VR.ready.then(function (displays) {
+      _this.managers = [];
+      _this.newState = [];
+      _this.pointers = [];
+      _this.motionDevices = [];
+      _this.velocity = new Vector3();
+      _this.matrix = new Matrix4();
+
+      if (!_this.options.disableKeyboard) {
+        _this.addInputManager(new Keyboard(_this, {
+          strafeLeft: {
+            buttons: [-Keys.A, -Keys.LEFTARROW]
+          },
+          strafeRight: {
+            buttons: [Keys.D, Keys.RIGHTARROW]
+          },
+          strafe: {
+            commands: ["strafeLeft", "strafeRight"]
+          },
+          driveForward: {
+            buttons: [-Keys.W, -Keys.UPARROW]
+          },
+          driveBack: {
+            buttons: [Keys.S, Keys.DOWNARROW]
+          },
+          drive: {
+            commands: ["driveForward", "driveBack"]
+          },
+          select: {
+            buttons: [Keys.ENTER]
+          },
+          dSelect: {
+            buttons: [Keys.ENTER],
+            delta: true
+          },
+          zero: {
+            buttons: [Keys.Z],
+            metaKeys: [-Keys.CTRL, -Keys.ALT, -Keys.SHIFT, -Keys.META],
+            commandUp: _this.emit.bind(_this, "zero")
+          }
+        }));
+
+        _this.Keyboard.operatingSystem = _this.options.os;
+        _this.Keyboard.codePage = _this.options.language;
+      }
+
+      _this.addInputManager(new Touch(_this.options.fullScreenElement, {
+        U: { axes: ["X0"], min: 0, max: 2, offset: 0 },
+        V: { axes: ["Y0"], min: 0, max: 2 },
+        buttons: {
+          axes: ["FINGERS"]
+        },
+        dButtons: {
+          axes: ["FINGERS"],
+          delta: true
+        },
+        heading: {
+          axes: ["DX0"],
+          integrate: true
+        },
+        pitch: {
+          axes: ["DY0"],
+          integrate: true,
+          min: -Math.PI * 0.5,
+          max: Math.PI * 0.5
+        }
+      }));
+
+      _this.addInputManager(new Mouse(_this.options.fullScreenElement, {
+        U: { axes: ["X"], min: 0, max: 2, offset: 0 },
+        V: { axes: ["Y"], min: 0, max: 2 },
+        buttons: {
+          axes: ["BUTTONS"]
+        },
+        dButtons: {
+          axes: ["BUTTONS"],
+          delta: true
+        },
+        _dx: {
+          axes: ["X"],
+          delta: true,
+          scale: 0.25
+        },
+        dx: {
+          buttons: [0],
+          commands: ["_dx"]
+        },
+        heading: {
+          commands: ["dx"],
+          integrate: true
+        },
+        _dy: {
+          axes: ["Y"],
+          delta: true,
+          scale: 0.25
+        },
+        dy: {
+          buttons: [0],
+          commands: ["_dy"]
+        },
+        pitch: {
+          commands: ["dy"],
+          integrate: true,
+          min: -Math.PI * 0.5,
+          max: Math.PI * 0.5
+        }
+      }));
+
+      // toggle back and forth between touch and mouse
+      _this.Touch.addEventListener("activate", function (evt) {
+        return _this.Mouse.inPhysicalUse = false;
+      });
+      _this.Mouse.addEventListener("activate", function (evt) {
+        return _this.Touch.inPhysicalUse = false;
+      });
+
+      _this.addInputManager(new VR(_this.options));
+
+      _this.motionDevices.push(_this.VR);
+
+      if (!_this.options.disableGamepad && GamepadManager.isAvailable) {
+        _this.gamepadMgr = new GamepadManager();
+        _this.gamepadMgr.addEventListener("gamepadconnected", function (pad) {
+          var padID = Gamepad.ID(pad);
+          var mgr = null;
+
+          if (padID !== "Unknown" && padID !== "Rift") {
+            if (Gamepad.isMotionController(pad)) {
+              var controllerNumber = 0;
+              for (var _i7 = 0; _i7 < _this.managers.length; ++_i7) {
+                mgr = _this.managers[_i7];
+                if (mgr.currentPad && mgr.currentPad.id === pad.id) {
+                  ++controllerNumber;
+                }
+              }
+
+              mgr = new Gamepad(_this.gamepadMgr, pad, controllerNumber, {
+                buttons: {
+                  axes: ["BUTTONS"]
+                },
+                dButtons: {
+                  axes: ["BUTTONS"],
+                  delta: true
+                },
+                zero: {
+                  buttons: [Gamepad.VIVE_BUTTONS.GRIP_PRESSED],
+                  commandUp: _this.emit.bind(_this, "zero")
+                }
+              });
+
+              _this.addInputManager(mgr);
+              _this.motionDevices.push(mgr);
+
+              var shift = (_this.motionDevices.length - 2) * 8,
+                  color = 0x0000ff << shift,
+                  highlight = 0xff0000 >> shift,
+                  ptr = new Pointer(padID + "Pointer", color, 1, highlight, [mgr], null, _this.options);
+              ptr.add(colored(box(0.1, 0.025, 0.2), color, {
+                emissive: highlight
+              }));
+
+              ptr.route(Pointer.EVENTS, _this.consumeEvent.bind(_this));
+
+              _this.pointers.push(ptr);
+              _this.scene.add(ptr);
+
+              _this.emit("motioncontrollerfound", mgr);
+            } else {
+              mgr = new Gamepad(_this.gamepadMgr, pad, 0, {
+                buttons: {
+                  axes: ["BUTTONS"]
+                },
+                dButtons: {
+                  axes: ["BUTTONS"],
+                  delta: true
+                },
+                strafe: {
+                  axes: ["LSX"],
+                  deadzone: 0.2
+                },
+                drive: {
+                  axes: ["LSY"],
+                  deadzone: 0.2
+                },
+                heading: {
+                  axes: ["RSX"],
+                  scale: -1,
+                  deadzone: 0.2,
+                  integrate: true
+                },
+                dHeading: {
+                  commands: ["heading"],
+                  delta: true
+                },
+                pitch: {
+                  axes: ["RSY"],
+                  scale: -1,
+                  deadzone: 0.2,
+                  integrate: true
+                },
+                zero: {
+                  buttons: [Gamepad.XBOX_ONE_BUTTONS.BACK],
+                  commandUp: _this.emit.bind(_this, "zero")
+                }
+              });
+              _this.addInputManager(mgr);
+              _this.mousePointer.addDevice(mgr, mgr);
+            }
+          }
+        });
+
+        _this.gamepadMgr.addEventListener("gamepaddisconnected", _this.removeInputManager.bind(_this));
+      }
+
+      _this.stage = hub();
+
+      _this.head = new Pointer("GazePointer", 0xffff00, 0x0000ff, 0.8, [_this.VR], [_this.Mouse, _this.Touch, _this.Keyboard], _this.options).addTo(_this.scene);
+
+      _this.head.route(Pointer.EVENTS, _this.consumeEvent.bind(_this));
+
+      _this.head.rotation.order = "YXZ";
+      _this.head.useGaze = _this.options.useGaze;
+      _this.pointers.push(_this.head);
+
+      _this.mousePointer = new Pointer("MousePointer", 0xff0000, 0x00ff00, 1, [_this.Mouse, _this.Touch], null, _this.options);
+      _this.mousePointer.route(Pointer.EVENTS, _this.consumeEvent.bind(_this));
+      _this.mousePointer.unproject = new Matrix4();
+      _this.pointers.push(_this.mousePointer);
+      _this.head.add(_this.mousePointer);
+
+      _this.VR.ready.then(function (displays) {
         return displays.forEach(function (display, i) {
           window.addEventListener("vrdisplayactivate", function (evt) {
             if (evt.display === display) {
-              (function () {
-                var exitVR = function exitVR() {
-                  window.removeEventListener("vrdisplaydeactivate", exitVR);
-                  _this.input.cancelVR();
-                };
-                window.addEventListener("vrdisplaydeactivate", exitVR, false);
-                _this.goFullScreen(i);
-              })();
+              var exitVR = function exitVR() {
+                window.removeEventListener("vrdisplaydeactivate", exitVR);
+                _this.cancelVR();
+              };
+              window.addEventListener("vrdisplaydeactivate", exitVR, false);
+              _this.goFullScreen(i);
             }
           }, false);
         });
       });
 
-      _this.fader = colored(box$1(1, 1, 1), _this.options.backgroundColor, {
+      _this.fader = colored(box(1, 1, 1), _this.options.backgroundColor, {
         opacity: 0,
         useFog: false,
         transparent: true,
@@ -12360,7 +12766,7 @@ var BrowserEnvironment = function (_EventDispatcher) {
         side: BackSide
       });
       _this.fader.visible = false;
-      _this.input.head.add(_this.fader);
+      _this.head.add(_this.fader);
 
       if (!_this.options.disableKeyboard) {
         var setFalse = function setFalse(evt) {
@@ -12368,17 +12774,17 @@ var BrowserEnvironment = function (_EventDispatcher) {
         };
 
         var keyDown = function keyDown(evt) {
-          if (_this.input.VR.isPresenting) {
-            if (evt.keyCode === Keys.ESCAPE && !_this.input.VR.isPolyfilled) {
-              _this.input.cancelVR();
+          if (_this.VR.isPresenting) {
+            if (evt.keyCode === Keys.ESCAPE && !_this.VR.isPolyfilled) {
+              _this.cancelVR();
             }
           }
 
-          _this.input.Keyboard.consumeEvent(evt);
+          _this.Keyboard.consumeEvent(evt);
           _this.consumeEvent(evt);
         },
             keyUp = function keyUp(evt) {
-          _this.input.Keyboard.consumeEvent(evt);
+          _this.Keyboard.consumeEvent(evt);
           _this.consumeEvent(evt);
         },
             withCurrentControl = function withCurrentControl(name$$1) {
@@ -12402,7 +12808,7 @@ var BrowserEnvironment = function (_EventDispatcher) {
 
         var focusClipboard = function focusClipboard(evt) {
           if (_this.lockMovement) {
-            var cmdName = _this.input.Keyboard.operatingSystem.makeCommandName(evt, _this.input.Keyboard.codePage);
+            var cmdName = _this.Keyboard.operatingSystem.makeCommandName(evt, _this.Keyboard.codePage);
             if (cmdName === "CUT" || cmdName === "COPY") {
               surrogate.style.display = "block";
               surrogate.focus();
@@ -12440,9 +12846,11 @@ var BrowserEnvironment = function (_EventDispatcher) {
         window.addEventListener("keydown", focusClipboard, true);
       }
 
-      _this.input.head.add(_this.camera);
+      _this.head.add(_this.camera);
 
-      return _this.input.ready;
+      return Promise.all(_this.managers.map(function (mgr) {
+        return mgr.ready;
+      }).filter(identity));
     });
 
     _this._readyParts = [_this.sky.ready, _this.ground.ready, modelsReady, documentReady];
@@ -12453,7 +12861,7 @@ var BrowserEnvironment = function (_EventDispatcher) {
         _this.renderer.shadowMap.type = PCFSoftShadowMap;
       }
 
-      _this.input.VR.displays.forEach(function (display) {
+      _this.VR.displays.forEach(function (display) {
         if (display.DOMElement !== undefined) {
           display.DOMElement = _this.renderer.domElement;
         }
@@ -12463,7 +12871,8 @@ var BrowserEnvironment = function (_EventDispatcher) {
         _this.insertFullScreenButtons(_this.options.fullScreenButtonContainer);
       }
 
-      _this.input.VR.connect(0);
+      _this.VR.connect(0);
+      _this.options.progress.hide();
 
       _this.emit("ready");
     });
@@ -12486,10 +12895,10 @@ var BrowserEnvironment = function (_EventDispatcher) {
 
     Object.defineProperties(_this, {
       quality: {
-        get: function get() {
+        get: function get$$1() {
           return _this.options.quality;
         },
-        set: function set(v) {
+        set: function set$$1(v) {
           if (0 <= v && v < PIXEL_SCALES.length) {
             _this.options.quality = v;
             resolutionScale = PIXEL_SCALES[v];
@@ -12510,7 +12919,7 @@ var BrowserEnvironment = function (_EventDispatcher) {
           newFunction = function newFunction() {};
         }
         return function () {
-          if (this.input && this.input.VR && this.input.VR.isPresenting) {
+          if (this.VR && this.VR.isPresenting) {
             newFunction();
           } else {
             oldFunction.apply(window, arguments);
@@ -12532,7 +12941,7 @@ var BrowserEnvironment = function (_EventDispatcher) {
     value: function connect(socket, userName) {
 
       if (!this.network) {
-        this.network = new Manager(this.input, this.audio, this.factories, this.options);
+        this.network = new Manager(this, this.audio, this.factories, this.options);
         this.network.addEventListener("addavatar", this.addAvatar);
         this.network.addEventListener("removeavatar", this.removeAvatar);
       }
@@ -12543,6 +12952,41 @@ var BrowserEnvironment = function (_EventDispatcher) {
     value: function disconnect() {
 
       return this.network && this.network.disconnect();
+    }
+  }, {
+    key: "addInputManager",
+    value: function addInputManager(mgr) {
+      for (var i = this.managers.length - 1; i >= 0; --i) {
+        if (this.managers[i].name === mgr.name) {
+          this.managers.splice(i, 1);
+        }
+      }
+      this.managers.push(mgr);
+      this[mgr.name] = mgr;
+    }
+  }, {
+    key: "removeInputManager",
+    value: function removeInputManager(id) {
+      var mgr = this[id],
+          mgrIdx = this.managers.indexOf(mgr);
+      if (mgrIdx > -1) {
+        this.managers.splice(mgrIdx, 1);
+        delete this[id];
+      }
+      console.log("removed", mgr);
+    }
+  }, {
+    key: "moveStage",
+    value: function moveStage(position) {
+      DISPLACEMENT.copy(position).sub(this.head.position);
+
+      this.stage.position.add(DISPLACEMENT);
+    }
+  }, {
+    key: "cancelVR",
+    value: function cancelVR() {
+      this.VR.cancel();
+      this.Touch.commands.U.offset = this.Mouse.commands.U.offset = 0;
     }
   }, {
     key: "setAudioFromUser",
@@ -12592,20 +13036,20 @@ var BrowserEnvironment = function (_EventDispatcher) {
     }
   }, {
     key: "lockMovement",
-    get: function get() {
+    get: function get$$1() {
 
       return this.currentControl && this.currentControl.lockMovement;
     }
   }, {
     key: "displays",
-    get: function get() {
+    get: function get$$1() {
 
-      return this.input.VR.displays;
+      return this.VR.displays;
     }
   }, {
     key: "fieldOfView",
-    get: function get() {
-      var d = this.input.VR.currentDevice,
+    get: function get$$1() {
+      var d = this.VR.currentDevice,
           eyes = [d && d.getEyeParameters("left"), d && d.getEyeParameters("right")].filter(identity);
       if (eyes.length > 0) {
         return eyes.reduce(function (fov, eye) {
@@ -12613,13 +13057,33 @@ var BrowserEnvironment = function (_EventDispatcher) {
         }, 0);
       }
     },
-    set: function set(v) {
+    set: function set$$1(v) {
       this.options.defaultFOV = StandardMonitorVRDisplay.DEFAULT_FOV = v;
     }
   }, {
     key: "currentTime",
-    get: function get() {
+    get: function get$$1() {
       return this.audio.context.currentTime;
+    }
+  }, {
+    key: "hasMotionControllers",
+    get: function get$$1() {
+      return !!(this.Vive_0 && this.Vive_0.enabled && this.Vive_0.inPhysicalUse || this.Vive_1 && this.Vive_1.enabled && this.Vive_1.inPhysicalUse);
+    }
+  }, {
+    key: "hasGamepad",
+    get: function get$$1() {
+      return !!(this.Gamepad_0 && this.Gamepad_0.enabled && this.Gamepad_0.inPhysicalUse);
+    }
+  }, {
+    key: "hasMouse",
+    get: function get$$1() {
+      return !!(this.Mouse && this.Mouse.enabled && this.Mouse.inPhysicalUse);
+    }
+  }, {
+    key: "hasTouch",
+    get: function get$$1() {
+      return !!(this.Touch && this.Touch.enabled && this.Touch.inPhysicalUse);
     }
   }]);
   return BrowserEnvironment;
@@ -12637,7 +13101,11 @@ BrowserEnvironment.DEFAULTS = {
   shadowMapSize: 2048,
   shadowCameraSize: 15,
   shadowRadius: 1,
-  progress: null,
+  progress: window.Preloader || {
+    thunk: function thunk() {},
+    hide: function hide() {},
+    resize: function resize() {}
+  },
   // The rate at which the view fades in and out.
   fadeRate: 5,
   // The rate at which the UI shell catches up with the user's movement.
@@ -12660,7 +13128,7 @@ BrowserEnvironment.DEFAULTS = {
   // the far plane of the camera.
   drawDistance: 100,
   // the field of view to use in non-VR settings.
-  defaultFOV: 55,
+  defaultFOV: StandardMonitorVRDisplay.DEFAULT_FOV,
   // The sound to play on loop in the background.
   ambientSound: null,
   // HTML5 canvas element, if one had already been created.
@@ -12680,7 +13148,7 @@ BrowserEnvironment.DEFAULTS = {
   disableAdvertising: false
 };
 
-var COUNTER$6 = 0;
+var COUNTER$7 = 0;
 
 var Model = function (_Entity) {
   inherits(Model, _Entity);
@@ -12688,7 +13156,7 @@ var Model = function (_Entity) {
   function Model(file, options) {
     classCallCheck(this, Model);
 
-    name = options && options.id || "Primrose.Controls.Model[" + COUNTER$6++ + "]";
+    name = options && options.id || "Primrose.Controls.Model[" + COUNTER$7++ + "]";
 
     var _this = possibleConstructorReturn(this, (Model.__proto__ || Object.getPrototypeOf(Model)).call(this, name, options));
 
@@ -12699,10 +13167,10 @@ var Model = function (_Entity) {
 
   createClass(Model, [{
     key: "_ready",
-    get: function get() {
+    get: function get$$1() {
       var _this2 = this;
 
-      return get$1(Model.prototype.__proto__ || Object.getPrototypeOf(Model.prototype), "_ready", this).then(function () {
+      return get(Model.prototype.__proto__ || Object.getPrototypeOf(Model.prototype), "_ready", this).then(function () {
         return cache(_this2._file, function () {
           return ModelFactory.loadModel(_this2._file, _this2.options.type, _this2.options.progress);
         }).then(function (factory) {
@@ -12716,9 +13184,9 @@ var Model = function (_Entity) {
   return Model;
 }(Entity);
 
-var PlainText$1 = function PlainText$1(text, size, fgcolor, bgcolor, x, y, z) {
+var PlainText$1 = function PlainText(text, size, fgcolor, bgcolor, x, y, z) {
   var hAlign = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : "center";
-  classCallCheck(this, PlainText$1);
+  classCallCheck(this, PlainText);
 
   text = text.replace(/\r\n/g, "\n");
   var lines = text.split("\n");
@@ -12780,7 +13248,7 @@ var Progress = function () {
 
     majorColor = majorColor || 0xffffff;
     minorColor = minorColor || 0x000000;
-    var geom = box$1(SIZE, SIZE_SMALL, SIZE_SMALL);
+    var geom = box(SIZE, SIZE_SMALL, SIZE_SMALL);
 
     this.totalBar = geom.colored(minorColor, {
       unshaded: true,
@@ -12830,28 +13298,28 @@ var Progress = function () {
     }
   }, {
     key: "visible",
-    get: function get() {
+    get: function get$$1() {
       return this.totalBar.visible;
     },
-    set: function set(v) {
+    set: function set$$1(v) {
       this.totalBar.visible = v;
     }
   }, {
     key: "position",
-    get: function get() {
+    get: function get$$1() {
       return this.totalBar.position;
     }
   }, {
     key: "quaternion",
-    get: function get() {
+    get: function get$$1() {
       return this.totalBar.quaternion;
     }
   }, {
     key: "value",
-    get: function get() {
+    get: function get$$1() {
       return this.valueBar.scale.x / INSET_LARGE;
     },
-    set: function set(v) {
+    set: function set$$1(v) {
       this.valueBar.scale.x = v * INSET_LARGE;
       this.valueBar.position.x = -SIZE * (1 - v) * INSET_LARGE / 2;
     }
@@ -12866,7 +13334,7 @@ var Progress = function () {
 //
 var TextInput$2 = new BasicTextInput("Text Line input commands");
 
-var COUNTER$7 = 0;
+var COUNTER$8 = 0;
 
 var TextInput = function (_TextBox) {
   inherits(TextInput, _TextBox);
@@ -12875,7 +13343,7 @@ var TextInput = function (_TextBox) {
     classCallCheck(this, TextInput);
 
     var _this = possibleConstructorReturn(this, (TextInput.__proto__ || Object.getPrototypeOf(TextInput)).call(this, Object.assign({}, {
-      id: "Primrose.Controls.TextInput[" + COUNTER$7++ + "]",
+      id: "Primrose.Controls.TextInput[" + COUNTER$8++ + "]",
       padding: 5,
       singleLine: true,
       disableWordWrap: true,
@@ -12900,501 +13368,31 @@ var TextInput = function (_TextBox) {
         }
         txt = val;
       }
-      get$1(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "drawText", this).call(this, ctx, txt, x, y);
+      get(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "drawText", this).call(this, ctx, txt, x, y);
     }
   }, {
     key: "value",
-    get: function get() {
-      return get$1(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "value", this);
+    get: function get$$1() {
+      return get(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "value", this);
     },
-    set: function set(v) {
+    set: function set$$1(v) {
       v = v || "";
       v = v.replace(/\r?\n/g, "");
-      set$1(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "value", v, this);
+      set(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "value", v, this);
     }
   }, {
     key: "selectedText",
-    get: function get() {
-      return get$1(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "selectedText", this);
+    get: function get$$1() {
+      return get(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "selectedText", this);
     },
-    set: function set(v) {
+    set: function set$$1(v) {
       v = v || "";
       v = v.replace(/\r?\n/g, "");
-      set$1(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "selectedText", v, this);
+      set(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "selectedText", v, this);
     }
   }]);
   return TextInput;
 }(TextBox);
-
-var index$5 = typeof Symbol === 'undefined' ? function (description) {
-	return '@' + (description || '@') + Math.random();
-} : Symbol;
-
-/*! npm.im/intervalometer */
-function intervalometer(cb, request, cancel, requestParameter) {
-	var requestId;
-	var previousLoopTime;
-	function loop(now) {
-		// must be requested before cb() because that might call .stop()
-		requestId = request(loop, requestParameter);
-
-		// called with "ms since last call". 0 on start()
-		cb(now - (previousLoopTime || now));
-
-		previousLoopTime = now;
-	}
-	return {
-		start: function start() {
-			if (!requestId) { // prevent double starts
-				loop(0);
-			}
-		},
-		stop: function stop() {
-			cancel(requestId);
-			requestId = null;
-			previousLoopTime = 0;
-		}
-	};
-}
-
-function frameIntervalometer(cb) {
-	return intervalometer(cb, requestAnimationFrame, cancelAnimationFrame);
-}
-
-/*! npm.im/iphone-inline-video */
-function preventEvent(element, eventName, toggleProperty, preventWithProperty) {
-	function handler(e) {
-		if (Boolean(element[toggleProperty]) === Boolean(preventWithProperty)) {
-			e.stopImmediatePropagation();
-			// console.log(eventName, 'prevented on', element);
-		}
-		delete element[toggleProperty];
-	}
-	element.addEventListener(eventName, handler, false);
-
-	// Return handler to allow to disable the prevention. Usage:
-	// const preventionHandler = preventEvent(el, 'click');
-	// el.removeEventHandler('click', preventionHandler);
-	return handler;
-}
-
-function proxyProperty(object, propertyName, sourceObject, copyFirst) {
-	function get() {
-		return sourceObject[propertyName];
-	}
-	function set(value) {
-		sourceObject[propertyName] = value;
-	}
-
-	if (copyFirst) {
-		set(object[propertyName]);
-	}
-
-	Object.defineProperty(object, propertyName, {get: get, set: set});
-}
-
-function proxyEvent(object, eventName, sourceObject) {
-	sourceObject.addEventListener(eventName, function () { return object.dispatchEvent(new Event(eventName)); });
-}
-
-function dispatchEventAsync(element, type) {
-	Promise.resolve().then(function () {
-		element.dispatchEvent(new Event(type));
-	});
-}
-
-// iOS 10 adds support for native inline playback + silent autoplay
-var isWhitelisted = 'object-fit' in document.head.style && /iPhone|iPod/i.test(navigator.userAgent) && !matchMedia('(-webkit-video-playable-inline)').matches;
-
-var ಠ = index$5();
-var ಠevent = index$5();
-var ಠplay = index$5('nativeplay');
-var ಠpause = index$5('nativepause');
-
-/**
- * UTILS
- */
-
-function getAudioFromVideo(video) {
-	var audio = new Audio();
-	proxyEvent(video, 'play', audio);
-	proxyEvent(video, 'playing', audio);
-	proxyEvent(video, 'pause', audio);
-	audio.crossOrigin = video.crossOrigin;
-
-	// 'data:' causes audio.networkState > 0
-	// which then allows to keep <audio> in a resumable playing state
-	// i.e. once you set a real src it will keep playing if it was if .play() was called
-	audio.src = video.src || video.currentSrc || 'data:';
-
-	// if (audio.src === 'data:') {
-	//   TODO: wait for video to be selected
-	// }
-	return audio;
-}
-
-var lastRequests = [];
-var requestIndex = 0;
-var lastTimeupdateEvent;
-
-function setTime(video, time, rememberOnly) {
-	// allow one timeupdate event every 200+ ms
-	if ((lastTimeupdateEvent || 0) + 200 < Date.now()) {
-		video[ಠevent] = true;
-		lastTimeupdateEvent = Date.now();
-	}
-	if (!rememberOnly) {
-		video.currentTime = time;
-	}
-	lastRequests[++requestIndex % 3] = time * 100 | 0 / 100;
-}
-
-function isPlayerEnded(player) {
-	return player.driver.currentTime >= player.video.duration;
-}
-
-function update$1(timeDiff) {
-	var player = this;
-	// console.log('update', player.video.readyState, player.video.networkState, player.driver.readyState, player.driver.networkState, player.driver.paused);
-	if (player.video.readyState >= player.video.HAVE_FUTURE_DATA) {
-		if (!player.hasAudio) {
-			player.driver.currentTime = player.video.currentTime + ((timeDiff * player.video.playbackRate) / 1000);
-			if (player.video.loop && isPlayerEnded(player)) {
-				player.driver.currentTime = 0;
-			}
-		}
-		setTime(player.video, player.driver.currentTime);
-	} else if (player.video.networkState === player.video.NETWORK_IDLE && !player.video.buffered.length) {
-		// this should happen when the source is available but:
-		// - it's potentially playing (.paused === false)
-		// - it's not ready to play
-		// - it's not loading
-		// If it hasAudio, that will be loaded in the 'emptied' handler below
-		player.video.load();
-		// console.log('Will load');
-	}
-
-	// console.assert(player.video.currentTime === player.driver.currentTime, 'Video not updating!');
-
-	if (player.video.ended) {
-		delete player.video[ಠevent]; // allow timeupdate event
-		player.video.pause(true);
-	}
-}
-
-/**
- * METHODS
- */
-
-function play$1() {
-	// console.log('play');
-	var video = this;
-	var player = video[ಠ];
-
-	// if it's fullscreen, use the native player
-	if (video.webkitDisplayingFullscreen) {
-		video[ಠplay]();
-		return;
-	}
-
-	if (player.driver.src !== 'data:' && player.driver.src !== video.src) {
-		// console.log('src changed on play', video.src);
-		setTime(video, 0, true);
-		player.driver.src = video.src;
-	}
-
-	if (!video.paused) {
-		return;
-	}
-	player.paused = false;
-
-	if (!video.buffered.length) {
-		// .load() causes the emptied event
-		// the alternative is .play()+.pause() but that triggers play/pause events, even worse
-		// possibly the alternative is preventing this event only once
-		video.load();
-	}
-
-	player.driver.play();
-	player.updater.start();
-
-	if (!player.hasAudio) {
-		dispatchEventAsync(video, 'play');
-		if (player.video.readyState >= player.video.HAVE_ENOUGH_DATA) {
-			// console.log('onplay');
-			dispatchEventAsync(video, 'playing');
-		}
-	}
-}
-function pause$1(forceEvents) {
-	// console.log('pause');
-	var video = this;
-	var player = video[ಠ];
-
-	player.driver.pause();
-	player.updater.stop();
-
-	// if it's fullscreen, the developer the native player.pause()
-	// This is at the end of pause() because it also
-	// needs to make sure that the simulation is paused
-	if (video.webkitDisplayingFullscreen) {
-		video[ಠpause]();
-	}
-
-	if (player.paused && !forceEvents) {
-		return;
-	}
-
-	player.paused = true;
-	if (!player.hasAudio) {
-		dispatchEventAsync(video, 'pause');
-	}
-	if (video.ended) {
-		video[ಠevent] = true;
-		dispatchEventAsync(video, 'ended');
-	}
-}
-
-/**
- * SETUP
- */
-
-function addPlayer(video, hasAudio) {
-	var player = video[ಠ] = {};
-	player.paused = true; // track whether 'pause' events have been fired
-	player.hasAudio = hasAudio;
-	player.video = video;
-	player.updater = frameIntervalometer(update$1.bind(player));
-
-	if (hasAudio) {
-		player.driver = getAudioFromVideo(video);
-	} else {
-		video.addEventListener('canplay', function () {
-			if (!video.paused) {
-				// console.log('oncanplay');
-				dispatchEventAsync(video, 'playing');
-			}
-		});
-		player.driver = {
-			src: video.src || video.currentSrc || 'data:',
-			muted: true,
-			paused: true,
-			pause: function () {
-				player.driver.paused = true;
-			},
-			play: function () {
-				player.driver.paused = false;
-				// media automatically goes to 0 if .play() is called when it's done
-				if (isPlayerEnded(player)) {
-					setTime(video, 0);
-				}
-			},
-			get ended() {
-				return isPlayerEnded(player);
-			}
-		};
-	}
-
-	// .load() causes the emptied event
-	video.addEventListener('emptied', function () {
-		// console.log('driver src is', player.driver.src);
-		var wasEmpty = !player.driver.src || player.driver.src === 'data:';
-		if (player.driver.src && player.driver.src !== video.src) {
-			// console.log('src changed to', video.src);
-			setTime(video, 0, true);
-			player.driver.src = video.src;
-			// playing videos will only keep playing if no src was present when .play()’ed
-			if (wasEmpty) {
-				player.driver.play();
-			} else {
-				player.updater.stop();
-			}
-		}
-	}, false);
-
-	// stop programmatic player when OS takes over
-	video.addEventListener('webkitbeginfullscreen', function () {
-		if (!video.paused) {
-			// make sure that the <audio> and the syncer/updater are stopped
-			video.pause();
-
-			// play video natively
-			video[ಠplay]();
-		} else if (hasAudio && !player.driver.buffered.length) {
-			// if the first play is native,
-			// the <audio> needs to be buffered manually
-			// so when the fullscreen ends, it can be set to the same current time
-			player.driver.load();
-		}
-	});
-	if (hasAudio) {
-		video.addEventListener('webkitendfullscreen', function () {
-			// sync audio to new video position
-			player.driver.currentTime = video.currentTime;
-			// console.assert(player.driver.currentTime === video.currentTime, 'Audio not synced');
-		});
-
-		// allow seeking
-		video.addEventListener('seeking', function () {
-			if (lastRequests.indexOf(video.currentTime * 100 | 0 / 100) < 0) {
-				// console.log('User-requested seeking');
-				player.driver.currentTime = video.currentTime;
-			}
-		});
-	}
-}
-
-function overloadAPI(video) {
-	var player = video[ಠ];
-	video[ಠplay] = video.play;
-	video[ಠpause] = video.pause;
-	video.play = play$1;
-	video.pause = pause$1;
-	proxyProperty(video, 'paused', player.driver);
-	proxyProperty(video, 'muted', player.driver, true);
-	proxyProperty(video, 'playbackRate', player.driver, true);
-	proxyProperty(video, 'ended', player.driver);
-	proxyProperty(video, 'loop', player.driver, true);
-	preventEvent(video, 'seeking');
-	preventEvent(video, 'seeked');
-	preventEvent(video, 'timeupdate', ಠevent, false);
-	preventEvent(video, 'ended', ಠevent, false); // prevent occasional native ended events
-}
-
-function enableInlineVideo(video, hasAudio, onlyWhitelisted) {
-	if ( hasAudio === void 0 ) hasAudio = true;
-	if ( onlyWhitelisted === void 0 ) onlyWhitelisted = true;
-
-	if ((onlyWhitelisted && !isWhitelisted) || video[ಠ]) {
-		return;
-	}
-	addPlayer(video, hasAudio);
-	overloadAPI(video);
-	video.classList.add('IIV');
-	if (!hasAudio && video.autoplay) {
-		video.play();
-	}
-	if (!/iPhone|iPod|iPad/.test(navigator.platform)) {
-		console.warn('iphone-inline-video is not guaranteed to work in emulated environments');
-	}
-}
-
-enableInlineVideo.isWhitelisted = isWhitelisted;
-
-var COUNTER$8 = 0;
-
-// Videos don't auto-play on mobile devices, so let's make them all play whenever we tap the screen.
-var processedVideos = [];
-function findAndFixVideo(evt) {
-  var vids = document.querySelectorAll("video");
-  for (var i = 0; i < vids.length; ++i) {
-    fixVideo(vids[i]);
-  }
-  window.removeEventListener("touchend", findAndFixVideo);
-  window.removeEventListener("mouseup", findAndFixVideo);
-  window.removeEventListener("keyup", findAndFixVideo);
-}
-
-function fixVideo(vid) {
-  if (isiOS && processedVideos.indexOf(vid) === -1) {
-    processedVideos.push(vid);
-    enableInlineVideo(vid, false);
-  }
-}
-
-window.addEventListener("touchend", findAndFixVideo, false);
-window.addEventListener("mouseup", findAndFixVideo, false);
-window.addEventListener("keyup", findAndFixVideo, false);
-
-var Video = function (_BaseTextured) {
-  inherits(Video, _BaseTextured);
-
-  function Video(videos, options) {
-    classCallCheck(this, Video);
-
-    ////////////////////////////////////////////////////////////////////////
-    // normalize input parameters
-    ////////////////////////////////////////////////////////////////////////
-    if (!(videos instanceof Array)) {
-      videos = [videos];
-    }
-
-    options = Object.assign({}, {
-      id: "Primrose.Controls.Video[" + COUNTER$8++ + "]"
-    }, options);
-
-    return possibleConstructorReturn(this, (Video.__proto__ || Object.getPrototypeOf(Video)).call(this, videos, options));
-  }
-
-  createClass(Video, [{
-    key: "_loadFiles",
-    value: function _loadFiles(videos, progress) {
-      var _this2 = this;
-
-      this._elements = Array.prototype.map.call(videos, function (spec, i) {
-        var video = null;
-        if (typeof spec === "string") {
-          video = document.querySelector("video[src='" + spec + "']");
-          if (!video) {
-            video = document.createElement("video");
-            video.src = spec;
-          }
-        } else if (spec instanceof HTMLVideoElement) {
-          video = spec;
-        } else if (spec.toString() === "[object MediaStream]" || spec.toString() === "[object LocalMediaStream]") {
-          video = document.createElement("video");
-          video.srcObject = spec;
-        }
-        video.onprogress = progress;
-        video.onloadedmetadata = progress;
-        video.muted = true;
-        video.loop = true;
-        video.setAttribute("playsinline", "");
-        video.setAttribute("webkit-playsinline", "");
-        if (!isiOS) {
-          video.preload = "auto";
-        }
-
-        var loadOptions = Object.assign({}, _this2.options);
-        _this2._meshes[i] = textured(_this2._geometry, video, loadOptions);
-
-        if (!video.parentElement) {
-          document.body.insertBefore(video, document.body.children[0]);
-          fixVideo(video);
-        }
-
-        loadOptions.promise.then(function (txt) {
-          return _this2._textures[i] = txt;
-        });
-
-        return video;
-      });
-      return Promise.resolve();
-    }
-  }, {
-    key: "play",
-    value: function play() {
-      if (this._elements.length > 0) {
-        this._elements[0].play();
-      }
-    }
-  }, {
-    key: "update",
-    value: function update() {
-      get$1(Video.prototype.__proto__ || Object.getPrototypeOf(Video.prototype), "update", this).call(this);
-      for (var i = 0; i < this._textures.length; ++i) {
-        if (this._textures[i]) {
-          var elem = this._elements[i];
-          if (elem.currentTime !== this._lastTime) {
-            this._textures[i].needsUpdate = true;
-            this._lastTime = elem.currentTime;
-          }
-        }
-      }
-    }
-  }]);
-  return Video;
-}(BaseTextured);
 
 var Controls = {
   Button2D: Button2D,
@@ -13449,7 +13447,7 @@ var DOM = {
 var Graphics = {
   fixGeometry: fixGeometry,
   InsideSphereGeometry: InsideSphereGeometry,
-  loadTexture: loadTexture$1,
+  loadTexture: loadTexture,
   ModelFactory: ModelFactory
 };
 
@@ -13462,7 +13460,7 @@ function delObject(url, options) {
 }
 
 function getText(url, options) {
-  return get$2("text", url, options);
+  return get$1("text", url, options);
 }
 
 function post(type, url, options) {
@@ -13476,7 +13474,7 @@ function postObject(url, options) {
 var HTTP = {
   del: del,
   delObject: delObject,
-  get: get$2,
+  get: get$1,
   getBuffer: getBuffer,
   getObject: getObject,
   getText: getText,
@@ -13507,6 +13505,7 @@ var Location = function (_InputProcessor) {
   createClass(Location, [{
     key: "setState",
     value: function setState(location) {
+      this.inPhysicalUse = true;
       for (var p in location.coords) {
         var k = p.toUpperCase();
         if (this.axisNames.indexOf(k) > -1) {
@@ -13528,7 +13527,6 @@ Location.DEFAULTS = {
 };
 
 var Input = {
-  FPSInput: FPSInput,
   Gamepad: Gamepad,
   InputProcessor: InputProcessor,
   Keyboard: Keyboard,
@@ -13760,7 +13758,7 @@ var WebRTCSocket = function (_EventDispatcher) {
   createClass(WebRTCSocket, [{
     key: "emit",
     value: function emit(type, evt) {
-      get$1(WebRTCSocket.prototype.__proto__ || Object.getPrototypeOf(WebRTCSocket.prototype), "emit", this).call(this, type, {
+      get(WebRTCSocket.prototype.__proto__ || Object.getPrototypeOf(WebRTCSocket.prototype), "emit", this).call(this, type, {
         fromUserName: this.fromUserName,
         fromUserIndex: this.fromUserIndex,
         toUserName: this.toUserName,
@@ -13815,7 +13813,7 @@ var WebRTCSocket = function (_EventDispatcher) {
     }
   }, {
     key: "complete",
-    get: function get() {
+    get: function get$$1() {
       return !this.rtc || this.rtc.signalingState === "closed";
     }
   }]);
@@ -13981,18 +13979,18 @@ var AudioChannel = function (_WebRTCSocket) {
   }, {
     key: "createOffer",
     value: function createOffer() {
-      return get$1(AudioChannel.prototype.__proto__ || Object.getPrototypeOf(AudioChannel.prototype), "createOffer", this).call(this).then(preferOpus);
+      return get(AudioChannel.prototype.__proto__ || Object.getPrototypeOf(AudioChannel.prototype), "createOffer", this).call(this).then(preferOpus);
     }
   }, {
     key: "complete",
-    get: function get() {
+    get: function get$$1() {
       if (this.goFirst) {
         this._log(1, "[First]: offer created: %s, answer recv: %s -> offer recv: %s -> answer created: %s.", this.progress.offer.created, this.progress.answer.received, this.progress.offer.received, this.progress.answer.created, this.rtc.signalingState);
       } else {
         this._log(1, "[Second]: offer recv: %s, answer created: %s -> offer created: %s -> answer recv: %s.", this.progress.offer.received, this.progress.answer.created, this.progress.offer.created, this.progress.answer.received, this.rtc.signalingState);
       }
 
-      return get$1(AudioChannel.prototype.__proto__ || Object.getPrototypeOf(AudioChannel.prototype), "complete", this) || this.progress.offer.received && this.progress.offer.created && this.progress.answer.received && this.progress.answer.created;
+      return get(AudioChannel.prototype.__proto__ || Object.getPrototypeOf(AudioChannel.prototype), "complete", this) || this.progress.offer.received && this.progress.offer.created && this.progress.answer.received && this.progress.answer.created;
     }
   }]);
   return AudioChannel;
@@ -14032,13 +14030,13 @@ var DataChannel = function (_WebRTCSocket) {
     }
   }, {
     key: "complete",
-    get: function get() {
+    get: function get$$1() {
       if (this.goFirst) {
         this._log(1, "[First]: OC %s -> AR %s.", this.progress.offer.created, this.progress.answer.received);
       } else {
         this._log(1, "[Second]: OC %s -> AR %s.", this.progress.offer.created, this.progress.answer.received);
       }
-      return get$1(DataChannel.prototype.__proto__ || Object.getPrototypeOf(DataChannel.prototype), "complete", this) || this.goFirst && this.progress.offer.created && this.progress.answer.received || !this.goFirst && this.progress.offer.received && this.progress.answer.created;
+      return get(DataChannel.prototype.__proto__ || Object.getPrototypeOf(DataChannel.prototype), "complete", this) || this.goFirst && this.progress.offer.created && this.progress.answer.received || !this.goFirst && this.progress.offer.received && this.progress.answer.created;
     }
   }]);
   return DataChannel;
@@ -14052,7 +14050,7 @@ var Network = {
   WebRTCSocket: WebRTCSocket
 };
 
-function ID$1() {
+function ID() {
   return (Math.random() * Math.log(Number.MAX_VALUE)).toString(36).replace(".", "");
 }
 
@@ -14070,7 +14068,7 @@ function vector(min, max) {
 
 var Random = {
   color: color,
-  ID: ID$1,
+  ID: ID,
   int: int,
   item: item,
   number: number,
@@ -14119,7 +14117,7 @@ var Recorder = function (_Automator) {
   createClass(Recorder, [{
     key: "update",
     value: function update(t) {
-      get$1(Recorder.prototype.__proto__ || Object.getPrototypeOf(Recorder.prototype), "update", this).call(this, t);
+      get(Recorder.prototype.__proto__ || Object.getPrototypeOf(Recorder.prototype), "update", this).call(this, t);
       var records = this.watchers.map(function (w) {
         return w.read();
       }).filter(function (r) {
@@ -14986,7 +14984,7 @@ var Tools = {
   Teleporter: Teleporter
 };
 
-var index$4 = {
+var index$5 = {
   Angle: Angle,
   Audio: Audio$1,
   BrowserEnvironment: BrowserEnvironment,
@@ -15025,4 +15023,5 @@ var index$4 = {
 Object.assign(window, flags, liveAPI, util);
 // Do this just for side effects, we are monkey-patching Three.js classes with our own utilities.
 
-export default index$4;
+export default index$5;
+//# sourceMappingURL=PrimroseWithDoc.modules.js.map
