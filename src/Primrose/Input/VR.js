@@ -10,6 +10,12 @@ pliny.class({
   }]
 });
 
+const DEFAULT_POSE = {
+    position: [0, 0, 0],
+    orientation: [0, 0, 0, 1]
+  };
+
+import { Vector3, Matrix4 } from "three";
 import PoseInputProcessor from "./PoseInputProcessor";
 import isChrome from "../../flags/isChrome";
 import isFirefox from "../../flags/isFirefox";
@@ -22,8 +28,6 @@ import standardLockBehavior from "../../util/standardLockBehavior";
 import installPolyfills from "../Displays/install";
 import StandardMonitorVRDisplay from "../Displays/StandardMonitorVRDisplay";
 import CardboardVRDisplay from "../Displays/CardboardVRDisplay";
-import { Matrix4 } from "three";
-
 export default class VR extends PoseInputProcessor {
 
   static isStereoDisplay(display) {
@@ -38,24 +42,18 @@ export default class VR extends PoseInputProcessor {
     this.options = options;
     this.displays = [];
     this._transformers = [];
+    this.lastLastTimerDevice = null;
+    this.lastTimerDevice = null;
     this.timerDevice = null;
     this.timer = null;
     this.currentDeviceIndex = -1;
-    this.stage = {
-      matrix: new Matrix4(),
-      sizeX: 0,
-      sizeZ: 0
-    };
+    this.movePlayer = new Matrix4();
+    this.stage = null;
+    this.lastStageWidth = null;
+    this.lastStageDepth = null;
     this.isStereo = false;
+    installPolyfills(options);
 
-    this.centerWorld = new Matrix4();
-    this.leftProjection = new Matrix4();
-    this.rightProjection = new Matrix4();
-    this.leftView = new Matrix4();
-    this.rightView = new Matrix4();
-    this.leftWorld = new Matrix4();
-    this.rightWorld = new Matrix4();
-    this.matrices = [this.leftWorld, this.rightWorld];
 
     if(this.options.nonstandardIPD !== null){
       CardboardVRDisplay.IPD = this.options.nonstandardIPD;
@@ -67,13 +65,10 @@ export default class VR extends PoseInputProcessor {
       CardboardVRDisplay.NECK_DEPTH = this.options.nonstandardNeckDepth;
     }
 
-    installPolyfills(options);
-
-    this.currentDevice = null;
     this.ready = navigator.getVRDisplays()
       .then((displays) => {
         this.displays.push.apply(this.displays, displays);
-        this.currentDevice = this.displays[0];
+        this.connect(0);
         return this.displays;
       });
   }
@@ -83,48 +78,17 @@ export default class VR extends PoseInputProcessor {
   }
 
   get isNativeWebVR() {
-    return this.currentDevice && this.currentDevice.isNativeVRDisplay;
-  }
-
-  updateFrameData() {
-    if(this.currentDevice) {
-      this.currentDevice.getFrameData(this.frameData);
-
-      var len = 1;
-      this.leftProjection.fromArray(this.frameData.leftProjectionMatrix);
-      this.leftView.fromArray(this.frameData.leftViewMatrix);
-      this.leftView.getInverse(this.leftView);
-      this.leftWorld.multiplyMatrices(this.leftProjection, this.leftView);
-      if(this.isStereo) {
-        len = 2;
-        this.rightProjection.fromArray(this.frameData.rightProjectionMatrix);
-        this.rightView.fromArray(this.frameData.rightViewMatrix);
-        this.rightView.getInverse(this.rightView);
-        this.rightWorld.multiplyMatrices(this.rightProjection, this.rightView);
-      }
-
-      for(let i = 0; i < 16; ++i) {
-        this.centerWorld.elements[i] = 0;
-        for(let j = 0; j < len; ++j) {
-          this.centerWorld.elements[i] += this.matrices[j].elements[i];
-        }
-        this.centerWorld.elements[i] /= len;
-      }
-
-      if(len === 2) {
-        this.centerWorld.debug("average of matrices", 3);
-      }
-    }
+    return this.currentDevice && !this.currentDevice.isPolyfilled;
   }
 
   connect(selectedIndex) {
     this.currentDevice = null;
     this.currentDeviceIndex = selectedIndex;
+    this.currentPose = null;
     if (0 <= selectedIndex && selectedIndex <= this.displays.length) {
       this.currentDevice = this.displays[selectedIndex];
+      this.currentPose = this.currentDevice.getPose();
       this.isStereo = VR.isStereoDisplay(this.currentDevice);
-      this.frameData = this.currentDevice.frameData;
-      this.updateFrameData();
     }
   }
 
@@ -140,8 +104,13 @@ export default class VR extends PoseInputProcessor {
         layers = [layers];
       }
 
+      // A hack to deal with a bug in the current build of Chromium
+      if (this.isNativeMobileWebVR && this.isStereo) {
+        layers = layers[0];
+      }
+
       var promise = this.currentDevice.requestPresent(layers);
-      if(isMobile) {
+      if(isMobile || !isFirefox) {
         promise = promise.then(standardLockBehavior);
       }
       return promise;
@@ -154,6 +123,7 @@ export default class VR extends PoseInputProcessor {
       promise = this.currentDevice.exitPresent();
       this.currentDevice = null;
       this.currentDeviceIndex = -1;
+      this.currentPose = null;
     }
     else {
       promise = Promise.resolve();
@@ -177,35 +147,61 @@ export default class VR extends PoseInputProcessor {
   }
 
   update(dt) {
-    this.updateFrameData();
+    var x, z, stage;
 
-    let stage = this.currentDevice &&  this.currentDevice.stageParameters;
-    if (stage) {
-      this.stage.matrix.fromArray(stage.sittingToStandingTransform);
-      this.stage.sizeX = stage.sizeX;
-      this.stage.sizeZ = stage.sizeZ;
+    if (this.currentDevice) {
+      this.currentPose = this.currentDevice.getPose();
+      stage = this.currentDevice.stageParameters;
     }
-    else {
-      this.stage.matrix.makeTranslation(0, this.options.avatarHeight, 0);
-      this.stage.sizeX = 0;
-      this.stage.sizeZ = 0;
+    else{
+      stage = null;
     }
 
     super.update(dt);
+
+    if (stage) {
+      this.movePlayer.fromArray(stage.sittingToStandingTransform);
+      x = stage.sizeX;
+      z = stage.sizeZ;
+    }
+    else {
+      this.movePlayer.makeTranslation(0, this.options.avatarHeight, 0);
+      x = 0;
+      z = 0;
+    }
+
+    var s = {
+      matrix: this.movePlayer,
+      sizeX: x,
+      sizeZ: z
+    };
+
+    if (!this.stage || s.sizeX !== this.stage.sizeX || s.sizeZ !== this.stage.sizeZ) {
+      this.stage = s;
+    }
+  }
+
+  get hasStage() {
+    return this.stage && this.stage.sizeX * this.stage.sizeZ > 0;
   }
 
   submitFrame() {
-    if(this.currentDevice && this.currentDevice === this.timerDevice) {
-      this.currentDevice.submitFrame();
+    if(this.currentDevice) {
+      this.currentDevice.submitFrame(this.currentPose);
     }
   }
 
   startAnimation(callback){
-    this.timerDevice = this.currentDevice || window;
-    this.timer = this.timerDevice.requestAnimationFrame(callback);
+    if(this.currentDevice) {
+      this.lastLastTimerDevice = this.lastTimerDevice;
+      this.lastTimerDevice = this.timerDevice;
+      this.timerDevice = this.currentDevice;
+      this.timer = this.currentDevice.requestAnimationFrame(callback);
+      return this.timer;
+    }
   }
 
-  stopAnimation(id) {
+  cancelAnimation() {
     if(this.timerDevice && this.timer) {
       this.timerDevice.cancelAnimationFrame(this.timer);
       this.timer = null;
@@ -228,7 +224,7 @@ export default class VR extends PoseInputProcessor {
   }
 
   get isPolyfilled() {
-    return this.currentDevice && !this.currentDevice.isNativeVRDisplay;
+    return this.currentDevice && this.currentDevice.isPolyfilled;
   }
 
   get isPresenting() {
@@ -238,59 +234,75 @@ export default class VR extends PoseInputProcessor {
   get hasOrientation() {
     return this.currentDevice && this.currentDevice.capabilities.hasOrientation;
   }
-}
 
-class Transform {
-  constructor() {
-    this.view = null;
-    this.projection = null;
-    this.viewport = {
-      left: null,
-      top: null,
-      width: null,
-      height: null
-    };
-    Object.defineProperty(this.viewport, "right", {
-      get: () => this.left + this.width
-    });
+  get currentCanvas() {
+    if(this.isPresenting) {
+      var layers = this.currentDevice.getLayers();
+      if(layers.length > 0){
+        return layers[0].source;
+      }
+    }
+    return null;
   }
 }
 
 class ViewCameraTransform {
+  static makeTransform(eye, near, far) {
+    return {
+      translation: new Vector3().fromArray(eye.offset),
+      projection: ViewCameraTransform.fieldOfViewToProjectionMatrix(eye.fieldOfView, near, far),
+      viewport: {
+        left: 0,
+        top: 0,
+        width: eye.renderWidth,
+        height: eye.renderHeight
+      }
+    };
+  }
+
+  static fieldOfViewToProjectionMatrix(fov, zNear, zFar) {
+    var upTan = Math.tan(fov.upDegrees * Math.PI / 180.0),
+      downTan = Math.tan(fov.downDegrees * Math.PI / 180.0),
+      leftTan = Math.tan(fov.leftDegrees * Math.PI / 180.0),
+      rightTan = Math.tan(fov.rightDegrees * Math.PI / 180.0),
+      xScale = 2.0 / (leftTan + rightTan),
+      yScale = 2.0 / (upTan + downTan),
+      matrix = new Matrix4();
+
+    matrix.elements[0] = xScale;
+    matrix.elements[1] = 0.0;
+    matrix.elements[2] = 0.0;
+    matrix.elements[3] = 0.0;
+    matrix.elements[4] = 0.0;
+    matrix.elements[5] = yScale;
+    matrix.elements[6] = 0.0;
+    matrix.elements[7] = 0.0;
+    matrix.elements[8] = -((leftTan - rightTan) * xScale * 0.5);
+    matrix.elements[9] = ((upTan - downTan) * yScale * 0.5);
+    matrix.elements[10] = -(zNear + zFar) / (zFar - zNear);
+    matrix.elements[11] = -1.0;
+    matrix.elements[12] = 0.0;
+    matrix.elements[13] = 0.0;
+    matrix.elements[14] = -(2.0 * zFar * zNear) / (zFar - zNear);
+    matrix.elements[15] = 0.0;
+
+    return matrix;
+  }
+
   constructor(display) {
     this.display = display;
-    this.params = [new Transform()];
   }
 
   getTransforms(near, far) {
-    this.display.depthNear = near;
-    this.display.depthFar = far;
-
-    const f = this.display.frameData,
-      l = this.display.getEyeParameters("left"),
+    const l = this.display.getEyeParameters("left"),
       r = this.display.getEyeParameters("right"),
-      lt = this.params[0];
-
-    lt.view = f.leftViewMatrix;
-    lt.projection = f.leftProjectionMatrix;
-    lt.viewport.width = l.renderWidth;
-    lt.viewport.height = l.renderHeight;
-
+      params = [ViewCameraTransform.makeTransform(l, near, far)];
     if (r) {
-      if(this.params.length === 1) {
-        this.params.push(new Transform());
-      }
-
-      const rt = this.params[1];
-      rt.view = f.rightViewMatrix;
-      rt.projection = f.rightProjectionMatrix;
-      rt.viewport.width = r.renderWidth;
-      rt.viewport.height = r.renderHeight;
+      params.push(ViewCameraTransform.makeTransform(r, near, far));
     }
-
-    for (let i = 1; i < this.params.length; ++i) {
-      this.params[i].viewport.left = this.params[i - 1].viewport.right;
+    for (let i = 1; i < params.length; ++i) {
+      params[i].viewport.left = params[i - 1].viewport.left + params[i - 1].viewport.width;
     }
-    return this.params;
+    return params;
   }
 }
