@@ -321,6 +321,8 @@ td:nth-child(2) {
   padding: 1em;
   padding-left: 2em;
   border-left: solid 3px #ec2471;
+  overflow-y: scroll;
+  max-height: 30em;
 }
 .icon {
   display: inline-block;
