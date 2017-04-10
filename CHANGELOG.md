@@ -1,3 +1,20 @@
+## v0.31.4 - Apr 05, 2017
+
+* Sunk the `FPSInput` class into the `BrowserEnvironment` class. This "makes sense" in that the `FPSInput` class was really just an adapter for reading user input values via the events that the browser provides. If we ever implement other `*Environment` classes, the user input would come through completely different means. In other words, all references to the browser's `window` and `document` objects need to be in `BrowserEnvironment` (or some module clearly namespaced to be pertinent to browsers only).
+* Enabled "tapping" on things in the scene with your finger on touch screens. This way, you can use Primrose on a smartphone and not have to use only the gaze-cursor to interact.
+* Implemented a means to be able to trigger "user actions" (the special-case events that browsers have decreed are allowed to trigger "dangerous" features like full-screen and VR request-present) off of any 3D element in the scene. There is no longer a need to have any 2D, HTML-based UI in Primrose demos. The trick is done by saving a reference to any "user action"-able event handlers on the objects that store them when the user points the mouse at them or touch-starts on them with their finger, then refer back to that saved function when the actual user-action of `mouseup` or `touchend` happens.
+* Fixed the field of view calculation--to quote Bullwinkle--"this time for SURE!" Not really. Who can ever be sure of anything?
+* In preparation for some day upgrading to full WebVR 1.1 support (which I am going to assume will make it easier to transition to WebVR 2.0 whenever it comes out), we've eliminated all calls to `getImmediatePose` on a `VRDisplay` in favor of calling only `getPose`.
+* Renamed the `latLon` mixin-method for Three.js Meshes to `latLng`, because that turned out to be how I was trying to type it all the time.
+* Fixed shadows rendering weird in the `jabbers` and `shadows` demo. The shadow "bias" value was wrong.
+* Fixed webcam support.
+* Now importing `DEG2RAD` and `RAD2DEG` out of Three.js, rather than keeping our own copy.
+* Moved neck-modeling code out of `BrowserEnvironment` and into `CardboardVRDisplay`.
+* Enabled development mode with source maps, woo!
+* Added a few references to Amazon Fire TV's pause and resume events to eventually, one day, run on Amazon Fire TV with their particular gamepad.
+* Fixed an issue where the Preloader wouldn't disappear once the scene was loaded if it never updated progress, i.e. if the scene was completely procedural and contained no loaded assets.
+* Wrote some documentation for setting up Git LFS on a new project or new user.
+
 ## v0.31.3 - Feb 22, 2017
 
 * We have a new demo, called <a href="../demos/forest.html">Forest</a>.
