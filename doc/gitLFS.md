@@ -1,13 +1,13 @@
 ## Notes on Git LFS
 When using Git LFS, you have to remember to replace most commands starting with `git` on the command line with `git lfs`, e.g.:
 
-````
+```
 git checkout [Branch-Name] -> git lfs checkout [Branch-Name]
 git clone [Repository-URL] -> git lfs [Repository-URL]
 git fetch -> git lfs fetch
 git pull -> git lfs pull
 git push -> git lfs push
-````
+```
 
 Additionally, there is a `git lfs status` command that provides additional information about the repository. It does not replace the standard `git status` command.
 
@@ -20,29 +20,29 @@ Go to [this site](https://git-lfs.github.com/) and install Git LFS.
 ### Clone an Existing Repository
 For users joining an existing project, the `git lfs clone` function is fundamentally broken. Instead, you need to manually separate the process of cloning the repository and downloading the LFS-tracked objects.
 
-````
+```
 git clone https://github.com/[User-Name]/[Project-Name].git
 cd [Project-Name]
 git lfs pull
-````
+```
 
 ### (Optional) disable locking.
 If you don't have commit access to a repository, you'll probably need to disable LFS' lock.
 
-````
+```
 git config 'lfs.https://github.com/[User-Name]/[Project-Name].git/info/lfs.locksverify'
+```
 
 ### (Optional) for developers using Unity:
 [Follow these instructions to find Unity's Yaml Merge tool](https://docs.unity3d.com/Manual/SmartMerge.html). Ignore the steps on configuring the tool for use with Git by directly editing the .git or .gitconfig file. Instead, use the command line.
 
-````
+```
 git config --global merge.tool "unityyamlmerge"
 git config --global mergetool.unityyamlmerge.cmd "'[Unity-Install-Directory]/Editor/Data/Tools/UnityYAMLMerge.exe' merge -p $BASE $REMOTE $LOCAL $MERGED"
 git config --global mergetool.unityyamlmerge.trustexitcode "false"
-````
+```
 
 Remembering to substitute `[User-Name]` and `[Project-Name]`. Your `[Unity-Install-Directory]` is likely to be `C:/Program Files/Unity`.
-````
 
 Finally, Unity projects have large files that--if configured correctly--exist as YAML-formatted text documents. If not configured correctly, they are a proprietary binary format that is impossible to Diff and Merge, so you might want to make sure text formatted assets are enabled.
 
@@ -54,14 +54,14 @@ The following steps have to be done on a per-project basis. Once they are done b
 ### Create the Git LFS hooks in the repo
 Open your terminal and navigate to your project, then type:
 
-````
+```
 git lfs install
-````
+```
 
 ### Create the .gitattributes file
 Then in the same directory create the file `.gitattributes` and copy the contents:
 
-````
+```
 *.cs diff=csharp text
 *.shader text
 
@@ -125,12 +125,12 @@ Then in the same directory create the file `.gitattributes` and copy the content
 *.lxo filter=lfs diff=lfs merge=lfs -text
 *.unity filter=lfs diff=lfs merge=lfs -text
 *.7z filter=lfs diff=lfs merge=lfs -text
-````
+```
 
 ### Create the .gitignore file
 And also these entries to your `.gitignore` file (creating one if you don't already have it):
 
-````
+```
 ## Unity
 
 ### These get regenerated at runtime
@@ -297,4 +297,4 @@ node_modules/
 bower_components/
 .ntvs_analysis.dat
 orleans.codegen.cs
-````
+```
