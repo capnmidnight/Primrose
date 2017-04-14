@@ -252,7 +252,7 @@ import PlainText from "./Text/Grammars/PlainText";
 
 import Teleporter from "./Tools/Teleporter";
 
-import { Quality, PIXEL_SCALES } from "./Constants";
+import { Quality, PIXEL_SCALES } from "./constants";
 
 
 import { EventDispatcher, Object3D, BackSide, PCFSoftShadowMap, FogExp2, Scene, PerspectiveCamera, TextGeometry, Quaternion, Color, Euler, Vector3, Matrix4, WebGLRenderer } from "three";

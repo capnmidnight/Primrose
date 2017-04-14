@@ -8,7 +8,7 @@ This top-level namespace contains classes for manipulating and viewing 3D enviro
 import Angle from "./Angle";
 import Audio from "./Audio";
 import BrowserEnvironment from "./BrowserEnvironment";
-import Constants from "./Constants";
+import Constants from "./constants";
 import Controls from "./Controls";
 import Displays from "./Displays";
 import DOM from "./DOM";
