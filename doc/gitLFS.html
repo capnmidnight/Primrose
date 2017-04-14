@@ -1,32 +1,44 @@
 <!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, shrink-to-fit=0, initial-scale=1.0"><meta name="apple-touch-fullscreen" content="yes"><meta name="web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="theme-color" content="black"><meta name="description" content="A WebVR application framework."><meta name="keywords" content="WebGL, WebVR, HTML5, JavaScript, text editor, source code editor, virtual reality, Primrose"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@Primrose_VR"><meta property="og:site_name" content="Primrose VR"><meta property="og:description" content="Primrose: Framework for WebVR Applications"><meta name="twitter:description" content="Primrose: Framework for WebVR Applications"><meta property="og:url" content="http://www.primrosevr.com/undefined"><!-- start main.pug meta block --><meta name="twitter:image" content="http://www.primrosevr.com/images/screenshot.jpg"><meta property="og:image" content="http://www.primrosevr.com/images/screenshot.jpg"><!-- end main.pug meta block -->
 <!-- start main.pug title block --><meta property="og:title" content="Primrose VR: WebVR Application Framework"><meta name="twitter:title" content="Primrose VR: WebVR Application Framework"><title>Primrose VR: WebVR Application Framework</title><!-- end main.pug title block --><link type="text/css" rel="stylesheet" href="../doc/style.min.css"><!-- start documentation.pug head append --><script src="../node_modules/lavu-details-polyfill/lib/index.min.js"></script><script src="../node_modules/pliny/pliny.min.js"></script><script src="../node_modules/three/build/three.min.js"></script><script src="../Primrose.min.js"></script><script src="../doc/PrimroseDocumentation.min.js"></script><!-- end documentation.pug head append --><script src="../ga.js"></script></head><body><header role="banner"><a id="logo" href="../"><img src="../doc/images/primrose40.png" alt="logo" title="Primrose logo"><span class="version-number">v0.31.4</span></a><nav role="navigation"><ul><li><a href="../demos/">Demos</a></li><li><a href="../doc/">Docs</a></li><li><a href="../doc/faq.html">FAQ</a></li><li><a href="../doc/community.html">Community</a></li><li><a href="https://github.com/NotionTheory/Primrose/" target="_blank">Github</a></li></ul></nav><h1>Setting Up Git LFS (Large File System) for Unity</h1></header><!-- start main.pug banner block --><!-- end main.pug banner block -->
-<!-- start main.pug main block --><main><!-- start documentation.pug main block --><div id="top"></div><div id="contents"><nav><ul><li><a href="../doc/readme.html">Installation &amp; Setup</a></li><li><a href="../doc/contributing.html">Contributing</a></li><li><a href="../doc/changelog.html">Change Log</a></li><li><a href="../doc/steamVRDongles.html">Pairing Multiple SteamVR Controllers</a></li><li><a href="../doc/gitLFS.html">Setting up Git LFS</a></li></ul></nav></div><div id="documentation"><section><article><!-- start documentation.pug documentation block --><h1 id="setup-git-lfs-for-a-new-user">Setup Git LFS for a new user</h1>
+<!-- start main.pug main block --><main><!-- start documentation.pug main block --><div id="top"></div><div id="contents"><nav><ul><li><a href="../doc/readme.html">Installation &amp; Setup</a></li><li><a href="../doc/contributing.html">Contributing</a></li><li><a href="../doc/changelog.html">Change Log</a></li><li><a href="../doc/steamVRDongles.html">Pairing Multiple SteamVR Controllers</a></li><li><a href="../doc/gitLFS.html">Setting up Git LFS</a></li></ul></nav></div><div id="documentation"><section><article><!-- start documentation.pug documentation block --><h2 id="notes-on-git-lfs">Notes on Git LFS</h2>
+<p>When using Git LFS, you have to remember to replace most commands starting with <code>git</code> on the command line with <code>git lfs</code>, e.g.:</p>
+<pre><code>git checkout [Branch-Name] -&gt; git lfs checkout [Branch-Name]
+git clone [Repository-URL] -&gt; git lfs [Repository-URL]
+git fetch -&gt; git lfs fetch
+git pull -&gt; git lfs pull
+git push -&gt; git lfs push
+</code></pre><p>Additionally, there is a <code>git lfs status</code> command that provides additional information about the repository. It does not replace the standard <code>git status</code> command.</p>
+<h2 id="setup-git-lfs-for-a-new-user">Setup Git LFS for a new user</h2>
 <p>The following steps have to be done once per user.</p>
-<h2 id="install-git-lfs">Install Git LFS</h2>
+<h3 id="install-git-lfs">Install Git LFS</h3>
 <p>Go to <a href="https://git-lfs.github.com/">this site</a> and install Git LFS.</p>
-<h2 id="-optional-configure-unity-to-use-text-formatted-assets">(Optional) Configure Unity to use text-formatted assets</h2>
-<p>Unity projects have large files that--if configured correctly--exist as YAML-formatted text documents. If not configured correctly, they are a proprietary binary format that is impossible to Diff and Merge, so you might want to make sure text formatted assets are enabled.</p>
-<p><a href="https://docs.unity3d.com/Manual/class-EditorManager.html">Follow these instructions to force enabling text assets for all assets</a>. Also, you may want to <a href="https://docs.unity3d.com/Manual/TextSceneFormat.html">read more about text-formatted scenes</a>.</p>
-<h2 id="configure-git-to-use-unityyamlmerge-tool">Configure Git to use <code>UnityYamlMerge</code> tool</h2>
+<h3 id="clone-an-existing-repository">Clone an Existing Repository</h3>
+<p>For users joining an existing project, the <code>git lfs clone</code> function is fundamentally broken. Instead, you need to manually separate the process of cloning the repository and downloading the LFS-tracked objects.</p>
+<pre><code>git clone https://github.com/[User-Name]/[Project-Name].git
+cd [Project-Name]
+git lfs pull
+</code></pre><h3 id="-optional-disable-locking-">(Optional) disable locking.</h3>
+<p>If you don&#39;t have commit access to a repository, you&#39;ll probably need to disable LFS&#39; lock.</p>
+<pre><code>git config &#39;lfs.https://github.com/[User-Name]/[Project-Name].git/info/lfs.locksverify&#39;
+</code></pre><h3 id="-optional-for-developers-using-unity-">(Optional) for developers using Unity:</h3>
 <p><a href="https://docs.unity3d.com/Manual/SmartMerge.html">Follow these instructions to find Unity&#39;s Yaml Merge tool</a>. Ignore the steps on configuring the tool for use with Git by directly editing the .git or .gitconfig file. Instead, use the command line.</p>
 <pre><code>git config --global merge.tool &quot;unityyamlmerge&quot;
 git config --global mergetool.unityyamlmerge.cmd &quot;&#39;[Unity-Install-Directory]/Editor/Data/Tools/UnityYAMLMerge.exe&#39; merge -p $BASE $REMOTE $LOCAL $MERGED&quot;
 git config --global mergetool.unityyamlmerge.trustexitcode &quot;false&quot;
 </code></pre><p>Remembering to substitute <code>[User-Name]</code> and <code>[Project-Name]</code>. Your <code>[Unity-Install-Directory]</code> is likely to be <code>C:/Program Files/Unity</code>.</p>
-<h1 id="setup-git-lfs-for-a-new-project">Setup Git LFS for a new project</h1>
+<p>Finally, Unity projects have large files that--if configured correctly--exist as YAML-formatted text documents. If not configured correctly, they are a proprietary binary format that is impossible to Diff and Merge, so you might want to make sure text formatted assets are enabled.</p>
+<p><a href="https://docs.unity3d.com/Manual/class-EditorManager.html">Follow these instructions to force enabling text assets for all assets</a>. Also, you may want to <a href="https://docs.unity3d.com/Manual/TextSceneFormat.html">read more about text-formatted scenes</a>.</p>
+<h2 id="setup-git-lfs-for-a-new-project">Setup Git LFS for a new project</h2>
 <p>The following steps have to be done on a per-project basis. Once they are done by one user on a project, they don&#39;t have to be done by anyone else.</p>
-<h2 id="create-the-git-lfs-hooks-in-the-repo">Create the Git LFS hooks in the repo</h2>
+<h3 id="create-the-git-lfs-hooks-in-the-repo">Create the Git LFS hooks in the repo</h3>
 <p>Open your terminal and navigate to your project, then type:</p>
 <pre><code>git lfs install
-</code></pre><h2 id="-optional-disable-locking-">(Optional) disable locking.</h2>
-<p>If you don&#39;t have commit access to a repository, you&#39;ll probably need to disable LFS&#39; lock.</p>
-<pre><code>git config &#39;lfs.https://github.com/[User-Name]/[Project-Name].git/info/lfs.locksverify&#39;
-</code></pre><h2 id="create-the-gitattributes-file">Create the .gitattributes file</h2>
+</code></pre><h3 id="create-the-gitattributes-file">Create the .gitattributes file</h3>
 <p>Then in the same directory create the file <code>.gitattributes</code> and copy the contents:</p>
 <pre><code>*.cs diff=csharp text
 *.shader text
 
-# Unity
+## Unity
 *.cginc text
 *.mat merge=unityyamlmerge eol=lf
 *.anim merge=unityyamlmerge eol=lf
@@ -38,7 +50,7 @@ git config --global mergetool.unityyamlmerge.trustexitcode &quot;false&quot;
 *.meta merge=unityyamlmerge eol=lf
 *.controller merge=unityyamlmerge eol=lf
 
-#Image
+##Image
 *.jpg filter=lfs diff=lfs merge=lfs -text
 *.jpeg filter=lfs diff=lfs merge=lfs -text
 *.png filter=lfs diff=lfs merge=lfs -text
@@ -48,18 +60,18 @@ git config --global mergetool.unityyamlmerge.trustexitcode &quot;false&quot;
 *.tif filter=lfs diff=lfs merge=lfs -text
 *.tiff filter=lfs diff=lfs merge=lfs -text
 
-#Audio
+##Audio
 *.mp3 filter=lfs diff=lfs merge=lfs -text
 *.wav filter=lfs diff=lfs merge=lfs -text
 *.ogg filter=lfs diff=lfs merge=lfs -text
 
-#Video
+##Video
 *.mp4 filter=lfs diff=lfs merge=lfs -text
 *.mov filter=lfs diff=lfs merge=lfs -text
 *.mpg filter=lfs diff=lfs merge=lfs -text
 *.mpeg filter=lfs diff=lfs merge=lfs -text
 
-#3D Object
+##3D Object
 *.FBX filter=lfs diff=lfs merge=lfs -text
 *.fbx filter=lfs diff=lfs merge=lfs -text
 *.blend filter=lfs diff=lfs merge=lfs -text
@@ -68,7 +80,7 @@ git config --global mergetool.unityyamlmerge.trustexitcode &quot;false&quot;
 *.obj filter=lfs diff=lfs merge=lfs -text
 *.asset filter=lfs diff=lfs merge=lfs -text
 
-#ETC
+##ETC
 *.a filter=lfs diff=lfs merge=lfs -text
 *.exr filter=lfs diff=lfs merge=lfs -text
 *.tga filter=lfs diff=lfs merge=lfs -text
@@ -86,31 +98,31 @@ git config --global mergetool.unityyamlmerge.trustexitcode &quot;false&quot;
 *.lxo filter=lfs diff=lfs merge=lfs -text
 *.unity filter=lfs diff=lfs merge=lfs -text
 *.7z filter=lfs diff=lfs merge=lfs -text
-</code></pre><h2 id="create-the-gitignore-file">Create the .gitignore file</h2>
+</code></pre><h3 id="create-the-gitignore-file">Create the .gitignore file</h3>
 <p>And also these entries to your <code>.gitignore</code> file (creating one if you don&#39;t already have it):</p>
-<pre><code># Unity
+<pre><code>## Unity
 
-## These get regenerated at runtime
+### These get regenerated at runtime
 [Ll]ibrary/
 [Ll]ibraries/
 
-## Unity3D generated meta files
+### Unity3D generated meta files
 *.pidb.meta
 
-## Unity3D Generated File On Crash Reports
+### Unity3D Generated File On Crash Reports
 sysinfo.txt
 
 
-# Visual Studio
+## Visual Studio
 
-## User-specific files
+### User-specific files
 *.suo
 *.user
 *.userosscache
 *.sln.docstates
 *.userprefs
 
-## Build results
+### Build results
 [Dd]ebug/
 [Dd]ebugPublic/
 [Rr]elease/
@@ -126,23 +138,23 @@ bld/
 [Bb]uilds/
 
 
-# Visual Studio 2015 cache/options directory
+## Visual Studio 2015 cache/options directory
 .vs/
 
-# MSTest test Results
+## MSTest test Results
 [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*
 
-# NUNIT
+## NUNIT
 *.VisualState.xml
 TestResult.xml
 
-# Build Results of an ATL Project
+## Build Results of an ATL Project
 [Dd]ebugPS/
 [Rr]eleasePS/
 dlldata.c
 
-# DNX
+## DNX
 project.lock.json
 artifacts/
 
@@ -170,7 +182,7 @@ artifacts/
 *.svclog
 *.scc
 
-# Visual C++ cache files
+## Visual C++ cache files
 ipch/
 *.aps
 *.ncb
@@ -181,68 +193,68 @@ ipch/
 *.VC.db
 *.VC.VC.opendb
 
-# Visual Studio profiler
+## Visual Studio profiler
 *.psess
 *.vsp
 *.vspx
 *.sap
 
-# TFS 2012 Local Workspace
+## TFS 2012 Local Workspace
 $tf/
 
-# Guidance Automation Toolkit
+## Guidance Automation Toolkit
 *.gpState
 
-# Installshield output folder
+## Installshield output folder
 [Ee]xpress/
 
-# Click-Once directory
+## Click-Once directory
 publish/
 
-# Publish Web Output
+## Publish Web Output
 *.[Pp]ublish.xml
 *.azurePubxml
-# TODO: Comment the next line if you want to checkin your web deploy settings
-# but database connection strings (with potential passwords) will be unencrypted
+## TODO: Comment the next line if you want to checkin your web deploy settings
+## but database connection strings (with potential passwords) will be unencrypted
 *.pubxml
 *.publishproj
 
-# NuGet Packages
+## NuGet Packages
 *.nupkg
-# The packages folder can be ignored because of Package Restore
+## The packages folder can be ignored because of Package Restore
 **/packages/*
-# except build/, which is used as an MSBuild target.
+## except build/, which is used as an MSBuild target.
 !**/packages/build/
-# Uncomment if necessary however generally it will be regenerated when needed
-#!**/packages/repositories.config
-# NuGet v3&#39;s project.json files produces more ignoreable files
+## Uncomment if necessary however generally it will be regenerated when needed
+##!**/packages/repositories.config
+## NuGet v3&#39;s project.json files produces more ignoreable files
 *.nuget.props
 *.nuget.targets
 
-# Windows Store app package directories and files
+## Windows Store app package directories and files
 AppPackages/
 BundleArtifacts/
 Package.StoreAssociation.xml
 _pkginfo.txt
 
-# Visual Studio cache files
-# files ending in .cache can be ignored
+## Visual Studio cache files
+## files ending in .cache can be ignored
 *.[Cc]ache
-# but keep track of directories ending in .cache
+## but keep track of directories ending in .cache
 !*.[Cc]ache/
 
-# Backup &amp; report files from converting an old project file
-# to a newer Visual Studio version. Backup files are not needed,
-# because we have git ;-)
+## Backup &amp; report files from converting an old project file
+## to a newer Visual Studio version. Backup files are not needed,
+## because we have git ;-)
 _UpgradeReport_Files/
 Backup*/
 UpgradeLog*.XML
 UpgradeLog*.htm
 
-# Microsoft Fakes
+## Microsoft Fakes
 FakesAssemblies/
 
-# Others
+## Others
 ClientBin/
 ~$*
 *~
@@ -254,13 +266,5 @@ node_modules/
 bower_components/
 .ntvs_analysis.dat
 orleans.codegen.cs
-</code></pre><h2 id="notes-on-git-lfs">Notes on Git LFS</h2>
-<p>When using Git LFS, you have to remember to replace most commands starting with <code>git</code> on the command line with <code>git lfs</code>, e.g.:</p>
-<pre><code>git checkout [Branch-Name] -&gt; git lfs checkout [Branch-Name]
-git clone [Repository-URL] -&gt; git lfs [Repository-URL]
-git fetch -&gt; git lfs fetch
-git pull -&gt; git lfs pull
-git push -&gt; git lfs push
-</code></pre><p>Additionally, there is a <code>git lfs status</code> command that provides additional information about the repository. It does not replace the standard <code>git status</code> command.</p>
-<!-- end documentation.pug documentation block --></article></section></div><!-- end documentation.pug main block --></main><!-- end main.pug main block -->
+</code></pre><!-- end documentation.pug documentation block --></article></section></div><!-- end documentation.pug main block --></main><!-- end main.pug main block -->
 <!-- start main.pug footer block --><footer><div id="footerWrapper"><a href="../doc/readme.html">About</a><a href="../doc/license.html">License</a><a href="../doc/changelog.html">Changelog</a><a href="https://notiontheory.typeform.com/to/QzZmAD" target="_blank">Slack</a><a class="small icon github" href="https://www.github.com/NotionTheory/Primrose" target="_blank">&nbsp;</a><a class="small icon twitter" href="https://www.twitter.com/Primrose_VR" target="_blank">&nbsp;</a><a href="http://www.notiontheory.com/team" target="_blank" style="color:#ec2471;">Made (with love) by NotionTheory</a></div><script src="app.js"></script></footer><!-- end main.pug footer block --></body></html>

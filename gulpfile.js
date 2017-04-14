@@ -3,8 +3,8 @@ var gulp = require("gulp"),
   pkg = require("./package.json"),
   marigold = require("marigold-build").setup(gulp, pkg),
 
-  pugFiles = ["*.pug", "demos/**/*.pug", "doc/**/*.pug", "templates/**/*.pug"],
-  html = marigold.html(pugFiles, { watch: ["*.md" ,"doc/**/*.md"] }),
+  pugFiles = ["*.pug", "demos/**/*.pug", "doc/**/*.pug"],
+  html = marigold.html(pugFiles, { watch: ["*.md" ,"doc/**/*.md", "templates/**/*.pug"] }),
 
   stylusFiles = ["*.styl", "demos/**/*.styl", "doc/**/*.styl"],
   css = marigold.css(stylusFiles),
