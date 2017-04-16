@@ -49,14 +49,6 @@ export default class MixedRealityVRDisplay extends VRDisplay {
     });
   }
 
-  requestPresent(layers) {
-    return this._display.requestPresent(layers)
-  }
-
-  exitPresent() {
-    return this._display.exitPresent();
-  }
-
   getLayers() {
     return this._display.getLayers();
   }
