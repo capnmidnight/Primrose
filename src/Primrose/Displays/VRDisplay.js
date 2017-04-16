@@ -45,7 +45,6 @@ export default class VRDisplay {
       })),
       displayId: immutable(nextDisplayId++),
       displayName: immutable(name),
-      isConnected: immutable(true),
       stageParameters: immutable(null),
       isPresenting: immutable(() => FullScreen.isActive ),
 

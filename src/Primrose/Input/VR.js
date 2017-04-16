@@ -139,13 +139,6 @@ export default class VR extends PoseInputProcessor {
       .then(() => this.connect(0));
   }
 
-  zero() {
-    super.zero();
-    if (this.currentDevice) {
-      this.currentDevice.resetPose();
-    }
-  }
-
   update(dt) {
     var x, z, stage;
 

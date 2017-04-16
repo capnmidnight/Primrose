@@ -72,7 +72,6 @@ export default class MockVRDisplay {
 
     this.getPose = () => dataPack.currentPose;
     this.getEyeParameters = (side) => dataPack.currentEyeParams[side];
-    this.resetPose = () => {};
   }
 
 

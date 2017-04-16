@@ -45,13 +45,6 @@ export default class StandardMonitorVRDisplay extends VRDisplay {
     }
   }
 
-  resetPose(){
-    var display = isMobile && this._display;
-    if(display){
-      return display.resetPose();
-    }
-  }
-
   getEyeParameters (side) {
     if (side === "left") {
       const curLayer = this.getLayers()[0],

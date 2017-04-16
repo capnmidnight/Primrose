@@ -33,7 +33,6 @@ export default class MixedRealityVRDisplay extends VRDisplay {
       stageParameters: { get: () => this._display.stageParameters },
       displayId: immutable(nextDisplayId++),
       displayName: immutable(name),
-      isConnected: { get: () => this._display.isConnected },
       isPresenting: { get: () => this._display.isPresenting },
 
       depthNear: {
@@ -107,12 +106,6 @@ export default class MixedRealityVRDisplay extends VRDisplay {
     }
     else{
       return defaultPose();
-    }
-  }
-
-  resetPose(){
-    if(this.motionDevice){
-      return this.motionDevice.resetPose();
     }
   }
 
