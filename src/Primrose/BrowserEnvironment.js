@@ -503,10 +503,12 @@ export default class BrowserEnvironment extends EventDispatcher {
     };
 
     var animate = (t) => {
+      timer = null;
       var dt = t - lt,
         i, j;
       lt = t;
       update(dt);
+      this.audio.setPlayer(this.head.mesh);
       render();
       RAF(animate);
     };
@@ -514,7 +516,6 @@ export default class BrowserEnvironment extends EventDispatcher {
     var render = () => {
       this.camera.position.set(0, 0, 0);
       this.camera.quaternion.set(0, 0, 0, 1);
-      this.audio.setPlayer(this.head.mesh);
       this.renderer.clear(true, true, true);
 
       var trans = this.VR.getTransforms(
@@ -564,7 +565,7 @@ export default class BrowserEnvironment extends EventDispatcher {
 
         this.renderer.domElement.width = canvasWidth;
         this.renderer.domElement.height = canvasHeight;
-        if (!this.timer) {
+        if (timer === null) {
           render();
         }
       }
@@ -981,16 +982,6 @@ export default class BrowserEnvironment extends EventDispatcher {
       return sceneGraph;
     };
 
-    var currentTimerObject = null;
-    this.timer = 0;
-    var RAF = (callback) => {
-      currentTimerObject = this.VR.currentDevice || window;
-      if (this.timer !== null) {
-        this.timer = currentTimerObject.requestAnimationFrame(callback);
-      }
-    };
-
-
     pliny.method({
       parent: "Primrose.BrowserEnvironment",
       name: "goFullScreen",
@@ -1047,7 +1038,20 @@ export default class BrowserEnvironment extends EventDispatcher {
       modifyScreen();
     };
 
-    let allowRestart = true;
+
+
+    let allowRestart = true,
+      currentTimerObject = null,
+      timer = null;
+
+    var RAF = (callback) => {
+      currentTimerObject = this.VR.currentDevice || window;
+      if (timer === null) {
+        timer = currentTimerObject.requestAnimationFrame(callback);
+      }
+    };
+
+
     pliny.method({
       parent: "Primrose.BrowserEnvironment",
       name: "start",
@@ -1059,35 +1063,59 @@ export default class BrowserEnvironment extends EventDispatcher {
         this.ready.then(() => {
           this.audio.start();
           lt = performance.now() * MILLISECONDS_TO_SECONDS;
-          this.VR.startAnimation(animate);
+          RAF(animate);
         });
       }
     };
 
+
     pliny.method({
       parent: "Primrose.BrowserEnvironment",
       name: "stop",
-      description: "Pause animation."
+      description: "Pause animation.",
+      parameters: [ {
+        name: "evt",
+        type: "Event",
+        optional: true,
+        defaultValue: null,
+        description: "The event that triggered this function."
+      }, {
+        name: "restartAllowed",
+        type: "Boolean",
+        optional: true,
+        defaultValue: false,
+        description: "Whether or not calling `start()` again is allowed, or if this is a permanent stop."
+      } ]
     });
-    this.stop = (isPause) => {
-      if(this.VR.timer) {
-        allowRestart = allowRestart && isPause === true;
-        this.VR.stopAnimation();
-        this.audio.stop();
+    this.stop = (evt, restartAllowed) => {
+      if(allowRestart) {
+        allowRestart = restartAllowed;
         if(!allowRestart) {
           console.log("stopped");
         }
+
+        if (currentTimerObject) {
+
+          if(timer !== null) {
+            currentTimerObject.cancelAnimationFrame(timer);
+            timer = null;
+          }
+
+          this.audio.stop();
+          currentTimerObject = null;
+        }
+
       }
     };
 
-    this.pause = this.stop.bind(this, true);
+    this.pause = (evt) => this.stop(evt, true);
 
     window.addEventListener("vrdisplaypresentchange", fullScreenChange, false);
     window.addEventListener("resize", modifyScreen, false);
     window.addEventListener("blur", this.pause, false);
     window.addEventListener("stop", this.stop, false);
     window.addEventListener("focus", this.start, false);
-    document.addEventListener("amazonPlatformReady", ()=>{
+    document.addEventListener("amazonPlatformReady", () => {
       document.addEventListener("pause", this.pause, false);
       document.addEventListener("resume", this.start, false);
     }, false);
@@ -1590,35 +1618,6 @@ export default class BrowserEnvironment extends EventDispatcher {
         });
         this.emit("ready");
       });
-
-
-    pliny.method({
-      parent: "Primrose.BrowserEnvironment",
-      name: "start",
-      returns: "Promise",
-      description: "Restart animation after it has been stopped."
-    });
-    this.start = () => {
-      this.ready.then(() => {
-        this.audio.start();
-        lt = performance.now() * MILLISECONDS_TO_SECONDS;
-        RAF(animate);
-      });
-    };
-
-
-    pliny.method({
-      parent: "Primrose.BrowserEnvironment",
-      name: "stop",
-      description: "Pause animation."
-    });
-    this.stop = () => {
-      if (currentTimerObject) {
-        currentTimerObject.cancelAnimationFrame(this.timer);
-      this.audio.stop();
-        this.timer = null;
-      }
-    };
 
     pliny.property({
       parent: "Primrose.BrowserEnvironment",

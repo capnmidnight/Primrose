@@ -11,7 +11,6 @@ import PointerLock from "../../util/PointerLock";
 export default class Mouse extends InputProcessor {
   constructor(DOMElement, commands) {
     super("Mouse", commands, ["BUTTONS", "X", "Y", "Z", "W"], "mousedown");
-    this.timer = null;
 
     var setState = (stateChange, event) => {
       this.inPhysicalUse = true;

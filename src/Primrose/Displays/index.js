@@ -1,5 +1,4 @@
 import CardboardVRDisplay from "./CardboardVRDisplay";
-import frameDataFromPose from "./frameDataFromPose";
 import install from "./install";
 import MockVRDisplay from "./MockVRDisplay";
 import StandardMonitorVRDisplay from "./StandardMonitorVRDisplay";
@@ -8,7 +7,6 @@ import VRFrameData from "./VRFrameData";
 
 export {
   CardboardVRDisplay,
-  frameDataFromPose,
   install,
   MockVRDisplay,
   StandardMonitorVRDisplay,
@@ -18,7 +16,6 @@ export {
 
 export default {
   CardboardVRDisplay,
-  frameDataFromPose,
   install,
   MockVRDisplay,
   StandardMonitorVRDisplay,
