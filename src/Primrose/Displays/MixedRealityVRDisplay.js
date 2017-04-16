@@ -62,15 +62,7 @@ export default class MixedRealityVRDisplay extends VRDisplay {
   }
 
   submitFrame(pose) {
-    // ?????
-    // probably do nothing
-    // probably need the real VRDisplay doing a rendering pass before this
-    if(this._display) {
-      this._display.submitFrame(pose);
-    }
-    else{
-      super.submitFrame(pose);
-    }
+    // do nothing, and make sure the real VRDisplay does a rendering pass first.
   }
 
   set motionDevice(device) {
@@ -84,21 +76,11 @@ export default class MixedRealityVRDisplay extends VRDisplay {
   }
 
   requestAnimationFrame(callback) {
-    if(this.motionDevice) {
-      return this._display.requestAnimationFrame(callback);
-    }
-    else {
-      return super.requestAnimationFrame(callback);
-    }
+    // do nothing here, the real VRDisplay should be managing the animation
   }
 
   cancelAnimationFrame(id) {
-    if(this.motionDevice) {
-      return this._display.cancelAnimationFrame(id);
-    }
-    else {
-      return super.cancelAnimationFrame(id);
-    }
+    // do nothing here, the real VRDisplay should be managing the animation
   }
 
   getPose() {
