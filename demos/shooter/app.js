@@ -73,7 +73,7 @@ env.addEventListener("ready", function(){
         b.position.copy(Primrose.Random.vector(-15, 15));
         b.velocity = Primrose.Random.vector(-1, 1);
         blocks.push(b);
-        env.stage.add(b);
+        env.scene.add(b);
       });
 
       Preloader.hide();
@@ -132,7 +132,7 @@ env.addEventListener("update", function(){
               .at(block.position.x, block.position.y, block.position.z,
                 block.velocity.x, block.velocity.y, block.velocity.z);
           }
-          env.stage.remove(block);
+          env.scene.remove(block);
           if(block.nextSize < asteroid.length){
             var newBlocks = asteroid[block.nextSize];
             for(var l = 0; l < newBlocks.length; ++l){
@@ -147,7 +147,7 @@ env.addEventListener("update", function(){
               else{
                 blocks.push(newBlock);
               }
-              env.stage.add(newBlock);
+              env.scene.add(newBlock);
             }
           }
           else{
@@ -176,7 +176,7 @@ function shoot(evt){
       .named("shot" + shots.length);
     block.velocity = v3();
     shots.push(block);
-    env.stage.add(block);
+    env.scene.add(block);
   }
   else{
     block = shots[n];

@@ -1,26 +1,72 @@
-# Install Git LFS
+## Notes on Git LFS
+When using Git LFS, you have to remember to replace most commands starting with `git` on the command line with `git lfs`, e.g.:
 
-Go to [this site](https://git-lfs.github.com/) and install Git LFS. Then, open your terminal to the project in which you want to enable LFS and type:
+```
+git checkout [Branch-Name] -> git lfs checkout [Branch-Name]
+git clone [Repository-URL] -> git lfs [Repository-URL]
+git fetch -> git lfs fetch
+git pull -> git lfs pull
+git push -> git lfs push
+```
 
-````
-git lfs install
+Additionally, there is a `git lfs status` command that provides additional information about the repository. It does not replace the standard `git status` command.
+
+## Setup Git LFS for a new user
+The following steps have to be done once per user.
+
+### Install Git LFS
+Go to [this site](https://git-lfs.github.com/) and install Git LFS.
+
+### Clone an Existing Repository
+For users joining an existing project, the `git lfs clone` function is fundamentally broken. Instead, you need to manually separate the process of cloning the repository and downloading the LFS-tracked objects.
+
+```
+git clone https://github.com/[User-Name]/[Project-Name].git
+cd [Project-Name]
+git lfs pull
+```
+
+### (Optional) disable locking.
+If you don't have commit access to a repository, you'll probably need to disable LFS' lock.
+
+```
 git config 'lfs.https://github.com/[User-Name]/[Project-Name].git/info/lfs.locksverify'
-git config merge.tool "unityyamlmerge"
-git config mergetool.unityyamlmerge.cmd "'[Unity-Install-Directory]/Editor/Data/Tools/UnityYAMLMerge.exe' merge -p $BASE $REMOTE $LOCAL $MERGED"
-git config mergetool.unityyamlmerge.trustexitcode "false"
-````
+```
+
+### (Optional) for developers using Unity:
+[Follow these instructions to find Unity's Yaml Merge tool](https://docs.unity3d.com/Manual/SmartMerge.html). Ignore the steps on configuring the tool for use with Git by directly editing the .git or .gitconfig file. Instead, use the command line.
+
+```
+git config --global merge.tool "unityyamlmerge"
+git config --global mergetool.unityyamlmerge.cmd "'[Unity-Install-Directory]/Editor/Data/Tools/UnityYAMLMerge.exe' merge -p $BASE $REMOTE $LOCAL $MERGED"
+git config --global mergetool.unityyamlmerge.trustexitcode "false"
+```
 
 Remembering to substitute `[User-Name]` and `[Project-Name]`. Your `[Unity-Install-Directory]` is likely to be `C:/Program Files/Unity`.
 
+Finally, Unity projects have large files that--if configured correctly--exist as YAML-formatted text documents. If not configured correctly, they are a proprietary binary format that is impossible to Diff and Merge, so you might want to make sure text formatted assets are enabled.
+
+[Follow these instructions to force enabling text assets for all assets](https://docs.unity3d.com/Manual/class-EditorManager.html). Also, you may want to [read more about text-formatted scenes](https://docs.unity3d.com/Manual/TextSceneFormat.html).
+
+## Setup Git LFS for a new project
+The following steps have to be done on a per-project basis. Once they are done by one user on a project, they don't have to be done by anyone else.
+
+### Create the Git LFS hooks in the repo
+Open your terminal and navigate to your project, then type:
+
+```
+git lfs install
+```
+
+### Create the .gitattributes file
 Then in the same directory create the file `.gitattributes` and copy the contents:
 
-````
-## Unity ##
-
+```
 *.cs diff=csharp text
-*.cginc text
 *.shader text
 
+## Unity
+*.cginc text
 *.mat merge=unityyamlmerge eol=lf
 *.anim merge=unityyamlmerge eol=lf
 *.unity merge=unityyamlmerge eol=lf
@@ -31,10 +77,7 @@ Then in the same directory create the file `.gitattributes` and copy the content
 *.meta merge=unityyamlmerge eol=lf
 *.controller merge=unityyamlmerge eol=lf
 
-
-## git-lfs ##
-
-#Image
+##Image
 *.jpg filter=lfs diff=lfs merge=lfs -text
 *.jpeg filter=lfs diff=lfs merge=lfs -text
 *.png filter=lfs diff=lfs merge=lfs -text
@@ -44,18 +87,18 @@ Then in the same directory create the file `.gitattributes` and copy the content
 *.tif filter=lfs diff=lfs merge=lfs -text
 *.tiff filter=lfs diff=lfs merge=lfs -text
 
-#Audio
+##Audio
 *.mp3 filter=lfs diff=lfs merge=lfs -text
 *.wav filter=lfs diff=lfs merge=lfs -text
 *.ogg filter=lfs diff=lfs merge=lfs -text
 
-#Video
+##Video
 *.mp4 filter=lfs diff=lfs merge=lfs -text
 *.mov filter=lfs diff=lfs merge=lfs -text
 *.mpg filter=lfs diff=lfs merge=lfs -text
 *.mpeg filter=lfs diff=lfs merge=lfs -text
 
-#3D Object
+##3D Object
 *.FBX filter=lfs diff=lfs merge=lfs -text
 *.fbx filter=lfs diff=lfs merge=lfs -text
 *.blend filter=lfs diff=lfs merge=lfs -text
@@ -64,37 +107,53 @@ Then in the same directory create the file `.gitattributes` and copy the content
 *.obj filter=lfs diff=lfs merge=lfs -text
 *.asset filter=lfs diff=lfs merge=lfs -text
 
-#ETC
+##ETC
 *.a filter=lfs diff=lfs merge=lfs -text
 *.exr filter=lfs diff=lfs merge=lfs -text
 *.tga filter=lfs diff=lfs merge=lfs -text
 *.pdf filter=lfs diff=lfs merge=lfs -text
 *.zip filter=lfs diff=lfs merge=lfs -text
 *.dll filter=lfs diff=lfs merge=lfs -text
+*.exe filter=lfs diff=lfs merge=lfs -text
+*.apk filter=lfs diff=lfs merge=lfs -text
+*.jar filter=lfs diff=lfs merge=lfs -text
 *.unitypackage filter=lfs diff=lfs merge=lfs -text
 *.aif filter=lfs diff=lfs merge=lfs -text
 *.ttf filter=lfs diff=lfs merge=lfs -text
 *.rns filter=lfs diff=lfs merge=lfs -text
 *.reason filter=lfs diff=lfs merge=lfs -text
 *.lxo filter=lfs diff=lfs merge=lfs -text
-````
+*.unity filter=lfs diff=lfs merge=lfs -text
+*.7z filter=lfs diff=lfs merge=lfs -text
+```
 
-And also the file `.gitignore`, with the contents:
+### Create the .gitignore file
+And also these entries to your `.gitignore` file (creating one if you don't already have it):
 
-````
-## Ignore Visual Studio temporary files, build results, and
-## files generated by popular Visual Studio add-ons.
+```
+## Unity
 
-# User-specific files
+### These get regenerated at runtime
+[Ll]ibrary/
+[Ll]ibraries/
+
+### Unity3D generated meta files
+*.pidb.meta
+
+### Unity3D Generated File On Crash Reports
+sysinfo.txt
+
+
+## Visual Studio
+
+### User-specific files
 *.suo
 *.user
 *.userosscache
 *.sln.docstates
-
-# User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
-# Build results
+### Build results
 [Dd]ebug/
 [Dd]ebugPublic/
 [Rr]elease/
@@ -109,30 +168,24 @@ bld/
 [Bb]uild/
 [Bb]uilds/
 
-# Unity
-[Ll]ibrary/
-[Ll]ibraries/
 
-
-# Visual Studio 2015 cache/options directory
+## Visual Studio 2015 cache/options directory
 .vs/
-# Uncomment if you have tasks that create the project's static files in wwwroot
-#wwwroot/
 
-# MSTest test Results
+## MSTest test Results
 [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*
 
-# NUNIT
+## NUNIT
 *.VisualState.xml
 TestResult.xml
 
-# Build Results of an ATL Project
+## Build Results of an ATL Project
 [Dd]ebugPS/
 [Rr]eleasePS/
 dlldata.c
 
-# DNX
+## DNX
 project.lock.json
 artifacts/
 
@@ -140,7 +193,6 @@ artifacts/
 *_p.c
 *_i.h
 *.ilk
-*.meta
 *.obj
 *.pch
 *.pdb
@@ -161,10 +213,7 @@ artifacts/
 *.svclog
 *.scc
 
-# Chutzpah Test files
-_Chutzpah*
-
-# Visual C++ cache files
+## Visual C++ cache files
 ipch/
 *.aps
 *.ncb
@@ -175,106 +224,68 @@ ipch/
 *.VC.db
 *.VC.VC.opendb
 
-# Visual Studio profiler
+## Visual Studio profiler
 *.psess
 *.vsp
 *.vspx
 *.sap
 
-# TFS 2012 Local Workspace
+## TFS 2012 Local Workspace
 $tf/
 
-# Guidance Automation Toolkit
+## Guidance Automation Toolkit
 *.gpState
 
-# ReSharper is a .NET coding add-in
-_ReSharper*/
-*.[Rr]e[Ss]harper
-*.DotSettings.user
-
-# JustCode is a .NET coding add-in
-.JustCode
-
-# TeamCity is a build add-in
-_TeamCity*
-
-# DotCover is a Code Coverage Tool
-*.dotCover
-
-# NCrunch
-_NCrunch_*
-.*crunch*.local.xml
-nCrunchTemp_*
-
-# MightyMoose
-*.mm.*
-AutoTest.Net/
-
-# Web workbench (sass)
-.sass-cache/
-
-# Installshield output folder
+## Installshield output folder
 [Ee]xpress/
 
-# DocProject is a documentation generator add-in
-DocProject/buildhelp/
-DocProject/Help/*.HxT
-DocProject/Help/*.HxC
-DocProject/Help/*.hhc
-DocProject/Help/*.hhk
-DocProject/Help/*.hhp
-DocProject/Help/Html2
-DocProject/Help/html
-
-# Click-Once directory
+## Click-Once directory
 publish/
 
-# Publish Web Output
+## Publish Web Output
 *.[Pp]ublish.xml
 *.azurePubxml
-# TODO: Comment the next line if you want to checkin your web deploy settings
-# but database connection strings (with potential passwords) will be unencrypted
+## TODO: Comment the next line if you want to checkin your web deploy settings
+## but database connection strings (with potential passwords) will be unencrypted
 *.pubxml
 *.publishproj
 
-# Microsoft Azure Web App publish settings. Comment the next line if you want to
-# checkin your Azure Web App publish settings, but sensitive information contained
-# in these scripts will be unencrypted
-PublishScripts/
-
-# NuGet Packages
+## NuGet Packages
 *.nupkg
-# The packages folder can be ignored because of Package Restore
+## The packages folder can be ignored because of Package Restore
 **/packages/*
-# except build/, which is used as an MSBuild target.
+## except build/, which is used as an MSBuild target.
 !**/packages/build/
-# Uncomment if necessary however generally it will be regenerated when needed
-#!**/packages/repositories.config
-# NuGet v3's project.json files produces more ignoreable files
+## Uncomment if necessary however generally it will be regenerated when needed
+##!**/packages/repositories.config
+## NuGet v3's project.json files produces more ignoreable files
 *.nuget.props
 *.nuget.targets
 
-# Microsoft Azure Build Output
-csx/
-*.build.csdef
-
-# Microsoft Azure Emulator
-ecf/
-rcf/
-
-# Windows Store app package directories and files
+## Windows Store app package directories and files
 AppPackages/
 BundleArtifacts/
 Package.StoreAssociation.xml
 _pkginfo.txt
 
-# Visual Studio cache files
-# files ending in .cache can be ignored
+## Visual Studio cache files
+## files ending in .cache can be ignored
 *.[Cc]ache
-# but keep track of directories ending in .cache
+## but keep track of directories ending in .cache
 !*.[Cc]ache/
 
-# Others
+## Backup & report files from converting an old project file
+## to a newer Visual Studio version. Backup files are not needed,
+## because we have git ;-)
+_UpgradeReport_Files/
+Backup*/
+UpgradeLog*.XML
+UpgradeLog*.htm
+
+## Microsoft Fakes
+FakesAssemblies/
+
+## Others
 ClientBin/
 ~$*
 *~
@@ -283,78 +294,7 @@ ClientBin/
 *.pfx
 *.publishsettings
 node_modules/
-orleans.codegen.cs
-
-# Since there are multiple workflows, uncomment next line to ignore bower_components
-# (https://github.com/github/gitignore/pull/1529#issuecomment-104372622)
-#bower_components/
-
-# RIA/Silverlight projects
-Generated_Code/
-
-# Backup & report files from converting an old project file
-# to a newer Visual Studio version. Backup files are not needed,
-# because we have git ;-)
-_UpgradeReport_Files/
-Backup*/
-UpgradeLog*.XML
-UpgradeLog*.htm
-
-# SQL Server files
-*.mdf
-*.ldf
-
-# Business Intelligence projects
-*.rdl.data
-*.bim.layout
-*.bim_*.settings
-
-# Microsoft Fakes
-FakesAssemblies/
-
-# GhostDoc plugin setting file
-*.GhostDoc.xml
-
-# Node.js Tools for Visual Studio
+bower_components/
 .ntvs_analysis.dat
-
-# Visual Studio 6 build log
-*.plg
-
-# Visual Studio 6 workspace options file
-*.opt
-
-# Visual Studio LightSwitch build output
-**/*.HTMLClient/GeneratedArtifacts
-**/*.DesktopClient/GeneratedArtifacts
-**/*.DesktopClient/ModelManifest.xml
-**/*.Server/GeneratedArtifacts
-**/*.Server/ModelManifest.xml
-_Pvt_Extensions
-
-# Paket dependency manager
-.paket/paket.exe
-paket-files/
-
-# FAKE - F# Make
-.fake/
-
-# JetBrains Rider
-.idea/
-*.sln.iml
-
-
-
-# Visual Studio 2015 cache directory
-/.vs/
-
-# Unity3D generated meta files
-*.pidb.meta
-
-# Unity3D Generated File On Crash Reports
-sysinfo.txt
-
-# Builds
-*.apk
-*.unitypackage
-````
+orleans.codegen.cs
+```

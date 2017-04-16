@@ -64,10 +64,6 @@ export default class CardboardVRDisplay extends VRDisplay {
     return this.poseSensor_.getPose();
   }
 
-  resetPose() {
-    this.poseSensor_.resetPose();
-  }
-
   getEyeParameters(whichEye) {
     var offset = [ipd, neckLength, neckDepth];
 

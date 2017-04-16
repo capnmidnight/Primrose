@@ -203,7 +203,8 @@ body > div
   margin-right 2em
 
 #documentation
-  display block
+  display inline-block
+  max-width calc(100% - 370px - 2em)
   min-width 340px
 
 #documentation img
@@ -290,6 +291,8 @@ td:nth-child(2)
   padding 1em
   padding-left 2em
   border-left solid 3px #ec2471
+  overflow-y scroll
+  max-height 30em
 
 .icon
   display inline-block
@@ -331,8 +334,8 @@ footer .icon
     float right
 
   header,   main,   footer
-    padding-left 2em
-    padding-right 2em
+    padding-left 15em
+    padding-right 15em
 
   header > nav > ul > li > a,   #footerWrapper > a
     padding 0.25em 1em

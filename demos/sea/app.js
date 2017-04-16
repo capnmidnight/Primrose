@@ -18,12 +18,12 @@ var env = new Primrose.BrowserEnvironment({
 
   pod = hub();
 
-env.stage.add(pod);
+env.scene.add(pod);
 pod.position.set(0, 0, -5);
 
 env.sky.add(moon);
 moon.latLng(-30, 30, 7);
-moon.lookAt(env.stage.position);
+moon.lookAt(env.scene.position);
 
 modelPromise = Promise.all(range(3, function(i) {
   var dolphin = new Primrose.Controls.Model("../shared_assets/models/dolphin.obj", {

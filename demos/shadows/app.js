@@ -12,7 +12,7 @@ const env = new Primrose.BrowserEnvironment({
           shadow: true
         })
         .named("box" + i)
-        .addTo(env.stage)
+        .addTo(env.scene)
         .at(
           Primrose.Random.number(-1, 1),
           Primrose.Random.number(0, 2),

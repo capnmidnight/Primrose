@@ -1,3 +1,729 @@
+console.info("[Primrose]:> primrose v0.31.4. see https://www.primrosevr.com for more information.");
+/**
+ * Copyright (c) 2014, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * https://raw.github.com/facebook/regenerator/master/LICENSE file. An
+ * additional grant of patent rights can be found in the PATENTS file in
+ * the same directory.
+ */
+
+!(function(global) {
+  "use strict";
+
+  var Op = Object.prototype;
+  var hasOwn = Op.hasOwnProperty;
+  var undefined; // More compressible than void 0.
+  var $Symbol = typeof Symbol === "function" ? Symbol : {};
+  var iteratorSymbol = $Symbol.iterator || "@@iterator";
+  var toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
+
+  var inModule = typeof module === "object";
+  var runtime = global.regeneratorRuntime;
+  if (runtime) {
+    if (inModule) {
+      // If regeneratorRuntime is defined globally and we're in a module,
+      // make the exports object identical to regeneratorRuntime.
+      module.exports = runtime;
+    }
+    // Don't bother evaluating the rest of this file if the runtime was
+    // already defined globally.
+    return;
+  }
+
+  // Define the runtime globally (as expected by generated code) as either
+  // module.exports (if we're in a module) or a new, empty object.
+  runtime = global.regeneratorRuntime = inModule ? module.exports : {};
+
+  function wrap(innerFn, outerFn, self, tryLocsList) {
+    // If outerFn provided and outerFn.prototype is a Generator, then outerFn.prototype instanceof Generator.
+    var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator;
+    var generator = Object.create(protoGenerator.prototype);
+    var context = new Context(tryLocsList || []);
+
+    // The ._invoke method unifies the implementations of the .next,
+    // .throw, and .return methods.
+    generator._invoke = makeInvokeMethod(innerFn, self, context);
+
+    return generator;
+  }
+  runtime.wrap = wrap;
+
+  // Try/catch helper to minimize deoptimizations. Returns a completion
+  // record like context.tryEntries[i].completion. This interface could
+  // have been (and was previously) designed to take a closure to be
+  // invoked without arguments, but in all the cases we care about we
+  // already have an existing method we want to call, so there's no need
+  // to create a new function object. We can even get away with assuming
+  // the method takes exactly one argument, since that happens to be true
+  // in every case, so we don't have to touch the arguments object. The
+  // only additional allocation required is the completion record, which
+  // has a stable shape and so hopefully should be cheap to allocate.
+  function tryCatch(fn, obj, arg) {
+    try {
+      return { type: "normal", arg: fn.call(obj, arg) };
+    } catch (err) {
+      return { type: "throw", arg: err };
+    }
+  }
+
+  var GenStateSuspendedStart = "suspendedStart";
+  var GenStateSuspendedYield = "suspendedYield";
+  var GenStateExecuting = "executing";
+  var GenStateCompleted = "completed";
+
+  // Returning this object from the innerFn has the same effect as
+  // breaking out of the dispatch switch statement.
+  var ContinueSentinel = {};
+
+  // Dummy constructor functions that we use as the .constructor and
+  // .constructor.prototype properties for functions that return Generator
+  // objects. For full spec compliance, you may wish to configure your
+  // minifier not to mangle the names of these two functions.
+  function Generator() {}
+  function GeneratorFunction() {}
+  function GeneratorFunctionPrototype() {}
+
+  // This is a polyfill for %IteratorPrototype% for environments that
+  // don't natively support it.
+  var IteratorPrototype = {};
+  IteratorPrototype[iteratorSymbol] = function () {
+    return this;
+  };
+
+  var getProto = Object.getPrototypeOf;
+  var NativeIteratorPrototype = getProto && getProto(getProto(values([])));
+  if (NativeIteratorPrototype &&
+      NativeIteratorPrototype !== Op &&
+      hasOwn.call(NativeIteratorPrototype, iteratorSymbol)) {
+    // This environment has a native %IteratorPrototype%; use it instead
+    // of the polyfill.
+    IteratorPrototype = NativeIteratorPrototype;
+  }
+
+  var Gp = GeneratorFunctionPrototype.prototype =
+    Generator.prototype = Object.create(IteratorPrototype);
+  GeneratorFunction.prototype = Gp.constructor = GeneratorFunctionPrototype;
+  GeneratorFunctionPrototype.constructor = GeneratorFunction;
+  GeneratorFunctionPrototype[toStringTagSymbol] =
+    GeneratorFunction.displayName = "GeneratorFunction";
+
+  // Helper for defining the .next, .throw, and .return methods of the
+  // Iterator interface in terms of a single ._invoke method.
+  function defineIteratorMethods(prototype) {
+    ["next", "throw", "return"].forEach(function(method) {
+      prototype[method] = function(arg) {
+        return this._invoke(method, arg);
+      };
+    });
+  }
+
+  runtime.isGeneratorFunction = function(genFun) {
+    var ctor = typeof genFun === "function" && genFun.constructor;
+    return ctor
+      ? ctor === GeneratorFunction ||
+        // For the native GeneratorFunction constructor, the best we can
+        // do is to check its .name property.
+        (ctor.displayName || ctor.name) === "GeneratorFunction"
+      : false;
+  };
+
+  runtime.mark = function(genFun) {
+    if (Object.setPrototypeOf) {
+      Object.setPrototypeOf(genFun, GeneratorFunctionPrototype);
+    } else {
+      genFun.__proto__ = GeneratorFunctionPrototype;
+      if (!(toStringTagSymbol in genFun)) {
+        genFun[toStringTagSymbol] = "GeneratorFunction";
+      }
+    }
+    genFun.prototype = Object.create(Gp);
+    return genFun;
+  };
+
+  // Within the body of any async function, `await x` is transformed to
+  // `yield regeneratorRuntime.awrap(x)`, so that the runtime can test
+  // `hasOwn.call(value, "__await")` to determine if the yielded value is
+  // meant to be awaited.
+  runtime.awrap = function(arg) {
+    return { __await: arg };
+  };
+
+  function AsyncIterator(generator) {
+    function invoke(method, arg, resolve, reject) {
+      var record = tryCatch(generator[method], generator, arg);
+      if (record.type === "throw") {
+        reject(record.arg);
+      } else {
+        var result = record.arg;
+        var value = result.value;
+        if (value &&
+            typeof value === "object" &&
+            hasOwn.call(value, "__await")) {
+          return Promise.resolve(value.__await).then(function(value) {
+            invoke("next", value, resolve, reject);
+          }, function(err) {
+            invoke("throw", err, resolve, reject);
+          });
+        }
+
+        return Promise.resolve(value).then(function(unwrapped) {
+          // When a yielded Promise is resolved, its final value becomes
+          // the .value of the Promise<{value,done}> result for the
+          // current iteration. If the Promise is rejected, however, the
+          // result for this iteration will be rejected with the same
+          // reason. Note that rejections of yielded Promises are not
+          // thrown back into the generator function, as is the case
+          // when an awaited Promise is rejected. This difference in
+          // behavior between yield and await is important, because it
+          // allows the consumer to decide what to do with the yielded
+          // rejection (swallow it and continue, manually .throw it back
+          // into the generator, abandon iteration, whatever). With
+          // await, by contrast, there is no opportunity to examine the
+          // rejection reason outside the generator function, so the
+          // only option is to throw it from the await expression, and
+          // let the generator function handle the exception.
+          result.value = unwrapped;
+          resolve(result);
+        }, reject);
+      }
+    }
+
+    if (typeof process === "object" && process.domain) {
+      invoke = process.domain.bind(invoke);
+    }
+
+    var previousPromise;
+
+    function enqueue(method, arg) {
+      function callInvokeWithMethodAndArg() {
+        return new Promise(function(resolve, reject) {
+          invoke(method, arg, resolve, reject);
+        });
+      }
+
+      return previousPromise =
+        // If enqueue has been called before, then we want to wait until
+        // all previous Promises have been resolved before calling invoke,
+        // so that results are always delivered in the correct order. If
+        // enqueue has not been called before, then it is important to
+        // call invoke immediately, without waiting on a callback to fire,
+        // so that the async generator function has the opportunity to do
+        // any necessary setup in a predictable way. This predictability
+        // is why the Promise constructor synchronously invokes its
+        // executor callback, and why async functions synchronously
+        // execute code before the first await. Since we implement simple
+        // async functions in terms of async generators, it is especially
+        // important to get this right, even though it requires care.
+        previousPromise ? previousPromise.then(
+          callInvokeWithMethodAndArg,
+          // Avoid propagating failures to Promises returned by later
+          // invocations of the iterator.
+          callInvokeWithMethodAndArg
+        ) : callInvokeWithMethodAndArg();
+    }
+
+    // Define the unified helper method that is used to implement .next,
+    // .throw, and .return (see defineIteratorMethods).
+    this._invoke = enqueue;
+  }
+
+  defineIteratorMethods(AsyncIterator.prototype);
+  runtime.AsyncIterator = AsyncIterator;
+
+  // Note that simple async functions are implemented on top of
+  // AsyncIterator objects; they just return a Promise for the value of
+  // the final result produced by the iterator.
+  runtime.async = function(innerFn, outerFn, self, tryLocsList) {
+    var iter = new AsyncIterator(
+      wrap(innerFn, outerFn, self, tryLocsList)
+    );
+
+    return runtime.isGeneratorFunction(outerFn)
+      ? iter // If outerFn is a generator, return the full iterator.
+      : iter.next().then(function(result) {
+          return result.done ? result.value : iter.next();
+        });
+  };
+
+  function makeInvokeMethod(innerFn, self, context) {
+    var state = GenStateSuspendedStart;
+
+    return function invoke(method, arg) {
+      if (state === GenStateExecuting) {
+        throw new Error("Generator is already running");
+      }
+
+      if (state === GenStateCompleted) {
+        if (method === "throw") {
+          throw arg;
+        }
+
+        // Be forgiving, per 25.3.3.3.3 of the spec:
+        // https://people.mozilla.org/~jorendorff/es6-draft.html#sec-generatorresume
+        return doneResult();
+      }
+
+      context.method = method;
+      context.arg = arg;
+
+      while (true) {
+        var delegate = context.delegate;
+        if (delegate) {
+          var delegateResult = maybeInvokeDelegate(delegate, context);
+          if (delegateResult) {
+            if (delegateResult === ContinueSentinel) continue;
+            return delegateResult;
+          }
+        }
+
+        if (context.method === "next") {
+          // Setting context._sent for legacy support of Babel's
+          // function.sent implementation.
+          context.sent = context._sent = context.arg;
+
+        } else if (context.method === "throw") {
+          if (state === GenStateSuspendedStart) {
+            state = GenStateCompleted;
+            throw context.arg;
+          }
+
+          context.dispatchException(context.arg);
+
+        } else if (context.method === "return") {
+          context.abrupt("return", context.arg);
+        }
+
+        state = GenStateExecuting;
+
+        var record = tryCatch(innerFn, self, context);
+        if (record.type === "normal") {
+          // If an exception is thrown from innerFn, we leave state ===
+          // GenStateExecuting and loop back for another invocation.
+          state = context.done
+            ? GenStateCompleted
+            : GenStateSuspendedYield;
+
+          if (record.arg === ContinueSentinel) {
+            continue;
+          }
+
+          return {
+            value: record.arg,
+            done: context.done
+          };
+
+        } else if (record.type === "throw") {
+          state = GenStateCompleted;
+          // Dispatch the exception by looping back around to the
+          // context.dispatchException(context.arg) call above.
+          context.method = "throw";
+          context.arg = record.arg;
+        }
+      }
+    };
+  }
+
+  // Call delegate.iterator[context.method](context.arg) and handle the
+  // result, either by returning a { value, done } result from the
+  // delegate iterator, or by modifying context.method and context.arg,
+  // setting context.delegate to null, and returning the ContinueSentinel.
+  function maybeInvokeDelegate(delegate, context) {
+    var method = delegate.iterator[context.method];
+    if (method === undefined) {
+      // A .throw or .return when the delegate iterator has no .throw
+      // method always terminates the yield* loop.
+      context.delegate = null;
+
+      if (context.method === "throw") {
+        if (delegate.iterator.return) {
+          // If the delegate iterator has a return method, give it a
+          // chance to clean up.
+          context.method = "return";
+          context.arg = undefined;
+          maybeInvokeDelegate(delegate, context);
+
+          if (context.method === "throw") {
+            // If maybeInvokeDelegate(context) changed context.method from
+            // "return" to "throw", let that override the TypeError below.
+            return ContinueSentinel;
+          }
+        }
+
+        context.method = "throw";
+        context.arg = new TypeError(
+          "The iterator does not provide a 'throw' method");
+      }
+
+      return ContinueSentinel;
+    }
+
+    var record = tryCatch(method, delegate.iterator, context.arg);
+
+    if (record.type === "throw") {
+      context.method = "throw";
+      context.arg = record.arg;
+      context.delegate = null;
+      return ContinueSentinel;
+    }
+
+    var info = record.arg;
+
+    if (! info) {
+      context.method = "throw";
+      context.arg = new TypeError("iterator result is not an object");
+      context.delegate = null;
+      return ContinueSentinel;
+    }
+
+    if (info.done) {
+      // Assign the result of the finished delegate to the temporary
+      // variable specified by delegate.resultName (see delegateYield).
+      context[delegate.resultName] = info.value;
+
+      // Resume execution at the desired location (see delegateYield).
+      context.next = delegate.nextLoc;
+
+      // If context.method was "throw" but the delegate handled the
+      // exception, let the outer generator proceed normally. If
+      // context.method was "next", forget context.arg since it has been
+      // "consumed" by the delegate iterator. If context.method was
+      // "return", allow the original .return call to continue in the
+      // outer generator.
+      if (context.method !== "return") {
+        context.method = "next";
+        context.arg = undefined;
+      }
+
+    } else {
+      // Re-yield the result returned by the delegate method.
+      return info;
+    }
+
+    // The delegate iterator is finished, so forget it and continue with
+    // the outer generator.
+    context.delegate = null;
+    return ContinueSentinel;
+  }
+
+  // Define Generator.prototype.{next,throw,return} in terms of the
+  // unified ._invoke helper method.
+  defineIteratorMethods(Gp);
+
+  Gp[toStringTagSymbol] = "Generator";
+
+  Gp.toString = function() {
+    return "[object Generator]";
+  };
+
+  function pushTryEntry(locs) {
+    var entry = { tryLoc: locs[0] };
+
+    if (1 in locs) {
+      entry.catchLoc = locs[1];
+    }
+
+    if (2 in locs) {
+      entry.finallyLoc = locs[2];
+      entry.afterLoc = locs[3];
+    }
+
+    this.tryEntries.push(entry);
+  }
+
+  function resetTryEntry(entry) {
+    var record = entry.completion || {};
+    record.type = "normal";
+    delete record.arg;
+    entry.completion = record;
+  }
+
+  function Context(tryLocsList) {
+    // The root entry object (effectively a try statement without a catch
+    // or a finally block) gives us a place to store values thrown from
+    // locations where there is no enclosing try statement.
+    this.tryEntries = [{ tryLoc: "root" }];
+    tryLocsList.forEach(pushTryEntry, this);
+    this.reset(true);
+  }
+
+  runtime.keys = function(object) {
+    var keys = [];
+    for (var key in object) {
+      keys.push(key);
+    }
+    keys.reverse();
+
+    // Rather than returning an object with a next method, we keep
+    // things simple and return the next function itself.
+    return function next() {
+      while (keys.length) {
+        var key = keys.pop();
+        if (key in object) {
+          next.value = key;
+          next.done = false;
+          return next;
+        }
+      }
+
+      // To avoid creating an additional object, we just hang the .value
+      // and .done properties off the next function object itself. This
+      // also ensures that the minifier will not anonymize the function.
+      next.done = true;
+      return next;
+    };
+  };
+
+  function values(iterable) {
+    if (iterable) {
+      var iteratorMethod = iterable[iteratorSymbol];
+      if (iteratorMethod) {
+        return iteratorMethod.call(iterable);
+      }
+
+      if (typeof iterable.next === "function") {
+        return iterable;
+      }
+
+      if (!isNaN(iterable.length)) {
+        var i = -1, next = function next() {
+          while (++i < iterable.length) {
+            if (hasOwn.call(iterable, i)) {
+              next.value = iterable[i];
+              next.done = false;
+              return next;
+            }
+          }
+
+          next.value = undefined;
+          next.done = true;
+
+          return next;
+        };
+
+        return next.next = next;
+      }
+    }
+
+    // Return an iterator with no values.
+    return { next: doneResult };
+  }
+  runtime.values = values;
+
+  function doneResult() {
+    return { value: undefined, done: true };
+  }
+
+  Context.prototype = {
+    constructor: Context,
+
+    reset: function(skipTempReset) {
+      this.prev = 0;
+      this.next = 0;
+      // Resetting context._sent for legacy support of Babel's
+      // function.sent implementation.
+      this.sent = this._sent = undefined;
+      this.done = false;
+      this.delegate = null;
+
+      this.method = "next";
+      this.arg = undefined;
+
+      this.tryEntries.forEach(resetTryEntry);
+
+      if (!skipTempReset) {
+        for (var name in this) {
+          // Not sure about the optimal order of these conditions:
+          if (name.charAt(0) === "t" &&
+              hasOwn.call(this, name) &&
+              !isNaN(+name.slice(1))) {
+            this[name] = undefined;
+          }
+        }
+      }
+    },
+
+    stop: function() {
+      this.done = true;
+
+      var rootEntry = this.tryEntries[0];
+      var rootRecord = rootEntry.completion;
+      if (rootRecord.type === "throw") {
+        throw rootRecord.arg;
+      }
+
+      return this.rval;
+    },
+
+    dispatchException: function(exception) {
+      if (this.done) {
+        throw exception;
+      }
+
+      var context = this;
+      function handle(loc, caught) {
+        record.type = "throw";
+        record.arg = exception;
+        context.next = loc;
+
+        if (caught) {
+          // If the dispatched exception was caught by a catch block,
+          // then let that catch block handle the exception normally.
+          context.method = "next";
+          context.arg = undefined;
+        }
+
+        return !! caught;
+      }
+
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        var record = entry.completion;
+
+        if (entry.tryLoc === "root") {
+          // Exception thrown outside of any try block that could handle
+          // it, so set the completion value of the entire function to
+          // throw the exception.
+          return handle("end");
+        }
+
+        if (entry.tryLoc <= this.prev) {
+          var hasCatch = hasOwn.call(entry, "catchLoc");
+          var hasFinally = hasOwn.call(entry, "finallyLoc");
+
+          if (hasCatch && hasFinally) {
+            if (this.prev < entry.catchLoc) {
+              return handle(entry.catchLoc, true);
+            } else if (this.prev < entry.finallyLoc) {
+              return handle(entry.finallyLoc);
+            }
+
+          } else if (hasCatch) {
+            if (this.prev < entry.catchLoc) {
+              return handle(entry.catchLoc, true);
+            }
+
+          } else if (hasFinally) {
+            if (this.prev < entry.finallyLoc) {
+              return handle(entry.finallyLoc);
+            }
+
+          } else {
+            throw new Error("try statement without catch or finally");
+          }
+        }
+      }
+    },
+
+    abrupt: function(type, arg) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.tryLoc <= this.prev &&
+            hasOwn.call(entry, "finallyLoc") &&
+            this.prev < entry.finallyLoc) {
+          var finallyEntry = entry;
+          break;
+        }
+      }
+
+      if (finallyEntry &&
+          (type === "break" ||
+           type === "continue") &&
+          finallyEntry.tryLoc <= arg &&
+          arg <= finallyEntry.finallyLoc) {
+        // Ignore the finally entry if control is not jumping to a
+        // location outside the try/catch block.
+        finallyEntry = null;
+      }
+
+      var record = finallyEntry ? finallyEntry.completion : {};
+      record.type = type;
+      record.arg = arg;
+
+      if (finallyEntry) {
+        this.method = "next";
+        this.next = finallyEntry.finallyLoc;
+        return ContinueSentinel;
+      }
+
+      return this.complete(record);
+    },
+
+    complete: function(record, afterLoc) {
+      if (record.type === "throw") {
+        throw record.arg;
+      }
+
+      if (record.type === "break" ||
+          record.type === "continue") {
+        this.next = record.arg;
+      } else if (record.type === "return") {
+        this.rval = this.arg = record.arg;
+        this.method = "return";
+        this.next = "end";
+      } else if (record.type === "normal" && afterLoc) {
+        this.next = afterLoc;
+      }
+
+      return ContinueSentinel;
+    },
+
+    finish: function(finallyLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.finallyLoc === finallyLoc) {
+          this.complete(entry.completion, entry.afterLoc);
+          resetTryEntry(entry);
+          return ContinueSentinel;
+        }
+      }
+    },
+
+    "catch": function(tryLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.tryLoc === tryLoc) {
+          var record = entry.completion;
+          if (record.type === "throw") {
+            var thrown = record.arg;
+            resetTryEntry(entry);
+          }
+          return thrown;
+        }
+      }
+
+      // The context.catch method must only be called with a location
+      // argument that corresponds to a known catch block.
+      throw new Error("illegal catch attempt");
+    },
+
+    delegateYield: function(iterable, resultName, nextLoc) {
+      this.delegate = {
+        iterator: values(iterable),
+        resultName: resultName,
+        nextLoc: nextLoc
+      };
+
+      if (this.method === "next") {
+        // Deliberately forget the last sent value so that we don't
+        // accidentally pass it on to the delegate.
+        this.arg = undefined;
+      }
+
+      return ContinueSentinel;
+    }
+  };
+})(
+  // Among the various tricks for obtaining a reference to the global
+  // object, this seems to be the most reliable technique that does not
+  // use indirect eval (which violates Content Security Policy).
+  typeof global === "object" ? global :
+  typeof window === "object" ? window :
+  typeof self === "object" ? self : this
+);
+
+
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('three')) :
 	typeof define === 'function' && define.amd ? define(['three'], factory) :
@@ -994,6 +1720,359 @@ function axis(length, width) {
   return hub().add(brick(0xff0000, length, width, width)).add(brick(0x00ff00, width, length, width)).add(brick(0x0000ff, width, width, length));
 }
 
+var index$3 = typeof Symbol === 'undefined' ? function (description) {
+	return '@' + (description || '@') + Math.random();
+} : Symbol;
+
+/*! npm.im/intervalometer */
+function intervalometer(cb, request, cancel, requestParameter) {
+	var requestId;
+	var previousLoopTime;
+	function loop(now) {
+		// must be requested before cb() because that might call .stop()
+		requestId = request(loop, requestParameter);
+
+		// called with "ms since last call". 0 on start()
+		cb(now ? now - previousLoopTime : 0);
+
+		previousLoopTime = now;
+	}
+	return {
+		start: function start() {
+			if (!requestId) { // prevent double starts
+				loop();
+			}
+		},
+		stop: function stop() {
+			requestId = cancel(requestId);
+		}
+	};
+}
+
+function frameIntervalometer(cb) {
+	return intervalometer(cb, requestAnimationFrame, cancelAnimationFrame);
+}
+
+/*! npm.im/iphone-inline-video */
+function preventEvent(element, eventName, toggleProperty, preventWithProperty) {
+	function handler(e) {
+		if (Boolean(element[toggleProperty]) === Boolean(preventWithProperty)) {
+			e.stopImmediatePropagation();
+			// console.log(eventName, 'prevented on', element);
+		}
+		delete element[toggleProperty];
+	}
+	element.addEventListener(eventName, handler, false);
+
+	// Return handler to allow to disable the prevention. Usage:
+	// const preventionHandler = preventEvent(el, 'click');
+	// el.removeEventHandler('click', preventionHandler);
+	return handler;
+}
+
+function proxyProperty(object, propertyName, sourceObject, copyFirst) {
+	function get() {
+		return sourceObject[propertyName];
+	}
+	function set(value) {
+		sourceObject[propertyName] = value;
+	}
+
+	if (copyFirst) {
+		set(object[propertyName]);
+	}
+
+	Object.defineProperty(object, propertyName, {get: get, set: set});
+}
+
+function proxyEvent(object, eventName, sourceObject) {
+	sourceObject.addEventListener(eventName, function () { return object.dispatchEvent(new Event(eventName)); });
+}
+
+function dispatchEventAsync(element, type) {
+	Promise.resolve().then(function () {
+		element.dispatchEvent(new Event(type));
+	});
+}
+
+// iOS 10 adds support for native inline playback + silent autoplay
+var isWhitelisted = 'object-fit' in document.head.style && /iPhone|iPod/i.test(navigator.userAgent) && !matchMedia('(-webkit-video-playable-inline)').matches;
+
+var ಠ = index$3();
+var ಠevent = index$3();
+var ಠplay = index$3('nativeplay');
+var ಠpause = index$3('nativepause');
+
+/**
+ * UTILS
+ */
+
+function getAudioFromVideo(video) {
+	var audio = new Audio();
+	proxyEvent(video, 'play', audio);
+	proxyEvent(video, 'playing', audio);
+	proxyEvent(video, 'pause', audio);
+	audio.crossOrigin = video.crossOrigin;
+
+	// 'data:' causes audio.networkState > 0
+	// which then allows to keep <audio> in a resumable playing state
+	// i.e. once you set a real src it will keep playing if it was if .play() was called
+	audio.src = video.src || video.currentSrc || 'data:';
+
+	// if (audio.src === 'data:') {
+	//   TODO: wait for video to be selected
+	// }
+	return audio;
+}
+
+var lastRequests = [];
+var requestIndex = 0;
+var lastTimeupdateEvent;
+
+function setTime(video, time, rememberOnly) {
+	// allow one timeupdate event every 200+ ms
+	if ((lastTimeupdateEvent || 0) + 200 < Date.now()) {
+		video[ಠevent] = true;
+		lastTimeupdateEvent = Date.now();
+	}
+	if (!rememberOnly) {
+		video.currentTime = time;
+	}
+	lastRequests[++requestIndex % 3] = time * 100 | 0 / 100;
+}
+
+function isPlayerEnded(player) {
+	return player.driver.currentTime >= player.video.duration;
+}
+
+function update(timeDiff) {
+	var player = this;
+	// console.log('update', player.video.readyState, player.video.networkState, player.driver.readyState, player.driver.networkState, player.driver.paused);
+	if (player.video.readyState >= player.video.HAVE_FUTURE_DATA) {
+		if (!player.hasAudio) {
+			player.driver.currentTime = player.video.currentTime + ((timeDiff * player.video.playbackRate) / 1000);
+			if (player.video.loop && isPlayerEnded(player)) {
+				player.driver.currentTime = 0;
+			}
+		}
+		setTime(player.video, player.driver.currentTime);
+	} else if (player.video.networkState === player.video.NETWORK_IDLE && !player.video.buffered.length) {
+		// this should happen when the source is available but:
+		// - it's potentially playing (.paused === false)
+		// - it's not ready to play
+		// - it's not loading
+		// If it hasAudio, that will be loaded in the 'emptied' handler below
+		player.video.load();
+		// console.log('Will load');
+	}
+
+	// console.assert(player.video.currentTime === player.driver.currentTime, 'Video not updating!');
+
+	if (player.video.ended) {
+		delete player.video[ಠevent]; // allow timeupdate event
+		player.video.pause(true);
+	}
+}
+
+/**
+ * METHODS
+ */
+
+function play() {
+	// console.log('play');
+	var video = this;
+	var player = video[ಠ];
+
+	// if it's fullscreen, use the native player
+	if (video.webkitDisplayingFullscreen) {
+		video[ಠplay]();
+		return;
+	}
+
+	if (player.driver.src !== 'data:' && player.driver.src !== video.src) {
+		// console.log('src changed on play', video.src);
+		setTime(video, 0, true);
+		player.driver.src = video.src;
+	}
+
+	if (!video.paused) {
+		return;
+	}
+	player.paused = false;
+
+	if (!video.buffered.length) {
+		// .load() causes the emptied event
+		// the alternative is .play()+.pause() but that triggers play/pause events, even worse
+		// possibly the alternative is preventing this event only once
+		video.load();
+	}
+
+	player.driver.play();
+	player.updater.start();
+
+	if (!player.hasAudio) {
+		dispatchEventAsync(video, 'play');
+		if (player.video.readyState >= player.video.HAVE_ENOUGH_DATA) {
+			// console.log('onplay');
+			dispatchEventAsync(video, 'playing');
+		}
+	}
+}
+function pause(forceEvents) {
+	// console.log('pause');
+	var video = this;
+	var player = video[ಠ];
+
+	player.driver.pause();
+	player.updater.stop();
+
+	// if it's fullscreen, the developer the native player.pause()
+	// This is at the end of pause() because it also
+	// needs to make sure that the simulation is paused
+	if (video.webkitDisplayingFullscreen) {
+		video[ಠpause]();
+	}
+
+	if (player.paused && !forceEvents) {
+		return;
+	}
+
+	player.paused = true;
+	if (!player.hasAudio) {
+		dispatchEventAsync(video, 'pause');
+	}
+	if (video.ended) {
+		video[ಠevent] = true;
+		dispatchEventAsync(video, 'ended');
+	}
+}
+
+/**
+ * SETUP
+ */
+
+function addPlayer(video, hasAudio) {
+	var player = video[ಠ] = {};
+	player.paused = true; // track whether 'pause' events have been fired
+	player.hasAudio = hasAudio;
+	player.video = video;
+	player.updater = frameIntervalometer(update.bind(player));
+
+	if (hasAudio) {
+		player.driver = getAudioFromVideo(video);
+	} else {
+		video.addEventListener('canplay', function () {
+			if (!video.paused) {
+				// console.log('oncanplay');
+				dispatchEventAsync(video, 'playing');
+			}
+		});
+		player.driver = {
+			src: video.src || video.currentSrc || 'data:',
+			muted: true,
+			paused: true,
+			pause: function () {
+				player.driver.paused = true;
+			},
+			play: function () {
+				player.driver.paused = false;
+				// media automatically goes to 0 if .play() is called when it's done
+				if (isPlayerEnded(player)) {
+					setTime(video, 0);
+				}
+			},
+			get ended() {
+				return isPlayerEnded(player);
+			}
+		};
+	}
+
+	// .load() causes the emptied event
+	video.addEventListener('emptied', function () {
+		// console.log('driver src is', player.driver.src);
+		var wasEmpty = !player.driver.src || player.driver.src === 'data:';
+		if (player.driver.src && player.driver.src !== video.src) {
+			// console.log('src changed to', video.src);
+			setTime(video, 0, true);
+			player.driver.src = video.src;
+			// playing videos will only keep playing if no src was present when .play()’ed
+			if (wasEmpty) {
+				player.driver.play();
+			} else {
+				player.updater.stop();
+			}
+		}
+	}, false);
+
+	// stop programmatic player when OS takes over
+	video.addEventListener('webkitbeginfullscreen', function () {
+		if (!video.paused) {
+			// make sure that the <audio> and the syncer/updater are stopped
+			video.pause();
+
+			// play video natively
+			video[ಠplay]();
+		} else if (hasAudio && !player.driver.buffered.length) {
+			// if the first play is native,
+			// the <audio> needs to be buffered manually
+			// so when the fullscreen ends, it can be set to the same current time
+			player.driver.load();
+		}
+	});
+	if (hasAudio) {
+		video.addEventListener('webkitendfullscreen', function () {
+			// sync audio to new video position
+			player.driver.currentTime = video.currentTime;
+			// console.assert(player.driver.currentTime === video.currentTime, 'Audio not synced');
+		});
+
+		// allow seeking
+		video.addEventListener('seeking', function () {
+			if (lastRequests.indexOf(video.currentTime * 100 | 0 / 100) < 0) {
+				// console.log('User-requested seeking');
+				player.driver.currentTime = video.currentTime;
+			}
+		});
+	}
+}
+
+function overloadAPI(video) {
+	var player = video[ಠ];
+	video[ಠplay] = video.play;
+	video[ಠpause] = video.pause;
+	video.play = play;
+	video.pause = pause;
+	proxyProperty(video, 'paused', player.driver);
+	proxyProperty(video, 'muted', player.driver, true);
+	proxyProperty(video, 'playbackRate', player.driver, true);
+	proxyProperty(video, 'ended', player.driver);
+	proxyProperty(video, 'loop', player.driver, true);
+	preventEvent(video, 'seeking');
+	preventEvent(video, 'seeked');
+	preventEvent(video, 'timeupdate', ಠevent, false);
+	preventEvent(video, 'ended', ಠevent, false); // prevent occasional native ended events
+}
+
+function enableInlineVideo(video, hasAudio, onlyWhitelisted) {
+	if ( hasAudio === void 0 ) hasAudio = true;
+	if ( onlyWhitelisted === void 0 ) onlyWhitelisted = true;
+
+	if ((onlyWhitelisted && !isWhitelisted) || video[ಠ]) {
+		return;
+	}
+	addPlayer(video, hasAudio);
+	overloadAPI(video);
+	video.classList.add('IIV');
+	if (!hasAudio && video.autoplay) {
+		video.play();
+	}
+	if (!/iPhone|iPod|iPad/.test(navigator.platform)) {
+		console.warn('iphone-inline-video is not guaranteed to work in emulated environments');
+	}
+}
+
+enableInlineVideo.isWhitelisted = isWhitelisted;
+
 pliny.class({
   parent: "Primrose.Controls",
   name: "Entity",
@@ -1541,57 +2620,131 @@ var BaseTextured = function (_Entity) {
 
 pliny.class({
   parent: "Primrose.Controls",
-  name: "Image",
+  name: "Videa",
   baseClass: "Primrose.Controls.BaseTextured",
-  description: "A simple 2D image to put on a Surface.",
+  description: "A simple 2D video to put on a Surface.",
   parameters: [{
     name: "options",
     type: "Object",
-    description: "Named parameters for creating the Image."
+    description: "Named parameters for creating the Video."
   }]
 });
 
 var COUNTER = 0;
 
-var Image = function (_BaseTextured) {
-  inherits(Image, _BaseTextured);
+// Videos don't auto-play on mobile devices, so let's make them all play whenever we tap the screen.
+var processedVideos = [];
+function findAndFixVideo(evt) {
+  var vids = document.querySelectorAll("video");
+  for (var i = 0; i < vids.length; ++i) {
+    fixVideo(vids[i]);
+  }
+  window.removeEventListener("touchend", findAndFixVideo);
+  window.removeEventListener("mouseup", findAndFixVideo);
+  window.removeEventListener("keyup", findAndFixVideo);
+}
 
-  function Image(images, options) {
-    classCallCheck(this, Image);
+function fixVideo(vid) {
+  if (isiOS && processedVideos.indexOf(vid) === -1) {
+    processedVideos.push(vid);
+    enableInlineVideo(vid, false);
+  }
+}
+
+window.addEventListener("touchend", findAndFixVideo, false);
+window.addEventListener("mouseup", findAndFixVideo, false);
+window.addEventListener("keyup", findAndFixVideo, false);
+
+var Video = function (_BaseTextured) {
+  inherits(Video, _BaseTextured);
+
+  function Video(videos, options) {
+    classCallCheck(this, Video);
 
     ////////////////////////////////////////////////////////////////////////
     // normalize input parameters
     ////////////////////////////////////////////////////////////////////////
-    if (!(images instanceof Array)) {
-      images = [images];
+    if (!(videos instanceof Array)) {
+      videos = [videos];
     }
 
     options = Object.assign({}, {
-      id: "Primrose.Controls.Image[" + COUNTER++ + "]"
+      id: "Primrose.Controls.Video[" + COUNTER++ + "]"
     }, options);
 
-    return possibleConstructorReturn(this, (Image.__proto__ || Object.getPrototypeOf(Image)).call(this, images, options));
+    return possibleConstructorReturn(this, (Video.__proto__ || Object.getPrototypeOf(Video)).call(this, videos, options));
   }
 
-  createClass(Image, [{
+  createClass(Video, [{
     key: "_loadFiles",
-    value: function _loadFiles(images, progress) {
+    value: function _loadFiles(videos, progress) {
       var _this2 = this;
 
-      return Promise.all(Array.prototype.map.call(images, function (src, i) {
-        var loadOptions = Object.assign({}, _this2.options, {
-          progress: progress
+      this._elements = Array.prototype.map.call(videos, function (spec, i) {
+        var video = null;
+        if (typeof spec === "string") {
+          video = document.querySelector("video[src='" + spec + "']");
+          if (!video) {
+            video = document.createElement("video");
+            video.src = spec;
+          }
+        } else if (spec instanceof HTMLVideoElement) {
+          video = spec;
+        } else if (spec.toString() === "[object MediaStream]" || spec.toString() === "[object LocalMediaStream]") {
+          video = document.createElement("video");
+          video.srcObject = spec;
+        }
+        video.onprogress = progress;
+        video.onloadedmetadata = progress;
+        video.muted = true;
+        video.loop = true;
+        video.setAttribute("playsinline", "");
+        video.setAttribute("webkit-playsinline", "");
+        if (!isiOS) {
+          video.preload = "auto";
+        }
+
+        var loadOptions = Object.assign({}, _this2.options);
+        _this2._meshes[i] = textured(_this2._geometry, video, loadOptions);
+
+        if (!video.parentElement) {
+          document.body.insertBefore(video, document.body.children[0]);
+          fixVideo(video);
+        }
+
+        loadOptions.promise.then(function (txt) {
+          _this2._textures[i] = txt;
+          console.log(txt);
+          txt.minFilter = three.LinearFilter;
         });
 
-        _this2._meshes[i] = _this2._geometry.textured(src, loadOptions).named(_this2.name + "-mesh-" + i);
-
-        return loadOptions.promise.then(function (txt) {
-          return _this2._textures[i] = txt;
-        });
-      }));
+        return video;
+      });
+      return Promise.resolve();
+    }
+  }, {
+    key: "play",
+    value: function play() {
+      if (this._elements.length > 0) {
+        this._elements[0].play();
+      }
+    }
+  }, {
+    key: "update",
+    value: function update() {
+      get(Video.prototype.__proto__ || Object.getPrototypeOf(Video.prototype), "update", this).call(this);
+      for (var i = 0; i < this._textures.length; ++i) {
+        if (this._textures[i]) {
+          var elem = this._elements[i];
+          if (elem.currentTime !== this._lastTime) {
+            this._textures[i].needsUpdate = true;
+            this._lastTime = elem.currentTime;
+          }
+        }
+      }
     }
   }]);
-  return Image;
+  return Video;
 }(BaseTextured);
 
 pliny.function({
@@ -1632,8 +2785,7 @@ function camera(index, options) {
     transparent: true,
     opacity: 0.5
   }, options);
-  var cam = hub();
-  cam.ready = navigator.mediaDevices.enumerateDevices().catch(console.error.bind(console, "ERR [enumerating devices]:>")).then(function (devices) {
+  return navigator.mediaDevices.enumerateDevices().catch(console.error.bind(console, "ERR [enumerating devices]:>")).then(function (devices) {
     return devices.filter(function (d) {
       return d.kind === "videoinput";
     })[index];
@@ -1646,15 +2798,8 @@ function camera(index, options) {
       }
     });
   }).catch(console.error.bind(console, "ERR [getting media access]:>")).then(function (stream) {
-    return new Image(stream, options).ready;
-  }).catch(console.error.bind(console, "ERR [creating image]:>")).then(function (image) {
-    image._meshes.forEach(function (mesh) {
-      return cam.add(mesh);
-    });
-    cam.image = image;
-    return cam;
-  });
-  return cam;
+    return new Video(stream, options).ready;
+  }).catch(console.error.bind(console, "ERR [creating image]:>"));
 }
 
 pliny.function({
@@ -2666,7 +3811,7 @@ pliny.function({
   }]
 });
 
-function immutable$1(value) {
+function immutable(value) {
   var getter = typeof value === "function" ? value : function () {
     return value;
   };
@@ -2867,9 +4012,9 @@ function standardLockBehavior(elem) {
 }
 
 function standardFullScreenBehavior(elem) {
-  return FullScreen.request(elem).then(standardLockBehavior).catch(function (exp) {
+  return FullScreen.request(elem).catch(function (exp) {
     return console.warn("FullScreen failed", exp);
-  });
+  }).then(standardLockBehavior);
 }
 
 pliny.class({
@@ -3148,7 +4293,7 @@ pliny.namespace({
 When including Primrose as a `script` tag, the Util functions are imported directly onto the window object and is available without qualification."
 });
 
-var index$3 = {
+var index$4 = {
   AsyncLockRequest: AsyncLockRequest,
   cache: cache,
   deleteSetting: deleteSetting,
@@ -3156,7 +4301,7 @@ var index$3 = {
   FullScreen: FullScreen,
   getSetting: getSetting,
   identity: identity,
-  immutable: immutable$1,
+  immutable: immutable,
   isTimestampDeltaValid: isTimestampDeltaValid,
   mutable: mutable,
   Orientation: Orientation,
@@ -3177,7 +4322,7 @@ var util = Object.freeze({
 	FullScreen: FullScreen,
 	getSetting: getSetting,
 	identity: identity,
-	immutable: immutable$1,
+	immutable: immutable,
 	isTimestampDeltaValid: isTimestampDeltaValid,
 	mutable: mutable,
 	Orientation: Orientation,
@@ -3188,7 +4333,7 @@ var util = Object.freeze({
 	standardLockBehavior: standardLockBehavior,
 	standardUnlockBehavior: standardUnlockBehavior,
 	Workerize: Workerize,
-	default: index$3
+	default: index$4
 });
 
 three.BufferGeometry.prototype.center = three.Geometry.prototype.center = function () {
@@ -3345,174 +4490,174 @@ three.Matrix4.prototype.toString = function (digits) {
  *
  */
 var MTLLoader = function (_EventDispatcher) {
-    inherits(MTLLoader, _EventDispatcher);
+  inherits(MTLLoader, _EventDispatcher);
 
-    function MTLLoader(manager) {
-        classCallCheck(this, MTLLoader);
+  function MTLLoader(manager) {
+    classCallCheck(this, MTLLoader);
 
-        var _this = possibleConstructorReturn(this, (MTLLoader.__proto__ || Object.getPrototypeOf(MTLLoader)).call(this));
+    var _this = possibleConstructorReturn(this, (MTLLoader.__proto__ || Object.getPrototypeOf(MTLLoader)).call(this));
 
-        _this.manager = manager !== undefined ? manager : three.DefaultLoadingManager;
+    _this.manager = manager !== undefined ? manager : three.DefaultLoadingManager;
 
-        return _this;
+    return _this;
+  }
+
+  /**
+   * Loads and parses a MTL asset from a URL.
+   *
+   * @param {String} url - URL to the MTL file.
+   * @param {Function} [onLoad] - Callback invoked with the loaded object.
+   * @param {Function} [onProgress] - Callback for download progress.
+   * @param {Function} [onError] - Callback for download errors.
+   *
+   * @see setPath setTexturePath
+   *
+   * @note In order for relative texture references to resolve correctly
+   * you must call setPath and/or setTexturePath explicitly prior to load.
+   */
+
+
+  createClass(MTLLoader, [{
+    key: 'load',
+    value: function load(url, onLoad, onProgress, onError) {
+
+      var scope = this;
+
+      var loader = new three.FileLoader(this.manager);
+      loader.setPath(this.path);
+      loader.load(url, function (text) {
+
+        onLoad(scope.parse(text));
+      }, onProgress, onError);
     }
 
     /**
-     * Loads and parses a MTL asset from a URL.
+     * Set base path for resolving references.
+     * If set this path will be prepended to each loaded and found reference.
      *
-     * @param {String} url - URL to the MTL file.
-     * @param {Function} [onLoad] - Callback invoked with the loaded object.
-     * @param {Function} [onProgress] - Callback for download progress.
-     * @param {Function} [onError] - Callback for download errors.
+     * @see setTexturePath
+     * @param {String} path
+     *
+     * @example
+     *     mtlLoader.setPath( 'assets/obj/' );
+     *     mtlLoader.load( 'my.mtl', ... );
+     */
+
+  }, {
+    key: 'setPath',
+    value: function setPath(path) {
+
+      this.path = path;
+    }
+
+    /**
+     * Set base path for resolving texture references.
+     * If set this path will be prepended found texture reference.
+     * If not set and setPath is, it will be used as texture base path.
+     *
+     * @see setPath
+     * @param {String} path
+     *
+     * @example
+     *     mtlLoader.setPath( 'assets/obj/' );
+     *     mtlLoader.setTexturePath( 'assets/textures/' );
+     *     mtlLoader.load( 'my.mtl', ... );
+     */
+
+  }, {
+    key: 'setTexturePath',
+    value: function setTexturePath(path) {
+
+      this.texturePath = path;
+    }
+  }, {
+    key: 'setBaseUrl',
+    value: function setBaseUrl(path) {
+
+      console.warn('MTLLoader: .setBaseUrl() is deprecated. Use .setTexturePath( path ) for texture path or .setPath( path ) for general base path instead.');
+
+      this.setTexturePath(path);
+    }
+  }, {
+    key: 'setCrossOrigin',
+    value: function setCrossOrigin(value) {
+
+      this.crossOrigin = value;
+    }
+  }, {
+    key: 'setMaterialOptions',
+    value: function setMaterialOptions(value) {
+
+      this.materialOptions = value;
+    }
+
+    /**
+     * Parses a MTL file.
+     *
+     * @param {String} text - Content of MTL file
+     * @return {MTLLoader.MaterialCreator}
      *
      * @see setPath setTexturePath
      *
      * @note In order for relative texture references to resolve correctly
-     * you must call setPath and/or setTexturePath explicitly prior to load.
+     * you must call setPath and/or setTexturePath explicitly prior to parse.
      */
 
+  }, {
+    key: 'parse',
+    value: function parse(text) {
 
-    createClass(MTLLoader, [{
-        key: 'load',
-        value: function load(url, onLoad, onProgress, onError) {
+      var lines = text.split('\n');
+      var info = {};
+      var delimiter_pattern = /\s+/;
+      var materialsInfo = {};
 
-            var scope = this;
+      for (var i = 0; i < lines.length; i++) {
 
-            var loader = new three.FileLoader(this.manager);
-            loader.setPath(this.path);
-            loader.load(url, function (text) {
+        var line = lines[i];
+        line = line.trim();
 
-                onLoad(scope.parse(text));
-            }, onProgress, onError);
+        if (line.length === 0 || line.charAt(0) === '#') {
+
+          // Blank line or comment ignore
+          continue;
         }
 
-        /**
-         * Set base path for resolving references.
-         * If set this path will be prepended to each loaded and found reference.
-         *
-         * @see setTexturePath
-         * @param {String} path
-         *
-         * @example
-         *     mtlLoader.setPath( 'assets/obj/' );
-         *     mtlLoader.load( 'my.mtl', ... );
-         */
+        var pos = line.indexOf(' ');
 
-    }, {
-        key: 'setPath',
-        value: function setPath(path) {
+        var key = pos >= 0 ? line.substring(0, pos) : line;
+        key = key.toLowerCase();
 
-            this.path = path;
+        var value = pos >= 0 ? line.substring(pos + 1) : '';
+        value = value.trim();
+
+        if (key === 'newmtl') {
+
+          // New material
+
+          info = { name: value };
+          materialsInfo[value] = info;
+        } else if (info) {
+
+          if (key === 'ka' || key === 'kd' || key === 'ks') {
+
+            var ss = value.split(delimiter_pattern, 3);
+            info[key] = [parseFloat(ss[0]), parseFloat(ss[1]), parseFloat(ss[2])];
+          } else {
+
+            info[key] = value;
+          }
         }
+      }
 
-        /**
-         * Set base path for resolving texture references.
-         * If set this path will be prepended found texture reference.
-         * If not set and setPath is, it will be used as texture base path.
-         *
-         * @see setPath
-         * @param {String} path
-         *
-         * @example
-         *     mtlLoader.setPath( 'assets/obj/' );
-         *     mtlLoader.setTexturePath( 'assets/textures/' );
-         *     mtlLoader.load( 'my.mtl', ... );
-         */
-
-    }, {
-        key: 'setTexturePath',
-        value: function setTexturePath(path) {
-
-            this.texturePath = path;
-        }
-    }, {
-        key: 'setBaseUrl',
-        value: function setBaseUrl(path) {
-
-            console.warn('MTLLoader: .setBaseUrl() is deprecated. Use .setTexturePath( path ) for texture path or .setPath( path ) for general base path instead.');
-
-            this.setTexturePath(path);
-        }
-    }, {
-        key: 'setCrossOrigin',
-        value: function setCrossOrigin(value) {
-
-            this.crossOrigin = value;
-        }
-    }, {
-        key: 'setMaterialOptions',
-        value: function setMaterialOptions(value) {
-
-            this.materialOptions = value;
-        }
-
-        /**
-         * Parses a MTL file.
-         *
-         * @param {String} text - Content of MTL file
-         * @return {MTLLoader.MaterialCreator}
-         *
-         * @see setPath setTexturePath
-         *
-         * @note In order for relative texture references to resolve correctly
-         * you must call setPath and/or setTexturePath explicitly prior to parse.
-         */
-
-    }, {
-        key: 'parse',
-        value: function parse(text) {
-
-            var lines = text.split('\n');
-            var info = {};
-            var delimiter_pattern = /\s+/;
-            var materialsInfo = {};
-
-            for (var i = 0; i < lines.length; i++) {
-
-                var line = lines[i];
-                line = line.trim();
-
-                if (line.length === 0 || line.charAt(0) === '#') {
-
-                    // Blank line or comment ignore
-                    continue;
-                }
-
-                var pos = line.indexOf(' ');
-
-                var key = pos >= 0 ? line.substring(0, pos) : line;
-                key = key.toLowerCase();
-
-                var value = pos >= 0 ? line.substring(pos + 1) : '';
-                value = value.trim();
-
-                if (key === 'newmtl') {
-
-                    // New material
-
-                    info = { name: value };
-                    materialsInfo[value] = info;
-                } else if (info) {
-
-                    if (key === 'ka' || key === 'kd' || key === 'ks') {
-
-                        var ss = value.split(delimiter_pattern, 3);
-                        info[key] = [parseFloat(ss[0]), parseFloat(ss[1]), parseFloat(ss[2])];
-                    } else {
-
-                        info[key] = value;
-                    }
-                }
-            }
-
-            var materialCreator = new MaterialCreator(this.texturePath || this.path, this.materialOptions);
-            materialCreator.setCrossOrigin(this.crossOrigin);
-            materialCreator.setManager(this.manager);
-            materialCreator.setMaterials(materialsInfo);
-            return materialCreator;
-        }
-    }]);
-    return MTLLoader;
+      var materialCreator = new MaterialCreator(this.texturePath || this.path, this.materialOptions);
+      materialCreator.setCrossOrigin(this.crossOrigin);
+      materialCreator.setManager(this.manager);
+      materialCreator.setMaterials(materialsInfo);
+      return materialCreator;
+    }
+  }]);
+  return MTLLoader;
 }(three.EventDispatcher);
 
 /**
@@ -3531,377 +4676,377 @@ var MTLLoader = function (_EventDispatcher) {
  */
 
 var MaterialCreator = function () {
-    function MaterialCreator(baseUrl, options) {
-        classCallCheck(this, MaterialCreator);
+  function MaterialCreator(baseUrl, options) {
+    classCallCheck(this, MaterialCreator);
 
 
-        this.baseUrl = baseUrl || '';
-        this.options = options;
-        this.materialsInfo = {};
-        this.materials = {};
-        this.materialsArray = [];
-        this.nameLookup = {};
+    this.baseUrl = baseUrl || '';
+    this.options = options;
+    this.materialsInfo = {};
+    this.materials = {};
+    this.materialsArray = [];
+    this.nameLookup = {};
 
-        this.side = this.options && this.options.side ? this.options.side : three.FrontSide;
-        this.wrap = this.options && this.options.wrap ? this.options.wrap : three.RepeatWrapping;
+    this.side = this.options && this.options.side ? this.options.side : three.FrontSide;
+    this.wrap = this.options && this.options.wrap ? this.options.wrap : three.RepeatWrapping;
+  }
+
+  createClass(MaterialCreator, [{
+    key: 'setCrossOrigin',
+    value: function setCrossOrigin(value) {
+
+      this.crossOrigin = value;
     }
+  }, {
+    key: 'setManager',
+    value: function setManager(value) {
 
-    createClass(MaterialCreator, [{
-        key: 'setCrossOrigin',
-        value: function setCrossOrigin(value) {
+      this.manager = value;
+    }
+  }, {
+    key: 'setMaterials',
+    value: function setMaterials(materialsInfo) {
 
-            this.crossOrigin = value;
-        }
-    }, {
-        key: 'setManager',
-        value: function setManager(value) {
+      this.materialsInfo = this.convert(materialsInfo);
+      this.materials = {};
+      this.materialsArray = [];
+      this.nameLookup = {};
+    }
+  }, {
+    key: 'convert',
+    value: function convert(materialsInfo) {
 
-            this.manager = value;
-        }
-    }, {
-        key: 'setMaterials',
-        value: function setMaterials(materialsInfo) {
+      if (!this.options) return materialsInfo;
 
-            this.materialsInfo = this.convert(materialsInfo);
-            this.materials = {};
-            this.materialsArray = [];
-            this.nameLookup = {};
-        }
-    }, {
-        key: 'convert',
-        value: function convert(materialsInfo) {
+      var converted = {};
 
-            if (!this.options) return materialsInfo;
+      for (var mn in materialsInfo) {
 
-            var converted = {};
+        // Convert materials info into normalized form based on options
 
-            for (var mn in materialsInfo) {
+        var mat = materialsInfo[mn];
 
-                // Convert materials info into normalized form based on options
+        var covmat = {};
 
-                var mat = materialsInfo[mn];
+        converted[mn] = covmat;
 
-                var covmat = {};
+        for (var prop in mat) {
 
-                converted[mn] = covmat;
+          var save = true;
+          var value = mat[prop];
+          var lprop = prop.toLowerCase();
 
-                for (var prop in mat) {
+          switch (lprop) {
 
-                    var save = true;
-                    var value = mat[prop];
-                    var lprop = prop.toLowerCase();
+            case 'kd':
+            case 'ka':
+            case 'ks':
 
-                    switch (lprop) {
+              // Diffuse color (color under white light) using RGB values
 
-                        case 'kd':
-                        case 'ka':
-                        case 'ks':
+              if (this.options && this.options.normalizeRGB) {
 
-                            // Diffuse color (color under white light) using RGB values
+                value = [value[0] / 255, value[1] / 255, value[2] / 255];
+              }
 
-                            if (this.options && this.options.normalizeRGB) {
+              if (this.options && this.options.ignoreZeroRGBs) {
 
-                                value = [value[0] / 255, value[1] / 255, value[2] / 255];
-                            }
+                if (value[0] === 0 && value[1] === 0 && value[2] === 0) {
 
-                            if (this.options && this.options.ignoreZeroRGBs) {
+                  // ignore
 
-                                if (value[0] === 0 && value[1] === 0 && value[2] === 0) {
-
-                                    // ignore
-
-                                    save = false;
-                                }
-                            }
-
-                            break;
-
-                        default:
-
-                            break;
-                    }
-
-                    if (save) {
-
-                        covmat[lprop] = value;
-                    }
+                  save = false;
                 }
-            }
+              }
 
-            return converted;
+              break;
+
+            default:
+
+              break;
+          }
+
+          if (save) {
+
+            covmat[lprop] = value;
+          }
         }
-    }, {
-        key: 'preload',
-        value: function preload() {
+      }
 
-            for (var mn in this.materialsInfo) {
+      return converted;
+    }
+  }, {
+    key: 'preload',
+    value: function preload() {
 
-                this.create(mn);
-            }
+      for (var mn in this.materialsInfo) {
+
+        this.create(mn);
+      }
+    }
+  }, {
+    key: 'getIndex',
+    value: function getIndex(materialName) {
+
+      return this.nameLookup[materialName];
+    }
+  }, {
+    key: 'getAsArray',
+    value: function getAsArray() {
+
+      var index = 0;
+
+      for (var mn in this.materialsInfo) {
+
+        this.materialsArray[index] = this.create(mn);
+        this.nameLookup[mn] = index;
+        index++;
+      }
+
+      return this.materialsArray;
+    }
+  }, {
+    key: 'create',
+    value: function create(materialName) {
+
+      if (this.materials[materialName] === undefined) {
+
+        this.createMaterial_(materialName);
+      }
+
+      return this.materials[materialName];
+    }
+  }, {
+    key: 'createMaterial_',
+    value: function createMaterial_(materialName) {
+
+      // Create material
+
+      var TMaterial = three.MeshPhongMaterial;
+      var scope = this;
+      var mat = this.materialsInfo[materialName];
+      var params = {
+
+        name: materialName,
+        side: this.side
+
+      };
+
+      var resolveURL = function resolveURL(baseUrl, url) {
+
+        if (typeof url !== 'string' || url === '') return '';
+
+        // Absolute URL
+        if (/^https?:\/\//i.test(url)) {
+          return url;
         }
-    }, {
-        key: 'getIndex',
-        value: function getIndex(materialName) {
 
-            return this.nameLookup[materialName];
+        return baseUrl + url;
+      };
+
+      function setMapForType(mapType, value) {
+
+        if (params[mapType]) return; // Keep the first encountered texture
+
+        var texParams = scope.getTextureParams(value, params);
+        var map = scope.loadTexture(resolveURL(scope.baseUrl, texParams.url));
+
+        map.repeat.copy(texParams.scale);
+        map.offset.copy(texParams.offset);
+
+        map.wrapS = scope.wrap;
+        map.wrapT = scope.wrap;
+
+        params[mapType] = map;
+      }
+
+      for (var prop in mat) {
+
+        var value = mat[prop];
+
+        if (value === '') continue;
+
+        switch (prop.toLowerCase()) {
+
+          // Ns is material specular exponent
+
+          case 'kd':
+
+            // Diffuse color (color under white light) using RGB values
+
+            params.color = new three.Color().fromArray(value);
+
+            break;
+
+          case 'ks':
+
+            // Specular color (color when light is reflected from shiny surface) using RGB values
+            params.specular = new three.Color().fromArray(value);
+
+            break;
+
+          case 'map_kd':
+
+            // Diffuse texture map
+
+            setMapForType("map", value);
+
+            break;
+
+          case 'map_ks':
+
+            // Specular map
+
+            setMapForType("specularMap", value);
+
+            break;
+
+          case 'map_bump':
+          case 'bump':
+
+            // Bump texture map
+
+            setMapForType("bumpMap", value);
+
+            break;
+
+          case 'ns':
+
+            // The specular exponent (defines the focus of the specular highlight)
+            // A high exponent results in a tight, concentrated highlight. Ns values normally range from 0 to 1000.
+
+            params.shininess = parseFloat(value);
+
+            break;
+
+          case 'd':
+
+            if (value < 1) {
+
+              params.opacity = value;
+              params.transparent = true;
+            }
+
+            break;
+
+          case 'illum':
+
+            value = parseFloat(value);
+
+            if (value === MTLLoader.COLOR_ON_AND_AMBIENT_OFF) {
+
+              TMaterial = three.MeshBasicMaterial;
+            }
+
+            break;
+
+          case 'Tr':
+
+            if (value > 0) {
+
+              params.opacity = 1 - value;
+              params.transparent = true;
+            }
+
+            break;
+
+          default:
+            break;
+
         }
-    }, {
-        key: 'getAsArray',
-        value: function getAsArray() {
+      }
 
-            var index = 0;
+      if (TMaterial === three.MeshBasicMaterial) {
 
-            for (var mn in this.materialsInfo) {
+        ["shininess", "specular"].forEach(function (attribute) {
 
-                this.materialsArray[index] = this.create(mn);
-                this.nameLookup[mn] = index;
-                index++;
-            }
+          if (attribute in params) {
 
-            return this.materialsArray;
-        }
-    }, {
-        key: 'create',
-        value: function create(materialName) {
+            delete params[attribute];
+          }
+        });
+      }
 
-            if (this.materials[materialName] === undefined) {
+      this.materials[materialName] = new TMaterial(params);
+      return this.materials[materialName];
+    }
+  }, {
+    key: 'getTextureParams',
+    value: function getTextureParams(value, matParams) {
 
-                this.createMaterial_(materialName);
-            }
+      var texParams = {
 
-            return this.materials[materialName];
-        }
-    }, {
-        key: 'createMaterial_',
-        value: function createMaterial_(materialName) {
+        scale: new three.Vector2(1, 1),
+        offset: new three.Vector2(0, 0)
 
-            // Create material
+      };
 
-            var TMaterial = three.MeshPhongMaterial;
-            var scope = this;
-            var mat = this.materialsInfo[materialName];
-            var params = {
+      var items = value.split(/\s+/);
+      var pos;
 
-                name: materialName,
-                side: this.side
+      pos = items.indexOf('-bm');
+      if (pos >= 0) {
 
-            };
+        matParams.bumpScale = parseFloat(items[pos + 1]);
+        items.splice(pos, 2);
+      }
 
-            var resolveURL = function resolveURL(baseUrl, url) {
+      pos = items.indexOf('-s');
+      if (pos >= 0) {
 
-                if (typeof url !== 'string' || url === '') return '';
+        texParams.scale.set(parseFloat(items[pos + 1]), parseFloat(items[pos + 2]));
+        items.splice(pos, 4); // we expect 3 parameters here!
+      }
 
-                // Absolute URL
-                if (/^https?:\/\//i.test(url)) {
-                    return url;
-                }
+      pos = items.indexOf('-o');
+      if (pos >= 0) {
 
-                return baseUrl + url;
-            };
+        texParams.offset.set(parseFloat(items[pos + 1]), parseFloat(items[pos + 2]));
+        items.splice(pos, 4); // we expect 3 parameters here!
+      }
 
-            function setMapForType(mapType, value) {
+      texParams.url = items.join(' ').trim();
+      return texParams;
+    }
+  }, {
+    key: 'loadTexture',
+    value: function loadTexture(url, mapping, onLoad, onProgress, onError) {
 
-                if (params[mapType]) return; // Keep the first encountered texture
+      var texture;
+      var loader = three.Loader.Handlers.get(url);
+      var manager = this.manager !== undefined ? this.manager : three.DefaultLoadingManager;
 
-                var texParams = scope.getTextureParams(value, params);
-                var map = scope.loadTexture(resolveURL(scope.baseUrl, texParams.url));
+      if (loader === null) {
 
-                map.repeat.copy(texParams.scale);
-                map.offset.copy(texParams.offset);
+        loader = new three.TextureLoader(manager);
+      }
 
-                map.wrapS = scope.wrap;
-                map.wrapT = scope.wrap;
+      if (loader.setCrossOrigin) loader.setCrossOrigin(this.crossOrigin);
+      texture = loader.load(url, onLoad, onProgress, onError);
 
-                params[mapType] = map;
-            }
+      if (mapping !== undefined) texture.mapping = mapping;
 
-            for (var prop in mat) {
-
-                var value = mat[prop];
-
-                if (value === '') continue;
-
-                switch (prop.toLowerCase()) {
-
-                    // Ns is material specular exponent
-
-                    case 'kd':
-
-                        // Diffuse color (color under white light) using RGB values
-
-                        params.color = new three.Color().fromArray(value);
-
-                        break;
-
-                    case 'ks':
-
-                        // Specular color (color when light is reflected from shiny surface) using RGB values
-                        params.specular = new three.Color().fromArray(value);
-
-                        break;
-
-                    case 'map_kd':
-
-                        // Diffuse texture map
-
-                        setMapForType("map", value);
-
-                        break;
-
-                    case 'map_ks':
-
-                        // Specular map
-
-                        setMapForType("specularMap", value);
-
-                        break;
-
-                    case 'map_bump':
-                    case 'bump':
-
-                        // Bump texture map
-
-                        setMapForType("bumpMap", value);
-
-                        break;
-
-                    case 'ns':
-
-                        // The specular exponent (defines the focus of the specular highlight)
-                        // A high exponent results in a tight, concentrated highlight. Ns values normally range from 0 to 1000.
-
-                        params.shininess = parseFloat(value);
-
-                        break;
-
-                    case 'd':
-
-                        if (value < 1) {
-
-                            params.opacity = value;
-                            params.transparent = true;
-                        }
-
-                        break;
-
-                    case 'illum':
-
-                        value = parseFloat(value);
-
-                        if (value === MTLLoader.COLOR_ON_AND_AMBIENT_OFF) {
-
-                            TMaterial = three.MeshBasicMaterial;
-                        }
-
-                        break;
-
-                    case 'Tr':
-
-                        if (value > 0) {
-
-                            params.opacity = 1 - value;
-                            params.transparent = true;
-                        }
-
-                        break;
-
-                    default:
-                        break;
-
-                }
-            }
-
-            if (TMaterial === three.MeshBasicMaterial) {
-
-                ["shininess", "specular"].forEach(function (attribute) {
-
-                    if (attribute in params) {
-
-                        delete params[attribute];
-                    }
-                });
-            }
-
-            this.materials[materialName] = new TMaterial(params);
-            return this.materials[materialName];
-        }
-    }, {
-        key: 'getTextureParams',
-        value: function getTextureParams(value, matParams) {
-
-            var texParams = {
-
-                scale: new three.Vector2(1, 1),
-                offset: new three.Vector2(0, 0)
-
-            };
-
-            var items = value.split(/\s+/);
-            var pos;
-
-            pos = items.indexOf('-bm');
-            if (pos >= 0) {
-
-                matParams.bumpScale = parseFloat(items[pos + 1]);
-                items.splice(pos, 2);
-            }
-
-            pos = items.indexOf('-s');
-            if (pos >= 0) {
-
-                texParams.scale.set(parseFloat(items[pos + 1]), parseFloat(items[pos + 2]));
-                items.splice(pos, 4); // we expect 3 parameters here!
-            }
-
-            pos = items.indexOf('-o');
-            if (pos >= 0) {
-
-                texParams.offset.set(parseFloat(items[pos + 1]), parseFloat(items[pos + 2]));
-                items.splice(pos, 4); // we expect 3 parameters here!
-            }
-
-            texParams.url = items.join(' ').trim();
-            return texParams;
-        }
-    }, {
-        key: 'loadTexture',
-        value: function loadTexture(url, mapping, onLoad, onProgress, onError) {
-
-            var texture;
-            var loader = three.Loader.Handlers.get(url);
-            var manager = this.manager !== undefined ? this.manager : three.DefaultLoadingManager;
-
-            if (loader === null) {
-
-                loader = new three.TextureLoader(manager);
-            }
-
-            if (loader.setCrossOrigin) loader.setCrossOrigin(this.crossOrigin);
-            texture = loader.load(url, onLoad, onProgress, onError);
-
-            if (mapping !== undefined) texture.mapping = mapping;
-
-            return texture;
-        }
-    }]);
-    return MaterialCreator;
+      return texture;
+    }
+  }]);
+  return MaterialCreator;
 }();
 
 
 
 // http://paulbourke.net/dataformats/mtl/
 Object.assign(MTLLoader, {
-    COLOR_ON_AND_AMBIENT_OFF: 0,
-    COLOR_ON_AND_AMBIENT_ON: 1,
-    HIGHLIGHT_ON: 2,
-    REFLECTION_ON_AND_RAY_TRACE_ON: 3,
-    TRANSPARENCY_GLASS_ON_REFLECTION_RAY_TRACE_ON: 4,
-    REFLECTION_FRESNEL_ON_AND_RAY_TRACE_ON: 5,
-    TRANSPARENCY_REFRACTION_ON_REFLECTION_FRESNEL_OFF_AND_RAY_TRACE_ON: 6,
-    TRANSPARENCY_REFRACTION_ON_REFLECTION_FRESNEL_ON_AND_RAY_TRACE_ON: 7,
-    REFLECTION_ON_AND_RAY_TRACE_OFF: 8,
-    TRANSPARENCY_GLASS_ON_REFLECTION_RAY_TRACE_OFF: 9,
-    CASTS_SHADOWS_ONTO_INVISIBLE_SURFACES: 10
+  COLOR_ON_AND_AMBIENT_OFF: 0,
+  COLOR_ON_AND_AMBIENT_ON: 1,
+  HIGHLIGHT_ON: 2,
+  REFLECTION_ON_AND_RAY_TRACE_ON: 3,
+  TRANSPARENCY_GLASS_ON_REFLECTION_RAY_TRACE_ON: 4,
+  REFLECTION_FRESNEL_ON_AND_RAY_TRACE_ON: 5,
+  TRANSPARENCY_REFRACTION_ON_REFLECTION_FRESNEL_OFF_AND_RAY_TRACE_ON: 6,
+  TRANSPARENCY_REFRACTION_ON_REFLECTION_FRESNEL_ON_AND_RAY_TRACE_ON: 7,
+  REFLECTION_ON_AND_RAY_TRACE_OFF: 8,
+  TRANSPARENCY_GLASS_ON_REFLECTION_RAY_TRACE_OFF: 9,
+  CASTS_SHADOWS_ONTO_INVISIBLE_SURFACES: 10
 });
 
 pliny.method({
@@ -3977,665 +5122,665 @@ Object.defineProperty(three.Object3D.prototype, "visible", {
  */
 
 var OBJLoader = function () {
-		function OBJLoader(manager) {
-				classCallCheck(this, OBJLoader);
+	function OBJLoader(manager) {
+		classCallCheck(this, OBJLoader);
 
 
-				this.manager = manager !== undefined ? manager : three.DefaultLoadingManager;
+		this.manager = manager !== undefined ? manager : three.DefaultLoadingManager;
 
-				this.materials = null;
+		this.materials = null;
 
-				this.regexp = {
-						// v float float float
-						vertex_pattern: /^v\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)/,
-						// vn float float float
-						normal_pattern: /^vn\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)/,
-						// vt float float
-						uv_pattern: /^vt\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)/,
-						// f vertex vertex vertex
-						face_vertex: /^f\s+(-?\d+)\s+(-?\d+)\s+(-?\d+)(?:\s+(-?\d+))?/,
-						// f vertex/uv vertex/uv vertex/uv
-						face_vertex_uv: /^f\s+(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)(?:\s+(-?\d+)\/(-?\d+))?/,
-						// f vertex/uv/normal vertex/uv/normal vertex/uv/normal
-						face_vertex_uv_normal: /^f\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)(?:\s+(-?\d+)\/(-?\d+)\/(-?\d+))?/,
-						// f vertex//normal vertex//normal vertex//normal
-						face_vertex_normal: /^f\s+(-?\d+)\/\/(-?\d+)\s+(-?\d+)\/\/(-?\d+)\s+(-?\d+)\/\/(-?\d+)(?:\s+(-?\d+)\/\/(-?\d+))?/,
-						// o object_name | g group_name
-						object_pattern: /^[og]\s*(.+)?/,
-						// s boolean
-						smoothing_pattern: /^s\s+(\d+|on|off)/,
-						// mtllib file_reference
-						material_library_pattern: /^mtllib /,
-						// usemtl material_name
-						material_use_pattern: /^usemtl /
-				};
+		this.regexp = {
+			// v float float float
+			vertex_pattern: /^v\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)/,
+			// vn float float float
+			normal_pattern: /^vn\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)/,
+			// vt float float
+			uv_pattern: /^vt\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)/,
+			// f vertex vertex vertex
+			face_vertex: /^f\s+(-?\d+)\s+(-?\d+)\s+(-?\d+)(?:\s+(-?\d+))?/,
+			// f vertex/uv vertex/uv vertex/uv
+			face_vertex_uv: /^f\s+(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)(?:\s+(-?\d+)\/(-?\d+))?/,
+			// f vertex/uv/normal vertex/uv/normal vertex/uv/normal
+			face_vertex_uv_normal: /^f\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)(?:\s+(-?\d+)\/(-?\d+)\/(-?\d+))?/,
+			// f vertex//normal vertex//normal vertex//normal
+			face_vertex_normal: /^f\s+(-?\d+)\/\/(-?\d+)\s+(-?\d+)\/\/(-?\d+)\s+(-?\d+)\/\/(-?\d+)(?:\s+(-?\d+)\/\/(-?\d+))?/,
+			// o object_name | g group_name
+			object_pattern: /^[og]\s*(.+)?/,
+			// s boolean
+			smoothing_pattern: /^s\s+(\d+|on|off)/,
+			// mtllib file_reference
+			material_library_pattern: /^mtllib /,
+			// usemtl material_name
+			material_use_pattern: /^usemtl /
+		};
+	}
+
+	createClass(OBJLoader, [{
+		key: 'load',
+		value: function load(url, onLoad, onProgress, onError) {
+
+			var scope = this;
+
+			var loader = new three.FileLoader(scope.manager);
+			loader.setPath(this.path);
+			loader.load(url, function (text) {
+
+				onLoad(scope.parse(text));
+			}, onProgress, onError);
 		}
+	}, {
+		key: 'setPath',
+		value: function setPath(value) {
 
-		createClass(OBJLoader, [{
-				key: 'load',
-				value: function load(url, onLoad, onProgress, onError) {
+			this.path = value;
+		}
+	}, {
+		key: 'setMaterials',
+		value: function setMaterials(materials) {
 
-						var scope = this;
+			this.materials = materials;
+		}
+	}, {
+		key: '_createParserState',
+		value: function _createParserState() {
 
-						var loader = new three.FileLoader(scope.manager);
-						loader.setPath(this.path);
-						loader.load(url, function (text) {
+			var state = new OBJParserState();
 
-								onLoad(scope.parse(text));
-						}, onProgress, onError);
-				}
-		}, {
-				key: 'setPath',
-				value: function setPath(value) {
+			state.startObject('', false);
 
-						this.path = value;
-				}
-		}, {
-				key: 'setMaterials',
-				value: function setMaterials(materials) {
+			return state;
+		}
+	}, {
+		key: 'parse',
+		value: function parse(text) {
 
-						this.materials = materials;
-				}
-		}, {
-				key: '_createParserState',
-				value: function _createParserState() {
+			console.time('OBJLoader');
 
-						var state = new OBJParserState();
+			var state = this._createParserState();
 
-						state.startObject('', false);
+			if (text.indexOf('\r\n') !== -1) {
 
-						return state;
-				}
-		}, {
-				key: 'parse',
-				value: function parse(text) {
+				// This is faster than String.split with regex that splits on both
+				text = text.replace('\r\n', '\n');
+			}
 
-						console.time('OBJLoader');
+			var lines = text.split('\n');
+			var line = '',
+			    lineFirstChar = '',
+			    lineSecondChar = '';
+			var lineLength = 0;
+			var result = [];
 
-						var state = this._createParserState();
+			// Faster to just trim left side of the line. Use if available.
+			var trimLeft = typeof ''.trimLeft === 'function';
 
-						if (text.indexOf('\r\n') !== -1) {
+			for (var i = 0, l = lines.length; i < l; i++) {
 
-								// This is faster than String.split with regex that splits on both
-								text = text.replace('\r\n', '\n');
+				line = lines[i];
+
+				line = trimLeft ? line.trimLeft() : line.trim();
+
+				lineLength = line.length;
+
+				if (lineLength === 0) continue;
+
+				lineFirstChar = line.charAt(0);
+
+				// @todo invoke passed in handler if any
+				if (lineFirstChar === '#') continue;
+
+				if (lineFirstChar === 'v') {
+
+					lineSecondChar = line.charAt(1);
+
+					if (lineSecondChar === ' ' && (result = this.regexp.vertex_pattern.exec(line)) !== null) {
+
+						// 0                  1      2      3
+						// ["v 1.0 2.0 3.0", "1.0", "2.0", "3.0"]
+
+						state.vertices.push(parseFloat(result[1]), parseFloat(result[2]), parseFloat(result[3]));
+					} else if (lineSecondChar === 'n' && (result = this.regexp.normal_pattern.exec(line)) !== null) {
+
+						// 0                   1      2      3
+						// ["vn 1.0 2.0 3.0", "1.0", "2.0", "3.0"]
+
+						state.normals.push(parseFloat(result[1]), parseFloat(result[2]), parseFloat(result[3]));
+					} else if (lineSecondChar === 't' && (result = this.regexp.uv_pattern.exec(line)) !== null) {
+
+						// 0               1      2
+						// ["vt 0.1 0.2", "0.1", "0.2"]
+
+						state.uvs.push(parseFloat(result[1]), parseFloat(result[2]));
+					} else {
+
+						throw new Error("Unexpected vertex/normal/uv line: '" + line + "'");
+					}
+				} else if (lineFirstChar === "f") {
+
+					if ((result = this.regexp.face_vertex_uv_normal.exec(line)) !== null) {
+
+						// f vertex/uv/normal vertex/uv/normal vertex/uv/normal
+						// 0                        1    2    3    4    5    6    7    8    9   10         11         12
+						// ["f 1/1/1 2/2/2 3/3/3", "1", "1", "1", "2", "2", "2", "3", "3", "3", undefined, undefined, undefined]
+
+						state.addFace(result[1], result[4], result[7], result[10], result[2], result[5], result[8], result[11], result[3], result[6], result[9], result[12]);
+					} else if ((result = this.regexp.face_vertex_uv.exec(line)) !== null) {
+
+						// f vertex/uv vertex/uv vertex/uv
+						// 0                  1    2    3    4    5    6   7          8
+						// ["f 1/1 2/2 3/3", "1", "1", "2", "2", "3", "3", undefined, undefined]
+
+						state.addFace(result[1], result[3], result[5], result[7], result[2], result[4], result[6], result[8]);
+					} else if ((result = this.regexp.face_vertex_normal.exec(line)) !== null) {
+
+						// f vertex//normal vertex//normal vertex//normal
+						// 0                     1    2    3    4    5    6   7          8
+						// ["f 1//1 2//2 3//3", "1", "1", "2", "2", "3", "3", undefined, undefined]
+
+						state.addFace(result[1], result[3], result[5], result[7], undefined, undefined, undefined, undefined, result[2], result[4], result[6], result[8]);
+					} else if ((result = this.regexp.face_vertex.exec(line)) !== null) {
+
+						// f vertex vertex vertex
+						// 0            1    2    3   4
+						// ["f 1 2 3", "1", "2", "3", undefined]
+
+						state.addFace(result[1], result[2], result[3], result[4]);
+					} else {
+
+						throw new Error("Unexpected face line: '" + line + "'");
+					}
+				} else if (lineFirstChar === "l") {
+
+					var lineParts = line.substring(1).trim().split(" ");
+					var lineVertices = [],
+					    lineUVs = [];
+
+					if (line.indexOf("/") === -1) {
+
+						lineVertices = lineParts;
+					} else {
+
+						for (var li = 0, llen = lineParts.length; li < llen; li++) {
+
+							var parts = lineParts[li].split("/");
+
+							if (parts[0] !== "") lineVertices.push(parts[0]);
+							if (parts[1] !== "") lineUVs.push(parts[1]);
 						}
+					}
+					state.addLineGeometry(lineVertices, lineUVs);
+				} else if ((result = this.regexp.object_pattern.exec(line)) !== null) {
 
-						var lines = text.split('\n');
-						var line = '',
-						    lineFirstChar = '',
-						    lineSecondChar = '';
-						var lineLength = 0;
-						var result = [];
+					// o object_name
+					// or
+					// g group_name
 
-						// Faster to just trim left side of the line. Use if available.
-						var trimLeft = typeof ''.trimLeft === 'function';
+					var name = result[0].substr(1).trim();
+					state.startObject(name);
+				} else if (this.regexp.material_use_pattern.test(line)) {
 
-						for (var i = 0, l = lines.length; i < l; i++) {
+					// material
 
-								line = lines[i];
+					state.object.startMaterial(line.substring(7).trim(), state.materialLibraries);
+				} else if (this.regexp.material_library_pattern.test(line)) {
 
-								line = trimLeft ? line.trimLeft() : line.trim();
+					// mtl file
 
-								lineLength = line.length;
+					state.materialLibraries.push(line.substring(7).trim());
+				} else if ((result = this.regexp.smoothing_pattern.exec(line)) !== null) {
 
-								if (lineLength === 0) continue;
+					// smooth shading
 
-								lineFirstChar = line.charAt(0);
+					// @todo Handle files that have varying smooth values for a set of faces inside one geometry,
+					// but does not define a usemtl for each face set.
+					// This should be detected and a dummy material created (later MultiMaterial and geometry groups).
+					// This requires some care to not create extra material on each smooth value for "normal" obj files.
+					// where explicit usemtl defines geometry groups.
+					// Example asset: examples/models/obj/cerberus/Cerberus.obj
 
-								// @todo invoke passed in handler if any
-								if (lineFirstChar === '#') continue;
+					var value = result[1].trim().toLowerCase();
+					state.object.smooth = value === '1' || value === 'on';
 
-								if (lineFirstChar === 'v') {
+					var material = state.object.currentMaterial();
+					if (material) {
 
-										lineSecondChar = line.charAt(1);
+						material.smooth = state.object.smooth;
+					}
+				} else {
 
-										if (lineSecondChar === ' ' && (result = this.regexp.vertex_pattern.exec(line)) !== null) {
+					// Handle null terminated files without exception
+					if (line === '\0') continue;
 
-												// 0                  1      2      3
-												// ["v 1.0 2.0 3.0", "1.0", "2.0", "3.0"]
-
-												state.vertices.push(parseFloat(result[1]), parseFloat(result[2]), parseFloat(result[3]));
-										} else if (lineSecondChar === 'n' && (result = this.regexp.normal_pattern.exec(line)) !== null) {
-
-												// 0                   1      2      3
-												// ["vn 1.0 2.0 3.0", "1.0", "2.0", "3.0"]
-
-												state.normals.push(parseFloat(result[1]), parseFloat(result[2]), parseFloat(result[3]));
-										} else if (lineSecondChar === 't' && (result = this.regexp.uv_pattern.exec(line)) !== null) {
-
-												// 0               1      2
-												// ["vt 0.1 0.2", "0.1", "0.2"]
-
-												state.uvs.push(parseFloat(result[1]), parseFloat(result[2]));
-										} else {
-
-												throw new Error("Unexpected vertex/normal/uv line: '" + line + "'");
-										}
-								} else if (lineFirstChar === "f") {
-
-										if ((result = this.regexp.face_vertex_uv_normal.exec(line)) !== null) {
-
-												// f vertex/uv/normal vertex/uv/normal vertex/uv/normal
-												// 0                        1    2    3    4    5    6    7    8    9   10         11         12
-												// ["f 1/1/1 2/2/2 3/3/3", "1", "1", "1", "2", "2", "2", "3", "3", "3", undefined, undefined, undefined]
-
-												state.addFace(result[1], result[4], result[7], result[10], result[2], result[5], result[8], result[11], result[3], result[6], result[9], result[12]);
-										} else if ((result = this.regexp.face_vertex_uv.exec(line)) !== null) {
-
-												// f vertex/uv vertex/uv vertex/uv
-												// 0                  1    2    3    4    5    6   7          8
-												// ["f 1/1 2/2 3/3", "1", "1", "2", "2", "3", "3", undefined, undefined]
-
-												state.addFace(result[1], result[3], result[5], result[7], result[2], result[4], result[6], result[8]);
-										} else if ((result = this.regexp.face_vertex_normal.exec(line)) !== null) {
-
-												// f vertex//normal vertex//normal vertex//normal
-												// 0                     1    2    3    4    5    6   7          8
-												// ["f 1//1 2//2 3//3", "1", "1", "2", "2", "3", "3", undefined, undefined]
-
-												state.addFace(result[1], result[3], result[5], result[7], undefined, undefined, undefined, undefined, result[2], result[4], result[6], result[8]);
-										} else if ((result = this.regexp.face_vertex.exec(line)) !== null) {
-
-												// f vertex vertex vertex
-												// 0            1    2    3   4
-												// ["f 1 2 3", "1", "2", "3", undefined]
-
-												state.addFace(result[1], result[2], result[3], result[4]);
-										} else {
-
-												throw new Error("Unexpected face line: '" + line + "'");
-										}
-								} else if (lineFirstChar === "l") {
-
-										var lineParts = line.substring(1).trim().split(" ");
-										var lineVertices = [],
-										    lineUVs = [];
-
-										if (line.indexOf("/") === -1) {
-
-												lineVertices = lineParts;
-										} else {
-
-												for (var li = 0, llen = lineParts.length; li < llen; li++) {
-
-														var parts = lineParts[li].split("/");
-
-														if (parts[0] !== "") lineVertices.push(parts[0]);
-														if (parts[1] !== "") lineUVs.push(parts[1]);
-												}
-										}
-										state.addLineGeometry(lineVertices, lineUVs);
-								} else if ((result = this.regexp.object_pattern.exec(line)) !== null) {
-
-										// o object_name
-										// or
-										// g group_name
-
-										var name = result[0].substr(1).trim();
-										state.startObject(name);
-								} else if (this.regexp.material_use_pattern.test(line)) {
-
-										// material
-
-										state.object.startMaterial(line.substring(7).trim(), state.materialLibraries);
-								} else if (this.regexp.material_library_pattern.test(line)) {
-
-										// mtl file
-
-										state.materialLibraries.push(line.substring(7).trim());
-								} else if ((result = this.regexp.smoothing_pattern.exec(line)) !== null) {
-
-										// smooth shading
-
-										// @todo Handle files that have varying smooth values for a set of faces inside one geometry,
-										// but does not define a usemtl for each face set.
-										// This should be detected and a dummy material created (later MultiMaterial and geometry groups).
-										// This requires some care to not create extra material on each smooth value for "normal" obj files.
-										// where explicit usemtl defines geometry groups.
-										// Example asset: examples/models/obj/cerberus/Cerberus.obj
-
-										var value = result[1].trim().toLowerCase();
-										state.object.smooth = value === '1' || value === 'on';
-
-										var material = state.object.currentMaterial();
-										if (material) {
-
-												material.smooth = state.object.smooth;
-										}
-								} else {
-
-										// Handle null terminated files without exception
-										if (line === '\0') continue;
-
-										throw new Error("Unexpected line: '" + line + "'");
-								}
-						}
-
-						state.finalize();
-
-						var container = new three.Group();
-						container.materialLibraries = [].concat(state.materialLibraries);
-
-						for (var i = 0, l = state.objects.length; i < l; i++) {
-
-								var object = state.objects[i];
-								var geometry = object.geometry;
-								var materials = object.materials;
-								var isLine = geometry.type === 'Line';
-
-								// Skip o/g line declarations that did not follow with any faces
-								if (geometry.vertices.length === 0) continue;
-
-								var buffergeometry = new three.BufferGeometry();
-
-								buffergeometry.addAttribute('position', new three.BufferAttribute(new Float32Array(geometry.vertices), 3));
-
-								if (geometry.normals.length > 0) {
-
-										buffergeometry.addAttribute('normal', new three.BufferAttribute(new Float32Array(geometry.normals), 3));
-								} else {
-
-										buffergeometry.computeVertexNormals();
-								}
-
-								if (geometry.uvs.length > 0) {
-
-										buffergeometry.addAttribute('uv', new three.BufferAttribute(new Float32Array(geometry.uvs), 2));
-								}
-
-								// Create materials
-
-								var createdMaterials = [];
-
-								for (var mi = 0, miLen = materials.length; mi < miLen; mi++) {
-
-										var sourceMaterial = materials[mi];
-										var material = undefined;
-
-										if (this.materials !== null) {
-
-												material = this.materials.create(sourceMaterial.name);
-
-												// mtl etc. loaders probably can't create line materials correctly, copy properties to a line material.
-												if (isLine && material && !material.isLineBasicMaterial) {
-
-														var materialLine = new three.LineBasicMaterial();
-														materialLine.copy(material);
-														material = materialLine;
-												}
-										}
-
-										if (!material) {
-
-												material = !isLine ? new three.MeshPhongMaterial() : new three.LineBasicMaterial();
-												material.name = sourceMaterial.name;
-										}
-
-										material.shading = sourceMaterial.smooth ? three.SmoothShading : three.FlatShading;
-
-										createdMaterials.push(material);
-								}
-
-								// Create mesh
-
-								var mesh;
-
-								if (createdMaterials.length > 1) {
-
-										for (var mi = 0, miLen = materials.length; mi < miLen; mi++) {
-
-												var sourceMaterial = materials[mi];
-												buffergeometry.addGroup(sourceMaterial.groupStart, sourceMaterial.groupCount, mi);
-										}
-
-										var multiMaterial = new three.MultiMaterial(createdMaterials);
-										mesh = !isLine ? new three.Mesh(buffergeometry, multiMaterial) : new three.LineSegments(buffergeometry, multiMaterial);
-								} else {
-
-										mesh = !isLine ? new three.Mesh(buffergeometry, createdMaterials[0]) : new three.LineSegments(buffergeometry, createdMaterials[0]);
-								}
-
-								mesh.name = object.name;
-
-								container.add(mesh);
-						}
-
-						console.timeEnd('OBJLoader');
-
-						return container;
+					throw new Error("Unexpected line: '" + line + "'");
 				}
-		}]);
-		return OBJLoader;
+			}
+
+			state.finalize();
+
+			var container = new three.Group();
+			container.materialLibraries = [].concat(state.materialLibraries);
+
+			for (var i = 0, l = state.objects.length; i < l; i++) {
+
+				var object = state.objects[i];
+				var geometry = object.geometry;
+				var materials = object.materials;
+				var isLine = geometry.type === 'Line';
+
+				// Skip o/g line declarations that did not follow with any faces
+				if (geometry.vertices.length === 0) continue;
+
+				var buffergeometry = new three.BufferGeometry();
+
+				buffergeometry.addAttribute('position', new three.BufferAttribute(new Float32Array(geometry.vertices), 3));
+
+				if (geometry.normals.length > 0) {
+
+					buffergeometry.addAttribute('normal', new three.BufferAttribute(new Float32Array(geometry.normals), 3));
+				} else {
+
+					buffergeometry.computeVertexNormals();
+				}
+
+				if (geometry.uvs.length > 0) {
+
+					buffergeometry.addAttribute('uv', new three.BufferAttribute(new Float32Array(geometry.uvs), 2));
+				}
+
+				// Create materials
+
+				var createdMaterials = [];
+
+				for (var mi = 0, miLen = materials.length; mi < miLen; mi++) {
+
+					var sourceMaterial = materials[mi];
+					var material = undefined;
+
+					if (this.materials !== null) {
+
+						material = this.materials.create(sourceMaterial.name);
+
+						// mtl etc. loaders probably can't create line materials correctly, copy properties to a line material.
+						if (isLine && material && !material.isLineBasicMaterial) {
+
+							var materialLine = new three.LineBasicMaterial();
+							materialLine.copy(material);
+							material = materialLine;
+						}
+					}
+
+					if (!material) {
+
+						material = !isLine ? new three.MeshPhongMaterial() : new three.LineBasicMaterial();
+						material.name = sourceMaterial.name;
+					}
+
+					material.shading = sourceMaterial.smooth ? three.SmoothShading : three.FlatShading;
+
+					createdMaterials.push(material);
+				}
+
+				// Create mesh
+
+				var mesh;
+
+				if (createdMaterials.length > 1) {
+
+					for (var mi = 0, miLen = materials.length; mi < miLen; mi++) {
+
+						var sourceMaterial = materials[mi];
+						buffergeometry.addGroup(sourceMaterial.groupStart, sourceMaterial.groupCount, mi);
+					}
+
+					var multiMaterial = new three.MultiMaterial(createdMaterials);
+					mesh = !isLine ? new three.Mesh(buffergeometry, multiMaterial) : new three.LineSegments(buffergeometry, multiMaterial);
+				} else {
+
+					mesh = !isLine ? new three.Mesh(buffergeometry, createdMaterials[0]) : new three.LineSegments(buffergeometry, createdMaterials[0]);
+				}
+
+				mesh.name = object.name;
+
+				container.add(mesh);
+			}
+
+			console.timeEnd('OBJLoader');
+
+			return container;
+		}
+	}]);
+	return OBJLoader;
 }();
 
 var OBJParserState = function () {
-		function OBJParserState() {
-				classCallCheck(this, OBJParserState);
+	function OBJParserState() {
+		classCallCheck(this, OBJParserState);
 
-				this.objects = [];
-				this.object = {};
+		this.objects = [];
+		this.object = {};
 
-				this.vertices = [];
-				this.normals = [];
-				this.uvs = [];
+		this.vertices = [];
+		this.normals = [];
+		this.uvs = [];
 
-				this.materialLibraries = [];
+		this.materialLibraries = [];
+	}
+
+	createClass(OBJParserState, [{
+		key: 'startObject',
+		value: function startObject(name, fromDeclaration) {
+
+			// If the current object (initial from reset) is not from a g/o declaration in the parsed
+			// file. We need to use it for the first parsed g/o to keep things in sync.
+			if (this.object && this.object.fromDeclaration === false) {
+
+				this.object.name = name;
+				this.object.fromDeclaration = fromDeclaration !== false;
+				return;
+			}
+
+			if (this.object && typeof this.object._finalize === 'function') {
+
+				this.object._finalize();
+			}
+
+			var previousMaterial = this.object && typeof this.object.currentMaterial === 'function' ? this.object.currentMaterial() : undefined;
+
+			this.object = new OBJ(name, fromDeclaration);
+
+			// Inherit previous objects material.
+			// Spec tells us that a declared material must be set to all objects until a new material is declared.
+			// If a usemtl declaration is encountered while this new object is being parsed, it will
+			// overwrite the inherited material. Exception being that there was already face declarations
+			// to the inherited material, then it will be preserved for proper MultiMaterial continuation.
+
+			if (previousMaterial && previousMaterial.name && typeof previousMaterial.clone === "function") {
+
+				var declared = previousMaterial.clone(0);
+				declared.inherited = true;
+				this.object.materials.push(declared);
+			}
+
+			this.objects.push(this.object);
 		}
+	}, {
+		key: 'finalize',
+		value: function finalize() {
 
-		createClass(OBJParserState, [{
-				key: 'startObject',
-				value: function startObject(name, fromDeclaration) {
+			if (this.object && typeof this.object._finalize === 'function') {
 
-						// If the current object (initial from reset) is not from a g/o declaration in the parsed
-						// file. We need to use it for the first parsed g/o to keep things in sync.
-						if (this.object && this.object.fromDeclaration === false) {
+				this.object._finalize();
+			}
+		}
+	}, {
+		key: 'parseVertexIndex',
+		value: function parseVertexIndex(value, len) {
 
-								this.object.name = name;
-								this.object.fromDeclaration = fromDeclaration !== false;
-								return;
-						}
+			var index = parseInt(value, 10);
+			return (index >= 0 ? index - 1 : index + len / 3) * 3;
+		}
+	}, {
+		key: 'parseNormalIndex',
+		value: function parseNormalIndex(value, len) {
 
-						if (this.object && typeof this.object._finalize === 'function') {
+			var index = parseInt(value, 10);
+			return (index >= 0 ? index - 1 : index + len / 3) * 3;
+		}
+	}, {
+		key: 'parseUVIndex',
+		value: function parseUVIndex(value, len) {
 
-								this.object._finalize();
-						}
+			var index = parseInt(value, 10);
+			return (index >= 0 ? index - 1 : index + len / 2) * 2;
+		}
+	}, {
+		key: 'addVertex',
+		value: function addVertex(a, b, c) {
 
-						var previousMaterial = this.object && typeof this.object.currentMaterial === 'function' ? this.object.currentMaterial() : undefined;
+			var src = this.vertices;
+			var dst = this.object.geometry.vertices;
 
-						this.object = new OBJ(name, fromDeclaration);
+			dst.push(src[a + 0]);
+			dst.push(src[a + 1]);
+			dst.push(src[a + 2]);
+			dst.push(src[b + 0]);
+			dst.push(src[b + 1]);
+			dst.push(src[b + 2]);
+			dst.push(src[c + 0]);
+			dst.push(src[c + 1]);
+			dst.push(src[c + 2]);
+		}
+	}, {
+		key: 'addVertexLine',
+		value: function addVertexLine(a) {
 
-						// Inherit previous objects material.
-						// Spec tells us that a declared material must be set to all objects until a new material is declared.
-						// If a usemtl declaration is encountered while this new object is being parsed, it will
-						// overwrite the inherited material. Exception being that there was already face declarations
-						// to the inherited material, then it will be preserved for proper MultiMaterial continuation.
+			var src = this.vertices;
+			var dst = this.object.geometry.vertices;
 
-						if (previousMaterial && previousMaterial.name && typeof previousMaterial.clone === "function") {
+			dst.push(src[a + 0]);
+			dst.push(src[a + 1]);
+			dst.push(src[a + 2]);
+		}
+	}, {
+		key: 'addNormal',
+		value: function addNormal(a, b, c) {
 
-								var declared = previousMaterial.clone(0);
-								declared.inherited = true;
-								this.object.materials.push(declared);
-						}
+			var src = this.normals;
+			var dst = this.object.geometry.normals;
 
-						this.objects.push(this.object);
+			dst.push(src[a + 0]);
+			dst.push(src[a + 1]);
+			dst.push(src[a + 2]);
+			dst.push(src[b + 0]);
+			dst.push(src[b + 1]);
+			dst.push(src[b + 2]);
+			dst.push(src[c + 0]);
+			dst.push(src[c + 1]);
+			dst.push(src[c + 2]);
+		}
+	}, {
+		key: 'addUV',
+		value: function addUV(a, b, c) {
+
+			var src = this.uvs;
+			var dst = this.object.geometry.uvs;
+
+			dst.push(src[a + 0]);
+			dst.push(src[a + 1]);
+			dst.push(src[b + 0]);
+			dst.push(src[b + 1]);
+			dst.push(src[c + 0]);
+			dst.push(src[c + 1]);
+		}
+	}, {
+		key: 'addUVLine',
+		value: function addUVLine(a) {
+
+			var src = this.uvs;
+			var dst = this.object.geometry.uvs;
+
+			dst.push(src[a + 0]);
+			dst.push(src[a + 1]);
+		}
+	}, {
+		key: 'addFace',
+		value: function addFace(a, b, c, d, ua, ub, uc, ud, na, nb, nc, nd) {
+
+			var vLen = this.vertices.length;
+
+			var ia = this.parseVertexIndex(a, vLen);
+			var ib = this.parseVertexIndex(b, vLen);
+			var ic = this.parseVertexIndex(c, vLen);
+			var id;
+
+			if (d === undefined) {
+
+				this.addVertex(ia, ib, ic);
+			} else {
+
+				id = this.parseVertexIndex(d, vLen);
+
+				this.addVertex(ia, ib, id);
+				this.addVertex(ib, ic, id);
+			}
+
+			if (ua !== undefined) {
+
+				var uvLen = this.uvs.length;
+
+				ia = this.parseUVIndex(ua, uvLen);
+				ib = this.parseUVIndex(ub, uvLen);
+				ic = this.parseUVIndex(uc, uvLen);
+
+				if (d === undefined) {
+
+					this.addUV(ia, ib, ic);
+				} else {
+
+					id = this.parseUVIndex(ud, uvLen);
+
+					this.addUV(ia, ib, id);
+					this.addUV(ib, ic, id);
 				}
-		}, {
-				key: 'finalize',
-				value: function finalize() {
+			}
 
-						if (this.object && typeof this.object._finalize === 'function') {
+			if (na !== undefined) {
 
-								this.object._finalize();
-						}
+				// Normals are many times the same. If so, skip function call and parseInt.
+				var nLen = this.normals.length;
+				ia = this.parseNormalIndex(na, nLen);
+
+				ib = na === nb ? ia : this.parseNormalIndex(nb, nLen);
+				ic = na === nc ? ia : this.parseNormalIndex(nc, nLen);
+
+				if (d === undefined) {
+
+					this.addNormal(ia, ib, ic);
+				} else {
+
+					id = this.parseNormalIndex(nd, nLen);
+
+					this.addNormal(ia, ib, id);
+					this.addNormal(ib, ic, id);
 				}
-		}, {
-				key: 'parseVertexIndex',
-				value: function parseVertexIndex(value, len) {
+			}
+		}
+	}, {
+		key: 'addLineGeometry',
+		value: function addLineGeometry(vertices, uvs) {
 
-						var index = parseInt(value, 10);
-						return (index >= 0 ? index - 1 : index + len / 3) * 3;
-				}
-		}, {
-				key: 'parseNormalIndex',
-				value: function parseNormalIndex(value, len) {
+			this.object.geometry.type = 'Line';
 
-						var index = parseInt(value, 10);
-						return (index >= 0 ? index - 1 : index + len / 3) * 3;
-				}
-		}, {
-				key: 'parseUVIndex',
-				value: function parseUVIndex(value, len) {
+			var vLen = this.vertices.length;
+			var uvLen = this.uvs.length;
 
-						var index = parseInt(value, 10);
-						return (index >= 0 ? index - 1 : index + len / 2) * 2;
-				}
-		}, {
-				key: 'addVertex',
-				value: function addVertex(a, b, c) {
+			for (var vi = 0, l = vertices.length; vi < l; vi++) {
 
-						var src = this.vertices;
-						var dst = this.object.geometry.vertices;
+				this.addVertexLine(this.parseVertexIndex(vertices[vi], vLen));
+			}
 
-						dst.push(src[a + 0]);
-						dst.push(src[a + 1]);
-						dst.push(src[a + 2]);
-						dst.push(src[b + 0]);
-						dst.push(src[b + 1]);
-						dst.push(src[b + 2]);
-						dst.push(src[c + 0]);
-						dst.push(src[c + 1]);
-						dst.push(src[c + 2]);
-				}
-		}, {
-				key: 'addVertexLine',
-				value: function addVertexLine(a) {
+			for (var uvi = 0, l = uvs.length; uvi < l; uvi++) {
 
-						var src = this.vertices;
-						var dst = this.object.geometry.vertices;
-
-						dst.push(src[a + 0]);
-						dst.push(src[a + 1]);
-						dst.push(src[a + 2]);
-				}
-		}, {
-				key: 'addNormal',
-				value: function addNormal(a, b, c) {
-
-						var src = this.normals;
-						var dst = this.object.geometry.normals;
-
-						dst.push(src[a + 0]);
-						dst.push(src[a + 1]);
-						dst.push(src[a + 2]);
-						dst.push(src[b + 0]);
-						dst.push(src[b + 1]);
-						dst.push(src[b + 2]);
-						dst.push(src[c + 0]);
-						dst.push(src[c + 1]);
-						dst.push(src[c + 2]);
-				}
-		}, {
-				key: 'addUV',
-				value: function addUV(a, b, c) {
-
-						var src = this.uvs;
-						var dst = this.object.geometry.uvs;
-
-						dst.push(src[a + 0]);
-						dst.push(src[a + 1]);
-						dst.push(src[b + 0]);
-						dst.push(src[b + 1]);
-						dst.push(src[c + 0]);
-						dst.push(src[c + 1]);
-				}
-		}, {
-				key: 'addUVLine',
-				value: function addUVLine(a) {
-
-						var src = this.uvs;
-						var dst = this.object.geometry.uvs;
-
-						dst.push(src[a + 0]);
-						dst.push(src[a + 1]);
-				}
-		}, {
-				key: 'addFace',
-				value: function addFace(a, b, c, d, ua, ub, uc, ud, na, nb, nc, nd) {
-
-						var vLen = this.vertices.length;
-
-						var ia = this.parseVertexIndex(a, vLen);
-						var ib = this.parseVertexIndex(b, vLen);
-						var ic = this.parseVertexIndex(c, vLen);
-						var id;
-
-						if (d === undefined) {
-
-								this.addVertex(ia, ib, ic);
-						} else {
-
-								id = this.parseVertexIndex(d, vLen);
-
-								this.addVertex(ia, ib, id);
-								this.addVertex(ib, ic, id);
-						}
-
-						if (ua !== undefined) {
-
-								var uvLen = this.uvs.length;
-
-								ia = this.parseUVIndex(ua, uvLen);
-								ib = this.parseUVIndex(ub, uvLen);
-								ic = this.parseUVIndex(uc, uvLen);
-
-								if (d === undefined) {
-
-										this.addUV(ia, ib, ic);
-								} else {
-
-										id = this.parseUVIndex(ud, uvLen);
-
-										this.addUV(ia, ib, id);
-										this.addUV(ib, ic, id);
-								}
-						}
-
-						if (na !== undefined) {
-
-								// Normals are many times the same. If so, skip function call and parseInt.
-								var nLen = this.normals.length;
-								ia = this.parseNormalIndex(na, nLen);
-
-								ib = na === nb ? ia : this.parseNormalIndex(nb, nLen);
-								ic = na === nc ? ia : this.parseNormalIndex(nc, nLen);
-
-								if (d === undefined) {
-
-										this.addNormal(ia, ib, ic);
-								} else {
-
-										id = this.parseNormalIndex(nd, nLen);
-
-										this.addNormal(ia, ib, id);
-										this.addNormal(ib, ic, id);
-								}
-						}
-				}
-		}, {
-				key: 'addLineGeometry',
-				value: function addLineGeometry(vertices, uvs) {
-
-						this.object.geometry.type = 'Line';
-
-						var vLen = this.vertices.length;
-						var uvLen = this.uvs.length;
-
-						for (var vi = 0, l = vertices.length; vi < l; vi++) {
-
-								this.addVertexLine(this.parseVertexIndex(vertices[vi], vLen));
-						}
-
-						for (var uvi = 0, l = uvs.length; uvi < l; uvi++) {
-
-								this.addUVLine(this.parseUVIndex(uvs[uvi], uvLen));
-						}
-				}
-		}]);
-		return OBJParserState;
+				this.addUVLine(this.parseUVIndex(uvs[uvi], uvLen));
+			}
+		}
+	}]);
+	return OBJParserState;
 }();
 
 var OBJ = function () {
-		function OBJ(name, fromDeclaration) {
-				classCallCheck(this, OBJ);
+	function OBJ(name, fromDeclaration) {
+		classCallCheck(this, OBJ);
 
 
-				this.name = name || '';
-				this.fromDeclaration = fromDeclaration !== false;
+		this.name = name || '';
+		this.fromDeclaration = fromDeclaration !== false;
 
-				this.geometry = {
-						vertices: [],
-						normals: [],
-						uvs: []
-				};
-				this.materials = [];
-				this.smooth = true;
+		this.geometry = {
+			vertices: [],
+			normals: [],
+			uvs: []
+		};
+		this.materials = [];
+		this.smooth = true;
+	}
+
+	createClass(OBJ, [{
+		key: 'startMaterial',
+		value: function startMaterial(name, libraries) {
+
+			var previous = this._finalize(false);
+
+			// New usemtl declaration overwrites an inherited material, except if faces were declared
+			// after the material, then it must be preserved for proper MultiMaterial continuation.
+			if (previous && (previous.inherited || previous.groupCount <= 0)) {
+
+				this.materials.splice(previous.index, 1);
+			}
+
+			var material = {
+				index: this.materials.length,
+				name: name || '',
+				mtllib: Array.isArray(libraries) && libraries.length > 0 ? libraries[libraries.length - 1] : '',
+				smooth: previous !== undefined ? previous.smooth : this.smooth,
+				groupStart: previous !== undefined ? previous.groupEnd : 0,
+				groupEnd: -1,
+				groupCount: -1,
+				inherited: false,
+
+				clone: function clone(index) {
+					return {
+						index: typeof index === 'number' ? index : this.index,
+						name: this.name,
+						mtllib: this.mtllib,
+						smooth: this.smooth,
+						groupStart: this.groupEnd,
+						groupEnd: -1,
+						groupCount: -1,
+						inherited: false
+					};
+				}
+			};
+
+			this.materials.push(material);
+
+			return material;
 		}
+	}, {
+		key: 'currentMaterial',
+		value: function currentMaterial() {
 
-		createClass(OBJ, [{
-				key: 'startMaterial',
-				value: function startMaterial(name, libraries) {
+			if (this.materials.length > 0) {
+				return this.materials[this.materials.length - 1];
+			}
 
-						var previous = this._finalize(false);
+			return undefined;
+		}
+	}, {
+		key: '_finalize',
+		value: function _finalize(end) {
 
-						// New usemtl declaration overwrites an inherited material, except if faces were declared
-						// after the material, then it must be preserved for proper MultiMaterial continuation.
-						if (previous && (previous.inherited || previous.groupCount <= 0)) {
+			var lastMultiMaterial = this.currentMaterial();
+			if (lastMultiMaterial && lastMultiMaterial.groupEnd === -1) {
 
-								this.materials.splice(previous.index, 1);
-						}
+				lastMultiMaterial.groupEnd = this.geometry.vertices.length / 3;
+				lastMultiMaterial.groupCount = lastMultiMaterial.groupEnd - lastMultiMaterial.groupStart;
+				lastMultiMaterial.inherited = false;
+			}
 
-						var material = {
-								index: this.materials.length,
-								name: name || '',
-								mtllib: Array.isArray(libraries) && libraries.length > 0 ? libraries[libraries.length - 1] : '',
-								smooth: previous !== undefined ? previous.smooth : this.smooth,
-								groupStart: previous !== undefined ? previous.groupEnd : 0,
-								groupEnd: -1,
-								groupCount: -1,
-								inherited: false,
+			// Guarantee at least one empty material, this makes the creation later more straight forward.
+			if (end !== false && this.materials.length === 0) {
+				this.materials.push({
+					name: '',
+					smooth: this.smooth
+				});
+			}
 
-								clone: function clone(index) {
-										return {
-												index: typeof index === 'number' ? index : this.index,
-												name: this.name,
-												mtllib: this.mtllib,
-												smooth: this.smooth,
-												groupStart: this.groupEnd,
-												groupEnd: -1,
-												groupCount: -1,
-												inherited: false
-										};
-								}
-						};
-
-						this.materials.push(material);
-
-						return material;
-				}
-		}, {
-				key: 'currentMaterial',
-				value: function currentMaterial() {
-
-						if (this.materials.length > 0) {
-								return this.materials[this.materials.length - 1];
-						}
-
-						return undefined;
-				}
-		}, {
-				key: '_finalize',
-				value: function _finalize(end) {
-
-						var lastMultiMaterial = this.currentMaterial();
-						if (lastMultiMaterial && lastMultiMaterial.groupEnd === -1) {
-
-								lastMultiMaterial.groupEnd = this.geometry.vertices.length / 3;
-								lastMultiMaterial.groupCount = lastMultiMaterial.groupEnd - lastMultiMaterial.groupStart;
-								lastMultiMaterial.inherited = false;
-						}
-
-						// Guarantee at least one empty material, this makes the creation later more straight forward.
-						if (end !== false && this.materials.length === 0) {
-								this.materials.push({
-										name: '',
-										smooth: this.smooth
-								});
-						}
-
-						return lastMultiMaterial;
-				}
-		}]);
-		return OBJ;
+			return lastMultiMaterial;
+		}
+	}]);
+	return OBJ;
 }();
 
 three.Geometry.prototype.offset = function (x, y, z) {
@@ -5459,10 +6604,16 @@ var Audio3D = function () {
       if (this.mainVolume) {
         this.mainVolume.connect(this.context.destination);
       }
+      if (this.context.resume) {
+        this.context.resume();
+      }
     }
   }, {
     key: "stop",
     value: function stop() {
+      if (this.context.suspend) {
+        this.context.suspend();
+      }
       if (this.mainVolume) {
         this.mainVolume.disconnect();
       }
@@ -5966,7 +7117,7 @@ var Audio$1 = {
 
 var packageName = "PrimroseVR";
 
-var version = "0.31.3";
+var version = "0.31.4";
 
 
 
@@ -6077,10 +7228,8 @@ var Pointer = function (_Entity) {
           h = devicePixelRatio * 2 / height;
       for (var i = 0; i < this.devices.length; ++i) {
         var device = this.devices[i];
-        if (device.commands.U && device.commands.V) {
-          device.commands.U.scale = w;
-          device.commands.V.scale = h;
-        }
+        device.commands.U.scale = w;
+        device.commands.V.scale = h;
       }
     }
   }, {
@@ -6093,7 +7242,7 @@ var Pointer = function (_Entity) {
         VECTOR_TEMP.set(0, 0, 0);
         for (var i = 0; i < this.devices.length; ++i) {
           var obj = this.devices[i];
-          if (obj.enabled && obj.inPhysicalUse && obj.commands.U && obj.commands.V && !obj.commands.U.disabled && !obj.commands.V.disabled) {
+          if (obj.enabled && obj.inPhysicalUse && !obj.commands.U.disabled && !obj.commands.V.disabled) {
             VECTOR_TEMP.x += obj.getValue("U") - 1;
             VECTOR_TEMP.y += obj.getValue("V") - 1;
           }
@@ -7964,6 +9113,61 @@ ButtonFactory.DEFAULT = new ButtonFactory(colored(box(1, 1, 1), 0xff0000), {
 });
 
 pliny.class({
+  parent: "Primrose.Controls",
+  name: "Image",
+  baseClass: "Primrose.Controls.BaseTextured",
+  description: "A simple 2D image to put on a Surface.",
+  parameters: [{
+    name: "options",
+    type: "Object",
+    description: "Named parameters for creating the Image."
+  }]
+});
+
+var COUNTER$5 = 0;
+
+var Image = function (_BaseTextured) {
+  inherits(Image, _BaseTextured);
+
+  function Image(images, options) {
+    classCallCheck(this, Image);
+
+    ////////////////////////////////////////////////////////////////////////
+    // normalize input parameters
+    ////////////////////////////////////////////////////////////////////////
+    if (!(images instanceof Array)) {
+      images = [images];
+    }
+
+    options = Object.assign({}, {
+      id: "Primrose.Controls.Image[" + COUNTER$5++ + "]"
+    }, options);
+
+    return possibleConstructorReturn(this, (Image.__proto__ || Object.getPrototypeOf(Image)).call(this, images, options));
+  }
+
+  createClass(Image, [{
+    key: "_loadFiles",
+    value: function _loadFiles(images, progress) {
+      var _this2 = this;
+
+      return Promise.all(Array.prototype.map.call(images, function (src, i) {
+        var loadOptions = Object.assign({}, _this2.options, {
+          progress: progress
+        });
+
+        _this2._meshes[i] = _this2._geometry.textured(src, loadOptions).named(_this2.name + "-mesh-" + i);
+
+        return loadOptions.promise.then(function (txt) {
+          return _this2._textures[i] = txt;
+        });
+      }));
+    }
+  }]);
+  return Image;
+}(BaseTextured);
+
+pliny.class({
   parent: "Primrose",
   name: "ModelFactory",
   description: "Creates an interface for cloning 3D models loaded from files, to instance those objects.\n\
@@ -8492,7 +9696,6 @@ var Sky = function (_Entity) {
       if (_this.options.enableShadows) {
         _this.sun.castShadow = true;
         _this.sun.shadow.mapSize.width = _this.sun.shadow.mapSize.height = _this.options.shadowMapSize;
-        _this.sun.shadow.bias = 0.01;
         _this.sun.shadow.radius = _this.options.shadowRadius;
         _this.sun.shadow.camera.top = _this.sun.shadow.camera.right = _this.options.shadowCameraSize;
         _this.sun.shadow.camera.bottom = _this.sun.shadow.camera.left = -_this.options.shadowCameraSize;
@@ -9346,7 +10549,7 @@ pliny.class({
 });
 
 var SCROLL_SCALE = isFirefox ? 3 : 100;
-var COUNTER$5 = 0;
+var COUNTER$6 = 0;
 var OFFSET = 0;
 
 var TextBox = function (_Surface) {
@@ -9363,7 +10566,7 @@ var TextBox = function (_Surface) {
     }
 
     var _this = possibleConstructorReturn(this, (TextBox.__proto__ || Object.getPrototypeOf(TextBox)).call(this, Object.assign({}, {
-      id: "Primrose.Controls.TextBox[" + COUNTER$5++ + "]"
+      id: "Primrose.Controls.TextBox[" + COUNTER$6++ + "]"
     }, options)));
 
     _this.isTextBox = true;
@@ -10251,27 +11454,6 @@ var TextBox = function (_Surface) {
   return TextBox;
 }(Surface);
 
-var BaseVRDisplay = function () {
-  function BaseVRDisplay(VRFrameDataType) {
-    classCallCheck(this, BaseVRDisplay);
-
-    this.frameData = new VRFrameDataType();
-  }
-
-  createClass(BaseVRDisplay, [{
-    key: "startAnimation",
-    value: function startAnimation(callback) {
-      this.timer = this.requestAnimationFrame(callback);
-    }
-  }, {
-    key: "stopAnimation",
-    value: function stopAnimation() {
-      this.cancelAnimationFrame(this.timer);
-    }
-  }]);
-  return BaseVRDisplay;
-}();
-
 var piOver180 = Math.PI / 180.0;
 var rad45 = Math.PI * 0.25;
 var defaultOrientation = new Float32Array([0, 0, 0, 1]);
@@ -10460,26 +11642,24 @@ function frameDataFromPose(frameData, pose, vrDisplay) {
   frameData.pose = pose;
   frameData.timestamp = pose.timestamp;
 
-  if (vrDisplay) {
-    updateEyeMatrices(frameData.leftProjectionMatrix, frameData.leftViewMatrix, pose, vrDisplay.getEyeParameters("left"), vrDisplay);
-    updateEyeMatrices(frameData.rightProjectionMatrix, frameData.rightViewMatrix, pose, vrDisplay.getEyeParameters("right"), vrDisplay);
-  }
+  updateEyeMatrices(frameData.leftProjectionMatrix, frameData.leftViewMatrix, pose, vrDisplay.getEyeParameters("left"), vrDisplay);
+  updateEyeMatrices(frameData.rightProjectionMatrix, frameData.rightViewMatrix, pose, vrDisplay.getEyeParameters("right"), vrDisplay);
 
   return true;
 }
 
 pliny.class({
   parent: "Primrose.Displays",
-  name: "PolyfilledVRFrameData",
-  description: "A polyfill for the WebVR standard PolyfilledVRFrameData object."
+  name: "VRFrameData",
+  description: "A polyfill for the WebVR standard VRFrameData object."
 });
 
-var PolyfilledVRFrameData = function PolyfilledVRFrameData() {
-  classCallCheck(this, PolyfilledVRFrameData);
+var VRFrameData = function VRFrameData() {
+  classCallCheck(this, VRFrameData);
 
 
   pliny.property({
-    parent: "Primrose.Displays.PolyfilledVRFrameData",
+    parent: "Primrose.Displays.VRFrameData",
     name: "leftProjectionMatrix",
     type: "Float32Array",
     description: "The projection matrix for the left eye."
@@ -10487,7 +11667,7 @@ var PolyfilledVRFrameData = function PolyfilledVRFrameData() {
   this.leftProjectionMatrix = new Float32Array(16);
 
   pliny.property({
-    parent: "Primrose.Displays.PolyfilledVRFrameData",
+    parent: "Primrose.Displays.VRFrameData",
     name: "rightProjectionMatrix",
     type: "Float32Array",
     description: "The projection matrix for the right eye."
@@ -10495,7 +11675,7 @@ var PolyfilledVRFrameData = function PolyfilledVRFrameData() {
   this.leftViewMatrix = new Float32Array(16);
 
   pliny.property({
-    parent: "Primrose.Displays.PolyfilledVRFrameData",
+    parent: "Primrose.Displays.VRFrameData",
     name: "leftViewMatrix",
     type: "Float32Array",
     description: "The view matrix for the left eye."
@@ -10503,7 +11683,7 @@ var PolyfilledVRFrameData = function PolyfilledVRFrameData() {
   this.rightProjectionMatrix = new Float32Array(16);
 
   pliny.property({
-    parent: "Primrose.Displays.PolyfilledVRFrameData",
+    parent: "Primrose.Displays.VRFrameData",
     name: "rightViewMatrix",
     type: "Float32Array",
     description: "The view matrix for the right eye."
@@ -10511,7 +11691,7 @@ var PolyfilledVRFrameData = function PolyfilledVRFrameData() {
   this.rightViewMatrix = new Float32Array(16);
 
   pliny.property({
-    parent: "Primrose.Displays.PolyfilledVRFrameData",
+    parent: "Primrose.Displays.VRFrameData",
     name: "pose",
     type: "VRPose",
     description: "Legacy VRPose data."
@@ -10537,63 +11717,51 @@ var PolyfilledVRFrameData = function PolyfilledVRFrameData() {
 // Start at a higher number to reduce chance of conflict.
 var nextDisplayId = 1000;
 
-function defaultPose() {
-  return {
-    position: [0, 0, 0],
-    orientation: [0, 0, 0, 1],
-    linearVelocity: null,
-    linearAcceleration: null,
-    angularVelocity: null,
-    angularAcceleration: null
-  };
-}
+var VRDisplay = function () {
+  function VRDisplay(name) {
+    classCallCheck(this, VRDisplay);
 
-var PolyfilledVRDisplay = function (_BaseVRDisplay) {
-  inherits(PolyfilledVRDisplay, _BaseVRDisplay);
+    this._currentLayers = [];
 
-  function PolyfilledVRDisplay(name) {
-    classCallCheck(this, PolyfilledVRDisplay);
-
-    var _this = possibleConstructorReturn(this, (PolyfilledVRDisplay.__proto__ || Object.getPrototypeOf(PolyfilledVRDisplay)).call(this, PolyfilledVRFrameData));
-
-    _this._currentLayers = [];
-
-    Object.defineProperties(_this, {
-      capabilities: immutable$1(Object.defineProperties({}, {
-        hasPosition: immutable$1(false),
-        hasOrientation: immutable$1(isMobile),
-        hasExternalDisplay: immutable$1(false),
-        canPresent: immutable$1(true),
-        maxLayers: immutable$1(1)
+    Object.defineProperties(this, {
+      capabilities: immutable(Object.defineProperties({}, {
+        hasPosition: immutable(false),
+        hasOrientation: immutable(isMobile),
+        hasExternalDisplay: immutable(false),
+        canPresent: immutable(true),
+        maxLayers: immutable(1)
       })),
-      displayId: immutable$1(nextDisplayId++),
-      displayName: immutable$1(name),
-      isConnected: immutable$1(true),
-      stageParameters: immutable$1(null),
-      isPresenting: immutable$1(function () {
+      displayId: immutable(nextDisplayId++),
+      displayName: immutable(name),
+      isConnected: immutable(true),
+      stageParameters: immutable(null),
+      isPresenting: immutable(function () {
         return FullScreen.isActive;
       }),
 
       depthNear: mutable(0.01, "number"),
       depthFar: mutable(10000.0, "number"),
 
-      isPolyfilled: immutable$1(true)
+      isPolyfilled: immutable(true)
     });
 
-    _this._poseData = null;
-    return _this;
+    this._frameData = null;
+    this._poseData = null;
   }
 
-  createClass(PolyfilledVRDisplay, [{
+  createClass(VRDisplay, [{
     key: "getFrameData",
     value: function getFrameData(frameData) {
-      frameDataFromPose(frameData, this.getPose(), this);
+      if (!this._frameData) {
+        this._frameData = frameDataFromPose(frameData, this.getPose(), this);
+      }
+      return this._frameData;
     }
   }, {
     key: "getPose",
     value: function getPose() {
       if (!this._poseData) {
-        this._poseData = this._getPose() || defaultPose();
+        this._poseData = this._getPose();
       }
       return this._poseData;
     }
@@ -10630,20 +11798,28 @@ var PolyfilledVRDisplay = function (_BaseVRDisplay) {
   }, {
     key: "submitFrame",
     value: function submitFrame(pose) {
+      this._frameData = null;
       this._poseData = null;
     }
   }]);
-  return PolyfilledVRDisplay;
-}(BaseVRDisplay);
+  return VRDisplay;
+}();
 
 var defaultFieldOfView = 100;
 
-function calcFoV(aFoV, aDim, bDim) {
-  return 180 * Math.atan(Math.tan(aFoV * Math.PI / 180) * aDim / bDim) / Math.PI;
+function defaultPose() {
+  return {
+    position: [0, 0, 0],
+    orientation: [0, 0, 0, 1],
+    linearVelocity: null,
+    linearAcceleration: null,
+    angularVelocity: null,
+    angularAcceleration: null
+  };
 }
 
-var StandardMonitorVRDisplay = function (_PolyfilledVRDisplay) {
-  inherits(StandardMonitorVRDisplay, _PolyfilledVRDisplay);
+var StandardMonitorVRDisplay = function (_VRDisplay) {
+  inherits(StandardMonitorVRDisplay, _VRDisplay);
   createClass(StandardMonitorVRDisplay, null, [{
     key: "DEFAULT_FOV",
     get: function get$$1() {
@@ -10654,28 +11830,36 @@ var StandardMonitorVRDisplay = function (_PolyfilledVRDisplay) {
     }
   }]);
 
-  function StandardMonitorVRDisplay(display, name) {
+  function StandardMonitorVRDisplay(display) {
     classCallCheck(this, StandardMonitorVRDisplay);
 
-    var _this = possibleConstructorReturn(this, (StandardMonitorVRDisplay.__proto__ || Object.getPrototypeOf(StandardMonitorVRDisplay)).call(this, name || "Full Screen"));
+    var _this = possibleConstructorReturn(this, (StandardMonitorVRDisplay.__proto__ || Object.getPrototypeOf(StandardMonitorVRDisplay)).call(this, "Full Screen"));
 
-    _this.isStandardMonitorVRDisplay = true;
-    _this.display = display;
+    _this._display = display;
     return _this;
   }
 
   createClass(StandardMonitorVRDisplay, [{
-    key: "_getPose",
-    value: function _getPose() {
-      var display = isMobile && this.display;
+    key: "submitFrame",
+    value: function submitFrame(pose) {
+      if (this._display && this._display.isPolyfilled) {
+        this._display.submitFrame(pose);
+      }
+    }
+  }, {
+    key: "getPose",
+    value: function getPose() {
+      var display = isMobile && this._display;
       if (display) {
         return display.getPose();
+      } else {
+        return defaultPose();
       }
     }
   }, {
     key: "resetPose",
     value: function resetPose() {
-      var display = isMobile && this.display;
+      var display = isMobile && this._display;
       if (display) {
         return display.resetPose();
       }
@@ -10710,24 +11894,13 @@ var StandardMonitorVRDisplay = function (_PolyfilledVRDisplay) {
         };
       }
     }
-  }, {
-    key: "isStereo",
-    get: function get$$1() {
-      return false;
-    }
-  }, {
-    key: "targetName",
-    get: function get$$1() {
-      return "Full Screen";
-    }
-  }, {
-    key: "renderOrder",
-    get: function get$$1() {
-      return 1;
-    }
   }]);
   return StandardMonitorVRDisplay;
-}(PolyfilledVRDisplay);
+}(VRDisplay);
+
+function calcFoV(aFoV, aDim, bDim) {
+  return 180 * Math.atan(Math.tan(aFoV * Math.PI / 180) * aDim / bDim) / Math.PI;
+}
 
 pliny.function({
   parent: "Primrose.DOM",
@@ -12156,6 +13329,13 @@ pliny.class({
   description: "| [under construction]"
 });
 
+var DEFAULT_POSE = {
+  position: [0, 0, 0],
+  orientation: [0, 0, 0, 1]
+};
+var EMPTY_SCALE = new three.Vector3();
+var IE_CORRECTION = new three.Quaternion(1, 0, 0, 0);
+
 var PoseInputProcessor = function (_InputProcessor) {
   inherits(PoseInputProcessor, _InputProcessor);
 
@@ -12164,10 +13344,14 @@ var PoseInputProcessor = function (_InputProcessor) {
 
     var _this = possibleConstructorReturn(this, (PoseInputProcessor.__proto__ || Object.getPrototypeOf(PoseInputProcessor)).call(this, name, commands, axisNames));
 
+    _this.currentDevice = null;
+    _this.lastPose = null;
+    _this.currentPose = null;
     _this.posePosition = new three.Vector3();
     _this.poseQuaternion = new three.Quaternion();
     _this.position = new three.Vector3();
     _this.quaternion = new three.Quaternion();
+    _this.matrix = new three.Matrix4();
     return _this;
   }
 
@@ -12176,7 +13360,39 @@ var PoseInputProcessor = function (_InputProcessor) {
     value: function update(dt) {
       get(PoseInputProcessor.prototype.__proto__ || Object.getPrototypeOf(PoseInputProcessor.prototype), "update", this).call(this, dt);
 
-      this.inPhysicalUse = this.hasOrientation || this.inPhysicalUse;
+      if (this.currentDevice) {
+        var pose = this.currentPose || this.lastPose || DEFAULT_POSE;
+        this.lastPose = pose;
+        this.inPhysicalUse = this.hasOrientation || this.inPhysicalUse;
+        var orient = this.currentPose && this.currentPose.orientation,
+            pos = this.currentPose && this.currentPose.position;
+        if (orient) {
+          this.poseQuaternion.fromArray(orient);
+          if (isMobile && isIE) {
+            this.poseQuaternion.multiply(IE_CORRECTION);
+          }
+        } else {
+          this.poseQuaternion.set(0, 0, 0, 1);
+        }
+        if (pos) {
+          this.posePosition.fromArray(pos);
+        } else {
+          this.posePosition.set(0, 0, 0);
+        }
+      }
+    }
+  }, {
+    key: "updateStage",
+    value: function updateStage(stageMatrix) {
+      this.matrix.makeRotationFromQuaternion(this.poseQuaternion);
+      this.matrix.setPosition(this.posePosition);
+      this.matrix.multiplyMatrices(stageMatrix, this.matrix);
+      this.matrix.decompose(this.position, this.quaternion, EMPTY_SCALE);
+    }
+  }, {
+    key: "hasPose",
+    get: function get$$1() {
+      return !!this.currentPose;
     }
   }]);
   return PoseInputProcessor;
@@ -12241,28 +13457,13 @@ var Gamepad = function (_PoseInputProcessor) {
 
     _this.currentDevice = pad;
     _this.axisOffset = axisOffset;
-    _this.frameData = new PolyfilledVRFrameData();
     return _this;
   }
 
   createClass(Gamepad, [{
-    key: "updateFrameData",
-    value: function updateFrameData() {
-      if (this.currentPose) {
-        frameDataFromPose(this.frameData, this.currentPose);
-
-        if (this.currentPose.orientation) {
-          this.poseQuaternion.fromArray(this.currentPose.orientation);
-        } else {
-          this.poseQuaternion.set(0, 0, 0, 1);
-        }
-
-        if (this.currentPose.position) {
-          this.posePosition.fromArray(this.currentPose.position);
-        } else {
-          this.posePosition.set(0, 0, 0);
-        }
-      }
+    key: "getPose",
+    value: function getPose() {
+      return this.currentPose;
     }
   }, {
     key: "checkDevice",
@@ -12272,10 +13473,7 @@ var Gamepad = function (_PoseInputProcessor) {
           j,
           buttonMap = 0;
       this.currentDevice = pad;
-      if (this.hasOrientation) {
-        this.currentPose = pad.pose;
-        this.updateFrameData();
-      }
+      this.currentPose = this.hasOrientation && this.currentDevice.pose;
       for (i = 0, j = pad.buttons.length; i < pad.buttons.length; ++i, ++j) {
         var btn = pad.buttons[i];
         this.setButton(i, btn.pressed);
@@ -13076,8 +14274,6 @@ var PosePredictor = function () {
 var isFirefoxAndroid = isFirefox && isMobile;
 var DEG2RAD$1 = three.Math.DEG2RAD;
 
-var IE_CORRECTION = new three.Quaternion(1, 0, 0, 0);
-
 /**
  * The pose sensor, implemented using DeviceMotion APIs.
  */
@@ -13155,9 +14351,6 @@ var FusionPoseSensor = function () {
       out.multiply(this.resetQ);
       out.multiply(this.predictedQ);
       out.multiply(this.worldToScreenQ);
-      if (isMobile && isIE) {
-        out.multiply(IE_CORRECTION);
-      }
 
       this.orientationOut_[0] = out.x;
       this.orientationOut_[1] = out.y;
@@ -13277,8 +14470,8 @@ var ipd = 0.03;
 var neckLength = 0;
 var neckDepth = 0;
 
-var CardboardVRDisplay = function (_PolyfilledVRDisplay) {
-  inherits(CardboardVRDisplay, _PolyfilledVRDisplay);
+var CardboardVRDisplay = function (_VRDisplay) {
+  inherits(CardboardVRDisplay, _VRDisplay);
   createClass(CardboardVRDisplay, null, [{
     key: "IPD",
     get: function get$$1() {
@@ -13313,19 +14506,19 @@ var CardboardVRDisplay = function (_PolyfilledVRDisplay) {
     _this.DOMElement = null;
 
     // "Private" members.
-    _this._poseSensor = options && options.overrideOrientation || new FusionPoseSensor(options);
+    _this.poseSensor_ = options && options.overrideOrientation || new FusionPoseSensor(options);
     return _this;
   }
 
   createClass(CardboardVRDisplay, [{
     key: "_getPose",
     value: function _getPose() {
-      return this._poseSensor.getPose();
+      return this.poseSensor_.getPose();
     }
   }, {
     key: "resetPose",
     value: function resetPose() {
-      this._poseSensor.resetPose();
+      this.poseSensor_.resetPose();
     }
   }, {
     key: "getEyeParameters",
@@ -13363,95 +14556,9 @@ var CardboardVRDisplay = function (_PolyfilledVRDisplay) {
         renderHeight: height
       };
     }
-  }, {
-    key: "isCardboardVRDisplay",
-    get: function get$$1() {
-      return true;
-    }
-  }, {
-    key: "isStereo",
-    get: function get$$1() {
-      return true;
-    }
-  }, {
-    key: "targetName",
-    get: function get$$1() {
-      return "Full Screen";
-    }
-  }, {
-    key: "renderOrder",
-    get: function get$$1() {
-      return 0;
-    }
   }]);
   return CardboardVRDisplay;
-}(PolyfilledVRDisplay);
-
-var MixedRealityVRDisplay = function (_StandardMonitorVRDis) {
-  inherits(MixedRealityVRDisplay, _StandardMonitorVRDis);
-
-  function MixedRealityVRDisplay(display) {
-    classCallCheck(this, MixedRealityVRDisplay);
-
-    var _this = possibleConstructorReturn(this, (MixedRealityVRDisplay.__proto__ || Object.getPrototypeOf(MixedRealityVRDisplay)).call(this, display, "Mixed Reality"));
-
-    _this.motionDevice = null;
-
-    Object.defineProperties(_this.capabilities, {
-      hasPosition: immutable(function () {
-        return _this.motionDevice && _this.motionDevice.hasPosition;
-      }),
-      hasOrientation: immutable(function () {
-        return _this.motionDevice && _this.motionDevice.hasOrientation;
-      })
-    });
-    return _this;
-  }
-
-  createClass(MixedRealityVRDisplay, [{
-    key: "_getPose",
-    value: function _getPose() {
-      if (this.motionDevice) {
-        return this.motionDevice.getPose();
-      }
-    }
-  }, {
-    key: "resetPose",
-    value: function resetPose() {
-      if (this.motionDevice) {
-        return this.motionDevice.resetPose();
-      }
-    }
-  }, {
-    key: "getFrameData",
-    value: function getFrameData(frameData) {
-      if (this.motionDevice) {
-        this.motionDevice.getFrameData(frameData);
-      }
-    }
-  }, {
-    key: "isMixedRealityVRDisplay",
-    get: function get$$1() {
-      return true;
-    }
-  }, {
-    key: "isStereo",
-    get: function get$$1() {
-      return false;
-    }
-  }, {
-    key: "targetName",
-    get: function get$$1() {
-      return "Full Screen";
-    }
-  }, {
-    key: "renderOrder",
-    get: function get$$1() {
-      return 1;
-    }
-  }]);
-  return MixedRealityVRDisplay;
-}(StandardMonitorVRDisplay);
+}(VRDisplay);
 
 pliny.class({
   parent: "Primrose.Replay",
@@ -13837,146 +14944,6 @@ var MockVRDisplay = function () {
   return MockVRDisplay;
 }();
 
-var NativeVRDisplay = function (_BaseVRDisplay) {
-  inherits(NativeVRDisplay, _BaseVRDisplay);
-
-  function NativeVRDisplay(display) {
-    classCallCheck(this, NativeVRDisplay);
-
-    var _this = possibleConstructorReturn(this, (NativeVRDisplay.__proto__ || Object.getPrototypeOf(NativeVRDisplay)).call(this, VRFrameData));
-
-    _this.display = display;
-    return _this;
-  }
-
-  createClass(NativeVRDisplay, [{
-    key: "getFrameData",
-    value: function getFrameData(frameData) {
-      this.display.getFrameData(frameData);
-    }
-  }, {
-    key: "getPose",
-    value: function getPose() {
-      return this.display.getPose();
-    }
-  }, {
-    key: "resetPose",
-    value: function resetPose() {
-      return this.display.resetPose();
-    }
-  }, {
-    key: "getEyeParameters",
-    value: function getEyeParameters(side) {
-      return this.display.getEyeParameters(side);
-    }
-  }, {
-    key: "requestAnimationFrame",
-    value: function requestAnimationFrame(callback) {
-      if (this.isPresenting) {
-        return this.display.requestAnimationFrame(callback);
-      } else {
-        return window.requestAnimationFrame(callback);
-      }
-    }
-  }, {
-    key: "cancelAnimationFrame",
-    value: function cancelAnimationFrame(id) {
-      if (this.isPresenting) {
-        return this.display.cancelAnimationFrame(id);
-      } else {
-        return window.cancelAnimationFrame(id);
-      }
-    }
-  }, {
-    key: "requestPresent",
-    value: function requestPresent(layers) {
-      return this.display.requestPresent(layers);
-    }
-  }, {
-    key: "exitPresent",
-    value: function exitPresent() {
-      return this.display.exitPresent();
-    }
-  }, {
-    key: "getLayers",
-    value: function getLayers() {
-      return this.display.getLayers();
-    }
-  }, {
-    key: "submitFrame",
-    value: function submitFrame() {
-      return this.display.submitFrame();
-    }
-  }, {
-    key: "capabilities",
-    get: function get$$1() {
-      return this.display.capabilities;
-    }
-  }, {
-    key: "displayId",
-    get: function get$$1() {
-      return this.display.displayId;
-    }
-  }, {
-    key: "displayName",
-    get: function get$$1() {
-      return this.display.displayName;
-    }
-  }, {
-    key: "isConnected",
-    get: function get$$1() {
-      return this.display.isConnected;
-    }
-  }, {
-    key: "stageParameters",
-    get: function get$$1() {
-      return this.display.stageParameters;
-    }
-  }, {
-    key: "isPresenting",
-    get: function get$$1() {
-      return this.display.isPresenting;
-    }
-  }, {
-    key: "depthNear",
-    get: function get$$1() {
-      return this.display.depthNear;
-    },
-    set: function set$$1(v) {
-      this.display.depthNear = v;
-    }
-  }, {
-    key: "depthFar",
-    get: function get$$1() {
-      return this.display.depthFar;
-    },
-    set: function set$$1(v) {
-      this.display.depthFar = v;
-    }
-  }, {
-    key: "isNativeVRDisplay",
-    get: function get$$1() {
-      return true;
-    }
-  }, {
-    key: "isStereo",
-    get: function get$$1() {
-      return true;
-    }
-  }, {
-    key: "targetName",
-    get: function get$$1() {
-      return this.display.displayName;
-    }
-  }, {
-    key: "renderOrder",
-    get: function get$$1() {
-      return 0;
-    }
-  }]);
-  return NativeVRDisplay;
-}(BaseVRDisplay);
-
 pliny.function({
   parent: "Primrose.HTTP",
   name: "getObject",
@@ -14003,85 +14970,145 @@ function getObject(url, options) {
 }
 
 var hasNativeWebVR = "getVRDisplays" in navigator;
+var allDisplays = [];
 var isCardboardCompatible = isMobile && !isGearVR;
 
+var polyFillDevicesPopulated = false;
 var standardMonitorPopulated = false;
+
+function upgrade1_0_to_1_1() {
+  // Put a shim in place to update the API to 1.1 if needed.
+  if ("VRDisplay" in window && !("VRFrameData" in window)) {
+    // Provide the VRFrameData object.
+    window.VRFrameData = VRFrameData;
+
+    // A lot of Chrome builds don't have depthNear and depthFar, even
+    // though they're in the WebVR 1.0 spec. Patch them in if they're not present.
+    if (!("depthNear" in window.VRDisplay.prototype)) {
+      window.VRDisplay.prototype.depthNear = 0.01;
+    }
+
+    if (!("depthFar" in window.VRDisplay.prototype)) {
+      window.VRDisplay.prototype.depthFar = 10000.0;
+    }
+
+    window.VRDisplay.prototype.getFrameData = function (frameData) {
+      return frameDataFromPose(frameData, this.getPose(), this);
+    };
+  }
+}
+
+function getPolyfillDisplays(options) {
+  if (!polyFillDevicesPopulated) {
+    if (isCardboardCompatible || options.forceStereo) {
+      FullScreen.addChangeListener(fireVRDisplayPresentChange);
+      allDisplays.push(new CardboardVRDisplay(options));
+    }
+
+    polyFillDevicesPopulated = true;
+  }
+
+  return new Promise(function (resolve, reject) {
+    try {
+      resolve(allDisplays);
+    } catch (e) {
+      reject(e);
+    }
+  });
+}
 
 function fireVRDisplayPresentChange() {
   var event = new CustomEvent('vrdisplaypresentchange', { detail: { vrdisplay: this } });
   window.dispatchEvent(event);
 }
 
-var isExperimentalChromium51 = navigator.userAgent.indexOf("Chrome/51.0.2664.0") > -1;
-
 function installPolyfill(options) {
+  var oldGetVRDisplays = null;
+  if (hasNativeWebVR) {
+    oldGetVRDisplays = navigator.getVRDisplays;
+  } else {
+    oldGetVRDisplays = function oldGetVRDisplays() {
+      return Promise.resolve([]);
+    };
+  }
+
+  // Provide navigator.getVRDisplays.
+  navigator.getVRDisplays = function () {
+    return oldGetVRDisplays.call(navigator).then(function (displays) {
+      if (displays.length === 0 || navigator.userAgent === "Mozilla/5.0 (Linux; Android 6.0.1; SM-G930V Build/MMB29M) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2664.0 Mobile Safari/537.36") {
+        options.overrideOrientation = displays[0];
+        return getPolyfillDisplays(options);
+      } else {
+        return displays;
+      }
+    });
+  };
+
   // Provide the VRDisplay object.
-  window.VRDisplay = window.VRDisplay || PolyfilledVRDisplay;
-  window.VRFrameData = window.VRFrameData || PolyfilledVRFrameData;
+  window.VRDisplay = window.VRDisplay || VRDisplay;
 
-  // A lot of Chrome builds don't have depthNear and depthFar, even
-  // though they're in the WebVR 1.0 spec. Patch them in if they're not present.
-  if (!("depthNear" in window.VRDisplay.prototype)) {
-    window.VRDisplay.prototype.depthNear = 0.01;
-  }
-
-  if (!("depthFar" in window.VRDisplay.prototype)) {
-    window.VRDisplay.prototype.depthFar = 10000.0;
-  }
+  // Provide navigator.vrEnabled.
+  Object.defineProperty(navigator, "vrEnabled", {
+    get: function get$$1() {
+      return isCardboardCompatible && (FullScreen.available || isiOS); // just fake it for iOS
+    }
+  });
 }
 
-function installDisplays(options) {
+function installStandardMonitor(options) {
   if (!standardMonitorPopulated && !isGearVR) {
-    var oldGetVRDisplays = null;
-    if (hasNativeWebVR) {
-      oldGetVRDisplays = navigator.getVRDisplays;
-    } else {
-      oldGetVRDisplays = function oldGetVRDisplays() {
-        return Promise.resolve([]);
-      };
-    }
-
+    var oldGetVRDisplays = navigator.getVRDisplays;
     navigator.getVRDisplays = function () {
       return oldGetVRDisplays.call(navigator).then(function (displays) {
-
-        var stdDeviceExists = false,
-            mockDeviceExists = false,
-            data = options && options.replayData;
-
-        for (var i = 0; i < displays.length; ++i) {
+        var created = false;
+        for (var i = 0; i < displays.length && !created; ++i) {
           var dsp = displays[i];
-          stdDeviceExists = stdDeviceExists || dsp instanceof StandardMonitorVRDisplay;
-          mockDeviceExists = mockDeviceExists || dsp instanceof MockVRDisplay;
+          created = dsp instanceof StandardMonitorVRDisplay;
         }
-
-        if (isCardboardCompatible || options.forceStereo) {
-          FullScreen.addChangeListener(fireVRDisplayPresentChange);
-          displays.push(new CardboardVRDisplay(options));
-        }
-
-        if (!stdDeviceExists) {
+        if (!created) {
           if (options && options.defaultFOV) {
             StandardMonitorVRDisplay.DEFAULT_FOV = options.defaultFOV;
           }
-
-          var nativeDisplay = displays[0];
-          if (nativeDisplay && !nativeDisplay.isPolyfilled) {
-            displays[0] = new NativeVRDisplay(nativeDisplay);
-            displays.unshift(new MixedRealityVRDisplay(nativeDisplay));
-          }
-
-          displays.unshift(new StandardMonitorVRDisplay(nativeDisplay));
+          displays.unshift(new StandardMonitorVRDisplay(displays[0]));
         }
-
-        if (data && !mockDeviceExists) {
-          displays.push(new MockVRDisplay(data));
-        }
-
         return displays;
       });
     };
 
     standardMonitorPopulated = true;
+  }
+}
+
+function installMockDisplay(options) {
+  var data = options && options.replayData;
+  if (data) {
+    var oldGetVRDisplays = navigator.getVRDisplays;
+    navigator.getVRDisplays = function () {
+      return oldGetVRDisplays.call(navigator).then(function (displays) {
+        var mockDeviceExists = displays.map(function (d) {
+          return d instanceof MockVRDisplay;
+        }).reduce(function (a, b) {
+          return a || b;
+        }, false);
+
+        if (mockDeviceExists) {
+          return displays;
+        } else {
+          var done = function done(obj) {
+            displays.push(new MockVRDisplay(obj));
+            resolve(displays);
+          };
+
+          if ((typeof data === "undefined" ? "undefined" : _typeof(data)) === "object") {
+            return Promise.resolve(data);
+          } else if (/\.json$/.test(data)) {
+            return getObject(data);
+          } else {
+            return Promise.resolve(JSON.parse(data));
+          }
+        }
+      });
+    };
   }
 }
 
@@ -14092,7 +15119,9 @@ function install(options) {
   }, options);
 
   installPolyfill(options);
-  installDisplays(options);
+  installStandardMonitor(options);
+  installMockDisplay(options);
+  upgrade1_0_to_1_1();
 }
 
 pliny.class({
@@ -14106,12 +15135,6 @@ pliny.class({
     description: "The default height to use for the user, if the HMD doesn't provide a stage transform."
   }]
 });
-
-var PROJ = new three.Matrix4();
-var VIEW = new three.Matrix4();
-var LEFT = new three.Matrix4();
-var RIGHT = new three.Matrix4();
-var PROC = [LEFT];
 
 var VR = function (_PoseInputProcessor) {
   inherits(VR, _PoseInputProcessor);
@@ -14132,15 +15155,17 @@ var VR = function (_PoseInputProcessor) {
     _this.options = options;
     _this.displays = [];
     _this._transformers = [];
+    _this.lastLastTimerDevice = null;
+    _this.lastTimerDevice = null;
     _this.timerDevice = null;
     _this.timer = null;
     _this.currentDeviceIndex = -1;
-    _this.stage = {
-      matrix: new three.Matrix4(),
-      sizeX: 0,
-      sizeZ: 0
-    };
+    _this.movePlayer = new three.Matrix4();
+    _this.stage = null;
+    _this.lastStageWidth = null;
+    _this.lastStageDepth = null;
     _this.isStereo = false;
+    install(options);
 
     if (_this.options.nonstandardIPD !== null) {
       CardboardVRDisplay.IPD = _this.options.nonstandardIPD;
@@ -14152,56 +15177,24 @@ var VR = function (_PoseInputProcessor) {
       CardboardVRDisplay.NECK_DEPTH = _this.options.nonstandardNeckDepth;
     }
 
-    install(options);
-
-    _this.currentDevice = null;
     _this.ready = navigator.getVRDisplays().then(function (displays) {
       _this.displays.push.apply(_this.displays, displays);
-      _this.currentDevice = _this.displays[0];
+      _this.connect(0);
       return _this.displays;
     });
     return _this;
   }
 
   createClass(VR, [{
-    key: "updateFrameData",
-    value: function updateFrameData() {
-      this.currentDevice.getFrameData(this.frameData);
-
-      PROJ.fromArray(this.frameData.leftProjectionMatrix);
-      VIEW.fromArray(this.frameData.leftViewMatrix);
-      LEFT.multiplyMatrices(PROJ, VIEW);
-      if (this.isStereo) {
-        PROJ.fromArray(this.frameData.rightProjectionMatrix);
-        VIEW.fromArray(this.frameData.rightViewMatrix);
-        RIGHT.multiplyMatrices(PROJ, VIEW);
-        if (PROC.length === 1) {
-          PROC.push(RIGHT);
-        }
-      } else if (PROC.length === 2) {
-        PROC.pop();
-      }
-
-      for (var i = 0; i < 16; ++i) {
-        PROJ.elements[i] = 0;
-        for (var j = 0; j < PROC.length; ++j) {
-          PROJ.elements[i] += PROC[j].elements[i];
-        }
-        PROJ.elements[i] /= PROC.length;
-      }
-
-      this.cam = PROJ;
-    }
-  }, {
     key: "connect",
     value: function connect(selectedIndex) {
       this.currentDevice = null;
       this.currentDeviceIndex = selectedIndex;
+      this.currentPose = null;
       if (0 <= selectedIndex && selectedIndex <= this.displays.length) {
         this.currentDevice = this.displays[selectedIndex];
+        this.currentPose = this.currentDevice.getPose();
         this.isStereo = VR.isStereoDisplay(this.currentDevice);
-        this.frameData = this.currentDevice.frameData;
-        this.updateFrameData();
       }
     }
   }, {
@@ -14223,7 +15216,7 @@ var VR = function (_PoseInputProcessor) {
         }
 
         var promise = this.currentDevice.requestPresent(layers);
-        if (isMobile) {
+        if (isMobile || !isFirefox) {
           promise = promise.then(standardLockBehavior);
         }
         return promise;
@@ -14239,6 +15232,7 @@ var VR = function (_PoseInputProcessor) {
         promise = this.currentDevice.exitPresent();
         this.currentDevice = null;
         this.currentDeviceIndex = -1;
+        this.currentPose = null;
       } else {
         promise = Promise.resolve();
       }
@@ -14264,37 +15258,58 @@ var VR = function (_PoseInputProcessor) {
   }, {
     key: "update",
     value: function update(dt) {
-      this.updateFrameData();
+      var x, z, stage;
 
-      var stage = this.currentDevice && this.currentDevice.stageParameters;
-      if (stage) {
-        this.stage.matrix.fromArray(stage.sittingToStandingTransform);
-        this.stage.sizeX = stage.sizeX;
-        this.stage.sizeZ = stage.sizeZ;
+      if (this.currentDevice) {
+        this.currentPose = this.currentDevice.getPose();
+        stage = this.currentDevice.stageParameters;
       } else {
-        this.stage.matrix.makeTranslation(0, this.options.avatarHeight, 0);
-        this.stage.sizeX = 0;
-        this.stage.sizeZ = 0;
+        stage = null;
       }
 
       get(VR.prototype.__proto__ || Object.getPrototypeOf(VR.prototype), "update", this).call(this, dt);
+
+      if (stage) {
+        this.movePlayer.fromArray(stage.sittingToStandingTransform);
+        x = stage.sizeX;
+        z = stage.sizeZ;
+      } else {
+        this.movePlayer.makeTranslation(0, this.options.avatarHeight, 0);
+        x = 0;
+        z = 0;
+      }
+
+      var s = {
+        matrix: this.movePlayer,
+        sizeX: x,
+        sizeZ: z
+      };
+
+      if (!this.stage || s.sizeX !== this.stage.sizeX || s.sizeZ !== this.stage.sizeZ) {
+        this.stage = s;
+      }
     }
   }, {
     key: "submitFrame",
     value: function submitFrame() {
-      if (this.currentDevice && this.currentDevice === this.timerDevice) {
-        this.currentDevice.submitFrame();
+      if (this.currentDevice) {
+        this.currentDevice.submitFrame(this.currentPose);
       }
     }
   }, {
     key: "startAnimation",
     value: function startAnimation(callback) {
-      this.timerDevice = this.currentDevice || window;
-      this.timer = this.timerDevice.requestAnimationFrame(callback);
+      if (this.currentDevice) {
+        this.lastLastTimerDevice = this.lastTimerDevice;
+        this.lastTimerDevice = this.timerDevice;
+        this.timerDevice = this.currentDevice;
+        this.timer = this.currentDevice.requestAnimationFrame(callback);
+        return this.timer;
+      }
     }
   }, {
-    key: "stopAnimation",
-    value: function stopAnimation(id) {
+    key: "cancelAnimation",
+    value: function cancelAnimation() {
       if (this.timerDevice && this.timer) {
         this.timerDevice.cancelAnimationFrame(this.timer);
         this.timer = null;
@@ -14320,7 +15335,12 @@ var VR = function (_PoseInputProcessor) {
   }, {
     key: "isNativeWebVR",
     get: function get$$1() {
-      return this.currentDevice && this.currentDevice.isNativeVRDisplay;
+      return this.currentDevice && !this.currentDevice.isPolyfilled;
+    }
+  }, {
+    key: "hasStage",
+    get: function get$$1() {
+      return this.stage && this.stage.sizeX * this.stage.sizeZ > 0;
     }
   }, {
     key: "canMirror",
@@ -14330,7 +15350,7 @@ var VR = function (_PoseInputProcessor) {
   }, {
     key: "isPolyfilled",
     get: function get$$1() {
-      return this.currentDevice && !this.currentDevice.isNativeVRDisplay;
+      return this.currentDevice && this.currentDevice.isPolyfilled;
     }
   }, {
     key: "isPresenting",
@@ -14342,70 +15362,87 @@ var VR = function (_PoseInputProcessor) {
     get: function get$$1() {
       return this.currentDevice && this.currentDevice.capabilities.hasOrientation;
     }
+  }, {
+    key: "currentCanvas",
+    get: function get$$1() {
+      if (this.isPresenting) {
+        var layers = this.currentDevice.getLayers();
+        if (layers.length > 0) {
+          return layers[0].source;
+        }
+      }
+      return null;
+    }
   }]);
   return VR;
 }(PoseInputProcessor);
 
-var Transform = function Transform() {
-  var _this3 = this;
-
-  classCallCheck(this, Transform);
-
-  this.view = null;
-  this.projection = null;
-  this.viewport = {
-    left: null,
-    top: null,
-    width: null,
-    height: null
-  };
-  Object.defineProperty(this.viewport, "right", {
-    get: function get$$1() {
-      return _this3.left + _this3.width;
-    }
-  });
-};
-
 var ViewCameraTransform = function () {
+  createClass(ViewCameraTransform, null, [{
+    key: "makeTransform",
+    value: function makeTransform(eye, near, far) {
+      return {
+        translation: new three.Vector3().fromArray(eye.offset),
+        projection: ViewCameraTransform.fieldOfViewToProjectionMatrix(eye.fieldOfView, near, far),
+        viewport: {
+          left: 0,
+          top: 0,
+          width: eye.renderWidth,
+          height: eye.renderHeight
+        }
+      };
+    }
+  }, {
+    key: "fieldOfViewToProjectionMatrix",
+    value: function fieldOfViewToProjectionMatrix(fov, zNear, zFar) {
+      var upTan = Math.tan(fov.upDegrees * Math.PI / 180.0),
+          downTan = Math.tan(fov.downDegrees * Math.PI / 180.0),
+          leftTan = Math.tan(fov.leftDegrees * Math.PI / 180.0),
+          rightTan = Math.tan(fov.rightDegrees * Math.PI / 180.0),
+          xScale = 2.0 / (leftTan + rightTan),
+          yScale = 2.0 / (upTan + downTan),
+          matrix = new three.Matrix4();
+
+      matrix.elements[0] = xScale;
+      matrix.elements[1] = 0.0;
+      matrix.elements[2] = 0.0;
+      matrix.elements[3] = 0.0;
+      matrix.elements[4] = 0.0;
+      matrix.elements[5] = yScale;
+      matrix.elements[6] = 0.0;
+      matrix.elements[7] = 0.0;
+      matrix.elements[8] = -((leftTan - rightTan) * xScale * 0.5);
+      matrix.elements[9] = (upTan - downTan) * yScale * 0.5;
+      matrix.elements[10] = -(zNear + zFar) / (zFar - zNear);
+      matrix.elements[11] = -1.0;
+      matrix.elements[12] = 0.0;
+      matrix.elements[13] = 0.0;
+      matrix.elements[14] = -(2.0 * zFar * zNear) / (zFar - zNear);
+      matrix.elements[15] = 0.0;
+
+      return matrix;
+    }
+  }]);
+
   function ViewCameraTransform(display) {
     classCallCheck(this, ViewCameraTransform);
 
     this.display = display;
-    this.params = [new Transform()];
   }
 
   createClass(ViewCameraTransform, [{
     key: "getTransforms",
     value: function getTransforms(near, far) {
-      this.display.depthNear = near;
-      this.display.depthFar = far;
-
-      var f = this.display.frameData,
-          l = this.display.getEyeParameters("left"),
+      var l = this.display.getEyeParameters("left"),
           r = this.display.getEyeParameters("right"),
-          lt = this.params[0];
-
-      lt.view = f.leftViewMatrix;
-      lt.projection = f.leftProjectionMatrix;
-      lt.viewport.width = l.renderWidth;
-      lt.viewport.height = l.renderHeight;
-
+          params = [ViewCameraTransform.makeTransform(l, near, far)];
       if (r) {
-        if (this.params.length === 1) {
-          this.params.push(new Transform());
-        }
-
-        var rt = this.params[1];
-        rt.view = f.rightViewMatrix;
-        rt.projection = f.rightProjectionMatrix;
-        rt.viewport.width = r.renderWidth;
-        rt.viewport.height = r.renderHeight;
+        params.push(ViewCameraTransform.makeTransform(r, near, far));
       }
-
-      for (var i = 1; i < this.params.length; ++i) {
-        this.params[i].viewport.left = this.params[i - 1].viewport.right;
+      for (var i = 1; i < params.length; ++i) {
+        params[i].viewport.left = params[i - 1].viewport.left + params[i - 1].viewport.width;
       }
-      return this.params;
+      return params;
     }
   }]);
   return ViewCameraTransform;
@@ -14621,8 +15658,8 @@ var RemoteUser = function (_EventDispatcher) {
     _this.peeringError = null;
     _this.peering = false;
     _this.peered = false;
-    _this.body = modelFactory.clone();
-    _this.body.traverse(function (obj) {
+    _this.stage = modelFactory.clone();
+    _this.stage.traverse(function (obj) {
       if (obj.name === "AvatarBelt") {
         colored(obj, color());
       } else if (obj.name === "AvatarHead") {
@@ -14636,11 +15673,11 @@ var RemoteUser = function (_EventDispatcher) {
     _this.nameObject.position.set(bounds.x / 2, bounds.y, 0);
     _this.head.add(_this.nameObject);
 
-    _this.dBodyQuaternion = new three.Quaternion();
+    _this.dStageQuaternion = new three.Quaternion();
     _this.dHeadPosition = new three.Vector3();
     _this.dHeadQuaternion = new three.Quaternion();
 
-    _this.lastBodyQuaternion = new three.Quaternion();
+    _this.lastStageQuaternion = new three.Quaternion();
     _this.lastHeadPosition = new three.Vector3();
     _this.lastHeadQuaternion = new three.Quaternion();
 
@@ -14756,14 +15793,14 @@ var RemoteUser = function (_EventDispatcher) {
       var fade = this.time >= RemoteUser.NETWORK_DT;
       this._updateV(this.headPosition, dt, fade);
       this._updateV(this.headQuaternion, dt, fade);
-      this.body.rotation.setFromQuaternion(this.headQuaternion.curr);
-      this.body.rotation.x = 0;
-      this.body.rotation.z = 0;
-      this.body.position.copy(this.headPosition.curr);
-      this.body.position.y = 0;
+      this.stage.rotation.setFromQuaternion(this.headQuaternion.curr);
+      this.stage.rotation.x = 0;
+      this.stage.rotation.z = 0;
+      this.stage.position.copy(this.headPosition.curr);
+      this.stage.position.y = 0;
       if (this.panner) {
-        this.panner.setPosition(this.body.position.x, this.body.position.y, this.body.position.z);
-        this.panner.setOrientation(Math.sin(this.body.rotation.y), 0, Math.cos(this.body.rotation.y));
+        this.panner.setPosition(this.stage.position.x, this.stage.position.y, this.stage.position.z);
+        this.panner.setOrientation(Math.sin(this.stage.rotation.y), 0, Math.cos(this.stage.rotation.y));
       }
     }
   }, {
@@ -14787,7 +15824,7 @@ var RemoteUser = function (_EventDispatcher) {
   }, {
     key: "toString",
     value: function toString(digits) {
-      return this.body.position.curr.toString(digits) + " " + this.headPosition.curr.toString(digits);
+      return this.stage.position.curr.toString(digits) + " " + this.headPosition.curr.toString(digits);
     }
   }]);
   return RemoteUser;
@@ -14874,8 +15911,8 @@ var Manager = function (_EventDispatcher) {
           user.setState(state);
         }
       } else if (this.deviceIndex > 0) {
-        this.localUser.body.position.fromArray(state, 1);
-        this.localUser.body.quaternion.fromArray(state, 4);
+        this.localUser.stage.position.fromArray(state, 1);
+        this.localUser.stage.quaternion.fromArray(state, 4);
         this.localUser.head.position.fromArray(state, 8);
         this.localUser.head.quaternion.fromArray(state, 11);
       }
@@ -15426,7 +16463,6 @@ var BrowserEnvironment = function (_EventDispatcher) {
         updateFade(dt);
 
         for (var frame = 0; frame < numFrames; ++frame) {
-
           var hadGamepad = _this.hasGamepad;
           if (_this.gamepadMgr) {
             _this.gamepadMgr.poll();
@@ -15477,11 +16513,11 @@ var BrowserEnvironment = function (_EventDispatcher) {
             pitch = 0;
           }
 
-          // move body according to heading and thrust
+          // move stage according to heading and thrust
           EULER_TEMP.set(pitch, heading, 0, "YXZ");
-          _this.body.quaternion.setFromEuler(EULER_TEMP);
+          _this.stage.quaternion.setFromEuler(EULER_TEMP);
 
-          // update the body's velocity
+          // update the stage's velocity
           _this.velocity.set(strafe, 0, drive);
 
           QUAT_TEMP.copy(_this.head.quaternion);
@@ -15490,35 +16526,43 @@ var BrowserEnvironment = function (_EventDispatcher) {
           EULER_TEMP.z = 0;
           QUAT_TEMP.setFromEuler(EULER_TEMP);
 
-          _this.moveBody(DISPLACEMENT.copy(_this.velocity).multiplyScalar(dt).applyQuaternion(QUAT_TEMP).add(_this.head.position));
+          _this.moveStage(DISPLACEMENT.copy(_this.velocity).multiplyScalar(dt).applyQuaternion(QUAT_TEMP).add(_this.head.position));
 
-          _this.body.position.y = _this.ground.getHeightAt(_this.body.position) || 0;
-          _this.body.position.y += _this.options.avatarHeight;
+          _this.stage.position.y = _this.ground.getHeightAt(_this.stage.position) || 0;
+          _this.stage.position.y += _this.options.avatarHeight;
           for (var _i2 = 0; _i2 < _this.motionDevices.length; ++_i2) {
             _this.motionDevices[_i2].posePosition.y -= _this.options.avatarHeight;
           }
 
-          for (var _i3 = 0; _i3 < _this.pointers.length; ++_i3) {
-            _this.pointers[_i3].update();
+          // update the motionDevices
+          _this.stage.updateMatrix();
+          _this.matrix.multiplyMatrices(_this.stage.matrix, _this.VR.stage.matrix);
+          for (var _i3 = 0; _i3 < _this.motionDevices.length; ++_i3) {
+            _this.motionDevices[_i3].updateStage(_this.matrix);
+          }
+
+          for (var _i4 = 0; _i4 < _this.pointers.length; ++_i4) {
+            _this.pointers[_i4].update();
           }
 
           // record the position and orientation of the user
+          _this.newState = [];
           _this.head.updateMatrix();
-          _this.body.rotation.x = 0;
-          _this.body.rotation.z = 0;
-          _this.body.quaternion.setFromEuler(_this.body.rotation);
-          _this.body.updateMatrix();
+          _this.stage.rotation.x = 0;
+          _this.stage.rotation.z = 0;
+          _this.stage.quaternion.setFromEuler(_this.stage.rotation);
+          _this.stage.updateMatrix();
           _this.head.position.toArray(_this.newState, 0);
           _this.head.quaternion.toArray(_this.newState, 3);
 
           if (frame === 0) {
             updateAll();
             var userActionHandlers = null;
-            for (var _i4 = 0; _i4 < _this.pointers.length && userActionHandlers === null; ++_i4) {
-              userActionHandlers = _this.pointers[_i4].resolvePicking(_this.scene);
+            for (var _i5 = 0; _i5 < _this.pointers.length; ++_i5) {
+              userActionHandlers = _this.pointers[_i5].resolvePicking(_this.scene);
             }
-            for (var _i5 = 0; _i5 < _this.managers.length; ++_i5) {
-              _this.managers[_i5].userActionHandlers = userActionHandlers;
+            for (var _i6 = 0; _i6 < _this.managers.length; ++_i6) {
+              _this.managers[_i6].userActionHandlers = userActionHandlers;
             }
             _this.ground.moveTo(_this.head.position);
             _this.sky.position.copy(_this.head.position);
@@ -15553,8 +16597,9 @@ var BrowserEnvironment = function (_EventDispatcher) {
     _this.turns = new Angle(0);
     var followEuler = new three.Euler(),
         maxX = -Math.PI / 4,
-        maxY = Math.PI / 6,
-        moveUI = function moveUI(dt) {
+        maxY = Math.PI / 6;
+
+    var moveUI = function moveUI(dt) {
       var y = _this.vicinity.position.y,
           p = _this.options.vicinityFollowRate,
           q = 1 - p;
@@ -15566,24 +16611,25 @@ var BrowserEnvironment = function (_EventDispatcher) {
       followEuler.set(maxX, _this.turns.radians, 0, "YXZ");
       _this.ui.quaternion.setFromEuler(followEuler);
       _this.ui.position.y = _this.ui.position.y * q + _this.head.position.y * p;
-    },
-        animate = function animate(t) {
+    };
+
+    var animate = function animate(t) {
       var dt = t - lt,
           i,
           j;
       lt = t;
       update(dt);
       render();
-      _this.VR.startAnimation(animate);
-    },
-        getTrans = function getTrans() {
-      return _this.VR && _this.VR.getTransforms(_this.options.nearPlane, _this.options.nearPlane + _this.options.drawDistance);
-    },
-        render = function render() {
+      RAF(animate);
+    };
+
+    var render = function render() {
+      _this.camera.position.set(0, 0, 0);
+      _this.camera.quaternion.set(0, 0, 0, 1);
       _this.audio.setPlayer(_this.head.mesh);
       _this.renderer.clear(true, true, true);
 
-      var trans = getTrans();
+      var trans = _this.VR.getTransforms(_this.options.nearPlane, _this.options.nearPlane + _this.options.drawDistance);
       for (var i = 0; trans && i < trans.length; ++i) {
         eyeBlankAll(i);
 
@@ -15592,21 +16638,21 @@ var BrowserEnvironment = function (_EventDispatcher) {
 
         _this.renderer.setViewport(v.left * resolutionScale, v.top * resolutionScale, v.width * resolutionScale, v.height * resolutionScale);
 
-        // this.camera.projectionMatrix.fromArray(st.projection);
-        // this.camera.matrix.fromArray(st.view);
-        // this.camera.matrix.getInverse(this.camera.matrix);
-        // this.camera.updateMatrixWorld(true);
-
-        _this.camera.matrixWorld.copy(_this.VR.cam);
+        _this.camera.projectionMatrix.copy(st.projection);
         if (_this.mousePointer.unproject) {
-          _this.mousePointer.unproject.getInverse(_this.camera.projectionMatrix);
+          _this.mousePointer.unproject.getInverse(st.projection);
         }
+        _this.camera.translateOnAxis(st.translation, 1);
         _this.renderer.render(_this.scene, _this.camera);
+        _this.camera.translateOnAxis(st.translation, -1);
       }
       _this.VR.submitFrame();
-    },
-        modifyScreen = function modifyScreen() {
-      var p = getTrans();
+    };
+
+    var modifyScreen = function modifyScreen() {
+      var near = _this.options.nearPlane,
+          far = near + _this.options.drawDistance,
+          p = _this.VR && _this.VR.getTransforms(near, far);
 
       if (p) {
         var canvasWidth = 0,
@@ -15624,6 +16670,9 @@ var BrowserEnvironment = function (_EventDispatcher) {
 
         _this.renderer.domElement.width = canvasWidth;
         _this.renderer.domElement.height = canvasHeight;
+        if (!_this.timer) {
+          render();
+        }
       }
     };
 
@@ -15665,7 +16714,7 @@ var BrowserEnvironment = function (_EventDispatcher) {
       return rgb;
     }
 
-    var modelsReady = ModelFactory.loadObjects(modelFiles).then(function (models) {
+    var modelsReady = ModelFactory.loadObjects(modelFiles, _this.options.progress.thunk).then(function (models) {
       window.text3D = function (font, size, text) {
         var geom = new three.TextGeometry(text, {
           font: font,
@@ -15879,7 +16928,7 @@ var BrowserEnvironment = function (_EventDispatcher) {
     });
     _this.teleport = function (pos, immediate) {
       return _this.transition(function () {
-        return _this.moveBody(pos);
+        return _this.moveStage(pos);
       }, function () {
         return _this.teleportAvailable && TELEPORT_DISPLACEMENT.copy(pos).sub(_this.head.position).length() > 0.2;
       }, immediate);
@@ -15955,7 +17004,6 @@ var BrowserEnvironment = function (_EventDispatcher) {
       description: "The camera used to render the view."
     });
     _this.camera = new three.PerspectiveCamera(75, 1, _this.options.nearPlane, _this.options.nearPlane + _this.options.drawDistance);
-    _this.camera.matrixAutoUpdate = false;
 
     pliny.property({
       parent: "Primrose.BrowserEnvironment",
@@ -15974,6 +17022,15 @@ var BrowserEnvironment = function (_EventDispatcher) {
     _this.ground = new Ground(_this.options).addTo(_this.scene);
 
     _this.teleporter = new Teleporter(_this);
+
+    pliny.property({
+      parent: "Primrose.BrowserEnvironment",
+      name: "ui",
+      type: "THREE.Object3D",
+      description: "An anchor point on which objects can be added that follows the user around in both position and orientation. The orientation lags following the user, so if the UI is ever in the way, the user can turn slightly and it won't follow them."
+    });
+    _this.vicinity = hub().named("Vicinity").addTo(_this.scene);
+    _this.ui = hub().named("UI").addTo(_this.vicinity);
 
     var buildScene = function buildScene(sceneGraph) {
       sceneGraph.buttons = [];
@@ -16009,6 +17066,15 @@ var BrowserEnvironment = function (_EventDispatcher) {
       return sceneGraph;
     };
 
+    var currentTimerObject = null;
+    _this.timer = 0;
+    var RAF = function RAF(callback) {
+      currentTimerObject = _this.VR.currentDevice || window;
+      if (_this.timer !== null) {
+        _this.timer = currentTimerObject.requestAnimationFrame(callback);
+      }
+    };
+
     pliny.method({
       parent: "Primrose.BrowserEnvironment",
       name: "goFullScreen",
@@ -16017,25 +17083,31 @@ var BrowserEnvironment = function (_EventDispatcher) {
     });
     _this.goFullScreen = function (index, evt) {
       if (evt !== "Gaze") {
+        var elem = null;
+        if (evt === "force" || _this.VR.canMirror || _this.VR.isNativeWebVR) {
+          elem = _this.renderer.domElement;
+        } else {
+          elem = _this.options.fullScreenElement;
+        }
         _this.VR.connect(index);
         return _this.VR.requestPresent([{
-          source: _this.renderer.domElement
+          source: elem
         }]).catch(function (exp) {
           return console.error("whaaat", exp);
         }).then(function () {
-          return _this.renderer.domElement.focus();
+          return elem.focus();
         });
       }
     };
 
     _this.addAvatar = function (user) {
       console.log(user);
-      _this.scene.add(user.body);
+      _this.scene.add(user.stage);
       _this.scene.add(user.head);
     };
 
     _this.removeAvatar = function (user) {
-      _this.scene.remove(user.body);
+      _this.scene.remove(user.stage);
       _this.scene.remove(user.head);
     };
 
@@ -16059,10 +17131,50 @@ var BrowserEnvironment = function (_EventDispatcher) {
       modifyScreen();
     };
 
+    var allowRestart = true;
+    pliny.method({
+      parent: "Primrose.BrowserEnvironment",
+      name: "start",
+      returns: "Promise",
+      description: "Restart animation after it has been stopped."
+    });
+    _this.start = function () {
+      if (allowRestart) {
+        _this.ready.then(function () {
+          _this.audio.start();
+          lt = performance.now() * MILLISECONDS_TO_SECONDS;
+          _this.VR.startAnimation(animate);
+        });
+      }
+    };
+
+    pliny.method({
+      parent: "Primrose.BrowserEnvironment",
+      name: "stop",
+      description: "Pause animation."
+    });
+    _this.stop = function (isPause) {
+      if (_this.VR.timer) {
+        allowRestart = allowRestart && isPause === true;
+        _this.VR.stopAnimation();
+        _this.audio.stop();
+        if (!allowRestart) {
+          console.log("stopped");
+        }
+      }
+    };
+
+    _this.pause = _this.stop.bind(_this, true);
+
     window.addEventListener("vrdisplaypresentchange", fullScreenChange, false);
     window.addEventListener("resize", modifyScreen, false);
-    window.addEventListener("blur", _this.stop, false);
+    window.addEventListener("blur", _this.pause, false);
+    window.addEventListener("stop", _this.stop, false);
     window.addEventListener("focus", _this.start, false);
+    document.addEventListener("amazonPlatformReady", function () {
+      document.addEventListener("pause", _this.pause, false);
+      document.addEventListener("resume", _this.start, false);
+    }, false);
 
     pliny.property({
       parent: "Primrose.BrowserEnvironment",
@@ -16089,6 +17201,7 @@ var BrowserEnvironment = function (_EventDispatcher) {
         }
       }
 
+      _this.options.fullScreenElement = document.querySelector(_this.options.fullScreenElement) || _this.renderer.domElement;
       var maxTabIndex = 0;
       var elementsWithTabIndex = document.querySelectorAll("[tabIndex]");
       for (var i = 0; i < elementsWithTabIndex.length; ++i) {
@@ -16096,7 +17209,7 @@ var BrowserEnvironment = function (_EventDispatcher) {
       }
 
       _this.renderer.domElement.tabIndex = maxTabIndex + 1;
-      _this.renderer.domElement.addEventListener('webglcontextlost', _this.stop, false);
+      _this.renderer.domElement.addEventListener('webglcontextlost', _this.pause, false);
       _this.renderer.domElement.addEventListener('webglcontextrestored', _this.start, false);
 
       _this.managers = [];
@@ -16104,6 +17217,7 @@ var BrowserEnvironment = function (_EventDispatcher) {
       _this.pointers = [];
       _this.motionDevices = [];
       _this.velocity = new three.Vector3();
+      _this.matrix = new three.Matrix4();
 
       if (!_this.options.disableKeyboard) {
         _this.addInputManager(new Keyboard(_this, {
@@ -16143,7 +17257,7 @@ var BrowserEnvironment = function (_EventDispatcher) {
         _this.Keyboard.codePage = _this.options.language;
       }
 
-      _this.addInputManager(new Touch(_this.renderer.domElement, {
+      _this.addInputManager(new Touch(_this.options.fullScreenElement, {
         U: { axes: ["X0"], min: 0, max: 2, offset: 0 },
         V: { axes: ["Y0"], min: 0, max: 2 },
         buttons: {
@@ -16165,7 +17279,7 @@ var BrowserEnvironment = function (_EventDispatcher) {
         }
       }));
 
-      _this.addInputManager(new Mouse(_this.renderer.domElement, {
+      _this.addInputManager(new Mouse(_this.options.fullScreenElement, {
         U: { axes: ["X"], min: 0, max: 2, offset: 0 },
         V: { axes: ["Y"], min: 0, max: 2 },
         buttons: {
@@ -16226,8 +17340,8 @@ var BrowserEnvironment = function (_EventDispatcher) {
           if (padID !== "Unknown" && padID !== "Rift") {
             if (Gamepad.isMotionController(pad)) {
               var controllerNumber = 0;
-              for (var _i6 = 0; _i6 < _this.managers.length; ++_i6) {
-                mgr = _this.managers[_i6];
+              for (var _i7 = 0; _i7 < _this.managers.length; ++_i7) {
+                mgr = _this.managers[_i7];
                 if (mgr.currentPad && mgr.currentPad.id === pad.id) {
                   ++controllerNumber;
                 }
@@ -16253,15 +17367,15 @@ var BrowserEnvironment = function (_EventDispatcher) {
               var shift = (_this.motionDevices.length - 2) * 8,
                   color = 0x0000ff << shift,
                   highlight = 0xff0000 >> shift,
-                  ptr = new Pointer(padID + "Pointer", color, 1, highlight, [mgr], null, _this.options).addTo(_this.head);
-
-              box(0.1, 0.025, 0.2).named(padID + "Laser").colored(color, {
+                  ptr = new Pointer(padID + "Pointer", color, 1, highlight, [mgr], null, _this.options);
+              ptr.add(colored(box(0.1, 0.025, 0.2), color, {
                 emissive: highlight
-              }).addTo(ptr);
+              }));
 
               ptr.route(Pointer.EVENTS, _this.consumeEvent.bind(_this));
 
               _this.pointers.push(ptr);
+              _this.scene.add(ptr);
 
               _this.emit("motioncontrollerfound", mgr);
             } else {
@@ -16311,20 +17425,9 @@ var BrowserEnvironment = function (_EventDispatcher) {
         _this.gamepadMgr.addEventListener("gamepaddisconnected", _this.removeInputManager.bind(_this));
       }
 
-      _this.stage = hub().named("Stage").addTo(_this.scene);
+      _this.stage = hub();
 
-      pliny.property({
-        parent: "Primrose.BrowserEnvironment",
-        name: "ui",
-        type: "THREE.Object3D",
-        description: "An anchor point on which objects can be added that follows the user around in both position and orientation. The orientation lags following the user, so if the UI is ever in the way, the user can turn slightly and it won't follow them."
-      });
-      _this.vicinity = hub().named("Vicinity").addTo(_this.stage);
-      _this.ui = hub().named("UI").addTo(_this.vicinity);
-
-      _this.body = hub().named("Body").addTo(_this.stage);
-
-      _this.head = new Pointer("Head", 0xffff00, 0x0000ff, 0.8, [], [_this.Mouse, _this.Touch, _this.Keyboard], _this.options).addTo(_this.body);
+      _this.head = new Pointer("GazePointer", 0xffff00, 0x0000ff, 0.8, [_this.VR], [_this.Mouse, _this.Touch, _this.Keyboard], _this.options).addTo(_this.scene);
 
       _this.head.route(Pointer.EVENTS, _this.consumeEvent.bind(_this));
 
@@ -16332,10 +17435,11 @@ var BrowserEnvironment = function (_EventDispatcher) {
       _this.head.useGaze = _this.options.useGaze;
       _this.pointers.push(_this.head);
 
-      _this.mousePointer = new Pointer("MousePointer", 0xff0000, 0x00ff00, 1, [_this.Mouse, _this.Touch], null, _this.options).addTo(_this.head);
+      _this.mousePointer = new Pointer("MousePointer", 0xff0000, 0x00ff00, 1, [_this.Mouse, _this.Touch], null, _this.options);
       _this.mousePointer.route(Pointer.EVENTS, _this.consumeEvent.bind(_this));
       _this.mousePointer.unproject = new three.Matrix4();
       _this.pointers.push(_this.mousePointer);
+      _this.head.add(_this.mousePointer);
 
       _this.VR.ready.then(function (displays) {
         return displays.forEach(function (display, i) {
@@ -16358,9 +17462,9 @@ var BrowserEnvironment = function (_EventDispatcher) {
         transparent: true,
         unshaded: true,
         side: three.BackSide
-      }).named("Fader").addTo(_this.head);
-
+      });
       _this.fader.visible = false;
+      _this.head.add(_this.fader);
 
       pliny.event({
         parent: "Primrose.BrowserEnvironment",
@@ -16526,6 +17630,7 @@ var BrowserEnvironment = function (_EventDispatcher) {
       }
 
       _this.VR.connect(0);
+      _this.options.progress.hide();
 
       pliny.event({
         parent: "Primrose.BrowserEnvironment",
@@ -16545,7 +17650,7 @@ var BrowserEnvironment = function (_EventDispatcher) {
       _this.ready.then(function () {
         _this.audio.start();
         lt = performance.now() * MILLISECONDS_TO_SECONDS;
-        _this.VR.startAnimation(animate);
+        RAF(animate);
       });
     };
 
@@ -16555,10 +17660,10 @@ var BrowserEnvironment = function (_EventDispatcher) {
       description: "Pause animation."
     });
     _this.stop = function () {
-      if (_this.VR.timer) {
-        _this.VR.stopAnimation();
+      if (currentTimerObject) {
+        currentTimerObject.cancelAnimationFrame(_this.timer);
         _this.audio.stop();
-        console.log("stopped");
+        _this.timer = null;
       }
     };
 
@@ -16672,11 +17777,11 @@ var BrowserEnvironment = function (_EventDispatcher) {
       console.log("removed", mgr);
     }
   }, {
-    key: "moveBody",
-    value: function moveBody(position) {
+    key: "moveStage",
+    value: function moveStage(position) {
       DISPLACEMENT.copy(position).sub(this.head.position);
 
-      this.body.position.add(DISPLACEMENT);
+      this.stage.position.add(DISPLACEMENT);
     }
   }, {
     key: "cancelVR",
@@ -16738,8 +17843,6 @@ var BrowserEnvironment = function (_EventDispatcher) {
         return btn;
       };
 
-      var mixedReality = null;
-
       var buttons = this.displays
       // We skip the Standard Monitor and Magic Window on iOS because we can't go full screen on those systems.
       .map(function (display, i) {
@@ -16748,25 +17851,9 @@ var BrowserEnvironment = function (_EventDispatcher) {
               btn = newButton(display.displayName, display.displayName, enterVR),
               isStereo = VR.isStereoDisplay(display);
           btn.className = isStereo ? "stereo" : "mono";
-          if (display.isMixedRealityVRDisplay) {
-
-            mixedReality = {
-              display: display,
-              btn: btn
-            };
-
-            btn.style.display = "none";
-          }
           return btn;
         }
       }).filter(identity);
-
-      if (mixedReality) {
-        this.addEventListener("motioncontrollerfound", function (mgr) {
-          mixedReality.display.motionDevice = mgr;
-          mixedReality.btn.style.display = "";
-        });
-      }
 
       if (!/(www\.)?primrosevr.com/.test(document.location.hostname) && !this.options.disableAdvertising) {
         buttons.push(newButton("Primrose", "✿", function () {
@@ -16804,7 +17891,13 @@ var BrowserEnvironment = function (_EventDispatcher) {
   }, {
     key: "fieldOfView",
     get: function get$$1() {
-      return StandardMonitorVRDisplay.DEFAULT_FOV;
+      var d = this.VR.currentDevice,
+          eyes = [d && d.getEyeParameters("left"), d && d.getEyeParameters("right")].filter(identity);
+      if (eyes.length > 0) {
+        return eyes.reduce(function (fov, eye) {
+          return Math.max(fov, eye.fieldOfView.upDegrees + eye.fieldOfView.downDegrees);
+        }, 0);
+      }
     },
     set: function set$$1(v) {
       this.options.defaultFOV = StandardMonitorVRDisplay.DEFAULT_FOV = v;
@@ -16850,7 +17943,11 @@ BrowserEnvironment.DEFAULTS = {
   shadowMapSize: 2048,
   shadowCameraSize: 15,
   shadowRadius: 1,
-  progress: null,
+  progress: window.Preloader || {
+    thunk: function thunk() {},
+    hide: function hide() {},
+    resize: function resize() {}
+  },
   // The rate at which the view fades in and out.
   fadeRate: 5,
   // The rate at which the UI shell catches up with the user's movement.
@@ -16900,7 +17997,7 @@ pliny.class({
   description: "An object loaded from a model file."
 });
 
-var COUNTER$6 = 0;
+var COUNTER$7 = 0;
 
 var Model = function (_Entity) {
   inherits(Model, _Entity);
@@ -16908,7 +18005,7 @@ var Model = function (_Entity) {
   function Model(file, options) {
     classCallCheck(this, Model);
 
-    name = options && options.id || "Primrose.Controls.Model[" + COUNTER$6++ + "]";
+    name = options && options.id || "Primrose.Controls.Model[" + COUNTER$7++ + "]";
 
     var _this = possibleConstructorReturn(this, (Model.__proto__ || Object.getPrototypeOf(Model)).call(this, name, options));
 
@@ -17155,7 +18252,7 @@ pliny.class({
   }]
 });
 
-var COUNTER$7 = 0;
+var COUNTER$8 = 0;
 
 var TextInput = function (_TextBox) {
   inherits(TextInput, _TextBox);
@@ -17164,7 +18261,7 @@ var TextInput = function (_TextBox) {
     classCallCheck(this, TextInput);
 
     var _this = possibleConstructorReturn(this, (TextInput.__proto__ || Object.getPrototypeOf(TextInput)).call(this, Object.assign({}, {
-      id: "Primrose.Controls.TextInput[" + COUNTER$7++ + "]",
+      id: "Primrose.Controls.TextInput[" + COUNTER$8++ + "]",
       padding: 5,
       singleLine: true,
       disableWordWrap: true,
@@ -17215,488 +18312,6 @@ var TextInput = function (_TextBox) {
   return TextInput;
 }(TextBox);
 
-var index$5 = typeof Symbol === 'undefined' ? function (description) {
-	return '@' + (description || '@') + Math.random();
-} : Symbol;
-
-/*! npm.im/intervalometer */
-function intervalometer(cb, request, cancel, requestParameter) {
-	var requestId;
-	var previousLoopTime;
-	function loop(now) {
-		// must be requested before cb() because that might call .stop()
-		requestId = request(loop, requestParameter);
-
-		// called with "ms since last call". 0 on start()
-		cb(now - (previousLoopTime || now));
-
-		previousLoopTime = now;
-	}
-	return {
-		start: function start() {
-			if (!requestId) { // prevent double starts
-				loop(0);
-			}
-		},
-		stop: function stop() {
-			cancel(requestId);
-			requestId = null;
-			previousLoopTime = 0;
-		}
-	};
-}
-
-function frameIntervalometer(cb) {
-	return intervalometer(cb, requestAnimationFrame, cancelAnimationFrame);
-}
-
-/*! npm.im/iphone-inline-video */
-function preventEvent(element, eventName, toggleProperty, preventWithProperty) {
-	function handler(e) {
-		if (Boolean(element[toggleProperty]) === Boolean(preventWithProperty)) {
-			e.stopImmediatePropagation();
-			// console.log(eventName, 'prevented on', element);
-		}
-		delete element[toggleProperty];
-	}
-	element.addEventListener(eventName, handler, false);
-
-	// Return handler to allow to disable the prevention. Usage:
-	// const preventionHandler = preventEvent(el, 'click');
-	// el.removeEventHandler('click', preventionHandler);
-	return handler;
-}
-
-function proxyProperty(object, propertyName, sourceObject, copyFirst) {
-	function get() {
-		return sourceObject[propertyName];
-	}
-	function set(value) {
-		sourceObject[propertyName] = value;
-	}
-
-	if (copyFirst) {
-		set(object[propertyName]);
-	}
-
-	Object.defineProperty(object, propertyName, {get: get, set: set});
-}
-
-function proxyEvent(object, eventName, sourceObject) {
-	sourceObject.addEventListener(eventName, function () { return object.dispatchEvent(new Event(eventName)); });
-}
-
-function dispatchEventAsync(element, type) {
-	Promise.resolve().then(function () {
-		element.dispatchEvent(new Event(type));
-	});
-}
-
-// iOS 10 adds support for native inline playback + silent autoplay
-var isWhitelisted = 'object-fit' in document.head.style && /iPhone|iPod/i.test(navigator.userAgent) && !matchMedia('(-webkit-video-playable-inline)').matches;
-
-var ಠ = index$5();
-var ಠevent = index$5();
-var ಠplay = index$5('nativeplay');
-var ಠpause = index$5('nativepause');
-
-/**
- * UTILS
- */
-
-function getAudioFromVideo(video) {
-	var audio = new Audio();
-	proxyEvent(video, 'play', audio);
-	proxyEvent(video, 'playing', audio);
-	proxyEvent(video, 'pause', audio);
-	audio.crossOrigin = video.crossOrigin;
-
-	// 'data:' causes audio.networkState > 0
-	// which then allows to keep <audio> in a resumable playing state
-	// i.e. once you set a real src it will keep playing if it was if .play() was called
-	audio.src = video.src || video.currentSrc || 'data:';
-
-	// if (audio.src === 'data:') {
-	//   TODO: wait for video to be selected
-	// }
-	return audio;
-}
-
-var lastRequests = [];
-var requestIndex = 0;
-var lastTimeupdateEvent;
-
-function setTime(video, time, rememberOnly) {
-	// allow one timeupdate event every 200+ ms
-	if ((lastTimeupdateEvent || 0) + 200 < Date.now()) {
-		video[ಠevent] = true;
-		lastTimeupdateEvent = Date.now();
-	}
-	if (!rememberOnly) {
-		video.currentTime = time;
-	}
-	lastRequests[++requestIndex % 3] = time * 100 | 0 / 100;
-}
-
-function isPlayerEnded(player) {
-	return player.driver.currentTime >= player.video.duration;
-}
-
-function update(timeDiff) {
-	var player = this;
-	// console.log('update', player.video.readyState, player.video.networkState, player.driver.readyState, player.driver.networkState, player.driver.paused);
-	if (player.video.readyState >= player.video.HAVE_FUTURE_DATA) {
-		if (!player.hasAudio) {
-			player.driver.currentTime = player.video.currentTime + ((timeDiff * player.video.playbackRate) / 1000);
-			if (player.video.loop && isPlayerEnded(player)) {
-				player.driver.currentTime = 0;
-			}
-		}
-		setTime(player.video, player.driver.currentTime);
-	} else if (player.video.networkState === player.video.NETWORK_IDLE && !player.video.buffered.length) {
-		// this should happen when the source is available but:
-		// - it's potentially playing (.paused === false)
-		// - it's not ready to play
-		// - it's not loading
-		// If it hasAudio, that will be loaded in the 'emptied' handler below
-		player.video.load();
-		// console.log('Will load');
-	}
-
-	// console.assert(player.video.currentTime === player.driver.currentTime, 'Video not updating!');
-
-	if (player.video.ended) {
-		delete player.video[ಠevent]; // allow timeupdate event
-		player.video.pause(true);
-	}
-}
-
-/**
- * METHODS
- */
-
-function play() {
-	// console.log('play');
-	var video = this;
-	var player = video[ಠ];
-
-	// if it's fullscreen, use the native player
-	if (video.webkitDisplayingFullscreen) {
-		video[ಠplay]();
-		return;
-	}
-
-	if (player.driver.src !== 'data:' && player.driver.src !== video.src) {
-		// console.log('src changed on play', video.src);
-		setTime(video, 0, true);
-		player.driver.src = video.src;
-	}
-
-	if (!video.paused) {
-		return;
-	}
-	player.paused = false;
-
-	if (!video.buffered.length) {
-		// .load() causes the emptied event
-		// the alternative is .play()+.pause() but that triggers play/pause events, even worse
-		// possibly the alternative is preventing this event only once
-		video.load();
-	}
-
-	player.driver.play();
-	player.updater.start();
-
-	if (!player.hasAudio) {
-		dispatchEventAsync(video, 'play');
-		if (player.video.readyState >= player.video.HAVE_ENOUGH_DATA) {
-			// console.log('onplay');
-			dispatchEventAsync(video, 'playing');
-		}
-	}
-}
-function pause(forceEvents) {
-	// console.log('pause');
-	var video = this;
-	var player = video[ಠ];
-
-	player.driver.pause();
-	player.updater.stop();
-
-	// if it's fullscreen, the developer the native player.pause()
-	// This is at the end of pause() because it also
-	// needs to make sure that the simulation is paused
-	if (video.webkitDisplayingFullscreen) {
-		video[ಠpause]();
-	}
-
-	if (player.paused && !forceEvents) {
-		return;
-	}
-
-	player.paused = true;
-	if (!player.hasAudio) {
-		dispatchEventAsync(video, 'pause');
-	}
-	if (video.ended) {
-		video[ಠevent] = true;
-		dispatchEventAsync(video, 'ended');
-	}
-}
-
-/**
- * SETUP
- */
-
-function addPlayer(video, hasAudio) {
-	var player = video[ಠ] = {};
-	player.paused = true; // track whether 'pause' events have been fired
-	player.hasAudio = hasAudio;
-	player.video = video;
-	player.updater = frameIntervalometer(update.bind(player));
-
-	if (hasAudio) {
-		player.driver = getAudioFromVideo(video);
-	} else {
-		video.addEventListener('canplay', function () {
-			if (!video.paused) {
-				// console.log('oncanplay');
-				dispatchEventAsync(video, 'playing');
-			}
-		});
-		player.driver = {
-			src: video.src || video.currentSrc || 'data:',
-			muted: true,
-			paused: true,
-			pause: function () {
-				player.driver.paused = true;
-			},
-			play: function () {
-				player.driver.paused = false;
-				// media automatically goes to 0 if .play() is called when it's done
-				if (isPlayerEnded(player)) {
-					setTime(video, 0);
-				}
-			},
-			get ended() {
-				return isPlayerEnded(player);
-			}
-		};
-	}
-
-	// .load() causes the emptied event
-	video.addEventListener('emptied', function () {
-		// console.log('driver src is', player.driver.src);
-		var wasEmpty = !player.driver.src || player.driver.src === 'data:';
-		if (player.driver.src && player.driver.src !== video.src) {
-			// console.log('src changed to', video.src);
-			setTime(video, 0, true);
-			player.driver.src = video.src;
-			// playing videos will only keep playing if no src was present when .play()’ed
-			if (wasEmpty) {
-				player.driver.play();
-			} else {
-				player.updater.stop();
-			}
-		}
-	}, false);
-
-	// stop programmatic player when OS takes over
-	video.addEventListener('webkitbeginfullscreen', function () {
-		if (!video.paused) {
-			// make sure that the <audio> and the syncer/updater are stopped
-			video.pause();
-
-			// play video natively
-			video[ಠplay]();
-		} else if (hasAudio && !player.driver.buffered.length) {
-			// if the first play is native,
-			// the <audio> needs to be buffered manually
-			// so when the fullscreen ends, it can be set to the same current time
-			player.driver.load();
-		}
-	});
-	if (hasAudio) {
-		video.addEventListener('webkitendfullscreen', function () {
-			// sync audio to new video position
-			player.driver.currentTime = video.currentTime;
-			// console.assert(player.driver.currentTime === video.currentTime, 'Audio not synced');
-		});
-
-		// allow seeking
-		video.addEventListener('seeking', function () {
-			if (lastRequests.indexOf(video.currentTime * 100 | 0 / 100) < 0) {
-				// console.log('User-requested seeking');
-				player.driver.currentTime = video.currentTime;
-			}
-		});
-	}
-}
-
-function overloadAPI(video) {
-	var player = video[ಠ];
-	video[ಠplay] = video.play;
-	video[ಠpause] = video.pause;
-	video.play = play;
-	video.pause = pause;
-	proxyProperty(video, 'paused', player.driver);
-	proxyProperty(video, 'muted', player.driver, true);
-	proxyProperty(video, 'playbackRate', player.driver, true);
-	proxyProperty(video, 'ended', player.driver);
-	proxyProperty(video, 'loop', player.driver, true);
-	preventEvent(video, 'seeking');
-	preventEvent(video, 'seeked');
-	preventEvent(video, 'timeupdate', ಠevent, false);
-	preventEvent(video, 'ended', ಠevent, false); // prevent occasional native ended events
-}
-
-function enableInlineVideo(video, hasAudio, onlyWhitelisted) {
-	if ( hasAudio === void 0 ) hasAudio = true;
-	if ( onlyWhitelisted === void 0 ) onlyWhitelisted = true;
-
-	if ((onlyWhitelisted && !isWhitelisted) || video[ಠ]) {
-		return;
-	}
-	addPlayer(video, hasAudio);
-	overloadAPI(video);
-	video.classList.add('IIV');
-	if (!hasAudio && video.autoplay) {
-		video.play();
-	}
-	if (!/iPhone|iPod|iPad/.test(navigator.platform)) {
-		console.warn('iphone-inline-video is not guaranteed to work in emulated environments');
-	}
-}
-
-enableInlineVideo.isWhitelisted = isWhitelisted;
-
-pliny.class({
-  parent: "Primrose.Controls",
-  name: "Videa",
-  baseClass: "Primrose.Controls.BaseTextured",
-  description: "A simple 2D video to put on a Surface.",
-  parameters: [{
-    name: "options",
-    type: "Object",
-    description: "Named parameters for creating the Video."
-  }]
-});
-
-var COUNTER$8 = 0;
-
-// Videos don't auto-play on mobile devices, so let's make them all play whenever we tap the screen.
-var processedVideos = [];
-function findAndFixVideo(evt) {
-  var vids = document.querySelectorAll("video");
-  for (var i = 0; i < vids.length; ++i) {
-    fixVideo(vids[i]);
-  }
-  window.removeEventListener("touchend", findAndFixVideo);
-  window.removeEventListener("mouseup", findAndFixVideo);
-  window.removeEventListener("keyup", findAndFixVideo);
-}
-
-function fixVideo(vid) {
-  if (isiOS && processedVideos.indexOf(vid) === -1) {
-    processedVideos.push(vid);
-    enableInlineVideo(vid, false);
-  }
-}
-
-window.addEventListener("touchend", findAndFixVideo, false);
-window.addEventListener("mouseup", findAndFixVideo, false);
-window.addEventListener("keyup", findAndFixVideo, false);
-
-var Video = function (_BaseTextured) {
-  inherits(Video, _BaseTextured);
-
-  function Video(videos, options) {
-    classCallCheck(this, Video);
-
-    ////////////////////////////////////////////////////////////////////////
-    // normalize input parameters
-    ////////////////////////////////////////////////////////////////////////
-    if (!(videos instanceof Array)) {
-      videos = [videos];
-    }
-
-    options = Object.assign({}, {
-      id: "Primrose.Controls.Video[" + COUNTER$8++ + "]"
-    }, options);
-
-    return possibleConstructorReturn(this, (Video.__proto__ || Object.getPrototypeOf(Video)).call(this, videos, options));
-  }
-
-  createClass(Video, [{
-    key: "_loadFiles",
-    value: function _loadFiles(videos, progress) {
-      var _this2 = this;
-
-      this._elements = Array.prototype.map.call(videos, function (spec, i) {
-        var video = null;
-        if (typeof spec === "string") {
-          video = document.querySelector("video[src='" + spec + "']");
-          if (!video) {
-            video = document.createElement("video");
-            video.src = spec;
-          }
-        } else if (spec instanceof HTMLVideoElement) {
-          video = spec;
-        } else if (spec.toString() === "[object MediaStream]" || spec.toString() === "[object LocalMediaStream]") {
-          video = document.createElement("video");
-          video.srcObject = spec;
-        }
-        video.onprogress = progress;
-        video.onloadedmetadata = progress;
-        video.muted = true;
-        video.loop = true;
-        video.setAttribute("playsinline", "");
-        video.setAttribute("webkit-playsinline", "");
-        if (!isiOS) {
-          video.preload = "auto";
-        }
-
-        var loadOptions = Object.assign({}, _this2.options);
-        _this2._meshes[i] = textured(_this2._geometry, video, loadOptions);
-
-        if (!video.parentElement) {
-          document.body.insertBefore(video, document.body.children[0]);
-          fixVideo(video);
-        }
-
-        loadOptions.promise.then(function (txt) {
-          return _this2._textures[i] = txt;
-        });
-
-        return video;
-      });
-      return Promise.resolve();
-    }
-  }, {
-    key: "play",
-    value: function play() {
-      if (this._elements.length > 0) {
-        this._elements[0].play();
-      }
-    }
-  }, {
-    key: "update",
-    value: function update() {
-      get(Video.prototype.__proto__ || Object.getPrototypeOf(Video.prototype), "update", this).call(this);
-      for (var i = 0; i < this._textures.length; ++i) {
-        if (this._textures[i]) {
-          var elem = this._elements[i];
-          if (elem.currentTime !== this._lastTime) {
-            this._textures[i].needsUpdate = true;
-            this._lastTime = elem.currentTime;
-          }
-        }
-      }
-    }
-  }]);
-  return Video;
-}(BaseTextured);
-
 pliny.namespace({
   parent: "Primrose",
   name: "Controls",
@@ -17721,22 +18336,14 @@ var Controls = {
   Video: Video
 };
 
-pliny.namespace({
-  parent: "Primrose",
-  name: "Displays",
-  description: "| under construction"
-});
-
 var Displays = {
-  BaseVRDisplay: BaseVRDisplay,
   CardboardVRDisplay: CardboardVRDisplay,
   frameDataFromPose: frameDataFromPose,
   install: install,
   MockVRDisplay: MockVRDisplay,
-  NativeVRDisplay: NativeVRDisplay,
-  PolyfilledVRDisplay: PolyfilledVRDisplay,
-  PolyfilledVRFrameData: PolyfilledVRFrameData,
-  StandardMonitorVRDisplay: StandardMonitorVRDisplay
+  StandardMonitorVRDisplay: StandardMonitorVRDisplay,
+  VRDisplay: VRDisplay,
+  VRFrameData: VRFrameData
 };
 
 pliny.function({
@@ -19862,7 +20469,7 @@ pliny.namespace({
 This top-level namespace contains classes for manipulating and viewing 3D environments."
 });
 
-var index$4 = {
+var index$5 = {
   Angle: Angle,
   Audio: Audio$1,
   BrowserEnvironment: BrowserEnvironment,
@@ -19901,7 +20508,7 @@ var index$4 = {
 Object.assign(window, flags, liveAPI, util);
 // Do this just for side effects, we are monkey-patching Three.js classes with our own utilities.
 
-return index$4;
+return index$5;
 
 })));
 //# sourceMappingURL=PrimroseWithDoc.js.map

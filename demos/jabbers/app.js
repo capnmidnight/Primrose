@@ -110,7 +110,7 @@ env.addEventListener("ready", function () {
       MIDX / 5,
       MIDZ / 5, 1);
     jabs[jab.uuid] = jab;
-    env.stage.add(jab);
+    env.scene.add(jab);
   }
 
   Preloader.hide();

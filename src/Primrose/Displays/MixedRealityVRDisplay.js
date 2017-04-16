@@ -1,48 +1,88 @@
-import StandardMonitorVRDisplay from "./StandardMonitorVRDisplay";
+import VRDisplay from "./VRDisplay";
+import getMonoscopicEyeParemtersMixin from "./getMonoscopicEyeParemtersMixin";
 
-export default class MixedRealityVRDisplay extends StandardMonitorVRDisplay {
+let defaultFieldOfView = 50;
+function defaultPose() {
+  return {
+
+    position: [0, 0, 0],
+    orientation: [0, 0, 0, 1],
+    linearVelocity: null,
+    linearAcceleration: null,
+    angularVelocity: null,
+    angularAcceleration: null
+  };
+}
+
+export default class MixedRealityVRDisplay extends VRDisplay {
+
+  static get DEFAULT_FOV () {
+    return defaultFieldOfView;
+  }
+
+  static set DEFAULT_FOV (v) {
+    defaultFieldOfView = v;
+  }
 
   constructor(display) {
-    super(display, "Mixed Reality");
+    super("Full Screen");
+    this._display = display;
     this.motionDevice = null;
 
-    Object.defineProperties(this.capabilities, {
-      hasPosition: immutable(() => this.motionDevice && this.motionDevice.hasPosition),
-      hasOrientation: immutable(() => this.motionDevice && this.motionDevice.hasOrientation),
+    Object.defineProperties(this, {
+      capabilities: { get: () => this._display.capabilities },
+      stageParameters: { get: () => this._display.stageParameters },
+      displayId: immutable(nextDisplayId++),
+      displayName: immutable(name),
+      isPresenting: { get: () => this._display.isPresenting },
+
+      depthNear: {
+        get: () => this._display.depthNear,
+        set: (v) => this._display.depthNear = v,
+      },
+      depthFar: {
+        get: () => this._display.depthFar,
+        set: (v) => this._display.depthFar = v,
+      },
+
+      isPolyfilled: immutable(true)
     });
   }
 
-  get isMixedRealityVRDisplay() {
-    return true;
+  getLayers() {
+    return this._display.getLayers();
   }
 
-  get isStereo() {
-    return false;
+  submitFrame(pose) {
+    // do nothing, and make sure the real VRDisplay does a rendering pass first.
   }
 
-  get targetName() {
-    return "Full Screen";
+  set motionDevice(device) {
+    this.enableMotion = !!device;
+    this._motionDevice = device;
+    if(this.enableMotion) {
+      this.capabilities.hasPosition = true;
+      this.capabilities.hasOrientation = true;
+      this.stageParameters = this._display.stageParameters;
+    }
   }
 
-  get renderOrder() {
-    return 1;
+  requestAnimationFrame(callback) {
+    // do nothing here, the real VRDisplay should be managing the animation
   }
 
-  _getPose() {
-    if(this.motionDevice) {
+  cancelAnimationFrame(id) {
+    // do nothing here, the real VRDisplay should be managing the animation
+  }
+
+  getPose() {
+    if(this.motionDevice){
       return this.motionDevice.getPose();
     }
-  }
-
-  resetPose(){
-    if(this.motionDevice) {
-      return this.motionDevice.resetPose();
-    }
-  }
-
-  getFrameData(frameData) {
-    if(this.motionDevice) {
-      this.motionDevice.getFrameData(frameData);
+    else{
+      return defaultPose();
     }
   }
 }
+
+MixedRealityVRDisplay.prototype.getEyeParameters = getMonoscopicEyeParemtersMixin;

@@ -771,13 +771,13 @@ pliny.function({
 });
 pliny.class({
   parent: "Primrose.Controls",
-  name: "Image",
+  name: "Videa",
   baseClass: "Primrose.Controls.BaseTextured",
-  description: "A simple 2D image to put on a Surface.",
+  description: "A simple 2D video to put on a Surface.",
   parameters: [{
     name: "options",
     type: "Object",
-    description: "Named parameters for creating the Image."
+    description: "Named parameters for creating the Video."
   }]
 });
 
@@ -2545,6 +2545,18 @@ pliny.property({
       });
 
       pliny.class({
+  parent: "Primrose.Controls",
+  name: "Image",
+  baseClass: "Primrose.Controls.BaseTextured",
+  description: "A simple 2D image to put on a Surface.",
+  parameters: [{
+    name: "options",
+    type: "Object",
+    description: "Named parameters for creating the Image."
+  }]
+});
+
+pliny.class({
   parent: "Primrose",
   name: "ModelFactory",
   description: "Creates an interface for cloning 3D models loaded from files, to instance those objects.\n\
@@ -2946,36 +2958,36 @@ pliny.class({
 
 pliny.class({
   parent: "Primrose.Displays",
-  name: "PolyfilledVRFrameData",
-  description: "A polyfill for the WebVR standard PolyfilledVRFrameData object."
+  name: "VRFrameData",
+  description: "A polyfill for the WebVR standard VRFrameData object."
 });
 
 pliny.property({
-    parent: "Primrose.Displays.PolyfilledVRFrameData",
+    parent: "Primrose.Displays.VRFrameData",
     name: "leftProjectionMatrix",
     type: "Float32Array",
     description: "The projection matrix for the left eye."
   });
   pliny.property({
-    parent: "Primrose.Displays.PolyfilledVRFrameData",
+    parent: "Primrose.Displays.VRFrameData",
     name: "rightProjectionMatrix",
     type: "Float32Array",
     description: "The projection matrix for the right eye."
   });
   pliny.property({
-    parent: "Primrose.Displays.PolyfilledVRFrameData",
+    parent: "Primrose.Displays.VRFrameData",
     name: "leftViewMatrix",
     type: "Float32Array",
     description: "The view matrix for the left eye."
   });
   pliny.property({
-    parent: "Primrose.Displays.PolyfilledVRFrameData",
+    parent: "Primrose.Displays.VRFrameData",
     name: "rightViewMatrix",
     type: "Float32Array",
     description: "The view matrix for the right eye."
   });
   pliny.property({
-    parent: "Primrose.Displays.PolyfilledVRFrameData",
+    parent: "Primrose.Displays.VRFrameData",
     name: "pose",
     type: "VRPose",
     description: "Legacy VRPose data."
@@ -3927,11 +3939,28 @@ pliny.property({
       type: "THREE.Object3D",
       description: "If a `groundTexture` option is provided, it will be a flat plane extending to infinity. As the user moves, the ground will shift under them by whole texture repeats, making the ground look infinite."
     });
+    pliny.property({
+      parent: "Primrose.BrowserEnvironment",
+      name: "ui",
+      type: "THREE.Object3D",
+      description: "An anchor point on which objects can be added that follows the user around in both position and orientation. The orientation lags following the user, so if the UI is ever in the way, the user can turn slightly and it won't follow them."
+    });
     pliny.method({
       parent: "Primrose.BrowserEnvironment",
       name: "goFullScreen",
       returns: "Promise",
       description: "Enter full-screen mode on one of the available displays. NOTE: due to a defect in iOS, this feature is not available on iPhones or iPads."
+    });
+    pliny.method({
+      parent: "Primrose.BrowserEnvironment",
+      name: "start",
+      returns: "Promise",
+      description: "Restart animation after it has been stopped."
+    });
+    pliny.method({
+      parent: "Primrose.BrowserEnvironment",
+      name: "stop",
+      description: "Pause animation."
     });
     pliny.property({
       parent: "Primrose.BrowserEnvironment",
@@ -3939,13 +3968,7 @@ pliny.property({
       type: "THREE.WebGLRenderer",
       description: "The Three.js renderer being used to draw the scene."
     });
-    pliny.property({
-        parent: "Primrose.BrowserEnvironment",
-        name: "ui",
-        type: "THREE.Object3D",
-        description: "An anchor point on which objects can be added that follows the user around in both position and orientation. The orientation lags following the user, so if the UI is ever in the way, the user can turn slightly and it won't follow them."
-      });
-      pliny.event({
+    pliny.event({
         parent: "Primrose.BrowserEnvironment",
         name: "select",
         description: "Fired when an object has been selected, either by a physical cursor or a gaze-based cursor. You will typically want to use this instead of pointerend or gazecomplete."
@@ -4165,28 +4188,10 @@ pliny.class({
   }]
 });
 
-pliny.class({
-  parent: "Primrose.Controls",
-  name: "Videa",
-  baseClass: "Primrose.Controls.BaseTextured",
-  description: "A simple 2D video to put on a Surface.",
-  parameters: [{
-    name: "options",
-    type: "Object",
-    description: "Named parameters for creating the Video."
-  }]
-});
-
 pliny.namespace({
   parent: "Primrose",
   name: "Controls",
   description: "Various 3D control objects."
-});
-
-pliny.namespace({
-  parent: "Primrose",
-  name: "Displays",
-  description: "| under construction"
 });
 
 pliny.function({

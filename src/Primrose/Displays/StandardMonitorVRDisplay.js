@@ -1,14 +1,21 @@
 import isMobile from "../../flags/isMobile";
-import PolyfilledVRDisplay from "./PolyfilledVRDisplay";
-import PolyfilledVRFrameData from "./PolyfilledVRFrameData";
+import VRDisplay from "./VRDisplay";
+import getMonoscopicEyeParemtersMixin from "./getMonoscopicEyeParemtersMixin";
 
 let defaultFieldOfView = 100;
 
-function calcFoV(aFoV, aDim, bDim){
-  return 180 * Math.atan(Math.tan(aFoV * Math.PI / 180) * aDim / bDim) / Math.PI;
+function defaultPose() {
+  return {
+    position: [0, 0, 0],
+    orientation: [0, 0, 0, 1],
+    linearVelocity: null,
+    linearAcceleration: null,
+    angularVelocity: null,
+    angularAcceleration: null
+  };
 }
 
-export default class StandardMonitorVRDisplay extends PolyfilledVRDisplay {
+export default class StandardMonitorVRDisplay extends VRDisplay {
 
   static get DEFAULT_FOV () {
     return defaultFieldOfView;
@@ -18,66 +25,26 @@ export default class StandardMonitorVRDisplay extends PolyfilledVRDisplay {
     defaultFieldOfView = v;
   }
 
-  constructor(display, name) {
-    super(name || "Full Screen");
-    this.isStandardMonitorVRDisplay = true;
-    this.display = display;
+  constructor(display) {
+    super("Full Screen");
+    this._display = display;
   }
 
-  _getPose() {
-    var display = isMobile && this.display;
+  submitFrame(pose) {
+    if(this._display && this._display.isPolyfilled) {
+      this._display.submitFrame(pose);
+    }
+  }
+
+  getPose() {
+    var display = isMobile && this._display;
     if(display){
       return display.getPose();
     }
-  }
-
-  resetPose(){
-    var display = isMobile && this.display;
-    if(display){
-      return display.resetPose();
+    else{
+      return defaultPose();
     }
   }
+};
 
-  get isStereo() {
-    return false;
-  }
-
-  getEyeParameters (side) {
-    if (side === "left") {
-      const curLayer = this.getLayers()[0],
-        elem = curLayer && curLayer.source || document.body,
-        width = elem.clientWidth,
-        height = elem.clientHeight;
-
-      let vFOV, hFOV;
-      if(height > width) {
-        vFOV = defaultFieldOfView / 2,
-        hFOV = calcFoV(vFOV, width, height);
-      }
-      else {
-        hFOV = defaultFieldOfView / 2,
-        vFOV = calcFoV(hFOV, height, width);
-      }
-
-      return {
-        renderWidth: width * devicePixelRatio,
-        renderHeight: height * devicePixelRatio,
-        offset: new Float32Array([0, 0, 0]),
-        fieldOfView: {
-          upDegrees: vFOV,
-          downDegrees: vFOV,
-          leftDegrees: hFOV,
-          rightDegrees: hFOV
-        }
-      };
-    }
-  }
-
-  get targetName () {
-    return "Full Screen";
-  }
-
-  get renderOrder() {
-    return 1;
-  }
-}
+StandardMonitorVRDisplay.prototype.getEyeParameters = getMonoscopicEyeParemtersMixin;

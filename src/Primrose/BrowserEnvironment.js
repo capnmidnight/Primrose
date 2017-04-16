@@ -252,7 +252,7 @@ import PlainText from "./Text/Grammars/PlainText";
 
 import Teleporter from "./Tools/Teleporter";
 
-import { Quality, PIXEL_SCALES } from "./Constants";
+import { Quality, PIXEL_SCALES } from "./constants";
 
 
 import { EventDispatcher, Object3D, BackSide, PCFSoftShadowMap, FogExp2, Scene, PerspectiveCamera, TextGeometry, Quaternion, Color, Euler, Vector3, Matrix4, WebGLRenderer } from "three";
@@ -346,9 +346,7 @@ export default class BrowserEnvironment extends EventDispatcher {
 
         updateFade(dt);
 
-        for(let frame = 0; frame < numFrames; ++frame) {
-
-          const hadGamepad = this.hasGamepad;
+        for(let frame = 0; frame < numFrames; ++frame) {const hadGamepad = this.hasGamepad;
           if(this.gamepadMgr) {
             this.gamepadMgr.poll();
           }
@@ -395,73 +393,86 @@ export default class BrowserEnvironment extends EventDispatcher {
             }
             heading += mouseHeading;
           }
-
           if (this.VR.hasOrientation) {
             pitch = 0;
           }
 
-          // move body according to heading and thrust
+          // move stage according to heading and thrust
           EULER_TEMP.set(pitch, heading, 0, "YXZ");
-          this.body.quaternion.setFromEuler(EULER_TEMP);
+          this.stage.quaternion.setFromEuler(EULER_TEMP);
 
-          // update the body's velocity
+          // update the stage's velocity
           this.velocity.set(strafe, 0, drive);
+
+          QUAT_TEMP.copy(this.head.quaternion);
+          EULER_TEMP.setFromQuaternion(QUAT_TEMP);
           EULER_TEMP.x = 0;
+          EULER_TEMP.z = 0;
           QUAT_TEMP.setFromEuler(EULER_TEMP);
 
-          this.moveBody(DISPLACEMENT
+          this.moveStage(DISPLACEMENT
             .copy(this.velocity)
             .multiplyScalar(dt)
             .applyQuaternion(QUAT_TEMP)
-            .add(this.body.position));
+            .add(this.head.position));
 
-          this.body.position.y = this.ground.getHeightAt(this.body.position) || 0;
-          this.body.position.y += this.options.avatarHeight;
+          this.stage.position.y = this.ground.getHeightAt(this.stage.position) || 0;
+          this.stage.position.y += this.options.avatarHeight;
           for (let i = 0; i < this.motionDevices.length; ++i) {
             this.motionDevices[i].posePosition.y -= this.options.avatarHeight;
+          }
+
+          // update the motionDevices
+          this.stage.updateMatrix();
+          this.matrix.multiplyMatrices(this.stage.matrix, this.VR.stage.matrix);
+          for (let i = 0; i < this.motionDevices.length; ++i) {
+            this.motionDevices[i].updateStage(this.matrix);
           }
 
           for (let i = 0; i < this.pointers.length; ++i) {
             this.pointers[i].update();
           }
-        }
 
-        updateAll();
-        let userActionHandlers = null;
-        for (let i = 0; i < this.pointers.length && userActionHandlers === null; ++i) {
-          userActionHandlers = this.pointers[i].resolvePicking(scene);
-        }
-        for (let i = 0; i < this.managers.length; ++i) {
-          this.managers[i].userActionHandlers = userActionHandlers;
-        }
-        this.ground.moveTo(this.body.position);
-        this.sky.position.copy(this.head.position);
+          // record the position and orientation of the user
+          this.newState = [];
+          this.head.updateMatrix();
+          this.stage.rotation.x = 0;
+          this.stage.rotation.z = 0;
+          this.stage.quaternion.setFromEuler(this.stage.rotation);
+          this.stage.updateMatrix();
+          this.head.position.toArray(this.newState, 0);
+          this.head.quaternion.toArray(this.newState, 3);
 
-        moveUI();
+          if(frame === 0) {
+            updateAll();
+            let userActionHandlers = null;
+            for (let i = 0; i < this.pointers.length; ++i) {
+              userActionHandlers = this.pointers[i].resolvePicking(this.scene);
+            }
+            for (let i = 0; i < this.managers.length; ++i) {
+              this.managers[i].userActionHandlers = userActionHandlers;
+            }
+            this.ground.moveTo(this.head.position);
+            this.sky.position.copy(this.head.position);
+            moveUI();
+          }
 
-        // if(this.network){
-        //   // record the position and orientation of the user
-        //   this.head.updateMatrix();
-        //   this.body.rotation.x = 0;
-        //   this.body.rotation.z = 0;
-        //   this.body.quaternion.setFromEuler(this.body.rotation);
-        //   this.body.updateMatrix();
-        //   this.head.position.toArray(this.newState, 0);
-        //   this.head.quaternion.toArray(this.newState, 3);
-        //   this.network.update(dt);
-        // }
+          pliny.event({
+            parent: "Primrose.BrowserEnvironment",
+            name: "update",
+            description: "Fires after every animation update."
+          });
+          try {
+            this.emit("update");
+          }
+          catch(exp){
+            // don't let user script kill the runtime
+            console.error("User update errored", exp);
+          }
 
-        pliny.event({
-          parent: "Primrose.BrowserEnvironment",
-          name: "update",
-          description: "Fires after every animation update."
-        });
-        try {
-          this.emit("update");
-        }
-        catch(exp){
-          // don't let user script kill the runtime
-          console.error("User update errored", exp);
+          if(frame === 0 && this.network){
+            this.network.update(dt);
+          }
         }
       }
     };
@@ -475,83 +486,89 @@ export default class BrowserEnvironment extends EventDispatcher {
     this.turns = new Angle(0);
     const followEuler = new Euler(),
       maxX = -Math.PI / 4,
-      maxY = Math.PI / 6,
+      maxY = Math.PI / 6;
 
-      moveUI = (dt) => {
-        var y = this.vicinity.position.y,
-          p = this.options.vicinityFollowRate,
-          q = 1 - p;
-        this.vicinity.position.lerp(this.head.position, p);
-        this.vicinity.position.y = y;
+    const moveUI = (dt) => {
+      var y = this.vicinity.position.y,
+        p = this.options.vicinityFollowRate,
+        q = 1 - p;
+      this.vicinity.position.lerp(this.head.position, p);
+      this.vicinity.position.y = y;
 
-        followEuler.setFromQuaternion(this.head.quaternion);
-        this.turns.radians = followEuler.y;
-        followEuler.set(maxX, this.turns.radians, 0, "YXZ");
-        this.ui.quaternion.setFromEuler(followEuler)
-        this.ui.position.y = this.ui.position.y * q + this.head.position.y * p;
-      },
+      followEuler.setFromQuaternion(this.head.quaternion);
+      this.turns.radians = followEuler.y;
+      followEuler.set(maxX, this.turns.radians, 0, "YXZ");
+      this.ui.quaternion.setFromEuler(followEuler)
+      this.ui.position.y = this.ui.position.y * q + this.head.position.y * p;
+    };
 
-      animate = (t) => {
-        var dt = t - lt,
-          i, j;
-        lt = t;
-        update(dt);
-        render();
-        this.VR.startAnimation(animate);
-      },
+    var animate = (t) => {
+      var dt = t - lt,
+        i, j;
+      lt = t;
+      update(dt);
+      render();
+      RAF(animate);
+    };
 
-      getTrans = () => this.VR && this.VR.getTransforms(
-          this.options.nearPlane,
-          this.options.nearPlane + this.options.drawDistance),
+    var render = () => {
+      this.camera.position.set(0, 0, 0);
+      this.camera.quaternion.set(0, 0, 0, 1);
+      this.audio.setPlayer(this.head.mesh);
+      this.renderer.clear(true, true, true);
 
-      render = () => {
-        this.audio.setPlayer(this.head.mesh);
-        this.renderer.clear(true, true, true);
+      var trans = this.VR.getTransforms(
+        this.options.nearPlane,
+        this.options.nearPlane + this.options.drawDistance);
+      for (var i = 0; trans && i < trans.length; ++i) {
+        eyeBlankAll(i);
 
-        var trans = getTrans();
-        for (var i = 0; trans && i < trans.length; ++i) {
-          eyeBlankAll(i);
+        var st = trans[i],
+          v = st.viewport;
 
-          var st = trans[i],
-            v = st.viewport;
+        this.renderer.setViewport(
+          v.left * resolutionScale,
+          v.top * resolutionScale,
+          v.width * resolutionScale,
+          v.height * resolutionScale);
 
-          this.renderer.setViewport(
-            v.left * resolutionScale,
-            v.top * resolutionScale,
-            v.width * resolutionScale,
-            v.height * resolutionScale);
-
-          this.camera.matrixWorld.copy(this.VR.matrices[i]);
-          this.renderer.render(scene, this.camera);
-        }
-
+        this.camera.projectionMatrix.copy(st.projection);
         if (this.mousePointer.unproject) {
-          this.mousePointer.unproject.getInverse(this.VR.centerWorld);
+          this.mousePointer.unproject.getInverse(st.projection);
         }
-        this.VR.submitFrame();
-      },
+        this.camera.translateOnAxis(st.translation, 1);
+        this.renderer.render(this.scene, this.camera);
+        this.camera.translateOnAxis(st.translation, -1);
+      }
+      this.VR.submitFrame();
+    };
 
-      modifyScreen = () => {
-        const p = getTrans();
+    var modifyScreen = () => {
+      var near = this.options.nearPlane,
+        far = near + this.options.drawDistance,
+        p = this.VR && this.VR.getTransforms(near, far);
 
-        if (p) {
-          var canvasWidth = 0,
-            canvasHeight = 0;
+      if (p) {
+        var canvasWidth = 0,
+          canvasHeight = 0;
 
-          for (var i = 0; i < p.length; ++i) {
-            canvasWidth += p[i].viewport.width;
-            canvasHeight = Math.max(canvasHeight, p[i].viewport.height);
-          }
-
-          this.mousePointer.setSize(canvasWidth, canvasHeight);
-
-          canvasWidth = Math.floor(canvasWidth * resolutionScale);
-          canvasHeight = Math.floor(canvasHeight * resolutionScale);
-
-          this.renderer.domElement.width = canvasWidth;
-          this.renderer.domElement.height = canvasHeight;
+        for (var i = 0; i < p.length; ++i) {
+          canvasWidth += p[i].viewport.width;
+          canvasHeight = Math.max(canvasHeight, p[i].viewport.height);
         }
-      };
+
+        this.mousePointer.setSize(canvasWidth, canvasHeight);
+
+        canvasWidth = Math.floor(canvasWidth * resolutionScale);
+        canvasHeight = Math.floor(canvasHeight * resolutionScale);
+
+        this.renderer.domElement.width = canvasWidth;
+        this.renderer.domElement.height = canvasHeight;
+        if (!this.timer) {
+          render();
+        }
+      }
+    };
 
     //
     // Initialize local variables
@@ -817,7 +834,7 @@ export default class BrowserEnvironment extends EventDispatcher {
       }]
     });
     this.teleport = (pos, immediate) => this.transition(
-      () => this.moveBody(pos),
+      () => this.moveStage(pos),
       () => this.teleportAvailable && TELEPORT_DISPLACEMENT.copy(pos)
         .sub(this.head.position)
         .length() > 0.2,
@@ -877,19 +894,16 @@ export default class BrowserEnvironment extends EventDispatcher {
       this.dispatchEvent(evt);
     };
 
-    const scene = new Scene();
-
     pliny.property({
       parent: "Primrose.BrowserEnvironment",
-      name: "stage",
+      name: "scene",
       type: "THREE.Scene",
       description: "The 3D scene that gets displayed to the user."
     });
-    this.stage = hub().named("Stage").addTo(scene);
-
+    this.options.scene = this.scene = this.options.scene || new Scene();
 
     if (this.options.useFog) {
-      scene.fog = new FogExp2(this.options.backgroundColor, 1 / Math.sqrt(this.options.drawDistance));
+      this.scene.fog = new FogExp2(this.options.backgroundColor, 1 / Math.sqrt(this.options.drawDistance));
     }
 
     pliny.property({
@@ -899,7 +913,6 @@ export default class BrowserEnvironment extends EventDispatcher {
       description: "The camera used to render the view."
     });
     this.camera = new PerspectiveCamera(75, 1, this.options.nearPlane, this.options.nearPlane + this.options.drawDistance);
-    this.camera.matrixAutoUpdate = false;
 
     pliny.property({
       parent: "Primrose.BrowserEnvironment",
@@ -908,7 +921,7 @@ export default class BrowserEnvironment extends EventDispatcher {
       description: "If a `skyTexture` option is provided, it will be a texture cube or photosphere. If no `skyTexture` option is provided, there will only be a THREE.Object3D, to create an anchor point on which implementing scripts can add objects that follow the user's position."
     });
     this.sky = new Sky(this.options)
-      .addTo(scene);
+      .addTo(this.scene);
 
 
     pliny.property({
@@ -918,9 +931,19 @@ export default class BrowserEnvironment extends EventDispatcher {
       description: "If a `groundTexture` option is provided, it will be a flat plane extending to infinity. As the user moves, the ground will shift under them by whole texture repeats, making the ground look infinite."
     });
     this.ground = new Ground(this.options)
-      .addTo(scene);
+      .addTo(this.scene);
 
     this.teleporter = new Teleporter(this);
+
+
+    pliny.property({
+      parent: "Primrose.BrowserEnvironment",
+      name: "ui",
+      type: "THREE.Object3D",
+      description: "An anchor point on which objects can be added that follows the user around in both position and orientation. The orientation lags following the user, so if the UI is ever in the way, the user can turn slightly and it won't follow them."
+    });
+    this.vicinity = hub().named("Vicinity").addTo(this.scene);
+    this.ui = hub().named("UI").addTo(this.vicinity);
 
     var buildScene = (sceneGraph) => {
       sceneGraph.buttons = [];
@@ -933,8 +956,8 @@ export default class BrowserEnvironment extends EventDispatcher {
           sceneGraph[child.name] = child;
         }
       });
-      scene.add.apply(scene, sceneGraph.children);
-      scene.traverse((obj) => {
+      this.scene.add.apply(this.scene, sceneGraph.children);
+      this.scene.traverse((obj) => {
         if (this.options.disableDefaultLighting && obj.material) {
           if(obj.material.map){
             textured(obj, obj.material.map, {
@@ -948,7 +971,7 @@ export default class BrowserEnvironment extends EventDispatcher {
           }
         }
         if (obj.name) {
-          scene[obj.name] = obj;
+          this.scene[obj.name] = obj;
         }
       });
       if (sceneGraph.Camera) {
@@ -956,6 +979,15 @@ export default class BrowserEnvironment extends EventDispatcher {
         this.camera.quaternion.copy(sceneGraph.Camera.quaternion);
       }
       return sceneGraph;
+    };
+
+    var currentTimerObject = null;
+    this.timer = 0;
+    var RAF = (callback) => {
+      currentTimerObject = this.VR.currentDevice || window;
+      if (this.timer !== null) {
+        this.timer = currentTimerObject.requestAnimationFrame(callback);
+      }
     };
 
 
@@ -967,24 +999,31 @@ export default class BrowserEnvironment extends EventDispatcher {
     });
     this.goFullScreen = (index, evt) => {
       if (evt !== "Gaze") {
+        let elem = null;
+        if(evt === "force" || this.VR.canMirror || this.VR.isNativeWebVR) {
+          elem = this.renderer.domElement;
+        }
+        else{
+          elem = this.options.fullScreenElement;
+        }
         this.VR.connect(index);
         return this.VR.requestPresent([{
-            source: this.renderer.domElement
+            source: elem
           }])
           .catch((exp) => console.error("whaaat", exp))
-          .then(() => this.renderer.domElement.focus());
+          .then(() => elem.focus());
       }
     };
 
     this.addAvatar = (user) => {
       console.log(user);
-      scene.add(user.body);
-      scene.add(user.head);
+      this.scene.add(user.stage);
+      this.scene.add(user.head);
     };
 
     this.removeAvatar = (user) => {
-      scene.remove(user.body);
-      scene.remove(user.head);
+      this.scene.remove(user.stage);
+      this.scene.remove(user.head);
     };
 
     PointerLock.addChangeListener((evt) => {
@@ -1079,6 +1118,7 @@ export default class BrowserEnvironment extends EventDispatcher {
         }
       }
 
+      this.options.fullScreenElement = document.querySelector(this.options.fullScreenElement) || this.renderer.domElement;
       let maxTabIndex = 0;
       const elementsWithTabIndex = document.querySelectorAll("[tabIndex]");
       for(let i = 0; i < elementsWithTabIndex.length; ++i){
@@ -1094,6 +1134,7 @@ export default class BrowserEnvironment extends EventDispatcher {
       this.pointers = [];
       this.motionDevices = [];
       this.velocity = new Vector3();
+      this.matrix = new Matrix4();
 
       if(!this.options.disableKeyboard) {
         this.addInputManager(new Keyboard(this, {
@@ -1150,7 +1191,7 @@ export default class BrowserEnvironment extends EventDispatcher {
         this.Keyboard.codePage = this.options.language;
       }
 
-      this.addInputManager(new Touch(this.renderer.domElement, {
+      this.addInputManager(new Touch(this.options.fullScreenElement, {
         U: { axes: ["X0"], min: 0, max: 2, offset: 0 },
         V: { axes: ["Y0"], min: 0, max: 2 },
         buttons: {
@@ -1173,7 +1214,7 @@ export default class BrowserEnvironment extends EventDispatcher {
       }));
 
 
-      this.addInputManager(new Mouse(this.renderer.domElement, {
+      this.addInputManager(new Mouse(this.options.fullScreenElement, {
         U: { axes: ["X"], min: 0, max: 2, offset: 0 },
         V: { axes: ["Y"], min: 0, max: 2 },
         buttons: {
@@ -1257,19 +1298,15 @@ export default class BrowserEnvironment extends EventDispatcher {
               const shift = (this.motionDevices.length - 2) * 8,
                 color = 0x0000ff << shift,
                 highlight = 0xff0000 >> shift,
-                ptr = new Pointer(padID + "Pointer", color, 1, highlight, [mgr], null, this.options)
-                  .addTo(this.head);
-
-              box(0.1, 0.025, 0.2)
-                .named(padID + "Laser")
-                .colored(color, {
-                  emissive: highlight
-                })
-                .addTo(ptr);
+                ptr = new Pointer(padID + "Pointer", color, 1, highlight, [mgr], null, this.options);
+              ptr.add(colored(box(0.1, 0.025, 0.2), color, {
+                emissive: highlight
+              }));
 
               ptr.route(Pointer.EVENTS, this.consumeEvent.bind(this));
 
               this.pointers.push(ptr);
+              this.scene.add(ptr);
 
               this.emit("motioncontrollerfound", mgr);
             }
@@ -1320,24 +1357,16 @@ export default class BrowserEnvironment extends EventDispatcher {
         this.gamepadMgr.addEventListener("gamepaddisconnected", this.removeInputManager.bind(this));
       }
 
+      this.stage = hub();
 
-      pliny.property({
-        parent: "Primrose.BrowserEnvironment",
-        name: "ui",
-        type: "THREE.Object3D",
-        description: "An anchor point on which objects can be added that follows the user around in both position and orientation. The orientation lags following the user, so if the UI is ever in the way, the user can turn slightly and it won't follow them."
-      });
-      this.vicinity = hub().named("Vicinity").addTo(this.stage);
-      this.ui = hub().named("UI").addTo(this.vicinity);
-
-      this.body = hub().named("Body").addTo(this.stage);
-
-      this.head = new Pointer("Head", 0xffff00, 0x0000ff, 0.8, [], [
+      this.head = new Pointer("GazePointer", 0xffff00, 0x0000ff, 0.8, [
+        this.VR
+      ], [
         this.Mouse,
         this.Touch,
         this.Keyboard
       ], this.options)
-        .addTo(this.body);
+        .addTo(this.scene);
 
       this.head.route(Pointer.EVENTS, this.consumeEvent.bind(this));
 
@@ -1348,11 +1377,11 @@ export default class BrowserEnvironment extends EventDispatcher {
       this.mousePointer = new Pointer("MousePointer", 0xff0000, 0x00ff00, 1, [
         this.Mouse,
         this.Touch
-      ], null, this.options)
-        .addTo(this.head);
+      ], null, this.options);
       this.mousePointer.route(Pointer.EVENTS, this.consumeEvent.bind(this));
       this.mousePointer.unproject = new Matrix4();
       this.pointers.push(this.mousePointer);
+      this.head.add(this.mousePointer);
 
       this.VR.ready.then((displays) => displays.forEach((display, i) => {
         window.addEventListener("vrdisplayactivate", (evt) => {
@@ -1373,10 +1402,9 @@ export default class BrowserEnvironment extends EventDispatcher {
         transparent: true,
         unshaded: true,
         side: BackSide
-      }).named("Fader")
-        .addTo(this.head);
-
+      });
       this.fader.visible = false;
+      this.head.add(this.fader);
 
       pliny.event({
         parent: "Primrose.BrowserEnvironment",
@@ -1564,6 +1592,34 @@ export default class BrowserEnvironment extends EventDispatcher {
       });
 
 
+    pliny.method({
+      parent: "Primrose.BrowserEnvironment",
+      name: "start",
+      returns: "Promise",
+      description: "Restart animation after it has been stopped."
+    });
+    this.start = () => {
+      this.ready.then(() => {
+        this.audio.start();
+        lt = performance.now() * MILLISECONDS_TO_SECONDS;
+        RAF(animate);
+      });
+    };
+
+
+    pliny.method({
+      parent: "Primrose.BrowserEnvironment",
+      name: "stop",
+      description: "Pause animation."
+    });
+    this.stop = () => {
+      if (currentTimerObject) {
+        currentTimerObject.cancelAnimationFrame(this.timer);
+      this.audio.stop();
+        this.timer = null;
+      }
+    };
+
     pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "quality",
@@ -1571,9 +1627,6 @@ export default class BrowserEnvironment extends EventDispatcher {
       description: "The current render quality."
     });
     Object.defineProperties(this, {
-      fog: {
-        get: () => scene.fog
-      },
       quality: {
         get: () => this.options.quality,
         set: (v) => {
@@ -1675,7 +1728,14 @@ export default class BrowserEnvironment extends EventDispatcher {
   }
 
   get fieldOfView() {
-    return StandardMonitorVRDisplay.DEFAULT_FOV;
+    var d = this.VR.currentDevice,
+      eyes = [
+      d && d.getEyeParameters("left"),
+      d && d.getEyeParameters("right")
+    ].filter(identity);
+    if(eyes.length > 0){
+      return eyes.reduce((fov, eye) => Math.max(fov, eye.fieldOfView.upDegrees + eye.fieldOfView.downDegrees), 0);
+    }
   }
 
   set fieldOfView(v){
@@ -1706,11 +1766,11 @@ export default class BrowserEnvironment extends EventDispatcher {
     console.log("removed", mgr);
   }
 
-  moveBody(position) {
+  moveStage(position) {
     DISPLACEMENT.copy(position)
       .sub(this.head.position);
 
-    this.body.position.add(DISPLACEMENT);
+    this.stage.position.add(DISPLACEMENT);
   }
 
   cancelVR() {
@@ -1785,8 +1845,6 @@ export default class BrowserEnvironment extends EventDispatcher {
       return btn;
     };
 
-    let mixedReality = null;
-
     const buttons = this.displays
       // We skip the Standard Monitor and Magic Window on iOS because we can't go full screen on those systems.
       .map((display, i) => {
@@ -1795,26 +1853,10 @@ export default class BrowserEnvironment extends EventDispatcher {
             btn = newButton(display.displayName, display.displayName, enterVR),
             isStereo = VR.isStereoDisplay(display);
           btn.className = isStereo ? "stereo" : "mono";
-          if(display.isMixedRealityVRDisplay){
-
-            mixedReality = {
-              display,
-              btn
-            };
-
-            btn.style.display = "none";
-          }
           return btn;
         }
       })
       .filter(identity);
-
-    if(mixedReality) {
-      this.addEventListener("motioncontrollerfound", (mgr) => {
-        mixedReality.display.motionDevice = mgr;
-        mixedReality.btn.style.display = "";
-      });
-    }
 
     if(!/(www\.)?primrosevr.com/.test(document.location.hostname) && !this.options.disableAdvertising) {
       buttons.push(newButton("Primrose", "✿", () => open("https://www.primrosevr.com", "_blank")));
@@ -1871,6 +1913,8 @@ BrowserEnvironment.DEFAULTS = {
   renderer: null,
   // A WebGL context to use, if one had already been created.
   context: null,
+  // Three.js scene, if one had already been created.
+  scene: null,
   // This is an experimental feature for setting the height of a user's "neck" on orientation-only systems (such as Google Cardboard and Samsung Gear VR) to create a more realistic feel.
   nonstandardNeckLength: null,
   nonstandardNeckDepth: null,

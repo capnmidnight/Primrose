@@ -42,7 +42,7 @@ export default class Teleporter {
         unshaded: true
       })
       .named("disk")
-      .addTo(env.stage);
+      .addTo(env.scene);
 
     this.disk.geometry.computeBoundingBox();
     this.disk.geometry.vertices.forEach((v) => {
@@ -84,7 +84,7 @@ export default class Teleporter {
   _updatePosition(evt) {
     this._startPoint.copy(this.disk.position);
     this.disk.position.copy(evt.hit.point)
-      .sub(this._environment.stage.position);
+      .sub(this._environment.head.position);
 
     var distSq = this.disk.position.x * this.disk.position.x + this.disk.position.z * this.disk.position.z;
     if (distSq > MAX_MOVE_DISTANCE_SQ) {
@@ -96,7 +96,7 @@ export default class Teleporter {
       this.disk.position.y = y;
     }
 
-    this.disk.position.add(this._environment.stage.position);
+    this.disk.position.add(this._environment.head.position);
 
     const len = DIFF.copy(this.disk.position)
       .sub(this._startPoint)

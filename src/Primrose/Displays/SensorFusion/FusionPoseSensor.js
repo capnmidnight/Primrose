@@ -19,14 +19,12 @@ import { Math as _Math } from "three";
 import isTimestampDeltaValid from "../../../util/isTimestampDeltaValid";
 import isLandscape from "../../../flags/isLandscape";
 import isiOS from "../../../flags/isiOS";
-import isIE from "../../../flags/isIE";
 import isFirefox from "../../../flags/isFirefox";
 import isMobile from "../../../flags/isMobile";
 
 
 const isFirefoxAndroid = isFirefox && isMobile;
 const { DEG2RAD } = _Math;
-const IE_CORRECTION = new Quaternion(1, 0, 0, 0);
 
 /**
  * The pose sensor, implemented using DeviceMotion APIs.
@@ -100,9 +98,6 @@ export default class FusionPoseSensor {
     out.multiply(this.resetQ);
     out.multiply(this.predictedQ);
     out.multiply(this.worldToScreenQ);
-    if(isMobile && isIE){
-      out.multiply(IE_CORRECTION);
-    }
 
     this.orientationOut_[0] = out.x;
     this.orientationOut_[1] = out.y;
@@ -120,23 +115,6 @@ export default class FusionPoseSensor {
       angularVelocity: null,
       angularAcceleration: null
     };
-  }
-
-  resetPose() {
-    // Reduce to inverted yaw-only.
-    this.resetQ.copy(this.filter.getOrientation());
-    this.resetQ.x = 0;
-    this.resetQ.y = 0;
-    this.resetQ.z *= -1;
-    this.resetQ.normalize();
-
-    // Take into account extra transformations in landscape mode.
-    if (isLandscape()) {
-      this.resetQ.multiply(this.inverseWorldToScreenQ);
-    }
-
-    // Take into account original pose.
-    this.resetQ.multiply(this.originalPoseAdjustQ);
   }
 
   onDeviceMotionChange_(deviceMotion) {

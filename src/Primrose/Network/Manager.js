@@ -70,8 +70,8 @@ export default class Manager extends EventDispatcher {
       }
     }
     else if (this.deviceIndex > 0) {
-      this.localUser.body.position.fromArray(state, 1);
-      this.localUser.body.quaternion.fromArray(state, 4);
+      this.localUser.stage.position.fromArray(state, 1);
+      this.localUser.stage.quaternion.fromArray(state, 4);
       this.localUser.head.position.fromArray(state, 8);
       this.localUser.head.quaternion.fromArray(state, 11);
     }

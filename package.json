@@ -2,7 +2,7 @@
   "name": "primrose",
   "packageName": "PrimroseVR",
   "description": "Primrose is a framework for building Virtual Reality applications in Web browsers.",
-  "version": "0.31.3",
+  "version": "0.31.4",
   "engines": {
     "node": ">=4.0.0"
   },
@@ -53,10 +53,14 @@
     "iphone-inline-video": "^1.9.3",
     "jstransformer-marked": "^1.0.1",
     "lavu-details-polyfill": "^0.1.0",
+    "pliny": "^3.2.6",
     "promise-polyfill": "^5.2.1",
     "three": "^0.84.0"
   },
   "devDependencies": {
-    "marigold-build": "^1.4.1"
+    "gulp": "^3.9.1",
+    "marigold-build": "^1.4.2",
+    "notion-node": "^0.3.0",
+    "notiontheory-basic-build": "^5.0.0"
   }
 }
