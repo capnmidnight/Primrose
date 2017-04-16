@@ -59,7 +59,7 @@
   },
   "devDependencies": {
     "gulp": "^3.9.1",
-    "marigold-build": "^1.4.2",
+    "marigold-build": "^1.4.3",
     "notion-node": "^0.3.0",
     "notiontheory-basic-build": "^5.0.0"
   }

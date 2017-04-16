@@ -10,7 +10,10 @@ var gulp = require("gulp"),
   css = marigold.css(stylusFiles),
 
   preloaderFiles = ["preloader/**/*.js"],
-  preloader = marigold.js({ entry: "preloader/index.js" }),
+  preloader = marigold.js({
+    entry: "preloader/index.js",
+    disableGenerators: true
+  }),
 
   jsOptions = (fmt) => {
     return {
