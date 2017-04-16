@@ -111,12 +111,21 @@ export default class MixedRealityVRDisplay extends VRDisplay {
 
   getEyeParameters (side) {
     if (side === "left") {
-      var curLayer = this.getLayers()[0],
+      const curLayer = this.getLayers()[0],
         elem = curLayer && curLayer.source || document.body,
         width = elem.clientWidth,
-        height = elem.clientHeight,
+        height = elem.clientHeight;
+
+      let vFOV, hFOV;
+      if(height > width) {
         vFOV = defaultFieldOfView / 2,
         hFOV = calcFoV(vFOV, width, height);
+      }
+      else {
+        hFOV = defaultFieldOfView / 2,
+        vFOV = calcFoV(hFOV, height, width);
+      }
+
       return {
         renderWidth: width * devicePixelRatio,
         renderHeight: height * devicePixelRatio,
@@ -133,5 +142,5 @@ export default class MixedRealityVRDisplay extends VRDisplay {
 }
 
 function calcFoV(aFoV, aDim, bDim){
-  return 360 * Math.atan(Math.tan(aFoV * Math.PI / 360) * aDim / bDim) / Math.PI;
+  return RAD2DEG * Math.atan(Math.tan(DEG2RAD * aFoV) * aDim / bDim);
 }
