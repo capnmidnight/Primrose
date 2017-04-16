@@ -1,7 +1,6 @@
 import VRDisplay from "./VRDisplay";
-import getMonoscopicEyeParemtersMixin from "./getMonoscopicEyeParemtersMixin";
+import mixinMonoscopicEyeParameters from "./mixinMonoscopicEyeParameters";
 
-let defaultFieldOfView = 50;
 function defaultPose() {
   return {
 
@@ -15,14 +14,6 @@ function defaultPose() {
 }
 
 export default class MixedRealityVRDisplay extends VRDisplay {
-
-  static get DEFAULT_FOV () {
-    return defaultFieldOfView;
-  }
-
-  static set DEFAULT_FOV (v) {
-    defaultFieldOfView = v;
-  }
 
   constructor(display) {
     super("Full Screen");
@@ -85,4 +76,4 @@ export default class MixedRealityVRDisplay extends VRDisplay {
   }
 }
 
-MixedRealityVRDisplay.prototype.getEyeParameters = getMonoscopicEyeParemtersMixin;
+mixinMonoscopicEyeParameters(MixedRealityVRDisplay);

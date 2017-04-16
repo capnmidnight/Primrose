@@ -1,8 +1,6 @@
 import isMobile from "../../flags/isMobile";
 import VRDisplay from "./VRDisplay";
-import getMonoscopicEyeParemtersMixin from "./getMonoscopicEyeParemtersMixin";
-
-let defaultFieldOfView = 100;
+import mixinMonoscopicEyeParameters from "./mixinMonoscopicEyeParameters";
 
 function defaultPose() {
   return {
@@ -16,14 +14,6 @@ function defaultPose() {
 }
 
 export default class StandardMonitorVRDisplay extends VRDisplay {
-
-  static get DEFAULT_FOV () {
-    return defaultFieldOfView;
-  }
-
-  static set DEFAULT_FOV (v) {
-    defaultFieldOfView = v;
-  }
 
   constructor(display) {
     super("Full Screen");
@@ -47,4 +37,4 @@ export default class StandardMonitorVRDisplay extends VRDisplay {
   }
 };
 
-StandardMonitorVRDisplay.prototype.getEyeParameters = getMonoscopicEyeParemtersMixin;
+mixinMonoscopicEyeParameters(StandardMonitorVRDisplay);
