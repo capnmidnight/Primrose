@@ -1,5 +1,8 @@
 import isMobile from "../../flags/isMobile";
 import VRDisplay from "./VRDisplay";
+import { Math as _Math } from "three";
+
+const { DEG2RAD, RAD2DEG } = _Math;
 
 let defaultFieldOfView = 100;
 
@@ -78,5 +81,5 @@ export default class StandardMonitorVRDisplay extends VRDisplay {
 }
 
 function calcFoV(aFoV, aDim, bDim){
-  return 180 * Math.atan(Math.tan(aFoV * Math.PI / 180) * aDim / bDim) / Math.PI;
+  return RAD2DEG * Math.atan(Math.tan(DEG2RAD * aFoV) * aDim / bDim);
 }
