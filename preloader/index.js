@@ -1,9 +1,13 @@
 function get(file, done) {
   const x = new XMLHttpRequest();
-  x.onload = () => done(x.response);
-  x.onprogress = prog.thunk;
+  x.onload = done && function(){ done(x.response); }
+  x.onprogress = prog && prog.thunk;
   x.open("GET", file);
   x.send();
+}
+
+if(!window.PRIMROSE_TELEMETRY_OPT_OUT) {
+  get("https://www.primrosevr.com/telemetry");
 }
 
 function findProgressBar() {
