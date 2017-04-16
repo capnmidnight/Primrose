@@ -1,4 +1,5 @@
 import VRDisplay from "./VRDisplay";
+import getMonoscopicEyeParemtersMixin from "./getMonoscopicEyeParemtersMixin";
 
 let defaultFieldOfView = 50;
 function defaultPose() {
@@ -108,39 +109,6 @@ export default class MixedRealityVRDisplay extends VRDisplay {
       return defaultPose();
     }
   }
-
-  getEyeParameters (side) {
-    if (side === "left") {
-      const curLayer = this.getLayers()[0],
-        elem = curLayer && curLayer.source || document.body,
-        width = elem.clientWidth,
-        height = elem.clientHeight;
-
-      let vFOV, hFOV;
-      if(height > width) {
-        vFOV = defaultFieldOfView / 2,
-        hFOV = calcFoV(vFOV, width, height);
-      }
-      else {
-        hFOV = defaultFieldOfView / 2,
-        vFOV = calcFoV(hFOV, height, width);
-      }
-
-      return {
-        renderWidth: width * devicePixelRatio,
-        renderHeight: height * devicePixelRatio,
-        offset: new Float32Array([0, 0, 0]),
-        fieldOfView: {
-          upDegrees: vFOV,
-          downDegrees: vFOV,
-          leftDegrees: hFOV,
-          rightDegrees: hFOV
-        }
-      };
-    }
-  }
 }
 
-function calcFoV(aFoV, aDim, bDim){
-  return RAD2DEG * Math.atan(Math.tan(DEG2RAD * aFoV) * aDim / bDim);
-}
+MixedRealityVRDisplay.prototype.getEyeParameters = getMonoscopicEyeParemtersMixin;
