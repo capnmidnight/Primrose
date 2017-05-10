@@ -4,7 +4,7 @@ block header
   h1 Getting started
 
 block document
-  img.logo(src= fileRoot + "doc/images/logo128.png", alt="logo", title="Primrose", style="float:left;padding:10px")
+  img.logo(src= fileRoot + "doc/images/logo128" + pngExt, alt="logo", title="Primrose", style="float:left;padding:10px")
 
   p Primrose is a framework for creating Virtual Reality experiences on the web. Prior to Primrose, there were no frameworks that provided a full, default experience in only a few lines of code. Primrose makes getting up and running in VR very easy.
 
@@ -30,5 +30,5 @@ block document
       // to your own rules.
     });
 
-  p If you have #[a(href= fileRoot + "demos/shared_assets/images/deck.png", target="_blank") the asset file for the floor texture] and everything worked correctly, it should look something like this:
-  img(src=fileRoot + "demos/empty/screenshot.jpg", alt="screenshot", title="Blank scene")
+  p If you have #[a(href= fileRoot + "demos/shared_assets/images/deck" + pngExt, target="_blank") the asset file for the floor texture] and everything worked correctly, it should look something like this:
+  img(src=fileRoot + "demos/empty/screenshot" + jpgExt, alt="screenshot", title="Blank scene")

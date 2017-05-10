@@ -42,13 +42,7 @@ html
       script window.DEBUG = true; window.PRIMROSE_TELEMETRY_OPT_OUT = true;
       != liveReload
       script(src= fileRoot + "node_modules/bare-bones-logger/bareBonesLogger.js")
-      script(src= fileRoot + "node_modules/pliny/pliny.js")
-      script(src= fileRoot + "preloader.js")
-      script(src= fileRoot + "node_modules/three/build/three.js")
-      script(src= fileRoot + "PrimroseWithDoc.js")
-      script(src= "app.js")
-    else
-      script(src= fileRoot + "preloader" + jsExt, data-files= fileRoot + "node_modules/three/build/three" + jsExt + "," + fileRoot + "Primrose" + jsExt + ",app" + jsExt)
+    script(src= fileRoot + "preloader" + jsExt, data-files= fileRoot + "Primrose" + jsExt + ",app" + jsExt)
   body
     <!-- start demoIFrame.pug main block -->
     block main

@@ -26,8 +26,8 @@ html
 
     <!-- start main.pug meta block -->
     block meta
-      meta(name="twitter:image", content="http://www.primrosevr.com/images/screenshot.jpg")
-      meta(property="og:image", content="http://www.primrosevr.com/images/screenshot.jpg" )
+      meta(name="twitter:image", content="http://www.primrosevr.com/images/screenshot" + jpgExt)
+      meta(property="og:image", content="http://www.primrosevr.com/images/screenshot" + jpgExt )
     <!-- end main.pug meta block -->
 
     <!-- start main.pug title block -->
@@ -46,7 +46,7 @@ html
 
     header(role="banner")
       a#logo(href= fileRoot)
-        img(src= fileRoot + "doc/images/primrose40.png", alt="logo", title="Primrose logo")
+        img(src= fileRoot + "doc/images/primrose40" + pngExt, alt="logo", title="Primrose logo")
         span.version-number v#{version}
 
 

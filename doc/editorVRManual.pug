@@ -43,19 +43,19 @@ block document
 
   blockquote The displaying of the Dev Zone may be toggled at any time by hitting #[kbd CTRL+SHIFT+E] on Windows/Linux or #[kbd CMD+OPT+E] on OS X
 
-  img(alt="screenshot", title="VR Editor Layout", src="images/editorVR/layout.jpg")
+  img(alt="screenshot", title="VR Editor Layout", src="images/editorVR/layout" + jpgExt)
 
   h3 Documentation Window
 
   p To the left of the Code Editor is the Documentation Window. For now, it's a static, read-only listing of the scripting functions that are available for using in the Code Editor. Eventually, it will become a live-query-able terminal for all of the documentation within Primrose.
 
-  img(alt="screenshot", title="Documentation Window", src="images/editorVR/docWindow.jpg")
+  img(alt="screenshot", title="Documentation Window", src="images/editorVR/docWindow" + jpgExt)
 
   h3 Console Window
 
   p To the right of the Code Editor is the Console Window. For now, it's a static, read-only printing from whenever you call the #[code log()] function with a String parameter in the Code Editor, as well as a description of any errors that occurred during script execution. Eventually, it will become a live-executable terminal for both logging and REPL code execution, exactly the same as the JavaScript Console in your browser's Developer Tools view.
 
-  img(alt="screenshot", title="Documentation Window", src="images/editorVR/consoleWindow.jpg")
+  img(alt="screenshot", title="Documentation Window", src="images/editorVR/consoleWindow" + jpgExt)
 
   h2 Selection Sphere
 
@@ -80,23 +80,23 @@ block document
     li #[kbd Arrow-keys] on the keyboard, a simple fallback for #[kbd WASD] both for people who prefer arrow keys and supporting the #[a(href="http://store.steampowered.com/app/353370/") Steam Controller],
     li #[kbd left analog stick] on your Xbox 360 gamepad.
 
-  img(alt="screenshot", title="Cursor Sphere", src="images/editorVR/cursor1.jpg")
+  img(alt="screenshot", title="Cursor Sphere", src="images/editorVR/cursor1" + jpgExt)
 
   h3 Making Text Selections with the Selection Sphere
   p When you point the Selection Sphere at a text area, it turns white and shrinks in size. If you are currently in Navigation Mode, activating the Selection Sphere will switch you to Editing Mode.
 
   p Once in Editing Mode, depressing a button to begin activating the Selection Sphere will move the text cursor to that location and begin a text selection.
 
-  img(alt="screenshot", title="Cursor Sphere", src="images/editorVR/cursor2.jpg")
+  img(alt="screenshot", title="Cursor Sphere", src="images/editorVR/cursor2" + jpgExt)
 
   p You may then move the Selection Sphere, dragging out a text selection. Releasing the button to activate the Selection Sphere will set the end of the text selection.
 
-  img(alt="screenshot", title="Cursor Sphere", src="images/editorVR/cursor3.jpg")
+  img(alt="screenshot", title="Cursor Sphere", src="images/editorVR/cursor3" + jpgExt)
 
   h3 Canceling Edit Mode without Navigating
   p If there is no object under the Selection Sphere, it will turn red and shrink in size. If you are currently in Editing Mode, activating the Selection Sphere at this point will put you in Navigation Mode. If you are already in Navigation Mode, activating the Selection Sphere will have no effect.
 
-  img(alt="screenshot", title="Cursor Sphere", src="images/editorVR/cursor4.jpg")
+  img(alt="screenshot", title="Cursor Sphere", src="images/editorVR/cursor4" + jpgExt)
 
   h2 Scripting
 

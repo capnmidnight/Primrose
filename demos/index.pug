@@ -7,4 +7,4 @@ block main
   for file in dir("**/screenshot.jpg").map(rem).map(parent).map((p) => path.join(fileRoot, p).replace(/\\/g, "/"))
     article
       a(href= file + ".html")
-        img(src= file + "/screenshot.jpg" style="width:100%")
+        img(src= file + "/screenshot" + jpgExt style="width:100%")
