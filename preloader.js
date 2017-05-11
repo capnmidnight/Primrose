@@ -93,17 +93,29 @@ var scripts = [];
 function installScripts() {
   if (!document.body) {
     setTimeout(installScripts, 0);
+  } else if (window.DEBUG) {
+    if (scripts.length > 0) {
+      var file = scripts.shift(),
+          s = document.createElement("script");
+      s.src = file;
+      s.onload = installScripts;
+      document.body.appendChild(s);
+    }
   } else {
-    var s = document.createElement("script");
-    s.innerHTML = scripts.join("\n");
-    document.body.appendChild(s);
+    var _s = document.createElement("script");
+    _s.innerHTML = scripts.join("\n");
+    document.body.appendChild(_s);
   }
 }
 
 var loaded = 0;
 function getNextScript(file, i, arr) {
   get(file, function (contents) {
-    scripts[i] = contents;
+    if (window.DEBUG) {
+      scripts[i] = file;
+    } else {
+      scripts[i] = contents;
+    }
     ++loaded;
     if (loaded === arr.length) {
       installScripts();
