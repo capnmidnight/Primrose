@@ -86,36 +86,39 @@ export default class Audio3D {
           }
         }
       }
-      catch(exp){
+      catch(exp) {
         reject(exp);
       }
     });
   }
 
   setVelocity(x, y, z) {
-    if(this.context){
+    if(this.context) {
       this.context.listener.setVelocity(x, y, z);
     }
   }
 
   setPlayer(obj) {
-    if(this.context && this.context.listener){
-      obj.updateMatrixWorld();
-      TEMP.copy(obj.matrixWorld);
-      var mx = TEMP.elements[12],
-        my = TEMP.elements[13],
-        mz = TEMP.elements[14];
+    if(this.context && this.context.listener) {
+      var m = obj.matrixWorld,
+        e = m.elements,
+        mx = e[12],
+        my = e[13],
+        mz = e[14];
 
-      this.context.listener.setPosition(mx, my, mz);
+      if(!isNaN(mx + my + mz)) {
 
-      VECTOR.set(0, 0, -1)
-        .applyMatrix4(TEMP)
-        .normalize();
-      UP.set(0, 1, 0)
-        .applyMatrix4(TEMP)
-        .normalize();
+        this.context.listener.setPosition(mx, my, mz);
 
-      this.context.listener.setOrientation(VECTOR.x, VECTOR.y, VECTOR.z, UP.x, UP.y, UP.z);
+        VECTOR.set(0, 0, -1)
+          .applyMatrix4(m)
+          .normalize();
+        UP.set(0, 1, 0)
+          .applyMatrix4(m)
+          .normalize();
+
+        this.context.listener.setOrientation(VECTOR.x, VECTOR.y, VECTOR.z, UP.x, UP.y, UP.z);
+      }
     }
   }
 
