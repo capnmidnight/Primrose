@@ -4,7 +4,7 @@ import Image from "./Image";
 import Pointer from "../Pointer";
 import ModelFactory from "../Graphics/ModelFactory";
 
-import { Raycaster, Vector3 } from "three";
+import { Raycaster, Vector3, Object3D } from "three";
 
 const heightTester = new Raycaster();
 
@@ -39,40 +39,39 @@ export default class Ground extends Entity {
           this.isInfinite = false;
         });
     }
+    else if(type === "number") {
+      this.isInfinite = true;
+      this.model = quad(dim, dim)
+        .colored(this.options.texture, this.options)
+        .rot(-Math.PI / 2, 0, 0);
+      promise = Promise.resolve();
+    }
+    else if(type === "string") {
+      this.isInfinite = true;
+      this.model = new Image(this.options.texture, Object.assign({}, this.options, {
+        width: dim,
+        height: dim,
+        txtRepeatX: dim,
+        txtRepeatY: dim,
+        anisotropy: 8
+      })).rot(-Math.PI / 2, 0, 0);
+
+      promise = this.model.ready;
+    }
     else {
-      if(type === "number") {
-        this.model = quad(dim, dim)
-          .colored(this.options.texture, this.options)
-          .rot(-Math.PI / 2, 0, 0);
-        promise = Promise.resolve();
-      }
-      else if(type === "string") {
-        this.model = new Image(this.options.texture, Object.assign({}, this.options, {
-          width: dim,
-          height: dim,
-          txtRepeatX: dim,
-          txtRepeatY: dim,
-          anisotropy: 8
-        })).rot(-Math.PI / 2, 0, 0);
-
-        promise = this.model.ready;
-      }
-
-      if(promise) {
-        this.isInfinite = true;
-      }
-      else{
-        promise = Promise.reject("Couldn't figure out how to make the ground out of " + this.options.texture);
-      }
+      this.model = new Object3D();
+      promise = Promise.resolve();
     }
 
     promise = promise.then(() => {
-      this.model.receiveShadow = this.options.shadow;
-      this.model
-        .named(this.name + "-" + (this.options.model || this.options.texture))
-        .addTo(this);
+      if(this.isInfinite != null) {
+        this.model.receiveShadow = this.options.shadow;
+        this.model
+          .named(this.name + "-" + (this.options.model || this.options.texture))
+          .addTo(this);
 
-      this.watch(this.model, Pointer.EVENTS);
+        this.watch(this.model, Pointer.EVENTS);
+      }
     });
 
     return promise;
