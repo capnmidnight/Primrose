@@ -8,7 +8,7 @@ var cube = range(6, function(i) { return "../shared_assets/images/space" + i + "
     showHeadPointer: isMobile,
     ambientSound: "../shared_assets/audio/space.ogg",
     fullScreenButtonContainer: "#fullScreenButtonContainer",
-    progress: Preloader.thunk
+    progress: Preloader
   }),
   blocks = [],
   shots = [],
