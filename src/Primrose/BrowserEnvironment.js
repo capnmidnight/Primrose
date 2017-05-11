@@ -319,7 +319,7 @@ export default class BrowserEnvironment extends EventDispatcher {
     const update = (dt) => {
       dt *= MILLISECONDS_TO_SECONDS;
       if(dt > 0) {
-        const fps = Math.round(1 / dt);
+        const fps = Math.max(1, Math.round(1 / dt));
         dt = 1 / fps;
         this.deltaTime = Math.min(this.deltaTime, dt);
 
@@ -343,7 +343,9 @@ export default class BrowserEnvironment extends EventDispatcher {
 
         updateFade(dt);
 
-        for(let frame = 0; frame < numFrames; ++frame) {const hadGamepad = this.hasGamepad;
+        for(let frame = 0; frame < numFrames; ++frame) {
+
+          const hadGamepad = this.hasGamepad;
           if(this.gamepadMgr) {
             this.gamepadMgr.poll();
           }
