@@ -82,7 +82,6 @@ gulp.task("copy", () => gulp.src(["Primrose.min.js"])
 
 delete jsESModules.format;
 delete jsESModules.default;
-delete jsESModules.debug;
 
 marigold.taskify([
   html,
