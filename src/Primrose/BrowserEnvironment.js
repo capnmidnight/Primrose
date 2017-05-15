@@ -1111,9 +1111,11 @@ export default class BrowserEnvironment extends EventDispatcher {
 
     window.addEventListener("vrdisplaypresentchange", fullScreenChange, false);
     window.addEventListener("resize", modifyScreen, false);
-    window.addEventListener("blur", this.pause, false);
+    if(!options.disableAutoPause) {
+      window.addEventListener("focus", this.start, false);
+      window.addEventListener("blur", this.pause, false);
+    }
     window.addEventListener("stop", this.stop, false);
-    window.addEventListener("focus", this.start, false);
     document.addEventListener("amazonPlatformReady", () => {
       document.addEventListener("pause", this.pause, false);
       document.addEventListener("resume", this.start, false);
@@ -1888,6 +1890,8 @@ BrowserEnvironment.DEFAULTS = {
   gravity: 9.8,
   // The amount of time in seconds to require gazes on objects before triggering the gaze event.
   gazeLength: 1.5,
+  // By default, the rendering will be paused when the browser window loses focus.
+  disableAutoPause: false,
   // By default, what we see in the VR view will get mirrored to a regular view on the primary screen. Set to true to improve performance.
   disableMirroring: false,
   // By default, a single light is added to the scene,
