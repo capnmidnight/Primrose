@@ -43,14 +43,10 @@ var gulp = require("gulp"),
   jsESModules = marigold.js(jsOptions("es")),
 
   tidyFiles = [
-    "doc/*/appWithDoc.js",
-    "doc/*/appDocumentation.js",
-    "PrimroseDocumentation*.js",
-    "templates/*.html",
-    "Primrose*.modules.js.map",
-    "**/*WithDoc*",
+    "Primrose.doc.js",
+    "Primrose.modules.doc.js",
     "Primrose.modules.min.js",
-    "Primrose*.doc.js"
+    "Primrose.modules.js.map"
   ],
 
   preloaderFiles = ["preloader/**/*.js"],
