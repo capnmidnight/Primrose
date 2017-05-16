@@ -17,6 +17,7 @@ import isTimestampDeltaValid from "./isTimestampDeltaValid";
 import mutable from "./mutable";
 import Orientation from "./Orientation";
 import PointerLock from "./PointerLock";
+import promisify from "./promisify";
 import setSetting from "./setSetting";
 import standardExitFullScreenBehavior from "./standardExitFullScreenBehavior";
 import standardFullScreenBehavior from "./standardFullScreenBehavior";
@@ -37,6 +38,7 @@ export {
   mutable,
   Orientation,
   PointerLock,
+  promisify,
   setSetting,
   standardExitFullScreenBehavior,
   standardFullScreenBehavior,
@@ -58,6 +60,7 @@ export default {
   mutable,
   Orientation,
   PointerLock,
+  promisify,
   setSetting,
   standardExitFullScreenBehavior,
   standardFullScreenBehavior,
