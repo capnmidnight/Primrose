@@ -34,8 +34,6 @@ export default class Audio3D {
     element.autoplay = true;
     element.controls = false;
     element.crossOrigin = "anonymous";
-    element.muted = true;
-    element.setAttribute("muted", "");
   }
 
   constructor() {
