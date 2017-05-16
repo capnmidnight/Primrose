@@ -1,11 +1,7 @@
 {
   "name": "primrose",
-  "packageName": "PrimroseVR",
   "description": "Primrose is a framework for building Virtual Reality applications in Web browsers.",
-  "version": "0.31.7",
-  "engines": {
-    "node": ">=4.0.0"
-  },
+  "version": "0.31.8",
   "author": "Sean T. McBeth <sean@seanmcbeth.com> (https://www.seanmcbeth.com)",
   "license": "GPL-3.0",
   "homepage": "https://www.primrosevr.com",
@@ -13,7 +9,7 @@
     "type": "git",
     "url": "https://github.com/NotionTheory/Primrose.git"
   },
-  "bugs": "https://trello.com/b/NVZsaC1P/primrose-development-tasks",
+  "bugs": "https://github.com/NotionTheory/Primrose/Issues",
   "files": [
     "CHANGELOG.md",
     "CONTRIBUTING.md",
@@ -21,8 +17,10 @@
     "index.html",
     "LICENSE.md",
     "preloader.js",
+    "preloader.js.map",
     "preloader.min.js",
     "Primrose.js",
+    "Primrose.js.map",
     "Primrose.min.js",
     "Primrose.modules.js",
     "README.md",
@@ -31,7 +29,6 @@
     "doc/",
     "demos/"
   ],
-  "jsnext:main": "src/index",
   "main": "Primrose.js",
   "browser": "Primrose.min.js",
   "scripts": {
@@ -49,7 +46,6 @@
     "highlighting"
   ],
   "dependencies": {
-    "bare-bones-logger": "^4.0.0",
     "iphone-inline-video": "^1.9.3",
     "jstransformer-marked": "^1.0.1",
     "lavu-details-polyfill": "^0.1.0",
@@ -59,6 +55,6 @@
   },
   "devDependencies": {
     "gulp": "^3.9.1",
-    "marigold-build": "^1.7.0"
+    "marigold-build": "^1.7.6"
   }
 }
