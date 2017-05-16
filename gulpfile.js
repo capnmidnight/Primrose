@@ -70,11 +70,13 @@ var gulp = require("gulp"),
   tidy = marigold.clean(tidyFiles, ["copy", "move"]);
 
 
-gulp.task("move", () => gulp.src(["Primrose.doc.js"])
-  .pipe(gulp.dest("doc")));
+gulp.task("move", () =>
+  gulp.src(["Primrose.doc.js"])
+    .pipe(gulp.dest("doc")));
 
-gulp.task("copy", () => gulp.src(["Primrose.min.js"])
-  .pipe(gulp.dest("quickstart")));
+gulp.task("copy", () =>
+  gulp.src(["Primrose.min.js"])
+    .pipe(gulp.dest("quickstart")));
 
 delete jsESModules.format;
 delete jsESModules.default;
