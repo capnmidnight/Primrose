@@ -11,6 +11,9 @@ import deleteSetting from "./deleteSetting";
 import findProperty from "./findProperty";
 import FullScreen from "./FullScreen";
 import getSetting from "./getSetting";
+import "./haxBox";
+import haxClass from "./haxClass";
+import haxFunction from "./haxFunction";
 import identity from "./identity";
 import immutable from "./immutable";
 import isTimestampDeltaValid from "./isTimestampDeltaValid";
@@ -32,6 +35,8 @@ export {
   findProperty,
   FullScreen,
   getSetting,
+  haxClass,
+  haxFunction,
   identity,
   immutable,
   isTimestampDeltaValid,
@@ -54,6 +59,8 @@ export default {
   findProperty,
   FullScreen,
   getSetting,
+  haxClass,
+  haxFunction,
   identity,
   immutable,
   isTimestampDeltaValid,
