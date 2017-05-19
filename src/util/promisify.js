@@ -1,3 +1,11 @@
+Promise.prototype.log = function(args){
+  args = args || [];
+  return this.then(function(obj) {
+    console.log.apply(console, args.concat([obj]));
+    return obj;
+  });
+};
+
 /*
   Helps convert old Node-style callback-based asynchronous functions to the new
   Promise-based style that is nicer to work with and will also work better with
