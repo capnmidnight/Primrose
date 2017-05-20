@@ -92,7 +92,7 @@ export default function cascadeElement(id, tag, DOMClass, add) {
     elem = id;
   }
   else if (typeof (id) === "string") {
-    elem = document.getElementById(id);
+    elem = document.getElementById(id) || document.querySelector(id);
     if (elem === null) {
       elem = document.createElement(tag);
       elem.id = id;

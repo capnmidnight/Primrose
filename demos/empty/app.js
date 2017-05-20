@@ -4,6 +4,7 @@ const env = new Primrose.BrowserEnvironment({
   useFog: true,
   drawDistance: 100,
   fullScreenButtonContainer: "#fullScreenButtonContainer",
+  fullScreenElement: document.body,
   nonstandardNeckLength: 0.15,
   nonstandardNeckDepth: 0.075
 });

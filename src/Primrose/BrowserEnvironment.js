@@ -1147,7 +1147,7 @@ export default class BrowserEnvironment extends EventDispatcher {
         }
       }
 
-      this.options.fullScreenElement = document.querySelector(this.options.fullScreenElement) || this.renderer.domElement;
+      this.options.fullScreenElement = cascadeElement(this.options.fullScreenElement) || this.renderer.domElement;
       let maxTabIndex = 0;
       const elementsWithTabIndex = document.querySelectorAll("[tabIndex]");
       for(let i = 0; i < elementsWithTabIndex.length; ++i){
