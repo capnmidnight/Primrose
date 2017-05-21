@@ -15,6 +15,7 @@
 
 import FusionPoseSensor from "./SensorFusion/FusionPoseSensor";
 import VRDisplay from "./VRDisplay";
+import calculateElementSize from "./calculateElementSize";
 import isiOS from "../../flags/isiOS";
 import isLandscape from "../../flags/isLandscape";
 
@@ -71,21 +72,7 @@ export default class CardboardVRDisplay extends VRDisplay {
       offset[0] *= -1.0;
     }
 
-    var width = screen.width,
-      height = screen.height;
-
-    if(this.DOMElement){
-      width = this.DOMElement.clientWidth;
-      height = this.DOMElement.clientHeight;
-    }
-    else if(isiOS && isLandscape()) {
-      var temp = width;
-      width = height;
-      height = temp;
-    }
-
-    width *= devicePixelRatio;
-    height *= devicePixelRatio;
+    const dim = calculateElementSize(this);
 
     return {
       fieldOfView: {
@@ -95,8 +82,8 @@ export default class CardboardVRDisplay extends VRDisplay {
         downDegrees: 40
       },
       offset: offset,
-      renderWidth: 0.5 * width,
-      renderHeight: height,
+      renderWidth: 0.5 * dim.width,
+      renderHeight: dim.height,
     }
   }
 };

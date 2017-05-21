@@ -1,3 +1,5 @@
+import calculateElementSize from "./calculateElementSize";
+
 import { Math as _Math } from "three";
 
 const { DEG2RAD, RAD2DEG } = _Math;
@@ -19,31 +21,28 @@ function calcFoV(aFoV, aDim, bDim){
 
 function getMonoscopicEyeParameters (side) {
   if (side === "left") {
-    const curLayer = this.getLayers()[0],
-    elem = curLayer && curLayer.source || document.body,
-    width = elem.clientWidth,
-    height = elem.clientHeight;
+    const dim = calculateElementSize(this);
 
     let vFOV, hFOV;
-    if(height > width) {
+    if(dim.height > dim.width) {
       vFOV = defaultFieldOfView / 2,
-      hFOV = calcFoV(vFOV, width, height);
+      hFOV = calcFoV(vFOV, dim.width, dim.height);
     }
     else {
       hFOV = defaultFieldOfView / 2,
-      vFOV = calcFoV(hFOV, height, width);
+      vFOV = calcFoV(hFOV, dim.height, dim.width);
     }
 
     return {
-      renderWidth: width * devicePixelRatio,
-      renderHeight: height * devicePixelRatio,
-      offset: new Float32Array([0, 0, 0]),
       fieldOfView: {
         upDegrees: vFOV,
         downDegrees: vFOV,
         leftDegrees: hFOV,
         rightDegrees: hFOV
-      }
+      },
+      offset: new Float32Array([0, 0, 0]),
+      renderWidth: dim.width,
+      renderHeight: dim.height
     };
   }
 }

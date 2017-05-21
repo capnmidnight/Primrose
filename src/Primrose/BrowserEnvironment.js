@@ -198,6 +198,7 @@ pliny.record({
 
 import isiOS from "../flags/isiOS";
 import isMobile from "../flags/isMobile";
+import isLandscape from "../flags/isLandscape";
 
 import box from "../live-api/box";
 import brick from "../live-api/brick";
@@ -315,8 +316,14 @@ export default class BrowserEnvironment extends EventDispatcher {
       }
     };
 
-    let missedFrames = 0;
+    let missedFrames = 0,
+      wasLandscape = isLandscape();
     const update = (dt) => {
+      const nowLandscape = isLandscape();
+      if(isiOS && nowLandscape != wasLandscape) {
+        wasLandscape = nowLandscape;
+        modifyScreen();
+      }
       dt *= MILLISECONDS_TO_SECONDS;
       if(dt > 0) {
         const fps = Math.max(1, Math.round(1 / dt));
@@ -545,7 +552,7 @@ export default class BrowserEnvironment extends EventDispatcher {
       this.VR.submitFrame();
     };
 
-    var modifyScreen = () => {
+    const modifyScreen = () => {
       var near = this.options.nearPlane,
         far = near + this.options.drawDistance,
         p = this.VR && this.VR.getTransforms(near, far);
@@ -561,11 +568,15 @@ export default class BrowserEnvironment extends EventDispatcher {
 
         this.mousePointer.setSize(canvasWidth, canvasHeight);
 
+        const styleWidth = canvasWidth / devicePixelRatio,
+          styleHeight = canvasHeight / devicePixelRatio;
         canvasWidth = Math.floor(canvasWidth * resolutionScale);
         canvasHeight = Math.floor(canvasHeight * resolutionScale);
 
         this.renderer.domElement.width = canvasWidth;
         this.renderer.domElement.height = canvasHeight;
+        this.renderer.domElement.style.width = styleWidth + "px";
+        this.renderer.domElement.style.height = styleHeight + "px";
         if (timer === null) {
           render();
         }
@@ -1045,7 +1056,7 @@ export default class BrowserEnvironment extends EventDispatcher {
       currentTimerObject = null,
       timer = null;
 
-    var RAF = (callback) => {
+    const RAF = (callback) => {
       currentTimerObject = this.VR.currentDevice || window;
       if (timer === null) {
         timer = currentTimerObject.requestAnimationFrame(callback);
