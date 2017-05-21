@@ -365,9 +365,9 @@ export default class BrowserEnvironment extends EventDispatcher {
             this.Mouse.inPhysicalUse = false;
           }
 
-          this.head.showPointer = this.VR.hasOrientation && this.options.showHeadPointer;
-          this.mousePointer.visible = this.VR.isPresenting;
-          this.mousePointer.showPointer = !this.hasMotionControllers;
+          this.head.showPointer = this.VR.hasOrientation && this.VR.isStereo && this.options.showHeadPointer;
+          this.mousePointer.visible = (this.VR.isPresenting || !this.VR.isStereo) && !this.hasTouch;
+          this.mousePointer.showPointer = !this.hasMotionControllers && !this.VR.isStereo;
 
           let heading = 0,
             pitch = 0,
@@ -1233,7 +1233,7 @@ export default class BrowserEnvironment extends EventDispatcher {
         this.Keyboard.codePage = this.options.language;
       }
 
-      this.addInputManager(new Touch(this.options.fullScreenElement, {
+      this.addInputManager(new Touch(this.renderer.domElement, {
         U: { axes: ["X0"], min: 0, max: 2, offset: 0 },
         V: { axes: ["Y0"], min: 0, max: 2 },
         buttons: {
