@@ -40,7 +40,7 @@ export default class Touch extends InputProcessor {
           y = t.pageY;
         this.setAxis("X" + id, x);
         this.setAxis("Y" + id, y);
-        this.setButton("FINGER" + t.identifier, stateChange);
+        this.setButton("FINGER" + id, stateChange);
 
         if(setAxis){
           const lx = this.getAxis("LX" + id),
