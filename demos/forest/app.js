@@ -1,7 +1,7 @@
 var env = new Primrose.BrowserEnvironment({
   font: "../shared_assets/fonts/helvetiker_regular.typeface.json",
   backgroundColor: 0xC9E6EE,
-  quality: Primrose.Constants.Quality.MEDIUM,
+  quality: Primrose.Constants.Quality[isMobile ? "MEDIUM" : "HIGH"],
   groundModel: "Ground.obj",
   useFog: true,
   enableShadows: true,
