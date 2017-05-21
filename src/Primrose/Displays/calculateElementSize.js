@@ -3,10 +3,8 @@ export default function calculateElementSize(display) {
     height = 0;
 
   if(!isiOS) {
-    const curLayer = display.getLayers()[0],
-      elem = display.DOMElement || curLayer && curLayer.source || document.body;
-    width = elem.clientWidth,
-    height = elem.clientHeight;
+    width = document.body.clientWidth,
+    height = document.body.clientHeight;
   }
   else if(isLandscape()) {
     width = screen.height;
