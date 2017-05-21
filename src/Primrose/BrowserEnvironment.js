@@ -349,6 +349,7 @@ export default class BrowserEnvironment extends EventDispatcher {
           if(this.gamepadMgr) {
             this.gamepadMgr.poll();
           }
+
           for (let i = 0; i < this.managers.length; ++i) {
             this.managers[i].update(dt);
           }
@@ -377,7 +378,7 @@ export default class BrowserEnvironment extends EventDispatcher {
             }
           }
 
-          if(this.hasMouse || this.hasTouch) {
+          if(this.hasMouse) {
             let mouseHeading = null;
             if (this.VR.hasOrientation) {
               mouseHeading = this.mousePointer.rotation.y;
@@ -392,6 +393,7 @@ export default class BrowserEnvironment extends EventDispatcher {
             }
             heading += mouseHeading;
           }
+
           if (this.VR.hasOrientation) {
             pitch = 0;
           }
