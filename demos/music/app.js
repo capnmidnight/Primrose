@@ -104,14 +104,15 @@ Board.prototype.select = function(i, evt) {
 };
 
 env.addEventListener("ready", function () {
-
-  var types = Primrose.Audio.Music.TYPES,
-    nTypes = types.length;
-  types.forEach(function(type, t) {
-    var board = new Board(type);
-    boards.push(board);
-    env.scene.add(board.object);
-    board.object.latLng(0, (t - (nTypes - 1) / 2) * 100 / nTypes);
+  env.audio.ready.then(function() {
+    var types = Primrose.Audio.Music.TYPES,
+      nTypes = types.length;
+    types.forEach(function(type, t) {
+      var board = new Board(type);
+      boards.push(board);
+      env.scene.add(board.object);
+      board.object.latLng(0, (t - (nTypes - 1) / 2) * 100 / nTypes);
+    });
   });
 
   Preloader.hide();

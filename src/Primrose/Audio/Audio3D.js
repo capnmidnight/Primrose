@@ -5,11 +5,57 @@ pliny.class({
 });
 
 // polyfill
-window.AudioContext =
-  window.AudioContext ||
-  window.webkitAudioContext;
+window.AudioContext = (function(AudioContext) {
+  Object.defineProperties(AudioContext.prototype, {
+    createGain: {
+      value: AudioContext.prototype.createGain || AudioContext.prototype.createGainNode
+    },
+    createDelay: {
+      value: AudioContext.prototype.createDelay|| AudioContext.prototype.createDelayNode
+    },
+    createScriptProcessor: {
+      value: AudioContext.prototype.createScriptProcessor || AudioContext.prototype.createJavaScriptNode
+    }
+  });
 
+  var testContext = new AudioContext(),
+    OscillatorNode = testContext.createOscillator().constructor,
+    BufferSourceNode = testContext.createBufferSource().constructor,
+    GainNodeGainValue = testContext.createGain().gain.constructor;
 
+  Object.defineProperties(OscillatorNode.prototype, {
+    setPeriodicWave: {
+      value: OscillatorNode.prototype.setPeriodicWave || OscillatorNode.prototype.setWaveTable
+    },
+    start: {
+      value: OscillatorNode.prototype.start || OscillatorNode.prototype.noteOn
+    },
+    stop: {
+      value: OscillatorNode.prototype.stop || OscillatorNode.prototype.noteOff
+    }
+  });
+
+  Object.defineProperties(BufferSourceNode.prototype, {
+    start: {
+      value: BufferSourceNode.prototype.start || function start() {
+        return arguments.length > 1
+          ? BufferSourceNode.prototype.noteGrainOn.apply(this, arguments)
+          : BufferSourceNode.prototype.noteOn.apply(this, arguments);
+      }
+    },
+    stop: {
+      value: BufferSourceNode.prototype.stop || BufferSourceNode.prototype.noteOff
+    }
+  });
+
+  Object.defineProperties(GainNodeGainValue.prototype, {
+    setTargetAtTime: {
+      value: GainNodeGainValue.prototype.setTargetAtTime || GainNodeGainValue.prototype.setTargetValueAtTime
+    }
+  });
+
+  return AudioContext;
+})(window.AudioContext || window.webkitAudioContext);
 
 let VECTOR = new Vector3(),
   UP = new Vector3(),
@@ -69,6 +115,7 @@ export default class Audio3D {
                     window.removeEventListener("mouseup", unlock);
                     window.removeEventListener("touchend", unlock);
                     window.removeEventListener("keyup", unlock);
+                    source.disconnect();
                     finishSetup();
                   }
                 }, 0);
