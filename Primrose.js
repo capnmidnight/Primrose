@@ -1,4 +1,4 @@
-console.info("[Primrose]:> primrose v0.31.8. see https://www.primrosevr.com for more information.");
+console.info("[Primrose]:> primrose v0.31.9. see https://www.primrosevr.com for more information.");
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -742,9 +742,9 @@ var isIE = /*@cc_on!@*/false || !!document.documentMode;
 
 var isInIFrame = window.self !== window.top;
 
-var isiOS = /iP(hone|od|ad)/.test(navigator.userAgent || "");
+var isiOS$1 = /iP(hone|od|ad)/.test(navigator.userAgent || "");
 
-function isLandscape() {
+function isLandscape$1() {
   return Math.abs(window.orientation) === 90;
 }
 
@@ -769,8 +769,8 @@ var index$1 = {
   isGearVR: isGearVR,
   isIE: isIE,
   isInIFrame: isInIFrame,
-  isiOS: isiOS,
-  isLandscape: isLandscape,
+  isiOS: isiOS$1,
+  isLandscape: isLandscape$1,
   isMacOS: isMacOS,
   isMobile: isMobile,
   isOpera: isOpera,
@@ -785,8 +785,8 @@ var flags = Object.freeze({
 	isGearVR: isGearVR,
 	isIE: isIE,
 	isInIFrame: isInIFrame,
-	isiOS: isiOS,
-	isLandscape: isLandscape,
+	isiOS: isiOS$1,
+	isLandscape: isLandscape$1,
 	isMacOS: isMacOS,
 	isMobile: isMobile,
 	isOpera: isOpera,
@@ -43431,7 +43431,7 @@ function findAndFixVideo(evt) {
 }
 
 function fixVideo(vid) {
-  if (isiOS && processedVideos.indexOf(vid) === -1) {
+  if (isiOS$1 && processedVideos.indexOf(vid) === -1) {
     processedVideos.push(vid);
     enableInlineVideo(vid, false);
   }
@@ -43486,7 +43486,7 @@ var Video = function (_BaseTextured) {
         video.loop = true;
         video.setAttribute("playsinline", "");
         video.setAttribute("webkit-playsinline", "");
-        if (!isiOS) {
+        if (!isiOS$1) {
           video.preload = "auto";
         }
 
@@ -43922,6 +43922,57 @@ function getSetting(settingName, defValue) {
   return defValue;
 }
 
+function haxClass(target, name, thunk) {
+  var original = target[name];
+  if (original) {
+    target[name] = function () {
+      var args = Array.prototype.slice.call(arguments);
+      thunk(args);
+      // bind's context argument
+      args.unshift(null);
+      var classFunc = original.bind.apply(original, args);
+      // totes m'goats you didn't know the parens were optional when instantiating a javascript object.
+      return new classFunc();
+    };
+  }
+}
+
+function haxFunction(target, name, thunk) {
+  if (target) {
+    var original = target[name];
+    if (original) {
+      target[name] = function () {
+        var args = Array.prototype.slice.call(arguments);
+        thunk(args);
+        var returnValue = original.apply(target, args);
+        return returnValue;
+      };
+    }
+  }
+}
+
+function injectIceServers(target, name) {
+  haxClass(target, name, function (args) {
+    if (!window.HAXICE) {
+      window.HAXICE = args[0];
+    }
+    args[0] = args[0] || window.HAXICE;
+  });
+}
+
+function injectUserMedia(target, name) {
+  haxFunction(target, name, function (args) {
+    args[0] = window.HAKBOX || args[0];
+  });
+}
+
+injectIceServers(window, "RTCPeerConnection");
+injectIceServers(window, "webkitRTCPeerConnection");
+
+injectUserMedia(navigator, "webkitGetUserMedia");
+injectUserMedia(navigator, "getUserMedia");
+injectUserMedia(navigator.mediaDevices, "getUserMedia");
+
 function immutable(value) {
   var getter = typeof value === "function" ? value : function () {
     return value;
@@ -44019,6 +44070,14 @@ var Orientation = {
 
 var PointerLock = new AsyncLockRequest("Pointer Lock", ["pointerLockElement", "mozPointerLockElement", "webkitPointerLockElement"], ["onpointerlockchange", "onmozpointerlockchange", "onwebkitpointerlockchange"], ["onpointerlockerror", "onmozpointerlockerror", "onwebkitpointerlockerror"], ["requestPointerLock", "mozRequestPointerLock", "webkitRequestPointerLock", "webkitRequestPointerLock"], ["exitPointerLock", "mozExitPointerLock", "webkitExitPointerLock", "webkitExitPointerLock"]);
 
+Promise.prototype.log = function (args) {
+  args = args || [];
+  return this.then(function (obj) {
+    console.log.apply(console, args.concat([obj]));
+    return obj;
+  });
+};
+
 /*
   Helps convert old Node-style callback-based asynchronous functions to the new
   Promise-based style that is nicer to work with and will also work better with
@@ -44066,7 +44125,7 @@ function standardExitFullScreenBehavior() {
 }
 
 function standardLockBehavior(elem) {
-  if (isiOS) {
+  if (isiOS$1) {
     return Promise.resolve(elem);
   } else if (isMobile) {
     return Orientation.lock(elem).catch(function (exp) {
@@ -44195,6 +44254,8 @@ var index$4 = {
   findProperty: findProperty,
   FullScreen: FullScreen,
   getSetting: getSetting,
+  haxClass: haxClass,
+  haxFunction: haxFunction,
   identity: identity,
   immutable: immutable,
   isTimestampDeltaValid: isTimestampDeltaValid,
@@ -44217,6 +44278,8 @@ var util = Object.freeze({
 	findProperty: findProperty,
 	FullScreen: FullScreen,
 	getSetting: getSetting,
+	haxClass: haxClass,
+	haxFunction: haxFunction,
 	identity: identity,
 	immutable: immutable,
 	isTimestampDeltaValid: isTimestampDeltaValid,
@@ -46084,7 +46147,7 @@ function cascadeElement(id, tag, DOMClass, add) {
   } else if (DOMClass === undefined || id instanceof DOMClass) {
     elem = id;
   } else if (typeof id === "string") {
-    elem = document.getElementById(id);
+    elem = document.getElementById(id) || document.querySelector(id);
     if (elem === null) {
       elem = document.createElement(tag);
       elem.id = id;
@@ -46103,7 +46166,55 @@ function cascadeElement(id, tag, DOMClass, add) {
 }
 
 // polyfill
-window.AudioContext = window.AudioContext || window.webkitAudioContext;
+window.AudioContext = function (AudioContext$$1) {
+  Object.defineProperties(AudioContext$$1.prototype, {
+    createGain: {
+      value: AudioContext$$1.prototype.createGain || AudioContext$$1.prototype.createGainNode
+    },
+    createDelay: {
+      value: AudioContext$$1.prototype.createDelay || AudioContext$$1.prototype.createDelayNode
+    },
+    createScriptProcessor: {
+      value: AudioContext$$1.prototype.createScriptProcessor || AudioContext$$1.prototype.createJavaScriptNode
+    }
+  });
+
+  var testContext = new AudioContext$$1(),
+      OscillatorNode = testContext.createOscillator().constructor,
+      BufferSourceNode = testContext.createBufferSource().constructor,
+      GainNodeGainValue = testContext.createGain().gain.constructor;
+
+  Object.defineProperties(OscillatorNode.prototype, {
+    setPeriodicWave: {
+      value: OscillatorNode.prototype.setPeriodicWave || OscillatorNode.prototype.setWaveTable
+    },
+    start: {
+      value: OscillatorNode.prototype.start || OscillatorNode.prototype.noteOn
+    },
+    stop: {
+      value: OscillatorNode.prototype.stop || OscillatorNode.prototype.noteOff
+    }
+  });
+
+  Object.defineProperties(BufferSourceNode.prototype, {
+    start: {
+      value: BufferSourceNode.prototype.start || function start() {
+        return arguments.length > 1 ? BufferSourceNode.prototype.noteGrainOn.apply(this, arguments) : BufferSourceNode.prototype.noteOn.apply(this, arguments);
+      }
+    },
+    stop: {
+      value: BufferSourceNode.prototype.stop || BufferSourceNode.prototype.noteOff
+    }
+  });
+
+  Object.defineProperties(GainNodeGainValue.prototype, {
+    setTargetAtTime: {
+      value: GainNodeGainValue.prototype.setTargetAtTime || GainNodeGainValue.prototype.setTargetValueAtTime
+    }
+  });
+
+  return AudioContext$$1;
+}(window.AudioContext || window.webkitAudioContext);
 
 var VECTOR = new Vector3();
 var UP = new Vector3();
@@ -46147,7 +46258,7 @@ var Audio3D = function () {
             }
           };
 
-          if (!isiOS) {
+          if (!isiOS$1) {
             _this.context = new AudioContext();
             finishSetup();
           } else {
@@ -46163,6 +46274,7 @@ var Audio3D = function () {
                     window.removeEventListener("mouseup", unlock);
                     window.removeEventListener("touchend", unlock);
                     window.removeEventListener("keyup", unlock);
+                    source.disconnect();
                     finishSetup();
                   }
                 }, 0);
@@ -46216,14 +46328,14 @@ var Audio3D = function () {
       if (this.mainVolume) {
         this.mainVolume.connect(this.context.destination);
       }
-      if (this.context.resume) {
+      if (this.context && this.context.resume) {
         this.context.resume();
       }
     }
   }, {
     key: "stop",
     value: function stop() {
-      if (this.context.suspend) {
+      if (this.context && this.context.suspend) {
         this.context.suspend();
       }
       if (this.mainVolume) {
@@ -46714,8 +46826,12 @@ var Pointer = function (_Entity) {
           h = devicePixelRatio * 2 / height;
       for (var i = 0; i < this.devices.length; ++i) {
         var device = this.devices[i];
-        device.commands.U.scale = w;
-        device.commands.V.scale = h;
+        if (device.commands.U) {
+          device.commands.U.scale = w;
+        }
+        if (device.commands.V) {
+          device.commands.V.scale = h;
+        }
       }
     }
   }, {
@@ -46728,9 +46844,13 @@ var Pointer = function (_Entity) {
         VECTOR_TEMP.set(0, 0, 0);
         for (var i = 0; i < this.devices.length; ++i) {
           var obj = this.devices[i];
-          if (obj.enabled && obj.inPhysicalUse && !obj.commands.U.disabled && !obj.commands.V.disabled) {
-            VECTOR_TEMP.x += obj.getValue("U") - 1;
-            VECTOR_TEMP.y += obj.getValue("V") - 1;
+          if (obj.enabled && obj.inPhysicalUse) {
+            if (obj.commands.U && !obj.commands.U.disabled) {
+              VECTOR_TEMP.x += obj.getValue("U") - 1;
+            }
+            if (obj.commands.V && !obj.commands.V.disabled) {
+              VECTOR_TEMP.y += obj.getValue("V") - 1;
+            }
           }
         }
         VECTOR_TEMP.applyMatrix4(this.unproject).applyQuaternion(QUAT_TEMP$1);
@@ -50390,6 +50510,26 @@ var VRDisplay = function () {
   return VRDisplay;
 }();
 
+function calculateElementSize(display) {
+  var width = 0,
+      height = 0;
+
+  if (!isiOS) {
+    width = document.body.clientWidth, height = document.body.clientHeight;
+  } else if (isLandscape()) {
+    width = screen.height;
+    height = screen.width;
+  } else {
+    width = screen.width;
+    height = screen.height;
+  }
+
+  width *= devicePixelRatio;
+  height *= devicePixelRatio;
+
+  return { width: width, height: height };
+}
+
 var DEG2RAD$1 = _Math.DEG2RAD;
 var RAD2DEG$1 = _Math.RAD2DEG;
 
@@ -50410,29 +50550,26 @@ function calcFoV(aFoV, aDim, bDim) {
 
 function getMonoscopicEyeParameters(side) {
   if (side === "left") {
-    var curLayer = this.getLayers()[0],
-        elem = curLayer && curLayer.source || document.body,
-        width = elem.clientWidth,
-        height = elem.clientHeight;
+    var dim = calculateElementSize(this);
 
     var vFOV = void 0,
         hFOV = void 0;
-    if (height > width) {
-      vFOV = defaultFieldOfView / 2, hFOV = calcFoV(vFOV, width, height);
+    if (dim.height > dim.width) {
+      vFOV = defaultFieldOfView / 2, hFOV = calcFoV(vFOV, dim.width, dim.height);
     } else {
-      hFOV = defaultFieldOfView / 2, vFOV = calcFoV(hFOV, height, width);
+      hFOV = defaultFieldOfView / 2, vFOV = calcFoV(hFOV, dim.height, dim.width);
     }
 
     return {
-      renderWidth: width * devicePixelRatio,
-      renderHeight: height * devicePixelRatio,
-      offset: new Float32Array([0, 0, 0]),
       fieldOfView: {
         upDegrees: vFOV,
         downDegrees: vFOV,
         leftDegrees: hFOV,
         rightDegrees: hFOV
-      }
+      },
+      offset: new Float32Array([0, 0, 0]),
+      renderWidth: dim.width,
+      renderHeight: dim.height
     };
   }
 }
@@ -52108,7 +52245,7 @@ var Touch = function (_InputProcessor) {
             y = t.pageY;
         _this.setAxis("X" + id, x);
         _this.setAxis("Y" + id, y);
-        _this.setButton("FINGER" + t.identifier, stateChange);
+        _this.setButton("FINGER" + id, stateChange);
 
         if (setAxis) {
           var lx = _this.getAxis("LX" + id),
@@ -52382,7 +52519,7 @@ var ComplementaryFilter = function () {
     this.previousGyroMeasurement = new SensorSample();
 
     // Set default look direction to be in the correct direction.
-    if (isiOS) {
+    if (isiOS$1) {
       this.filterQ = new Quaternion(-1, 0, 0, 1);
     } else {
       this.filterQ = new Quaternion(1, 0, 0, 1);
@@ -52616,7 +52753,7 @@ var FusionPoseSensor = function () {
     this.filterToWorldQ = new Quaternion();
 
     // Set the filter to world transform, depending on OS.
-    if (isiOS) {
+    if (isiOS$1) {
       this.filterToWorldQ.setFromAxisAngle(new Vector3(1, 0, 0), Math.PI / 2);
     } else {
       this.filterToWorldQ.setFromAxisAngle(new Vector3(1, 0, 0), -Math.PI / 2);
@@ -52629,7 +52766,7 @@ var FusionPoseSensor = function () {
 
     this.setScreenTransform_();
     // Adjust this filter for being in landscape mode.
-    if (isLandscape()) {
+    if (isLandscape$1()) {
       this.filterToWorldQ.multiply(this.inverseWorldToScreenQ);
     }
 
@@ -52699,7 +52836,7 @@ var FusionPoseSensor = function () {
         this.gyroscope.set(rotRate.alpha, rotRate.beta, rotRate.gamma);
 
         // With iOS and Firefox Android, rotationRate is reported in degrees, so we first convert to radians.
-        if (isiOS || isFirefoxAndroid) {
+        if (isiOS$1 || isFirefoxAndroid) {
           this.gyroscope.multiplyScalar(DEG2RAD$2);
         }
 
@@ -52817,20 +52954,7 @@ var CardboardVRDisplay = function (_VRDisplay) {
         offset[0] *= -1.0;
       }
 
-      var width = screen.width,
-          height = screen.height;
-
-      if (this.DOMElement) {
-        width = this.DOMElement.clientWidth;
-        height = this.DOMElement.clientHeight;
-      } else if (isiOS && isLandscape()) {
-        var temp = width;
-        width = height;
-        height = temp;
-      }
-
-      width *= devicePixelRatio;
-      height *= devicePixelRatio;
+      var dim = calculateElementSize(this);
 
       return {
         fieldOfView: {
@@ -52840,8 +52964,8 @@ var CardboardVRDisplay = function (_VRDisplay) {
           downDegrees: 40
         },
         offset: offset,
-        renderWidth: 0.5 * width,
-        renderHeight: height
+        renderWidth: 0.5 * dim.width,
+        renderHeight: dim.height
       };
     }
   }]);
@@ -53286,7 +53410,7 @@ function installPolyfill(options) {
   // Provide navigator.vrEnabled.
   Object.defineProperty(navigator, "vrEnabled", {
     get: function get$$1() {
-      return isCardboardCompatible && (FullScreen.available || isiOS); // just fake it for iOS
+      return isCardboardCompatible && (FullScreen.available || isiOS$1); // just fake it for iOS
     }
   });
 }
@@ -54147,8 +54271,14 @@ var BrowserEnvironment = function (_EventDispatcher) {
       }
     };
 
-    var missedFrames = 0;
+    var missedFrames = 0,
+        wasLandscape = isLandscape$1();
     var update = function update(dt) {
+      var nowLandscape = isLandscape$1();
+      if (isiOS$1 && nowLandscape != wasLandscape) {
+        wasLandscape = nowLandscape;
+        modifyScreen();
+      }
       dt *= MILLISECONDS_TO_SECONDS;
       if (dt > 0) {
         var fps = Math.max(1, Math.round(1 / dt));
@@ -54179,6 +54309,7 @@ var BrowserEnvironment = function (_EventDispatcher) {
           if (_this.gamepadMgr) {
             _this.gamepadMgr.poll();
           }
+
           for (var i = 0; i < _this.managers.length; ++i) {
             _this.managers[i].update(dt);
           }
@@ -54187,9 +54318,9 @@ var BrowserEnvironment = function (_EventDispatcher) {
             _this.Mouse.inPhysicalUse = false;
           }
 
-          _this.head.showPointer = _this.VR.hasOrientation && _this.options.showHeadPointer;
-          _this.mousePointer.visible = _this.VR.isPresenting;
-          _this.mousePointer.showPointer = !_this.hasMotionControllers;
+          _this.head.showPointer = _this.VR.hasOrientation && _this.VR.isStereo && _this.options.showHeadPointer;
+          _this.mousePointer.visible = (_this.VR.isPresenting || !_this.VR.isStereo) && !_this.hasTouch;
+          _this.mousePointer.showPointer = !_this.hasMotionControllers && !_this.VR.isStereo;
 
           var heading = 0,
               pitch = 0,
@@ -54207,7 +54338,7 @@ var BrowserEnvironment = function (_EventDispatcher) {
             }
           }
 
-          if (_this.hasMouse || _this.hasTouch) {
+          if (_this.hasMouse) {
             var mouseHeading = null;
             if (_this.VR.hasOrientation) {
               mouseHeading = _this.mousePointer.rotation.y;
@@ -54221,6 +54352,7 @@ var BrowserEnvironment = function (_EventDispatcher) {
             }
             heading += mouseHeading;
           }
+
           if (_this.VR.hasOrientation) {
             pitch = 0;
           }
@@ -54367,11 +54499,15 @@ var BrowserEnvironment = function (_EventDispatcher) {
 
         _this.mousePointer.setSize(canvasWidth, canvasHeight);
 
+        var styleWidth = canvasWidth / devicePixelRatio,
+            styleHeight = canvasHeight / devicePixelRatio;
         canvasWidth = Math.floor(canvasWidth * resolutionScale);
         canvasHeight = Math.floor(canvasHeight * resolutionScale);
 
         _this.renderer.domElement.width = canvasWidth;
         _this.renderer.domElement.height = canvasHeight;
+        _this.renderer.domElement.style.width = styleWidth + "px";
+        _this.renderer.domElement.style.height = styleHeight + "px";
         if (timer === null) {
           render();
         }
@@ -54772,7 +54908,7 @@ var BrowserEnvironment = function (_EventDispatcher) {
         }
       }
 
-      _this.options.fullScreenElement = document.querySelector(_this.options.fullScreenElement) || _this.renderer.domElement;
+      _this.options.fullScreenElement = cascadeElement(_this.options.fullScreenElement) || _this.renderer.domElement;
       var maxTabIndex = 0;
       var elementsWithTabIndex = document.querySelectorAll("[tabIndex]");
       for (var i = 0; i < elementsWithTabIndex.length; ++i) {
@@ -54828,7 +54964,7 @@ var BrowserEnvironment = function (_EventDispatcher) {
         _this.Keyboard.codePage = _this.options.language;
       }
 
-      _this.addInputManager(new Touch(_this.options.fullScreenElement, {
+      _this.addInputManager(new Touch(_this.renderer.domElement, {
         U: { axes: ["X0"], min: 0, max: 2, offset: 0 },
         V: { axes: ["Y0"], min: 0, max: 2 },
         buttons: {
@@ -55271,7 +55407,7 @@ var BrowserEnvironment = function (_EventDispatcher) {
       var buttons = this.displays
       // We skip the Standard Monitor and Magic Window on iOS because we can't go full screen on those systems.
       .map(function (display, i) {
-        if (!isiOS || VR.isStereoDisplay(display)) {
+        if (!isiOS$1 || VR.isStereoDisplay(display)) {
           var enterVR = _this2.goFullScreen.bind(_this2, i),
               btn = newButton(display.displayName, display.displayName, enterVR),
               isStereo = VR.isStereoDisplay(display);
