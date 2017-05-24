@@ -1,4 +1,4 @@
-# Primrose
+# Primrose [![Codacy Badge](https://api.codacy.com/project/badge/Grade/0440ecd3eb5248bebb6096b61cc2ac9c)](https://www.codacy.com/app/capnmidnight/Primrose)
 
 Primrose is an immersive environment for web browsers on desktop and mobile devices alike. Within this environment, web developers can be applications that progressively enhance to support users on a wide variety of form factors, including high-end VR headsets.
 
