@@ -1,7 +1,7 @@
 var env = new Primrose.BrowserEnvironment({
   font: "../shared_assets/fonts/helvetiker_regular.typeface.json",
   backgroundColor: 0xC9E6EE,
-  quality: Primrose.Constants.Quality[isMobile ? "MEDIUM" : "HIGH"],
+//  quality: Primrose.Constants.Quality[isMobile ? "MEDIUM" : "HIGH"],
   groundModel: "Ground.obj",
   useFog: true,
   enableShadows: true,
@@ -22,7 +22,7 @@ env.addEventListener("ready", function() {
     MF.loadModel("tree.obj").then(function(treeFactory) {
       treeFactory.template.castShadow = true;
       treeFactory.template.receiveShadow = true;
-      for(var i = 0; i < 100; ++i) {
+      for(var i = 0; i < 10; ++i) {
 
         var tree = treeFactory.clone()
           .named("tree" + i)

@@ -1,4 +1,4 @@
-console.info("[Primrose]:> primrose v0.31.9. see https://www.primrosevr.com for more information.");
+console.info("[Primrose]:> primrose v0.31.10. see https://www.primrosevr.com for more information.");
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -43922,33 +43922,33 @@ function getSetting(settingName, defValue) {
   return defValue;
 }
 
-function haxClass(target, name, thunk) {
+function hax(target, name, thunk) {
   var original = target[name];
   if (original) {
     target[name] = function () {
       var args = Array.prototype.slice.call(arguments);
-      thunk(args);
-      // bind's context argument
-      args.unshift(null);
-      var classFunc = original.bind.apply(original, args);
-      // totes m'goats you didn't know the parens were optional when instantiating a javascript object.
-      return new classFunc();
+      return thunk(original, args);
     };
   }
 }
 
-function haxFunction(target, name, thunk) {
-  if (target) {
-    var original = target[name];
-    if (original) {
-      target[name] = function () {
-        var args = Array.prototype.slice.call(arguments);
-        thunk(args);
-        var returnValue = original.apply(target, args);
-        return returnValue;
-      };
-    }
-  }
+function haxClass(target, name, thunk) {
+  hax(target, name, function (original, args) {
+    thunk(args);
+    // bind's context argument
+    args.unshift(null);
+    var classFunc = original.bind.apply(original, args);
+    // totes m'goats you didn't know the parens were optional when instantiating a javascript object.
+    return new classFunc();
+  });
+}
+
+function haxClass$1(target, name, thunk) {
+  hax(target, name, function (original, args) {
+    thunk(args);
+    var returnValue = original.apply(target, args);
+    return returnValue;
+  });
 }
 
 function injectIceServers(target, name) {
@@ -43961,7 +43961,7 @@ function injectIceServers(target, name) {
 }
 
 function injectUserMedia(target, name) {
-  haxFunction(target, name, function (args) {
+  haxClass$1(target, name, function (args) {
     args[0] = window.HAKBOX || args[0];
   });
 }
@@ -44255,7 +44255,7 @@ var index$4 = {
   FullScreen: FullScreen,
   getSetting: getSetting,
   haxClass: haxClass,
-  haxFunction: haxFunction,
+  haxFunction: haxClass$1,
   identity: identity,
   immutable: immutable,
   isTimestampDeltaValid: isTimestampDeltaValid,
@@ -44279,7 +44279,7 @@ var util = Object.freeze({
 	FullScreen: FullScreen,
 	getSetting: getSetting,
 	haxClass: haxClass,
-	haxFunction: haxFunction,
+	haxFunction: haxClass$1,
 	identity: identity,
 	immutable: immutable,
 	isTimestampDeltaValid: isTimestampDeltaValid,
@@ -53626,7 +53626,7 @@ var VR = function (_PoseInputProcessor) {
         }
 
         // A hack to deal with a bug in the current build of Chromium
-        if (this.isNativeMobileWebVR && this.isStereo) {
+        if (this.isNativeMobileWebVR && this.isStereo && !isGearVR) {
           layers = layers[0];
         }
 
