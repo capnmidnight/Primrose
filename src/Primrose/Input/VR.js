@@ -21,6 +21,7 @@ import isChrome from "../../flags/isChrome";
 import isFirefox from "../../flags/isFirefox";
 import isiOS from "../../flags/isiOS";
 import isMobile from "../../flags/isMobile";
+import isGearVR from "../../flags/isGearVR";
 import PointerLock from "../../util/PointerLock";
 import Orientation from "../../util/Orientation";
 import standardFullScreenBehavior from "../../util/standardFullScreenBehavior";
@@ -103,7 +104,7 @@ export default class VR extends PoseInputProcessor {
       }
 
       // A hack to deal with a bug in the current build of Chromium
-      if (this.isNativeMobileWebVR && this.isStereo) {
+      if (this.isNativeMobileWebVR && this.isStereo && !isGearVR) {
         layers = layers[0];
       }
 
