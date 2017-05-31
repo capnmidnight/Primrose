@@ -43,14 +43,13 @@ var gulp = require("gulp"),
       advertise: true,
       extractDocumentation: true,
       format: fmt
-    }
+    };
   },
 
   jsUMD = marigold.js(jsOptions("umd")),
   jsESModules = marigold.js(jsOptions("es")),
 
   tidyFiles = [
-    "Primrose.doc.js",
     "Primrose.modules.doc.js",
     "Primrose.modules.min.js",
     "Primrose.modules.js.map"
@@ -74,21 +73,16 @@ var gulp = require("gulp"),
     url: "Primrose/demos/empty/"
   }),
 
-  tidy = marigold.clean(tidyFiles, ["copy", "move"]);
+  copyQuickstart = marigold.move(["Primrose.min.js"], "quickstart"),
 
-
-gulp.task("move", () =>
-  gulp.src(["Primrose.doc.js"])
-    .pipe(gulp.dest("doc")));
-
-gulp.task("copy", () =>
-  gulp.src(["Primrose.min.js"])
-    .pipe(gulp.dest("quickstart")));
+  tidy = marigold.clean(tidyFiles, [copyQuickstart]);
 
 // simplify some of the tasks to improve performance.
 delete jsESModules.default;
 html.default = justDemoHTML.default;
 css.default = justDemoCSS.default;
+
+gulp.task("serve", devServer);
 
 marigold.taskify([
   html,
@@ -99,7 +93,7 @@ marigold.taskify([
   jsESModules
 ], {
   default: devServer,
-  release: function() {
+  release() {
     gulp.start(tidy);
   }
 });
