@@ -11,7 +11,9 @@ var gulp = require("gulp"),
   },
 
   pugFiles = inplace("pug"),
+  justDemoPugFiles = ["demos/**/*.pug"],
   stylusFiles = inplace("styl"),
+  justDemoStylusFiles = ["demos/**/*.styl"],
   htmlFiles = inplace("html"),
   cssFiles = inplace("css"),
   jsFiles = inplace("js"),
@@ -21,7 +23,13 @@ var gulp = require("gulp"),
   html = marigold.html(pugFiles, {
     watch: ["*.md" ,"doc/**/*.md", "templates/**/*.pug"]
   }),
+  justDemoHTML = marigold.html(justDemoPugFiles, {
+    name: "primrose:just-demos"
+  }),
   css = marigold.css(stylusFiles),
+  justDemoCSS = marigold.css(justDemoStylusFiles, {
+    name: "primrose:just-demos"
+  }),
   images = marigold.images(jpgFiles.concat(pngFiles)),
 
   preloader = marigold.js({
@@ -34,7 +42,6 @@ var gulp = require("gulp"),
       name: "Primrose",
       advertise: true,
       extractDocumentation: true,
-      dependencies: ["format"],
       format: fmt
     }
   },
@@ -78,8 +85,10 @@ gulp.task("copy", () =>
   gulp.src(["Primrose.min.js"])
     .pipe(gulp.dest("quickstart")));
 
-delete jsESModules.format;
+// simplify some of the tasks to improve performance.
 delete jsESModules.default;
+html.default = justDemoHTML.default;
+css.default = justDemoCSS.default;
 
 marigold.taskify([
   html,
