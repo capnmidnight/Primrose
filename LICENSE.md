@@ -1,7 +1,7 @@
 # LICENSE
 
-<a href="https://www.github.com/NotionTheory/Primrose" target="_blank">https://www.github.com/NotionTheory/Primrose</a>
-Copyright (c) 2014 - 2016 Sean T. McBeth
+<a href="https://www.github.com/capnmidnight/Primrose" target="_blank">https://www.github.com/capnmidnight/Primrose</a>
+Copyright (c) 2014 - 2017 Sean T. McBeth
 All rights reserved.
 
 ## GNU GENERAL PUBLIC LICENSE

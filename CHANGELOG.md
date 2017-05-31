@@ -54,7 +54,7 @@ This is super exciting. I've been writing pretty much non-stop, trying to get ev
 
 ### The Future
 
-If you have ideas of your own, or are looking for an established open source project to join, <a href="mailto:sean+primrose@notiontheory.com?Subject=Contributing to Primrose">please contact us at NotionTheory</a> and let's chat! We'd like to bring on anyone of any background or experience level, so long as you're willing to learn. The last two years have been a blast and we can't wait to bring more people on board.
+If you have ideas of your own, or are looking for an established open source project to join, <a href="mailto:sean+primrose@seanmcbeth.com?Subject=Contributing to Primrose">please contact us</a> and let's chat! We'd like to bring on anyone of any background or experience level, so long as you're willing to learn. The last two years have been a blast and we can't wait to bring more people on board.
 
 Thankfully, there is still a lot of fun work left to do:
 
@@ -69,7 +69,7 @@ Thankfully, there is still a lot of fun work left to do:
 * BrowserEnvironment now defaults to using gaze cursors on mobile devices, rather than requiring apps to set that explicity, thanks to Atte Niemi (<a href="https://github.com/hurbraa" target="_blank">@hurbraa</a>).
 * Cleaned up the FAQ a bit.
 * The Preloader now has a method for shrinking the progress bar, rather than requiring user scripts manually edit the CSS. Eventually, we'll have a 3D object with an identical API to take over the progress indicator once the BrowserEnvironment is ready to execute, but still waiting on assets to load.
-* Lots and of new documentation in the <a href="https://github.com/NotionTheory/Primrose/wiki" target="_blank">GitHub Wiki</a>.
+* Lots and of new documentation in the <a href="https://github.com/capnmidnight/Primrose/wiki" target="_blank">GitHub Wiki</a>.
 * <a href="https://www.primrosevr.com/demos/shadows/">A new demo showing off shadows</a>.
 * A fix for <a href="https://www.primrosevr.com/demos/editorVR/">the VR Live Programming Environment</a> to make sure the demo script always loads.
 * The teleport feature now gets disabled if you've dragged the mouse very far, i.e. are probably just trying to rotate the view, thanks to Marko Papp (<a href="https://github.com/markopp" target="_blank">@markopp</a>).
@@ -102,7 +102,7 @@ The big highlights are:
 
 ### The Future
 
-If you have ideas of your own, or are looking for an established open source project to join, <a href="mailto:sean+primrose@notiontheory.com?Subject=Contributing to Primrose">please contact us at NotionTheory</a> and let's chat! We'd like to bring on anyone of any background or experience level, so long as you're willing to learn. The last two years have been a blast and we can't wait to bring more people on board.
+If you have ideas of your own, or are looking for an established open source project to join, <a href="mailto:sean+primrose@seanmcbeth.com?Subject=Contributing to Primrose">please contact us</a> and let's chat! We'd like to bring on anyone of any background or experience level, so long as you're willing to learn. The last two years have been a blast and we can't wait to bring more people on board.
 
 Thankfully, there is still a lot of fun code left to be written.
 * Updated Gear VR support and support for Oculus' Carmel browser are right around the corner.
@@ -674,4 +674,4 @@ It's going to be nothing but documentation for a while.
 
 ## Other
 
-If you want to know more, check the [Git commit log](https://github.com/NotionTheory/Primrose/commits/dev). I'm not going to rewrite the entire thing here.
+If you want to know more, check the [Git commit log](https://github.com/capnmidnight/Primrose/commits/master). I'm not going to rewrite the entire thing here.

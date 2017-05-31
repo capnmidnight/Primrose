@@ -7,9 +7,9 @@
   "homepage": "https://www.primrosevr.com",
   "repository": {
     "type": "git",
-    "url": "https://github.com/NotionTheory/Primrose.git"
+    "url": "https://github.com/capnmidnight/Primrose.git"
   },
-  "bugs": "https://github.com/NotionTheory/Primrose/Issues",
+  "bugs": "https://github.com/capnmidnight/Primrose/Issues",
   "files": [
     "CHANGELOG.md",
     "CONTRIBUTING.md",
