@@ -1,4 +1,4 @@
-const env = new Primrose.BrowserEnvironment({
+var env = new Primrose.BrowserEnvironment({
   backgroundColor: 0x000000,
   groundTexture: "../shared_assets/images/deck.png",
   useFog: true,
