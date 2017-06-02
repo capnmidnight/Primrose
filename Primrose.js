@@ -1,728 +1,4 @@
-console.info("[Primrose]:> primrose v0.31.10. see https://www.primrosevr.com for more information.");
-/**
- * Copyright (c) 2014, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * https://raw.github.com/facebook/regenerator/master/LICENSE file. An
- * additional grant of patent rights can be found in the PATENTS file in
- * the same directory.
- */
-
-!(function(global) {
-  "use strict";
-
-  var Op = Object.prototype;
-  var hasOwn = Op.hasOwnProperty;
-  var undefined; // More compressible than void 0.
-  var $Symbol = typeof Symbol === "function" ? Symbol : {};
-  var iteratorSymbol = $Symbol.iterator || "@@iterator";
-  var toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
-
-  var inModule = typeof module === "object";
-  var runtime = global.regeneratorRuntime;
-  if (runtime) {
-    if (inModule) {
-      // If regeneratorRuntime is defined globally and we're in a module,
-      // make the exports object identical to regeneratorRuntime.
-      module.exports = runtime;
-    }
-    // Don't bother evaluating the rest of this file if the runtime was
-    // already defined globally.
-    return;
-  }
-
-  // Define the runtime globally (as expected by generated code) as either
-  // module.exports (if we're in a module) or a new, empty object.
-  runtime = global.regeneratorRuntime = inModule ? module.exports : {};
-
-  function wrap(innerFn, outerFn, self, tryLocsList) {
-    // If outerFn provided and outerFn.prototype is a Generator, then outerFn.prototype instanceof Generator.
-    var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator;
-    var generator = Object.create(protoGenerator.prototype);
-    var context = new Context(tryLocsList || []);
-
-    // The ._invoke method unifies the implementations of the .next,
-    // .throw, and .return methods.
-    generator._invoke = makeInvokeMethod(innerFn, self, context);
-
-    return generator;
-  }
-  runtime.wrap = wrap;
-
-  // Try/catch helper to minimize deoptimizations. Returns a completion
-  // record like context.tryEntries[i].completion. This interface could
-  // have been (and was previously) designed to take a closure to be
-  // invoked without arguments, but in all the cases we care about we
-  // already have an existing method we want to call, so there's no need
-  // to create a new function object. We can even get away with assuming
-  // the method takes exactly one argument, since that happens to be true
-  // in every case, so we don't have to touch the arguments object. The
-  // only additional allocation required is the completion record, which
-  // has a stable shape and so hopefully should be cheap to allocate.
-  function tryCatch(fn, obj, arg) {
-    try {
-      return { type: "normal", arg: fn.call(obj, arg) };
-    } catch (err) {
-      return { type: "throw", arg: err };
-    }
-  }
-
-  var GenStateSuspendedStart = "suspendedStart";
-  var GenStateSuspendedYield = "suspendedYield";
-  var GenStateExecuting = "executing";
-  var GenStateCompleted = "completed";
-
-  // Returning this object from the innerFn has the same effect as
-  // breaking out of the dispatch switch statement.
-  var ContinueSentinel = {};
-
-  // Dummy constructor functions that we use as the .constructor and
-  // .constructor.prototype properties for functions that return Generator
-  // objects. For full spec compliance, you may wish to configure your
-  // minifier not to mangle the names of these two functions.
-  function Generator() {}
-  function GeneratorFunction() {}
-  function GeneratorFunctionPrototype() {}
-
-  // This is a polyfill for %IteratorPrototype% for environments that
-  // don't natively support it.
-  var IteratorPrototype = {};
-  IteratorPrototype[iteratorSymbol] = function () {
-    return this;
-  };
-
-  var getProto = Object.getPrototypeOf;
-  var NativeIteratorPrototype = getProto && getProto(getProto(values([])));
-  if (NativeIteratorPrototype &&
-      NativeIteratorPrototype !== Op &&
-      hasOwn.call(NativeIteratorPrototype, iteratorSymbol)) {
-    // This environment has a native %IteratorPrototype%; use it instead
-    // of the polyfill.
-    IteratorPrototype = NativeIteratorPrototype;
-  }
-
-  var Gp = GeneratorFunctionPrototype.prototype =
-    Generator.prototype = Object.create(IteratorPrototype);
-  GeneratorFunction.prototype = Gp.constructor = GeneratorFunctionPrototype;
-  GeneratorFunctionPrototype.constructor = GeneratorFunction;
-  GeneratorFunctionPrototype[toStringTagSymbol] =
-    GeneratorFunction.displayName = "GeneratorFunction";
-
-  // Helper for defining the .next, .throw, and .return methods of the
-  // Iterator interface in terms of a single ._invoke method.
-  function defineIteratorMethods(prototype) {
-    ["next", "throw", "return"].forEach(function(method) {
-      prototype[method] = function(arg) {
-        return this._invoke(method, arg);
-      };
-    });
-  }
-
-  runtime.isGeneratorFunction = function(genFun) {
-    var ctor = typeof genFun === "function" && genFun.constructor;
-    return ctor
-      ? ctor === GeneratorFunction ||
-        // For the native GeneratorFunction constructor, the best we can
-        // do is to check its .name property.
-        (ctor.displayName || ctor.name) === "GeneratorFunction"
-      : false;
-  };
-
-  runtime.mark = function(genFun) {
-    if (Object.setPrototypeOf) {
-      Object.setPrototypeOf(genFun, GeneratorFunctionPrototype);
-    } else {
-      genFun.__proto__ = GeneratorFunctionPrototype;
-      if (!(toStringTagSymbol in genFun)) {
-        genFun[toStringTagSymbol] = "GeneratorFunction";
-      }
-    }
-    genFun.prototype = Object.create(Gp);
-    return genFun;
-  };
-
-  // Within the body of any async function, `await x` is transformed to
-  // `yield regeneratorRuntime.awrap(x)`, so that the runtime can test
-  // `hasOwn.call(value, "__await")` to determine if the yielded value is
-  // meant to be awaited.
-  runtime.awrap = function(arg) {
-    return { __await: arg };
-  };
-
-  function AsyncIterator(generator) {
-    function invoke(method, arg, resolve, reject) {
-      var record = tryCatch(generator[method], generator, arg);
-      if (record.type === "throw") {
-        reject(record.arg);
-      } else {
-        var result = record.arg;
-        var value = result.value;
-        if (value &&
-            typeof value === "object" &&
-            hasOwn.call(value, "__await")) {
-          return Promise.resolve(value.__await).then(function(value) {
-            invoke("next", value, resolve, reject);
-          }, function(err) {
-            invoke("throw", err, resolve, reject);
-          });
-        }
-
-        return Promise.resolve(value).then(function(unwrapped) {
-          // When a yielded Promise is resolved, its final value becomes
-          // the .value of the Promise<{value,done}> result for the
-          // current iteration. If the Promise is rejected, however, the
-          // result for this iteration will be rejected with the same
-          // reason. Note that rejections of yielded Promises are not
-          // thrown back into the generator function, as is the case
-          // when an awaited Promise is rejected. This difference in
-          // behavior between yield and await is important, because it
-          // allows the consumer to decide what to do with the yielded
-          // rejection (swallow it and continue, manually .throw it back
-          // into the generator, abandon iteration, whatever). With
-          // await, by contrast, there is no opportunity to examine the
-          // rejection reason outside the generator function, so the
-          // only option is to throw it from the await expression, and
-          // let the generator function handle the exception.
-          result.value = unwrapped;
-          resolve(result);
-        }, reject);
-      }
-    }
-
-    if (typeof process === "object" && process.domain) {
-      invoke = process.domain.bind(invoke);
-    }
-
-    var previousPromise;
-
-    function enqueue(method, arg) {
-      function callInvokeWithMethodAndArg() {
-        return new Promise(function(resolve, reject) {
-          invoke(method, arg, resolve, reject);
-        });
-      }
-
-      return previousPromise =
-        // If enqueue has been called before, then we want to wait until
-        // all previous Promises have been resolved before calling invoke,
-        // so that results are always delivered in the correct order. If
-        // enqueue has not been called before, then it is important to
-        // call invoke immediately, without waiting on a callback to fire,
-        // so that the async generator function has the opportunity to do
-        // any necessary setup in a predictable way. This predictability
-        // is why the Promise constructor synchronously invokes its
-        // executor callback, and why async functions synchronously
-        // execute code before the first await. Since we implement simple
-        // async functions in terms of async generators, it is especially
-        // important to get this right, even though it requires care.
-        previousPromise ? previousPromise.then(
-          callInvokeWithMethodAndArg,
-          // Avoid propagating failures to Promises returned by later
-          // invocations of the iterator.
-          callInvokeWithMethodAndArg
-        ) : callInvokeWithMethodAndArg();
-    }
-
-    // Define the unified helper method that is used to implement .next,
-    // .throw, and .return (see defineIteratorMethods).
-    this._invoke = enqueue;
-  }
-
-  defineIteratorMethods(AsyncIterator.prototype);
-  runtime.AsyncIterator = AsyncIterator;
-
-  // Note that simple async functions are implemented on top of
-  // AsyncIterator objects; they just return a Promise for the value of
-  // the final result produced by the iterator.
-  runtime.async = function(innerFn, outerFn, self, tryLocsList) {
-    var iter = new AsyncIterator(
-      wrap(innerFn, outerFn, self, tryLocsList)
-    );
-
-    return runtime.isGeneratorFunction(outerFn)
-      ? iter // If outerFn is a generator, return the full iterator.
-      : iter.next().then(function(result) {
-          return result.done ? result.value : iter.next();
-        });
-  };
-
-  function makeInvokeMethod(innerFn, self, context) {
-    var state = GenStateSuspendedStart;
-
-    return function invoke(method, arg) {
-      if (state === GenStateExecuting) {
-        throw new Error("Generator is already running");
-      }
-
-      if (state === GenStateCompleted) {
-        if (method === "throw") {
-          throw arg;
-        }
-
-        // Be forgiving, per 25.3.3.3.3 of the spec:
-        // https://people.mozilla.org/~jorendorff/es6-draft.html#sec-generatorresume
-        return doneResult();
-      }
-
-      context.method = method;
-      context.arg = arg;
-
-      while (true) {
-        var delegate = context.delegate;
-        if (delegate) {
-          var delegateResult = maybeInvokeDelegate(delegate, context);
-          if (delegateResult) {
-            if (delegateResult === ContinueSentinel) continue;
-            return delegateResult;
-          }
-        }
-
-        if (context.method === "next") {
-          // Setting context._sent for legacy support of Babel's
-          // function.sent implementation.
-          context.sent = context._sent = context.arg;
-
-        } else if (context.method === "throw") {
-          if (state === GenStateSuspendedStart) {
-            state = GenStateCompleted;
-            throw context.arg;
-          }
-
-          context.dispatchException(context.arg);
-
-        } else if (context.method === "return") {
-          context.abrupt("return", context.arg);
-        }
-
-        state = GenStateExecuting;
-
-        var record = tryCatch(innerFn, self, context);
-        if (record.type === "normal") {
-          // If an exception is thrown from innerFn, we leave state ===
-          // GenStateExecuting and loop back for another invocation.
-          state = context.done
-            ? GenStateCompleted
-            : GenStateSuspendedYield;
-
-          if (record.arg === ContinueSentinel) {
-            continue;
-          }
-
-          return {
-            value: record.arg,
-            done: context.done
-          };
-
-        } else if (record.type === "throw") {
-          state = GenStateCompleted;
-          // Dispatch the exception by looping back around to the
-          // context.dispatchException(context.arg) call above.
-          context.method = "throw";
-          context.arg = record.arg;
-        }
-      }
-    };
-  }
-
-  // Call delegate.iterator[context.method](context.arg) and handle the
-  // result, either by returning a { value, done } result from the
-  // delegate iterator, or by modifying context.method and context.arg,
-  // setting context.delegate to null, and returning the ContinueSentinel.
-  function maybeInvokeDelegate(delegate, context) {
-    var method = delegate.iterator[context.method];
-    if (method === undefined) {
-      // A .throw or .return when the delegate iterator has no .throw
-      // method always terminates the yield* loop.
-      context.delegate = null;
-
-      if (context.method === "throw") {
-        if (delegate.iterator.return) {
-          // If the delegate iterator has a return method, give it a
-          // chance to clean up.
-          context.method = "return";
-          context.arg = undefined;
-          maybeInvokeDelegate(delegate, context);
-
-          if (context.method === "throw") {
-            // If maybeInvokeDelegate(context) changed context.method from
-            // "return" to "throw", let that override the TypeError below.
-            return ContinueSentinel;
-          }
-        }
-
-        context.method = "throw";
-        context.arg = new TypeError(
-          "The iterator does not provide a 'throw' method");
-      }
-
-      return ContinueSentinel;
-    }
-
-    var record = tryCatch(method, delegate.iterator, context.arg);
-
-    if (record.type === "throw") {
-      context.method = "throw";
-      context.arg = record.arg;
-      context.delegate = null;
-      return ContinueSentinel;
-    }
-
-    var info = record.arg;
-
-    if (! info) {
-      context.method = "throw";
-      context.arg = new TypeError("iterator result is not an object");
-      context.delegate = null;
-      return ContinueSentinel;
-    }
-
-    if (info.done) {
-      // Assign the result of the finished delegate to the temporary
-      // variable specified by delegate.resultName (see delegateYield).
-      context[delegate.resultName] = info.value;
-
-      // Resume execution at the desired location (see delegateYield).
-      context.next = delegate.nextLoc;
-
-      // If context.method was "throw" but the delegate handled the
-      // exception, let the outer generator proceed normally. If
-      // context.method was "next", forget context.arg since it has been
-      // "consumed" by the delegate iterator. If context.method was
-      // "return", allow the original .return call to continue in the
-      // outer generator.
-      if (context.method !== "return") {
-        context.method = "next";
-        context.arg = undefined;
-      }
-
-    } else {
-      // Re-yield the result returned by the delegate method.
-      return info;
-    }
-
-    // The delegate iterator is finished, so forget it and continue with
-    // the outer generator.
-    context.delegate = null;
-    return ContinueSentinel;
-  }
-
-  // Define Generator.prototype.{next,throw,return} in terms of the
-  // unified ._invoke helper method.
-  defineIteratorMethods(Gp);
-
-  Gp[toStringTagSymbol] = "Generator";
-
-  Gp.toString = function() {
-    return "[object Generator]";
-  };
-
-  function pushTryEntry(locs) {
-    var entry = { tryLoc: locs[0] };
-
-    if (1 in locs) {
-      entry.catchLoc = locs[1];
-    }
-
-    if (2 in locs) {
-      entry.finallyLoc = locs[2];
-      entry.afterLoc = locs[3];
-    }
-
-    this.tryEntries.push(entry);
-  }
-
-  function resetTryEntry(entry) {
-    var record = entry.completion || {};
-    record.type = "normal";
-    delete record.arg;
-    entry.completion = record;
-  }
-
-  function Context(tryLocsList) {
-    // The root entry object (effectively a try statement without a catch
-    // or a finally block) gives us a place to store values thrown from
-    // locations where there is no enclosing try statement.
-    this.tryEntries = [{ tryLoc: "root" }];
-    tryLocsList.forEach(pushTryEntry, this);
-    this.reset(true);
-  }
-
-  runtime.keys = function(object) {
-    var keys = [];
-    for (var key in object) {
-      keys.push(key);
-    }
-    keys.reverse();
-
-    // Rather than returning an object with a next method, we keep
-    // things simple and return the next function itself.
-    return function next() {
-      while (keys.length) {
-        var key = keys.pop();
-        if (key in object) {
-          next.value = key;
-          next.done = false;
-          return next;
-        }
-      }
-
-      // To avoid creating an additional object, we just hang the .value
-      // and .done properties off the next function object itself. This
-      // also ensures that the minifier will not anonymize the function.
-      next.done = true;
-      return next;
-    };
-  };
-
-  function values(iterable) {
-    if (iterable) {
-      var iteratorMethod = iterable[iteratorSymbol];
-      if (iteratorMethod) {
-        return iteratorMethod.call(iterable);
-      }
-
-      if (typeof iterable.next === "function") {
-        return iterable;
-      }
-
-      if (!isNaN(iterable.length)) {
-        var i = -1, next = function next() {
-          while (++i < iterable.length) {
-            if (hasOwn.call(iterable, i)) {
-              next.value = iterable[i];
-              next.done = false;
-              return next;
-            }
-          }
-
-          next.value = undefined;
-          next.done = true;
-
-          return next;
-        };
-
-        return next.next = next;
-      }
-    }
-
-    // Return an iterator with no values.
-    return { next: doneResult };
-  }
-  runtime.values = values;
-
-  function doneResult() {
-    return { value: undefined, done: true };
-  }
-
-  Context.prototype = {
-    constructor: Context,
-
-    reset: function(skipTempReset) {
-      this.prev = 0;
-      this.next = 0;
-      // Resetting context._sent for legacy support of Babel's
-      // function.sent implementation.
-      this.sent = this._sent = undefined;
-      this.done = false;
-      this.delegate = null;
-
-      this.method = "next";
-      this.arg = undefined;
-
-      this.tryEntries.forEach(resetTryEntry);
-
-      if (!skipTempReset) {
-        for (var name in this) {
-          // Not sure about the optimal order of these conditions:
-          if (name.charAt(0) === "t" &&
-              hasOwn.call(this, name) &&
-              !isNaN(+name.slice(1))) {
-            this[name] = undefined;
-          }
-        }
-      }
-    },
-
-    stop: function() {
-      this.done = true;
-
-      var rootEntry = this.tryEntries[0];
-      var rootRecord = rootEntry.completion;
-      if (rootRecord.type === "throw") {
-        throw rootRecord.arg;
-      }
-
-      return this.rval;
-    },
-
-    dispatchException: function(exception) {
-      if (this.done) {
-        throw exception;
-      }
-
-      var context = this;
-      function handle(loc, caught) {
-        record.type = "throw";
-        record.arg = exception;
-        context.next = loc;
-
-        if (caught) {
-          // If the dispatched exception was caught by a catch block,
-          // then let that catch block handle the exception normally.
-          context.method = "next";
-          context.arg = undefined;
-        }
-
-        return !! caught;
-      }
-
-      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
-        var entry = this.tryEntries[i];
-        var record = entry.completion;
-
-        if (entry.tryLoc === "root") {
-          // Exception thrown outside of any try block that could handle
-          // it, so set the completion value of the entire function to
-          // throw the exception.
-          return handle("end");
-        }
-
-        if (entry.tryLoc <= this.prev) {
-          var hasCatch = hasOwn.call(entry, "catchLoc");
-          var hasFinally = hasOwn.call(entry, "finallyLoc");
-
-          if (hasCatch && hasFinally) {
-            if (this.prev < entry.catchLoc) {
-              return handle(entry.catchLoc, true);
-            } else if (this.prev < entry.finallyLoc) {
-              return handle(entry.finallyLoc);
-            }
-
-          } else if (hasCatch) {
-            if (this.prev < entry.catchLoc) {
-              return handle(entry.catchLoc, true);
-            }
-
-          } else if (hasFinally) {
-            if (this.prev < entry.finallyLoc) {
-              return handle(entry.finallyLoc);
-            }
-
-          } else {
-            throw new Error("try statement without catch or finally");
-          }
-        }
-      }
-    },
-
-    abrupt: function(type, arg) {
-      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
-        var entry = this.tryEntries[i];
-        if (entry.tryLoc <= this.prev &&
-            hasOwn.call(entry, "finallyLoc") &&
-            this.prev < entry.finallyLoc) {
-          var finallyEntry = entry;
-          break;
-        }
-      }
-
-      if (finallyEntry &&
-          (type === "break" ||
-           type === "continue") &&
-          finallyEntry.tryLoc <= arg &&
-          arg <= finallyEntry.finallyLoc) {
-        // Ignore the finally entry if control is not jumping to a
-        // location outside the try/catch block.
-        finallyEntry = null;
-      }
-
-      var record = finallyEntry ? finallyEntry.completion : {};
-      record.type = type;
-      record.arg = arg;
-
-      if (finallyEntry) {
-        this.method = "next";
-        this.next = finallyEntry.finallyLoc;
-        return ContinueSentinel;
-      }
-
-      return this.complete(record);
-    },
-
-    complete: function(record, afterLoc) {
-      if (record.type === "throw") {
-        throw record.arg;
-      }
-
-      if (record.type === "break" ||
-          record.type === "continue") {
-        this.next = record.arg;
-      } else if (record.type === "return") {
-        this.rval = this.arg = record.arg;
-        this.method = "return";
-        this.next = "end";
-      } else if (record.type === "normal" && afterLoc) {
-        this.next = afterLoc;
-      }
-
-      return ContinueSentinel;
-    },
-
-    finish: function(finallyLoc) {
-      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
-        var entry = this.tryEntries[i];
-        if (entry.finallyLoc === finallyLoc) {
-          this.complete(entry.completion, entry.afterLoc);
-          resetTryEntry(entry);
-          return ContinueSentinel;
-        }
-      }
-    },
-
-    "catch": function(tryLoc) {
-      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
-        var entry = this.tryEntries[i];
-        if (entry.tryLoc === tryLoc) {
-          var record = entry.completion;
-          if (record.type === "throw") {
-            var thrown = record.arg;
-            resetTryEntry(entry);
-          }
-          return thrown;
-        }
-      }
-
-      // The context.catch method must only be called with a location
-      // argument that corresponds to a known catch block.
-      throw new Error("illegal catch attempt");
-    },
-
-    delegateYield: function(iterable, resultName, nextLoc) {
-      this.delegate = {
-        iterator: values(iterable),
-        resultName: resultName,
-        nextLoc: nextLoc
-      };
-
-      if (this.method === "next") {
-        // Deliberately forget the last sent value so that we don't
-        // accidentally pass it on to the delegate.
-        this.arg = undefined;
-      }
-
-      return ContinueSentinel;
-    }
-  };
-})(
-  // Among the various tricks for obtaining a reference to the global
-  // object, this seems to be the most reliable technique that does not
-  // use indirect eval (which violates Content Security Policy).
-  typeof global === "object" ? global :
-  typeof window === "object" ? window :
-  typeof self === "object" ? self : this
-);
-
+console.info("[Primrose]:> primrose v0.31.11. see https://www.primrosevr.com for more information.");
 
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
@@ -738,9 +14,9 @@ var isFirefox = typeof window.InstallTrigger !== "undefined";
 
 var isGearVR = navigator.userAgent.indexOf("Mobile VR") > -1;
 
-var isIE = /*@cc_on!@*/false || !!document.documentMode;
+var isIE = /*@cc_on!@*/ false || !!document.documentMode;
 
-var isInIFrame = window.self !== window.top;
+var isInIFrame = (window.self !== window.top);
 
 var isiOS$1 = /iP(hone|od|ad)/.test(navigator.userAgent || "");
 
@@ -750,33 +26,36 @@ function isLandscape$1() {
 
 var isMacOS = /Macintosh/.test(navigator.userAgent || "");
 
-function testUserAgent(a) {
-  return (/(android|bb\d+|meego).+|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od|ad)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(a) || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substring(0, 4))
-  );
+function testUserAgent (a) {
+  return /(android|bb\d+|meego).+|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od|ad)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(
+      a) ||
+    /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(
+      a.substring(0, 4));
 }
 
 var isMobile = testUserAgent(navigator.userAgent || navigator.vendor || window.opera);
 
-var isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf("Constructor") > 0;
+var isSafari = Object.prototype.toString.call(window.HTMLElement)
+  .indexOf("Constructor") > 0;
 
 var isWebKit = isOpera || isChrome || isSafari;
 
 var isWindows = /Windows/.test(navigator.userAgent || "");
 
 var index$1 = {
-  isChrome: isChrome,
-  isFirefox: isFirefox,
-  isGearVR: isGearVR,
-  isIE: isIE,
-  isInIFrame: isInIFrame,
+  isChrome,
+  isFirefox,
+  isGearVR,
+  isIE,
+  isInIFrame,
   isiOS: isiOS$1,
   isLandscape: isLandscape$1,
-  isMacOS: isMacOS,
-  isMobile: isMobile,
-  isOpera: isOpera,
-  isSafari: isSafari,
-  isWebKit: isWebKit,
-  isWindows: isWindows
+  isMacOS,
+  isMobile,
+  isOpera,
+  isSafari,
+  isWebKit,
+  isWindows
 };
 
 var flags = Object.freeze({
@@ -42367,18 +41646,19 @@ function hub() {
   return new Object3D();
 }
 
-var _cache = {};
+const _cache = {};
 function cache(hash, makeObject, onCacheHit) {
   if (!_cache[hash]) {
     _cache[hash] = makeObject();
-  } else if (onCacheHit) {
+  }
+  else if(onCacheHit) {
     onCacheHit(_cache[hash]);
   }
   return _cache[hash];
 }
 
-function material(textureDescription, options) {
-  if (options === undefined && typeof textureDescription !== "string") {
+function material(textureDescription, options){
+  if(options === undefined && typeof textureDescription !== "string") {
     options = textureDescription;
     textureDescription = "none";
   }
@@ -42393,21 +41673,22 @@ function material(textureDescription, options) {
     side: FrontSide
   }, options);
 
-  var materialDescription = "Primrose.material(" + textureDescription + ", " + options.color + ", " + options.unshaded + ", " + options.side + ", " + options.opacity + ", " + options.roughness + ", " + options.metalness + ", " + options.color + ", " + options.emissive + ", " + options.wireframe + ", " + options.useFog + ")";
+  var materialDescription = `Primrose.material(${textureDescription}, ${options.color}, ${options.unshaded}, ${options.side}, ${options.opacity}, ${options.roughness}, ${options.metalness}, ${options.color}, ${options.emissive}, ${options.wireframe}, ${options.useFog})`;
 
-  return cache(materialDescription, function () {
+  return cache(materialDescription, () => {
     var materialOptions = {
-      fog: options.useFog,
-      transparent: options.transparent || options.opacity !== undefined && options.opacity < 1,
-      opacity: options.opacity,
-      side: options.side || FrontSide
-    },
-        MaterialType = MeshStandardMaterial;
+        fog: options.useFog,
+        transparent: options.transparent || (options.opacity !== undefined && options.opacity < 1),
+        opacity: options.opacity,
+        side: options.side || FrontSide
+      },
+      MaterialType = MeshStandardMaterial;
 
     if (options.unshaded) {
       materialOptions.shading = FlatShading;
       MaterialType = MeshBasicMaterial;
-    } else {
+    }
+    else {
       materialOptions.roughness = options.roughness;
       materialOptions.metalness = options.metalness;
 
@@ -42427,240 +41708,121 @@ function material(textureDescription, options) {
 
 function loadTexture(id, url, progress) {
   var textureLoader = null;
-  if (url instanceof Array && url.length === 6) {
+  if(url instanceof Array && url.length === 6) {
     textureLoader = new CubeTextureLoader();
-  } else {
-    if (url instanceof HTMLImageElement) {
+  }
+  else {
+    if(url instanceof HTMLImageElement){
       url = url.src;
     }
 
-    if (typeof url === "string") {
+    if(typeof url === "string") {
       textureLoader = new TextureLoader();
     }
   }
 
-  if (textureLoader) {
+  if(textureLoader){
     textureLoader.setCrossOrigin("anonymous");
   }
 
-  return cache("Texture(" + id + ")", function () {
-    return new Promise(function (resolve, reject) {
-      if (textureLoader) {
+  return cache(
+    `Texture(${id})`,
+    () => new Promise((resolve, reject) => {
+      if(textureLoader){
         textureLoader.load(url, resolve, progress, reject);
-      } else {
+      }
+      else{
         resolve(new Texture(url));
       }
-    });
-  });
+    }));
 }
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
-  return typeof obj;
-} : function (obj) {
-  return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-};
-
-
-
-
-
-
-
-
-
-
-
-var classCallCheck = function (instance, Constructor) {
-  if (!(instance instanceof Constructor)) {
-    throw new TypeError("Cannot call a class as a function");
-  }
-};
-
-var createClass = function () {
-  function defineProperties(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-
-  return function (Constructor, protoProps, staticProps) {
-    if (protoProps) defineProperties(Constructor.prototype, protoProps);
-    if (staticProps) defineProperties(Constructor, staticProps);
-    return Constructor;
-  };
-}();
-
-
-
-
-
-
-
-var get = function get(object, property, receiver) {
-  if (object === null) object = Function.prototype;
-  var desc = Object.getOwnPropertyDescriptor(object, property);
-
-  if (desc === undefined) {
-    var parent = Object.getPrototypeOf(object);
-
-    if (parent === null) {
-      return undefined;
-    } else {
-      return get(parent, property, receiver);
-    }
-  } else if ("value" in desc) {
-    return desc.value;
-  } else {
-    var getter = desc.get;
-
-    if (getter === undefined) {
-      return undefined;
-    }
-
-    return getter.call(receiver);
-  }
-};
-
-var inherits = function (subClass, superClass) {
-  if (typeof superClass !== "function" && superClass !== null) {
-    throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
-  }
-
-  subClass.prototype = Object.create(superClass && superClass.prototype, {
-    constructor: {
-      value: subClass,
-      enumerable: false,
-      writable: true,
-      configurable: true
-    }
-  });
-  if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
-};
-
-
-
-
-
-
-
-
-
-
-
-var possibleConstructorReturn = function (self, call) {
-  if (!self) {
-    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-  }
-
-  return call && (typeof call === "object" || typeof call === "function") ? call : self;
-};
-
-
-
-var set = function set(object, property, value, receiver) {
-  var desc = Object.getOwnPropertyDescriptor(object, property);
-
-  if (desc === undefined) {
-    var parent = Object.getPrototypeOf(object);
-
-    if (parent !== null) {
-      set(parent, property, value, receiver);
-    }
-  } else if ("value" in desc && desc.writable) {
-    desc.value = value;
-  } else {
-    var setter = desc.set;
-
-    if (setter !== undefined) {
-      setter.call(receiver, value);
-    }
-  }
-
-  return value;
-};
-
-var seenElements = new WeakMap();
-var seenElementCount = 0;
+const seenElements = new WeakMap();
+let seenElementCount = 0;
 
 function textured(geometry, txt, options) {
-  if (!options) {
+  if(!options){
     options = {};
   }
-  if (!options.txtRepeatX) {
+  if(!options.txtRepeatX){
     options.txtRepeatX = 1;
   }
-  if (!options.txtRepeatY) {
+  if(!options.txtRepeatY){
     options.txtRepeatY = 1;
   }
-  if (!options.anisotropy) {
+  if(!options.anisotropy){
     options.anisotropy = 1;
   }
 
-  var txtType = typeof txt === "undefined" ? "undefined" : _typeof(txt),
-      txtID = null;
-  if (txtType === "object") {
-    if (txt.id) {
+  let txtType = typeof txt,
+    txtID = null;
+  if(txtType === "object") {
+    if(txt.id){
       txtID = txt.id;
-    } else {
-      if (!seenElements.has(txt)) {
+    }
+    else{
+      if(!seenElements.has(txt)) {
         seenElements.set(txt, "TextureAutoID" + seenElementCount);
         ++seenElementCount;
       }
       txtID = seenElements.get(txt);
     }
-  } else if (txtType === "string") {
+  }
+  else if(txtType === "string") {
     txtID = txt;
-  } else {
-    var err = new Error("Couldn't figure out how to make a texture out of typeof '" + txtType + "', value " + txt + ".");
-    if (options.reject) {
+  }
+  else{
+    var err = new Error(`Couldn't figure out how to make a texture out of typeof '${txtType}', value ${txt}.`);
+    if(options.reject){
       options.reject(err);
-    } else {
+    }
+    else{
       throw err;
     }
   }
 
-  var textureDescription = "Primrose.textured(" + txtID + ", " + options.txtRepeatX + ", " + options.txtRepeatY + ", " + options.anisotropy + ", " + options.scaleTextureWidth + ", " + options.scaleTextureHeight + ")";
-  var texturePromise = cache(textureDescription, function () {
-    if (typeof txt === "string" || txt instanceof Array || txt.length === 6) {
-      return loadTexture(textureDescription, txt, options.progress);
-    } else {
-      var retValue = null;
-      if (txt instanceof HTMLCanvasElement || txt instanceof HTMLVideoElement || txt instanceof HTMLImageElement) {
-        retValue = new Texture(txt);
-      } else if (txt.isTexture) {
-        retValue = txt;
-      } else {
-        Promise.reject("Texture description couldn't be converted to a THREE.Texture object");
+  const textureDescription = `Primrose.textured(${txtID}, ${options.txtRepeatX}, ${options.txtRepeatY}, ${options.anisotropy}, ${options.scaleTextureWidth}, ${options.scaleTextureHeight})`;
+  const texturePromise = cache(textureDescription, () => {
+      if (typeof txt === "string" || (txt instanceof Array || txt.length === 6)) {
+        return loadTexture(textureDescription, txt, options.progress);
       }
+      else {
+        let retValue = null;
+        if (txt instanceof HTMLCanvasElement || txt instanceof HTMLVideoElement || txt instanceof HTMLImageElement) {
+          retValue = new Texture(txt);
+        }
+        else if(txt.isTexture) {
+          retValue = txt;
+        }
+        else {
+          Promise.reject("Texture description couldn't be converted to a THREE.Texture object");
+        }
 
-      return Promise.resolve(retValue);
-    }
-  });
+        return Promise.resolve(retValue);
+      }
+    });
 
   var mat = material(textureDescription, options),
-      obj = null;
+    obj = null;
   if (geometry.type.indexOf("Geometry") > -1) {
     obj = new Mesh(geometry, mat);
-  } else if (geometry.isMesh) {
+  }
+  else if (geometry.isMesh) {
     obj = geometry;
     obj.material = mat;
     geometry = obj.geometry;
   }
 
-  if (options.shadow) {
+  if(options.shadow){
     obj.receiveShadow = true;
     obj.castShadow = true;
   }
 
-  if (options.scaleTextureWidth || options.scaleTextureHeight) {
+  if ((options.scaleTextureWidth || options.scaleTextureHeight)) {
     if (geometry.attributes && geometry.attributes.uv && geometry.attributes.uv.array) {
       var uv = geometry.attributes.uv,
-          arr = uv.array,
-          i;
+        arr = uv.array,
+        i;
       if (options.scaleTextureWidth) {
         for (i = 0; i < arr.length; i += uv.itemSize) {
           arr[i] *= options.scaleTextureWidth;
@@ -42671,12 +41833,13 @@ function textured(geometry, txt, options) {
           arr[i] = 1 - (1 - arr[i]) * options.scaleTextureHeight;
         }
       }
-    } else {
+    }
+    else {
       console.trace(geometry, options);
     }
   }
 
-  options.promise = texturePromise.then(function (texture) {
+  options.promise = texturePromise.then((texture) => {
     if (options.txtRepeatX * options.txtRepeatY > 1) {
       texture.wrapS = texture.wrapT = RepeatWrapping;
       texture.repeat.set(options.txtRepeatX, options.txtRepeatY);
@@ -42684,9 +41847,10 @@ function textured(geometry, txt, options) {
 
     texture.anisotropy = options.anisotropy;
 
-    if (texture.isCubeTexture) {
+    if(texture.isCubeTexture){
       mat.envMap = texture;
-    } else if (texture.isTexture) {
+    }
+    else if(texture.isTexture){
       mat.map = texture;
     }
 
@@ -42703,21 +41867,22 @@ function colored(geometry, color, options) {
   options.color = color;
 
   var mat = material("", options),
-      obj = null;
+    obj = null;
 
   if (geometry.type.indexOf("Geometry") > -1) {
     obj = new Mesh(geometry, mat);
-  } else if (geometry.isObject3D) {
+  }
+  else if (geometry.isObject3D) {
     obj = geometry;
     obj.material = mat;
   }
 
-  if (options.shadow) {
+  if(options.shadow){
     obj.receiveShadow = true;
     obj.castShadow = true;
   }
 
-  if (options.resolve) {
+  if(options.resolve){
     options.resolve();
   }
   return obj;
@@ -42730,9 +41895,9 @@ function box(width, height, length, t, u, v) {
   if (length === undefined) {
     length = width;
   }
-  return cache("BoxBufferGeometry(" + width + ", " + height + ", " + length + ", " + t + ", " + u + ", " + v + ")", function () {
-    return new BoxBufferGeometry(width, height, length, t, u, v);
-  });
+  return cache(
+    `BoxBufferGeometry(${width}, ${height}, ${length}, ${t}, ${u}, ${v})`,
+    () => new BoxBufferGeometry(width, height, length, t, u, v));
 }
 
 function brick(txt, width, height, length, options) {
@@ -42746,13 +41911,16 @@ function brick(txt, width, height, length, options) {
     transparent: true,
     opacity: 1
   }, options);
-  var m = typeof txt === "number" ? colored : textured,
-      obj = m(box(width, height, length), txt, options);
+  const m = (typeof txt === "number") ? colored : textured,
+    obj = m(box(width, height, length), txt, options);
   return obj;
 }
 
 function axis(length, width) {
-  return hub().add(brick(0xff0000, length, width, width)).add(brick(0x00ff00, width, length, width)).add(brick(0x0000ff, width, width, length));
+  return hub()
+    .add(brick(0xff0000, length, width, width))
+    .add(brick(0x00ff00, width, length, width))
+    .add(brick(0x0000ff, width, width, length));
 }
 
 var index$3 = typeof Symbol === 'undefined' ? function (description) {
@@ -43110,57 +42278,47 @@ function enableInlineVideo(video, hasAudio, onlyWhitelisted) {
 
 enableInlineVideo.isWhitelisted = isWhitelisted;
 
-var Entity = function (_Object3D) {
-  inherits(Entity, _Object3D);
+class Entity extends Object3D {
 
-  function Entity(name, options) {
-    classCallCheck(this, Entity);
-
-    var _this = possibleConstructorReturn(this, (Entity.__proto__ || Object.getPrototypeOf(Entity)).call(this));
-
-    _this.isEntity = true;
-    _this.name = name;
-    _this.options = options || {};
-    _this.ready = _this._ready.then(function () {
-      return _this;
-    });
-    _this.disabled = false;
-    return _this;
+  constructor(name, options) {
+    super();
+    this.isEntity = true;
+    this.name = name;
+    this.options = options || {};
+    this.ready = this._ready.then(() => this);
+    this.disabled = false;
   }
 
-  createClass(Entity, [{
-    key: "_ready",
-    get: function get$$1() {
-      return Promise.resolve();
-    }
-  }]);
-  return Entity;
-}(Object3D);
+  get _ready() {
+    return Promise.resolve();
+  }
+}
 
-function fixGeometry(geometry, options) {
+function fixGeometry(geometry, options){
   options = options || {};
-  var maxU = options.maxU || 1,
-      maxV = options.maxV || 1,
-      attrs = geometry.attributes || geometry._bufferGeometry && geometry._bufferGeometry.attributes;
+  const maxU = options.maxU || 1,
+    maxV = options.maxV || 1,
+    attrs = geometry.attributes || (geometry._bufferGeometry && geometry._bufferGeometry.attributes);
   if (attrs && attrs.uv && attrs.uv.array) {
-    var uv = attrs.uv,
-        arr = uv.array;
-    for (var j = 0; j < arr.length; j += uv.itemSize) {
+    const uv = attrs.uv,
+      arr = uv.array;
+    for (let j = 0; j < arr.length; j += uv.itemSize) {
       arr[j] *= maxU;
     }
-    for (var _j = 1; _j < arr.length; _j += uv.itemSize) {
-      arr[_j] = 1 - (1 - arr[_j]) * maxV;
+    for (let j = 1; j < arr.length; j += uv.itemSize) {
+      arr[j] = 1 - (1 - arr[j]) * maxV;
     }
-  } else if (geometry.faceVertexUvs) {
-    var faces = geometry.faceVertexUvs;
-    for (var i = 0; i < faces.length; ++i) {
-      var face = faces[i];
-      for (var _j2 = 0; _j2 < face.length; ++_j2) {
-        var uvs = face[_j2];
-        for (var k = 0; k < uvs.length; ++k) {
-          var _uv = uvs[k];
-          _uv.x *= maxU;
-          _uv.y = 1 - (1 - _uv.y) * maxV;
+  }
+  else if(geometry.faceVertexUvs) {
+    const faces = geometry.faceVertexUvs;
+    for(let i = 0; i < faces.length; ++i){
+      const face = faces[i];
+      for(let j = 0; j < face.length; ++j){
+        const uvs = face[j];
+        for(let k = 0; k < uvs.length; ++k){
+          const uv = uvs[k];
+          uv.x *= maxU;
+          uv.y = 1 - (1 - uv.y) * maxV;
         }
       }
     }
@@ -43184,132 +42342,142 @@ function quad(width, height, options) {
     t: 1
   }, options);
 
-  return cache("PlaneBufferGeometry(" + width + ", " + height + ", " + options.s + ", " + options.t + ", " + options.maxU + ", " + options.maxV + ")", function () {
-    return fixGeometry(new PlaneBufferGeometry(width, height, options.s, options.t), options);
-  });
+  return cache(
+    `PlaneBufferGeometry(${width}, ${height}, ${options.s}, ${options.t}, ${options.maxU}, ${options.maxV})`,
+    () => fixGeometry(new PlaneBufferGeometry(width, height, options.s, options.t), options));
 }
 
-var InsideSphereGeometry = function (_Geometry) {
-    inherits(InsideSphereGeometry, _Geometry);
+class InsideSphereGeometry extends Geometry {
+  constructor(radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength) {
+    super();
 
-    function InsideSphereGeometry(radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength) {
-        classCallCheck(this, InsideSphereGeometry);
+    this.type = 'InsideSphereGeometry';
 
-        var _this = possibleConstructorReturn(this, (InsideSphereGeometry.__proto__ || Object.getPrototypeOf(InsideSphereGeometry)).call(this));
+    this.parameters = {
+      radius: radius,
+      widthSegments: widthSegments,
+      heightSegments: heightSegments,
+      phiStart: phiStart,
+      phiLength: phiLength,
+      thetaStart: thetaStart,
+      thetaLength: thetaLength
+    };
 
-        _this.type = 'InsideSphereGeometry';
+    radius = radius || 50;
 
-        _this.parameters = {
-            radius: radius,
-            widthSegments: widthSegments,
-            heightSegments: heightSegments,
-            phiStart: phiStart,
-            phiLength: phiLength,
-            thetaStart: thetaStart,
-            thetaLength: thetaLength
-        };
+    widthSegments = Math.max(3, Math.floor(widthSegments) || 8);
+    heightSegments = Math.max(2, Math.floor(heightSegments) || 6);
 
-        radius = radius || 50;
+    phiStart = phiStart !== undefined ? phiStart : 0;
+    phiLength = phiLength !== undefined ? phiLength : Math.PI * 2;
 
-        widthSegments = Math.max(3, Math.floor(widthSegments) || 8);
-        heightSegments = Math.max(2, Math.floor(heightSegments) || 6);
+    thetaStart = thetaStart !== undefined ? thetaStart : 0;
+    thetaLength = thetaLength !== undefined ? thetaLength : Math.PI;
 
-        phiStart = phiStart !== undefined ? phiStart : 0;
-        phiLength = phiLength !== undefined ? phiLength : Math.PI * 2;
+    var x,
+      y,
+      vertices = [],
+      uvs = [];
 
-        thetaStart = thetaStart !== undefined ? thetaStart : 0;
-        thetaLength = thetaLength !== undefined ? thetaLength : Math.PI;
+    for (y = 0; y <= heightSegments; y++) {
 
-        var x,
-            y,
-            vertices = [],
-            uvs = [];
+      var verticesRow = [];
+      var uvsRow = [];
 
-        for (y = 0; y <= heightSegments; y++) {
+      for (x = widthSegments; x >= 0; x--) {
 
-            var verticesRow = [];
-            var uvsRow = [];
+        var u = x / widthSegments;
 
-            for (x = widthSegments; x >= 0; x--) {
+        var v = y / heightSegments;
 
-                var u = x / widthSegments;
+        var vertex = new Vector3();
+        vertex.x = -radius * Math.cos(phiStart + u * phiLength) * Math.sin(
+          thetaStart + v * thetaLength);
+        vertex.y = radius * Math.cos(thetaStart + v * thetaLength);
+        vertex.z = radius * Math.sin(phiStart + u * phiLength) * Math.sin(
+          thetaStart + v * thetaLength);
 
-                var v = y / heightSegments;
+        this.vertices.push(vertex);
 
-                var vertex = new Vector3();
-                vertex.x = -radius * Math.cos(phiStart + u * phiLength) * Math.sin(thetaStart + v * thetaLength);
-                vertex.y = radius * Math.cos(thetaStart + v * thetaLength);
-                vertex.z = radius * Math.sin(phiStart + u * phiLength) * Math.sin(thetaStart + v * thetaLength);
+        verticesRow.push(this.vertices.length - 1);
+        uvsRow.push(new Vector2(1 - u, 1 - v));
 
-                _this.vertices.push(vertex);
+      }
 
-                verticesRow.push(_this.vertices.length - 1);
-                uvsRow.push(new Vector2(1 - u, 1 - v));
-            }
+      vertices.push(verticesRow);
+      uvs.push(uvsRow);
 
-            vertices.push(verticesRow);
-            uvs.push(uvsRow);
-        }
-
-        for (y = 0; y < heightSegments; y++) {
-
-            for (x = 0; x < widthSegments; x++) {
-
-                var v1 = vertices[y][x + 1];
-                var v2 = vertices[y][x];
-                var v3 = vertices[y + 1][x];
-                var v4 = vertices[y + 1][x + 1];
-
-                var n1 = _this.vertices[v1].clone().normalize();
-                var n2 = _this.vertices[v2].clone().normalize();
-                var n3 = _this.vertices[v3].clone().normalize();
-                var n4 = _this.vertices[v4].clone().normalize();
-
-                var uv1 = uvs[y][x + 1].clone();
-                var uv2 = uvs[y][x].clone();
-                var uv3 = uvs[y + 1][x].clone();
-                var uv4 = uvs[y + 1][x + 1].clone();
-
-                if (Math.abs(_this.vertices[v1].y) === radius) {
-
-                    uv1.x = (uv1.x + uv2.x) / 2;
-                    _this.faces.push(new Face3(v1, v3, v4, [n1, n3, n4]));
-                    _this.faceVertexUvs[0].push([uv1, uv3, uv4]);
-                } else if (Math.abs(_this.vertices[v3].y) === radius) {
-
-                    uv3.x = (uv3.x + uv4.x) / 2;
-                    _this.faces.push(new Face3(v1, v2, v3, [n1, n2, n3]));
-                    _this.faceVertexUvs[0].push([uv1, uv2, uv3]);
-                } else {
-
-                    _this.faces.push(new Face3(v1, v2, v4, [n1, n2, n4]));
-                    _this.faceVertexUvs[0].push([uv1, uv2, uv4]);
-
-                    _this.faces.push(new Face3(v2, v3, v4, [n2.clone(), n3, n4.clone()]));
-                    _this.faceVertexUvs[0].push([uv2.clone(), uv3, uv4.clone()]);
-                }
-            }
-        }
-
-        _this.computeFaceNormals();
-
-        for (var i = 0; i < _this.faces.length; ++i) {
-            var f = _this.faces[i];
-            f.normal.multiplyScalar(-1);
-            for (var j = 0; j < f.vertexNormals.length; ++j) {
-                f.vertexNormals[j].multiplyScalar(-1);
-            }
-        }
-
-        _this.boundingSphere = new Sphere(new Vector3(), radius);
-
-        return _this;
     }
 
-    return InsideSphereGeometry;
-}(Geometry);
+    for (y = 0; y < heightSegments; y++) {
 
-var SLICE = 0.45;
+      for (x = 0; x < widthSegments; x++) {
+
+        var v1 = vertices[y][x + 1];
+        var v2 = vertices[y][x];
+        var v3 = vertices[y + 1][x];
+        var v4 = vertices[y + 1][x + 1];
+
+        var n1 = this.vertices[v1].clone()
+          .normalize();
+        var n2 = this.vertices[v2].clone()
+          .normalize();
+        var n3 = this.vertices[v3].clone()
+          .normalize();
+        var n4 = this.vertices[v4].clone()
+          .normalize();
+
+        var uv1 = uvs[y][x + 1].clone();
+        var uv2 = uvs[y][x].clone();
+        var uv3 = uvs[y + 1][x].clone();
+        var uv4 = uvs[y + 1][x + 1].clone();
+
+        if (Math.abs(this.vertices[v1].y) === radius) {
+
+          uv1.x = (uv1.x + uv2.x) / 2;
+          this.faces.push(new Face3(v1, v3, v4, [n1, n3, n4]));
+          this.faceVertexUvs[0].push([uv1, uv3, uv4]);
+
+        }
+        else if (Math.abs(this.vertices[v3].y) === radius) {
+
+          uv3.x = (uv3.x + uv4.x) / 2;
+          this.faces.push(new Face3(v1, v2, v3, [n1, n2, n3]));
+          this.faceVertexUvs[0].push([uv1, uv2, uv3]);
+
+        }
+        else {
+
+          this.faces.push(new Face3(v1, v2, v4, [n1, n2, n4]));
+          this.faceVertexUvs[0].push([uv1, uv2, uv4]);
+
+          this.faces.push(new Face3(v2, v3, v4, [n2.clone(), n3,
+            n4.clone()
+          ]));
+          this.faceVertexUvs[0].push([uv2.clone(), uv3, uv4.clone()]);
+
+        }
+
+      }
+
+    }
+
+    this.computeFaceNormals();
+
+    for (var i = 0; i < this.faces.length; ++i) {
+      var f = this.faces[i];
+      f.normal.multiplyScalar(-1);
+      for (var j = 0; j < f.vertexNormals.length; ++j) {
+        f.vertexNormals[j].multiplyScalar(-1);
+      }
+    }
+
+    this.boundingSphere = new Sphere(new Vector3(), radius);
+
+  }
+}
+
+const SLICE = 0.45;
 function shell(r, slices, rings, phi, theta, options) {
   if (phi === undefined) {
     phi = Math.PI * SLICE;
@@ -43318,111 +42486,103 @@ function shell(r, slices, rings, phi, theta, options) {
     theta = Math.PI * SLICE * 0.6;
   }
   var phiStart = 1.5 * Math.PI - phi * 0.5,
-      thetaStart = (Math.PI - theta) * 0.5;
+    thetaStart = (Math.PI - theta) * 0.5;
   options = options || {};
-  return cache("InsideSphereGeometry(" + r + ", " + slices + ", " + rings + ", " + phi + ", " + theta + ")", function () {
-    return fixGeometry(new InsideSphereGeometry(r, slices, rings, phiStart, phi, thetaStart, theta, true), options);
-  });
+  return cache(
+    `InsideSphereGeometry(${r}, ${slices}, ${rings}, ${phi}, ${theta})`,
+    () => fixGeometry(new InsideSphereGeometry(r, slices, rings, phiStart, phi, thetaStart, theta, true), options));
 }
 
 var entities = [];
 
-function updateAll() {
-  entities.forEach(function (entity) {
+function updateAll(){
+  entities.forEach((entity) => {
     entity.eyeBlank(0);
     entity.update();
   });
 }
 
 function eyeBlankAll(eye) {
-  entities.forEach(function (entity) {
-    return entity.eyeBlank(eye);
-  });
+  entities.forEach((entity) =>
+    entity.eyeBlank(eye));
 }
 
-var BaseTextured = function (_Entity) {
-  inherits(BaseTextured, _Entity);
+class BaseTextured extends Entity {
 
-  function BaseTextured(files, options) {
-    classCallCheck(this, BaseTextured);
-
+  constructor(files, options) {
     name = options && options.id || files.join();
+    
+    super(name, options);
 
-    var _this = possibleConstructorReturn(this, (BaseTextured.__proto__ || Object.getPrototypeOf(BaseTextured)).call(this, name, options));
-
-    entities.push(_this);
+    entities.push(this);
 
     ////////////////////////////////////////////////////////////////////////
     // initialization
     ///////////////////////////////////////////////////////////////////////
-    _this._files = files;
-    _this._meshes = [];
-    _this._textures = [];
-    _this._currentImageIndex = 0;
+    this._files = files;
+    this._meshes = [];
+    this._textures = [];
+    this._currentImageIndex = 0;
 
-    if (_this.options.geometry) {
-      _this._geometry = _this.options.geometry;
-    } else if (_this.options.radius) {
-      _this._geometry = shell(_this.options.radius, 72, 36, Math.PI * 2, Math.PI, options);
-    } else {
-      if (!_this.options.width) {
-        _this.options.width = 0.5;
-      }
-      if (!_this.options.height) {
-        _this.options.height = 0.5;
-      }
-      _this._geometry = quad(_this.options.width, _this.options.height, options);
+    if(this.options.geometry){
+      this._geometry = this.options.geometry;
     }
-    return _this;
+    else if(this.options.radius){
+      this._geometry = shell(
+        this.options.radius,
+        72,
+        36,
+        Math.PI * 2,
+        Math.PI,
+        options);
+    }
+    else {
+      if(!this.options.width){
+        this.options.width = 0.5;
+      }
+      if(!this.options.height){
+        this.options.height = 0.5;
+      }
+      this._geometry = quad(this.options.width, this.options.height, options);
+    }
   }
 
-  createClass(BaseTextured, [{
-    key: "eyeBlank",
-    value: function eyeBlank(eye) {
-      if (this._meshes && this._meshes.length > 0) {
-        this._currentImageIndex = eye % this._meshes.length;
-        for (var i = 0; i < this._meshes.length; ++i) {
-          this._meshes[i].visible = i === this._currentImageIndex;
-        }
+  get _ready() {
+    return super._ready
+      .then(() => this._loadFiles(this._files, this.options.progress))
+      .then(() => this._meshes.forEach((mesh) =>
+        this.add(mesh)));
+  }
+
+  get blending() {
+    return this._meshes && this._meshes.length > 0 && this._meshes[0] && this._meshes[0].material.blending;
+  }
+
+  set blending(v){
+    this._meshes.forEach((mesh) => mesh.material.blending = v);
+  }
+
+  eyeBlank(eye) {
+    if(this._meshes && this._meshes.length > 0) {
+      this._currentImageIndex = eye % this._meshes.length;
+      for(let i = 0; i < this._meshes.length; ++i){
+        this._meshes[i].visible = (i === this._currentImageIndex);
       }
     }
-  }, {
-    key: "update",
-    value: function update() {}
-  }, {
-    key: "_ready",
-    get: function get$$1() {
-      var _this2 = this;
+  }
 
-      return get(BaseTextured.prototype.__proto__ || Object.getPrototypeOf(BaseTextured.prototype), "_ready", this).then(function () {
-        return _this2._loadFiles(_this2._files, _this2.options.progress);
-      }).then(function () {
-        return _this2._meshes.forEach(function (mesh) {
-          return _this2.add(mesh);
-        });
-      });
-    }
-  }, {
-    key: "blending",
-    get: function get$$1() {
-      return this._meshes && this._meshes.length > 0 && this._meshes[0] && this._meshes[0].material.blending;
-    },
-    set: function set$$1(v) {
-      this._meshes.forEach(function (mesh) {
-        return mesh.material.blending = v;
-      });
-    }
-  }]);
-  return BaseTextured;
-}(Entity);
+  update() {
 
-var COUNTER = 0;
+  }
+}
+
+let COUNTER = 0;
 
 // Videos don't auto-play on mobile devices, so let's make them all play whenever we tap the screen.
-var processedVideos = [];
-function findAndFixVideo(evt) {
-  var vids = document.querySelectorAll("video");
-  for (var i = 0; i < vids.length; ++i) {
+const processedVideos = [];
+function findAndFixVideo(evt){
+  const vids = document.querySelectorAll("video");
+  for(let i = 0; i < vids.length; ++i){
     fixVideo(vids[i]);
   }
   window.removeEventListener("touchend", findAndFixVideo);
@@ -43431,7 +42591,7 @@ function findAndFixVideo(evt) {
 }
 
 function fixVideo(vid) {
-  if (isiOS$1 && processedVideos.indexOf(vid) === -1) {
+  if(isiOS$1 && processedVideos.indexOf(vid) === -1){
     processedVideos.push(vid);
     enableInlineVideo(vid, false);
   }
@@ -43441,129 +42601,122 @@ window.addEventListener("touchend", findAndFixVideo, false);
 window.addEventListener("mouseup", findAndFixVideo, false);
 window.addEventListener("keyup", findAndFixVideo, false);
 
-var Video = function (_BaseTextured) {
-  inherits(Video, _BaseTextured);
+class Video extends BaseTextured {
 
-  function Video(videos, options) {
-    classCallCheck(this, Video);
-
+  constructor(videos, options) {
     ////////////////////////////////////////////////////////////////////////
     // normalize input parameters
     ////////////////////////////////////////////////////////////////////////
-    if (!(videos instanceof Array)) {
+    if(!(videos instanceof Array)) {
       videos = [videos];
     }
 
     options = Object.assign({}, {
-      id: "Primrose.Controls.Video[" + COUNTER++ + "]"
+      id: "Primrose.Controls.Video[" + (COUNTER++) + "]"
     }, options);
 
-    return possibleConstructorReturn(this, (Video.__proto__ || Object.getPrototypeOf(Video)).call(this, videos, options));
+    super(videos, options);
   }
 
-  createClass(Video, [{
-    key: "_loadFiles",
-    value: function _loadFiles(videos, progress) {
-      var _this2 = this;
-
-      this._elements = Array.prototype.map.call(videos, function (spec, i) {
-        var video = null;
-        if (typeof spec === "string") {
-          video = document.querySelector("video[src='" + spec + "']");
-          if (!video) {
-            video = document.createElement("video");
-            video.src = spec;
-          }
-        } else if (spec instanceof HTMLVideoElement) {
-          video = spec;
-        } else if (spec.toString() === "[object MediaStream]" || spec.toString() === "[object LocalMediaStream]") {
+  _loadFiles(videos, progress) {
+    this._elements = Array.prototype.map.call(videos, (spec, i) => {
+      let video = null;
+      if(typeof spec === "string"){
+        video = document.querySelector(`video[src='${spec}']`);
+        if(!video) {
           video = document.createElement("video");
-          video.srcObject = spec;
+          video.src = spec;
         }
-        video.onprogress = progress;
-        video.onloadedmetadata = progress;
-        video.muted = true;
-        video.loop = true;
-        video.setAttribute("playsinline", "");
-        video.setAttribute("webkit-playsinline", "");
-        if (!isiOS$1) {
-          video.preload = "auto";
-        }
+      }
+      else if(spec instanceof HTMLVideoElement){
+        video = spec;
+      }
+      else if(spec.toString() === "[object MediaStream]" || spec.toString() === "[object LocalMediaStream]"){
+        video = document.createElement("video");
+        video.srcObject = spec;
+      }
+      video.onprogress = progress;
+      video.onloadedmetadata = progress;
+      video.muted = true;
+      video.loop = true;
+      video.setAttribute("playsinline", "");
+      video.setAttribute("webkit-playsinline", "");
+      if(!isiOS$1) {
+        video.preload = "auto";
+      }
 
-        var loadOptions = Object.assign({}, _this2.options);
-        _this2._meshes[i] = textured(_this2._geometry, video, loadOptions);
+      const loadOptions = Object.assign({}, this.options);
+      this._meshes[i] = textured(
+        this._geometry,
+        video,
+        loadOptions);
 
-        if (!video.parentElement) {
-          document.body.insertBefore(video, document.body.children[0]);
-          fixVideo(video);
-        }
+      if(!video.parentElement){
+        document.body.insertBefore(video, document.body.children[0]);
+        fixVideo(video);
+      }
 
-        loadOptions.promise.then(function (txt) {
-          _this2._textures[i] = txt;
-          console.log(txt);
-          txt.minFilter = LinearFilter;
-        });
-
-        return video;
+      loadOptions.promise.then((txt) => {
+        this._textures[i] = txt;
+        console.log(txt);
+        txt.minFilter = LinearFilter;
       });
-      return Promise.resolve();
+
+      return video;
+    });
+    return Promise.resolve();
+  }
+
+  play() {
+    if(this._elements.length > 0) {
+      this._elements[0].play();
     }
-  }, {
-    key: "play",
-    value: function play() {
-      if (this._elements.length > 0) {
-        this._elements[0].play();
-      }
-    }
-  }, {
-    key: "update",
-    value: function update() {
-      get(Video.prototype.__proto__ || Object.getPrototypeOf(Video.prototype), "update", this).call(this);
-      for (var i = 0; i < this._textures.length; ++i) {
-        if (this._textures[i]) {
-          var elem = this._elements[i];
-          if (elem.currentTime !== this._lastTime) {
-            this._textures[i].needsUpdate = true;
-            this._lastTime = elem.currentTime;
-          }
+  }
+
+  update(){
+    super.update();
+    for (let i = 0; i < this._textures.length; ++i) {
+      if(this._textures[i]) {
+        const elem = this._elements[i];
+        if(elem.currentTime !== this._lastTime){
+          this._textures[i].needsUpdate = true;
+          this._lastTime = elem.currentTime;
         }
       }
     }
-  }]);
-  return Video;
-}(BaseTextured);
+  }
+}
 
 function camera(index, options) {
   options = Object.assign({
-    width: 1,
-    height: 768 / 1280,
-    unshaded: true,
-    transparent: true,
-    opacity: 0.5
-  }, options);
-  return navigator.mediaDevices.enumerateDevices().catch(console.error.bind(console, "ERR [enumerating devices]:>")).then(function (devices) {
-    return devices.filter(function (d) {
-      return d.kind === "videoinput";
-    })[index];
-  }).catch(console.error.bind(console, "ERR [filtering devices]:>")).then(function (device) {
-    return navigator.mediaDevices.getUserMedia({
+      width: 1,
+      height: 768/1280,
+      unshaded: true,
+      transparent: true,
+      opacity: 0.5
+    }, options);
+  return navigator.mediaDevices.enumerateDevices()
+    .catch(console.error.bind(console, "ERR [enumerating devices]:>"))
+    .then((devices) => devices.filter((d) => d.kind === "videoinput")[index])
+    .catch(console.error.bind(console, "ERR [filtering devices]:>"))
+    .then((device) => navigator.mediaDevices.getUserMedia({
       video: {
         deviceId: device.deviceId,
         width: { ideal: 1280 },
         height: { ideal: 768 }
       }
-    });
-  }).catch(console.error.bind(console, "ERR [getting media access]:>")).then(function (stream) {
-    return new Video(stream, options).ready;
-  }).catch(console.error.bind(console, "ERR [creating image]:>"));
+    }))
+    .catch(console.error.bind(console, "ERR [getting media access]:>"))
+    .then((stream) => new Video(stream, options).ready)
+    .catch(console.error.bind(console, "ERR [creating image]:>"));
 }
 
 function circle(r, sections, start, end) {
   r = r || 1;
   sections = sections || 18;
-  return cache("CircleBufferGeometry(" + r + ", " + sections + ", " + start + ", " + end + ")", function () {
-    return new CircleBufferGeometry(r, sections, start, end);
-  });
+  return cache(
+    `CircleBufferGeometry(${r}, ${sections}, ${start}, ${end})`,
+    () => new CircleBufferGeometry(r, sections, start, end));
 }
 
 function cloud(verts, c, s) {
@@ -43571,12 +42724,12 @@ function cloud(verts, c, s) {
   for (var i = 0; i < verts.length; ++i) {
     geom.vertices.push(verts[i]);
   }
-  var mat = cache("PointsMaterial(" + c + ", " + s + ")", function () {
-    return new PointsMaterial({
+  var mat = cache(
+    `PointsMaterial(${c}, ${s})`,
+    () => new PointsMaterial({
       color: c,
       size: s
-    });
-  });
+    }));
   return new Points(geom, mat);
 }
 
@@ -43590,9 +42743,9 @@ function cylinder(rT, rB, height, rS, hS, openEnded, thetaStart, thetaEnd) {
   if (height === undefined) {
     height = 1;
   }
-  return cache("CylinderBufferGeometry(" + rT + ", " + rB + ", " + height + ", " + rS + ", " + hS + ", " + openEnded + ", " + thetaStart + ", " + thetaEnd + ")", function () {
-    return new CylinderBufferGeometry(rT, rB, height, rS, hS, openEnded, thetaStart, thetaEnd);
-  });
+  return cache(
+    `CylinderBufferGeometry(${rT}, ${rB}, ${height}, ${rS}, ${hS}, ${openEnded}, ${thetaStart}, ${thetaEnd})`,
+    () => new CylinderBufferGeometry(rT, rB, height, rS, hS, openEnded, thetaStart, thetaEnd));
 }
 
 function light(color, intensity, distance, decay) {
@@ -43608,32 +42761,32 @@ function identity(obj) {
 }
 
 function range(n, m, s, t) {
-  var n2 = s && n || 0,
-      m2 = s && m || n,
-      s2 = t && s || 1;
-  var t2 = t || s || m,
-      output = null;
+  const n2 = s && n || 0,
+    m2 = s && m || n,
+    s2 = t && s || 1;
+  let t2 = t || s || m,
+    output = null;
 
-  if (!(t2 instanceof Function)) {
+  if(!(t2 instanceof Function)) {
     t2 = identity;
   }
 
-  for (var i = n2; i < m2; i += s2) {
-    var value = t2(i);
-    if (output === null && value !== undefined) {
+  for (let i = n2; i < m2; i += s2) {
+    const value = t2(i);
+    if(output === null && value !== undefined) {
       output = [];
     }
-    if (output !== null) {
+    if(output !== null) {
       output.push(value);
     }
   }
-  if (output !== null) {
+  if(output !== null) {
     return output;
   }
 }
 
 function ring(rInner, rOuter, sectors, rings, start, end) {
-  if (rInner === undefined) {
+  if(rInner === undefined){
     rInner = 0.5;
   }
   sectors = sectors || 18;
@@ -43641,9 +42794,9 @@ function ring(rInner, rOuter, sectors, rings, start, end) {
   rOuter = rOuter || 1;
   start = start || 0;
   end = end || 2 * Math.PI;
-  return cache("RingBufferGeometry(" + rInner + ", " + rOuter + ", " + sectors + ", " + rings + ", " + start + ", " + end + ")", function () {
-    return new RingBufferGeometry(rInner, rOuter, sectors, rings, start, end);
-  });
+  return cache(
+    `RingBufferGeometry(${rInner}, ${rOuter}, ${sectors}, ${rings}, ${start}, ${end})`,
+    () => new RingBufferGeometry(rInner, rOuter, sectors, rings, start, end));
 }
 
 function raycaster() {
@@ -43651,9 +42804,9 @@ function raycaster() {
 }
 
 function sphere(r, slices, rings) {
-  return cache("SphereGeometry(" + r + ", " + slices + ", " + rings + ")", function () {
-    return new SphereGeometry(r, slices, rings);
-  });
+  return cache(
+    `SphereGeometry(${r}, ${slices}, ${rings})`,
+    () => new SphereGeometry(r, slices, rings));
 }
 
 function v2(x, y) {
@@ -43669,28 +42822,28 @@ function v4(x, y, z, w) {
 }
 
 var index$2 = {
-  axis: axis,
-  box: box,
-  brick: brick,
-  camera: camera,
-  circle: circle,
-  cloud: cloud,
-  colored: colored,
-  cylinder: cylinder,
-  hub: hub,
-  light: light,
-  material: material,
-  quad: quad,
-  quat: quat,
-  range: range,
-  ring: ring,
-  shell: shell,
-  raycaster: raycaster,
-  sphere: sphere,
-  textured: textured,
-  v2: v2,
-  v3: v3,
-  v4: v4
+  axis,
+  box,
+  brick,
+  camera,
+  circle,
+  cloud,
+  colored,
+  cylinder,
+  hub,
+  light,
+  material,
+  quad,
+  quat,
+  range,
+  ring,
+  shell,
+  raycaster,
+  sphere,
+  textured,
+  v2,
+  v3,
+  v4
 };
 
 var liveAPI = Object.freeze({
@@ -43727,10 +42880,8 @@ function findProperty(elem, arr) {
   }
 }
 
-var AsyncLockRequest = function () {
-  function AsyncLockRequest(name, elementOpts, changeEventOpts, errorEventOpts, requestMethodOpts, exitMethodOpts) {
-    classCallCheck(this, AsyncLockRequest);
-
+class AsyncLockRequest {
+  constructor(name, elementOpts, changeEventOpts, errorEventOpts, requestMethodOpts, exitMethodOpts) {
 
     this.name = name;
 
@@ -43753,127 +42904,113 @@ var AsyncLockRequest = function () {
     this.request = this.request.bind(this);
   }
 
-  createClass(AsyncLockRequest, [{
-    key: "addEventListener",
-    value: function addEventListener(name, thunk, bubbles) {
-      if (this._events[name]) {
-        document.addEventListener(this._events[name], thunk, bubbles);
-      }
-    }
-  }, {
-    key: "removeEventListener",
-    value: function removeEventListener(name, thunk) {
-      if (this._events[name]) {
-        document.removeEventListener(this._events[name], thunk);
-      }
-    }
-  }, {
-    key: "addChangeListener",
-    value: function addChangeListener(thunk, bubbles) {
-      this.addEventListener("change", thunk, bubbles);
-    }
-  }, {
-    key: "removeChangeListener",
-    value: function removeChangeListener(thunk) {
-      this.removeEventListener("change", thunk);
-    }
-  }, {
-    key: "addErrorListener",
-    value: function addErrorListener(thunk, bubbles) {
-      this.addEventListener("error", thunk, bubbles);
-    }
-  }, {
-    key: "removeErrorListener",
-    value: function removeErrorListener(thunk) {
-      this.removeEventListener("error", thunk);
-    }
-  }, {
-    key: "_withChange",
-    value: function _withChange(act) {
-      var _this = this;
+  get element(){
+    return document[this._elementName];
+  }
 
-      return new Promise(function (resolve, reject) {
-        var onSuccess = function onSuccess() {
+  get isActive(){
+    return !!this.element;
+  }
+
+  addEventListener(name, thunk, bubbles){
+    if(this._events[name]) {
+      document.addEventListener(this._events[name], thunk, bubbles);
+    }
+  }
+
+  removeEventListener(name, thunk){
+    if(this._events[name]) {
+      document.removeEventListener(this._events[name], thunk);
+    }
+  };
+
+  addChangeListener (thunk, bubbles) {
+    this.addEventListener("change", thunk, bubbles);
+  }
+
+  removeChangeListener(thunk){
+    this.removeEventListener("change", thunk);
+  }
+
+  addErrorListener(thunk, bubbles) {
+    this.addEventListener("error", thunk, bubbles);
+  }
+
+  removeErrorListener(thunk){
+    this.removeEventListener("error", thunk);
+  }
+
+  _withChange(act){
+    return new Promise((resolve, reject) => {
+      var onSuccess = () => {
           setTimeout(tearDown);
-          resolve(_this.element);
+          resolve(this.element);
         },
-            onError = function onError(evt) {
+        onError = (evt) => {
           setTimeout(tearDown);
           reject(evt);
         },
-            stop = function stop() {
-          if (_this._changeTimeout) {
-            clearTimeout(_this._changeTimeout);
-            _this._changeTimeout = null;
+        stop = () => {
+          if (this._changeTimeout) {
+            clearTimeout(this._changeTimeout);
+            this._changeTimeout = null;
           }
         },
-            tearDown = function tearDown() {
+        tearDown = () => {
           stop();
-          _this.removeChangeListener(onSuccess);
-          _this.removeErrorListener(onError);
+          this.removeChangeListener(onSuccess);
+          this.removeErrorListener(onError);
         };
 
-        _this.addChangeListener(onSuccess, false);
-        _this.addErrorListener(onError, false);
+      this.addChangeListener(onSuccess, false);
+      this.addErrorListener(onError, false);
 
-        if (act()) {
-          // we've already gotten lock, so don't wait for it.
-          onSuccess();
-        } else {
-          // Timeout waiting on the lock to happen, for systems like iOS that
-          // don't properly support it, even though they say they do.
-          stop();
-          _this._changeTimeout = setTimeout(function () {
-            return onError(name + " state did not change in allotted time");
-          }, 1000);
-        }
-      });
-    }
-  }, {
-    key: "request",
-    value: function request(elem, extraParam) {
-      var _this2 = this;
+      if (act()) {
+        // we've already gotten lock, so don't wait for it.
+        onSuccess();
+      }
+      else {
+        // Timeout waiting on the lock to happen, for systems like iOS that
+        // don't properly support it, even though they say they do.
+        stop();
+        this._changeTimeout = setTimeout(
+          () => onError(name + " state did not change in allotted time"),
+          1000);
+      }
+    });
+  }
 
-      return this._withChange(function () {
-        if (!_this2._requestMethodName) {
-          throw new Error("No " + _this2.name + " API support.");
-        } else if (_this2.isActive) {
-          return true;
-        } else if (extraParam) {
-          elem[_this2._requestMethodName](extraParam);
-        } else {
-          elem[_this2._requestMethodName]();
-        }
-      });
-    }
-  }, {
-    key: "exit",
-    value: function exit() {
-      var _this3 = this;
+  request(elem, extraParam){
+    return this._withChange(() => {
+      if (!this._requestMethodName) {
+        throw new Error("No " + this.name + " API support.");
+      }
+      else if (this.isActive) {
+        return true;
+      }
+      else if (extraParam) {
+        elem[this._requestMethodName](extraParam);
+      }
+      else {
+        elem[this._requestMethodName]();
+      }
+    });
+  }
 
-      return this._withChange(function () {
-        if (!_this3._exitMethodName) {
-          throw new Error("No " + name + " API support.");
-        } else if (!_this3.isActive) {
-          return true;
-        } else {
-          document[_this3._exitMethodName]();
-        }
-      });
-    }
-  }, {
-    key: "element",
-    get: function get$$1() {
-      return document[this._elementName];
-    }
-  }, {
-    key: "isActive",
-    get: function get$$1() {
-      return !!this.element;
-    }
-  }]);
-  return AsyncLockRequest;
-}();
+  exit(){
+    return this._withChange(() => {
+      if (!this._exitMethodName) {
+        throw new Error("No " + name + " API support.");
+      }
+      else if (!this.isActive) {
+        return true;
+      }
+      else {
+        document[this._exitMethodName]();
+      }
+    });
+  }
+}
 
 function deleteSetting(settingName) {
   if (window.localStorage) {
@@ -43881,28 +43018,48 @@ function deleteSetting(settingName) {
   }
 }
 
-var FullScreenLockRequest = function (_AsyncLockRequest) {
-  inherits(FullScreenLockRequest, _AsyncLockRequest);
-
-  function FullScreenLockRequest() {
-    classCallCheck(this, FullScreenLockRequest);
-
-    var _this = possibleConstructorReturn(this, (FullScreenLockRequest.__proto__ || Object.getPrototypeOf(FullScreenLockRequest)).call(this, "Fullscreen", ["fullscreenElement", "msFullscreenElement", "mozFullScreenElement", "webkitFullscreenElement"], ["onfullscreenchange", "onmsfullscreenchange", "onmozfullscreenchange", "onwebkitfullscreenchange"], ["onfullscreenerror", "onmsfullscreenerror", "onmozfullscreenerror", "onwebkitfullscreenerror"], ["requestFullscreen", "msRequestFullscreen", "mozRequestFullScreen", "webkitRequestFullscreen"], ["exitFullscreen", "msExitFullscreen", "mozExitFullScreen", "webkitExitFullscreen"]));
+class FullScreenLockRequest extends AsyncLockRequest {
+  constructor() {
     // Notice the spelling difference for the Mozilla cases. They require a capital S for Screen.
+    super("Fullscreen", [
+              "fullscreenElement",
+            "msFullscreenElement",
+           "mozFullScreenElement",
+        "webkitFullscreenElement"
+      ], [
+              "onfullscreenchange",
+            "onmsfullscreenchange",
+           "onmozfullscreenchange",
+        "onwebkitfullscreenchange"
+      ], [
+              "onfullscreenerror",
+            "onmsfullscreenerror",
+           "onmozfullscreenerror",
+        "onwebkitfullscreenerror"
+      ], [
+              "requestFullscreen",
+            "msRequestFullscreen",
+           "mozRequestFullScreen",
+        "webkitRequestFullscreen"
+      ], [
+              "exitFullscreen",
+            "msExitFullscreen",
+           "mozExitFullScreen",
+        "webkitExitFullscreen"
+      ]);
 
-
-    _this._fullScreenEnabledProperty = findProperty(document, ["fullscreenEnabled", "msFullscreenEnabled", "mozFullScreenEnabled", "webkitFullscreenEnabled"]);
-    return _this;
+    this._fullScreenEnabledProperty = findProperty(document, [
+            "fullscreenEnabled",
+          "msFullscreenEnabled",
+         "mozFullScreenEnabled",
+      "webkitFullscreenEnabled"
+    ]);
   }
 
-  createClass(FullScreenLockRequest, [{
-    key: "available",
-    get: function get$$1() {
-      return !!(this._fullScreenEnabledProperty && document[this._fullScreenEnabledProperty]);
-    }
-  }]);
-  return FullScreenLockRequest;
-}(AsyncLockRequest);
+  get available() {
+    return !!(this._fullScreenEnabledProperty && document[this._fullScreenEnabledProperty]);
+  }
+}
 
 var FullScreen = new FullScreenLockRequest();
 
@@ -43912,10 +43069,11 @@ function getSetting(settingName, defValue) {
     if (val) {
       try {
         return JSON.parse(val);
-      } catch (exp) {
-        console.error("getSetting", settingName, val, typeof val === "undefined" ? "undefined" : _typeof(val), exp);
+      }
+      catch (exp) {
+        console.error("getSetting", settingName, val, typeof (val), exp);
         console.error(exp);
-        console.error("getSetting", settingName, val, typeof val === "undefined" ? "undefined" : _typeof(val));
+        console.error("getSetting", settingName, val, typeof (val));
       }
     }
   }
@@ -43924,8 +43082,8 @@ function getSetting(settingName, defValue) {
 
 function hax(target, name, thunk) {
   var original = target[name];
-  if (original) {
-    target[name] = function () {
+  if(original) {
+    target[name] = function() {
       var args = Array.prototype.slice.call(arguments);
       return thunk(original, args);
     };
@@ -43933,18 +43091,18 @@ function hax(target, name, thunk) {
 }
 
 function haxClass(target, name, thunk) {
-  hax(target, name, function (original, args) {
+  hax(target, name, (original, args) => {
     thunk(args);
     // bind's context argument
     args.unshift(null);
     var classFunc = original.bind.apply(original, args);
     // totes m'goats you didn't know the parens were optional when instantiating a javascript object.
-    return new classFunc();
+    return new classFunc;
   });
 }
 
 function haxClass$1(target, name, thunk) {
-  hax(target, name, function (original, args) {
+  hax(target, name, (original, args) => {
     thunk(args);
     var returnValue = original.apply(target, args);
     return returnValue;
@@ -43952,8 +43110,8 @@ function haxClass$1(target, name, thunk) {
 }
 
 function injectIceServers(target, name) {
-  haxClass(target, name, function (args) {
-    if (!window.HAXICE) {
+  haxClass(target, name, function(args) {
+    if(!window.HAXICE) {
       window.HAXICE = args[0];
     }
     args[0] = args[0] || window.HAXICE;
@@ -43961,7 +43119,7 @@ function injectIceServers(target, name) {
 }
 
 function injectUserMedia(target, name) {
-  haxClass$1(target, name, function (args) {
+  haxClass$1(target, name, function(args) {
     args[0] = window.HAKBOX || args[0];
   });
 }
@@ -43974,62 +43132,66 @@ injectUserMedia(navigator, "getUserMedia");
 injectUserMedia(navigator.mediaDevices, "getUserMedia");
 
 function immutable(value) {
-  var getter = typeof value === "function" ? value : function () {
+  const getter = (typeof value === "function") ? value : function () {
     return value;
   };
   return {
     enumerable: true,
     configurable: true,
     get: getter,
-    set: function set() {
+    set: function() {
       throw new Error("This value is immutable and may only be read, not written.");
     }
   };
 }
 
-var MIN_TIMESTEP = 0.001;
-var MAX_TIMESTEP = 1;
+const MIN_TIMESTEP = 0.001;
+const MAX_TIMESTEP = 1;
 
 function isTimestampDeltaValid(timestampDeltaS) {
-  return !isNaN(timestampDeltaS) && MIN_TIMESTEP < timestampDeltaS && timestampDeltaS <= MAX_TIMESTEP;
+  return !isNaN(timestampDeltaS) &&
+    MIN_TIMESTEP < timestampDeltaS &&
+    timestampDeltaS <= MAX_TIMESTEP;
 }
 
 function mutable(value, type) {
-  if (!type) {
+  if(!type) {
     return {
       enumerable: true,
       configurable: true,
-      get: function get$$1() {
+      get: function() {
         return value;
       },
-      set: function set$$1(v) {
+      set: function(v) {
         value = v;
       }
     };
-  } else if (typeof type === "function") {
+  }
+  else if(typeof type === "function") {
     return {
       enumerable: true,
       configurable: true,
-      get: function get$$1() {
+      get: function() {
         return value;
       },
-      set: function set$$1(v) {
-        if (v instanceof type) {
+      set: function(v) {
+        if(v instanceof type) {
           throw new Error("Value must be a " + type + ": " + v);
         }
         value = v;
       }
     };
-  } else {
+  }
+  else {
     return {
       enumerable: true,
       configurable: true,
-      get: function get$$1() {
+      get: function() {
         return value;
       },
-      set: function set$$1(v) {
-        var t = typeof v === "undefined" ? "undefined" : _typeof(v);
-        if (t !== type) {
+      set: function(v) {
+        var t = typeof v;
+        if(t !== type) {
           throw new Error("Value must be a " + type + ". An " + t + " was provided instead: " + v);
         }
         value = v;
@@ -44045,12 +43207,14 @@ function lock(element) {
   }
   if (screen.orientation && screen.orientation.lock) {
     return screen.orientation.lock(type);
-  } else if (screen.mozLockOrientation) {
+  }
+  else if (screen.mozLockOrientation) {
     var locked = screen.mozLockOrientation(type);
     if (locked) {
       return Promise.resolve(element);
     }
-  } else {
+  }
+  else {
     return Promise.reject(new Error("Pointer lock not supported."));
   }
 }
@@ -44058,21 +43222,28 @@ function lock(element) {
 function unlock() {
   if (screen.orientation && screen.orientation.unlock) {
     screen.orientation.unlock();
-  } else if (screen.mozUnlockOrientation) {
+  }
+  else if (screen.mozUnlockOrientation) {
     screen.mozUnlockOrientation();
   }
 }
 
 var Orientation = {
-  lock: lock,
-  unlock: unlock
+  lock,
+  unlock
 };
 
-var PointerLock = new AsyncLockRequest("Pointer Lock", ["pointerLockElement", "mozPointerLockElement", "webkitPointerLockElement"], ["onpointerlockchange", "onmozpointerlockchange", "onwebkitpointerlockchange"], ["onpointerlockerror", "onmozpointerlockerror", "onwebkitpointerlockerror"], ["requestPointerLock", "mozRequestPointerLock", "webkitRequestPointerLock", "webkitRequestPointerLock"], ["exitPointerLock", "mozExitPointerLock", "webkitExitPointerLock", "webkitExitPointerLock"]);
+var PointerLock = new AsyncLockRequest(
+  "Pointer Lock",
+  ["pointerLockElement", "mozPointerLockElement", "webkitPointerLockElement"],
+  ["onpointerlockchange", "onmozpointerlockchange", "onwebkitpointerlockchange"],
+  ["onpointerlockerror", "onmozpointerlockerror", "onwebkitpointerlockerror"],
+  ["requestPointerLock", "mozRequestPointerLock", "webkitRequestPointerLock", "webkitRequestPointerLock"],
+  ["exitPointerLock", "mozExitPointerLock", "webkitExitPointerLock", "webkitExitPointerLock"]);
 
-Promise.prototype.log = function (args) {
+Promise.prototype.log = function(args){
   args = args || [];
-  return this.then(function (obj) {
+  return this.then(function(obj) {
     console.log.apply(console, args.concat([obj]));
     return obj;
   });
@@ -44084,11 +43255,12 @@ Promise.prototype.log = function (args) {
   async/await whenever it perpetuates out into the cosmos.
 */
 function promisify(thunk, defaultResults) {
-  return new Promise(function (resolve, reject) {
-    var returnValue = thunk(function (err, results) {
-      if (err) {
+  return new Promise((resolve, reject) => {
+    const returnValue = thunk(function(err, results) {
+      if(err){
         reject(err);
-      } else {
+      }
+      else{
         resolve(results || returnValue || defaultResults);
       }
     });
@@ -44099,8 +43271,9 @@ function setSetting(settingName, val) {
   if (window.localStorage && val) {
     try {
       window.localStorage.setItem(settingName, JSON.stringify(val));
-    } catch (exp) {
-      console.error("setSetting", settingName, val, typeof val === "undefined" ? "undefined" : _typeof(val), exp);
+    }
+    catch (exp) {
+      console.error("setSetting", settingName, val, typeof (val), exp);
     }
   }
 }
@@ -44109,84 +43282,75 @@ function standardUnlockBehavior() {
   if (isMobile) {
     Orientation.unlock();
     return Promise.resolve();
-  } else {
-    return PointerLock.exit().catch(function (exp) {
-      return console.warn("PointerLock exit failed", exp);
-    });
+  }
+  else{
+    return PointerLock.exit()
+      .catch((exp) => console.warn("PointerLock exit failed", exp));
   }
 }
 
 function standardExitFullScreenBehavior() {
-  return standardUnlockBehavior().then(function () {
-    return FullScreen.exit();
-  }).catch(function (exp) {
-    return console.warn("FullScreen failed", exp);
-  });
+  return standardUnlockBehavior()
+    .then(() => FullScreen.exit())
+    .catch((exp) => console.warn("FullScreen failed", exp));
 }
 
 function standardLockBehavior(elem) {
-  if (isiOS$1) {
+  if(isiOS$1) {
     return Promise.resolve(elem);
-  } else if (isMobile) {
-    return Orientation.lock(elem).catch(function (exp) {
-      return console.warn("OrientationLock failed", exp);
-    });
-  } else {
-    return PointerLock.request(elem).catch(function (exp) {
-      return console.warn("PointerLock failed", exp);
-    });
+  }
+  else if (isMobile) {
+    return Orientation.lock(elem)
+      .catch((exp) => console.warn("OrientationLock failed", exp));
+  }
+  else {
+    return PointerLock.request(elem)
+      .catch((exp) => console.warn("PointerLock failed", exp));
   }
 }
 
 function standardFullScreenBehavior(elem) {
-  return FullScreen.request(elem).catch(function (exp) {
-    return console.warn("FullScreen failed", exp);
-  }).then(standardLockBehavior);
+  return FullScreen.request(elem)
+    .catch((exp) => console.warn("FullScreen failed", exp))
+    .then(standardLockBehavior);
 }
 
-var Workerize = function (_EventDispatcher) {
-  inherits(Workerize, _EventDispatcher);
-  createClass(Workerize, null, [{
-    key: "createWorker",
-    value: function createWorker(script, stripFunc) {
+class Workerize extends EventDispatcher {
 
-      if (typeof script === "function") {
-        script = script.toString();
-      }
+  static createWorker(script, stripFunc) {
 
-      if (stripFunc) {
-        script = script.trim();
-        var start = script.indexOf('{');
-        script = script.substring(start + 1, script.length - 1);
-      }
+    if (typeof script === "function") {
+      script = script.toString();
+    }
 
-      var blob = new Blob([script], {
+    if (stripFunc) {
+      script = script.trim();
+      var start = script.indexOf('{');
+      script = script.substring(start + 1, script.length - 1);
+    }
+
+    var blob = new Blob([script], {
         type: "text/javascript"
       }),
-          dataURI = URL.createObjectURL(blob);
+      dataURI = URL.createObjectURL(blob);
 
-      return new Worker(dataURI);
-    }
-  }]);
+    return new Worker(dataURI);
+  }
 
-  function Workerize(func) {
-    classCallCheck(this, Workerize);
-
+  constructor(func) {
+    super();
     // First, rebuild the script that defines the class. Since we're dealing
     // with pre-ES6 browsers, we have to use ES5 syntax in the script, or invoke
     // a conversion at a point post-script reconstruction, pre-workerization.
 
     // start with the constructor function
-    var _this = possibleConstructorReturn(this, (Workerize.__proto__ || Object.getPrototypeOf(Workerize)).call(this));
-
     var script = func.toString(),
-
-    // strip out the name in a way that Internet Explorer also understands
-    // (IE doesn't have the Function.name property supported by Chrome and
-    // Firefox)
-    matches = script.match(/function\s+(\w+)\s*\(/),
-        name = matches[1],
-        k;
+      // strip out the name in a way that Internet Explorer also understands
+      // (IE doesn't have the Function.name property supported by Chrome and
+      // Firefox)
+      matches = script.match(/function\s+(\w+)\s*\(/),
+      name = matches[1],
+      k;
 
     // then rebuild the member methods
     for (k in func.prototype) {
@@ -44203,21 +43367,35 @@ var Workerize = function (_EventDispatcher) {
     // Create a mapper from the events that the class defines to the worker-side
     // postMessage method, to send message to the UI thread that one of the
     // events occured.
-    script += "\n  if(instance.addEventListener){\n" + "    self.args = [null, null];\n" + "    for(var k in instance.listeners) {\n" + "      instance.addEventListener(k, function(eventName, args){\n" + "        self.args[0] = eventName;\n" + "        self.args[1] = args;\n" + "        postMessage(self.args);\n" + "      }.bind(this, k));\n" + "    }\n" + "  }";
+    script += "\n  if(instance.addEventListener){\n" +
+      "    self.args = [null, null];\n" +
+      "    for(var k in instance.listeners) {\n" +
+      "      instance.addEventListener(k, function(eventName, args){\n" +
+      "        self.args[0] = eventName;\n" +
+      "        self.args[1] = args;\n" +
+      "        postMessage(self.args);\n" +
+      "      }.bind(this, k));\n" +
+      "    }\n" +
+      "  }";
 
     // Create a mapper from the worker-side onmessage event, to receive messages
     // from the UI thread that methods were called on the object.
-    script += "\n\n  onmessage = function(evt){\n" + "    var f = evt.data[0],\n" + "        t = instance[f];\n" + "    if(t){\n" + "      t.call(instance, evt.data[1]);\n" + "    }\n" + "  };\n\n" + "})();";
+    script += "\n\n  onmessage = function(evt){\n" +
+      "    var f = evt.data[0],\n" +
+      "        t = instance[f];\n" +
+      "    if(t){\n" +
+      "      t.call(instance, evt.data[1]);\n" +
+      "    }\n" +
+      "  };\n\n" +
+      "})();";
 
     // The binary-large-object can be used to convert the script from text to a
     // data URI, because workers can only be created from same-origin URIs.
-    _this.worker = Workerize.createWorker(script, false);
+    this.worker = Workerize.createWorker(script, false);
 
-    _this.args = [null, null];
+    this.args = [null, null];
 
-    _this.worker.onmessage = function (e) {
-      return _this.emit(e.data[0], e.data[1]);
-    };
+    this.worker.onmessage = (e) => this.emit(e.data[0], e.data[1]);
 
     // create mappers from the UI-thread side method calls to the UI-thread side
     // postMessage method, to inform the worker thread that methods were called,
@@ -44227,49 +43405,45 @@ var Workerize = function (_EventDispatcher) {
       // different way, to be able to pass messages across the thread boundary.
       if (k !== "addEventListener" && k[0] !== '_') {
         // make the name of the function the first argument, no matter what.
-        _this[k] = _this.methodShim.bind(_this, k);
+        this[k] = this.methodShim.bind(this, k);
       }
     }
 
-    _this.ready = true;
-    return _this;
+    this.ready = true;
   }
 
-  createClass(Workerize, [{
-    key: "methodShim",
-    value: function methodShim(eventName, args) {
+  methodShim(eventName, args) {
 
-      this.args[0] = eventName;
-      this.args[1] = args;
-      this.worker.postMessage(this.args);
-    }
-  }]);
-  return Workerize;
-}(EventDispatcher);
+    this.args[0] = eventName;
+    this.args[1] = args;
+    this.worker.postMessage(this.args);
+  }
+}
 
 var index$4 = {
-  AsyncLockRequest: AsyncLockRequest,
-  cache: cache,
-  deleteSetting: deleteSetting,
-  findProperty: findProperty,
-  FullScreen: FullScreen,
-  getSetting: getSetting,
-  haxClass: haxClass,
+  AsyncLockRequest,
+  cache,
+  deleteSetting,
+  findProperty,
+  FullScreen,
+  getSetting,
+  haxClass,
   haxFunction: haxClass$1,
-  identity: identity,
-  immutable: immutable,
-  isTimestampDeltaValid: isTimestampDeltaValid,
-  mutable: mutable,
-  Orientation: Orientation,
-  PointerLock: PointerLock,
-  promisify: promisify,
-  setSetting: setSetting,
-  standardExitFullScreenBehavior: standardExitFullScreenBehavior,
-  standardFullScreenBehavior: standardFullScreenBehavior,
-  standardLockBehavior: standardLockBehavior,
-  standardUnlockBehavior: standardUnlockBehavior,
-  Workerize: Workerize
+  identity,
+  immutable,
+  isTimestampDeltaValid,
+  mutable,
+  Orientation,
+  PointerLock,
+  promisify,
+  setSetting,
+  standardExitFullScreenBehavior,
+  standardFullScreenBehavior,
+  standardLockBehavior,
+  standardUnlockBehavior,
+  Workerize
 };
+
 
 var util = Object.freeze({
 	AsyncLockRequest: AsyncLockRequest,
@@ -44296,145 +43470,148 @@ var util = Object.freeze({
 	default: index$4
 });
 
-BufferGeometry.prototype.center = Geometry.prototype.center = function () {
-  this.computeBoundingBox();
-  var b = this.boundingBox,
-      dx = (b.max.x + b.min.x) / 2,
-      dy = (b.max.y + b.min.y) / 2,
-      dz = (b.max.z + b.min.z) / 2;
-  return this.offset(-dx, -dy, -dz);
-};
+BufferGeometry.prototype.center =
+Geometry.prototype.center =
+  function() {
+    this.computeBoundingBox();
+    const b = this.boundingBox,
+          dx = (b.max.x + b.min.x) / 2,
+          dy = (b.max.y + b.min.y) / 2,
+          dz = (b.max.z + b.min.z) / 2;
+    return this.offset(-dx, -dy, -dz);
+  };
 
-BufferGeometry.prototype.colored = Geometry.prototype.colored = Mesh.prototype.colored = function (color, options) {
-  return colored(this, color, options);
-};
+BufferGeometry.prototype.colored =
+Geometry.prototype.colored =
+Mesh.prototype.colored =
+  function(color, options){
+    return colored(this, color, options);
+  };
 
-CubeTextureLoader.prototype.load = function (urls, onLoad, onProgress, onError) {
+CubeTextureLoader.prototype.load = function( urls, onLoad, onProgress, onError ) {
   var texture = new CubeTexture();
-  var loader = new ImageLoader(this.manager);
-  loader.setCrossOrigin(this.crossOrigin);
-  loader.setPath(this.path);
+  var loader = new ImageLoader( this.manager );
+  loader.setCrossOrigin( this.crossOrigin );
+  loader.setPath( this.path );
   var loaded = 0;
 
-  for (var i = 0; i < urls.length; ++i) {
-    loader.load(urls[i], function (image) {
-      texture.images[i] = image;
+  for ( var i = 0; i < urls.length; ++ i ) {
+    loader.load( urls[ i ], (function ( image ) {
+      texture.images[ i ] = image;
       ++loaded;
-      if (loaded === 6) {
+      if ( loaded === 6 ) {
         texture.needsUpdate = true;
-        if (onLoad) onLoad(texture);
+        if ( onLoad ) onLoad( texture );
       }
-    }.bind(null, i), onProgress, onError);
+    }).bind(null, i), onProgress, onError );
   }
 
   return texture;
 };
 
-Object3D.prototype.emit = EventDispatcher.prototype.emit = function (evt, obj) {
-  if (!obj) {
+Object3D.prototype.emit = EventDispatcher.prototype.emit = function(evt, obj) {
+  if(!obj) {
     obj = {};
   }
 
-  if ((typeof obj === "undefined" ? "undefined" : _typeof(obj)) === "object" && !(obj instanceof Event)) {
+  if(typeof obj === "object" && !(obj instanceof Event)){
     obj.type = evt;
 
-    if (obj.defaultPrevented === undefined) {
+    if(obj.defaultPrevented === undefined){
       obj.defaultPrevented = false;
-      obj.preventDefault = function () {
-        return obj.defaultPrevented = true;
-      };
+      obj.preventDefault = () => obj.defaultPrevented = true;
     }
   }
 
   this.dispatchEvent(obj);
 };
 
-Object3D.prototype.dispatchEvent = EventDispatcher.prototype.dispatchEvent = function (evt) {
-  if (this._listeners === undefined) {
+Object3D.prototype.dispatchEvent = EventDispatcher.prototype.dispatchEvent = function(evt) {
+  if (this._listeners === undefined ){
     return;
   }
 
   var listeners = this._listeners;
-  var listenerArray = listeners[evt.type];
+  var listenerArray = listeners[ evt.type ];
 
-  if (listenerArray !== undefined) {
+  if ( listenerArray !== undefined ) {
 
-    if (!(evt instanceof Event)) {
+    if(!(evt instanceof Event)) {
       evt.target = this;
     }
 
-    var array = [],
-        i = 0;
+    var array = [], i = 0;
     var length = listenerArray.length;
 
-    for (i = 0; i < length; i++) {
+    for ( i = 0; i < length; i ++ ) {
 
-      array[i] = listenerArray[i];
+      array[ i ] = listenerArray[ i ];
+
     }
 
-    for (i = 0; i < length; i++) {
+    for ( i = 0; i < length; i ++ ) {
 
-      array[i].call(this, evt);
+      array[ i ].call( this, evt );
+
     }
+
   }
 };
 
-Object3D.prototype.watch = EventDispatcher.prototype.watch = function (child, events) {
-  var _this = this;
-
-  if (!(events instanceof Array)) {
+Object3D.prototype.watch = EventDispatcher.prototype.watch = function(child, events) {
+  if(!(events instanceof Array)) {
     events = [events];
   }
-  events.forEach(function (event) {
-    return child.addEventListener(event, _this.dispatchEvent.bind(_this));
-  });
+  events.forEach((event) =>
+    child.addEventListener(event, this.dispatchEvent.bind(this)));
   return this;
 };
 
-Object3D.prototype.route = EventDispatcher.prototype.route = function (events, listener) {
-  var _this2 = this;
-
-  events.forEach(function (event) {
-    return _this2.addEventListener(event, listener);
-  });
+Object3D.prototype.route = EventDispatcher.prototype.route = function(events, listener) {
+  events.forEach((event) =>
+    this.addEventListener(event, listener));
   return this;
 };
 
-Object3D.prototype.on = EventDispatcher.prototype.on = function (event, listener) {
+Object3D.prototype.on = EventDispatcher.prototype.on = function(event, listener) {
   this.addEventListener(event, listener);
   return this;
 };
 
-Matrix4.prototype.toString = function (digits) {
-  if (digits === undefined) {
+Matrix4.prototype.toString = function(digits) {
+  if(digits === undefined){
     digits = 10;
   }
   this.transpose();
   var parts = this.toArray();
   this.transpose();
   if (digits !== undefined) {
-    for (var i = 0; i < parts.length; ++i) {}
+    for (let i = 0; i < parts.length; ++i) {
+    }
   }
   var output = "";
-  for (var _i = 0; _i < parts.length; ++_i) {
-    if (_i % 4 === 0) {
+  for (let i = 0; i < parts.length; ++i) {
+    if ((i % 4) === 0) {
       output += "| ";
     }
-    if (Math.sign(parts[_i]) === -1) {
+    if(Math.sign(parts[i]) === -1){
       output += "-";
-    } else {
+    }
+    else{
       output += " ";
     }
 
-    if (parts[_i] !== null && parts[_i] !== undefined) {
-      output += Math.abs(parts[_i]).toFixed(digits);
-    } else {
+    if (parts[i] !== null && parts[i] !== undefined) {
+      output += Math.abs(parts[i]).toFixed(digits);
+    }
+    else {
       output += "undefined".substring(0, digits);
     }
 
-    if (_i % 4 === 3) {
+    if ((i % 4) === 3) {
       output += " |\n";
-    } else {
+    }
+    else {
       output += ", ";
     }
   }
@@ -44449,176 +43626,170 @@ Matrix4.prototype.toString = function (digits) {
  * Converted to ES2015 by @capnmidnight
  *
  */
-var MTLLoader = function (_EventDispatcher) {
-    inherits(MTLLoader, _EventDispatcher);
+class MTLLoader extends EventDispatcher {
 
-    function MTLLoader(manager) {
-        classCallCheck(this, MTLLoader);
+  constructor ( manager ) {
 
-        var _this = possibleConstructorReturn(this, (MTLLoader.__proto__ || Object.getPrototypeOf(MTLLoader)).call(this));
+    super();
 
-        _this.manager = manager !== undefined ? manager : DefaultLoadingManager;
+    this.manager = ( manager !== undefined ) ? manager : DefaultLoadingManager;
 
-        return _this;
+  }
+
+  /**
+   * Loads and parses a MTL asset from a URL.
+   *
+   * @param {String} url - URL to the MTL file.
+   * @param {Function} [onLoad] - Callback invoked with the loaded object.
+   * @param {Function} [onProgress] - Callback for download progress.
+   * @param {Function} [onError] - Callback for download errors.
+   *
+   * @see setPath setTexturePath
+   *
+   * @note In order for relative texture references to resolve correctly
+   * you must call setPath and/or setTexturePath explicitly prior to load.
+   */
+  load ( url, onLoad, onProgress, onError ) {
+
+    var scope = this;
+
+    var loader = new FileLoader( this.manager );
+    loader.setPath( this.path );
+    loader.load( url, function ( text ) {
+
+      onLoad( scope.parse( text ) );
+
+    }, onProgress, onError );
+
+  }
+
+  /**
+   * Set base path for resolving references.
+   * If set this path will be prepended to each loaded and found reference.
+   *
+   * @see setTexturePath
+   * @param {String} path
+   *
+   * @example
+   *     mtlLoader.setPath( 'assets/obj/' );
+   *     mtlLoader.load( 'my.mtl', ... );
+   */
+  setPath ( path ) {
+
+    this.path = path;
+
+  }
+
+  /**
+   * Set base path for resolving texture references.
+   * If set this path will be prepended found texture reference.
+   * If not set and setPath is, it will be used as texture base path.
+   *
+   * @see setPath
+   * @param {String} path
+   *
+   * @example
+   *     mtlLoader.setPath( 'assets/obj/' );
+   *     mtlLoader.setTexturePath( 'assets/textures/' );
+   *     mtlLoader.load( 'my.mtl', ... );
+   */
+  setTexturePath ( path ) {
+
+    this.texturePath = path;
+
+  }
+
+  setBaseUrl ( path ) {
+
+    console.warn( 'MTLLoader: .setBaseUrl() is deprecated. Use .setTexturePath( path ) for texture path or .setPath( path ) for general base path instead.' );
+
+    this.setTexturePath( path );
+
+  }
+
+  setCrossOrigin ( value ) {
+
+    this.crossOrigin = value;
+
+  }
+
+  setMaterialOptions ( value ) {
+
+    this.materialOptions = value;
+
+  }
+
+  /**
+   * Parses a MTL file.
+   *
+   * @param {String} text - Content of MTL file
+   * @return {MTLLoader.MaterialCreator}
+   *
+   * @see setPath setTexturePath
+   *
+   * @note In order for relative texture references to resolve correctly
+   * you must call setPath and/or setTexturePath explicitly prior to parse.
+   */
+  parse ( text ) {
+
+    var lines = text.split( '\n' );
+    var info = {};
+    var delimiter_pattern = /\s+/;
+    var materialsInfo = {};
+
+    for ( var i = 0; i < lines.length; i ++ ) {
+
+      var line = lines[ i ];
+      line = line.trim();
+
+      if ( line.length === 0 || line.charAt( 0 ) === '#' ) {
+
+        // Blank line or comment ignore
+        continue;
+
+      }
+
+      var pos = line.indexOf( ' ' );
+
+      var key = ( pos >= 0 ) ? line.substring( 0, pos ) : line;
+      key = key.toLowerCase();
+
+      var value = ( pos >= 0 ) ? line.substring( pos + 1 ) : '';
+      value = value.trim();
+
+      if ( key === 'newmtl' ) {
+
+        // New material
+
+        info = { name: value };
+        materialsInfo[ value ] = info;
+
+      } else if ( info ) {
+
+        if ( key === 'ka' || key === 'kd' || key === 'ks' ) {
+
+          var ss = value.split( delimiter_pattern, 3 );
+          info[ key ] = [ parseFloat( ss[ 0 ] ), parseFloat( ss[ 1 ] ), parseFloat( ss[ 2 ] ) ];
+
+        } else {
+
+          info[ key ] = value;
+
+        }
+
+      }
+
     }
 
-    /**
-     * Loads and parses a MTL asset from a URL.
-     *
-     * @param {String} url - URL to the MTL file.
-     * @param {Function} [onLoad] - Callback invoked with the loaded object.
-     * @param {Function} [onProgress] - Callback for download progress.
-     * @param {Function} [onError] - Callback for download errors.
-     *
-     * @see setPath setTexturePath
-     *
-     * @note In order for relative texture references to resolve correctly
-     * you must call setPath and/or setTexturePath explicitly prior to load.
-     */
+    var materialCreator = new MaterialCreator( this.texturePath || this.path, this.materialOptions );
+    materialCreator.setCrossOrigin( this.crossOrigin );
+    materialCreator.setManager( this.manager );
+    materialCreator.setMaterials( materialsInfo );
+    return materialCreator;
 
+  }
 
-    createClass(MTLLoader, [{
-        key: 'load',
-        value: function load(url, onLoad, onProgress, onError) {
-
-            var scope = this;
-
-            var loader = new FileLoader(this.manager);
-            loader.setPath(this.path);
-            loader.load(url, function (text) {
-
-                onLoad(scope.parse(text));
-            }, onProgress, onError);
-        }
-
-        /**
-         * Set base path for resolving references.
-         * If set this path will be prepended to each loaded and found reference.
-         *
-         * @see setTexturePath
-         * @param {String} path
-         *
-         * @example
-         *     mtlLoader.setPath( 'assets/obj/' );
-         *     mtlLoader.load( 'my.mtl', ... );
-         */
-
-    }, {
-        key: 'setPath',
-        value: function setPath(path) {
-
-            this.path = path;
-        }
-
-        /**
-         * Set base path for resolving texture references.
-         * If set this path will be prepended found texture reference.
-         * If not set and setPath is, it will be used as texture base path.
-         *
-         * @see setPath
-         * @param {String} path
-         *
-         * @example
-         *     mtlLoader.setPath( 'assets/obj/' );
-         *     mtlLoader.setTexturePath( 'assets/textures/' );
-         *     mtlLoader.load( 'my.mtl', ... );
-         */
-
-    }, {
-        key: 'setTexturePath',
-        value: function setTexturePath(path) {
-
-            this.texturePath = path;
-        }
-    }, {
-        key: 'setBaseUrl',
-        value: function setBaseUrl(path) {
-
-            console.warn('MTLLoader: .setBaseUrl() is deprecated. Use .setTexturePath( path ) for texture path or .setPath( path ) for general base path instead.');
-
-            this.setTexturePath(path);
-        }
-    }, {
-        key: 'setCrossOrigin',
-        value: function setCrossOrigin(value) {
-
-            this.crossOrigin = value;
-        }
-    }, {
-        key: 'setMaterialOptions',
-        value: function setMaterialOptions(value) {
-
-            this.materialOptions = value;
-        }
-
-        /**
-         * Parses a MTL file.
-         *
-         * @param {String} text - Content of MTL file
-         * @return {MTLLoader.MaterialCreator}
-         *
-         * @see setPath setTexturePath
-         *
-         * @note In order for relative texture references to resolve correctly
-         * you must call setPath and/or setTexturePath explicitly prior to parse.
-         */
-
-    }, {
-        key: 'parse',
-        value: function parse(text) {
-
-            var lines = text.split('\n');
-            var info = {};
-            var delimiter_pattern = /\s+/;
-            var materialsInfo = {};
-
-            for (var i = 0; i < lines.length; i++) {
-
-                var line = lines[i];
-                line = line.trim();
-
-                if (line.length === 0 || line.charAt(0) === '#') {
-
-                    // Blank line or comment ignore
-                    continue;
-                }
-
-                var pos = line.indexOf(' ');
-
-                var key = pos >= 0 ? line.substring(0, pos) : line;
-                key = key.toLowerCase();
-
-                var value = pos >= 0 ? line.substring(pos + 1) : '';
-                value = value.trim();
-
-                if (key === 'newmtl') {
-
-                    // New material
-
-                    info = { name: value };
-                    materialsInfo[value] = info;
-                } else if (info) {
-
-                    if (key === 'ka' || key === 'kd' || key === 'ks') {
-
-                        var ss = value.split(delimiter_pattern, 3);
-                        info[key] = [parseFloat(ss[0]), parseFloat(ss[1]), parseFloat(ss[2])];
-                    } else {
-
-                        info[key] = value;
-                    }
-                }
-            }
-
-            var materialCreator = new MaterialCreator(this.texturePath || this.path, this.materialOptions);
-            materialCreator.setCrossOrigin(this.crossOrigin);
-            materialCreator.setManager(this.manager);
-            materialCreator.setMaterials(materialsInfo);
-            return materialCreator;
-        }
-    }]);
-    return MTLLoader;
-}(EventDispatcher);
+}
 
 /**
  * Create a new MTLLoader.MaterialCreator
@@ -44635,391 +43806,418 @@ var MTLLoader = function (_EventDispatcher) {
  * @constructor
  */
 
-var MaterialCreator = function () {
-    function MaterialCreator(baseUrl, options) {
-        classCallCheck(this, MaterialCreator);
+class MaterialCreator {
 
+  constructor ( baseUrl, options ) {
 
-        this.baseUrl = baseUrl || '';
-        this.options = options;
-        this.materialsInfo = {};
-        this.materials = {};
-        this.materialsArray = [];
-        this.nameLookup = {};
+    this.baseUrl = baseUrl || '';
+    this.options = options;
+    this.materialsInfo = {};
+    this.materials = {};
+    this.materialsArray = [];
+    this.nameLookup = {};
 
-        this.side = this.options && this.options.side ? this.options.side : FrontSide;
-        this.wrap = this.options && this.options.wrap ? this.options.wrap : RepeatWrapping;
+    this.side = ( this.options && this.options.side ) ? this.options.side : FrontSide;
+    this.wrap = ( this.options && this.options.wrap ) ? this.options.wrap : RepeatWrapping;
+
+  }
+
+  setCrossOrigin ( value ) {
+
+    this.crossOrigin = value;
+
+  }
+
+  setManager ( value ) {
+
+    this.manager = value;
+
+  }
+
+  setMaterials ( materialsInfo ) {
+
+    this.materialsInfo = this.convert( materialsInfo );
+    this.materials = {};
+    this.materialsArray = [];
+    this.nameLookup = {};
+
+  }
+
+  convert ( materialsInfo ) {
+
+    if ( ! this.options ) return materialsInfo;
+
+    var converted = {};
+
+    for ( var mn in materialsInfo ) {
+
+      // Convert materials info into normalized form based on options
+
+      var mat = materialsInfo[ mn ];
+
+      var covmat = {};
+
+      converted[ mn ] = covmat;
+
+      for ( var prop in mat ) {
+
+        var save = true;
+        var value = mat[ prop ];
+        var lprop = prop.toLowerCase();
+
+        switch ( lprop ) {
+
+          case 'kd':
+          case 'ka':
+          case 'ks':
+
+            // Diffuse color (color under white light) using RGB values
+
+            if ( this.options && this.options.normalizeRGB ) {
+
+              value = [ value[ 0 ] / 255, value[ 1 ] / 255, value[ 2 ] / 255 ];
+
+            }
+
+            if ( this.options && this.options.ignoreZeroRGBs ) {
+
+              if ( value[ 0 ] === 0 && value[ 1 ] === 0 && value[ 2 ] === 0 ) {
+
+                // ignore
+
+                save = false;
+
+              }
+
+            }
+
+            break;
+
+          default:
+
+            break;
+        }
+
+        if ( save ) {
+
+          covmat[ lprop ] = value;
+
+        }
+
+      }
+
     }
 
-    createClass(MaterialCreator, [{
-        key: 'setCrossOrigin',
-        value: function setCrossOrigin(value) {
+    return converted;
 
-            this.crossOrigin = value;
+  }
+
+  preload () {
+
+    for ( var mn in this.materialsInfo ) {
+
+      this.create( mn );
+
+    }
+
+  }
+
+  getIndex ( materialName ) {
+
+    return this.nameLookup[ materialName ];
+
+  }
+
+  getAsArray () {
+
+    var index = 0;
+
+    for ( var mn in this.materialsInfo ) {
+
+      this.materialsArray[ index ] = this.create( mn );
+      this.nameLookup[ mn ] = index;
+      index ++;
+
+    }
+
+    return this.materialsArray;
+
+  }
+
+  create ( materialName ) {
+
+    if ( this.materials[ materialName ] === undefined ) {
+
+      this.createMaterial_( materialName );
+
+    }
+
+    return this.materials[ materialName ];
+
+  }
+
+  createMaterial_ ( materialName ) {
+
+    // Create material
+
+    var TMaterial = MeshPhongMaterial;
+    var scope = this;
+    var mat = this.materialsInfo[ materialName ];
+    var params = {
+
+      name: materialName,
+      side: this.side
+
+    };
+
+    var resolveURL = function ( baseUrl, url ) {
+
+      if ( typeof url !== 'string' || url === '' )
+        return '';
+
+      // Absolute URL
+      if ( /^https?:\/\//i.test( url ) ) {
+        return url;
+      }
+
+      return baseUrl + url;
+    };
+
+    function setMapForType ( mapType, value ) {
+
+      if ( params[ mapType ] ) return; // Keep the first encountered texture
+
+      var texParams = scope.getTextureParams( value, params );
+      var map = scope.loadTexture( resolveURL( scope.baseUrl, texParams.url ) );
+
+      map.repeat.copy( texParams.scale );
+      map.offset.copy( texParams.offset );
+
+      map.wrapS = scope.wrap;
+      map.wrapT = scope.wrap;
+
+      params[ mapType ] = map;
+    }
+
+    for ( var prop in mat ) {
+
+      var value = mat[ prop ];
+
+      if ( value === '' ) continue;
+
+      switch ( prop.toLowerCase() ) {
+
+        // Ns is material specular exponent
+
+        case 'kd':
+
+          // Diffuse color (color under white light) using RGB values
+
+          params.color = new Color().fromArray( value );
+
+          break;
+
+        case 'ks':
+
+          // Specular color (color when light is reflected from shiny surface) using RGB values
+          params.specular = new Color().fromArray( value );
+
+          break;
+
+        case 'map_kd':
+
+          // Diffuse texture map
+
+          setMapForType( "map", value );
+
+          break;
+
+        case 'map_ks':
+
+          // Specular map
+
+          setMapForType( "specularMap", value );
+
+          break;
+
+        case 'map_bump':
+        case 'bump':
+
+          // Bump texture map
+
+          setMapForType( "bumpMap", value );
+
+          break;
+
+        case 'ns':
+
+          // The specular exponent (defines the focus of the specular highlight)
+          // A high exponent results in a tight, concentrated highlight. Ns values normally range from 0 to 1000.
+
+          params.shininess = parseFloat( value );
+
+          break;
+
+        case 'd':
+
+          if ( value < 1 ) {
+
+            params.opacity = value;
+            params.transparent = true;
+
+          }
+
+          break;
+
+        case 'illum':
+
+          value = parseFloat(value);
+
+          if ( value === MTLLoader.COLOR_ON_AND_AMBIENT_OFF ) {
+
+            TMaterial = MeshBasicMaterial;
+
+          }
+
+          break;
+
+        case 'Tr':
+
+          if ( value > 0 ) {
+
+            params.opacity = 1 - value;
+            params.transparent = true;
+
+          }
+
+          break;
+
+        default:
+          break;
+
+      }
+
+    }
+
+    if ( TMaterial === MeshBasicMaterial ) {
+
+      [ "shininess", "specular" ].forEach( function ( attribute ) {
+
+        if ( attribute in params ) {
+
+          delete params[attribute];
+
         }
-    }, {
-        key: 'setManager',
-        value: function setManager(value) {
 
-            this.manager = value;
-        }
-    }, {
-        key: 'setMaterials',
-        value: function setMaterials(materialsInfo) {
+      } );
 
-            this.materialsInfo = this.convert(materialsInfo);
-            this.materials = {};
-            this.materialsArray = [];
-            this.nameLookup = {};
-        }
-    }, {
-        key: 'convert',
-        value: function convert(materialsInfo) {
+    }
 
-            if (!this.options) return materialsInfo;
+    this.materials[ materialName ] = new TMaterial( params );
+    return this.materials[ materialName ];
+  }
 
-            var converted = {};
+  getTextureParams ( value, matParams ) {
 
-            for (var mn in materialsInfo) {
+    var texParams = {
 
-                // Convert materials info into normalized form based on options
+      scale: new Vector2( 1, 1 ),
+      offset: new Vector2( 0, 0 ),
 
-                var mat = materialsInfo[mn];
+     };
 
-                var covmat = {};
+    var items = value.split(/\s+/);
+    var pos;
 
-                converted[mn] = covmat;
+    pos = items.indexOf('-bm');
+    if (pos >= 0) {
 
-                for (var prop in mat) {
+      matParams.bumpScale = parseFloat( items[pos+1] );
+      items.splice( pos, 2 );
 
-                    var save = true;
-                    var value = mat[prop];
-                    var lprop = prop.toLowerCase();
+    }
 
-                    switch (lprop) {
+    pos = items.indexOf('-s');
+    if (pos >= 0) {
 
-                        case 'kd':
-                        case 'ka':
-                        case 'ks':
+      texParams.scale.set( parseFloat( items[pos+1] ), parseFloat( items[pos+2] ) );
+      items.splice( pos, 4 ); // we expect 3 parameters here!
 
-                            // Diffuse color (color under white light) using RGB values
+    }
 
-                            if (this.options && this.options.normalizeRGB) {
+    pos = items.indexOf('-o');
+    if (pos >= 0) {
 
-                                value = [value[0] / 255, value[1] / 255, value[2] / 255];
-                            }
+      texParams.offset.set( parseFloat( items[pos+1] ), parseFloat( items[pos+2] ) );
+      items.splice( pos, 4 ); // we expect 3 parameters here!
 
-                            if (this.options && this.options.ignoreZeroRGBs) {
+    }
 
-                                if (value[0] === 0 && value[1] === 0 && value[2] === 0) {
+    texParams.url = items.join(' ').trim();
+    return texParams;
 
-                                    // ignore
+  }
 
-                                    save = false;
-                                }
-                            }
+  loadTexture ( url, mapping, onLoad, onProgress, onError ) {
 
-                            break;
+    var texture;
+    var loader = Loader.Handlers.get( url );
+    var manager = ( this.manager !== undefined ) ? this.manager : DefaultLoadingManager;
 
-                        default:
+    if ( loader === null ) {
 
-                            break;
-                    }
+      loader = new TextureLoader( manager );
 
-                    if (save) {
+    }
 
-                        covmat[lprop] = value;
-                    }
-                }
-            }
+    if ( loader.setCrossOrigin ) loader.setCrossOrigin( this.crossOrigin );
+    texture = loader.load( url, onLoad, onProgress, onError );
 
-            return converted;
-        }
-    }, {
-        key: 'preload',
-        value: function preload() {
+    if ( mapping !== undefined ) texture.mapping = mapping;
 
-            for (var mn in this.materialsInfo) {
+    return texture;
 
-                this.create(mn);
-            }
-        }
-    }, {
-        key: 'getIndex',
-        value: function getIndex(materialName) {
+  }
 
-            return this.nameLookup[materialName];
-        }
-    }, {
-        key: 'getAsArray',
-        value: function getAsArray() {
-
-            var index = 0;
-
-            for (var mn in this.materialsInfo) {
-
-                this.materialsArray[index] = this.create(mn);
-                this.nameLookup[mn] = index;
-                index++;
-            }
-
-            return this.materialsArray;
-        }
-    }, {
-        key: 'create',
-        value: function create(materialName) {
-
-            if (this.materials[materialName] === undefined) {
-
-                this.createMaterial_(materialName);
-            }
-
-            return this.materials[materialName];
-        }
-    }, {
-        key: 'createMaterial_',
-        value: function createMaterial_(materialName) {
-
-            // Create material
-
-            var TMaterial = MeshPhongMaterial;
-            var scope = this;
-            var mat = this.materialsInfo[materialName];
-            var params = {
-
-                name: materialName,
-                side: this.side
-
-            };
-
-            var resolveURL = function resolveURL(baseUrl, url) {
-
-                if (typeof url !== 'string' || url === '') return '';
-
-                // Absolute URL
-                if (/^https?:\/\//i.test(url)) {
-                    return url;
-                }
-
-                return baseUrl + url;
-            };
-
-            function setMapForType(mapType, value) {
-
-                if (params[mapType]) return; // Keep the first encountered texture
-
-                var texParams = scope.getTextureParams(value, params);
-                var map = scope.loadTexture(resolveURL(scope.baseUrl, texParams.url));
-
-                map.repeat.copy(texParams.scale);
-                map.offset.copy(texParams.offset);
-
-                map.wrapS = scope.wrap;
-                map.wrapT = scope.wrap;
-
-                params[mapType] = map;
-            }
-
-            for (var prop in mat) {
-
-                var value = mat[prop];
-
-                if (value === '') continue;
-
-                switch (prop.toLowerCase()) {
-
-                    // Ns is material specular exponent
-
-                    case 'kd':
-
-                        // Diffuse color (color under white light) using RGB values
-
-                        params.color = new Color().fromArray(value);
-
-                        break;
-
-                    case 'ks':
-
-                        // Specular color (color when light is reflected from shiny surface) using RGB values
-                        params.specular = new Color().fromArray(value);
-
-                        break;
-
-                    case 'map_kd':
-
-                        // Diffuse texture map
-
-                        setMapForType("map", value);
-
-                        break;
-
-                    case 'map_ks':
-
-                        // Specular map
-
-                        setMapForType("specularMap", value);
-
-                        break;
-
-                    case 'map_bump':
-                    case 'bump':
-
-                        // Bump texture map
-
-                        setMapForType("bumpMap", value);
-
-                        break;
-
-                    case 'ns':
-
-                        // The specular exponent (defines the focus of the specular highlight)
-                        // A high exponent results in a tight, concentrated highlight. Ns values normally range from 0 to 1000.
-
-                        params.shininess = parseFloat(value);
-
-                        break;
-
-                    case 'd':
-
-                        if (value < 1) {
-
-                            params.opacity = value;
-                            params.transparent = true;
-                        }
-
-                        break;
-
-                    case 'illum':
-
-                        value = parseFloat(value);
-
-                        if (value === MTLLoader.COLOR_ON_AND_AMBIENT_OFF) {
-
-                            TMaterial = MeshBasicMaterial;
-                        }
-
-                        break;
-
-                    case 'Tr':
-
-                        if (value > 0) {
-
-                            params.opacity = 1 - value;
-                            params.transparent = true;
-                        }
-
-                        break;
-
-                    default:
-                        break;
-
-                }
-            }
-
-            if (TMaterial === MeshBasicMaterial) {
-
-                ["shininess", "specular"].forEach(function (attribute) {
-
-                    if (attribute in params) {
-
-                        delete params[attribute];
-                    }
-                });
-            }
-
-            this.materials[materialName] = new TMaterial(params);
-            return this.materials[materialName];
-        }
-    }, {
-        key: 'getTextureParams',
-        value: function getTextureParams(value, matParams) {
-
-            var texParams = {
-
-                scale: new Vector2(1, 1),
-                offset: new Vector2(0, 0)
-
-            };
-
-            var items = value.split(/\s+/);
-            var pos;
-
-            pos = items.indexOf('-bm');
-            if (pos >= 0) {
-
-                matParams.bumpScale = parseFloat(items[pos + 1]);
-                items.splice(pos, 2);
-            }
-
-            pos = items.indexOf('-s');
-            if (pos >= 0) {
-
-                texParams.scale.set(parseFloat(items[pos + 1]), parseFloat(items[pos + 2]));
-                items.splice(pos, 4); // we expect 3 parameters here!
-            }
-
-            pos = items.indexOf('-o');
-            if (pos >= 0) {
-
-                texParams.offset.set(parseFloat(items[pos + 1]), parseFloat(items[pos + 2]));
-                items.splice(pos, 4); // we expect 3 parameters here!
-            }
-
-            texParams.url = items.join(' ').trim();
-            return texParams;
-        }
-    }, {
-        key: 'loadTexture',
-        value: function loadTexture(url, mapping, onLoad, onProgress, onError) {
-
-            var texture;
-            var loader = Loader.Handlers.get(url);
-            var manager = this.manager !== undefined ? this.manager : DefaultLoadingManager;
-
-            if (loader === null) {
-
-                loader = new TextureLoader(manager);
-            }
-
-            if (loader.setCrossOrigin) loader.setCrossOrigin(this.crossOrigin);
-            texture = loader.load(url, onLoad, onProgress, onError);
-
-            if (mapping !== undefined) texture.mapping = mapping;
-
-            return texture;
-        }
-    }]);
-    return MaterialCreator;
-}();
-
-
+}
 
 // http://paulbourke.net/dataformats/mtl/
-Object.assign(MTLLoader, {
-    COLOR_ON_AND_AMBIENT_OFF: 0,
-    COLOR_ON_AND_AMBIENT_ON: 1,
-    HIGHLIGHT_ON: 2,
-    REFLECTION_ON_AND_RAY_TRACE_ON: 3,
-    TRANSPARENCY_GLASS_ON_REFLECTION_RAY_TRACE_ON: 4,
-    REFLECTION_FRESNEL_ON_AND_RAY_TRACE_ON: 5,
-    TRANSPARENCY_REFRACTION_ON_REFLECTION_FRESNEL_OFF_AND_RAY_TRACE_ON: 6,
-    TRANSPARENCY_REFRACTION_ON_REFLECTION_FRESNEL_ON_AND_RAY_TRACE_ON: 7,
-    REFLECTION_ON_AND_RAY_TRACE_OFF: 8,
-    TRANSPARENCY_GLASS_ON_REFLECTION_RAY_TRACE_OFF: 9,
-    CASTS_SHADOWS_ONTO_INVISIBLE_SURFACES: 10
+Object.assign( MTLLoader, {
+  COLOR_ON_AND_AMBIENT_OFF: 0,
+  COLOR_ON_AND_AMBIENT_ON: 1,
+  HIGHLIGHT_ON: 2,
+  REFLECTION_ON_AND_RAY_TRACE_ON: 3,
+  TRANSPARENCY_GLASS_ON_REFLECTION_RAY_TRACE_ON: 4,
+  REFLECTION_FRESNEL_ON_AND_RAY_TRACE_ON: 5,
+  TRANSPARENCY_REFRACTION_ON_REFLECTION_FRESNEL_OFF_AND_RAY_TRACE_ON: 6,
+  TRANSPARENCY_REFRACTION_ON_REFLECTION_FRESNEL_ON_AND_RAY_TRACE_ON: 7,
+  REFLECTION_ON_AND_RAY_TRACE_OFF: 8,
+  TRANSPARENCY_GLASS_ON_REFLECTION_RAY_TRACE_OFF: 9,
+  CASTS_SHADOWS_ONTO_INVISIBLE_SURFACES: 10
 });
 
-Object3D.prototype.appendChild = function (child) {
+Object3D.prototype.appendChild = function(child) {
   return this.add(child);
 };
 
 Object.defineProperty(Object3D.prototype, "pickable", {
-  get: function get() {
-    return this._listeners && (this._listeners.enter && this._listeners.enter.length > 0 || this._listeners.exit && this._listeners.exit.length > 0 || this._listeners.select && this._listeners.select.length > 0 || this._listeners.useraction && this._listeners.useraction.length > 0 || this._listeners.pointerstart && this._listeners.pointerstart.length > 0 || this._listeners.pointerend && this._listeners.pointerend.length > 0 || this._listeners.pointermove && this._listeners.pointermove.length > 0 || this._listeners.gazestart && this._listeners.gazestart.length > 0 || this._listeners.gazecancel && this._listeners.gazecancel.length > 0 || this._listeners.gazemove && this._listeners.gazemove.length > 0 || this._listeners.gazecomplete && this._listeners.gazecomplete.length > 0);
+  get: function() {
+    return this._listeners && (
+         (this._listeners.enter && this._listeners.enter.length > 0)
+      || (this._listeners.exit && this._listeners.exit.length > 0)
+      || (this._listeners.select && this._listeners.select.length > 0)
+      || (this._listeners.useraction && this._listeners.useraction.length > 0)
+      || (this._listeners.pointerstart && this._listeners.pointerstart.length > 0)
+      || (this._listeners.pointerend && this._listeners.pointerend.length > 0)
+      || (this._listeners.pointermove && this._listeners.pointermove.length > 0)
+      || (this._listeners.gazestart && this._listeners.gazestart.length > 0)
+      || (this._listeners.gazecancel && this._listeners.gazecancel.length > 0)
+      || (this._listeners.gazemove && this._listeners.gazemove.length > 0)
+      || (this._listeners.gazecomplete && this._listeners.gazecomplete.length > 0));
   }
 });
 
-Object3D.prototype.latLng = function (lat, lon, r) {
+Object3D.prototype.latLng = function(lat, lon, r) {
   lat = -Math.PI * (lat || 0) / 180;
   lon = Math.PI * (lon || 0) / 180;
   r = r || 1.5;
@@ -45029,39 +44227,39 @@ Object3D.prototype.latLng = function (lat, lon, r) {
   return this;
 };
 
-Object3D.prototype.named = function (name) {
+Object3D.prototype.named = function(name){
   this.name = name;
   return this;
 };
 
-Object3D.prototype.addTo = function (obj) {
+Object3D.prototype.addTo = function(obj) {
   obj.add(this);
   return this;
 };
 
-Object3D.prototype.at = function (x, y, z) {
+Object3D.prototype.at = function(x, y, z) {
   this.position.set(x, y, z);
   return this;
 };
 
-Object3D.prototype.rot = function (x, y, z) {
+Object3D.prototype.rot = function(x, y, z) {
   this.rotation.set(x, y, z);
   return this;
 };
 
-Object3D.prototype.scl = function (x, y, z) {
+Object3D.prototype.scl = function(x, y, z) {
   this.scale.set(x, y, z);
   return this;
 };
 
 Object.defineProperty(Object3D.prototype, "visible", {
-  get: function get() {
+  get: function() {
     return this._visible;
   },
-  set: function set(v) {
+  set: function(v) {
     var oldV = this._visible;
     this._visible = v;
-    if (oldV !== v) {
+    if(oldV !== v){
       this.emit("visiblechanged");
     }
   }
@@ -45071,672 +44269,736 @@ Object.defineProperty(Object3D.prototype, "visible", {
  * @author mrdoob / http://mrdoob.com/
  */
 
-var OBJLoader = function () {
-		function OBJLoader(manager) {
-				classCallCheck(this, OBJLoader);
+class OBJLoader {
+	constructor ( manager ) {
+
+		this.manager = ( manager !== undefined ) ? manager : DefaultLoadingManager;
+
+		this.materials = null;
+
+		this.regexp = {
+			// v float float float
+			vertex_pattern           : /^v\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)/,
+			// vn float float float
+			normal_pattern           : /^vn\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)/,
+			// vt float float
+			uv_pattern               : /^vt\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)/,
+			// f vertex vertex vertex
+			face_vertex              : /^f\s+(-?\d+)\s+(-?\d+)\s+(-?\d+)(?:\s+(-?\d+))?/,
+			// f vertex/uv vertex/uv vertex/uv
+			face_vertex_uv           : /^f\s+(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)(?:\s+(-?\d+)\/(-?\d+))?/,
+			// f vertex/uv/normal vertex/uv/normal vertex/uv/normal
+			face_vertex_uv_normal    : /^f\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)(?:\s+(-?\d+)\/(-?\d+)\/(-?\d+))?/,
+			// f vertex//normal vertex//normal vertex//normal
+			face_vertex_normal       : /^f\s+(-?\d+)\/\/(-?\d+)\s+(-?\d+)\/\/(-?\d+)\s+(-?\d+)\/\/(-?\d+)(?:\s+(-?\d+)\/\/(-?\d+))?/,
+			// o object_name | g group_name
+			object_pattern           : /^[og]\s*(.+)?/,
+			// s boolean
+			smoothing_pattern        : /^s\s+(\d+|on|off)/,
+			// mtllib file_reference
+			material_library_pattern : /^mtllib /,
+			// usemtl material_name
+			material_use_pattern     : /^usemtl /
+		};
+
+	}
+
+	load ( url, onLoad, onProgress, onError ) {
+
+		var scope = this;
+
+		var loader = new FileLoader( scope.manager );
+		loader.setPath( this.path );
+		loader.load( url, function ( text ) {
+
+			onLoad( scope.parse( text ) );
+
+		}, onProgress, onError );
+
+	}
+
+	setPath ( value ) {
+
+		this.path = value;
+
+	}
+
+	setMaterials ( materials ) {
+
+		this.materials = materials;
+
+	}
+
+	_createParserState () {
+
+		var state = new OBJParserState();
+
+		state.startObject( '', false );
+
+		return state;
+
+	}
+
+	parse ( text ) {
+
+		console.time( 'OBJLoader' );
+
+		var state = this._createParserState();
+
+		if ( text.indexOf( '\r\n' ) !== - 1 ) {
+
+			// This is faster than String.split with regex that splits on both
+			text = text.replace( '\r\n', '\n' );
+
+		}
+
+		var lines = text.split( '\n' );
+		var line = '', lineFirstChar = '', lineSecondChar = '';
+		var lineLength = 0;
+		var result = [];
+
+		// Faster to just trim left side of the line. Use if available.
+		var trimLeft = ( typeof ''.trimLeft === 'function' );
+
+		for ( var i = 0, l = lines.length; i < l; i ++ ) {
+
+			line = lines[ i ];
+
+			line = trimLeft ? line.trimLeft() : line.trim();
+
+			lineLength = line.length;
+
+			if ( lineLength === 0 ) continue;
+
+			lineFirstChar = line.charAt( 0 );
+
+			// @todo invoke passed in handler if any
+			if ( lineFirstChar === '#' ) continue;
+
+			if ( lineFirstChar === 'v' ) {
+
+				lineSecondChar = line.charAt( 1 );
+
+				if ( lineSecondChar === ' ' && ( result = this.regexp.vertex_pattern.exec( line ) ) !== null ) {
+
+					// 0                  1      2      3
+					// ["v 1.0 2.0 3.0", "1.0", "2.0", "3.0"]
+
+					state.vertices.push(
+						parseFloat( result[ 1 ] ),
+						parseFloat( result[ 2 ] ),
+						parseFloat( result[ 3 ] )
+					);
+
+				} else if ( lineSecondChar === 'n' && ( result = this.regexp.normal_pattern.exec( line ) ) !== null ) {
+
+					// 0                   1      2      3
+					// ["vn 1.0 2.0 3.0", "1.0", "2.0", "3.0"]
+
+					state.normals.push(
+						parseFloat( result[ 1 ] ),
+						parseFloat( result[ 2 ] ),
+						parseFloat( result[ 3 ] )
+					);
+
+				} else if ( lineSecondChar === 't' && ( result = this.regexp.uv_pattern.exec( line ) ) !== null ) {
+
+					// 0               1      2
+					// ["vt 0.1 0.2", "0.1", "0.2"]
+
+					state.uvs.push(
+						parseFloat( result[ 1 ] ),
+						parseFloat( result[ 2 ] )
+					);
+
+				} else {
+
+					throw new Error( "Unexpected vertex/normal/uv line: '" + line  + "'" );
+
+				}
+
+			} else if ( lineFirstChar === "f" ) {
+
+				if ( ( result = this.regexp.face_vertex_uv_normal.exec( line ) ) !== null ) {
+
+					// f vertex/uv/normal vertex/uv/normal vertex/uv/normal
+					// 0                        1    2    3    4    5    6    7    8    9   10         11         12
+					// ["f 1/1/1 2/2/2 3/3/3", "1", "1", "1", "2", "2", "2", "3", "3", "3", undefined, undefined, undefined]
+
+					state.addFace(
+						result[ 1 ], result[ 4 ], result[ 7 ], result[ 10 ],
+						result[ 2 ], result[ 5 ], result[ 8 ], result[ 11 ],
+						result[ 3 ], result[ 6 ], result[ 9 ], result[ 12 ]
+					);
+
+				} else if ( ( result = this.regexp.face_vertex_uv.exec( line ) ) !== null ) {
+
+					// f vertex/uv vertex/uv vertex/uv
+					// 0                  1    2    3    4    5    6   7          8
+					// ["f 1/1 2/2 3/3", "1", "1", "2", "2", "3", "3", undefined, undefined]
+
+					state.addFace(
+						result[ 1 ], result[ 3 ], result[ 5 ], result[ 7 ],
+						result[ 2 ], result[ 4 ], result[ 6 ], result[ 8 ]
+					);
+
+				} else if ( ( result = this.regexp.face_vertex_normal.exec( line ) ) !== null ) {
+
+					// f vertex//normal vertex//normal vertex//normal
+					// 0                     1    2    3    4    5    6   7          8
+					// ["f 1//1 2//2 3//3", "1", "1", "2", "2", "3", "3", undefined, undefined]
+
+					state.addFace(
+						result[ 1 ], result[ 3 ], result[ 5 ], result[ 7 ],
+						undefined, undefined, undefined, undefined,
+						result[ 2 ], result[ 4 ], result[ 6 ], result[ 8 ]
+					);
+
+				} else if ( ( result = this.regexp.face_vertex.exec( line ) ) !== null ) {
+
+					// f vertex vertex vertex
+					// 0            1    2    3   4
+					// ["f 1 2 3", "1", "2", "3", undefined]
+
+					state.addFace(
+						result[ 1 ], result[ 2 ], result[ 3 ], result[ 4 ]
+					);
+
+				} else {
+
+					throw new Error( "Unexpected face line: '" + line  + "'" );
+
+				}
+
+			} else if ( lineFirstChar === "l" ) {
+
+				var lineParts = line.substring( 1 ).trim().split( " " );
+				var lineVertices = [], lineUVs = [];
+
+				if ( line.indexOf( "/" ) === - 1 ) {
+
+					lineVertices = lineParts;
+
+				} else {
+
+					for ( var li = 0, llen = lineParts.length; li < llen; li ++ ) {
+
+						var parts = lineParts[ li ].split( "/" );
+
+						if ( parts[ 0 ] !== "" ) lineVertices.push( parts[ 0 ] );
+						if ( parts[ 1 ] !== "" ) lineUVs.push( parts[ 1 ] );
+
+					}
+
+				}
+				state.addLineGeometry( lineVertices, lineUVs );
+
+			} else if ( ( result = this.regexp.object_pattern.exec( line ) ) !== null ) {
+
+				// o object_name
+				// or
+				// g group_name
+
+				var name = result[ 0 ].substr( 1 ).trim();
+				state.startObject( name );
+
+			} else if ( this.regexp.material_use_pattern.test( line ) ) {
+
+				// material
+
+				state.object.startMaterial( line.substring( 7 ).trim(), state.materialLibraries );
+
+			} else if ( this.regexp.material_library_pattern.test( line ) ) {
+
+				// mtl file
+
+				state.materialLibraries.push( line.substring( 7 ).trim() );
+
+			} else if ( ( result = this.regexp.smoothing_pattern.exec( line ) ) !== null ) {
+
+				// smooth shading
+
+				// @todo Handle files that have varying smooth values for a set of faces inside one geometry,
+				// but does not define a usemtl for each face set.
+				// This should be detected and a dummy material created (later MultiMaterial and geometry groups).
+				// This requires some care to not create extra material on each smooth value for "normal" obj files.
+				// where explicit usemtl defines geometry groups.
+				// Example asset: examples/models/obj/cerberus/Cerberus.obj
+
+				var value = result[ 1 ].trim().toLowerCase();
+				state.object.smooth = ( value === '1' || value === 'on' );
+
+				var material = state.object.currentMaterial();
+				if ( material ) {
+
+					material.smooth = state.object.smooth;
+
+				}
+
+			} else {
+
+				// Handle null terminated files without exception
+				if ( line === '\0' ) continue;
+
+				throw new Error( "Unexpected line: '" + line  + "'" );
+
+			}
+
+		}
+
+		state.finalize();
+
+		var container = new Group();
+		container.materialLibraries = [].concat( state.materialLibraries );
+
+		for ( var i = 0, l = state.objects.length; i < l; i ++ ) {
+
+			var object = state.objects[ i ];
+			var geometry = object.geometry;
+			var materials = object.materials;
+			var isLine = ( geometry.type === 'Line' );
+
+			// Skip o/g line declarations that did not follow with any faces
+			if ( geometry.vertices.length === 0 ) continue;
+
+			var buffergeometry = new BufferGeometry();
+
+			buffergeometry.addAttribute( 'position', new BufferAttribute( new Float32Array( geometry.vertices ), 3 ) );
+
+			if ( geometry.normals.length > 0 ) {
+
+				buffergeometry.addAttribute( 'normal', new BufferAttribute( new Float32Array( geometry.normals ), 3 ) );
+
+			} else {
+
+				buffergeometry.computeVertexNormals();
+
+			}
+
+			if ( geometry.uvs.length > 0 ) {
+
+				buffergeometry.addAttribute( 'uv', new BufferAttribute( new Float32Array( geometry.uvs ), 2 ) );
+
+			}
+
+			// Create materials
+
+			var createdMaterials = [];
+
+			for ( var mi = 0, miLen = materials.length; mi < miLen ; mi++ ) {
+
+				var sourceMaterial = materials[mi];
+				var material = undefined;
+
+				if ( this.materials !== null ) {
+
+					material = this.materials.create( sourceMaterial.name );
+
+					// mtl etc. loaders probably can't create line materials correctly, copy properties to a line material.
+					if ( isLine && material && ! ( material.isLineBasicMaterial ) ) {
+
+						var materialLine = new LineBasicMaterial();
+						materialLine.copy( material );
+						material = materialLine;
+
+					}
+
+				}
+
+				if ( ! material ) {
+
+					material = ( ! isLine ? new MeshPhongMaterial() : new LineBasicMaterial() );
+					material.name = sourceMaterial.name;
+
+				}
+
+				material.shading = sourceMaterial.smooth ? SmoothShading : FlatShading;
+
+				createdMaterials.push(material);
+
+			}
+
+			// Create mesh
+
+			var mesh;
+
+			if ( createdMaterials.length > 1 ) {
+
+				for ( var mi = 0, miLen = materials.length; mi < miLen ; mi++ ) {
+
+					var sourceMaterial = materials[mi];
+					buffergeometry.addGroup( sourceMaterial.groupStart, sourceMaterial.groupCount, mi );
+
+				}
+
+				var multiMaterial = new MultiMaterial( createdMaterials );
+				mesh = ( ! isLine ? new Mesh( buffergeometry, multiMaterial ) : new LineSegments( buffergeometry, multiMaterial ) );
+
+			} else {
+
+				mesh = ( ! isLine ? new Mesh( buffergeometry, createdMaterials[ 0 ] ) : new LineSegments( buffergeometry, createdMaterials[ 0 ] ) );
+			}
+
+			mesh.name = object.name;
+
+			container.add( mesh );
+
+		}
+
+		console.timeEnd( 'OBJLoader' );
+
+		return container;
+
+	}
+
+}
 
 
-				this.manager = manager !== undefined ? manager : DefaultLoadingManager;
+class OBJParserState {
 
-				this.materials = null;
+	constructor () {
+		this.objects  = [];
+		this.object   = {};
 
-				this.regexp = {
-						// v float float float
-						vertex_pattern: /^v\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)/,
-						// vn float float float
-						normal_pattern: /^vn\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)/,
-						// vt float float
-						uv_pattern: /^vt\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)/,
-						// f vertex vertex vertex
-						face_vertex: /^f\s+(-?\d+)\s+(-?\d+)\s+(-?\d+)(?:\s+(-?\d+))?/,
-						// f vertex/uv vertex/uv vertex/uv
-						face_vertex_uv: /^f\s+(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)(?:\s+(-?\d+)\/(-?\d+))?/,
-						// f vertex/uv/normal vertex/uv/normal vertex/uv/normal
-						face_vertex_uv_normal: /^f\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)(?:\s+(-?\d+)\/(-?\d+)\/(-?\d+))?/,
-						// f vertex//normal vertex//normal vertex//normal
-						face_vertex_normal: /^f\s+(-?\d+)\/\/(-?\d+)\s+(-?\d+)\/\/(-?\d+)\s+(-?\d+)\/\/(-?\d+)(?:\s+(-?\d+)\/\/(-?\d+))?/,
-						// o object_name | g group_name
-						object_pattern: /^[og]\s*(.+)?/,
-						// s boolean
-						smoothing_pattern: /^s\s+(\d+|on|off)/,
-						// mtllib file_reference
-						material_library_pattern: /^mtllib /,
-						// usemtl material_name
-						material_use_pattern: /^usemtl /
+		this.vertices = [];
+		this.normals  = [];
+		this.uvs      = [];
+
+		this.materialLibraries = [];
+	}
+
+	startObject  ( name, fromDeclaration ) {
+
+		// If the current object (initial from reset) is not from a g/o declaration in the parsed
+		// file. We need to use it for the first parsed g/o to keep things in sync.
+		if ( this.object && this.object.fromDeclaration === false ) {
+
+			this.object.name = name;
+			this.object.fromDeclaration = ( fromDeclaration !== false );
+			return;
+
+		}
+
+		if ( this.object && typeof this.object._finalize === 'function' ) {
+
+			this.object._finalize();
+
+		}
+
+		var previousMaterial = ( this.object && typeof this.object.currentMaterial === 'function' ? this.object.currentMaterial() : undefined );
+
+		this.object = new OBJ(name, fromDeclaration);
+
+		// Inherit previous objects material.
+		// Spec tells us that a declared material must be set to all objects until a new material is declared.
+		// If a usemtl declaration is encountered while this new object is being parsed, it will
+		// overwrite the inherited material. Exception being that there was already face declarations
+		// to the inherited material, then it will be preserved for proper MultiMaterial continuation.
+
+		if ( previousMaterial && previousMaterial.name && typeof previousMaterial.clone === "function" ) {
+
+			var declared = previousMaterial.clone( 0 );
+			declared.inherited = true;
+			this.object.materials.push( declared );
+
+		}
+
+		this.objects.push( this.object );
+
+	}
+
+	finalize () {
+
+		if ( this.object && typeof this.object._finalize === 'function' ) {
+
+			this.object._finalize();
+
+		}
+
+	}
+
+	parseVertexIndex ( value, len ) {
+
+		var index = parseInt( value, 10 );
+		return ( index >= 0 ? index - 1 : index + len / 3 ) * 3;
+
+	}
+
+	parseNormalIndex ( value, len ) {
+
+		var index = parseInt( value, 10 );
+		return ( index >= 0 ? index - 1 : index + len / 3 ) * 3;
+
+	}
+
+	parseUVIndex ( value, len ) {
+
+		var index = parseInt( value, 10 );
+		return ( index >= 0 ? index - 1 : index + len / 2 ) * 2;
+
+	}
+
+	addVertex ( a, b, c ) {
+
+		var src = this.vertices;
+		var dst = this.object.geometry.vertices;
+
+		dst.push( src[ a + 0 ] );
+		dst.push( src[ a + 1 ] );
+		dst.push( src[ a + 2 ] );
+		dst.push( src[ b + 0 ] );
+		dst.push( src[ b + 1 ] );
+		dst.push( src[ b + 2 ] );
+		dst.push( src[ c + 0 ] );
+		dst.push( src[ c + 1 ] );
+		dst.push( src[ c + 2 ] );
+
+	}
+
+	addVertexLine ( a ) {
+
+		var src = this.vertices;
+		var dst = this.object.geometry.vertices;
+
+		dst.push( src[ a + 0 ] );
+		dst.push( src[ a + 1 ] );
+		dst.push( src[ a + 2 ] );
+
+	}
+
+	addNormal ( a, b, c ) {
+
+		var src = this.normals;
+		var dst = this.object.geometry.normals;
+
+		dst.push( src[ a + 0 ] );
+		dst.push( src[ a + 1 ] );
+		dst.push( src[ a + 2 ] );
+		dst.push( src[ b + 0 ] );
+		dst.push( src[ b + 1 ] );
+		dst.push( src[ b + 2 ] );
+		dst.push( src[ c + 0 ] );
+		dst.push( src[ c + 1 ] );
+		dst.push( src[ c + 2 ] );
+
+	}
+
+	addUV ( a, b, c ) {
+
+		var src = this.uvs;
+		var dst = this.object.geometry.uvs;
+
+		dst.push( src[ a + 0 ] );
+		dst.push( src[ a + 1 ] );
+		dst.push( src[ b + 0 ] );
+		dst.push( src[ b + 1 ] );
+		dst.push( src[ c + 0 ] );
+		dst.push( src[ c + 1 ] );
+
+	}
+
+	addUVLine ( a ) {
+
+		var src = this.uvs;
+		var dst = this.object.geometry.uvs;
+
+		dst.push( src[ a + 0 ] );
+		dst.push( src[ a + 1 ] );
+
+	}
+
+	addFace ( a, b, c, d, ua, ub, uc, ud, na, nb, nc, nd ) {
+
+		var vLen = this.vertices.length;
+
+		var ia = this.parseVertexIndex( a, vLen );
+		var ib = this.parseVertexIndex( b, vLen );
+		var ic = this.parseVertexIndex( c, vLen );
+		var id;
+
+		if ( d === undefined ) {
+
+			this.addVertex( ia, ib, ic );
+
+		} else {
+
+			id = this.parseVertexIndex( d, vLen );
+
+			this.addVertex( ia, ib, id );
+			this.addVertex( ib, ic, id );
+
+		}
+
+		if ( ua !== undefined ) {
+
+			var uvLen = this.uvs.length;
+
+			ia = this.parseUVIndex( ua, uvLen );
+			ib = this.parseUVIndex( ub, uvLen );
+			ic = this.parseUVIndex( uc, uvLen );
+
+			if ( d === undefined ) {
+
+				this.addUV( ia, ib, ic );
+
+			} else {
+
+				id = this.parseUVIndex( ud, uvLen );
+
+				this.addUV( ia, ib, id );
+				this.addUV( ib, ic, id );
+
+			}
+
+		}
+
+		if ( na !== undefined ) {
+
+			// Normals are many times the same. If so, skip function call and parseInt.
+			var nLen = this.normals.length;
+			ia = this.parseNormalIndex( na, nLen );
+
+			ib = na === nb ? ia : this.parseNormalIndex( nb, nLen );
+			ic = na === nc ? ia : this.parseNormalIndex( nc, nLen );
+
+			if ( d === undefined ) {
+
+				this.addNormal( ia, ib, ic );
+
+			} else {
+
+				id = this.parseNormalIndex( nd, nLen );
+
+				this.addNormal( ia, ib, id );
+				this.addNormal( ib, ic, id );
+
+			}
+
+		}
+
+	}
+
+	addLineGeometry ( vertices, uvs ) {
+
+		this.object.geometry.type = 'Line';
+
+		var vLen = this.vertices.length;
+		var uvLen = this.uvs.length;
+
+		for ( var vi = 0, l = vertices.length; vi < l; vi ++ ) {
+
+			this.addVertexLine( this.parseVertexIndex( vertices[ vi ], vLen ) );
+
+		}
+
+		for ( var uvi = 0, l = uvs.length; uvi < l; uvi ++ ) {
+
+			this.addUVLine( this.parseUVIndex( uvs[ uvi ], uvLen ) );
+
+		}
+
+	}
+
+}
+
+
+class OBJ {
+
+	constructor (name, fromDeclaration) {
+
+		this.name = name || '';
+		this.fromDeclaration = ( fromDeclaration !== false );
+
+		this.geometry = {
+			vertices : [],
+			normals  : [],
+			uvs      : []
+		};
+		this.materials = [];
+		this.smooth = true;
+
+	}
+
+	startMaterial ( name, libraries ) {
+
+		var previous = this._finalize( false );
+
+		// New usemtl declaration overwrites an inherited material, except if faces were declared
+		// after the material, then it must be preserved for proper MultiMaterial continuation.
+		if ( previous && ( previous.inherited || previous.groupCount <= 0 ) ) {
+
+			this.materials.splice( previous.index, 1 );
+
+		}
+
+		var material = {
+			index      : this.materials.length,
+			name       : name || '',
+			mtllib     : ( Array.isArray( libraries ) && libraries.length > 0 ? libraries[ libraries.length - 1 ] : '' ),
+			smooth     : ( previous !== undefined ? previous.smooth : this.smooth ),
+			groupStart : ( previous !== undefined ? previous.groupEnd : 0 ),
+			groupEnd   : -1,
+			groupCount : -1,
+			inherited  : false,
+
+			clone : function( index ) {
+				return {
+					index      : ( typeof index === 'number' ? index : this.index ),
+					name       : this.name,
+					mtllib     : this.mtllib,
+					smooth     : this.smooth,
+					groupStart : this.groupEnd,
+					groupEnd   : -1,
+					groupCount : -1,
+					inherited  : false
 				};
+			}
+		};
+
+		this.materials.push( material );
+
+		return material;
+
+	}
+
+	currentMaterial () {
+
+		if ( this.materials.length > 0 ) {
+			return this.materials[ this.materials.length - 1 ];
 		}
 
-		createClass(OBJLoader, [{
-				key: 'load',
-				value: function load(url, onLoad, onProgress, onError) {
+		return undefined;
 
-						var scope = this;
+	}
 
-						var loader = new FileLoader(scope.manager);
-						loader.setPath(this.path);
-						loader.load(url, function (text) {
+	_finalize ( end ) {
 
-								onLoad(scope.parse(text));
-						}, onProgress, onError);
-				}
-		}, {
-				key: 'setPath',
-				value: function setPath(value) {
+		var lastMultiMaterial = this.currentMaterial();
+		if ( lastMultiMaterial && lastMultiMaterial.groupEnd === -1 ) {
 
-						this.path = value;
-				}
-		}, {
-				key: 'setMaterials',
-				value: function setMaterials(materials) {
+			lastMultiMaterial.groupEnd = this.geometry.vertices.length / 3;
+			lastMultiMaterial.groupCount = lastMultiMaterial.groupEnd - lastMultiMaterial.groupStart;
+			lastMultiMaterial.inherited = false;
 
-						this.materials = materials;
-				}
-		}, {
-				key: '_createParserState',
-				value: function _createParserState() {
-
-						var state = new OBJParserState();
-
-						state.startObject('', false);
-
-						return state;
-				}
-		}, {
-				key: 'parse',
-				value: function parse(text) {
-
-						console.time('OBJLoader');
-
-						var state = this._createParserState();
-
-						if (text.indexOf('\r\n') !== -1) {
-
-								// This is faster than String.split with regex that splits on both
-								text = text.replace('\r\n', '\n');
-						}
-
-						var lines = text.split('\n');
-						var line = '',
-						    lineFirstChar = '',
-						    lineSecondChar = '';
-						var lineLength = 0;
-						var result = [];
-
-						// Faster to just trim left side of the line. Use if available.
-						var trimLeft = typeof ''.trimLeft === 'function';
-
-						for (var i = 0, l = lines.length; i < l; i++) {
-
-								line = lines[i];
-
-								line = trimLeft ? line.trimLeft() : line.trim();
-
-								lineLength = line.length;
-
-								if (lineLength === 0) continue;
-
-								lineFirstChar = line.charAt(0);
-
-								// @todo invoke passed in handler if any
-								if (lineFirstChar === '#') continue;
-
-								if (lineFirstChar === 'v') {
-
-										lineSecondChar = line.charAt(1);
-
-										if (lineSecondChar === ' ' && (result = this.regexp.vertex_pattern.exec(line)) !== null) {
-
-												// 0                  1      2      3
-												// ["v 1.0 2.0 3.0", "1.0", "2.0", "3.0"]
-
-												state.vertices.push(parseFloat(result[1]), parseFloat(result[2]), parseFloat(result[3]));
-										} else if (lineSecondChar === 'n' && (result = this.regexp.normal_pattern.exec(line)) !== null) {
-
-												// 0                   1      2      3
-												// ["vn 1.0 2.0 3.0", "1.0", "2.0", "3.0"]
-
-												state.normals.push(parseFloat(result[1]), parseFloat(result[2]), parseFloat(result[3]));
-										} else if (lineSecondChar === 't' && (result = this.regexp.uv_pattern.exec(line)) !== null) {
-
-												// 0               1      2
-												// ["vt 0.1 0.2", "0.1", "0.2"]
-
-												state.uvs.push(parseFloat(result[1]), parseFloat(result[2]));
-										} else {
-
-												throw new Error("Unexpected vertex/normal/uv line: '" + line + "'");
-										}
-								} else if (lineFirstChar === "f") {
-
-										if ((result = this.regexp.face_vertex_uv_normal.exec(line)) !== null) {
-
-												// f vertex/uv/normal vertex/uv/normal vertex/uv/normal
-												// 0                        1    2    3    4    5    6    7    8    9   10         11         12
-												// ["f 1/1/1 2/2/2 3/3/3", "1", "1", "1", "2", "2", "2", "3", "3", "3", undefined, undefined, undefined]
-
-												state.addFace(result[1], result[4], result[7], result[10], result[2], result[5], result[8], result[11], result[3], result[6], result[9], result[12]);
-										} else if ((result = this.regexp.face_vertex_uv.exec(line)) !== null) {
-
-												// f vertex/uv vertex/uv vertex/uv
-												// 0                  1    2    3    4    5    6   7          8
-												// ["f 1/1 2/2 3/3", "1", "1", "2", "2", "3", "3", undefined, undefined]
-
-												state.addFace(result[1], result[3], result[5], result[7], result[2], result[4], result[6], result[8]);
-										} else if ((result = this.regexp.face_vertex_normal.exec(line)) !== null) {
-
-												// f vertex//normal vertex//normal vertex//normal
-												// 0                     1    2    3    4    5    6   7          8
-												// ["f 1//1 2//2 3//3", "1", "1", "2", "2", "3", "3", undefined, undefined]
-
-												state.addFace(result[1], result[3], result[5], result[7], undefined, undefined, undefined, undefined, result[2], result[4], result[6], result[8]);
-										} else if ((result = this.regexp.face_vertex.exec(line)) !== null) {
-
-												// f vertex vertex vertex
-												// 0            1    2    3   4
-												// ["f 1 2 3", "1", "2", "3", undefined]
-
-												state.addFace(result[1], result[2], result[3], result[4]);
-										} else {
-
-												throw new Error("Unexpected face line: '" + line + "'");
-										}
-								} else if (lineFirstChar === "l") {
-
-										var lineParts = line.substring(1).trim().split(" ");
-										var lineVertices = [],
-										    lineUVs = [];
-
-										if (line.indexOf("/") === -1) {
-
-												lineVertices = lineParts;
-										} else {
-
-												for (var li = 0, llen = lineParts.length; li < llen; li++) {
-
-														var parts = lineParts[li].split("/");
-
-														if (parts[0] !== "") lineVertices.push(parts[0]);
-														if (parts[1] !== "") lineUVs.push(parts[1]);
-												}
-										}
-										state.addLineGeometry(lineVertices, lineUVs);
-								} else if ((result = this.regexp.object_pattern.exec(line)) !== null) {
-
-										// o object_name
-										// or
-										// g group_name
-
-										var name = result[0].substr(1).trim();
-										state.startObject(name);
-								} else if (this.regexp.material_use_pattern.test(line)) {
-
-										// material
-
-										state.object.startMaterial(line.substring(7).trim(), state.materialLibraries);
-								} else if (this.regexp.material_library_pattern.test(line)) {
-
-										// mtl file
-
-										state.materialLibraries.push(line.substring(7).trim());
-								} else if ((result = this.regexp.smoothing_pattern.exec(line)) !== null) {
-
-										// smooth shading
-
-										// @todo Handle files that have varying smooth values for a set of faces inside one geometry,
-										// but does not define a usemtl for each face set.
-										// This should be detected and a dummy material created (later MultiMaterial and geometry groups).
-										// This requires some care to not create extra material on each smooth value for "normal" obj files.
-										// where explicit usemtl defines geometry groups.
-										// Example asset: examples/models/obj/cerberus/Cerberus.obj
-
-										var value = result[1].trim().toLowerCase();
-										state.object.smooth = value === '1' || value === 'on';
-
-										var material = state.object.currentMaterial();
-										if (material) {
-
-												material.smooth = state.object.smooth;
-										}
-								} else {
-
-										// Handle null terminated files without exception
-										if (line === '\0') continue;
-
-										throw new Error("Unexpected line: '" + line + "'");
-								}
-						}
-
-						state.finalize();
-
-						var container = new Group();
-						container.materialLibraries = [].concat(state.materialLibraries);
-
-						for (var i = 0, l = state.objects.length; i < l; i++) {
-
-								var object = state.objects[i];
-								var geometry = object.geometry;
-								var materials = object.materials;
-								var isLine = geometry.type === 'Line';
-
-								// Skip o/g line declarations that did not follow with any faces
-								if (geometry.vertices.length === 0) continue;
-
-								var buffergeometry = new BufferGeometry();
-
-								buffergeometry.addAttribute('position', new BufferAttribute(new Float32Array(geometry.vertices), 3));
-
-								if (geometry.normals.length > 0) {
-
-										buffergeometry.addAttribute('normal', new BufferAttribute(new Float32Array(geometry.normals), 3));
-								} else {
-
-										buffergeometry.computeVertexNormals();
-								}
-
-								if (geometry.uvs.length > 0) {
-
-										buffergeometry.addAttribute('uv', new BufferAttribute(new Float32Array(geometry.uvs), 2));
-								}
-
-								// Create materials
-
-								var createdMaterials = [];
-
-								for (var mi = 0, miLen = materials.length; mi < miLen; mi++) {
-
-										var sourceMaterial = materials[mi];
-										var material = undefined;
-
-										if (this.materials !== null) {
-
-												material = this.materials.create(sourceMaterial.name);
-
-												// mtl etc. loaders probably can't create line materials correctly, copy properties to a line material.
-												if (isLine && material && !material.isLineBasicMaterial) {
-
-														var materialLine = new LineBasicMaterial();
-														materialLine.copy(material);
-														material = materialLine;
-												}
-										}
-
-										if (!material) {
-
-												material = !isLine ? new MeshPhongMaterial() : new LineBasicMaterial();
-												material.name = sourceMaterial.name;
-										}
-
-										material.shading = sourceMaterial.smooth ? SmoothShading : FlatShading;
-
-										createdMaterials.push(material);
-								}
-
-								// Create mesh
-
-								var mesh;
-
-								if (createdMaterials.length > 1) {
-
-										for (var mi = 0, miLen = materials.length; mi < miLen; mi++) {
-
-												var sourceMaterial = materials[mi];
-												buffergeometry.addGroup(sourceMaterial.groupStart, sourceMaterial.groupCount, mi);
-										}
-
-										var multiMaterial = new MultiMaterial(createdMaterials);
-										mesh = !isLine ? new Mesh(buffergeometry, multiMaterial) : new LineSegments(buffergeometry, multiMaterial);
-								} else {
-
-										mesh = !isLine ? new Mesh(buffergeometry, createdMaterials[0]) : new LineSegments(buffergeometry, createdMaterials[0]);
-								}
-
-								mesh.name = object.name;
-
-								container.add(mesh);
-						}
-
-						console.timeEnd('OBJLoader');
-
-						return container;
-				}
-		}]);
-		return OBJLoader;
-}();
-
-var OBJParserState = function () {
-		function OBJParserState() {
-				classCallCheck(this, OBJParserState);
-
-				this.objects = [];
-				this.object = {};
-
-				this.vertices = [];
-				this.normals = [];
-				this.uvs = [];
-
-				this.materialLibraries = [];
 		}
 
-		createClass(OBJParserState, [{
-				key: 'startObject',
-				value: function startObject(name, fromDeclaration) {
-
-						// If the current object (initial from reset) is not from a g/o declaration in the parsed
-						// file. We need to use it for the first parsed g/o to keep things in sync.
-						if (this.object && this.object.fromDeclaration === false) {
-
-								this.object.name = name;
-								this.object.fromDeclaration = fromDeclaration !== false;
-								return;
-						}
-
-						if (this.object && typeof this.object._finalize === 'function') {
-
-								this.object._finalize();
-						}
-
-						var previousMaterial = this.object && typeof this.object.currentMaterial === 'function' ? this.object.currentMaterial() : undefined;
-
-						this.object = new OBJ(name, fromDeclaration);
-
-						// Inherit previous objects material.
-						// Spec tells us that a declared material must be set to all objects until a new material is declared.
-						// If a usemtl declaration is encountered while this new object is being parsed, it will
-						// overwrite the inherited material. Exception being that there was already face declarations
-						// to the inherited material, then it will be preserved for proper MultiMaterial continuation.
-
-						if (previousMaterial && previousMaterial.name && typeof previousMaterial.clone === "function") {
-
-								var declared = previousMaterial.clone(0);
-								declared.inherited = true;
-								this.object.materials.push(declared);
-						}
-
-						this.objects.push(this.object);
-				}
-		}, {
-				key: 'finalize',
-				value: function finalize() {
-
-						if (this.object && typeof this.object._finalize === 'function') {
-
-								this.object._finalize();
-						}
-				}
-		}, {
-				key: 'parseVertexIndex',
-				value: function parseVertexIndex(value, len) {
-
-						var index = parseInt(value, 10);
-						return (index >= 0 ? index - 1 : index + len / 3) * 3;
-				}
-		}, {
-				key: 'parseNormalIndex',
-				value: function parseNormalIndex(value, len) {
-
-						var index = parseInt(value, 10);
-						return (index >= 0 ? index - 1 : index + len / 3) * 3;
-				}
-		}, {
-				key: 'parseUVIndex',
-				value: function parseUVIndex(value, len) {
-
-						var index = parseInt(value, 10);
-						return (index >= 0 ? index - 1 : index + len / 2) * 2;
-				}
-		}, {
-				key: 'addVertex',
-				value: function addVertex(a, b, c) {
-
-						var src = this.vertices;
-						var dst = this.object.geometry.vertices;
-
-						dst.push(src[a + 0]);
-						dst.push(src[a + 1]);
-						dst.push(src[a + 2]);
-						dst.push(src[b + 0]);
-						dst.push(src[b + 1]);
-						dst.push(src[b + 2]);
-						dst.push(src[c + 0]);
-						dst.push(src[c + 1]);
-						dst.push(src[c + 2]);
-				}
-		}, {
-				key: 'addVertexLine',
-				value: function addVertexLine(a) {
-
-						var src = this.vertices;
-						var dst = this.object.geometry.vertices;
-
-						dst.push(src[a + 0]);
-						dst.push(src[a + 1]);
-						dst.push(src[a + 2]);
-				}
-		}, {
-				key: 'addNormal',
-				value: function addNormal(a, b, c) {
-
-						var src = this.normals;
-						var dst = this.object.geometry.normals;
-
-						dst.push(src[a + 0]);
-						dst.push(src[a + 1]);
-						dst.push(src[a + 2]);
-						dst.push(src[b + 0]);
-						dst.push(src[b + 1]);
-						dst.push(src[b + 2]);
-						dst.push(src[c + 0]);
-						dst.push(src[c + 1]);
-						dst.push(src[c + 2]);
-				}
-		}, {
-				key: 'addUV',
-				value: function addUV(a, b, c) {
-
-						var src = this.uvs;
-						var dst = this.object.geometry.uvs;
-
-						dst.push(src[a + 0]);
-						dst.push(src[a + 1]);
-						dst.push(src[b + 0]);
-						dst.push(src[b + 1]);
-						dst.push(src[c + 0]);
-						dst.push(src[c + 1]);
-				}
-		}, {
-				key: 'addUVLine',
-				value: function addUVLine(a) {
-
-						var src = this.uvs;
-						var dst = this.object.geometry.uvs;
-
-						dst.push(src[a + 0]);
-						dst.push(src[a + 1]);
-				}
-		}, {
-				key: 'addFace',
-				value: function addFace(a, b, c, d, ua, ub, uc, ud, na, nb, nc, nd) {
-
-						var vLen = this.vertices.length;
-
-						var ia = this.parseVertexIndex(a, vLen);
-						var ib = this.parseVertexIndex(b, vLen);
-						var ic = this.parseVertexIndex(c, vLen);
-						var id;
-
-						if (d === undefined) {
-
-								this.addVertex(ia, ib, ic);
-						} else {
-
-								id = this.parseVertexIndex(d, vLen);
-
-								this.addVertex(ia, ib, id);
-								this.addVertex(ib, ic, id);
-						}
-
-						if (ua !== undefined) {
-
-								var uvLen = this.uvs.length;
-
-								ia = this.parseUVIndex(ua, uvLen);
-								ib = this.parseUVIndex(ub, uvLen);
-								ic = this.parseUVIndex(uc, uvLen);
-
-								if (d === undefined) {
-
-										this.addUV(ia, ib, ic);
-								} else {
-
-										id = this.parseUVIndex(ud, uvLen);
-
-										this.addUV(ia, ib, id);
-										this.addUV(ib, ic, id);
-								}
-						}
-
-						if (na !== undefined) {
-
-								// Normals are many times the same. If so, skip function call and parseInt.
-								var nLen = this.normals.length;
-								ia = this.parseNormalIndex(na, nLen);
-
-								ib = na === nb ? ia : this.parseNormalIndex(nb, nLen);
-								ic = na === nc ? ia : this.parseNormalIndex(nc, nLen);
-
-								if (d === undefined) {
-
-										this.addNormal(ia, ib, ic);
-								} else {
-
-										id = this.parseNormalIndex(nd, nLen);
-
-										this.addNormal(ia, ib, id);
-										this.addNormal(ib, ic, id);
-								}
-						}
-				}
-		}, {
-				key: 'addLineGeometry',
-				value: function addLineGeometry(vertices, uvs) {
-
-						this.object.geometry.type = 'Line';
-
-						var vLen = this.vertices.length;
-						var uvLen = this.uvs.length;
-
-						for (var vi = 0, l = vertices.length; vi < l; vi++) {
-
-								this.addVertexLine(this.parseVertexIndex(vertices[vi], vLen));
-						}
-
-						for (var uvi = 0, l = uvs.length; uvi < l; uvi++) {
-
-								this.addUVLine(this.parseUVIndex(uvs[uvi], uvLen));
-						}
-				}
-		}]);
-		return OBJParserState;
-}();
-
-var OBJ = function () {
-		function OBJ(name, fromDeclaration) {
-				classCallCheck(this, OBJ);
-
-
-				this.name = name || '';
-				this.fromDeclaration = fromDeclaration !== false;
-
-				this.geometry = {
-						vertices: [],
-						normals: [],
-						uvs: []
-				};
-				this.materials = [];
-				this.smooth = true;
+		// Guarantee at least one empty material, this makes the creation later more straight forward.
+		if ( end !== false && this.materials.length === 0 ) {
+			this.materials.push({
+				name   : '',
+				smooth : this.smooth
+			});
 		}
 
-		createClass(OBJ, [{
-				key: 'startMaterial',
-				value: function startMaterial(name, libraries) {
+		return lastMultiMaterial;
 
-						var previous = this._finalize(false);
+	}
+}
 
-						// New usemtl declaration overwrites an inherited material, except if faces were declared
-						// after the material, then it must be preserved for proper MultiMaterial continuation.
-						if (previous && (previous.inherited || previous.groupCount <= 0)) {
-
-								this.materials.splice(previous.index, 1);
-						}
-
-						var material = {
-								index: this.materials.length,
-								name: name || '',
-								mtllib: Array.isArray(libraries) && libraries.length > 0 ? libraries[libraries.length - 1] : '',
-								smooth: previous !== undefined ? previous.smooth : this.smooth,
-								groupStart: previous !== undefined ? previous.groupEnd : 0,
-								groupEnd: -1,
-								groupCount: -1,
-								inherited: false,
-
-								clone: function clone(index) {
-										return {
-												index: typeof index === 'number' ? index : this.index,
-												name: this.name,
-												mtllib: this.mtllib,
-												smooth: this.smooth,
-												groupStart: this.groupEnd,
-												groupEnd: -1,
-												groupCount: -1,
-												inherited: false
-										};
-								}
-						};
-
-						this.materials.push(material);
-
-						return material;
-				}
-		}, {
-				key: 'currentMaterial',
-				value: function currentMaterial() {
-
-						if (this.materials.length > 0) {
-								return this.materials[this.materials.length - 1];
-						}
-
-						return undefined;
-				}
-		}, {
-				key: '_finalize',
-				value: function _finalize(end) {
-
-						var lastMultiMaterial = this.currentMaterial();
-						if (lastMultiMaterial && lastMultiMaterial.groupEnd === -1) {
-
-								lastMultiMaterial.groupEnd = this.geometry.vertices.length / 3;
-								lastMultiMaterial.groupCount = lastMultiMaterial.groupEnd - lastMultiMaterial.groupStart;
-								lastMultiMaterial.inherited = false;
-						}
-
-						// Guarantee at least one empty material, this makes the creation later more straight forward.
-						if (end !== false && this.materials.length === 0) {
-								this.materials.push({
-										name: '',
-										smooth: this.smooth
-								});
-						}
-
-						return lastMultiMaterial;
-				}
-		}]);
-		return OBJ;
-}();
-
-Geometry.prototype.offset = function (x, y, z) {
-  var arr = this.vertices;
-  for (var i = 0; i < arr.length; ++i) {
-    var vert = arr[i];
+Geometry.prototype.offset = function(x, y, z){
+  const arr = this.vertices;
+  for(let i = 0; i < arr.length; ++i) {
+    const vert = arr[i];
     vert.x += x;
     vert.y += y;
     vert.z += z;
@@ -45744,10 +45006,10 @@ Geometry.prototype.offset = function (x, y, z) {
   return this;
 };
 
-BufferGeometry.prototype.offset = function (x, y, z) {
-  var arr = this.attributes.position.array,
-      l = this.attributes.position.itemSize;
-  for (var i = 0; i < arr.length; i += l) {
+BufferGeometry.prototype.offset = function(x, y, z){
+  const arr = this.attributes.position.array,
+    l = this.attributes.position.itemSize;
+  for(let i = 0; i < arr.length; i += l) {
     arr[i] += x;
     arr[i + 1] += y;
     arr[i + 2] += z;
@@ -45755,33 +45017,49 @@ BufferGeometry.prototype.offset = function (x, y, z) {
   return this;
 };
 
-BufferGeometry.prototype.textured = Geometry.prototype.textured = Mesh.prototype.textured = function (texture, options) {
-  return textured(this, texture, options);
-};
+BufferGeometry.prototype.textured =
+Geometry.prototype.textured =
+Mesh.prototype.textured =
+  function(texture, options) {
+    return textured(this, texture, options);
+  };
 
-Euler.prototype.toString = Quaternion.prototype.toString = Vector2.prototype.toString = Vector3.prototype.toString = Vector4.prototype.toString = function (digits) {
-  var parts = this.toArray();
-  if (digits !== undefined) {
-    for (var i = 0; i < parts.length; ++i) {
-      if (parts[i] !== null && parts[i] !== undefined) {
-        parts[i] = parts[i].toFixed(digits);
-      } else {
-        parts[i] = "undefined";
+Euler.prototype.toString =
+Quaternion.prototype.toString =
+Vector2.prototype.toString =
+Vector3.prototype.toString =
+Vector4.prototype.toString =
+  function(digits) {
+    var parts = this.toArray();
+    if (digits !== undefined) {
+      for (var i = 0; i < parts.length; ++i) {
+        if (parts[i] !== null && parts[i] !== undefined) {
+          parts[i] = parts[i].toFixed(digits);
+        }
+        else {
+          parts[i] = "undefined";
+        }
       }
     }
-  }
-  return "<" + parts.join(", ") + ">";
-};
+    return "<" + parts.join(", ") + ">";
+  };
 
-var debugOutputCache = {};
-Euler.prototype.debug = Quaternion.prototype.debug = Vector2.prototype.debug = Vector3.prototype.debug = Vector4.prototype.debug = Matrix3.prototype.debug = Matrix4.prototype.debug = function (label, digits) {
-  var val = this.toString(digits);
-  if (val !== debugOutputCache[label]) {
-    debugOutputCache[label] = val;
-    console.trace(label + "\n" + val);
-  }
-  return this;
-};
+const debugOutputCache = {};
+Euler.prototype.debug =
+Quaternion.prototype.debug =
+Vector2.prototype.debug =
+Vector3.prototype.debug =
+Vector4.prototype.debug =
+Matrix3.prototype.debug =
+Matrix4.prototype.debug =
+  function(label, digits) {
+    var val = this.toString(digits);
+    if (val !== debugOutputCache[label]) {
+      debugOutputCache[label] = val;
+      console.trace(label + "\n" + val);
+    }
+    return this;
+  };
 
 var commonjsGlobal = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -46025,14 +45303,11 @@ var promise = createCommonjsModule(function (module) {
 })(commonjsGlobal);
 });
 
-var DEG2RAD = _Math.DEG2RAD;
-var RAD2DEG = _Math.RAD2DEG;
+const { DEG2RAD, RAD2DEG } = _Math;
 
-var Angle = function () {
-  function Angle(v) {
-    classCallCheck(this, Angle);
-
-    if (typeof v !== "number") {
+class Angle {
+  constructor (v) {
+    if (typeof (v) !== "number") {
       throw new Error("Angle must be initialized with a number. Initial value was: " + v);
     }
 
@@ -46043,41 +45318,39 @@ var Angle = function () {
     this._d3 = null;
   }
 
-  createClass(Angle, [{
-    key: "degrees",
-    get: function get$$1() {
-      return this._value;
-    },
-    set: function set$$1(newValue) {
+  get degrees() {
+    return this._value;
+  }
 
-      do {
-        // figure out if it is adding the raw value, or whole
-        // rotations of the value, that results in a smaller
-        // magnitude of change.
-        this._d1 = newValue + this._delta - this._value;
-        this._d2 = Math.abs(this._d1 + 360);
-        this._d3 = Math.abs(this._d1 - 360);
-        this._d1 = Math.abs(this._d1);
-        if (this._d2 < this._d1 && this._d2 < this._d3) {
-          this._delta += 360;
-        } else if (this._d3 < this._d1) {
-          this._delta -= 360;
-        }
-      } while (this._d1 > this._d2 || this._d1 > this._d3);
-      this._value = newValue + this._delta;
-    }
-  }, {
-    key: "radians",
-    get: function get$$1() {
-      return this.degrees * DEG2RAD;
-    },
-    set: function set$$1(val) {
+  set degrees(newValue) {
 
-      this.degrees = val * RAD2DEG;
-    }
-  }]);
-  return Angle;
-}();
+    do {
+      // figure out if it is adding the raw value, or whole
+      // rotations of the value, that results in a smaller
+      // magnitude of change.
+      this._d1 = newValue + this._delta - this._value;
+      this._d2 = Math.abs(this._d1 + 360);
+      this._d3 = Math.abs(this._d1 - 360);
+      this._d1 = Math.abs(this._d1);
+      if (this._d2 < this._d1 && this._d2 < this._d3) {
+        this._delta += 360;
+      }
+      else if (this._d3 < this._d1) {
+        this._delta -= 360;
+      }
+    } while (this._d1 > this._d2 || this._d1 > this._d3);
+    this._value = newValue + this._delta;
+  }
+
+  get radians() {
+    return this.degrees * DEG2RAD;
+  }
+
+  set radians(val) {
+
+    this.degrees = val * RAD2DEG;
+  }
+}
 
 function XHR(method, type, url, options) {
   return new Promise(function (resolve, reject) {
@@ -46088,12 +45361,8 @@ function XHR(method, type, url, options) {
     }
 
     var req = new XMLHttpRequest();
-    req.onerror = function (evt) {
-      return reject(new Error("Request error: " + evt.message));
-    };
-    req.onabort = function (evt) {
-      return reject(new Error("Request abort: " + evt.message));
-    };
+    req.onerror = (evt) => reject(new Error("Request error: " + evt.message));
+    req.onabort = (evt) => reject(new Error("Request abort: " + evt.message));
     req.onload = function () {
       // The other error events are client-errors. If there was a server error,
       // we'd find out about it during this event. We need to only respond to
@@ -46101,7 +45370,8 @@ function XHR(method, type, url, options) {
       // range.
       if (req.status < 400) {
         resolve(req.response);
-      } else {
+      }
+      else {
         reject(req);
       }
     };
@@ -46125,18 +45395,19 @@ function XHR(method, type, url, options) {
 
     if (options.data) {
       req.send(JSON.stringify(options.data));
-    } else {
+    }
+    else {
       req.send();
     }
   });
 }
 
-function get$1(type, url, options) {
+function get(type, url, options) {
   return XHR("GET", type || "text", url, options);
 }
 
 function getBuffer(url, options) {
-  return get$1("arraybuffer", url, options);
+  return get("arraybuffer", url, options);
 }
 
 function cascadeElement(id, tag, DOMClass, add) {
@@ -46144,9 +45415,11 @@ function cascadeElement(id, tag, DOMClass, add) {
   if (id === null) {
     elem = document.createElement(tag);
     elem.id = id = "auto_" + tag + Date.now();
-  } else if (DOMClass === undefined || id instanceof DOMClass) {
+  }
+  else if (DOMClass === undefined || id instanceof DOMClass) {
     elem = id;
-  } else if (typeof id === "string") {
+  }
+  else if (typeof (id) === "string") {
     elem = document.getElementById(id) || document.querySelector(id);
     if (elem === null) {
       elem = document.createElement(tag);
@@ -46154,7 +45427,8 @@ function cascadeElement(id, tag, DOMClass, add) {
       if (add) {
         document.body.appendChild(elem);
       }
-    } else if (elem.tagName !== tag.toUpperCase()) {
+    }
+    else if (elem.tagName !== tag.toUpperCase()) {
       elem = null;
     }
   }
@@ -46166,13 +45440,13 @@ function cascadeElement(id, tag, DOMClass, add) {
 }
 
 // polyfill
-window.AudioContext = function (AudioContext$$1) {
+window.AudioContext = (function(AudioContext$$1) {
   Object.defineProperties(AudioContext$$1.prototype, {
     createGain: {
       value: AudioContext$$1.prototype.createGain || AudioContext$$1.prototype.createGainNode
     },
     createDelay: {
-      value: AudioContext$$1.prototype.createDelay || AudioContext$$1.prototype.createDelayNode
+      value: AudioContext$$1.prototype.createDelay|| AudioContext$$1.prototype.createDelayNode
     },
     createScriptProcessor: {
       value: AudioContext$$1.prototype.createScriptProcessor || AudioContext$$1.prototype.createJavaScriptNode
@@ -46180,9 +45454,9 @@ window.AudioContext = function (AudioContext$$1) {
   });
 
   var testContext = new AudioContext$$1(),
-      OscillatorNode = testContext.createOscillator().constructor,
-      BufferSourceNode = testContext.createBufferSource().constructor,
-      GainNodeGainValue = testContext.createGain().gain.constructor;
+    OscillatorNode = testContext.createOscillator().constructor,
+    BufferSourceNode = testContext.createBufferSource().constructor,
+    GainNodeGainValue = testContext.createGain().gain.constructor;
 
   Object.defineProperties(OscillatorNode.prototype, {
     setPeriodicWave: {
@@ -46199,7 +45473,9 @@ window.AudioContext = function (AudioContext$$1) {
   Object.defineProperties(BufferSourceNode.prototype, {
     start: {
       value: BufferSourceNode.prototype.start || function start() {
-        return arguments.length > 1 ? BufferSourceNode.prototype.noteGrainOn.apply(this, arguments) : BufferSourceNode.prototype.noteOn.apply(this, arguments);
+        return arguments.length > 1
+          ? BufferSourceNode.prototype.noteGrainOn.apply(this, arguments)
+          : BufferSourceNode.prototype.noteOn.apply(this, arguments);
       }
     },
     stop: {
@@ -46214,63 +45490,59 @@ window.AudioContext = function (AudioContext$$1) {
   });
 
   return AudioContext$$1;
-}(window.AudioContext || window.webkitAudioContext);
+})(window.AudioContext || window.webkitAudioContext);
 
-var VECTOR = new Vector3();
-var UP = new Vector3();
-var TEMP = new Matrix4();
+let VECTOR = new Vector3();
+let UP = new Vector3();
+let TEMP = new Matrix4();
 
-var Audio3D = function () {
-  createClass(Audio3D, null, [{
-    key: "setAudioStream",
-    value: function setAudioStream(stream, id) {
-      var audioElementCount = document.querySelectorAll("audio").length,
-          element = cascadeElement(id || "audioStream" + audioElementCount, "audio", HTMLAudioElement, true);
-      setAudioProperties(element);
-      element.srcObject = stream;
-      return element;
-    }
-  }, {
-    key: "setAudioProperties",
-    value: function setAudioProperties(element) {
-      element.autoplay = true;
-      element.controls = false;
-      element.crossOrigin = "anonymous";
-    }
-  }]);
+class Audio3D {
 
-  function Audio3D() {
-    var _this = this;
+  static setAudioStream(stream, id) {
+    const audioElementCount = document.querySelectorAll("audio")
+      .length,
+      element = cascadeElement(id || ("audioStream" + audioElementCount), "audio", HTMLAudioElement, true);
+    setAudioProperties(element);
+    element.srcObject = stream;
+    return element;
+  }
 
-    classCallCheck(this, Audio3D);
+  static setAudioProperties(element){
+    element.autoplay = true;
+    element.controls = false;
+    element.crossOrigin = "anonymous";
+  }
 
-    this.ready = new Promise(function (resolve, reject) {
-      try {
-        if (Audio3D.isAvailable) {
-          var finishSetup = function finishSetup() {
-            try {
-              _this.sampleRate = _this.context.sampleRate;
-              _this.mainVolume = _this.context.createGain();
-              _this.start();
+  constructor() {
+    this.ready = new Promise((resolve, reject) => {
+      try{
+        if(Audio3D.isAvailable) {
+          const finishSetup = () => {
+            try{
+              this.sampleRate = this.context.sampleRate;
+              this.mainVolume = this.context.createGain();
+              this.start();
               resolve();
-            } catch (exp) {
+            }
+            catch(exp){
               reject(exp);
             }
           };
 
-          if (!isiOS$1) {
-            _this.context = new AudioContext();
+          if(!isiOS$1) {
+            this.context = new AudioContext();
             finishSetup();
-          } else {
-            var unlock = function unlock() {
-              try {
-                _this.context = _this.context || new AudioContext();
-                var source = _this.context.createBufferSource();
-                source.buffer = _this.createRawSound([[0]]);
-                source.connect(_this.context.destination);
+          }
+          else {
+            const unlock = () => {
+              try{
+                this.context = this.context || new AudioContext();
+                const source = this.context.createBufferSource();
+                source.buffer = this.createRawSound([[0]]);
+                source.connect(this.context.destination);
                 source.start();
-                setTimeout(function () {
-                  if (source.playbackState === source.PLAYING_STATE || source.playbackState === source.FINISHED_STATE) {
+                setTimeout(() => {
+                  if((source.playbackState === source.PLAYING_STATE || source.playbackState === source.FINISHED_STATE)) {
                     window.removeEventListener("mouseup", unlock);
                     window.removeEventListener("touchend", unlock);
                     window.removeEventListener("keyup", unlock);
@@ -46278,7 +45550,8 @@ var Audio3D = function () {
                     finishSetup();
                   }
                 }, 0);
-              } catch (exp) {
+              }
+              catch(exp){
                 reject(exp);
               }
             };
@@ -46288,273 +45561,250 @@ var Audio3D = function () {
             window.addEventListener("keyup", unlock, false);
           }
         }
-      } catch (exp) {
+      }
+      catch(exp) {
         reject(exp);
       }
     });
   }
 
-  createClass(Audio3D, [{
-    key: "setVelocity",
-    value: function setVelocity(x, y, z) {
-      if (this.context) {
-        this.context.listener.setVelocity(x, y, z);
+  setVelocity(x, y, z) {
+    if(this.context) {
+      this.context.listener.setVelocity(x, y, z);
+    }
+  }
+
+  setPlayer(obj) {
+    if(this.context && this.context.listener) {
+      var m = obj.matrixWorld,
+        e = m.elements,
+        mx = e[12],
+        my = e[13],
+        mz = e[14];
+
+      if(!isNaN(mx + my + mz)) {
+
+        this.context.listener.setPosition(mx, my, mz);
+
+        VECTOR.set(0, 0, -1)
+          .applyMatrix4(m)
+          .normalize();
+        UP.set(0, 1, 0)
+          .applyMatrix4(m)
+          .normalize();
+
+        this.context.listener.setOrientation(VECTOR.x, VECTOR.y, VECTOR.z, UP.x, UP.y, UP.z);
       }
     }
-  }, {
-    key: "setPlayer",
-    value: function setPlayer(obj) {
-      if (this.context && this.context.listener) {
-        var m = obj.matrixWorld,
-            e = m.elements,
-            mx = e[12],
-            my = e[13],
-            mz = e[14];
+  }
 
-        if (!isNaN(mx + my + mz)) {
-
-          this.context.listener.setPosition(mx, my, mz);
-
-          VECTOR.set(0, 0, -1).applyMatrix4(m).normalize();
-          UP.set(0, 1, 0).applyMatrix4(m).normalize();
-
-          this.context.listener.setOrientation(VECTOR.x, VECTOR.y, VECTOR.z, UP.x, UP.y, UP.z);
-        }
-      }
+  start() {
+    if(this.mainVolume){
+      this.mainVolume.connect(this.context.destination);
     }
-  }, {
-    key: "start",
-    value: function start() {
-      if (this.mainVolume) {
-        this.mainVolume.connect(this.context.destination);
-      }
-      if (this.context && this.context.resume) {
-        this.context.resume();
-      }
+    if(this.context && this.context.resume) {
+      this.context.resume();
     }
-  }, {
-    key: "stop",
-    value: function stop() {
-      if (this.context && this.context.suspend) {
-        this.context.suspend();
-      }
-      if (this.mainVolume) {
-        this.mainVolume.disconnect();
-      }
-    }
-  }, {
-    key: "loadURL",
-    value: function loadURL(src) {
-      var _this2 = this;
+  }
 
-      return this.ready.then(function () {
-        console.log("Loading " + src + " from URL");
-        getBuffer(src);
-      }).then(function (data) {
-        return new Promise(function (resolve, reject) {
-          return _this2.context.decodeAudioData(data, resolve, reject);
-        });
-      }).then(function (dat) {
+  stop() {
+    if(this.context && this.context.suspend) {
+      this.context.suspend();
+    }
+    if(this.mainVolume){
+      this.mainVolume.disconnect();
+    }
+  }
+
+  loadURL(src) {
+    return this.ready.then(() => {
+      console.log("Loading " + src + " from URL");
+      getBuffer(src);
+    })
+      .then((data) => new Promise((resolve, reject) =>
+        this.context.decodeAudioData(data, resolve, reject)))
+      .then((dat) => {
         console.log(src + " loaded");
         return dat;
-      }).catch(function (err) {
+      })
+      .catch((err) => {
         console.error("Couldn't load " + src + ". Reason: " + err);
       });
-    }
-  }, {
-    key: "createRawSound",
-    value: function createRawSound(pcmData) {
-      if (pcmData.length !== 1 && pcmData.length !== 2) {
-        throw new Error("Incorrect number of channels. Expected 1 or 2, got " + pcmData.length);
-      }
+  }
 
-      var frameCount = pcmData[0].length;
-      if (pcmData.length > 1 && pcmData[1].length !== frameCount) {
-        throw new Error("Second channel is not the same length as the first channel. Expected " + frameCount + ", but was " + pcmData[1].length);
-      }
+  createRawSound(pcmData) {
+    if (pcmData.length !== 1 && pcmData.length !== 2) {
+      throw new Error("Incorrect number of channels. Expected 1 or 2, got " + pcmData.length);
+    }
 
-      var buffer = this.context.createBuffer(pcmData.length, frameCount, this.sampleRate || 22050);
-      for (var c = 0; c < pcmData.length; ++c) {
-        var channel = buffer.getChannelData(c);
-        for (var i = 0; i < frameCount; ++i) {
-          channel[i] = pcmData[c][i];
-        }
-      }
-      return buffer;
+    var frameCount = pcmData[0].length;
+    if (pcmData.length > 1 && pcmData[1].length !== frameCount) {
+      throw new Error(
+        "Second channel is not the same length as the first channel. Expected " + frameCount + ", but was " + pcmData[1].length);
     }
-  }, {
-    key: "create3DSound",
-    value: function create3DSound(x, y, z, snd) {
-      snd.panner = this.context.createPanner();
-      snd.panner.setPosition(x, y, z);
-      snd.panner.connect(this.mainVolume);
-      snd.volume.connect(snd.panner);
-      return snd;
-    }
-  }, {
-    key: "createFixedSound",
-    value: function createFixedSound(snd) {
-      snd.volume.connect(this.mainVolume);
-      return snd;
-    }
-  }, {
-    key: "loadSource",
-    value: function loadSource(sources, loop) {
-      var _this3 = this;
 
-      return this.ready.then(function () {
-        return new Promise(function (resolve, reject) {
-          console.log("Loading " + sources);
-          if (!(sources instanceof Array)) {
-            sources = [sources];
-          }
-          var audio = document.createElement("audio");
-          audio.autoplay = true;
-          audio.preload = "auto";
-          audio["webkit-playsinline"] = true;
-          audio.playsinline = true;
-          audio.loop = loop;
-          audio.crossOrigin = "anonymous";
-          sources.map(function (src) {
-            var source = document.createElement("source");
-            source.src = src;
-            return source;
-          }).forEach(audio.appendChild.bind(audio));
-          audio.onerror = reject;
-          audio.oncanplay = function () {
-            audio.oncanplay = null;
-            var snd = {
-              volume: _this3.context.createGain(),
-              source: _this3.context.createMediaElementSource(audio)
-            };
-            snd.source.connect(snd.volume);
-            resolve(snd);
-          };
-          audio.play();
-          document.body.appendChild(audio);
-        });
-      }).then(function (dat) {
+    var buffer = this.context.createBuffer(pcmData.length, frameCount, this.sampleRate || 22050);
+    for (var c = 0; c < pcmData.length; ++c) {
+      var channel = buffer.getChannelData(c);
+      for (var i = 0; i < frameCount; ++i) {
+        channel[i] = pcmData[c][i];
+      }
+    }
+    return buffer;
+  }
+
+  create3DSound(x, y, z, snd) {
+    snd.panner = this.context.createPanner();
+    snd.panner.setPosition(x, y, z);
+    snd.panner.connect(this.mainVolume);
+    snd.volume.connect(snd.panner);
+    return snd;
+  }
+
+  createFixedSound(snd) {
+    snd.volume.connect(this.mainVolume);
+    return snd;
+  }
+
+  loadSource(sources, loop) {
+
+    return this.ready.then(() => new Promise((resolve, reject) => {
+      console.log("Loading " + sources);
+      if (!(sources instanceof Array)) {
+        sources = [sources];
+      }
+      var audio = document.createElement("audio");
+      audio.autoplay = true;
+      audio.preload = "auto";
+      audio["webkit-playsinline"] = true;
+      audio.playsinline = true;
+      audio.loop = loop;
+      audio.crossOrigin = "anonymous";
+      sources.map((src) => {
+          var source = document.createElement("source");
+          source.src = src;
+          return source;
+        })
+        .forEach(audio.appendChild.bind(audio));
+      audio.onerror = reject;
+      audio.oncanplay = () => {
+        audio.oncanplay = null;
+        const snd = {
+          volume: this.context.createGain(),
+          source: this.context.createMediaElementSource(audio)
+        };
+        snd.source.connect(snd.volume);
+        resolve(snd);
+      };
+      audio.play();
+      document.body.appendChild(audio);
+    }))
+      .then((dat) => {
         console.log(sources + " loaded");
         return dat;
-      }).catch(function (err) {
+      })
+      .catch((err) => {
         console.error("Couldn't load " + sources + ". Reason: " + err);
       });
-    }
-  }, {
-    key: "load3DSound",
-    value: function load3DSound(src, loop, x, y, z) {
-      return this.loadSource(src, loop).then(this.create3DSound.bind(this, x, y, z));
-    }
-  }, {
-    key: "loadFixedSound",
-    value: function loadFixedSound(src, loop) {
-      return this.loadSource(src, loop).then(this.createFixedSound.bind(this));
-    }
-  }]);
-  return Audio3D;
-}();
+  }
+
+  load3DSound(src, loop, x, y, z) {
+    return this.loadSource(src, loop)
+      .then(this.create3DSound.bind(this, x, y, z));
+  }
+
+  loadFixedSound(src, loop) {
+    return this.loadSource(src, loop)
+      .then(this.createFixedSound.bind(this));
+  }
+}
 
 Audio3D.isAvailable = !!window.AudioContext && !!AudioContext.prototype.createGain;
 
-var PositionalSound = function () {
-  function PositionalSound(ctx, mainVolume) {
-    classCallCheck(this, PositionalSound);
-
-    this.gn = ctx.createGain(), this.pnr = ctx.createPanner();
+class PositionalSound {
+  constructor(ctx, mainVolume){
+    this.gn = ctx.createGain(),
+    this.pnr = ctx.createPanner();
     this.gn.connect(this.pnr);
     this.pnr.connect(mainVolume);
     this.gn.gain.value = 0;
     this.ctx = ctx;
   }
 
-  createClass(PositionalSound, [{
-    key: "at",
-    value: function at(x, y, z, dx, dy, dz) {
-      x = x || 0;
-      y = y || 0;
-      z = z || 0;
-      if (dx === undefined || dx === null) {
-        dx = 0;
-      }
-      dy = dy || 0;
-      dz = dz || 0;
-
-      this.pnr.setPosition(x, y, z);
-      this.pnr.setOrientation(dx, dy, dz);
-      return this;
+  at(x, y, z, dx, dy, dz) {
+    x = x || 0;
+    y = y || 0;
+    z = z || 0;
+    if(dx === undefined || dx === null) {
+      dx = 0;
     }
-  }]);
-  return PositionalSound;
-}();
+    dy = dy || 0;
+    dz = dz || 0;
 
-var PIANO_BASE = Math.pow(2, 1 / 12);
+    this.pnr.setPosition(x, y, z);
+    this.pnr.setOrientation(dx, dy, dz);
+    return this;
+  }
+}
 
-var Note = function (_PositionalSound) {
-  inherits(Note, _PositionalSound);
-  createClass(Note, null, [{
-    key: "piano",
-    value: function piano(n) {
-      return 440 * Math.pow(PIANO_BASE, n - 49);
-    }
-  }]);
+const PIANO_BASE = Math.pow(2, 1 / 12);
 
-  function Note(ctx, mainVolume, type) {
-    classCallCheck(this, Note);
+class Note extends PositionalSound {
 
-    var _this = possibleConstructorReturn(this, (Note.__proto__ || Object.getPrototypeOf(Note)).call(this, ctx, mainVolume));
-
-    _this.osc = ctx.createOscillator(), _this.osc.type = type;
-    _this.osc.frequency.value = 0;
-    _this.osc.connect(_this.gn);
-    _this.osc.start();
-    return _this;
+  static piano(n) {
+    return 440 * Math.pow(PIANO_BASE, n - 49);
   }
 
-  createClass(Note, [{
-    key: "on",
-    value: function on(i, volume, dt, ramp) {
-      if (dt === undefined) {
-        dt = 0;
-      }
-      var f = Note.piano(parseFloat(i) + 1),
-          t = this.ctx.currentTime + dt;
-      this.gn.gain.setValueAtTime(volume, t);
-      if (ramp) {
-        this.osc.frequency.exponentialRampToValueAtTime(f, t);
-      } else {
-        this.osc.frequency.setValueAtTime(f, t);
-      }
-      return this;
+  constructor(ctx, mainVolume, type){
+    super(ctx, mainVolume);
+    this.osc = ctx.createOscillator(),
+    this.osc.type = type;
+    this.osc.frequency.value = 0;
+    this.osc.connect(this.gn);
+    this.osc.start();
+  }
+
+  get ready(){
+    return this.gn.gain.value === 0;
+  }
+
+  on(i, volume, dt, ramp) {
+    if(dt === undefined){
+      dt = 0;
     }
-  }, {
-    key: "off",
-    value: function off(dt) {
-      if (dt === undefined) {
-        dt = 0;
-      }
-      var t = this.ctx.currentTime + dt;
-      this.gn.gain.setValueAtTime(0, t);
-      this.osc.frequency.setValueAtTime(0, t);
-      return this;
+    const f = Note.piano(parseFloat(i) + 1),
+      t = this.ctx.currentTime + dt;
+    this.gn.gain.setValueAtTime(volume, t);
+    if(ramp){
+      this.osc.frequency.exponentialRampToValueAtTime(f, t);
     }
-  }, {
-    key: "ready",
-    get: function get$$1() {
-      return this.gn.gain.value === 0;
+    else {
+      this.osc.frequency.setValueAtTime(f, t);
     }
-  }]);
-  return Note;
-}(PositionalSound);
+    return this;
+  }
+
+  off(dt) {
+    if(dt === undefined){
+      dt = 0;
+    }
+    const t = this.ctx.currentTime + dt;
+    this.gn.gain.setValueAtTime(0, t);
+    this.osc.frequency.setValueAtTime(0, t);
+    return this;
+  }
+}
 
 var MAX_NOTE_COUNT = (navigator.maxTouchPoints || 10) + 1;
-var TYPES = ["sine", "square", "sawtooth", "triangle"];
+var TYPES = ["sine",
+    "square",
+    "sawtooth",
+    "triangle"
+  ];
 
-var Music = function () {
-  function Music(audio, numNotes) {
-    var _this = this;
+class Music {
 
-    classCallCheck(this, Music);
-
+  constructor(audio, numNotes) {
     if (numNotes === undefined) {
       numNotes = MAX_NOTE_COUNT;
     }
@@ -46562,121 +45812,104 @@ var Music = function () {
     this.oscillators = {};
     this.isAvailable = false;
     this.audio = audio;
-    this.audio.ready.then(function () {
-      var ctx = _this.audio.context;
-      _this.mainVolume = ctx.createGain();
-      _this.mainVolume.connect(_this.audio.mainVolume);
-      _this.mainVolume.gain.value = 1;
-      _this.numNotes = numNotes;
-      TYPES.forEach(function (type) {
-        var oscs = _this.oscillators[type] = [];
-        _this[type] = _this.play.bind(_this, type);
-        for (var i = 0; i < _this.numNotes; ++i) {
-          oscs.push(new Note(ctx, _this.mainVolume, type));
+    this.audio.ready.then(() => {
+      const ctx = this.audio.context;
+      this.mainVolume = ctx.createGain();
+      this.mainVolume.connect(this.audio.mainVolume);
+      this.mainVolume.gain.value = 1;
+      this.numNotes = numNotes;
+      TYPES.forEach((type) => {
+        const oscs = this.oscillators[type] = [];
+        this[type] = this.play.bind(this, type);
+        for (var i = 0; i < this.numNotes; ++i) {
+          oscs.push(new Note(ctx, this.mainVolume, type));
         }
       });
-      _this.isAvailable = true;
+      this.isAvailable = true;
     });
   }
 
-  createClass(Music, [{
-    key: "getOsc",
-    value: function getOsc(type) {
-      var osc = this.oscillators[type];
-      var n = void 0;
-      for (n = 0; n < osc.length; ++n) {
-        if (osc[n].ready) {
-          break;
-        }
-      }
+  get type() {
+    return this._type;
+  }
 
-      return osc[n % this.numNotes];
+  set type(v){
+    if(this.isAvailable){
+      this._type = v;
+      this.oscillators.forEach((o) => o.osc.type = this._type);
     }
-  }, {
-    key: "play",
-    value: function play(type, i, volume, duration, dt) {
-      if (dt === undefined) {
-        dt = 0;
-      }
-      var o = this.getOsc(type).on(i, volume, dt);
-      dt += duration;
-      o.off(dt);
-      dt = this.audio.context.currentTime + dt - performance.now() / 1000;
-      return o;
-    }
-  }, {
-    key: "type",
-    get: function get$$1() {
-      return this._type;
-    },
-    set: function set$$1(v) {
-      var _this2 = this;
+  }
 
-      if (this.isAvailable) {
-        this._type = v;
-        this.oscillators.forEach(function (o) {
-          return o.osc.type = _this2._type;
-        });
+  getOsc(type){
+    const osc = this.oscillators[type];
+    let n;
+    for(n = 0; n < osc.length; ++n){
+      if(osc[n].ready){
+        break;
       }
     }
-  }]);
-  return Music;
-}();
+
+    return osc[n % this.numNotes];
+  }
+
+  play (type, i, volume, duration, dt) {
+    if(dt === undefined){
+      dt = 0;
+    }
+    const o = this.getOsc(type)
+      .on(i, volume, dt);
+    dt += duration;
+    o.off(dt);
+    dt = this.audio.context.currentTime + dt - performance.now() / 1000;
+    return o;
+  }
+}
 
 Music.TYPES = TYPES;
 
-var Sound = function (_PositionalSound) {
-  inherits(Sound, _PositionalSound);
-
-  function Sound(audio3D, sources, loop) {
-    classCallCheck(this, Sound);
-
-    var _this = possibleConstructorReturn(this, (Sound.__proto__ || Object.getPrototypeOf(Sound)).call(this, audio3D.context, audio3D.mainVolume));
-
-    _this.audio = document.createElement("audio");
-    _this.audio.autoplay = true;
-    _this.audio.preload = "auto";
-    _this.audio["webkit-playsinline"] = true;
-    _this.audio.playsinline = true;
-    _this.audio.loop = loop;
-    _this.audio.crossOrigin = "anonymous";
+class Sound extends PositionalSound {
+  constructor(audio3D, sources, loop){
+    super(audio3D.context, audio3D.mainVolume);
+    this.audio = document.createElement("audio");
+    this.audio.autoplay = true;
+    this.audio.preload = "auto";
+    this.audio["webkit-playsinline"] = true;
+    this.audio.playsinline = true;
+    this.audio.loop = loop;
+    this.audio.crossOrigin = "anonymous";
     console.log("Loading " + sources);
     if (!(sources instanceof Array)) {
       sources = [sources];
     }
-    sources.map(function (src) {
-      var source = document.createElement("source");
-      source.src = src;
-      return source;
-    }).forEach(_this.audio.appendChild.bind(_this.audio));
-    _this.ready = new Promise(function (resolve, reject) {
-      _this.audio.onerror = reject;
-      _this.audio.oncanplay = function () {
-        _this.audio.oncanplay = null;
-        _this.node = _this.ctx.createMediaElementSource(_this.audio);
-        _this.node.connect(_this.gn);
-        _this.gn.gain.setValueAtTime(0, _this.ctx.currentTime);
-        resolve(_this);
+    sources.map((src) => {
+        var source = document.createElement("source");
+        source.src = src;
+        return source;
+      })
+      .forEach(this.audio.appendChild.bind(this.audio));
+    this.ready = new Promise((resolve, reject) => {
+      this.audio.onerror = reject;
+      this.audio.oncanplay = () => {
+        this.audio.oncanplay = null;
+        this.node = this.ctx.createMediaElementSource(this.audio);
+        this.node.connect(this.gn);
+        this.gn.gain.setValueAtTime(0, this.ctx.currentTime);
+        resolve(this);
       };
-      _this.audio.play();
+      this.audio.play();
     });
 
-    document.body.appendChild(_this.audio);
-    return _this;
+    document.body.appendChild(this.audio);
   }
 
-  createClass(Sound, [{
-    key: "play",
-    value: function play() {
-      this.gn.gain.setValueAtTime(1, this.ctx.currentTime);
-      this.audio.play();
-      return this;
-    }
-  }]);
-  return Sound;
-}(PositionalSound);
+  play(){
+    this.gn.gain.setValueAtTime(1, this.ctx.currentTime);
+    this.audio.play();
+    return this;
+  }
+}
 
-var DEFAULT_SPEECH_SETTINGS = {
+const DEFAULT_SPEECH_SETTINGS = {
   remoteVoices: true,
   volume: 1,
   rate: 1,
@@ -46684,21 +45917,15 @@ var DEFAULT_SPEECH_SETTINGS = {
   voice: 0
 };
 
-var Speech = function () {
-  function Speech(options) {
-    var _this = this;
-
-    classCallCheck(this, Speech);
-
+class Speech {
+  constructor (options) {
     this.options = Object.assign({}, DEFAULT_SPEECH_SETTINGS, options);
-    if (Speech.isAvailable) {
-      var getVoices = function getVoices() {
-        _this.voices = speechSynthesis.getVoices().filter(function (v) {
-          return _this.options.remoteVoices || v.default || v.localService;
-        });
-        _this.voiceNames = _this.voices.map(function (voice) {
-          return voice.name;
-        });
+    if(Speech.isAvailable) {
+      const getVoices = () => {
+        this.voices = speechSynthesis
+          .getVoices()
+          .filter((v) => this.options.remoteVoices || v.default || v.localService);
+        this.voiceNames = this.voices.map((voice) => voice.name);
       };
 
       getVoices();
@@ -46706,373 +45933,381 @@ var Speech = function () {
     }
   }
 
-  createClass(Speech, [{
-    key: "speak",
-    value: function speak(txt, opts) {
-      var _this2 = this;
-
-      if (Speech.isAvailable) {
-        return new Promise(function (resolve, reject) {
-          var msg = new SpeechSynthesisUtterance();
-          msg.voice = _this2.voices[opts && opts.voice || _this2.options.voice];
-          msg.volume = opts && opts.volume || _this2.options.volume;
-          msg.rate = opts && opts.rate || _this2.options.rate;
-          msg.pitch = opts && opts.pitch || _this2.options.pitch;
-          msg.text = txt;
-          msg.onend = resolve;
-          msg.onerror = reject;
-          speechSynthesis.speak(msg);
-        });
-      } else {
-        return Promise.reject();
-      }
-    }
-  }, {
-    key: "speaking",
-    get: function get$$1() {
-      return Speech.isAvailable && speechSynthesis.speaking;
-    }
-  }], [{
-    key: "isAvailable",
-    get: function get$$1() {
-      return !!window.speechSynthesis;
-    }
-  }]);
-  return Speech;
-}();
-
-var Audio$2 = {
-  Audio3D: Audio3D,
-  Music: Music,
-  Note: Note,
-  PositionalSound: PositionalSound,
-  Sound: Sound,
-  Speech: Speech
-};
-
-var FORWARD = new Vector3(0, 0, -1);
-var LASER_WIDTH = 0.01;
-var LASER_LENGTH = 3 * LASER_WIDTH;
-var GAZE_RING_DISTANCE = -1.25;
-var GAZE_RING_INNER = 0.015;
-var GAZE_RING_OUTER = 0.03;
-var VECTOR_TEMP = new Vector3();
-var EULER_TEMP$1 = new Euler();
-var QUAT_TEMP$1 = new Quaternion();
-
-function hasGazeEvent(obj) {
-  return obj && obj._listeners && (obj._listeners.gazecomplete && obj._listeners.gazecomplete.length > 0 || obj._listeners.select && obj._listeners.select.length > 0 || obj._listeners.click && obj._listeners.click.length > 0);
-}
-
-var Pointer = function (_Entity) {
-  inherits(Pointer, _Entity);
-
-  function Pointer(pointerName, color, highlight, s, devices, triggerDevices, options) {
-    classCallCheck(this, Pointer);
-
-    var _this = possibleConstructorReturn(this, (Pointer.__proto__ || Object.getPrototypeOf(Pointer)).call(this, pointerName, options));
-
-    _this.isPointer = true;
-    _this.devices = devices.filter(identity);
-    _this.triggerDevices = triggerDevices && triggerDevices.filter(identity) || _this.devices.slice();
-    _this.gazeTimeout = (_this.options.gazeLength || 1.5) * 1000;
-
-    _this.unproject = null;
-
-    _this.picker = new Raycaster();
-    _this.showPointer = true;
-    _this.color = color;
-    _this.highlight = highlight;
-    _this.velocity = new Vector3();
-
-    _this.mesh = box(LASER_WIDTH / s, LASER_WIDTH / s, LASER_LENGTH * s).colored(_this.color, {
-      unshaded: true
-    }).named(pointerName + "-pointer").addTo(_this).at(0, 0, -1.5);
-
-    _this.gazeInner = circle(GAZE_RING_INNER / 2, 10).colored(0xc0c0c0, {
-      unshaded: true
-    }).addTo(_this).at(0, 0, GAZE_RING_DISTANCE);
-
-    _this.gazeReference = ring(GAZE_RING_INNER * 0.5, GAZE_RING_INNER * 0.75, 10, 36, 0, 2 * Math.PI).colored(0xffffff, {
-      unshaded: true
-    }).addTo(_this.gazeInner);
-
-    _this.gazeOuter = ring(GAZE_RING_INNER, GAZE_RING_OUTER, 10, 36, 0, 2 * Math.PI).colored(0xffffff, {
-      unshaded: true
-    }).addTo(_this.gazeInner);
-
-    _this.gazeOuter.visible = false;
-
-    _this.useGaze = _this.options.useGaze;
-    _this.lastHit = null;
-    return _this;
+  static get isAvailable () {
+    return !!window.speechSynthesis;
   }
 
-  createClass(Pointer, [{
-    key: "addDevice",
-    value: function addDevice(orientation, trigger) {
-      if (orientation) {
-        this.devices.push(orientation);
-      }
+  get speaking(){
+    return Speech.isAvailable && speechSynthesis.speaking;
+  }
 
-      if (trigger) {
-        this.triggerDevices.push(trigger);
+  speak(txt, opts) {
+    if(Speech.isAvailable) {
+      return new Promise((resolve, reject) => {
+        var msg = new SpeechSynthesisUtterance();
+        msg.voice = this.voices[opts && opts.voice || this.options.voice];
+        msg.volume = opts && opts.volume || this.options.volume;
+        msg.rate = opts && opts.rate || this.options.rate;
+        msg.pitch = opts && opts.pitch || this.options.pitch;
+        msg.text = txt;
+        msg.onend = resolve;
+        msg.onerror = reject;
+        speechSynthesis.speak(msg);
+      });
+    }
+    else{
+      return Promise.reject();
+    }
+  }
+}
+
+var Audio$2 = {
+  Audio3D,
+  Music,
+  Note,
+  PositionalSound,
+  Sound,
+  Speech
+};
+
+const FORWARD = new Vector3(0, 0, -1);
+const LASER_WIDTH = 0.01;
+const LASER_LENGTH = 3 * LASER_WIDTH;
+const GAZE_RING_DISTANCE  = -1.25;
+const GAZE_RING_INNER = 0.015;
+const GAZE_RING_OUTER = 0.03;
+const VECTOR_TEMP = new Vector3();
+const EULER_TEMP$1 = new Euler();
+const QUAT_TEMP$1 = new Quaternion();
+
+
+function hasGazeEvent(obj){
+  return obj && obj._listeners && (
+      (obj._listeners.gazecomplete && obj._listeners.gazecomplete.length > 0) ||
+      (obj._listeners.select && obj._listeners.select.length > 0) ||
+      (obj._listeners.click && obj._listeners.click.length > 0));
+}
+
+class Pointer extends Entity {
+  constructor(pointerName, color, highlight, s, devices, triggerDevices, options) {
+    super(pointerName, options);
+
+    this.isPointer = true;
+    this.devices = devices.filter(identity);
+    this.triggerDevices = triggerDevices && triggerDevices.filter(identity) || this.devices.slice();
+    this.gazeTimeout = (this.options.gazeLength || 1.5) * 1000;
+
+    this.unproject = null;
+
+    this.picker = new Raycaster();
+    this.showPointer = true;
+    this.color = color;
+    this.highlight = highlight;
+    this.velocity = new Vector3();
+
+    this.mesh = box(LASER_WIDTH / s, LASER_WIDTH / s, LASER_LENGTH * s)
+      .colored(this.color, {
+        unshaded: true
+      })
+      .named(pointerName + "-pointer")
+      .addTo(this)
+      .at(0, 0, -1.5);
+
+    this.gazeInner = circle(GAZE_RING_INNER / 2, 10)
+      .colored(0xc0c0c0, {
+        unshaded: true
+      })
+      .addTo(this)
+      .at(0, 0, GAZE_RING_DISTANCE);
+
+    this.gazeReference = ring(GAZE_RING_INNER * 0.5, GAZE_RING_INNER * 0.75, 10, 36, 0, 2 * Math.PI)
+      .colored(0xffffff, {
+        unshaded: true
+      })
+      .addTo(this.gazeInner);
+
+    this.gazeOuter = ring(GAZE_RING_INNER, GAZE_RING_OUTER, 10, 36, 0, 2 * Math.PI)
+      .colored(0xffffff, {
+        unshaded: true
+      })
+      .addTo(this.gazeInner);
+
+    this.gazeOuter.visible = false;
+
+    this.useGaze = this.options.useGaze;
+    this.lastHit = null;
+  }
+
+  get pickable() {
+    return false;
+  }
+
+  get material(){
+    return this.mesh.material;
+  }
+
+  set material(v){
+    this.mesh.material = v;
+    this.gazeInner.material = v;
+    this.gazeOuter.material = v;
+  }
+
+  addDevice(orientation, trigger){
+    if(orientation){
+      this.devices.push(orientation);
+    }
+
+    if(trigger){
+      this.triggerDevices.push(trigger);
+    }
+  }
+
+  setSize(width, height) {
+    const w = devicePixelRatio * 2 / width,
+      h = devicePixelRatio * 2 / height;
+    for(let i = 0; i < this.devices.length; ++i) {
+      const device = this.devices[i];
+      if(device.commands.U) {
+        device.commands.U.scale = w;
+      }
+      if(device.commands.V) {
+        device.commands.V.scale = h;
       }
     }
-  }, {
-    key: "setSize",
-    value: function setSize(width, height) {
-      var w = devicePixelRatio * 2 / width,
-          h = devicePixelRatio * 2 / height;
-      for (var i = 0; i < this.devices.length; ++i) {
-        var device = this.devices[i];
-        if (device.commands.U) {
-          device.commands.U.scale = w;
-        }
-        if (device.commands.V) {
-          device.commands.V.scale = h;
-        }
-      }
-    }
-  }, {
-    key: "update",
-    value: function update() {
-      this.position.set(0, 0, 0);
+  }
 
-      if (this.unproject) {
-        QUAT_TEMP$1.set(0, 1, 0, 0);
-        VECTOR_TEMP.set(0, 0, 0);
-        for (var i = 0; i < this.devices.length; ++i) {
-          var obj = this.devices[i];
-          if (obj.enabled && obj.inPhysicalUse) {
-            if (obj.commands.U && !obj.commands.U.disabled) {
-              VECTOR_TEMP.x += obj.getValue("U") - 1;
-            }
-            if (obj.commands.V && !obj.commands.V.disabled) {
-              VECTOR_TEMP.y += obj.getValue("V") - 1;
-            }
+  update() {
+    this.position.set(0, 0, 0);
+
+    if(this.unproject) {
+      QUAT_TEMP$1.set(0, 1, 0, 0);
+      VECTOR_TEMP.set(0, 0, 0);
+      for(let i = 0; i < this.devices.length; ++i) {
+        const obj = this.devices[i];
+        if(obj.enabled && obj.inPhysicalUse) {
+          if(obj.commands.U && !obj.commands.U.disabled) {
+            VECTOR_TEMP.x += obj.getValue("U") - 1;
+          }
+          if(obj.commands.V && !obj.commands.V.disabled) {
+            VECTOR_TEMP.y += obj.getValue("V") - 1;
           }
         }
-        VECTOR_TEMP.applyMatrix4(this.unproject).applyQuaternion(QUAT_TEMP$1);
-        this.lookAt(VECTOR_TEMP);
-      } else {
-        this.quaternion.set(0, 0, 0, 1);
-        EULER_TEMP$1.set(0, 0, 0, "YXZ");
-        for (var _i = 0; _i < this.devices.length; ++_i) {
-          var _obj = this.devices[_i];
-          if (_obj.enabled) {
-            if (_obj.quaternion) {
-              this.quaternion.multiply(_obj.quaternion);
-            }
-            if (_obj.position) {
-              this.position.add(_obj.position);
-            }
+      }
+      VECTOR_TEMP.applyMatrix4(this.unproject)
+        .applyQuaternion(QUAT_TEMP$1);
+      this.lookAt(VECTOR_TEMP);
+    }
+    else {
+      this.quaternion.set(0, 0, 0, 1);
+      EULER_TEMP$1.set(0, 0, 0, "YXZ");
+      for(let i = 0; i < this.devices.length; ++i) {
+        const obj = this.devices[i];
+        if(obj.enabled) {
+          if(obj.quaternion) {
+            this.quaternion.multiply(obj.quaternion);
+          }
+          if(obj.position) {
+            this.position.add(obj.position);
           }
         }
-
-        QUAT_TEMP$1.setFromEuler(EULER_TEMP$1);
-        this.quaternion.multiply(QUAT_TEMP$1);
       }
-      this.updateMatrixWorld();
-    }
-  }, {
-    key: "_check",
-    value: function _check(curHit) {
-      var curObj = curHit && curHit.object,
-          lastHit = this.lastHit,
-          lastObj = lastHit && lastHit.object;
 
-      if (curObj || lastObj) {
-        var moved = lastHit && curHit && (curHit.point.x !== lastHit.point.x || curHit.point.y !== lastHit.point.y || curHit.point.z !== lastHit.point.z),
-            dt = lastHit && lastHit.time && performance.now() - lastHit.time,
-            curID = curObj && curObj.id,
-            lastID = lastObj && lastObj.id,
-            changed = curID !== lastID,
-            enterEvt = {
+      QUAT_TEMP$1.setFromEuler(EULER_TEMP$1);
+      this.quaternion.multiply(QUAT_TEMP$1);
+    }
+    this.updateMatrixWorld();
+  }
+
+  _check(curHit) {
+    const curObj = curHit && curHit.object,
+      lastHit = this.lastHit,
+      lastObj = lastHit && lastHit.object;
+
+    if(curObj || lastObj) {
+      const moved = lastHit && curHit &&
+          (curHit.point.x !== lastHit.point.x ||
+          curHit.point.y !== lastHit.point.y ||
+          curHit.point.z !== lastHit.point.z),
+        dt = lastHit && lastHit.time && (performance.now() - lastHit.time),
+        curID = curObj && curObj.id,
+        lastID = lastObj && lastObj.id,
+        changed = curID !== lastID,
+        enterEvt = {
           pointer: this,
           buttons: 0,
           hit: curHit
         },
-            leaveEvt = {
+        leaveEvt = {
           pointer: this,
           buttons: 0,
           hit: lastHit
         };
 
-        if (curHit) {
-          this.gazeInner.position.z = 0.02 - curHit.distance;
-          curHit.time = performance.now();
+      if(curHit){
+        this.gazeInner.position.z = 0.02 - curHit.distance;
+        curHit.time = performance.now();
 
-          this.mesh.material = material("", {
-            color: this.highlight,
-            unshaded: true
-          });
-        } else {
-          this.gazeInner.position.z = GAZE_RING_DISTANCE;
-        }
-
-        this.mesh.position.z = this.gazeInner.position.z - 0.02;
-
-        if (moved) {
-          lastHit.point.copy(curHit.point);
-        }
-
-        var dButtons = 0;
-        for (var i = 0; i < this.triggerDevices.length; ++i) {
-          var obj = this.triggerDevices[i];
-          if (obj.enabled) {
-            enterEvt.buttons |= obj.getValue("buttons");
-            dButtons |= obj.getValue("dButtons");
-          }
-        }
-
-        leaveEvt.buttons = enterEvt.buttons;
-
-        if (changed) {
-          if (lastObj) {
-            this.emit("exit", leaveEvt);
-          }
-          if (curObj) {
-            this.emit("enter", enterEvt);
-          }
-        }
-
-        var selected = false;
-        if (dButtons) {
-          if (enterEvt.buttons) {
-            if (curObj) {
-              this.emit("pointerstart", enterEvt);
-            }
-            if (lastHit) {
-              lastHit.time = performance.now();
-            }
-          } else if (curObj) {
-            selected = !!curHit;
-            this.emit("pointerend", enterEvt);
-          }
-        } else if (moved && curObj) {
-          this.emit("pointermove", enterEvt);
-        }
-
-        if (this.useGaze) {
-          if (changed) {
-            if (dt !== null && dt < this.gazeTimeout) {
-              this.gazeOuter.visible = false;
-              if (lastObj) {
-                this.emit("gazecancel", leaveEvt);
-              }
-            }
-            if (curHit) {
-              this.gazeOuter.visible = true;
-              if (curObj) {
-                this.emit("gazestart", enterEvt);
-              }
-            }
-          } else if (dt !== null) {
-            if (dt >= this.gazeTimeout) {
-              this.gazeOuter.visible = false;
-              if (curObj) {
-                selected = !!curHit;
-                this.emit("gazecomplete", enterEvt);
-              }
-              lastHit.time = null;
-            } else if (hasGazeEvent(curObj)) {
-              var p = Math.round(36 * dt / this.gazeTimeout),
-                  a = 2 * Math.PI * p / 36;
-              this.gazeOuter.geometry = ring(GAZE_RING_INNER, GAZE_RING_OUTER, 36, p, 0, a);
-              if (moved && curObj) {
-                this.emit("gazemove", enterEvt);
-              }
-            } else {
-              this.gazeOuter.visible = false;
-            }
-          }
-        }
-
-        if (selected) {
-          this.emit("select", enterEvt);
-        }
-
-        if (!changed && curHit && lastHit) {
-          curHit.time = lastHit.time;
-        }
-        return true;
+        this.mesh.material = material("", {
+          color: this.highlight,
+          unshaded: true
+        });
+      }
+      else{
+        this.gazeInner.position.z = GAZE_RING_DISTANCE;
       }
 
-      return false;
-    }
-  }, {
-    key: "resolvePicking",
-    value: function resolvePicking(objects) {
-      this.mesh.visible = false;
-      this.gazeInner.visible = false;
-      this.mesh.material = material("", {
-        color: this.color,
-        unshaded: true
-      });
+      this.mesh.position.z = this.gazeInner.position.z - 0.02;
 
-      if (this.showPointer) {
-        VECTOR_TEMP.set(0, 0, 0).applyMatrix4(this.matrixWorld);
-        FORWARD.set(0, 0, -1).applyMatrix4(this.matrixWorld).sub(VECTOR_TEMP);
-        this.picker.set(VECTOR_TEMP, FORWARD);
-        this.gazeInner.visible = this.useGaze;
-        this.mesh.visible = !this.useGaze;
+      if(moved){
+        lastHit.point.copy(curHit.point);
+      }
 
-        // Fire phasers
-        var hits = this.picker.intersectObject(objects, true);
-        for (var i = 0; i < hits.length; ++i) {
+      var dButtons = 0;
+      for(let i = 0; i < this.triggerDevices.length; ++i) {
+        const obj = this.triggerDevices[i];
+        if(obj.enabled){
+          enterEvt.buttons |= obj.getValue("buttons");
+          dButtons |= obj.getValue("dButtons");
+        }
+      }
 
-          var hit = hits[i],
-              origObj = hit.object;
-          var obj = origObj;
+      leaveEvt.buttons = enterEvt.buttons;
 
-          // Try to find a Primrose Entity
-          while (obj && (!obj.isEntity || obj.isPointer)) {
-            obj = obj.parent;
+      if(changed){
+        if(lastObj) {
+          this.emit("exit", leaveEvt);
+        }
+        if(curObj) {
+          this.emit("enter", enterEvt);
+        }
+      }
+
+      let selected = false;
+      if(dButtons){
+        if(enterEvt.buttons){
+          if(curObj) {
+            this.emit("pointerstart", enterEvt);
           }
-
-          // If we didn't find a Primrose Entity, go back to using the Three.js mesh.
-          if (!obj) {
-            obj = origObj;
-          }
-
-          // Check to see if the object has any event handlers that we care about.
-          if (obj && !obj.pickable) {
-            obj = null;
-          }
-
-          // Save the setting, necessary for checking against the last value, to check for changes in which object was pointed at.
-          hit.object = obj;
-
-          if (obj && this._check(hit)) {
-            this.lastHit = hit;
-            return hit.object._listeners.useraction;
+          if(lastHit){
+            lastHit.time = performance.now();
           }
         }
-
-        // If we got this far, it means we didn't find any good objects, and the _check method never ran. So run the check again with no object and it will fire the necessary "end" event handlers.
-        this._check();
-        this.lastHit = null;
+        else if(curObj) {
+          selected = !!curHit;
+          this.emit("pointerend", enterEvt);
+        }
       }
+      else if(moved && curObj) {
+        this.emit("pointermove", enterEvt);
+      }
+
+      if(this.useGaze){
+        if(changed) {
+          if(dt !== null && dt < this.gazeTimeout){
+            this.gazeOuter.visible = false;
+            if(lastObj) {
+              this.emit("gazecancel", leaveEvt);
+            }
+          }
+          if(curHit){
+            this.gazeOuter.visible = true;
+            if(curObj) {
+              this.emit("gazestart", enterEvt);
+            }
+          }
+        }
+        else if(dt !== null) {
+          if(dt >= this.gazeTimeout){
+            this.gazeOuter.visible = false;
+            if(curObj) {
+              selected = !!curHit;
+              this.emit("gazecomplete", enterEvt);
+            }
+            lastHit.time = null;
+          }
+          else if(hasGazeEvent(curObj)){
+            var p = Math.round(36 * dt / this.gazeTimeout),
+              a = 2 * Math.PI * p / 36;
+            this.gazeOuter.geometry = ring(GAZE_RING_INNER, GAZE_RING_OUTER, 36, p, 0, a);
+            if(moved && curObj) {
+              this.emit("gazemove", enterEvt);
+            }
+          }
+          else{
+            this.gazeOuter.visible = false;
+          }
+        }
+      }
+
+      if(selected){
+        this.emit("select", enterEvt);
+      }
+
+      if(!changed && curHit && lastHit) {
+        curHit.time = lastHit.time;
+      }
+      return true;
     }
-  }, {
-    key: "pickable",
-    get: function get$$1() {
-      return false;
+
+    return false;
+  }
+
+  resolvePicking(objects) {
+    this.mesh.visible = false;
+    this.gazeInner.visible = false;
+    this.mesh.material = material("", {
+      color: this.color,
+      unshaded: true
+    });
+
+    if(this.showPointer){
+      VECTOR_TEMP.set(0, 0, 0)
+        .applyMatrix4(this.matrixWorld);
+      FORWARD.set(0, 0, -1)
+        .applyMatrix4(this.matrixWorld)
+        .sub(VECTOR_TEMP);
+      this.picker.set(VECTOR_TEMP, FORWARD);
+      this.gazeInner.visible = this.useGaze;
+      this.mesh.visible = !this.useGaze;
+
+      // Fire phasers
+      const hits = this.picker.intersectObject(objects, true);
+      for(let i = 0; i < hits.length; ++i) {
+
+        const hit = hits[i],
+          origObj = hit.object;
+        let obj = origObj;
+
+        // Try to find a Primrose Entity
+        while(obj && (!obj.isEntity || obj.isPointer)) {
+          obj = obj.parent;
+        }
+
+        // If we didn't find a Primrose Entity, go back to using the Three.js mesh.
+        if(!obj) {
+          obj = origObj;
+        }
+
+        // Check to see if the object has any event handlers that we care about.
+        if(obj && !obj.pickable) {
+          obj = null;
+        }
+
+        // Save the setting, necessary for checking against the last value, to check for changes in which object was pointed at.
+        hit.object = obj;
+
+        if(obj && this._check(hit)) {
+          this.lastHit = hit;
+          return hit.object._listeners.useraction;
+        }
+      }
+
+      // If we got this far, it means we didn't find any good objects, and the _check method never ran. So run the check again with no object and it will fire the necessary "end" event handlers.
+      this._check();
+      this.lastHit = null;
     }
-  }, {
-    key: "material",
-    get: function get$$1() {
-      return this.mesh.material;
-    },
-    set: function set$$1(v) {
-      this.mesh.material = v;
-      this.gazeInner.material = v;
-      this.gazeOuter.material = v;
-    }
-  }]);
-  return Pointer;
-}(Entity);
+  }
+}
 
 Pointer.EVENTS = ["pointerstart", "pointerend", "pointermove", "gazestart", "gazemove", "gazecomplete", "gazecancel", "exit", "enter", "select", "useraction"];
 
@@ -47204,704 +46439,642 @@ var Keys = {
 // create a reverse mapping from keyCode to name.
 for (var key in Keys) {
   var val = Keys[key];
-  if (Keys.hasOwnProperty(key) && typeof val === "number") {
+  if (Keys.hasOwnProperty(key) && typeof (val) === "number") {
     Keys[val] = key;
   }
 }
 
-var Point = function () {
-  function Point(x, y) {
-    classCallCheck(this, Point);
-
+class Point {
+  constructor (x, y) {
     this.set(x || 0, y || 0);
   }
 
-  createClass(Point, [{
-    key: "set",
-    value: function set$$1(x, y) {
-      this.x = x;
-      this.y = y;
-    }
-  }, {
-    key: "copy",
-    value: function copy(p) {
-      if (p) {
-        this.x = p.x;
-        this.y = p.y;
-      }
-    }
-  }, {
-    key: "clone",
-    value: function clone() {
-      return new Point(this.x, this.y);
-    }
-  }, {
-    key: "toString",
-    value: function toString() {
-      return "(x:" + this.x + ", y:" + this.y + ")";
-    }
-  }]);
-  return Point;
-}();
+  set(x, y) {
+    this.x = x;
+    this.y = y;
+  }
 
-var Size = function () {
-  function Size(width, height) {
-    classCallCheck(this, Size);
+  copy(p) {
+    if (p) {
+      this.x = p.x;
+      this.y = p.y;
+    }
+  }
 
+  clone() {
+    return new Point(this.x, this.y);
+  }
+
+  toString() {
+    return "(x:" + this.x + ", y:" + this.y + ")";
+  }
+}
+
+class Size {
+  constructor(width, height) {
     this.set(width || 0, height || 0);
   }
 
-  createClass(Size, [{
-    key: "set",
-    value: function set$$1(width, height) {
-      this.width = width;
-      this.height = height;
-    }
-  }, {
-    key: "copy",
-    value: function copy(s) {
-      if (s) {
-        this.width = s.width;
-        this.height = s.height;
-      }
-    }
-  }, {
-    key: "clone",
-    value: function clone() {
-      return new Size(this.width, this.height);
-    }
-  }, {
-    key: "toString",
-    value: function toString() {
-      return "<w:" + this.width + ", h:" + this.height + ">";
-    }
-  }]);
-  return Size;
-}();
+  set(width, height) {
+    this.width = width;
+    this.height = height;
+  }
 
-var Rectangle = function () {
-  function Rectangle(x, y, width, height) {
-    classCallCheck(this, Rectangle);
+  copy(s) {
+    if (s) {
+      this.width = s.width;
+      this.height = s.height;
+    }
+  }
 
+  clone() {
+    return new Size(this.width, this.height);
+  }
+
+  toString() {
+    return "<w:" + this.width + ", h:" + this.height + ">";
+  }
+}
+
+class Rectangle {
+  constructor(x, y, width, height) {
     this.isRectangle = true;
     this.point = new Point(x, y);
     this.size = new Size(width, height);
   }
 
-  createClass(Rectangle, [{
-    key: "set",
-    value: function set$$1(x, y, width, height) {
-      this.point.set(x, y);
-      this.size.set(width, height);
+  get x() {
+    return this.point.x;
+  }
+
+  set x(x) {
+    this.point.x = x;
+  }
+
+  get left() {
+    return this.point.x;
+  }
+  set left(x) {
+    this.point.x = x;
+  }
+
+  get width() {
+    return this.size.width;
+  }
+  set width(width) {
+    this.size.width = width;
+  }
+
+  get right() {
+    return this.point.x + this.size.width;
+  }
+  set right(right) {
+    this.point.x = right - this.size.width;
+  }
+
+  get y() {
+    return this.point.y;
+  }
+  set y(y) {
+    this.point.y = y;
+  }
+
+  get top() {
+    return this.point.y;
+  }
+  set top(y) {
+    this.point.y = y;
+  }
+
+  get height() {
+    return this.size.height;
+  }
+  set height(height) {
+    this.size.height = height;
+  }
+
+  get bottom() {
+    return this.point.y + this.size.height;
+  }
+  set bottom(bottom) {
+    this.point.y = bottom - this.size.height;
+  }
+
+  get area() {
+    return this.width * this.height;
+  }
+
+  set(x, y, width, height) {
+    this.point.set(x, y);
+    this.size.set(width, height);
+  }
+
+  copy(r) {
+    if (r) {
+      this.point.copy(r.point);
+      this.size.copy(r.size);
     }
-  }, {
-    key: "copy",
-    value: function copy(r) {
-      if (r) {
-        this.point.copy(r.point);
-        this.size.copy(r.size);
-      }
+  }
+
+  clone() {
+    return new Rectangle(this.point.x, this.point.y, this.size.width, this.size.height);
+  }
+
+  toString() {
+    return `[${this.point.toString()} x ${this.size.toString()}]`;
+  }
+
+  overlap(r) {
+    var left = Math.max(this.left, r.left),
+      top = Math.max(this.top, r.top),
+      right = Math.min(this.right, r.right),
+      bottom = Math.min(this.bottom, r.bottom);
+    if (right > left && bottom > top) {
+      return new Rectangle(left, top, right - left, bottom - top);
     }
-  }, {
-    key: "clone",
-    value: function clone() {
-      return new Rectangle(this.point.x, this.point.y, this.size.width, this.size.height);
-    }
-  }, {
-    key: "toString",
-    value: function toString() {
-      return "[" + this.point.toString() + " x " + this.size.toString() + "]";
-    }
-  }, {
-    key: "overlap",
-    value: function overlap(r) {
-      var left = Math.max(this.left, r.left),
-          top = Math.max(this.top, r.top),
-          right = Math.min(this.right, r.right),
-          bottom = Math.min(this.bottom, r.bottom);
-      if (right > left && bottom > top) {
-        return new Rectangle(left, top, right - left, bottom - top);
-      }
-    }
-  }, {
-    key: "x",
-    get: function get$$1() {
-      return this.point.x;
-    },
-    set: function set$$1(x) {
-      this.point.x = x;
-    }
-  }, {
-    key: "left",
-    get: function get$$1() {
-      return this.point.x;
-    },
-    set: function set$$1(x) {
-      this.point.x = x;
-    }
-  }, {
-    key: "width",
-    get: function get$$1() {
-      return this.size.width;
-    },
-    set: function set$$1(width) {
-      this.size.width = width;
-    }
-  }, {
-    key: "right",
-    get: function get$$1() {
-      return this.point.x + this.size.width;
-    },
-    set: function set$$1(right) {
-      this.point.x = right - this.size.width;
-    }
-  }, {
-    key: "y",
-    get: function get$$1() {
-      return this.point.y;
-    },
-    set: function set$$1(y) {
-      this.point.y = y;
-    }
-  }, {
-    key: "top",
-    get: function get$$1() {
-      return this.point.y;
-    },
-    set: function set$$1(y) {
-      this.point.y = y;
-    }
-  }, {
-    key: "height",
-    get: function get$$1() {
-      return this.size.height;
-    },
-    set: function set$$1(height) {
-      this.size.height = height;
-    }
-  }, {
-    key: "bottom",
-    get: function get$$1() {
-      return this.point.y + this.size.height;
-    },
-    set: function set$$1(bottom) {
-      this.point.y = bottom - this.size.height;
-    }
-  }, {
-    key: "area",
-    get: function get$$1() {
-      return this.width * this.height;
-    }
-  }]);
-  return Rectangle;
-}();
+  }
+}
 
 var COUNTER$4 = 0;
 
-var Surface = function (_BaseTextured) {
-  inherits(Surface, _BaseTextured);
+class Surface extends BaseTextured {
 
-  function Surface(options) {
-    classCallCheck(this, Surface);
-
+  constructor(options) {
     options = Object.assign({}, {
-      id: "Primrose.Controls.Surface[" + COUNTER$4++ + "]",
+      id: "Primrose.Controls.Surface[" + (COUNTER$4++) + "]",
       bounds: new Rectangle()
     }, options);
 
-    if (options.width) {
+    if(options.width) {
       options.bounds.width = options.width;
     }
 
-    if (options.height) {
+    if(options.height) {
       options.bounds.height = options.height;
     }
 
-    var canvas = null,
-        context = null;
+    let canvas = null,
+      context = null;
 
     if (options.id instanceof Surface) {
       throw new Error("Object is already a Surface. Please don't try to wrap them.");
-    } else if (options.id instanceof CanvasRenderingContext2D) {
+    }
+    else if (options.id instanceof CanvasRenderingContext2D) {
       context = options.id;
       canvas = context.canvas;
-    } else if (options.id instanceof HTMLCanvasElement) {
+    }
+    else if (options.id instanceof HTMLCanvasElement) {
       canvas = options.id;
-    } else if (typeof options.id === "string" || options.id instanceof String) {
+    }
+    else if (typeof (options.id) === "string" || options.id instanceof String) {
       canvas = document.getElementById(options.id);
       if (canvas === null) {
         canvas = document.createElement("canvas");
         canvas.id = options.id;
-      } else if (canvas.tagName !== "CANVAS") {
+      }
+      else if (canvas.tagName !== "CANVAS") {
         canvas = null;
       }
     }
 
     if (canvas === null) {
-      console.error(_typeof(options.id));
+      console.error(typeof (options.id));
       console.error(options.id);
       throw new Error(options.id + " does not refer to a valid canvas element.");
     }
 
-    var _this = possibleConstructorReturn(this, (Surface.__proto__ || Object.getPrototypeOf(Surface)).call(this, [canvas], options));
+    super([canvas], options);
+    this.isSurface = true;
+    this.bounds = this.options.bounds;
+    this.canvas = canvas;
+    this.context = context || this.canvas.getContext("2d");
+    this._opacity = 1;
 
-    _this.isSurface = true;
-    _this.bounds = _this.options.bounds;
-    _this.canvas = canvas;
-    _this.context = context || _this.canvas.getContext("2d");
-    _this._opacity = 1;
+    this.focused = false;
 
-    _this.focused = false;
+    this.focusable = true;
 
-    _this.focusable = true;
+    this.style = {};
 
-    _this.style = {};
-
-    Object.defineProperties(_this.style, {
+    Object.defineProperties(this.style, {
       width: {
-        get: function get$$1() {
-          return _this.bounds.width;
+        get: () => {
+          return this.bounds.width;
         },
-        set: function set$$1(v) {
-          _this.bounds.width = v;
-          _this.resize();
+        set: (v) => {
+          this.bounds.width = v;
+          this.resize();
         }
       },
       height: {
-        get: function get$$1() {
-          return _this.bounds.height;
+        get: () => {
+          return this.bounds.height;
         },
-        set: function set$$1(v) {
-          _this.bounds.height = v;
-          _this.resize();
+        set: (v) => {
+          this.bounds.height = v;
+          this.resize();
         }
       },
       left: {
-        get: function get$$1() {
-          return _this.bounds.left;
+        get: () => {
+          return this.bounds.left;
         },
-        set: function set$$1(v) {
-          _this.bounds.left = v;
+        set: (v) => {
+          this.bounds.left = v;
         }
       },
       top: {
-        get: function get$$1() {
-          return _this.bounds.top;
+        get: () => {
+          return this.bounds.top;
         },
-        set: function set$$1(v) {
-          _this.bounds.top = v;
+        set: (v) => {
+          this.bounds.top = v;
         }
       },
       opacity: {
-        get: function get$$1() {
-          return _this._opacity;
+        get: () => {
+          return this._opacity;
         },
-        set: function set$$1(v) {
-          _this._opacity = v;
+        set: (v) => {
+          this._opacity = v;
         }
       },
       fontSize: {
-        get: function get$$1() {
-          return _this.fontSize;
+        get: () => {
+          return this.fontSize;
         },
-        set: function set$$1(v) {
-          _this.fontSize = v;
+        set: (v) => {
+          this.fontSize = v;
         }
       },
       backgroundColor: {
-        get: function get$$1() {
-          return _this.backgroundColor;
+        get: () => {
+          return this.backgroundColor;
         },
-        set: function set$$1(v) {
-          _this.backgroundColor = v;
+        set: (v) => {
+          this.backgroundColor = v;
         }
       },
       color: {
-        get: function get$$1() {
-          return _this.color;
+        get: () => {
+          return this.color;
         },
-        set: function set$$1(v) {
-          _this.color = v;
+        set: (v) => {
+          this.color = v;
         }
       }
     });
 
-    if (_this.bounds.width === 0) {
-      _this.bounds.width = _this.imageWidth;
-      _this.bounds.height = _this.imageHeight;
+    if (this.bounds.width === 0) {
+      this.bounds.width = this.imageWidth;
+      this.bounds.height = this.imageHeight;
     }
 
-    _this.imageWidth = _this.bounds.width;
-    _this.imageHeight = _this.bounds.height;
+    this.imageWidth = this.bounds.width;
+    this.imageHeight = this.bounds.height;
 
-    _this.canvas.style.imageRendering = isChrome ? "pixelated" : "optimizespeed";
-    _this.context.imageSmoothingEnabled = false;
-    _this.context.textBaseline = "top";
+    this.canvas.style.imageRendering = isChrome ? "pixelated" : "optimizespeed";
+    this.context.imageSmoothingEnabled = false;
+    this.context.textBaseline = "top";
 
-    _this.subSurfaces = [];
+    this.subSurfaces = [];
 
-    _this.render = _this.render.bind(_this);
+    this.render = this.render.bind(this);
 
-    _this.on("focus", _this.render).on("blur", _this.render).on("pointerstart", _this.startUV.bind(_this)).on("pointermove", _this.moveUV.bind(_this)).on("gazemove", _this.moveUV.bind(_this)).on("pointerend", _this.endPointer.bind(_this)).on("gazecomplete", function (evt) {
-      _this.startUV(evt);
-      setTimeout(function () {
-        return _this.endPointer(evt);
-      }, 100);
-    }).on("keydown", _this.keyDown.bind(_this)).on("keyup", _this.keyUp.bind(_this));
+    this.on("focus", this.render)
+      .on("blur", this.render)
+      .on("pointerstart", this.startUV.bind(this))
+      .on("pointermove", this.moveUV.bind(this))
+      .on("gazemove", this.moveUV.bind(this))
+      .on("pointerend", this.endPointer.bind(this))
+      .on("gazecomplete", (evt) => {
+        this.startUV(evt);
+        setTimeout(() => this.endPointer(evt), 100);
+      })
+      .on("keydown", this.keyDown.bind(this))
+      .on("keyup", this.keyUp.bind(this));
 
-    _this.render();
-    return _this;
+    this.render();
   }
 
-  createClass(Surface, [{
-    key: "_loadFiles",
-    value: function _loadFiles(canvases, progress) {
-      var _this2 = this;
+  get pickable() {
+    return true;
+  }
 
-      return Promise.all(canvases.map(function (canvas, i) {
-        var loadOptions = Object.assign({}, _this2.options);
-        _this2._meshes[i] = _this2._geometry.textured(canvas, loadOptions);
-        return loadOptions.promise.then(function (txt) {
-          return _this2._textures[i] = txt;
-        });
-      }));
+
+  _loadFiles(canvases, progress) {
+    return Promise.all(canvases.map((canvas, i) => {
+      const loadOptions = Object.assign({}, this.options);
+      this._meshes[i] = this._geometry.textured(canvas, loadOptions);
+      return loadOptions.promise.then((txt) => this._textures[i] = txt);
+    }));
+  }
+
+  invalidate(bounds) {
+    var useDefault = !bounds;
+    if (!bounds) {
+      bounds = this.bounds.clone();
+      bounds.left = 0;
+      bounds.top = 0;
     }
-  }, {
-    key: "invalidate",
-    value: function invalidate(bounds) {
-      var useDefault = !bounds;
-      if (!bounds) {
-        bounds = this.bounds.clone();
-        bounds.left = 0;
-        bounds.top = 0;
-      } else if (bounds.isRectangle) {
-        bounds = bounds.clone();
+    else if (bounds.isRectangle) {
+      bounds = bounds.clone();
+    }
+    for (var i = 0; i < this.subSurfaces.length; ++i) {
+      var subSurface = this.subSurfaces[i],
+        overlap = bounds.overlap(subSurface.bounds);
+      if (overlap) {
+        var x = overlap.left - subSurface.bounds.left,
+          y = overlap.top - subSurface.bounds.top;
+        this.context.drawImage(
+          subSurface.canvas,
+          x, y, overlap.width, overlap.height,
+          overlap.x, overlap.y, overlap.width, overlap.height);
       }
-      for (var i = 0; i < this.subSurfaces.length; ++i) {
-        var subSurface = this.subSurfaces[i],
-            overlap = bounds.overlap(subSurface.bounds);
-        if (overlap) {
-          var x = overlap.left - subSurface.bounds.left,
-              y = overlap.top - subSurface.bounds.top;
-          this.context.drawImage(subSurface.canvas, x, y, overlap.width, overlap.height, overlap.x, overlap.y, overlap.width, overlap.height);
+    }
+    if (this._textures[0]) {
+      this._textures[0].needsUpdate = true;
+    }
+    if (this._meshes[0]) {
+      this._meshes[0].material.needsUpdate = true;
+    }
+    if (this.parent instanceof Surface) {
+      bounds.left += this.bounds.left;
+      bounds.top += this.bounds.top;
+      this.parent.invalidate(bounds);
+    }
+  }
+
+  render() {
+    this.invalidate();
+  }
+
+  get imageWidth() {
+    return this.canvas.width;
+  }
+
+  set imageWidth(v) {
+    this.canvas.width = v;
+    this.bounds.width = v;
+  }
+
+  get imageHeight() {
+    return this.canvas.height;
+  }
+
+  set imageHeight(v) {
+    this.canvas.height = v;
+    this.bounds.height = v;
+  }
+
+  get elementWidth() {
+    return this.canvas.clientWidth * devicePixelRatio;
+  }
+
+  set elementWidth(v) {
+    this.canvas.style.width = (v / devicePixelRatio) + "px";
+  }
+
+  get elementHeight() {
+    return this.canvas.clientHeight * devicePixelRatio;
+  }
+
+  set elementHeight(v) {
+    this.canvas.style.height = (v / devicePixelRatio) + "px";
+  }
+
+  get surfaceWidth() {
+    return this.canvas.parentElement ? this.elementWidth : this.bounds.width;
+  }
+
+  get surfaceHeight() {
+    return this.canvas.parentElement ? this.elementHeight : this.bounds.height;
+  }
+
+  get resized() {
+    return this.imageWidth !== this.surfaceWidth ||
+      this.imageHeight !== this.surfaceHeight;
+  }
+
+  resize() {
+    this.setSize(this.surfaceWidth, this.surfaceHeight);
+  }
+
+  setSize(width, height) {
+    const oldTextBaseline = this.context.textBaseline,
+      oldTextAlign = this.context.textAlign;
+    this.imageWidth = width;
+    this.imageHeight = height;
+
+    this.context.textBaseline = oldTextBaseline;
+    this.context.textAlign = oldTextAlign;
+  }
+
+  get environment() {
+    var head = this;
+    while(head){
+      if(head._environment){
+        if(head !== this){
+          this._environment = head._environment;
         }
+        return this._environment;
       }
-      if (this._textures[0]) {
-        this._textures[0].needsUpdate = true;
-      }
-      if (this._meshes[0]) {
-        this._meshes[0].material.needsUpdate = true;
-      }
-      if (this.parent instanceof Surface) {
-        bounds.left += this.bounds.left;
-        bounds.top += this.bounds.top;
-        this.parent.invalidate(bounds);
-      }
+      head = head.parent;
     }
-  }, {
-    key: "render",
-    value: function render() {
+  }
+
+  add(child) {
+    if(child.isSurface) {
+      this.subSurfaces.push(child);
       this.invalidate();
     }
-  }, {
-    key: "resize",
-    value: function resize() {
-      this.setSize(this.surfaceWidth, this.surfaceHeight);
+    else if (child.isObject3D) {
+      super.add(child);
     }
-  }, {
-    key: "setSize",
-    value: function setSize(width, height) {
-      var oldTextBaseline = this.context.textBaseline,
-          oldTextAlign = this.context.textAlign;
-      this.imageWidth = width;
-      this.imageHeight = height;
+    else {
+      throw new Error("Can only append other Surfaces to a Surface. You gave: " + child);
+    }
+  }
 
-      this.context.textBaseline = oldTextBaseline;
-      this.context.textAlign = oldTextAlign;
+  mapUV(point) {
+    if(point instanceof Array){
+      return {
+        x: point[0] * this.imageWidth,
+        y: (1 - point[1]) * this.imageHeight
+      };
     }
-  }, {
-    key: "add",
-    value: function add(child) {
-      if (child.isSurface) {
-        this.subSurfaces.push(child);
-        this.invalidate();
-      } else if (child.isObject3D) {
-        get(Surface.prototype.__proto__ || Object.getPrototypeOf(Surface.prototype), "add", this).call(this, child);
-      } else {
-        throw new Error("Can only append other Surfaces to a Surface. You gave: " + child);
+    else if(point.isVector2) {
+      return {
+        x: point.x * this.imageWidth,
+        y: (1 - point.y) * this.imageHeight
+      };
+    }
+  }
+
+  unmapUV(point) {
+    return [point.x / this.imageWidth, (1 - point.y / this.imageHeight)];
+  }
+
+  _findSubSurface(x, y, thunk) {
+    var here = this.inBounds(x, y),
+      found = null;
+    for (var i = this.subSurfaces.length - 1; i >= 0; --i) {
+      var subSurface = this.subSurfaces[i];
+      if (!found && subSurface.inBounds(x - this.bounds.left, y - this.bounds.top)) {
+        found = subSurface;
+      }
+      else if (subSurface.focused) {
+        subSurface.blur();
       }
     }
-  }, {
-    key: "mapUV",
-    value: function mapUV(point) {
-      if (point instanceof Array) {
-        return {
-          x: point[0] * this.imageWidth,
-          y: (1 - point[1]) * this.imageHeight
-        };
-      } else if (point.isVector2) {
-        return {
-          x: point.x * this.imageWidth,
-          y: (1 - point.y) * this.imageHeight
-        };
-      }
-    }
-  }, {
-    key: "unmapUV",
-    value: function unmapUV(point) {
-      return [point.x / this.imageWidth, 1 - point.y / this.imageHeight];
-    }
-  }, {
-    key: "_findSubSurface",
-    value: function _findSubSurface(x, y, thunk) {
-      var here = this.inBounds(x, y),
-          found = null;
-      for (var i = this.subSurfaces.length - 1; i >= 0; --i) {
-        var subSurface = this.subSurfaces[i];
-        if (!found && subSurface.inBounds(x - this.bounds.left, y - this.bounds.top)) {
-          found = subSurface;
-        } else if (subSurface.focused) {
-          subSurface.blur();
-        }
-      }
-      return found || here && this;
-    }
-  }, {
-    key: "inBounds",
-    value: function inBounds(x, y) {
-      return this.bounds.left <= x && x < this.bounds.right && this.bounds.top <= y && y < this.bounds.bottom;
-    }
-  }, {
-    key: "startPointer",
-    value: function startPointer(x, y) {
-      if (this.inBounds(x, y)) {
-        var target = this._findSubSurface(x, y, function (subSurface, x2, y2) {
-          return subSurface.startPointer(x2, y2);
-        });
-        if (target) {
-          if (!this.focused) {
-            this.focus();
-          }
-          this.emit("click", {
-            target: target,
-            x: x,
-            y: y
-          });
-          if (target !== this) {
-            target.startPointer(x - this.bounds.left, y - this.bounds.top);
-          }
-        } else if (this.focused) {
-          this.blur();
-        }
-      }
-    }
-  }, {
-    key: "movePointer",
-    value: function movePointer(x, y) {
-      var target = this._findSubSurface(x, y, function (subSurface, x2, y2) {
-        return subSurface.startPointer(x2, y2);
-      });
+    return found || here && this;
+  }
+
+  inBounds(x, y) {
+    return this.bounds.left <= x && x < this.bounds.right && this.bounds.top <= y && y < this.bounds.bottom;
+  }
+
+  startPointer(x, y) {
+    if (this.inBounds(x, y)) {
+      var target = this._findSubSurface(x, y, (subSurface, x2, y2) => subSurface.startPointer(x2, y2));
       if (target) {
-        this.emit("move", {
-          target: target,
-          x: x,
-          y: y
+        if (!this.focused) {
+          this.focus();
+        }
+        this.emit("click", {
+          target,
+          x,
+          y
         });
         if (target !== this) {
-          target.movePointer(x - this.bounds.left, y - this.bounds.top);
+          target.startPointer(x - this.bounds.left, y - this.bounds.top);
         }
       }
-    }
-  }, {
-    key: "_forFocusedSubSurface",
-    value: function _forFocusedSubSurface(name, evt) {
-      var elem = this.focusedElement;
-      if (elem && elem !== this) {
-        elem[name](evt);
-        return true;
-      }
-      return false;
-    }
-  }, {
-    key: "startUV",
-    value: function startUV(evt) {
-      if (!this._forFocusedSubSurface("startUV", evt)) {
-        var p = this.mapUV(evt.hit.uv);
-        this.startPointer(p.x, p.y);
+      else if (this.focused) {
+        this.blur();
       }
     }
-  }, {
-    key: "moveUV",
-    value: function moveUV(evt) {
-      if (!this._forFocusedSubSurface("moveUV", evt)) {
-        var p = this.mapUV(evt.hit.uv);
-        this.movePointer(p.x, p.y);
+  }
+
+  movePointer(x, y) {
+    var target = this._findSubSurface(x, y, (subSurface, x2, y2) => subSurface.startPointer(x2, y2));
+    if (target) {
+      this.emit("move", {
+        target,
+        x,
+        y
+      });
+      if (target !== this) {
+        target.movePointer(x - this.bounds.left, y - this.bounds.top);
       }
     }
-  }, {
-    key: "endPointer",
-    value: function endPointer(evt) {
-      this._forFocusedSubSurface("endPointer", evt);
-    }
-  }, {
-    key: "focus",
-    value: function focus() {
-      if (this.focusable && !this.focused) {
-        this.focused = true;
-        this.emit("focus");
-      }
-    }
-  }, {
-    key: "blur",
-    value: function blur() {
-      if (this.focused) {
-        this.focused = false;
-        for (var i = 0; i < this.subSurfaces.length; ++i) {
-          if (this.subSurfaces[i].focused) {
-            this.subSurfaces[i].blur();
-          }
-        }
-        this.emit("blur");
-      }
-    }
-  }, {
-    key: "keyDown",
-    value: function keyDown(evt) {
-      this._forFocusedSubSurface("keyDown", evt);
-    }
-  }, {
-    key: "keyUp",
-    value: function keyUp(evt) {
-      this._forFocusedSubSurface("keyUp", evt);
-    }
-  }, {
-    key: "readClipboard",
-    value: function readClipboard(evt) {
-      this._forFocusedSubSurface("readClipboard", evt);
-    }
-  }, {
-    key: "copySelectedText",
-    value: function copySelectedText(evt) {
-      this._forFocusedSubSurface("copySelectedText", evt);
-    }
-  }, {
-    key: "cutSelectedText",
-    value: function cutSelectedText(evt) {
-      this._forFocusedSubSurface("cutSelectedText", evt);
-    }
-  }, {
-    key: "readWheel",
-    value: function readWheel(evt) {
-      this._forFocusedSubSurface("readWheel", evt);
-    }
-  }, {
-    key: "pickable",
-    get: function get$$1() {
+  }
+
+  _forFocusedSubSurface(name, evt) {
+    var elem = this.focusedElement;
+    if (elem && elem !== this) {
+      elem[name](evt);
       return true;
     }
-  }, {
-    key: "imageWidth",
-    get: function get$$1() {
-      return this.canvas.width;
-    },
-    set: function set$$1(v) {
-      this.canvas.width = v;
-      this.bounds.width = v;
+    return false;
+  }
+
+  startUV(evt) {
+    if(!this._forFocusedSubSurface("startUV", evt)){
+      var p = this.mapUV(evt.hit.uv);
+      this.startPointer(p.x, p.y);
     }
-  }, {
-    key: "imageHeight",
-    get: function get$$1() {
-      return this.canvas.height;
-    },
-    set: function set$$1(v) {
-      this.canvas.height = v;
-      this.bounds.height = v;
+  }
+
+  moveUV(evt) {
+    if(!this._forFocusedSubSurface("moveUV", evt)) {
+      var p = this.mapUV(evt.hit.uv);
+      this.movePointer(p.x, p.y);
     }
-  }, {
-    key: "elementWidth",
-    get: function get$$1() {
-      return this.canvas.clientWidth * devicePixelRatio;
-    },
-    set: function set$$1(v) {
-      this.canvas.style.width = v / devicePixelRatio + "px";
+  }
+
+  endPointer(evt) {
+    this._forFocusedSubSurface("endPointer", evt);
+  }
+
+  focus() {
+    if (this.focusable && !this.focused) {
+      this.focused = true;
+      this.emit("focus");
     }
-  }, {
-    key: "elementHeight",
-    get: function get$$1() {
-      return this.canvas.clientHeight * devicePixelRatio;
-    },
-    set: function set$$1(v) {
-      this.canvas.style.height = v / devicePixelRatio + "px";
-    }
-  }, {
-    key: "surfaceWidth",
-    get: function get$$1() {
-      return this.canvas.parentElement ? this.elementWidth : this.bounds.width;
-    }
-  }, {
-    key: "surfaceHeight",
-    get: function get$$1() {
-      return this.canvas.parentElement ? this.elementHeight : this.bounds.height;
-    }
-  }, {
-    key: "resized",
-    get: function get$$1() {
-      return this.imageWidth !== this.surfaceWidth || this.imageHeight !== this.surfaceHeight;
-    }
-  }, {
-    key: "environment",
-    get: function get$$1() {
-      var head = this;
-      while (head) {
-        if (head._environment) {
-          if (head !== this) {
-            this._environment = head._environment;
-          }
-          return this._environment;
-        }
-        head = head.parent;
-      }
-    }
-  }, {
-    key: "theme",
-    get: function get$$1() {
-      return null;
-    },
-    set: function set$$1(v) {
+  }
+
+  blur() {
+    if (this.focused) {
+      this.focused = false;
       for (var i = 0; i < this.subSurfaces.length; ++i) {
-        this.subSurfaces[i].theme = v;
-      }
-    }
-  }, {
-    key: "lockMovement",
-    get: function get$$1() {
-      var lock = false;
-      for (var i = 0; i < this.subSurfaces.length && !lock; ++i) {
-        lock = lock || this.subSurfaces[i].lockMovement;
-      }
-      return lock;
-    }
-  }, {
-    key: "focusedElement",
-    get: function get$$1() {
-      var result = null,
-          head = this;
-      while (head && head.focused) {
-        result = head;
-        var subSurfaces = head.subSurfaces;
-        head = null;
-        for (var i = 0; i < subSurfaces.length; ++i) {
-          var subSurface = subSurfaces[i];
-          if (subSurface.focused) {
-            head = subSurface;
-          }
+        if (this.subSurfaces[i].focused) {
+          this.subSurfaces[i].blur();
         }
       }
-      return result;
+      this.emit("blur");
     }
-  }]);
-  return Surface;
-}(BaseTextured);
+  }
+
+  get theme() {
+    return null;
+  }
+
+  set theme(v) {
+    for (var i = 0; i < this.subSurfaces.length; ++i) {
+      this.subSurfaces[i].theme = v;
+    }
+  }
+
+  get lockMovement() {
+    var lock = false;
+    for (var i = 0; i < this.subSurfaces.length && !lock; ++i) {
+      lock = lock || this.subSurfaces[i].lockMovement;
+    }
+    return lock;
+  }
+
+  get focusedElement() {
+    var result = null,
+      head = this;
+    while (head && head.focused) {
+      result = head;
+      var subSurfaces = head.subSurfaces;
+      head = null;
+      for (var i = 0; i < subSurfaces.length; ++i) {
+        var subSurface = subSurfaces[i];
+        if (subSurface.focused) {
+          head = subSurface;
+        }
+      }
+    }
+    return result;
+  }
+
+  keyDown(evt) {
+    this._forFocusedSubSurface("keyDown", evt);
+  }
+
+  keyUp(evt) {
+    this._forFocusedSubSurface("keyUp", evt);
+  }
+
+  readClipboard(evt) {
+    this._forFocusedSubSurface("readClipboard", evt);
+  }
+
+  copySelectedText(evt) {
+    this._forFocusedSubSurface("copySelectedText", evt);
+  }
+
+  cutSelectedText(evt) {
+    this._forFocusedSubSurface("cutSelectedText", evt);
+  }
+
+  readWheel(evt) {
+    this._forFocusedSubSurface("readWheel", evt);
+  }
+}
 
 var Default = {
   name: "Light",
@@ -47951,282 +47124,249 @@ var Default = {
 
 var COUNTER$3 = 0;
 
-var Label = function (_Surface) {
-  inherits(Label, _Surface);
-
-  function Label(options) {
-    classCallCheck(this, Label);
+class Label extends Surface {
+  constructor(options) {
+    ////////////////////////////////////////////////////////////////////////
+    // normalize input parameters
+    ////////////////////////////////////////////////////////////////////////
+    super(Object.assign({}, {
+      id: "Primrose.Controls.Label[" + (COUNTER$3++) + "]"
+    }, options));
 
     ////////////////////////////////////////////////////////////////////////
     // initialization
     ///////////////////////////////////////////////////////////////////////
 
-    var _this = possibleConstructorReturn(this, (Label.__proto__ || Object.getPrototypeOf(Label)).call(this, Object.assign({}, {
-      id: "Primrose.Controls.Label[" + COUNTER$3++ + "]"
-    }, options)));
-    ////////////////////////////////////////////////////////////////////////
-    // normalize input parameters
-    ////////////////////////////////////////////////////////////////////////
+    this._lastFont = null;
+    this._lastText = null;
+    this._lastCharacterWidth = null;
+    this._lastCharacterHeight = null;
+    this._lastPadding = null;
+    this._lastWidth = -1;
+    this._lastHeight = -1;
+    this._lastTextAlign = null;
 
-
-    _this._lastFont = null;
-    _this._lastText = null;
-    _this._lastCharacterWidth = null;
-    _this._lastCharacterHeight = null;
-    _this._lastPadding = null;
-    _this._lastWidth = -1;
-    _this._lastHeight = -1;
-    _this._lastTextAlign = null;
-
-    _this.textAlign = _this.options.textAlign;
-    _this.character = new Size();
-    _this.theme = _this.options.theme;
-    _this.fontSize = _this.options.fontSize || 16;
-    _this.refreshCharacter();
-    _this.backgroundColor = _this.options.backgroundColor || _this.theme.regular.backColor;
-    _this.color = _this.options.color || _this.theme.regular.foreColor;
-    _this.value = _this.options.value;
-    return _this;
+    this.textAlign = this.options.textAlign;
+    this.character = new Size();
+    this.theme = this.options.theme;
+    this.fontSize = this.options.fontSize || 16;
+    this.refreshCharacter();
+    this.backgroundColor = this.options.backgroundColor || this.theme.regular.backColor;
+    this.color = this.options.color || this.theme.regular.foreColor;
+    this.value = this.options.value;
   }
 
-  createClass(Label, [{
-    key: "refreshCharacter",
-    value: function refreshCharacter() {
-      this.character.height = this.fontSize;
-      this.context.font = this.character.height + "px " + this.theme.fontFamily;
-      // measure 100 letter M's, then divide by 100, to get the width of an M
-      // to two decimal places on systems that return integer values from
-      // measureText.
-      this.character.width = this.context.measureText("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM").width / 100;
+  get textAlign() {
+    return this.context.textAlign;
+  }
+
+  set textAlign(v) {
+    this.context.textAlign = v;
+    this.render();
+  }
+
+  get value() {
+    return this._value;
+  }
+
+  set value(txt) {
+    txt = txt || "";
+    this._value = txt.replace(/\r\n/g, "\n");
+    this.render();
+  }
+
+  get theme() {
+    return this._theme;
+  }
+
+  set theme(t) {
+    this._theme = Object.assign({}, Default, t);
+    this._theme.fontSize = this.fontSize;
+    this.refreshCharacter();
+    this.render();
+  }
+
+  refreshCharacter() {
+    this.character.height = this.fontSize;
+    this.context.font = this.character.height + "px " + this.theme.fontFamily;
+    // measure 100 letter M's, then divide by 100, to get the width of an M
+    // to two decimal places on systems that return integer values from
+    // measureText.
+    this.character.width = this.context.measureText(
+        "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM")
+      .width /
+      100;
+  }
+
+  _isChanged() {
+    var textChanged = this._lastText !== this.value,
+      characterWidthChanged = this.character.width !== this._lastCharacterWidth,
+      characterHeightChanged = this.character.height !== this._lastCharacterHeight,
+      fontChanged = this.context.font !== this._lastFont,
+      alignChanged = this.textAlign !== this._lastTextAlign,
+      changed = this.resized || textChanged || characterWidthChanged || characterHeightChanged || this.resized || fontChanged || alignChanged;
+    return changed;
+  }
+
+  render() {
+    if (this.resized) {
+      this.resize();
     }
-  }, {
-    key: "_isChanged",
-    value: function _isChanged() {
-      var textChanged = this._lastText !== this.value,
-          characterWidthChanged = this.character.width !== this._lastCharacterWidth,
-          characterHeightChanged = this.character.height !== this._lastCharacterHeight,
-          fontChanged = this.context.font !== this._lastFont,
-          alignChanged = this.textAlign !== this._lastTextAlign,
-          changed = this.resized || textChanged || characterWidthChanged || characterHeightChanged || this.resized || fontChanged || alignChanged;
-      return changed;
-    }
-  }, {
-    key: "render",
-    value: function render() {
-      if (this.resized) {
-        this.resize();
+
+    if (this.theme && this._isChanged) {
+      this._lastText = this.value;
+      this._lastCharacterWidth = this.character.width;
+      this._lastCharacterHeight = this.character.height;
+      this._lastWidth = this.imageWidth;
+      this._lastHeight = this.imageHeight;
+      this._lastFont = this.context.font;
+      this._lastTextAlign = this.textAlign;
+
+      this.context.textAlign = this.textAlign || "left";
+
+      var clearFunc = this.backgroundColor ? "fillRect" : "clearRect";
+      if (this.theme.regular.backColor) {
+        this.context.fillStyle = this.backgroundColor;
       }
 
-      if (this.theme && this._isChanged) {
-        this._lastText = this.value;
-        this._lastCharacterWidth = this.character.width;
-        this._lastCharacterHeight = this.character.height;
-        this._lastWidth = this.imageWidth;
-        this._lastHeight = this.imageHeight;
-        this._lastFont = this.context.font;
-        this._lastTextAlign = this.textAlign;
+      this.context[clearFunc](0, 0, this.imageWidth, this.imageHeight);
 
-        this.context.textAlign = this.textAlign || "left";
+      if (this.value) {
+        var lines = this.value.split("\n");
+        for (var y = 0; y < lines.length; ++y) {
+          var line = lines[y],
+            textY = (this.imageHeight - lines.length * this.character.height) / 2 + y * this.character.height;
 
-        var clearFunc = this.backgroundColor ? "fillRect" : "clearRect";
-        if (this.theme.regular.backColor) {
-          this.context.fillStyle = this.backgroundColor;
-        }
-
-        this.context[clearFunc](0, 0, this.imageWidth, this.imageHeight);
-
-        if (this.value) {
-          var lines = this.value.split("\n");
-          for (var y = 0; y < lines.length; ++y) {
-            var line = lines[y],
-                textY = (this.imageHeight - lines.length * this.character.height) / 2 + y * this.character.height;
-
-            var textX = null;
-            switch (this.textAlign) {
-              case "right":
-                textX = this.imageWidth;
-                break;
-              case "center":
-                textX = this.imageWidth / 2;
-                break;
-              default:
-                textX = 0;
-            }
-
-            var font = (this.theme.regular.fontWeight || "") + " " + (this.theme.regular.fontStyle || "") + " " + this.character.height + "px " + this.theme.fontFamily;
-            this.context.font = font.trim();
-            this.context.fillStyle = this.color;
-            this.context.fillText(line, textX, textY);
+          var textX = null;
+          switch (this.textAlign) {
+            case "right":
+              textX = this.imageWidth;
+              break;
+            case "center":
+              textX = this.imageWidth / 2;
+              break;
+            default:
+              textX = 0;
           }
+
+          var font = (this.theme.regular.fontWeight || "") +
+            " " + (this.theme.regular.fontStyle || "") +
+            " " + this.character.height + "px " + this.theme.fontFamily;
+          this.context.font = font.trim();
+          this.context.fillStyle = this.color;
+          this.context.fillText(line, textX, textY);
         }
-
-        this.renderCanvasTrim();
-
-        this.invalidate();
       }
+
+      this.renderCanvasTrim();
+
+      this.invalidate();
     }
-  }, {
-    key: "renderCanvasTrim",
-    value: function renderCanvasTrim() {}
-  }, {
-    key: "textAlign",
-    get: function get$$1() {
-      return this.context.textAlign;
-    },
-    set: function set$$1(v) {
-      this.context.textAlign = v;
-      this.render();
-    }
-  }, {
-    key: "value",
-    get: function get$$1() {
-      return this._value;
-    },
-    set: function set$$1(txt) {
-      txt = txt || "";
-      this._value = txt.replace(/\r\n/g, "\n");
-      this.render();
-    }
-  }, {
-    key: "theme",
-    get: function get$$1() {
-      return this._theme;
-    },
-    set: function set$$1(t) {
-      this._theme = Object.assign({}, Default, t);
-      this._theme.fontSize = this.fontSize;
-      this.refreshCharacter();
-      this.render();
-    }
-  }]);
-  return Label;
-}(Surface);
+  }
+
+  renderCanvasTrim() {}
+}
 
 var COUNTER$2 = 0;
 
-var Button2D = function (_Label) {
-  inherits(Button2D, _Label);
+class Button2D extends Label {
 
-  function Button2D(options) {
-    classCallCheck(this, Button2D);
-
-    var _this = possibleConstructorReturn(this, (Button2D.__proto__ || Object.getPrototypeOf(Button2D)).call(this, Object.assign({}, {
-      id: "Primrose.Controls.Button2D[" + COUNTER$2++ + "]",
+  constructor(options) {
+    super(Object.assign({}, {
+      id: "Primrose.Controls.Button2D[" + (COUNTER$2++) + "]",
       textAlign: "center"
-    }, options)));
-
-    _this._lastActivated = null;
-    return _this;
+    }, options));
+    this._lastActivated = null;
   }
 
-  createClass(Button2D, [{
-    key: "startPointer",
-    value: function startPointer(x, y) {
-      this.focus();
-      this._activated = true;
+  startPointer(x, y) {
+    this.focus();
+    this._activated = true;
+    this.render();
+  }
+
+  endPointer() {
+    if (this._activated) {
+      this._activated = false;
+      this.emit("click", {
+        target: this
+      });
       this.render();
     }
-  }, {
-    key: "endPointer",
-    value: function endPointer() {
-      if (this._activated) {
-        this._activated = false;
-        this.emit("click", {
-          target: this
-        });
-        this.render();
-      }
-    }
-  }, {
-    key: "_isChanged",
-    value: function _isChanged() {
-      var activatedChanged = this._activated !== this._lastActivated,
-          changed = get(Button2D.prototype.__proto__ || Object.getPrototypeOf(Button2D.prototype), "_isChanged", this) || activatedChanged;
-      return changed;
-    }
-  }, {
-    key: "renderCanvasTrim",
-    value: function renderCanvasTrim() {
-      this.context.lineWidth = this._activated ? 4 : 2;
-      this.context.strokeStyle = this.theme.regular.foreColor || Primrose.Text.Themes.Default.regular.foreColor;
-      this.context.strokeRect(0, 0, this.imageWidth, this.imageHeight);
-    }
-  }]);
-  return Button2D;
-}(Label);
-
-var Button3D = function (_Entity) {
-  inherits(Button3D, _Entity);
-
-  function Button3D(model, buttonName, options) {
-    classCallCheck(this, Button3D);
-
-    var _this = possibleConstructorReturn(this, (Button3D.__proto__ || Object.getPrototypeOf(Button3D)).call(this, buttonName, Object.assign({}, Button3D.DEFAULTS, options)));
-
-    _this.options.minDeflection = Math.cos(_this.options.minDeflection);
-    _this.options.colorUnpressed = new Color(_this.options.colorUnpressed);
-    _this.options.colorPressed = new Color(_this.options.colorPressed);
-
-    _this.base = model.children[1];
-
-    _this.cap = model.children[0];
-    _this.cap.name = buttonName;
-    _this.cap.material = _this.cap.material.clone();
-    _this.cap.button = _this;
-    _this.cap.base = _this.base;
-
-    _this.add(_this.base);
-    _this.add(_this.cap);
-
-    _this.color = _this.cap.material.color;
-
-    _this.name = buttonName;
-
-    _this.element = null;
-    return _this;
   }
 
-  createClass(Button3D, [{
-    key: "startUV",
-    value: function startUV(point) {
+  _isChanged() {
+    var activatedChanged = this._activated !== this._lastActivated,
+      changed = super._isChanged || activatedChanged;
+    return changed;
+  }
 
-      this.color.copy(this.options.colorPressed);
-      if (this.element) {
-        this.element.click();
-      } else {
-        this.emit("click", { source: this });
-      }
-    }
-  }, {
-    key: "endPointer",
-    value: function endPointer(evt) {
+  renderCanvasTrim() {
+    this.context.lineWidth = this._activated ? 4 : 2;
+    this.context.strokeStyle = this.theme.regular.foreColor || Primrose.Text.Themes.Default.regular.foreColor;
+    this.context.strokeRect(0, 0, this.imageWidth, this.imageHeight);
+  }
+}
 
-      this.color.copy(this.options.colorUnpressed);
-      this.emit("release", { source: this });
-    }
-  }, {
-    key: "consumeEvent",
-    value: function consumeEvent(evt) {
-      var _this2 = this;
+class Button3D extends Entity {
+  constructor(model, buttonName, options) {
+    super(buttonName, Object.assign({}, Button3D.DEFAULTS, options));
 
-      switch (evt.type) {
-        case "pointerstart":
-          this.startUV();
-          break;
-        case "pointerend":
-          this.endPointer(evt);
-          break;
-        case "gazecomplete":
-          this.startUV();
-          setTimeout(function () {
-            return _this2.endPointer(evt);
-          }, 100);
-          break;
-      }
+    this.options.minDeflection = Math.cos(this.options.minDeflection);
+    this.options.colorUnpressed = new Color(this.options.colorUnpressed);
+    this.options.colorPressed = new Color(this.options.colorPressed);
+
+    this.base = model.children[1];
+
+    this.cap = model.children[0];
+    this.cap.name = buttonName;
+    this.cap.material = this.cap.material.clone();
+    this.cap.button = this;
+    this.cap.base = this.base;
+
+    this.add(this.base);
+    this.add(this.cap);
+
+    this.color = this.cap.material.color;
+
+    this.name = buttonName;
+
+    this.element = null;
+  }
+
+  startUV(point) {
+
+    this.color.copy(this.options.colorPressed);
+    if (this.element) {
+      this.element.click();
     }
-  }]);
-  return Button3D;
-}(Entity);
+    else {
+      this.emit("click", { source: this });
+    }
+  }
+
+  endPointer(evt) {
+
+    this.color.copy(this.options.colorUnpressed);
+    this.emit("release", { source: this });
+  }
+
+  consumeEvent(evt) {
+
+    switch(evt.type){
+      case "pointerstart":
+        this.startUV();
+      break;
+      case "pointerend":
+        this.endPointer(evt);
+      break;
+      case "gazecomplete":
+        this.startUV();
+        setTimeout(() => this.endPointer(evt), 100);
+      break;
+    }
+  }
+}
 
 Button3D.DEFAULTS = {
   maxThrow: 0.1,
@@ -48238,77 +47378,64 @@ Button3D.DEFAULTS = {
 
 var buttonCount = 0;
 
-var ButtonFactory = function () {
-  function ButtonFactory(templateFile, options) {
-    classCallCheck(this, ButtonFactory);
+class ButtonFactory {
 
+  constructor(templateFile, options) {
     this.options = options;
 
     this.template = templateFile;
   }
 
-  createClass(ButtonFactory, [{
-    key: "create",
-    value: function create(toggle) {
-      var name = "button" + ++buttonCount;
-      var obj = this.template.clone();
-      var btn = new Button3D(obj, name, this.options, toggle);
-      return btn;
-    }
-  }]);
-  return ButtonFactory;
-}();
+  create(toggle) {
+    var name = "button" + (++buttonCount);
+    var obj = this.template.clone();
+    var btn = new Button3D(obj, name, this.options, toggle);
+    return btn;
+  }
 
-ButtonFactory.DEFAULT = new ButtonFactory(colored(box(1, 1, 1), 0xff0000), {
-  maxThrow: 0.1,
-  minDeflection: 10,
-  colorUnpressed: 0x7f0000,
-  colorPressed: 0x007f00,
-  toggle: true
-});
+}
 
-var COUNTER$5 = 0;
+ButtonFactory.DEFAULT = new ButtonFactory(
+  colored(box(1, 1, 1), 0xff0000), {
+    maxThrow: 0.1,
+    minDeflection: 10,
+    colorUnpressed: 0x7f0000,
+    colorPressed: 0x007f00,
+    toggle: true
+  });
 
-var Image = function (_BaseTextured) {
-  inherits(Image, _BaseTextured);
+let COUNTER$5 = 0;
 
-  function Image(images, options) {
-    classCallCheck(this, Image);
+class Image extends BaseTextured {
 
+  constructor(images, options) {
     ////////////////////////////////////////////////////////////////////////
     // normalize input parameters
     ////////////////////////////////////////////////////////////////////////
-    if (!(images instanceof Array)) {
+    if(!(images instanceof Array)) {
       images = [images];
     }
 
     options = Object.assign({}, {
-      id: "Primrose.Controls.Image[" + COUNTER$5++ + "]"
+      id: "Primrose.Controls.Image[" + (COUNTER$5++) + "]"
     }, options);
 
-    return possibleConstructorReturn(this, (Image.__proto__ || Object.getPrototypeOf(Image)).call(this, images, options));
+    super(images, options);
   }
 
-  createClass(Image, [{
-    key: "_loadFiles",
-    value: function _loadFiles(images, progress) {
-      var _this2 = this;
+  _loadFiles(images, progress) {
+    return Promise.all(Array.prototype.map.call(images, (src, i) => {
+      const loadOptions = Object.assign({}, this.options, {
+        progress: progress
+      });
 
-      return Promise.all(Array.prototype.map.call(images, function (src, i) {
-        var loadOptions = Object.assign({}, _this2.options, {
-          progress: progress
-        });
+      this._meshes[i] = this._geometry.textured(src, loadOptions)
+        .named(this.name + "-mesh-" + i);
 
-        _this2._meshes[i] = _this2._geometry.textured(src, loadOptions).named(_this2.name + "-mesh-" + i);
-
-        return loadOptions.promise.then(function (txt) {
-          return _this2._textures[i] = txt;
-        });
-      }));
-    }
-  }]);
-  return Image;
-}(BaseTextured);
+      return loadOptions.promise.then((txt) => this._textures[i] = txt);
+    }));
+  }
+}
 
 // The JSON format object loader is not always included in the Three.js distribution,
 // so we have to first check for it.
@@ -48317,12 +47444,11 @@ var PATH_PATTERN = /((?:https?:\/\/)?(?:[^/]+\/)+)(\w+)(\.(?:\w+))$/;
 var EXTENSION_PATTERN = /(\.(?:\w+))+$/;
 
 function loader(map, key) {
-  return function (obj) {
-    return ModelFactory.loadObject(map[key]).then(function (model) {
+  return (obj) => ModelFactory.loadObject(map[key])
+    .then((model) => {
       obj[key] = model;
       return obj;
     });
-  };
 }
 
 // Sometimes, the properties that export out of Blender and into Three.js don't
@@ -48338,20 +47464,20 @@ function fixJSONScene(json) {
 }
 
 function fixOBJScene(group) {
-  if (group.type === "Group" && group.children.length === 1 && group.children[0].isMesh) {
+  if(group.type === "Group" && group.children.length === 1 && group.children[0].isMesh) {
     return group.children[0];
   }
   return group;
 }
 
 var propertyTests = {
-  isButton: function isButton(obj) {
+  isButton: function (obj) {
     return obj.material && obj.material.name.match(/^button\d+$/);
   },
-  isSolid: function isSolid(obj) {
+  isSolid: function (obj) {
     return !obj.name.match(/^(water|sky)/);
   },
-  isGround: function isGround(obj) {
+  isGround: function (obj) {
     return obj.material && obj.material.name && obj.material.name.match(/\bground\b/);
   }
 };
@@ -48367,242 +47493,231 @@ function setProperties(object) {
   return object;
 }
 
-var ModelFactory = function () {
-  createClass(ModelFactory, null, [{
-    key: "loadModel",
-    value: function loadModel(src, type, progress) {
-      return ModelFactory.loadObject(src, type, progress).then(function (scene) {
-        while (scene && scene.type === "Group") {
+class ModelFactory {
+
+  static loadModel(src, type, progress) {
+    return ModelFactory.loadObject(src, type, progress)
+      .then((scene) => {
+        while(scene && scene.type === "Group"){
           scene = scene.children[0];
         }
         return new ModelFactory(scene);
       });
-    }
-  }, {
-    key: "loadObject",
-    value: function loadObject(src, type, progress) {
+  }
 
-      var extMatch = src.match(EXTENSION_PATTERN),
-          extension = type && "." + type || extMatch[0];
-      if (!extension) {
-        return Promise.reject("File path `" + src + "` does not have a file extension, and a type was not provided as a parameter, so we can't determine the type.");
-      } else {
-        extension = extension.toLowerCase();
-        if (loaders === null) {
-          loaders = {
-            ".json": ObjectLoader,
-            ".mtl": MTLLoader,
-            ".obj": OBJLoader,
-            ".typeface.json": FontLoader
-          };
-        }
-        var LoaderType = loaders[extension];
-        if (!LoaderType) {
-          return Promise.reject("There is no loader type for the file extension: " + extension);
-        } else {
-          var loader = new LoaderType(),
-              name = src.substring(0, extMatch.index),
-              elemID = name + "_" + extension.toLowerCase(),
-              elem = document.getElementById(elemID),
-              promise = Promise.resolve();
-          if (extension === ".obj") {
-            var newPath = src.replace(EXTENSION_PATTERN, ".mtl");
-            promise = promise.then(function () {
-              return ModelFactory.loadObject(newPath, "mtl", progress);
-            }).then(function (materials) {
+  static loadObject(src, type, progress) {
+
+    var extMatch = src.match(EXTENSION_PATTERN),
+      extension = type && ("." + type) || extMatch[0];
+    if (!extension) {
+      return Promise.reject("File path `" + src + "` does not have a file extension, and a type was not provided as a parameter, so we can't determine the type.");
+    }
+    else {
+      extension = extension.toLowerCase();
+      if(loaders === null){
+        loaders = {
+          ".json": ObjectLoader,
+          ".mtl": MTLLoader,
+          ".obj": OBJLoader,
+          ".typeface.json": FontLoader
+        };
+      }
+      var LoaderType = loaders[extension];
+      if (!LoaderType) {
+        return Promise.reject("There is no loader type for the file extension: " + extension);
+      }
+      else {
+        var loader = new LoaderType(),
+          name = src.substring(0, extMatch.index),
+          elemID = name + "_" + extension.toLowerCase(),
+          elem = document.getElementById(elemID),
+          promise = Promise.resolve();
+        if (extension === ".obj") {
+          var newPath = src.replace(EXTENSION_PATTERN, ".mtl");
+          promise = promise
+            .then(() => ModelFactory.loadObject(newPath, "mtl", progress))
+            .then((materials) => {
               materials.preload();
               loader.setMaterials(materials);
-            }).catch(console.error.bind(console, "Error loading MTL file: " + newPath));
-          } else if (extension === ".mtl") {
-            var match = src.match(PATH_PATTERN);
-            if (match) {
-              var dir = match[1];
-              src = match[2] + match[3];
-              loader.setTexturePath(dir);
-              loader.setPath(dir);
-            }
-          }
-
-          if (elem) {
-            var elemSource = elem.innerHTML.split(/\r?\n/g).map(function (s) {
-              return s.trim();
-            }).join("\n");
-            promise = promise.then(function () {
-              return loader.parse(elemSource);
-            });
-          } else {
-            if (loader.setCrossOrigin) {
-              loader.setCrossOrigin("anonymous");
-            }
-            promise = promise.then(function () {
-              return new Promise(function (resolve, reject) {
-                return loader.load(src, resolve, progress, reject);
-              });
-            });
-          }
-
-          if (extension === ".obj") {
-            promise = promise.then(fixOBJScene);
-          }
-
-          if (extension === ".json") {
-            promise = promise.then(fixJSONScene);
-          }
-
-          if (extension !== ".mtl" && extension !== ".typeface.json") {
-            promise = promise.then(setProperties);
-          }
-          promise = promise.catch(console.error.bind(console, "MODEL_ERR", src));
-          return promise;
+            })
+            .catch(console.error.bind(console, "Error loading MTL file: " + newPath));
         }
+        else if (extension === ".mtl") {
+          var match = src.match(PATH_PATTERN);
+          if(match) {
+            var dir = match[1];
+            src = match[2] + match[3];
+            loader.setTexturePath(dir);
+            loader.setPath(dir);
+          }
+        }
+
+        if (elem) {
+          var elemSource = elem.innerHTML
+            .split(/\r?\n/g)
+            .map((s) => s.trim())
+            .join("\n");
+          promise = promise.then(() => loader.parse(elemSource));
+        }
+        else {
+          if (loader.setCrossOrigin) {
+            loader.setCrossOrigin("anonymous");
+          }
+          promise = promise.then(() => new Promise((resolve, reject) => loader.load(src, resolve, progress, reject)));
+        }
+
+        if (extension === ".obj") {
+          promise = promise.then(fixOBJScene);
+        }
+
+        if (extension === ".json") {
+          promise = promise.then(fixJSONScene);
+        }
+
+        if (extension !== ".mtl" && extension !== ".typeface.json") {
+          promise = promise.then(setProperties);
+        }
+        promise = promise.catch(console.error.bind(console, "MODEL_ERR", src));
+        return promise;
       }
     }
-  }, {
-    key: "loadObjects",
-    value: function loadObjects(map) {
+  }
 
-      var output = {},
-          promise = Promise.resolve(output);
-      for (var key in map) {
-        if (map[key]) {
-          promise = promise.then(loader(map, key));
-        }
+  static loadObjects(map) {
+
+    var output = {},
+      promise = Promise.resolve(output);
+    for (var key in map) {
+      if (map[key]) {
+        promise = promise.then(loader(map, key));
       }
-      return promise;
     }
-  }]);
+    return promise;
+  }
 
-  function ModelFactory(template) {
-    classCallCheck(this, ModelFactory);
-
+  constructor(template) {
     this.template = template;
   }
 
-  createClass(ModelFactory, [{
-    key: "clone",
-    value: function clone() {
-      var _this = this;
+  clone() {
 
-      var obj = this.template.clone();
+    var obj = this.template.clone();
 
-      obj.traverse(function (child) {
-        if (child.isSkinnedMesh) {
-          obj.animation = new AnimationClip(child, child.geometry.animation);
-          if (!_this.template.originalAnimationClipData && obj.animation.data) {
-            _this.template.originalAnimationClipData = obj.animation.data;
-          }
-          if (!obj.animation.data) {
-            obj.animation.data = _this.template.originalAnimationClipData;
-          }
+    obj.traverse((child) => {
+      if (child.isSkinnedMesh) {
+        obj.animation = new AnimationClip(child, child.geometry.animation);
+        if (!this.template.originalAnimationClipData && obj.animation.data) {
+          this.template.originalAnimationClipData = obj.animation.data;
         }
-      });
+        if (!obj.animation.data) {
+          obj.animation.data = this.template.originalAnimationClipData;
+        }
+      }
+    });
 
-      setProperties(obj);
-      return obj;
-    }
-  }]);
-  return ModelFactory;
-}();
+    setProperties(obj);
+    return obj;
+  }
 
-var heightTester = new Raycaster();
+}
+
+const heightTester = new Raycaster();
 
 heightTester.ray.direction.set(0, -1, 0);
 
-var Ground = function (_Entity) {
-  inherits(Ground, _Entity);
+class Ground extends Entity {
 
-  function Ground(options) {
-    classCallCheck(this, Ground);
-    return possibleConstructorReturn(this, (Ground.__proto__ || Object.getPrototypeOf(Ground)).call(this, "Ground", {
+  constructor(options) {
+    super("Ground", {
       transparent: false,
       dim: options.drawDistance,
       texture: options.groundTexture,
       model: options.groundModel,
       shadow: options.enableShadows,
       progress: options.progress
-    }));
+    });
   }
 
-  createClass(Ground, [{
-    key: "moveTo",
-    value: function moveTo(pos) {
-      if (this.isInfinite) {
-        this.position.set(Math.floor(pos.x), 0, Math.floor(pos.z));
-      }
-    }
-  }, {
-    key: "getHeightAt",
-    value: function getHeightAt(pos) {
-      if (this.model) {
-        heightTester.ray.origin.copy(pos);
-        heightTester.ray.origin.y = 100;
-        var hits = heightTester.intersectObject(this.model);
-        if (hits.length > 0) {
-          var hit = hits[0];
-          return 100 - hit.distance;
-        }
-      }
-    }
-  }, {
-    key: "_ready",
-    get: function get$$1() {
-      var _this2 = this;
+  get _ready() {
+    const dim = this.options.dim,
+      type = typeof  this.options.texture;
 
-      var dim = this.options.dim,
-          type = _typeof(this.options.texture);
+    let promise = null;
 
-      var promise = null;
+    this.model = null;
+    this.isInfinite = null;
 
-      this.model = null;
-      this.isInfinite = null;
-
-      if (this.options.model) {
-        promise = ModelFactory.loadObject(this.options.model).then(function (model) {
-          _this2.model = model;
-          _this2.isInfinite = false;
+    if(this.options.model) {
+      promise = ModelFactory.loadObject(this.options.model)
+        .then((model) => {
+          this.model = model;
+          this.isInfinite = false;
         });
-      } else if (type === "number") {
-        this.isInfinite = true;
-        this.model = quad(dim, dim).colored(this.options.texture, this.options).rot(-Math.PI / 2, 0, 0);
-        promise = Promise.resolve();
-      } else if (type === "string") {
-        this.isInfinite = true;
-        this.model = new Image(this.options.texture, Object.assign({}, this.options, {
-          width: dim,
-          height: dim,
-          txtRepeatX: dim,
-          txtRepeatY: dim,
-          anisotropy: 8
-        })).rot(-Math.PI / 2, 0, 0);
-
-        promise = this.model.ready;
-      } else {
-        this.model = new Object3D();
-        promise = Promise.resolve();
-      }
-
-      promise = promise.then(function () {
-        if (_this2.isInfinite != null) {
-          _this2.model.receiveShadow = _this2.options.shadow;
-          _this2.model.named(_this2.name + "-" + (_this2.options.model || _this2.options.texture)).addTo(_this2);
-
-          _this2.watch(_this2.model, Pointer.EVENTS);
-        }
-      });
-
-      return promise;
     }
-  }]);
-  return Ground;
-}(Entity);
+    else if(type === "number") {
+      this.isInfinite = true;
+      this.model = quad(dim, dim)
+        .colored(this.options.texture, this.options)
+        .rot(-Math.PI / 2, 0, 0);
+      promise = Promise.resolve();
+    }
+    else if(type === "string") {
+      this.isInfinite = true;
+      this.model = new Image(this.options.texture, Object.assign({}, this.options, {
+        width: dim,
+        height: dim,
+        txtRepeatX: dim,
+        txtRepeatY: dim,
+        anisotropy: 8
+      })).rot(-Math.PI / 2, 0, 0);
 
-var Sky = function (_Entity) {
-  inherits(Sky, _Entity);
+      promise = this.model.ready;
+    }
+    else {
+      this.model = new Object3D();
+      promise = Promise.resolve();
+    }
 
-  function Sky(options) {
-    classCallCheck(this, Sky);
+    promise = promise.then(() => {
+      if(this.isInfinite != null) {
+        this.model.receiveShadow = this.options.shadow;
+        this.model
+          .named(this.name + "-" + (this.options.model || this.options.texture))
+          .addTo(this);
 
-    var _this = possibleConstructorReturn(this, (Sky.__proto__ || Object.getPrototypeOf(Sky)).call(this, "Sky", {
+        this.watch(this.model, Pointer.EVENTS);
+      }
+    });
+
+    return promise;
+  }
+
+  moveTo(pos) {
+    if(this.isInfinite) {
+      this.position.set(
+        Math.floor(pos.x),
+        0,
+        Math.floor(pos.z));
+    }
+  }
+
+  getHeightAt(pos) {
+    if(this.model) {
+      heightTester.ray.origin.copy(pos);
+      heightTester.ray.origin.y = 100;
+      const hits = heightTester.intersectObject(this.model);
+      if(hits.length > 0) {
+        const hit = hits[0];
+        return 100 - hit.distance;
+      }
+    }
+  }
+}
+
+class Sky extends Entity {
+
+  constructor(options) {
+    super("Sky", {
       transparent: false,
       useFog: false,
       unshaded: true,
@@ -48613,68 +47728,74 @@ var Sky = function (_Entity) {
       shadowMapSize: options.shadowMapSize,
       shadowCameraSize: options.shadowCameraSize,
       shadowRadius: options.shadowRadius
-    }));
+    });
 
-    _this._image = null;
+    this._image = null;
 
-    if (options.disableDefaultLighting) {
-      _this.ambient = null;
-      _this.sun = null;
-    } else {
+    if(options.disableDefaultLighting) {
+      this.ambient = null;
+      this.sun = null;
+    }
+    else{
 
-      _this.ambient = new AmbientLight(0xffffff, 0.5).addTo(_this);
+      this.ambient = new AmbientLight(0xffffff, 0.5)
+        .addTo(this);
 
-      _this.sun = new DirectionalLight(0xffffff, 1).addTo(_this).at(0, 100, 100);
+      this.sun = new DirectionalLight(0xffffff, 1)
+        .addTo(this)
+        .at(0, 100, 100);
 
-      _this.add(_this.sun.target);
+      this.add(this.sun.target);
 
-      if (_this.options.enableShadows) {
-        _this.sun.castShadow = true;
-        _this.sun.shadow.mapSize.width = _this.sun.shadow.mapSize.height = _this.options.shadowMapSize;
-        _this.sun.shadow.radius = _this.options.shadowRadius;
-        _this.sun.shadow.camera.top = _this.sun.shadow.camera.right = _this.options.shadowCameraSize;
-        _this.sun.shadow.camera.bottom = _this.sun.shadow.camera.left = -_this.options.shadowCameraSize;
-        _this.sun.shadow.camera.updateProjectionMatrix();
+      if(this.options.enableShadows) {
+        this.sun.castShadow = true;
+        this.sun.shadow.mapSize.width =
+        this.sun.shadow.mapSize.height = this.options.shadowMapSize;
+        this.sun.shadow.radius = this.options.shadowRadius;
+        this.sun.shadow.camera.top = this.sun.shadow.camera.right = this.options.shadowCameraSize;
+        this.sun.shadow.camera.bottom = this.sun.shadow.camera.left = -this.options.shadowCameraSize;
+        this.sun.shadow.camera.updateProjectionMatrix();
       }
     }
-    return _this;
   }
 
-  createClass(Sky, [{
-    key: "replace",
-    value: function replace(files) {
-      this.options.texture = files;
-      this.children.splice(0);
-      return this._ready;
-    }
-  }, {
-    key: "_ready",
-    get: function get$$1() {
-      var type = _typeof(this.options.texture);
-      if (type === "number") {
-        var skyDim = this.options.skyRadius / Math.sqrt(2);
-        this.options.side = BackSide;
-        this.add(box(skyDim, skyDim, skyDim).colored(this.options.texture, this.options));
-      } else if (type === "string" || this.options.texture instanceof Array && this.options.texture.length === 6 && typeof this.options.texture[0] === "string") {
-        this._image = new Image(this.options.texture, this.options);
-        this.add(this._image);
-      }
+  replace(files){
+    this.options.texture = files;
+    this.children.splice(0);
+    return this._ready;
+  }
 
-      return this._image && this._image.ready || get(Sky.prototype.__proto__ || Object.getPrototypeOf(Sky.prototype), "_ready", this);
+  get _ready() {
+    const type = typeof  this.options.texture;
+    if(type === "number") {
+      const skyDim = this.options.skyRadius / Math.sqrt(2);
+      this.options.side = BackSide;
+      this.add(box(skyDim, skyDim, skyDim)
+        .colored(this.options.texture, this.options));
     }
-  }]);
-  return Sky;
-}(Entity);
+    else if(type === "string" || (this.options.texture instanceof Array && this.options.texture.length === 6 && typeof this.options.texture[0] === "string")) {
+      this._image = new Image(this.options.texture, this.options);
+      this.add(this._image);
+    }
+
+    return this._image && this._image.ready || super._ready;
+  }
+
+
+}
 
 // unicode-aware string reverse
-var reverse = function () {
-  var combiningMarks = /(<%= allExceptCombiningMarks %>)(<%= combiningMarks %>+)/g,
-      surrogatePair = /(<%= highSurrogates %>)(<%= lowSurrogates %>)/g;
+var reverse = (function () {
+  var combiningMarks =
+    /(<%= allExceptCombiningMarks %>)(<%= combiningMarks %>+)/g,
+    surrogatePair = /(<%= highSurrogates %>)(<%= lowSurrogates %>)/g;
 
   function reverse(str) {
-    str = str.replace(combiningMarks, function (match, capture1, capture2) {
-      return reverse(capture2) + capture1;
-    }).replace(surrogatePair, "$2$1");
+    str = str.replace(combiningMarks, function (match, capture1,
+        capture2) {
+        return reverse(capture2) + capture1;
+      })
+      .replace(surrogatePair, "$2$1");
     var res = "";
     for (var i = str.length - 1; i >= 0; --i) {
       res += str[i];
@@ -48682,333 +47803,304 @@ var reverse = function () {
     return res;
   }
   return reverse;
-}();
+})();
 
-var Cursor = function () {
-  createClass(Cursor, null, [{
-    key: "min",
-    value: function min(a, b) {
-      if (a.i <= b.i) {
-        return a;
-      }
-      return b;
+class Cursor {
+
+  static min(a, b) {
+    if (a.i <= b.i) {
+      return a;
     }
-  }, {
-    key: "max",
-    value: function max(a, b) {
-      if (a.i > b.i) {
-        return a;
-      }
-      return b;
+    return b;
+  }
+
+  static max(a, b) {
+    if (a.i > b.i) {
+      return a;
     }
-  }]);
+    return b;
+  }
 
-  function Cursor(i, x, y) {
-    classCallCheck(this, Cursor);
-
+  constructor(i, x, y) {
     this.i = i || 0;
     this.x = x || 0;
     this.y = y || 0;
     this.moved = true;
   }
 
-  createClass(Cursor, [{
-    key: "clone",
-    value: function clone() {
-      return new Cursor(this.i, this.x, this.y);
+  clone() {
+    return new Cursor(this.i, this.x, this.y);
+  }
+
+  toString() {
+    return "[i:" + this.i + " x:" + this.x + " y:" + this.y + "]";
+  }
+
+  copy(cursor) {
+    this.i = cursor.i;
+    this.x = cursor.x;
+    this.y = cursor.y;
+    this.moved = false;
+  }
+
+  fullhome() {
+    this.i = 0;
+    this.x = 0;
+    this.y = 0;
+    this.moved = true;
+  }
+
+  fullend(lines) {
+    this.i = 0;
+    var lastLength = 0;
+    for (var y = 0; y < lines.length; ++y) {
+      var line = lines[y];
+      lastLength = line.length;
+      this.i += lastLength;
     }
-  }, {
-    key: "toString",
-    value: function toString() {
-      return "[i:" + this.i + " x:" + this.x + " y:" + this.y + "]";
+    this.y = lines.length - 1;
+    this.x = lastLength;
+    this.moved = true;
+  }
+
+  skipleft(lines) {
+    if (this.x === 0) {
+      this.left(lines);
     }
-  }, {
-    key: "copy",
-    value: function copy(cursor) {
-      this.i = cursor.i;
-      this.x = cursor.x;
-      this.y = cursor.y;
-      this.moved = false;
+    else {
+      var x = this.x - 1;
+      var line = lines[this.y];
+      var word = reverse(line.substring(0, x));
+      var m = word.match(/(\s|\W)+/);
+      var dx = m ? (m.index + m[0].length + 1) : word.length;
+      this.i -= dx;
+      this.x -= dx;
     }
-  }, {
-    key: "fullhome",
-    value: function fullhome() {
-      this.i = 0;
-      this.x = 0;
-      this.y = 0;
-      this.moved = true;
-    }
-  }, {
-    key: "fullend",
-    value: function fullend(lines) {
-      this.i = 0;
-      var lastLength = 0;
-      for (var y = 0; y < lines.length; ++y) {
-        var line = lines[y];
-        lastLength = line.length;
-        this.i += lastLength;
-      }
-      this.y = lines.length - 1;
-      this.x = lastLength;
-      this.moved = true;
-    }
-  }, {
-    key: "skipleft",
-    value: function skipleft(lines) {
-      if (this.x === 0) {
-        this.left(lines);
-      } else {
-        var x = this.x - 1;
+    this.moved = true;
+  }
+
+  left(lines) {
+    if (this.i > 0) {
+      --this.i;
+      --this.x;
+      if (this.x < 0) {
+        --this.y;
         var line = lines[this.y];
-        var word = reverse(line.substring(0, x));
-        var m = word.match(/(\s|\W)+/);
-        var dx = m ? m.index + m[0].length + 1 : word.length;
-        this.i -= dx;
-        this.x -= dx;
+        this.x = line.length;
       }
-      this.moved = true;
-    }
-  }, {
-    key: "left",
-    value: function left(lines) {
-      if (this.i > 0) {
-        --this.i;
-        --this.x;
-        if (this.x < 0) {
-          --this.y;
-          var line = lines[this.y];
-          this.x = line.length;
-        }
-        if (this.reverseFromNewline(lines)) {
-          ++this.i;
-        }
+      if (this.reverseFromNewline(lines)) {
+        ++this.i;
       }
-      this.moved = true;
     }
-  }, {
-    key: "skipright",
-    value: function skipright(lines) {
-      var line = lines[this.y];
-      if (this.x === line.length || line[this.x] === '\n') {
-        this.right(lines);
-      } else {
-        var x = this.x + 1;
-        line = line.substring(x);
-        var m = line.match(/(\s|\W)+/);
-        var dx = m ? m.index + m[0].length + 1 : line.length - this.x;
-        this.i += dx;
-        this.x += dx;
-        this.reverseFromNewline(lines);
-      }
-      this.moved = true;
+    this.moved = true;
+  }
+
+  skipright(lines) {
+    var line = lines[this.y];
+    if (this.x === line.length || line[this.x] === '\n') {
+      this.right(lines);
     }
-  }, {
-    key: "fixCursor",
-    value: function fixCursor(lines) {
-      this.x = this.i;
-      this.y = 0;
-      var total = 0;
-      var line = lines[this.y];
-      while (this.x > line.length) {
-        this.x -= line.length;
-        total += line.length;
-        if (this.y >= lines.length - 1) {
-          this.i = total;
-          this.x = line.length;
-          this.moved = true;
-          break;
-        }
-        ++this.y;
-        line = lines[this.y];
-      }
-      return this.moved;
-    }
-  }, {
-    key: "right",
-    value: function right(lines) {
-      this.advanceN(lines, 1);
-    }
-  }, {
-    key: "advanceN",
-    value: function advanceN(lines, n) {
-      var line = lines[this.y];
-      if (this.y < lines.length - 1 || this.x < line.length) {
-        this.i += n;
-        this.fixCursor(lines);
-        line = lines[this.y];
-        if (this.x > 0 && line[this.x - 1] === '\n') {
-          ++this.y;
-          this.x = 0;
-        }
-      }
-      this.moved = true;
-    }
-  }, {
-    key: "home",
-    value: function home() {
-      this.i -= this.x;
-      this.x = 0;
-      this.moved = true;
-    }
-  }, {
-    key: "end",
-    value: function end(lines) {
-      var line = lines[this.y];
-      var dx = line.length - this.x;
+    else {
+      var x = this.x + 1;
+      line = line.substring(x);
+      var m = line.match(/(\s|\W)+/);
+      var dx = m ? (m.index + m[0].length + 1) : (line.length - this.x);
       this.i += dx;
       this.x += dx;
       this.reverseFromNewline(lines);
-      this.moved = true;
     }
-  }, {
-    key: "up",
-    value: function up(lines) {
-      if (this.y > 0) {
-        --this.y;
-        var line = lines[this.y];
-        var dx = Math.min(0, line.length - this.x);
-        this.x += dx;
-        this.i -= line.length - dx;
-        this.reverseFromNewline(lines);
+    this.moved = true;
+  }
+
+  fixCursor(lines) {
+    this.x = this.i;
+    this.y = 0;
+    var total = 0;
+    var line = lines[this.y];
+    while (this.x > line.length) {
+      this.x -= line.length;
+      total += line.length;
+      if (this.y >= lines.length - 1) {
+        this.i = total;
+        this.x = line.length;
+        this.moved = true;
+        break;
       }
-      this.moved = true;
+      ++this.y;
+      line = lines[this.y];
     }
-  }, {
-    key: "down",
-    value: function down(lines) {
-      if (this.y < lines.length - 1) {
-        ++this.y;
-        var line = lines[this.y];
-        var pLine = lines[this.y - 1];
-        var dx = Math.min(0, line.length - this.x);
-        this.x += dx;
-        this.i += pLine.length + dx;
-        this.reverseFromNewline(lines);
-      }
-      this.moved = true;
-    }
-  }, {
-    key: "incY",
-    value: function incY(dy, lines) {
-      this.y = Math.max(0, Math.min(lines.length - 1, this.y + dy));
-      var line = lines[this.y];
-      this.x = Math.max(0, Math.min(line.length, this.x));
-      this.i = this.x;
-      for (var i = 0; i < this.y; ++i) {
-        this.i += lines[i].length;
-      }
-      this.reverseFromNewline(lines);
-      this.moved = true;
-    }
-  }, {
-    key: "setXY",
-    value: function setXY(x, y, lines) {
-      this.y = Math.max(0, Math.min(lines.length - 1, y));
-      var line = lines[this.y];
-      this.x = Math.max(0, Math.min(line.length, x));
-      this.i = this.x;
-      for (var i = 0; i < this.y; ++i) {
-        this.i += lines[i].length;
-      }
-      this.reverseFromNewline(lines);
-      this.moved = true;
-    }
-  }, {
-    key: "setI",
-    value: function setI(i, lines) {
-      this.i = i;
+    return this.moved;
+  }
+
+  right(lines) {
+    this.advanceN(lines, 1);
+  }
+
+  advanceN(lines, n) {
+    var line = lines[this.y];
+    if (this.y < lines.length - 1 || this.x < line.length) {
+      this.i += n;
       this.fixCursor(lines);
-      this.moved = true;
-    }
-  }, {
-    key: "reverseFromNewline",
-    value: function reverseFromNewline(lines) {
-      var line = lines[this.y];
+      line = lines[this.y];
       if (this.x > 0 && line[this.x - 1] === '\n') {
-        --this.x;
-        --this.i;
-        return true;
+        ++this.y;
+        this.x = 0;
       }
-      return false;
     }
-  }]);
-  return Cursor;
-}();
+    this.moved = true;
+  }
 
-var CommandPack = function CommandPack(commandPackName, commands) {
-  classCallCheck(this, CommandPack);
+  home() {
+    this.i -= this.x;
+    this.x = 0;
+    this.moved = true;
+  }
 
-  this.name = commandPackName;
-  Object.assign(this, commands);
-};
+  end(lines) {
+    var line = lines[this.y];
+    var dx = line.length - this.x;
+    this.i += dx;
+    this.x += dx;
+    this.reverseFromNewline(lines);
+    this.moved = true;
+  }
 
-var BasicTextInput = function (_CommandPack) {
-  inherits(BasicTextInput, _CommandPack);
+  up(lines) {
+    if (this.y > 0) {
+      --this.y;
+      var line = lines[this.y];
+      var dx = Math.min(0, line.length - this.x);
+      this.x += dx;
+      this.i -= line.length - dx;
+      this.reverseFromNewline(lines);
+    }
+    this.moved = true;
+  }
 
-  function BasicTextInput(additionalName, additionalCommands) {
-    classCallCheck(this, BasicTextInput);
+  down(lines) {
+    if (this.y < lines.length - 1) {
+      ++this.y;
+      var line = lines[this.y];
+      var pLine = lines[this.y - 1];
+      var dx = Math.min(0, line.length - this.x);
+      this.x += dx;
+      this.i += pLine.length + dx;
+      this.reverseFromNewline(lines);
+    }
+    this.moved = true;
+  }
 
+  incY(dy, lines) {
+    this.y = Math.max(0, Math.min(lines.length - 1, this.y + dy));
+    var line = lines[this.y];
+    this.x = Math.max(0, Math.min(line.length, this.x));
+    this.i = this.x;
+    for (var i = 0; i < this.y; ++i) {
+      this.i += lines[i].length;
+    }
+    this.reverseFromNewline(lines);
+    this.moved = true;
+  }
+
+  setXY(x, y, lines) {
+    this.y = Math.max(0, Math.min(lines.length - 1, y));
+    var line = lines[this.y];
+    this.x = Math.max(0, Math.min(line.length, x));
+    this.i = this.x;
+    for (var i = 0; i < this.y; ++i) {
+      this.i += lines[i].length;
+    }
+    this.reverseFromNewline(lines);
+    this.moved = true;
+  }
+
+  setI(i, lines) {
+    this.i = i;
+    this.fixCursor(lines);
+    this.moved = true;
+  }
+
+  reverseFromNewline(lines) {
+    var line = lines[this.y];
+    if (this.x > 0 && line[this.x - 1] === '\n') {
+      --this.x;
+      --this.i;
+      return true;
+    }
+    return false;
+  }
+}
+
+class CommandPack {
+  constructor (commandPackName, commands) {
+    this.name = commandPackName;
+    Object.assign(this, commands);
+  }
+}
+
+class BasicTextInput extends CommandPack {
+  constructor(additionalName, additionalCommands) {
     var commands = {
-      NORMAL_LEFTARROW: function NORMAL_LEFTARROW(prim, tokenRows) {
+      NORMAL_LEFTARROW: function (prim, tokenRows) {
         prim.cursorLeft(tokenRows, prim.frontCursor);
       },
-      NORMAL_SKIPLEFT: function NORMAL_SKIPLEFT(prim, tokenRows) {
+      NORMAL_SKIPLEFT: function (prim, tokenRows) {
         prim.cursorSkipLeft(tokenRows, prim.frontCursor);
       },
-      NORMAL_RIGHTARROW: function NORMAL_RIGHTARROW(prim, tokenRows) {
+      NORMAL_RIGHTARROW: function (prim, tokenRows) {
         prim.cursorRight(tokenRows, prim.frontCursor);
       },
-      NORMAL_SKIPRIGHT: function NORMAL_SKIPRIGHT(prim, tokenRows) {
+      NORMAL_SKIPRIGHT: function (prim, tokenRows) {
         prim.cursorSkipRight(tokenRows, prim.frontCursor);
       },
-      NORMAL_HOME: function NORMAL_HOME(prim, tokenRows) {
+      NORMAL_HOME: function (prim, tokenRows) {
         prim.cursorHome(tokenRows, prim.frontCursor);
       },
-      NORMAL_END: function NORMAL_END(prim, tokenRows) {
+      NORMAL_END: function (prim, tokenRows) {
         prim.cursorEnd(tokenRows, prim.frontCursor);
       },
-      NORMAL_BACKSPACE: function NORMAL_BACKSPACE(prim, tokenRows) {
+      NORMAL_BACKSPACE: function (prim, tokenRows) {
         if (prim.frontCursor.i === prim.backCursor.i) {
           prim.frontCursor.left(tokenRows);
         }
         prim.selectedText = "";
         prim.scrollIntoView(prim.frontCursor);
       },
-      NORMAL_ENTER: function NORMAL_ENTER(prim, tokenRows, currentToken) {
+      NORMAL_ENTER: function (prim, tokenRows, currentToken) {
         prim.emit("change", {
           target: prim
         });
       },
-      NORMAL_DELETE: function NORMAL_DELETE(prim, tokenRows) {
+      NORMAL_DELETE: function (prim, tokenRows) {
         if (prim.frontCursor.i === prim.backCursor.i) {
           prim.backCursor.right(tokenRows);
         }
         prim.selectedText = "";
         prim.scrollIntoView(prim.frontCursor);
       },
-      NORMAL_TAB: function NORMAL_TAB(prim, tokenRows) {
+      NORMAL_TAB: function (prim, tokenRows) {
         prim.selectedText = prim.tabString;
       },
 
-      SHIFT_LEFTARROW: function SHIFT_LEFTARROW(prim, tokenRows) {
+      SHIFT_LEFTARROW: function (prim, tokenRows) {
         prim.cursorLeft(tokenRows, prim.backCursor);
       },
-      SHIFT_SKIPLEFT: function SHIFT_SKIPLEFT(prim, tokenRows) {
+      SHIFT_SKIPLEFT: function (prim, tokenRows) {
         prim.cursorSkipLeft(tokenRows, prim.backCursor);
       },
-      SHIFT_RIGHTARROW: function SHIFT_RIGHTARROW(prim, tokenRows) {
+      SHIFT_RIGHTARROW: function (prim, tokenRows) {
         prim.cursorRight(tokenRows, prim.backCursor);
       },
-      SHIFT_SKIPRIGHT: function SHIFT_SKIPRIGHT(prim, tokenRows) {
+      SHIFT_SKIPRIGHT: function (prim, tokenRows) {
         prim.cursorSkipRight(tokenRows, prim.backCursor);
       },
-      SHIFT_HOME: function SHIFT_HOME(prim, tokenRows) {
+      SHIFT_HOME: function (prim, tokenRows) {
         prim.cursorHome(tokenRows, prim.backCursor);
       },
-      SHIFT_END: function SHIFT_END(prim, tokenRows) {
+      SHIFT_END: function (prim, tokenRows) {
         prim.cursorEnd(tokenRows, prim.backCursor);
       },
-      SHIFT_DELETE: function SHIFT_DELETE(prim, tokenRows) {
+      SHIFT_DELETE: function (prim, tokenRows) {
         if (prim.frontCursor.i === prim.backCursor.i) {
           prim.frontCursor.home(tokenRows);
           prim.backCursor.end(tokenRows);
@@ -49016,30 +48108,30 @@ var BasicTextInput = function (_CommandPack) {
         prim.selectedText = "";
         prim.scrollIntoView(prim.frontCursor);
       },
-      CTRL_HOME: function CTRL_HOME(prim, tokenRows) {
+      CTRL_HOME: function (prim, tokenRows) {
         prim.cursorFullHome(tokenRows, prim.frontCursor);
       },
-      CTRL_END: function CTRL_END(prim, tokenRows) {
+      CTRL_END: function (prim, tokenRows) {
         prim.cursorFullEnd(tokenRows, prim.frontCursor);
       },
 
-      CTRLSHIFT_HOME: function CTRLSHIFT_HOME(prim, tokenRows) {
+      CTRLSHIFT_HOME: function (prim, tokenRows) {
         prim.cursorFullHome(tokenRows, prim.backCursor);
       },
-      CTRLSHIFT_END: function CTRLSHIFT_END(prim, tokenRows) {
+      CTRLSHIFT_END: function (prim, tokenRows) {
         prim.cursorFullEnd(tokenRows, prim.backCursor);
       },
 
-      SELECT_ALL: function SELECT_ALL(prim, tokenRows) {
+      SELECT_ALL: function (prim, tokenRows) {
         prim.frontCursor.fullhome(tokenRows);
         prim.backCursor.fullend(tokenRows);
       },
 
-      REDO: function REDO(prim, tokenRows) {
+      REDO: function (prim, tokenRows) {
         prim.redo();
         prim.scrollIntoView(prim.frontCursor);
       },
-      UNDO: function UNDO(prim, tokenRows) {
+      UNDO: function (prim, tokenRows) {
         prim.undo();
         prim.scrollIntoView(prim.frontCursor);
       }
@@ -49051,143 +48143,127 @@ var BasicTextInput = function (_CommandPack) {
       }
     }
 
-    return possibleConstructorReturn(this, (BasicTextInput.__proto__ || Object.getPrototypeOf(BasicTextInput)).call(this, additionalName || "Text editor commands", commands));
+    super(additionalName || "Text editor commands", commands);
   }
+}
 
-  return BasicTextInput;
-}(CommandPack);
+var TextEditor = new BasicTextInput(
+  "Text Area input commands", {
+    NORMAL_UPARROW: function (prim, tokenRows) {
+      prim.cursorUp(tokenRows, prim.frontCursor);
+    },
+    NORMAL_DOWNARROW: function (prim, tokenRows) {
+      prim.cursorDown(tokenRows, prim.frontCursor);
+    },
+    NORMAL_PAGEUP: function (prim, tokenRows) {
+      prim.cursorPageUp(tokenRows, prim.frontCursor);
+    },
+    NORMAL_PAGEDOWN: function (prim, tokenRows) {
+      prim.cursorPageDown(tokenRows, prim.frontCursor);
+    },
+    NORMAL_ENTER: function (prim, tokenRows, currentToken) {
+      var indent = "";
+      var tokenRow = tokenRows[prim.frontCursor.y];
+      if (tokenRow.length > 0 && tokenRow[0].type === "whitespace") {
+        indent = tokenRow[0].value;
+      }
+      prim.selectedText = "\n" + indent;
+      prim.scrollIntoView(prim.frontCursor);
+    },
 
-var TextEditor = new BasicTextInput("Text Area input commands", {
-  NORMAL_UPARROW: function NORMAL_UPARROW(prim, tokenRows) {
-    prim.cursorUp(tokenRows, prim.frontCursor);
-  },
-  NORMAL_DOWNARROW: function NORMAL_DOWNARROW(prim, tokenRows) {
-    prim.cursorDown(tokenRows, prim.frontCursor);
-  },
-  NORMAL_PAGEUP: function NORMAL_PAGEUP(prim, tokenRows) {
-    prim.cursorPageUp(tokenRows, prim.frontCursor);
-  },
-  NORMAL_PAGEDOWN: function NORMAL_PAGEDOWN(prim, tokenRows) {
-    prim.cursorPageDown(tokenRows, prim.frontCursor);
-  },
-  NORMAL_ENTER: function NORMAL_ENTER(prim, tokenRows, currentToken) {
-    var indent = "";
-    var tokenRow = tokenRows[prim.frontCursor.y];
-    if (tokenRow.length > 0 && tokenRow[0].type === "whitespace") {
-      indent = tokenRow[0].value;
+    SHIFT_UPARROW: function (prim, tokenRows) {
+      prim.cursorUp(tokenRows, prim.backCursor);
+    },
+    SHIFT_DOWNARROW: function (prim, tokenRows) {
+      prim.cursorDown(tokenRows, prim.backCursor);
+    },
+    SHIFT_PAGEUP: function (prim, tokenRows) {
+      prim.cursorPageUp(tokenRows, prim.backCursor);
+    },
+    SHIFT_PAGEDOWN: function (prim, tokenRows) {
+      prim.cursorPageDown(tokenRows, prim.backCursor);
+    },
+
+    WINDOW_SCROLL_DOWN: function (prim, tokenRows) {
+      if (prim.scroll.y < tokenRows.length) {
+        ++prim.scroll.y;
+      }
+    },
+    WINDOW_SCROLL_UP: function (prim, tokenRows) {
+      if (prim.scroll.y > 0) {
+        --prim.scroll.y;
+      }
     }
-    prim.selectedText = "\n" + indent;
-    prim.scrollIntoView(prim.frontCursor);
-  },
+  });
 
-  SHIFT_UPARROW: function SHIFT_UPARROW(prim, tokenRows) {
-    prim.cursorUp(tokenRows, prim.backCursor);
-  },
-  SHIFT_DOWNARROW: function SHIFT_DOWNARROW(prim, tokenRows) {
-    prim.cursorDown(tokenRows, prim.backCursor);
-  },
-  SHIFT_PAGEUP: function SHIFT_PAGEUP(prim, tokenRows) {
-    prim.cursorPageUp(tokenRows, prim.backCursor);
-  },
-  SHIFT_PAGEDOWN: function SHIFT_PAGEDOWN(prim, tokenRows) {
-    prim.cursorPageDown(tokenRows, prim.backCursor);
-  },
-
-  WINDOW_SCROLL_DOWN: function WINDOW_SCROLL_DOWN(prim, tokenRows) {
-    if (prim.scroll.y < tokenRows.length) {
-      ++prim.scroll.y;
-    }
-  },
-  WINDOW_SCROLL_UP: function WINDOW_SCROLL_UP(prim, tokenRows) {
-    if (prim.scroll.y > 0) {
-      --prim.scroll.y;
-    }
-  }
-});
-
-var Rule = function () {
-  function Rule(name, test) {
-    classCallCheck(this, Rule);
-
+class Rule {
+  constructor (name, test) {
     this.name = name;
     this.test = test;
   }
 
-  createClass(Rule, [{
-    key: "carveOutMatchedToken",
-    value: function carveOutMatchedToken(tokens, j) {
-      var token = tokens[j];
-      if (token.type === "regular") {
-        var res = this.test.exec(token.value);
-        if (res) {
-          // Only use the last group that matches the regex, to allow for more
-          // complex regexes that can match in special contexts, but not make
-          // the context part of the token.
-          var midx = res[res.length - 1],
-              start = res.input.indexOf(midx),
-              end = start + midx.length;
-          if (start === 0) {
-            // the rule matches the start of the token
-            token.type = this.name;
-            if (end < token.value.length) {
-              // but not the end
-              var next = token.splitAt(end);
-              next.type = "regular";
-              tokens.splice(j + 1, 0, next);
-            }
-          } else {
-            // the rule matches from the middle of the token
-            var mid = token.splitAt(start);
-            if (midx.length < mid.value.length) {
-              // but not the end
-              var right = mid.splitAt(midx.length);
-              tokens.splice(j + 1, 0, right);
-            }
-            mid.type = this.name;
-            tokens.splice(j + 1, 0, mid);
+  carveOutMatchedToken(tokens, j) {
+    var token = tokens[j];
+    if (token.type === "regular") {
+      var res = this.test.exec(token.value);
+      if (res) {
+        // Only use the last group that matches the regex, to allow for more
+        // complex regexes that can match in special contexts, but not make
+        // the context part of the token.
+        var midx = res[res.length - 1],
+          start = res.input.indexOf(midx),
+          end = start + midx.length;
+        if (start === 0) {
+          // the rule matches the start of the token
+          token.type = this.name;
+          if (end < token.value.length) {
+            // but not the end
+            var next = token.splitAt(end);
+            next.type = "regular";
+            tokens.splice(j + 1, 0, next);
           }
+        }
+        else {
+          // the rule matches from the middle of the token
+          var mid = token.splitAt(start);
+          if (midx.length < mid.value.length) {
+            // but not the end
+            var right = mid.splitAt(midx.length);
+            tokens.splice(j + 1, 0, right);
+          }
+          mid.type = this.name;
+          tokens.splice(j + 1, 0, mid);
         }
       }
     }
-  }]);
-  return Rule;
-}();
+  }
+}
 
-var Token = function () {
-  function Token(value, type, index, line) {
-    classCallCheck(this, Token);
-
+class Token {
+  constructor(value, type, index, line) {
     this.value = value;
     this.type = type;
     this.index = index;
     this.line = line;
   }
 
-  createClass(Token, [{
-    key: "clone",
-    value: function clone() {
-      return new Token(this.value, this.type, this.index, this.line);
-    }
-  }, {
-    key: "splitAt",
-    value: function splitAt(i) {
-      var next = this.value.substring(i);
-      this.value = this.value.substring(0, i);
-      return new Token(next, this.type, this.index + i, this.line);
-    }
-  }, {
-    key: "toString",
-    value: function toString() {
-      return "[" + this.type + ": " + this.value + "]";
-    }
-  }]);
-  return Token;
-}();
+  clone() {
+    return new Token(this.value, this.type, this.index, this.line);
+  }
 
-var Grammar = function () {
-  function Grammar(grammarName, rules) {
-    classCallCheck(this, Grammar);
+  splitAt(i) {
+    var next = this.value.substring(i);
+    this.value = this.value.substring(0, i);
+    return new Token(next, this.type, this.index + i, this.line);
+  }
 
+  toString() {
+    return "[" + this.type + ": " + this.value + "]";
+  }
+}
+
+class Grammar {
+  constructor(grammarName, rules) {
     this.name = grammarName;
 
     // clone the preprocessing grammar to start a new grammar
@@ -49197,10 +48273,9 @@ var Grammar = function () {
 
     function crudeParsing(tokens) {
       var commentDelim = null,
-          stringDelim = null,
-          line = 0,
-          i,
-          t;
+        stringDelim = null,
+        line = 0,
+        i, t;
       for (i = 0; i < tokens.length; ++i) {
         t = tokens[i];
         t.line = line;
@@ -49215,17 +48290,21 @@ var Grammar = function () {
           if (t.type !== "newlines") {
             t.type = "strings";
           }
-        } else if (commentDelim) {
-          if (commentDelim === "startBlockComments" && t.type === "endBlockComments" || commentDelim === "startLineComments" && t.type === "newlines") {
+        }
+        else if (commentDelim) {
+          if (commentDelim === "startBlockComments" && t.type === "endBlockComments" ||
+            commentDelim === "startLineComments" && t.type === "newlines") {
             commentDelim = null;
           }
           if (t.type !== "newlines") {
             t.type = "comments";
           }
-        } else if (t.type === "stringDelim") {
+        }
+        else if (t.type === "stringDelim") {
           stringDelim = t.value;
           t.type = "strings";
-        } else if (t.type === "startBlockComments" || t.type === "startLineComments") {
+        }
+        else if (t.type === "startBlockComments" || t.type === "startLineComments") {
           commentDelim = t.type;
           t.type = "comments";
         }
@@ -49258,48 +48337,54 @@ var Grammar = function () {
     };
   }
 
-  createClass(Grammar, [{
-    key: "toHTML",
-    value: function toHTML(txt) {
-      var theme = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : Default;
-
-      var tokenRows = this.tokenize(txt),
-          temp = document.createElement("div");
-      for (var y = 0; y < tokenRows.length; ++y) {
-        // draw the tokens on this row
-        var t = tokenRows[y];
-        if (t.type === "newlines") {
-          temp.appendChild(document.createElement("br"));
-        } else {
-          var style = theme[t.type] || {},
-              elem = document.createElement("span");
-          elem.style.fontWeight = style.fontWeight || theme.regular.fontWeight;
-          elem.style.fontStyle = style.fontStyle || theme.regular.fontStyle || "";
-          elem.style.color = style.foreColor || theme.regular.foreColor;
-          elem.style.backgroundColor = style.backColor || theme.regular.backColor;
-          elem.style.fontFamily = style.fontFamily || theme.fontFamily;
-          elem.appendChild(document.createTextNode(t.value));
-          temp.appendChild(elem);
-        }
+  toHTML(txt, theme = Default) {
+    var tokenRows = this.tokenize(txt),
+      temp = document.createElement("div");
+    for (var y = 0; y < tokenRows.length; ++y) {
+      // draw the tokens on this row
+      var t = tokenRows[y];
+      if (t.type === "newlines") {
+        temp.appendChild(document.createElement("br"));
       }
-      return temp.innerHTML;
+      else {
+        var style = theme[t.type] || {},
+          elem = document.createElement("span");
+        elem.style.fontWeight = style.fontWeight || theme.regular.fontWeight;
+        elem.style.fontStyle = style.fontStyle || theme.regular.fontStyle || "";
+        elem.style.color = style.foreColor || theme.regular.foreColor;
+        elem.style.backgroundColor = style.backColor || theme.regular.backColor;
+        elem.style.fontFamily = style.fontFamily || theme.fontFamily;
+        elem.appendChild(document.createTextNode(t.value));
+        temp.appendChild(elem);
+      }
     }
-  }]);
-  return Grammar;
-}();
+    return temp.innerHTML;
+  }
+}
 
-var JavaScript = new Grammar("JavaScript", [["newlines", /(?:\r\n|\r|\n)/], ["startBlockComments", /\/\*/], ["endBlockComments", /\*\//], ["regexes", /(?:^|,|;|\(|\[|\{)(?:\s*)(\/(?:\\\/|[^\n\/])+\/)/], ["stringDelim", /("|')/], ["startLineComments", /\/\/.*$/m], ["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/], ["keywords", /\b(?:break|case|catch|class|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/], ["functions", /(\w+)(?:\s*\()/], ["members", /(\w+)\./], ["members", /((\w+\.)+)(\w+)/]]);
+var JavaScript = new Grammar("JavaScript", [
+  ["newlines", /(?:\r\n|\r|\n)/],
+  ["startBlockComments", /\/\*/],
+  ["endBlockComments", /\*\//],
+  ["regexes", /(?:^|,|;|\(|\[|\{)(?:\s*)(\/(?:\\\/|[^\n\/])+\/)/],
+  ["stringDelim", /("|')/],
+  ["startLineComments", /\/\/.*$/m],
+  ["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/],
+  ["keywords",
+    /\b(?:break|case|catch|class|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/
+  ],
+  ["functions", /(\w+)(?:\s*\()/],
+  ["members", /(\w+)\./],
+  ["members", /((\w+\.)+)(\w+)/]
+]);
 
 var SCROLL_SCALE = isFirefox ? 3 : 100;
 var COUNTER$6 = 0;
 var OFFSET = 0;
 
-var TextBox = function (_Surface) {
-  inherits(TextBox, _Surface);
+class TextBox extends Surface {
 
-  function TextBox(options) {
-    classCallCheck(this, TextBox);
-
+  constructor(options) {
 
     if (typeof options === "string") {
       options = {
@@ -49307,18 +48392,18 @@ var TextBox = function (_Surface) {
       };
     }
 
-    var _this = possibleConstructorReturn(this, (TextBox.__proto__ || Object.getPrototypeOf(TextBox)).call(this, Object.assign({}, {
-      id: "Primrose.Controls.TextBox[" + COUNTER$6++ + "]"
-    }, options)));
+    super(Object.assign({}, {
+      id: "Primrose.Controls.TextBox[" + (COUNTER$6++) + "]"
+    }, options));
 
-    _this.isTextBox = true;
+    this.isTextBox = true;
     ////////////////////////////////////////////////////////////////////////
     // normalize input parameters
     ////////////////////////////////////////////////////////////////////////
 
-    _this.useCaching = !isFirefox || !isMobile;
+    this.useCaching = !isFirefox || !isMobile;
 
-    var makeCursorCommand = function makeCursorCommand(name) {
+    var makeCursorCommand = function (name) {
       var method = name.toLowerCase();
       this["cursor" + name] = function (lines, cursor) {
         cursor[method](lines);
@@ -49326,889 +48411,929 @@ var TextBox = function (_Surface) {
       };
     };
 
-    ["Left", "Right", "SkipLeft", "SkipRight", "Up", "Down", "Home", "End", "FullHome", "FullEnd"].map(makeCursorCommand.bind(_this));
+    ["Left", "Right",
+      "SkipLeft", "SkipRight",
+      "Up", "Down",
+      "Home", "End",
+      "FullHome", "FullEnd"
+    ].map(makeCursorCommand.bind(this));
 
     ////////////////////////////////////////////////////////////////////////
     // initialization
     ///////////////////////////////////////////////////////////////////////
-    _this.tokens = null;
-    _this.lines = null;
-    _this._commandPack = null;
-    _this._tokenRows = null;
-    _this._tokenHashes = null;
-    _this._tabString = null;
-    _this._currentTouchID = null;
-    _this._lineCountWidth = null;
+    this.tokens = null;
+    this.lines = null;
+    this._commandPack = null;
+    this._tokenRows = null;
+    this._tokenHashes = null;
+    this._tabString = null;
+    this._currentTouchID = null;
+    this._lineCountWidth = null;
 
-    _this._lastFont = null;
-    _this._lastText = null;
-    _this._lastCharacterWidth = null;
-    _this._lastCharacterHeight = null;
-    _this._lastGridBounds = null;
-    _this._lastPadding = null;
-    _this._lastFrontCursor = null;
-    _this._lastBackCursor = null;
-    _this._lastWidth = -1;
-    _this._lastHeight = -1;
-    _this._lastScrollX = -1;
-    _this._lastScrollY = -1;
-    _this._lastFocused = false;
-    _this._lastThemeName = null;
-    _this._lastPointer = new Point();
+    this._lastFont = null;
+    this._lastText = null;
+    this._lastCharacterWidth = null;
+    this._lastCharacterHeight = null;
+    this._lastGridBounds = null;
+    this._lastPadding = null;
+    this._lastFrontCursor = null;
+    this._lastBackCursor = null;
+    this._lastWidth = -1;
+    this._lastHeight = -1;
+    this._lastScrollX = -1;
+    this._lastScrollY = -1;
+    this._lastFocused = false;
+    this._lastThemeName = null;
+    this._lastPointer = new Point();
 
     // different browsers have different sets of keycodes for less-frequently
     // used keys like curly brackets.
-    _this._browser = isChrome ? "CHROMIUM" : isFirefox ? "FIREFOX" : isIE ? "IE" : isOpera ? "OPERA" : isSafari ? "SAFARI" : "UNKNOWN";
-    _this._pointer = new Point();
-    _this._history = [];
-    _this._historyFrame = -1;
-    _this._topLeftGutter = new Size();
-    _this._bottomRightGutter = new Size();
-    _this._dragging = false;
-    _this._scrolling = false;
-    _this._wheelScrollSpeed = 4;
-    var subBounds = new Rectangle(0, 0, _this.bounds.width, _this.bounds.height);
-    _this._fg = new Surface({
-      id: _this.id + "-fore",
+    this._browser = isChrome ? "CHROMIUM" : (isFirefox ? "FIREFOX" : (isIE ? "IE" : (isOpera ? "OPERA" : (isSafari ? "SAFARI" : "UNKNOWN"))));
+    this._pointer = new Point();
+    this._history = [];
+    this._historyFrame = -1;
+    this._topLeftGutter = new Size();
+    this._bottomRightGutter = new Size();
+    this._dragging = false;
+    this._scrolling = false;
+    this._wheelScrollSpeed = 4;
+    var subBounds = new Rectangle(0, 0, this.bounds.width, this.bounds.height);
+    this._fg = new Surface({
+      id: this.id + "-fore",
       bounds: subBounds
     });
-    _this._fgCanvas = _this._fg.canvas;
-    _this._fgfx = _this._fg.context;
-    _this._bg = new Surface({
-      id: _this.id + "-back",
+    this._fgCanvas = this._fg.canvas;
+    this._fgfx = this._fg.context;
+    this._bg = new Surface({
+      id: this.id + "-back",
       bounds: subBounds
     });
-    _this._bgCanvas = _this._bg.canvas;
-    _this._bgfx = _this._bg.context;
-    _this._trim = new Surface({
-      id: _this.id + "-trim",
+    this._bgCanvas = this._bg.canvas;
+    this._bgfx = this._bg.context;
+    this._trim = new Surface({
+      id: this.id + "-trim",
       bounds: subBounds
     });
-    _this._trimCanvas = _this._trim.canvas;
-    _this._tgfx = _this._trim.context;
-    _this._rowCache = {};
-    _this._VSCROLL_WIDTH = 2;
+    this._trimCanvas = this._trim.canvas;
+    this._tgfx = this._trim.context;
+    this._rowCache = {};
+    this._VSCROLL_WIDTH = 2;
 
-    _this.tabWidth = _this.options.tabWidth;
-    _this.showLineNumbers = !_this.options.hideLineNumbers;
-    _this.showScrollBars = !_this.options.hideScrollBars;
-    _this.wordWrap = !_this.options.disableWordWrap;
-    _this.readOnly = !!_this.options.readOnly;
-    _this.multiline = !_this.options.singleLine;
-    _this.gridBounds = new Rectangle();
-    _this.frontCursor = new Cursor();
-    _this.backCursor = new Cursor();
-    _this.scroll = new Point();
-    _this.character = new Size();
-    _this.theme = _this.options.theme;
-    _this.fontSize = _this.options.fontSize;
-    _this.tokenizer = _this.options.tokenizer;
-    _this.commandPack = _this.options.commands || TextEditor;
-    _this.value = _this.options.value;
-    _this.padding = _this.options.padding || 1;
+    this.tabWidth = this.options.tabWidth;
+    this.showLineNumbers = !this.options.hideLineNumbers;
+    this.showScrollBars = !this.options.hideScrollBars;
+    this.wordWrap = !this.options.disableWordWrap;
+    this.readOnly = !!this.options.readOnly;
+    this.multiline = !this.options.singleLine;
+    this.gridBounds = new Rectangle();
+    this.frontCursor = new Cursor();
+    this.backCursor = new Cursor();
+    this.scroll = new Point();
+    this.character = new Size();
+    this.theme = this.options.theme;
+    this.fontSize = this.options.fontSize;
+    this.tokenizer = this.options.tokenizer;
+    this.commandPack = this.options.commands || TextEditor;
+    this.value = this.options.value;
+    this.padding = this.options.padding || 1;
 
-    _this.addEventListener("visiblechanged", _this.blur.bind(_this));
-    return _this;
+    this.addEventListener("visiblechanged", this.blur.bind(this));
   }
 
-  createClass(TextBox, [{
-    key: "cursorPageUp",
-    value: function cursorPageUp(lines, cursor) {
-      cursor.incY(-this.gridBounds.height, lines);
-      this.scrollIntoView(cursor);
-    }
-  }, {
-    key: "cursorPageDown",
-    value: function cursorPageDown(lines, cursor) {
-      cursor.incY(this.gridBounds.height, lines);
-      this.scrollIntoView(cursor);
-    }
-  }, {
-    key: "pushUndo",
-    value: function pushUndo(lines) {
-      if (this._historyFrame < this._history.length - 1) {
-        this._history.splice(this._historyFrame + 1);
-      }
-      this._history.push(lines);
-      this._historyFrame = this._history.length - 1;
-      this.refreshTokens();
-      this.render();
-    }
-  }, {
-    key: "redo",
-    value: function redo() {
-      if (this._historyFrame < this._history.length - 1) {
-        ++this._historyFrame;
-      }
-      this.refreshTokens();
-      this.fixCursor();
-      this.render();
-    }
-  }, {
-    key: "undo",
-    value: function undo() {
-      if (this._historyFrame > 0) {
-        --this._historyFrame;
-      }
-      this.refreshTokens();
-      this.fixCursor();
-      this.render();
-    }
-  }, {
-    key: "scrollIntoView",
-    value: function scrollIntoView(currentCursor) {
-      this.scroll.y += this.minDelta(currentCursor.y, this.scroll.y, this.scroll.y + this.gridBounds.height);
-      if (!this.wordWrap) {
-        this.scroll.x += this.minDelta(currentCursor.x, this.scroll.x, this.scroll.x + this.gridBounds.width);
-      }
-      this.clampScroll();
-    }
-  }, {
-    key: "readWheel",
-    value: function readWheel(evt) {
-      if (this.focused) {
-        if (evt.shiftKey || isChrome) {
-          this.fontSize += -evt.deltaX / SCROLL_SCALE;
-        }
-        if (!evt.shiftKey || isChrome) {
-          this.scroll.y += Math.floor(evt.deltaY * this._wheelScrollSpeed / SCROLL_SCALE);
-        }
-        this.clampScroll();
-        this.render();
-        evt.preventDefault();
-      }
-    }
-  }, {
-    key: "startPointer",
-    value: function startPointer(x, y) {
-      if (!get(TextBox.prototype.__proto__ || Object.getPrototypeOf(TextBox.prototype), "startPointer", this).call(this, x, y)) {
-        this._dragging = true;
-        this.setCursorXY(this.frontCursor, x, y);
-      }
-    }
-  }, {
-    key: "movePointer",
-    value: function movePointer(x, y) {
-      if (this._dragging) {
-        this.setCursorXY(this.backCursor, x, y);
-      }
-    }
-  }, {
-    key: "endPointer",
-    value: function endPointer() {
-      get(TextBox.prototype.__proto__ || Object.getPrototypeOf(TextBox.prototype), "endPointer", this).call(this);
-      this._dragging = false;
-      this._scrolling = false;
-    }
-  }, {
-    key: "copySelectedText",
-    value: function copySelectedText(evt) {
-      if (this.focused && this.frontCursor.i !== this.backCursor.i) {
-        var clipboard = evt.clipboardData || window.clipboardData;
-        clipboard.setData(window.clipboardData ? "Text" : "text/plain", this.selectedText);
-        evt.returnValue = false;
-      }
-    }
-  }, {
-    key: "cutSelectedText",
-    value: function cutSelectedText(evt) {
-      if (this.focused) {
-        this.copySelectedText(evt);
-        if (!this.readOnly) {
-          this.selectedText = "";
-        }
-      }
-    }
-  }, {
-    key: "keyDown",
-    value: function keyDown(evt) {
-      if (this.focused && !this.readOnly) {
-        var func = this.commandPack[evt.altCmdName] || this.commandPack[evt.cmdName] || evt.altCmdText || evt.cmdText;
+  cursorPageUp(lines, cursor) {
+    cursor.incY(-this.gridBounds.height, lines);
+    this.scrollIntoView(cursor);
+  }
 
-        if (func instanceof String || typeof func === "string") {
-          console.warn("This shouldn't have happened.");
-          func = this.commandPack[func] || this.commandPack[func] || func;
-        }
+  cursorPageDown(lines, cursor) {
+    cursor.incY(this.gridBounds.height, lines);
+    this.scrollIntoView(cursor);
+  }
 
-        if (func) {
-          this.frontCursor.moved = false;
-          this.backCursor.moved = false;
-          if (func instanceof Function) {
-            func(this, this.lines);
-          } else if (func instanceof String || typeof func === "string") {
-            console.log(func);
-            this.selectedText = func;
-          }
-          evt.resetDeadKeyState();
-          evt.preventDefault();
+  get value() {
+    return this._history[this._historyFrame].join("\n");
+  }
 
-          if (this.frontCursor.moved && !this.backCursor.moved) {
-            this.backCursor.copy(this.frontCursor);
-          }
-          this.clampScroll();
-          this.render();
-        }
-      }
+  set value(txt) {
+    txt = txt || "";
+    txt = txt.replace(/\r\n/g, "\n");
+    if (!this.multiline) {
+      txt = txt.replace(/\n/g, "");
     }
-  }, {
-    key: "readClipboard",
-    value: function readClipboard(evt) {
-      if (this.focused && !this.readOnly) {
-        evt.returnValue = false;
-        var clipboard = evt.clipboardData || window.clipboardData,
-            str = clipboard.getData(window.clipboardData ? "Text" : "text/plain");
-        if (str) {
-          this.selectedText = str;
-        }
-      }
-    }
-  }, {
-    key: "resize",
-    value: function resize() {
-      get(TextBox.prototype.__proto__ || Object.getPrototypeOf(TextBox.prototype), "resize", this).call(this);
-      this._bg.setSize(this.surfaceWidth, this.surfaceHeight);
-      this._fg.setSize(this.surfaceWidth, this.surfaceHeight);
-      this._trim.setSize(this.surfaceWidth, this.surfaceHeight);
-      if (this.theme) {
-        this.character.height = this.fontSize;
-        this.context.font = this.character.height + "px " + this.theme.fontFamily;
-        // measure 100 letter M's, then divide by 100, to get the width of an M
-        // to two decimal places on systems that return integer values from
-        // measureText.
-        this.character.width = this.context.measureText("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM").width / 100;
-      }
-      this.render();
-    }
-  }, {
-    key: "pixel2cell",
-    value: function pixel2cell(point) {
-      var x = point.x * this.imageWidth / this.surfaceWidth,
-          y = point.y * this.imageHeight / this.surfaceHeight;
-      point.set(Math.round(point.x / this.character.width) + this.scroll.x - this.gridBounds.x, Math.floor(point.y / this.character.height - 0.25) + this.scroll.y);
-    }
-  }, {
-    key: "clampScroll",
-    value: function clampScroll() {
-      if (this.scroll.y < 0) {
-        this.scroll.y = 0;
-      } else {
-        while (0 < this.scroll.y && this.scroll.y > this.lines.length - this.gridBounds.height) {
-          --this.scroll.y;
-        }
-      }
-    }
-  }, {
-    key: "refreshTokens",
-    value: function refreshTokens() {
-      this.tokens = this.tokenizer.tokenize(this.value);
-    }
-  }, {
-    key: "fixCursor",
-    value: function fixCursor() {
-      var moved = this.frontCursor.fixCursor(this.lines) || this.backCursor.fixCursor(this.lines);
-      if (moved) {
-        this.render();
-      }
-    }
-  }, {
-    key: "setCursorXY",
-    value: function setCursorXY(cursor, x, y) {
-      x = Math.round(x);
-      y = Math.round(y);
-      this._pointer.set(x, y);
-      this.pixel2cell(this._pointer, this.scroll, this.gridBounds);
-      var gx = this._pointer.x - this.scroll.x,
-          gy = this._pointer.y - this.scroll.y,
-          onBottom = gy >= this.gridBounds.height,
-          onLeft = gx < 0,
-          onRight = this._pointer.x >= this.gridBounds.width;
-      if (!this._scrolling && !onBottom && !onLeft && !onRight) {
-        cursor.setXY(this._pointer.x, this._pointer.y, this.lines);
-        this.backCursor.copy(cursor);
-      } else if (this._scrolling || onRight && !onBottom) {
-        this._scrolling = true;
-        var scrollHeight = this.lines.length - this.gridBounds.height;
-        if (gy >= 0 && scrollHeight >= 0) {
-          var sy = gy * scrollHeight / this.gridBounds.height;
-          this.scroll.y = Math.floor(sy);
-        }
-      } else if (onBottom && !onLeft) {
-        var maxWidth = 0;
-        for (var dy = 0; dy < this.lines.length; ++dy) {
-          maxWidth = Math.max(maxWidth, this.lines[dy].length);
-        }
-        var scrollWidth = maxWidth - this.gridBounds.width;
-        if (gx >= 0 && scrollWidth >= 0) {
-          var sx = gx * scrollWidth / this.gridBounds.width;
-          this.scroll.x = Math.floor(sx);
-        }
-      } else if (onLeft && !onBottom) {
-        // clicked in number-line gutter
-      } else {
-          // clicked in the lower-left corner
-        }
-      this._lastPointer.copy(this._pointer);
-      this.render();
-    }
-  }, {
-    key: "setGutter",
-    value: function setGutter() {
-      if (this.showLineNumbers) {
-        this._topLeftGutter.width = 1;
-      } else {
-        this._topLeftGutter.width = 0;
-      }
+    var lines = txt.split("\n");
+    this.pushUndo(lines);
+    this.render();
+    this.emit("change", {
+      target: this
+    });
+  }
 
-      if (!this.showScrollBars) {
-        this._bottomRightGutter.set(0, 0);
-      } else if (this.wordWrap) {
-        this._bottomRightGutter.set(this._VSCROLL_WIDTH, 0);
-      } else {
-        this._bottomRightGutter.set(this._VSCROLL_WIDTH, 1);
-      }
-    }
-  }, {
-    key: "refreshGridBounds",
-    value: function refreshGridBounds() {
-      this._lineCountWidth = 0;
-      if (this.showLineNumbers) {
-        this._lineCountWidth = Math.max(1, Math.ceil(Math.log(this._history[this._historyFrame].length) / Math.LN10));
-      }
+  get selectedText() {
+    var minCursor = Cursor.min(this.frontCursor, this.backCursor),
+      maxCursor = Cursor.max(this.frontCursor, this.backCursor);
+    return this.value.substring(minCursor.i, maxCursor.i);
+  }
 
-      var x = Math.floor(this._topLeftGutter.width + this._lineCountWidth + this.padding / this.character.width),
-          y = Math.floor(this.padding / this.character.height),
-          w = Math.floor((this.imageWidth - 2 * this.padding) / this.character.width) - x - this._bottomRightGutter.width,
-          h = Math.floor((this.imageHeight - 2 * this.padding) / this.character.height) - y - this._bottomRightGutter.height;
-      this.gridBounds.set(x, y, w, h);
-    }
-  }, {
-    key: "performLayout",
-    value: function performLayout() {
+  set selectedText(str) {
+    str = str || "";
+    str = str.replace(/\r\n/g, "\n");
 
-      // group the tokens into rows
-      this._tokenRows = [[]];
-      this._tokenHashes = [""];
-      this.lines = [""];
-      var currentRowWidth = 0;
-      var tokenQueue = this.tokens.slice();
-      for (var i = 0; i < tokenQueue.length; ++i) {
-        var t = tokenQueue[i].clone();
-        var widthLeft = this.gridBounds.width - currentRowWidth;
-        var wrap = this.wordWrap && t.type !== "newlines" && t.value.length > widthLeft;
-        var breakLine = t.type === "newlines" || wrap;
-        if (wrap) {
-          var split = t.value.length > this.gridBounds.width ? widthLeft : 0;
-          tokenQueue.splice(i + 1, 0, t.splitAt(split));
-        }
-
-        if (t.value.length > 0) {
-          this._tokenRows[this._tokenRows.length - 1].push(t);
-          this._tokenHashes[this._tokenHashes.length - 1] += JSON.stringify(t);
-          this.lines[this.lines.length - 1] += t.value;
-          currentRowWidth += t.value.length;
-        }
-
-        if (breakLine) {
-          this._tokenRows.push([]);
-          this._tokenHashes.push("");
-          this.lines.push("");
-          currentRowWidth = 0;
-        }
-      }
-    }
-  }, {
-    key: "minDelta",
-    value: function minDelta(v, minV, maxV) {
-      var dvMinV = v - minV,
-          dvMaxV = v - maxV + 5,
-          dv = 0;
-      if (dvMinV < 0 || dvMaxV >= 0) {
-        // compare the absolute values, so we get the smallest change
-        // regardless of direction.
-        dv = Math.abs(dvMinV) < Math.abs(dvMaxV) ? dvMinV : dvMaxV;
-      }
-
-      return dv;
-    }
-  }, {
-    key: "fillRect",
-    value: function fillRect(gfx, fill, x, y, w, h) {
-      gfx.fillStyle = fill;
-      gfx.fillRect(x * this.character.width, y * this.character.height, w * this.character.width + 1, h * this.character.height + 1);
-    }
-  }, {
-    key: "strokeRect",
-    value: function strokeRect(gfx, stroke, x, y, w, h) {
-      gfx.strokeStyle = stroke;
-      gfx.strokeRect(x * this.character.width, y * this.character.height, w * this.character.width + 1, h * this.character.height + 1);
-    }
-  }, {
-    key: "renderCanvasBackground",
-    value: function renderCanvasBackground() {
+    if (this.frontCursor.i !== this.backCursor.i || str.length > 0) {
       var minCursor = Cursor.min(this.frontCursor, this.backCursor),
-          maxCursor = Cursor.max(this.frontCursor, this.backCursor),
-          tokenFront = new Cursor(),
-          tokenBack = new Cursor(),
-          clearFunc = this.theme.regular.backColor ? "fillRect" : "clearRect",
-          OFFSETY = OFFSET / this.character.height;
-
-      if (this.theme.regular.backColor) {
-        this._bgfx.fillStyle = this.theme.regular.backColor;
-      }
-
-      this._bgfx[clearFunc](0, 0, this.imageWidth, this.imageHeight);
-      this._bgfx.save();
-      this._bgfx.translate((this.gridBounds.x - this.scroll.x) * this.character.width + this.padding, -this.scroll.y * this.character.height + this.padding);
-
-      // draw the current row highlighter
-      if (this.focused) {
-        this.fillRect(this._bgfx, this.theme.regular.currentRowBackColor || Default.regular.currentRowBackColor, 0, minCursor.y + OFFSETY, this.gridBounds.width, maxCursor.y - minCursor.y + 1);
-      }
-
-      for (var y = 0; y < this._tokenRows.length; ++y) {
-        // draw the tokens on this row
-        var row = this._tokenRows[y];
-
-        for (var i = 0; i < row.length; ++i) {
-          var t = row[i];
-          tokenBack.x += t.value.length;
-          tokenBack.i += t.value.length;
-
-          // skip drawing tokens that aren't in view
-          if (this.scroll.y <= y && y < this.scroll.y + this.gridBounds.height && this.scroll.x <= tokenBack.x && tokenFront.x < this.scroll.x + this.gridBounds.width) {
-            // draw the selection box
-            var inSelection = minCursor.i <= tokenBack.i && tokenFront.i < maxCursor.i;
-            if (inSelection) {
-              var selectionFront = Cursor.max(minCursor, tokenFront);
-              var selectionBack = Cursor.min(maxCursor, tokenBack);
-              var cw = selectionBack.i - selectionFront.i;
-              this.fillRect(this._bgfx, this.theme.regular.selectedBackColor || Default.regular.selectedBackColor, selectionFront.x, selectionFront.y + OFFSETY, cw, 1);
-            }
-          }
-
-          tokenFront.copy(tokenBack);
-        }
-
-        tokenFront.x = 0;
-        ++tokenFront.y;
-        tokenBack.copy(tokenFront);
-      }
-
-      // draw the cursor caret
-      if (this.focused) {
-        var cc = this.theme.cursorColor || "black";
-        var w = 1 / this.character.width;
-        this.fillRect(this._bgfx, cc, minCursor.x, minCursor.y + OFFSETY, w, 1);
-        this.fillRect(this._bgfx, cc, maxCursor.x, maxCursor.y + OFFSETY, w, 1);
-      }
-      this._bgfx.restore();
-    }
-  }, {
-    key: "renderCanvasForeground",
-    value: function renderCanvasForeground() {
-      var tokenFront = new Cursor(),
-          tokenBack = new Cursor();
-
-      this._fgfx.clearRect(0, 0, this.imageWidth, this.imageHeight);
-      this._fgfx.save();
-      this._fgfx.translate((this.gridBounds.x - this.scroll.x) * this.character.width + this.padding, this.padding);
-      for (var y = 0; y < this._tokenRows.length; ++y) {
-        // draw the tokens on this row
-        var line = this.lines[y] + this.padding,
-            row = this._tokenRows[y],
-            drawn = false,
-            textY = (y - this.scroll.y) * this.character.height;
-
-        for (var i = 0; i < row.length; ++i) {
-          var t = row[i];
-          tokenBack.x += t.value.length;
-          tokenBack.i += t.value.length;
-
-          // skip drawing tokens that aren't in view
-          if (this.scroll.y <= y && y < this.scroll.y + this.gridBounds.height && this.scroll.x <= tokenBack.x && tokenFront.x < this.scroll.x + this.gridBounds.width) {
-
-            // draw the text
-            if (this.useCaching && this._rowCache[line] !== undefined) {
-              if (i === 0) {
-                this._fgfx.putImageData(this._rowCache[line], this.padding, textY + this.padding + OFFSET);
-              }
-            } else {
-              var style = this.theme[t.type] || {};
-              var font = (style.fontWeight || this.theme.regular.fontWeight || "") + " " + (style.fontStyle || this.theme.regular.fontStyle || "") + " " + this.character.height + "px " + this.theme.fontFamily;
-              this._fgfx.font = font.trim();
-              this._fgfx.fillStyle = style.foreColor || this.theme.regular.foreColor;
-              this.drawText(this._fgfx, t.value, tokenFront.x * this.character.width, textY);
-              drawn = true;
-            }
-          }
-
-          tokenFront.copy(tokenBack);
-        }
-
-        tokenFront.x = 0;
-        ++tokenFront.y;
-        tokenBack.copy(tokenFront);
-        if (this.useCaching && drawn && this._rowCache[line] === undefined) {
-          this._rowCache[line] = this._fgfx.getImageData(this.padding, textY + this.padding + OFFSET, this.imageWidth - 2 * this.padding, this.character.height);
-        }
-      }
-
-      this._fgfx.restore();
-    }
-
-    // provides a hook for TextInput to be able to override text drawing and spit out password blanking characters
-
-  }, {
-    key: "drawText",
-    value: function drawText(ctx, txt, x, y) {
-      ctx.fillText(txt, x, y);
-    }
-  }, {
-    key: "renderCanvasTrim",
-    value: function renderCanvasTrim() {
-      var tokenFront = new Cursor(),
-          tokenBack = new Cursor(),
-          maxLineWidth = 0;
-
-      this._tgfx.clearRect(0, 0, this.imageWidth, this.imageHeight);
-      this._tgfx.save();
-      this._tgfx.translate(this.padding, this.padding);
-      this._tgfx.save();
-      this._tgfx.lineWidth = 2;
-      this._tgfx.translate(0, -this.scroll.y * this.character.height);
-      for (var y = 0, lastLine = -1; y < this._tokenRows.length; ++y) {
-        var row = this._tokenRows[y];
-
-        for (var i = 0; i < row.length; ++i) {
-          var t = row[i];
-          tokenBack.x += t.value.length;
-          tokenBack.i += t.value.length;
-          tokenFront.copy(tokenBack);
-        }
-
-        maxLineWidth = Math.max(maxLineWidth, tokenBack.x);
-        tokenFront.x = 0;
-        ++tokenFront.y;
-        tokenBack.copy(tokenFront);
-
-        if (this.showLineNumbers && this.scroll.y <= y && y < this.scroll.y + this.gridBounds.height) {
-          var currentLine = row.length > 0 ? row[0].line : lastLine + 1;
-          // draw the left gutter
-          var lineNumber = currentLine.toString();
-          while (lineNumber.length < this._lineCountWidth) {
-            lineNumber = " " + lineNumber;
-          }
-          this.fillRect(this._tgfx, this.theme.regular.selectedBackColor || Default.regular.selectedBackColor, 0, y, this.gridBounds.x, 1);
-          this._tgfx.font = "bold " + this.character.height + "px " + this.theme.fontFamily;
-
-          if (currentLine > lastLine) {
-            this._tgfx.fillStyle = this.theme.regular.foreColor;
-            this._tgfx.fillText(lineNumber, 0, y * this.character.height);
-          }
-          lastLine = currentLine;
-        }
-      }
-
-      this._tgfx.restore();
-
-      if (this.showLineNumbers) {
-        this.strokeRect(this._tgfx, this.theme.regular.foreColor || Default.regular.foreColor, 0, 0, this.gridBounds.x, this.gridBounds.height);
-      }
-
-      // draw the scrollbars
-      if (this.showScrollBars) {
-        var drawWidth = this.gridBounds.width * this.character.width - this.padding,
-            drawHeight = this.gridBounds.height * this.character.height,
-            scrollX = this.scroll.x * drawWidth / maxLineWidth + this.gridBounds.x * this.character.width,
-            scrollY = this.scroll.y * drawHeight / this._tokenRows.length;
-
-        this._tgfx.fillStyle = this.theme.regular.selectedBackColor || Default.regular.selectedBackColor;
-        // horizontal
-        var bw;
-        if (!this.wordWrap && maxLineWidth > this.gridBounds.width) {
-          var scrollBarWidth = drawWidth * (this.gridBounds.width / maxLineWidth),
-              by = this.gridBounds.height * this.character.height;
-          bw = Math.max(this.character.width, scrollBarWidth);
-          this._tgfx.fillRect(scrollX, by, bw, this.character.height);
-          this._tgfx.strokeRect(scrollX, by, bw, this.character.height);
-        }
-
-        //vertical
-        if (this._tokenRows.length > this.gridBounds.height) {
-          var scrollBarHeight = drawHeight * (this.gridBounds.height / this._tokenRows.length),
-              bx = this.image - this._VSCROLL_WIDTH * this.character.width - 2 * this.padding,
-              bh = Math.max(this.character.height, scrollBarHeight);
-          bw = this._VSCROLL_WIDTH * this.character.width;
-          this._tgfx.fillRect(bx, scrollY, bw, bh);
-          this._tgfx.strokeRect(bx, scrollY, bw, bh);
-        }
-      }
-
-      this._tgfx.lineWidth = 2;
-      this._tgfx.restore();
-      this._tgfx.strokeRect(1, 1, this.imageWidth - 2, this.imageHeight - 2);
-      if (!this.focused) {
-        this._tgfx.fillStyle = this.theme.regular.unfocused || Default.regular.unfocused;
-        this._tgfx.fillRect(0, 0, this.imageWidth, this.imageHeight);
-      }
-    }
-  }, {
-    key: "render",
-    value: function render() {
-      if (this.tokens && this.theme) {
-        this.refreshGridBounds();
-        var boundsChanged = this.gridBounds.toString() !== this._lastGridBounds,
-            textChanged = this._lastText !== this.value,
-            characterWidthChanged = this.character.width !== this._lastCharacterWidth,
-            characterHeightChanged = this.character.height !== this._lastCharacterHeight,
-            paddingChanged = this.padding !== this._lastPadding,
-            cursorChanged = !this._lastFrontCursor || !this._lastBackCursor || this.frontCursor.i !== this._lastFrontCursor.i || this._lastBackCursor.i !== this.backCursor.i,
-            scrollChanged = this.scroll.x !== this._lastScrollX || this.scroll.y !== this._lastScrollY,
-            fontChanged = this.context.font !== this._lastFont,
-            themeChanged = this.theme.name !== this._lastThemeName,
-            focusChanged = this.focused !== this._lastFocused,
-            changeBounds = null,
-            layoutChanged = this.resized || boundsChanged || textChanged || characterWidthChanged || characterHeightChanged || paddingChanged,
-            backgroundChanged = layoutChanged || cursorChanged || scrollChanged || themeChanged,
-            foregroundChanged = backgroundChanged || textChanged,
-            trimChanged = backgroundChanged || focusChanged,
-            imageChanged = foregroundChanged || backgroundChanged || trimChanged;
-
-        if (layoutChanged) {
-          this.performLayout(this.gridBounds);
-          this._rowCache = {};
-        }
-
-        if (imageChanged) {
-          if (cursorChanged && !(layoutChanged || scrollChanged || themeChanged || focusChanged)) {
-            var top = Math.min(this.frontCursor.y, this._lastFrontCursor.y, this.backCursor.y, this._lastBackCursor.y) - this.scroll.y + this.gridBounds.y,
-                bottom = Math.max(this.frontCursor.y, this._lastFrontCursor.y, this.backCursor.y, this._lastBackCursor.y) - this.scroll.y + 1;
-            changeBounds = new Rectangle(0, top * this.character.height, this.bounds.width, (bottom - top) * this.character.height + 2);
-          }
-
-          if (backgroundChanged) {
-            this.renderCanvasBackground();
-          }
-          if (foregroundChanged) {
-            this.renderCanvasForeground();
-          }
-          if (trimChanged) {
-            this.renderCanvasTrim();
-          }
-
-          this.context.clearRect(0, 0, this.imageWidth, this.imageHeight);
-          this.context.drawImage(this._bgCanvas, 0, 0);
-          this.context.drawImage(this._fgCanvas, 0, 0);
-          this.context.drawImage(this._trimCanvas, 0, 0);
-          this.invalidate(changeBounds);
-        }
-
-        this._lastGridBounds = this.gridBounds.toString();
-        this._lastText = this.value;
-        this._lastCharacterWidth = this.character.width;
-        this._lastCharacterHeight = this.character.height;
-        this._lastWidth = this.imageWidth;
-        this._lastHeight = this.imageHeight;
-        this._lastPadding = this.padding;
-        this._lastFrontCursor = this.frontCursor.clone();
-        this._lastBackCursor = this.backCursor.clone();
-        this._lastFocused = this.focused;
-        this._lastFont = this.context.font;
-        this._lastThemeName = this.theme.name;
-        this._lastScrollX = this.scroll.x;
-        this._lastScrollY = this.scroll.y;
-      }
-    }
-  }, {
-    key: "value",
-    get: function get$$1() {
-      return this._history[this._historyFrame].join("\n");
-    },
-    set: function set$$1(txt) {
-      txt = txt || "";
-      txt = txt.replace(/\r\n/g, "\n");
-      if (!this.multiline) {
-        txt = txt.replace(/\n/g, "");
-      }
-      var lines = txt.split("\n");
-      this.pushUndo(lines);
-      this.render();
-      this.emit("change", {
-        target: this
-      });
-    }
-  }, {
-    key: "selectedText",
-    get: function get$$1() {
-      var minCursor = Cursor.min(this.frontCursor, this.backCursor),
-          maxCursor = Cursor.max(this.frontCursor, this.backCursor);
-      return this.value.substring(minCursor.i, maxCursor.i);
-    },
-    set: function set$$1(str) {
-      str = str || "";
-      str = str.replace(/\r\n/g, "\n");
-
-      if (this.frontCursor.i !== this.backCursor.i || str.length > 0) {
-        var minCursor = Cursor.min(this.frontCursor, this.backCursor),
-            maxCursor = Cursor.max(this.frontCursor, this.backCursor),
-
+        maxCursor = Cursor.max(this.frontCursor, this.backCursor),
         // TODO: don't recalc the string first.
         text = this.value,
-            left = text.substring(0, minCursor.i),
-            right = text.substring(maxCursor.i);
+        left = text.substring(0, minCursor.i),
+        right = text.substring(maxCursor.i);
 
-        var v = left + str + right;
-        this.value = v;
-        this.refreshGridBounds();
-        this.performLayout();
-        minCursor.advanceN(this.lines, Math.max(0, str.length));
-        this.scrollIntoView(maxCursor);
+      var v = left + str + right;
+      this.value = v;
+      this.refreshGridBounds();
+      this.performLayout();
+      minCursor.advanceN(this.lines, Math.max(0, str.length));
+      this.scrollIntoView(maxCursor);
+      this.clampScroll();
+      maxCursor.copy(minCursor);
+      this.render();
+    }
+  }
+
+  get padding() {
+    return this._padding;
+  }
+
+  set padding(v) {
+    this._padding = v;
+    this.render();
+  }
+
+  get wordWrap() {
+    return this._wordWrap;
+  }
+
+  set wordWrap(v) {
+    this._wordWrap = v || false;
+    this.setGutter();
+  }
+
+  get showLineNumbers() {
+    return this._showLineNumbers;
+  }
+
+  set showLineNumbers(v) {
+    this._showLineNumbers = v;
+    this.setGutter();
+  }
+
+  get showScrollBars() {
+    return this._showScrollBars;
+  }
+
+  set showScrollBars(v) {
+    this._showScrollBars = v;
+    this.setGutter();
+  }
+
+  get theme() {
+    return this._theme;
+  }
+
+  set theme(t) {
+    this._theme = Object.assign({}, Default, t);
+    this._theme.fontSize = this.fontSize;
+    this._rowCache = {};
+    this.render();
+  }
+
+  get commandPack() {
+    return this._commandPack;
+  }
+
+  set commandPack(v) {
+    this._commandPack = v;
+  }
+
+  get selectionStart() {
+    return this.frontCursor.i;
+  }
+
+  set selectionStart(i) {
+    this.frontCursor.setI(i, this.lines);
+  }
+
+  get selectionEnd() {
+    return this.backCursor.i;
+  }
+
+  set selectionEnd(i) {
+    this.backCursor.setI(i, this.lines);
+  }
+
+  get selectionDirection() {
+    return this.frontCursor.i <= this.backCursor.i ? "forward" : "backward";
+  }
+
+  get tokenizer() {
+    return this._tokenizer;
+  }
+
+  set tokenizer(tk) {
+    this._tokenizer = tk || JavaScript;
+    if (this._history && this._history.length > 0) {
+      this.refreshTokens();
+      this.render();
+    }
+  }
+
+  get tabWidth() {
+    return this._tabWidth;
+  }
+
+  set tabWidth(tw) {
+    this._tabWidth = tw || 2;
+    this._tabString = "";
+    for (var i = 0; i < this._tabWidth; ++i) {
+      this._tabString += " ";
+    }
+  }
+
+  get tabString() {
+    return this._tabString;
+  }
+
+  get fontSize() {
+    return this._fontSize || 16;
+  }
+
+  set fontSize(v) {
+    v = v || 16;
+    this._fontSize = v;
+    if (this.theme) {
+      this.theme.fontSize = this._fontSize;
+      this.resize();
+      this.render();
+    }
+  }
+
+  get lockMovement() {
+    return this.focused && !this.readOnly;
+  }
+
+  pushUndo(lines) {
+    if (this._historyFrame < this._history.length - 1) {
+      this._history.splice(this._historyFrame + 1);
+    }
+    this._history.push(lines);
+    this._historyFrame = this._history.length - 1;
+    this.refreshTokens();
+    this.render();
+  }
+
+  redo() {
+    if (this._historyFrame < this._history.length - 1) {
+      ++this._historyFrame;
+    }
+    this.refreshTokens();
+    this.fixCursor();
+    this.render();
+  }
+
+  undo() {
+    if (this._historyFrame > 0) {
+      --this._historyFrame;
+    }
+    this.refreshTokens();
+    this.fixCursor();
+    this.render();
+  }
+
+  scrollIntoView(currentCursor) {
+    this.scroll.y += this.minDelta(currentCursor.y, this.scroll.y, this.scroll.y + this.gridBounds.height);
+    if (!this.wordWrap) {
+      this.scroll.x += this.minDelta(currentCursor.x, this.scroll.x, this.scroll.x + this.gridBounds.width);
+    }
+    this.clampScroll();
+  }
+
+  readWheel(evt) {
+    if (this.focused) {
+      if (evt.shiftKey || isChrome) {
+        this.fontSize += -evt.deltaX / SCROLL_SCALE;
+      }
+      if (!evt.shiftKey || isChrome) {
+        this.scroll.y += Math.floor(evt.deltaY * this._wheelScrollSpeed / SCROLL_SCALE);
+      }
+      this.clampScroll();
+      this.render();
+      evt.preventDefault();
+    }
+  }
+
+  startPointer(x, y) {
+    if (!super.startPointer(x, y)) {
+      this._dragging = true;
+      this.setCursorXY(this.frontCursor, x, y);
+    }
+  }
+
+  movePointer(x, y) {
+    if (this._dragging) {
+      this.setCursorXY(this.backCursor, x, y);
+    }
+  }
+
+  endPointer() {
+    super.endPointer();
+    this._dragging = false;
+    this._scrolling = false;
+  }
+
+  copySelectedText(evt) {
+    if (this.focused && this.frontCursor.i !== this.backCursor.i) {
+      var clipboard = evt.clipboardData || window.clipboardData;
+      clipboard.setData(
+        window.clipboardData ? "Text" : "text/plain", this.selectedText);
+      evt.returnValue = false;
+    }
+  }
+
+  cutSelectedText(evt) {
+    if (this.focused) {
+      this.copySelectedText(evt);
+      if (!this.readOnly) {
+        this.selectedText = "";
+      }
+    }
+  }
+
+  keyDown(evt){
+    if (this.focused && !this.readOnly) {
+      var func = this.commandPack[evt.altCmdName] ||
+        this.commandPack[evt.cmdName] ||
+        evt.altCmdText ||
+        evt.cmdText;
+
+
+      if (func instanceof String || typeof func === "string") {
+        console.warn("This shouldn't have happened.");
+        func = this.commandPack[func] ||
+          this.commandPack[func] ||
+          func;
+      }
+
+      if (func) {
+        this.frontCursor.moved = false;
+        this.backCursor.moved = false;
+        if (func instanceof Function) {
+          func(this, this.lines);
+        }
+        else if (func instanceof String || typeof func === "string") {
+          console.log(func);
+          this.selectedText = func;
+        }
+        evt.resetDeadKeyState();
+        evt.preventDefault();
+
+        if (this.frontCursor.moved && !this.backCursor.moved) {
+          this.backCursor.copy(this.frontCursor);
+        }
         this.clampScroll();
-        maxCursor.copy(minCursor);
         this.render();
       }
     }
-  }, {
-    key: "padding",
-    get: function get$$1() {
-      return this._padding;
-    },
-    set: function set$$1(v) {
-      this._padding = v;
-      this.render();
-    }
-  }, {
-    key: "wordWrap",
-    get: function get$$1() {
-      return this._wordWrap;
-    },
-    set: function set$$1(v) {
-      this._wordWrap = v || false;
-      this.setGutter();
-    }
-  }, {
-    key: "showLineNumbers",
-    get: function get$$1() {
-      return this._showLineNumbers;
-    },
-    set: function set$$1(v) {
-      this._showLineNumbers = v;
-      this.setGutter();
-    }
-  }, {
-    key: "showScrollBars",
-    get: function get$$1() {
-      return this._showScrollBars;
-    },
-    set: function set$$1(v) {
-      this._showScrollBars = v;
-      this.setGutter();
-    }
-  }, {
-    key: "theme",
-    get: function get$$1() {
-      return this._theme;
-    },
-    set: function set$$1(t) {
-      this._theme = Object.assign({}, Default, t);
-      this._theme.fontSize = this.fontSize;
-      this._rowCache = {};
-      this.render();
-    }
-  }, {
-    key: "commandPack",
-    get: function get$$1() {
-      return this._commandPack;
-    },
-    set: function set$$1(v) {
-      this._commandPack = v;
-    }
-  }, {
-    key: "selectionStart",
-    get: function get$$1() {
-      return this.frontCursor.i;
-    },
-    set: function set$$1(i) {
-      this.frontCursor.setI(i, this.lines);
-    }
-  }, {
-    key: "selectionEnd",
-    get: function get$$1() {
-      return this.backCursor.i;
-    },
-    set: function set$$1(i) {
-      this.backCursor.setI(i, this.lines);
-    }
-  }, {
-    key: "selectionDirection",
-    get: function get$$1() {
-      return this.frontCursor.i <= this.backCursor.i ? "forward" : "backward";
-    }
-  }, {
-    key: "tokenizer",
-    get: function get$$1() {
-      return this._tokenizer;
-    },
-    set: function set$$1(tk) {
-      this._tokenizer = tk || JavaScript;
-      if (this._history && this._history.length > 0) {
-        this.refreshTokens();
-        this.render();
-      }
-    }
-  }, {
-    key: "tabWidth",
-    get: function get$$1() {
-      return this._tabWidth;
-    },
-    set: function set$$1(tw) {
-      this._tabWidth = tw || 2;
-      this._tabString = "";
-      for (var i = 0; i < this._tabWidth; ++i) {
-        this._tabString += " ";
-      }
-    }
-  }, {
-    key: "tabString",
-    get: function get$$1() {
-      return this._tabString;
-    }
-  }, {
-    key: "fontSize",
-    get: function get$$1() {
-      return this._fontSize || 16;
-    },
-    set: function set$$1(v) {
-      v = v || 16;
-      this._fontSize = v;
-      if (this.theme) {
-        this.theme.fontSize = this._fontSize;
-        this.resize();
-        this.render();
-      }
-    }
-  }, {
-    key: "lockMovement",
-    get: function get$$1() {
-      return this.focused && !this.readOnly;
-    }
-  }]);
-  return TextBox;
-}(Surface);
+  }
 
-var piOver180 = Math.PI / 180.0;
-var rad45 = Math.PI * 0.25;
-var defaultOrientation = new Float32Array([0, 0, 0, 1]);
-var defaultPosition = new Float32Array([0, 0, 0]);
+  readClipboard(evt) {
+    if (this.focused && !this.readOnly) {
+      evt.returnValue = false;
+      var clipboard = evt.clipboardData || window.clipboardData,
+        str = clipboard.getData(window.clipboardData ? "Text" : "text/plain");
+      if (str) {
+        this.selectedText = str;
+      }
+    }
+  }
+
+  resize() {
+    super.resize();
+    this._bg.setSize(this.surfaceWidth, this.surfaceHeight);
+    this._fg.setSize(this.surfaceWidth, this.surfaceHeight);
+    this._trim.setSize(this.surfaceWidth, this.surfaceHeight);
+    if (this.theme) {
+      this.character.height = this.fontSize;
+      this.context.font = this.character.height + "px " + this.theme.fontFamily;
+      // measure 100 letter M's, then divide by 100, to get the width of an M
+      // to two decimal places on systems that return integer values from
+      // measureText.
+      this.character.width = this.context.measureText(
+          "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM")
+        .width /
+        100;
+    }
+    this.render();
+  }
+
+  pixel2cell(point) {
+    const x = point.x * this.imageWidth / this.surfaceWidth,
+      y = point.y * this.imageHeight / this.surfaceHeight;
+    point.set(
+      Math.round(point.x / this.character.width) + this.scroll.x - this.gridBounds.x,
+      Math.floor((point.y / this.character.height) - 0.25) + this.scroll.y);
+  }
+
+  clampScroll() {
+    if (this.scroll.y < 0) {
+      this.scroll.y = 0;
+    }
+    else {
+      while (0 < this.scroll.y &&
+        this.scroll.y > this.lines.length - this.gridBounds.height) {
+        --this.scroll.y;
+      }
+    }
+  }
+
+  refreshTokens() {
+    this.tokens = this.tokenizer.tokenize(this.value);
+  }
+
+  fixCursor() {
+    var moved = this.frontCursor.fixCursor(this.lines) ||
+      this.backCursor.fixCursor(this.lines);
+    if (moved) {
+      this.render();
+    }
+  }
+
+  setCursorXY(cursor, x, y) {
+    x = Math.round(x);
+    y = Math.round(y);
+    this._pointer.set(x, y);
+    this.pixel2cell(this._pointer, this.scroll, this.gridBounds);
+    var gx = this._pointer.x - this.scroll.x,
+      gy = this._pointer.y - this.scroll.y,
+      onBottom = gy >= this.gridBounds.height,
+      onLeft = gx < 0,
+      onRight = this._pointer.x >= this.gridBounds.width;
+    if (!this._scrolling && !onBottom && !onLeft && !onRight) {
+      cursor.setXY(this._pointer.x, this._pointer.y, this.lines);
+      this.backCursor.copy(cursor);
+    }
+    else if (this._scrolling || onRight && !onBottom) {
+      this._scrolling = true;
+      var scrollHeight = this.lines.length - this.gridBounds.height;
+      if (gy >= 0 && scrollHeight >= 0) {
+        var sy = gy * scrollHeight / this.gridBounds.height;
+        this.scroll.y = Math.floor(sy);
+      }
+    }
+    else if (onBottom && !onLeft) {
+      var maxWidth = 0;
+      for (var dy = 0; dy < this.lines.length; ++dy) {
+        maxWidth = Math.max(maxWidth, this.lines[dy].length);
+      }
+      var scrollWidth = maxWidth - this.gridBounds.width;
+      if (gx >= 0 && scrollWidth >= 0) {
+        var sx = gx * scrollWidth / this.gridBounds.width;
+        this.scroll.x = Math.floor(sx);
+      }
+    }
+    else if (onLeft && !onBottom) {
+      // clicked in number-line gutter
+    }
+    else {
+      // clicked in the lower-left corner
+    }
+    this._lastPointer.copy(this._pointer);
+    this.render();
+  }
+
+  setGutter() {
+    if (this.showLineNumbers) {
+      this._topLeftGutter.width = 1;
+    }
+    else {
+      this._topLeftGutter.width = 0;
+    }
+
+    if (!this.showScrollBars) {
+      this._bottomRightGutter.set(0, 0);
+    }
+    else if (this.wordWrap) {
+      this._bottomRightGutter.set(this._VSCROLL_WIDTH, 0);
+    }
+    else {
+      this._bottomRightGutter.set(this._VSCROLL_WIDTH, 1);
+    }
+  }
+
+  refreshGridBounds() {
+    this._lineCountWidth = 0;
+    if (this.showLineNumbers) {
+      this._lineCountWidth = Math.max(1, Math.ceil(Math.log(this._history[this._historyFrame].length) / Math.LN10));
+    }
+
+    var x = Math.floor(this._topLeftGutter.width + this._lineCountWidth + this.padding / this.character.width),
+      y = Math.floor(this.padding / this.character.height),
+      w = Math.floor((this.imageWidth - 2 * this.padding) / this.character.width) - x - this._bottomRightGutter.width,
+      h = Math.floor((this.imageHeight - 2 * this.padding) / this.character.height) - y - this._bottomRightGutter.height;
+    this.gridBounds.set(x, y, w, h);
+  }
+
+  performLayout() {
+
+    // group the tokens into rows
+    this._tokenRows = [
+      []
+    ];
+    this._tokenHashes = [""];
+    this.lines = [""];
+    var currentRowWidth = 0;
+    var tokenQueue = this.tokens.slice();
+    for (var i = 0; i < tokenQueue.length; ++i) {
+      var t = tokenQueue[i].clone();
+      var widthLeft = this.gridBounds.width - currentRowWidth;
+      var wrap = this.wordWrap && t.type !== "newlines" && t.value.length > widthLeft;
+      var breakLine = t.type === "newlines" || wrap;
+      if (wrap) {
+        var split = t.value.length > this.gridBounds.width ? widthLeft : 0;
+        tokenQueue.splice(i + 1, 0, t.splitAt(split));
+      }
+
+      if (t.value.length > 0) {
+        this._tokenRows[this._tokenRows.length - 1].push(t);
+        this._tokenHashes[this._tokenHashes.length - 1] += JSON.stringify(t);
+        this.lines[this.lines.length - 1] += t.value;
+        currentRowWidth += t.value.length;
+      }
+
+      if (breakLine) {
+        this._tokenRows.push([]);
+        this._tokenHashes.push("");
+        this.lines.push("");
+        currentRowWidth = 0;
+      }
+    }
+  }
+
+  minDelta(v, minV, maxV) {
+    var dvMinV = v - minV,
+      dvMaxV = v - maxV + 5,
+      dv = 0;
+    if (dvMinV < 0 || dvMaxV >= 0) {
+      // compare the absolute values, so we get the smallest change
+      // regardless of direction.
+      dv = Math.abs(dvMinV) < Math.abs(dvMaxV) ? dvMinV : dvMaxV;
+    }
+
+    return dv;
+  }
+
+  fillRect(gfx, fill, x, y, w, h) {
+    gfx.fillStyle = fill;
+    gfx.fillRect(
+      x * this.character.width,
+      y * this.character.height,
+      w * this.character.width + 1,
+      h * this.character.height + 1);
+  }
+
+  strokeRect(gfx, stroke, x, y, w, h) {
+    gfx.strokeStyle = stroke;
+    gfx.strokeRect(
+      x * this.character.width,
+      y * this.character.height,
+      w * this.character.width + 1,
+      h * this.character.height + 1);
+  }
+
+  renderCanvasBackground() {
+    var minCursor = Cursor.min(this.frontCursor, this.backCursor),
+      maxCursor = Cursor.max(this.frontCursor, this.backCursor),
+      tokenFront = new Cursor(),
+      tokenBack = new Cursor(),
+      clearFunc = this.theme.regular.backColor ? "fillRect" : "clearRect",
+      OFFSETY = OFFSET / this.character.height;
+
+    if (this.theme.regular.backColor) {
+      this._bgfx.fillStyle = this.theme.regular.backColor;
+    }
+
+    this._bgfx[clearFunc](0, 0, this.imageWidth, this.imageHeight);
+    this._bgfx.save();
+    this._bgfx.translate(
+      (this.gridBounds.x - this.scroll.x) * this.character.width + this.padding, -this.scroll.y * this.character.height + this.padding);
+
+
+    // draw the current row highlighter
+    if (this.focused) {
+      this.fillRect(this._bgfx, this.theme.regular.currentRowBackColor ||
+        Default.regular.currentRowBackColor,
+        0, minCursor.y + OFFSETY,
+        this.gridBounds.width,
+        maxCursor.y - minCursor.y + 1);
+    }
+
+    for (var y = 0; y < this._tokenRows.length; ++y) {
+      // draw the tokens on this row
+      var row = this._tokenRows[y];
+
+      for (var i = 0; i < row.length; ++i) {
+        var t = row[i];
+        tokenBack.x += t.value.length;
+        tokenBack.i += t.value.length;
+
+        // skip drawing tokens that aren't in view
+        if (this.scroll.y <= y && y < this.scroll.y + this.gridBounds.height &&
+          this.scroll.x <= tokenBack.x && tokenFront.x < this.scroll.x +
+          this.gridBounds.width) {
+          // draw the selection box
+          var inSelection = minCursor.i <= tokenBack.i && tokenFront.i <
+            maxCursor.i;
+          if (inSelection) {
+            var selectionFront = Cursor.max(minCursor,
+              tokenFront);
+            var selectionBack = Cursor.min(maxCursor, tokenBack);
+            var cw = selectionBack.i - selectionFront.i;
+            this.fillRect(this._bgfx, this.theme.regular.selectedBackColor ||
+              Default.regular.selectedBackColor,
+              selectionFront.x, selectionFront.y + OFFSETY,
+              cw, 1);
+          }
+        }
+
+        tokenFront.copy(tokenBack);
+      }
+
+      tokenFront.x = 0;
+      ++tokenFront.y;
+      tokenBack.copy(tokenFront);
+    }
+
+    // draw the cursor caret
+    if (this.focused) {
+      var cc = this.theme.cursorColor || "black";
+      var w = 1 / this.character.width;
+      this.fillRect(this._bgfx, cc, minCursor.x, minCursor.y + OFFSETY, w, 1);
+      this.fillRect(this._bgfx, cc, maxCursor.x, maxCursor.y + OFFSETY, w, 1);
+    }
+    this._bgfx.restore();
+  }
+
+  renderCanvasForeground() {
+    var tokenFront = new Cursor(),
+      tokenBack = new Cursor();
+
+    this._fgfx.clearRect(0, 0, this.imageWidth, this.imageHeight);
+    this._fgfx.save();
+    this._fgfx.translate((this.gridBounds.x - this.scroll.x) * this.character.width + this.padding, this.padding);
+    for (var y = 0; y < this._tokenRows.length; ++y) {
+      // draw the tokens on this row
+      var line = this.lines[y] + this.padding,
+        row = this._tokenRows[y],
+        drawn = false,
+        textY = (y - this.scroll.y) * this.character.height;
+
+      for (var i = 0; i < row.length; ++i) {
+        var t = row[i];
+        tokenBack.x += t.value.length;
+        tokenBack.i += t.value.length;
+
+        // skip drawing tokens that aren't in view
+        if (this.scroll.y <= y && y < this.scroll.y + this.gridBounds.height &&
+          this.scroll.x <= tokenBack.x && tokenFront.x < this.scroll.x +
+          this.gridBounds.width) {
+
+          // draw the text
+          if (this.useCaching && this._rowCache[line] !== undefined) {
+            if (i === 0) {
+              this._fgfx.putImageData(this._rowCache[line], this.padding, textY + this.padding + OFFSET);
+            }
+          }
+          else {
+            var style = this.theme[t.type] || {};
+            var font = (style.fontWeight || this.theme.regular.fontWeight || "") +
+              " " + (style.fontStyle || this.theme.regular.fontStyle || "") +
+              " " + this.character.height + "px " + this.theme.fontFamily;
+            this._fgfx.font = font.trim();
+            this._fgfx.fillStyle = style.foreColor || this.theme.regular.foreColor;
+            this.drawText(this._fgfx, t.value,
+              tokenFront.x * this.character.width,
+              textY);
+            drawn = true;
+          }
+        }
+
+        tokenFront.copy(tokenBack);
+      }
+
+      tokenFront.x = 0;
+      ++tokenFront.y;
+      tokenBack.copy(tokenFront);
+      if (this.useCaching && drawn && this._rowCache[line] === undefined) {
+        this._rowCache[line] = this._fgfx.getImageData(
+          this.padding,
+          textY + this.padding + OFFSET,
+          this.imageWidth - 2 * this.padding,
+          this.character.height);
+      }
+    }
+
+    this._fgfx.restore();
+  }
+
+  // provides a hook for TextInput to be able to override text drawing and spit out password blanking characters
+  drawText(ctx, txt, x, y) {
+    ctx.fillText(txt, x, y);
+  }
+
+
+  renderCanvasTrim() {
+    var tokenFront = new Cursor(),
+      tokenBack = new Cursor(),
+      maxLineWidth = 0;
+
+    this._tgfx.clearRect(0, 0, this.imageWidth, this.imageHeight);
+    this._tgfx.save();
+    this._tgfx.translate(this.padding, this.padding);
+    this._tgfx.save();
+    this._tgfx.lineWidth = 2;
+    this._tgfx.translate(0, -this.scroll.y * this.character.height);
+    for (var y = 0, lastLine = -1; y < this._tokenRows.length; ++y) {
+      var row = this._tokenRows[y];
+
+      for (var i = 0; i < row.length; ++i) {
+        var t = row[i];
+        tokenBack.x += t.value.length;
+        tokenBack.i += t.value.length;
+        tokenFront.copy(tokenBack);
+      }
+
+      maxLineWidth = Math.max(maxLineWidth, tokenBack.x);
+      tokenFront.x = 0;
+      ++tokenFront.y;
+      tokenBack.copy(tokenFront);
+
+      if (this.showLineNumbers && this.scroll.y <= y && y < this.scroll.y + this.gridBounds.height) {
+        var currentLine = row.length > 0 ? row[0].line : lastLine + 1;
+        // draw the left gutter
+        var lineNumber = currentLine.toString();
+        while (lineNumber.length < this._lineCountWidth) {
+          lineNumber = " " + lineNumber;
+        }
+        this.fillRect(this._tgfx,
+          this.theme.regular.selectedBackColor ||
+          Default.regular.selectedBackColor,
+          0, y,
+          this.gridBounds.x, 1);
+        this._tgfx.font = "bold " + this.character.height + "px " +
+          this.theme.fontFamily;
+
+        if (currentLine > lastLine) {
+          this._tgfx.fillStyle = this.theme.regular.foreColor;
+          this._tgfx.fillText(
+            lineNumber,
+            0, y * this.character.height);
+        }
+        lastLine = currentLine;
+      }
+    }
+
+    this._tgfx.restore();
+
+    if (this.showLineNumbers) {
+      this.strokeRect(this._tgfx,
+        this.theme.regular.foreColor ||
+        Default.regular.foreColor,
+        0, 0,
+        this.gridBounds.x, this.gridBounds.height);
+    }
+
+    // draw the scrollbars
+    if (this.showScrollBars) {
+      var drawWidth = this.gridBounds.width * this.character.width - this.padding,
+        drawHeight = this.gridBounds.height * this.character.height,
+        scrollX = (this.scroll.x * drawWidth) / maxLineWidth + this.gridBounds.x * this.character.width,
+        scrollY = (this.scroll.y * drawHeight) / this._tokenRows.length;
+
+      this._tgfx.fillStyle = this.theme.regular.selectedBackColor ||
+        Default.regular.selectedBackColor;
+      // horizontal
+      var bw;
+      if (!this.wordWrap && maxLineWidth > this.gridBounds.width) {
+        var scrollBarWidth = drawWidth * (this.gridBounds.width / maxLineWidth),
+          by = this.gridBounds.height * this.character.height;
+        bw = Math.max(this.character.width, scrollBarWidth);
+        this._tgfx.fillRect(scrollX, by, bw, this.character.height);
+        this._tgfx.strokeRect(scrollX, by, bw, this.character.height);
+      }
+
+      //vertical
+      if (this._tokenRows.length > this.gridBounds.height) {
+        var scrollBarHeight = drawHeight * (this.gridBounds.height / this._tokenRows.length),
+          bx = this.image - this._VSCROLL_WIDTH * this.character.width - 2 * this.padding,
+          bh = Math.max(this.character.height, scrollBarHeight);
+        bw = this._VSCROLL_WIDTH * this.character.width;
+        this._tgfx.fillRect(bx, scrollY, bw, bh);
+        this._tgfx.strokeRect(bx, scrollY, bw, bh);
+      }
+    }
+
+    this._tgfx.lineWidth = 2;
+    this._tgfx.restore();
+    this._tgfx.strokeRect(1, 1, this.imageWidth - 2, this.imageHeight - 2);
+    if (!this.focused) {
+      this._tgfx.fillStyle = this.theme.regular.unfocused || Default.regular.unfocused;
+      this._tgfx.fillRect(0, 0, this.imageWidth, this.imageHeight);
+    }
+  }
+
+  render() {
+    if (this.tokens && this.theme) {
+      this.refreshGridBounds();
+      var boundsChanged = this.gridBounds.toString() !== this._lastGridBounds,
+        textChanged = this._lastText !== this.value,
+        characterWidthChanged = this.character.width !== this._lastCharacterWidth,
+        characterHeightChanged = this.character.height !== this._lastCharacterHeight,
+        paddingChanged = this.padding !== this._lastPadding,
+        cursorChanged = !this._lastFrontCursor || !this._lastBackCursor || this.frontCursor.i !== this._lastFrontCursor.i || this._lastBackCursor.i !== this.backCursor.i,
+        scrollChanged = this.scroll.x !== this._lastScrollX || this.scroll.y !== this._lastScrollY,
+        fontChanged = this.context.font !== this._lastFont,
+        themeChanged = this.theme.name !== this._lastThemeName,
+        focusChanged = this.focused !== this._lastFocused,
+
+        changeBounds = null,
+
+        layoutChanged = this.resized || boundsChanged || textChanged || characterWidthChanged || characterHeightChanged || paddingChanged,
+        backgroundChanged = layoutChanged || cursorChanged || scrollChanged || themeChanged,
+        foregroundChanged = backgroundChanged || textChanged,
+        trimChanged = backgroundChanged || focusChanged,
+        imageChanged = foregroundChanged || backgroundChanged || trimChanged;
+
+      if (layoutChanged) {
+        this.performLayout(this.gridBounds);
+        this._rowCache = {};
+      }
+
+      if (imageChanged) {
+        if (cursorChanged && !(layoutChanged || scrollChanged || themeChanged || focusChanged)) {
+          var top = Math.min(this.frontCursor.y, this._lastFrontCursor.y, this.backCursor.y, this._lastBackCursor.y) - this.scroll.y + this.gridBounds.y,
+            bottom = Math.max(this.frontCursor.y, this._lastFrontCursor.y, this.backCursor.y, this._lastBackCursor.y) - this.scroll.y + 1;
+          changeBounds = new Rectangle(
+            0,
+            top * this.character.height,
+            this.bounds.width,
+            (bottom - top) * this.character.height + 2);
+        }
+
+        if (backgroundChanged) {
+          this.renderCanvasBackground();
+        }
+        if (foregroundChanged) {
+          this.renderCanvasForeground();
+        }
+        if (trimChanged) {
+          this.renderCanvasTrim();
+        }
+
+        this.context.clearRect(0, 0, this.imageWidth, this.imageHeight);
+        this.context.drawImage(this._bgCanvas, 0, 0);
+        this.context.drawImage(this._fgCanvas, 0, 0);
+        this.context.drawImage(this._trimCanvas, 0, 0);
+        this.invalidate(changeBounds);
+      }
+
+      this._lastGridBounds = this.gridBounds.toString();
+      this._lastText = this.value;
+      this._lastCharacterWidth = this.character.width;
+      this._lastCharacterHeight = this.character.height;
+      this._lastWidth = this.imageWidth;
+      this._lastHeight = this.imageHeight;
+      this._lastPadding = this.padding;
+      this._lastFrontCursor = this.frontCursor.clone();
+      this._lastBackCursor = this.backCursor.clone();
+      this._lastFocused = this.focused;
+      this._lastFont = this.context.font;
+      this._lastThemeName = this.theme.name;
+      this._lastScrollX = this.scroll.x;
+      this._lastScrollY = this.scroll.y;
+    }
+  }
+}
+
+const piOver180 = Math.PI / 180.0;
+const rad45 = Math.PI * 0.25;
+const defaultOrientation = new Float32Array([0, 0, 0, 1]);
+const defaultPosition = new Float32Array([0, 0, 0]);
 
 // Borrowed from glMatrix.
 function mat4_perspectiveFromFieldOfView(out, fov, near, far) {
-  var upTan = Math.tan(fov ? fov.upDegrees * piOver180 : rad45),
-      downTan = Math.tan(fov ? fov.downDegrees * piOver180 : rad45),
-      leftTan = Math.tan(fov ? fov.leftDegrees * piOver180 : rad45),
-      rightTan = Math.tan(fov ? fov.rightDegrees * piOver180 : rad45),
-      xScale = 2.0 / (leftTan + rightTan),
-      yScale = 2.0 / (upTan + downTan);
+  var upTan = Math.tan(fov ? (fov.upDegrees * piOver180) : rad45),
+  downTan = Math.tan(fov ? (fov.downDegrees * piOver180) : rad45),
+  leftTan = Math.tan(fov ? (fov.leftDegrees * piOver180) : rad45),
+  rightTan = Math.tan(fov ? (fov.rightDegrees * piOver180) : rad45),
+  xScale = 2.0 / (leftTan + rightTan),
+  yScale = 2.0 / (upTan + downTan);
 
   out[0] = xScale;
   out[1] = 0.0;
@@ -50219,25 +49344,23 @@ function mat4_perspectiveFromFieldOfView(out, fov, near, far) {
   out[6] = 0.0;
   out[7] = 0.0;
   out[8] = -((leftTan - rightTan) * xScale * 0.5);
-  out[9] = (upTan - downTan) * yScale * 0.5;
+  out[9] = ((upTan - downTan) * yScale * 0.5);
   out[10] = far / (near - far);
   out[11] = -1.0;
   out[12] = 0.0;
   out[13] = 0.0;
-  out[14] = far * near / (near - far);
+  out[14] = (far * near) / (near - far);
   out[15] = 0.0;
   return out;
 }
 
 function mat4_fromRotationTranslation(out, q, v) {
   // Quaternion math
-  var x = q[0],
-      y = q[1],
-      z = q[2],
-      w = q[3],
+  var x = q[0], y = q[1], z = q[2], w = q[3],
       x2 = x + x,
       y2 = y + y,
       z2 = z + z,
+
       xx = x * x2,
       xy = x * y2,
       xz = x * z2,
@@ -50269,21 +49392,10 @@ function mat4_fromRotationTranslation(out, q, v) {
 }
 
 function mat4_translate(out, a, v) {
-  var x = v[0],
-      y = v[1],
-      z = v[2],
-      a00,
-      a01,
-      a02,
-      a03,
-      a10,
-      a11,
-      a12,
-      a13,
-      a20,
-      a21,
-      a22,
-      a23;
+  var x = v[0], y = v[1], z = v[2],
+      a00, a01, a02, a03,
+      a10, a11, a12, a13,
+      a20, a21, a22, a23;
 
   if (a === out) {
     out[12] = a[0] * x + a[4] * y + a[8] * z + a[12];
@@ -50291,13 +49403,13 @@ function mat4_translate(out, a, v) {
     out[14] = a[2] * x + a[6] * y + a[10] * z + a[14];
     out[15] = a[3] * x + a[7] * y + a[11] * z + a[15];
   } else {
-    a00 = a[0];a01 = a[1];a02 = a[2];a03 = a[3];
-    a10 = a[4];a11 = a[5];a12 = a[6];a13 = a[7];
-    a20 = a[8];a21 = a[9];a22 = a[10];a23 = a[11];
+    a00 = a[0]; a01 = a[1]; a02 = a[2]; a03 = a[3];
+    a10 = a[4]; a11 = a[5]; a12 = a[6]; a13 = a[7];
+    a20 = a[8]; a21 = a[9]; a22 = a[10]; a23 = a[11];
 
-    out[0] = a00;out[1] = a01;out[2] = a02;out[3] = a03;
-    out[4] = a10;out[5] = a11;out[6] = a12;out[7] = a13;
-    out[8] = a20;out[9] = a21;out[10] = a22;out[11] = a23;
+    out[0] = a00; out[1] = a01; out[2] = a02; out[3] = a03;
+    out[4] = a10; out[5] = a11; out[6] = a12; out[7] = a13;
+    out[8] = a20; out[9] = a21; out[10] = a22; out[11] = a23;
 
     out[12] = a00 * x + a10 * y + a20 * z + a[12];
     out[13] = a01 * x + a11 * y + a21 * z + a[13];
@@ -50309,22 +49421,11 @@ function mat4_translate(out, a, v) {
 }
 
 function mat4_invert(out, a) {
-  var a00 = a[0],
-      a01 = a[1],
-      a02 = a[2],
-      a03 = a[3],
-      a10 = a[4],
-      a11 = a[5],
-      a12 = a[6],
-      a13 = a[7],
-      a20 = a[8],
-      a21 = a[9],
-      a22 = a[10],
-      a23 = a[11],
-      a30 = a[12],
-      a31 = a[13],
-      a32 = a[14],
-      a33 = a[15],
+  var a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3],
+      a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7],
+      a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11],
+      a30 = a[12], a31 = a[13], a32 = a[14], a33 = a[15],
+
       b00 = a00 * a11 - a01 * a10,
       b01 = a00 * a12 - a02 * a10,
       b02 = a00 * a13 - a03 * a10,
@@ -50338,9 +49439,8 @@ function mat4_invert(out, a) {
       b10 = a21 * a33 - a23 * a31,
       b11 = a22 * a33 - a23 * a32,
 
-
-  // Calculate the determinant
-  det = b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
+      // Calculate the determinant
+      det = b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
 
   if (!det) {
     return null;
@@ -50374,25 +49474,31 @@ function updateEyeMatrices(projection, view, pose, parameters, vrDisplay) {
   var position = pose.position || defaultPosition;
 
   mat4_fromRotationTranslation(view, orientation, position);
-  if (parameters) mat4_translate(view, view, parameters.offset);
+  if (parameters)
+    mat4_translate(view, view, parameters.offset);
   mat4_invert(view, view);
 }
 
+
 function frameDataFromPose(frameData, pose, vrDisplay) {
-  if (!frameData || !pose) return false;
+  if (!frameData || !pose)
+    return false;
 
   frameData.pose = pose;
   frameData.timestamp = pose.timestamp;
 
-  updateEyeMatrices(frameData.leftProjectionMatrix, frameData.leftViewMatrix, pose, vrDisplay.getEyeParameters("left"), vrDisplay);
-  updateEyeMatrices(frameData.rightProjectionMatrix, frameData.rightViewMatrix, pose, vrDisplay.getEyeParameters("right"), vrDisplay);
+  updateEyeMatrices(
+      frameData.leftProjectionMatrix, frameData.leftViewMatrix,
+      pose, vrDisplay.getEyeParameters("left"), vrDisplay);
+  updateEyeMatrices(
+      frameData.rightProjectionMatrix, frameData.rightViewMatrix,
+      pose, vrDisplay.getEyeParameters("right"), vrDisplay);
 
   return true;
 }
 
-var VRFrameData = function VRFrameData() {
-    classCallCheck(this, VRFrameData);
-
+class VRFrameData {
+  constructor () {
 
     this.leftProjectionMatrix = new Float32Array(16);
 
@@ -50403,7 +49509,8 @@ var VRFrameData = function VRFrameData() {
     this.rightViewMatrix = new Float32Array(16);
 
     this.pose = null;
-};
+  }
+}
 
 /*
  * Copyright 2015 Google Inc. All Rights Reserved.
@@ -50421,12 +49528,11 @@ var VRFrameData = function VRFrameData() {
  */
 
 // Start at a higher number to reduce chance of conflict.
-var nextDisplayId = 1000;
+let nextDisplayId = 1000;
 
-var VRDisplay = function () {
-  function VRDisplay(name) {
-    classCallCheck(this, VRDisplay);
 
+class VRDisplay {
+  constructor(name) {
     this._currentLayers = [];
 
     Object.defineProperties(this, {
@@ -50440,9 +49546,7 @@ var VRDisplay = function () {
       displayId: immutable(nextDisplayId++),
       displayName: immutable(name),
       stageParameters: immutable(null),
-      isPresenting: immutable(function () {
-        return FullScreen.isActive;
-      }),
+      isPresenting: immutable(() => FullScreen.isActive ),
 
       depthNear: mutable(0.01, "number"),
       depthFar: mutable(10000.0, "number"),
@@ -50454,72 +49558,65 @@ var VRDisplay = function () {
     this._poseData = null;
   }
 
-  createClass(VRDisplay, [{
-    key: "getFrameData",
-    value: function getFrameData(frameData) {
-      if (!this._frameData) {
-        this._frameData = frameDataFromPose(frameData, this.getPose(), this);
-      }
-      return this._frameData;
+  getFrameData(frameData) {
+    if(!this._frameData) {
+      this._frameData = frameDataFromPose(frameData, this.getPose(), this);
     }
-  }, {
-    key: "getPose",
-    value: function getPose() {
-      if (!this._poseData) {
-        this._poseData = this._getPose();
-      }
-      return this._poseData;
+    return this._frameData;
+  }
+
+  getPose() {
+    if(!this._poseData){
+      this._poseData = this._getPose();
     }
-  }, {
-    key: "requestAnimationFrame",
-    value: function requestAnimationFrame(callback) {
-      return window.requestAnimationFrame(callback);
+    return this._poseData;
+  }
+
+  requestAnimationFrame(callback) {
+    return window.requestAnimationFrame(callback);
+  }
+
+  cancelAnimationFrame(id) {
+    return window.cancelAnimationFrame(id);
+  }
+
+  requestPresent(layers) {
+    for (var i = 0; i < this.capabilities.maxLayers && i < layers.length; ++i) {
+      this._currentLayers[i] = layers[i];
     }
-  }, {
-    key: "cancelAnimationFrame",
-    value: function cancelAnimationFrame(id) {
-      return window.cancelAnimationFrame(id);
-    }
-  }, {
-    key: "requestPresent",
-    value: function requestPresent(layers) {
-      for (var i = 0; i < this.capabilities.maxLayers && i < layers.length; ++i) {
-        this._currentLayers[i] = layers[i];
-      }
-      var elem = layers[0].source;
-      return standardFullScreenBehavior(elem);
-    }
-  }, {
-    key: "exitPresent",
-    value: function exitPresent() {
-      this._currentLayers.splice(0);
-      return standardExitFullScreenBehavior();
-    }
-  }, {
-    key: "getLayers",
-    value: function getLayers() {
-      return this._currentLayers.slice();
-    }
-  }, {
-    key: "submitFrame",
-    value: function submitFrame(pose) {
-      this._frameData = null;
-      this._poseData = null;
-    }
-  }]);
-  return VRDisplay;
-}();
+    const elem = layers[0].source;
+    return standardFullScreenBehavior(elem);
+  }
+
+  exitPresent() {
+    this._currentLayers.splice(0);
+    return standardExitFullScreenBehavior();
+  }
+
+  getLayers() {
+    return this._currentLayers.slice();
+  }
+
+  submitFrame(pose) {
+    this._frameData = null;
+    this._poseData = null;
+  }
+
+}
 
 function calculateElementSize(display) {
-  var width = 0,
-      height = 0;
+  let width = 0,
+    height = 0;
 
-  if (!isiOS) {
-    width = document.body.clientWidth, height = document.body.clientHeight;
-  } else if (isLandscape()) {
+  if(!isiOS) {
+    width = document.body.clientWidth,
+    height = document.body.clientHeight;
+  }
+  else if(isLandscape()) {
     width = screen.height;
     height = screen.width;
-  } else {
+  }
+  else{
     width = screen.width;
     height = screen.height;
   }
@@ -50527,14 +49624,13 @@ function calculateElementSize(display) {
   width *= devicePixelRatio;
   height *= devicePixelRatio;
 
-  return { width: width, height: height };
+  return { width, height };
 }
 
-var DEG2RAD$1 = _Math.DEG2RAD;
-var RAD2DEG$1 = _Math.RAD2DEG;
+const { DEG2RAD: DEG2RAD$1, RAD2DEG: RAD2DEG$1 } = _Math;
 
 
-var defaultFieldOfView = 100;
+let defaultFieldOfView = 100;
 
 function getDefaultFieldOfView() {
   return defaultFieldOfView;
@@ -50544,20 +49640,22 @@ function setDefaultFieldOfView(v) {
   defaultFieldOfView = v;
 }
 
-function calcFoV(aFoV, aDim, bDim) {
+function calcFoV(aFoV, aDim, bDim){
   return RAD2DEG$1 * Math.atan(Math.tan(DEG2RAD$1 * aFoV) * aDim / bDim);
 }
 
-function getMonoscopicEyeParameters(side) {
+function getMonoscopicEyeParameters (side) {
   if (side === "left") {
-    var dim = calculateElementSize(this);
+    const dim = calculateElementSize(this);
 
-    var vFOV = void 0,
-        hFOV = void 0;
-    if (dim.height > dim.width) {
-      vFOV = defaultFieldOfView / 2, hFOV = calcFoV(vFOV, dim.width, dim.height);
-    } else {
-      hFOV = defaultFieldOfView / 2, vFOV = calcFoV(hFOV, dim.height, dim.width);
+    let vFOV, hFOV;
+    if(dim.height > dim.width) {
+      vFOV = defaultFieldOfView / 2,
+      hFOV = calcFoV(vFOV, dim.width, dim.height);
+    }
+    else {
+      hFOV = defaultFieldOfView / 2,
+      vFOV = calcFoV(hFOV, dim.height, dim.width);
     }
 
     return {
@@ -50595,40 +49693,29 @@ function defaultPose() {
   };
 }
 
-var StandardMonitorVRDisplay = function (_VRDisplay) {
-  inherits(StandardMonitorVRDisplay, _VRDisplay);
+class StandardMonitorVRDisplay extends VRDisplay {
 
-  function StandardMonitorVRDisplay(display) {
-    classCallCheck(this, StandardMonitorVRDisplay);
-
-    var _this = possibleConstructorReturn(this, (StandardMonitorVRDisplay.__proto__ || Object.getPrototypeOf(StandardMonitorVRDisplay)).call(this, "Full Screen"));
-
-    _this._display = display;
-    return _this;
+  constructor(display) {
+    super("Full Screen");
+    this._display = display;
   }
 
-  createClass(StandardMonitorVRDisplay, [{
-    key: "submitFrame",
-    value: function submitFrame(pose) {
-      if (this._display && this._display.isPolyfilled) {
-        this._display.submitFrame(pose);
-      }
+  submitFrame(pose) {
+    if(this._display && this._display.isPolyfilled) {
+      this._display.submitFrame(pose);
     }
-  }, {
-    key: "getPose",
-    value: function getPose() {
-      var display = isMobile && this._display;
-      if (display) {
-        return display.getPose();
-      } else {
-        return defaultPose();
-      }
+  }
+
+  getPose() {
+    var display = isMobile && this._display;
+    if(display){
+      return display.getPose();
     }
-  }]);
-  return StandardMonitorVRDisplay;
-}(VRDisplay);
-
-
+    else{
+      return defaultPose();
+    }
+  }
+}
 
 mixinMonoscopicEyeParameters(StandardMonitorVRDisplay);
 
@@ -50644,7 +49731,7 @@ function makeHidingContainer(id, obj) {
   return elem;
 }
 
-function initState() {
+function initState(){
   this.inputState = {
     buttons: [],
     axes: [],
@@ -50664,31 +49751,33 @@ function initState() {
 }
 
 function filterMetaKey(k) {
-  for (var i = 0; i < Keys.MODIFIER_KEYS.length; ++i) {
-    var m = Keys.MODIFIER_KEYS[i];
+  for (let i = 0; i < Keys.MODIFIER_KEYS.length; ++i) {
+    const m = Keys.MODIFIER_KEYS[i];
     if (Math.abs(k) === Keys[m.toLocaleUpperCase()]) {
       return Math.sign(k) * (i + 1);
     }
   }
 }
 
-function filterValue(elem) {
-  var t = typeof elem === "undefined" ? "undefined" : _typeof(elem);
-  var index = 0,
-      toggle = false,
-      sign = 1;
+function filterValue(elem){
+  const t = typeof elem;
+  let index = 0,
+    toggle = false,
+    sign = 1;
 
-  if (t === "number") {
+  if(t === "number"){
     index = Math.abs(elem) - 1;
     toggle = elem < 0;
-    sign = elem < 0 ? -1 : 1;
-  } else if (t === "string") {
-    if (elem[0] === "-") {
+    sign = (elem < 0) ? -1 : 1;
+  }
+  else if(t === "string") {
+    if(elem[0] === "-") {
       sign = -1;
       elem = elem.substring(1);
     }
     index = this.axisNames.indexOf(elem);
-  } else {
+  }
+  else {
     throw new Error("Cannot clone command spec. Element was type: " + t, elem);
   }
 
@@ -50699,60 +49788,56 @@ function filterValue(elem) {
   };
 }
 
-function swap(a, b) {
-  for (var i = 0; i < this.inputState.buttons.length; ++i) {
+function swap(a, b){
+  for(let i = 0; i < this.inputState.buttons.length; ++i){
     this[a].buttons[i] = this[b].buttons[i];
   }
-  for (var _i = 0; _i < this.inputState.axes.length; ++_i) {
-    this[a].axes[_i] = this[b].axes[_i];
+  for(let i = 0; i < this.inputState.axes.length; ++i){
+    this[a].axes[i] = this[b].axes[i];
   }
-  for (var _i2 = 0; _i2 < Keys.MODIFIER_KEYS.length; ++_i2) {
-    var m = Keys.MODIFIER_KEYS[_i2];
+  for (let i = 0; i < Keys.MODIFIER_KEYS.length; ++i) {
+    const m = Keys.MODIFIER_KEYS[i];
     this[a][m] = this[b][m];
   }
 }
 
-function resetInputState() {
+function resetInputState(){
   swap.call(this, "inputState", "lastInputState");
 }
 
-function recordLastState() {
+function recordLastState(){
   swap.call(this, "lastInputState", "inputState");
 }
 
-var CommandState = function CommandState() {
-  classCallCheck(this, CommandState);
+class CommandState{
+  constructor(){
+    this.value = null;
+    this.pressed = false;
+    this.wasPressed = false;
+    this.fireAgain = false;
+    this.lt = 0;
+    this.ct = 0;
+    this.repeatCount = 0;
+  }
+}
 
-  this.value = null;
-  this.pressed = false;
-  this.wasPressed = false;
-  this.fireAgain = false;
-  this.lt = 0;
-  this.ct = 0;
-  this.repeatCount = 0;
-};
+class InputProcessor extends EventDispatcher {
 
-var InputProcessor = function (_EventDispatcher) {
-  inherits(InputProcessor, _EventDispatcher);
+  constructor(name, commands, axisNames, userActionEvent) {
+    super();
+    this.name = name;
+    this.commands = {};
+    this.commandNames = [];
+    this.enabled = true;
+    this.paused = false;
+    this.ready = true;
+    this.inPhysicalUse = false;
+    initState.call(this);
 
-  function InputProcessor(name, commands, axisNames, userActionEvent) {
-    classCallCheck(this, InputProcessor);
-
-    var _this = possibleConstructorReturn(this, (InputProcessor.__proto__ || Object.getPrototypeOf(InputProcessor)).call(this));
-
-    _this.name = name;
-    _this.commands = {};
-    _this.commandNames = [];
-    _this.enabled = true;
-    _this.paused = false;
-    _this.ready = true;
-    _this.inPhysicalUse = false;
-    initState.call(_this);
-
-    var readMetaKeys = function readMetaKeys(event) {
-      for (var i = 0; i < Keys.MODIFIER_KEYS.length; ++i) {
-        var m = Keys.MODIFIER_KEYS[i];
-        _this.inputState[m] = event[m + "Key"];
+    const readMetaKeys = (event) => {
+      for (let i = 0; i < Keys.MODIFIER_KEYS.length; ++i) {
+        const m = Keys.MODIFIER_KEYS[i];
+        this.inputState[m] = event[m + "Key"];
       }
     };
 
@@ -50760,436 +49845,413 @@ var InputProcessor = function (_EventDispatcher) {
     window.addEventListener("keyup", readMetaKeys, false);
     window.addEventListener("focus", readMetaKeys, false);
 
-    _this.axisNames = axisNames || [];
+    this.axisNames = axisNames || [];
 
-    for (var i = 0; i < _this.axisNames.length; ++i) {
-      _this.inputState.axes[i] = 0;
+    for (let i = 0; i < this.axisNames.length; ++i) {
+      this.inputState.axes[i] = 0;
     }
 
-    for (var cmdName in commands) {
-      _this.addCommand(cmdName, commands[cmdName]);
+    for (const cmdName in commands) {
+      this.addCommand(cmdName, commands[cmdName]);
     }
 
-    for (var _i3 = 0; _i3 < Keys.MODIFIER_KEYS.length; ++_i3) {
-      _this.inputState[Keys.MODIFIER_KEYS[_i3]] = false;
+    for (let i = 0; i < Keys.MODIFIER_KEYS.length; ++i) {
+      this.inputState[Keys.MODIFIER_KEYS[i]] = false;
     }
 
-    _this.userActionHandlers = null;
-    if (userActionEvent) {
-      window.addEventListener(userActionEvent, function (evt) {
-        if (_this.userActionHandlers) {
-          for (var _i4 = 0; _i4 < _this.userActionHandlers.length; ++_i4) {
-            _this.userActionHandlers[_i4](evt);
+    this.userActionHandlers = null;
+    if(userActionEvent){
+      window.addEventListener(userActionEvent, (evt) => {
+        if(this.userActionHandlers) {
+          for (let i = 0; i < this.userActionHandlers.length; ++i) {
+            this.userActionHandlers[i](evt);
           }
         }
       });
     }
-    return _this;
   }
 
-  createClass(InputProcessor, [{
-    key: "addCommand",
-    value: function addCommand(name, cmd) {
-      cmd.name = name;
-      cmd = this.cloneCommand(cmd);
-      if (typeof cmd.repetitions === "undefined") {
-        cmd.repetitions = 1;
+  get inPhysicalUse() {
+    return this._inPhysicalUse;
+  }
+
+  set inPhysicalUse(v) {
+    const wasInPhysicalUse = this._inPhysicalUse;
+    this._inPhysicalUse = v;
+    if(!wasInPhysicalUse && v){
+      this.emit("activate");
+    }
+  }
+
+  addCommand(name, cmd) {
+    cmd.name = name;
+    cmd = this.cloneCommand(cmd);
+    if (typeof cmd.repetitions === "undefined") {
+      cmd.repetitions = 1;
+    }
+    cmd.state = new CommandState();
+    this.commands[name] = cmd;
+    this.commandNames.push(name);
+  }
+
+  cloneCommand(cmd) {
+    return {
+      name: cmd.name,
+      disabled: !!cmd.disabled,
+      dt: cmd.dt || 0,
+      deadzone: cmd.deadzone || 0,
+      threshold: cmd.threshold || 0,
+      repetitions: cmd.repetitions,
+      scale: cmd.scale,
+      offset: cmd.offset,
+      min: cmd.min,
+      max: cmd.max,
+      integrate: !!cmd.integrate,
+      delta: !!cmd.delta,
+      axes: this.maybeClone(cmd.axes),
+      commands: cmd.commands && cmd.commands.slice() || [],
+      buttons: this.maybeClone(cmd.buttons),
+      metaKeys: this.maybeClone(cmd.metaKeys && cmd.metaKeys.map(filterMetaKey)),
+      commandDown: cmd.commandDown,
+      commandUp: cmd.commandUp
+    };
+  }
+
+  maybeClone(arr) {
+    var output = [];
+    if (arr) {
+      for (var i = 0; i < arr.length; ++i) {
+        output[i] = filterValue.call(this, arr[i]);
       }
-      cmd.state = new CommandState();
-      this.commands[name] = cmd;
-      this.commandNames.push(name);
     }
-  }, {
-    key: "cloneCommand",
-    value: function cloneCommand(cmd) {
-      return {
-        name: cmd.name,
-        disabled: !!cmd.disabled,
-        dt: cmd.dt || 0,
-        deadzone: cmd.deadzone || 0,
-        threshold: cmd.threshold || 0,
-        repetitions: cmd.repetitions,
-        scale: cmd.scale,
-        offset: cmd.offset,
-        min: cmd.min,
-        max: cmd.max,
-        integrate: !!cmd.integrate,
-        delta: !!cmd.delta,
-        axes: this.maybeClone(cmd.axes),
-        commands: cmd.commands && cmd.commands.slice() || [],
-        buttons: this.maybeClone(cmd.buttons),
-        metaKeys: this.maybeClone(cmd.metaKeys && cmd.metaKeys.map(filterMetaKey)),
-        commandDown: cmd.commandDown,
-        commandUp: cmd.commandUp
-      };
-    }
-  }, {
-    key: "maybeClone",
-    value: function maybeClone(arr) {
-      var output = [];
-      if (arr) {
-        for (var i = 0; i < arr.length; ++i) {
-          output[i] = filterValue.call(this, arr[i]);
+    return output;
+  }
+
+  update(dt) {
+    if (this.enabled && this.ready && this.inPhysicalUse && !this.paused && dt > 0) {
+
+      this.inputState.buttons[Keys.ANY] = false;
+      for (const n in this.inputState.buttons) {
+        if (this.inputState.buttons[n]) {
+          this.inputState.buttons[Keys.ANY] = true;
+          break;
         }
       }
-      return output;
-    }
-  }, {
-    key: "update",
-    value: function update(dt) {
-      if (this.enabled && this.ready && this.inPhysicalUse && !this.paused && dt > 0) {
 
-        this.inputState.buttons[Keys.ANY] = false;
-        for (var n in this.inputState.buttons) {
-          if (this.inputState.buttons[n]) {
-            this.inputState.buttons[Keys.ANY] = true;
-            break;
+      let stateMod = recordLastState;
+      for (var name in this.commands) {
+        var cmd = this.commands[name];
+        cmd.state.wasPressed = cmd.state.pressed;
+        cmd.state.pressed = false;
+        if (!cmd.disabled) {
+          let pressed = true,
+            value = 0;
+          if (cmd.metaKeys) {
+            for (let n = 0; n < cmd.metaKeys.length && pressed; ++n) {
+              var m = cmd.metaKeys[n];
+              pressed = pressed &&
+                (this.inputState[Keys.MODIFIER_KEYS[m.index]] &&
+                  !m.toggle ||
+                  !this.inputState[Keys.MODIFIER_KEYS[m.index]] &&
+                  m.toggle);
+            }
           }
-        }
 
-        var stateMod = recordLastState;
-        for (var name in this.commands) {
-          var cmd = this.commands[name];
-          cmd.state.wasPressed = cmd.state.pressed;
-          cmd.state.pressed = false;
-          if (!cmd.disabled) {
-            var pressed = true,
-                value = 0;
-            if (cmd.metaKeys) {
-              for (var _n = 0; _n < cmd.metaKeys.length && pressed; ++_n) {
-                var m = cmd.metaKeys[_n];
-                pressed = pressed && (this.inputState[Keys.MODIFIER_KEYS[m.index]] && !m.toggle || !this.inputState[Keys.MODIFIER_KEYS[m.index]] && m.toggle);
+          if (pressed) {
+            if (cmd.buttons.length > 0) {
+              for (let n = 0; n < cmd.buttons.length; ++n) {
+                var btn = cmd.buttons[n],
+                  code = btn.index + 1,
+                  p = !!this.inputState.buttons[code];
+
+                const temp = p ? btn.sign : 0;
+                pressed = pressed && (p && !btn.toggle || !p && btn.toggle);
+                if (Math.abs(temp) > Math.abs(value)) {
+                  value = temp;
+                }
               }
             }
 
-            if (pressed) {
-              if (cmd.buttons.length > 0) {
-                for (var _n2 = 0; _n2 < cmd.buttons.length; ++_n2) {
-                  var btn = cmd.buttons[_n2],
-                      code = btn.index + 1,
-                      p = !!this.inputState.buttons[code];
-
-                  var temp = p ? btn.sign : 0;
-                  pressed = pressed && (p && !btn.toggle || !p && btn.toggle);
+            if (cmd.buttons.length === 0 || value !== 0) {
+              if (cmd.axes.length > 0) {
+                value = 0;
+                for (let n = 0; n < cmd.axes.length; ++n) {
+                  var a = cmd.axes[n];
+                  const temp = a.sign * this.inputState.axes[a.index];
+                  if (Math.abs(temp) > Math.abs(value)) {
+                    value = temp;
+                  }
+                }
+              }
+              else if(cmd.commands.length > 0){
+                value = 0;
+                for (let n = 0; n < cmd.commands.length; ++n) {
+                  const temp = this.getValue(cmd.commands[n]);
                   if (Math.abs(temp) > Math.abs(value)) {
                     value = temp;
                   }
                 }
               }
 
-              if (cmd.buttons.length === 0 || value !== 0) {
-                if (cmd.axes.length > 0) {
-                  value = 0;
-                  for (var _n3 = 0; _n3 < cmd.axes.length; ++_n3) {
-                    var a = cmd.axes[_n3];
-                    var _temp = a.sign * this.inputState.axes[a.index];
-                    if (Math.abs(_temp) > Math.abs(value)) {
-                      value = _temp;
-                    }
-                  }
-                } else if (cmd.commands.length > 0) {
-                  value = 0;
-                  for (var _n4 = 0; _n4 < cmd.commands.length; ++_n4) {
-                    var _temp2 = this.getValue(cmd.commands[_n4]);
-                    if (Math.abs(_temp2) > Math.abs(value)) {
-                      value = _temp2;
-                    }
-                  }
-                }
+              if (cmd.scale !== undefined) {
+                value *= cmd.scale;
+              }
 
-                if (cmd.scale !== undefined) {
-                  value *= cmd.scale;
-                }
+              if (cmd.offset !== undefined) {
+                value += cmd.offset;
+              }
 
-                if (cmd.offset !== undefined) {
-                  value += cmd.offset;
-                }
+              if (cmd.deadzone && Math.abs(value) < cmd.deadzone) {
+                value = 0;
+              }
 
-                if (cmd.deadzone && Math.abs(value) < cmd.deadzone) {
-                  value = 0;
+              if (cmd.integrate) {
+                value = this.getValue(cmd.name) + value * dt;
+              }
+              else if (cmd.delta) {
+                var ov = value;
+                if (cmd.state.lv !== undefined) {
+                  value = (value - cmd.state.lv);
                 }
+                cmd.state.lv = ov;
+              }
 
-                if (cmd.integrate) {
-                  value = this.getValue(cmd.name) + value * dt;
-                } else if (cmd.delta) {
-                  var ov = value;
-                  if (cmd.state.lv !== undefined) {
-                    value = value - cmd.state.lv;
-                  }
-                  cmd.state.lv = ov;
-                }
+              if (cmd.min !== undefined && value < cmd.min){
+                value = cmd.min;
+                stateMod = resetInputState;
+              }
 
-                if (cmd.min !== undefined && value < cmd.min) {
-                  value = cmd.min;
-                  stateMod = resetInputState;
-                }
+              if (cmd.max !== undefined && value > cmd.max) {
+                value = cmd.max;
+                stateMod = resetInputState;
+              }
 
-                if (cmd.max !== undefined && value > cmd.max) {
-                  value = cmd.max;
-                  stateMod = resetInputState;
-                }
-
-                if (cmd.threshold) {
-                  pressed = pressed && value > cmd.threshold;
-                }
+              if (cmd.threshold) {
+                pressed = pressed && (value > cmd.threshold);
               }
             }
-
-            cmd.state.pressed = pressed;
-            cmd.state.value = value;
-            cmd.state.lt += dt;
-
-            cmd.state.fireAgain = cmd.state.pressed && cmd.state.lt >= cmd.dt && (cmd.repetitions === -1 || cmd.state.repeatCount < cmd.repetitions);
-
-            if (cmd.state.fireAgain) {
-              cmd.state.lt = 0;
-              ++cmd.state.repeatCount;
-            } else if (!cmd.state.pressed) {
-              cmd.state.repeatCount = 0;
-            }
-          }
-        }
-        stateMod.call(this);
-
-        this.fireCommands();
-      }
-    }
-  }, {
-    key: "zero",
-    value: function zero() {
-      initState.call(this);
-      for (var key in this.commands) {
-        this.commands[key].state = new CommandState();
-      }
-    }
-  }, {
-    key: "fireCommands",
-    value: function fireCommands() {
-      if (this.ready && !this.paused) {
-        for (var name in this.commands) {
-          var cmd = this.commands[name];
-          if (cmd.state.fireAgain && cmd.commandDown) {
-            cmd.commandDown(this.name);
           }
 
-          if (!cmd.state.pressed && cmd.state.wasPressed && cmd.commandUp) {
-            cmd.commandUp(this.name);
+          cmd.state.pressed = pressed;
+          cmd.state.value = value;
+          cmd.state.lt += dt;
+
+          cmd.state.fireAgain = cmd.state.pressed &&
+            cmd.state.lt >= cmd.dt &&
+            (cmd.repetitions === -1 || cmd.state.repeatCount < cmd.repetitions);
+
+          if (cmd.state.fireAgain) {
+            cmd.state.lt = 0;
+            ++cmd.state.repeatCount;
+          }
+          else if (!cmd.state.pressed) {
+            cmd.state.repeatCount = 0;
           }
         }
       }
+      stateMod.call(this);
+
+      this.fireCommands();
     }
-  }, {
-    key: "setProperty",
-    value: function setProperty(key, name, value) {
-      if (this.commands[name]) {
-        this.commands[name][key] = value;
-      }
+  }
+
+  zero() {
+    initState.call(this);
+    for(const key in this.commands){
+      this.commands[key].state = new CommandState();
     }
-  }, {
-    key: "setDeadzone",
-    value: function setDeadzone(name, value) {
-      this.setProperty("deadzone", name, value);
-    }
-  }, {
-    key: "setScale",
-    value: function setScale(name, value) {
-      this.setProperty("scale", name, value);
-    }
-  }, {
-    key: "setDT",
-    value: function setDT(name, value) {
-      this.setProperty("dt", name, value);
-    }
-  }, {
-    key: "setMin",
-    value: function setMin(name, value) {
-      this.setProperty("min", name, value);
-    }
-  }, {
-    key: "setMax",
-    value: function setMax(name, value) {
-      this.setProperty("max", name, value);
-    }
-  }, {
-    key: "addMetaKey",
-    value: function addMetaKey(name, value) {
-      this.addToArray("metaKeys", name, filterMetaKey(value));
-    }
-  }, {
-    key: "addAxis",
-    value: function addAxis(name, value) {
-      this.addToArray("axes", name, value);
-    }
-  }, {
-    key: "addButton",
-    value: function addButton(name, value) {
-      this.addToArray("buttons", name, value);
-    }
-  }, {
-    key: "removeMetaKey",
-    value: function removeMetaKey(name, value) {
-      this.removeFromArray("metaKeys", name, value);
-    }
-  }, {
-    key: "removeAxis",
-    value: function removeAxis(name, value) {
-      this.removeFromArray("axes", name, value);
-    }
-  }, {
-    key: "removeButton",
-    value: function removeButton(name, value) {
-      this.removeFromArray("buttons", name, value);
-    }
-  }, {
-    key: "invertAxis",
-    value: function invertAxis(name, value) {
-      this.invertInArray("axes", name, value);
-    }
-  }, {
-    key: "invertButton",
-    value: function invertButton(name, value) {
-      this.invertInArray("buttons", name, value);
-    }
-  }, {
-    key: "invertMetaKey",
-    value: function invertMetaKey(name, value) {
-      this.invertInArray("metaKeys", name, value);
-    }
-  }, {
-    key: "addToArray",
-    value: function addToArray(key, name, value) {
-      if (this.commands[name] && this.commands[name][key]) {
-        this.commands[name][key].push(filterValue(value));
-      }
-    }
-  }, {
-    key: "removeFromArray",
-    value: function removeFromArray(key, name, value) {
-      if (this.commands[name] && this.commands[name][key]) {
-        --value;
-        var arr = this.commands[name][key];
-        for (var i = 0; i < arr.length; ++i) {
-          var elem = arr[i];
-          if (elem.index === value) {
-            return arr.splice(i, 1);
-          }
+  }
+
+  fireCommands() {
+    if (this.ready && !this.paused) {
+      for (var name in this.commands) {
+        var cmd = this.commands[name];
+        if (cmd.state.fireAgain && cmd.commandDown) {
+          cmd.commandDown(this.name);
+        }
+
+        if (!cmd.state.pressed && cmd.state.wasPressed && cmd.commandUp) {
+          cmd.commandUp(this.name);
         }
       }
     }
-  }, {
-    key: "invertInArray",
-    value: function invertInArray(key, name, value) {
-      if (this.commands[name] && this.commands[name][key]) {
-        var arr = this.commands[name][key],
-            n = arr.indexOf(value);
-        for (var i = 0; i < arr.length; ++i) {
-          var elem = arr[i];
-          if (elem.index === value) {
-            elem.sign *= -1;
-            return;
-          }
+  }
+
+  setProperty(key, name, value) {
+    if (this.commands[name]) {
+      this.commands[name][key] = value;
+    }
+  }
+
+  setDeadzone(name, value) {
+    this.setProperty("deadzone", name, value);
+  }
+
+  setScale(name, value) {
+    this.setProperty("scale", name, value);
+  }
+
+  setDT(name, value) {
+    this.setProperty("dt", name, value);
+  }
+
+  setMin(name, value) {
+    this.setProperty("min", name, value);
+  }
+
+  setMax(name, value) {
+    this.setProperty("max", name, value);
+  }
+
+  addMetaKey(name, value) {
+    this.addToArray("metaKeys", name, filterMetaKey(value));
+  }
+
+  addAxis(name, value) {
+    this.addToArray("axes", name, value);
+  }
+
+  addButton(name, value) {
+    this.addToArray("buttons", name, value);
+  }
+
+  removeMetaKey(name, value) {
+    this.removeFromArray("metaKeys", name, value);
+  }
+
+  removeAxis(name, value) {
+    this.removeFromArray("axes", name, value);
+  }
+
+  removeButton(name, value) {
+    this.removeFromArray("buttons", name, value);
+  }
+
+  invertAxis(name, value) {
+    this.invertInArray("axes", name, value);
+  }
+
+  invertButton(name, value) {
+    this.invertInArray("buttons", name, value);
+  }
+
+  invertMetaKey(name, value) {
+    this.invertInArray("metaKeys", name, value);
+  }
+
+  addToArray(key, name, value) {
+    if (this.commands[name] && this.commands[name][key]) {
+      this.commands[name][key].push(filterValue(value));
+    }
+  }
+
+  removeFromArray(key, name, value) {
+    if (this.commands[name] && this.commands[name][key]) {
+      --value;
+      const arr = this.commands[name][key];
+      for(let i = 0; i < arr.length; ++i){
+        const elem = arr[i];
+        if(elem.index === value){
+          return arr.splice(i, 1);
         }
       }
     }
-  }, {
-    key: "pause",
-    value: function pause(v) {
-      this.paused = v;
-    }
-  }, {
-    key: "isPaused",
-    value: function isPaused() {
-      return this.paused;
-    }
-  }, {
-    key: "enable",
-    value: function enable(k, v) {
-      if (v === undefined || v === null) {
-        v = k;
-        k = null;
-      }
+  }
 
-      if (k) {
-        this.setProperty("disabled", k, !v);
-      } else {
-        this.enabled = v;
+  invertInArray(key, name, value) {
+    if (this.commands[name] && this.commands[name][key]) {
+      var arr = this.commands[name][key],
+        n = arr.indexOf(value);
+      for(let i = 0; i < arr.length; ++i){
+        const elem = arr[i];
+        if(elem.index === value){
+          elem.sign *= -1;
+          return;
+        }
       }
     }
-  }, {
-    key: "isEnabled",
-    value: function isEnabled(name) {
-      return name && this.commands[name] && !this.commands[name].disabled;
-    }
-  }, {
-    key: "getAxis",
-    value: function getAxis(name) {
-      var i = this.axisNames.indexOf(name);
-      if (i > -1) {
-        var value = this.inputState.axes[i] || 0;
-        return value;
-      }
-      return null;
-    }
-  }, {
-    key: "setAxis",
-    value: function setAxis(name, value) {
-      var i = this.axisNames.indexOf(name);
-      if (i > -1 && (this.inPhysicalUse || value !== 0)) {
-        this.inputState.axes[i] = value;
-      }
-    }
-  }, {
-    key: "setButton",
-    value: function setButton(index, pressed) {
-      if (this.inPhysicalUse || pressed) {
-        this.inputState.buttons[index] = pressed;
-      }
-    }
-  }, {
-    key: "isDown",
-    value: function isDown(name) {
-      return this.enabled && this.isEnabled(name) && this.commands[name].state.pressed;
-    }
-  }, {
-    key: "isUp",
-    value: function isUp(name) {
-      return this.enabled && this.isEnabled(name) && this.commands[name].state.pressed;
-    }
-  }, {
-    key: "getValue",
-    value: function getValue(name) {
-      return this.enabled && this.isEnabled(name) && (this.commands[name].state.value || this.getAxis(name)) || 0;
-    }
-  }, {
-    key: "setValue",
-    value: function setValue(name, value) {
-      var j = this.axisNames.indexOf(name);
-      if (!this.commands[name] && j > -1) {
-        this.setAxis(name, value);
-      } else if (this.commands[name] && !this.commands[name].disabled) {
-        this.commands[name].state.value = value;
-      }
-    }
-  }, {
-    key: "inPhysicalUse",
-    get: function get$$1() {
-      return this._inPhysicalUse;
-    },
-    set: function set$$1(v) {
-      var wasInPhysicalUse = this._inPhysicalUse;
-      this._inPhysicalUse = v;
-      if (!wasInPhysicalUse && v) {
-        this.emit("activate");
-      }
-    }
-  }]);
-  return InputProcessor;
-}(EventDispatcher);
+  }
 
-var OperatingSystem = function () {
-  function OperatingSystem(osName, pre1, pre2, redo, pre3, home, end, pre5) {
-    classCallCheck(this, OperatingSystem);
+  pause(v) {
+    this.paused = v;
+  }
 
+  isPaused() {
+    return this.paused;
+  }
+
+  enable(k, v) {
+    if (v === undefined || v === null) {
+      v = k;
+      k = null;
+    }
+
+    if (k) {
+      this.setProperty("disabled", k, !v);
+    }
+    else {
+      this.enabled = v;
+    }
+  }
+
+  isEnabled(name) {
+    return name && this.commands[name] && !this.commands[name].disabled;
+  }
+
+  getAxis(name) {
+    var i = this.axisNames.indexOf(name);
+    if (i > -1) {
+      var value = this.inputState.axes[i] || 0;
+      return value;
+    }
+    return null;
+  }
+
+  setAxis(name, value) {
+    var i = this.axisNames.indexOf(name);
+    if (i > -1 && (this.inPhysicalUse || value !== 0)) {
+      this.inputState.axes[i] = value;
+    }
+  }
+
+  setButton(index, pressed) {
+    if(this.inPhysicalUse || pressed){
+      this.inputState.buttons[index] = pressed;
+    }
+  }
+
+  isDown(name) {
+    return this.enabled &&
+      this.isEnabled(name) &&
+      this.commands[name].state.pressed;
+  }
+
+  isUp(name) {
+    return this.enabled &&
+      this.isEnabled(name) &&
+      this.commands[name].state.pressed;
+  }
+
+  getValue(name) {
+    return this.enabled &&
+        this.isEnabled(name) &&
+        (this.commands[name].state.value || this.getAxis(name)) ||
+        0;
+  }
+
+  setValue(name, value) {
+    var j = this.axisNames.indexOf(name);
+    if (!this.commands[name] && j > -1) {
+      this.setAxis(name, value);
+    }
+    else if (this.commands[name] && !this.commands[name].disabled) {
+      this.commands[name].state.value = value;
+    }
+  }
+}
+
+class OperatingSystem {
+  constructor(osName, pre1, pre2, redo, pre3, home, end, pre5) {
     this.name = osName;
 
     var pre4 = pre3;
@@ -51217,47 +50279,51 @@ var OperatingSystem = function () {
     this[pre5 + "SHIFT_END"] = "CTRLSHIFT_END";
   }
 
-  createClass(OperatingSystem, [{
-    key: "makeCommandName",
-    value: function makeCommandName(evt, codePage) {
-      var key = evt.keyCode;
-      if (key !== Keys.CTRL && key !== Keys.ALT && key !== Keys.META_L && key !== Keys.META_R && key !== Keys.SHIFT) {
+  makeCommandName(evt, codePage) {
+    const key = evt.keyCode;
+    if (key !== Keys.CTRL &&
+      key !== Keys.ALT &&
+      key !== Keys.META_L &&
+      key !== Keys.META_R &&
+      key !== Keys.SHIFT) {
 
-        var commandName = codePage.deadKeyState;
+      let commandName = codePage.deadKeyState;
 
-        if (evt.ctrlKey) {
-          commandName += "CTRL";
-        }
-        if (evt.altKey) {
-          commandName += "ALT";
-        }
-        if (evt.metaKey) {
-          commandName += "META";
-        }
-        if (evt.shiftKey) {
-          commandName += "SHIFT";
-        }
-        if (commandName === codePage.deadKeyState) {
-          commandName += "NORMAL";
-        }
-
-        commandName += "_" + codePage.keyNames[key];
-
-        return this[commandName] || commandName;
+      if (evt.ctrlKey) {
+        commandName += "CTRL";
       }
+      if (evt.altKey) {
+        commandName += "ALT";
+      }
+      if (evt.metaKey) {
+        commandName += "META";
+      }
+      if (evt.shiftKey) {
+        commandName += "SHIFT";
+      }
+      if (commandName === codePage.deadKeyState) {
+        commandName += "NORMAL";
+      }
+
+      commandName += "_" + codePage.keyNames[key];
+
+      return this[commandName] || commandName;
     }
-  }]);
-  return OperatingSystem;
-}();
+  }
+}
 
-var Windows = new OperatingSystem("Windows", "CTRL", "CTRL", "CTRL_y", "", "HOME", "END", "CTRL", "HOME", "END");
+var Windows = new OperatingSystem(
+  "Windows", "CTRL", "CTRL", "CTRL_y",
+  "", "HOME", "END",
+  "CTRL", "HOME", "END");
 
-var macOS = new OperatingSystem("macOS", "META", "ALT", "METASHIFT_z", "META", "LEFTARROW", "RIGHTARROW", "META", "UPARROW", "DOWNARROW");
+var macOS = new OperatingSystem(
+  "macOS", "META", "ALT", "METASHIFT_z",
+  "META", "LEFTARROW", "RIGHTARROW",
+  "META", "UPARROW", "DOWNARROW");
 
-var CodePage = function () {
-  function CodePage(codePageName, lang, options) {
-    classCallCheck(this, CodePage);
-
+class CodePage {
+  constructor(codePageName, lang, options) {
     this.name = codePageName;
     this.language = lang;
 
@@ -51320,7 +50386,7 @@ var CodePage = function () {
       }
     };
 
-    for (var key in options) {
+    for(var key in options){
       commands[key] = Object.assign({}, commands[key], options[key]);
     }
 
@@ -51351,15 +50417,16 @@ var CodePage = function () {
 
     for (var type in commands) {
       var codes = commands[type];
-      if ((typeof codes === "undefined" ? "undefined" : _typeof(codes)) === "object") {
+      if (typeof (codes) === "object") {
         for (code in codes) {
           if (code.indexOf("_") > -1) {
             var parts = code.split(' '),
-                browser = parts[0];
+              browser = parts[0];
             code = parts[1];
             char = commands.NORMAL[code];
             cmdName = browser + "_" + type + " " + char;
-          } else {
+          }
+          else {
             char = commands.NORMAL[code];
             cmdName = type + "_" + char;
           }
@@ -51377,18 +50444,12 @@ var CodePage = function () {
     this.lastDeadKeyState = this.deadKeyState = "";
   }
 
-  createClass(CodePage, [{
-    key: "resetDeadKeyState",
-    value: function resetDeadKeyState() {
-      if (this.deadKeyState === this.lastDeadKeyState) {
-        this.deadKeyState = "";
-      }
+  resetDeadKeyState() {
+    if(this.deadKeyState === this.lastDeadKeyState) {
+      this.deadKeyState = "";
     }
-  }]);
-  return CodePage;
-}();
-
-
+  }
+}
 
 CodePage.DEAD = function (key) {
   return function (prim) {
@@ -51741,229 +50802,207 @@ var FR_AZERTY = new CodePage("Français: AZERTY", "fr", {
 });
 
 var CodePages = {
-  CodePage: CodePage,
-  DE_QWERTZ: DE_QWERTZ,
-  EN_UKX: EN_UKX,
-  EN_US: EN_US,
-  FR_AZERTY: FR_AZERTY
+  CodePage,
+  DE_QWERTZ,
+  EN_UKX,
+  EN_US,
+  FR_AZERTY
 };
 
-var Keyboard = function (_InputProcessor) {
-  inherits(Keyboard, _InputProcessor);
+class Keyboard extends InputProcessor {
+  constructor(input, commands) {
+    super("Keyboard", commands);
 
-  function Keyboard(input, commands) {
-    classCallCheck(this, Keyboard);
-
-    var _this = possibleConstructorReturn(this, (Keyboard.__proto__ || Object.getPrototypeOf(Keyboard)).call(this, "Keyboard", commands));
-
-    _this._operatingSystem = null;
-    _this.browser = isChrome ? "CHROMIUM" : isFirefox ? "FIREFOX" : isIE ? "IE" : isOpera ? "OPERA" : isSafari ? "SAFARI" : "UNKNOWN";
-    _this._codePage = null;
-    _this.resetDeadKeyState = function () {
-      return _this.codePage.resetDeadKeyState();
-    };
-    return _this;
+    this._operatingSystem = null;
+    this.browser = isChrome ? "CHROMIUM" : (isFirefox ? "FIREFOX" : (isIE ? "IE" : (isOpera ? "OPERA" : (isSafari ? "SAFARI" : "UNKNOWN"))));
+    this._codePage = null;
+    this.resetDeadKeyState = () => this.codePage.resetDeadKeyState();
   }
 
-  createClass(Keyboard, [{
-    key: "consumeEvent",
-    value: function consumeEvent(evt) {
-      this.inPhysicalUse = true;
-      var isKeyDown = evt.type === "keydown";
-      this.setButton(evt.keyCode, isKeyDown);
-      if (isKeyDown) {
-        evt.cmdName = this.operatingSystem.makeCommandName(evt, this.codePage);
-        evt.altCmdName = this.browser + "_" + evt.cmdName;
-        evt.cmdText = this.codePage[evt.cmdName];
-        evt.altCmdText = this.codePage[evt.altCmdName];
-        evt.resetDeadKeyState = this.resetDeadKeyState;
+  consumeEvent(evt) {
+    this.inPhysicalUse = true;
+    const isKeyDown = evt.type === "keydown";
+    this.setButton(evt.keyCode, isKeyDown);
+    if(isKeyDown) {
+      evt.cmdName = this.operatingSystem.makeCommandName(evt, this.codePage);
+      evt.altCmdName = this.browser + "_" + evt.cmdName;
+      evt.cmdText = this.codePage[evt.cmdName];
+      evt.altCmdText = this.codePage[evt.altCmdName];
+      evt.resetDeadKeyState = this.resetDeadKeyState;
+    }
+  }
+
+  get operatingSystem() {
+    return this._operatingSystem;
+  }
+
+  set operatingSystem(os) {
+    this._operatingSystem = os || (isMacOS ? macOS : Windows);
+  }
+
+  get codePage() {
+    return this._codePage;
+  }
+
+  set codePage(cp) {
+    var key,
+      code,
+      char,
+      name;
+    this._codePage = cp;
+    if (!this._codePage) {
+      var lang = (navigator.languages && navigator.languages[0]) ||
+        navigator.language ||
+        navigator.userLanguage ||
+        navigator.browserLanguage;
+
+      if (!lang || lang === "en") {
+        lang = "en-US";
       }
-    }
-  }, {
-    key: "operatingSystem",
-    get: function get$$1() {
-      return this._operatingSystem;
-    },
-    set: function set$$1(os) {
-      this._operatingSystem = os || (isMacOS ? macOS : Windows);
-    }
-  }, {
-    key: "codePage",
-    get: function get$$1() {
-      return this._codePage;
-    },
-    set: function set$$1(cp) {
-      var key, code, char, name;
-      this._codePage = cp;
+
+      for (key in CodePages) {
+        cp = CodePages[key];
+        if (cp.language === lang) {
+          this._codePage = cp;
+          break;
+        }
+      }
+
       if (!this._codePage) {
-        var lang = navigator.languages && navigator.languages[0] || navigator.language || navigator.userLanguage || navigator.browserLanguage;
-
-        if (!lang || lang === "en") {
-          lang = "en-US";
-        }
-
-        for (key in CodePages) {
-          cp = CodePages[key];
-          if (cp.language === lang) {
-            this._codePage = cp;
-            break;
-          }
-        }
-
-        if (!this._codePage) {
-          this._codePage = CodePages.EN_US;
-        }
+        this._codePage = CodePages.EN_US;
       }
     }
-  }]);
-  return Keyboard;
-}(InputProcessor);
+  }
+}
 
-var Mouse = function (_InputProcessor) {
-  inherits(Mouse, _InputProcessor);
+class Mouse extends InputProcessor {
+  constructor(DOMElement, commands) {
+    super("Mouse", commands, ["BUTTONS", "X", "Y", "Z", "W"], "mousedown");
 
-  function Mouse(DOMElement, commands) {
-    classCallCheck(this, Mouse);
-
-    var _this = possibleConstructorReturn(this, (Mouse.__proto__ || Object.getPrototypeOf(Mouse)).call(this, "Mouse", commands, ["BUTTONS", "X", "Y", "Z", "W"], "mousedown"));
-
-    var setState = function setState(stateChange, event) {
-      _this.inPhysicalUse = true;
+    var setState = (stateChange, event) => {
+      this.inPhysicalUse = true;
       var state = event.buttons;
-      for (var button = 0; button < Mouse.NUM_BUTTONS; ++button) {
+      for(let button = 0; button < Mouse.NUM_BUTTONS; ++button) {
         var isDown = state & 0x1 !== 0;
-        if (isDown && stateChange || !isDown && !stateChange) {
-          _this.setButton(button, stateChange);
+        if(isDown && stateChange || !isDown && !stateChange){
+          this.setButton(button, stateChange);
         }
         state >>= 1;
       }
-      _this.setAxis("BUTTONS", event.buttons << 10);
-      if (event.target === DOMElement) {
+      this.setAxis("BUTTONS", event.buttons << 10);
+      if(event.target === DOMElement){
         event.preventDefault();
       }
     };
 
-    DOMElement.addEventListener("mousedown", setState.bind(_this, true), false);
-    DOMElement.addEventListener("mouseup", setState.bind(_this, false), false);
-    DOMElement.addEventListener("contextmenu", function (event) {
-      return !(event.ctrlKey && event.shiftKey) && event.preventDefault();
-    }, false);
-    DOMElement.addEventListener("mousemove", function (event) {
+    DOMElement.addEventListener("mousedown", setState.bind(this, true), false);
+    DOMElement.addEventListener("mouseup", setState.bind(this, false), false);
+    DOMElement.addEventListener("contextmenu", (event) => !(event.ctrlKey && event.shiftKey) && event.preventDefault(), false);
+    DOMElement.addEventListener("mousemove", (event) => {
       setState(true, event);
 
       if (PointerLock.isActive) {
         var mx = event.movementX,
-            my = event.movementY;
+          my = event.movementY;
 
         if (mx === undefined) {
           mx = event.webkitMovementX || event.mozMovementX || 0;
           my = event.webkitMovementY || event.mozMovementY || 0;
         }
-        _this.setAxis("X", _this.getAxis("X") + mx);
-        _this.setAxis("Y", _this.getAxis("Y") + my);
-      } else {
-        _this.setAxis("X", event.layerX);
-        _this.setAxis("Y", event.layerY);
+        this.setAxis("X", this.getAxis("X") + mx);
+        this.setAxis("Y", this.getAxis("Y") + my);
+      }
+      else {
+        this.setAxis("X", event.layerX);
+        this.setAxis("Y", event.layerY);
       }
     }, false);
 
-    DOMElement.addEventListener("wheel", function (event) {
+    DOMElement.addEventListener("wheel", (event) => {
       if (isChrome) {
-        _this.W += event.deltaX;
-        _this.Z += event.deltaY;
-      } else if (event.shiftKey) {
-        _this.W += event.deltaY;
-      } else {
-        _this.Z += event.deltaY;
+        this.W += event.deltaX;
+        this.Z += event.deltaY;
       }
-      if (event.target === DOMElement) {
+      else if (event.shiftKey) {
+        this.W += event.deltaY;
+      }
+      else {
+        this.Z += event.deltaY;
+      }
+      if(event.target === DOMElement){
         event.preventDefault();
       }
     }, false);
-    return _this;
   }
-
-  return Mouse;
-}(InputProcessor);
-
-
+}
 
 Mouse.NUM_BUTTONS = 3;
 
-var DEFAULT_POSE = {
-  position: [0, 0, 0],
-  orientation: [0, 0, 0, 1]
-};
-var EMPTY_SCALE = new Vector3();
-var IE_CORRECTION = new Quaternion(1, 0, 0, 0);
+const DEFAULT_POSE = {
+    position: [0, 0, 0],
+    orientation: [0, 0, 0, 1]
+  };
+const EMPTY_SCALE = new Vector3();
+const IE_CORRECTION = new Quaternion(1, 0, 0, 0);
 
-var PoseInputProcessor = function (_InputProcessor) {
-  inherits(PoseInputProcessor, _InputProcessor);
+class PoseInputProcessor extends InputProcessor {
+  constructor(name, commands, axisNames) {
+    super(name, commands, axisNames);
 
-  function PoseInputProcessor(name, commands, axisNames) {
-    classCallCheck(this, PoseInputProcessor);
-
-    var _this = possibleConstructorReturn(this, (PoseInputProcessor.__proto__ || Object.getPrototypeOf(PoseInputProcessor)).call(this, name, commands, axisNames));
-
-    _this.currentDevice = null;
-    _this.lastPose = null;
-    _this.currentPose = null;
-    _this.posePosition = new Vector3();
-    _this.poseQuaternion = new Quaternion();
-    _this.position = new Vector3();
-    _this.quaternion = new Quaternion();
-    _this.matrix = new Matrix4();
-    return _this;
+    this.currentDevice = null;
+    this.lastPose = null;
+    this.currentPose = null;
+    this.posePosition = new Vector3();
+    this.poseQuaternion = new Quaternion();
+    this.position = new Vector3();
+    this.quaternion = new Quaternion();
+    this.matrix = new Matrix4();
   }
 
-  createClass(PoseInputProcessor, [{
-    key: "update",
-    value: function update(dt) {
-      get(PoseInputProcessor.prototype.__proto__ || Object.getPrototypeOf(PoseInputProcessor.prototype), "update", this).call(this, dt);
+  get hasPose() {
+    return !!this.currentPose;
+  }
 
-      if (this.currentDevice) {
-        var pose = this.currentPose || this.lastPose || DEFAULT_POSE;
-        this.lastPose = pose;
-        this.inPhysicalUse = this.hasOrientation || this.inPhysicalUse;
-        var orient = this.currentPose && this.currentPose.orientation,
-            pos = this.currentPose && this.currentPose.position;
-        if (orient) {
-          this.poseQuaternion.fromArray(orient);
-          if (isMobile && isIE) {
-            this.poseQuaternion.multiply(IE_CORRECTION);
-          }
-        } else {
-          this.poseQuaternion.set(0, 0, 0, 1);
-        }
-        if (pos) {
-          this.posePosition.fromArray(pos);
-        } else {
-          this.posePosition.set(0, 0, 0);
+  update(dt) {
+    super.update(dt);
+
+    if (this.currentDevice) {
+      var pose = this.currentPose || this.lastPose || DEFAULT_POSE;
+      this.lastPose = pose;
+      this.inPhysicalUse = this.hasOrientation || this.inPhysicalUse;
+      var orient = this.currentPose && this.currentPose.orientation,
+        pos = this.currentPose && this.currentPose.position;
+      if (orient) {
+        this.poseQuaternion.fromArray(orient);
+        if(isMobile && isIE){
+          this.poseQuaternion.multiply(IE_CORRECTION);
         }
       }
+      else {
+        this.poseQuaternion.set(0, 0, 0, 1);
+      }
+      if (pos) {
+        this.posePosition.fromArray(pos);
+      }
+      else {
+        this.posePosition.set(0, 0, 0);
+      }
     }
-  }, {
-    key: "updateStage",
-    value: function updateStage(stageMatrix) {
-      this.matrix.makeRotationFromQuaternion(this.poseQuaternion);
-      this.matrix.setPosition(this.posePosition);
-      this.matrix.multiplyMatrices(stageMatrix, this.matrix);
-      this.matrix.decompose(this.position, this.quaternion, EMPTY_SCALE);
-    }
-  }, {
-    key: "hasPose",
-    get: function get$$1() {
-      return !!this.currentPose;
-    }
-  }]);
-  return PoseInputProcessor;
-}(InputProcessor);
+  }
 
-function playPattern(devices, pattern, pause) {
-  if (pattern.length > 0) {
-    var length = pattern.shift();
-    if (!pause) {
-      for (var i = 0; i < devices.length; ++i) {
+  updateStage(stageMatrix) {
+    this.matrix.makeRotationFromQuaternion(this.poseQuaternion);
+    this.matrix.setPosition(this.posePosition);
+    this.matrix.multiplyMatrices(stageMatrix, this.matrix);
+    this.matrix.decompose(this.position, this.quaternion, EMPTY_SCALE);
+  }
+}
+
+function playPattern(devices, pattern, pause){
+  if(pattern.length > 0){
+    const length = pattern.shift();
+    if(!pause){
+      for(var i = 0; i < devices.length; ++i){
         devices[0].vibrate(1, length);
       }
     }
@@ -51971,106 +51010,91 @@ function playPattern(devices, pattern, pause) {
   }
 }
 
-var Gamepad = function (_PoseInputProcessor) {
-  inherits(Gamepad, _PoseInputProcessor);
-  createClass(Gamepad, null, [{
-    key: "ID",
-    value: function ID(pad) {
-      var id = pad.id;
-      if (id === "OpenVR Gamepad") {
-        id = "Vive";
-      } else if (id.indexOf("Rift") === 0) {
-        id = "Rift";
-      } else if (id.indexOf("Unknown") === 0) {
-        id = "Unknown";
-      } else {
-        id = "Gamepad";
-      }
-      id = (id + "_" + (pad.index || 0)).replace(/\s+/g, "_");
-      return id;
+class Gamepad extends PoseInputProcessor {
+  static ID(pad) {
+    var id = pad.id;
+    if (id === "OpenVR Gamepad") {
+      id = "Vive";
     }
-  }, {
-    key: "isMotionController",
-    value: function isMotionController(pad) {
-      if (pad) {
-        var obj = pad.capabilities || pad.pose;
-        return obj && obj.hasOrientation;
-      }
-      return false;
+    else if (id.indexOf("Rift") === 0) {
+      id = "Rift";
     }
-  }]);
-
-  function Gamepad(mgr, pad, axisOffset, commands) {
-    classCallCheck(this, Gamepad);
-
-    var padID = Gamepad.ID(pad);
-
-    var _this = possibleConstructorReturn(this, (Gamepad.__proto__ || Object.getPrototypeOf(Gamepad)).call(this, padID, commands, ["LSX", "LSY", "RSX", "RSY", "IDK1", "IDK2", "Z", "BUTTONS"]));
-
-    mgr.registerPad(padID, _this);
-
-    _this.currentDevice = pad;
-    _this.axisOffset = axisOffset;
-    return _this;
+    else if (id.indexOf("Unknown") === 0) {
+      id = "Unknown";
+    }
+    else {
+      id = "Gamepad";
+    }
+    id = (id + "_" + (pad.index || 0))
+      .replace(/\s+/g, "_");
+    return id;
   }
 
-  createClass(Gamepad, [{
-    key: "getPose",
-    value: function getPose() {
-      return this.currentPose;
+  static isMotionController(pad){
+    if(pad) {
+      const obj = pad.capabilities || pad.pose;
+      return obj && obj.hasOrientation;
     }
-  }, {
-    key: "checkDevice",
-    value: function checkDevice(pad) {
-      this.inPhysicalUse = true;
-      var i,
-          j,
-          buttonMap = 0;
-      this.currentDevice = pad;
-      this.currentPose = this.hasOrientation && this.currentDevice.pose;
-      for (i = 0, j = pad.buttons.length; i < pad.buttons.length; ++i, ++j) {
-        var btn = pad.buttons[i];
-        this.setButton(i, btn.pressed);
-        if (btn.pressed) {
-          buttonMap |= 0x1 << i;
-        }
+    return false;
+  }
 
-        this.setButton(j, btn.touched);
-        if (btn.touched) {
-          buttonMap |= 0x1 << j;
-        }
+  constructor(mgr, pad, axisOffset, commands) {
+    var padID = Gamepad.ID(pad);
+    super(padID, commands, ["LSX", "LSY", "RSX", "RSY", "IDK1", "IDK2", "Z", "BUTTONS"]);
+    mgr.registerPad(padID, this);
+
+    this.currentDevice = pad;
+    this.axisOffset = axisOffset;
+  }
+
+  get hasOrientation() {
+    return Gamepad.isMotionController(this.currentDevice);
+  }
+
+  getPose() {
+    return this.currentPose;
+  }
+
+  checkDevice(pad) {
+    this.inPhysicalUse = true;
+    var i, j, buttonMap = 0;
+    this.currentDevice = pad;
+    this.currentPose = this.hasOrientation && this.currentDevice.pose;
+    for (i = 0, j = pad.buttons.length; i < pad.buttons.length; ++i, ++j) {
+      var btn = pad.buttons[i];
+      this.setButton(i, btn.pressed);
+      if (btn.pressed) {
+        buttonMap |= 0x1 << i;
       }
-      this.setAxis("BUTTONS", buttonMap);
-      for (i = 0; i < pad.axes.length; ++i) {
-        var axisName = this.axisNames[this.axisOffset * pad.axes.length + i],
-            axisValue = pad.axes[i];
-        this.setAxis(axisName, axisValue);
+
+      this.setButton(j, btn.touched);
+      if(btn.touched){
+        buttonMap |= 0x1 << j;
       }
     }
-  }, {
-    key: "vibratePattern",
-    value: function vibratePattern(pattern) {
-      if (this.currentDevice) {
-        if (this.currentDevice.vibrate) {
-          this.currentDevice.vibrate(pattern);
-        } else if (this.currentDevice.haptics && this.currentDevice.haptics.length > 0) {
-          playPattern(this.currentDevice.haptics, pattern);
-        }
+    this.setAxis("BUTTONS", buttonMap);
+    for (i = 0; i < pad.axes.length; ++i) {
+      var axisName = this.axisNames[this.axisOffset * pad.axes.length + i],
+        axisValue = pad.axes[i];
+      this.setAxis(axisName, axisValue);
+    }
+  }
+
+  vibratePattern(pattern) {
+    if(this.currentDevice){
+      if (this.currentDevice.vibrate) {
+        this.currentDevice.vibrate(pattern);
+      }
+      else if(this.currentDevice.haptics && this.currentDevice.haptics.length > 0) {
+        playPattern(this.currentDevice.haptics, pattern);
       }
     }
-  }, {
-    key: "hasOrientation",
-    get: function get$$1() {
-      return Gamepad.isMotionController(this.currentDevice);
-    }
-  }, {
-    key: "haptics",
-    get: function get$$1() {
-      return this.currentDevice && this.currentDevice.haptics;
-    }
-  }]);
-  return Gamepad;
-}(PoseInputProcessor);
+  }
+
+  get haptics() {
+    return this.currentDevice && this.currentDevice.haptics;
+  }
+}
 
 Gamepad.XBOX_360_BUTTONS = {
   A: 1,
@@ -52122,99 +51146,88 @@ Gamepad.VIVE_BUTTONS = {
   MENU_TOUCHED: 7
 };
 
-var blackList = ["Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2910.0 Safari/537.36"];
+const blackList = [
+"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2910.0 Safari/537.36"
+];
 
-navigator.getGamepads = navigator.getGamepads || navigator.webkitGetGamepads;
 
-var GamepadManager = function (_EventDispatcher) {
-  inherits(GamepadManager, _EventDispatcher);
-  createClass(GamepadManager, null, [{
-    key: "isAvailable",
-    get: function get$$1() {
-      return blackList.indexOf(navigator.userAgent) === -1 && !!navigator.getGamepads;
-    }
-  }]);
+navigator.getGamepads = navigator.getGamepads ||
+  navigator.webkitGetGamepads;
 
-  function GamepadManager() {
-    classCallCheck(this, GamepadManager);
+class GamepadManager extends EventDispatcher {
 
-    var _this = possibleConstructorReturn(this, (GamepadManager.__proto__ || Object.getPrototypeOf(GamepadManager)).call(this));
-
-    _this.currentDevices = [];
-    _this.currentDeviceIDs = [];
-    _this.currentManagers = {};
-    return _this;
+  static get isAvailable() {
+    return blackList.indexOf(navigator.userAgent) === -1
+     && !!navigator.getGamepads;
   }
 
-  createClass(GamepadManager, [{
-    key: "poll",
-    value: function poll() {
-      if (GamepadManager.isAvailable) {
-        var maybePads = navigator.getGamepads(),
-            pads = [],
-            padIDs = [],
-            newPads = [],
-            oldPads = [],
-            i,
-            padID;
+  constructor(){
+    super();
+    this.currentDevices = [];
+    this.currentDeviceIDs = [];
+    this.currentManagers = {};
+  }
 
-        if (maybePads) {
-          for (i = 0; i < maybePads.length; ++i) {
-            var maybePad = maybePads[i];
-            if (maybePad) {
-              padID = Gamepad.ID(maybePad);
-              var padIdx = this.currentDeviceIDs.indexOf(padID);
-              pads.push(maybePad);
-              padIDs.push(padID);
-              if (padIdx === -1) {
-                newPads.push(maybePad);
-                this.currentDeviceIDs.push(padID);
-                this.currentDevices.push(maybePad);
-                delete this.currentManagers[padID];
-              } else {
-                this.currentDevices[padIdx] = maybePad;
-              }
+  poll() {
+    if(GamepadManager.isAvailable){
+      var maybePads = navigator.getGamepads(),
+        pads = [],
+        padIDs = [],
+        newPads = [],
+        oldPads = [],
+        i, padID;
+
+      if (maybePads) {
+        for (i = 0; i < maybePads.length; ++i) {
+          var maybePad = maybePads[i];
+          if (maybePad) {
+            padID = Gamepad.ID(maybePad);
+            var padIdx = this.currentDeviceIDs.indexOf(padID);
+            pads.push(maybePad);
+            padIDs.push(padID);
+            if (padIdx === -1) {
+              newPads.push(maybePad);
+              this.currentDeviceIDs.push(padID);
+              this.currentDevices.push(maybePad);
+              delete this.currentManagers[padID];
+            }
+            else {
+              this.currentDevices[padIdx] = maybePad;
             }
           }
         }
-
-        for (i = this.currentDeviceIDs.length - 1; i >= 0; --i) {
-          padID = this.currentDeviceIDs[i];
-          var mgr = this.currentManagers[padID],
-              pad = this.currentDevices[i];
-          if (padIDs.indexOf(padID) === -1) {
-            oldPads.push(padID);
-            this.currentDevices.splice(i, 1);
-            this.currentDeviceIDs.splice(i, 1);
-          } else if (mgr) {
-            mgr.checkDevice(pad);
-          }
-        }
-
-        newPads.forEach(this.emit.bind(this, "gamepadconnected"));
-        oldPads.forEach(this.emit.bind(this, "gamepaddisconnected"));
       }
-    }
-  }, {
-    key: "registerPad",
-    value: function registerPad(id, mgr) {
-      this.currentManagers[id] = mgr;
-    }
-  }, {
-    key: "pads",
-    get: function get$$1() {
-      return this.currentDevices;
-    }
-  }]);
-  return GamepadManager;
-}(EventDispatcher);
 
-var Touch = function (_InputProcessor) {
-  inherits(Touch, _InputProcessor);
+      for (i = this.currentDeviceIDs.length - 1; i >= 0; --i) {
+        padID = this.currentDeviceIDs[i];
+        var mgr = this.currentManagers[padID],
+          pad = this.currentDevices[i];
+        if (padIDs.indexOf(padID) === -1) {
+          oldPads.push(padID);
+          this.currentDevices.splice(i, 1);
+          this.currentDeviceIDs.splice(i, 1);
+        }
+        else if (mgr) {
+          mgr.checkDevice(pad);
+        }
+      }
 
-  function Touch(DOMElement, commands) {
-    classCallCheck(this, Touch);
+      newPads.forEach(this.emit.bind(this, "gamepadconnected"));
+      oldPads.forEach(this.emit.bind(this, "gamepaddisconnected"));
+    }
+  }
 
+  registerPad(id, mgr){
+    this.currentManagers[id] = mgr;
+  }
+
+  get pads() {
+    return this.currentDevices;
+  }
+}
+
+class Touch extends InputProcessor {
+  constructor(DOMElement, commands) {
     var axes = ["FINGERS"];
     for (var i = 0; i < 10; ++i) {
       axes.push("X" + i);
@@ -52224,89 +51237,78 @@ var Touch = function (_InputProcessor) {
       axes.push("DX" + i);
       axes.push("DY" + i);
     }
+    super("Touch", commands, axes, "touchend");
 
-    var _this = possibleConstructorReturn(this, (Touch.__proto__ || Object.getPrototypeOf(Touch)).call(this, "Touch", commands, axes, "touchend"));
-
-    var setState = function setState(stateChange, setAxis, event) {
-      _this.inPhysicalUse = true;
+    var setState = (stateChange, setAxis, event) => {
+      this.inPhysicalUse = true;
       // We have to find the minimum identifier value because iOS uses a very
       // large number that changes after every gesture. Every other platform
       // just numbers them 0 through 9.
-      var touches = event.changedTouches,
-          minIdentifier = Number.MAX_VALUE;
-      for (var _i = 0; _i < touches.length; ++_i) {
-        minIdentifier = Math.min(minIdentifier, touches[_i].identifier);
+      let touches = event.changedTouches,
+        minIdentifier = Number.MAX_VALUE;
+      for (let i = 0; i < touches.length; ++i) {
+        minIdentifier = Math.min(minIdentifier, touches[i].identifier);
       }
 
-      for (var _i2 = 0; _i2 < touches.length; ++_i2) {
-        var t = touches[_i2],
-            id = t.identifier - minIdentifier,
-            x = t.pageX,
-            y = t.pageY;
-        _this.setAxis("X" + id, x);
-        _this.setAxis("Y" + id, y);
-        _this.setButton("FINGER" + id, stateChange);
+      for (let i = 0; i < touches.length; ++i) {
+        const t = touches[i],
+          id = t.identifier - minIdentifier,
+          x = t.pageX,
+          y = t.pageY;
+        this.setAxis("X" + id, x);
+        this.setAxis("Y" + id, y);
+        this.setButton("FINGER" + id, stateChange);
 
-        if (setAxis) {
-          var lx = _this.getAxis("LX" + id),
-              ly = _this.getAxis("LY" + id);
-          _this.setAxis("DX" + id, x - lx);
-          _this.setAxis("DY" + id, y - ly);
+        if(setAxis){
+          const lx = this.getAxis("LX" + id),
+            ly = this.getAxis("LY" + id);
+          this.setAxis("DX" + id, x - lx);
+          this.setAxis("DY" + id, y - ly);
         }
 
-        _this.setAxis("LX" + id, x);
-        _this.setAxis("LY" + id, y);
+        this.setAxis("LX" + id, x);
+        this.setAxis("LY" + id, y);
       }
 
       touches = event.touches;
-      var fingerState = 0;
-      for (var _i3 = 0; _i3 < touches.length; ++_i3) {
-        var _t = touches[_i3];
-        fingerState |= 1 << _t.identifier;
+      let fingerState = 0;
+      for (let i = 0; i < touches.length; ++i) {
+        const t = touches[i];
+        fingerState |= 1 << t.identifier;
       }
-      _this.setAxis("FINGERS", fingerState);
+      this.setAxis("FINGERS", fingerState);
 
-      if (event.target === DOMElement) {
+      if(event.target === DOMElement){
         event.preventDefault();
       }
     };
 
-    DOMElement.addEventListener("touchstart", setState.bind(_this, true, false), false);
-    DOMElement.addEventListener("touchend", setState.bind(_this, false, true), false);
-    DOMElement.addEventListener("touchmove", setState.bind(_this, true, true), false);
-    return _this;
+    DOMElement.addEventListener("touchstart", setState.bind(this, true, false), false);
+    DOMElement.addEventListener("touchend", setState.bind(this, false, true), false);
+    DOMElement.addEventListener("touchmove", setState.bind(this, true, true), false);
   }
 
-  createClass(Touch, [{
-    key: "update",
-    value: function update(dt) {
-      get(Touch.prototype.__proto__ || Object.getPrototypeOf(Touch.prototype), "update", this).call(this, dt);
-      for (var id = 0; id < 10; ++id) {
-        var x = this.getAxis("X" + id),
-            y = this.getAxis("Y" + id),
-            lx = this.getAxis("LX" + id),
-            ly = this.getAxis("LY" + id);
-        this.setAxis("DX" + id, x - lx);
-        this.setAxis("DY" + id, y - ly);
-        this.setAxis("LX" + id, x);
-        this.setAxis("LY" + id, y);
-      }
+  update(dt) {
+    super.update(dt);
+    for (let id = 0; id < 10; ++id) {
+      const x = this.getAxis("X" + id),
+        y = this.getAxis("Y" + id),
+        lx = this.getAxis("LX" + id),
+        ly = this.getAxis("LY" + id);
+      this.setAxis("DX" + id, x - lx);
+      this.setAxis("DY" + id, y - ly);
+      this.setAxis("LX" + id, x);
+      this.setAxis("LY" + id, y);
     }
-  }]);
-  return Touch;
-}(InputProcessor);
+  }
+}
 
-var Speech$1 = function (_InputProcessor) {
-  inherits(Speech, _InputProcessor);
-
-  function Speech(commands) {
-    classCallCheck(this, Speech);
-
-    var _this = possibleConstructorReturn(this, (Speech.__proto__ || Object.getPrototypeOf(Speech)).call(this, "Speech", commands));
-
+class Speech$1 extends InputProcessor {
+  constructor(commands) {
+    super("Speech", commands);
     var running = false,
-        recognition = null,
-        errorMessage = null;
+      recognition = null,
+      errorMessage = null;
 
     function warn() {
       var msg = "Failed to initialize speech engine. Reason: " + errorMessage.message;
@@ -52317,7 +51319,8 @@ var Speech$1 = function (_InputProcessor) {
     function start() {
       if (!available) {
         return warn();
-      } else if (!running) {
+      }
+      else if (!running) {
         running = true;
         recognition.start();
         return true;
@@ -52336,15 +51339,16 @@ var Speech$1 = function (_InputProcessor) {
       return false;
     }
 
-    _this.check = function () {
+    this.check = function () {
       if (this.enabled && !running) {
         start();
-      } else if (!this.enabled && running) {
+      }
+      else if (!this.enabled && running) {
         stop();
       }
     };
 
-    _this.getErrorMessage = function () {
+    this.getErrorMessage = function () {
       return errorMessage;
     };
 
@@ -52352,7 +51356,8 @@ var Speech$1 = function (_InputProcessor) {
       if (window.SpeechRecognition) {
         // just in case this ever gets standardized
         recognition = new SpeechRecognition();
-      } else {
+      }
+      else {
         // purposefully don't check the existance so it errors out and setup fails.
         recognition = new webkitSpeechRecognition();
       }
@@ -52363,14 +51368,14 @@ var Speech$1 = function (_InputProcessor) {
       recognition.addEventListener("start", function () {
         console.log("speech started");
         command = "";
-      }.bind(_this), true);
+      }.bind(this), true);
 
       recognition.addEventListener("error", function (evt) {
         restart = true;
         console.log("speech error", evt);
         running = false;
         command = "speech error";
-      }.bind(_this), true);
+      }.bind(this), true);
 
       recognition.addEventListener("end", function (evt) {
         console.log("speech ended", evt);
@@ -52380,7 +51385,7 @@ var Speech$1 = function (_InputProcessor) {
           restart = false;
           this.enable(true);
         }
-      }.bind(_this), true);
+      }.bind(this), true);
 
       recognition.addEventListener("result", function (evt) {
         var newCommand = [];
@@ -52407,79 +51412,66 @@ var Speech$1 = function (_InputProcessor) {
           this.inputState.text = newCommand;
         }
         this.update();
-      }.bind(_this), true);
+      }.bind(this), true);
 
       available = true;
-    } catch (exp) {
+    }
+    catch (exp) {
       console.error(exp);
       errorMessage = exp;
       available = false;
     }
-    return _this;
   }
 
-  createClass(Speech, [{
-    key: "cloneCommand",
-    value: function cloneCommand(cmd) {
-      return {
-        name: cmd.name,
-        preamble: cmd.preamble,
-        keywords: Speech.maybeClone(cmd.keywords),
-        commandUp: cmd.commandUp,
-        disabled: cmd.disabled
-      };
-    }
-  }, {
-    key: "evalCommand",
-    value: function evalCommand(cmd, cmdState, metaKeysSet, dt) {
-      if (metaKeysSet && this.inputState.text) {
-        for (var i = 0; i < cmd.keywords.length; ++i) {
-          if (this.inputState.text.indexOf(cmd.keywords[i]) === 0 && (cmd.preamble || cmd.keywords[i].length === this.inputState.text.length)) {
-            cmdState.pressed = true;
-            cmdState.value = this.inputState.text.substring(cmd.keywords[i].length).trim();
-            this.inputState.text = null;
-          }
+  static maybeClone(arr) {
+    return (arr && arr.slice()) || [];
+  }
+
+  cloneCommand(cmd) {
+    return {
+      name: cmd.name,
+      preamble: cmd.preamble,
+      keywords: Speech$1.maybeClone(cmd.keywords),
+      commandUp: cmd.commandUp,
+      disabled: cmd.disabled
+    };
+  }
+
+  evalCommand(cmd, cmdState, metaKeysSet, dt) {
+    if (metaKeysSet && this.inputState.text) {
+      for (var i = 0; i < cmd.keywords.length; ++i) {
+        if (this.inputState.text.indexOf(cmd.keywords[i]) === 0 && (cmd.preamble || cmd.keywords[i].length === this.inputState.text.length)) {
+          cmdState.pressed = true;
+          cmdState.value = this.inputState.text.substring(cmd.keywords[i].length)
+            .trim();
+          this.inputState.text = null;
         }
       }
     }
-  }, {
-    key: "enable",
-    value: function enable(k, v) {
-      get(Speech.prototype.__proto__ || Object.getPrototypeOf(Speech.prototype), "enable", this).call(this, k, v);
-      this.check();
-    }
-  }], [{
-    key: "maybeClone",
-    value: function maybeClone(arr) {
-      return arr && arr.slice() || [];
-    }
-  }]);
-  return Speech;
-}(InputProcessor);
+  }
 
-var SensorSample = function () {
-  function SensorSample(sample, timestampS) {
-    classCallCheck(this, SensorSample);
+  enable(k, v) {
+    super.enable(k, v);
+    this.check();
+  }
+}
 
+class SensorSample {
+  constructor (sample, timestampS) {
     this.set(sample, timestampS);
   }
 
-  createClass(SensorSample, [{
-    key: "set",
-    value: function set$$1(sample, timestampS) {
+  set(sample, timestampS) {
 
-      this.sample = sample;
-      this.timestampS = timestampS;
-    }
-  }, {
-    key: "copy",
-    value: function copy(sensorSample) {
+    this.sample = sample;
+    this.timestampS = timestampS;
+  }
 
-      this.set(sensorSample.sample, sensorSample.timestampS);
-    }
-  }]);
-  return SensorSample;
-}();
+  copy(sensorSample) {
+
+    this.set(sensorSample.sample, sensorSample.timestampS);
+  }
+}
 
 /*
  * Copyright 2015 Google Inc. All Rights Reserved.
@@ -52506,11 +51498,8 @@ var SensorSample = function () {
  * 2. Get orientation estimates from gyroscope by integrating over time.
  * 3. Combine the two estimates, weighing (1) in the long term, but (2) for the short term.
  */
-
-var ComplementaryFilter = function () {
-  function ComplementaryFilter(kFilter) {
-    classCallCheck(this, ComplementaryFilter);
-
+class ComplementaryFilter {
+  constructor(kFilter) {
     this.kFilter = kFilter;
 
     // Raw sensor measurements.
@@ -52540,104 +51529,96 @@ var ComplementaryFilter = function () {
     this.gyroIntegralQ = new Quaternion();
   }
 
-  createClass(ComplementaryFilter, [{
-    key: "addAccelMeasurement",
-    value: function addAccelMeasurement(vector, timestampS) {
-      this.currentAccelMeasurement.set(vector, timestampS);
+  addAccelMeasurement(vector, timestampS) {
+    this.currentAccelMeasurement.set(vector, timestampS);
+  }
+
+  addGyroMeasurement(vector, timestampS) {
+    this.currentGyroMeasurement.set(vector, timestampS);
+
+    var deltaT = timestampS - this.previousGyroMeasurement.timestampS;
+    if (isTimestampDeltaValid(deltaT)) {
+      this.run_();
     }
-  }, {
-    key: "addGyroMeasurement",
-    value: function addGyroMeasurement(vector, timestampS) {
-      this.currentGyroMeasurement.set(vector, timestampS);
 
-      var deltaT = timestampS - this.previousGyroMeasurement.timestampS;
-      if (isTimestampDeltaValid(deltaT)) {
-        this.run_();
-      }
+    this.previousGyroMeasurement.copy(this.currentGyroMeasurement);
+  }
 
-      this.previousGyroMeasurement.copy(this.currentGyroMeasurement);
+  run_() {
+
+    if (!this.isOrientationInitialized) {
+      this.accelQ = this.accelToQuaternion_(this.currentAccelMeasurement.sample);
+      this.previousFilterQ.copy(this.accelQ);
+      this.isOrientationInitialized = true;
+      return;
     }
-  }, {
-    key: "run_",
-    value: function run_() {
 
-      if (!this.isOrientationInitialized) {
-        this.accelQ = this.accelToQuaternion_(this.currentAccelMeasurement.sample);
-        this.previousFilterQ.copy(this.accelQ);
-        this.isOrientationInitialized = true;
-        return;
-      }
+    var deltaT = this.currentGyroMeasurement.timestampS -
+        this.previousGyroMeasurement.timestampS;
 
-      var deltaT = this.currentGyroMeasurement.timestampS - this.previousGyroMeasurement.timestampS;
+    // Convert gyro rotation vector to a quaternion delta.
+    var gyroDeltaQ = this.gyroToQuaternionDelta_(this.currentGyroMeasurement.sample, deltaT);
+    this.gyroIntegralQ.multiply(gyroDeltaQ);
 
-      // Convert gyro rotation vector to a quaternion delta.
-      var gyroDeltaQ = this.gyroToQuaternionDelta_(this.currentGyroMeasurement.sample, deltaT);
-      this.gyroIntegralQ.multiply(gyroDeltaQ);
+    // filter_1 = K * (filter_0 + gyro * dT) + (1 - K) * accel.
+    this.filterQ.copy(this.previousFilterQ);
+    this.filterQ.multiply(gyroDeltaQ);
 
-      // filter_1 = K * (filter_0 + gyro * dT) + (1 - K) * accel.
-      this.filterQ.copy(this.previousFilterQ);
-      this.filterQ.multiply(gyroDeltaQ);
+    // Calculate the delta between the current estimated gravity and the real
+    // gravity vector from accelerometer.
+    var invFilterQ = new Quaternion();
+    invFilterQ.copy(this.filterQ);
+    invFilterQ.inverse();
 
-      // Calculate the delta between the current estimated gravity and the real
-      // gravity vector from accelerometer.
-      var invFilterQ = new Quaternion();
-      invFilterQ.copy(this.filterQ);
-      invFilterQ.inverse();
+    this.estimatedGravity.set(0, 0, -1);
+    this.estimatedGravity.applyQuaternion(invFilterQ);
+    this.estimatedGravity.normalize();
 
-      this.estimatedGravity.set(0, 0, -1);
-      this.estimatedGravity.applyQuaternion(invFilterQ);
-      this.estimatedGravity.normalize();
+    this.measuredGravity.copy(this.currentAccelMeasurement.sample);
+    this.measuredGravity.normalize();
 
-      this.measuredGravity.copy(this.currentAccelMeasurement.sample);
-      this.measuredGravity.normalize();
+    // Compare estimated gravity with measured gravity, get the delta quaternion
+    // between the two.
+    var deltaQ = new Quaternion();
+    deltaQ.setFromUnitVectors(this.estimatedGravity, this.measuredGravity);
+    deltaQ.inverse();
 
-      // Compare estimated gravity with measured gravity, get the delta quaternion
-      // between the two.
-      var deltaQ = new Quaternion();
-      deltaQ.setFromUnitVectors(this.estimatedGravity, this.measuredGravity);
-      deltaQ.inverse();
+    // Calculate the SLERP target: current orientation plus the measured-estimated
+    // quaternion delta.
+    var targetQ = new Quaternion();
+    targetQ.copy(this.filterQ);
+    targetQ.multiply(deltaQ);
 
-      // Calculate the SLERP target: current orientation plus the measured-estimated
-      // quaternion delta.
-      var targetQ = new Quaternion();
-      targetQ.copy(this.filterQ);
-      targetQ.multiply(deltaQ);
+    // SLERP factor: 0 is pure gyro, 1 is pure accel.
+    this.filterQ.slerp(targetQ, 1 - this.kFilter);
 
-      // SLERP factor: 0 is pure gyro, 1 is pure accel.
-      this.filterQ.slerp(targetQ, 1 - this.kFilter);
+    this.previousFilterQ.copy(this.filterQ);
+  }
 
-      this.previousFilterQ.copy(this.filterQ);
-    }
-  }, {
-    key: "getOrientation",
-    value: function getOrientation() {
-      return this.filterQ;
-    }
-  }, {
-    key: "accelToQuaternion_",
-    value: function accelToQuaternion_(accel) {
-      var normAccel = new Vector3();
-      normAccel.copy(accel);
-      normAccel.normalize();
-      var quat = new Quaternion();
-      quat.setFromUnitVectors(new Vector3(0, 0, -1), normAccel);
-      quat.inverse();
-      return quat;
-    }
-  }, {
-    key: "gyroToQuaternionDelta_",
-    value: function gyroToQuaternionDelta_(gyro, dt) {
-      // Extract axis and angle from the gyroscope data.
-      var quat = new Quaternion();
-      var axis = new Vector3();
-      axis.copy(gyro);
-      axis.normalize();
-      quat.setFromAxisAngle(axis, gyro.length() * dt);
-      return quat;
-    }
-  }]);
-  return ComplementaryFilter;
-}();
+  getOrientation() {
+    return this.filterQ;
+  }
+
+  accelToQuaternion_(accel) {
+    var normAccel = new Vector3();
+    normAccel.copy(accel);
+    normAccel.normalize();
+    var quat = new Quaternion();
+    quat.setFromUnitVectors(new Vector3(0, 0, -1), normAccel);
+    quat.inverse();
+    return quat;
+  }
+
+  gyroToQuaternionDelta_(gyro, dt) {
+    // Extract axis and angle from the gyroscope data.
+    var quat = new Quaternion();
+    var axis = new Vector3();
+    axis.copy(gyro);
+    axis.normalize();
+    quat.setFromAxisAngle(axis, gyro.length() * dt);
+    return quat;
+  }
+}
 
 /*
  * Copyright 2015 Google Inc. All Rights Reserved.
@@ -52654,56 +51635,49 @@ var ComplementaryFilter = function () {
  * limitations under the License.
  */
 
-var DEG2RAD$3 = _Math.DEG2RAD;
+const { DEG2RAD: DEG2RAD$3, RAD2DEG: RAD2DEG$3 } = _Math;
+const AXIS = new Vector3();
 
-var AXIS = new Vector3();
-
-var PosePredictor = function () {
-  function PosePredictor(predictionTimeS) {
-    classCallCheck(this, PosePredictor);
-
+class PosePredictor {
+  constructor(predictionTimeS) {
     this.predictionTimeS = predictionTimeS;
     this.previousQ = new Quaternion();
     this.previousTimestampS = null;
     this.deltaQ = new Quaternion();
   }
 
-  createClass(PosePredictor, [{
-    key: "getPrediction",
-    value: function getPrediction(currentQ, gyro, timestampS, outQ) {
-      if (!this.previousTimestampS) {
-        this.previousQ.copy(currentQ);
-        this.previousTimestampS = timestampS;
-        return currentQ;
-      }
-
-      // Calculate axis and angle based on gyroscope rotation rate data.
-      AXIS.copy(gyro);
-      AXIS.normalize();
-
-      var angularSpeed = gyro.length();
-
-      // If we're rotating slowly, don't do prediction.
-      if (angularSpeed < DEG2RAD$3 * 20) {
-        outQ.copy(currentQ);
-        this.previousQ.copy(currentQ);
-        return;
-      }
-
-      // Get the predicted angle based on the time delta and latency.
-      var deltaT = timestampS - this.previousTimestampS;
-      var predictAngle = angularSpeed * this.predictionTimeS;
-
-      this.deltaQ.setFromAxisAngle(AXIS, predictAngle);
-      outQ.copy(this.previousQ);
-      outQ.multiply(this.deltaQ);
-
+  getPrediction(currentQ, gyro, timestampS, outQ) {
+    if (!this.previousTimestampS) {
       this.previousQ.copy(currentQ);
       this.previousTimestampS = timestampS;
+      return currentQ;
     }
-  }]);
-  return PosePredictor;
-}();
+
+    // Calculate axis and angle based on gyroscope rotation rate data.
+    AXIS.copy(gyro);
+    AXIS.normalize();
+
+    var angularSpeed = gyro.length();
+
+    // If we're rotating slowly, don't do prediction.
+    if (angularSpeed < DEG2RAD$3 * 20) {
+      outQ.copy(currentQ);
+      this.previousQ.copy(currentQ);
+      return;
+    }
+
+    // Get the predicted angle based on the time delta and latency.
+    var deltaT = timestampS - this.previousTimestampS;
+    var predictAngle = angularSpeed * this.predictionTimeS;
+
+    this.deltaQ.setFromAxisAngle(AXIS, predictAngle);
+    outQ.copy(this.previousQ);
+    outQ.multiply(this.deltaQ);
+
+    this.previousQ.copy(currentQ);
+    this.previousTimestampS = timestampS;
+  }
+}
 
 /*
  * Copyright 2015 Google Inc. All Rights Reserved.
@@ -52719,17 +51693,14 @@ var PosePredictor = function () {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var isFirefoxAndroid = isFirefox && isMobile;
-var DEG2RAD$2 = _Math.DEG2RAD;
+const isFirefoxAndroid = isFirefox && isMobile;
+const { DEG2RAD: DEG2RAD$2 } = _Math;
 
 /**
  * The pose sensor, implemented using DeviceMotion APIs.
  */
-
-var FusionPoseSensor = function () {
-  function FusionPoseSensor(options) {
-    classCallCheck(this, FusionPoseSensor);
-
+class FusionPoseSensor {
+  constructor(options) {
     options = Object.assign({
       // Complementary filter coefficient. 0 for accelerometer, 1 for gyro.
       K_FILTER: 0.98,
@@ -52762,7 +51733,8 @@ var FusionPoseSensor = function () {
     this.inverseWorldToScreenQ = new Quaternion();
     this.worldToScreenQ = new Quaternion();
     this.originalPoseAdjustQ = new Quaternion();
-    this.originalPoseAdjustQ.setFromAxisAngle(new Vector3(0, 0, 1), -window.orientation * DEG2RAD$2);
+    this.originalPoseAdjustQ.setFromAxisAngle(new Vector3(0, 0, 1),
+                                             -window.orientation * DEG2RAD$2);
 
     this.setScreenTransform_();
     // Adjust this filter for being in landscape mode.
@@ -52778,104 +51750,96 @@ var FusionPoseSensor = function () {
     this.previousTimestampS = null;
   }
 
-  createClass(FusionPoseSensor, [{
-    key: "getPosition",
-    value: function getPosition() {
-      // This PoseSensor doesn't support position
-      return null;
+  getPosition() {
+    // This PoseSensor doesn't support position
+    return null;
+  }
+
+  getOrientation() {
+    // Convert from filter space to the the same system used by the deviceorientation event.
+    var orientation = this.filter.getOrientation();
+
+    // Predict orientation.
+    this.posePredictor.getPrediction(orientation, this.gyroscope, this.previousTimestampS, this.predictedQ);
+
+    // Convert to THREE coordinate system: -Z forward, Y up, X right.
+    var out = new Quaternion();
+    out.copy(this.filterToWorldQ);
+    out.multiply(this.resetQ);
+    out.multiply(this.predictedQ);
+    out.multiply(this.worldToScreenQ);
+
+    this.orientationOut_[0] = out.x;
+    this.orientationOut_[1] = out.y;
+    this.orientationOut_[2] = out.z;
+    this.orientationOut_[3] = out.w;
+    return this.orientationOut_;
+  }
+
+  getPose() {
+    return {
+      position: this.getPosition(),
+      orientation: this.getOrientation(),
+      linearVelocity: null,
+      linearAcceleration: null,
+      angularVelocity: null,
+      angularAcceleration: null
+    };
+  }
+
+  onDeviceMotionChange_(deviceMotion) {
+    const accGravity = deviceMotion.accelerationIncludingGravity,
+      rotRate = deviceMotion.rotationRate;
+    let timestampS = deviceMotion.timeStamp / 1000;
+
+    // Firefox Android timeStamp returns one thousandth of a millisecond.
+    if (isFirefoxAndroid) {
+      timestampS /= 1000;
     }
-  }, {
-    key: "getOrientation",
-    value: function getOrientation() {
-      // Convert from filter space to the the same system used by the deviceorientation event.
-      var orientation = this.filter.getOrientation();
 
-      // Predict orientation.
-      this.posePredictor.getPrediction(orientation, this.gyroscope, this.previousTimestampS, this.predictedQ);
+    var deltaS = timestampS - this.previousTimestampS;
+    if (isTimestampDeltaValid(deltaS)) {
+      this.accelerometer.set(-accGravity.x, -accGravity.y, -accGravity.z);
+      this.gyroscope.set(rotRate.alpha, rotRate.beta, rotRate.gamma);
 
-      // Convert to THREE coordinate system: -Z forward, Y up, X right.
-      var out = new Quaternion();
-      out.copy(this.filterToWorldQ);
-      out.multiply(this.resetQ);
-      out.multiply(this.predictedQ);
-      out.multiply(this.worldToScreenQ);
-
-      this.orientationOut_[0] = out.x;
-      this.orientationOut_[1] = out.y;
-      this.orientationOut_[2] = out.z;
-      this.orientationOut_[3] = out.w;
-      return this.orientationOut_;
-    }
-  }, {
-    key: "getPose",
-    value: function getPose() {
-      return {
-        position: this.getPosition(),
-        orientation: this.getOrientation(),
-        linearVelocity: null,
-        linearAcceleration: null,
-        angularVelocity: null,
-        angularAcceleration: null
-      };
-    }
-  }, {
-    key: "onDeviceMotionChange_",
-    value: function onDeviceMotionChange_(deviceMotion) {
-      var accGravity = deviceMotion.accelerationIncludingGravity,
-          rotRate = deviceMotion.rotationRate;
-      var timestampS = deviceMotion.timeStamp / 1000;
-
-      // Firefox Android timeStamp returns one thousandth of a millisecond.
-      if (isFirefoxAndroid) {
-        timestampS /= 1000;
+      // With iOS and Firefox Android, rotationRate is reported in degrees, so we first convert to radians.
+      if (isiOS$1 || isFirefoxAndroid) {
+        this.gyroscope.multiplyScalar(DEG2RAD$2);
       }
 
-      var deltaS = timestampS - this.previousTimestampS;
-      if (isTimestampDeltaValid(deltaS)) {
-        this.accelerometer.set(-accGravity.x, -accGravity.y, -accGravity.z);
-        this.gyroscope.set(rotRate.alpha, rotRate.beta, rotRate.gamma);
-
-        // With iOS and Firefox Android, rotationRate is reported in degrees, so we first convert to radians.
-        if (isiOS$1 || isFirefoxAndroid) {
-          this.gyroscope.multiplyScalar(DEG2RAD$2);
-        }
-
-        this.filter.addAccelMeasurement(this.accelerometer, timestampS);
-        this.filter.addGyroMeasurement(this.gyroscope, timestampS);
-      } else if (this.previousTimestampS !== null) {
-        console.warn("Invalid timestamps detected. Time step between successive gyroscope sensor samples is very small or not monotonic");
-      }
-
-      this.previousTimestampS = timestampS;
+      this.filter.addAccelMeasurement(this.accelerometer, timestampS);
+      this.filter.addGyroMeasurement(this.gyroscope, timestampS);
     }
-  }, {
-    key: "onScreenOrientationChange_",
-    value: function onScreenOrientationChange_(screenOrientation) {
-      this.setScreenTransform_();
+    else if (this.previousTimestampS !== null){
+      console.warn("Invalid timestamps detected. Time step between successive gyroscope sensor samples is very small or not monotonic");
     }
-  }, {
-    key: "setScreenTransform_",
-    value: function setScreenTransform_() {
-      this.worldToScreenQ.set(0, 0, 0, 1);
-      switch (window.orientation) {
-        case 0:
-          break;
-        case 90:
-          this.worldToScreenQ.setFromAxisAngle(new Vector3(0, 0, 1), -Math.PI / 2);
-          break;
-        case -90:
-          this.worldToScreenQ.setFromAxisAngle(new Vector3(0, 0, 1), Math.PI / 2);
-          break;
-        case 180:
-          // TODO.
-          break;
-      }
-      this.inverseWorldToScreenQ.copy(this.worldToScreenQ);
-      this.inverseWorldToScreenQ.inverse();
+
+    this.previousTimestampS = timestampS;
+  }
+
+  onScreenOrientationChange_(screenOrientation) {
+    this.setScreenTransform_();
+  }
+
+  setScreenTransform_() {
+    this.worldToScreenQ.set(0, 0, 0, 1);
+    switch (window.orientation) {
+      case 0:
+        break;
+      case 90:
+        this.worldToScreenQ.setFromAxisAngle(new Vector3(0, 0, 1), -Math.PI / 2);
+        break;
+      case -90:
+        this.worldToScreenQ.setFromAxisAngle(new Vector3(0, 0, 1), Math.PI / 2);
+        break;
+      case 180:
+        // TODO.
+        break;
     }
-  }]);
-  return FusionPoseSensor;
-}();
+    this.inverseWorldToScreenQ.copy(this.worldToScreenQ);
+    this.inverseWorldToScreenQ.inverse();
+  }
+}
 
 /*
  * Copyright 2016 Google Inc. All Rights Reserved.
@@ -52892,357 +51856,293 @@ var FusionPoseSensor = function () {
  * limitations under the License.
  */
 
-var Eye = {
+let Eye = {
   LEFT: "left",
   RIGHT: "right"
 };
-var ipd = 0.03;
-var neckLength = 0;
-var neckDepth = 0;
+let ipd = 0.03;
+let neckLength = 0;
+let neckDepth = 0;
 
-var CardboardVRDisplay = function (_VRDisplay) {
-  inherits(CardboardVRDisplay, _VRDisplay);
-  createClass(CardboardVRDisplay, null, [{
-    key: "IPD",
-    get: function get$$1() {
-      return ipd;
-    },
-    set: function set$$1(v) {
-      ipd = v;
-    }
-  }, {
-    key: "NECK_LENGTH",
-    get: function get$$1() {
-      return neckLength;
-    },
-    set: function set$$1(v) {
-      neckLength = v;
-    }
-  }, {
-    key: "NECK_DEPTH",
-    get: function get$$1() {
-      return neckDepth;
-    },
-    set: function set$$1(v) {
-      neckDepth = v;
-    }
-  }]);
+class CardboardVRDisplay extends VRDisplay {
 
-  function CardboardVRDisplay(options) {
-    classCallCheck(this, CardboardVRDisplay);
+  static get IPD() {
+    return ipd;
+  }
 
-    var _this = possibleConstructorReturn(this, (CardboardVRDisplay.__proto__ || Object.getPrototypeOf(CardboardVRDisplay)).call(this, "Google Cardboard"));
+  static set IPD(v) {
+    ipd = v;
+  }
 
-    _this.DOMElement = null;
+  static get NECK_LENGTH() {
+    return neckLength;
+  }
+
+  static set NECK_LENGTH(v) {
+    neckLength = v;
+  }
+
+  static get NECK_DEPTH() {
+    return neckDepth;
+  }
+
+  static set NECK_DEPTH(v) {
+    neckDepth = v;
+  }
+
+  constructor(options) {
+    super("Google Cardboard");
+    this.DOMElement = null;
 
     // "Private" members.
-    _this.poseSensor_ = options && options.overrideOrientation || new FusionPoseSensor(options);
-    return _this;
+    this.poseSensor_ = options && options.overrideOrientation || new FusionPoseSensor(options);
   }
 
-  createClass(CardboardVRDisplay, [{
-    key: "_getPose",
-    value: function _getPose() {
-      return this.poseSensor_.getPose();
-    }
-  }, {
-    key: "getEyeParameters",
-    value: function getEyeParameters(whichEye) {
-      var offset = [ipd, neckLength, neckDepth];
-
-      if (whichEye == Eye.LEFT) {
-        offset[0] *= -1.0;
-      }
-
-      var dim = calculateElementSize(this);
-
-      return {
-        fieldOfView: {
-          upDegrees: 40,
-          leftDegrees: 40,
-          rightDegrees: 40,
-          downDegrees: 40
-        },
-        offset: offset,
-        renderWidth: 0.5 * dim.width,
-        renderHeight: dim.height
-      };
-    }
-  }]);
-  return CardboardVRDisplay;
-}(VRDisplay);
-
-var Automator = function (_EventDispatcher) {
-  inherits(Automator, _EventDispatcher);
-
-  function Automator() {
-    var root = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : window;
-    classCallCheck(this, Automator);
-
-    var _this = possibleConstructorReturn(this, (Automator.__proto__ || Object.getPrototypeOf(Automator)).call(this));
-
-    _this.root = root;
-    _this.frames = [];
-    _this.startT = null;
-    return _this;
+  _getPose() {
+    return this.poseSensor_.getPose();
   }
 
-  createClass(Automator, [{
-    key: "update",
-    value: function update(t) {
-      if (this.startT === null) {
-        this.startT = t;
-      }
-    }
-  }, {
-    key: "reset",
-    value: function reset() {
-      this.frames.splice(0);
-      this.startT = null;
-    }
-  }, {
-    key: "length",
-    get: function get$$1() {
-      return this.frames.length;
-    }
-  }]);
-  return Automator;
-}(EventDispatcher);
+  getEyeParameters(whichEye) {
+    var offset = [ipd, neckLength, neckDepth];
 
-var Obj = function Obj(path) {
-  var root = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : window;
-  classCallCheck(this, Obj);
+    if (whichEye == Eye.LEFT) {
+      offset[0] *= -1.0;
+    }
 
-  this.path = path;
+    const dim = calculateElementSize(this);
 
-  var parts = path.split("."),
+    return {
+      fieldOfView: {
+        upDegrees: 40,
+        leftDegrees: 40,
+        rightDegrees: 40,
+        downDegrees: 40
+      },
+      offset: offset,
+      renderWidth: 0.5 * dim.width,
+      renderHeight: dim.height,
+    }
+  }
+}
+
+class Automator extends EventDispatcher {
+
+  constructor(root = window) {
+    super();
+    this.root = root;
+    this.frames = [];
+    this.startT = null;
+  }
+
+  update(t) {
+    if (this.startT === null) {
+      this.startT = t;
+    }
+  }
+
+  reset() {
+    this.frames.splice(0);
+    this.startT = null;
+  }
+
+  get length() {
+    return this.frames.length;
+  }
+}
+
+class Obj {
+  constructor(path, root = window) {
+    this.path = path;
+
+    const parts = path.split("."),
       key = parts[parts.length - 1];
 
-  var find = function find(fill) {
-    var head = root;
+    const find = (fill) => {
+      let head = root;
 
-    for (var i = 0; i < parts.length - 1; ++i) {
-      var part = parts[i];
-      if (head[part] === undefined || head[part] === null) {
-        if (fill) {
-          if (/^\d+$/.test(parts[i + 1])) {
-            head[part] = [];
-          } else {
-            head[part] = {};
+      for (let i = 0; i < parts.length - 1; ++i) {
+        const part = parts[i];
+        if (head[part] === undefined || head[part] === null) {
+          if (fill) {
+            if (/^\d+$/.test(parts[i + 1])) {
+              head[part] = [];
+            }
+            else {
+              head[part] = {};
+            }
           }
-        } else {
-          head = null;
-          break;
+          else {
+            head = null;
+            break;
+          }
         }
+        head = head[part];
       }
-      head = head[part];
-    }
 
-    return head;
-  };
+      return head;
+    };
 
-  this.get = function () {
-    var obj = find(false);
-    return obj && obj[key];
-  };
+    this.get = () => {
+      var obj = find(false);
+      return obj && obj[key];
+    };
 
-  this.set = function (v) {
-    var obj = find(true);
-    if (obj) {
-      obj[key] = v;
-    }
-  };
-};
+    this.set = (v) => {
+      var obj = find(true);
+      if (obj) {
+        obj[key] = v;
+      }
+    };
+  }
+}
 
-var Record = function (_Obj) {
-  inherits(Record, _Obj);
+class Record extends Obj {
 
-  function Record(path, value, root) {
-    classCallCheck(this, Record);
-
-    var _this = possibleConstructorReturn(this, (Record.__proto__ || Object.getPrototypeOf(Record)).call(this, path, root));
-
-    _this.value = value;
-    return _this;
+  constructor(path, value, root) {
+    super(path, root);
+    this.value = value;
   }
 
-  createClass(Record, [{
-    key: "write",
-    value: function write() {
-      if (this.value !== this.get()) {
-        this.set(this.value);
-      }
+  write() {
+    if (this.value !== this.get()) {
+      this.set(this.value);
     }
-  }]);
-  return Record;
-}(Obj);
+  }
+}
 
 /*
   A collection of all the recorded state values at a single point in time.
 */
+class Frame {
 
-var Frame = function () {
-  createClass(Frame, null, [{
-    key: "parse",
-    value: function parse(timestamp, obj, root) {
-      var stack = [{
+  static parse(timestamp, obj, root) {
+    const stack = [{
         path: "",
         value: obj
       }],
-          records = [];
+      records = [];
 
-      while (stack.length > 0) {
-        var _stack$shift = stack.shift(),
-            path = _stack$shift.path,
-            value = _stack$shift.value;
+    while (stack.length > 0) {
+      const {
+        path,
+        value
+      } = stack.shift();
 
-        if ((typeof value === "undefined" ? "undefined" : _typeof(value)) === "object") {
-          for (var key in value) {
-            var newPath = path;
-            if (path.length > 0) {
-              newPath += ".";
-            }
-            newPath += key;
-            stack.push({
-              path: newPath,
-              value: value[key]
-            });
+      if (typeof value === "object") {
+        for (const key in value) {
+          let newPath = path;
+          if (path.length > 0) {
+            newPath += ".";
           }
-        } else {
-          records.push(new Record(path, value, root));
+          newPath += key;
+          stack.push({
+            path: newPath,
+            value: value[key]
+          });
         }
       }
-
-      return new Frame(timestamp, records);
+      else {
+        records.push(new Record(path, value, root));
+      }
     }
-  }]);
 
-  function Frame(timestamp, records) {
-    classCallCheck(this, Frame);
+    return new Frame(timestamp, records);
+  }
 
+  constructor(timestamp, records) {
     this.t = timestamp;
     this.records = records;
   }
 
-  createClass(Frame, [{
-    key: "write",
-    value: function write() {
-      for (var i = 0; i < this.records.length; ++i) {
-        this.records[i].write();
-      }
+  write() {
+    for (var i = 0; i < this.records.length; ++i) {
+      this.records[i].write();
     }
-  }]);
-  return Frame;
-}();
+  }
+}
 
-var Player = function (_Automator) {
-  inherits(Player, _Automator);
+class Player extends Automator {
 
-  function Player(root) {
-    classCallCheck(this, Player);
-
-    var _this = possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, root));
-
-    _this.frameIndex = -1;
-    return _this;
+  constructor(root) {
+    super(root);
+    this.frameIndex = -1;
   }
 
-  createClass(Player, [{
-    key: "parse",
-    value: function parse(json) {
-      this.load(JSON.parse(json));
-    }
-  }, {
-    key: "load",
-    value: function load(objs) {
-      var frames = [];
+  parse(json) {
+    this.load(JSON.parse(json));
+  }
 
-      for (var t in objs) {
-        frames.push(Frame.parse(t, objs[t], this.root));
-      }
+  load(objs) {
+    const frames = [];
 
-      this.append(frames);
+    for (var t in objs) {
+      frames.push(Frame.parse(t, objs[t], this.root));
     }
-  }, {
-    key: "reset",
-    value: function reset() {
-      get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), "reset", this).call(this);
-      this.frameIndex = -1;
-    }
-  }, {
-    key: "update",
-    value: function update(t) {
-      get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), "update", this).call(this, t);
 
-      t += this.minT - this.startT;
+    this.append(frames);
+  }
 
-      var oldFrameIndex = this.frameIndex;
-      while (this.frameIndex < this.frames.length - 1 && t >= this.frames[this.frameIndex + 1].t) {
-        ++this.frameIndex;
-      }
+  reset() {
+    super.reset();
+    this.frameIndex = -1;
+  }
 
-      if (this.frameIndex !== oldFrameIndex && 0 <= this.frameIndex && this.frameIndex < this.frames.length) {
-        var frame = this.frames[this.frameIndex];
-        frame.write();
-        this.emit("frame", frame);
-      }
-    }
-  }, {
-    key: "append",
-    value: function append(frames) {
-      if (frames) {
-        this.frames.push.apply(this.frames, frames);
-        this.minT = this.frames.map(function (f) {
-          return f.t;
-        }).reduce(function (a, b) {
-          return Math.min(a, b);
-        }, Number.MAX_VALUE);
-      }
-    }
-  }, {
-    key: "reverse",
-    value: function reverse() {
-      var maxT = this.frames.map(function (f) {
-        return f.t;
-      }).reduce(function (a, b) {
-        return Math.max(a, b);
-      }, Number.MIN_VALUE);
-      this.frames.reverse();
-      for (var i = 0; i < this.frames.length; ++i) {
-        var frame = this.frames[i];
-        frame.t = maxT - frame.t + this.minT;
-      }
-    }
-  }, {
-    key: "done",
-    get: function get$$1() {
-      return this.frameIndex >= this.frames.length - 1;
-    }
-  }]);
-  return Player;
-}(Automator);
+  update(t) {
+    super.update(t);
 
-var MockVRDisplay = function () {
-  function MockVRDisplay(data) {
-    classCallCheck(this, MockVRDisplay);
+    t += this.minT - this.startT;
 
+    const oldFrameIndex = this.frameIndex;
+    while (this.frameIndex < this.frames.length - 1 &&
+      t >= this.frames[this.frameIndex + 1].t) {
+      ++this.frameIndex;
+    }
+
+    if (this.frameIndex !== oldFrameIndex && 0 <= this.frameIndex && this.frameIndex < this.frames.length) {
+      const frame = this.frames[this.frameIndex];
+      frame.write();
+      this.emit("frame", frame);
+    }
+  }
+
+  append(frames) {
+    if (frames) {
+      this.frames.push.apply(this.frames, frames);
+      this.minT = this.frames.map((f) => f.t)
+        .reduce((a, b) => Math.min(a, b), Number.MAX_VALUE);
+    }
+  }
+
+  reverse() {
+    const maxT = this.frames.map((f) => f.t)
+      .reduce((a, b) => Math.max(a, b), Number.MIN_VALUE);
+    this.frames.reverse();
+    for (var i = 0; i < this.frames.length; ++i) {
+      var frame = this.frames[i];
+      frame.t = maxT - frame.t + this.minT;
+    }
+  }
+
+  get done() {
+    return this.frameIndex >= this.frames.length - 1;
+  }
+}
+
+class MockVRDisplay {
+  constructor(data) {
 
     var timestamp = null,
-        displayName = null,
-        startOn = null;
+      displayName = null,
+      startOn = null;
 
     Object.defineProperties(this, {
       displayName: {
-        get: function get$$1() {
-          return "Mock " + displayName;
-        },
-        set: function set$$1(v) {
-          return displayName = v;
-        }
+        get: () => "Mock " + displayName,
+        set: (v) => displayName = v
       }
     });
 
-    var dataPack = {
+    const dataPack = {
       currentDisplay: this,
       currentEyeParams: {
         left: {
@@ -53277,66 +52177,49 @@ var MockVRDisplay = function () {
 
     Object.defineProperties(dataPack.currentPose, {
       timestamp: {
-        get: function get$$1() {
-          return timestamp;
-        },
-        set: function set$$1(v) {
-          return timestamp = v;
-        }
+        get: () => timestamp,
+        set: (v) => timestamp = v
       },
       timeStamp: {
-        get: function get$$1() {
-          return timestamp;
-        },
-        set: function set$$1(v) {
-          return timestamp = v;
-        }
+        get: () => timestamp,
+        set: (v) => timestamp = v
       }
     });
 
-    var player = new Player(dataPack);
+    const player = new Player(dataPack);
     player.load(data);
     player.update(0);
 
-    this.requestAnimationFrame = function (thunk) {
-      return window.requestAnimationFrame(function (t) {
-        if (startOn === null) {
-          startOn = t;
-        }
-        player.update(t - startOn);
-        thunk(t);
-      });
-    };
+    this.requestAnimationFrame = (thunk) => window.requestAnimationFrame((t) => {
+      if (startOn === null) {
+        startOn = t;
+      }
+      player.update(t - startOn);
+      thunk(t);
+    });
 
-    this.getPose = function () {
-      return dataPack.currentPose;
-    };
-    this.getEyeParameters = function (side) {
-      return dataPack.currentEyeParams[side];
-    };
+    this.getPose = () => dataPack.currentPose;
+    this.getEyeParameters = (side) => dataPack.currentEyeParams[side];
   }
 
-  createClass(MockVRDisplay, [{
-    key: "cancelAnimationFrame",
-    value: function cancelAnimationFrame(handle) {
-      window.cancelAnimationFrame(handle);
-    }
-  }]);
-  return MockVRDisplay;
-}();
 
-function getObject(url, options) {
-  return get$1("json", url, options);
+  cancelAnimationFrame(handle) {
+    window.cancelAnimationFrame(handle);
+  }
 }
 
-var hasNativeWebVR = "getVRDisplays" in navigator;
-var allDisplays = [];
-var isCardboardCompatible = isMobile && !isGearVR;
+function getObject(url, options) {
+  return get("json", url, options);
+}
 
-var polyFillDevicesPopulated = false;
-var standardMonitorPopulated = false;
+const hasNativeWebVR = "getVRDisplays" in navigator;
+const allDisplays = [];
+const isCardboardCompatible = isMobile && !isGearVR;
 
-function upgrade1_0_to_1_1() {
+let polyFillDevicesPopulated = false;
+let standardMonitorPopulated = false;
+
+function upgrade1_0_to_1_1(){
   // Put a shim in place to update the API to 1.1 if needed.
   if ("VRDisplay" in window && !("VRFrameData" in window)) {
     // Provide the VRFrameData object.
@@ -53344,15 +52227,15 @@ function upgrade1_0_to_1_1() {
 
     // A lot of Chrome builds don't have depthNear and depthFar, even
     // though they're in the WebVR 1.0 spec. Patch them in if they're not present.
-    if (!("depthNear" in window.VRDisplay.prototype)) {
+    if(!("depthNear" in window.VRDisplay.prototype)) {
       window.VRDisplay.prototype.depthNear = 0.01;
     }
 
-    if (!("depthFar" in window.VRDisplay.prototype)) {
+    if(!("depthFar" in window.VRDisplay.prototype)) {
       window.VRDisplay.prototype.depthFar = 10000.0;
     }
 
-    window.VRDisplay.prototype.getFrameData = function (frameData) {
+    window.VRDisplay.prototype.getFrameData = function(frameData) {
       return frameDataFromPose(frameData, this.getPose(), this);
     };
   }
@@ -53368,7 +52251,7 @@ function getPolyfillDisplays(options) {
     polyFillDevicesPopulated = true;
   }
 
-  return new Promise(function (resolve, reject) {
+  return new Promise(function(resolve, reject) {
     try {
       resolve(allDisplays);
     } catch (e) {
@@ -53378,61 +52261,64 @@ function getPolyfillDisplays(options) {
 }
 
 function fireVRDisplayPresentChange() {
-  var event = new CustomEvent('vrdisplaypresentchange', { detail: { vrdisplay: this } });
+  var event = new CustomEvent('vrdisplaypresentchange', {detail: {vrdisplay: this}});
   window.dispatchEvent(event);
 }
 
-function installPolyfill(options) {
-  var oldGetVRDisplays = null;
-  if (hasNativeWebVR) {
+function installPolyfill(options){
+  let oldGetVRDisplays = null;
+  if(hasNativeWebVR) {
     oldGetVRDisplays = navigator.getVRDisplays;
-  } else {
-    oldGetVRDisplays = function oldGetVRDisplays() {
-      return Promise.resolve([]);
-    };
+  }
+  else{
+    oldGetVRDisplays = () => Promise.resolve([]);
   }
 
   // Provide navigator.getVRDisplays.
   navigator.getVRDisplays = function () {
-    return oldGetVRDisplays.call(navigator).then(function (displays) {
-      if (displays.length === 0 || navigator.userAgent === "Mozilla/5.0 (Linux; Android 6.0.1; SM-G930V Build/MMB29M) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2664.0 Mobile Safari/537.36") {
-        options.overrideOrientation = displays[0];
-        return getPolyfillDisplays(options);
-      } else {
-        return displays;
-      }
-    });
-  };
+    return oldGetVRDisplays.call(navigator)
+      .then((displays) => {
+        if(displays.length === 0 || navigator.userAgent === "Mozilla/5.0 (Linux; Android 6.0.1; SM-G930V Build/MMB29M) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2664.0 Mobile Safari/537.36") {
+          options.overrideOrientation = displays[0];
+          return getPolyfillDisplays(options);
+        }
+        else {
+          return displays;
+        }
+      });
+    };
 
   // Provide the VRDisplay object.
   window.VRDisplay = window.VRDisplay || VRDisplay;
 
   // Provide navigator.vrEnabled.
   Object.defineProperty(navigator, "vrEnabled", {
-    get: function get$$1() {
-      return isCardboardCompatible && (FullScreen.available || isiOS$1); // just fake it for iOS
+    get: function () {
+      return isCardboardCompatible &&
+        (FullScreen.available || isiOS$1); // just fake it for iOS
     }
   });
 }
 
 function installStandardMonitor(options) {
-  if (!standardMonitorPopulated && !isGearVR) {
+  if(!standardMonitorPopulated && !isGearVR){
     var oldGetVRDisplays = navigator.getVRDisplays;
     navigator.getVRDisplays = function () {
-      return oldGetVRDisplays.call(navigator).then(function (displays) {
-        var created = false;
-        for (var i = 0; i < displays.length && !created; ++i) {
-          var dsp = displays[i];
-          created = dsp instanceof StandardMonitorVRDisplay;
-        }
-        if (!created) {
-          if (options && options.defaultFOV) {
-            StandardMonitorVRDisplay.DEFAULT_FOV = options.defaultFOV;
+      return oldGetVRDisplays.call(navigator)
+        .then((displays) => {
+          var created = false;
+          for(var i = 0; i < displays.length && !created; ++i){
+            var dsp = displays[i];
+            created = dsp instanceof StandardMonitorVRDisplay;
           }
-          displays.unshift(new StandardMonitorVRDisplay(displays[0]));
-        }
-        return displays;
-      });
+          if (!created) {
+            if(options && options.defaultFOV) {
+              StandardMonitorVRDisplay.DEFAULT_FOV = options.defaultFOV;
+            }
+            displays.unshift(new StandardMonitorVRDisplay(displays[0]));
+          }
+          return displays;
+        });
     };
 
     standardMonitorPopulated = true;
@@ -53441,42 +52327,42 @@ function installStandardMonitor(options) {
 
 function installMockDisplay(options) {
   var data = options && options.replayData;
-  if (data) {
+  if(data){
     var oldGetVRDisplays = navigator.getVRDisplays;
-    navigator.getVRDisplays = function () {
-      return oldGetVRDisplays.call(navigator).then(function (displays) {
-        var mockDeviceExists = displays.map(function (d) {
-          return d instanceof MockVRDisplay;
-        }).reduce(function (a, b) {
-          return a || b;
-        }, false);
+    navigator.getVRDisplays = () => oldGetVRDisplays.call(navigator)
+      .then((displays) => {
+        const mockDeviceExists = displays
+          .map((d) => d instanceof MockVRDisplay)
+          .reduce((a, b) => a || b, false);
 
         if (mockDeviceExists) {
           return displays;
-        } else {
-          var done = function done(obj) {
+        }
+        else {
+          var done = (obj) => {
             displays.push(new MockVRDisplay(obj));
             resolve(displays);
           };
 
-          if ((typeof data === "undefined" ? "undefined" : _typeof(data)) === "object") {
+          if (typeof data === "object") {
             return Promise.resolve(data);
-          } else if (/\.json$/.test(data)) {
+          }
+          else if (/\.json$/.test(data)) {
             return getObject(data);
-          } else {
+          }
+          else {
             return Promise.resolve(JSON.parse(data));
           }
         }
       });
-    };
   }
 }
 
 function install(options) {
   options = Object.assign({
-    // Forces availability of VR mode, even for non-mobile devices.
-    FORCE_ENABLE_VR: false
-  }, options);
+      // Forces availability of VR mode, even for non-mobile devices.
+      FORCE_ENABLE_VR: false
+    }, options);
 
   installPolyfill(options);
   installStandardMonitor(options);
@@ -53484,286 +52370,256 @@ function install(options) {
   upgrade1_0_to_1_1();
 }
 
-var ViewCameraTransform = function () {
-  createClass(ViewCameraTransform, null, [{
-    key: "makeTransform",
-    value: function makeTransform(eye, near, far) {
-      return {
-        translation: new Vector3().fromArray(eye.offset),
-        projection: ViewCameraTransform.fieldOfViewToProjectionMatrix(eye.fieldOfView, near, far),
-        viewport: {
-          left: 0,
-          top: 0,
-          width: eye.renderWidth,
-          height: eye.renderHeight
-        }
-      };
-    }
-  }, {
-    key: "fieldOfViewToProjectionMatrix",
-    value: function fieldOfViewToProjectionMatrix(fov, zNear, zFar) {
-      var upTan = Math.tan(fov.upDegrees * Math.PI / 180.0),
-          downTan = Math.tan(fov.downDegrees * Math.PI / 180.0),
-          leftTan = Math.tan(fov.leftDegrees * Math.PI / 180.0),
-          rightTan = Math.tan(fov.rightDegrees * Math.PI / 180.0),
-          xScale = 2.0 / (leftTan + rightTan),
-          yScale = 2.0 / (upTan + downTan),
-          matrix = new Matrix4();
+class ViewCameraTransform {
+  static makeTransform(eye, near, far) {
+    return {
+      translation: new Vector3().fromArray(eye.offset),
+      projection: ViewCameraTransform.fieldOfViewToProjectionMatrix(eye.fieldOfView, near, far),
+      viewport: {
+        left: 0,
+        top: 0,
+        width: eye.renderWidth,
+        height: eye.renderHeight
+      }
+    };
+  }
 
-      matrix.elements[0] = xScale;
-      matrix.elements[1] = 0.0;
-      matrix.elements[2] = 0.0;
-      matrix.elements[3] = 0.0;
-      matrix.elements[4] = 0.0;
-      matrix.elements[5] = yScale;
-      matrix.elements[6] = 0.0;
-      matrix.elements[7] = 0.0;
-      matrix.elements[8] = -((leftTan - rightTan) * xScale * 0.5);
-      matrix.elements[9] = (upTan - downTan) * yScale * 0.5;
-      matrix.elements[10] = -(zNear + zFar) / (zFar - zNear);
-      matrix.elements[11] = -1.0;
-      matrix.elements[12] = 0.0;
-      matrix.elements[13] = 0.0;
-      matrix.elements[14] = -(2.0 * zFar * zNear) / (zFar - zNear);
-      matrix.elements[15] = 0.0;
+  static fieldOfViewToProjectionMatrix(fov, zNear, zFar) {
+    var upTan = Math.tan(fov.upDegrees * Math.PI / 180.0),
+      downTan = Math.tan(fov.downDegrees * Math.PI / 180.0),
+      leftTan = Math.tan(fov.leftDegrees * Math.PI / 180.0),
+      rightTan = Math.tan(fov.rightDegrees * Math.PI / 180.0),
+      xScale = 2.0 / (leftTan + rightTan),
+      yScale = 2.0 / (upTan + downTan),
+      matrix = new Matrix4();
 
-      return matrix;
-    }
-  }]);
+    matrix.elements[0] = xScale;
+    matrix.elements[1] = 0.0;
+    matrix.elements[2] = 0.0;
+    matrix.elements[3] = 0.0;
+    matrix.elements[4] = 0.0;
+    matrix.elements[5] = yScale;
+    matrix.elements[6] = 0.0;
+    matrix.elements[7] = 0.0;
+    matrix.elements[8] = -((leftTan - rightTan) * xScale * 0.5);
+    matrix.elements[9] = ((upTan - downTan) * yScale * 0.5);
+    matrix.elements[10] = -(zNear + zFar) / (zFar - zNear);
+    matrix.elements[11] = -1.0;
+    matrix.elements[12] = 0.0;
+    matrix.elements[13] = 0.0;
+    matrix.elements[14] = -(2.0 * zFar * zNear) / (zFar - zNear);
+    matrix.elements[15] = 0.0;
 
-  function ViewCameraTransform(display) {
-    classCallCheck(this, ViewCameraTransform);
+    return matrix;
+  }
 
+  constructor(display) {
     this.display = display;
   }
 
-  createClass(ViewCameraTransform, [{
-    key: "getTransforms",
-    value: function getTransforms(near, far) {
-      var l = this.display.getEyeParameters("left"),
-          r = this.display.getEyeParameters("right"),
-          params = [ViewCameraTransform.makeTransform(l, near, far)];
-      if (r) {
-        params.push(ViewCameraTransform.makeTransform(r, near, far));
-      }
-      for (var i = 1; i < params.length; ++i) {
-        params[i].viewport.left = params[i - 1].viewport.left + params[i - 1].viewport.width;
-      }
-      return params;
+  getTransforms(near, far) {
+    const l = this.display.getEyeParameters("left"),
+      r = this.display.getEyeParameters("right"),
+      params = [ViewCameraTransform.makeTransform(l, near, far)];
+    if (r) {
+      params.push(ViewCameraTransform.makeTransform(r, near, far));
     }
-  }]);
-  return ViewCameraTransform;
-}();
-
-var VR = function (_PoseInputProcessor) {
-  inherits(VR, _PoseInputProcessor);
-  createClass(VR, null, [{
-    key: "isStereoDisplay",
-    value: function isStereoDisplay(display) {
-      var leftParams = display.getEyeParameters("left"),
-          rightParams = display.getEyeParameters("right");
-      return !!(leftParams && rightParams);
+    for (let i = 1; i < params.length; ++i) {
+      params[i].viewport.left = params[i - 1].viewport.left + params[i - 1].viewport.width;
     }
-  }]);
+    return params;
+  }
+}
 
-  function VR(options) {
-    classCallCheck(this, VR);
+class VR extends PoseInputProcessor {
 
-    var _this = possibleConstructorReturn(this, (VR.__proto__ || Object.getPrototypeOf(VR)).call(this, "VR"));
-
-    _this.options = options;
-    _this.displays = [];
-    _this._transformers = [];
-    _this.currentDeviceIndex = -1;
-    _this.movePlayer = new Matrix4();
-    _this.stage = null;
-    _this.lastStageWidth = null;
-    _this.lastStageDepth = null;
-    _this.isStereo = false;
-    install(options);
-
-    if (_this.options.nonstandardIPD !== null) {
-      CardboardVRDisplay.IPD = _this.options.nonstandardIPD;
-    }
-    if (_this.options.nonstandardNeckLength !== null) {
-      CardboardVRDisplay.NECK_LENGTH = _this.options.nonstandardNeckLength;
-    }
-    if (_this.options.nonstandardNeckDepth !== null) {
-      CardboardVRDisplay.NECK_DEPTH = _this.options.nonstandardNeckDepth;
-    }
-
-    _this.ready = navigator.getVRDisplays().then(function (displays) {
-      _this.displays.push.apply(_this.displays, displays);
-      _this.connect(0);
-      return _this.displays;
-    });
-    return _this;
+  static isStereoDisplay(display) {
+    const leftParams = display.getEyeParameters("left"),
+        rightParams = display.getEyeParameters("right");
+    return !!(leftParams && rightParams);
   }
 
-  createClass(VR, [{
-    key: "connect",
-    value: function connect(selectedIndex) {
-      this.currentDevice = null;
-      this.currentDeviceIndex = selectedIndex;
-      this.currentPose = null;
-      if (0 <= selectedIndex && selectedIndex <= this.displays.length) {
-        this.currentDevice = this.displays[selectedIndex];
-        this.currentPose = this.currentDevice.getPose();
-        this.isStereo = VR.isStereoDisplay(this.currentDevice);
-      }
+  constructor(options) {
+    super("VR");
+
+    this.options = options;
+    this.displays = [];
+    this._transformers = [];
+    this.currentDeviceIndex = -1;
+    this.movePlayer = new Matrix4();
+    this.stage = null;
+    this.lastStageWidth = null;
+    this.lastStageDepth = null;
+    this.isStereo = false;
+    install(options);
+
+
+    if(this.options.nonstandardIPD !== null){
+      CardboardVRDisplay.IPD = this.options.nonstandardIPD;
     }
-  }, {
-    key: "requestPresent",
-    value: function requestPresent(opts) {
-      if (!this.currentDevice) {
-        return Promise.reject("No display");
-      } else {
-        var layers = opts,
-            elem = opts[0].source;
-
-        if (!(layers instanceof Array)) {
-          layers = [layers];
-        }
-
-        // A hack to deal with a bug in the current build of Chromium
-        if (this.isNativeMobileWebVR && this.isStereo && !isGearVR) {
-          layers = layers[0];
-        }
-
-        var promise = this.currentDevice.requestPresent(layers);
-        if (isMobile || !isFirefox) {
-          promise = promise.then(standardLockBehavior);
-        }
-        return promise;
-      }
+    if(this.options.nonstandardNeckLength !== null){
+      CardboardVRDisplay.NECK_LENGTH = this.options.nonstandardNeckLength;
     }
-  }, {
-    key: "cancel",
-    value: function cancel() {
-      var _this2 = this;
+    if(this.options.nonstandardNeckDepth !== null){
+      CardboardVRDisplay.NECK_DEPTH = this.options.nonstandardNeckDepth;
+    }
 
-      var promise = null;
-      if (this.isPresenting) {
-        promise = this.currentDevice.exitPresent();
-        this.currentDevice = null;
-        this.currentDeviceIndex = -1;
-        this.currentPose = null;
-      } else {
-        promise = Promise.resolve();
-      }
-
-      if (this.isNativeMobileWebVR) {
-        promise = promise.then(Orientation.unlock);
-      }
-
-      return promise.then(PointerLock.exit).catch(function (exp) {
-        return console.warn(exp);
-      }).then(function () {
-        return _this2.connect(0);
+    this.ready = navigator.getVRDisplays()
+      .then((displays) => {
+        this.displays.push.apply(this.displays, displays);
+        this.connect(0);
+        return this.displays;
       });
-    }
-  }, {
-    key: "update",
-    value: function update(dt) {
-      var x, z, stage;
+  }
 
-      if (this.currentDevice) {
-        this.currentPose = this.currentDevice.getPose();
-        stage = this.currentDevice.stageParameters;
-      } else {
-        stage = null;
+  get isNativeMobileWebVR() {
+    return this.isNativeWebVR && isChrome && isMobile;
+  }
+
+  get isNativeWebVR() {
+    return this.currentDevice && !this.currentDevice.isPolyfilled;
+  }
+
+  connect(selectedIndex) {
+    this.currentDevice = null;
+    this.currentDeviceIndex = selectedIndex;
+    this.currentPose = null;
+    if (0 <= selectedIndex && selectedIndex <= this.displays.length) {
+      this.currentDevice = this.displays[selectedIndex];
+      this.currentPose = this.currentDevice.getPose();
+      this.isStereo = VR.isStereoDisplay(this.currentDevice);
+    }
+  }
+
+  requestPresent(opts) {
+    if (!this.currentDevice) {
+      return Promise.reject("No display");
+    }
+    else {
+      let layers = opts,
+        elem = opts[0].source;
+
+      if (!(layers instanceof Array)) {
+        layers = [layers];
       }
 
-      get(VR.prototype.__proto__ || Object.getPrototypeOf(VR.prototype), "update", this).call(this, dt);
-
-      if (stage) {
-        this.movePlayer.fromArray(stage.sittingToStandingTransform);
-        x = stage.sizeX;
-        z = stage.sizeZ;
-      } else {
-        this.movePlayer.makeTranslation(0, this.options.avatarHeight, 0);
-        x = 0;
-        z = 0;
+      // A hack to deal with a bug in the current build of Chromium
+      if (this.isNativeMobileWebVR && this.isStereo && !isGearVR) {
+        layers = layers[0];
       }
 
-      var s = {
-        matrix: this.movePlayer,
-        sizeX: x,
-        sizeZ: z
-      };
+      var promise = this.currentDevice.requestPresent(layers);
+      if(isMobile || !isFirefox) {
+        promise = promise.then(standardLockBehavior);
+      }
+      return promise;
+    }
+  }
 
-      if (!this.stage || s.sizeX !== this.stage.sizeX || s.sizeZ !== this.stage.sizeZ) {
-        this.stage = s;
+  cancel() {
+    let promise = null;
+    if (this.isPresenting) {
+      promise = this.currentDevice.exitPresent();
+      this.currentDevice = null;
+      this.currentDeviceIndex = -1;
+      this.currentPose = null;
+    }
+    else {
+      promise = Promise.resolve();
+    }
+
+    if (this.isNativeMobileWebVR) {
+      promise = promise.then(Orientation.unlock);
+    }
+
+    return promise
+      .then(PointerLock.exit)
+      .catch((exp) => console.warn(exp))
+      .then(() => this.connect(0));
+  }
+
+  update(dt) {
+    var x, z, stage;
+
+    if (this.currentDevice) {
+      this.currentPose = this.currentDevice.getPose();
+      stage = this.currentDevice.stageParameters;
+    }
+    else{
+      stage = null;
+    }
+
+    super.update(dt);
+
+    if (stage) {
+      this.movePlayer.fromArray(stage.sittingToStandingTransform);
+      x = stage.sizeX;
+      z = stage.sizeZ;
+    }
+    else {
+      this.movePlayer.makeTranslation(0, this.options.avatarHeight, 0);
+      x = 0;
+      z = 0;
+    }
+
+    var s = {
+      matrix: this.movePlayer,
+      sizeX: x,
+      sizeZ: z
+    };
+
+    if (!this.stage || s.sizeX !== this.stage.sizeX || s.sizeZ !== this.stage.sizeZ) {
+      this.stage = s;
+    }
+  }
+
+  get hasStage() {
+    return this.stage && this.stage.sizeX * this.stage.sizeZ > 0;
+  }
+
+  submitFrame() {
+    if(this.currentDevice) {
+      this.currentDevice.submitFrame(this.currentPose);
+    }
+  }
+
+  getTransforms(near, far) {
+    if (this.currentDevice) {
+      if (!this._transformers[this.currentDeviceIndex]) {
+        this._transformers[this.currentDeviceIndex] = new ViewCameraTransform(this.currentDevice);
+      }
+      this.currentDevice.depthNear = near;
+      this.currentDevice.depthFar = far;
+      return this._transformers[this.currentDeviceIndex].getTransforms(near, far);
+    }
+  }
+
+  get canMirror() {
+    return this.currentDevice && this.currentDevice.capabilities.hasExternalDisplay;
+  }
+
+  get isPolyfilled() {
+    return this.currentDevice && this.currentDevice.isPolyfilled;
+  }
+
+  get isPresenting() {
+    return this.currentDevice && this.currentDevice.isPresenting;
+  }
+
+  get hasOrientation() {
+    return this.currentDevice && this.currentDevice.capabilities.hasOrientation;
+  }
+
+  get currentCanvas() {
+    if(this.isPresenting) {
+      var layers = this.currentDevice.getLayers();
+      if(layers.length > 0){
+        return layers[0].source;
       }
     }
-  }, {
-    key: "submitFrame",
-    value: function submitFrame() {
-      if (this.currentDevice) {
-        this.currentDevice.submitFrame(this.currentPose);
-      }
-    }
-  }, {
-    key: "getTransforms",
-    value: function getTransforms(near, far) {
-      if (this.currentDevice) {
-        if (!this._transformers[this.currentDeviceIndex]) {
-          this._transformers[this.currentDeviceIndex] = new ViewCameraTransform(this.currentDevice);
-        }
-        this.currentDevice.depthNear = near;
-        this.currentDevice.depthFar = far;
-        return this._transformers[this.currentDeviceIndex].getTransforms(near, far);
-      }
-    }
-  }, {
-    key: "isNativeMobileWebVR",
-    get: function get$$1() {
-      return this.isNativeWebVR && isChrome && isMobile;
-    }
-  }, {
-    key: "isNativeWebVR",
-    get: function get$$1() {
-      return this.currentDevice && !this.currentDevice.isPolyfilled;
-    }
-  }, {
-    key: "hasStage",
-    get: function get$$1() {
-      return this.stage && this.stage.sizeX * this.stage.sizeZ > 0;
-    }
-  }, {
-    key: "canMirror",
-    get: function get$$1() {
-      return this.currentDevice && this.currentDevice.capabilities.hasExternalDisplay;
-    }
-  }, {
-    key: "isPolyfilled",
-    get: function get$$1() {
-      return this.currentDevice && this.currentDevice.isPolyfilled;
-    }
-  }, {
-    key: "isPresenting",
-    get: function get$$1() {
-      return this.currentDevice && this.currentDevice.isPresenting;
-    }
-  }, {
-    key: "hasOrientation",
-    get: function get$$1() {
-      return this.currentDevice && this.currentDevice.capabilities.hasOrientation;
-    }
-  }, {
-    key: "currentCanvas",
-    get: function get$$1() {
-      if (this.isPresenting) {
-        var layers = this.currentDevice.getLayers();
-        if (layers.length > 0) {
-          return layers[0].source;
-        }
-      }
-      return null;
-    }
-  }]);
-  return VR;
-}(PoseInputProcessor);
+    return null;
+  }
+}
 
 function number(min, max, power) {
   power = power || 1;
@@ -53771,8 +52627,8 @@ function number(min, max, power) {
     max = min;
     min = 0;
   }
-  var delta = max - min,
-      n = Math.pow(Math.random(), power);
+  const delta = max - min,
+    n = Math.pow(Math.random(), power);
   return min + n * delta;
 }
 
@@ -53782,343 +52638,310 @@ function int(min, max, power) {
 
 function color() {
   var r = int(0, 256),
-      g = int(0, 256),
-      b = int(0, 256);
+    g = int(0, 256),
+    b = int(0, 256);
   return r << 16 | g << 8 | b;
 }
 
-var RemoteUser = function (_EventDispatcher) {
-  inherits(RemoteUser, _EventDispatcher);
+class RemoteUser extends EventDispatcher {
 
-  function RemoteUser(userName, modelFactory, nameMaterial, disableWebRTC, requestICEPath, microphone, localUserName, goSecond) {
-    classCallCheck(this, RemoteUser);
+  constructor(userName, modelFactory, nameMaterial, disableWebRTC, requestICEPath, microphone, localUserName, goSecond) {
+    super();
+    this.time = 0;
 
-    var _this = possibleConstructorReturn(this, (RemoteUser.__proto__ || Object.getPrototypeOf(RemoteUser)).call(this));
-
-    _this.time = 0;
-
-    _this.userName = userName;
-    _this.peeringError = null;
-    _this.peering = false;
-    _this.peered = false;
-    _this.stage = modelFactory.clone();
-    _this.stage.traverse(function (obj) {
+    this.userName = userName;
+    this.peeringError = null;
+    this.peering = false;
+    this.peered = false;
+    this.stage = modelFactory.clone();
+    this.stage.traverse((obj) => {
       if (obj.name === "AvatarBelt") {
         colored(obj, color());
-      } else if (obj.name === "AvatarHead") {
-        _this.head = obj;
+      }
+      else if (obj.name === "AvatarHead") {
+        this.head = obj;
       }
     });
 
-    _this.nameObject = colored(text3D(0.1, userName), nameMaterial);
-    var bounds = _this.nameObject.geometry.boundingBox.max;
-    _this.nameObject.rotation.set(0, Math.PI, 0);
-    _this.nameObject.position.set(bounds.x / 2, bounds.y, 0);
-    _this.head.add(_this.nameObject);
+    this.nameObject = colored(text3D(0.1, userName), nameMaterial);
+    var bounds = this.nameObject.geometry.boundingBox.max;
+    this.nameObject.rotation.set(0, Math.PI, 0);
+    this.nameObject.position.set(bounds.x / 2, bounds.y, 0);
+    this.head.add(this.nameObject);
 
-    _this.dStageQuaternion = new Quaternion();
-    _this.dHeadPosition = new Vector3();
-    _this.dHeadQuaternion = new Quaternion();
+    this.dStageQuaternion = new Quaternion();
+    this.dHeadPosition = new Vector3();
+    this.dHeadQuaternion = new Quaternion();
 
-    _this.lastStageQuaternion = new Quaternion();
-    _this.lastHeadPosition = new Vector3();
-    _this.lastHeadQuaternion = new Quaternion();
+    this.lastStageQuaternion = new Quaternion();
+    this.lastHeadPosition = new Vector3();
+    this.lastHeadQuaternion = new Quaternion();
 
-    _this.headPosition = {
+    this.headPosition = {
       arr1: [],
       arr2: [],
-      last: _this.lastHeadPosition,
-      delta: _this.dHeadPosition,
-      curr: _this.head.position
+      last: this.lastHeadPosition,
+      delta: this.dHeadPosition,
+      curr: this.head.position
     };
-    _this.headQuaternion = {
+    this.headQuaternion = {
       arr1: [],
       arr2: [],
-      last: _this.lastHeadQuaternion,
-      delta: _this.dHeadQuaternion,
-      curr: _this.head.quaternion
+      last: this.lastHeadQuaternion,
+      delta: this.dHeadQuaternion,
+      curr: this.head.quaternion
     };
 
-    _this.audioChannel = null;
-    _this.audioElement = null;
-    _this.audioStream = null;
-    _this.gain = null;
-    _this.panner = null;
-    _this.analyzer = null;
-    return _this;
+    this.audioChannel = null;
+    this.audioElement = null;
+    this.audioStream = null;
+    this.gain = null;
+    this.panner = null;
+    this.analyzer = null;
   }
 
-  createClass(RemoteUser, [{
-    key: "setAudio",
-    value: function setAudio(audio, audioSource) {
-      if (audioSource instanceof Element) {
-        this.audioElement = audioSource;
-        Audio3D.setAudioProperties(this.audioElement);
-        this.audioStream = audio.context.createMediaElementSource(this.audioElement);
-      } else {
-        this.audioElement = Audio3D.setAudioStream(audioSource, "audio" + this.userName);
-        this.audioStream = audio.context.createMediaStreamSource(audioSource);
-      }
-      this.gain = audio.context.createGain();
-      this.panner = audio.context.createPanner();
-
-      this.audioStream.connect(this.gain);
-      this.gain.connect(this.panner);
-      this.panner.connect(audio.mainVolume);
-      this.panner.coneInnerAngle = 180;
-      this.panner.coneOuterAngle = 360;
-      this.panner.coneOuterGain = 0.1;
-      this.panner.panningModel = "HRTF";
-      this.panner.distanceModel = "exponential";
+  setAudio(audio, audioSource){
+    if(audioSource instanceof Element){
+      this.audioElement = audioSource;
+      Audio3D.setAudioProperties(this.audioElement);
+      this.audioStream = audio.context.createMediaElementSource(this.audioElement);
     }
-  }, {
-    key: "unpeer",
-    value: function unpeer() {
-      if (this.audioChannel) {
-        this.audioChannel.close();
-        if (this.audioElement) {
-          document.body.removeChild(this.audioElement);
-          if (this.panner) {
-            this.panner.disconnect();
-            this.gain.disconnect();
-            this.audioStream.disconnect();
-          }
+    else {
+      this.audioElement = Audio3D.setAudioStream(audioSource, "audio" + this.userName);
+      this.audioStream = audio.context.createMediaStreamSource(audioSource);
+    }
+    this.gain = audio.context.createGain();
+    this.panner = audio.context.createPanner();
+
+    this.audioStream.connect(this.gain);
+    this.gain.connect(this.panner);
+    this.panner.connect(audio.mainVolume);
+    this.panner.coneInnerAngle = 180;
+    this.panner.coneOuterAngle = 360;
+    this.panner.coneOuterGain = 0.1;
+    this.panner.panningModel = "HRTF";
+    this.panner.distanceModel = "exponential";
+  }
+
+  unpeer() {
+    if (this.audioChannel) {
+      this.audioChannel.close();
+      if (this.audioElement) {
+        document.body.removeChild(this.audioElement);
+        if (this.panner) {
+          this.panner.disconnect();
+          this.gain.disconnect();
+          this.audioStream.disconnect();
         }
       }
     }
-  }, {
-    key: "_updateV",
-    value: function _updateV(v, dt, fade) {
-      v.curr.toArray(v.arr1);
-      v.delta.toArray(v.arr2);
-      for (var i = 0; i < v.arr1.length; ++i) {
-        if (fade) {
-          v.arr2[i] *= RemoteUser.FADE_FACTOR;
-        }
-        v.arr1[i] += v.arr2[i] * dt;
-      }
+  }
 
-      v.curr.fromArray(v.arr1);
-      v.delta.fromArray(v.arr2);
-    }
-  }, {
-    key: "_predict",
-    value: function _predict(v, state, off) {
-      v.delta.fromArray(state, off);
-      v.delta.toArray(v.arr1);
-      v.curr.toArray(v.arr2);
-      for (var i = 0; i < v.arr1.length; ++i) {
-        v.arr1[i] = (v.arr1[i] - v.arr2[i]) * RemoteUser.NETWORK_DT_INV;
+  _updateV(v, dt, fade) {
+    v.curr.toArray(v.arr1);
+    v.delta.toArray(v.arr2);
+    for (var i = 0; i < v.arr1.length; ++i) {
+      if (fade) {
+        v.arr2[i] *= RemoteUser.FADE_FACTOR;
       }
-      v.delta.fromArray(v.arr1);
+      v.arr1[i] += v.arr2[i] * dt;
     }
-  }, {
-    key: "update",
-    value: function update(dt) {
-      this.time += dt;
-      var fade = this.time >= RemoteUser.NETWORK_DT;
-      this._updateV(this.headPosition, dt, fade);
-      this._updateV(this.headQuaternion, dt, fade);
-      this.stage.rotation.setFromQuaternion(this.headQuaternion.curr);
-      this.stage.rotation.x = 0;
-      this.stage.rotation.z = 0;
-      this.stage.position.copy(this.headPosition.curr);
-      this.stage.position.y = 0;
-      if (this.panner) {
-        this.panner.setPosition(this.stage.position.x, this.stage.position.y, this.stage.position.z);
-        this.panner.setOrientation(Math.sin(this.stage.rotation.y), 0, Math.cos(this.stage.rotation.y));
-      }
+
+    v.curr.fromArray(v.arr1);
+    v.delta.fromArray(v.arr2);
+  }
+
+  _predict(v, state, off) {
+    v.delta.fromArray(state, off);
+    v.delta.toArray(v.arr1);
+    v.curr.toArray(v.arr2);
+    for (var i = 0; i < v.arr1.length; ++i) {
+      v.arr1[i] = (v.arr1[i] - v.arr2[i]) * RemoteUser.NETWORK_DT_INV;
     }
-  }, {
-    key: "setState",
-    value: function setState(v) {
-      this.time = 0;
-      this._predict(this.headPosition, v, 1);
-      this._predict(this.headQuaternion, v, 4);
+    v.delta.fromArray(v.arr1);
+  }
+
+  update(dt) {
+    this.time += dt;
+    var fade = this.time >= RemoteUser.NETWORK_DT;
+    this._updateV(this.headPosition, dt, fade);
+    this._updateV(this.headQuaternion, dt, fade);
+    this.stage.rotation.setFromQuaternion(this.headQuaternion.curr);
+    this.stage.rotation.x = 0;
+    this.stage.rotation.z = 0;
+    this.stage.position.copy(this.headPosition.curr);
+    this.stage.position.y = 0;
+    if (this.panner) {
+      this.panner.setPosition(this.stage.position.x, this.stage.position.y, this.stage.position.z);
+      this.panner.setOrientation(Math.sin(this.stage.rotation.y), 0, Math.cos(this.stage.rotation.y));
     }
-  }, {
-    key: "toString",
-    value: function toString(digits) {
-      return this.stage.position.curr.toString(digits) + " " + this.headPosition.curr.toString(digits);
-    }
-  }]);
-  return RemoteUser;
-}(EventDispatcher);
+  }
+
+  setState(v) {
+    this.time = 0;
+    this._predict(this.headPosition, v, 1);
+    this._predict(this.headQuaternion, v, 4);
+  }
+
+  toString(digits) {
+    return this.stage.position.curr.toString(digits) + " " + this.headPosition.curr.toString(digits);
+  }
+}
 
 RemoteUser.FADE_FACTOR = 0.5;
 RemoteUser.NETWORK_DT = 0.10;
 RemoteUser.NETWORK_DT_INV = 1 / RemoteUser.NETWORK_DT;
 
-var Manager = function (_EventDispatcher) {
-  inherits(Manager, _EventDispatcher);
-
-  function Manager(localUser, audio, factories, options) {
-    classCallCheck(this, Manager);
-
-    var _this = possibleConstructorReturn(this, (Manager.__proto__ || Object.getPrototypeOf(Manager)).call(this));
-
-    _this.localUser = localUser;
-    _this.audio = audio;
-    _this.factories = factories;
-    _this.options = options;
-    _this.lastNetworkUpdate = 0;
-    _this.oldState = [];
-    _this.users = {};
-    _this.waitForLastUser = Promise.resolve();
-    _this._socket = null;
-    _this.userName = null;
-    _this.microphone = null;
-    _this.audioHeap = {};
-    return _this;
+class Manager extends EventDispatcher {
+  constructor(localUser, audio, factories, options) {
+    super();
+    this.localUser = localUser;
+    this.audio = audio;
+    this.factories = factories;
+    this.options = options;
+    this.lastNetworkUpdate = 0;
+    this.oldState = [];
+    this.users = {};
+    this.waitForLastUser = Promise.resolve();
+    this._socket = null;
+    this.userName = null;
+    this.microphone = null;
+    this.audioHeap = {};
   }
 
-  createClass(Manager, [{
-    key: "update",
-    value: function update(dt) {
-      if (this._socket && this.deviceIndex === 0) {
-        this.lastNetworkUpdate += dt;
-        if (this.lastNetworkUpdate >= RemoteUser.NETWORK_DT) {
-          this.lastNetworkUpdate -= RemoteUser.NETWORK_DT;
-          for (var i = 0; i < this.localUser.newState.length; ++i) {
-            if (this.oldState[i] !== this.localUser.newState[i]) {
-              this._socket.emit("userState", this.localUser.newState);
-              this.oldState = this.localUser.newState;
-              break;
-            }
+  update(dt) {
+    if (this._socket && this.deviceIndex === 0) {
+      this.lastNetworkUpdate += dt;
+      if (this.lastNetworkUpdate >= RemoteUser.NETWORK_DT) {
+        this.lastNetworkUpdate -= RemoteUser.NETWORK_DT;
+        for (var i = 0; i < this.localUser.newState.length; ++i) {
+          if (this.oldState[i] !== this.localUser.newState[i]) {
+            this._socket.emit("userState", this.localUser.newState);
+            this.oldState = this.localUser.newState;
+            break;
           }
         }
       }
-      for (var key in this.users) {
-        var user = this.users[key];
-        user.update(dt);
-        if (this.audioHeap[key]) {
-          user.setAudio(this.audio, this.audioHeap[key]);
-          delete this.audioHeap[key];
-        }
+    }
+    for (const key in this.users) {
+      const user = this.users[key];
+      user.update(dt);
+      if(this.audioHeap[key]){
+        user.setAudio(this.audio, this.audioHeap[key]);
+        delete this.audioHeap[key];
       }
     }
-  }, {
-    key: "updateUser",
-    value: function updateUser(state) {
-      var key = state[0];
-      if (key !== this.userName) {
-        var user = this.users[key];
-        if (user) {
-          user.setState(state);
-        }
-      } else if (this.deviceIndex > 0) {
-        this.localUser.stage.position.fromArray(state, 1);
-        this.localUser.stage.quaternion.fromArray(state, 4);
-        this.localUser.head.position.fromArray(state, 8);
-        this.localUser.head.quaternion.fromArray(state, 11);
+  }
+
+  updateUser(state) {
+    const key = state[0];
+    if (key !== this.userName) {
+      const user = this.users[key];
+      if (user) {
+        user.setState(state);
       }
     }
-  }, {
-    key: "connect",
-    value: function connect(socket, userName) {
-      this.userName = userName.toLocaleUpperCase();
-      if (!this.microphone) {
-        this.microphone = navigator.mediaDevices.getUserMedia({
+    else if (this.deviceIndex > 0) {
+      this.localUser.stage.position.fromArray(state, 1);
+      this.localUser.stage.quaternion.fromArray(state, 4);
+      this.localUser.head.position.fromArray(state, 8);
+      this.localUser.head.quaternion.fromArray(state, 11);
+    }
+  }
+
+  connect(socket, userName) {
+    this.userName = userName.toLocaleUpperCase();
+    if (!this.microphone) {
+      this.microphone = navigator.mediaDevices.getUserMedia({
           audio: true,
           video: false
-        }).catch(console.warn.bind(console, "Can't get audio"));
+        })
+        .catch(console.warn.bind(console, "Can't get audio"));
+    }
+    if (!this._socket) {
+      this._socket = socket;
+      this._socket.on("userList", this.listUsers.bind(this));
+      this._socket.on("userJoin", this.addUser.bind(this));
+      this._socket.on("deviceAdded", this.addDevice.bind(this));
+      this._socket.on("deviceIndex", this.setDeviceIndex.bind(this));
+      this._socket.on("chat", this.receiveChat.bind(this));
+      this._socket.on("userState", this.updateUser.bind(this));
+      this._socket.on("userLeft", this.removeUser.bind(this));
+      this._socket.on("connection_lost", this.lostConnection.bind(this));
+      this._socket.emit("listUsers");
+      this._socket.emit("getDeviceIndex");
+    }
+  }
+
+  disconnect() {
+    this.userName = null;
+    this._socket.close();
+    this._socket = null;
+  }
+
+  addUser(state, goSecond) {
+    console.log("User %s logging on.", state[0]);
+    var toUserName = state[0],
+      user = new RemoteUser(toUserName, this.factories.avatar, this.options.foregroundColor, this.options.disableWebRTC, this.options.webRTC, this.microphone, this.userName, goSecond);
+    this.users[toUserName] = user;
+    this.updateUser(state);
+    this.emit("addavatar", user);
+  }
+
+  removeUser(key) {
+    console.log("User %s logging off.", key);
+    var user = this.users[key];
+    if (user) {
+      if(user.peered){
+        user.unpeer();
       }
-      if (!this._socket) {
-        this._socket = socket;
-        this._socket.on("userList", this.listUsers.bind(this));
-        this._socket.on("userJoin", this.addUser.bind(this));
-        this._socket.on("deviceAdded", this.addDevice.bind(this));
-        this._socket.on("deviceIndex", this.setDeviceIndex.bind(this));
-        this._socket.on("chat", this.receiveChat.bind(this));
-        this._socket.on("userState", this.updateUser.bind(this));
-        this._socket.on("userLeft", this.removeUser.bind(this));
-        this._socket.on("connection_lost", this.lostConnection.bind(this));
-        this._socket.emit("listUsers");
-        this._socket.emit("getDeviceIndex");
-      }
+      delete this.users[key];
+      this.emit("removeavatar", user);
     }
-  }, {
-    key: "disconnect",
-    value: function disconnect() {
-      this.userName = null;
-      this._socket.close();
-      this._socket = null;
-    }
-  }, {
-    key: "addUser",
-    value: function addUser(state, goSecond) {
-      console.log("User %s logging on.", state[0]);
-      var toUserName = state[0],
-          user = new RemoteUser(toUserName, this.factories.avatar, this.options.foregroundColor, this.options.disableWebRTC, this.options.webRTC, this.microphone, this.userName, goSecond);
-      this.users[toUserName] = user;
-      this.updateUser(state);
-      this.emit("addavatar", user);
-    }
-  }, {
-    key: "removeUser",
-    value: function removeUser(key) {
-      console.log("User %s logging off.", key);
-      var user = this.users[key];
-      if (user) {
-        if (user.peered) {
-          user.unpeer();
-        }
-        delete this.users[key];
-        this.emit("removeavatar", user);
-      }
-    }
-  }, {
-    key: "listUsers",
-    value: function listUsers(newUsers) {
-      Object.keys(this.users).forEach(this.removeUser.bind(this));
-      while (newUsers.length > 0) {
-        this.addUser(newUsers.shift(), true);
-      }
-      this.emit("authorizationsucceeded");
-    }
-  }, {
-    key: "receiveChat",
-    value: function receiveChat(evt) {
-      console.log("chat", evt);
-    }
-  }, {
-    key: "lostConnection",
-    value: function lostConnection() {
-      this.deviceIndex = null;
-    }
-  }, {
-    key: "addDevice",
-    value: function addDevice(index) {
-      console.log("addDevice", index);
-    }
-  }, {
-    key: "setDeviceIndex",
-    value: function setDeviceIndex(index) {
-      this.deviceIndex = index;
-    }
-  }, {
-    key: "setAudioFromUser",
-    value: function setAudioFromUser(userName, audioElement) {
-      this.audioHeap[userName] = audioElement;
-    }
-  }]);
-  return Manager;
-}(EventDispatcher);
+  }
 
-var PlainText = new Grammar("PlainText", [["newlines", /(?:\r\n|\r|\n)/]]);
+  listUsers(newUsers) {
+    Object.keys(this.users)
+      .forEach(this.removeUser.bind(this));
+    while (newUsers.length > 0) {
+      this.addUser(newUsers.shift(), true);
+    }
+    this.emit("authorizationsucceeded");
+  }
 
-var DIFF = new Vector3();
-var MAX_MOVE_DISTANCE = 5;
-var MAX_MOVE_DISTANCE_SQ = MAX_MOVE_DISTANCE * MAX_MOVE_DISTANCE;
-var MAX_TELEPORT_WAGGLE = 0.5;
-var TELEPORT_PAD_RADIUS = 0.4;
+  receiveChat(evt) {
+    console.log("chat", evt);
+  }
 
-var Teleporter = function () {
-  function Teleporter(env) {
-    var _this = this;
+  lostConnection() {
+    this.deviceIndex = null;
+  }
 
-    classCallCheck(this, Teleporter);
+  addDevice(index) {
+    console.log("addDevice", index);
+  }
 
+  setDeviceIndex(index) {
+    this.deviceIndex = index;
+  }
+
+  setAudioFromUser(userName, audioElement){
+    this.audioHeap[userName] = audioElement;
+  }
+}
+
+var PlainText = new Grammar("PlainText", [
+  ["newlines", /(?:\r\n|\r|\n)/]
+]);
+
+const DIFF = new Vector3();
+const MAX_MOVE_DISTANCE = 5;
+const MAX_MOVE_DISTANCE_SQ = MAX_MOVE_DISTANCE * MAX_MOVE_DISTANCE;
+const MAX_TELEPORT_WAGGLE = 0.5;
+const TELEPORT_PAD_RADIUS = 0.4;
+
+class Teleporter {
+  constructor(env) {
 
     this.enabled = true;
     this._environment = env;
@@ -54131,85 +52954,101 @@ var Teleporter = function () {
     this._move = this._move.bind(this);
     this._end = this._end.bind(this);
 
-    env.ground.on("exit", this._exit).on("gazecancel", this._exit).on("gazecomplete", this._exit).on("pointerend", this._exit).on("pointerstart", this._start).on("gazestart", this._start).on("pointermove", this._move).on("gazemove", this._move).on("select", this._end);
+    env.ground.on("exit", this._exit)
+      .on("gazecancel", this._exit)
+      .on("gazecomplete", this._exit)
+      .on("pointerend", this._exit)
 
-    this.disk = sphere(TELEPORT_PAD_RADIUS, 128, 3).colored(0xff0000, {
-      unshaded: true
-    }).named("disk").addTo(env.scene);
+      .on("pointerstart", this._start)
+      .on("gazestart", this._start)
+
+      .on("pointermove", this._move)
+      .on("gazemove", this._move)
+
+      .on("select", this._end);
+
+
+    this.disk = sphere(TELEPORT_PAD_RADIUS, 128, 3)
+      .colored(0xff0000, {
+        unshaded: true
+      })
+      .named("disk")
+      .addTo(env.scene);
 
     this.disk.geometry.computeBoundingBox();
-    this.disk.geometry.vertices.forEach(function (v) {
-      v.y = 0.1 * (v.y - _this.disk.geometry.boundingBox.min.y);
+    this.disk.geometry.vertices.forEach((v) => {
+      v.y = 0.1 * (v.y - this.disk.geometry.boundingBox.min.y);
     });
     this.disk.geometry.computeBoundingBox();
 
     this.disk.visible = false;
   }
 
-  createClass(Teleporter, [{
-    key: "_exit",
-    value: function _exit(evt) {
-      this.disk.visible = false;
+  _exit(evt) {
+    this.disk.visible = false;
+  }
+
+  _start(evt){
+    if(this.enabled){
+      this._updatePosition(evt);
+      this.disk.visible = true;
+      this._moveDistance = 0;
     }
-  }, {
-    key: "_start",
-    value: function _start(evt) {
-      if (this.enabled) {
-        this._updatePosition(evt);
-        this.disk.visible = true;
-        this._moveDistance = 0;
+  }
+
+  _move(evt) {
+    if(this.enabled) {
+      this._updatePosition(evt);
+      this.disk.visible = this._moveDistance < MAX_TELEPORT_WAGGLE;
+    }
+  }
+
+  _end(evt) {
+    if(this.enabled) {
+      this._updatePosition(evt);
+      if(this._moveDistance < MAX_TELEPORT_WAGGLE) {
+        this._environment.teleport(this.disk.position);
       }
     }
-  }, {
-    key: "_move",
-    value: function _move(evt) {
-      if (this.enabled) {
-        this._updatePosition(evt);
-        this.disk.visible = this._moveDistance < MAX_TELEPORT_WAGGLE;
-      }
+  }
+
+  _updatePosition(evt) {
+    this._startPoint.copy(this.disk.position);
+    this.disk.position.copy(evt.hit.point)
+      .sub(this._environment.head.position);
+
+    var distSq = this.disk.position.x * this.disk.position.x + this.disk.position.z * this.disk.position.z;
+    if (distSq > MAX_MOVE_DISTANCE_SQ) {
+      var dist = Math.sqrt(distSq),
+        factor = MAX_MOVE_DISTANCE / dist,
+        y = this.disk.position.y;
+      this.disk.position.y = 0;
+      this.disk.position.multiplyScalar(factor);
+      this.disk.position.y = y;
     }
-  }, {
-    key: "_end",
-    value: function _end(evt) {
-      if (this.enabled) {
-        this._updatePosition(evt);
-        if (this._moveDistance < MAX_TELEPORT_WAGGLE) {
-          this._environment.teleport(this.disk.position);
-        }
-      }
-    }
-  }, {
-    key: "_updatePosition",
-    value: function _updatePosition(evt) {
-      this._startPoint.copy(this.disk.position);
-      this.disk.position.copy(evt.hit.point).sub(this._environment.head.position);
 
-      var distSq = this.disk.position.x * this.disk.position.x + this.disk.position.z * this.disk.position.z;
-      if (distSq > MAX_MOVE_DISTANCE_SQ) {
-        var dist = Math.sqrt(distSq),
-            factor = MAX_MOVE_DISTANCE / dist,
-            y = this.disk.position.y;
-        this.disk.position.y = 0;
-        this.disk.position.multiplyScalar(factor);
-        this.disk.position.y = y;
-      }
+    this.disk.position.add(this._environment.head.position);
 
-      this.disk.position.add(this._environment.head.position);
+    const len = DIFF.copy(this.disk.position)
+      .sub(this._startPoint)
+      .length();
+    this._moveDistance += len;
+  }
+}
 
-      var len = DIFF.copy(this.disk.position).sub(this._startPoint).length();
-      this._moveDistance += len;
-    }
-  }]);
-  return Teleporter;
-}();
+const PIXEL_SCALES = [
+  0.5,
+  0.25,
+  0.333333,
+  0.5,
+  1
+];
 
-var PIXEL_SCALES = [0.5, 0.25, 0.333333, 0.5, 1];
+const SKINS = [0xFFDFC4, 0xF0D5BE, 0xEECEB3, 0xE1B899, 0xE5C298, 0xFFDCB2, 0xE5B887, 0xE5A073, 0xE79E6D, 0xDB9065, 0xCE967C, 0xC67856, 0xBA6C49, 0xA57257, 0xF0C8C9, 0xDDA8A0, 0xB97C6D, 0xA8756C, 0xAD6452, 0x5C3836, 0xCB8442, 0xBD723C, 0x704139, 0xA3866A, 0x870400, 0x710101, 0x430000, 0x5B0001, 0x302E2E ];
 
-var SKINS = [0xFFDFC4, 0xF0D5BE, 0xEECEB3, 0xE1B899, 0xE5C298, 0xFFDCB2, 0xE5B887, 0xE5A073, 0xE79E6D, 0xDB9065, 0xCE967C, 0xC67856, 0xBA6C49, 0xA57257, 0xF0C8C9, 0xDDA8A0, 0xB97C6D, 0xA8756C, 0xAD6452, 0x5C3836, 0xCB8442, 0xBD723C, 0x704139, 0xA3866A, 0x870400, 0x710101, 0x430000, 0x5B0001, 0x302E2E];
+const SYS_FONTS = "-apple-system, '.SFNSText-Regular', 'San Francisco', 'Roboto', 'Segoe UI', 'Helvetica Neue', 'Lucida Grande', sans-serif";
 
-var SYS_FONTS = "-apple-system, '.SFNSText-Regular', 'San Francisco', 'Roboto', 'Segoe UI', 'Helvetica Neue', 'Lucida Grande', sans-serif";
-
-var Quality = {
+const Quality = {
   NONE: 0,
   VERYLOW: 1,
   LOW: 2,
@@ -54218,118 +53057,156 @@ var Quality = {
   MAXIMUM: PIXEL_SCALES.length - 1
 };
 
-var NAMES = ["Dahlia", "Zinnia", "Camellia", "Ren", "Lotus", "Azalea", "Kunal", "Saffron", "Jessamine", "Basil", "Indigo", "Violet", "Iris", "Holly", "Yarrow", "Hazel", "Cypress", "Amaranth", "Aster", "Emerald", "Ash", "Boxwood", "Birchwood", "Ebony", "Forsythia", "Hawthorn", "Hemlock", "Locust", "Juniper", "Linden", "Magnolia", "Laurel", "Oak", "Alder", "Sycamore", "Blackhaw"];
+
+const NAMES = [
+  "Dahlia",
+  "Zinnia",
+  "Camellia",
+  "Ren",
+  "Lotus",
+  "Azalea",
+  "Kunal",
+  "Saffron",
+  "Jessamine",
+  "Basil",
+  "Indigo",
+  "Violet",
+  "Iris",
+  "Holly",
+  "Yarrow",
+  "Hazel",
+  "Cypress",
+  "Amaranth",
+  "Aster",
+  "Emerald",
+  "Ash",
+  "Boxwood",
+  "Birchwood",
+  "Ebony",
+  "Forsythia",
+  "Hawthorn",
+  "Hemlock",
+  "Locust",
+  "Juniper",
+  "Linden",
+  "Magnolia",
+  "Laurel",
+  "Oak",
+  "Alder",
+  "Sycamore",
+  "Blackhaw"
+];
 
 var Constants = {
-  PIXEL_SCALES: PIXEL_SCALES,
-  SKINS: SKINS,
-  SYS_FONTS: SYS_FONTS,
-  NAMES: NAMES,
-  Quality: Quality
+  PIXEL_SCALES,
+  SKINS,
+  SYS_FONTS,
+  NAMES,
+  Quality
 };
 
 /// NOTE: maybe BrowserEnvironment should be a subclass of THREE.Scene.
 
 
-var MILLISECONDS_TO_SECONDS = 0.001;
-var TELEPORT_DISPLACEMENT = new Vector3();
-var DISPLACEMENT = new Vector3();
-var EULER_TEMP = new Euler();
-var QUAT_TEMP = new Quaternion();
-var WEDGE = Math.PI / 3;
+const MILLISECONDS_TO_SECONDS = 0.001;
+const TELEPORT_DISPLACEMENT = new Vector3();
+const DISPLACEMENT = new Vector3();
+const EULER_TEMP = new Euler();
+const QUAT_TEMP = new Quaternion();
+const WEDGE = Math.PI / 3;
 
-var BrowserEnvironment = function (_EventDispatcher) {
-  inherits(BrowserEnvironment, _EventDispatcher);
+class BrowserEnvironment extends EventDispatcher {
+  constructor(options) {
+    super();
 
-  function BrowserEnvironment(options) {
-    classCallCheck(this, BrowserEnvironment);
+    this.options = Object.assign({}, BrowserEnvironment.DEFAULTS, options);
 
-    var _this = possibleConstructorReturn(this, (BrowserEnvironment.__proto__ || Object.getPrototypeOf(BrowserEnvironment)).call(this));
+    this.options.foregroundColor = this.options.foregroundColor || complementColor(new Color(this.options.backgroundColor))
+      .getHex();
 
-    _this.options = Object.assign({}, BrowserEnvironment.DEFAULTS, options);
+    this.deltaTime = 1;
 
-    _this.options.foregroundColor = _this.options.foregroundColor || complementColor(new Color(_this.options.backgroundColor)).getHex();
+    this.network = null;
 
-    _this.deltaTime = 1;
-
-    _this.network = null;
-
-    if (_this.options.nonstandardIPD !== null) {
-      _this.options.nonstandardIPD *= 0.5;
+    if(this.options.nonstandardIPD !== null){
+      this.options.nonstandardIPD *= 0.5;
     }
 
-    _this.audioQueue = [];
+    this.audioQueue = [];
 
-    _this.zero = function () {
-      if (!_this.lockMovement) {
-        for (var i = 0; i < _this.managers.length; ++i) {
-          _this.managers[i].zero();
+
+    this.zero = () => {
+      if (!this.lockMovement) {
+        for (let i = 0; i < this.managers.length; ++i) {
+          this.managers[i].zero();
         }
-        if (_this.quality === Quality.NONE) {
-          _this.quality = Quality.HIGH;
+        if (this.quality === Quality.NONE) {
+          this.quality = Quality.HIGH;
         }
       }
     };
 
-    var missedFrames = 0,
-        wasLandscape = isLandscape$1();
-    var update = function update(dt) {
-      var nowLandscape = isLandscape$1();
-      if (isiOS$1 && nowLandscape != wasLandscape) {
+    let missedFrames = 0,
+      wasLandscape = isLandscape$1();
+    const update = (dt) => {
+      const nowLandscape = isLandscape$1();
+      if(isiOS$1 && nowLandscape != wasLandscape) {
         wasLandscape = nowLandscape;
         modifyScreen();
       }
       dt *= MILLISECONDS_TO_SECONDS;
-      if (dt > 0) {
-        var fps = Math.max(1, Math.round(1 / dt));
+      if(dt > 0) {
+        const fps = Math.max(1, Math.round(1 / dt));
         dt = 1 / fps;
-        _this.deltaTime = Math.min(_this.deltaTime, dt);
+        this.deltaTime = Math.min(this.deltaTime, dt);
+
 
         // if we missed way too many frames in one go, just update once, otherwise we'll end up locking up the system.
-        var numFrames = dt / _this.deltaTime;
-        if (numFrames > 1) {
+        let numFrames = dt / this.deltaTime;
+        if(numFrames > 1) {
           missedFrames += numFrames;
-          if (numFrames > 10) {
+          if(numFrames > 10) {
             numFrames = 1;
           }
-        } else if (missedFrames > 0) {
+        }
+        else if(missedFrames > 0) {
           missedFrames -= 0.1;
         }
 
-        if (missedFrames >= 10) {
-          _this.deltaTime = dt;
+        if(missedFrames >= 10) {
+          this.deltaTime = dt;
           missedFrames = 0;
         }
 
         updateFade(dt);
 
-        for (var frame = 0; frame < numFrames; ++frame) {
+        for(let frame = 0; frame < numFrames; ++frame) {
 
-          var hadGamepad = _this.hasGamepad;
-          if (_this.gamepadMgr) {
-            _this.gamepadMgr.poll();
+          const hadGamepad = this.hasGamepad;
+          if(this.gamepadMgr) {
+            this.gamepadMgr.poll();
           }
 
-          for (var i = 0; i < _this.managers.length; ++i) {
-            _this.managers[i].update(dt);
+          for (let i = 0; i < this.managers.length; ++i) {
+            this.managers[i].update(dt);
           }
 
-          if (!hadGamepad && _this.hasGamepad) {
-            _this.Mouse.inPhysicalUse = false;
+          if (!hadGamepad && this.hasGamepad) {
+            this.Mouse.inPhysicalUse = false;
           }
 
-          _this.head.showPointer = _this.VR.hasOrientation && _this.VR.isStereo && _this.options.showHeadPointer;
-          _this.mousePointer.visible = (_this.VR.isPresenting || !_this.VR.isStereo) && !_this.hasTouch;
-          _this.mousePointer.showPointer = !_this.hasMotionControllers && !_this.VR.isStereo;
+          this.head.showPointer = this.VR.hasOrientation && this.VR.isStereo && this.options.showHeadPointer;
+          this.mousePointer.visible = (this.VR.isPresenting || !this.VR.isStereo) && !this.hasTouch;
+          this.mousePointer.showPointer = !this.hasMotionControllers && !this.VR.isStereo;
 
-          var heading = 0,
-              pitch = 0,
-              strafe = 0,
-              drive = 0;
-          for (var _i = 0; _i < _this.managers.length; ++_i) {
-            var mgr = _this.managers[_i];
-            if (mgr.enabled) {
-              if (mgr.name !== "Mouse") {
+          let heading = 0,
+            pitch = 0,
+            strafe = 0,
+            drive = 0;
+          for (let i = 0; i < this.managers.length; ++i) {
+            const mgr = this.managers[i];
+            if(mgr.enabled){
+              if(mgr.name !== "Mouse"){
                 heading += mgr.getValue("heading");
               }
               pitch += mgr.getValue("pitch");
@@ -54338,176 +53215,187 @@ var BrowserEnvironment = function (_EventDispatcher) {
             }
           }
 
-          if (_this.hasMouse) {
-            var mouseHeading = null;
-            if (_this.VR.hasOrientation) {
-              mouseHeading = _this.mousePointer.rotation.y;
-              var newMouseHeading = WEDGE * Math.floor(mouseHeading / WEDGE + 0.5);
-              if (newMouseHeading !== 0) {
-                _this.Mouse.commands.U.offset -= _this.Mouse.getValue("U") - 1;
+          if(this.hasMouse) {
+            let mouseHeading = null;
+            if (this.VR.hasOrientation) {
+              mouseHeading = this.mousePointer.rotation.y;
+              const newMouseHeading = WEDGE * Math.floor((mouseHeading / WEDGE) + 0.5);
+              if(newMouseHeading !== 0){
+                this.Mouse.commands.U.offset -= this.Mouse.getValue("U") - 1;
               }
-              mouseHeading = newMouseHeading + _this.Mouse.commands.U.offset * 2;
-            } else {
-              mouseHeading = _this.Mouse.getValue("heading");
+              mouseHeading = newMouseHeading + this.Mouse.commands.U.offset * 2;
+            }
+            else{
+              mouseHeading = this.Mouse.getValue("heading");
             }
             heading += mouseHeading;
           }
 
-          if (_this.VR.hasOrientation) {
+          if (this.VR.hasOrientation) {
             pitch = 0;
           }
 
           // move stage according to heading and thrust
           EULER_TEMP.set(pitch, heading, 0, "YXZ");
-          _this.stage.quaternion.setFromEuler(EULER_TEMP);
+          this.stage.quaternion.setFromEuler(EULER_TEMP);
 
           // update the stage's velocity
-          _this.velocity.set(strafe, 0, drive);
+          this.velocity.set(strafe, 0, drive);
 
-          QUAT_TEMP.copy(_this.head.quaternion);
+          QUAT_TEMP.copy(this.head.quaternion);
           EULER_TEMP.setFromQuaternion(QUAT_TEMP);
           EULER_TEMP.x = 0;
           EULER_TEMP.z = 0;
           QUAT_TEMP.setFromEuler(EULER_TEMP);
 
-          _this.moveStage(DISPLACEMENT.copy(_this.velocity).multiplyScalar(dt).applyQuaternion(QUAT_TEMP).add(_this.head.position));
+          this.moveStage(DISPLACEMENT
+            .copy(this.velocity)
+            .multiplyScalar(dt)
+            .applyQuaternion(QUAT_TEMP)
+            .add(this.head.position));
 
-          _this.stage.position.y = _this.ground.getHeightAt(_this.stage.position) || 0;
-          _this.stage.position.y += _this.options.avatarHeight;
-          for (var _i2 = 0; _i2 < _this.motionDevices.length; ++_i2) {
-            _this.motionDevices[_i2].posePosition.y -= _this.options.avatarHeight;
+          this.stage.position.y = this.ground.getHeightAt(this.stage.position) || 0;
+          this.stage.position.y += this.options.avatarHeight;
+          for (let i = 0; i < this.motionDevices.length; ++i) {
+            this.motionDevices[i].posePosition.y -= this.options.avatarHeight;
           }
 
           // update the motionDevices
-          _this.stage.updateMatrix();
-          _this.matrix.multiplyMatrices(_this.stage.matrix, _this.VR.stage.matrix);
-          for (var _i3 = 0; _i3 < _this.motionDevices.length; ++_i3) {
-            _this.motionDevices[_i3].updateStage(_this.matrix);
+          this.stage.updateMatrix();
+          this.matrix.multiplyMatrices(this.stage.matrix, this.VR.stage.matrix);
+          for (let i = 0; i < this.motionDevices.length; ++i) {
+            this.motionDevices[i].updateStage(this.matrix);
           }
 
-          for (var _i4 = 0; _i4 < _this.pointers.length; ++_i4) {
-            _this.pointers[_i4].update();
+          for (let i = 0; i < this.pointers.length; ++i) {
+            this.pointers[i].update();
           }
 
           // record the position and orientation of the user
-          _this.newState = [];
-          _this.head.updateMatrix();
-          _this.stage.rotation.x = 0;
-          _this.stage.rotation.z = 0;
-          _this.stage.quaternion.setFromEuler(_this.stage.rotation);
-          _this.stage.updateMatrix();
-          _this.head.position.toArray(_this.newState, 0);
-          _this.head.quaternion.toArray(_this.newState, 3);
+          this.newState = [];
+          this.head.updateMatrix();
+          this.stage.rotation.x = 0;
+          this.stage.rotation.z = 0;
+          this.stage.quaternion.setFromEuler(this.stage.rotation);
+          this.stage.updateMatrix();
+          this.head.position.toArray(this.newState, 0);
+          this.head.quaternion.toArray(this.newState, 3);
 
-          if (frame === 0) {
+          if(frame === 0) {
             updateAll();
-            var userActionHandlers = null;
-            for (var _i5 = 0; _i5 < _this.pointers.length; ++_i5) {
-              userActionHandlers = _this.pointers[_i5].resolvePicking(_this.scene);
+            let userActionHandlers = null;
+            for (let i = 0; i < this.pointers.length; ++i) {
+              userActionHandlers = this.pointers[i].resolvePicking(this.scene);
             }
-            for (var _i6 = 0; _i6 < _this.managers.length; ++_i6) {
-              _this.managers[_i6].userActionHandlers = userActionHandlers;
+            for (let i = 0; i < this.managers.length; ++i) {
+              this.managers[i].userActionHandlers = userActionHandlers;
             }
-            _this.ground.moveTo(_this.head.position);
-            _this.sky.position.copy(_this.head.position);
+            this.ground.moveTo(this.head.position);
+            this.sky.position.copy(this.head.position);
             moveUI();
           }
 
           try {
-            _this.emit("update");
-          } catch (exp) {
+            this.emit("update");
+          }
+          catch(exp){
             // don't let user script kill the runtime
             console.error("User update errored", exp);
           }
 
-          if (frame === 0 && _this.network) {
-            _this.network.update(dt);
+          if(frame === 0 && this.network){
+            this.network.update(dt);
           }
         }
       }
     };
 
-    _this.turns = new Angle(0);
-    var followEuler = new Euler(),
-        maxX = -Math.PI / 4,
-        maxY = Math.PI / 6;
+    this.turns = new Angle(0);
+    const followEuler = new Euler(),
+      maxX = -Math.PI / 4,
+      maxY = Math.PI / 6;
 
-    var moveUI = function moveUI(dt) {
-      var y = _this.vicinity.position.y,
-          p = _this.options.vicinityFollowRate,
-          q = 1 - p;
-      _this.vicinity.position.lerp(_this.head.position, p);
-      _this.vicinity.position.y = y;
+    const moveUI = (dt) => {
+      var y = this.vicinity.position.y,
+        p = this.options.vicinityFollowRate,
+        q = 1 - p;
+      this.vicinity.position.lerp(this.head.position, p);
+      this.vicinity.position.y = y;
 
-      followEuler.setFromQuaternion(_this.head.quaternion);
-      _this.turns.radians = followEuler.y;
-      followEuler.set(maxX, _this.turns.radians, 0, "YXZ");
-      _this.ui.quaternion.setFromEuler(followEuler);
-      _this.ui.position.y = _this.ui.position.y * q + _this.head.position.y * p;
+      followEuler.setFromQuaternion(this.head.quaternion);
+      this.turns.radians = followEuler.y;
+      followEuler.set(maxX, this.turns.radians, 0, "YXZ");
+      this.ui.quaternion.setFromEuler(followEuler);
+      this.ui.position.y = this.ui.position.y * q + this.head.position.y * p;
     };
 
-    var animate = function animate(t) {
+    var animate = (t) => {
       timer = null;
       var dt = t - lt,
-          i,
-          j;
+        i, j;
       lt = t;
       update(dt);
-      _this.audio.setPlayer(_this.head.mesh);
+      this.audio.setPlayer(this.head.mesh);
       render();
       RAF(animate);
     };
 
-    var render = function render() {
-      _this.camera.position.set(0, 0, 0);
-      _this.camera.quaternion.set(0, 0, 0, 1);
-      _this.renderer.clear(true, true, true);
+    var render = () => {
+      this.camera.position.set(0, 0, 0);
+      this.camera.quaternion.set(0, 0, 0, 1);
+      this.renderer.clear(true, true, true);
 
-      var trans = _this.VR.getTransforms(_this.options.nearPlane, _this.options.nearPlane + _this.options.drawDistance);
+      var trans = this.VR.getTransforms(
+        this.options.nearPlane,
+        this.options.nearPlane + this.options.drawDistance);
       for (var i = 0; trans && i < trans.length; ++i) {
         eyeBlankAll(i);
 
         var st = trans[i],
-            v = st.viewport;
+          v = st.viewport;
 
-        _this.renderer.setViewport(v.left * resolutionScale, v.top * resolutionScale, v.width * resolutionScale, v.height * resolutionScale);
+        this.renderer.setViewport(
+          v.left * resolutionScale,
+          v.top * resolutionScale,
+          v.width * resolutionScale,
+          v.height * resolutionScale);
 
-        _this.camera.projectionMatrix.copy(st.projection);
-        if (_this.mousePointer.unproject) {
-          _this.mousePointer.unproject.getInverse(st.projection);
+        this.camera.projectionMatrix.copy(st.projection);
+        if (this.mousePointer.unproject) {
+          this.mousePointer.unproject.getInverse(st.projection);
         }
-        _this.camera.translateOnAxis(st.translation, 1);
-        _this.renderer.render(_this.scene, _this.camera);
-        _this.camera.translateOnAxis(st.translation, -1);
+        this.camera.translateOnAxis(st.translation, 1);
+        this.renderer.render(this.scene, this.camera);
+        this.camera.translateOnAxis(st.translation, -1);
       }
-      _this.VR.submitFrame();
+      this.VR.submitFrame();
     };
 
-    var modifyScreen = function modifyScreen() {
-      var near = _this.options.nearPlane,
-          far = near + _this.options.drawDistance,
-          p = _this.VR && _this.VR.getTransforms(near, far);
+    const modifyScreen = () => {
+      var near = this.options.nearPlane,
+        far = near + this.options.drawDistance,
+        p = this.VR && this.VR.getTransforms(near, far);
 
       if (p) {
         var canvasWidth = 0,
-            canvasHeight = 0;
+          canvasHeight = 0;
 
         for (var i = 0; i < p.length; ++i) {
           canvasWidth += p[i].viewport.width;
           canvasHeight = Math.max(canvasHeight, p[i].viewport.height);
         }
 
-        _this.mousePointer.setSize(canvasWidth, canvasHeight);
+        this.mousePointer.setSize(canvasWidth, canvasHeight);
 
-        var styleWidth = canvasWidth / devicePixelRatio,
-            styleHeight = canvasHeight / devicePixelRatio;
+        const styleWidth = canvasWidth / devicePixelRatio,
+          styleHeight = canvasHeight / devicePixelRatio;
         canvasWidth = Math.floor(canvasWidth * resolutionScale);
         canvasHeight = Math.floor(canvasHeight * resolutionScale);
 
-        _this.renderer.domElement.width = canvasWidth;
-        _this.renderer.domElement.height = canvasHeight;
-        _this.renderer.domElement.style.width = styleWidth + "px";
-        _this.renderer.domElement.style.height = styleHeight + "px";
+        this.renderer.domElement.width = canvasWidth;
+        this.renderer.domElement.height = canvasHeight;
+        this.renderer.domElement.style.width = styleWidth + "px";
+        this.renderer.domElement.style.height = styleHeight + "px";
         if (timer === null) {
           render();
         }
@@ -54519,19 +53407,19 @@ var BrowserEnvironment = function (_EventDispatcher) {
     //
 
     var lt = 0,
-        currentHeading = 0,
-        qPitch = new Quaternion(),
-        vEye = new Vector3(),
-        vBody = new Vector3(),
-        modelFiles = {
-      scene: _this.options.sceneModel,
-      avatar: _this.options.avatarModel,
-      button: _this.options.button && typeof _this.options.button.model === "string" && _this.options.button.model,
-      font: _this.options.font
-    },
-        resolutionScale = 1;
+      currentHeading = 0,
+      qPitch = new Quaternion(),
+      vEye = new Vector3(),
+      vBody = new Vector3(),
+      modelFiles = {
+        scene: this.options.sceneModel,
+        avatar: this.options.avatarModel,
+        button: this.options.button && typeof this.options.button.model === "string" && this.options.button.model,
+        font: this.options.font
+      },
+      resolutionScale = 1;
 
-    _this.factories = {
+    this.factories = {
       avatar: null
     };
 
@@ -54540,65 +53428,68 @@ var BrowserEnvironment = function (_EventDispatcher) {
       var hsl = rgb.getHSL();
       hsl.h = hsl.h + 0.5;
       hsl.l = 1 - hsl.l;
-      while (hsl.h > 1) {
-        hsl.h -= 1;
-      }rgb.setHSL(hsl.h, hsl.s, hsl.l);
+      while (hsl.h > 1) hsl.h -= 1;
+      rgb.setHSL(hsl.h, hsl.s, hsl.l);
       return rgb;
     }
 
-    var modelsReady = ModelFactory.loadObjects(modelFiles, _this.options.progress.thunk).then(function (models) {
-      window.text3D = function (font, size, text) {
-        var geom = new TextGeometry(text, {
-          font: font,
-          size: size,
-          height: size / 5,
-          curveSegments: 2
-        });
-        geom.computeBoundingSphere();
-        geom.computeBoundingBox();
-        return geom;
-      }.bind(window, models.font);
+    var modelsReady = ModelFactory.loadObjects(modelFiles, this.options.progress.thunk)
+      .then((models) => {
+        window.text3D = function (font, size, text) {
+          var geom = new TextGeometry(text, {
+            font: font,
+            size: size,
+            height: size / 5,
+            curveSegments: 2
+          });
+          geom.computeBoundingSphere();
+          geom.computeBoundingBox();
+          return geom;
+        }.bind(window, models.font);
 
-      if (models.scene) {
-        buildScene(models.scene);
-      }
+        if (models.scene) {
+          buildScene(models.scene);
+        }
 
-      if (models.avatar) {
-        _this.factories.avatar = new ModelFactory(models.avatar);
-      }
+        if (models.avatar) {
+          this.factories.avatar = new ModelFactory(models.avatar);
+        }
 
-      if (models.button) {
-        _this.buttonFactory = new ButtonFactory(models.button, _this.options.button.options);
-      }
-    }).catch(function (err) {
-      return console.error(err);
-    }).then(function () {
-      return _this.buttonFactory = _this.buttonFactory || ButtonFactory.DEFAULT;
-    });
+        if (models.button) {
+          this.buttonFactory = new ButtonFactory(
+            models.button,
+            this.options.button.options);
+        }
+      })
+      .catch((err) => console.error(err))
+      .then(() => this.buttonFactory = this.buttonFactory || ButtonFactory.DEFAULT);
 
     //
     // Initialize public properties
     //
 
-    _this.speech = new Speech(_this.options.speech);
+    this.speech = new Speech(this.options.speech);
 
-    _this.audio = new Audio3D();
+    this.audio = new Audio3D();
 
-    if (_this.options.ambientSound) {
-      _this.audio.load3DSound(_this.options.ambientSound, true, -1, 1, -1).then(function (aud) {
-        if (!(aud.source instanceof MediaElementAudioSourceNode)) {
-          aud.volume.gain.value = 0.1;
-          aud.source.start();
-        }
-      }).catch(console.error.bind(console, "Audio3D loadSource"));
+    if (this.options.ambientSound) {
+      this.audio.load3DSound(this.options.ambientSound, true, -1, 1, -1)
+        .then((aud) => {
+          if (!(aud.source instanceof MediaElementAudioSourceNode)) {
+            aud.volume.gain.value = 0.1;
+            aud.source.start();
+          }
+        })
+        .catch(console.error.bind(console, "Audio3D loadSource"));
     }
 
     var documentReady = null;
     if (document.readyState === "complete") {
       documentReady = Promise.resolve("already");
-    } else {
-      documentReady = new Promise(function (resolve, reject) {
-        document.addEventListener("readystatechange", function (evt) {
+    }
+    else {
+      documentReady = new Promise((resolve, reject) => {
+        document.addEventListener("readystatechange", (evt) => {
           if (document.readyState === "complete") {
             resolve("had to wait for it");
           }
@@ -54606,342 +53497,372 @@ var BrowserEnvironment = function (_EventDispatcher) {
       });
     }
 
-    _this.music = new Music(_this.audio);
+    this.music = new Music(this.audio);
 
-    _this.currentControl = null;
+    this.currentControl = null;
 
-    var fadeOutPromise = null,
-        _fadeOutPromiseResolver = null,
-        fadeInPromise = null,
-        _fadeInPromiseResolver = null;
-    _this.fadeOut = function () {
-      if (fadeInPromise) {
+
+    let fadeOutPromise = null,
+      fadeOutPromiseResolver = null,
+      fadeInPromise = null,
+      fadeInPromiseResolver = null;
+    this.fadeOut = () => {
+      if(fadeInPromise) {
         return Promise.reject("Currently fading in.");
       }
-      if (!fadeOutPromise) {
-        _this.fader.visible = true;
-        _this.fader.material.opacity = 0;
-        _this.fader.material.needsUpdate = true;
-        fadeOutPromise = new Promise(function (resolve, reject) {
-          return _fadeOutPromiseResolver = function fadeOutPromiseResolver(obj) {
+      if(!fadeOutPromise) {
+        this.fader.visible = true;
+        this.fader.material.opacity = 0;
+        this.fader.material.needsUpdate = true;
+        fadeOutPromise = new Promise((resolve, reject) =>
+          fadeOutPromiseResolver = (obj) => {
             fadeOutPromise = null;
-            _fadeOutPromiseResolver = null;
+            fadeOutPromiseResolver = null;
             resolve(obj);
-          };
-        });
+          });
       }
       return fadeOutPromise;
     };
 
-    _this.fadeIn = function () {
-      if (fadeOutPromise) {
+
+    this.fadeIn = () => {
+      if(fadeOutPromise) {
         return Promise.reject("Currently fading out.");
       }
-      if (!fadeInPromise) {
-        fadeInPromise = new Promise(function (resolve, reject) {
-          return _fadeInPromiseResolver = function fadeInPromiseResolver(obj) {
+      if(!fadeInPromise){
+        fadeInPromise = new Promise((resolve, reject) =>
+          fadeInPromiseResolver = (obj) => {
             fadeInPromise = null;
-            _fadeInPromiseResolver = null;
-            _this.fader.visible = false;
+            fadeInPromiseResolver = null;
+            this.fader.visible = false;
             resolve(obj);
-          };
-        });
+          });
       }
       return fadeInPromise;
     };
 
-    var updateFade = function updateFade(dt) {
-      if (fadeOutPromise || fadeInPromise) {
-        var m = _this.fader.material,
-            f = _this.options.fadeRate * dt;
+    const updateFade = (dt) => {
+      if(fadeOutPromise || fadeInPromise) {
+        const m = this.fader.material,
+          f = this.options.fadeRate * dt;
         m.needsUpdate = true;
-        if (fadeOutPromise) {
+        if(fadeOutPromise) {
           m.opacity += f;
-          if (1 <= m.opacity) {
+          if(1 <= m.opacity){
             m.opacity = 1;
-            _fadeOutPromiseResolver();
+            fadeOutPromiseResolver();
           }
-        } else {
+        }
+        else {
           m.opacity -= f;
-          if (m.opacity <= 0) {
+          if(m.opacity <= 0){
             m.opacity = 0;
-            _fadeInPromiseResolver();
+            fadeInPromiseResolver();
           }
         }
       }
     };
 
-    _this.teleportAvailable = true;
+    this.teleportAvailable = true;
 
-    _this.transition = function (thunk, check, immediate) {
-      if (immediate) {
+    this.transition = (thunk, check, immediate) => {
+      if(immediate) {
         thunk();
         return Promise.resolve();
-      } else if (!check || check()) {
-        return _this.fadeOut().then(thunk).then(_this.fadeIn).catch(console.warn.bind(console, "Error transitioning"));
+      }
+      else if(!check || check()){
+        return this.fadeOut()
+          .then(thunk)
+          .then(this.fadeIn)
+          .catch(console.warn.bind(console, "Error transitioning"));
       }
     };
 
-    _this.teleport = function (pos, immediate) {
-      return _this.transition(function () {
-        return _this.moveStage(pos);
-      }, function () {
-        return _this.teleportAvailable && TELEPORT_DISPLACEMENT.copy(pos).sub(_this.head.position).length() > 0.2;
-      }, immediate);
-    };
 
-    var delesectControl = function delesectControl() {
-      if (_this.currentControl) {
-        _this.currentControl.removeEventListener("blur", delesectControl);
-        _this.Keyboard.enabled = true;
-        _this.Mouse.commands.pitch.disabled = _this.Mouse.commands.heading.disabled = _this.VR.isPresenting;
-        _this.currentControl.blur();
-        _this.currentControl = null;
+    this.teleport = (pos, immediate) => this.transition(
+      () => this.moveStage(pos),
+      () => this.teleportAvailable && TELEPORT_DISPLACEMENT.copy(pos)
+        .sub(this.head.position)
+        .length() > 0.2,
+      immediate);
+
+    const delesectControl = () => {
+      if(this.currentControl) {
+        this.currentControl.removeEventListener("blur", delesectControl);
+        this.Keyboard.enabled = true;
+        this.Mouse.commands.pitch.disabled =
+        this.Mouse.commands.heading.disabled = this.VR.isPresenting;
+        this.currentControl.blur();
+        this.currentControl = null;
       }
     };
 
-    _this.consumeEvent = function (evt) {
-      var obj = evt.hit && evt.hit.object,
-          cancel = evt.type === "exit" || evt.cmdName === "NORMAL_ESCAPE";
+    this.consumeEvent = (evt) => {
+      const obj = evt.hit && evt.hit.object,
+        cancel = evt.type === "exit" || evt.cmdName === "NORMAL_ESCAPE";
 
-      if (evt.type === "select" || cancel) {
+      if(evt.type === "select" || cancel) {
 
-        if (obj !== _this.currentControl || cancel) {
+        if(obj !== this.currentControl || cancel){
 
           delesectControl();
 
-          if (!cancel && obj.isSurface) {
-            _this.currentControl = obj;
-            _this.currentControl.focus();
-            _this.currentControl.addEventListener("blur", delesectControl);
-            if (_this.currentControl.lockMovement) {
-              _this.Keyboard.enabled = false;
-              _this.Mouse.commands.pitch.disabled = _this.Mouse.commands.heading.disabled = !_this.VR.isPresenting;
+          if(!cancel && obj.isSurface){
+            this.currentControl = obj;
+            this.currentControl.focus();
+            this.currentControl.addEventListener("blur", delesectControl);
+            if(this.currentControl.lockMovement) {
+              this.Keyboard.enabled = false;
+              this.Mouse.commands.pitch.disabled =
+              this.Mouse.commands.heading.disabled = !this.VR.isPresenting;
             }
           }
         }
       }
 
-      if (obj) {
+      if(obj) {
         obj.dispatchEvent(evt);
-      } else if (_this.currentControl) {
-        _this.currentControl.dispatchEvent(evt);
+      }
+      else if(this.currentControl){
+        this.currentControl.dispatchEvent(evt);
       }
 
-      _this.dispatchEvent(evt);
+      this.dispatchEvent(evt);
     };
 
-    _this.options.scene = _this.scene = _this.options.scene || new Scene();
+    this.options.scene = this.scene = this.options.scene || new Scene();
 
-    if (_this.options.useFog) {
-      _this.scene.fog = new FogExp2(_this.options.backgroundColor, 1 / Math.sqrt(_this.options.drawDistance));
+    if (this.options.useFog) {
+      this.scene.fog = new FogExp2(this.options.backgroundColor, 1 / Math.sqrt(this.options.drawDistance));
     }
 
-    _this.camera = new PerspectiveCamera(75, 1, _this.options.nearPlane, _this.options.nearPlane + _this.options.drawDistance);
+    this.camera = new PerspectiveCamera(75, 1, this.options.nearPlane, this.options.nearPlane + this.options.drawDistance);
 
-    _this.sky = new Sky(_this.options).addTo(_this.scene);
+    this.sky = new Sky(this.options)
+      .addTo(this.scene);
 
-    _this.ground = new Ground(_this.options).addTo(_this.scene);
 
-    _this.teleporter = new Teleporter(_this);
+    this.ground = new Ground(this.options)
+      .addTo(this.scene);
 
-    _this.vicinity = hub().named("Vicinity").addTo(_this.scene);
-    _this.ui = hub().named("UI").addTo(_this.vicinity);
+    this.teleporter = new Teleporter(this);
 
-    var buildScene = function buildScene(sceneGraph) {
+
+    this.vicinity = hub().named("Vicinity").addTo(this.scene);
+    this.ui = hub().named("UI").addTo(this.vicinity);
+
+    var buildScene = (sceneGraph) => {
       sceneGraph.buttons = [];
       sceneGraph.traverse(function (child) {
         if (child.isButton) {
-          sceneGraph.buttons.push(new Button3D(child.parent, child.name));
+          sceneGraph.buttons.push(
+            new Button3D(child.parent, child.name));
         }
         if (child.name) {
           sceneGraph[child.name] = child;
         }
       });
-      _this.scene.add.apply(_this.scene, sceneGraph.children);
-      _this.scene.traverse(function (obj) {
-        if (_this.options.disableDefaultLighting && obj.material) {
-          if (obj.material.map) {
+      this.scene.add.apply(this.scene, sceneGraph.children);
+      this.scene.traverse((obj) => {
+        if (this.options.disableDefaultLighting && obj.material) {
+          if(obj.material.map){
             textured(obj, obj.material.map, {
               unshaded: true
             });
-          } else {
+          }
+          else{
             colored(obj, obj.material.color.getHex(), {
               unshaded: true
             });
           }
         }
         if (obj.name) {
-          _this.scene[obj.name] = obj;
+          this.scene[obj.name] = obj;
         }
       });
       if (sceneGraph.Camera) {
-        _this.camera.position.copy(sceneGraph.Camera.position);
-        _this.camera.quaternion.copy(sceneGraph.Camera.quaternion);
+        this.camera.position.copy(sceneGraph.Camera.position);
+        this.camera.quaternion.copy(sceneGraph.Camera.quaternion);
       }
       return sceneGraph;
     };
 
-    _this.goFullScreen = function (index, evt) {
+    this.goFullScreen = (index, evt) => {
       if (evt !== "Gaze") {
-        var elem = null;
-        if (evt === "force" || _this.VR.canMirror || _this.VR.isNativeWebVR) {
-          elem = _this.renderer.domElement;
-        } else {
-          elem = _this.options.fullScreenElement;
+        let elem = null;
+        if(evt === "force" || this.VR.canMirror || this.VR.isNativeWebVR) {
+          elem = this.renderer.domElement;
         }
-        _this.VR.connect(index);
-        return _this.VR.requestPresent([{
-          source: elem
-        }]).catch(function (exp) {
-          return console.error("whaaat", exp);
-        }).then(function () {
-          return elem.focus();
-        });
+        else{
+          elem = this.options.fullScreenElement;
+        }
+        this.VR.connect(index);
+        return this.VR.requestPresent([{
+            source: elem
+          }])
+          .catch((exp) => console.error("whaaat", exp))
+          .then(() => elem.focus());
       }
     };
 
-    _this.addAvatar = function (user) {
+    this.addAvatar = (user) => {
       console.log(user);
-      _this.scene.add(user.stage);
-      _this.scene.add(user.head);
+      this.scene.add(user.stage);
+      this.scene.add(user.head);
     };
 
-    _this.removeAvatar = function (user) {
-      _this.scene.remove(user.stage);
-      _this.scene.remove(user.head);
+    this.removeAvatar = (user) => {
+      this.scene.remove(user.stage);
+      this.scene.remove(user.head);
     };
 
-    PointerLock.addChangeListener(function (evt) {
-      if (_this.VR.isPresenting && !PointerLock.isActive) {
-        _this.cancelVR();
+    PointerLock.addChangeListener((evt) => {
+      if (this.VR.isPresenting && !PointerLock.isActive) {
+        this.cancelVR();
       }
     });
 
-    var fullScreenChange = function fullScreenChange(evt) {
-      var presenting = !!_this.VR.isPresenting,
-          cmd = (presenting ? "remove" : "add") + "Button";
-      _this.Mouse[cmd]("dx", 0);
-      _this.Mouse[cmd]("dy", 0);
-      _this.Mouse.commands.U.disabled = _this.Mouse.commands.V.disabled = presenting && !_this.VR.isStereo;
-      _this.Mouse.commands.heading.scale = presenting ? -1 : 1;
-      _this.Mouse.commands.pitch.scale = presenting ? -1 : 1;
+    const fullScreenChange = (evt) => {
+      const presenting = !!this.VR.isPresenting,
+        cmd = (presenting ? "remove" : "add") + "Button";
+      this.Mouse[cmd]("dx", 0);
+      this.Mouse[cmd]("dy", 0);
+      this.Mouse.commands.U.disabled =
+        this.Mouse.commands.V.disabled = presenting && !this.VR.isStereo;
+      this.Mouse.commands.heading.scale = presenting ? -1 : 1;
+      this.Mouse.commands.pitch.scale = presenting ? -1 : 1;
       if (!presenting) {
-        _this.cancelVR();
+        this.cancelVR();
       }
       modifyScreen();
     };
 
-    var allowRestart = true,
-        currentTimerObject = null,
-        timer = null;
 
-    var RAF = function RAF(callback) {
-      currentTimerObject = _this.VR.currentDevice || window;
+
+    let allowRestart = true,
+      currentTimerObject = null,
+      timer = null;
+
+    const RAF = (callback) => {
+      currentTimerObject = this.VR.currentDevice || window;
       if (timer === null) {
         timer = currentTimerObject.requestAnimationFrame(callback);
       }
     };
 
-    _this.start = function () {
-      if (allowRestart) {
-        _this.ready.then(function () {
-          _this.audio.start();
+
+    this.start = () => {
+      if(allowRestart) {
+        this.ready.then(() => {
+          this.audio.start();
           lt = performance.now() * MILLISECONDS_TO_SECONDS;
           RAF(animate);
         });
       }
     };
 
-    _this.stop = function (evt, restartAllowed) {
-      if (allowRestart) {
+
+    this.stop = (evt, restartAllowed) => {
+      if(allowRestart) {
         allowRestart = restartAllowed;
-        if (!allowRestart) {
+        if(!allowRestart) {
           console.log("stopped");
         }
 
         if (currentTimerObject) {
 
-          if (timer !== null) {
+          if(timer !== null) {
             currentTimerObject.cancelAnimationFrame(timer);
             timer = null;
           }
 
-          _this.audio.stop();
+          this.audio.stop();
           currentTimerObject = null;
         }
+
       }
     };
 
-    _this.pause = function (evt) {
-      return _this.stop(evt, true);
-    };
+    this.pause = (evt) => this.stop(evt, true);
 
     window.addEventListener("vrdisplaypresentchange", fullScreenChange, false);
     window.addEventListener("resize", modifyScreen, false);
-    if (!options.disableAutoPause) {
-      window.addEventListener("focus", _this.start, false);
-      window.addEventListener("blur", _this.pause, false);
+    if(!options.disableAutoPause) {
+      window.addEventListener("focus", this.start, false);
+      window.addEventListener("blur", this.pause, false);
     }
-    window.addEventListener("stop", _this.stop, false);
-    document.addEventListener("amazonPlatformReady", function () {
-      document.addEventListener("pause", _this.pause, false);
-      document.addEventListener("resume", _this.start, false);
+    window.addEventListener("stop", this.stop, false);
+    document.addEventListener("amazonPlatformReady", () => {
+      document.addEventListener("pause", this.pause, false);
+      document.addEventListener("resume", this.start, false);
     }, false);
 
-    documentReady = documentReady.then(function () {
-      if (_this.options.renderer) {
-        _this.renderer = _this.options.renderer;
-      } else {
-        _this.renderer = new WebGLRenderer({
-          canvas: cascadeElement(_this.options.canvasElement, "canvas", HTMLCanvasElement),
-          context: _this.options.context,
-          antialias: _this.options.antialias,
+    documentReady = documentReady.then(() => {
+      if (this.options.renderer) {
+        this.renderer = this.options.renderer;
+      }
+      else {
+        this.renderer = new WebGLRenderer({
+          canvas: cascadeElement(this.options.canvasElement, "canvas", HTMLCanvasElement),
+          context: this.options.context,
+          antialias: this.options.antialias,
           alpha: true,
           logarithmicDepthBuffer: false
         });
-        _this.renderer.autoClear = false;
-        _this.renderer.sortObjects = true;
-        _this.renderer.setClearColor(_this.options.backgroundColor);
-        if (!_this.renderer.domElement.parentElement) {
-          document.body.appendChild(_this.renderer.domElement);
+        this.renderer.autoClear = false;
+        this.renderer.sortObjects = true;
+        this.renderer.setClearColor(this.options.backgroundColor);
+        if (!this.renderer.domElement.parentElement) {
+          document.body.appendChild(this.renderer.domElement);
         }
       }
 
-      _this.options.fullScreenElement = cascadeElement(_this.options.fullScreenElement) || _this.renderer.domElement;
-      var maxTabIndex = 0;
-      var elementsWithTabIndex = document.querySelectorAll("[tabIndex]");
-      for (var i = 0; i < elementsWithTabIndex.length; ++i) {
+      this.options.fullScreenElement = cascadeElement(this.options.fullScreenElement) || this.renderer.domElement;
+      let maxTabIndex = 0;
+      const elementsWithTabIndex = document.querySelectorAll("[tabIndex]");
+      for(let i = 0; i < elementsWithTabIndex.length; ++i){
         maxTabIndex = Math.max(maxTabIndex, elementsWithTabIndex[i].tabIndex);
       }
 
-      _this.renderer.domElement.tabIndex = maxTabIndex + 1;
-      _this.renderer.domElement.addEventListener('webglcontextlost', _this.pause, false);
-      _this.renderer.domElement.addEventListener('webglcontextrestored', _this.start, false);
+      this.renderer.domElement.tabIndex = maxTabIndex + 1;
+      this.renderer.domElement.addEventListener('webglcontextlost', this.pause, false);
+      this.renderer.domElement.addEventListener('webglcontextrestored', this.start, false);
 
-      _this.managers = [];
-      _this.newState = [];
-      _this.pointers = [];
-      _this.motionDevices = [];
-      _this.velocity = new Vector3();
-      _this.matrix = new Matrix4();
+      this.managers = [];
+      this.newState = [];
+      this.pointers = [];
+      this.motionDevices = [];
+      this.velocity = new Vector3();
+      this.matrix = new Matrix4();
 
-      if (!_this.options.disableKeyboard) {
-        _this.addInputManager(new Keyboard(_this, {
+      if(!this.options.disableKeyboard) {
+        this.addInputManager(new Keyboard(this, {
           strafeLeft: {
-            buttons: [-Keys.A, -Keys.LEFTARROW]
+            buttons: [
+              -Keys.A,
+              -Keys.LEFTARROW
+            ]
           },
           strafeRight: {
-            buttons: [Keys.D, Keys.RIGHTARROW]
+            buttons: [
+              Keys.D,
+              Keys.RIGHTARROW
+            ]
           },
           strafe: {
             commands: ["strafeLeft", "strafeRight"]
           },
           driveForward: {
-            buttons: [-Keys.W, -Keys.UPARROW]
+            buttons: [
+              -Keys.W,
+              -Keys.UPARROW
+            ]
           },
           driveBack: {
-            buttons: [Keys.S, Keys.DOWNARROW]
+            buttons: [
+              Keys.S,
+              Keys.DOWNARROW
+            ]
           },
           drive: {
             commands: ["driveForward", "driveBack"]
@@ -54955,16 +53876,21 @@ var BrowserEnvironment = function (_EventDispatcher) {
           },
           zero: {
             buttons: [Keys.Z],
-            metaKeys: [-Keys.CTRL, -Keys.ALT, -Keys.SHIFT, -Keys.META],
-            commandUp: _this.emit.bind(_this, "zero")
+            metaKeys: [
+              -Keys.CTRL,
+              -Keys.ALT,
+              -Keys.SHIFT,
+              -Keys.META
+            ],
+            commandUp: this.emit.bind(this, "zero")
           }
         }));
 
-        _this.Keyboard.operatingSystem = _this.options.os;
-        _this.Keyboard.codePage = _this.options.language;
+        this.Keyboard.operatingSystem = this.options.os;
+        this.Keyboard.codePage = this.options.language;
       }
 
-      _this.addInputManager(new Touch(_this.renderer.domElement, {
+      this.addInputManager(new Touch(this.renderer.domElement, {
         U: { axes: ["X0"], min: 0, max: 2, offset: 0 },
         V: { axes: ["Y0"], min: 0, max: 2 },
         buttons: {
@@ -54986,7 +53912,8 @@ var BrowserEnvironment = function (_EventDispatcher) {
         }
       }));
 
-      _this.addInputManager(new Mouse(_this.options.fullScreenElement, {
+
+      this.addInputManager(new Mouse(this.options.fullScreenElement, {
         U: { axes: ["X"], min: 0, max: 2, offset: 0 },
         V: { axes: ["Y"], min: 0, max: 2 },
         buttons: {
@@ -55027,34 +53954,30 @@ var BrowserEnvironment = function (_EventDispatcher) {
       }));
 
       // toggle back and forth between touch and mouse
-      _this.Touch.addEventListener("activate", function (evt) {
-        return _this.Mouse.inPhysicalUse = false;
-      });
-      _this.Mouse.addEventListener("activate", function (evt) {
-        return _this.Touch.inPhysicalUse = false;
-      });
+      this.Touch.addEventListener("activate", (evt) => this.Mouse.inPhysicalUse = false);
+      this.Mouse.addEventListener("activate", (evt) => this.Touch.inPhysicalUse = false);
 
-      _this.addInputManager(new VR(_this.options));
+      this.addInputManager(new VR(this.options));
 
-      _this.motionDevices.push(_this.VR);
+      this.motionDevices.push(this.VR);
 
-      if (!_this.options.disableGamepad && GamepadManager.isAvailable) {
-        _this.gamepadMgr = new GamepadManager();
-        _this.gamepadMgr.addEventListener("gamepadconnected", function (pad) {
-          var padID = Gamepad.ID(pad);
-          var mgr = null;
+      if(!this.options.disableGamepad && GamepadManager.isAvailable){
+        this.gamepadMgr = new GamepadManager();
+        this.gamepadMgr.addEventListener("gamepadconnected", (pad) => {
+          const padID = Gamepad.ID(pad);
+          let mgr = null;
 
           if (padID !== "Unknown" && padID !== "Rift") {
             if (Gamepad.isMotionController(pad)) {
-              var controllerNumber = 0;
-              for (var _i7 = 0; _i7 < _this.managers.length; ++_i7) {
-                mgr = _this.managers[_i7];
+              let controllerNumber = 0;
+              for (let i = 0; i < this.managers.length; ++i) {
+                mgr = this.managers[i];
                 if (mgr.currentPad && mgr.currentPad.id === pad.id) {
                   ++controllerNumber;
                 }
               }
 
-              mgr = new Gamepad(_this.gamepadMgr, pad, controllerNumber, {
+              mgr = new Gamepad(this.gamepadMgr, pad, controllerNumber, {
                 buttons: {
                   axes: ["BUTTONS"]
                 },
@@ -55064,29 +53987,30 @@ var BrowserEnvironment = function (_EventDispatcher) {
                 },
                 zero: {
                   buttons: [Gamepad.VIVE_BUTTONS.GRIP_PRESSED],
-                  commandUp: _this.emit.bind(_this, "zero")
+                  commandUp: this.emit.bind(this, "zero")
                 }
               });
 
-              _this.addInputManager(mgr);
-              _this.motionDevices.push(mgr);
+              this.addInputManager(mgr);
+              this.motionDevices.push(mgr);
 
-              var shift = (_this.motionDevices.length - 2) * 8,
-                  color = 0x0000ff << shift,
-                  highlight = 0xff0000 >> shift,
-                  ptr = new Pointer(padID + "Pointer", color, 1, highlight, [mgr], null, _this.options);
+              const shift = (this.motionDevices.length - 2) * 8,
+                color = 0x0000ff << shift,
+                highlight = 0xff0000 >> shift,
+                ptr = new Pointer(padID + "Pointer", color, 1, highlight, [mgr], null, this.options);
               ptr.add(colored(box(0.1, 0.025, 0.2), color, {
                 emissive: highlight
               }));
 
-              ptr.route(Pointer.EVENTS, _this.consumeEvent.bind(_this));
+              ptr.route(Pointer.EVENTS, this.consumeEvent.bind(this));
 
-              _this.pointers.push(ptr);
-              _this.scene.add(ptr);
+              this.pointers.push(ptr);
+              this.scene.add(ptr);
 
-              _this.emit("motioncontrollerfound", mgr);
-            } else {
-              mgr = new Gamepad(_this.gamepadMgr, pad, 0, {
+              this.emit("motioncontrollerfound", mgr);
+            }
+            else {
+              mgr = new Gamepad(this.gamepadMgr, pad, 0, {
                 buttons: {
                   axes: ["BUTTONS"]
                 },
@@ -55120,100 +54044,109 @@ var BrowserEnvironment = function (_EventDispatcher) {
                 },
                 zero: {
                   buttons: [Gamepad.XBOX_ONE_BUTTONS.BACK],
-                  commandUp: _this.emit.bind(_this, "zero")
+                  commandUp: this.emit.bind(this, "zero")
                 }
               });
-              _this.addInputManager(mgr);
-              _this.mousePointer.addDevice(mgr, mgr);
+              this.addInputManager(mgr);
+              this.mousePointer.addDevice(mgr, mgr);
             }
           }
         });
 
-        _this.gamepadMgr.addEventListener("gamepaddisconnected", _this.removeInputManager.bind(_this));
+        this.gamepadMgr.addEventListener("gamepaddisconnected", this.removeInputManager.bind(this));
       }
 
-      _this.stage = hub();
+      this.stage = hub();
 
-      _this.head = new Pointer("GazePointer", 0xffff00, 0x0000ff, 0.8, [_this.VR], [_this.Mouse, _this.Touch, _this.Keyboard], _this.options).addTo(_this.scene);
+      this.head = new Pointer("GazePointer", 0xffff00, 0x0000ff, 0.8, [
+        this.VR
+      ], [
+        this.Mouse,
+        this.Touch,
+        this.Keyboard
+      ], this.options)
+        .addTo(this.scene);
 
-      _this.head.route(Pointer.EVENTS, _this.consumeEvent.bind(_this));
+      this.head.route(Pointer.EVENTS, this.consumeEvent.bind(this));
 
-      _this.head.rotation.order = "YXZ";
-      _this.head.useGaze = _this.options.useGaze;
-      _this.pointers.push(_this.head);
+      this.head.rotation.order = "YXZ";
+      this.head.useGaze = this.options.useGaze;
+      this.pointers.push(this.head);
 
-      _this.mousePointer = new Pointer("MousePointer", 0xff0000, 0x00ff00, 1, [_this.Mouse, _this.Touch], null, _this.options);
-      _this.mousePointer.route(Pointer.EVENTS, _this.consumeEvent.bind(_this));
-      _this.mousePointer.unproject = new Matrix4();
-      _this.pointers.push(_this.mousePointer);
-      _this.head.add(_this.mousePointer);
+      this.mousePointer = new Pointer("MousePointer", 0xff0000, 0x00ff00, 1, [
+        this.Mouse,
+        this.Touch
+      ], null, this.options);
+      this.mousePointer.route(Pointer.EVENTS, this.consumeEvent.bind(this));
+      this.mousePointer.unproject = new Matrix4();
+      this.pointers.push(this.mousePointer);
+      this.head.add(this.mousePointer);
 
-      _this.VR.ready.then(function (displays) {
-        return displays.forEach(function (display, i) {
-          window.addEventListener("vrdisplayactivate", function (evt) {
-            if (evt.display === display) {
-              var exitVR = function exitVR() {
-                window.removeEventListener("vrdisplaydeactivate", exitVR);
-                _this.cancelVR();
-              };
-              window.addEventListener("vrdisplaydeactivate", exitVR, false);
-              _this.goFullScreen(i);
-            }
-          }, false);
-        });
-      });
+      this.VR.ready.then((displays) => displays.forEach((display, i) => {
+        window.addEventListener("vrdisplayactivate", (evt) => {
+          if(evt.display === display) {
+            const exitVR = () => {
+              window.removeEventListener("vrdisplaydeactivate", exitVR);
+              this.cancelVR();
+            };
+            window.addEventListener("vrdisplaydeactivate", exitVR, false);
+            this.goFullScreen(i);
+          }
+        }, false);
+      }));
 
-      _this.fader = colored(box(1, 1, 1), _this.options.backgroundColor, {
+      this.fader = colored(box(1, 1, 1), this.options.backgroundColor, {
         opacity: 0,
         useFog: false,
         transparent: true,
         unshaded: true,
         side: BackSide
       });
-      _this.fader.visible = false;
-      _this.head.add(_this.fader);
+      this.fader.visible = false;
+      this.head.add(this.fader);
 
-      if (!_this.options.disableKeyboard) {
-        var setFalse = function setFalse(evt) {
-          evt.returnValue = false;
-        };
-
-        var keyDown = function keyDown(evt) {
-          if (_this.VR.isPresenting) {
-            if (evt.keyCode === Keys.ESCAPE && !_this.VR.isPolyfilled) {
-              _this.cancelVR();
-            }
-          }
-
-          _this.Keyboard.consumeEvent(evt);
-          _this.consumeEvent(evt);
-        },
-            keyUp = function keyUp(evt) {
-          _this.Keyboard.consumeEvent(evt);
-          _this.consumeEvent(evt);
-        },
-            withCurrentControl = function withCurrentControl(name) {
-          return function (evt) {
-            if (_this.currentControl) {
-              if (_this.currentControl[name]) {
-                _this.currentControl[name](evt);
-              } else {
-                console.warn("Couldn't find %s on %o", name, _this.currentControl);
+      if(!this.options.disableKeyboard) {
+        const keyDown =  (evt) => {
+            if (this.VR.isPresenting) {
+              if (evt.keyCode === Keys.ESCAPE && !this.VR.isPolyfilled) {
+                this.cancelVR();
               }
             }
+
+            this.Keyboard.consumeEvent(evt);
+            this.consumeEvent(evt);
+          },
+
+          keyUp = (evt) => {
+            this.Keyboard.consumeEvent(evt);
+            this.consumeEvent(evt);
+          },
+
+          withCurrentControl = (name) => {
+            return (evt) => {
+              if (this.currentControl) {
+                if (this.currentControl[name]) {
+                  this.currentControl[name](evt);
+                }
+                else {
+                  console.warn("Couldn't find %s on %o", name, this.currentControl);
+                }
+              }
+            };
           };
-        };
 
         window.addEventListener("keydown", keyDown, false);
 
         window.addEventListener("keyup", keyUp, false);
 
+
         window.addEventListener("paste", withCurrentControl("readClipboard"), false);
         window.addEventListener("wheel", withCurrentControl("readWheel"), false);
 
-        var focusClipboard = function focusClipboard(evt) {
-          if (_this.lockMovement) {
-            var cmdName = _this.Keyboard.operatingSystem.makeCommandName(evt, _this.Keyboard.codePage);
+
+        const focusClipboard = (evt) => {
+          if (this.lockMovement) {
+            var cmdName = this.Keyboard.operatingSystem.makeCommandName(evt, this.Keyboard.codePage);
             if (cmdName === "CUT" || cmdName === "COPY") {
               surrogate.style.display = "block";
               surrogate.focus();
@@ -55221,26 +54154,29 @@ var BrowserEnvironment = function (_EventDispatcher) {
           }
         };
 
-        var clipboardOperation = function clipboardOperation(evt) {
-          if (_this.currentControl) {
-            _this.currentControl[evt.type + "SelectedText"](evt);
+        const clipboardOperation = (evt) => {
+          if (this.currentControl) {
+            this.currentControl[evt.type + "SelectedText"](evt);
             if (!evt.returnValue) {
               evt.preventDefault();
             }
             surrogate.style.display = "none";
-            _this.currentControl.focus();
+            this.currentControl.focus();
           }
         };
 
         // the `surrogate` textarea makes clipboard events possible
         var surrogate = cascadeElement("primrose-surrogate-textarea", "textarea", HTMLTextAreaElement),
-            surrogateContainer = makeHidingContainer("primrose-surrogate-textarea-container", surrogate);
+          surrogateContainer = makeHidingContainer("primrose-surrogate-textarea-container", surrogate);
 
         surrogateContainer.style.position = "absolute";
         surrogateContainer.style.overflow = "hidden";
         surrogateContainer.style.width = 0;
         surrogateContainer.style.height = 0;
 
+        function setFalse(evt) {
+          evt.returnValue = false;
+        }
         surrogate.addEventListener("beforecopy", setFalse, false);
         surrogate.addEventListener("copy", clipboardOperation, false);
         surrogate.addEventListener("beforecut", setFalse, false);
@@ -55251,69 +54187,74 @@ var BrowserEnvironment = function (_EventDispatcher) {
         window.addEventListener("keydown", focusClipboard, true);
       }
 
-      _this.head.add(_this.camera);
+      this.head.add(this.camera);
 
-      return Promise.all(_this.managers.map(function (mgr) {
-        return mgr.ready;
-      }).filter(identity));
+      return Promise.all(this.managers
+        .map((mgr) => mgr.ready)
+        .filter(identity));
     });
 
-    _this._readyParts = [_this.sky.ready, _this.ground.ready, modelsReady, documentReady];
-    _this.ready = Promise.all(_this._readyParts).then(function () {
-      _this.renderer.domElement.style.cursor = "default";
-      if (_this.options.enableShadows && _this.sky.sun) {
-        _this.renderer.shadowMap.enabled = true;
-        _this.renderer.shadowMap.type = PCFSoftShadowMap;
-      }
-
-      _this.VR.displays.forEach(function (display) {
-        if (display.DOMElement !== undefined) {
-          display.DOMElement = _this.renderer.domElement;
+    this._readyParts = [
+      this.sky.ready,
+      this.ground.ready,
+      modelsReady,
+      documentReady
+    ];
+    this.ready = Promise.all(this._readyParts)
+      .then(() => {
+        this.renderer.domElement.style.cursor = "default";
+        if(this.options.enableShadows && this.sky.sun) {
+          this.renderer.shadowMap.enabled = true;
+          this.renderer.shadowMap.type = PCFSoftShadowMap;
         }
+
+        this.VR.displays.forEach((display) => {
+          if(display.DOMElement !== undefined) {
+            display.DOMElement = this.renderer.domElement;
+          }
+        });
+
+        if(this.options.fullScreenButtonContainer){
+          this.insertFullScreenButtons(this.options.fullScreenButtonContainer);
+        }
+
+        this.VR.connect(0);
+        this.options.progress.hide();
+
+        this.emit("ready");
       });
 
-      if (_this.options.fullScreenButtonContainer) {
-        _this.insertFullScreenButtons(_this.options.fullScreenButtonContainer);
-      }
-
-      _this.VR.connect(0);
-      _this.options.progress.hide();
-
-      _this.emit("ready");
-    });
-
-    Object.defineProperties(_this, {
+    Object.defineProperties(this, {
       quality: {
-        get: function get$$1() {
-          return _this.options.quality;
-        },
-        set: function set$$1(v) {
+        get: () => this.options.quality,
+        set: (v) => {
           if (0 <= v && v < PIXEL_SCALES.length) {
-            _this.options.quality = v;
+            this.options.quality = v;
             resolutionScale = PIXEL_SCALES[v];
           }
-          _this.ready.then(modifyScreen);
+          this.ready.then(modifyScreen);
         }
       }
     });
 
-    _this.quality = _this.options.quality;
+    this.quality = this.options.quality;
 
     if (window.alert.toString().indexOf("native code") > -1) {
       // overwrite the native alert functions so they can't be called while in
       // full screen VR mode.
 
-      var rerouteDialog = function rerouteDialog(oldFunction, newFunction) {
+      var rerouteDialog = (oldFunction, newFunction) => {
         if (!newFunction) {
-          newFunction = function newFunction() {};
+          newFunction = function () {};
         }
-        return function () {
+        return (function () {
           if (this.VR && this.VR.isPresenting) {
             newFunction();
-          } else {
+          }
+          else {
             oldFunction.apply(window, arguments);
           }
-        }.bind(_this);
+        }).bind(this);
       };
 
       window.alert = rerouteDialog(window.alert);
@@ -55321,162 +54262,144 @@ var BrowserEnvironment = function (_EventDispatcher) {
       window.prompt = rerouteDialog(window.prompt);
     }
 
-    _this.start();
-    return _this;
+    this.start();
   }
 
-  createClass(BrowserEnvironment, [{
-    key: "connect",
-    value: function connect(socket, userName) {
+  get lockMovement(){
 
-      if (!this.network) {
-        this.network = new Manager(this, this.audio, this.factories, this.options);
-        this.network.addEventListener("addavatar", this.addAvatar);
-        this.network.addEventListener("removeavatar", this.removeAvatar);
-      }
-      return this.network && this.network.connect(socket, userName);
-    }
-  }, {
-    key: "disconnect",
-    value: function disconnect() {
+    return this.currentControl && this.currentControl.lockMovement;
+  }
 
-      return this.network && this.network.disconnect();
-    }
-  }, {
-    key: "addInputManager",
-    value: function addInputManager(mgr) {
-      for (var i = this.managers.length - 1; i >= 0; --i) {
-        if (this.managers[i].name === mgr.name) {
-          this.managers.splice(i, 1);
-        }
-      }
-      this.managers.push(mgr);
-      this[mgr.name] = mgr;
-    }
-  }, {
-    key: "removeInputManager",
-    value: function removeInputManager(id) {
-      var mgr = this[id],
-          mgrIdx = this.managers.indexOf(mgr);
-      if (mgrIdx > -1) {
-        this.managers.splice(mgrIdx, 1);
-        delete this[id];
-      }
-      console.log("removed", mgr);
-    }
-  }, {
-    key: "moveStage",
-    value: function moveStage(position) {
-      DISPLACEMENT.copy(position).sub(this.head.position);
+  connect(socket, userName) {
 
-      this.stage.position.add(DISPLACEMENT);
+    if(!this.network){
+      this.network = new Manager(this, this.audio, this.factories, this.options);
+      this.network.addEventListener("addavatar", this.addAvatar);
+      this.network.addEventListener("removeavatar", this.removeAvatar);
     }
-  }, {
-    key: "cancelVR",
-    value: function cancelVR() {
-      this.VR.cancel();
-      this.Touch.commands.U.offset = this.Mouse.commands.U.offset = 0;
-    }
-  }, {
-    key: "setAudioFromUser",
-    value: function setAudioFromUser(userName, audioElement) {
+    return this.network && this.network.connect(socket, userName);
+  }
 
-      this.audioQueue.push([userName, audioElement]);
-      if (this.network) {
-        while (this.audioQueue.length > 0) {
-          this.network.setAudioFromUser.apply(this.network, this.audioQueue.shift());
-        }
+  disconnect() {
+
+    return this.network && this.network.disconnect();
+  }
+
+  get displays() {
+
+    return this.VR.displays;
+  }
+
+  get fieldOfView() {
+    var d = this.VR.currentDevice,
+      eyes = [
+      d && d.getEyeParameters("left"),
+      d && d.getEyeParameters("right")
+    ].filter(identity);
+    if(eyes.length > 0){
+      return eyes.reduce((fov, eye) => Math.max(fov, eye.fieldOfView.upDegrees + eye.fieldOfView.downDegrees), 0);
+    }
+  }
+
+  set fieldOfView(v){
+    this.options.defaultFOV = StandardMonitorVRDisplay.DEFAULT_FOV = v;
+  }
+
+  get currentTime() {
+    return this.audio.context.currentTime;
+  }
+
+  addInputManager(mgr) {
+    for (let i = this.managers.length - 1; i >= 0; --i) {
+      if (this.managers[i].name === mgr.name) {
+        this.managers.splice(i, 1);
       }
     }
-  }, {
-    key: "insertFullScreenButtons",
-    value: function insertFullScreenButtons(containerSpec) {
-      var _this2 = this;
+    this.managers.push(mgr);
+    this[mgr.name] = mgr;
+  }
 
-      var container = document.querySelector(containerSpec);
-      var newButton = function newButton(title, text, thunk) {
-        var btn = document.createElement("button");
-        btn.type = "button";
-        btn.title = title;
-        btn.appendChild(document.createTextNode(text));
-        btn.addEventListener("click", thunk, false);
-        container.appendChild(btn);
-        return btn;
-      };
+  removeInputManager(id) {
+    const mgr = this[id],
+      mgrIdx = this.managers.indexOf(mgr);
+    if (mgrIdx > -1) {
+      this.managers.splice(mgrIdx, 1);
+      delete this[id];
+    }
+    console.log("removed", mgr);
+  }
 
-      var buttons = this.displays
+  moveStage(position) {
+    DISPLACEMENT.copy(position)
+      .sub(this.head.position);
+
+    this.stage.position.add(DISPLACEMENT);
+  }
+
+  cancelVR() {
+    this.VR.cancel();
+    this.Touch.commands.U.offset = this.Mouse.commands.U.offset = 0;
+  }
+
+  get hasMotionControllers() {
+    return !!(this.Vive_0 && this.Vive_0.enabled && this.Vive_0.inPhysicalUse ||
+      this.Vive_1 && this.Vive_1.enabled && this.Vive_1.inPhysicalUse);
+  }
+
+  get hasGamepad() {
+    return !!(this.Gamepad_0 && this.Gamepad_0.enabled && this.Gamepad_0.inPhysicalUse);
+  }
+
+  get hasMouse() {
+    return !!(this.Mouse && this.Mouse.enabled && this.Mouse.inPhysicalUse);
+  }
+
+  get hasTouch() {
+    return !!(this.Touch && this.Touch.enabled && this.Touch.inPhysicalUse);
+  }
+
+  setAudioFromUser(userName, audioElement){
+
+    this.audioQueue.push([userName, audioElement]);
+    if(this.network){
+      while(this.audioQueue.length > 0){
+        this.network.setAudioFromUser.apply(this.network, this.audioQueue.shift());
+      }
+    }
+  }
+
+  insertFullScreenButtons(containerSpec){
+
+    const container = document.querySelector(containerSpec);
+    const newButton = (title, text, thunk) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.title = title;
+      btn.appendChild(document.createTextNode(text));
+      btn.addEventListener("click", thunk, false);
+      container.appendChild(btn);
+      return btn;
+    };
+
+    const buttons = this.displays
       // We skip the Standard Monitor and Magic Window on iOS because we can't go full screen on those systems.
-      .map(function (display, i) {
-        if (!isiOS$1 || VR.isStereoDisplay(display)) {
-          var enterVR = _this2.goFullScreen.bind(_this2, i),
-              btn = newButton(display.displayName, display.displayName, enterVR),
-              isStereo = VR.isStereoDisplay(display);
+      .map((display, i) => {
+        if(!isiOS$1 || VR.isStereoDisplay(display)) {
+          const enterVR = this.goFullScreen.bind(this, i),
+            btn = newButton(display.displayName, display.displayName, enterVR),
+            isStereo = VR.isStereoDisplay(display);
           btn.className = isStereo ? "stereo" : "mono";
           return btn;
         }
-      }).filter(identity);
+      })
+      .filter(identity);
 
-      if (!/(www\.)?primrosevr.com/.test(document.location.hostname) && !this.options.disableAdvertising) {
-        buttons.push(newButton("Primrose", "✿", function () {
-          return open("https://www.primrosevr.com", "_blank");
-        }));
-      }
-      return buttons;
+    if(!/(www\.)?primrosevr.com/.test(document.location.hostname) && !this.options.disableAdvertising) {
+      buttons.push(newButton("Primrose", "✿", () => open("https://www.primrosevr.com", "_blank")));
     }
-  }, {
-    key: "lockMovement",
-    get: function get$$1() {
-
-      return this.currentControl && this.currentControl.lockMovement;
-    }
-  }, {
-    key: "displays",
-    get: function get$$1() {
-
-      return this.VR.displays;
-    }
-  }, {
-    key: "fieldOfView",
-    get: function get$$1() {
-      var d = this.VR.currentDevice,
-          eyes = [d && d.getEyeParameters("left"), d && d.getEyeParameters("right")].filter(identity);
-      if (eyes.length > 0) {
-        return eyes.reduce(function (fov, eye) {
-          return Math.max(fov, eye.fieldOfView.upDegrees + eye.fieldOfView.downDegrees);
-        }, 0);
-      }
-    },
-    set: function set$$1(v) {
-      this.options.defaultFOV = StandardMonitorVRDisplay.DEFAULT_FOV = v;
-    }
-  }, {
-    key: "currentTime",
-    get: function get$$1() {
-      return this.audio.context.currentTime;
-    }
-  }, {
-    key: "hasMotionControllers",
-    get: function get$$1() {
-      return !!(this.Vive_0 && this.Vive_0.enabled && this.Vive_0.inPhysicalUse || this.Vive_1 && this.Vive_1.enabled && this.Vive_1.inPhysicalUse);
-    }
-  }, {
-    key: "hasGamepad",
-    get: function get$$1() {
-      return !!(this.Gamepad_0 && this.Gamepad_0.enabled && this.Gamepad_0.inPhysicalUse);
-    }
-  }, {
-    key: "hasMouse",
-    get: function get$$1() {
-      return !!(this.Mouse && this.Mouse.enabled && this.Mouse.inPhysicalUse);
-    }
-  }, {
-    key: "hasTouch",
-    get: function get$$1() {
-      return !!(this.Touch && this.Touch.enabled && this.Touch.inPhysicalUse);
-    }
-  }]);
-  return BrowserEnvironment;
-}(EventDispatcher);
+    return buttons;
+  }
+}
 
 BrowserEnvironment.DEFAULTS = {
   antialias: true,
@@ -55491,9 +54414,9 @@ BrowserEnvironment.DEFAULTS = {
   shadowCameraSize: 15,
   shadowRadius: 1,
   progress: window.Preloader || {
-    thunk: function thunk() {},
-    hide: function hide() {},
-    resize: function resize() {}
+    thunk: function() {},
+    hide: function() {},
+    resize: function() {}
   },
   // The rate at which the view fades in and out.
   fadeRate: 5,
@@ -55539,277 +54462,253 @@ BrowserEnvironment.DEFAULTS = {
   disableAdvertising: false
 };
 
-var COUNTER$7 = 0;
+let COUNTER$7 = 0;
 
-var Model = function (_Entity) {
-  inherits(Model, _Entity);
+class Model extends Entity {
 
-  function Model(file, options) {
-    classCallCheck(this, Model);
-
-    name = options && options.id || "Primrose.Controls.Model[" + COUNTER$7++ + "]";
-
-    var _this = possibleConstructorReturn(this, (Model.__proto__ || Object.getPrototypeOf(Model)).call(this, name, options));
-
-    _this._file = file;
-    _this._model = null;
-    return _this;
+  constructor(file, options) {
+    name = options && options.id || "Primrose.Controls.Model[" + (COUNTER$7++) + "]";
+    super(name, options);
+    this._file = file;
+    this._model = null;
   }
 
-  createClass(Model, [{
-    key: "_ready",
-    get: function get$$1() {
-      var _this2 = this;
+  get _ready() {
+    return super._ready.then(() => cache(this._file, () =>
+      ModelFactory.loadModel(this._file, this.options.type, this.options.progress))
+    .then((factory) => {
+      this._model = factory.clone();
+      this.add(this._model);
+      return this;
+    }))
+  }
 
-      return get(Model.prototype.__proto__ || Object.getPrototypeOf(Model.prototype), "_ready", this).then(function () {
-        return cache(_this2._file, function () {
-          return ModelFactory.loadModel(_this2._file, _this2.options.type, _this2.options.progress);
-        }).then(function (factory) {
-          _this2._model = factory.clone();
-          _this2.add(_this2._model);
-          return _this2;
-        });
-      });
+}
+
+class PlainText$1 {
+  constructor(text, size, fgcolor, bgcolor, x, y, z, hAlign = "center") {
+    text = text.replace(/\r\n/g, "\n");
+    var lines = text.split("\n");
+    var lineHeight = (size * 1000);
+    var boxHeight = lineHeight * lines.length;
+
+    var textCanvas = document.createElement("canvas");
+    var textContext = textCanvas.getContext("2d");
+    textContext.font = lineHeight + "px Arial";
+    var width = textContext.measureText(text)
+      .width;
+
+    textCanvas.width = width;
+    textCanvas.height = boxHeight;
+    textContext.font = lineHeight * 0.8 + "px Arial";
+    if (bgcolor !== "transparent") {
+      textContext.fillStyle = bgcolor;
+      textContext.fillRect(0, 0, textCanvas.width, textCanvas.height);
     }
-  }]);
-  return Model;
-}(Entity);
+    textContext.fillStyle = fgcolor;
 
-var PlainText$1 = function PlainText(text, size, fgcolor, bgcolor, x, y, z) {
-  var hAlign = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : "center";
-  classCallCheck(this, PlainText);
+    for (var i = 0; i < lines.length; ++i) {
+      textContext.fillText(lines[i], 0, i * lineHeight);
+    }
 
-  text = text.replace(/\r\n/g, "\n");
-  var lines = text.split("\n");
-  var lineHeight = size * 1000;
-  var boxHeight = lineHeight * lines.length;
+    var texture = new Texture(textCanvas);
+    texture.needsUpdate = true;
 
-  var textCanvas = document.createElement("canvas");
-  var textContext = textCanvas.getContext("2d");
-  textContext.font = lineHeight + "px Arial";
-  var width = textContext.measureText(text).width;
+    var material = new MeshBasicMaterial({
+      map: texture,
+      transparent: bgcolor === "transparent",
+      useScreenCoordinates: false,
+      color: 0xffffff,
+      shading: FlatShading
+    });
 
-  textCanvas.width = width;
-  textCanvas.height = boxHeight;
-  textContext.font = lineHeight * 0.8 + "px Arial";
-  if (bgcolor !== "transparent") {
-    textContext.fillStyle = bgcolor;
-    textContext.fillRect(0, 0, textCanvas.width, textCanvas.height);
+    var textGeometry = new PlaneGeometry(size * width / lineHeight,
+      size * lines.length);
+    textGeometry.computeBoundingBox();
+    textGeometry.computeVertexNormals();
+
+    var textMesh = new Mesh(textGeometry, material);
+    if (hAlign === "left") {
+      x -= textGeometry.boundingBox.min.x;
+    }
+    else if (hAlign === "right") {
+      x += textGeometry.boundingBox.min.x;
+    }
+    textMesh.position.set(x, y, z);
+    return textMesh;
   }
-  textContext.fillStyle = fgcolor;
+}
 
-  for (var i = 0; i < lines.length; ++i) {
-    textContext.fillText(lines[i], 0, i * lineHeight);
-  }
+const SIZE = 1;
+const INSET = 0.8;
+const PROPORTION = 10;
+const SIZE_SMALL = SIZE / PROPORTION;
+const INSET_LARGE = (1 - (1 - INSET) / PROPORTION);
 
-  var texture = new Texture(textCanvas);
-  texture.needsUpdate = true;
+class Progress {
 
-  var material = new MeshBasicMaterial({
-    map: texture,
-    transparent: bgcolor === "transparent",
-    useScreenCoordinates: false,
-    color: 0xffffff,
-    shading: FlatShading
-  });
-
-  var textGeometry = new PlaneGeometry(size * width / lineHeight, size * lines.length);
-  textGeometry.computeBoundingBox();
-  textGeometry.computeVertexNormals();
-
-  var textMesh = new Mesh(textGeometry, material);
-  if (hAlign === "left") {
-    x -= textGeometry.boundingBox.min.x;
-  } else if (hAlign === "right") {
-    x += textGeometry.boundingBox.min.x;
-  }
-  textMesh.position.set(x, y, z);
-  return textMesh;
-};
-
-var SIZE = 1;
-var INSET = 0.8;
-var PROPORTION = 10;
-var SIZE_SMALL = SIZE / PROPORTION;
-var INSET_LARGE = 1 - (1 - INSET) / PROPORTION;
-
-var Progress = function () {
-  function Progress(majorColor, minorColor) {
-    classCallCheck(this, Progress);
-
+  constructor(majorColor, minorColor) {
     majorColor = majorColor || 0xffffff;
     minorColor = minorColor || 0x000000;
     var geom = box(SIZE, SIZE_SMALL, SIZE_SMALL);
 
-    this.totalBar = geom.colored(minorColor, {
-      unshaded: true,
-      side: BackSide
-    });
+    this.totalBar = geom
+      .colored(minorColor, {
+        unshaded: true,
+        side: BackSide
+      });
 
-    this.valueBar = geom.colored(majorColor, {
-      unshaded: true
-    }).scl(0, INSET, INSET).addTo(this.totalBar);
+    this.valueBar = geom
+      .colored(majorColor, {
+        unshaded: true
+      })
+      .scl(0, INSET, INSET)
+      .addTo(this.totalBar);
 
     this.fileState = null;
     this.reset();
   }
 
-  createClass(Progress, [{
-    key: "reset",
-    value: function reset() {
-      this.fileState = {};
+  reset(){
+    this.fileState = {};
+    this.value = 0;
+  }
+
+  get visible(){
+    return this.totalBar.visible;
+  }
+
+  set visible(v){
+    this.totalBar.visible = v;
+  }
+
+  get position(){
+    return this.totalBar.position;
+  }
+
+  get quaternion(){
+    return this.totalBar.quaternion;
+  }
+
+  get value(){
+    return this.valueBar.scale.x / INSET_LARGE;
+  }
+
+  set value(v){
+    this.valueBar.scale.x = v * INSET_LARGE;
+    this.valueBar.position.x = -SIZE * (1 - v) * INSET_LARGE / 2;
+  }
+
+  onProgress(evt){
+    const file = evt.target.responseURL || evt.target.currentSrc;
+    if(file && evt.loaded !== undefined){
+      if(!this.fileState[file]){
+        this.fileState[file] = {};
+      }
+      const f = this.fileState[file];
+      f.loaded = evt.loaded;
+      f.total = evt.total;
+    }
+
+    let total = 0, loaded = 0;
+    for(let key in this.fileState){
+      const f = this.fileState[key];
+      total += f.total;
+      loaded += f.loaded;
+    }
+
+    if(total > 0){
+      this.value = loaded / total;
+    }
+    else{
       this.value = 0;
     }
-  }, {
-    key: "onProgress",
-    value: function onProgress(evt) {
-      var file = evt.target.responseURL || evt.target.currentSrc;
-      if (file && evt.loaded !== undefined) {
-        if (!this.fileState[file]) {
-          this.fileState[file] = {};
-        }
-        var f = this.fileState[file];
-        f.loaded = evt.loaded;
-        f.total = evt.total;
-      }
-
-      var total = 0,
-          loaded = 0;
-      for (var key in this.fileState) {
-        var _f = this.fileState[key];
-        total += _f.total;
-        loaded += _f.loaded;
-      }
-
-      if (total > 0) {
-        this.value = loaded / total;
-      } else {
-        this.value = 0;
-      }
-    }
-  }, {
-    key: "visible",
-    get: function get$$1() {
-      return this.totalBar.visible;
-    },
-    set: function set$$1(v) {
-      this.totalBar.visible = v;
-    }
-  }, {
-    key: "position",
-    get: function get$$1() {
-      return this.totalBar.position;
-    }
-  }, {
-    key: "quaternion",
-    get: function get$$1() {
-      return this.totalBar.quaternion;
-    }
-  }, {
-    key: "value",
-    get: function get$$1() {
-      return this.valueBar.scale.x / INSET_LARGE;
-    },
-    set: function set$$1(v) {
-      this.valueBar.scale.x = v * INSET_LARGE;
-      this.valueBar.position.x = -SIZE * (1 - v) * INSET_LARGE / 2;
-    }
-  }]);
-  return Progress;
-}();
+  }
+}
 
 ////
 // For all of these commands, the "current" cursor is:
 // If SHIFT is not held, then "front".
 // If SHIFT is held, then "back"
 //
-var TextInput$2 = new BasicTextInput("Text Line input commands");
+var TextInput$1 = new BasicTextInput("Text Line input commands");
 
 var COUNTER$8 = 0;
 
-var TextInput = function (_TextBox) {
-  inherits(TextInput, _TextBox);
+class TextInput extends TextBox {
+  constructor(options) {
+    super(Object.assign({}, {
+        id: "Primrose.Controls.TextInput[" + (COUNTER$8++) + "]",
+        padding: 5,
+        singleLine: true,
+        disableWordWrap: true,
+        hideLineNumbers: true,
+        hideScrollBars: true,
+        tabWidth: 1,
+        tokenizer: PlainText,
+        commands: TextInput$1
+      }), options);
 
-  function TextInput(options) {
-    classCallCheck(this, TextInput);
-
-    var _this = possibleConstructorReturn(this, (TextInput.__proto__ || Object.getPrototypeOf(TextInput)).call(this, Object.assign({}, {
-      id: "Primrose.Controls.TextInput[" + COUNTER$8++ + "]",
-      padding: 5,
-      singleLine: true,
-      disableWordWrap: true,
-      hideLineNumbers: true,
-      hideScrollBars: true,
-      tabWidth: 1,
-      tokenizer: PlainText,
-      commands: TextInput$2
-    }), options));
-
-    _this.passwordCharacter = _this.options.passwordCharacter;
-    return _this;
+    this.passwordCharacter = this.options.passwordCharacter;
   }
 
-  createClass(TextInput, [{
-    key: "drawText",
-    value: function drawText(ctx, txt, x, y) {
-      if (this.passwordCharacter) {
-        var val = "";
-        for (var i = 0; i < txt.length; ++i) {
-          val += this.passwordCharacter;
-        }
-        txt = val;
+  get value() {
+    return super.value;
+  }
+
+  set value(v) {
+    v = v || "";
+    v = v.replace(/\r?\n/g, "");
+    super.value = v;
+  }
+
+  get selectedText() {
+    return super.selectedText;
+  }
+
+  set selectedText(v) {
+    v = v || "";
+    v = v.replace(/\r?\n/g, "");
+    super.selectedText = v;
+  }
+
+  drawText(ctx, txt, x, y) {
+    if (this.passwordCharacter) {
+      var val = "";
+      for (var i = 0; i < txt.length; ++i) {
+        val += this.passwordCharacter;
       }
-      get(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "drawText", this).call(this, ctx, txt, x, y);
+      txt = val;
     }
-  }, {
-    key: "value",
-    get: function get$$1() {
-      return get(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "value", this);
-    },
-    set: function set$$1(v) {
-      v = v || "";
-      v = v.replace(/\r?\n/g, "");
-      set(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "value", v, this);
-    }
-  }, {
-    key: "selectedText",
-    get: function get$$1() {
-      return get(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "selectedText", this);
-    },
-    set: function set$$1(v) {
-      v = v || "";
-      v = v.replace(/\r?\n/g, "");
-      set(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "selectedText", v, this);
-    }
-  }]);
-  return TextInput;
-}(TextBox);
+    super.drawText(ctx, txt, x, y);
+  }
+}
 
 var Controls = {
-  Button2D: Button2D,
-  Button3D: Button3D,
-  ButtonFactory: ButtonFactory,
-  Entity: Entity,
-  Ground: Ground,
-  Image: Image,
-  Label: Label,
-  Model: Model,
+  Button2D,
+  Button3D,
+  ButtonFactory,
+  Entity,
+  Ground,
+  Image,
+  Label,
+  Model,
   PlainText: PlainText$1,
-  Progress: Progress,
-  Sky: Sky,
-  Surface: Surface,
-  TextBox: TextBox,
-  TextInput: TextInput,
-  Video: Video
+  Progress,
+  Sky,
+  Surface,
+  TextBox,
+  TextInput,
+  Video
 };
 
 var Displays = {
-  CardboardVRDisplay: CardboardVRDisplay,
-  install: install,
-  MockVRDisplay: MockVRDisplay,
-  StandardMonitorVRDisplay: StandardMonitorVRDisplay,
-  VRDisplay: VRDisplay,
-  VRFrameData: VRFrameData
+  CardboardVRDisplay,
+  install,
+  MockVRDisplay,
+  StandardMonitorVRDisplay,
+  VRDisplay,
+  VRFrameData
 };
 
 function findEverything(elem, obj) {
@@ -55829,16 +54728,16 @@ function findEverything(elem, obj) {
 }
 
 var DOM = {
-  cascadeElement: cascadeElement,
-  findEverything: findEverything,
-  makeHidingContainer: makeHidingContainer
+  cascadeElement,
+  findEverything,
+  makeHidingContainer
 };
 
 var Graphics = {
-  fixGeometry: fixGeometry,
-  InsideSphereGeometry: InsideSphereGeometry,
-  loadTexture: loadTexture,
-  ModelFactory: ModelFactory
+  fixGeometry,
+  InsideSphereGeometry,
+  loadTexture,
+  ModelFactory
 };
 
 function del(type, url, options) {
@@ -55850,7 +54749,7 @@ function delObject(url, options) {
 }
 
 function getText(url, options) {
-  return get$1("text", url, options);
+  return get("text", url, options);
 }
 
 function post(type, url, options) {
@@ -55862,53 +54761,43 @@ function postObject(url, options) {
 }
 
 var HTTP = {
-  del: del,
-  delObject: delObject,
-  get: get$1,
-  getBuffer: getBuffer,
-  getObject: getObject,
-  getText: getText,
-  post: post,
-  postObject: postObject,
-  XHR: XHR
+  del,
+  delObject,
+  get,
+  getBuffer,
+  getObject,
+  getText,
+  post,
+  postObject,
+  XHR
 };
 
-var Location = function (_InputProcessor) {
-  inherits(Location, _InputProcessor);
+class Location extends InputProcessor {
+  constructor(commands, options) {
+    super("Location", commands, ["LONGITUDE", "LATITUDE", "ALTITUDE", "HEADING", "SPEED"]);
 
-  function Location(commands, options) {
-    classCallCheck(this, Location);
+    this.options = Object.assign({}, Location.DEFAULTS, options);
 
-    var _this = possibleConstructorReturn(this, (Location.__proto__ || Object.getPrototypeOf(Location)).call(this, "Location", commands, ["LONGITUDE", "LATITUDE", "ALTITUDE", "HEADING", "SPEED"]));
-
-    _this.options = Object.assign({}, Location.DEFAULTS, options);
-
-    _this.available = !!navigator.geolocation;
-    if (_this.available) {
-      navigator.geolocation.watchPosition(_this.setState.bind(_this), function () {
-        return _this.available = false;
-      }, _this.options);
+    this.available = !!navigator.geolocation;
+    if (this.available) {
+      navigator.geolocation.watchPosition(
+        this.setState.bind(this),
+        () => this.available = false,
+        this.options);
     }
-    return _this;
   }
 
-  createClass(Location, [{
-    key: "setState",
-    value: function setState(location) {
-      this.inPhysicalUse = true;
-      for (var p in location.coords) {
-        var k = p.toUpperCase();
-        if (this.axisNames.indexOf(k) > -1) {
-          this.setAxis(k, location.coords[p]);
-        }
+  setState(location) {
+    this.inPhysicalUse = true;
+    for (var p in location.coords) {
+      var k = p.toUpperCase();
+      if (this.axisNames.indexOf(k) > -1) {
+        this.setAxis(k, location.coords[p]);
       }
-      this.update();
     }
-  }]);
-  return Location;
-}(InputProcessor);
-
-
+    this.update();
+  }
+}
 
 Location.DEFAULTS = {
   enableHighAccuracy: true,
@@ -55917,88 +54806,79 @@ Location.DEFAULTS = {
 };
 
 var Input = {
-  Gamepad: Gamepad,
-  InputProcessor: InputProcessor,
-  Keyboard: Keyboard,
-  Location: Location,
-  Mouse: Mouse,
-  PoseInputProcessor: PoseInputProcessor,
+  Gamepad,
+  InputProcessor,
+  Keyboard,
+  Location,
+  Mouse,
+  PoseInputProcessor,
   Speech: Speech$1,
-  Touch: Touch,
-  VR: VR
+  Touch,
+  VR
 };
 
-var PEERING_TIMEOUT_LENGTH = 30000;
+const PEERING_TIMEOUT_LENGTH = 30000;
 // some useful information:
 // - https://www.webrtc-experiment.com/docs/STUN-or-TURN.html
 // - http://www.html5rocks.com/en/tutorials/webrtc/infrastructure/#after-signaling-using-ice-to-cope-with-nats-and-firewalls
 // - https://github.com/coturn/rfc5766-turn-server/
 
-var INSTANCE_COUNT = 0;
+let INSTANCE_COUNT = 0;
 
-var WebRTCSocketEvent = function (_Event) {
-  inherits(WebRTCSocketEvent, _Event);
-
-  function WebRTCSocketEvent(type, target, fromUserName, toUserName, item) {
-    classCallCheck(this, WebRTCSocketEvent);
-
-    var _this = possibleConstructorReturn(this, (WebRTCSocketEvent.__proto__ || Object.getPrototypeOf(WebRTCSocketEvent)).call(this, type, target));
-
-    Object.assign(_this, {
-      fromUserName: fromUserName,
-      toUserName: toUserName,
-      item: item
+class WebRTCSocketEvent extends Event {
+  constructor(type, target, fromUserName, toUserName, item) {
+    super(type, target);
+    Object.assign(this, {
+      fromUserName,
+      toUserName,
+      item
     });
-    return _this;
   }
-
-  return WebRTCSocketEvent;
-}(Event);
+}
 
 function extractSdp$1(sdpLine, pattern) {
   var result = sdpLine.match(pattern);
-  return result && result.length == 2 ? result[1] : null;
+  return (result && result.length == 2) ? result[1] : null;
 }
 
-var WebRTCSocket = function (_EventDispatcher) {
-  inherits(WebRTCSocket, _EventDispatcher);
-
+class WebRTCSocket extends EventDispatcher {
   // Be forewarned, the WebRTC lifecycle is very complex and editing this class is likely to break it.
-  function WebRTCSocket(config, fromUserName, toUserName, goSecond) {
-    classCallCheck(this, WebRTCSocket);
+  constructor(config, fromUserName, toUserName, goSecond) {
+    super();
 
     // These logging constructs are basically off by default, but you will need
     // them if you ever need to debug the WebRTC workflow.
-    var _this2 = possibleConstructorReturn(this, (WebRTCSocket.__proto__ || Object.getPrototypeOf(WebRTCSocket)).call(this));
-
-    var attemptCount = 0;
-    var MAX_LOG_LEVEL = 0,
-        instanceNumber = ++INSTANCE_COUNT,
-        print = function print(name, level, format) {
-      if (level < MAX_LOG_LEVEL) {
-        var args = ["%s: " + format, level];
-        for (var i = 3; i < arguments.length; ++i) {
-          args.push(arguments[i]);
+    let attemptCount = 0;
+    const MAX_LOG_LEVEL = 0,
+      instanceNumber = ++INSTANCE_COUNT,
+      print = function (name, level, format) {
+        if (level < MAX_LOG_LEVEL) {
+          const args = [
+            "%s: " + format,
+            level
+          ];
+          for (var i = 3; i < arguments.length; ++i) {
+            args.push(arguments[i]);
+          }
+          console[name].apply(console, args);
         }
-        console[name].apply(console, args);
-      }
-      return arguments[3];
-    };
+        return arguments[3];
+      };
 
-    _this2.myResult = null;
-    _this2.theirResult = null;
-    _this2._timeout = null;
-    _this2._log = print.bind(null, "trace");
-    _this2._error = print.bind(null, "error", 0, "");
-    _this2.fromUserName = fromUserName;
-    _this2.toUserName = toUserName;
-    _this2.rtc = null;
-    _this2.inAudioStreams = [];
-    _this2.outAudioStreams = [];
-    _this2.dataChannels = [];
-    _this2.goFirst = !goSecond;
-    _this2.preferOpus = true;
-    _this2.progress = {
+    this.myResult = null;
+    this.theirResult = null;
+    this._timeout = null;
+    this._log = print.bind(null, "trace");
+    this._error = print.bind(null, "error", 0, "");
+    this.fromUserName = fromUserName;
+    this.toUserName = toUserName;
+    this.rtc = null;
+    this.inAudioStreams = [];
+    this.outAudioStreams = [];
+    this.dataChannels = [];
+    this.goFirst = !goSecond;
+    this.preferOpus = true;
+    this.progress = {
       offer: {
         created: false,
         received: false
@@ -56011,32 +54891,32 @@ var WebRTCSocket = function (_EventDispatcher) {
 
     // If the user leaves the page, we want to at least fire off the close signal and perhaps
     // not completely surprise the remote user.
-    window.addEventListener("unload", _this2.close.bind(_this2));
+    window.addEventListener("unload", this.close.bind(this));
 
-    var done = function done(isError) {
-      _this2._log(2, "Tearing down event handlers");
-      _this2.stopTimeout();
-      _this2.rtc.onsignalingstatechange = null;
-      _this2.rtc.oniceconnectionstatechange = null;
-      _this2.rtc.onnegotiationneeded = null;
-      _this2.rtc.onicecandidate = null;
-      _this2.rtc.ondatachannel = null;
-      _this2.rtc.ontrack = null;
-      _this2.rtc.onaddstream = null;
+    const done = (isError) => {
+      this._log(2, "Tearing down event handlers");
+      this.stopTimeout();
+      this.rtc.onsignalingstatechange = null;
+      this.rtc.oniceconnectionstatechange = null;
+      this.rtc.onnegotiationneeded = null;
+      this.rtc.onicecandidate = null;
+      this.rtc.ondatachannel = null;
+      this.rtc.ontrack = null;
+      this.rtc.onaddstream = null;
 
-      _this2.teardown();
+      this.teardown();
       if (isError) {
-        _this2.close();
+        this.close();
       }
     };
 
     // A pass-through function to include in the promise stream to see if the
     // channels have all been set up correctly and ready to go.
-    var check = function check(obj) {
-      if (_this2.complete) {
-        _this2._log(1, "Timeout avoided.");
+    const check = (obj) => {
+      if (this.complete) {
+        this._log(1, "Timeout avoided.");
         done();
-        _this2.emit("ready", _this2.dataChannels[0]);
+        this.emit("ready", this.dataChannels[0]);
       }
       return obj;
     };
@@ -56044,107 +54924,107 @@ var WebRTCSocket = function (_EventDispatcher) {
     // When an offer or an answer is received, it's pretty much the same exact
     // processing. Either type of object gets checked to see if it was expected,
     // then unwrapped.
-    _this2.peering_answer = function (description) {
-      _this2._log(1, "description", description);
+    this.peering_answer = (description) => {
+      this._log(1, "description", description);
       // Check to see if we expected this sort of message from this user.
-      _this2.recordProgress(description.item, "received");
+      this.recordProgress(description.item, "received");
 
       // The description we received is always the remote description,
       // regardless of whether or not it's an offer or an answer.
-      return _this2.rtc.setRemoteDescription(new RTCSessionDescription(description.item))
+      return this.rtc.setRemoteDescription(new RTCSessionDescription(description.item))
 
-      // check to see if we're done.
-      .then(check)
+        // check to see if we're done.
+        .then(check)
 
-      // and if there are any errors, bomb out and shut everything down.
-      .catch(_this2.peering_error);
+        // and if there are any errors, bomb out and shut everything down.
+        .catch(this.peering_error);
     };
 
     // When an offer or an answer is created, it's pretty much the same exact
     // processing. Either type of object gets wrapped with a context identifying
     // which peer channel is being negotiated, and then transmitted through the
     // negotiation server to the remote user.
-    _this2.descriptionCreated = function (description) {
-      _this2.recordProgress(description, "created");
+    this.descriptionCreated = (description) => {
+      this.recordProgress(description, "created");
 
       // The description we create is always the local description, regardless
       // of whether or not it's an offer
       // or an answer.
-      return _this2.rtc.setLocalDescription(description)
-      // Let the remote user know what happened.
-      .then(function () {
-        return _this2.emit(description.type, description);
-      })
-      // check to see if we're done.
-      .then(check)
-      // and if there are any errors, bomb out and shut everything down.
-      .catch(_this2.peering_error);
+      return this.rtc.setLocalDescription(description)
+        // Let the remote user know what happened.
+        .then(() => this.emit(description.type, description))
+        // check to see if we're done.
+        .then(check)
+        // and if there are any errors, bomb out and shut everything down.
+        .catch(this.peering_error);
     };
 
     // A catch-all error handler to shut down the world if an error we couldn't
     // handle happens.
-    _this2.peering_error = function (exp) {
-      _this2._error(exp);
-      _this2.emit("cancel", exp);
-      _this2._log(1, "Timeout avoided, but only because of an error.");
+    this.peering_error = (exp) => {
+      this._error(exp);
+      this.emit("cancel", exp);
+      this._log(1, "Timeout avoided, but only because of an error.");
       done(true);
-      _this2.emit("error", exp);
+      this.emit("error", exp);
     };
 
     // A catch-all error handler to shut down the world if an error we couldn't
     // handle happens.
-    _this2.peering_cancel = function (exp) {
-      _this2._error(exp);
-      _this2._log(1, "Timeout avoided, but only because of an error.");
+    this.peering_cancel = (exp) => {
+      this._error(exp);
+      this._log(1, "Timeout avoided, but only because of an error.");
       done(true);
-      _this2.emit("error", exp);
+      this.emit("error", exp);
     };
 
     // When an offer is received, we need to create an answer in reply.
-    _this2.peering_offer = function (offer) {
-      _this2._log(1, "offer", offer);
-      var promise = _this2.peering_answer(offer);
+    this.peering_offer = (offer) => {
+      this._log(1, "offer", offer);
+      var promise = this.peering_answer(offer);
       if (promise) {
-        return promise.then(function () {
-          return _this2.rtc.createAnswer();
-        }).then(_this2.descriptionCreated);
+        return promise.then(() => this.rtc.createAnswer())
+          .then(this.descriptionCreated);
       }
     };
 
     // ICE stands for Interactive Connectivity Establishment. It's basically a description of a local end-point,
     // with enough information for the remote user to be able to connect to it.
-    _this2.peering_ice = function (ice) {
-      _this2._log(1, "ice", ice);
+    this.peering_ice = (ice) => {
+      this._log(1, "ice", ice);
       var candidate = new RTCIceCandidate(ice.item);
-      return _this2.rtc.addIceCandidate(candidate).catch(_this2._error);
+      return this.rtc.addIceCandidate(candidate)
+        .catch(this._error);
     };
 
-    _this2.peering_peer = function (evt) {
-      _this2._log(1, "peering", evt);
-      if (_this2.goFirst) {
-        _this2._log(0, "Creating data channel");
-        _this2.emit("readyforcontent");
+    this.peering_peer = (evt) => {
+      this._log(1, "peering", evt);
+      if (this.goFirst) {
+        this._log(0, "Creating data channel");
+        this.emit("readyforcontent");
       }
     };
 
     // This is where things get gnarly
-    if (config === true) {
+    if(config === true) {
       config = WebRTCSocket.DEFAULT_ICE_CONFIG;
-    } else if (config === false) {
+    }
+    else if(config === false) {
       config = null;
     }
 
-    if (config) {
-      for (var i = config.iceServers.length - 1; i >= 0; --i) {
-        var server = config.iceServers[i];
-        if (!server.urls || server.urls.length === 0) {
+    if(config) {
+      for(let i = config.iceServers.length - 1; i >= 0; --i){
+        const server = config.iceServers[i];
+        if(!server.urls || server.urls.length === 0){
           config.iceServers.splice(i, 1);
-        } else {
-          if (server.url && !server.urls) {
+        }
+        else {
+          if(server.url && !server.urls){
             server.urls = [server.url];
             delete server.url;
           }
-          if (server.username && server.credential) {
+          if(server.username && server.credential){
             server.credentialType = "token";
           }
         }
@@ -56153,16 +55033,23 @@ var WebRTCSocket = function (_EventDispatcher) {
       config.iceCandidatePoolSize = 100;
     }
 
-    _this2._log(1, JSON.stringify(config));
-    _this2.rtc = new RTCPeerConnection(config);
+    this._log(1, JSON.stringify(config));
+    this.rtc = new RTCPeerConnection(config);
     // This is just for debugging purposes.
-    _this2.rtc.onsignalingstatechange = function (evt) {
-      return _this2._log(1, "[%s] Signal State: %s", instanceNumber, _this2.rtc.signalingState);
-    };
+    this.rtc.onsignalingstatechange = (evt) =>
+      this._log(
+        1,
+        "[%s] Signal State: %s",
+        instanceNumber,
+        this.rtc.signalingState);
 
-    _this2.rtc.oniceconnectionstatechange = function (evt) {
-      return _this2._log(1, "[%s] ICE Connection %s, Gathering %s", instanceNumber, _this2.rtc.iceConnectionState, _this2.rtc.iceGatheringState);
-    };
+    this.rtc.oniceconnectionstatechange = (evt) =>
+      this._log(
+        1,
+        "[%s] ICE Connection %s, Gathering %s",
+        instanceNumber,
+        this.rtc.iceConnectionState,
+        this.rtc.iceGatheringState);
 
     // All of the literature you'll read on WebRTC show creating an offer right
     // after creating a data channel or adding a stream to the peer connection.
@@ -56171,181 +55058,176 @@ var WebRTCSocket = function (_EventDispatcher) {
     // race-condition between the signaling state of the RTCPeerConnection and
     // creating an offer after creating a channel if we don't wait for the
     // appropriate time.
-    _this2.rtc.onnegotiationneeded = function (evt) {
-      return _this2.createOffer().then(_this2.descriptionCreated);
-    };
+    this.rtc.onnegotiationneeded = (evt) => this.createOffer()
+      .then(this.descriptionCreated);
 
     // The API is going to figure out end-point configurations for us by
     // communicating with the STUN servers and seeing which end-points are
     // visible and which require network address translation.
-    _this2.rtc.onicecandidate = function (evt) {
+    this.rtc.onicecandidate = (evt) => {
       // There is an error condition where sometimes the candidate returned in
       // this event handler will be null.
       if (evt.candidate) {
         // Then let the remote user know of our folly.
-        _this2.emit("ice", evt.candidate);
+        this.emit("ice", evt.candidate);
       }
     };
 
     // Receiving an audio stream from the peer connection is just a
-    var onStream = function onStream(stream) {
-      _this2.inAudio = stream;
-      if (!_this2.goFirst) {
-        _this2._log(0, "Creating the second stream from %s to %s", _this2.fromUserName, _this2.toUserName);
-        _this2.stopTimeout();
-        _this2._log(1, "Restarting timeout.");
-        _this2.startTimeout();
-        _this2.addStream();
+    const onStream = (stream) => {
+      this.inAudio = stream;
+      if (!this.goFirst) {
+        this._log(0, "Creating the second stream from %s to %s", this.fromUserName, this.toUserName);
+        this.stopTimeout();
+        this._log(1, "Restarting timeout.");
+        this.startTimeout();
+        this.addStream();
       }
     };
 
     // Wait to receive an audio track.
-    if ("ontrack" in _this2.rtc) {
-      _this2.rtc.ontrack = function (evt) {
-        return onStream(evt.streams[0]);
-      };
-    } else {
-      _this2.rtc.onaddstream = function (evt) {
-        return onStream(evt.stream);
-      };
+    if("ontrack" in this.rtc){
+      this.rtc.ontrack = (evt) => onStream(evt.streams[0]);
     }
-    return _this2;
+    else{
+      this.rtc.onaddstream = (evt) => onStream(evt.stream);
+    }
   }
 
-  createClass(WebRTCSocket, [{
-    key: "createChannel",
-    value: function createChannel() {
-      if (this.rtc) {
-        var channel = this.rtc.createDataChannel("from-" + this.fromUserName + "-to-" + this.toUserName + "-" + this.dataChannels.length);
-        this.dataChannels.push(channel);
-        return channel;
+  createChannel() {
+    if(this.rtc) {
+      const channel = this.rtc.createDataChannel(`from-${this.fromUserName}-to-${this.toUserName}-${this.dataChannels.length}`);
+      this.dataChannels.push(channel);
+      return channel;
+    }
+  }
+
+
+
+  // Adding an audio stream to the peer connection is different between Firefox (which supports the latest
+  //  version of the API) and Chrome.
+  addStream () {
+    this._log(0, "adding stream", this.outAudio, this.rtc.addTrack);
+
+    // Make sure we actually have audio to send to the remote.
+    this.outAudio.then((aud) => {
+      if (this.rtc.addTrack) {
+        aud.getAudioTracks()
+          .forEach((track) => this.rtc.addTrack(track, aud));
       }
-    }
+      else {
+        this.rtc.addStream(aud);
+      }
 
-    // Adding an audio stream to the peer connection is different between Firefox (which supports the latest
-    //  version of the API) and Chrome.
+      if(isIE){
+        this.createOffer()
+          .then(this.descriptionCreated);
+      }
+    });
+  }
 
-  }, {
-    key: "addStream",
-    value: function addStream() {
-      var _this3 = this;
-
-      this._log(0, "adding stream", this.outAudio, this.rtc.addTrack);
-
-      // Make sure we actually have audio to send to the remote.
-      this.outAudio.then(function (aud) {
-        if (_this3.rtc.addTrack) {
-          aud.getAudioTracks().forEach(function (track) {
-            return _this3.rtc.addTrack(track, aud);
-          });
-        } else {
-          _this3.rtc.addStream(aud);
-        }
-
-        if (isIE) {
-          _this3.createOffer().then(_this3.descriptionCreated);
-        }
-      });
-    }
-  }, {
-    key: "connect",
-    value: function connect() {
-      var _this4 = this;
-
-      return new Promise(function (resolve, reject) {
-        var done = function done() {
-          _this4.removeEventListener("ready", good);
-          _this4.removeEventListener("error", bad);
-        },
-            good = function good(evt) {
+  connect() {
+    return new Promise((resolve, reject) => {
+      const done = () => {
+          this.removeEventListener("ready", good);
+          this.removeEventListener("error", bad);
+        }, good = (evt) => {
           done();
           resolve(evt.item);
-        },
-            bad = function bad(exp) {
+        }, bad = (exp) => {
           done();
           reject(exp);
         };
 
-        _this4.addEventListener("ready", good);
-        _this4.addEventListener("error", bad);
+      this.addEventListener("ready", good);
+      this.addEventListener("error", bad);
 
-        if (!_this4.goFirst) {
-          _this4.emit("peer");
-        }
-      });
-    }
-  }, {
-    key: "emit",
-    value: function emit(type, evt) {
-      this.dispatchEvent(new WebRTCSocketEvent(type, this, this.fromUserName, this.toUserName, evt));
-    }
-  }, {
-    key: "startTimeout",
-    value: function startTimeout() {
-      if (this._timeout === null) {
-        this._log(1, "Timing out in " + Math.floor(PEERING_TIMEOUT_LENGTH / 1000) + " seconds.");
-        this._timeout = setTimeout(this.peering_error.bind(this, "Gave up waiting on the peering connection."), PEERING_TIMEOUT_LENGTH);
+      if(!this.goFirst) {
+        this.emit("peer");
       }
+    });
+  }
+
+  emit(type, evt){
+    this.dispatchEvent(new WebRTCSocketEvent(
+      type,
+      this,
+      this.fromUserName,
+      this.toUserName,
+      evt
+    ));
+  }
+
+  startTimeout() {
+    if (this._timeout === null) {
+      this._log(1, "Timing out in " + Math.floor(PEERING_TIMEOUT_LENGTH / 1000) + " seconds.");
+      this._timeout = setTimeout(this.peering_error.bind(this, "Gave up waiting on the peering connection."), PEERING_TIMEOUT_LENGTH);
     }
-  }, {
-    key: "stopTimeout",
-    value: function stopTimeout() {
-      if (this._timeout !== null) {
-        clearTimeout(this._timeout);
-        this._timeout = null;
-      }
+  }
+
+  stopTimeout() {
+    if (this._timeout !== null) {
+      clearTimeout(this._timeout);
+      this._timeout = null;
     }
-  }, {
-    key: "createOffer",
-    value: function createOffer() {
-      return this.rtc.createOffer(this.offerOptions);
+  }
+
+  createOffer() {
+    return this.rtc.createOffer(this.offerOptions);
+  }
+
+  recordProgress(description, method) {
+    this._log(2, "Logging progress [%s]: %s %s -> true", description.type, method, this.progress[description.type][method]);
+    this.progress[description.type][method] = true;
+  }
+
+  close() {
+    if (this.rtc && this.rtc.signalingState !== "closed") {
+      this.rtc.close();
+      this.rtc = null;
     }
-  }, {
-    key: "recordProgress",
-    value: function recordProgress(description, method) {
-      this._log(2, "Logging progress [%s]: %s %s -> true", description.type, method, this.progress[description.type][method]);
-      this.progress[description.type][method] = true;
+  }
+
+  get complete() {
+    if (this.goFirst) {
+      this._log(1, "[First]: OC %s -> AR %s.",
+        this.progress.offer.created,
+        this.progress.answer.received);
     }
-  }, {
-    key: "close",
-    value: function close() {
-      if (this.rtc && this.rtc.signalingState !== "closed") {
-        this.rtc.close();
-        this.rtc = null;
-      }
+    else {
+      this._log(1, "[Second]: OC %s -> AR %s.",
+        this.progress.offer.created,
+        this.progress.answer.received);
     }
-  }, {
-    key: "teardown",
-    value: function teardown() {
-      this.rtc.ondatachannel = null;
-    }
-  }, {
-    key: "complete",
-    get: function get$$1() {
-      if (this.goFirst) {
-        this._log(1, "[First]: OC %s -> AR %s.", this.progress.offer.created, this.progress.answer.received);
-      } else {
-        this._log(1, "[Second]: OC %s -> AR %s.", this.progress.offer.created, this.progress.answer.received);
-      }
-      return !this.rtc || this.rtc.signalingState === "closed" || this.dataChannels.length > 0 && (this.goFirst && this.progress.offer.created && this.progress.answer.received || !this.goFirst && this.progress.offer.received && this.progress.answer.created);
-    }
-  }]);
-  return WebRTCSocket;
-}(EventDispatcher);
+    return !this.rtc ||
+      this.rtc.signalingState === "closed" ||
+      this.dataChannels.length > 0 &&
+      (this.goFirst && this.progress.offer.created && this.progress.answer.received ||
+        !this.goFirst && this.progress.offer.received && this.progress.answer.created);
+  }
+
+  teardown() {
+    this.rtc.ondatachannel = null;
+  }
+}
 
 WebRTCSocket.PEERING_EVENTS = ["peer", "cancel", "offer", "ice", "answer"];
 WebRTCSocket.DEFAULT_ICE_CONFIG = {
-  iceServers: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302", "stun:stun2.l.google.com:19302", "stun:stun3.l.google.com:19302", "stun:stun4.l.google.com:19302"].map(function (address) {
-    return Object.assign({
-      credential: null,
-      url: address,
-      urls: address,
-      username: null
-    });
-  })
+  iceServers: [
+    "stun:stun.l.google.com:19302",
+    "stun:stun1.l.google.com:19302",
+    "stun:stun2.l.google.com:19302",
+    "stun:stun3.l.google.com:19302",
+    "stun:stun4.l.google.com:19302"
+  ].map((address) => Object.assign({
+    credential: null,
+    url: address,
+    urls: address,
+    username: null
+  }))
 };
 
-var ENABLE_OPUS_HACK = true;
+const ENABLE_OPUS_HACK = true;
 
 function preferOpus(description) {
   if (ENABLE_OPUS_HACK && description) {
@@ -56380,7 +55262,7 @@ function preferOpus(description) {
 
 function extractSdp(sdpLine, pattern) {
   var result = sdpLine.match(pattern);
-  return result && result.length == 2 ? result[1] : null;
+  return (result && result.length == 2) ? result[1] : null;
 }
 
 function setDefaultCodec(mLine, payload) {
@@ -56414,167 +55296,159 @@ function removeCN(sdpLines, mLineIndex) {
   sdpLines[mLineIndex] = mLineElements.join(' ');
   return sdpLines;
 }
-
-var AudioChannel = function (_WebRTCSocket) {
-  inherits(AudioChannel, _WebRTCSocket);
-
-  function AudioChannel(requestICEPath, fromUserName, toUserName, outAudio, goSecond) {
-    classCallCheck(this, AudioChannel);
-
+class AudioChannel extends WebRTCSocket {
+  constructor(requestICEPath, fromUserName, toUserName, outAudio, goSecond) {
     console.log("attempting to peer audio from %s to %s. %s goes first.", fromUserName, toUserName, goSecond ? toUserName : fromUserName);
-
-    var _this = possibleConstructorReturn(this, (AudioChannel.__proto__ || Object.getPrototypeOf(AudioChannel)).call(this, requestICEPath, fromUserName, 0, toUserName, 0, goSecond));
-
-    _this.outAudio = outAudio;
-    _this.inAudio = null;
-    _this.startTimeout();
-    return _this;
+    super(requestICEPath, fromUserName, 0, toUserName, 0, goSecond);
+    this.outAudio = outAudio;
+    this.inAudio = null;
+    this.startTimeout();
   }
 
-  createClass(AudioChannel, [{
-    key: "issueRequest",
-    value: function issueRequest() {
-      var _this2 = this;
+  issueRequest() {
+    console.log("going first", this.goFirst);
+    // Adding an audio stream to the peer connection is different between Firefox (which supports the latest
+    //  version of the API) and Chrome.
+    const addStream = () => {
+      this._log(0, "adding stream", this.outAudio, this.rtc.addTrack);
 
-      console.log("going first", this.goFirst);
-      // Adding an audio stream to the peer connection is different between Firefox (which supports the latest
-      //  version of the API) and Chrome.
-      var addStream = function addStream() {
-        _this2._log(0, "adding stream", _this2.outAudio, _this2.rtc.addTrack);
-
-        // Make sure we actually have audio to send to the remote.
-        _this2.outAudio.then(function (aud) {
-          if (_this2.rtc.addTrack) {
-            aud.getAudioTracks().forEach(function (track) {
-              return _this2.rtc.addTrack(track, aud);
-            });
-          } else {
-            _this2.rtc.addStream(aud);
-          }
-
-          if (isIE) {
-            _this2.createOffer().then(_this2.descriptionCreated);
-          }
-        });
-      };
-
-      // Receiving an audio stream from the peer connection is just a
-      var onStream = function onStream(stream) {
-        _this2.inAudio = stream;
-        if (!_this2.goFirst) {
-          _this2._log(0, "Creating the second stream from %s to %s", _this2.fromUserName, _this2.toUserName);
-          _this2.stopTimeout();
-          _this2._log(1, "Restarting timeout.");
-          _this2.startTimeout();
-          addStream();
+      // Make sure we actually have audio to send to the remote.
+      this.outAudio.then((aud) => {
+        if (this.rtc.addTrack) {
+          aud.getAudioTracks()
+            .forEach((track) => this.rtc.addTrack(track, aud));
         }
-      };
+        else {
+          this.rtc.addStream(aud);
+        }
 
-      // Wait to receive an audio track.
-      if ("ontrack" in this.rtc) {
-        this.rtc.ontrack = function (evt) {
-          return onStream(evt.streams[0]);
-        };
-      } else {
-        this.rtc.onaddstream = function (evt) {
-          return onStream(evt.stream);
-        };
-      }
+        if(isIE){
+          this.createOffer()
+            .then(this.descriptionCreated);
+        }
+      });
+    };
 
-      // If we're the boss, tell people about it.
-      if (this.goFirst) {
-        this._log(0, "Creating the first stream from %s to %s", this.fromUserName, this.toUserName);
+    // Receiving an audio stream from the peer connection is just a
+    const onStream = (stream) => {
+      this.inAudio = stream;
+      if (!this.goFirst) {
+        this._log(0, "Creating the second stream from %s to %s", this.fromUserName, this.toUserName);
+        this.stopTimeout();
+        this._log(1, "Restarting timeout.");
+        this.startTimeout();
         addStream();
       }
+    };
+
+    // Wait to receive an audio track.
+    if("ontrack" in this.rtc){
+      this.rtc.ontrack = (evt) => onStream(evt.streams[0]);
+    }
+    else{
+      this.rtc.onaddstream = (evt) => onStream(evt.stream);
     }
 
-    // The peering process is complete when all offers are answered.
-
-  }, {
-    key: "teardown",
-    value: function teardown() {
-      if ("ontrack" in this.rtc) {
-        this.rtc.ontrack = null;
-      } else {
-        this.rtc.onaddstream = null;
-      }
+    // If we're the boss, tell people about it.
+    if (this.goFirst) {
+      this._log(0, "Creating the first stream from %s to %s", this.fromUserName, this.toUserName);
+      addStream();
     }
-  }, {
-    key: "createOffer",
-    value: function createOffer() {
-      return get(AudioChannel.prototype.__proto__ || Object.getPrototypeOf(AudioChannel.prototype), "createOffer", this).call(this).then(preferOpus);
-    }
-  }, {
-    key: "complete",
-    get: function get$$1() {
-      if (this.goFirst) {
-        this._log(1, "[First]: offer created: %s, answer recv: %s -> offer recv: %s -> answer created: %s.", this.progress.offer.created, this.progress.answer.received, this.progress.offer.received, this.progress.answer.created, this.rtc.signalingState);
-      } else {
-        this._log(1, "[Second]: offer recv: %s, answer created: %s -> offer created: %s -> answer recv: %s.", this.progress.offer.received, this.progress.answer.created, this.progress.offer.created, this.progress.answer.received, this.rtc.signalingState);
-      }
-
-      return get(AudioChannel.prototype.__proto__ || Object.getPrototypeOf(AudioChannel.prototype), "complete", this) || this.progress.offer.received && this.progress.offer.created && this.progress.answer.received && this.progress.answer.created;
-    }
-  }]);
-  return AudioChannel;
-}(WebRTCSocket);
-
-var DataChannel = function (_WebRTCSocket) {
-  inherits(DataChannel, _WebRTCSocket);
-
-  function DataChannel(requestICEPath, fromUserName, fromUserIndex, toUserName, toUserIndex, goSecond) {
-    classCallCheck(this, DataChannel);
-
-    var _this = possibleConstructorReturn(this, (DataChannel.__proto__ || Object.getPrototypeOf(DataChannel)).call(this, requestICEPath, fromUserName, fromUserIndex, toUserName, toUserIndex, goSecond));
-
-    _this.dataChannel = null;
-    return _this;
   }
 
-  createClass(DataChannel, [{
-    key: "issueRequest",
-    value: function issueRequest() {
-      var _this2 = this;
+  // The peering process is complete when all offers are answered.
+  get complete() {
+    if (this.goFirst) {
+      this._log(1, "[First]: offer created: %s, answer recv: %s -> offer recv: %s -> answer created: %s.",
+        this.progress.offer.created,
+        this.progress.answer.received,
+        this.progress.offer.received,
+        this.progress.answer.created,
+        this.rtc.signalingState);
+    }
+    else {
+      this._log(1, "[Second]: offer recv: %s, answer created: %s -> offer created: %s -> answer recv: %s.",
+        this.progress.offer.received,
+        this.progress.answer.created,
+        this.progress.offer.created,
+        this.progress.answer.received,
+        this.rtc.signalingState);
+    }
 
-      if (this.goFirst) {
-        this._log(0, "Creating data channel");
-        this.dataChannel = this.rtc.createDataChannel();
-      } else {
-        this.ondatachannel = function (evt) {
-          _this2._log(0, "Receving data channel");
-          _this2.dataChannel = evt.channel;
-        };
-      }
+    return super.complete || (this.progress.offer.received &&
+      this.progress.offer.created &&
+      this.progress.answer.received &&
+      this.progress.answer.created);
+  }
+
+  teardown() {
+    if ("ontrack" in this.rtc) {
+      this.rtc.ontrack = null;
     }
-  }, {
-    key: "teardown",
-    value: function teardown() {
-      this.rtc.ondatachannel = null;
+    else {
+      this.rtc.onaddstream = null;
     }
-  }, {
-    key: "complete",
-    get: function get$$1() {
-      if (this.goFirst) {
-        this._log(1, "[First]: OC %s -> AR %s.", this.progress.offer.created, this.progress.answer.received);
-      } else {
-        this._log(1, "[Second]: OC %s -> AR %s.", this.progress.offer.created, this.progress.answer.received);
-      }
-      return get(DataChannel.prototype.__proto__ || Object.getPrototypeOf(DataChannel.prototype), "complete", this) || this.goFirst && this.progress.offer.created && this.progress.answer.received || !this.goFirst && this.progress.offer.received && this.progress.answer.created;
+  }
+
+  createOffer() {
+    return super.createOffer()
+      .then(preferOpus);
+  }
+}
+
+class DataChannel extends WebRTCSocket {
+  constructor(requestICEPath, fromUserName, fromUserIndex, toUserName, toUserIndex, goSecond) {
+    super(requestICEPath, fromUserName, fromUserIndex, toUserName, toUserIndex, goSecond);
+
+    this.dataChannel = null;
+  }
+
+  issueRequest() {
+    if (this.goFirst) {
+      this._log(0, "Creating data channel");
+      this.dataChannel = this.rtc.createDataChannel();
     }
-  }]);
-  return DataChannel;
-}(WebRTCSocket);
+    else {
+      this.ondatachannel = (evt) => {
+        this._log(0, "Receving data channel");
+        this.dataChannel = evt.channel;
+      };
+    }
+  }
+
+  get complete() {
+    if (this.goFirst) {
+      this._log(1, "[First]: OC %s -> AR %s.",
+        this.progress.offer.created,
+        this.progress.answer.received);
+    }
+    else {
+      this._log(1, "[Second]: OC %s -> AR %s.",
+        this.progress.offer.created,
+        this.progress.answer.received);
+    }
+    return super.complete ||
+      (this.goFirst && this.progress.offer.created && this.progress.answer.received ||
+        !this.goFirst && this.progress.offer.received && this.progress.answer.created);
+  }
+
+  teardown() {
+    this.rtc.ondatachannel = null;
+  }
+}
 
 var Network = {
-  AudioChannel: AudioChannel,
-  DataChannel: DataChannel,
-  Manager: Manager,
-  RemoteUser: RemoteUser,
-  WebRTCSocket: WebRTCSocket
+  AudioChannel,
+  DataChannel,
+  Manager,
+  RemoteUser,
+  WebRTCSocket
 };
 
 function ID() {
-  return (Math.random() * Math.log(Number.MAX_VALUE)).toString(36).replace(".", "");
+  return (Math.random() * Math.log(Number.MAX_VALUE))
+    .toString(36)
+    .replace(".", "");
 }
 
 function item(arr) {
@@ -56585,199 +55459,191 @@ function steps(min, max, steps) {
   return min + int(0, (1 + max - min) / steps) * steps;
 }
 
-function vector(min, max) {
-  return new Vector3().set(number(min, max), number(min, max), number(min, max));
+function vector(min, max){
+  return new Vector3().set(
+    number(min, max),
+    number(min, max),
+    number(min, max)
+  );
 }
 
 var Random = {
-  color: color,
-  ID: ID,
-  int: int,
-  item: item,
-  number: number,
-  steps: steps,
-  vector: vector
+  color,
+  ID,
+  int,
+  item,
+  number,
+  steps,
+  vector
 };
 
-var Watcher = function (_Obj) {
-  inherits(Watcher, _Obj);
+class Watcher extends Obj {
+  constructor(path, root) {
+    super(path, root);
 
-  function Watcher(path, root) {
-    classCallCheck(this, Watcher);
-
-    var _this = possibleConstructorReturn(this, (Watcher.__proto__ || Object.getPrototypeOf(Watcher)).call(this, path, root));
-
-    var lastValue = null;
-    _this.read = function () {
-      var value = _this.get();
-      if (value !== _this.lastValue) {
-        _this.lastValue = value;
-        return new Record(_this.path, value, root);
-      } else {
+    let lastValue = null;
+    this.read = () => {
+      const value = this.get();
+      if (value !== this.lastValue) {
+        this.lastValue = value;
+        return new Record(this.path, value, root);
+      }
+      else {
         return null;
       }
     };
-    return _this;
+  }
+}
+
+class Recorder extends Automator {
+  constructor(watchers, root) {
+    super(root);
+    this.watchers = watchers.map((path) => new Watcher(path, this.root));
   }
 
-  return Watcher;
-}(Obj);
+  update(t) {
+    super.update(t);
+    const records = this.watchers
+      .map((w) => w.read())
+      .filter((r) => r);
 
-var Recorder = function (_Automator) {
-  inherits(Recorder, _Automator);
-
-  function Recorder(watchers, root) {
-    classCallCheck(this, Recorder);
-
-    var _this = possibleConstructorReturn(this, (Recorder.__proto__ || Object.getPrototypeOf(Recorder)).call(this, root));
-
-    _this.watchers = watchers.map(function (path) {
-      return new Watcher(path, _this.root);
-    });
-    return _this;
+    var frame = new Frame(t - this.startT, records);
+    this.frames.push(frame);
+    this.emit("frame", frame);
   }
 
-  createClass(Recorder, [{
-    key: "update",
-    value: function update(t) {
-      get(Recorder.prototype.__proto__ || Object.getPrototypeOf(Recorder.prototype), "update", this).call(this, t);
-      var records = this.watchers.map(function (w) {
-        return w.read();
-      }).filter(function (r) {
-        return r;
-      });
+  toJSON() {
+    const output = {};
 
-      var frame = new Frame(t - this.startT, records);
-      this.frames.push(frame);
-      this.emit("frame", frame);
-    }
-  }, {
-    key: "toJSON",
-    value: function toJSON() {
-      var output = {};
-
-      this.frames.forEach(function (frame) {
-        output[frame.t] = {};
-        for (var i = 0; i < frame.records.length; ++i) {
-          var record = frame.records[i];
-          if (record.value !== null) {
-            var parts = record.path.split("."),
-                key = parts[parts.length - 1];
-            var head = output[frame.t];
-            for (var j = 0; j < parts.length - 1; ++j) {
-              var part = parts[j];
-              if (head[part] === undefined || head[part] === null) {
-                if (/^\d+$/.test(parts[j + 1])) {
-                  head[part] = [];
-                } else {
-                  head[part] = {};
-                }
+    this.frames.forEach((frame) => {
+      output[frame.t] = {};
+      for (var i = 0; i < frame.records.length; ++i) {
+        var record = frame.records[i];
+        if (record.value !== null) {
+          const parts = record.path.split("."),
+            key = parts[parts.length - 1];
+          let head = output[frame.t];
+          for (let j = 0; j < parts.length - 1; ++j) {
+            var part = parts[j];
+            if (head[part] === undefined || head[part] === null) {
+              if (/^\d+$/.test(parts[j + 1])) {
+                head[part] = [];
               }
-              head = head[part];
+              else {
+                head[part] = {};
+              }
             }
-            head[key] = record.value;
+            head = head[part];
           }
+          head[key] = record.value;
         }
-      });
+      }
+    });
 
-      return JSON.stringify(output);
-    }
-  }]);
-  return Recorder;
-}(Automator);
+    return JSON.stringify(output);
+  }
+}
 
 var Replay = {
-  Automator: Automator,
-  Frame: Frame,
-  Obj: Obj,
-  Player: Player,
-  Record: Record,
-  Recorder: Recorder,
-  Watcher: Watcher
+  Automator,
+  Frame,
+  Obj,
+  Player,
+  Record,
+  Recorder,
+  Watcher
 };
 
 var CommandPacks = {
-  BasicTextInput: BasicTextInput,
-  CommandPack: CommandPack,
-  TextEditor: TextEditor,
-  TextInput: TextInput$2
+  BasicTextInput,
+  CommandPack,
+  TextEditor,
+  TextInput: TextInput$1
 };
 
-var eval2 = eval;
+const eval2 = eval;
 
-var Basic = new Grammar("BASIC",
-// Grammar rules are applied in the order they are specified.
-[
-// Text needs at least the newlines token, or else every line will attempt to render as a single line and the line count won't work.
-["newlines", /(?:\r\n|\r|\n)/],
-// BASIC programs used to require the programmer type in her own line numbers. The start at the beginning of the line.
-["lineNumbers", /^\d+\s+/],
-// Comments were lines that started with the keyword "REM" (for REMARK) and ran to the end of the line. They did not have to be numbered, because they were not executable and were stripped out by the interpreter.
-["startLineComments", /^REM\s/],
-// Both double-quoted and single-quoted strings were not always supported, but in this case, I'm just demonstrating how it would be done for both.
-["strings", /"(?:\\"|[^"])*"/], ["strings", /'(?:\\'|[^'])*'/],
-// Numbers are an optional dash, followed by a optional digits, followed by optional period, followed by 1 or more required digits. This allows us to match both integers and decimal numbers, both positive and negative, with or without leading zeroes for decimal numbers between (-1, 1).
-["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/],
-// Keywords are really just a list of different words we want to match, surrounded by the "word boundary" selector "\b".
-["keywords", /\b(?:RESTORE|REPEAT|RETURN|LOAD|LABEL|DATA|READ|THEN|ELSE|FOR|DIM|LET|IF|TO|STEP|NEXT|WHILE|WEND|UNTIL|GOTO|GOSUB|ON|TAB|AT|END|STOP|PRINT|INPUT|RND|INT|CLS|CLK|LEN)\b/],
-// Sometimes things we want to treat as keywords have different meanings in different locations. We can specify rules for tokens more than once.
-["keywords", /^DEF FN/],
-// These are all treated as mathematical operations.
-["operators", /(?:\+|;|,|-|\*\*|\*|\/|>=|<=|=|<>|<|>|OR|AND|NOT|MOD|\(|\)|\[|\])/],
-// Once everything else has been matched, the left over blocks of words are treated as variable and function names.
-["identifiers", /\w+\$?/]]);
+const Basic = new Grammar("BASIC",
+  // Grammar rules are applied in the order they are specified.
+  [
+    // Text needs at least the newlines token, or else every line will attempt to render as a single line and the line count won't work.
+    ["newlines", /(?:\r\n|\r|\n)/],
+    // BASIC programs used to require the programmer type in her own line numbers. The start at the beginning of the line.
+    ["lineNumbers", /^\d+\s+/],
+    // Comments were lines that started with the keyword "REM" (for REMARK) and ran to the end of the line. They did not have to be numbered, because they were not executable and were stripped out by the interpreter.
+    ["startLineComments", /^REM\s/],
+    // Both double-quoted and single-quoted strings were not always supported, but in this case, I'm just demonstrating how it would be done for both.
+    ["strings", /"(?:\\"|[^"])*"/],
+    ["strings", /'(?:\\'|[^'])*'/],
+    // Numbers are an optional dash, followed by a optional digits, followed by optional period, followed by 1 or more required digits. This allows us to match both integers and decimal numbers, both positive and negative, with or without leading zeroes for decimal numbers between (-1, 1).
+    ["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/],
+    // Keywords are really just a list of different words we want to match, surrounded by the "word boundary" selector "\b".
+    ["keywords",
+      /\b(?:RESTORE|REPEAT|RETURN|LOAD|LABEL|DATA|READ|THEN|ELSE|FOR|DIM|LET|IF|TO|STEP|NEXT|WHILE|WEND|UNTIL|GOTO|GOSUB|ON|TAB|AT|END|STOP|PRINT|INPUT|RND|INT|CLS|CLK|LEN)\b/
+    ],
+    // Sometimes things we want to treat as keywords have different meanings in different locations. We can specify rules for tokens more than once.
+    ["keywords", /^DEF FN/],
+    // These are all treated as mathematical operations.
+    ["operators",
+      /(?:\+|;|,|-|\*\*|\*|\/|>=|<=|=|<>|<|>|OR|AND|NOT|MOD|\(|\)|\[|\])/
+    ],
+    // Once everything else has been matched, the left over blocks of words are treated as variable and function names.
+    ["identifiers", /\w+\$?/]
+  ]);
 var oldTokenize = Basic.tokenize;
 Basic.tokenize = function (code) {
   return oldTokenize.call(this, code.toUpperCase());
 };
 
-Basic.interpret = function (sourceCode, input, output, errorOut, next, clearScreen, loadFile, done) {
+Basic.interpret = function (sourceCode, input, output, errorOut, next,
+  clearScreen, loadFile, done) {
   var tokens = this.tokenize(sourceCode),
-      EQUAL_SIGN = new Token("=", "operators"),
-      counter = 0,
-      isDone = false,
-      program = {},
-      lineNumbers = [],
-      currentLine = [],
-      lines = [currentLine],
-      data = [],
-      returnStack = [],
-      forLoopCounters = {},
-      dataCounter = 0,
-      state = {
-    INT: function INT(v) {
-      return v | 0;
-    },
-    RND: function RND() {
-      return Math.random();
-    },
-    CLK: function CLK() {
-      return Date.now() / 3600000;
-    },
-    LEN: function LEN(id) {
-      return id.length;
-    },
-    LINE: function LINE() {
-      return lineNumbers[counter];
-    },
-    TAB: function TAB(v) {
-      var str = "";
-      for (var i = 0; i < v; ++i) {
-        str += " ";
+    EQUAL_SIGN = new Token("=", "operators"),
+    counter = 0,
+    isDone = false,
+    program = {},
+    lineNumbers = [],
+    currentLine = [],
+    lines = [currentLine],
+    data = [],
+    returnStack = [],
+    forLoopCounters = {},
+    dataCounter = 0,
+    state = {
+      INT: function (v) {
+        return v | 0;
+      },
+      RND: function () {
+        return Math.random();
+      },
+      CLK: function () {
+        return Date.now() / 3600000;
+      },
+      LEN: function (id) {
+        return id.length;
+      },
+      LINE: function () {
+        return lineNumbers[counter];
+      },
+      TAB: function (v) {
+        var str = "";
+        for (var i = 0; i < v; ++i) {
+          str += " ";
+        }
+        return str;
+      },
+      POW: function (a, b) {
+        return Math.pow(a, b);
       }
-      return str;
-    },
-    POW: function POW(a, b) {
-      return Math.pow(a, b);
-    }
-  };
+    };
 
   function toNum(ln) {
     return new Token(ln.toString(), "numbers");
   }
 
   function toStr(str) {
-    return new Token("\"" + str.replace("\n", "\\n").replace("\"", "\\\"") + "\"", "strings");
+    return new Token("\"" + str.replace("\n", "\\n")
+      .replace("\"", "\\\"") + "\"", "strings");
   }
 
   var tokenMap = {
@@ -56793,7 +55659,8 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next, clearScre
     if (token.type === "newlines") {
       currentLine = [];
       lines.push(currentLine);
-    } else if (token.type !== "regular" && token.type !== "comments") {
+    }
+    else if (token.type !== "regular" && token.type !== "comments") {
       token.value = tokenMap[token.value] || token.value;
       currentLine.push(token);
     }
@@ -56817,13 +55684,16 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next, clearScre
 
       lineNumber = parseFloat(lineNumber.value);
       if (lastLine && lineNumber <= lastLine) {
-        throw new Error("expected line number greater than " + lastLine + ", but received " + lineNumber + ".");
-      } else if (line.length > 0) {
+        throw new Error("expected line number greater than " + lastLine +
+          ", but received " + lineNumber + ".");
+      }
+      else if (line.length > 0) {
         lineNumbers.push(lineNumber);
         program[lineNumber] = line;
       }
     }
   }
+
 
   function process(line) {
     if (line && line.length > 0) {
@@ -56831,12 +55701,17 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next, clearScre
       if (op) {
         if (commands.hasOwnProperty(op.value)) {
           return commands[op.value](line);
-        } else if (!isNaN(op.value)) {
+        }
+        else if (!isNaN(op.value)) {
           return setProgramCounter([op]);
-        } else if (state[op.value] || line.length > 0 && line[0].type === "operators" && line[0].value === "=") {
+        }
+        else if (state[op.value] ||
+          (line.length > 0 && line[0].type === "operators" &&
+            line[0].value === "=")) {
           line.unshift(op);
           return translate(line);
-        } else {
+        }
+        else {
           error("Unknown command. >>> " + op.value);
         }
       }
@@ -56859,7 +55734,10 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next, clearScre
     for (var i = 0; i < line.length; ++i) {
       var t = line[i];
       var nest = 0;
-      if (t.type === "identifiers" && typeof state[t.value] !== "function" && i < line.length - 1 && line[i + 1].value === "(") {
+      if (t.type === "identifiers" &&
+        typeof state[t.value] !== "function" &&
+        i < line.length - 1 &&
+        line[i + 1].value === "(") {
         for (var j = i + 1; j < line.length; ++j) {
           var t2 = line[j];
           if (t2.value === "(") {
@@ -56867,12 +55745,14 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next, clearScre
               t2.value = "[";
             }
             ++nest;
-          } else if (t2.value === ")") {
+          }
+          else if (t2.value === ")") {
             --nest;
             if (nest === 0) {
               t2.value = "]";
             }
-          } else if (t2.value === "," && nest === 1) {
+          }
+          else if (t2.value === "," && nest === 1) {
             t2.value = "][";
           }
 
@@ -56886,7 +55766,8 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next, clearScre
     //with ( state ) { // jshint ignore:line
     try {
       return eval2(script); // jshint ignore:line
-    } catch (exp) {
+    }
+    catch (exp) {
       console.error(exp);
       console.debug(line.join(", "));
       console.error(script);
@@ -56897,20 +55778,22 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next, clearScre
 
   function declareVariable(line) {
     var decl = [],
-        decls = [decl],
-        nest = 0,
-        i;
+      decls = [decl],
+      nest = 0,
+      i;
     for (i = 0; i < line.length; ++i) {
       var t = line[i];
       if (t.value === "(") {
         ++nest;
-      } else if (t.value === ")") {
+      }
+      else if (t.value === ")") {
         --nest;
       }
       if (nest === 0 && t.value === ",") {
         decl = [];
         decls.push(decl);
-      } else {
+      }
+      else {
         decl.push(t);
       }
     }
@@ -56919,9 +55802,10 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next, clearScre
       var id = decl.shift();
       if (id.type !== "identifiers") {
         error("Identifier expected: " + id.value);
-      } else {
+      }
+      else {
         var val = null,
-            j;
+          j;
         id = id.value;
         if (decl[0].value === "(" && decl[decl.length - 1].value === ")") {
           var sizes = [];
@@ -56932,12 +55816,14 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next, clearScre
           }
           if (sizes.length === 0) {
             val = [];
-          } else {
+          }
+          else {
             val = new Array(sizes[0]);
             var queue = [val];
             for (j = 1; j < sizes.length; ++j) {
               var size = sizes[j];
-              for (var k = 0, l = queue.length; k < l; ++k) {
+              for (var k = 0,
+                  l = queue.length; k < l; ++k) {
                 var arr = queue.shift();
                 for (var m = 0; m < arr.length; ++m) {
                   arr[m] = new Array(size);
@@ -56965,16 +55851,20 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next, clearScre
           if (nest === 0) {
             t.value = "+ \", \" + ";
           }
-        } else if (t.value === ";") {
+        }
+        else if (t.value === ";") {
           t.value = "+ \" \"";
           if (i < line.length - 1) {
             t.value += " + ";
-          } else {
+          }
+          else {
             endLine = "";
           }
-        } else if (t.value === "(") {
+        }
+        else if (t.value === "(") {
           ++nest;
-        } else if (t.value === ")") {
+        }
+        else if (t.value === ")") {
           --nest;
         }
       }
@@ -56991,7 +55881,8 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next, clearScre
   function setProgramCounter(line) {
     var lineNumber = parseFloat(evaluate(line));
     counter = -1;
-    while (counter < lineNumbers.length - 1 && lineNumbers[counter + 1] < lineNumber) {
+    while (counter < lineNumbers.length - 1 &&
+      lineNumbers[counter + 1] < lineNumber) {
       ++counter;
     }
 
@@ -57000,18 +55891,20 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next, clearScre
 
   function checkConditional(line) {
     var thenIndex = -1,
-        elseIndex = -1,
-        i;
+      elseIndex = -1,
+      i;
     for (i = 0; i < line.length; ++i) {
       if (line[i].type === "keywords" && line[i].value === "THEN") {
         thenIndex = i;
-      } else if (line[i].type === "keywords" && line[i].value === "ELSE") {
+      }
+      else if (line[i].type === "keywords" && line[i].value === "ELSE") {
         elseIndex = i;
       }
     }
     if (thenIndex === -1) {
       error("Expected THEN clause.");
-    } else {
+    }
+    else {
       var condition = line.slice(0, thenIndex);
       for (i = 0; i < condition.length; ++i) {
         var t = condition[i];
@@ -57019,16 +55912,19 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next, clearScre
           t.value = "==";
         }
       }
-      var thenClause, elseClause;
+      var thenClause,
+        elseClause;
       if (elseIndex === -1) {
         thenClause = line.slice(thenIndex + 1);
-      } else {
+      }
+      else {
         thenClause = line.slice(thenIndex + 1, elseIndex);
         elseClause = line.slice(elseIndex + 1);
       }
       if (evaluate(condition)) {
         return process(thenClause);
-      } else if (elseClause) {
+      }
+      else if (elseClause) {
         return process(elseClause);
       }
     }
@@ -57063,7 +55959,8 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next, clearScre
       var valueToken = null;
       if (!isNaN(str)) {
         valueToken = toNum(str);
-      } else {
+      }
+      else {
         valueToken = toStr(str);
       }
       evaluate([toVar, EQUAL_SIGN, valueToken]);
@@ -57076,10 +55973,12 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next, clearScre
 
   function onStatement(line) {
     var idxExpr = [],
-        idx = null,
-        targets = [];
+      idx = null,
+      targets = [];
     try {
-      while (line.length > 0 && (line[0].type !== "keywords" || line[0].value !== "GOTO")) {
+      while (line.length > 0 &&
+        (line[0].type !== "keywords" ||
+          line[0].value !== "GOTO")) {
         idxExpr.push(line.shift());
       }
 
@@ -57088,7 +55987,8 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next, clearScre
 
         for (var i = 0; i < line.length; ++i) {
           var t = line[i];
-          if (t.type !== "operators" || t.value !== ",") {
+          if (t.type !== "operators" ||
+            t.value !== ",") {
             targets.push(t);
           }
         }
@@ -57099,7 +55999,8 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next, clearScre
           return setProgramCounter([targets[idx]]);
         }
       }
-    } catch (exp) {
+    }
+    catch (exp) {
       console.error(exp);
     }
     return true;
@@ -57143,7 +56044,8 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next, clearScre
     var cond = evaluate(line);
     if (!cond) {
       counter = findNext("WEND");
-    } else {
+    }
+    else {
       returnStack.push(toNum(lineNumbers[counter]));
     }
     return true;
@@ -57167,7 +56069,8 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next, clearScre
           varExpr.push(t);
         }
         ++a;
-      } else {
+      }
+      else {
         arrs[a].push(t);
       }
     }
@@ -57186,7 +56089,8 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next, clearScre
     if (!cond) {
       delete forLoopCounters[n];
       counter = findNext("NEXT");
-    } else {
+    }
+    else {
       varExpr.push(toNum(forLoopCounters[n]));
       process(varExpr);
       forLoopCounters[n] += skip;
@@ -57200,7 +56104,8 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next, clearScre
   }
 
   function loadCodeFile(line) {
-    loadFile(evaluate(line)).then(next);
+    loadFile(evaluate(line))
+      .then(next);
     return false;
   }
 
@@ -57236,7 +56141,8 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next, clearScre
   }
 
   function defineFunction(line) {
-    var name = line.shift().value;
+    var name = line.shift()
+      .value;
     var signature = "";
     var body = "";
     var fillSig = true;
@@ -57244,14 +56150,17 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next, clearScre
       var t = line[i];
       if (t.type === "operators" && t.value === "=") {
         fillSig = false;
-      } else if (fillSig) {
+      }
+      else if (fillSig) {
         signature += t.value;
-      } else {
+      }
+      else {
         body += t.value;
       }
     }
     name = "FN" + name;
-    var script = "(function " + name + signature + "{ return " + body + "; })";
+    var script = "(function " + name + signature + "{ return " + body +
+      "; })";
     state[name] = eval2(script); // jshint ignore:line
     return true;
   }
@@ -57302,32 +56211,52 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next, clearScre
   };
 };
 
-var HTML = new Grammar("HTML", [["newlines", /(?:\r\n|\r|\n)/], ["startBlockComments", /(?:<|&lt;)!--/], ["endBlockComments", /--(?:>|&gt;)/], ["stringDelim", /("|')/], ["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/], ["keywords", /(?:<|&lt;)\/?(html|base|head|link|meta|style|title|address|article|aside|footer|header|h1|h2|h3|h4|h5|h6|hgroup|nav|section|dd|div|dl|dt|figcaption|figure|hr|li|main|ol|p|pre|ul|a|abbr|b|bdi|bdo|br|cite|code|data|dfn|em|i|kbd|mark|q|rp|rt|rtc|ruby|s|samp|small|span|strong|sub|sup|time|u|var|wbr|area|audio|img|map|track|video|embed|object|param|source|canvas|noscript|script|del|ins|caption|col|colgroup|table|tbody|td|tfoot|th|thead|tr|button|datalist|fieldset|form|input|label|legend|meter|optgroup|option|output|progress|select|textarea|details|dialog|menu|menuitem|summary|content|element|shadow|template|acronym|applet|basefont|big|blink|center|command|content|dir|font|frame|frameset|isindex|keygen|listing|marquee|multicol|nextid|noembed|plaintext|spacer|strike|tt|xmp)\b/], ["members", /(\w+)=/]]);
+var HTML = new Grammar("HTML", [
+  ["newlines", /(?:\r\n|\r|\n)/],
+  ["startBlockComments", /(?:<|&lt;)!--/],
+  ["endBlockComments", /--(?:>|&gt;)/],
+  ["stringDelim", /("|')/],
+  ["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/],
+  ["keywords",
+    /(?:<|&lt;)\/?(html|base|head|link|meta|style|title|address|article|aside|footer|header|h1|h2|h3|h4|h5|h6|hgroup|nav|section|dd|div|dl|dt|figcaption|figure|hr|li|main|ol|p|pre|ul|a|abbr|b|bdi|bdo|br|cite|code|data|dfn|em|i|kbd|mark|q|rp|rt|rtc|ruby|s|samp|small|span|strong|sub|sup|time|u|var|wbr|area|audio|img|map|track|video|embed|object|param|source|canvas|noscript|script|del|ins|caption|col|colgroup|table|tbody|td|tfoot|th|thead|tr|button|datalist|fieldset|form|input|label|legend|meter|optgroup|option|output|progress|select|textarea|details|dialog|menu|menuitem|summary|content|element|shadow|template|acronym|applet|basefont|big|blink|center|command|content|dir|font|frame|frameset|isindex|keygen|listing|marquee|multicol|nextid|noembed|plaintext|spacer|strike|tt|xmp)\b/
+  ],
+  ["members", /(\w+)=/]
+]);
 
-var TestResults = new Grammar("TestResults", [["newlines", /(?:\r\n|\r|\n)/, true], ["numbers", /(\[)(o+)/, true], ["numbers", /(\d+ succeeded), 0 failed/, true], ["numbers", /^    Successes:/, true], ["functions", /(x+)\]/, true], ["functions", /[1-9]\d* failed/, true], ["functions", /^    Failures:/, true], ["comments", /(\d+ms:)(.*)/, true], ["keywords", /(Test results for )(\w+):/, true], ["strings", /        \w+/, true]]);
+var TestResults = new Grammar("TestResults", [
+  ["newlines", /(?:\r\n|\r|\n)/, true],
+  ["numbers", /(\[)(o+)/, true],
+  ["numbers", /(\d+ succeeded), 0 failed/, true],
+  ["numbers", /^    Successes:/, true],
+  ["functions", /(x+)\]/, true],
+  ["functions", /[1-9]\d* failed/, true],
+  ["functions", /^    Failures:/, true],
+  ["comments", /(\d+ms:)(.*)/, true],
+  ["keywords", /(Test results for )(\w+):/, true],
+  ["strings", /        \w+/, true]
+]);
 
 var Grammars = {
-  Basic: Basic,
-  Grammar: Grammar,
-  HTML: HTML,
-  JavaScript: JavaScript,
-  PlainText: PlainText,
-  TestResults: TestResults
+  Basic,
+  Grammar,
+  HTML,
+  JavaScript,
+  PlainText,
+  TestResults
 };
 
 var OperatingSystems = {
   Linux: Windows,
-  macOS: macOS,
-  OperatingSystem: OperatingSystem,
-  Windows: Windows
+  macOS,
+  OperatingSystem,
+  Windows
 };
 
-var Terminal = function Terminal(inputEditor, outputEditor) {
-  classCallCheck(this, Terminal);
+class Terminal {
+  constructor(inputEditor, outputEditor) {
+    outputEditor = outputEditor || inputEditor;
 
-  outputEditor = outputEditor || inputEditor;
-
-  var inputCallback = null,
+    var inputCallback = null,
       currentProgram = null,
       originalGrammar = null,
       currentEditIndex = 0,
@@ -57337,105 +56266,109 @@ var Terminal = function Terminal(inputEditor, outputEditor) {
       restoreInput = inputEditor === outputEditor,
       self = this;
 
-  this.running = false;
-  this.waitingForInput = false;
+    this.running = false;
+    this.waitingForInput = false;
 
-  function toEnd(editor) {
-    editor.selectionStart = editor.selectionEnd = editor.value.length;
-    editor.scrollIntoView(editor.frontCursor);
-  }
-
-  function done() {
-    if (self.running) {
-      flush();
-      self.running = false;
-      if (restoreInput) {
-        inputEditor.tokenizer = originalGrammar;
-        inputEditor.value = currentProgram;
-      }
-      toEnd(inputEditor);
+    function toEnd(editor) {
+      editor.selectionStart = editor.selectionEnd = editor.value.length;
+      editor.scrollIntoView(editor.frontCursor);
     }
-  }
 
-  function clearScreen() {
-    outputEditor.selectionStart = outputEditor.selectionEnd = 0;
-    outputEditor.value = "";
-    return true;
-  }
-
-  function flush() {
-    if (buffer.length > 0) {
-      var lines = buffer.split("\n");
-      for (var i = 0; i < pageSize && lines.length > 0; ++i) {
-        outputQueue.push(lines.shift());
-      }
-      if (lines.length > 0) {
-        outputQueue.push(" ----- more -----");
-      }
-      buffer = lines.join("\n");
-    }
-  }
-
-  function input(callback) {
-    inputCallback = callback;
-    self.waitingForInput = true;
-    flush();
-  }
-
-  function stdout(str) {
-    buffer += str;
-  }
-
-  this.sendInput = function (evt) {
-    if (buffer.length > 0) {
-      flush();
-    } else {
-      outputEditor.keyDown(evt);
-      var str = outputEditor.value.substring(currentEditIndex);
-      inputCallback(str.trim());
-      inputCallback = null;
-      this.waitingForInput = false;
-    }
-  };
-
-  this.execute = function () {
-    pageSize = 10;
-    originalGrammar = inputEditor.tokenizer;
-    if (originalGrammar && originalGrammar.interpret) {
-      this.running = true;
-      var looper,
-          next = function next() {
-        if (self.running) {
-          setTimeout(looper, 1);
+    function done() {
+      if (self.running) {
+        flush();
+        self.running = false;
+        if (restoreInput) {
+          inputEditor.tokenizer = originalGrammar;
+          inputEditor.value = currentProgram;
         }
-      };
-
-      currentProgram = inputEditor.value;
-      looper = originalGrammar.interpret(currentProgram, input, stdout, stdout, next, clearScreen, this.loadFile.bind(this), done);
-      outputEditor.tokenizer = PlainText;
-      clearScreen();
-      next();
-    }
-  };
-
-  this.loadFile = function (fileName) {
-    return getText(fileName.toLowerCase()).then(function (file) {
-      if (isMacOS) {
-        file = file.replace("CTRL+SHIFT+SPACE", "CMD+OPT+E");
+        toEnd(inputEditor);
       }
-      inputEditor.value = currentProgram = file;
-      return file;
-    });
-  };
-
-  this.update = function () {
-    if (outputQueue.length > 0) {
-      outputEditor.value += outputQueue.shift() + "\n";
-      toEnd(outputEditor);
-      currentEditIndex = outputEditor.selectionStart;
     }
-  };
-};
+
+    function clearScreen() {
+      outputEditor.selectionStart = outputEditor.selectionEnd = 0;
+      outputEditor.value = "";
+      return true;
+    }
+
+    function flush() {
+      if (buffer.length > 0) {
+        var lines = buffer.split("\n");
+        for (var i = 0; i < pageSize && lines.length > 0; ++i) {
+          outputQueue.push(lines.shift());
+        }
+        if (lines.length > 0) {
+          outputQueue.push(" ----- more -----");
+        }
+        buffer = lines.join("\n");
+      }
+    }
+
+    function input(callback) {
+      inputCallback = callback;
+      self.waitingForInput = true;
+      flush();
+    }
+
+    function stdout(str) {
+      buffer += str;
+    }
+
+    this.sendInput = function (evt) {
+      if (buffer.length > 0) {
+        flush();
+      }
+      else {
+        outputEditor.keyDown(evt);
+        var str = outputEditor.value.substring(currentEditIndex);
+        inputCallback(str.trim());
+        inputCallback = null;
+        this.waitingForInput = false;
+      }
+    };
+
+    this.execute = function () {
+      pageSize = 10;
+      originalGrammar = inputEditor.tokenizer;
+      if (originalGrammar && originalGrammar.interpret) {
+        this.running = true;
+        var looper,
+          next = function () {
+            if (self.running) {
+              setTimeout(looper, 1);
+            }
+          };
+
+        currentProgram = inputEditor.value;
+        looper = originalGrammar.interpret(currentProgram, input, stdout,
+          stdout, next, clearScreen, this.loadFile.bind(this), done);
+        outputEditor.tokenizer = PlainText;
+        clearScreen();
+        next();
+      }
+    };
+
+    this.loadFile = function (fileName) {
+      return getText(fileName.toLowerCase())
+        .then(function (file) {
+          if (isMacOS) {
+            file = file.replace("CTRL+SHIFT+SPACE", "CMD+OPT+E");
+          }
+          inputEditor.value = currentProgram = file;
+          return file;
+        });
+    };
+
+    this.update = function () {
+      if (outputQueue.length > 0) {
+        outputEditor.value += outputQueue.shift() + "\n";
+        toEnd(outputEditor);
+        currentEditIndex = outputEditor.selectionStart;
+      }
+    };
+  }
+}
 
 var Dark = {
   name: "Dark",
@@ -57484,51 +56417,51 @@ var Dark = {
 };
 
 var Themes = {
-  Dark: Dark,
-  Default: Default
+  Dark,
+  Default
 };
 
 var Text = {
-  CodePages: CodePages,
-  CommandPacks: CommandPacks,
-  Cursor: Cursor,
-  Grammars: Grammars,
-  OperatingSystems: OperatingSystems,
-  Point: Point,
-  Rectangle: Rectangle,
-  Rule: Rule,
-  Size: Size,
-  Terminal: Terminal,
-  Themes: Themes,
-  Token: Token
+  CodePages,
+  CommandPacks,
+  Cursor,
+  Grammars,
+  OperatingSystems,
+  Point,
+  Rectangle,
+  Rule,
+  Size,
+  Terminal,
+  Themes,
+  Token
 };
 
 var Tools = {
-  Teleporter: Teleporter
+  Teleporter
 };
 
 var index$5 = {
-  Angle: Angle,
+  Angle,
   Audio: Audio$2,
-  BrowserEnvironment: BrowserEnvironment,
-  Constants: Constants,
-  Controls: Controls,
-  Displays: Displays,
-  DOM: DOM,
-  Graphics: Graphics,
-  HTTP: HTTP,
-  Input: Input,
-  Keys: Keys,
-  Network: Network,
-  Pointer: Pointer,
-  Random: Random,
-  Replay: Replay,
-  Text: Text,
-  Tools: Tools
+  BrowserEnvironment,
+  Constants,
+  Controls,
+  Displays,
+  DOM,
+  Graphics,
+  HTTP,
+  Input,
+  Keys,
+  Network,
+  Pointer,
+  Random,
+  Replay,
+  Text,
+  Tools
 };
 
 /*
- * Copyright (C) 2014 - 2016 Sean T. McBeth <sean@notiontheory.com>
+ * Copyright (C) 2014 - 2016 Sean T. McBeth <sean@seanmcbeth.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

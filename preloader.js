@@ -5,60 +5,59 @@
 }(this, (function () { 'use strict';
 
 function get(file, done) {
-  var x = new XMLHttpRequest();
-  x.onload = done && function () {
-    done(x.response);
-  };
+  const x = new XMLHttpRequest();
+  x.onload = done && function(){ done(x.response); };
   x.onprogress = prog && prog.thunk;
   x.open("GET", file);
   x.send();
 }
 
-if (!window.PRIMROSE_TELEMETRY_OPT_OUT) {
+if(!window.PRIMROSE_TELEMETRY_OPT_OUT) {
   get("https://www.primrosevr.com/telemetry");
 }
 
 function findProgressBar() {
-  if (!prog.bar) {
+  if(!prog.bar){
     prog.bar = document.querySelector("progress");
   }
 }
 
-var prog = {
+const prog = {
   bar: null,
   files: {},
   loaded: 0,
   total: 0,
 
-  shrink: function shrink(size) {
+  shrink: (size) => {
     findProgressBar();
-    if (prog.bar) {
+    if(prog.bar) {
       prog.bar.style.height = size;
     }
   },
 
-  hide: function hide() {
+  hide: () => {
     findProgressBar();
-    if (prog.bar) {
+    if(prog.bar) {
       prog.bar.style.display = "none";
     }
   },
 
-  thunk: function thunk(evt) {
-    var file = evt.target.responseURL || evt.target.currentSrc;
-    if (file) {
-      if (!prog.files[file]) {
+  thunk: (evt) => {
+    const file = evt.target.responseURL || evt.target.currentSrc;
+    if(file){
+      if(!prog.files[file]){
         prog.files[file] = {};
       }
-      var f = prog.files[file];
-      if (typeof evt.loaded === "number") {
+      const f = prog.files[file];
+      if(typeof evt.loaded === "number") {
         f.loaded = evt.loaded;
         f.total = evt.total;
-      } else if (evt.srcElement) {
-        var bs = evt.srcElement.buffered;
-        var min = Number.MAX_VALUE,
-            max = Number.MIN_VALUE;
-        for (var i = 0; i < bs.length; ++i) {
+      }
+      else if(evt.srcElement) {
+        const bs = evt.srcElement.buffered;
+        let min = Number.MAX_VALUE,
+          max = Number.MIN_VALUE;
+        for(let i = 0; i < bs.length; ++i){
           min = Math.min(min, bs.start(i));
           max = Math.max(max, bs.end(i));
         }
@@ -67,12 +66,11 @@ var prog = {
       }
     }
 
-    var total = 0,
-        loaded = 0;
-    for (var key in prog.files) {
-      var _f = prog.files[key];
-      loaded += _f.loaded;
-      total += _f.total;
+    let total = 0, loaded = 0;
+    for(var key in prog.files){
+      const f = prog.files[key];
+      loaded += f.loaded;
+      total += f.total;
     }
 
     prog.loaded = loaded;
@@ -80,50 +78,54 @@ var prog = {
 
     findProgressBar();
 
-    if (prog.bar && total) {
+    if(prog.bar && total){
       prog.bar.max = total;
       prog.bar.value = loaded;
     }
   }
 };
-var curScripts = document.querySelectorAll("script");
-var curScript = curScripts[curScripts.length - 1];
-var scripts = [];
+const curScripts = document.querySelectorAll("script");
+const curScript = curScripts[curScripts.length - 1];
+const scripts = [];
 
 function installScripts() {
-  if (!document.body) {
+  if(!document.body){
     setTimeout(installScripts, 0);
-  } else if (window.DEBUG) {
-    if (scripts.length > 0) {
-      var file = scripts.shift(),
-          s = document.createElement("script");
+  }
+  else if(window.DEBUG) {
+    if(scripts.length > 0) {
+      const file = scripts.shift(),
+        s = document.createElement("script");
       s.src = file;
       s.onload = installScripts;
       document.body.appendChild(s);
     }
-  } else {
-    var _s = document.createElement("script");
-    _s.innerHTML = scripts.join("\n");
-    document.body.appendChild(_s);
+  }
+  else{
+    const s = document.createElement("script");
+    s.innerHTML = scripts.join("\n");
+    document.body.appendChild(s);
   }
 }
 
-var loaded = 0;
+let loaded = 0;
 function getNextScript(file, i, arr) {
-  get(file, function (contents) {
-    if (window.DEBUG) {
+  get(file, (contents) => {
+    if(window.DEBUG) {
       scripts[i] = file;
-    } else {
+    }
+    else{
       scripts[i] = contents;
     }
     ++loaded;
-    if (loaded === arr.length) {
+    if(loaded === arr.length) {
       installScripts();
     }
   });
 }
 
-if (curScript && curScript.dataset.files) {
+
+if(curScript && curScript.dataset.files) {
   curScript.dataset.files.split(",").forEach(getNextScript);
 }
 
