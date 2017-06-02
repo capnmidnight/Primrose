@@ -119,14 +119,20 @@ function scroller(id) {
           for (var i = 0; i < collection.length; ++i) {
             var obj = collection[i];
             group.items.push(obj);
-            docoCache["#" + obj.id.trim()] = {
-              obj: obj,
-              doc: pliny.formats.html.format(obj) + "<a href=\"javascript:scroller('top')\">top</a>"
-            };
-            // This is called "trampolining", and is basically a way of performing
-            // recursion in languages that do not support automatic tail recursion.
-            // Which is ECMAScript 5. Supposedly it's coming in ECMAScript 6. Whatever.
-            stack.push(obj);
+            try{
+              docoCache["#" + obj.id.trim()] = {
+                obj: obj,
+                doc: pliny.formatters.html.format(obj) + "<a href=\"javascript:scroller('top')\">top</a>"
+              };
+              // This is called "trampolining", and is basically a way of performing
+              // recursion in languages that do not support automatic tail recursion.
+              // Which is ECMAScript 5. Supposedly it's coming in ECMAScript 6. Whatever.
+              stack.push(obj);
+            }
+            catch(exp) {
+              console.error(exp);
+              console.log(obj.id, obj);
+            }
           }
         }
       }
@@ -234,7 +240,7 @@ var GRAMMAR_TEST = /^grammar\("(\w+)"\);\r?\n/,
         },
         "#Global": {
           obj: pliny.database,
-          doc: pliny.formats.html.format(pliny.database)
+          doc: pliny.formatters.html.format(pliny.database)
         }
       };
       renderDocs();
