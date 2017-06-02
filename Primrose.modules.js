@@ -1,4 +1,4 @@
-console.info("[Primrose]:> primrose v0.31.11. see https://www.primrosevr.com for more information.");
+console.info("[Primrose]:> primrose v0.31.12. see https://www.primrosevr.com for more information.");
 
 var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
 
