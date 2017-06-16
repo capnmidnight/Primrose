@@ -4,51 +4,39 @@
 	(global.Preloader = factory());
 }(this, (function () { 'use strict';
 
-function get(file, done) {
-  const x = new XMLHttpRequest();
-  x.onload = done && function(){ done(x.response); };
-  x.onprogress = prog && prog.thunk;
-  x.open("GET", file);
-  x.send();
-}
-
-if(!window.PRIMROSE_TELEMETRY_OPT_OUT) {
-  get("https://www.primrosevr.com/telemetry");
-}
-
-function findProgressBar() {
-  if(!prog.bar){
-    prog.bar = document.querySelector("progress");
-  }
-}
-
 const prog = {
   bar: null,
   files: {},
   loaded: 0,
   total: 0,
 
-  shrink: (size) => {
-    findProgressBar();
-    if(prog.bar) {
-      prog.bar.style.height = size;
+  findProgressBar() {
+    if(!this.bar){
+      this.bar = document.querySelector("progress");
     }
   },
 
-  hide: () => {
-    findProgressBar();
-    if(prog.bar) {
-      prog.bar.style.display = "none";
+  shrink(size){
+    this.findProgressBar();
+    if(this.bar) {
+      this.bar.style.height = size;
     }
   },
 
-  thunk: (evt) => {
+  hide() {
+    this.findProgressBar();
+    if(this.bar) {
+      this.bar.style.display = "none";
+    }
+  },
+
+  thunk(evt) {
     const file = evt.target.responseURL || evt.target.currentSrc;
     if(file){
-      if(!prog.files[file]){
-        prog.files[file] = {};
+      if(!this.files[file]){
+        this.files[file] = {};
       }
-      const f = prog.files[file];
+      const f = this.files[file];
       if(typeof evt.loaded === "number") {
         f.loaded = evt.loaded;
         f.total = evt.total;
@@ -67,26 +55,38 @@ const prog = {
     }
 
     let total = 0, loaded = 0;
-    for(var key in prog.files){
-      const f = prog.files[key];
+    for(var key in this.files){
+      const f = this.files[key];
       loaded += f.loaded;
       total += f.total;
     }
 
-    prog.loaded = loaded;
-    prog.total = total;
+    this.loaded = loaded;
+    this.total = total;
 
-    findProgressBar();
+    this.findProgressBar();
 
-    if(prog.bar && total){
-      prog.bar.max = total;
-      prog.bar.value = loaded;
+    if(this.bar && total){
+      this.bar.max = total;
+      this.bar.value = loaded;
     }
   }
 };
 const curScripts = document.querySelectorAll("script");
 const curScript = curScripts[curScripts.length - 1];
 const scripts = [];
+
+["findProgressBar", "shrink", "hide", "thunk"].forEach((n) => prog[n] = prog[n].bind(prog));
+
+let loaded = 0;
+
+function get(file, done) {
+  const x = new XMLHttpRequest();
+  x.onload = done && function(){ done(x.response); };
+  x.onprogress = prog && prog.thunk;
+  x.open("GET", file);
+  x.send();
+}
 
 function installScripts() {
   if(!document.body){
@@ -108,7 +108,6 @@ function installScripts() {
   }
 }
 
-let loaded = 0;
 function getNextScript(file, i, arr) {
   get(file, (contents) => {
     if(window.DEBUG) {
@@ -124,6 +123,9 @@ function getNextScript(file, i, arr) {
   });
 }
 
+if(!window.PRIMROSE_TELEMETRY_OPT_OUT) {
+  get("https://www.primrosevr.com/telemetry");
+}
 
 if(curScript && curScript.dataset.files) {
   curScript.dataset.files.split(",").forEach(getNextScript);
