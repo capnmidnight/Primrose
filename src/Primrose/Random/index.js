@@ -5,6 +5,7 @@ pliny.namespace({
 });
 
 import color from "./color";
+import flipCoin from "./flipCoin";
 import ID from "./ID";
 import int from "./int";
 import item from "./item";
@@ -14,6 +15,7 @@ import vector from "./vector";
 
 export {
   color,
+  flipCoin,
   ID,
   int,
   item,
@@ -24,6 +26,7 @@ export {
 
 export default {
   color,
+  flipCoin,
   ID,
   int,
   item,
