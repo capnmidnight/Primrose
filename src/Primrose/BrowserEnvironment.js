@@ -343,6 +343,13 @@ export default class BrowserEnvironment extends EventDispatcher {
 
       iOSOrientationHack();
 
+      for(let i = 0; i < this.scene.children.length; ++i) {
+        const child = this.scene.children[i];
+        if(child.rigidBody && !child.rigidBody.world) {
+          this.physics.addBody(child.rigidBody);
+        }
+      }
+
       dt = Math.min(1, dt * MILLISECONDS_TO_SECONDS);
       if(dt > 0) {
         accumTime += dt;
@@ -1642,6 +1649,11 @@ export default class BrowserEnvironment extends EventDispatcher {
     ];
     this.ready = Promise.all(this._readyParts)
       .then(() => {
+
+        if(this.ground.rigidBody) {
+          this.physics.addBody(this.ground.rigidBody);
+        }
+
         this.renderer.domElement.style.cursor = "none";
         if(this.options.enableShadows && this.sky.sun) {
           this.renderer.shadowMap.enabled = true;

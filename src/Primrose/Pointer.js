@@ -76,7 +76,6 @@ export default class Pointer extends Entity {
     this.showPointer = true;
     this.color = color;
     this.highlight = highlight;
-    this.velocity = new Vector3();
 
     this.mesh = box(LASER_WIDTH / s, LASER_WIDTH / s, LASER_LENGTH * s)
       .colored(this.color, {

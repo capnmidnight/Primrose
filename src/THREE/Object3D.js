@@ -16,18 +16,19 @@ Object3D.prototype.appendChild = function(child) {
 
 Object.defineProperty(Object3D.prototype, "pickable", {
   get: function() {
-    return this._listeners && (
-         (this._listeners.enter && this._listeners.enter.length > 0)
-      || (this._listeners.exit && this._listeners.exit.length > 0)
-      || (this._listeners.select && this._listeners.select.length > 0)
-      || (this._listeners.useraction && this._listeners.useraction.length > 0)
-      || (this._listeners.pointerstart && this._listeners.pointerstart.length > 0)
-      || (this._listeners.pointerend && this._listeners.pointerend.length > 0)
-      || (this._listeners.pointermove && this._listeners.pointermove.length > 0)
-      || (this._listeners.gazestart && this._listeners.gazestart.length > 0)
-      || (this._listeners.gazecancel && this._listeners.gazecancel.length > 0)
-      || (this._listeners.gazemove && this._listeners.gazemove.length > 0)
-      || (this._listeners.gazecomplete && this._listeners.gazecomplete.length > 0));
+    const l = this._listeners;
+    return l && (
+         (l.enter && l.enter.length > 0)
+      || (l.exit && l.exit.length > 0)
+      || (l.select && l.select.length > 0)
+      || (l.useraction && l.useraction.length > 0)
+      || (l.pointerstart && l.pointerstart.length > 0)
+      || (l.pointerend && l.pointerend.length > 0)
+      || (l.pointermove && l.pointermove.length > 0)
+      || (l.gazestart && l.gazestart.length > 0)
+      || (l.gazecancel && l.gazecancel.length > 0)
+      || (l.gazemove && l.gazemove.length > 0)
+      || (l.gazecomplete && l.gazecomplete.length > 0));
   }
 });
 

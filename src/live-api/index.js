@@ -16,6 +16,7 @@ import cylinder from "./cylinder";
 import hub from "./hub";
 import light from "./light";
 import material from "./material";
+import phys from "./phys";
 import quad from "./quad";
 import quat from "./quat";
 import range from "./range";
@@ -41,6 +42,7 @@ export {
   hub,
   light,
   material,
+  phys,
   quad,
   quat,
   range,
@@ -66,6 +68,7 @@ export default {
   hub,
   light,
   material,
+  phys,
   quad,
   quat,
   range,

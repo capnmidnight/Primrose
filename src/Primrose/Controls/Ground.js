@@ -7,6 +7,9 @@ import ModelFactory from "../Graphics/ModelFactory";
 
 import { Raycaster, Vector3, Object3D } from "three";
 
+import CANNON from "cannon";
+
+
 const heightTester = new Raycaster();
 
 heightTester.ray.direction.set(0, -1, 0);
@@ -43,8 +46,7 @@ export default class Ground extends Entity {
     else if(type === "number") {
       this.isInfinite = true;
       this.model = quad(dim, dim)
-        .colored(this.options.texture, this.options)
-        .rot(-Math.PI / 2, 0, 0);
+        .colored(this.options.texture, this.options);
       promise = Promise.resolve();
     }
     else if(type === "string") {
@@ -55,7 +57,7 @@ export default class Ground extends Entity {
         txtRepeatX: dim,
         txtRepeatY: dim,
         anisotropy: 8
-      })).rot(-Math.PI / 2, 0, 0);
+      }));
 
       promise = this.model.ready;
     }
@@ -72,6 +74,15 @@ export default class Ground extends Entity {
           .addTo(this);
 
         this.watch(this.model, Pointer.EVENTS);
+
+        this.rigidBody = new CANNON.Body({ mass: 0 });
+        if(this.isInfinite) {
+          const groundShape = new CANNON.Plane();
+          this.rigidBody.addShape(groundShape);
+          this.rigidBody.quaternion.setFromVectors(
+            CANNON.Vec3.UNIT_Z,
+            CANNON.Vec3.UNIT_Y);
+        }
       }
     });
 

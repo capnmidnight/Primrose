@@ -7,5 +7,6 @@ export * from "./MTLLoader";
 import "./Object3D";
 export * from "./OBJLoader";
 import "./offset";
+import "./phys";
 import "./textured";
 import "./vectorToString";
