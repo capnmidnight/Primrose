@@ -17,11 +17,12 @@ pliny.class({
   }]
 });
 
-var buttonCount = 0;
+import { colored, box } from "../../live-api";
 
 import Button3D from "./Button3D";
-import colored from "../../live-api/colored";
-import box from "../../live-api/box";
+
+let buttonCount = 0;
+
 export default class ButtonFactory {
 
   constructor(templateFile, options) {

@@ -1,5 +1,7 @@
 import { BufferGeometry, Geometry, Mesh } from "three";
-import colored from "../live-api/colored";
+
+import { colored } from "../live-api";
+
 
 BufferGeometry.prototype.colored =
 Geometry.prototype.colored =

@@ -56,7 +56,10 @@ pliny.record({
 });
 
 import { Mesh } from "three";
+
 import material from "./material";
+
+
 export default function colored(geometry, color, options) {
   options = options || {};
   options.color = color;

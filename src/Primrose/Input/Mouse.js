@@ -5,9 +5,11 @@ pliny.class({
   description: "| [under construction]"
 });
 
+import { isChrome } from "../../flags";
+import { PointerLock } from "../../util";
+
 import InputProcessor from "./InputProcessor";
-import isChrome from "../../flags/isChrome";
-import PointerLock from "../../util/PointerLock";
+
 export default class Mouse extends InputProcessor {
   constructor(DOMElement, commands) {
     super("Mouse", commands, ["BUTTONS", "X", "Y", "Z", "W"], "mousedown");

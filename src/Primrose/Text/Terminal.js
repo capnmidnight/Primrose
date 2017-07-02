@@ -4,9 +4,11 @@ pliny.class({
     description: "| [under construction]"
 });
 
+import { isMacOS } from "../../flags";
+
 import getText from "../HTTP/getText";
 import PlainText from "./Grammars/PlainText";
-import isMacOS from "../../flags/isMacOS";
+
 export default class Terminal {
   constructor(inputEditor, outputEditor) {
     outputEditor = outputEditor || inputEditor;

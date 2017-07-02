@@ -20,7 +20,7 @@ pliny.function({
 })
 
 import { CubeTextureLoader, TextureLoader, Texture } from "three";
-import cache from "../../util/cache";
+import { cache } from "../../util";
 
 export default function loadTexture(id, url, progress) {
   var textureLoader = null;

@@ -55,8 +55,11 @@ It should look something like this:\n\
   }]
 });
 
-import cache from "../util/cache";
 import { RingBufferGeometry } from "three";
+
+import { cache } from "../util";
+
+
 export default function ring(rInner, rOuter, sectors, rings, start, end) {
   if(rInner === undefined){
     rInner = 0.5;

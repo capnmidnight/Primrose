@@ -52,8 +52,11 @@ It should look something like this:\n\
   }]
 });
 
-import cache from "../util/cache";
 import { BoxBufferGeometry } from "three";
+
+import { cache } from "../util";
+
+
 export default function box(width, height, length, t, u, v) {
   if (height === undefined) {
     height = width;

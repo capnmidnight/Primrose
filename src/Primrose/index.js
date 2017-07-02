@@ -5,7 +5,6 @@ pliny.namespace({
 This top-level namespace contains classes for manipulating and viewing 3D environments."
 });
 
-import Angle from "./Angle";
 import Audio from "./Audio";
 import BrowserEnvironment from "./BrowserEnvironment";
 import Constants from "./constants";
@@ -24,7 +23,6 @@ import Text from "./Text";
 import Tools from "./Tools";
 
 export {
-  Angle,
   Audio,
   BrowserEnvironment,
   Constants,
@@ -44,7 +42,6 @@ export {
 };
 
 export default {
-  Angle,
   Audio,
   BrowserEnvironment,
   Constants,

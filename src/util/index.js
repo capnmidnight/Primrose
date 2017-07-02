@@ -5,6 +5,7 @@ pliny.namespace({
 When including Primrose as a `script` tag, the Util functions are imported directly onto the window object and is available without qualification."
 });
 
+import Angle from "./Angle";
 import AsyncLockRequest from "./AsyncLockRequest";
 import cache from "./cache";
 import deleteSetting from "./deleteSetting";
@@ -29,6 +30,7 @@ import standardUnlockBehavior from "./standardUnlockBehavior";
 import Workerize from "./Workerize";
 
 export {
+  Angle,
   AsyncLockRequest,
   cache,
   deleteSetting,
@@ -53,6 +55,7 @@ export {
 };
 
 export default {
+  Angle,
   AsyncLockRequest,
   cache,
   deleteSetting,

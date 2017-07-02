@@ -29,6 +29,8 @@ pliny.function({
 });
 
 import randInt from "./int";
+
+
 export default function color() {
   var r = randInt(0, 256),
     g = randInt(0, 256),

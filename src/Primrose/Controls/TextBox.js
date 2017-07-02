@@ -23,12 +23,14 @@ import TextEditor from "../Text/CommandPacks/TextEditor";
 import DefaultTheme from "../Text/Themes/Default";
 import JavaScript from "../Text/Grammars/JavaScript";
 
-import isFirefox from "../../flags/isFirefox";
-import isChrome from "../../flags/isChrome";
-import isIE from "../../flags/isIE";
-import isOpera from "../../flags/isOpera";
-import isSafari from "../../flags/isSafari";
-import isMobile from "../../flags/isMobile";
+import {
+  isFirefox,
+  isChrome,
+  isIE,
+  isOpera,
+  isSafari,
+  isMobile
+} from "../../flags";
 
 var SCROLL_SCALE = isFirefox ? 3 : 100,
   COUNTER = 0,

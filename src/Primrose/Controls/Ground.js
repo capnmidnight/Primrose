@@ -1,4 +1,5 @@
-import quad from "../../live-api/quad";
+import { quad } from "../../live-api";
+
 import Entity from "./Entity";
 import Image from "./Image";
 import Pointer from "../Pointer";

@@ -1,3 +1,5 @@
+import { isiOS, isLandscape } from "../../flags";
+
 export default function calculateElementSize(display) {
   let width = 0,
     height = 0;

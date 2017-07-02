@@ -8,7 +8,8 @@ pliny.class({
 
 import Entity from "./Entity";
 import ModelFactory from "../Graphics/ModelFactory";
-import cache from "../../util/cache";
+
+import { cache } from "../../util";
 
 let COUNTER = 0;
 

@@ -1,5 +1,5 @@
 pliny.class({
-  parent: "Primrose",
+  parent: "Util",
     name: "Angle",
     description: "The Angle class smooths out the jump from 360 to 0 degrees. It\n\
 keeps track of the previous state of angle values and keeps the change between\n\
@@ -35,7 +35,7 @@ For more information, see [Radian - Wikipedia, the free encyclopedia](https://en
 ## Code:\n\
 \n\
   grammar(\"JavaScript\");\n\
-  var a = new Primrose.Angle(356);\n\
+  var a = new Angle(356);\n\
   a.degrees += 5;\n\
   console.log(a.degrees);\n\
 \n\
@@ -43,12 +43,12 @@ For more information, see [Radian - Wikipedia, the free encyclopedia](https://en
 > 361"
     }, {
       name: "Convert degrees to radians",
-      description: "Create an instance of Primrose.Angle, modify the `degrees` property, and read the `radians` property.\n\
+      description: "Create an instance of Angle, modify the `degrees` property, and read the `radians` property.\n\
 \n\
 ## Code:\n\
 \n\
   grammar(\"JavaScript\");\n\
-  var a = new Primrose.Angle(10);\n\
+  var a = new Angle(10);\n\
   a.degrees += 355;\n\
   console.log(a.radians);\n\
 \n\
@@ -56,12 +56,12 @@ For more information, see [Radian - Wikipedia, the free encyclopedia](https://en
 > 0.08726646259971647"
     }, {
       name: "Convert radians to degress",
-      description: "Create an instance of Primrose.Angle, modify the `radians` property, and read the `degrees` property.\n\
+      description: "Create an instance of Angle, modify the `radians` property, and read the `degrees` property.\n\
 \n\
 ## Code:\n\
 \n\
   grammar(\"JavaScript\");\n\
-  var a = new Primrose.Angle(0);\n\
+  var a = new Angle(0);\n\
   a.radians += Math.PI / 2;\n\
   console.log(a.degrees);\n\
 \n\
@@ -94,7 +94,7 @@ export default class Angle {
   set degrees(newValue) {
 
     pliny.property({
-      parent: "Primrose.Angle",
+      parent: "Util.Angle",
       name: "degrees",
       type: "Number",
       description: "Get/set the current value of the angle in degrees."
@@ -125,7 +125,7 @@ export default class Angle {
   set radians(val) {
 
     pliny.property({
-      parent: "Primrose.Angle",
+      parent: "Util.Angle",
       name: "radians",
       type: "Number",
       description: "Get/set the current value of the angle in radians."

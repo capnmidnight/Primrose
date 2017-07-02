@@ -13,9 +13,11 @@ const DEFAULT_POSE = {
   IE_CORRECTION = new Quaternion(1, 0, 0, 0);
 
 import { Vector3, Quaternion, Matrix4 } from "three";
+
+import { isMobile, isIE } from "../../flags";
+
 import InputProcessor from "./InputProcessor";
-import isMobile from "../../flags/isMobile";
-import isIE from "../../flags/isIE";
+
 export default class PoseInputProcessor extends InputProcessor {
   constructor(name, commands, axisNames) {
     super(name, commands, axisNames);

@@ -92,7 +92,10 @@ pliny.record({
 });
 
 import { FrontSide, FlatShading, MeshStandardMaterial, MeshBasicMaterial } from "three";
-import cache from "../util/cache";
+
+import { cache } from "../util";
+
+
 export default function material(textureDescription, options){
   if(options === undefined && typeof textureDescription !== "string") {
     options = textureDescription;

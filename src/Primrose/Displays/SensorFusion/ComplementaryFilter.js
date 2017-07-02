@@ -15,8 +15,8 @@
 
 import SensorSample from "./SensorSample";
 import { Math as _Math, Quaternion, Vector3 } from "three";
-import isTimestampDeltaValid from "../../../util/isTimestampDeltaValid";
-import isiOS from "../../../flags/isiOS";
+import { isTimestampDeltaValid } from "../../../util";
+import { isiOS } from "../../../flags";
 
 const { RAD2DEG } = _Math;
 

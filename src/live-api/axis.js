@@ -31,6 +31,8 @@ The result should appear as:\n\
 
 import hub from "./hub";
 import brick from "./brick";
+
+
 export default function axis(length, width) {
   return hub()
     .add(brick(0xff0000, length, width, width))

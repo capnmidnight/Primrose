@@ -10,10 +10,13 @@ pliny.class({
   }]
 });
 
-let COUNTER = 0;
+import { textured } from "../../live-api";
 
 import BaseTextured from "./BaseTextured";
-import textured from "../../live-api/textured";
+
+
+let COUNTER = 0;
+
 export default class Image extends BaseTextured {
 
   constructor(images, options) {

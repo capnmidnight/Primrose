@@ -5,20 +5,20 @@ pliny.class({
 });
 
 // polyfill
-window.AudioContext = (function(AudioContext) {
-  Object.defineProperties(AudioContext.prototype, {
+window.AudioContext = (function(AC) {
+  Object.defineProperties(AC.prototype, {
     createGain: {
-      value: AudioContext.prototype.createGain || AudioContext.prototype.createGainNode
+      value: AC.prototype.createGain || AC.prototype.createGainNode
     },
     createDelay: {
-      value: AudioContext.prototype.createDelay|| AudioContext.prototype.createDelayNode
+      value: AC.prototype.createDelay|| AC.prototype.createDelayNode
     },
     createScriptProcessor: {
-      value: AudioContext.prototype.createScriptProcessor || AudioContext.prototype.createJavaScriptNode
+      value: AC.prototype.createScriptProcessor || AC.prototype.createJavaScriptNode
     }
   });
 
-  var testContext = new AudioContext(),
+  var testContext = new AC(),
     OscillatorNode = testContext.createOscillator().constructor,
     BufferSourceNode = testContext.createBufferSource().constructor,
     GainNodeGainValue = testContext.createGain().gain.constructor;
@@ -54,7 +54,7 @@ window.AudioContext = (function(AudioContext) {
     }
   });
 
-  return AudioContext;
+  return AC;
 })(window.AudioContext || window.webkitAudioContext);
 
 let VECTOR = new Vector3(),
@@ -62,7 +62,7 @@ let VECTOR = new Vector3(),
   TEMP = new Matrix4();
 
 import { Vector3, Matrix4 } from "three";
-import isiOS from "../../flags/isiOS";
+import { isiOS } from "../../flags";
 import getBuffer from "../HTTP/getBuffer";
 import cascadeElement from "../DOM/cascadeElement"
 export default class Audio3D {

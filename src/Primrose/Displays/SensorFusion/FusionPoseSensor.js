@@ -16,11 +16,8 @@ import ComplementaryFilter from "./ComplementaryFilter";
 import PosePredictor from "./PosePredictor";
 import { Quaternion, Vector3 } from "three";
 import { Math as _Math } from "three";
-import isTimestampDeltaValid from "../../../util/isTimestampDeltaValid";
-import isLandscape from "../../../flags/isLandscape";
-import isiOS from "../../../flags/isiOS";
-import isFirefox from "../../../flags/isFirefox";
-import isMobile from "../../../flags/isMobile";
+import { isTimestampDeltaValid } from "../../../util";
+import { isLandscape, isiOS, isFirefox, isMobile } from "../../../flags";
 
 
 const isFirefoxAndroid = isFirefox && isMobile;

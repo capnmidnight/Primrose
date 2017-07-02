@@ -15,8 +15,8 @@ import enableInlineVideo from "iphone-inline-video";
 import { LinearFilter } from "three";
 
 import BaseTextured from "./BaseTextured";
-import textured from "../../live-api/textured";
-import isiOS from "../../flags/isiOS";
+import { textured } from "../../live-api";
+import { isiOS } from "../../flags";
 
 let COUNTER = 0;
 

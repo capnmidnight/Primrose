@@ -49,6 +49,8 @@ The result should appear as:\n\
 import textured from "./textured";
 import colored from "./colored";
 import box from "./box";
+
+
 export default function brick(txt, width, height, length, options) {
   width = width || 1;
   height = height || 1;

@@ -5,13 +5,11 @@ import StandardMonitorVRDisplay from "./StandardMonitorVRDisplay";
 import VRDisplay from "./VRDisplay";
 import VRFrameData from "./VRFrameData";
 
-import isMobile from "../../flags/isMobile";
-import isGearVR from "../../flags/isGearVR";
-import isiOS from "../../flags/isiOS";
+import { isMobile, isGearVR, isiOS } from "../../flags";
 
-import FullScreen from "../../util/FullScreen";
+import { FullScreen } from "../../util";
 
-import getObject from "../HTTP/getObject";
+import { getObject } from "../HTTP";
 
 const hasNativeWebVR = "getVRDisplays" in navigator,
   allDisplays = [],

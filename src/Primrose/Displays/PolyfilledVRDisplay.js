@@ -16,12 +16,15 @@
 import BaseVRDisplay from "./BaseVRDisplay";
 import frameDataFromPose from "./frameDataFromPose";
 import PolyfilledVRFrameData from "./PolyfilledVRFrameData";
-import isMobile from "../../flags/isMobile";
-import immutable from "../../util/immutable";
-import mutable from "../../util/mutable";
-import FullScreen from "../../util/FullScreen";
-import standardFullScreenBehavior from "../../util/standardFullScreenBehavior";
-import standardExitFullScreenBehavior from "../../util/standardExitFullScreenBehavior";
+import { isMobile } from "../../flags";
+
+import {
+  mutable,
+  immutable,
+  FullScreen,
+  standardFullScreenBehavior,
+  standardExitFullScreenBehavior
+} from "../../util";
 
 const defaultLeftBounds = [0, 0, 0.5, 1],
   defaultRightBounds = [0.5, 0, 0.5, 1];

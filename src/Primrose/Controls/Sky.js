@@ -1,12 +1,9 @@
-import quad from "../../live-api/quad";
-import box from "../../live-api/box";
-import isMobile from "../../flags/isMobile";
+import { box, quad } from "../../live-api";
+import { isMobile } from "../../flags";
 import Entity from "./Entity";
 import Image from "./Image";
 
-import { DirectionalLight } from "three";
-
-import { AmbientLight, BackSide } from "three";
+import { DirectionalLight, AmbientLight, BackSide } from "three";
 
 export default class Sky extends Entity {
 

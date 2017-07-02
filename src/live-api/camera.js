@@ -29,7 +29,9 @@ pliny.record({
 });
 
 import hub from "./hub";
+
 import Video from "../Primrose/Controls/Video";
+
 
 export default function camera(index, options) {
   options = Object.assign({

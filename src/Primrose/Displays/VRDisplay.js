@@ -13,15 +13,19 @@
  * limitations under the License.
  */
 
+import {
+  immutable,
+  mutable,
+  FullScreen,
+  standardFullScreenBehavior,
+  standardExitFullScreenBehavior
+} from "../../util";
+
+import { isMobile } from "../../flags";
+
 import frameDataFromPose from "./frameDataFromPose";
 import VRFrameData from "./VRFrameData";
-import isiOS from "../../flags/isiOS";
-import isMobile from "../../flags/isMobile";
-import immutable from "../../util/immutable";
-import mutable from "../../util/mutable";
-import FullScreen from "../../util/FullScreen";
-import standardFullScreenBehavior from "../../util/standardFullScreenBehavior";
-import standardExitFullScreenBehavior from "../../util/standardExitFullScreenBehavior";
+
 
 const defaultLeftBounds = [0, 0, 0.5, 1],
   defaultRightBounds = [0.5, 0, 0.5, 1];

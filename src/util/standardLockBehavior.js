@@ -1,5 +1,4 @@
-import isMobile from "../flags/isMobile";
-import isiOS from "../flags/isiOS";
+import { isMobile, isiOS } from "../flags";
 import Orientation from "./Orientation";
 import PointerLock from "./PointerLock";
 

@@ -104,10 +104,14 @@ pliny.record({
   }]
 });
 
-import cache from "../util/cache";
-import material from "./material";
 import { Mesh, RepeatWrapping, Texture } from "three";
+
+import { cache } from "../util";
+
+import material from "./material";
+
 import loadTexture from "../Primrose/Graphics/loadTexture";
+
 
 const seenElements = new WeakMap();
 let seenElementCount = 0;

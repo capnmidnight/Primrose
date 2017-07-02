@@ -28,12 +28,11 @@ pliny.record({
 var COUNTER = 0;
 
 import { Texture } from "three";
-import isChrome from "../../flags/isChrome";
+import { isChrome } from "../../flags";
 import BaseTextured from "./BaseTextured";
 import Rectangle from "../Text/Rectangle";
-import textured from "../../live-api/textured";
-import quad from "../../live-api/quad";
-import shell from "../../live-api/shell";
+import { textured,  quad, shell }from "../../live-api";
+
 export default class Surface extends BaseTextured {
 
   constructor(options) {

@@ -196,21 +196,19 @@ pliny.record({
   }]
 });
 
-import isiOS from "../flags/isiOS";
-import isMobile from "../flags/isMobile";
-import isLandscape from "../flags/isLandscape";
+import { isCardboard, isiOS, isLandscape } from "../flags";
 
-import box from "../live-api/box";
-import brick from "../live-api/brick";
-import colored from "../live-api/colored";
-import hub from "../live-api/hub";
-import textured from "../live-api/textured";
-import sphere from "../live-api/sphere";
+import {
+  box,
+  brick,
+  colored,
+  hub,
+  textured,
+  sphere
+} from "../live-api";
 
-import PointerLock from "../util/PointerLock";
-import identity from "../util/identity";
+import { PointerLock, identity, Angle } from "../util";
 
-import Angle from "./Angle";
 import Pointer from "./Pointer";
 import Keys from "./Keys";
 
@@ -316,14 +314,22 @@ export default class BrowserEnvironment extends EventDispatcher {
       }
     };
 
-    let missedFrames = 0,
-      wasLandscape = isLandscape();
-    const update = (dt) => {
-      const nowLandscape = isLandscape();
-      if(isiOS && nowLandscape != wasLandscape) {
-        wasLandscape = nowLandscape;
-        modifyScreen();
+    let wasLandscape = isLandscape();
+    function iOSOrientationHack() {
+      if(isiOS) {
+        const nowLandscape = isLandscape();
+        if(nowLandscape != wasLandscape) {
+          wasLandscape = nowLandscape;
+          window.dispatchEvent(new Event("resize"));
+        }
       }
+    }
+
+    let missedFrames = 0;
+    const update = (dt) => {
+
+      iOSOrientationHack();
+
       dt *= MILLISECONDS_TO_SECONDS;
       if(dt > 0) {
         const fps = Math.max(1, Math.round(1 / dt));
@@ -488,7 +494,7 @@ export default class BrowserEnvironment extends EventDispatcher {
     pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "turns",
-      type: "Primrose.Angle",
+      type: "Util.Angle",
       description: "A slewing angle that loosely follows the user around."
     });
     this.turns = new Angle(0);
@@ -1859,8 +1865,9 @@ export default class BrowserEnvironment extends EventDispatcher {
     };
 
     const buttons = this.displays
-      // We skip the Standard Monitor and Magic Window on iOS because we can't go full screen on those systems.
       .map((display, i) => {
+        // We skip the Standard Monitor and Magic Window on iOS because we can't
+        // go full screen on those systems.
         if(!isiOS || VR.isStereoDisplay(display)) {
           const enterVR = this.goFullScreen.bind(this, i),
             btn = newButton(display.displayName, display.displayName, enterVR),
@@ -1881,7 +1888,7 @@ export default class BrowserEnvironment extends EventDispatcher {
 BrowserEnvironment.DEFAULTS = {
   antialias: true,
   quality: Quality.MAXIMUM,
-  useGaze: isMobile,
+  useGaze: isCardboard,
   useFog: false,
   avatarHeight: 1.65,
   walkSpeed: 2,

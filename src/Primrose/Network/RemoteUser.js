@@ -31,8 +31,10 @@ pliny.class({
 });
 
 import { EventDispatcher } from "three";
+
+import { colored } from "../../live-api";
+
 import randColor from "../Random/color";
-import colored from "../../live-api/colored";
 import Audio3D from "../Audio/Audio3D";
 import { Quaternion, Vector3 } from "three";
 

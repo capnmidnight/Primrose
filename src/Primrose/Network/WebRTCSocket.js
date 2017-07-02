@@ -27,7 +27,7 @@ pliny.class({
 });
 
 import { EventDispatcher } from "three";
-import isIE from "../../flags/isIE";
+import { isIE } from "../../flags";
 
 const PEERING_TIMEOUT_LENGTH = 30000;
 const ENABLE_OPUS_HACK = true;

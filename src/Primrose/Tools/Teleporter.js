@@ -1,6 +1,6 @@
 import { Vector3 } from "three";
 
-import sphere from "../../live-api/sphere"
+import { sphere } from "../../live-api"
 
 const DIFF = new Vector3(),
   MAX_MOVE_DISTANCE = 5,

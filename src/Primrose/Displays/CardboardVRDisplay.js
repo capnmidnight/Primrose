@@ -16,8 +16,6 @@
 import FusionPoseSensor from "./SensorFusion/FusionPoseSensor";
 import VRDisplay from "./VRDisplay";
 import calculateElementSize from "./calculateElementSize";
-import isiOS from "../../flags/isiOS";
-import isLandscape from "../../flags/isLandscape";
 
 let Eye = {
   LEFT: "left",

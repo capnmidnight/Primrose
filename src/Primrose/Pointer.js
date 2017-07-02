@@ -29,14 +29,18 @@ pliny.class({
 
 import { Vector3, Euler, Quaternion, Raycaster, Object3D } from "three";
 
-import identity from "../util/identity";
-import colored from "../live-api/colored";
-import hub from "../live-api/hub";
-import box from "../live-api/box";
-import sphere from "../live-api/sphere";
-import circle from "../live-api/circle";
-import ring from "../live-api/ring";
-import material from "../live-api/material";
+import { identity } from "../util";
+
+import {
+  colored,
+  hub,
+  box,
+  sphere,
+  circle,
+  ring,
+  material
+} from "../live-api";
+
 import Entity from "./Controls/Entity";
 
 const FORWARD = new Vector3(0, 0, -1),

@@ -4,15 +4,17 @@ pliny.class({
   description: "| [under construction]"
 });
 
+import { BackSide } from "three";
+
+import { colored, box } from "../../live-api";
+
+
 const SIZE = 1,
   INSET = 0.8,
   PROPORTION = 10,
   SIZE_SMALL = SIZE / PROPORTION,
   INSET_LARGE = (1 - (1 - INSET) / PROPORTION);
 
-import colored from "../../live-api/colored";
-import box from "../../live-api/box";
-import { BackSide } from "three";
 export default class Progress {
 
   constructor(majorColor, minorColor) {

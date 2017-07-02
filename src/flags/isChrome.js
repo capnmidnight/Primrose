@@ -6,4 +6,6 @@ pliny.value({
 });
 
 import isOpera from "./isOpera";
+
+
 export default !!window.chrome && !isOpera;

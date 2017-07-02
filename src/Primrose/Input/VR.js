@@ -16,20 +16,28 @@ const DEFAULT_POSE = {
   };
 
 import { Matrix4 } from "three";
-import PoseInputProcessor from "./PoseInputProcessor";
-import isChrome from "../../flags/isChrome";
-import isFirefox from "../../flags/isFirefox";
-import isiOS from "../../flags/isiOS";
-import isMobile from "../../flags/isMobile";
-import isGearVR from "../../flags/isGearVR";
-import PointerLock from "../../util/PointerLock";
-import Orientation from "../../util/Orientation";
-import standardFullScreenBehavior from "../../util/standardFullScreenBehavior";
-import standardLockBehavior from "../../util/standardLockBehavior";
+
+import {
+  isCardboard,
+  isChrome,
+  isFirefox,
+  isMobile,
+  isGearVR
+} from "../../flags";
+
+import {
+  PointerLock,
+  Orientation,
+  standardFullScreenBehavior,
+  standardLockBehavior
+} from "../../util";
+
 import installPolyfills from "../Displays/install";
 import StandardMonitorVRDisplay from "../Displays/StandardMonitorVRDisplay";
 import CardboardVRDisplay from "../Displays/CardboardVRDisplay";
 import ViewCameraTransform from "../Displays/ViewCameraTransform";
+
+import PoseInputProcessor from "./PoseInputProcessor";
 
 export default class VR extends PoseInputProcessor {
 
