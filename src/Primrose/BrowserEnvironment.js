@@ -198,14 +198,7 @@ pliny.record({
 
 import { isCardboard, isiOS, isLandscape } from "../flags";
 
-import {
-  box,
-  brick,
-  colored,
-  hub,
-  textured,
-  sphere
-} from "../live-api";
+import { box, hub } from "../live-api";
 
 import { PointerLock, identity, Angle } from "../util";
 
@@ -251,7 +244,25 @@ import Teleporter from "./Tools/Teleporter";
 import { Quality, PIXEL_SCALES } from "./constants";
 
 
-import { EventDispatcher, Object3D, BackSide, PCFSoftShadowMap, FogExp2, Scene, PerspectiveCamera, TextGeometry, Quaternion, Color, Euler, Vector3, Matrix4, WebGLRenderer } from "three";
+import {
+  EventDispatcher,
+  Object3D,
+  BackSide,
+  PCFSoftShadowMap,
+  FogExp2,
+  Scene,
+  PerspectiveCamera,
+  TextGeometry,
+  Quaternion,
+  Color,
+  Euler,
+  Vector3,
+  Matrix4,
+  WebGLRenderer
+} from "three";
+
+import CANNON from "cannon";
+
 
 const MILLISECONDS_TO_SECONDS = 0.001,
   TELEPORT_DISPLACEMENT = new Vector3(),
@@ -325,38 +336,44 @@ export default class BrowserEnvironment extends EventDispatcher {
       }
     }
 
-    let missedFrames = 0;
+    let missedFrames = 0,
+      accumTime = 0;
+
     const update = (dt) => {
 
       iOSOrientationHack();
 
-      dt *= MILLISECONDS_TO_SECONDS;
+      dt = Math.min(1, dt * MILLISECONDS_TO_SECONDS);
       if(dt > 0) {
+        accumTime += dt;
         const fps = Math.max(1, Math.round(1 / dt));
-        dt = 1 / fps;
-        this.deltaTime = Math.min(this.deltaTime, dt);
+        this.deltaTime = Math.min(this.deltaTime, 1 / fps);
 
 
         // if we missed way too many frames in one go, just update once, otherwise we'll end up locking up the system.
-        let numFrames = dt / this.deltaTime;
-        if(numFrames > 1) {
-          missedFrames += numFrames;
-          if(numFrames > 10) {
-            numFrames = 1;
-          }
-        }
-        else if(missedFrames > 0) {
-          missedFrames -= 0.1;
+        let numFrames = accumTime / this.deltaTime;
+        missedFrames += numFrames - 1;
+        if(numFrames > 10) {
+          numFrames = 1;
+          accumTime = this.deltaTime;
         }
 
-        if(missedFrames >= 10) {
-          this.deltaTime = dt;
-          missedFrames = 0;
+
+        if(missedFrames > 0) {
+          if(missedFrames >= 10 && dt < 1) {
+            this.deltaTime = dt;
+            missedFrames = 0;
+          }
+          if(numFrames === 1) {
+            missedFrames -= 0.1;
+          }
         }
 
         updateFade(dt);
 
         for(let frame = 0; frame < numFrames; ++frame) {
+
+          accumTime -= this.deltaTime;
 
           const hadGamepad = this.hasGamepad;
           if(this.gamepadMgr) {
@@ -488,6 +505,8 @@ export default class BrowserEnvironment extends EventDispatcher {
             this.network.update(dt);
           }
         }
+
+        this.physics.step(this.deltaTime, dt);
       }
     };
 
@@ -915,6 +934,17 @@ export default class BrowserEnvironment extends EventDispatcher {
 
     pliny.property({
       parent: "Primrose.BrowserEnvironment",
+      name: "physics",
+      type: "CANNON.World",
+      description: "The physics subsystem."
+    });
+    this.physics = new CANNON.World();
+    this.physics.gravity.set(0, this.options.gravity, 0);
+    this.physics.broadphase = new CANNON.NaiveBroadphase();
+    this.physics.solver.iterations = 10;
+
+    pliny.property({
+      parent: "Primrose.BrowserEnvironment",
       name: "scene",
       type: "THREE.Scene",
       description: "The 3D scene that gets displayed to the user."
@@ -979,12 +1009,12 @@ export default class BrowserEnvironment extends EventDispatcher {
       this.scene.traverse((obj) => {
         if (this.options.disableDefaultLighting && obj.material) {
           if(obj.material.map){
-            textured(obj, obj.material.map, {
+            obj.textured(obj.material.map, {
               unshaded: true
             });
           }
           else{
-            colored(obj, obj.material.color.getHex(), {
+            obj.colored(obj.material.color.getHex(), {
               unshaded: true
             });
           }
@@ -1347,9 +1377,10 @@ export default class BrowserEnvironment extends EventDispatcher {
                 color = 0x0000ff << shift,
                 highlight = 0xff0000 >> shift,
                 ptr = new Pointer(padID + "Pointer", color, 1, highlight, [mgr], null, this.options);
-              ptr.add(colored(box(0.1, 0.025, 0.2), color, {
-                emissive: highlight
-              }));
+
+              box(0.1, 0.025, 0.2)
+                .colored(color, { emissive: highlight })
+                .addTo(ptr);
 
               ptr.route(Pointer.EVENTS, this.consumeEvent.bind(this));
 
@@ -1444,15 +1475,14 @@ export default class BrowserEnvironment extends EventDispatcher {
         }, false);
       }));
 
-      this.fader = colored(box(1, 1, 1), this.options.backgroundColor, {
+      this.fader = box(1, 1, 1).colored(this.options.backgroundColor, {
         opacity: 0,
         useFog: false,
         transparent: true,
         unshaded: true,
         side: BackSide
-      });
+      }).addTo(this.head);
       this.fader.visible = false;
-      this.head.add(this.fader);
 
       pliny.event({
         parent: "Primrose.BrowserEnvironment",
@@ -1612,7 +1642,7 @@ export default class BrowserEnvironment extends EventDispatcher {
     ];
     this.ready = Promise.all(this._readyParts)
       .then(() => {
-        this.renderer.domElement.style.cursor = "default";
+        this.renderer.domElement.style.cursor = "none";
         if(this.options.enableShadows && this.sky.sun) {
           this.renderer.shadowMap.enabled = true;
           this.renderer.shadowMap.type = PCFSoftShadowMap;
@@ -1907,7 +1937,7 @@ BrowserEnvironment.DEFAULTS = {
   // The rate at which the UI shell catches up with the user's movement.
   vicinityFollowRate: 0.02,
   // The acceleration applied to falling objects.
-  gravity: 9.8,
+  gravity: -9.8,
   // The amount of time in seconds to require gazes on objects before triggering the gaze event.
   gazeLength: 1.5,
   // By default, the rendering will be paused when the browser window loses focus.

@@ -1,5 +1,4 @@
-var world = new CANNON.World(),
-  env = new Primrose.BrowserEnvironment({
+var env = new Primrose.BrowserEnvironment({
     backgroundColor: 0x000000,
     groundTexture: "../shared_assets/images/deck.png",
     useFog: true,
@@ -51,7 +50,7 @@ function SolidBox(w, h, d) {
     .colored(Primrose.Random.color())
     .on("enter", this.jump.bind(this));
 
-  world.addBody(this.body);
+  env.physics.addBody(this.body);
   env.scene.add(this.mesh);
 }
 
@@ -64,25 +63,21 @@ SolidBox.prototype.update = function() {
   this.mesh.quaternion.copy(this.body.quaternion);
 };
 
-world.gravity.set(0, -9.8, 0);
-world.broadphase = new CANNON.NaiveBroadphase();
-world.solver.iterations = 10;
-
-ground.quaternion.setFromVectors(
-  new CANNON.Vec3(0, 0, -1),
-  new CANNON.Vec3(0, -1, 0));
-
-ground.addShape(groundShape);
-world.addBody(ground);
-
 env.addEventListener("update", function() {
-  world.step(env.deltaTime);
   for(var i = 0; i < boxes.length; ++i){
     boxes[i].update();
   }
 });
 
 env.addEventListener("ready", function() {
+
+  ground.quaternion.setFromVectors(
+    CANNON.Vec3.UNIT_Z,
+    CANNON.Vec3.UNIT_Y);
+
+  ground.addShape(groundShape);
+  env.physics.addBody(ground);
+
   for(var i = 0; i < 50; ++i){
     var a = new SolidBox(Primrose.Random.number(0.1, 0.2));
     boxes.push(a);
