@@ -46,6 +46,7 @@
     "highlighting"
   ],
   "dependencies": {
+    "cannon": "^0.6.2",
     "iphone-inline-video": "^1.9.3",
     "jstransformer-marked": "^1.0.1",
     "lavu-details-polyfill": "^0.1.0",
@@ -55,6 +56,6 @@
   },
   "devDependencies": {
     "gulp": "^3.9.1",
-    "marigold-build": "^1.10.1"
+    "marigold-build": "^1.10.6"
   }
 }
