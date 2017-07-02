@@ -229,8 +229,6 @@ export default class Pointer extends Entity {
         this.gazeInner.position.z = GAZE_RING_DISTANCE;
       }
 
-      this.mesh.position.z = this.gazeInner.position.z - 0.02;
-
       if(moved){
         lastHit.point.copy(curHit.point);
       }
