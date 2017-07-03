@@ -1,7 +1,7 @@
 pliny.class({
   parent: "Primrose.Physics",
   name: "DirectedForceField",
-  description: "A component that causes two objects (the object to which the DirectedForceField is added as a component and one other object) to repel or attract each other with a set force."
+  description: "A component that causes two objects (the object to which the DirectedForceField is added as a component and one other object) to repel or attract each other with a set force.",
   parameters: [
     { name: "bodyStart", type: "THREE.Object3D", description: "An entity that has a rigid body component that we can manipulate for the physics system." },
     { name: "bodyEnd", type: "THREE.Object3D", description: "An entity that has a rigid body component that we can manipulate for the physics system." },

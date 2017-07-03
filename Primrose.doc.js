@@ -7,6 +7,27 @@ When including Primrose as a \`script\` tag, the Flags namespace is imported dir
 
 pliny.value({
   parent: "Flags",
+  name: "isCardboard",
+  type: "Boolean",
+  description: "Flag indicating the current system is a \"mobile\" device, but is not a Samsung Gear VR (or Google Daydream)."
+});
+
+pliny.value({
+  parent: "Flags",
+  name: "isMobile",
+  type: "Boolean",
+  description: "Flag indicating the current system is a recognized \"mobile\" device, usually possessing a motion sensor."
+});
+
+pliny.value({
+  parent: "Flags",
+  name: "isGearVR",
+  type: "Boolean",
+  description: "Flag indicating the application is running on the Samsung Gear VR in the Samsung Internet app."
+});
+
+pliny.value({
+  parent: "Flags",
   name: "isChrome",
   type: "Boolean",
   description: "Flag indicating the browser is currently calling itself Chrome or Chromium."
@@ -24,13 +45,6 @@ pliny.value({
   name: "isFirefox",
   type: "Boolean",
   description: "Flag indicating the browser is currently calling itself Firefox."
-});
-
-pliny.value({
-  parent: "Flags",
-  name: "isGearVR",
-  type: "Boolean",
-  description: "Flag indicating the application is running on the Samsung Gear VR in the Samsung Internet app."
 });
 
 pliny.value({
@@ -66,13 +80,6 @@ pliny.value({
   name: "isMacOS",
   type: "Boolean",
   description: "Flag indicating the current system is a computer running the Apple macOS operating system. Useful for changing keyboard shortcuts to support Apple's idiosyncratic, consensus-defying keyboard shortcuts."
-});
-
-pliny.value({
-  parent: "Flags",
-  name: "isMobile",
-  type: "Boolean",
-  description: "Flag indicating the current system is a recognized \"mobile\" device, usually possessing a motion sensor."
 });
 
 pliny.value({
@@ -303,6 +310,154 @@ pliny.record({
   }]
 });
 
+pliny.namespace({
+  name: "Util",
+  description: "A few different utility functions.\n\
+\n\
+When including Primrose as a `script` tag, the Util functions are imported directly onto the window object and is available without qualification."
+});
+
+pliny.class({
+  parent: "Util",
+    name: "Angle",
+    description: "The Angle class smooths out the jump from 360 to 0 degrees. It\n\
+keeps track of the previous state of angle values and keeps the change between\n\
+angle values to a maximum magnitude of 180 degrees, plus or minus. This allows for\n\
+smoother operation as rotating past 360 degrees will not reset to 0, but continue\n\
+to 361 degrees and beyond, while rotating behind 0 degrees will not reset to 360\n\
+but continue to -1 and below.\n\
+\n\
+When instantiating, choose a value that is as close as you can guess will be your\n\
+initial sensor readings.\n\
+\n\
+This is particularly important for the 180 degrees, +- 10 degrees or so. If you\n\
+expect values to run back and forth over 180 degrees, then initialAngleInDegrees\n\
+should be set to 180. Otherwise, if your initial value is anything slightly larger\n\
+than 180, the correction will rotate the angle into negative degrees, e.g.:\n\
+* initialAngleInDegrees = 0\n\
+* first reading = 185\n\
+* updated degrees value = -175\n\
+\n\
+It also automatically performs degree-to-radian and radian-to-degree conversions.\n\
+For more information, see [Radian - Wikipedia, the free encyclopedia](https://en.wikipedia.org/wiki/Radian).\n\
+\n\
+![Radians](https://upload.wikimedia.org/wikipedia/commons/4/4e/Circle_radians.gif)",
+    parameters: [{
+      name: "initialAngleInDegrees",
+      type: "Number",
+      description: "(Required) Specifies the initial context of the angle. Zero is not always the correct value."
+    }],
+    examples: [{
+      name: "Basic usage",
+      description: "To use the Angle class, create an instance of it with `new`, and modify the `degrees` property.\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var a = new Angle(356);\n\
+  a.degrees += 5;\n\
+  console.log(a.degrees);\n\
+\n\
+## Results:\n\
+> 361"
+    }, {
+      name: "Convert degrees to radians",
+      description: "Create an instance of Angle, modify the `degrees` property, and read the `radians` property.\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var a = new Angle(10);\n\
+  a.degrees += 355;\n\
+  console.log(a.radians);\n\
+\n\
+## Results:\n\
+> 0.08726646259971647"
+    }, {
+      name: "Convert radians to degress",
+      description: "Create an instance of Angle, modify the `radians` property, and read the `degrees` property.\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var a = new Angle(0);\n\
+  a.radians += Math.PI / 2;\n\
+  console.log(a.degrees);\n\
+\n\
+## Results:\n\
+> 90"
+    }]
+});
+
+pliny.property({
+      parent: "Util.Angle",
+      name: "degrees",
+      type: "Number",
+      description: "Get/set the current value of the angle in degrees."
+    });
+
+    pliny.property({
+      parent: "Util.Angle",
+      name: "radians",
+      type: "Number",
+      description: "Get/set the current value of the angle in radians."
+    });
+
+    pliny.class({
+  parent: "Util",
+  name: "AsyncLockRequest",
+  description: "Searches a set of properties from a list of potential browser-vendor-prefixed options for a set of related functions that can be used to make certain types of Full Screen and Orientation Locking requests.",
+  parameters: [{
+    name: "name ",
+    type: "String",
+    description: "A friendly name to use in error messages emitted by this locking object."
+  }, {
+    name: "elementOpts",
+    type: "Array",
+    description: "An array of potential element names to search the document object that indicate to which DOM element the lock has been acquired."
+  }, {
+    name: "changeEventOpts",
+    type: "Array",
+    description: "An array of potential event names for the callback when the lock is acquired."
+  }, {
+    name: "errorEventOpts",
+    type: "Array",
+    description: "An array of potential event names for the callback when the lock has failed to be acquired."
+  }, {
+    name: "requestMethodOpts",
+    type: "Array",
+    description: "An array of potential method names for initiating the lock request."
+  }, {
+    name: "exitMethodOpts",
+    type: "Array",
+    description: "An array of potential method names for canceling the lock."
+  }]
+});
+
+pliny.function({
+  parent: "Util",
+  name: "findProperty",
+  description: "Searches an object for a property that might go by different names in different browsers.",
+  parameters: [{
+    name: "elem",
+    type: "Object",
+    description: "The object to search."
+  }, {
+    name: "arr",
+    type: "Array",
+    description: "An array of strings that lists the possible values for the property name."
+  }],
+  returns: "String",
+  examples: [{
+    name: "Find the right name of the full screen element.",
+    description: "    grammar(\"JavaScript\");\n\
+    var elementName = findProperty(document, [\"fullscreenElement\", \"mozFullScreenElement\", \"webkitFullscreenElement\", \"msFullscreenElement\"]);\n\
+    console.assert(!isFirefox || elementName === \"mozFullScreenElement\");\n\
+    console.assert(!isChrome || elementName === \"webkitFullscreenElement\");\n\
+    console.assert(!isIE || elementName === \"msFullscreenElement\");"
+  }]
+});
+
 pliny.function({
   parent: "Util",
   name: "cache",
@@ -338,6 +493,321 @@ pliny.function({
 });
 
 pliny.function({
+  parent: "Util",
+  name: "deleteSetting",
+  parameters: [{
+    name: "settingName",
+    type: "string",
+    description: "The name of the setting to delete."
+  }],
+  description: "Removes an object from localStorage",
+  examples: [{
+    name: "Basic usage",
+    description: "\
+\n\
+    grammar(\"JavaScript\");\n\
+    console.assert(getSetting(\"A\", \"default-A\") === \"default-A\");\n\
+    setSetting(\"A\", \"modified-A\");\n\
+    console.assert(getSetting(\"A\", \"default-A\") === \"modified-A\");\n\
+    deleteSetting(\"A\");\n\
+    console.assert(getSetting(\"A\", \"default-A\") === \"default-A\");"
+  }]
+});
+
+pliny.function({
+  parent: "Util",
+  name: "getSetting",
+  parameters: [{
+    name: "settingName",
+    type: "string",
+    description: "The name of the setting to read."
+  }, {
+    name: "defValue",
+    type: "Object",
+    description: "The default value to return, if the setting is not present in `localStorage`."
+  }],
+  returns: "The Object stored in `localStorage` for the given name, or the default value provided if the setting doesn't exist in `localStorage`.",
+  description: "Retrieves named values out of `localStorage`. The values should\n\
+be valid for passing to `JSON.parse()`. A default value can be specified in the\n\
+function call that should be returned if the value does not exist, or causes an\n\
+error in parsing. Typically, you'd call this function at page-load time after having\n\
+called the [`setSetting()`](#setSetting) function during a previous page session.",
+  examples: [{
+    name: "Basic usage",
+    description: "Assuming a text input element with the id `text1`, the following\n\
+code should persist between reloads whatever the user writes in the text area:\n\
+\n\
+    grammar(\"JavaScript\");\n\
+    var text1 = document.getElementById(\"text1\");\n\
+    document.addEventListener(\"unload\", function(){\n\
+      setSetting(\"text1-value\", text1.value);\n\
+    }, false);\n\
+    document.addEventListener(\"load\", function(){\n\
+      text1.value = getSetting(\"text1-value\", \"My default value!\");\n\
+    }, false);"
+  }]
+});
+
+pliny.function({
+  parent: "Util",
+  name: "identity",
+  description: "The identity function takes a single parameter and returns out again that parameter.",
+  returns: "Any",
+  parameters: [{
+    name: "obj",
+    type: "Any",
+    description: "The value to pass through."
+  }],
+  examples: [{
+    name: "Basic usage",
+    description: "The `identity()` function is useful in certain functional programming scenarios, such as filtering values of an array for falseyness.\n\
+\n\
+    grammar(\"JavaScript\");\n\
+    var arr = [false, 1, 2, null, undefined, 0, 3, 4, \"Hello, world.\"];\n\
+    console.log(arr.filter(identity)); // [1, 2, 3, 4]"
+  }]
+});
+
+pliny.function({
+  parent: "Util",
+  name: "immutable",
+  description: "Define an enumerable property that cannot be modified.",
+  returns: "Property",
+  parameters: [{
+    name: "value",
+    type: "Object",
+    optional: true,
+    description: "The initial value for the property."
+  }]
+});
+
+pliny.function({
+  parent: "Util",
+  name: "isTimestampDeltaValid",
+  returns: "Boolean",
+  description: "Helper method to validate the time steps of sensor timestamps.",
+  parameters: [{
+    name: "timestampDeltaS",
+    type: "Number",
+    description: "The timestamp to check."
+  }]
+});
+pliny.function({
+  parent: "Util",
+  name: "mutable",
+  description: "Define an enumerable property that can be modified, with type optional checking.",
+  returns: "Property",
+  parameters: [{
+    name: "value",
+    type: "Object",
+    optional: true,
+    description: "The initial value for the property."
+  }, {
+    name: "type",
+    type: "string or Function",
+    optional: true,
+
+  }]
+});
+
+pliny.function({
+  parent: "Util",
+  name: "setSetting",
+  parameters: [{
+    name: "settingName",
+    type: "string",
+    description: "The name of the setting to set."
+  }, {
+    name: "val",
+    type: "Object",
+    description: "The value to write. It should be useable as a parameter to `JSON.stringify()`."
+  }],
+  description: "Writes named values to `localStorage`. The values should be valid\n\
+for passing to `JSON.stringify()`. Typically, you'd call this function at page-unload\n\
+time, then call the [`getSetting()`](#getSetting) function during a subsequent page load.",
+  examples: [{
+    name: "Basic usage",
+    description: "Assuming a text input element with the id `text1`, the following\n\
+code should persist between reloads whatever the user writes in the text area:\n\
+\n\
+    grammar(\"JavaScript\");\n\
+    var text1 = document.getElementById(\"text1\");\n\
+    document.addEventListener(\"unload\", function(){\n\
+      setSetting(\"text1-value\", text1.value);\n\
+    }, false);\n\
+    document.addEventListener(\"load\", function(){\n\
+      text1.value = getSetting(\"text1-value\", \"My default value!\");\n\
+    }, false);"
+  }]
+});
+
+pliny.class({
+  parent: "Util",
+  name: "Workerize",
+  description: "Builds a WebWorker thread out of a JavaScript class's source code, and attempts to create a message interface that matches the message-passing interface that the class already uses.\n\
+\n\
+Automatically workerized classes should have methods that take a single array for any parameters and return no values. All return results should come through an Event that the class emits.",
+  parameters: [{
+    name: "func",
+    type: "Function",
+    description: "The class function to workerize"
+  }],
+  examples: [{
+    name: "Create a basic workerized class.",
+    description: "Classes in JavaScript are created by adding new functions to the `prototype` of another function, then instantiating objects from that class with `new`. When creating such a class for automatic workerization, a few restrictions are required:\n\
+* All methods in the class must be on the prototype. Any methods created and assigned in the constructor will not be available to the message passing interface.\n\
+* All interaction with objects of the class must be through these publicly accessible methods. This includes initialization.\n\
+* All methods should take at most a single argument. If you need multiple arguments, pack them into an array.\n\
+* The methods cannot return any values. If a value must be returned to the calling context, it must be done through an event callback.\n\
+* The class must assign handlers to events through an addEventListener method that mirrors the standard interface used in DOM. Workerize will not respect the 3rd `bubbles` parameter that is so often omitted when programming against DOM.\n\
+\n\
+Assuming the following class:\n\
+\n\
+    grammar(\"JavaScript\");\n\
+    function MyClass(){\n\
+      this.listeners = {\n\
+        complete: []\n\
+      };\n\
+      this.objects = [];\n\
+    }\n\
+\n\
+    MyClass.prototype.addEventListener = function(evt, handler){\n\
+      if(this.listeners[evt]){\n\
+        this.listeners[evt].push(handler);\n\
+      }\n\
+    };\n\
+\n\
+    MyClass.prototype.addObject = function(obj){\n\
+      this.objects.push(obj);\n\
+    };\n\
+\n\
+    MyClass.prototype.update = function(dt){\n\
+      // we can make essentially arbitrarily small timeslice updates\n\
+      var SLICE = 0.1;\n\
+      for(var ddt = 0; ddt < dt; ddt += SLICE){\n\
+        for(var i = 0; i < this.objects.length; ++i){\n\
+          var o = this.objects[i];\n\
+          o.x += o.vx * SLICE;\n\
+          o.y += o.vy * SLICE;\n\
+          o.z += o.vz * SLICE;\n\
+        }\n\
+      }\n\
+      // prepare our return state for the UI thread.\n\
+      var returnValue = [];\n\
+      for(var i = 0; i < this.objects.length; ++i){\n\
+        returnValue.push([o.x, o.y, o.z]);\n\
+      }\n\
+      // and emit the event to all of the listeners.\n\
+      for(var i = 0; i < this.listeners.complete.length; ++i){\n\
+        this.listeners.complete[i](returnValue);\n\
+      }\n\
+    };\n\
+\n\
+Then we can create and use an automatically workerized version of it as follows.\n\
+\n\
+    grammar(\"JavaScript\");\n\
+    var phys = new Primrose.Workerize(MyClass);\n\
+    // we keep a local copy of the state so we can perform other operations on it.\n\
+    var objects = [];\n\
+    for(var i = 0; i < 10; ++i){\n\
+      var obj = {\n\
+        // random values between -1 and 1\n\
+        x: 2 * Math.random() - 1,\n\
+        y: 2 * Math.random() - 1,\n\
+        z: 2 * Math.random() - 1,\n\
+        vx: 2 * Math.random() - 1,\n\
+        vy: 2 * Math.random() - 1,\n\
+        vz: 2 * Math.random() - 1\n\
+      };\n\
+      objects.push(obj);\n\
+      phys.addObject(obj);\n\
+    }\n\
+    \n\
+    // this flag lets us keep track of whether or not we know that the worker is in the middle of an expensive operation.\n\
+    phys.ready = true;\n\
+    phys.addEventListener(\"complete\", function(newPositions){\n\
+      // We update the state in the UI thread with the expensively-computed values.\n\
+      for(var i = 0; i < newPositions.length; ++i){\n\
+        objects[i].x = newPositions[i][0];\n\
+        objects[i].y = newPositions[i][1];\n\
+        objects[i].z = newPositions[i][2];\n\
+      }\n\
+      phys.ready = true;\n\
+    });\n\
+    \n\
+    var lt = null;\n\
+    function paint(t){\n\
+      requestAnimationFrame(paint);\n\
+      if(lt === undefined || lt === null){\n\
+        lt = t;\n\
+      } else {\n\
+        var dt = t - lt;\n\
+        if(phys.ready){\n\
+          phys.ready = false;\n\
+          phys.update(dt);\n\
+          lt = t;\n\
+        }\n\
+        for(var i = 0; i < objects.length; ++i){\n\
+          var o = objects[i];\n\
+          // We can even perform a much cheaper position update to smooth over the blips in the expensive update on the worker thread.\n\
+          drawObjectAt(o.x + o.vx * dt, o.y + o.vy * dt, o.z + o.vz * dt);\n\
+        }\n\
+      }\n\
+    }\n\
+    requestAnimationFrame(paint);"
+    }]
+});
+
+pliny.function({
+      parent: "Util.Workerize",
+      name: "createWorker",
+      description: "A static function that loads Plain Ol' JavaScript Functions into a WebWorker.",
+      parameters: [{
+        name: "script",
+        type: "(String|Function)",
+        description: "A String defining a script, or a Function that can be toString()'d to get it's script."
+      }, {
+        name: "stripFunc",
+        type: "Boolean",
+        description: "Set to true if you want the function to strip the surround function block scope from the script."
+      }],
+      returns: "The WebWorker object."
+    });
+
+    pliny.property({
+      parent: "Util.Workerize",
+      name: "worker",
+      type: "WebWorker",
+      description: "The worker thread containing our class."
+    });
+    pliny.property({
+      parent: "Util.Workerize",
+      name: "args",
+      type: "Array",
+      description: "Static allocation of an array to save on memory usage when piping commands to a worker."
+    });
+    pliny.property({
+      parent: "Util.Workerize",
+      name: "&lt;mappings for each method in the original class&gt;",
+      type: "Function",
+      description: "Each mapped function causes a message to be posted to the worker thread with its arguments packed into an array."
+    });
+    pliny.method({
+      parent: "Util.Workerize",
+      name: "methodShim",
+      description: "Posts messages to the worker thread by packing arguments into an array. The worker will receive the array and interpret the first value as the name of the method to invoke and the second value as another array of parameters.",
+      parameters: [{
+        name: "methodName",
+        type: "String",
+        description: "The method inside the worker context that we want to invoke."
+      }, {
+        name: "args",
+        type: "Array",
+        description: "The arguments that we want to pass to the method that we are calling in the worker context."
+      }]
+    });
+
+    pliny.function({
   parent: "Live API",
   name: "material",
   description: "A mechanism for creating and caching Three.js Materials so they don't get duplicated, as duplicate materials can severally slow down the system.\n\
@@ -635,216 +1105,6 @@ pliny.class({
 
 pliny.function({
   parent: "Live API",
-  name: "quad",
-  description: "A shortcut function for the THREE.PlaneBufferGeometry class. Creates a flat rectangle, oriented in the XY plane.",
-  parameters: [{
-    name: "width",
-    type: "Number",
-    description: "The width of the rectangle."
-  }, {
-    name: "height",
-    type: "Number",
-    description: "The height of the rectangle.",
-    optional: true,
-    default: "The value of the `width` parameter."
-  }, {
-    name: "options",
-    type: "Live API.quad.optionsHash",
-    optional: true,
-    description: "Optional settings for creating the quad geometry. See [`Live API.quad.optionsHash`](#LiveAPI_quad_optionsHash) for more information."
-  }],
-  returns: "THREE.PlaneBufferGeometry",
-  examples: [{
-    name: "Basic usage",
-    description: "Three.js separates geometry from materials, so you can create shared materials and geometry that recombine in different ways. To create a simple circle geometry object that you can then add a material to create a mesh:\n\
-  \n\
-    grammar(\"JavaScript\");\n\
-    var mesh = quad(1, 2)\n\
-      .colored(0xff0000)\n\
-      .addTo(scene)\n\
-      .at(-2, 1, -5);\n\
-\n\
-It should look something like this:\n\
-<img src=\"images/quad.jpg\">"
-  }]
-});
-
-pliny.record({
-  parent: "Live API.quad",
-  name: "optionsHash",
-  description: "Optional options to alter how the quad is built.",
-  parameters: [{
-    name: "s",
-    type: "Number",
-    description: "The number of sub-quads in which to divide the quad horizontally.",
-    optional: true,
-    default: 1
-  }, {
-    name: "t",
-    type: "Number",
-    description: "The number of sub-quads in which to divide the quad vertically.",
-    optional: true,
-    default: 1
-  }, {
-    name: "maxU",
-    type: "Number",
-    description: "A scalar value for the texture coordinate U component.",
-    optional: true,
-    default: 1
-  }, {
-    name: "maxV",
-    type: "Number",
-    description: "A scalar value for the texture coordinate V component.",
-    optional: true,
-    default: 1
-  }]
-});
-
-pliny.function({
-  parent: "Primrose.Graphics",
-  name: "fixGeometry",
-  description: "Performs some changes to the geometry's UV coordinates to make them work better.",
-  returns: "THREE.Geometry",
-  parameters: [{
-    name: "geometry",
-    type: "THREE.Geometry",
-    description: "The geometry to fix."
-  }, {
-    name: "options",
-    type: "Primrose.Graphics.fixGeometry.optionsHash",
-    optional: true,
-    description: "Options for changing the UV coordinates. See [`Primrose.Graphics.fixGeometry.optionsHash`](#Primrose_Graphics_fixGeometry_optionsHash) for more information."
-  }]
-});
-
-pliny.record({
-  parent: "Primrose.Graphics.fixGeometry",
-  name: "optionsHash",
-  description: "Options for changing the UV coordinates.",
-  parameters: [{
-    name: "maxU",
-    type: "Number",
-    optional: true,
-    default: 1,
-    description: "The value by which to scale the U component of the texture coordinate."
-  }, {
-    name: "maxV",
-    type: "Number",
-    optional: true,
-    default: 1,
-    description: "The value by which to scale the V component of the texture coordinate."
-  }]
-});
-pliny.function({
-  parent: "Live API",
-  name: "shell",
-  parameters: [{
-    name: "radius",
-    type: "Number",
-    description: "How far the sphere should extend away from a center point."
-  }, {
-    name: "widthSegments",
-    type: "Number",
-    description: "The number of faces wide in which to slice the geometry."
-  }, {
-    name: "heightSegments",
-    type: "Number",
-    description: "The number of faces tall in which to slice the geometry."
-  }, {
-    name: "phi",
-    type: "Number",
-    optional: true,
-    description: "The angle in radians around the Y-axis of the sphere.",
-    default: "80 degrees."
-  }, {
-    name: "theta",
-    type: "Number",
-    optional: true,
-    description: "The angle in radians around the Z-axis of the sphere.",
-    default: "48 degrees."
-  }],
-  description: "The shell is basically an inside-out sphere. Say you want a to model\n\
-the sky as a sphere, or the inside of a helmet. You don't care anything about the\n\
-outside of this sphere, only the inside. You would use InsideSphereGeometry in this\n\
-case. It is mostly an alias for [`InsideSphereGeometry`](#LiveAPI_InsideSphereGeometry).",
-  examples: [{
-    name: "Create a sky sphere",
-    description: "To create a sphere that hovers around the user at a\n\
-far distance, showing a sky of some kind, you can use the `shell()` function in\n\
-combination with the [`textured()`](#LiveAPI_textured) function. Assuming you have an image\n\
-file to use as the texture, execute code as such:\n\
-\n\
-    grammar(\"JavaScript\");\n\
-    var sky = textured(\n\
-      shell(\n\
-          // The radius value should be less than your draw distance.\n\
-          1000,\n\
-          // The number of slices defines how smooth the sphere will be in the\n\
-          // horizontal direction. Think of it like lines of longitude.\n\
-          18,\n\
-          // The number of rings defines how smooth the sphere will be in the\n\
-          // vertical direction. Think of it like lines of latitude.\n\
-          9,\n\
-          // The phi angle is the number or radians around the 'belt' of the sphere\n\
-          // to sweep out the geometry. To make a full circle, you'll need 2 * PI\n\
-          // radians.\n\
-          Math.PI * 2,\n\
-          // The theta angle is the number of radians above and below the 'belt'\n\
-          // of the sphere to sweep out the geometry. Since the belt sweeps a full\n\
-          // 360 degrees, theta only needs to sweep a half circle, or PI radians.\n\
-          Math.PI ),\n\
-      // Specify the texture image next.\n\
-      \"skyTexture.jpg\",\n\
-      // Specify that the material should be shadeless, i.e. no shadows. This\n\
-      // works best for skymaps.\n\
-      {unshaded: true} );"
-  }]
-});
-
-pliny.class({
-  parent: "Primrose.Graphics",
-  name: "InsideSphereGeometry",
-  parameters: [{
-    name: "radius",
-    type: "Number",
-    description: "How far the sphere should extend away from a center point."
-  }, {
-    name: "widthSegments",
-    type: "Number",
-    description: "The number of faces wide in which to slice the geometry."
-  }, {
-    name: "heightSegments",
-    type: "Number",
-    description: "The number of faces tall in which to slice the geometry."
-  }, {
-    name: "phiStart",
-    type: "Number",
-    description: "The angle in radians around the Y-axis at which the sphere starts."
-  }, {
-    name: "phiLength",
-    type: "Number",
-    description: "The change of angle in radians around the Y-axis to which the sphere ends."
-  }, {
-    name: "thetaStart",
-    type: "Number",
-    description: "The angle in radians around the Z-axis at which the sphere starts."
-  }, {
-    name: "thetaLength",
-    type: "Number",
-    description: "The change of angle in radians around the Z-axis to which the sphere ends."
-  }],
-  description: "The InsideSphereGeometry is basically an inside-out Sphere. Or\n\
-more accurately, it's a Sphere where the face winding order is reversed, so that\n\
-textures appear on the inside of the sphere, rather than the outside. I know, that's\n\
-not exactly helpful.\n\
-\n\
-Say you want a to model the sky as a sphere, or the inside of a helmet. You don't\n\
-care anything about the outside of this sphere, only the inside. You would use\n\
-InsideSphereGeometry in this case. Or its alias, [`shell()`](#LiveAPI_shell)."
-});
-
-pliny.function({
-  parent: "Live API",
   name: "circle",
   description: "A shortcut function for the THREE.CircleBufferGeometry class. Creates a flat circle, oriented in the XZ plane. `Circle` is a bit of a misnomer. It's actually an N-sided polygon, with the implication being that N must be large to convincingly approximate a true circle.",
   parameters: [{
@@ -1042,6 +1302,114 @@ pliny.function({
 
 pliny.function({
   parent: "Live API",
+  name: "phys",
+  description: "Make a 3D object react to physics updates."
+});
+
+pliny.function({
+  parent: "Live API",
+  name: "quad",
+  description: "A shortcut function for the THREE.PlaneBufferGeometry class. Creates a flat rectangle, oriented in the XY plane.",
+  parameters: [{
+    name: "width",
+    type: "Number",
+    description: "The width of the rectangle."
+  }, {
+    name: "height",
+    type: "Number",
+    description: "The height of the rectangle.",
+    optional: true,
+    default: "The value of the `width` parameter."
+  }, {
+    name: "options",
+    type: "Live API.quad.optionsHash",
+    optional: true,
+    description: "Optional settings for creating the quad geometry. See [`Live API.quad.optionsHash`](#LiveAPI_quad_optionsHash) for more information."
+  }],
+  returns: "THREE.PlaneBufferGeometry",
+  examples: [{
+    name: "Basic usage",
+    description: "Three.js separates geometry from materials, so you can create shared materials and geometry that recombine in different ways. To create a simple circle geometry object that you can then add a material to create a mesh:\n\
+  \n\
+    grammar(\"JavaScript\");\n\
+    var mesh = quad(1, 2)\n\
+      .colored(0xff0000)\n\
+      .addTo(scene)\n\
+      .at(-2, 1, -5);\n\
+\n\
+It should look something like this:\n\
+<img src=\"images/quad.jpg\">"
+  }]
+});
+
+pliny.record({
+  parent: "Live API.quad",
+  name: "optionsHash",
+  description: "Optional options to alter how the quad is built.",
+  parameters: [{
+    name: "s",
+    type: "Number",
+    description: "The number of sub-quads in which to divide the quad horizontally.",
+    optional: true,
+    default: 1
+  }, {
+    name: "t",
+    type: "Number",
+    description: "The number of sub-quads in which to divide the quad vertically.",
+    optional: true,
+    default: 1
+  }, {
+    name: "maxU",
+    type: "Number",
+    description: "A scalar value for the texture coordinate U component.",
+    optional: true,
+    default: 1
+  }, {
+    name: "maxV",
+    type: "Number",
+    description: "A scalar value for the texture coordinate V component.",
+    optional: true,
+    default: 1
+  }]
+});
+
+pliny.function({
+  parent: "Primrose.Graphics",
+  name: "fixGeometry",
+  description: "Performs some changes to the geometry's UV coordinates to make them work better.",
+  returns: "THREE.Geometry",
+  parameters: [{
+    name: "geometry",
+    type: "THREE.Geometry",
+    description: "The geometry to fix."
+  }, {
+    name: "options",
+    type: "Primrose.Graphics.fixGeometry.optionsHash",
+    optional: true,
+    description: "Options for changing the UV coordinates. See [`Primrose.Graphics.fixGeometry.optionsHash`](#Primrose_Graphics_fixGeometry_optionsHash) for more information."
+  }]
+});
+
+pliny.record({
+  parent: "Primrose.Graphics.fixGeometry",
+  name: "optionsHash",
+  description: "Options for changing the UV coordinates.",
+  parameters: [{
+    name: "maxU",
+    type: "Number",
+    optional: true,
+    default: 1,
+    description: "The value by which to scale the U component of the texture coordinate."
+  }, {
+    name: "maxV",
+    type: "Number",
+    optional: true,
+    default: 1,
+    description: "The value by which to scale the V component of the texture coordinate."
+  }]
+});
+pliny.function({
+  parent: "Live API",
   name: "quat",
   description: "A shorthand for THREE.Quaternion.",
   returns: "THREE.Quaternion",
@@ -1147,23 +1515,9 @@ pliny.function({
 });
 
 pliny.function({
-  parent: "Util",
-  name: "identity",
-  description: "The identity function takes a single parameter and returns out again that parameter.",
-  returns: "Any",
-  parameters: [{
-    name: "obj",
-    type: "Any",
-    description: "The value to pass through."
-  }],
-  examples: [{
-    name: "Basic usage",
-    description: "The `identity()` function is useful in certain functional programming scenarios, such as filtering values of an array for falseyness.\n\
-\n\
-    grammar(\"JavaScript\");\n\
-    var arr = [false, 1, 2, null, undefined, 0, 3, 4, \"Hello, world.\"];\n\
-    console.log(arr.filter(identity)); // [1, 2, 3, 4]"
-  }]
+  parent: "Live API",
+  name: "raycaster",
+  description: "Creates a THREE.Raycaster. This is useful so you don't have to try to figure out how to import any parts of Three.js separately from Primrose. It also makes it possible to use in functional settings."
 });
 
 pliny.function({
@@ -1225,8 +1579,110 @@ It should look something like this:\n\
 
 pliny.function({
   parent: "Live API",
-  name: "raycaster",
-  description: "Creates a THREE.Raycaster. This is useful so you don't have to try to figure out how to import any parts of Three.js separately from Primrose. It also makes it possible to use in functional settings."
+  name: "shell",
+  parameters: [{
+    name: "radius",
+    type: "Number",
+    description: "How far the sphere should extend away from a center point."
+  }, {
+    name: "widthSegments",
+    type: "Number",
+    description: "The number of faces wide in which to slice the geometry."
+  }, {
+    name: "heightSegments",
+    type: "Number",
+    description: "The number of faces tall in which to slice the geometry."
+  }, {
+    name: "phi",
+    type: "Number",
+    optional: true,
+    description: "The angle in radians around the Y-axis of the sphere.",
+    default: "80 degrees."
+  }, {
+    name: "theta",
+    type: "Number",
+    optional: true,
+    description: "The angle in radians around the Z-axis of the sphere.",
+    default: "48 degrees."
+  }],
+  description: "The shell is basically an inside-out sphere. Say you want a to model\n\
+the sky as a sphere, or the inside of a helmet. You don't care anything about the\n\
+outside of this sphere, only the inside. You would use InsideSphereGeometry in this\n\
+case. It is mostly an alias for [`InsideSphereGeometry`](#LiveAPI_InsideSphereGeometry).",
+  examples: [{
+    name: "Create a sky sphere",
+    description: "To create a sphere that hovers around the user at a\n\
+far distance, showing a sky of some kind, you can use the `shell()` function in\n\
+combination with the [`textured()`](#LiveAPI_textured) function. Assuming you have an image\n\
+file to use as the texture, execute code as such:\n\
+\n\
+    grammar(\"JavaScript\");\n\
+    var sky = textured(\n\
+      shell(\n\
+          // The radius value should be less than your draw distance.\n\
+          1000,\n\
+          // The number of slices defines how smooth the sphere will be in the\n\
+          // horizontal direction. Think of it like lines of longitude.\n\
+          18,\n\
+          // The number of rings defines how smooth the sphere will be in the\n\
+          // vertical direction. Think of it like lines of latitude.\n\
+          9,\n\
+          // The phi angle is the number or radians around the 'belt' of the sphere\n\
+          // to sweep out the geometry. To make a full circle, you'll need 2 * PI\n\
+          // radians.\n\
+          Math.PI * 2,\n\
+          // The theta angle is the number of radians above and below the 'belt'\n\
+          // of the sphere to sweep out the geometry. Since the belt sweeps a full\n\
+          // 360 degrees, theta only needs to sweep a half circle, or PI radians.\n\
+          Math.PI ),\n\
+      // Specify the texture image next.\n\
+      \"skyTexture.jpg\",\n\
+      // Specify that the material should be shadeless, i.e. no shadows. This\n\
+      // works best for skymaps.\n\
+      {unshaded: true} );"
+  }]
+});
+
+pliny.class({
+  parent: "Primrose.Graphics",
+  name: "InsideSphereGeometry",
+  parameters: [{
+    name: "radius",
+    type: "Number",
+    description: "How far the sphere should extend away from a center point."
+  }, {
+    name: "widthSegments",
+    type: "Number",
+    description: "The number of faces wide in which to slice the geometry."
+  }, {
+    name: "heightSegments",
+    type: "Number",
+    description: "The number of faces tall in which to slice the geometry."
+  }, {
+    name: "phiStart",
+    type: "Number",
+    description: "The angle in radians around the Y-axis at which the sphere starts."
+  }, {
+    name: "phiLength",
+    type: "Number",
+    description: "The change of angle in radians around the Y-axis to which the sphere ends."
+  }, {
+    name: "thetaStart",
+    type: "Number",
+    description: "The angle in radians around the Z-axis at which the sphere starts."
+  }, {
+    name: "thetaLength",
+    type: "Number",
+    description: "The change of angle in radians around the Z-axis to which the sphere ends."
+  }],
+  description: "The InsideSphereGeometry is basically an inside-out Sphere. Or\n\
+more accurately, it's a Sphere where the face winding order is reversed, so that\n\
+textures appear on the inside of the sphere, rather than the outside. I know, that's\n\
+not exactly helpful.\n\
+\n\
+Say you want a to model the sky as a sphere, or the inside of a helmet. You don't\n\
+care anything about the outside of this sphere, only the inside. You would use\n\
+InsideSphereGeometry in this case. Or its alias, [`shell()`](#LiveAPI_shell)."
 });
 
 pliny.function({
@@ -1268,6 +1724,26 @@ pliny.function({
       0xffff00,\n\
       {unshaded: true} );"
   }]
+});
+
+pliny.function({
+  parent: "Live API",
+  name: "spring",
+  parameters: [{
+    name: "a",
+    type: "Primrose.Controls.Entity",
+    description: "One half of the spring."
+  }, {
+    name: "b",
+    type: "Primrose.Controls.Entity",
+    description: "The other half of the spring."
+  }, {
+    name: "options",
+    type: "Object",
+    optional: true,
+    description: "Options to pass to the `CANNON.Spring` constructor."
+  }],
+  description: "Creates a spring physics constraint between two objects."
 });
 
 pliny.function({
@@ -1357,364 +1833,7 @@ pliny.function({
   }]
 });
 
-pliny.namespace({
-  name: "Util",
-  description: "A few different utility functions.\n\
-\n\
-When including Primrose as a `script` tag, the Util functions are imported directly onto the window object and is available without qualification."
-});
-
-pliny.class({
-  parent: "Util",
-  name: "AsyncLockRequest",
-  description: "Searches a set of properties from a list of potential browser-vendor-prefixed options for a set of related functions that can be used to make certain types of Full Screen and Orientation Locking requests.",
-  parameters: [{
-    name: "name ",
-    type: "String",
-    description: "A friendly name to use in error messages emitted by this locking object."
-  }, {
-    name: "elementOpts",
-    type: "Array",
-    description: "An array of potential element names to search the document object that indicate to which DOM element the lock has been acquired."
-  }, {
-    name: "changeEventOpts",
-    type: "Array",
-    description: "An array of potential event names for the callback when the lock is acquired."
-  }, {
-    name: "errorEventOpts",
-    type: "Array",
-    description: "An array of potential event names for the callback when the lock has failed to be acquired."
-  }, {
-    name: "requestMethodOpts",
-    type: "Array",
-    description: "An array of potential method names for initiating the lock request."
-  }, {
-    name: "exitMethodOpts",
-    type: "Array",
-    description: "An array of potential method names for canceling the lock."
-  }]
-});
-
-pliny.function({
-  parent: "Util",
-  name: "findProperty",
-  description: "Searches an object for a property that might go by different names in different browsers.",
-  parameters: [{
-    name: "elem",
-    type: "Object",
-    description: "The object to search."
-  }, {
-    name: "arr",
-    type: "Array",
-    description: "An array of strings that lists the possible values for the property name."
-  }],
-  returns: "String",
-  examples: [{
-    name: "Find the right name of the full screen element.",
-    description: "    grammar(\"JavaScript\");\n\
-    var elementName = findProperty(document, [\"fullscreenElement\", \"mozFullScreenElement\", \"webkitFullscreenElement\", \"msFullscreenElement\"]);\n\
-    console.assert(!isFirefox || elementName === \"mozFullScreenElement\");\n\
-    console.assert(!isChrome || elementName === \"webkitFullscreenElement\");\n\
-    console.assert(!isIE || elementName === \"msFullscreenElement\");"
-  }]
-});
-
-pliny.function({
-  parent: "Util",
-  name: "deleteSetting",
-  parameters: [{
-    name: "settingName",
-    type: "string",
-    description: "The name of the setting to delete."
-  }],
-  description: "Removes an object from localStorage",
-  examples: [{
-    name: "Basic usage",
-    description: "\
-\n\
-    grammar(\"JavaScript\");\n\
-    console.assert(getSetting(\"A\", \"default-A\") === \"default-A\");\n\
-    setSetting(\"A\", \"modified-A\");\n\
-    console.assert(getSetting(\"A\", \"default-A\") === \"modified-A\");\n\
-    deleteSetting(\"A\");\n\
-    console.assert(getSetting(\"A\", \"default-A\") === \"default-A\");"
-  }]
-});
-
-pliny.function({
-  parent: "Util",
-  name: "getSetting",
-  parameters: [{
-    name: "settingName",
-    type: "string",
-    description: "The name of the setting to read."
-  }, {
-    name: "defValue",
-    type: "Object",
-    description: "The default value to return, if the setting is not present in `localStorage`."
-  }],
-  returns: "The Object stored in `localStorage` for the given name, or the default value provided if the setting doesn't exist in `localStorage`.",
-  description: "Retrieves named values out of `localStorage`. The values should\n\
-be valid for passing to `JSON.parse()`. A default value can be specified in the\n\
-function call that should be returned if the value does not exist, or causes an\n\
-error in parsing. Typically, you'd call this function at page-load time after having\n\
-called the [`setSetting()`](#setSetting) function during a previous page session.",
-  examples: [{
-    name: "Basic usage",
-    description: "Assuming a text input element with the id `text1`, the following\n\
-code should persist between reloads whatever the user writes in the text area:\n\
-\n\
-    grammar(\"JavaScript\");\n\
-    var text1 = document.getElementById(\"text1\");\n\
-    document.addEventListener(\"unload\", function(){\n\
-      setSetting(\"text1-value\", text1.value);\n\
-    }, false);\n\
-    document.addEventListener(\"load\", function(){\n\
-      text1.value = getSetting(\"text1-value\", \"My default value!\");\n\
-    }, false);"
-  }]
-});
-
-pliny.function({
-  parent: "Util",
-  name: "immutable",
-  description: "Define an enumerable property that cannot be modified.",
-  returns: "Property",
-  parameters: [{
-    name: "value",
-    type: "Object",
-    optional: true,
-    description: "The initial value for the property."
-  }]
-});
-
-pliny.function({
-  parent: "Util",
-  name: "isTimestampDeltaValid",
-  returns: "Boolean",
-  description: "Helper method to validate the time steps of sensor timestamps.",
-  parameters: [{
-    name: "timestampDeltaS",
-    type: "Number",
-    description: "The timestamp to check."
-  }]
-});
-pliny.function({
-  parent: "Util",
-  name: "mutable",
-  description: "Define an enumerable property that can be modified, with type optional checking.",
-  returns: "Property",
-  parameters: [{
-    name: "value",
-    type: "Object",
-    optional: true,
-    description: "The initial value for the property."
-  }, {
-    name: "type",
-    type: "string or Function",
-    optional: true,
-
-  }]
-});
-
-pliny.function({
-  parent: "Util",
-  name: "setSetting",
-  parameters: [{
-    name: "settingName",
-    type: "string",
-    description: "The name of the setting to set."
-  }, {
-    name: "val",
-    type: "Object",
-    description: "The value to write. It should be useable as a parameter to `JSON.stringify()`."
-  }],
-  description: "Writes named values to `localStorage`. The values should be valid\n\
-for passing to `JSON.stringify()`. Typically, you'd call this function at page-unload\n\
-time, then call the [`getSetting()`](#getSetting) function during a subsequent page load.",
-  examples: [{
-    name: "Basic usage",
-    description: "Assuming a text input element with the id `text1`, the following\n\
-code should persist between reloads whatever the user writes in the text area:\n\
-\n\
-    grammar(\"JavaScript\");\n\
-    var text1 = document.getElementById(\"text1\");\n\
-    document.addEventListener(\"unload\", function(){\n\
-      setSetting(\"text1-value\", text1.value);\n\
-    }, false);\n\
-    document.addEventListener(\"load\", function(){\n\
-      text1.value = getSetting(\"text1-value\", \"My default value!\");\n\
-    }, false);"
-  }]
-});
-
-pliny.class({
-  parent: "Util",
-  name: "Workerize",
-  description: "Builds a WebWorker thread out of a JavaScript class's source code, and attempts to create a message interface that matches the message-passing interface that the class already uses.\n\
-\n\
-Automatically workerized classes should have methods that take a single array for any parameters and return no values. All return results should come through an Event that the class emits.",
-  parameters: [{
-    name: "func",
-    type: "Function",
-    description: "The class function to workerize"
-  }],
-  examples: [{
-    name: "Create a basic workerized class.",
-    description: "Classes in JavaScript are created by adding new functions to the `prototype` of another function, then instantiating objects from that class with `new`. When creating such a class for automatic workerization, a few restrictions are required:\n\
-* All methods in the class must be on the prototype. Any methods created and assigned in the constructor will not be available to the message passing interface.\n\
-* All interaction with objects of the class must be through these publicly accessible methods. This includes initialization.\n\
-* All methods should take at most a single argument. If you need multiple arguments, pack them into an array.\n\
-* The methods cannot return any values. If a value must be returned to the calling context, it must be done through an event callback.\n\
-* The class must assign handlers to events through an addEventListener method that mirrors the standard interface used in DOM. Workerize will not respect the 3rd `bubbles` parameter that is so often omitted when programming against DOM.\n\
-\n\
-Assuming the following class:\n\
-\n\
-    grammar(\"JavaScript\");\n\
-    function MyClass(){\n\
-      this.listeners = {\n\
-        complete: []\n\
-      };\n\
-      this.objects = [];\n\
-    }\n\
-\n\
-    MyClass.prototype.addEventListener = function(evt, handler){\n\
-      if(this.listeners[evt]){\n\
-        this.listeners[evt].push(handler);\n\
-      }\n\
-    };\n\
-\n\
-    MyClass.prototype.addObject = function(obj){\n\
-      this.objects.push(obj);\n\
-    };\n\
-\n\
-    MyClass.prototype.update = function(dt){\n\
-      // we can make essentially arbitrarily small timeslice updates\n\
-      var SLICE = 0.1;\n\
-      for(var ddt = 0; ddt < dt; ddt += SLICE){\n\
-        for(var i = 0; i < this.objects.length; ++i){\n\
-          var o = this.objects[i];\n\
-          o.x += o.vx * SLICE;\n\
-          o.y += o.vy * SLICE;\n\
-          o.z += o.vz * SLICE;\n\
-        }\n\
-      }\n\
-      // prepare our return state for the UI thread.\n\
-      var returnValue = [];\n\
-      for(var i = 0; i < this.objects.length; ++i){\n\
-        returnValue.push([o.x, o.y, o.z]);\n\
-      }\n\
-      // and emit the event to all of the listeners.\n\
-      for(var i = 0; i < this.listeners.complete.length; ++i){\n\
-        this.listeners.complete[i](returnValue);\n\
-      }\n\
-    };\n\
-\n\
-Then we can create and use an automatically workerized version of it as follows.\n\
-\n\
-    grammar(\"JavaScript\");\n\
-    var phys = new Primrose.Workerize(MyClass);\n\
-    // we keep a local copy of the state so we can perform other operations on it.\n\
-    var objects = [];\n\
-    for(var i = 0; i < 10; ++i){\n\
-      var obj = {\n\
-        // random values between -1 and 1\n\
-        x: 2 * Math.random() - 1,\n\
-        y: 2 * Math.random() - 1,\n\
-        z: 2 * Math.random() - 1,\n\
-        vx: 2 * Math.random() - 1,\n\
-        vy: 2 * Math.random() - 1,\n\
-        vz: 2 * Math.random() - 1\n\
-      };\n\
-      objects.push(obj);\n\
-      phys.addObject(obj);\n\
-    }\n\
-    \n\
-    // this flag lets us keep track of whether or not we know that the worker is in the middle of an expensive operation.\n\
-    phys.ready = true;\n\
-    phys.addEventListener(\"complete\", function(newPositions){\n\
-      // We update the state in the UI thread with the expensively-computed values.\n\
-      for(var i = 0; i < newPositions.length; ++i){\n\
-        objects[i].x = newPositions[i][0];\n\
-        objects[i].y = newPositions[i][1];\n\
-        objects[i].z = newPositions[i][2];\n\
-      }\n\
-      phys.ready = true;\n\
-    });\n\
-    \n\
-    var lt = null;\n\
-    function paint(t){\n\
-      requestAnimationFrame(paint);\n\
-      if(lt === undefined || lt === null){\n\
-        lt = t;\n\
-      } else {\n\
-        var dt = t - lt;\n\
-        if(phys.ready){\n\
-          phys.ready = false;\n\
-          phys.update(dt);\n\
-          lt = t;\n\
-        }\n\
-        for(var i = 0; i < objects.length; ++i){\n\
-          var o = objects[i];\n\
-          // We can even perform a much cheaper position update to smooth over the blips in the expensive update on the worker thread.\n\
-          drawObjectAt(o.x + o.vx * dt, o.y + o.vy * dt, o.z + o.vz * dt);\n\
-        }\n\
-      }\n\
-    }\n\
-    requestAnimationFrame(paint);"
-    }]
-});
-
-pliny.function({
-      parent: "Util.Workerize",
-      name: "createWorker",
-      description: "A static function that loads Plain Ol' JavaScript Functions into a WebWorker.",
-      parameters: [{
-        name: "script",
-        type: "(String|Function)",
-        description: "A String defining a script, or a Function that can be toString()'d to get it's script."
-      }, {
-        name: "stripFunc",
-        type: "Boolean",
-        description: "Set to true if you want the function to strip the surround function block scope from the script."
-      }],
-      returns: "The WebWorker object."
-    });
-
-    pliny.property({
-      parent: "Util.Workerize",
-      name: "worker",
-      type: "WebWorker",
-      description: "The worker thread containing our class."
-    });
-    pliny.property({
-      parent: "Util.Workerize",
-      name: "args",
-      type: "Array",
-      description: "Static allocation of an array to save on memory usage when piping commands to a worker."
-    });
-    pliny.property({
-      parent: "Util.Workerize",
-      name: "&lt;mappings for each method in the original class&gt;",
-      type: "Function",
-      description: "Each mapped function causes a message to be posted to the worker thread with its arguments packed into an array."
-    });
-    pliny.method({
-      parent: "Util.Workerize",
-      name: "methodShim",
-      description: "Posts messages to the worker thread by packing arguments into an array. The worker will receive the array and interpret the first value as the name of the method to invoke and the second value as another array of parameters.",
-      parameters: [{
-        name: "methodName",
-        type: "String",
-        description: "The method inside the worker context that we want to invoke."
-      }, {
-        name: "args",
-        type: "Array",
-        description: "The arguments that we want to pass to the method that we are calling in the worker context."
-      }]
-    });
-
-    pliny.method({
+pliny.method({
   parent: "THREE.Object3D",
   name: "appendChild",
   description: "An alias for `Object3D::add`, to mirror DOM.",
@@ -1731,93 +1850,7 @@ pliny.namespace({
 This top-level namespace contains classes for manipulating and viewing 3D environments."
 });
 
-pliny.class({
-  parent: "Primrose",
-    name: "Angle",
-    description: "The Angle class smooths out the jump from 360 to 0 degrees. It\n\
-keeps track of the previous state of angle values and keeps the change between\n\
-angle values to a maximum magnitude of 180 degrees, plus or minus. This allows for\n\
-smoother operation as rotating past 360 degrees will not reset to 0, but continue\n\
-to 361 degrees and beyond, while rotating behind 0 degrees will not reset to 360\n\
-but continue to -1 and below.\n\
-\n\
-When instantiating, choose a value that is as close as you can guess will be your\n\
-initial sensor readings.\n\
-\n\
-This is particularly important for the 180 degrees, +- 10 degrees or so. If you\n\
-expect values to run back and forth over 180 degrees, then initialAngleInDegrees\n\
-should be set to 180. Otherwise, if your initial value is anything slightly larger\n\
-than 180, the correction will rotate the angle into negative degrees, e.g.:\n\
-* initialAngleInDegrees = 0\n\
-* first reading = 185\n\
-* updated degrees value = -175\n\
-\n\
-It also automatically performs degree-to-radian and radian-to-degree conversions.\n\
-For more information, see [Radian - Wikipedia, the free encyclopedia](https://en.wikipedia.org/wiki/Radian).\n\
-\n\
-![Radians](https://upload.wikimedia.org/wikipedia/commons/4/4e/Circle_radians.gif)",
-    parameters: [{
-      name: "initialAngleInDegrees",
-      type: "Number",
-      description: "(Required) Specifies the initial context of the angle. Zero is not always the correct value."
-    }],
-    examples: [{
-      name: "Basic usage",
-      description: "To use the Angle class, create an instance of it with `new`, and modify the `degrees` property.\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  var a = new Primrose.Angle(356);\n\
-  a.degrees += 5;\n\
-  console.log(a.degrees);\n\
-\n\
-## Results:\n\
-> 361"
-    }, {
-      name: "Convert degrees to radians",
-      description: "Create an instance of Primrose.Angle, modify the `degrees` property, and read the `radians` property.\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  var a = new Primrose.Angle(10);\n\
-  a.degrees += 355;\n\
-  console.log(a.radians);\n\
-\n\
-## Results:\n\
-> 0.08726646259971647"
-    }, {
-      name: "Convert radians to degress",
-      description: "Create an instance of Primrose.Angle, modify the `radians` property, and read the `degrees` property.\n\
-\n\
-## Code:\n\
-\n\
-  grammar(\"JavaScript\");\n\
-  var a = new Primrose.Angle(0);\n\
-  a.radians += Math.PI / 2;\n\
-  console.log(a.degrees);\n\
-\n\
-## Results:\n\
-> 90"
-    }]
-});
-
-pliny.property({
-      parent: "Primrose.Angle",
-      name: "degrees",
-      type: "Number",
-      description: "Get/set the current value of the angle in degrees."
-    });
-
-    pliny.property({
-      parent: "Primrose.Angle",
-      name: "radians",
-      type: "Number",
-      description: "Get/set the current value of the angle in radians."
-    });
-
-    pliny.namespace({
+pliny.namespace({
   parent: "Primrose",
   name: "Audio",
   description: "The audio namespace contains classes that handle output to devices other than the screen (e.g. Audio, Music, etc.)."
@@ -2358,7 +2391,7 @@ pliny.property({
           pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "turns",
-      type: "Primrose.Angle",
+      type: "Util.Angle",
       description: "A slewing angle that loosely follows the user around."
     });
     pliny.property({
@@ -2452,6 +2485,12 @@ pliny.property({
         type: "Event",
         description: "A pointer click event that triggered."
       }]
+    });
+    pliny.property({
+      parent: "Primrose.BrowserEnvironment",
+      name: "physics",
+      type: "CANNON.World",
+      description: "The physics subsystem."
     });
     pliny.property({
       parent: "Primrose.BrowserEnvironment",
@@ -3902,6 +3941,51 @@ pliny.class({
   description: "| [under construction]"
 });
 
+pliny.namespace({
+  parent: "Primrose",
+  name: "HTTP",
+  description: "A collection of basic XMLHttpRequest wrappers."
+});
+
+pliny.function({
+  parent: "Primrose.HTTP",
+  name: "del",
+  description: "Process an HTTP DELETE request.",
+  returns: "Promise",
+  parameters: [{
+    name: "type",
+    type: "String",
+    description: `How the response should be interpreted. One of ["text", "json", "arraybuffer"]. See the [MDN - XMLHttpRequest - responseType](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype).`,
+    default: `"text"`
+  }, {
+    name: "url",
+    type: "String",
+    description: "The resource to which the request is being sent."
+  }, {
+    name: "options",
+    type: "Primrose.HTTP.XHR.optionsHash",
+    optional: true,
+    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information."
+  }]
+});
+
+pliny.function({
+  parent: "Primrose.HTTP",
+  name: "delObject",
+  description: "Delete something on the server, and receive JSON in response.",
+  returns: "Promise",
+  parameters: [{
+    name: "url",
+    type: "String",
+    description: "The resource to which the request is being sent."
+  }, {
+    name: "options",
+    type: "Primrose.HTTP.XHR.optionsHash",
+    optional: true,
+    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information."
+  }]
+});
+
 pliny.function({
   parent: "Primrose.HTTP",
   name: "getObject",
@@ -3932,6 +4016,77 @@ pliny.function({
 
 ## Results:
 > Object {field1: 1, field2: "Field2"}`
+  }]
+});
+
+pliny.function({
+  parent: "Primrose.HTTP",
+  name: "getText",
+  description: "Get plain text from a server. Returns a promise that will be resolve with the text retrieved from the server.",
+  returns: "Promise",
+  parameters: [{
+    name: "url",
+    type: "String",
+    description: "The resource to which the request is being sent."
+  }, {
+    name: "options",
+    type: "Primrose.HTTP.XHR.optionsHash",
+    optional: true,
+    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information."
+  }],
+  examples: [{
+    name: "Make a GET request for plain text.",
+    description: `Use this to load arbitrary files and do whatever you want with them.
+
+## Code:
+
+    grammar("JavaScript");
+    Primrose.HTTP.getText("localFile.json",
+      console.log.bind(console, "progress"),
+      console.log.bind(console, "done"),
+      console.error.bind(console));
+
+## Results:
+> "Object {field1: 1, field2: \\"Field2\\"}"`
+  }]
+});
+
+pliny.function({
+  parent: "Primrose.HTTP",
+  name: "post",
+  description: "Process an HTTP POST request.",
+  returns: "Promise",
+  parameters: [{
+    name: "type",
+    type: "String",
+    description: `How the response should be interpreted. One of ["text", "json", "arraybuffer"]. See the [MDN - XMLHttpRequest - responseType](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype).`,
+    default: `"text"`
+  }, {
+    name: "url",
+    type: "String",
+    description: "The resource to which the request is being sent."
+  }, {
+    name: "options",
+    type: "Primrose.HTTP.XHR.optionsHash",
+    optional: true,
+    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information. The `data` field is not optional."
+  }]
+});
+
+pliny.function({
+  parent: "Primrose.HTTP",
+  name: "postObject",
+  description: "Send a JSON object to a server.",
+  returns: "Promise",
+  parameters: [{
+    name: "url",
+    type: "String",
+    description: "The resource to which the request is being sent."
+  }, {
+    name: "options",
+    type: "Primrose.HTTP.XHR.optionsHash",
+    optional: true,
+    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information. The `data` field is not optional."
   }]
 });
 
@@ -4166,36 +4321,48 @@ pliny.namespace({
   parent: "Primrose",
   name: "Constants",
   description: "Useful values that are used frequently."
-})
+});
+
+pliny.value({
+  parent: "Primrose.Constants",
+  name: "G",
+  type: "Number",
+  description: "The Gravitational Constant."
+});
 
 pliny.value({
   parent: "Primrose.Constants",
   name: "PIXEL_SCALES",
   description: "Scaling factors for changing the resolution of the display when the render quality level changes."
 });
+
 pliny.value({
   parent: "Primrose.Constants",
   name: "SKINS",
   type: "Array of Number",
   description: "A selection of color values that closely match skin colors of people."
 });
+
 pliny.value({
   parent: "Primrose.Constants",
   name: "SYS_FONTS",
   type: "String",
   description: "A selection of fonts that will match whatever the user's operating system normally uses."
 });
+
 pliny.enumeration({
   parent: "Primrose.Constants",
   name: "Quality",
   description: "Graphics quality settings."
 });
+
 pliny.value({
   parent: "Primrose.Constants",
   name: "NAMES",
   type: "Array of String",
   description: "Just a list of nice names."
 });
+
 pliny.namespace({
   parent: "Primrose",
   name: "Controls",
@@ -4344,122 +4511,6 @@ pliny.namespace({
 
 pliny.namespace({
   parent: "Primrose",
-  name: "HTTP",
-  description: "A collection of basic XMLHttpRequest wrappers."
-});
-
-pliny.function({
-  parent: "Primrose.HTTP",
-  name: "del",
-  description: "Process an HTTP DELETE request.",
-  returns: "Promise",
-  parameters: [{
-    name: "type",
-    type: "String",
-    description: `How the response should be interpreted. One of ["text", "json", "arraybuffer"]. See the [MDN - XMLHttpRequest - responseType](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype).`,
-    default: `"text"`
-  }, {
-    name: "url",
-    type: "String",
-    description: "The resource to which the request is being sent."
-  }, {
-    name: "options",
-    type: "Primrose.HTTP.XHR.optionsHash",
-    optional: true,
-    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information."
-  }]
-});
-
-pliny.function({
-  parent: "Primrose.HTTP",
-  name: "delObject",
-  description: "Delete something on the server, and receive JSON in response.",
-  returns: "Promise",
-  parameters: [{
-    name: "url",
-    type: "String",
-    description: "The resource to which the request is being sent."
-  }, {
-    name: "options",
-    type: "Primrose.HTTP.XHR.optionsHash",
-    optional: true,
-    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information."
-  }]
-});
-
-pliny.function({
-  parent: "Primrose.HTTP",
-  name: "getText",
-  description: "Get plain text from a server. Returns a promise that will be resolve with the text retrieved from the server.",
-  returns: "Promise",
-  parameters: [{
-    name: "url",
-    type: "String",
-    description: "The resource to which the request is being sent."
-  }, {
-    name: "options",
-    type: "Primrose.HTTP.XHR.optionsHash",
-    optional: true,
-    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information."
-  }],
-  examples: [{
-    name: "Make a GET request for plain text.",
-    description: `Use this to load arbitrary files and do whatever you want with them.
-
-## Code:
-
-    grammar("JavaScript");
-    Primrose.HTTP.getText("localFile.json",
-      console.log.bind(console, "progress"),
-      console.log.bind(console, "done"),
-      console.error.bind(console));
-
-## Results:
-> "Object {field1: 1, field2: \\"Field2\\"}"`
-  }]
-});
-
-pliny.function({
-  parent: "Primrose.HTTP",
-  name: "post",
-  description: "Process an HTTP POST request.",
-  returns: "Promise",
-  parameters: [{
-    name: "type",
-    type: "String",
-    description: `How the response should be interpreted. One of ["text", "json", "arraybuffer"]. See the [MDN - XMLHttpRequest - responseType](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype).`,
-    default: `"text"`
-  }, {
-    name: "url",
-    type: "String",
-    description: "The resource to which the request is being sent."
-  }, {
-    name: "options",
-    type: "Primrose.HTTP.XHR.optionsHash",
-    optional: true,
-    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information. The `data` field is not optional."
-  }]
-});
-
-pliny.function({
-  parent: "Primrose.HTTP",
-  name: "postObject",
-  description: "Send a JSON object to a server.",
-  returns: "Promise",
-  parameters: [{
-    name: "url",
-    type: "String",
-    description: "The resource to which the request is being sent."
-  }, {
-    name: "options",
-    type: "Primrose.HTTP.XHR.optionsHash",
-    optional: true,
-    description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information. The `data` field is not optional."
-  }]
-});
-
-pliny.namespace({
-  parent: "Primrose",
   name: "Input",
   description: "The Input namespace contains classes that handle user input, for use in navigating the 3D environment."
 });
@@ -4565,8 +4616,79 @@ pliny.property({
     });
     pliny.namespace({
   parent: "Primrose",
+  name: "Physics",
+  description: "A collection of components to use with the Cannon.js physics system."
+});
+
+pliny.class({
+  parent: "Primrose.Physics",
+  name: "DirectedForceField",
+  description: "A component that causes two objects (the object to which the DirectedForceField is added as a component and one other object) to repel or attract each other with a set force.",
+  parameters: [
+    { name: "bodyStart", type: "THREE.Object3D", description: "An entity that has a rigid body component that we can manipulate for the physics system." },
+    { name: "bodyEnd", type: "THREE.Object3D", description: "An entity that has a rigid body component that we can manipulate for the physics system." },
+    { name: "options", type: "Object", optional: true, description: "Optional configuration values. See following parameters:" },
+    { name: "options.force", type: "Number", optional: true, defaultValue: 1, description: "The force to attract the two objects together. Use negative values to repel objects. If `gravitational` is true, the force will be a value for the gravitational constant G in the two-body gravity equation. The real value of G is available as `Primrose.Constants.G."},
+    { name: "options.gravitational", type: "Boolean", optional: true, defaultValue: false, description: "Indicate whether or not to treat the force as gravity, i.e. taking mass into consideration. If `gravitational` is true, the force will be a value for the gravitational constant G in the two-body gravity equation. The real value of G is available as `Primrose.Constants.G." },
+    { name: "options.falloff", type: "Boolean", optional: true, defaultValue: true, description: "Indicate whether or not to use a distance-squared fall-off for the force. If `gravitational` is specified, the fall-off is always distance-squared, regardless of setting this value." }
+  ]
+});
+
+pliny.property({
+      parent: "Primrose.Physics.DirectedForceField",
+      name: "force",
+      type: "Number",
+      description: "The force to attract the two objects together. Use negative values to repel objects. If `gravitational` is true, the force will be a value for the gravitational constant G in the two-body gravity equation. The real value of G is available as `Primrose.Constants.G."
+    });
+    pliny.property({
+      parent: "Primrose.Physics.DirectedForceField",
+      name: "gravitational",
+      type: "Boolean",
+      description: "Indicate whether or not to treat the force as gravity, i.e. taking mass into consideration. If `gravitational` is true, the force will be a value for the gravitational constant G in the two-body gravity equation. The real value of G is available as `Primrose.Constants.G."
+    });
+    pliny.property({
+      parent: "Primrose.Physics.DirectedForceField",
+      name: "falloff",
+      type: "Boolean",
+      description: "Indicate whether or not to use a distance-squared fall-off for the force. If `gravitational` is specified, the fall-off is always distance-squared, regardless of setting this value."
+    });
+    pliny.namespace({
+  parent: "Primrose",
   name: "Random",
   description: "Functions for handling random numbers of different criteria, or selecting random elements of arrays."
+});
+
+pliny.function({
+  parent: "Primrose.Random",
+  name: "flipCoin",
+  description: "Returns a true or false. Supports bum coins.",
+  returns: "Boolean",
+  parameters: [
+    { name: "p", type: "Number", optional: true, defaultValue: 0.5, description: "Set the probability of seeing a true value." }
+  ],
+  examples: [{
+    name: "Play heads-or-tails.",
+    description: "To generate a sequence of truth values, call the `Primrose.Random.flipCoin()` function:\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  for(var i = 0; i < 10; ++i){\n\
+    console.log(Primrose.Random.flipCoin() ? \"heads\" : \"tails\");\n\
+  }\n\
+\n\
+## Result (note that this is just one possible outcome):\n\
+> heads\n\
+> heads\n\
+> tails\n\
+> heads\n\
+> tails\n\
+> tails\n\
+> tails\n\
+> heads\n\
+> heads\n\
+> tails"
+  }]
 });
 
 pliny.function({

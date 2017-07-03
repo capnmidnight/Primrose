@@ -1,7 +1,7 @@
 {
   "name": "primrose",
   "description": "Primrose is a framework for building Virtual Reality applications in Web browsers.",
-  "version": "0.31.13",
+  "version": "0.32.0",
   "author": "Sean T. McBeth <sean@seanmcbeth.com> (https://www.seanmcbeth.com)",
   "license": "GPL-3.0",
   "homepage": "https://www.primrosevr.com",

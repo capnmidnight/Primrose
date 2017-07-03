@@ -70,7 +70,7 @@ var gulp = require("gulp"),
 
   devServer = marigold.devServer(stopOnFiles, reloadOnFiles, {
     debounceDelay: 1500,
-    url: "Primrose/demos/physics1/"
+    url: "Primrose/demos/dataViz/"
   }),
 
   copyQuickstart = marigold.move(["Primrose.min.js"], "quickstart"),
