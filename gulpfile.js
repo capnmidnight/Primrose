@@ -14,6 +14,7 @@ var gulp = require("gulp"),
   justDemoPugFiles = ["demos/**/*.pug"],
   stylusFiles = inplace("styl"),
   justDemoStylusFiles = ["demos/**/*.styl"],
+  justDemoJSFiles = ["demos/**/*.js", "!demos/**/*.min.js", "!demos/pacman/pacman.js"],
   htmlFiles = inplace("html"),
   cssFiles = inplace("css"),
   jsFiles = inplace("js"),
@@ -31,6 +32,7 @@ var gulp = require("gulp"),
     name: "primrose:just-demos"
   }),
   images = marigold.images(jpgFiles.concat(pngFiles)),
+  minifyDemos = marigold.minify(justDemoJSFiles),
 
   preloader = marigold.js({
     entry: "preloader/index.js",
@@ -70,7 +72,7 @@ var gulp = require("gulp"),
 
   devServer = marigold.devServer(stopOnFiles, reloadOnFiles, {
     debounceDelay: 1500,
-    url: "Primrose/demos/dataViz/"
+    url: "Primrose/demos/physics2/"
   }),
 
   copyQuickstart = marigold.move(["Primrose.min.js"], "quickstart"),

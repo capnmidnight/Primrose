@@ -6,7 +6,7 @@ var env = new Primrose.BrowserEnvironment({
     fullScreenButtonContainer: "#fullScreenButtonContainer",
     nonstandardNeckLength: 0.15,
     nonstandardNeckDepth: 0.075,
-    gravity: 0,
+    gravity: 0
   }),
 
   center = hub()
