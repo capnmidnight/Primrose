@@ -9,38 +9,15 @@ var env = new Primrose.BrowserEnvironment({
     gravity: 0,
   }),
 
-  spheres = [],
-  springs = [],
-  repellers = [];
-
-var TEMP = v3();
-
-env.physics.addEventListener("preStep", function(event) {
-  for(var i = 0; i < repellers.length; ++i){
-    var r = repellers[i],
-      a = r[0],
-      b = r[1],
-      o = r[2];
-
-    TEMP.copy(b.rigidBody.position).sub(a.rigidBody.position);
-    var d = TEMP.length();
-    TEMP.multiplyScalar(o.force / Math.pow(d, 3));
-    b.rigidBody.force.vadd(TEMP, b.rigidBody.force);
-    TEMP.negate();
-    a.rigidBody.force.vadd(TEMP, a.rigidBody.force);
-  }
-});
-
-env.physics.addEventListener("postStep", function(event) {
-  for(var i = 0; i < springs.length; ++i){
-    springs[i].applyForce();
-  }
-});
+  center = hub()
+    .phys({mass: 0})
+    .addTo(env.scene)
+    .at(0, 1.5, -3);
 
 for(var i = 0; i < 50; ++i){
   var a = sphere(Primrose.Random.number(0.1, 0.2), 20, 20)
     .colored(Primrose.Random.color())
-    .phys({ mass: i })
+    .phys({ mass: i + 1 })
     .addTo(env.scene)
     .at(
       Primrose.Random.number(-0.5, 0.5),
@@ -56,20 +33,9 @@ for(var i = 0; i < 50; ++i){
       this.velocity.y = Primrose.Random.number(5, 10);
     });
 
-  spheres.push(a);
-  env.scene.add(a);
-  if(i > 0) {
-    for(var j = 0; j < i; ++j) {
-      var b = spheres[j];
-
-      if(j === 0) {
-        springs.push(new CANNON.Spring(a.rigidBody, b.rigidBody, {
-          restLength: 1,
-          stiffness: 500,
-          damping: 5
-        }));
-      }
-      repellers.push([a, b, { force: Primrose.Random.number(0, 0.2) }]);
-    }
-  }
+  spring(center, a, {
+    restLength: 1,
+    stiffness: 500,
+    damping: 5
+  });
 }

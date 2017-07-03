@@ -1,7 +1,7 @@
-import { Mesh } from "three";
+import { Mesh, Object3D } from "three";
 
 import phys from "../live-api/phys";
 
-Mesh.prototype.phys = function(options) {
+Object3D.prototype.phys = Mesh.prototype.phys = function(options) {
   return phys(this, options);
 };

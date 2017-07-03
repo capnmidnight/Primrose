@@ -149,6 +149,7 @@ export default class Pointer extends Entity {
   }
 
   update() {
+    super.update();
     this.position.set(0, 0, 0);
 
     if(this.unproject) {

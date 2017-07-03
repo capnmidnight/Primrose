@@ -9,7 +9,26 @@ import { Object3D, Euler, Quaternion } from "three";
 
 
 const TEMP_EULER = new Euler(),
-  TEMP_QUAT = new Quaternion();
+  TEMP_QUAT = new Quaternion(),
+  entities = [];
+
+export function preStepAllEntities() {
+  for(let i = 0; i < entities.length; ++i) {
+    entities[i].preStep();
+  }
+}
+
+export function postStepAllEntities() {
+  for(let i = 0; i < entities.length; ++i) {
+    entities[i].postStep();
+  }
+}
+
+export function updateAllEntities() {
+  for(let i = 0; i < entities.length; ++i) {
+    entities[i].update();
+  }
+}
 
 export default class Entity extends Object3D {
 
@@ -22,6 +41,8 @@ export default class Entity extends Object3D {
     this.disabled = false;
     this.mesh = null;
     this.rigidBody = null;
+    this.components = [];
+    entities.push(this);
   }
 
   get _ready() {
@@ -111,5 +132,23 @@ export default class Entity extends Object3D {
       this.rigidBody.addShape(shape);
     }
     return this;
+  }
+
+  preStep() {
+    for(let i = 0; i < this.components.length; ++i) {
+      this.components[i].preStep();
+    }
+  }
+
+  postStep() {
+    for(let i = 0; i < this.components.length; ++i) {
+      this.components[i].postStep();
+    }
+  }
+
+  update() {
+    for(let i = 0; i < this.components.length; ++i) {
+      this.components[i].update();
+    }
   }
 };

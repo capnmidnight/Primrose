@@ -4,6 +4,7 @@ pliny.namespace({
   description: "Useful values that are used frequently."
 });
 
+import G from "./G";
 import PIXEL_SCALES from "./PIXEL_SCALES";
 import SKINS from "./SKINS";
 import SYS_FONTS from "./SYS_FONTS";
@@ -12,6 +13,7 @@ import NAMES from "./NAMES";
 
 
 export {
+  G,
   NAMES,
   PIXEL_SCALES,
   Quality,
@@ -20,6 +22,7 @@ export {
 };
 
 export default {
+  G,
   NAMES,
   PIXEL_SCALES,
   Quality,

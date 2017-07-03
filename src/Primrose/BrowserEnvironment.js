@@ -214,6 +214,7 @@ import Button2D from "./Controls/Button2D";
 import Button3D from "./Controls/Button3D";
 import ButtonFactory from "./Controls/ButtonFactory";
 import Entity from "./Controls/Entity";
+import { preStepAllEntities, postStepAllEntities, updateAllEntities } from "./Controls/Entity";
 import Ground from "./Controls/Ground";
 import Sky from "./Controls/Sky";
 import Image from "./Controls/Image";
@@ -514,6 +515,8 @@ export default class BrowserEnvironment extends EventDispatcher {
         }
 
         this.physics.step(this.deltaTime, dt);
+
+        updateAllEntities();
       }
     };
 
@@ -949,6 +952,9 @@ export default class BrowserEnvironment extends EventDispatcher {
     this.physics.gravity.set(0, this.options.gravity, 0);
     this.physics.broadphase = new CANNON.NaiveBroadphase();
     this.physics.solver.iterations = 10;
+    this.physics.addEventListener("preStep", preStepAllEntities);
+    this.physics.addEventListener("postStep", postStepAllEntities);
+
 
     pliny.property({
       parent: "Primrose.BrowserEnvironment",

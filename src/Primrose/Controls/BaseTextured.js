@@ -16,7 +16,8 @@ import { quad, shell, hub } from "../../live-api";
 
 import Entity from "./Entity";
 
-var entities = [];
+
+const entities = [];
 
 pliny.function({
   parent: "Primrose.Controls.Entity",
@@ -29,15 +30,18 @@ pliny.function({
   }]
 });
 export function updateAll(){
-  entities.forEach((entity) => {
+  for(let i = 0; i < entities.length; ++i) {
+    const entity = entities[i];
     entity.eyeBlank(0);
     entity.update();
-  });
+  }
 };
 
 export function eyeBlankAll(eye) {
-  entities.forEach((entity) =>
-    entity.eyeBlank(eye));
+  for(let i = 0; i < entities.length; ++i) {
+    const entity = entities[i];
+    entity.eyeBlank(eye);
+  }
 };
 
 export default class BaseTextured extends Entity {
@@ -102,9 +106,5 @@ export default class BaseTextured extends Entity {
         this._meshes[i].visible = (i === this._currentImageIndex);
       }
     }
-  }
-
-  update() {
-
   }
 }
