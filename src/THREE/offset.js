@@ -1,3 +1,5 @@
+import pliny from "pliny";
+
 import { Geometry, BufferGeometry } from "three";
 
 Geometry.prototype.offset = function(x, y, z){

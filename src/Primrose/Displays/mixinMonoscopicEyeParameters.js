@@ -1,3 +1,5 @@
+import pliny from "pliny";
+
 import calculateElementSize from "./calculateElementSize";
 
 import { Math as _Math } from "three";

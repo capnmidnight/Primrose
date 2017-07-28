@@ -1,3 +1,5 @@
+import pliny from "pliny";
+
 import CardboardVRDisplay from "./CardboardVRDisplay";
 import install from "./install";
 import MockVRDisplay from "./MockVRDisplay";

@@ -1,3 +1,5 @@
+import pliny from "pliny";
+
 import { isMobile } from "../../flags";
 import VRDisplay from "./VRDisplay";
 import mixinMonoscopicEyeParameters from "./mixinMonoscopicEyeParameters";

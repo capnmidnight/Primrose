@@ -1,3 +1,5 @@
+import pliny from "pliny";
+
 import { Matrix4 } from "three";
 
 Matrix4.prototype.toString = function(digits) {

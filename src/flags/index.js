@@ -1,3 +1,5 @@
+import pliny from "pliny";
+
 pliny.namespace({
   name: "Flags",
   description: `Various flags used for feature detecting and configuring the system.

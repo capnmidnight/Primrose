@@ -1,3 +1,5 @@
+import pliny from "pliny";
+
 import FullScreen from "./FullScreen";
 import standardLockBehavior from "./standardLockBehavior";
 

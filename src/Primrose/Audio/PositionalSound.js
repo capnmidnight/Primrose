@@ -1,3 +1,5 @@
+import pliny from "pliny";
+
 pliny.class({
   parent: "Primrose.Output",
     name: "PositionalSound",

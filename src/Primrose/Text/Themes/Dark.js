@@ -1,3 +1,5 @@
+import pliny from "pliny";
+
 pliny.record({
   parent: "Primrose.Text.Themes",
   name: "Dark",

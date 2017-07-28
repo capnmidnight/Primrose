@@ -1,3 +1,5 @@
+import pliny from "pliny";
+
 pliny.record({
   parent: "Primrose.Text.CodePages",
   name: "EN_UKX",

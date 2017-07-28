@@ -1,3 +1,5 @@
+import pliny from "pliny";
+
 import { Object3D } from "three";
 
 pliny.method({

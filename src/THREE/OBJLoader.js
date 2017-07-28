@@ -1,3 +1,5 @@
+import pliny from "pliny";
+
 /**
  * @author mrdoob / http://mrdoob.com/
  */

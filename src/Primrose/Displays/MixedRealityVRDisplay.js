@@ -1,3 +1,5 @@
+import pliny from "pliny";
+
 import VRDisplay from "./VRDisplay";
 import mixinMonoscopicEyeParameters from "./mixinMonoscopicEyeParameters";
 

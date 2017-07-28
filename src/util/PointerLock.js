@@ -1,3 +1,5 @@
+import pliny from "pliny";
+
 import AsyncLockRequest from "./AsyncLockRequest";
 export default new AsyncLockRequest(
   "Pointer Lock",

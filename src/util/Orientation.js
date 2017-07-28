@@ -1,3 +1,5 @@
+import pliny from "pliny";
+
 export function lock(element) {
   var type = screen.orientation && screen.orientation.type || screen.mozOrientation || "";
   if (type.indexOf("landscape") === -1) {

@@ -1,3 +1,5 @@
+import pliny from "pliny";
+
 Promise.prototype.log = function(args){
   args = args || [];
   return this.then(function(obj) {

@@ -1,3 +1,5 @@
+import pliny from "pliny";
+
 import { EventDispatcher, Object3D } from "three";
 
 Object3D.prototype.emit = EventDispatcher.prototype.emit = function(evt, obj) {

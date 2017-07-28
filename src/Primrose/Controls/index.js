@@ -1,3 +1,5 @@
+import pliny from "pliny";
+
 pliny.namespace({
   parent: "Primrose",
   name: "Controls",

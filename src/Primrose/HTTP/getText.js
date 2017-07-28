@@ -1,3 +1,5 @@
+import pliny from "pliny";
+
 pliny.function({
   parent: "Primrose.HTTP",
   name: "getText",

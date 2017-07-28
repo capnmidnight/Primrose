@@ -1,3 +1,5 @@
+import pliny from "pliny";
+
 pliny.value({
   parent: "Primrose.Text.OperatingSystems",
   name: "Linux",

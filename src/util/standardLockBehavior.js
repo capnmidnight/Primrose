@@ -1,3 +1,5 @@
+import pliny from "pliny";
+
 import { isMobile, isiOS } from "../flags";
 import Orientation from "./Orientation";
 import PointerLock from "./PointerLock";

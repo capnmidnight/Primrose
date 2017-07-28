@@ -1,3 +1,5 @@
+import pliny from "pliny";
+
 pliny.enumeration({
   parent: "Primrose.Constants",
   name: "Quality",

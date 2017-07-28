@@ -1,3 +1,5 @@
+import pliny from "pliny";
+
 pliny.value({
   parent: "Primrose.Constants",
   name: "SYS_FONTS",

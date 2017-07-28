@@ -1,3 +1,5 @@
+import pliny from "pliny";
+
 pliny.namespace({
   name: "Primrose",
   description: "Primrose helps you make VR applications for web browsers as easy as making other types of interactive web pages.\n\

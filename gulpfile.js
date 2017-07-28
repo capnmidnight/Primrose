@@ -43,7 +43,7 @@ var gulp = require("gulp"),
     return {
       name: "Primrose",
       advertise: true,
-      extractDocumentation: true,
+      extractDocumentation: (debug) => !debug,
       format: fmt
     };
   },

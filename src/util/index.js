@@ -1,3 +1,5 @@
+import pliny from "pliny";
+
 pliny.namespace({
   name: "Util",
   description: "A few different utility functions.\n\
