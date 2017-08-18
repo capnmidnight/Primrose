@@ -1,4 +1,4 @@
-import pliny from "pliny";
+import pliny from "pliny/pliny";
 
 export default function hax(target, name, thunk) {
   var original = target[name];

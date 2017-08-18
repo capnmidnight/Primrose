@@ -1,4 +1,4 @@
-import pliny from "pliny";
+import pliny from "pliny/pliny";
 
 pliny.namespace({
   parent: "Primrose.Text",

@@ -1,4 +1,4 @@
-import pliny from "pliny";
+import pliny from "pliny/pliny";
 
 import CardboardVRDisplay from "./CardboardVRDisplay";
 import install from "./install";
