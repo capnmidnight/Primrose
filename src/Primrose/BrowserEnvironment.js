@@ -422,11 +422,13 @@ export default class BrowserEnvironment extends EventDispatcher {
             let mouseHeading = null;
             if (this.VR.hasOrientation) {
               mouseHeading = this.mousePointer.rotation.y;
-              const newMouseHeading = WEDGE * Math.floor((mouseHeading / WEDGE) + 0.5);
+              const newMouseHeading = WEDGE * Math.floor((mouseHeading / WEDGE) + 0.5),
+                offset = this.Mouse.commands.U.offset;
               if(newMouseHeading !== 0){
-                this.Mouse.commands.U.offset -= this.Mouse.getValue("U") - 1;
+                offset += 1 - this.Mouse.getValue("U");
+                this.Mouse.setOffset(offset);
               }
-              mouseHeading = newMouseHeading + this.Mouse.commands.U.offset * 2;
+              mouseHeading = newMouseHeading + offset * 2;
             }
             else{
               mouseHeading = this.Mouse.getValue("heading");
@@ -894,8 +896,8 @@ export default class BrowserEnvironment extends EventDispatcher {
       if(this.currentControl) {
         this.currentControl.removeEventListener("blur", delesectControl);
         this.Keyboard.enabled = true;
-        this.Mouse.commands.pitch.disabled =
-        this.Mouse.commands.heading.disabled = this.VR.isPresenting;
+        this.Mouse.enable("pitch", !this.VR.isPresenting);
+        this.Mouse.enable("headin", !this.VR.isPresenting);
         this.currentControl.blur();
         this.currentControl = null;
       }
@@ -927,8 +929,8 @@ export default class BrowserEnvironment extends EventDispatcher {
             this.currentControl.addEventListener("blur", delesectControl);
             if(this.currentControl.lockMovement) {
               this.Keyboard.enabled = false;
-              this.Mouse.commands.pitch.disabled =
-              this.Mouse.commands.heading.disabled = !this.VR.isPresenting;
+              this.Mouse.enable("pitch", this.VR.isPresenting);
+              this.Mouse.enable("heading", this.VR.isPresenting);
             }
           }
         }
@@ -1081,20 +1083,27 @@ export default class BrowserEnvironment extends EventDispatcher {
     };
 
     PointerLock.addChangeListener((evt) => {
-      if (this.VR.isPresenting && !PointerLock.isActive) {
-        this.cancelVR();
+      if(PointerLock.isActive) {
+        this.Mouse.removeButton("dx", 0);
+        this.Mouse.removeButton("dy", 0);
+      }
+      else {
+        this.Mouse.addButton("dx", 0);
+        this.Mouse.addButton("dy", 0);
+        if (this.VR.isPresenting) {
+          this.cancelVR();
+        }
       }
     });
 
     const fullScreenChange = (evt) => {
-      const presenting = !!this.VR.isPresenting,
-        cmd = (presenting ? "remove" : "add") + "Button";
-      this.Mouse[cmd]("dx", 0);
-      this.Mouse[cmd]("dy", 0);
-      this.Mouse.commands.U.disabled =
-        this.Mouse.commands.V.disabled = presenting && !this.VR.isStereo;
-      this.Mouse.commands.heading.scale = presenting ? -1 : 1;
-      this.Mouse.commands.pitch.scale = presenting ? -1 : 1;
+      const presenting = this.VR.isPresenting,
+        lockMouse = !presenting || this.VR.isStereo,
+        scale = presenting ? -1 : 1;
+      this.Mouse.enable("U", lockMouse);
+      this.Mouse.enable("V", lockMouse);
+      this.Mouse.setScale("heading", scale);
+      this.Mouse.setScale("pitch", scale);
       if (!presenting) {
         this.cancelVR();
       }
@@ -1832,7 +1841,6 @@ export default class BrowserEnvironment extends EventDispatcher {
       this.managers.splice(mgrIdx, 1);
       delete this[id];
     }
-    console.log("removed", mgr);
   }
 
   moveStage(position) {
@@ -1844,7 +1852,8 @@ export default class BrowserEnvironment extends EventDispatcher {
 
   cancelVR() {
     this.VR.cancel();
-    this.Touch.commands.U.offset = this.Mouse.commands.U.offset = 0;
+    this.Touch.setOffset("U", 0);
+    this.Mouse.setOffset("U", 0);
   }
 
   get hasMotionControllers() {

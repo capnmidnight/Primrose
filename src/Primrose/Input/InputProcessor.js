@@ -371,6 +371,10 @@ export default class InputProcessor extends EventDispatcher {
     this.setProperty("scale", name, value);
   }
 
+  setOffset(name, value) {
+    this.setProperty("offset", name, value);
+  }
+
   setDT(name, value) {
     this.setProperty("dt", name, value);
   }
