@@ -1,4 +1,4 @@
-import pliny from "pliny";
+import pliny from "pliny/pliny";
 
 pliny.class({
   parent: "Primrose.Input",
@@ -369,6 +369,10 @@ export default class InputProcessor extends EventDispatcher {
 
   setScale(name, value) {
     this.setProperty("scale", name, value);
+  }
+
+  setOffset(name, value) {
+    this.setProperty("offset", name, value);
   }
 
   setDT(name, value) {

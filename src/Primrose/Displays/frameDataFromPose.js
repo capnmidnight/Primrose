@@ -1,4 +1,4 @@
-import pliny from "pliny";
+import pliny from "pliny/pliny";
 
 const piOver180 = Math.PI / 180.0,
   rad45 = Math.PI * 0.25,

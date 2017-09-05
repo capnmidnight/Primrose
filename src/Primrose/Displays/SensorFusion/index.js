@@ -1,4 +1,4 @@
-import pliny from "pliny";
+import pliny from "pliny/pliny";
 
 import ComplementaryFilter from "./ComplementaryFilter";
 import FusionPoseSensor from "./FusionPoseSensor";

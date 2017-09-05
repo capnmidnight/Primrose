@@ -1,4 +1,4 @@
-import pliny from "pliny";
+import pliny from "pliny/pliny";
 
 import frameDataFromPose from "./frameDataFromPose";
 import CardboardVRDisplay from "./CardboardVRDisplay";
@@ -44,8 +44,8 @@ function upgrade1_0_to_1_1(){
 
 function getPolyfillDisplays(options) {
   if (!polyFillDevicesPopulated) {
+    FullScreen.addChangeListener(fireVRDisplayPresentChange);
     if (isCardboardCompatible || options.forceStereo) {
-      FullScreen.addChangeListener(fireVRDisplayPresentChange);
       allDisplays.push(new CardboardVRDisplay(options));
     }
 

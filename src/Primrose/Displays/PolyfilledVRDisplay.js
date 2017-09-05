@@ -1,4 +1,4 @@
-import pliny from "pliny";
+import pliny from "pliny/pliny";
 
 /*
  * Copyright 2015 Google Inc. All Rights Reserved.

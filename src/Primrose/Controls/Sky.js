@@ -1,4 +1,4 @@
-import pliny from "pliny";
+import pliny from "pliny/pliny";
 
 import { box, quad } from "../../live-api";
 import { isMobile } from "../../flags";
