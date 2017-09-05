@@ -10,7 +10,7 @@ append header
 
 append main
   <!-- start demo.pug banner block -->
-  p Click on the image below to lock mouse cursor to demo. #[a(href=fileRoot + "demos/" + name, target="_blank") Open demo in new window].
+  p Click on the image below to lock mouse cursor to demo. #[a(href=fileRoot + "demos/" + name, target="_blank", rel="noopener") Open demo in new window].
   iframe#demo(src = fileRoot + "demos/" + name, style="width: 100%;height: 50vw;", allowfullscreen, allowvr)
   if exists("demos/" + name + "/app.js")
     h2 Source
