@@ -5,22 +5,22 @@ import install from "./install";
 import MockVRDisplay from "./MockVRDisplay";
 import StandardMonitorVRDisplay from "./StandardMonitorVRDisplay";
 import VRDisplay from "./VRDisplay";
-import VRFrameData from "./VRFrameData";
+import PolyfilledVRFrameData from "./PolyfilledVRFrameData";
 
 export {
   CardboardVRDisplay,
   install,
   MockVRDisplay,
+  PolyfilledVRFrameData,
   StandardMonitorVRDisplay,
-  VRDisplay,
-  VRFrameData
+  VRDisplay
 };
 
 export default {
   CardboardVRDisplay,
   install,
   MockVRDisplay,
+  PolyfilledVRFrameData,
   StandardMonitorVRDisplay,
-  VRDisplay,
-  VRFrameData
+  VRDisplay
 };

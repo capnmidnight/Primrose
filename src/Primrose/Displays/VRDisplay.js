@@ -26,7 +26,7 @@ import {
 import { isMobile } from "../../flags";
 
 import frameDataFromPose from "./frameDataFromPose";
-import VRFrameData from "./VRFrameData";
+import BaseVRDisplay from "./BaseVRDisplay";
 
 
 const defaultLeftBounds = [0, 0, 0.5, 1],
@@ -37,8 +37,9 @@ let nextDisplayId = 1000,
   hasShowDeprecationWarning = false;
 
 
-export default class VRDisplay {
+export default class VRDisplay extends BaseVRDisplay {
   constructor(name) {
+    super();
     this._currentLayers = [];
 
     Object.defineProperties(this, {
@@ -60,22 +61,7 @@ export default class VRDisplay {
       isPolyfilled: immutable(true)
     });
 
-    this._frameData = null;
-    this._poseData = null;
-  }
-
-  getFrameData(frameData) {
-    if(!this._frameData) {
-      this._frameData = frameDataFromPose(frameData, this.getPose(), this);
-    }
-    return this._frameData;
-  }
-
-  getPose() {
-    if(!this._poseData){
-      this._poseData = this._getPose();
-    }
-    return this._poseData;
+    this.frameData = null;
   }
 
   requestAnimationFrame(callback) {
@@ -103,9 +89,8 @@ export default class VRDisplay {
     return this._currentLayers.slice();
   }
 
-  submitFrame(pose) {
-    this._frameData = null;
-    this._poseData = null;
+  submitFrame() {
+    this.frameData = null;
   }
 
 };

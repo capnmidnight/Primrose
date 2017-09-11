@@ -4,7 +4,7 @@ import BaseVRDisplay from "./BaseVRDisplay";
 
 export default class NativeVRDisplay extends BaseVRDisplay {
   constructor(display) {
-    super(VRFrameData);
+    super();
     this.display = display;
   }
 
@@ -50,14 +50,6 @@ export default class NativeVRDisplay extends BaseVRDisplay {
 
   getFrameData(frameData) {
     this.display.getFrameData(frameData);
-  }
-
-  getPose() {
-    return this.display.getPose();
-  }
-
-  resetPose(){
-    return this.display.resetPose();
   }
 
   getEyeParameters (side) {

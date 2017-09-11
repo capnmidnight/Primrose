@@ -93,10 +93,12 @@ export default class VR extends PoseInputProcessor {
   connect(selectedIndex) {
     this.currentDevice = null;
     this.currentDeviceIndex = selectedIndex;
+    this.currentFrameData = new VRFrameData();
     this.currentPose = null;
     if (0 <= selectedIndex && selectedIndex <= this.displays.length) {
       this.currentDevice = this.displays[selectedIndex];
-      this.currentPose = this.currentDevice.getPose();
+      this.currentDevice.getFrameData(this.currentFrameData);
+      this.currentPose = this.currentFrameData.pose;
       this.isStereo = VR.isStereoDisplay(this.currentDevice);
     }
   }
@@ -133,6 +135,7 @@ export default class VR extends PoseInputProcessor {
       this.currentDevice = null;
       this.currentDeviceIndex = -1;
       this.currentPose = null;
+      this.currentFrameData = null;
     }
     else {
       promise = Promise.resolve();
@@ -152,7 +155,8 @@ export default class VR extends PoseInputProcessor {
     var x, z, stage;
 
     if (this.currentDevice) {
-      this.currentPose = this.currentDevice.getPose();
+      this.currentDevice.getFrameData(this.currentFrameData);
+      this.currentPose = this.currentFrameData.pose;
       stage = this.currentDevice.stageParameters;
     }
     else{
@@ -189,7 +193,7 @@ export default class VR extends PoseInputProcessor {
 
   submitFrame() {
     if(this.currentDevice) {
-      this.currentDevice.submitFrame(this.currentPose);
+      this.currentDevice.submitFrame();
     }
   }
 

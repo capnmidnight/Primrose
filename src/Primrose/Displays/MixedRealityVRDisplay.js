@@ -68,12 +68,12 @@ export default class MixedRealityVRDisplay extends VRDisplay {
     // do nothing here, the real VRDisplay should be managing the animation
   }
 
-  getPose() {
+  getFrameData(frameData) {
     if(this.motionDevice){
-      return this.motionDevice.getPose();
+      this.motionDevice.getFrameData(frameData);
     }
     else{
-      return defaultPose();
+      frameData.pose = defaultPose();
     }
   }
 }

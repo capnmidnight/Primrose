@@ -5,7 +5,7 @@ import CardboardVRDisplay from "./CardboardVRDisplay";
 import MockVRDisplay from "./MockVRDisplay";
 import StandardMonitorVRDisplay from "./StandardMonitorVRDisplay";
 import VRDisplay from "./VRDisplay";
-import VRFrameData from "./VRFrameData";
+import PolyfilledVRFrameData from "./PolyfilledVRFrameData";
 
 import { isMobile, isGearVR, isiOS } from "../../flags";
 
@@ -23,8 +23,9 @@ let polyFillDevicesPopulated = false,
 function upgrade1_0_to_1_1(){
   // Put a shim in place to update the API to 1.1 if needed.
   if ("VRDisplay" in window && !("VRFrameData" in window)) {
+    console.log("upgrade 1.0 to 1.1");
     // Provide the VRFrameData object.
-    window.VRFrameData = VRFrameData;
+    window.VRFrameData = PolyfilledVRFrameData;
 
     // A lot of Chrome builds don't have depthNear and depthFar, even
     // though they're in the WebVR 1.0 spec. Patch them in if they're not present.

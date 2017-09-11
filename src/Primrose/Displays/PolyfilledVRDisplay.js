@@ -17,7 +17,6 @@ import pliny from "pliny/pliny";
 
 import BaseVRDisplay from "./BaseVRDisplay";
 import frameDataFromPose from "./frameDataFromPose";
-import PolyfilledVRFrameData from "./PolyfilledVRFrameData";
 import { isMobile } from "../../flags";
 
 import {
@@ -48,7 +47,7 @@ function defaultPose() {
 
 export default class PolyfilledVRDisplay extends BaseVRDisplay {
   constructor(name) {
-    super(PolyfilledVRFrameData);
+    super();
     this._currentLayers = [];
 
     Object.defineProperties(this, {
@@ -75,14 +74,11 @@ export default class PolyfilledVRDisplay extends BaseVRDisplay {
   }
 
   getFrameData(frameData) {
-    frameDataFromPose(frameData, this.getPose(), this);
-  }
-
-  getPose() {
     if(!this._poseData){
       this._poseData = this._getPose() || defaultPose();
     }
-    return this._poseData;
+
+    frameDataFromPose(frameData, this._poseData, this);
   }
 
   requestAnimationFrame(callback) {

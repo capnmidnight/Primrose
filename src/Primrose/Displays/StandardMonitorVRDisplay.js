@@ -22,19 +22,19 @@ export default class StandardMonitorVRDisplay extends VRDisplay {
     this._display = display;
   }
 
-  submitFrame(pose) {
+  submitFrame() {
     if(this._display && this._display.isPolyfilled) {
-      this._display.submitFrame(pose);
+      this._display.submitFrame();
     }
   }
 
-  getPose() {
+  getFrameData(frameData) {
     var display = isMobile && this._display;
     if(display){
-      return display.getPose();
+      display.getFrameData(frameData);
     }
     else{
-      return defaultPose();
+      frameData.pose = defaultPose();
     }
   }
 };
