@@ -53,7 +53,6 @@ artifacts/
 *_p.c
 *_i.h
 *.ilk
-*.obj
 *.pch
 *.pdb
 *.pgc
@@ -265,3 +264,4 @@ paket-files/
 
 # Unity3D Generated File On Crash Reports
 sysinfo.txt
+*.blend1
