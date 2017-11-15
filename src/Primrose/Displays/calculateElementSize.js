@@ -8,7 +8,7 @@ pliny.function({
 
 import { isiOS, isLandscape } from "../../flags";
 
-export default function calculateElementSize(display) {
+export default function calculateElementSize() {
   let width = 0,
     height = 0;
 
