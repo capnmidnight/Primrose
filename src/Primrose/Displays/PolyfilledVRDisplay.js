@@ -16,6 +16,7 @@ import pliny from "pliny/pliny";
  */
 
 import BaseVRDisplay from "./BaseVRDisplay";
+import defaultPose from "./defaultPose";
 import frameDataFromPose from "./frameDataFromPose";
 import PolyfilledVRFrameData from "./PolyfilledVRFrameData";
 import { isMobile } from "../../flags";
@@ -35,20 +36,10 @@ const defaultLeftBounds = [0, 0, 0.5, 1],
 let nextDisplayId = 1000,
   hasShowDeprecationWarning = false;
 
-function defaultPose() {
-  return {
-    position: [0, 0, 0],
-    orientation: [0, 0, 0, 1],
-    linearVelocity: null,
-    linearAcceleration: null,
-    angularVelocity: null,
-    angularAcceleration: null
-  };
-}
-
 export default class PolyfilledVRDisplay extends BaseVRDisplay {
   constructor(name) {
-    super(PolyfilledVRFrameData);
+    super();
+
     this._currentLayers = [];
 
     Object.defineProperties(this, {
@@ -61,7 +52,6 @@ export default class PolyfilledVRDisplay extends BaseVRDisplay {
       })),
       displayId: immutable(nextDisplayId++),
       displayName: immutable(name),
-      isConnected: immutable(true),
       stageParameters: immutable(null),
       isPresenting: immutable(() => FullScreen.isActive ),
 
@@ -74,15 +64,8 @@ export default class PolyfilledVRDisplay extends BaseVRDisplay {
     this._poseData = null;
   }
 
-  getFrameData(frameData) {
-    frameDataFromPose(frameData, this.getPose(), this);
-  }
-
-  getPose() {
-    if(!this._poseData){
-      this._poseData = this._getPose() || defaultPose();
-    }
-    return this._poseData;
+  get isPolyfilledVRDisplay() {
+    return true;
   }
 
   requestAnimationFrame(callback) {
@@ -108,6 +91,17 @@ export default class PolyfilledVRDisplay extends BaseVRDisplay {
 
   getLayers() {
     return this._currentLayers.slice();
+  }
+
+  makeVRFrameDataObject() {
+    return new PolyfilledVRFrameData();
+  }
+
+  getFrameData(frameData) {
+    if(!this._poseData) {
+      this._poseData = this._getPose();
+    }
+    frameDataFromPose(frameData, this._poseData, this);
   }
 
   submitFrame(pose) {

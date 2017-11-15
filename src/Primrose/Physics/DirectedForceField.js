@@ -4,14 +4,38 @@ pliny.class({
   parent: "Primrose.Physics",
   name: "DirectedForceField",
   description: "A component that causes two objects (the object to which the DirectedForceField is added as a component and one other object) to repel or attract each other with a set force.",
-  parameters: [
-    { name: "bodyStart", type: "THREE.Object3D", description: "An entity that has a rigid body component that we can manipulate for the physics system." },
-    { name: "bodyEnd", type: "THREE.Object3D", description: "An entity that has a rigid body component that we can manipulate for the physics system." },
-    { name: "options", type: "Object", optional: true, description: "Optional configuration values. See following parameters:" },
-    { name: "options.force", type: "Number", optional: true, defaultValue: 1, description: "The force to attract the two objects together. Use negative values to repel objects. If `gravitational` is true, the force will be a value for the gravitational constant G in the two-body gravity equation. The real value of G is available as `Primrose.Constants.G."},
-    { name: "options.gravitational", type: "Boolean", optional: true, defaultValue: false, description: "Indicate whether or not to treat the force as gravity, i.e. taking mass into consideration. If `gravitational` is true, the force will be a value for the gravitational constant G in the two-body gravity equation. The real value of G is available as `Primrose.Constants.G." },
-    { name: "options.falloff", type: "Boolean", optional: true, defaultValue: true, description: "Indicate whether or not to use a distance-squared fall-off for the force. If `gravitational` is specified, the fall-off is always distance-squared, regardless of setting this value." }
-  ]
+  parameters: [{
+    name: "bodyStart",
+    type: "THREE.Object3D",
+    description: "An entity that has a rigid body component that we can manipulate for the physics system."
+  }, {
+    name: "bodyEnd",
+    type: "THREE.Object3D",
+    description: "An entity that has a rigid body component that we can manipulate for the physics system."
+  }, {
+    name: "options",
+    type: "Object",
+    optional: true,
+    description: "Optional configuration values. See following parameters:"
+  }, {
+    name: "options.force",
+    type: "Number",
+    optional: true,
+    default: 1,
+    description: "The force to attract the two objects together. Use negative values to repel objects. If `gravitational` is true, the force will be a value for the gravitational constant G in the two-body gravity equation. The real value of G is available as `Primrose.Constants.G."
+  }, {
+    name: "options.gravitational",
+    type: "Boolean",
+    optional: true,
+    default: false,
+    description: "Indicate whether or not to treat the force as gravity, i.e. taking mass into consideration. If `gravitational` is true, the force will be a value for the gravitational constant G in the two-body gravity equation. The real value of G is available as `Primrose.Constants.G."
+  }, {
+    name: "options.falloff",
+    type: "Boolean",
+    optional: true,
+    default: true,
+    description: "Indicate whether or not to use a distance-squared fall-off for the force. If `gravitational` is specified, the fall-off is always distance-squared, regardless of setting this value."
+  }]
 });
 
 import CANNON from "cannon";

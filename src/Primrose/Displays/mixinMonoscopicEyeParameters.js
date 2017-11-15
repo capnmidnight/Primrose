@@ -23,7 +23,7 @@ function calcFoV(aFoV, aDim, bDim){
 
 function getMonoscopicEyeParameters (side) {
   if (side === "left") {
-    const dim = calculateElementSize(this);
+    const dim = calculateElementSize();
 
     let vFOV, hFOV;
     if(dim.height > dim.width) {

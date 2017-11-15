@@ -1,72 +1,87 @@
 import pliny from "pliny/pliny";
 
 import BaseVRDisplay from "./BaseVRDisplay";
+import frameDataFromPose from "./frameDataFromPose";
+import PolyfilledVRFrameData from "./PolyfilledVRFrameData";
 
 export default class NativeVRDisplay extends BaseVRDisplay {
-  constructor(display) {
-    super(VRFrameData);
-    this.display = display;
+  constructor(display, overrideName, overrideId) {
+    super();
+
+    this._display = display;
+    this._overrideName = overrideName;
+    this._overrideId = overrideId;
+
+    if("depthNear" in display){
+      Object.defineProperties(this, {
+        depthNear: {
+          get() {
+            return this._display.depthNear;
+          },
+
+          set(v) {
+            this._display.depthNear = v;
+          }
+        },
+
+        depthFar: {
+          get() {
+            return this._display.depthFar;
+          },
+
+          set(v) {
+            this._display.depthFar = v;
+          }
+        }
+      });
+    }
+    else{
+      this.depthNear = 0.01;
+      this.depthFar = 10000.0;
+    }
+
+    if("getFrameData" in display){
+      this.makeVRFrameDataObject = () => new VRFrameData();
+      this.getFrameData = display.getFrameData.bind(display);
+    }
+    else{
+      this.getFrameData = (frameData) =>
+      this.makeVRFrameDataObject = () => new PolyfilledVRFrameData();
+        frameDataFromPose(frameData, this.getPose(), this);
+    }
+  }
+
+  get isNativeVRDisplay() {
+    return true;
   }
 
   get capabilities() {
-    return this.display.capabilities;
+    return this._display.capabilities;
   }
 
   get displayId() {
-    return this.display.displayId;
+    return this._overrideId || this._display.displayId;
   }
 
   get displayName() {
-    return this.display.displayName;
-  }
-
-  get isConnected() {
-    return this.display.isConnected;
+    return this._overrideName || this._display.displayName;
   }
 
   get stageParameters() {
-    return this.display.stageParameters;
+    return this._display.stageParameters;
   }
 
   get isPresenting() {
-    return this.display.isPresenting;
-  }
-
-  get depthNear() {
-    return this.display.depthNear;
-  }
-
-  set depthNear(v) {
-    this.display.depthNear = v;
-  }
-
-  get depthFar() {
-    return this.display.depthFar;
-  }
-
-  set depthFar(v) {
-    this.display.depthFar = v;
-  }
-
-  getFrameData(frameData) {
-    this.display.getFrameData(frameData);
-  }
-
-  getPose() {
-    return this.display.getPose();
-  }
-
-  resetPose(){
-    return this.display.resetPose();
+    return this._display.isPresenting;
   }
 
   getEyeParameters (side) {
-    return this.display.getEyeParameters(side);
+    return this._display.getEyeParameters(side);
   }
 
   requestAnimationFrame(callback) {
     if(this.isPresenting) {
-      return this.display.requestAnimationFrame(callback);
+      return this._display.requestAnimationFrame(callback);
     }
     else {
       return window.requestAnimationFrame(callback);
@@ -75,7 +90,7 @@ export default class NativeVRDisplay extends BaseVRDisplay {
 
   cancelAnimationFrame(id) {
     if(this.isPresenting) {
-      return this.display.cancelAnimationFrame(id);
+      return this._display.cancelAnimationFrame(id);
     }
     else {
       return window.cancelAnimationFrame(id);
@@ -83,31 +98,30 @@ export default class NativeVRDisplay extends BaseVRDisplay {
   }
 
   requestPresent(layers) {
-    return this.display.requestPresent(layers);
+    return this._display.requestPresent(layers)
+      .catch((exp) => console.error(exp));
   }
 
   exitPresent() {
-    return this.display.exitPresent();
+    return this._display.exitPresent();
   }
 
   getLayers() {
-    return this.display.getLayers();
+    return this._display.getLayers();
   }
 
   submitFrame() {
-    return this.display.submitFrame();
-  }
-
-  get isNativeVRDisplay() {
-    return true;
+    if(this.isPresenting) {
+      return this._display.submitFrame();
+    }
   }
 
   get isStereo() {
-    return true;
+    return !this._display.isBaseVRDisplay || this._display.isStereo;
   }
 
   get targetName() {
-    return this.display.displayName;
+    return this._display.displayName;
   }
 
   get renderOrder() {

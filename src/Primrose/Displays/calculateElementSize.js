@@ -1,8 +1,14 @@
 import pliny from "pliny/pliny";
 
+pliny.function({
+  parent: "Primrose.Displays",
+  name: "calculateElementSize",
+  description: "Figure out the size the canvas needs to be for rendering."
+})
+
 import { isiOS, isLandscape } from "../../flags";
 
-export default function calculateElementSize(display) {
+export default function calculateElementSize() {
   let width = 0,
     height = 0;
 

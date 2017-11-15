@@ -5,9 +5,13 @@ pliny.function({
   name: "flipCoin",
   description: "Returns a true or false. Supports bum coins.",
   returns: "Boolean",
-  parameters: [
-    { name: "p", type: "Number", optional: true, defaultValue: 0.5, description: "Set the probability of seeing a true value." }
-  ],
+  parameters: [{
+    name: "p",
+    type: "Number",
+    optional: true,
+    default: 0.5,
+    description: "Set the probability of seeing a true value."
+  }],
   examples: [{
     name: "Play heads-or-tails.",
     description: "To generate a sequence of truth values, call the `Primrose.Random.flipCoin()` function:\n\

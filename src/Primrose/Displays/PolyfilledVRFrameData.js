@@ -19,7 +19,7 @@ export default class PolyfilledVRFrameData {
 
     pliny.property({
       parent: "Primrose.Displays.PolyfilledVRFrameData",
-      name: "rightProjectionMatrix",
+      name: "leftViewMatrix",
       type: "Float32Array",
       description: "The projection matrix for the right eye."
     });
@@ -27,7 +27,7 @@ export default class PolyfilledVRFrameData {
 
     pliny.property({
       parent: "Primrose.Displays.PolyfilledVRFrameData",
-      name: "leftViewMatrix",
+      name: "rightProjectionMatrix",
       type: "Float32Array",
       description: "The view matrix for the left eye."
     });
@@ -45,8 +45,12 @@ export default class PolyfilledVRFrameData {
       parent: "Primrose.Displays.PolyfilledVRFrameData",
       name: "pose",
       type: "VRPose",
-      description: "Legacy VRPose data."
+      description: "VRPose data, instead of using the legacy VRDisplay.prototype.getPose."
     });
     this.pose = null;
+  }
+
+  get isPolyfilledVRFrameData() {
+    return true;
   }
 };
