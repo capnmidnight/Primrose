@@ -22,6 +22,10 @@ export default class StandardMonitorVRDisplay extends VRDisplay {
     this._display = display;
   }
 
+  get isStereo() {
+    return false;
+  }
+
   submitFrame() {
     if(this._display && this._display.isPolyfilled) {
       this._display.submitFrame();

@@ -1123,7 +1123,7 @@ export default class BrowserEnvironment extends EventDispatcher {
         this.ready.then(() => {
           this.audio.start();
           lt = performance.now() * MILLISECONDS_TO_SECONDS;
-          RAF(animate);
+          this.VR.currentDevice.startAnimation(animate);
         });
       }
     };
@@ -1906,11 +1906,10 @@ export default class BrowserEnvironment extends EventDispatcher {
       .map((display, i) => {
         // We skip the Standard Monitor and Magic Window on iOS because we can't
         // go full screen on those systems.
-        if(!isiOS || VR.isStereoDisplay(display)) {
+        if(!isiOS || display.isStereo) {
           const enterVR = this.goFullScreen.bind(this, i),
-            btn = newButton(display.displayName, display.displayName, enterVR),
-            isStereo = VR.isStereoDisplay(display);
-          btn.className = isStereo ? "stereo" : "mono";
+            btn = newButton(display.displayName, display.displayName, enterVR);
+          btn.className = display.isStereo ? "stereo" : "mono";
           return btn;
         }
       })

@@ -42,6 +42,10 @@ export default class MixedRealityVRDisplay extends VRDisplay {
     });
   }
 
+  get isStereo() {
+    return false;
+  }
+
   getLayers() {
     return this._display.getLayers();
   }

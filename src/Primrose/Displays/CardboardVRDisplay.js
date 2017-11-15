@@ -61,6 +61,10 @@ export default class CardboardVRDisplay extends VRDisplay {
     this.poseSensor_ = options && options.overrideOrientation || new FusionPoseSensor(options);
   }
 
+  get isStereo() {
+    return true;
+  }
+
   _getPose() {
     return this.poseSensor_.getPose();
   }

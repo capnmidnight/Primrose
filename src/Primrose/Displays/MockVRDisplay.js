@@ -76,6 +76,10 @@ export default class MockVRDisplay {
     this.getEyeParameters = (side) => dataPack.currentEyeParams[side];
   }
 
+  get isStereo() {
+    return false;
+  }
+
 
   cancelAnimationFrame(handle) {
     window.cancelAnimationFrame(handle);

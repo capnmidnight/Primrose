@@ -95,7 +95,7 @@ export default class NativeVRDisplay extends BaseVRDisplay {
   }
 
   get isStereo() {
-    return true;
+    return !this._display.isBaseVRDisplay || this._display.isStereo;
   }
 
   get targetName() {

@@ -35,19 +35,11 @@ import {
 } from "../../util";
 
 import installPolyfills from "../Displays/install";
-import StandardMonitorVRDisplay from "../Displays/StandardMonitorVRDisplay";
 import CardboardVRDisplay from "../Displays/CardboardVRDisplay";
-import ViewCameraTransform from "../Displays/ViewCameraTransform";
 
 import PoseInputProcessor from "./PoseInputProcessor";
 
 export default class VR extends PoseInputProcessor {
-
-  static isStereoDisplay(display) {
-    const leftParams = display.getEyeParameters("left"),
-        rightParams = display.getEyeParameters("right");
-    return !!(leftParams && rightParams);
-  }
 
   constructor(options) {
     super("VR");
@@ -60,7 +52,6 @@ export default class VR extends PoseInputProcessor {
     this.stage = null;
     this.lastStageWidth = null;
     this.lastStageDepth = null;
-    this.isStereo = false;
     installPolyfills(options);
 
 
@@ -99,7 +90,6 @@ export default class VR extends PoseInputProcessor {
       this.currentDevice = this.displays[selectedIndex];
       this.currentDevice.getFrameData(this.currentFrameData);
       this.currentPose = this.currentFrameData.pose;
-      this.isStereo = VR.isStereoDisplay(this.currentDevice);
     }
   }
 
@@ -222,6 +212,10 @@ export default class VR extends PoseInputProcessor {
 
   get hasOrientation() {
     return this.currentDevice && this.currentDevice.capabilities.hasOrientation;
+  }
+
+  get isStereo() {
+    return this.currentDevice && this.currentDevice.isStereo;
   }
 
   get currentCanvas() {
