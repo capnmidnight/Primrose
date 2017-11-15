@@ -2,6 +2,7 @@ import pliny from "pliny/pliny";
 
 import frameDataFromPose from "./frameDataFromPose";
 import CardboardVRDisplay from "./CardboardVRDisplay";
+import MagicWindowVRDisplay from "./MagicWindowVRDisplay";
 import MockVRDisplay from "./MockVRDisplay";
 import StandardMonitorVRDisplay from "./StandardMonitorVRDisplay";
 import VRDisplay from "./VRDisplay";

@@ -1,16 +1,19 @@
 import pliny from "pliny/pliny";
 
-import { isMobile } from "../../flags";
-import VRDisplay from "./VRDisplay";
 import defaultPose from "./defaultPose";
+import frameDataFromPose from "./frameDataFromPose";
 import mixinMonoscopicEyeParameters from "./mixinMonoscopicEyeParameters";
+import PolyfilledVRDisplay from "./PolyfilledVRDisplay";
+import PolyfilledVRFrameData from "./PolyfilledVRFrameData";
 
+export default class StandardMonitorVRDisplay extends PolyfilledVRDisplay {
 
-export default class StandardMonitorVRDisplay extends VRDisplay {
-
-  constructor(display) {
+  constructor() {
     super("Full Screen");
-    this._display = display;
+  }
+
+  get isStandardMonitorVRDisplay() {
+    return true;
   }
 
   get isStereo() {
@@ -18,19 +21,11 @@ export default class StandardMonitorVRDisplay extends VRDisplay {
   }
 
   submitFrame() {
-    if(this._display && this._display.isPolyfilled) {
-      this._display.submitFrame();
-    }
+    // do nothing
   }
 
-  getFrameData(frameData) {
-    var display = isMobile && this._display;
-    if(display){
-      display.getFrameData(frameData);
-    }
-    else{
-      frameData.pose = defaultPose();
-    }
+  _getPose() {
+    return defaultPose();
   }
 };
 

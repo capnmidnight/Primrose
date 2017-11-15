@@ -2,25 +2,25 @@ import pliny from "pliny/pliny";
 
 import CardboardVRDisplay from "./CardboardVRDisplay";
 import install from "./install";
+import MagicWindowVRDisplay from "./MagicWindowVRDisplay";
 import MockVRDisplay from "./MockVRDisplay";
-import StandardMonitorVRDisplay from "./StandardMonitorVRDisplay";
-import VRDisplay from "./VRDisplay";
 import PolyfilledVRFrameData from "./PolyfilledVRFrameData";
+import StandardMonitorVRDisplay from "./StandardMonitorVRDisplay";
 
 export {
   CardboardVRDisplay,
   install,
+  MagicWindowVRDisplay,
   MockVRDisplay,
   PolyfilledVRFrameData,
-  StandardMonitorVRDisplay,
-  VRDisplay
+  StandardMonitorVRDisplay
 };
 
 export default {
   CardboardVRDisplay,
   install,
+  MagicWindowVRDisplay,
   MockVRDisplay,
   PolyfilledVRFrameData,
-  StandardMonitorVRDisplay,
-  VRDisplay
+  StandardMonitorVRDisplay
 };
