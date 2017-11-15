@@ -550,14 +550,12 @@ export default class BrowserEnvironment extends EventDispatcher {
     };
 
     var animate = (t) => {
-      timer = null;
       var dt = t - lt,
         i, j;
       lt = t;
       update(dt);
       this.audio.setPlayer(this.head.mesh);
       render();
-      RAF(animate);
     };
 
     var render = () => {
@@ -616,7 +614,7 @@ export default class BrowserEnvironment extends EventDispatcher {
         this.renderer.domElement.height = canvasHeight;
         this.renderer.domElement.style.width = styleWidth + "px";
         this.renderer.domElement.style.height = styleHeight + "px";
-        if (timer === null) {
+        if (!this.VR.currentDevice.isAnimating) {
           render();
         }
       }
@@ -1112,17 +1110,7 @@ export default class BrowserEnvironment extends EventDispatcher {
 
 
 
-    let allowRestart = true,
-      currentTimerObject = null,
-      timer = null;
-
-    const RAF = (callback) => {
-      currentTimerObject = this.VR.currentDevice || window;
-      if (timer === null) {
-        timer = currentTimerObject.requestAnimationFrame(callback);
-      }
-    };
-
+    let allowRestart = true;
 
     pliny.method({
       parent: "Primrose.BrowserEnvironment",
@@ -1149,13 +1137,13 @@ export default class BrowserEnvironment extends EventDispatcher {
         name: "evt",
         type: "Event",
         optional: true,
-        defaultValue: null,
+        default: null,
         description: "The event that triggered this function."
       }, {
         name: "restartAllowed",
         type: "Boolean",
         optional: true,
-        defaultValue: false,
+        default: false,
         description: "Whether or not calling `start()` again is allowed, or if this is a permanent stop."
       } ]
     });
@@ -1166,17 +1154,8 @@ export default class BrowserEnvironment extends EventDispatcher {
           console.log("stopped");
         }
 
-        if (currentTimerObject) {
-
-          if(timer !== null) {
-            currentTimerObject.cancelAnimationFrame(timer);
-            timer = null;
-          }
-
-          this.audio.stop();
-          currentTimerObject = null;
-        }
-
+        this.VR.currentDevice.stopAnimation();
+        this.audio.stop();
       }
     };
 
@@ -1798,7 +1777,7 @@ export default class BrowserEnvironment extends EventDispatcher {
     pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "displays",
-      type: "Array of VRDisplay",
+      type: "Array of BaseVRDisplay",
       description: "The VRDisplays available on the system."
     });
 

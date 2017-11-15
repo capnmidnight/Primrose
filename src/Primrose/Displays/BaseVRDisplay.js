@@ -8,8 +8,12 @@ pliny.class({
 
 export default class BaseVRDisplay {
 
+  constructor() {
+    this._timer = null;
+    this._isAnimating = false;
+  }
+
   startAnimation(callback) {
-    this.timer = this.requestAnimationFrame(callback);
 
     pliny.method({
       parent: "Primrose.Displays.BaseVRDisplay",
@@ -21,15 +25,40 @@ export default class BaseVRDisplay {
         description: "The code to execute during the animation update."
       }]
     });
+
+    if(this._timer === null) {
+      this._isAnimating = true;
+
+      const animator = (time) => {
+        this._timer = null;
+        callback(time);
+        this._timer = this.requestAnimationFrame(animator);
+      };
+
+      this._timer = this.requestAnimationFrame(animator);
+    }
+  }
+
+  get isBaseVRDisplay() {
+    return true;
+  }
+
+  get isAnimating() {
+    return this._isAnimating;
   }
 
   stopAnimation() {
-    this.cancelAnimationFrame(this.timer);
 
     pliny.method({
       parent: "Primrose.Displays.BaseVRDisplay",
       name: "stopAnimation",
       description: "Stop any animation loop that is currently running."
     });
+
+    if(this._timer !== null) {
+      this.cancelAnimationFrame(this._timer);
+      this._timer = null;
+      this._isAnimating = false;
+    }
   }
 };

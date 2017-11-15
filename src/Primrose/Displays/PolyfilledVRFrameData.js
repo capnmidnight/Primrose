@@ -49,4 +49,8 @@ export default class PolyfilledVRFrameData {
     });
     this.pose = null;
   }
+
+  get isPolyfilledVRFrameData() {
+    return true;
+  }
 };
