@@ -59,6 +59,15 @@ export default class CardboardVRDisplay extends VRDisplay {
 
     // "Private" members.
     this.poseSensor_ = options && options.overrideOrientation || new FusionPoseSensor(options);
+    if(options.nonstandardIPD !== null){
+      ipd = options.nonstandardIPD;
+    }
+    if(options.nonstandardNeckLength !== null){
+      neckLength = options.nonstandardNeckLength;
+    }
+    if(options.nonstandardNeckDepth !== null){
+      neckDepth = options.nonstandardNeckDepth;
+    }
   }
 
   get isStereo() {
