@@ -18,6 +18,7 @@ import pliny from "pliny/pliny";
 import BaseVRDisplay from "./BaseVRDisplay";
 import defaultPose from "./defaultPose";
 import frameDataFromPose from "./frameDataFromPose";
+import PolyfilledVRFrameData from "./PolyfilledVRFrameData";
 import { isMobile } from "../../flags";
 
 import {
@@ -51,7 +52,6 @@ export default class PolyfilledVRDisplay extends BaseVRDisplay {
       })),
       displayId: immutable(nextDisplayId++),
       displayName: immutable(name),
-      isConnected: immutable(true),
       stageParameters: immutable(null),
       isPresenting: immutable(() => FullScreen.isActive ),
 
@@ -64,12 +64,8 @@ export default class PolyfilledVRDisplay extends BaseVRDisplay {
     this._poseData = null;
   }
 
-  getFrameData(frameData) {
-    if(!this._poseData){
-      this._poseData = this._getPose() || defaultPose();
-    }
-
-    frameDataFromPose(frameData, this._poseData, this);
+  get isPolyfilledVRDisplay() {
+    return true;
   }
 
   requestAnimationFrame(callback) {
@@ -95,6 +91,17 @@ export default class PolyfilledVRDisplay extends BaseVRDisplay {
 
   getLayers() {
     return this._currentLayers.slice();
+  }
+
+  makeVRFrameDataObject() {
+    return new PolyfilledVRFrameData();
+  }
+
+  getFrameData(frameData) {
+    if(!this._poseData) {
+      this._poseData = this._getPose();
+    }
+    frameDataFromPose(frameData, this._poseData, this);
   }
 
   submitFrame(pose) {

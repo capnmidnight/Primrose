@@ -71,12 +71,13 @@ export default class VR extends PoseInputProcessor {
   }
 
   connect(selectedIndex) {
+    this.currentPose = null;
+    this.currentFrameData = null;
     this.currentDevice = null;
     this.currentDeviceIndex = selectedIndex;
-    this.currentFrameData = new VRFrameData();
-    this.currentPose = null;
     if (0 <= selectedIndex && selectedIndex <= this.displays.length) {
       this.currentDevice = this.displays[selectedIndex];
+      this.currentFrameData = this.currentDevice.makeVRFrameDataObject();
       this.currentDevice.getFrameData(this.currentFrameData);
       this.currentPose = this.currentFrameData.pose;
     }
@@ -94,12 +95,7 @@ export default class VR extends PoseInputProcessor {
         layers = [layers];
       }
 
-      // A hack to deal with a bug in the current build of Chromium
-      if (this.isNativeMobileWebVR && this.isStereo && !isGearVR) {
-        layers = layers[0];
-      }
-
-      var promise = this.currentDevice.requestPresent(layers);
+      let promise = this.currentDevice.requestPresent(layers);
       if(isMobile || !isFirefox) {
         promise = promise.then(standardLockBehavior);
       }
@@ -178,12 +174,40 @@ export default class VR extends PoseInputProcessor {
 
   getTransforms(near, far) {
     if (this.currentDevice) {
-      if (!this._transformers[this.currentDeviceIndex]) {
-        this._transformers[this.currentDeviceIndex] = new ViewCameraTransform(this.currentDevice);
-      }
       this.currentDevice.depthNear = near;
       this.currentDevice.depthFar = far;
-      return this._transformers[this.currentDeviceIndex].getTransforms(near, far);
+
+      const left = this.currentDevice.getEyeParameters("left"),
+        right = this.currentDevice.getEyeParameters("right"),
+        eyes = [{
+          projection: this.currentFrameData.leftProjectionMatrix,
+          view: this.currentFrameData.leftViewMatrix,
+          eye: left
+        }];
+
+      if(right) {
+        eyes.push({
+          projection: this.currentFrameData.rightProjectionMatrix,
+          view: this.currentFrameData.rightViewMatrix,
+          eye: right
+        });
+      }
+
+      let x = 0;
+      for(let i = 0; i < eyes.length; ++i) {
+        const view = eyes[i],
+          eye = view.eye;
+
+        view.viewport = {
+          left: x,
+          width: eye.renderWidth,
+          height: eye.renderHeight
+        };
+
+        x += eye.renderWidth;
+      }
+
+      return eyes;
     }
   }
 

@@ -2,10 +2,11 @@ import pliny from "pliny/pliny";
 
 import Player from "../Replay/Player";
 
-export default class MockVRDisplay {
-  constructor(data) {
+import PolyfilledVRDisplay from "./PolyfilledVRDisplay";
 
-    var timestamp = null,
+export default class MockVRDisplay extends PolyfilledVRDisplay {
+  constructor(data) {
+    let timestamp = null,
       displayName = null,
       startOn = null;
 
@@ -16,27 +17,15 @@ export default class MockVRDisplay {
       }
     });
 
-    const dataPack = {
+    this._dataPack = {
       currentDisplay: this,
       currentEyeParams: {
         left: {
-          fieldOfView: {
-            downDegrees: null,
-            leftDegrees: null,
-            rightDegrees: null,
-            upDegrees: null
-          },
           renderWidth: null,
           renderHeight: null,
           offset: null
         },
         right: {
-          fieldOfView: {
-            downDegrees: null,
-            leftDegrees: null,
-            rightDegrees: null,
-            upDegrees: null
-          },
           renderWidth: null,
           renderHeight: null,
           offset: null
@@ -49,7 +38,7 @@ export default class MockVRDisplay {
       }
     };
 
-    Object.defineProperties(dataPack.currentPose, {
+    Object.defineProperties(this._dataPack.currentPose, {
       timestamp: {
         get: () => timestamp,
         set: (v) => timestamp = v
@@ -60,7 +49,7 @@ export default class MockVRDisplay {
       }
     });
 
-    const player = new Player(dataPack);
+    const player = new Player(this._dataPack);
     player.load(data);
     player.update(0);
 
@@ -72,14 +61,20 @@ export default class MockVRDisplay {
       thunk(t);
     });
 
-    this.getFrameData = (frameData) => frameData.pose = dataPack.currentPose;
-    this.getEyeParameters = (side) => dataPack.currentEyeParams[side];
+    this.getEyeParameters = (side) => this._dataPack.currentEyeParams[side];
+  }
+
+  get isMockVRDisplay() {
+    return true;
   }
 
   get isStereo() {
     return false;
   }
 
+  _getPose() {
+    return this._dataPack.currentPose;
+  }
 
   cancelAnimationFrame(handle) {
     window.cancelAnimationFrame(handle);

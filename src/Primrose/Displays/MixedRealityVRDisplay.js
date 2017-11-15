@@ -1,15 +1,15 @@
 import pliny from "pliny/pliny";
 
-import VRDisplay from "./VRDisplay";
 import defaultPose from "./defaultPose";
 import mixinMonoscopicEyeParameters from "./mixinMonoscopicEyeParameters";
+import PolyfilledVRDisplay from "./PolyfilledVRDisplay";
 
-export default class MixedRealityVRDisplay extends VRDisplay {
+export default class MixedRealityVRDisplay extends PolyfilledVRDisplay {
 
   constructor(display) {
     super("Full Screen");
     this._display = display;
-    this.motionDevice = null;
+    this._motionDevice = null;
 
     Object.defineProperties(this, {
       capabilities: { get: () => this._display.capabilities },
@@ -29,6 +29,10 @@ export default class MixedRealityVRDisplay extends VRDisplay {
 
       isPolyfilled: immutable(true)
     });
+  }
+
+  get isMixedRealityVRDisplay() {
+    return true;
   }
 
   get isStereo() {
@@ -61,12 +65,12 @@ export default class MixedRealityVRDisplay extends VRDisplay {
     // do nothing here, the real VRDisplay should be managing the animation
   }
 
-  getFrameData(frameData) {
-    if(this.motionDevice){
-      this.motionDevice.getFrameData(frameData);
+  _getPose() {
+    if(this._motionDevice){
+      return this._motionDevice.getPose();
     }
-    else{
-      frameData.pose = defaultPose();
+    else {
+      return defaultPose();
     }
   }
 }
