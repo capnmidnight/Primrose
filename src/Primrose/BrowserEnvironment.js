@@ -422,8 +422,8 @@ export default class BrowserEnvironment extends EventDispatcher {
             let mouseHeading = null;
             if (this.VR.hasOrientation) {
               mouseHeading = this.mousePointer.rotation.y;
-              const newMouseHeading = WEDGE * Math.floor((mouseHeading / WEDGE) + 0.5),
-                offset = this.Mouse.commands.U.offset;
+              const newMouseHeading = WEDGE * Math.floor((mouseHeading / WEDGE) + 0.5);
+              let offset = this.Mouse.commands.U.offset;
               if(newMouseHeading !== 0){
                 offset += 1 - this.Mouse.getValue("U");
                 this.Mouse.setOffset(offset);
