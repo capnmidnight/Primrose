@@ -14,6 +14,38 @@ import pliny from "pliny/pliny";
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+pliny.class({
+  parent: "Primrose.Displays.SensorFusion",
+  name: "FusionPoseSensor",
+  description: "The pose sensor, implemented using DeviceMotion APIs.",
+  parameters: [{
+    name: "options",
+    type: "Primrose.Displays.FusionPoseSensor.optionsHash",
+    optional: true,
+    description: "Options for configuring the pose sensor."
+  }]
+});
+
+pliny.record({
+  parent: "Primrose.Displays.FusionPoseSensor",
+  name: "optionsHash",
+  description: "Options for configuring the pose sensor.",
+  parameters: [{
+    name: "K_FILTER",
+    type: "Number",
+    optional: true,
+    default: 0.98,
+    description: "Complementary filter coefficient. 0 for accelerometer, 1 for gyro."
+  }, {
+    name: "PREDICTION_TIME_S",
+    type: "Number",
+    optional: true,
+    default: 0.040,
+    description: "How far into the future to predict during fast motion (in seconds)."
+  }]
+});
+
 import ComplementaryFilter from "./ComplementaryFilter";
 import PosePredictor from "./PosePredictor";
 import { Quaternion, Vector3 } from "three";

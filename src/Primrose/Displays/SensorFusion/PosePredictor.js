@@ -16,7 +16,7 @@ import pliny from "pliny/pliny";
  */
 
 pliny.class({
-  parent: "Primrose.Displays",
+  parent: "Primrose.Displays.SensorFusion",
   name: "PosePredictor",
   description: "Given an orientation and the gyroscope data, predicts the future orientation of the head. This makes rendering appear faster. Also see: http://msl.cs.uiuc.edu/~lavalle/papers/LavYerKatAnt14.pdf",
   parameters: [{

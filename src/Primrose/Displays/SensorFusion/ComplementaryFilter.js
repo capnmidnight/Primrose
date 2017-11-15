@@ -15,6 +15,17 @@ import pliny from "pliny/pliny";
  * limitations under the License.
  */
 
+pliny.class({
+  parent: "Primrose.Displays.SensorFusion",
+  name: "ComplementaryFilter",
+  description: "An implementation of a simple complementary filter, which fuses gyroscope and accelerometer data from the 'devicemotion' event. Accelerometer data is very noisy, but stable over the long term. Gyroscope data is smooth, but tends to drift over the long term. This fusion is relatively simple: 1.) Get orientation estimates from accelerometer by applying a low-pass filter on that data, 2.) Get orientation estimates from gyroscope by integrating over time, 3.) Combine the two estimates, weighing (1) in the long term, but (2) for the short term.",
+  parameters: [{
+    name: "kFilter",
+    type: "Number",
+    description: "Complementary filter coefficient. 0 for accelerometer, 1 for gyro."
+  }]
+});
+
 import SensorSample from "./SensorSample";
 import { Math as _Math, Quaternion, Vector3 } from "three";
 import { isTimestampDeltaValid } from "../../../util";
