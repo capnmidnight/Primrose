@@ -16,6 +16,7 @@ import pliny from "pliny/pliny";
  */
 
 import BaseVRDisplay from "./BaseVRDisplay";
+import defaultPose from "./defaultPose";
 import frameDataFromPose from "./frameDataFromPose";
 import { isMobile } from "../../flags";
 
@@ -34,20 +35,10 @@ const defaultLeftBounds = [0, 0, 0.5, 1],
 let nextDisplayId = 1000,
   hasShowDeprecationWarning = false;
 
-function defaultPose() {
-  return {
-    position: [0, 0, 0],
-    orientation: [0, 0, 0, 1],
-    linearVelocity: null,
-    linearAcceleration: null,
-    angularVelocity: null,
-    angularAcceleration: null
-  };
-}
-
 export default class PolyfilledVRDisplay extends BaseVRDisplay {
   constructor(name) {
     super();
+
     this._currentLayers = [];
 
     Object.defineProperties(this, {

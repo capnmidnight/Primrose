@@ -2,18 +2,9 @@ import pliny from "pliny/pliny";
 
 import { isMobile } from "../../flags";
 import VRDisplay from "./VRDisplay";
+import defaultPose from "./defaultPose";
 import mixinMonoscopicEyeParameters from "./mixinMonoscopicEyeParameters";
 
-function defaultPose() {
-  return {
-    position: [0, 0, 0],
-    orientation: [0, 0, 0, 1],
-    linearVelocity: null,
-    linearAcceleration: null,
-    angularVelocity: null,
-    angularAcceleration: null
-  };
-}
 
 export default class StandardMonitorVRDisplay extends VRDisplay {
 
