@@ -32,6 +32,7 @@ pliny.class({
 });
 
 import findProperty from "./findProperty";
+import immutable from "./immutable";
 
 export default class AsyncLockRequest {
   constructor(name, elementOpts, changeEventOpts, errorEventOpts, requestMethodOpts, exitMethodOpts) {
@@ -55,7 +56,69 @@ export default class AsyncLockRequest {
 
     this.exit = this.exit.bind(this);
     this.request = this.request.bind(this);
+
+    pliny.property({
+      parent: "Util.AsyncLockRequest",
+      name: "available",
+      type: "Boolean",
+      description: "Returns true if the system actually supports the requested locking API."
+    })
+    this.available = immutable(!!this._requestMethodName);
+
+    if(!this.available) {
+      const lowerName = name.toLocaleLowerCase();
+      console.log(`Mocking ${name} API`);
+
+      this._elementName = `mock${name}Element`;
+      this._changeEventName = `mock${lowerName}change`;
+      this._errorEventName = `mock${lowerName}error`;
+      this._requestMethodName = `mockRequest${name}`;
+      this._exitMethodName = `mockExit${name}`;
+
+      // The locking APIs spec says the property should be `null` when not locked,
+      // not `undefined`.
+      document[this._elementName] = null;
+
+      // Mock out the request process. We have to use the `self` pattern because
+      // we need to use the Element's `this` to set "locked element" property of
+      // the document.
+      const self = this;
+      Element.prototype[this._requestMethodName] = function() {
+        self._onRequest();
+        // We kick out to a timeout so the rest of the processing from AsyncLockRequest
+        // can take place and AsyncLockRequest can follow through.
+        setTimeout(() => {
+          // Recording which element is actively in the the pointer lock state.
+          document[self._elementName] = this;
+          self._preDispatchChangeEvent();
+          // Say we succeeded, even though we didn't really.
+          document.dispatchEvent(new Event(self._changeEventName));
+        });
+      };
+
+      // Mock out the exit process.
+      document[this._exitMethodName] = () => {
+        // We never actually succeeded in the first place, so just undo the state
+        // changes we made when we lied in the first place.
+        document[this._elementName] = null;
+        document.dispatchEvent(new Event(this._changeEventName));
+      };
+
+      // Enable using the escape key to exit the lock.
+      window.addEventListener("keydown", (evt) => {
+        if(evt.keyCode === 27) {
+          this.exit();
+        }
+      });
+
+      this.addChangeListener(() => {
+        console.info(`The ${name} ${this.isActive ? "is" : "is not"} active.`);
+      });
+    }
   }
+
+  _onRequest() {}
+  _preDispatchChangeEvent() {}
 
   get element(){
     return document[this._elementName];
