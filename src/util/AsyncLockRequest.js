@@ -49,8 +49,8 @@ export default class AsyncLockRequest {
     this._errorEventName = this._errorEventName && this._errorEventName.substring(2);
 
     this._events = {
-      change: this._changeEventName,
-      error: this._errorEventName
+      change: () => this._changeEventName,
+      error: () => this._errorEventName
     };
 
     this.exit = this.exit.bind(this);
@@ -66,14 +66,16 @@ export default class AsyncLockRequest {
   }
 
   addEventListener(name, thunk, bubbles){
-    if(this._events[name]) {
-      document.addEventListener(this._events[name], thunk, bubbles);
+    const eventName = this._events[name]();
+    if(eventName) {
+      document.addEventListener(eventName, thunk, bubbles);
     }
   }
 
   removeEventListener(name, thunk){
-    if(this._events[name]) {
-      document.removeEventListener(this._events[name], thunk);
+    const eventName = this._events[name]();
+    if(eventName) {
+      document.removeEventListener(eventName, thunk);
     }
   };
 

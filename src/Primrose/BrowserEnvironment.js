@@ -207,7 +207,7 @@ import { isCardboard, isiOS, isLandscape } from "../flags";
 
 import { box, hub } from "../live-api";
 
-import { PointerLock, identity, Angle } from "../util";
+import { FullScreen, PointerLock, identity, Angle } from "../util";
 
 import Pointer from "./Pointer";
 import Keys from "./Keys";
@@ -1064,7 +1064,9 @@ export default class BrowserEnvironment extends EventDispatcher {
         else{
           elem = this.options.fullScreenElement;
         }
+
         this.VR.connect(index);
+
         return this.VR.requestPresent([{
             source: elem
           }])
@@ -1893,20 +1895,38 @@ export default class BrowserEnvironment extends EventDispatcher {
 
     const buttons = this.displays
       .map((display, i) => {
-        // We skip the Standard Monitor and Magic Window on iOS because we can't
-        // go full screen on those systems.
-        if(!isiOS || display.isStereo) {
-          const enterVR = this.goFullScreen.bind(this, i),
-            btn = newButton(display.displayName, display.displayName, enterVR);
-          btn.className = display.isStereo ? "stereo" : "mono";
-          return btn;
-        }
-      })
-      .filter(identity);
+        const enterVR = this.goFullScreen.bind(this, i),
+          btn = newButton(display.displayName, display.displayName, enterVR);
+        btn.className = "enterVRButton " + display.isStereo ? "stereo" : "mono";
+        return btn;
+      });
 
     if(!/(www\.)?primrosevr.com/.test(document.location.hostname) && !this.options.disableAdvertising) {
-      buttons.push(newButton("Primrose", "✿", () => open("https://www.primrosevr.com", "_blank")));
+      const visitPrimroseButton = newButton("Primrose", "✿", () => open("https://www.primrosevr.com", "_blank"));
+      visitPrimroseButton.className = "visitPrimroseButton";
+      buttons.push(visitPrimroseButton);
     }
+
+    const exitFullScreenButton = newButton("Exit Fullscreen", "🗙", () => {
+      FullScreen.exit();
+      PointerLock.exit();
+    });
+
+    exitFullScreenButton.className = "exitVRButton"
+    exitFullScreenButton.style.display = "none";
+
+    buttons.push(exitFullScreenButton);
+
+    FullScreen.addChangeListener(() => {
+      const enterVRStyle = FullScreen.isActive ? "none" : "",
+        exitVRStyle = FullScreen.isActive ? "" : "none";
+
+      buttons.forEach((btn) =>
+        btn.style.display = enterVRStyle);
+
+      exitFullScreenButton.style.display = exitVRStyle;
+    });
+
     return buttons;
   }
 }
