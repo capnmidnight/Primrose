@@ -1,14 +1,13 @@
 import pliny from "pliny/pliny";
 
-import { isMobile } from "../../flags";
-import mixinMonoscopicEyeParameters from "./mixinMonoscopicEyeParameters";
+import FusionPoseSensor from "./SensorFusion/FusionPoseSensor";
 import PolyfilledVRDisplay from "./PolyfilledVRDisplay";
 
 export default class MagicWindowVRDisplay extends PolyfilledVRDisplay {
 
-  constructor(display) {
+  constructor(options) {
     super("Magic Window");
-    this._display = display;
+    this._poseSensor = new FusionPoseSensor(options);
   }
 
   get isMagicWindowVRDisplay() {
@@ -19,17 +18,7 @@ export default class MagicWindowVRDisplay extends PolyfilledVRDisplay {
     return false;
   }
 
-  submitFrame() {
-    this._display.submitFrame();
-  }
-
-  makeVRFrameDataObject() {
-    return this._display.makeVRFrameDataObject();
-  }
-
-  getFrameData(frameData) {
-    this._display.getFrameData(frameData);
+  _getPose() {
+    return this._poseSensor.getPose();
   }
 };
-
-mixinMonoscopicEyeParameters(MagicWindowVRDisplay);

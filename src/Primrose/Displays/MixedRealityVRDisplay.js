@@ -1,7 +1,6 @@
 import pliny from "pliny/pliny";
 
 import defaultPose from "./defaultPose";
-import mixinMonoscopicEyeParameters from "./mixinMonoscopicEyeParameters";
 import PolyfilledVRDisplay from "./PolyfilledVRDisplay";
 
 export default class MixedRealityVRDisplay extends PolyfilledVRDisplay {
@@ -74,5 +73,3 @@ export default class MixedRealityVRDisplay extends PolyfilledVRDisplay {
     }
   }
 }
-
-mixinMonoscopicEyeParameters(MixedRealityVRDisplay);

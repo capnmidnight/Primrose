@@ -100,11 +100,10 @@ function findDisplayOfType(Type, displays) {
   return false;
 }
 
-function prefixDisplays(Type, findParameter) {
-  findParameter = findParameter || function() {};
+function prefixDisplays(Type, options) {
   wrapGetVRDisplays((displays) => {
     if (!findDisplayOfType(Type, displays)) {
-      displays.unshift(new Type(findParameter(displays)));
+      displays.unshift(new Type(options));
     }
     return displays;
   });
@@ -112,11 +111,7 @@ function prefixDisplays(Type, findParameter) {
 
 function installMagicWindow(options) {
   if(!magicWindowPopulated && !(options && options.disableMotion)) {
-    prefixDisplays(
-      MagicWindowVRDisplay,
-      (displays) =>
-        findDisplayOfType(CardboardVRDisplay, displays)
-          || new CardboardVRDisplay(options));
+    prefixDisplays(MagicWindowVRDisplay, options);
     magicWindowPopulated = true;
   }
 }

@@ -1,7 +1,6 @@
 import pliny from "pliny/pliny";
 
 import BaseVRDisplay from "./BaseVRDisplay";
-import frameDataFromPose from "./frameDataFromPose";
 import PolyfilledVRFrameData from "./PolyfilledVRFrameData";
 
 export default class NativeVRDisplay extends BaseVRDisplay {
@@ -45,9 +44,8 @@ export default class NativeVRDisplay extends BaseVRDisplay {
       this.getFrameData = display.getFrameData.bind(display);
     }
     else{
-      this.getFrameData = (frameData) =>
       this.makeVRFrameDataObject = () => new PolyfilledVRFrameData();
-        frameDataFromPose(frameData, this.getPose(), this);
+      this._getPose = () => this.getPose();
     }
   }
 

@@ -81,17 +81,27 @@ export default class CardboardVRDisplay extends PolyfilledVRDisplay {
     return this._poseSensor.getPose();
   }
 
-  getEyeParameters(whichEye) {
+  _getFOV(whichEye) {
     var offset = [ipd, neckLength, neckDepth];
 
     if (whichEye == Eye.LEFT) {
       offset[0] *= -1.0;
     }
 
-    const dim = calculateElementSize();
-
     return {
-      offset: offset,
+      offset,
+      fieldOfView: {
+        upDegrees: 40,
+        downDegrees: 40,
+        leftDegrees: 40,
+        rightDegrees: 40
+      }
+    };
+  }
+
+  getEyeParameters(whichEye) {
+    const dim = calculateElementSize();
+    return {
       renderWidth: 0.5 * dim.width,
       renderHeight: dim.height,
     }
