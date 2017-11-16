@@ -6,13 +6,14 @@ import PolyfilledVRDisplay from "./PolyfilledVRDisplay";
 
 export default class MockVRDisplay extends PolyfilledVRDisplay {
   constructor(data) {
+    super("Test Data Playback");
     let timestamp = null,
       displayName = null,
       startOn = null;
 
     Object.defineProperties(this, {
       displayName: {
-        get: () => "Mock " + displayName,
+        get: () => "Test Data Playback: " + displayName,
         set: (v) => displayName = v
       }
     });

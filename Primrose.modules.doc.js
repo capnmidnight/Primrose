@@ -5,6 +5,7 @@ pliny.namespace({
 When including Primrose as a \`script\` tag, the Flags namespace is imported directly onto the window object and is available without qualification.`
 });
 
+pliny.js.map
 pliny.value({
   parent: "Flags",
   name: "isCardboard",
@@ -434,7 +435,13 @@ pliny.property({
   }]
 });
 
-pliny.function({
+pliny.property({
+      parent: "Util.AsyncLockRequest",
+      name: "available",
+      type: "Boolean",
+      description: "Returns true if the system actually supports the requested locking API."
+    })
+    pliny.function({
   parent: "Util",
   name: "findProperty",
   description: "Searches an object for a property that might go by different names in different browsers.",
@@ -455,6 +462,19 @@ pliny.function({
     console.assert(!isFirefox || elementName === \"mozFullScreenElement\");\n\
     console.assert(!isChrome || elementName === \"webkitFullscreenElement\");\n\
     console.assert(!isIE || elementName === \"msFullscreenElement\");"
+  }]
+});
+
+pliny.function({
+  parent: "Util",
+  name: "immutable",
+  description: "Define an enumerable property that cannot be modified.",
+  returns: "Property",
+  parameters: [{
+    name: "value",
+    type: "Object",
+    optional: true,
+    description: "The initial value for the property."
   }]
 });
 
@@ -514,6 +534,13 @@ pliny.function({
   }]
 });
 
+pliny.class({
+  parent: "Util",
+  name: "FullScreenLockRequest",
+  baseClass: "Util.AsyncLockRequest",
+  description: "A cross browser/polyfill/mock implementation of the Fullscreen API. It includes a liar mode for systems that don't support the Fullscreen API, to make the handling of application logic more streamlined. This class itself is not exported, only a single instance of it."
+});
+
 pliny.function({
   parent: "Util",
   name: "getSetting",
@@ -570,19 +597,6 @@ pliny.function({
 
 pliny.function({
   parent: "Util",
-  name: "immutable",
-  description: "Define an enumerable property that cannot be modified.",
-  returns: "Property",
-  parameters: [{
-    name: "value",
-    type: "Object",
-    optional: true,
-    description: "The initial value for the property."
-  }]
-});
-
-pliny.function({
-  parent: "Util",
   name: "isTimestampDeltaValid",
   returns: "Boolean",
   description: "Helper method to validate the time steps of sensor timestamps.",
@@ -608,6 +622,13 @@ pliny.function({
     optional: true,
 
   }]
+});
+
+pliny.class({
+  parent: "Util",
+  name: "PointerLockRequest",
+  baseClass: "Util.AsyncLockRequest",
+  description: "A cross browser/polyfill/mock implementation of the PointerLock API. It includes a liar mode for systems that don't support the PointerLock API, to make the handling of application logic more streamlined. This class itself is not exported, only a single instance of it."
 });
 
 pliny.function({
@@ -2266,6 +2287,11 @@ pliny.record({
     optional: true,
     description: "By default, what we see in the VR view will get mirrored to a regular view on the primary screen. Set to true to improve performance."
   }, {
+    name: "disableMotion",
+    type: "Boolean",
+    optional: true,
+    description: "By default, mobile devices have a motion sensor that can be used to update the view. Set to true to disable motion tracking."
+  }, {
     name: "disableDefaultLighting",
     type: "Boolean",
     optional: true,
@@ -2542,13 +2568,13 @@ pliny.property({
         name: "evt",
         type: "Event",
         optional: true,
-        defaultValue: null,
+        default: null,
         description: "The event that triggered this function."
       }, {
         name: "restartAllowed",
         type: "Boolean",
         optional: true,
-        defaultValue: false,
+        default: false,
         description: "Whether or not calling `start()` again is allowed, or if this is a permanent stop."
       } ]
     });
@@ -2661,7 +2687,7 @@ pliny.property({
     pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "displays",
-      type: "Array of VRDisplay",
+      type: "Array of BaseVRDisplay",
       description: "The VRDisplays available on the system."
     });
 
@@ -3585,41 +3611,76 @@ pliny.class({
     description: "| [under construction]"
 });
 
+pliny.function({
+  parent: "Primrose.Displays",
+  name: "defaultPose",
+  description: "Creates a new copy of the default, base state."
+});
+
 pliny.class({
   parent: "Primrose.Displays",
-  name: "VRFrameData",
-  description: "A polyfill for the WebVR standard VRFrameData object."
+  name: "BaseVRDisplay",
+  description: "The base class from which all *VRDisplay types inherit, providing additional functionality over the WebVR API standard VRDisplay."
+});
+
+pliny.method({
+      parent: "Primrose.Displays.BaseVRDisplay",
+      name: "startAnimation",
+      description: "Starts and maintains an animation loop.",
+      parameters: [{
+        name: "callback",
+        type: "Function",
+        description: "The code to execute during the animation update."
+      }]
+    });
+
+    pliny.method({
+      parent: "Primrose.Displays.BaseVRDisplay",
+      name: "stopAnimation",
+      description: "Stop any animation loop that is currently running."
+    });
+
+    pliny.function({
+  parent: "Primrose.Displays",
+  name: "calculateElementSize",
+  description: "Figure out the size the canvas needs to be for rendering."
+})
+
+pliny.class({
+  parent: "Primrose.Displays",
+  name: "PolyfilledVRFrameData",
+  description: "A polyfill for the WebVR standard PolyfilledVRFrameData object."
 });
 
 pliny.property({
-      parent: "Primrose.Displays.VRFrameData",
+      parent: "Primrose.Displays.PolyfilledVRFrameData",
       name: "leftProjectionMatrix",
       type: "Float32Array",
       description: "The projection matrix for the left eye."
     });
     pliny.property({
-      parent: "Primrose.Displays.VRFrameData",
-      name: "rightProjectionMatrix",
+      parent: "Primrose.Displays.PolyfilledVRFrameData",
+      name: "leftViewMatrix",
       type: "Float32Array",
       description: "The projection matrix for the right eye."
     });
     pliny.property({
-      parent: "Primrose.Displays.VRFrameData",
-      name: "leftViewMatrix",
+      parent: "Primrose.Displays.PolyfilledVRFrameData",
+      name: "rightProjectionMatrix",
       type: "Float32Array",
       description: "The view matrix for the left eye."
     });
     pliny.property({
-      parent: "Primrose.Displays.VRFrameData",
+      parent: "Primrose.Displays.PolyfilledVRFrameData",
       name: "rightViewMatrix",
       type: "Float32Array",
       description: "The view matrix for the right eye."
     });
     pliny.property({
-      parent: "Primrose.Displays.VRFrameData",
+      parent: "Primrose.Displays.PolyfilledVRFrameData",
       name: "pose",
       type: "VRPose",
-      description: "Legacy VRPose data."
+      description: "VRPose data, instead of using the legacy VRDisplay.prototype.getPose."
     });
     pliny.function({
   parent: "Primrose.DOM",
@@ -3861,6 +3922,48 @@ pliny.class({
 
 pliny.class({
   parent: "Primrose.Displays.SensorFusion",
+  name: "FusionPoseSensor",
+  description: "The pose sensor, implemented using DeviceMotion APIs.",
+  parameters: [{
+    name: "options",
+    type: "Primrose.Displays.FusionPoseSensor.optionsHash",
+    optional: true,
+    description: "Options for configuring the pose sensor."
+  }]
+});
+
+pliny.record({
+  parent: "Primrose.Displays.FusionPoseSensor",
+  name: "optionsHash",
+  description: "Options for configuring the pose sensor.",
+  parameters: [{
+    name: "K_FILTER",
+    type: "Number",
+    optional: true,
+    default: 0.98,
+    description: "Complementary filter coefficient. 0 for accelerometer, 1 for gyro."
+  }, {
+    name: "PREDICTION_TIME_S",
+    type: "Number",
+    optional: true,
+    default: 0.040,
+    description: "How far into the future to predict during fast motion (in seconds)."
+  }]
+});
+
+pliny.class({
+  parent: "Primrose.Displays.SensorFusion",
+  name: "ComplementaryFilter",
+  description: "An implementation of a simple complementary filter, which fuses gyroscope and accelerometer data from the 'devicemotion' event. Accelerometer data is very noisy, but stable over the long term. Gyroscope data is smooth, but tends to drift over the long term. This fusion is relatively simple: 1.) Get orientation estimates from accelerometer by applying a low-pass filter on that data, 2.) Get orientation estimates from gyroscope by integrating over time, 3.) Combine the two estimates, weighing (1) in the long term, but (2) for the short term.",
+  parameters: [{
+    name: "kFilter",
+    type: "Number",
+    description: "Complementary filter coefficient. 0 for accelerometer, 1 for gyro."
+  }]
+});
+
+pliny.class({
+  parent: "Primrose.Displays.SensorFusion",
   name: "SensorSample",
   description: "A combination of a sensor reading and a timestamp.",
   parameters: [{
@@ -3901,7 +4004,7 @@ pliny.method({
     });
 
     pliny.class({
-  parent: "Primrose.Displays",
+  parent: "Primrose.Displays.SensorFusion",
   name: "PosePredictor",
   description: "Given an orientation and the gyroscope data, predicts the future orientation of the head. This makes rendering appear faster. Also see: http://msl.cs.uiuc.edu/~lavalle/papers/LavYerKatAnt14.pdf",
   parameters: [{
@@ -4448,6 +4551,12 @@ pliny.record({
 
 pliny.namespace({
   parent: "Primrose",
+  name: "Displays",
+  description: "All the ways in which displays can be managed."
+});
+
+pliny.namespace({
+  parent: "Primrose",
   name: "DOM",
   description: "A few functions for manipulating DOM."
 });
@@ -4624,14 +4733,38 @@ pliny.class({
   parent: "Primrose.Physics",
   name: "DirectedForceField",
   description: "A component that causes two objects (the object to which the DirectedForceField is added as a component and one other object) to repel or attract each other with a set force.",
-  parameters: [
-    { name: "bodyStart", type: "THREE.Object3D", description: "An entity that has a rigid body component that we can manipulate for the physics system." },
-    { name: "bodyEnd", type: "THREE.Object3D", description: "An entity that has a rigid body component that we can manipulate for the physics system." },
-    { name: "options", type: "Object", optional: true, description: "Optional configuration values. See following parameters:" },
-    { name: "options.force", type: "Number", optional: true, defaultValue: 1, description: "The force to attract the two objects together. Use negative values to repel objects. If `gravitational` is true, the force will be a value for the gravitational constant G in the two-body gravity equation. The real value of G is available as `Primrose.Constants.G."},
-    { name: "options.gravitational", type: "Boolean", optional: true, defaultValue: false, description: "Indicate whether or not to treat the force as gravity, i.e. taking mass into consideration. If `gravitational` is true, the force will be a value for the gravitational constant G in the two-body gravity equation. The real value of G is available as `Primrose.Constants.G." },
-    { name: "options.falloff", type: "Boolean", optional: true, defaultValue: true, description: "Indicate whether or not to use a distance-squared fall-off for the force. If `gravitational` is specified, the fall-off is always distance-squared, regardless of setting this value." }
-  ]
+  parameters: [{
+    name: "bodyStart",
+    type: "THREE.Object3D",
+    description: "An entity that has a rigid body component that we can manipulate for the physics system."
+  }, {
+    name: "bodyEnd",
+    type: "THREE.Object3D",
+    description: "An entity that has a rigid body component that we can manipulate for the physics system."
+  }, {
+    name: "options",
+    type: "Object",
+    optional: true,
+    description: "Optional configuration values. See following parameters:"
+  }, {
+    name: "options.force",
+    type: "Number",
+    optional: true,
+    default: 1,
+    description: "The force to attract the two objects together. Use negative values to repel objects. If `gravitational` is true, the force will be a value for the gravitational constant G in the two-body gravity equation. The real value of G is available as `Primrose.Constants.G."
+  }, {
+    name: "options.gravitational",
+    type: "Boolean",
+    optional: true,
+    default: false,
+    description: "Indicate whether or not to treat the force as gravity, i.e. taking mass into consideration. If `gravitational` is true, the force will be a value for the gravitational constant G in the two-body gravity equation. The real value of G is available as `Primrose.Constants.G."
+  }, {
+    name: "options.falloff",
+    type: "Boolean",
+    optional: true,
+    default: true,
+    description: "Indicate whether or not to use a distance-squared fall-off for the force. If `gravitational` is specified, the fall-off is always distance-squared, regardless of setting this value."
+  }]
 });
 
 pliny.property({
@@ -4663,9 +4796,13 @@ pliny.function({
   name: "flipCoin",
   description: "Returns a true or false. Supports bum coins.",
   returns: "Boolean",
-  parameters: [
-    { name: "p", type: "Number", optional: true, defaultValue: 0.5, description: "Set the probability of seeing a true value." }
-  ],
+  parameters: [{
+    name: "p",
+    type: "Number",
+    optional: true,
+    default: 0.5,
+    description: "Set the probability of seeing a true value."
+  }],
   examples: [{
     name: "Play heads-or-tails.",
     description: "To generate a sequence of truth values, call the `Primrose.Random.flipCoin()` function:\n\
