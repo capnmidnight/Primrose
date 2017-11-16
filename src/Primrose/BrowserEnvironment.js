@@ -1,4 +1,4 @@
-import pliny from "pliny/pliny";
+// import pliny from "pliny/pliny";
 
 /// NOTE: maybe BrowserEnvironment should be a subclass of THREE.Scene.
 

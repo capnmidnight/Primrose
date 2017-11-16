@@ -1,7 +1,7 @@
 {
   "name": "primrose",
   "description": "Primrose is a framework for building Virtual Reality applications in Web browsers.",
-  "version": "0.33.0",
+  "version": "0.33.1",
   "author": "Sean T. McBeth <sean@seanmcbeth.com> (https://www.seanmcbeth.com)",
   "license": "GPL-3.0",
   "homepage": "https://www.primrosevr.com",
@@ -50,12 +50,11 @@
     "iphone-inline-video": "^1.9.3",
     "jstransformer-marked": "^1.0.1",
     "lavu-details-polyfill": "^0.1.0",
-    "pliny": "^4.0.1",
     "promise-polyfill": "^5.2.1",
     "three": "^0.85.2"
   },
   "devDependencies": {
     "gulp": "^3.9.1",
-    "marigold-build": "^1.10.9"
+    "marigold-build": "1.15.0"
   }
 }

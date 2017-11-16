@@ -1,4 +1,4 @@
-import pliny from "pliny/pliny";
+// import pliny from "pliny/pliny";
 
 export function lock(element) {
   var type = screen.orientation && screen.orientation.type || screen.mozOrientation || "";

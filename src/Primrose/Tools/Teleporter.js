@@ -1,4 +1,4 @@
-import pliny from "pliny/pliny";
+// import pliny from "pliny/pliny";
 
 import { Vector3 } from "three";
 

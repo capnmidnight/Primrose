@@ -43,6 +43,7 @@ var gulp = require("gulp"),
     return {
       name: "Primrose",
       advertise: true,
+      sourceMap: (debug) => debug,
       extractDocumentation: (debug) => !debug,
       format: fmt
     };
@@ -72,7 +73,7 @@ var gulp = require("gulp"),
 
   devServer = marigold.devServer(stopOnFiles, reloadOnFiles, {
     debounceDelay: 1500,
-    url: "Primrose/demos/physics2/"
+    url: "fx/demos/physics2/"
   }),
 
   copyQuickstart = marigold.move(["Primrose.min.js"], "quickstart"),

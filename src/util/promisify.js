@@ -1,4 +1,4 @@
-import pliny from "pliny/pliny";
+// import pliny from "pliny/pliny";
 
 Promise.prototype.log = function(args){
   args = args || [];

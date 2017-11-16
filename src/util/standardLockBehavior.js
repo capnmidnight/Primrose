@@ -1,4 +1,4 @@
-import pliny from "pliny/pliny";
+// import pliny from "pliny/pliny";
 
 import { isMobile, isiOS } from "../flags";
 import Orientation from "./Orientation";

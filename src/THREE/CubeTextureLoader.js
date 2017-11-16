@@ -1,4 +1,4 @@
-import pliny from "pliny/pliny";
+// import pliny from "pliny/pliny";
 
 import { CubeTextureLoader, CubeTexture, ImageLoader } from "three";
 

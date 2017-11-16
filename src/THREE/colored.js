@@ -1,4 +1,4 @@
-import pliny from "pliny/pliny";
+// import pliny from "pliny/pliny";
 
 import { BufferGeometry, Geometry, Mesh } from "three";
 

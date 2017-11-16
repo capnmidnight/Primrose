@@ -1,4 +1,4 @@
-import pliny from "pliny/pliny";
+// import pliny from "pliny/pliny";
 
 import { Euler, Quaternion, Vector2, Vector3, Vector4, Matrix3, Matrix4 } from "three";
 
