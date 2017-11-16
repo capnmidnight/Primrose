@@ -1,6 +1,7 @@
 import pliny from "pliny/pliny";
 
 import BaseVRDisplay from "./BaseVRDisplay";
+import mixinFrameDataFromPose from "./mixinFrameDataFromPose";
 import PolyfilledVRFrameData from "./PolyfilledVRFrameData";
 
 export default class NativeVRDisplay extends BaseVRDisplay {
@@ -39,13 +40,35 @@ export default class NativeVRDisplay extends BaseVRDisplay {
       this.depthFar = 10000.0;
     }
 
+    this._poseData = null;
+
     if("getFrameData" in display){
       this.makeVRFrameDataObject = () => new VRFrameData();
+
       this.getFrameData = display.getFrameData.bind(display);
+
+      this.submitFrame = () => {
+        if(this.isPresenting) {
+          return this._display.submitFrame();
+        }
+      };
     }
     else{
+      // WebVR 1.0 upgrade
       this.makeVRFrameDataObject = () => new PolyfilledVRFrameData();
-      this._getPose = () => this.getPose();
+
+      this.getFrameData = (frameData) => {
+        if(!this._poseData) {
+          this._poseData = this._display.getPose();
+        }
+
+        this._frameDataFromPose(frameData);
+      };
+
+      this.submitFrame = () => {
+        this._display.submitFrame(this._poseData);
+        this._poseData = null;
+      };
     }
   }
 
@@ -108,12 +131,6 @@ export default class NativeVRDisplay extends BaseVRDisplay {
     return this._display.getLayers();
   }
 
-  submitFrame() {
-    if(this.isPresenting) {
-      return this._display.submitFrame();
-    }
-  }
-
   get isStereo() {
     return !this._display.isBaseVRDisplay || this._display.isStereo;
   }
@@ -126,3 +143,5 @@ export default class NativeVRDisplay extends BaseVRDisplay {
     return 0;
   }
 };
+
+mixinFrameDataFromPose(NativeVRDisplay);
