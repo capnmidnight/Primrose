@@ -96,6 +96,6 @@ marigold.taskify([
 ], {
   default: devServer,
   release() {
-    gulp.start(tidy);
+    gulp.start(tidy.release);
   }
 });
