@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Input",
   name: "VR",
@@ -11,6 +12,7 @@ pliny.class({
     description: "The default height to use for the user, if the HMD doesn't provide a stage transform."
   }]
 });
+*/
 
 const DEFAULT_POSE = {
     position: [0, 0, 0],

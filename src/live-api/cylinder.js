@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Live API",
   name: "cylinder",
@@ -68,6 +69,7 @@ It should look something like this:\n\
 <img src=\"images/cylinder.jpg\">"
   }]
 });
+*/
 
 import { CylinderBufferGeometry } from "three";
 

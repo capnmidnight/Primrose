@@ -1,11 +1,13 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Controls",
   name: "Model",
   baseClass: "Primrose.Controls.Entity",
   description: "An object loaded from a model file."
 });
+*/
 
 
 import Entity from "./Entity";

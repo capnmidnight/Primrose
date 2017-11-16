@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Text",
   name: "CodePage",
@@ -20,6 +21,7 @@ As we work in the browser and not at the operating system level, we do not recei
     description: "The CodePage description, an object literal expressing how different key events with different modifier keys result into different character codes or dead key state transitions. See: https://en.wikipedia.org/wiki/Dead_key."
   }]
 });
+*/
 
 import Keys from "../../Keys";
 export default class CodePage {

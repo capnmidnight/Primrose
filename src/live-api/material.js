@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Live API",
   name: "material",
@@ -20,7 +21,9 @@ You typically won't use this function on your own. It's usually called by one of
     description: "Options to pass to the THREE.MeshStandardMaterial or THREE.MeshBasicMaterial constructor, or infrequently-used options to change the behavior of the setup. See [`Live API.material.optionsHash`](#LiveAPI_material_optionsHash) for more information."
   }]
 });
+*/
 
+/*
 pliny.record({
   parent: "Live API.material",
   name: "optionsHash",
@@ -92,6 +95,7 @@ pliny.record({
     description: "When `unshaded` is falsey, sets the light that the THREE.MeshStandardMaterial emits onto the scene."
   } ]
 });
+*/
 
 import { FrontSide, FlatShading, MeshStandardMaterial, MeshBasicMaterial } from "three";
 

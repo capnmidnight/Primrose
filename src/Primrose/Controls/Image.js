@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Controls",
   name: "Image",
@@ -11,6 +12,7 @@ pliny.class({
     description: "Named parameters for creating the Image."
   }]
 });
+*/
 
 import { textured } from "../../live-api";
 

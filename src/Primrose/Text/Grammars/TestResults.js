@@ -1,10 +1,12 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.value({
   parent: "Primrose.Text.Grammars",
   name: "TestResults",
   description: "A grammar for displaying the results of Unit Tests."
 });
+*/
 
 import Grammar from "./Grammar";
 export default new Grammar("TestResults", [

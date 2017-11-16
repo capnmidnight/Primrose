@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Util",
   name: "Workerize",
@@ -116,6 +117,7 @@ Then we can create and use an automatically workerized version of it as follows.
     requestAnimationFrame(paint);"
     }]
 });
+*/
 
 import { EventDispatcher } from "three";
 
@@ -123,7 +125,8 @@ export default class Workerize extends EventDispatcher {
 
   static createWorker(script, stripFunc) {
 
-    pliny.function({
+    /*
+pliny.function({
       parent: "Util.Workerize",
       name: "createWorker",
       description: "A static function that loads Plain Ol' JavaScript Functions into a WebWorker.",
@@ -138,6 +141,7 @@ export default class Workerize extends EventDispatcher {
       }],
       returns: "The WebWorker object."
     });
+*/
 
     if (typeof script === "function") {
       script = script.toString();
@@ -211,20 +215,24 @@ export default class Workerize extends EventDispatcher {
 
     // The binary-large-object can be used to convert the script from text to a
     // data URI, because workers can only be created from same-origin URIs.
-    pliny.property({
+    /*
+pliny.property({
       parent: "Util.Workerize",
       name: "worker",
       type: "WebWorker",
       description: "The worker thread containing our class."
     });
+*/
     this.worker = Workerize.createWorker(script, false);
 
-    pliny.property({
+    /*
+pliny.property({
       parent: "Util.Workerize",
       name: "args",
       type: "Array",
       description: "Static allocation of an array to save on memory usage when piping commands to a worker."
     });
+*/
     this.args = [null, null];
 
     this.worker.onmessage = (e) => this.emit(e.data[0], e.data[1]);
@@ -232,12 +240,14 @@ export default class Workerize extends EventDispatcher {
     // create mappers from the UI-thread side method calls to the UI-thread side
     // postMessage method, to inform the worker thread that methods were called,
     // with parameters.
-    pliny.property({
+    /*
+pliny.property({
       parent: "Util.Workerize",
       name: "&lt;mappings for each method in the original class&gt;",
       type: "Function",
       description: "Each mapped function causes a message to be posted to the worker thread with its arguments packed into an array."
     });
+*/
     for (k in func.prototype) {
       // we skip the addEventListener method because we override it in a
       // different way, to be able to pass messages across the thread boundary.
@@ -252,7 +262,8 @@ export default class Workerize extends EventDispatcher {
 
   methodShim(eventName, args) {
 
-    pliny.method({
+    /*
+pliny.method({
       parent: "Util.Workerize",
       name: "methodShim",
       description: "Posts messages to the worker thread by packing arguments into an array. The worker will receive the array and interpret the first value as the name of the method to invoke and the second value as another array of parameters.",
@@ -266,6 +277,7 @@ export default class Workerize extends EventDispatcher {
         description: "The arguments that we want to pass to the method that we are calling in the worker context."
       }]
     });
+*/
 
     this.args[0] = eventName;
     this.args[1] = args;

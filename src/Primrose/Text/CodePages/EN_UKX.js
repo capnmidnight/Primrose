@@ -1,10 +1,12 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.record({
   parent: "Primrose.Text.CodePages",
   name: "EN_UKX",
   description: "CodePage for the `English: UK Extended` locale."
 });
+*/
 
 import CodePage from "./CodePage";
 export default new CodePage("English: UK Extended", "en-GB", {

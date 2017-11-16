@@ -2,6 +2,7 @@ import pliny from "pliny/pliny";
 
 import { Object3D } from "three";
 
+/*
 pliny.method({
   parent: "THREE.Object3D",
   name: "appendChild",
@@ -12,6 +13,7 @@ pliny.method({
     description: "The object to add."
   }]
 });
+*/
 Object3D.prototype.appendChild = function(child) {
   return this.add(child);
 };

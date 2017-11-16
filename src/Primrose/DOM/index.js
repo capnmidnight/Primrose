@@ -1,10 +1,12 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.namespace({
   parent: "Primrose",
   name: "DOM",
   description: "A few functions for manipulating DOM."
 });
+*/
 
 import cascadeElement from "./cascadeElement";
 import findEverything from "./findEverything";

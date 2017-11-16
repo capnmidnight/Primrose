@@ -3,6 +3,7 @@ import pliny from "pliny/pliny";
 /// NOTE: maybe BrowserEnvironment should be a subclass of THREE.Scene.
 
 
+/*
 pliny.class({
   parent: "Primrose",
   name: "BrowserEnvironment",
@@ -15,7 +16,9 @@ The `BrowserEnvironment` class provides a plethora of options for setting up new
     description: "Settings to change how the environment looks and behaves. See [`Primrose.BrowserEnvironment.optionsHash`](#Primrose_BrowserEnvironment_optionsHash) for more information."
   }]
 });
+*/
 
+/*
 pliny.record({
   parent: "Primrose.BrowserEnvironment",
   name: "optionsHash",
@@ -202,6 +205,7 @@ pliny.record({
     description: "When creating a neck model, this is the how far apart to set the eyes. I highly suggest you don't go down the road that requires setting this. I will not help you understand what it does, because I would rather you just not use it."
   }]
 });
+*/
 
 import { isCardboard, isiOS, isLandscape } from "../flags";
 
@@ -283,12 +287,14 @@ export default class BrowserEnvironment extends EventDispatcher {
   constructor(options) {
     super();
 
-    pliny.property({
+    /*
+pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "options",
       type: "Object",
       description: "A manager for messages sent across the network."
     });
+*/
     this.options = Object.assign({}, BrowserEnvironment.DEFAULTS, options);
 
     this.options.foregroundColor = this.options.foregroundColor || complementColor(new Color(this.options.backgroundColor))
@@ -296,32 +302,38 @@ export default class BrowserEnvironment extends EventDispatcher {
 
     this.deltaTime = 1;
 
-    pliny.property({
+    /*
+pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "network",
       type: "Primrose.Network.Manager",
       description: "A manager for messages sent across the network."
     });
+*/
     this.network = null;
 
     if(this.options.nonstandardIPD !== null){
       this.options.nonstandardIPD *= 0.5;
     }
 
-    pliny.property({
+    /*
+pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "audioQueue",
       type: "Array",
       description: "Remote user Audio elements that joined as peers before the `BrowserEnvironment` could finish loading all of the assets."
     });
+*/
     this.audioQueue = [];
 
 
-    pliny.method({
+    /*
+pliny.method({
       parent: "Primrose.BrowserEnvironment",
       name: "zero",
       description: "Zero and reset sensor data."
     });
+*/
     this.zero = () => {
       if (!this.lockMovement) {
         for (let i = 0; i < this.managers.length; ++i) {
@@ -505,11 +517,13 @@ export default class BrowserEnvironment extends EventDispatcher {
             moveUI();
           }
 
-          pliny.event({
+          /*
+pliny.event({
             parent: "Primrose.BrowserEnvironment",
             name: "update",
             description: "Fires after every animation update."
           });
+*/
           try {
             this.emit("update");
           }
@@ -529,12 +543,14 @@ export default class BrowserEnvironment extends EventDispatcher {
       }
     };
 
-    pliny.property({
+    /*
+pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "turns",
       type: "Util.Angle",
       description: "A slewing angle that loosely follows the user around."
     });
+*/
     this.turns = new Angle(0);
     const followEuler = new Euler(),
       maxX = -Math.PI / 4,
@@ -641,12 +657,14 @@ export default class BrowserEnvironment extends EventDispatcher {
       },
       resolutionScale = 1;
 
-    pliny.property({
+    /*
+pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "factories",
       type: "Object",
       description: "A database of object factories, generally used to create 3D models."
     });
+*/
     this.factories = {
       avatar: null
     };
@@ -687,12 +705,14 @@ export default class BrowserEnvironment extends EventDispatcher {
           this.factories.avatar = new ModelFactory(models.avatar);
         }
 
-        pliny.property({
+        /*
+pliny.property({
           parent: "Primrose.BrowserEnvironment",
           name: "buttonFactory",
           type: "Primrose.Controls.ButtonFactory",
           description: "A factory for creating the geometry for individual 3D buttons whenever they are needed."
         })
+*/
         if (models.button) {
           this.buttonFactory = new ButtonFactory(
             models.button,
@@ -706,20 +726,24 @@ export default class BrowserEnvironment extends EventDispatcher {
     // Initialize public properties
     //
 
-    pliny.property({
+    /*
+pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "speech",
       type: "Primrose.Audio.Speech",
       description: "A text-2-speech system."
     });
+*/
     this.speech = new Text2Speech(this.options.speech);
 
-    pliny.property({
+    /*
+pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "audio",
       type: "Primrose.Audio.Audio3D",
       description: "An audio graph that keeps track of 3D information."
     });
+*/
     this.audio = new Audio3D();
 
     if (this.options.ambientSound) {
@@ -747,29 +771,35 @@ export default class BrowserEnvironment extends EventDispatcher {
       });
     }
 
-    pliny.property({
+    /*
+pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "music",
       type: "Primrose.Audio.Music",
       description: "A primitive sort of synthesizer for making simple music."
     });
+*/
     this.music = new Music(this.audio);
 
-    pliny.property({
+    /*
+pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "currentControl",
       type: "Primrose.Control.Entity",
       description: "The currently selected control, by a user-click or some other function."
     });
+*/
     this.currentControl = null;
 
 
-    pliny.method({
+    /*
+pliny.method({
       parent: "Primrose.BrowserEnvironment",
       name: "fadeOut",
       returns: "Promise",
       description: "Causes the fully rendered view fade out to the color provided `options.backgroundColor`"
     });
+*/
     let fadeOutPromise = null,
       fadeOutPromiseResolver = null,
       fadeInPromise = null,
@@ -793,12 +823,14 @@ export default class BrowserEnvironment extends EventDispatcher {
     };
 
 
-    pliny.method({
+    /*
+pliny.method({
       parent: "Primrose.BrowserEnvironment",
       name: "fadeIn",
       returns: "Promise",
       description: "Causes the faded out cube to disappear."
     });
+*/
     this.fadeIn = () => {
       if(fadeOutPromise) {
         return Promise.reject("Currently fading out.");
@@ -837,15 +869,18 @@ export default class BrowserEnvironment extends EventDispatcher {
       }
     };
 
-    pliny.property({
+    /*
+pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "teleportAvailable",
       type: "Boolean",
       description: "Returns true when the system is not currently fading out or in.`"
     });
+*/
     this.teleportAvailable = true;
 
-    pliny.method({
+    /*
+pliny.method({
       parent: "Primrose.BrowserEnvironment",
       name: "transition",
       returns: "Promise",
@@ -856,6 +891,7 @@ export default class BrowserEnvironment extends EventDispatcher {
         description: "A callback function, to be executed between the fade-out and fade-in effects."
       }]
     });
+*/
     this.transition = (thunk, check, immediate) => {
       if(immediate) {
         thunk();
@@ -870,7 +906,8 @@ export default class BrowserEnvironment extends EventDispatcher {
     };
 
 
-    pliny.method({
+    /*
+pliny.method({
       parent: "Primrose.BrowserEnvironment",
       name: "teleport",
       returns: "Promise",
@@ -887,6 +924,7 @@ export default class BrowserEnvironment extends EventDispatcher {
         description: "If true, skips the transition effect."
       }]
     });
+*/
     this.teleport = (pos, immediate) => this.transition(
       () => this.moveStage(pos),
       () => this.teleportAvailable && TELEPORT_DISPLACEMENT.copy(pos)
@@ -905,7 +943,8 @@ export default class BrowserEnvironment extends EventDispatcher {
       }
     };
 
-    pliny.method({
+    /*
+pliny.method({
       parent: "Primrose.BrowserEnvironment",
       name: "consumeEvent",
       description: "Handles pointer interactions and differentiates between teleportation and selecting controls on the screen.",
@@ -915,6 +954,7 @@ export default class BrowserEnvironment extends EventDispatcher {
         description: "A pointer click event that triggered."
       }]
     });
+*/
     this.consumeEvent = (evt) => {
       const obj = evt.hit && evt.hit.object,
         cancel = evt.type === "exit" || evt.cmdName === "NORMAL_ESCAPE";
@@ -948,12 +988,14 @@ export default class BrowserEnvironment extends EventDispatcher {
       this.dispatchEvent(evt);
     };
 
-    pliny.property({
+    /*
+pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "physics",
       type: "CANNON.World",
       description: "The physics subsystem."
     });
+*/
     this.physics = new CANNON.World();
     this.physics.gravity.set(0, this.options.gravity, 0);
     this.physics.broadphase = new CANNON.NaiveBroadphase();
@@ -962,54 +1004,64 @@ export default class BrowserEnvironment extends EventDispatcher {
     this.physics.addEventListener("postStep", postStepAllEntities);
 
 
-    pliny.property({
+    /*
+pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "scene",
       type: "THREE.Scene",
       description: "The 3D scene that gets displayed to the user."
     });
+*/
     this.options.scene = this.scene = this.options.scene || new Scene();
 
     if (this.options.useFog) {
       this.scene.fog = new FogExp2(this.options.backgroundColor, 1 / Math.sqrt(this.options.drawDistance));
     }
 
-    pliny.property({
+    /*
+pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "camera",
       type: "THREE.PerspectiveCamera",
       description: "The camera used to render the view."
     });
+*/
     this.camera = new PerspectiveCamera(75, 1, this.options.nearPlane, this.options.nearPlane + this.options.drawDistance);
 
-    pliny.property({
+    /*
+pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "sky",
       type: "THREE.Object3D",
       description: "If a `skyTexture` option is provided, it will be a texture cube or photosphere. If no `skyTexture` option is provided, there will only be a THREE.Object3D, to create an anchor point on which implementing scripts can add objects that follow the user's position."
     });
+*/
     this.sky = new Sky(this.options)
       .addTo(this.scene);
 
 
-    pliny.property({
+    /*
+pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "ground",
       type: "THREE.Object3D",
       description: "If a `groundTexture` option is provided, it will be a flat plane extending to infinity. As the user moves, the ground will shift under them by whole texture repeats, making the ground look infinite."
     });
+*/
     this.ground = new Ground(this.options)
       .addTo(this.scene);
 
     this.teleporter = new Teleporter(this);
 
 
-    pliny.property({
+    /*
+pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "ui",
       type: "THREE.Object3D",
       description: "An anchor point on which objects can be added that follows the user around in both position and orientation. The orientation lags following the user, so if the UI is ever in the way, the user can turn slightly and it won't follow them."
     });
+*/
     this.vicinity = hub().named("Vicinity").addTo(this.scene);
     this.ui = hub().named("UI").addTo(this.vicinity);
 
@@ -1049,12 +1101,14 @@ export default class BrowserEnvironment extends EventDispatcher {
       return sceneGraph;
     };
 
-    pliny.method({
+    /*
+pliny.method({
       parent: "Primrose.BrowserEnvironment",
       name: "goFullScreen",
       returns: "Promise",
       description: "Enter full-screen mode on one of the available displays. NOTE: due to a defect in iOS, this feature is not available on iPhones or iPads."
     });
+*/
     this.goFullScreen = (index, evt) => {
       if (evt !== "Gaze") {
 
@@ -1119,12 +1173,14 @@ export default class BrowserEnvironment extends EventDispatcher {
 
     let allowRestart = true;
 
-    pliny.method({
+    /*
+pliny.method({
       parent: "Primrose.BrowserEnvironment",
       name: "start",
       returns: "Promise",
       description: "Restart animation after it has been stopped."
     });
+*/
     this.start = () => {
       if(allowRestart) {
         this.ready.then(() => {
@@ -1136,7 +1192,8 @@ export default class BrowserEnvironment extends EventDispatcher {
     };
 
 
-    pliny.method({
+    /*
+pliny.method({
       parent: "Primrose.BrowserEnvironment",
       name: "stop",
       description: "Pause animation.",
@@ -1154,6 +1211,7 @@ export default class BrowserEnvironment extends EventDispatcher {
         description: "Whether or not calling `start()` again is allowed, or if this is a permanent stop."
       } ]
     });
+*/
     this.stop = (evt, restartAllowed) => {
       if(allowRestart) {
         allowRestart = restartAllowed;
@@ -1180,12 +1238,14 @@ export default class BrowserEnvironment extends EventDispatcher {
       document.addEventListener("resume", this.start, false);
     }, false);
 
-    pliny.property({
+    /*
+pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "renderer",
       type: "THREE.WebGLRenderer",
       description: "The Three.js renderer being used to draw the scene."
     });
+*/
     documentReady = documentReady.then(() => {
       if (this.options.renderer) {
         this.renderer = this.options.renderer;
@@ -1494,65 +1554,85 @@ export default class BrowserEnvironment extends EventDispatcher {
       }).addTo(this.head);
       this.fader.visible = false;
 
-      pliny.event({
+      /*
+pliny.event({
         parent: "Primrose.BrowserEnvironment",
         name: "select",
         description: "Fired when an object has been selected, either by a physical cursor or a gaze-based cursor. You will typically want to use this instead of pointerend or gazecomplete."
       });
+*/
 
-      pliny.event({
+      /*
+pliny.event({
         parent: "Primrose.BrowserEnvironment",
         name: "pointerstart",
         description: "Fired when mouse, gamepad, or touch-based pointers have their trigger buttons depressed."
       });
+*/
 
-      pliny.event({
+      /*
+pliny.event({
         parent: "Primrose.BrowserEnvironment",
         name: "pointerend",
         description: "Fired when mouse, gamepad, or touch-based pointers have their trigger buttons released."
       });
+*/
 
-      pliny.event({
+      /*
+pliny.event({
         parent: "Primrose.BrowserEnvironment",
         name: "pointermove",
         description: "Fired when mouse, gamepad, or touch-based pointers are moved away from where they were last frame."
       });
+*/
 
-      pliny.event({
+      /*
+pliny.event({
         parent: "Primrose.BrowserEnvironment",
         name: "gazestart",
         description: "Fired when a gaze-based cursor starts spinning on a selectable object."
       });
+*/
 
-      pliny.event({
+      /*
+pliny.event({
         parent: "Primrose.BrowserEnvironment",
         name: "gazemove",
         description: "Fired when a gaze-based cursor moves across an object that it is attempting to select."
       });
+*/
 
-      pliny.event({
+      /*
+pliny.event({
         parent: "Primrose.BrowserEnvironment",
         name: "gazecomplete",
         description: "Fired when a gaze-based cursor finishes spinning on a selectable object."
       });
+*/
 
-      pliny.event({
+      /*
+pliny.event({
         parent: "Primrose.BrowserEnvironment",
         name: "gazecancel",
         description: "Fired when a gaze-based cursor is moved off of the object it is attempting to select before it can finish spinning."
       });
+*/
 
-      pliny.event({
+      /*
+pliny.event({
         parent: "Primrose.BrowserEnvironment",
         name: "exit",
         description: "Fired when a pointer leaves an object."
       });
+*/
 
-      pliny.event({
+      /*
+pliny.event({
         parent: "Primrose.BrowserEnvironment",
         name: "enter",
         description: "Fired when a pointer hovers over an object."
       });
+*/
 
 
       if(!this.options.disableKeyboard) {
@@ -1676,20 +1756,24 @@ export default class BrowserEnvironment extends EventDispatcher {
         this.VR.connect(0);
         this.options.progress.hide();
 
-        pliny.event({
+        /*
+pliny.event({
           parent: "Primrose.BrowserEnvironment",
           name: "ready",
           description: "Fires after the initial assets have been downloaded and the scene initialized, just before animation starts."
         });
+*/
         this.emit("ready");
       });
 
-    pliny.property({
+    /*
+pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "quality",
       type: "Primrose.Constants.Quality",
       description: "The current render quality."
     });
+*/
     Object.defineProperties(this, {
       quality: {
         get: () => this.options.quality,
@@ -1733,19 +1817,22 @@ export default class BrowserEnvironment extends EventDispatcher {
 
   get lockMovement(){
 
-    pliny.property({
+    /*
+pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "lockMovement",
       type: "Boolean",
       description: "True if the user is focused on a text box control. If the user is focused on a text box control, keyboard commands should not move their position."
     });
+*/
 
     return this.currentControl && this.currentControl.lockMovement;
   }
 
   connect(socket, userName) {
 
-    pliny.method({
+    /*
+pliny.method({
       parent: "Primrose.BrowserEnvironment",
       name: "connect",
       description: "Connect to a server at a WebSocket using a specific userName. NOTE: this does not handle authentication or authorization. You must handle those tasks yourself. This only binds an authenticated WebSocket connection to the framework so the framework may use it to transmit user state.",
@@ -1759,6 +1846,7 @@ export default class BrowserEnvironment extends EventDispatcher {
         description: "The name of the user being connected."
       }]
     });
+*/
 
     if(!this.network){
       this.network = new NetworkManager(this, this.audio, this.factories, this.options);
@@ -1770,23 +1858,27 @@ export default class BrowserEnvironment extends EventDispatcher {
 
   disconnect() {
 
-    pliny.method({
+    /*
+pliny.method({
       parent: "Primrose.BrowserEnvironment",
       name: "disconnect",
       description: "Disconnect from the server."
     });
+*/
 
     return this.network && this.network.disconnect();
   }
 
   get displays() {
 
-    pliny.property({
+    /*
+pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "displays",
       type: "Array of BaseVRDisplay",
       description: "The VRDisplays available on the system."
     });
+*/
 
     return this.VR.displays;
   }
@@ -1846,7 +1938,8 @@ export default class BrowserEnvironment extends EventDispatcher {
 
   setAudioFromUser(userName, audioElement){
 
-    pliny.method({
+    /*
+pliny.method({
       parent: "Primrose.BrowserEnvironment",
       name: "setAudioFromUser",
       description: "When using a 3D-party voice chat provider, this method associates the `HTMLVideoElement` or `HTMLAudioElement` created by the chat provider with the remote user, so that their audio may be spatialized with their position.",
@@ -1860,6 +1953,7 @@ export default class BrowserEnvironment extends EventDispatcher {
         description: "The DOM element that represents the user's audio."
       }]
     });
+*/
 
     this.audioQueue.push([userName, audioElement]);
     if(this.network){
@@ -1871,7 +1965,8 @@ export default class BrowserEnvironment extends EventDispatcher {
 
   insertFullScreenButtons(containerSpec){
 
-    pliny.method({
+    /*
+pliny.method({
       parent: "Primrose.BrowserEnvironment",
       name: "insertFullScreenButtons",
       description: "Add the default UI for managing full screen state.",
@@ -1882,6 +1977,7 @@ export default class BrowserEnvironment extends EventDispatcher {
         description: "A query selector for the DOM element to which to add the buttons."
       }]
     });
+*/
 
     const container = document.querySelector(containerSpec);
     const newButton = (title, text, thunk) => {

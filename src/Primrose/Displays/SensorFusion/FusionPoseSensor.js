@@ -15,6 +15,7 @@ import pliny from "pliny/pliny";
  * limitations under the License.
  */
 
+/*
 pliny.class({
   parent: "Primrose.Displays.SensorFusion",
   name: "FusionPoseSensor",
@@ -26,7 +27,9 @@ pliny.class({
     description: "Options for configuring the pose sensor."
   }]
 });
+*/
 
+/*
 pliny.record({
   parent: "Primrose.Displays.FusionPoseSensor",
   name: "optionsHash",
@@ -45,6 +48,7 @@ pliny.record({
     description: "How far into the future to predict during fast motion (in seconds)."
   }]
 });
+*/
 
 import ComplementaryFilter from "./ComplementaryFilter";
 import PosePredictor from "./PosePredictor";

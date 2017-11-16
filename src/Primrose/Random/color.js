@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Primrose.Random",
   name: "color",
@@ -29,6 +30,7 @@ pliny.function({
 > 5f5c50"
   }]
 });
+*/
 
 import randInt from "./int";
 

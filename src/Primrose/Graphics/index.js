@@ -1,10 +1,12 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.namespace({
   parent: "Primrose",
   name: "Graphics",
   description: "The Graphics namespace contains classes and functions that with 3D geometry."
 });
+*/
 
 import fixGeometry from "./fixGeometry";
 import InsideSphereGeometry from "./InsideSphereGeometry";

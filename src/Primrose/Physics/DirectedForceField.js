@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Physics",
   name: "DirectedForceField",
@@ -37,6 +38,7 @@ pliny.class({
     description: "Indicate whether or not to use a distance-squared fall-off for the force. If `gravitational` is specified, the fall-off is always distance-squared, regardless of setting this value."
   }]
 });
+*/
 
 import CANNON from "cannon";
 const { Vec3 } = CANNON;
@@ -59,28 +61,34 @@ export default class DirectedForceField extends Component {
       falloff: true
     }, options);
 
-    pliny.property({
+    /*
+pliny.property({
       parent: "Primrose.Physics.DirectedForceField",
       name: "force",
       type: "Number",
       description: "The force to attract the two objects together. Use negative values to repel objects. If `gravitational` is true, the force will be a value for the gravitational constant G in the two-body gravity equation. The real value of G is available as `Primrose.Constants.G."
     });
+*/
     this.force = options.force;
 
-    pliny.property({
+    /*
+pliny.property({
       parent: "Primrose.Physics.DirectedForceField",
       name: "gravitational",
       type: "Boolean",
       description: "Indicate whether or not to treat the force as gravity, i.e. taking mass into consideration. If `gravitational` is true, the force will be a value for the gravitational constant G in the two-body gravity equation. The real value of G is available as `Primrose.Constants.G."
     });
+*/
     this.gravitational = options.gravitational;
 
-    pliny.property({
+    /*
+pliny.property({
       parent: "Primrose.Physics.DirectedForceField",
       name: "falloff",
       type: "Boolean",
       description: "Indicate whether or not to use a distance-squared fall-off for the force. If `gravitational` is specified, the fall-off is always distance-squared, regardless of setting this value."
     });
+*/
     this.falloff = options.falloff;
   }
 

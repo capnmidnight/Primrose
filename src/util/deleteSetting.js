@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Util",
   name: "deleteSetting",
@@ -21,6 +22,7 @@ pliny.function({
     console.assert(getSetting(\"A\", \"default-A\") === \"default-A\");"
   }]
 });
+*/
 
 export default function deleteSetting(settingName) {
   if (window.localStorage) {

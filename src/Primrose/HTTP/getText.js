@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Primrose.HTTP",
   name: "getText",
@@ -31,6 +32,7 @@ pliny.function({
 > "Object {field1: 1, field2: \\"Field2\\"}"`
   }]
 });
+*/
 
 import get from "./get";
 export default function getText(url, options) {

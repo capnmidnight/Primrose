@@ -1,10 +1,12 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Output",
     name: "Note",
     description: "| [under construction]"
 });
+*/
 
 const PIANO_BASE = Math.pow(2, 1 / 12);
 

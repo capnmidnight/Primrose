@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Primrose.HTTP",
   name: "getBuffer",
@@ -34,6 +35,7 @@ pliny.function({
     console.error.bind(console, "error loading")\n`
   }]
 });
+*/
 
 import get from "./get";
 export default function getBuffer(url, options) {

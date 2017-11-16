@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Live API",
   name: "brick",
@@ -47,6 +48,7 @@ The result should appear as:\n\
 ![screenshot](images/brick.jpg)"
   }]
 });
+*/
 
 import textured from "./textured";
 import colored from "./colored";

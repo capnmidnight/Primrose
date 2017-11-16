@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Network",
     name: "AudioChannel",
@@ -23,6 +24,7 @@ pliny.class({
       description: "An audio stream from the local user to send to the remote user."
     }]
 });
+*/
 
 import WebRTCSocket from "./WebRTCSocket";
 import { isIE } from "../../flags";

@@ -1,10 +1,12 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.record({
   parent: "Primrose.Text.CodePages",
   name: "FR_AZERTY",
   description: "CodePage for the `Français: AZERTY` locale."
 });
+*/
 
 import CodePage from "./CodePage";
 export default new CodePage("Français: AZERTY", "fr", {

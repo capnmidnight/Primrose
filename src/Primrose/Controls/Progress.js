@@ -1,10 +1,12 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Controls",
   name: "Progress",
   description: "| [under construction]"
 });
+*/
 
 import { BackSide } from "three";
 

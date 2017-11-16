@@ -1,10 +1,12 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.value({
   parent: "Primrose.Text.OperatingSystems",
   name: "macOS",
   description: "Keyboard shortcuts for Apple macOS nee OSX."
 });
+*/
 
 import OperatingSystem from "./OperatingSystem";
 export default new OperatingSystem(

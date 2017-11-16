@@ -31,21 +31,25 @@ export default class Sky extends Entity {
     }
     else{
 
-      pliny.property({
+      /*
+pliny.property({
         parent: "Primrose.Controls.Sky",
         name: "ambient",
         type: "THREE.AmbientLight",
         description: "If the `disableDefaultLighting` option is not present, the ambient light provides a fill light so that dark shadows do not completely obscure object details."
       });
+*/
       this.ambient = new AmbientLight(0xffffff, 0.5)
         .addTo(this);
 
-      pliny.property({
+      /*
+pliny.property({
         parent: "Primrose.Controls.Sky",
         name: "sun",
         type: "THREE.PointLight",
         description: "If the `disableDefaultLighting` option is not present, the sun light provides a key light so that objects have shading and relief."
       });
+*/
       this.sun = new DirectionalLight(0xffffff, 1)
         .addTo(this)
         .at(0, 100, 100);

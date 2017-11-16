@@ -1,11 +1,13 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Controls",
   name: "Entity",
   baseClass: "THREE.Object3D",
   description: "The Entity class is the parent class for all 3D controls. It manages a unique ID for every new control, the focus state of the control, and performs basic conversions from DOM elements to the internal Control format."
 });
+*/
 
 import { Object3D, Euler, Quaternion } from "three";
 

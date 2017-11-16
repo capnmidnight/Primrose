@@ -15,6 +15,7 @@ import pliny from "pliny/pliny";
  * limitations under the License.
  */
 
+/*
 pliny.class({
   parent: "Primrose.Displays.SensorFusion",
   name: "PosePredictor",
@@ -25,6 +26,7 @@ pliny.class({
     description: "time from head movement to the appearance of the corresponding image."
   }]
 });
+*/
 
 import { Quaternion, Vector3 } from "three";
 import { Math as _Math } from "three";

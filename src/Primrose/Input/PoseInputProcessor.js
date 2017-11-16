@@ -1,11 +1,13 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Input",
   name: "PoseInputProcessor",
   baseClass: "Primrose.Input.InputProcessor",
   description: "| [under construction]"
 });
+*/
 
 const DEFAULT_POSE = {
     position: [0, 0, 0],

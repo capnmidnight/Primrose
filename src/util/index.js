@@ -1,11 +1,13 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.namespace({
   name: "Util",
   description: "A few different utility functions.\n\
 \n\
 When including Primrose as a `script` tag, the Util functions are imported directly onto the window object and is available without qualification."
 });
+*/
 
 import Angle from "./Angle";
 import AsyncLockRequest from "./AsyncLockRequest";

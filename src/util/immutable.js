@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Util",
   name: "immutable",
@@ -12,6 +13,7 @@ pliny.function({
     description: "The initial value for the property."
   }]
 });
+*/
 
 export default function immutable(value) {
   const getter = (typeof value === "function") ? value : function () {

@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Live API",
   name: "circle",
@@ -44,6 +45,7 @@ It should look something like this:\n\
 <img src=\"images/circle.jpg\">"
   }]
 });
+*/
 
 import { CircleBufferGeometry } from "three";
 

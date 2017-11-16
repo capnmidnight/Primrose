@@ -1,10 +1,12 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.record({
   parent: "Primrose.Text.CommandPacks",
   name: "TextInput",
   description: "A concrete instantiation of the single-line text editor commands provided by BasicTextInput."
 });
+*/
 
 ////
 // For all of these commands, the "current" cursor is:

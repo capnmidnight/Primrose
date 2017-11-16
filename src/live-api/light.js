@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Live API",
   name: "light",
@@ -38,6 +39,7 @@ pliny.function({
       .at(0, 100, 0);"
   }]
 });
+*/
 
 import { PointLight } from "three";
 

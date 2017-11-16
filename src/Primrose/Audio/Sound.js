@@ -1,10 +1,12 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Output",
     name: "Sound",
     description: "| [under construction]"
 });
+*/
 
 import PositionalSound from "./PositionalSound";
 export default class Sound extends PositionalSound {

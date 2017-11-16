@@ -1,11 +1,13 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Input",
   name: "Location",
   baseClass: "Primrose.Input.InputProcessor",
   description: "| [under construction]"
 });
+*/
 
 import InputProcessor from "./InputProcessor";
 export default class Location extends InputProcessor {

@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Primrose.Random",
   name: "item",
@@ -41,6 +42,7 @@ pliny.function({
 > two"
   }]
 });
+*/
 
 import randInt from "./int";
 export default function item(arr) {

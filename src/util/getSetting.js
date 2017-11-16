@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Util",
   name: "getSetting",
@@ -33,6 +34,7 @@ code should persist between reloads whatever the user writes in the text area:\n
     }, false);"
   }]
 });
+*/
 
 export default function getSetting(settingName, defValue) {
   if (window.localStorage) {

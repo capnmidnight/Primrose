@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Live API",
   name: "textured",
@@ -44,7 +45,9 @@ The result should appear as:\n\
 ![screenshot](images/moon.jpg)"
   }]
 });
+*/
 
+/*
 pliny.record({
   parent: "Live API.textured",
   name: "optionsHash",
@@ -105,6 +108,7 @@ pliny.record({
     description: "The degree to which to resize a texture on the Y axis to fit on the model."
   }]
 });
+*/
 
 import { Mesh, RepeatWrapping, Texture } from "three";
 

@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Live API",
   name: "range",
@@ -81,6 +82,7 @@ pliny.function({
 "
   }]
 });
+*/
 
 import { identity } from "../util";
 

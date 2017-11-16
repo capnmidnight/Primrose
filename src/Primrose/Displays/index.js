@@ -1,10 +1,12 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.namespace({
   parent: "Primrose",
   name: "Displays",
   description: "All the ways in which displays can be managed."
 });
+*/
 
 import CardboardVRDisplay from "./CardboardVRDisplay";
 import install from "./install";

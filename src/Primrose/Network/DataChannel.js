@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Network",
     name: "DataChannel",
@@ -27,6 +28,7 @@ pliny.class({
       description: "For users with multiple devices logged in at one time, this is the index of the device that is receiving the peering operation."
     }]
 });
+*/
 
 import WebRTCSocket from "./WebRTCSocket";
 
@@ -36,12 +38,14 @@ export default class DataChannel extends WebRTCSocket {
   constructor(requestICEPath, fromUserName, fromUserIndex, toUserName, toUserIndex, goSecond) {
     super(requestICEPath, fromUserName, fromUserIndex, toUserName, toUserIndex, goSecond);
 
-    pliny.property({
+    /*
+pliny.property({
       parent: "Primrose.Network.DataChannel",
       name: "dataChannel",
       type: "RTCDataChannel",
       description: "A bidirectional data channel from the remote user to the local user."
     });
+*/
     this.dataChannel = null;
   }
 

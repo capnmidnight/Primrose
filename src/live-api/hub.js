@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Live API",
   name: "hub",
@@ -14,6 +15,7 @@ pliny.function({
     var base2 = hub();`
   }]
 });
+*/
 
 import { Object3D } from "three";
 

@@ -1,10 +1,12 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Output",
     name: "Music",
     description: "| [under construction]"
 });
+*/
 
 var MAX_NOTE_COUNT = (navigator.maxTouchPoints || 10) + 1,
   TYPES = ["sine",

@@ -1,10 +1,12 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Output",
     name: "Speech",
     description: "| [under construction]"
 });
+*/
 
 const DEFAULT_SPEECH_SETTINGS = {
   remoteVoices: true,

@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Primrose.DOM",
   name: "makeHidingContainer",
@@ -20,6 +21,7 @@ a newly created element if it does not exist, or an Element to manipulate and va
   }],
   returns: "The hiding container element, not yet inserted into the DOM."
 });
+*/
 
 import cascadeElement from "./cascadeElement";
 export default function makeHidingContainer(id, obj) {

@@ -1,10 +1,12 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.namespace({
   parent: "Primrose",
   name: "Replay",
   description: "Record and playback data."
 });
+*/
 
 import Automator from "./Automator";
 import Frame from "./Frame";

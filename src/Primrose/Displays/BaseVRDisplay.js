@@ -1,10 +1,12 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Displays",
   name: "BaseVRDisplay",
   description: "The base class from which all *VRDisplay types inherit, providing additional functionality over the WebVR API standard VRDisplay."
 });
+*/
 
 export default class BaseVRDisplay {
 
@@ -15,7 +17,8 @@ export default class BaseVRDisplay {
 
   startAnimation(callback) {
 
-    pliny.method({
+    /*
+pliny.method({
       parent: "Primrose.Displays.BaseVRDisplay",
       name: "startAnimation",
       description: "Starts and maintains an animation loop.",
@@ -25,6 +28,7 @@ export default class BaseVRDisplay {
         description: "The code to execute during the animation update."
       }]
     });
+*/
 
     if(this._timer === null) {
       this._isAnimating = true;
@@ -49,11 +53,13 @@ export default class BaseVRDisplay {
 
   stopAnimation() {
 
-    pliny.method({
+    /*
+pliny.method({
       parent: "Primrose.Displays.BaseVRDisplay",
       name: "stopAnimation",
       description: "Stop any animation loop that is currently running."
     });
+*/
 
     if(this._timer !== null) {
       this.cancelAnimationFrame(this._timer);

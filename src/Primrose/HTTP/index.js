@@ -1,10 +1,12 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.namespace({
   parent: "Primrose",
   name: "HTTP",
   description: "A collection of basic XMLHttpRequest wrappers."
 });
+*/
 
 import del from "./del";
 import delObject from "./delObject";

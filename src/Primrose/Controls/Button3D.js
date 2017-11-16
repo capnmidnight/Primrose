@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Controls",
   name: "Button3D",
@@ -19,6 +20,7 @@ pliny.class({
   }],
   description: "A 3D button control, with a separate cap from a stand that it sits on. You click and depress the cap on top of the stand to actuate."
 });
+*/
 
 import Entity from "./Entity";
 import { Color } from "three";
@@ -30,32 +32,40 @@ export default class Button3D extends Entity {
     this.options.colorUnpressed = new Color(this.options.colorUnpressed);
     this.options.colorPressed = new Color(this.options.colorPressed);
 
-    pliny.event({
+    /*
+pliny.event({
       parent: "Primrose.Controls.Button3D",
       name: "click",
       description: "Occurs when the button is activated."
     });
+*/
 
-    pliny.event({
+    /*
+pliny.event({
       parent: "Primrose.Controls.Button3D",
       name: "release",
       description: "Occurs when the button is deactivated."
     });
+*/
 
-    pliny.property({
+    /*
+pliny.property({
       parent: "Primrose.Controls.Button3D",
       name: "base",
       type: "THREE.Object3D",
       description: "The stand the button cap sits on."
     });
+*/
     this.base = model.children[1];
 
-    pliny.property({
+    /*
+pliny.property({
       parent: "Primrose.Controls.Button3D",
       name: "base",
       type: "THREE.Object3D",
       description: "The moveable part of the button, that triggers the click event."
     });
+*/
     this.cap = model.children[0];
     this.cap.name = buttonName;
     this.cap.material = this.cap.material.clone();
@@ -65,35 +75,42 @@ export default class Button3D extends Entity {
     this.add(this.base);
     this.add(this.cap);
 
-    pliny.property({
+    /*
+pliny.property({
       parent: "Primrose.Controls.Button3D",
       name: "color",
       type: "Number",
       description: "The current color of the button cap."
     });
+*/
     this.color = this.cap.material.color;
 
-    pliny.property({
+    /*
+pliny.property({
       parent: "Primrose.Controls.Button3D",
       name: " name",
       type: "String",
       description: "A name for the button, to tell it from others when debugging."
     });
+*/
     this.name = buttonName;
 
-    pliny.property({
+    /*
+pliny.property({
       parent: "Primrose.Controls.Button3D",
       name: "element",
       type: "Element",
       optional: true,
       description: "If this 3D button was created from a copy of an HTMLButtonElement, this is that element."
     });
+*/
     this.element = null;
   }
 
   startUV(point) {
 
-    pliny.method({
+    /*
+pliny.method({
       parent: "Primrose.Controls.Button3D",
       name: "startUV",
       description: "Handle a mouse-down event on a textured object.",
@@ -103,6 +120,7 @@ export default class Button3D extends Entity {
         description: "The UV coordinate of the texture that was clicked."
       }]
     });
+*/
 
     this.color.copy(this.options.colorPressed);
     if (this.element) {
@@ -115,7 +133,8 @@ export default class Button3D extends Entity {
 
   endPointer(evt) {
 
-    pliny.method({
+    /*
+pliny.method({
       parent: "Primrose.Controls.Button3D",
       name: "endPointer",
       description: "Handle a mouse-up event on a textured object.",
@@ -125,6 +144,7 @@ export default class Button3D extends Entity {
         description: "Not actually used."
       }]
     });
+*/
 
     this.color.copy(this.options.colorUnpressed);
     this.emit("release", { source: this });
@@ -132,7 +152,8 @@ export default class Button3D extends Entity {
 
   consumeEvent(evt) {
 
-    pliny.method({
+    /*
+pliny.method({
       parent: "Primrose.Controls.Button3D",
       name: "consumeEvent",
       description: "Route events.",
@@ -142,6 +163,7 @@ export default class Button3D extends Entity {
         description: "The event to route."
       }]
     });
+*/
 
     switch(evt.type){
       case "pointerstart":
@@ -158,41 +180,53 @@ export default class Button3D extends Entity {
   }
 }
 
+/*
 pliny.record({
   parent: "Primrose.Controls.Button3D",
   name: "DEFAULTS",
   description: "Default option values that override undefined options passed to the Button3D class."
 });
+*/
+/*
 pliny.value({
   parent: "Primrose.Controls.Button3D.DEFAULTS",
   name: "maxThrow",
   type: "Number",
   description: "The limit for how far the button can be depressed."
 });
+*/
+/*
 pliny.value({
   parent: "Primrose.Controls.Button3D.DEFAULTS",
   name: "minDeflection",
   type: "Number",
   description: "The minimum distance the button must be depressed before it is activated."
 });
+*/
+/*
 pliny.value({
   parent: "Primrose.Controls.Button3D.DEFAULTS",
   name: "colorUnpressed",
   type: "Number",
   description: "The color to change the button cap to when the button is deactivated."
 });
+*/
+/*
 pliny.value({
   parent: "Primrose.Controls.Button3D.DEFAULTS",
   name: "colorPressed",
   type: "Number",
   description: "The color to change the button cap to when the button is activated."
 });
+*/
+/*
 pliny.value({
   parent: "Primrose.Controls.Button3D.DEFAULTS",
   name: "toggle",
   type: "Boolean",
   description: "True if deactivating the button should require a second click. False if the button should deactivate when it is released."
 });
+*/
 Button3D.DEFAULTS = {
   maxThrow: 0.1,
   minDeflection: 10,

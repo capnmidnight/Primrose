@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Graphics",
   name: "InsideSphereGeometry",
@@ -41,6 +42,7 @@ Say you want a to model the sky as a sphere, or the inside of a helmet. You don'
 care anything about the outside of this sphere, only the inside. You would use\n\
 InsideSphereGeometry in this case. Or its alias, [`shell()`](#LiveAPI_shell)."
 });
+*/
 
 import { Geometry, Vector3, Vector2, Face3, Sphere } from "three";
 export default class InsideSphereGeometry extends Geometry {

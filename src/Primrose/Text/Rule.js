@@ -1,10 +1,12 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Text",
     name: "Rule",
     description: "| [under construction]"
 });
+*/
 
 export default class Rule {
   constructor (name, test) {

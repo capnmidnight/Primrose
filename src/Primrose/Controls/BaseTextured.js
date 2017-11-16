@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Controls",
   name: "BaseTextured",
@@ -11,6 +12,7 @@ pliny.class({
     description: "Named parameters for creating the textured object."
   }]
 });
+*/
 
 let COUNTER = 0;
 
@@ -21,6 +23,7 @@ import Entity from "./Entity";
 
 const entities = [];
 
+/*
 pliny.function({
   parent: "Primrose.Controls.Entity",
   name: "updateAll",
@@ -31,6 +34,7 @@ pliny.function({
     description: "The eye to switch to: -1 for left, +1 for right."
   }]
 });
+*/
 export function updateAll(){
   for(let i = 0; i < entities.length; ++i) {
     const entity = entities[i];

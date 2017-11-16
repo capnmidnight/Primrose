@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Input",
   name: "Speech",
@@ -22,6 +23,7 @@ The `keywords` property is an array of strings for which SpeechInput will listen
 The `command` property is the callback function that will be executed. It takes no parameters."
     }]
 });
+*/
 
 import InputProcessor from "./InputProcessor";
 export default class Speech extends InputProcessor {

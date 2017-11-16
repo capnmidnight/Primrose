@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Primrose.HTTP",
   name: "postObject",
@@ -16,6 +17,7 @@ pliny.function({
     description: "Options for passing data or tracking progress. See [`Primrose.HTTP.XHR.optionsHash`](#Primrose_HTTP_XHR_optionsHash) for more information. The `data` field is not optional."
   }]
 });
+*/
 
 import post from "./post";
 export default function postObject(url, options) {

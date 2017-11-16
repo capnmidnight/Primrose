@@ -1,11 +1,13 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.value({
   parent: "Primrose.Constants",
   name: "NAMES",
   type: "Array of String",
   description: "Just a list of nice names."
 });
+*/
 
 export default [
   "Dahlia",

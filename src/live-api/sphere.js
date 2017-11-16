@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Live API",
   name: "sphere",
@@ -40,6 +41,7 @@ pliny.function({
       {unshaded: true} );"
   }]
 });
+*/
 
 import { SphereGeometry } from "three";
 

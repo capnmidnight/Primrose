@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Primrose.HTTP",
   name: "XHR",
@@ -40,7 +41,9 @@ pliny.function({
 > Object {field1: 1, field2: "Field2"}`
   }]
 });
+*/
 
+/*
 pliny.record({
   parent: "Primrose.HTTP.XHR",
   name: "optionsHash",
@@ -57,6 +60,7 @@ pliny.record({
     description: "A callback function to use for tracking progress. The callback function should accept a standard [`ProgressEvent`](https://developer.mozilla.org/en-US/docs/Web/API/ProgressEvent)."
   }]
 });
+*/
 
 export default function XHR(method, type, url, options) {
   return new Promise(function (resolve, reject) {

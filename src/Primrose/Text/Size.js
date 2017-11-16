@@ -1,10 +1,12 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Text",
     name: "Size",
     description: "| [under construction]"
 });
+*/
 
 export default class Size {
   constructor(width, height) {

@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Util",
   name: "isTimestampDeltaValid",
@@ -11,6 +12,7 @@ pliny.function({
     description: "The timestamp to check."
   }]
 });
+*/
 const MIN_TIMESTEP = 0.001,
   MAX_TIMESTEP = 1;
 

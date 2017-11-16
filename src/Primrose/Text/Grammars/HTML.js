@@ -1,10 +1,12 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.value({
   parent: "Primrose.Text.Grammars",
   name: "HTML",
   description: "A grammar for HyperText Markup Language."
 });
+*/
 
 import Grammar from "./Grammar";
 export default new Grammar("HTML", [

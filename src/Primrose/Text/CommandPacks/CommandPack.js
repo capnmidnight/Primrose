@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Text",
     name: "CommandPack",
@@ -17,6 +18,7 @@ pliny.class({
 * The value elements are the action that occurs when the command is activated."
     }]
 });
+*/
 export default class CommandPack {
   constructor (commandPackName, commands) {
     this.name = commandPackName;

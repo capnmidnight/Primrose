@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Live API",
   name: "quad",
@@ -35,7 +36,9 @@ It should look something like this:\n\
 <img src=\"images/quad.jpg\">"
   }]
 });
+*/
 
+/*
 pliny.record({
   parent: "Live API.quad",
   name: "optionsHash",
@@ -66,6 +69,7 @@ pliny.record({
     default: 1
   }]
 });
+*/
 
 import { PlaneBufferGeometry } from "three";
 

@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Live API",
   name: "shell",
@@ -65,6 +66,7 @@ file to use as the texture, execute code as such:\n\
       {unshaded: true} );"
   }]
 });
+*/
 
 import { cache } from "../util";
 

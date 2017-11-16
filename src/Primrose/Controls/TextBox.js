@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Controls",
     name: "TextBox",
@@ -15,6 +16,7 @@ pliny.class({
       description: "Named parameters for creating the TextBox."
     }]
 });
+*/
 
 import Surface from "./Surface";
 import Cursor from "../Text/Cursor";

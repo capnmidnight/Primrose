@@ -1,10 +1,12 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.record({
   parent: "Primrose.Text.CodePages",
   name: "DE_QWERTZ",
   description: "CodePage for `Deutsch: QWERTZ` locale."
 });
+*/
 
 import CodePage from "./CodePage";
 export default new CodePage("Deutsch: QWERTZ", "de", {

@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Live API",
   name: "ring",
@@ -56,6 +57,7 @@ It should look something like this:\n\
 <img src=\"images/ring.jpg\">"
   }]
 });
+*/
 
 import { RingBufferGeometry } from "three";
 

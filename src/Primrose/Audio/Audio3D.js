@@ -1,10 +1,12 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Output",
     name: "Audio3D",
     description: "| [under construction]"
 });
+*/
 
 // polyfill
 window.AudioContext = (function(AC) {
@@ -239,7 +241,8 @@ export default class Audio3D {
 
   loadSource(sources, loop) {
 
-    pliny.method({
+    /*
+pliny.method({
       parent: "Primrose.Output.Audio3D",
       name: "loadSound",
       returns: "Promise<MediaElementAudioSourceNode>",
@@ -291,6 +294,7 @@ export default class Audio3D {
   });"
       }]
     });
+*/
 
     return this.ready.then(() => new Promise((resolve, reject) => {
       console.log("Loading " + sources);

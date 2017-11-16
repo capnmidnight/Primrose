@@ -1,10 +1,12 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.enumeration({
   parent: "Primrose",
   name: "Keys",
   description: "Keycode values for system keys that are the same across all international standards"
 });
+*/
 
 var Keys = {
   ANY: Number.MAX_VALUE,

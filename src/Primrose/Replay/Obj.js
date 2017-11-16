@@ -1,10 +1,12 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Replay",
   name: "Obj",
   description: "| [under construction]"
 });
+*/
 
 export default class Obj {
   constructor(path, root = window) {

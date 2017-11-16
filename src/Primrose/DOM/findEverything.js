@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Primrose.DOM",
   name: "findEverything",
@@ -50,6 +51,7 @@ of element references, with fields named by the ID of the elements that were fou
 > img.png"
   }]
 });
+*/
 
 export default function findEverything(elem, obj) {
   elem = elem || document;

@@ -1,11 +1,13 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Input",
   name: "Mouse",
   baseClass: "Primrose.Input.InputProcessor",
   description: "| [under construction]"
 });
+*/
 
 import { isChrome } from "../../flags";
 import { PointerLock } from "../../util";

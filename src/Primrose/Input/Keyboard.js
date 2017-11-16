@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Input",
     name: "Keyboard",
@@ -23,6 +24,7 @@ pliny.class({
       description: ""
     }]
 });
+*/
 
 import {
   isFirefox,

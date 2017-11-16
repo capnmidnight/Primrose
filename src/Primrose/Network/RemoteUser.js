@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Network",
   name: "RemoteUser",
@@ -31,6 +32,7 @@ pliny.class({
     description: "The name of the user initiating the peer connection."
   }]
 });
+*/
 
 import { EventDispatcher } from "three";
 
@@ -121,11 +123,13 @@ export default class RemoteUser extends EventDispatcher {
   }
 
   unpeer() {
-    pliny.method({
+    /*
+pliny.method({
       parent: "Pliny.RemoteUser",
       name: "unpeer",
       description: "Cleans up after a user has left the room, removing the audio channels that were created for the user."
     });
+*/
 
     if (this.audioChannel) {
       this.audioChannel.close();
@@ -165,7 +169,8 @@ export default class RemoteUser extends EventDispatcher {
   }
 
   update(dt) {
-    pliny.method({
+    /*
+pliny.method({
       parent: "Pliny.RemoteUser",
       name: "update",
       description: "Moves the avatar by its velocity for a set amount of time. Updates the audio panner information.",
@@ -175,6 +180,7 @@ export default class RemoteUser extends EventDispatcher {
         description: "The amount of time since the last update to the user."
       }]
     });
+*/
 
     this.time += dt;
     var fade = this.time >= RemoteUser.NETWORK_DT;
@@ -192,7 +198,8 @@ export default class RemoteUser extends EventDispatcher {
   }
 
   setState(v) {
-    pliny.property({
+    /*
+pliny.property({
       parent: "Pliny.RemoteUser",
       name: "state",
       description: "After receiving a network update, sets the current state of the remote user so that, by the time the next network update comes around, the user will be where it is predicted to be.",
@@ -202,6 +209,7 @@ export default class RemoteUser extends EventDispatcher {
         description: "The raw state array from the network (includes the un-read first username field)."
       }]
     });
+*/
 
     this.time = 0;
     this._predict(this.headPosition, v, 1);

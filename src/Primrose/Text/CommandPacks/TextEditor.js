@@ -1,10 +1,12 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.record({
   parent: "Primrose.Text.CommandPacks",
   name: "TextEditor",
   description: "A set of commands for a multi-line text editing, extending single-line text editing."
 });
+*/
 
 import BasicTextInput from "./BasicTextInput";
 export default new BasicTextInput(

@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Primrose.Random",
   name: "int",
@@ -66,6 +67,7 @@ pliny.function({
 > 52"
   }]
 });
+*/
 
 import randNum from "./number";
 export default function int(min, max, power) {

@@ -1,10 +1,12 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.namespace({
   parent: "Primrose.Text",
   name: "CodePages",
   description: "The CodePages namespace contains international keyboard parameters."
 });
+*/
 
 import CodePage from "./CodePage";
 import DE_QWERTZ from "./DE_QWERTZ";

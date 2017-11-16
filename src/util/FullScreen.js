@@ -1,11 +1,13 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Util",
   name: "FullScreenLockRequest",
   baseClass: "Util.AsyncLockRequest",
   description: "A cross browser/polyfill/mock implementation of the Fullscreen API. It includes a liar mode for systems that don't support the Fullscreen API, to make the handling of application logic more streamlined. This class itself is not exported, only a single instance of it."
 });
+*/
 
 import AsyncLockRequest from "./AsyncLockRequest";
 import findProperty from "./findProperty";

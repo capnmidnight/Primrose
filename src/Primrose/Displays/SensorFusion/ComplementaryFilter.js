@@ -15,6 +15,7 @@ import pliny from "pliny/pliny";
  * limitations under the License.
  */
 
+/*
 pliny.class({
   parent: "Primrose.Displays.SensorFusion",
   name: "ComplementaryFilter",
@@ -25,6 +26,7 @@ pliny.class({
     description: "Complementary filter coefficient. 0 for accelerometer, 1 for gyro."
   }]
 });
+*/
 
 import SensorSample from "./SensorSample";
 import { Math as _Math, Quaternion, Vector3 } from "three";

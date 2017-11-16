@@ -1,10 +1,12 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.enumeration({
   parent: "Primrose.Constants",
   name: "Quality",
   description: "Graphics quality settings."
 });
+*/
 
 import PIXEL_SCALES from "./PIXEL_SCALES";
 

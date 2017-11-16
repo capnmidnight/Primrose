@@ -1,10 +1,12 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.namespace({
   parent: "Primrose.Text",
   name: "CommandPacks",
   description: "The CommandPacks namespace contains sets of keyboard shortcuts for different types of text-oriented controls."
 });
+*/
 
 import BasicTextInput from "./BasicTextInput";
 import CommandPack from "./CommandPack";

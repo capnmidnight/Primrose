@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Util",
   name: "findProperty",
@@ -23,6 +24,7 @@ pliny.function({
     console.assert(!isIE || elementName === \"msFullscreenElement\");"
   }]
 });
+*/
 
 export default function findProperty(elem, arr) {
   for (var i = 0; i < arr.length; ++i) {

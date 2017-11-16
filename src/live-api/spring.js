@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Live API",
   name: "spring",
@@ -19,6 +20,7 @@ pliny.function({
   }],
   description: "Creates a spring physics constraint between two objects."
 });
+*/
 
 import CANNON from "cannon";
 

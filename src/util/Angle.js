@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Util",
     name: "Angle",
@@ -71,6 +72,7 @@ For more information, see [Radian - Wikipedia, the free encyclopedia](https://en
 > 90"
     }]
 });
+*/
 
 import { Math as _Math } from "three";
 
@@ -95,12 +97,14 @@ export default class Angle {
 
   set degrees(newValue) {
 
-    pliny.property({
+    /*
+pliny.property({
       parent: "Util.Angle",
       name: "degrees",
       type: "Number",
       description: "Get/set the current value of the angle in degrees."
     });
+*/
 
     do {
       // figure out if it is adding the raw value, or whole
@@ -126,12 +130,14 @@ export default class Angle {
 
   set radians(val) {
 
-    pliny.property({
+    /*
+pliny.property({
       parent: "Util.Angle",
       name: "radians",
       type: "Number",
       description: "Get/set the current value of the angle in radians."
     });
+*/
 
     this.degrees = val * RAD2DEG;
   }

@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Controls",
     name: "TextInput",
@@ -15,6 +16,7 @@ pliny.class({
       description: "Named parameters for creating the TextInput."
     }]
 });
+*/
 
 var COUNTER = 0;
 

@@ -1,10 +1,12 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.record({
   parent: "Primrose.Text.Themes",
   name: "Dark",
   description: "A dark background with a light foreground for text."
 });
+*/
 
 export default {
   name: "Dark",

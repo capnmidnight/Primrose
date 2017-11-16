@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose",
   name: "Pointer",
@@ -28,6 +29,7 @@ pliny.class({
     default: null
     }]
 });
+*/
 
 import { Vector3, Euler, Quaternion, Raycaster, Object3D } from "three";
 

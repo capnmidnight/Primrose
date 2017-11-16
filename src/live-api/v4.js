@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Live API",
   name: "v4",
@@ -33,6 +34,7 @@ pliny.function({
     console.assert(a.toArray().join(\", \") === \"1, 2, 3, 4\");"
   }]
 });
+*/
 
 import { Vector4 } from "three";
 

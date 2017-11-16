@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose",
   name: "WebRTCSocket",
@@ -27,6 +28,7 @@ pliny.class({
     description: "For users with multiple devices logged in at one time, this is the index of the device that is receiving the peering operation."
   }]
 });
+*/
 
 import { EventDispatcher } from "three";
 import { isIE } from "../../flags";

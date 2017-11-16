@@ -1,11 +1,13 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.namespace({
   name: "Primrose",
   description: "Primrose helps you make VR applications for web browsers as easy as making other types of interactive web pages.\n\
 \n\
 This top-level namespace contains classes for manipulating and viewing 3D environments."
 });
+*/
 
 import Audio from "./Audio";
 import BrowserEnvironment from "./BrowserEnvironment";

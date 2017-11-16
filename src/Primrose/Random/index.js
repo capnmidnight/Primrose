@@ -1,10 +1,12 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.namespace({
   parent: "Primrose",
   name: "Random",
   description: "Functions for handling random numbers of different criteria, or selecting random elements of arrays."
 });
+*/
 
 import color from "./color";
 import flipCoin from "./flipCoin";

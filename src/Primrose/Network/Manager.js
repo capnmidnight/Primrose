@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Network",
   name: "Manager",
@@ -18,6 +19,7 @@ pliny.class({
     description: "Model factory for creating avatars for new remote users."
   }]
 });
+*/
 
 import { EventDispatcher } from "three";
 import RemoteUser from "./RemoteUser";

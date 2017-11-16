@@ -1,10 +1,12 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Text",
     name: "Rectangle",
     description: "| [under construction]"
 });
+*/
 
 import Point from "./Point";
 import Size from "./Size";

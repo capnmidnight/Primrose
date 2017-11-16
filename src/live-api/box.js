@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Live API",
   name: "box",
@@ -53,6 +54,7 @@ It should look something like this:\n\
 <img src=\"images/box.jpg\">"
   }]
 });
+*/
 
 import { BoxBufferGeometry } from "three";
 

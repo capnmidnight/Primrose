@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Primrose.Random",
   name: "flipCoin",
@@ -36,6 +37,7 @@ pliny.function({
 > tails"
   }]
 });
+*/
 
 import number from "./number";
 

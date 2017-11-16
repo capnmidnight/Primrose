@@ -1,10 +1,12 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Replay",
   name: "Player",
   description: "| [under construction]"
 });
+*/
 
 import Automator from "./Automator";
 import Frame from "./Frame";

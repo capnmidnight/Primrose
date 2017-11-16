@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Live API",
   name: "camera",
@@ -18,7 +19,9 @@ pliny.function({
     description: "Extra parameters for the selected camera, including resolution."
   }]
 });
+*/
 
+/*
 pliny.record({
   parent: "Live API.camera",
   name: "optionsHash",
@@ -29,6 +32,7 @@ pliny.record({
     description: "The width of the camera image to request. Note that if the camera does not support the resolution mode you are specifying, the request may not succeed, or may not give you the results you expect."
   }]
 });
+*/
 
 import hub from "./hub";
 

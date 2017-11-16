@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Live API",
   name: "axis",
@@ -30,6 +31,7 @@ The result should appear as:\n\
 ![screenshot](images/axis.png)"
   }]
 });
+*/
 
 import hub from "./hub";
 import brick from "./brick";

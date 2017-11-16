@@ -1,10 +1,12 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Text",
     name: "Cursor",
     description: "| [under construction]"
 });
+*/
 
 // unicode-aware string reverse
 var reverse = (function () {

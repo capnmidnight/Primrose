@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Util",
   name: "cache",
@@ -33,6 +34,7 @@ pliny.function({
     console.assert(a === c);"
   }]
 });
+*/
 
 const _cache = {};
 export default function cache(hash, makeObject, onCacheHit) {

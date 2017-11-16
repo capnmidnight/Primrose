@@ -1,10 +1,12 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.namespace({
   parent: "Primrose",
   name: "Controls",
   description: "Various 3D control objects."
 });
+*/
 
 import Button2D from "./Button2D";
 import Button3D from "./Button3D";

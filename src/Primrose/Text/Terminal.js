@@ -1,10 +1,12 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Text",
     name: "Terminal",
     description: "| [under construction]"
 });
+*/
 
 import { isMacOS } from "../../flags";
 

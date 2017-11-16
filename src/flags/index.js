@@ -1,11 +1,13 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.namespace({
   name: "Flags",
   description: `Various flags used for feature detecting and configuring the system.
 
 When including Primrose as a \`script\` tag, the Flags namespace is imported directly onto the window object and is available without qualification.`
 });
+*/
 
 import isCardboard from "./isCardboard";
 import isChrome from "./isChrome";

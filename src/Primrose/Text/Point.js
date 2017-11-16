@@ -1,10 +1,12 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Text",
     name: "Point",
     description: "| [under construction]"
 });
+*/
 
 export default class Point {
   constructor (x, y) {

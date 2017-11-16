@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Util",
   name: "identity",
@@ -19,6 +20,7 @@ pliny.function({
     console.log(arr.filter(identity)); // [1, 2, 3, 4]"
   }]
 });
+*/
 
 export default function identity(obj) {
   return obj;

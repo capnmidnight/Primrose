@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Controls",
   name: "Surface",
@@ -12,7 +13,9 @@ pliny.class({
     description: "Optional settings for creating the surface, including ID and Bounds. See [`Primrose.Controls.Surface.optionsHash`](#Primrose_Controls_Surface_optionsHash) for more information."
   }]
 });
+*/
 
+/*
 pliny.record({
   parent: "Primrose.Controls.Surface",
   name: "optionsHash",
@@ -26,6 +29,7 @@ pliny.record({
     description: "The size and location of the surface to create."
   }]
 });
+*/
 
 var COUNTER = 0;
 
@@ -38,15 +42,33 @@ import { textured,  quad, shell }from "../../live-api";
 export default class Surface extends BaseTextured {
 
   constructor(options) {
-    pliny.event({ parent: "Primrose.Controls.Surface", name: "focus", description: "If the element is focusable, occurs when the user clicks on an element for the first time, or when a program calls the `focus()` method." });
-    pliny.event({ parent: "Primrose.Controls.Surface", name: "blur", description: "If the element is focused (which implies it is also focusable), occurs when the user clicks off of an element, or when a program calls the `blur()` method." });
-    pliny.event({ parent: "Primrose.Controls.Surface", name: "click", description: "Occurs whenever the user clicks on an element." });
-    pliny.event({ parent: "Primrose.Controls.Surface", name: "keydown", description: "Occurs when the user pushes a key down while focused on the element." });
-    pliny.event({ parent: "Primrose.Controls.Surface", name: "keyup", description: "Occurs when the user releases a key while focused on the element." });
-    pliny.event({ parent: "Primrose.Controls.Surface", name: "paste", description: "Occurs when the user activates the clipboard's `paste` command while focused on the element." });
-    pliny.event({ parent: "Primrose.Controls.Surface", name: "cut", description: "Occurs when the user activates the clipboard's `cut` command while focused on the element." });
-    pliny.event({ parent: "Primrose.Controls.Surface", name: "copy", description: "Occurs when the user activates the clipboard's `copy` command while focused on the element." });
-    pliny.event({ parent: "Primrose.Controls.Surface", name: "wheel", description: "Occurs when the user scrolls the mouse wheel while focused on the element." });
+    /*
+pliny.event({ parent: "Primrose.Controls.Surface", name: "focus", description: "If the element is focusable, occurs when the user clicks on an element for the first time, or when a program calls the `focus()` method." });
+*/
+    /*
+pliny.event({ parent: "Primrose.Controls.Surface", name: "blur", description: "If the element is focused (which implies it is also focusable), occurs when the user clicks off of an element, or when a program calls the `blur()` method." });
+*/
+    /*
+pliny.event({ parent: "Primrose.Controls.Surface", name: "click", description: "Occurs whenever the user clicks on an element." });
+*/
+    /*
+pliny.event({ parent: "Primrose.Controls.Surface", name: "keydown", description: "Occurs when the user pushes a key down while focused on the element." });
+*/
+    /*
+pliny.event({ parent: "Primrose.Controls.Surface", name: "keyup", description: "Occurs when the user releases a key while focused on the element." });
+*/
+    /*
+pliny.event({ parent: "Primrose.Controls.Surface", name: "paste", description: "Occurs when the user activates the clipboard's `paste` command while focused on the element." });
+*/
+    /*
+pliny.event({ parent: "Primrose.Controls.Surface", name: "cut", description: "Occurs when the user activates the clipboard's `cut` command while focused on the element." });
+*/
+    /*
+pliny.event({ parent: "Primrose.Controls.Surface", name: "copy", description: "Occurs when the user activates the clipboard's `copy` command while focused on the element." });
+*/
+    /*
+pliny.event({ parent: "Primrose.Controls.Surface", name: "wheel", description: "Occurs when the user scrolls the mouse wheel while focused on the element." });
+*/
 
 
 
@@ -88,12 +110,14 @@ export default class Surface extends BaseTextured {
     }
 
     if (canvas === null) {
-      pliny.error({
+      /*
+pliny.error({
         parent: "Primrose.Controls.Surface",
         name: "Invalid element",
         type: "Error",
         description: "If the element could not be found, could not be created, or one of the appropriate ID was found but did not match the expected type, an error is thrown to halt operation."
       });
+*/
       console.error(typeof (options.id));
       console.error(options.id);
       throw new Error(options.id + " does not refer to a valid canvas element.");
@@ -106,20 +130,24 @@ export default class Surface extends BaseTextured {
     this.context = context || this.canvas.getContext("2d");
     this._opacity = 1;
 
-    pliny.property({
+    /*
+pliny.property({
       parent: "Primrose.Controls.Surface",
       name: "focused",
       type: "Boolean",
       description: "A flag indicating if the element, or a child element within it, has received focus from the user."
     });
+*/
     this.focused = false;
 
-    pliny.property({
+    /*
+pliny.property({
       parent: "Primrose.Controls.Surface",
       name: "focusable",
       type: "Boolean",
       description: "A flag indicating if the element, or any child elements within it, is capable of receiving focus."
     });
+*/
     this.focusable = true;
 
     this.style = {};
@@ -448,7 +476,8 @@ export default class Surface extends BaseTextured {
   }
 
   startUV(evt) {
-    pliny.method({
+    /*
+pliny.method({
       parent: "Primrose.Controls.Surface",
       name: "startUV",
       parameters: [{
@@ -458,6 +487,7 @@ export default class Surface extends BaseTextured {
       }],
       description: "Hooks up to the window's `mouseDown` and `touchStart` events, with coordinates translated to tangent-space UV coordinates, and propagates it to any of its focused subSurfaces."
     });
+*/
     if(!this._forFocusedSubSurface("startUV", evt)){
       var p = this.mapUV(evt.hit.uv);
       this.startPointer(p.x, p.y);
@@ -465,7 +495,8 @@ export default class Surface extends BaseTextured {
   }
 
   moveUV(evt) {
-    pliny.method({
+    /*
+pliny.method({
       parent: "Primrose.Controls.Surface",
       name: "moveUV",
       parameters: [{
@@ -475,6 +506,7 @@ export default class Surface extends BaseTextured {
       }],
       description: "Hooks up to the window's `mouseMove` and `touchMove` events, with coordinates translated to tangent-space UV coordinates, and propagates it to any of its focused subSurfaces."
     });
+*/
     if(!this._forFocusedSubSurface("moveUV", evt)) {
       var p = this.mapUV(evt.hit.uv);
       this.movePointer(p.x, p.y);
@@ -482,16 +514,19 @@ export default class Surface extends BaseTextured {
   }
 
   endPointer(evt) {
-    pliny.method({
+    /*
+pliny.method({
       parent: "Primrose.Controls.Surface",
       name: "endPointer",
       description: "Hooks up to the window's `mouseUp` and `toucheEnd` events and propagates it to any of its focused subSurfaces."
     });
+*/
     this._forFocusedSubSurface("endPointer", evt);
   }
 
   focus() {
-    pliny.method({
+    /*
+pliny.method({
       parent: "Primrose.Controls.Surface",
       name: "focus",
       description: "If the control is focusable, sets the focus property of the control, does not change the focus property of any other control.",
@@ -519,6 +554,7 @@ export default class Surface extends BaseTextured {
   }"
       }]
     });
+*/
 
     if (this.focusable && !this.focused) {
       this.focused = true;
@@ -527,7 +563,8 @@ export default class Surface extends BaseTextured {
   }
 
   blur() {
-    pliny.method({
+    /*
+pliny.method({
       parent: "Primrose.Controls.Surface",
       name: "blur",
       description: "If the element is focused, unsets the focus property of the control and all child controls. Does not change the focus property of any parent or sibling controls.",
@@ -555,6 +592,7 @@ export default class Surface extends BaseTextured {
   }"
       }]
     });
+*/
     if (this.focused) {
       this.focused = false;
       for (var i = 0; i < this.subSurfaces.length; ++i) {
@@ -567,12 +605,14 @@ export default class Surface extends BaseTextured {
   }
 
   get theme() {
-    pliny.property({
+    /*
+pliny.property({
       parent: "Primrose.Controls.Surface",
       name: "theme",
       type: "Primrose.Text.Themes.*",
       description: "Get or set the theme used for rendering text on any controls in the control tree."
     });
+*/
     return null;
   }
 
@@ -583,12 +623,14 @@ export default class Surface extends BaseTextured {
   }
 
   get lockMovement() {
-    pliny.property({
+    /*
+pliny.property({
       parent: "Primrose.Controls.Surface",
       name: "lockMovement",
       type: "Boolean",
       description: "Recursively searches the deepest leaf-node of the control graph for a control that has its `lockMovement` property set to `true`, indicating that key events should not be used to navigate the user, because they are being interpreted as typing commands."
     });
+*/
     var lock = false;
     for (var i = 0; i < this.subSurfaces.length && !lock; ++i) {
       lock = lock || this.subSurfaces[i].lockMovement;
@@ -597,12 +639,14 @@ export default class Surface extends BaseTextured {
   }
 
   get focusedElement() {
-    pliny.property({
+    /*
+pliny.property({
       parent: "Primrose.Controls.Surface",
       name: "focusedElement",
       type: "Primrose.Controls.Surface",
       description: "Searches the deepest leaf-node of the control graph for a control that has its `focused` property set to `true`."
     });
+*/
     var result = null,
       head = this;
     while (head && head.focused) {
@@ -620,7 +664,8 @@ export default class Surface extends BaseTextured {
   }
 
   keyDown(evt) {
-    pliny.method({
+    /*
+pliny.method({
       parent: "Primrose.Controls.Surface",
       name: "keyDown",
       parameters: [{
@@ -630,11 +675,13 @@ export default class Surface extends BaseTextured {
       }],
       description: "Hooks up to the window's `keyDown` event and propagates it to any of its focused subSurfaces."
     });
+*/
     this._forFocusedSubSurface("keyDown", evt);
   }
 
   keyUp(evt) {
-    pliny.method({
+    /*
+pliny.method({
       parent: "Primrose.Controls.Surface",
       name: "keyUp",
       parameters: [{
@@ -644,11 +691,13 @@ export default class Surface extends BaseTextured {
       }],
       description: "Hooks up to the window's `keyUp` event and propagates it to any of its focused subSurfaces."
     });
+*/
     this._forFocusedSubSurface("keyUp", evt);
   }
 
   readClipboard(evt) {
-    pliny.method({
+    /*
+pliny.method({
       parent: "Primrose.Controls.Surface",
       name: "readClipboard",
       parameters: [{
@@ -658,11 +707,13 @@ export default class Surface extends BaseTextured {
       }],
       description: "Hooks up to the clipboard's `paste` event and propagates it to any of its focused subSurfaces."
     });
+*/
     this._forFocusedSubSurface("readClipboard", evt);
   }
 
   copySelectedText(evt) {
-    pliny.method({
+    /*
+pliny.method({
       parent: "Primrose.Controls.Surface",
       name: "copySelectedText",
       parameters: [{
@@ -672,11 +723,13 @@ export default class Surface extends BaseTextured {
       }],
       description: "Hooks up to the clipboard's `copy` event and propagates it to any of its focused subSurfaces."
     });
+*/
     this._forFocusedSubSurface("copySelectedText", evt);
   }
 
   cutSelectedText(evt) {
-    pliny.method({
+    /*
+pliny.method({
       parent: "Primrose.Controls.Surface",
       name: "cutSelectedText",
       parameters: [{
@@ -686,11 +739,13 @@ export default class Surface extends BaseTextured {
       }],
       description: "Hooks up to the clipboard's `cut` event and propagates it to any of its focused subSurfaces."
     });
+*/
     this._forFocusedSubSurface("cutSelectedText", evt);
   }
 
   readWheel(evt) {
-    pliny.method({
+    /*
+pliny.method({
       parent: "Primrose.Controls.Surface",
       name: "readWheel",
       parameters: [{
@@ -700,6 +755,7 @@ export default class Surface extends BaseTextured {
       }],
       description: "Hooks up to the window's `wheel` event and propagates it to any of its focused subSurfaces."
     });
+*/
     this._forFocusedSubSurface("readWheel", evt);
   }
 }

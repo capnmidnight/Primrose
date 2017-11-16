@@ -1,10 +1,12 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.value({
   parent: "Primrose.Text.Grammars",
   name: "Basic",
   description: "A grammar and an interpreter for a BASIC-like language."
 });
+*/
 
 import Grammar from "./Grammar";
 import Token from "../Token";

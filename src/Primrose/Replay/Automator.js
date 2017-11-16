@@ -1,10 +1,12 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Replay",
   name: "Automator",
   description: "| [under construction]"
 });
+*/
 
 import { EventDispatcher } from "three";
 

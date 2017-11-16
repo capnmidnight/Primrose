@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Primrose.Random",
   name: "ID",
@@ -29,6 +30,7 @@ pliny.function({
 > 9p06sytn6dfearuibsnn4s4i"
   }]
 });
+*/
 
 export default function ID() {
   return (Math.random() * Math.log(Number.MAX_VALUE))

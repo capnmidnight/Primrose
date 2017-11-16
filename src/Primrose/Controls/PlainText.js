@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Controls",
   name: "PlainText",
@@ -40,6 +41,7 @@ pliny.class({
     default: "center"
   }]
 });
+*/
 
 import { PlaneGeometry, Mesh, Texture, MeshBasicMaterial, FlatShading } from "three";
 export default class PlainText {

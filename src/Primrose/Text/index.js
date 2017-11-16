@@ -1,10 +1,12 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.namespace({
   parent: "Primrose",
   name: "Text",
   description: "The Text namespace contains classes everything regarding the Primrose source code editor."
 });
+*/
 
 import CodePages from "./CodePages";
 import CommandPacks from "./CommandPacks";

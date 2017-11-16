@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Util",
   name: "AsyncLockRequest",
@@ -30,6 +31,7 @@ pliny.class({
     description: "An array of potential method names for canceling the lock."
   }]
 });
+*/
 
 import findProperty from "./findProperty";
 import immutable from "./immutable";
@@ -57,12 +59,14 @@ export default class AsyncLockRequest {
     this.exit = this.exit.bind(this);
     this.request = this.request.bind(this);
 
-    pliny.property({
+    /*
+pliny.property({
       parent: "Util.AsyncLockRequest",
       name: "available",
       type: "Boolean",
       description: "Returns true if the system actually supports the requested locking API."
     })
+*/
     this.available = immutable(!!this._requestMethodName);
 
     if(!this.available) {

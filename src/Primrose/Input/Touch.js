@@ -1,11 +1,13 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Input",
   name: "Touch",
   baseClass: "Primrose.Input.InputProcessor",
   description: "| [under construction]"
 });
+*/
 
 const TEMP = new Vector2();
 

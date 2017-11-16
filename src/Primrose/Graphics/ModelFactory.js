@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose",
     name: "ModelFactory",
@@ -39,6 +40,7 @@ pliny.class({
   .catch(console.error.bind(console));"
     }]
 });
+*/
 
 import { ObjectLoader, FontLoader, AnimationClip } from "three";
 
@@ -119,7 +121,8 @@ export default class ModelFactory {
 
   static loadObject(src, type, progress) {
 
-    pliny.function({
+    /*
+pliny.function({
       parent: "Primrose.Controls.ModelFactory",
       name: "loadObject",
       description: "Asynchronously loads a JSON, OBJ, or MTL file as a Three.js object. It processes the scene for attributes, creates new properties on the scene to give us\n\
@@ -169,6 +172,7 @@ export default class ModelFactory {
       requestAnimationFrame(paint);"
       }]
     });
+*/
 
     var extMatch = src.match(EXTENSION_PATTERN),
       extension = type && ("." + type) || extMatch[0];
@@ -248,7 +252,8 @@ export default class ModelFactory {
 
   static loadObjects(map) {
 
-    pliny.function({
+    /*
+pliny.function({
       parent: "Primrose.Controls.ModelFactory",
       name: "loadObjects",
       description: "Asynchronously loads an array of JSON, OBJ, or MTL file as a Three.js object. It processes the objects for attributes, creating new properties on each object to give us\n\
@@ -314,6 +319,7 @@ export default class ModelFactory {
       requestAnimationFrame(paint);"
       }]
     });
+*/
 
     var output = {},
       promise = Promise.resolve(output);
@@ -326,18 +332,21 @@ export default class ModelFactory {
   }
 
   constructor(template) {
-    pliny.property({
+    /*
+pliny.property({
       parent: "Primrose.Graphics.ModelFactory",
       name: "template",
       type: "THREE.Object3D",
       description: "When a model is loaded, stores a reference to the model so it can be cloned in the future."
     });
+*/
     this.template = template;
   }
 
   clone() {
 
-    pliny.method({
+    /*
+pliny.method({
       parent: "Primrose.Controls.ModelFactory",
       name: "clone",
       description: "Creates a copy of the stored template model.",
@@ -368,6 +377,7 @@ export default class ModelFactory {
       });"
       }]
     });
+*/
     var obj = this.template.clone();
 
     obj.traverse((child) => {

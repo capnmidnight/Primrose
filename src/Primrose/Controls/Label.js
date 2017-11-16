@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Controls",
   name: "Label",
@@ -15,6 +16,7 @@ pliny.class({
     description: "Named parameters for creating the Button."
   }]
 });
+*/
 
 var COUNTER = 0;
 

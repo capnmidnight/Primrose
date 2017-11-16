@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Primrose.Graphics",
   name: "loadTexture",
@@ -20,6 +21,7 @@ pliny.function({
     description: "A callback function to use for tracking progress. The callback function should accept a standard [`ProgressEvent`](https://developer.mozilla.org/en-US/docs/Web/API/ProgressEvent)."
   }]
 })
+*/
 
 import { CubeTextureLoader, TextureLoader, Texture } from "three";
 import { cache } from "../../util";

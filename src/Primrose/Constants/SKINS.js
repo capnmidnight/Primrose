@@ -1,11 +1,13 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.value({
   parent: "Primrose.Constants",
   name: "SKINS",
   type: "Array of Number",
   description: "A selection of color values that closely match skin colors of people."
 });
+*/
 
 export default [
   0xFFDFC4,

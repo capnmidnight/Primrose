@@ -1,10 +1,12 @@
 import pliny from "pliny";
 
+/*
 pliny.function({
   parent: "Primrose.Displays",
   name: "defaultPose",
   description: "Creates a new copy of the default, base state."
 });
+*/
 
 export default function defaultPose(){
   return {

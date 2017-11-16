@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Primrose.Graphics",
   name: "fixGeometry",
@@ -16,7 +17,9 @@ pliny.function({
     description: "Options for changing the UV coordinates. See [`Primrose.Graphics.fixGeometry.optionsHash`](#Primrose_Graphics_fixGeometry_optionsHash) for more information."
   }]
 });
+*/
 
+/*
 pliny.record({
   parent: "Primrose.Graphics.fixGeometry",
   name: "optionsHash",
@@ -35,6 +38,7 @@ pliny.record({
     description: "The value by which to scale the V component of the texture coordinate."
   }]
 });
+*/
 export default function fixGeometry(geometry, options){
   options = options || {};
   const maxU = options.maxU || 1,

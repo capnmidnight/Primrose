@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Primrose.Random",
   name: "number",
@@ -44,6 +45,7 @@ pliny.function({
 > -0.9659552359953523"
   }]
 });
+*/
 
 export default function number(min, max, power) {
   power = power || 1;

@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Live API",
   name: "colored",
@@ -42,8 +43,10 @@ The results should look like this:
 <img src="images/colored.jpg">`
   }]
 });
+*/
 
 
+/*
 pliny.record({
   parent: "Live API.colored",
   name: "optionsHash",
@@ -56,6 +59,7 @@ pliny.record({
     description: "A callback function to use when the material is successfully created, so that `colored()` can be used in place of `textured()`."
   }]
 });
+*/
 
 import { Mesh } from "three";
 

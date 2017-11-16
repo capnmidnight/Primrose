@@ -1,10 +1,12 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Live API",
   name: "phys",
   description: "Make a 3D object react to physics updates."
 });
+*/
 
 import CANNON from "cannon";
 import { Vector3 } from "three";

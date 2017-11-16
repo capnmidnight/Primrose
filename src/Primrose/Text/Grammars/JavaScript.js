@@ -1,10 +1,12 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.value({
   parent: "Primrose.Text.Grammars",
   name: "JavaScript",
   description: "A grammar for the JavaScript programming language."
 });
+*/
 
 import Grammar from "./Grammar";
 export default new Grammar("JavaScript", [

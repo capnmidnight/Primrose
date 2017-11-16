@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Util",
   name: "mutable",
@@ -17,6 +18,7 @@ pliny.function({
 
   }]
 });
+*/
 
 export default function mutable(value, type) {
   if(!type) {

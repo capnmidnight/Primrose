@@ -1,10 +1,12 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.namespace({
   parent: "Primrose",
   name: "Constants",
   description: "Useful values that are used frequently."
 });
+*/
 
 import G from "./G";
 import PIXEL_SCALES from "./PIXEL_SCALES";

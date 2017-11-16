@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Live API",
   name: "quat",
@@ -23,6 +24,7 @@ pliny.function({
     description: "The `w` component of the Quaternion."
   }]
 });
+*/
 
 import { Quaternion } from "three";
 

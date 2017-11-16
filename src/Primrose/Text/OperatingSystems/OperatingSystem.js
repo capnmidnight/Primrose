@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Text",
     name: "OperatingSystem",
@@ -38,6 +39,7 @@ pliny.class({
       description: "Modifiers for the fullHome and fullEnd commands."
     }]
 });
+*/
 
 import Keys from "../../Keys";
 

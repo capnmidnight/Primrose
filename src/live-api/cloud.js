@@ -1,5 +1,6 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.function({
   parent: "Live API",
   name: "cloud",
@@ -43,6 +44,7 @@ The results should look like this:\n\
 <img src=\"images/cloud.jpg\">"
   }]
 });
+*/
 
 import { Geometry, PointsMaterial, Points } from "three";
 

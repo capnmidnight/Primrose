@@ -1,11 +1,13 @@
 import pliny from "pliny/pliny";
 
+/*
 pliny.class({
   parent: "Primrose.Input",
   name: "Gamepad",
   baseClass: "Primrose.Input.PoseInputProcessor",
   description: "| [under construction]"
 });
+*/
 
 function playPattern(devices, pattern, pause){
   if(pattern.length > 0){
@@ -106,11 +108,13 @@ export default class Gamepad extends PoseInputProcessor {
   }
 }
 
+/*
 pliny.enumeration({
   parent: "Primrose.Input.Gamepad",
   name: "XBOX_360_BUTTONS",
   description: "Labeled names for each of the different control features of the Xbox 360 controller."
 });
+*/
 Gamepad.XBOX_360_BUTTONS = {
   A: 1,
   B: 2,
@@ -130,11 +134,13 @@ Gamepad.XBOX_360_BUTTONS = {
   RIGHT_DPAD: 16
 };
 
+/*
 pliny.enumeration({
   parent: "Primrose.Input.Gamepad",
   name: "XBOX_ONE_BUTTONS",
   description: "Labeled names for each of the different control features of the Xbox 360 controller."
 });
+*/
 Gamepad.XBOX_ONE_BUTTONS = {
   A: 1,
   B: 2,
@@ -154,11 +160,13 @@ Gamepad.XBOX_ONE_BUTTONS = {
   RIGHT_DPAD: 16
 };
 
+/*
 pliny.enumeration({
   parent: "Primrose.Input.Gamepad",
   name: "VIVE_BUTTONS",
   description: "Labeled names for each of the different control buttons of the HTC Vive Motion Controllers."
 });
+*/
 Gamepad.VIVE_BUTTONS = {
   TOUCHPAD_PRESSED: 0,
   TRIGGER_PRESSED: 1,
