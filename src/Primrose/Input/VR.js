@@ -62,14 +62,6 @@ export default class VR extends PoseInputProcessor {
       });
   }
 
-  get isNativeMobileWebVR() {
-    return this.isNativeWebVR && isChrome && isMobile;
-  }
-
-  get isNativeWebVR() {
-    return this.currentDevice && !this.currentDevice.isPolyfilled;
-  }
-
   connect(selectedIndex) {
     this.currentPose = null;
     this.currentFrameData = null;
@@ -116,7 +108,7 @@ export default class VR extends PoseInputProcessor {
       promise = Promise.resolve();
     }
 
-    if (this.isNativeMobileWebVR) {
+    if (!this.isPolyfilled && isChrome && isMobile) {
       promise = promise.then(Orientation.unlock);
     }
 
@@ -216,7 +208,7 @@ export default class VR extends PoseInputProcessor {
   }
 
   get isPolyfilled() {
-    return this.currentDevice && this.currentDevice.isPolyfilled;
+    return this.currentDevice && this.currentDevice.isPolyfilledVRDisplay;
   }
 
   get isPresenting() {

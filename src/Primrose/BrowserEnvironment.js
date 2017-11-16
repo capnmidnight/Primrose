@@ -1057,15 +1057,16 @@ export default class BrowserEnvironment extends EventDispatcher {
     });
     this.goFullScreen = (index, evt) => {
       if (evt !== "Gaze") {
+
+        this.VR.connect(index);
+
         let elem = null;
-        if(evt === "force" || this.VR.canMirror || this.VR.isNativeWebVR) {
+        if(evt === "force" || this.VR.canMirror || !this.VR.isPolyfilled) {
           elem = this.renderer.domElement;
         }
         else{
           elem = this.options.fullScreenElement;
         }
-
-        this.VR.connect(index);
 
         return this.VR.requestPresent([{
             source: elem
@@ -1205,7 +1206,7 @@ export default class BrowserEnvironment extends EventDispatcher {
         }
       }
 
-      this.options.fullScreenElement = cascadeElement(this.options.fullScreenElement) || this.renderer.domElement;
+      this.options.fullScreenElement = cascadeElement(this.options.fullScreenElement) || this.renderer.domElement.parentElement;
       let maxTabIndex = 0;
       const elementsWithTabIndex = document.querySelectorAll("[tabIndex]");
       for(let i = 0; i < elementsWithTabIndex.length; ++i){

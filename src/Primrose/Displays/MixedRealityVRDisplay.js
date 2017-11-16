@@ -24,9 +24,7 @@ export default class MixedRealityVRDisplay extends PolyfilledVRDisplay {
       depthFar: {
         get: () => this._display.depthFar,
         set: (v) => this._display.depthFar = v,
-      },
-
-      isPolyfilled: immutable(true)
+      }
     });
   }
 
