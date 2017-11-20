@@ -1,5 +1,3 @@
-// import pliny from "pliny/pliny";
-
 import { BufferGeometry, Geometry, Mesh } from "three";
 
 import { colored } from "../live-api";

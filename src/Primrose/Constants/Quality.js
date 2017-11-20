@@ -1,5 +1,3 @@
-// import pliny from "pliny/pliny";
-
 /*
 pliny.enumeration({
   parent: "Primrose.Constants",

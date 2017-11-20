@@ -1,5 +1,3 @@
-// import pliny from "pliny/pliny";
-
 import { CubeTextureLoader, CubeTexture, ImageLoader } from "three";
 
 CubeTextureLoader.prototype.load = function( urls, onLoad, onProgress, onError ) {

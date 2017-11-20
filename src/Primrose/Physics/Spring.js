@@ -1,5 +1,3 @@
-// import pliny from "pliny/pliny";
-
 import CANNON from "cannon";
 
 import Component from "../Controls/Component";

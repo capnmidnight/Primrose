@@ -1,5 +1,3 @@
-// import pliny from "pliny/pliny";
-
 import { Mesh, Object3D } from "three";
 
 import phys from "../live-api/phys";

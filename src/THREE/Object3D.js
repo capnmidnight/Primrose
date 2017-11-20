@@ -1,5 +1,3 @@
-// import pliny from "pliny/pliny";
-
 import { Object3D } from "three";
 
 /*

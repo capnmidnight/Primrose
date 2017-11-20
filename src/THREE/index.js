@@ -1,5 +1,3 @@
-// import pliny from "pliny/pliny";
-
 import "./center";
 import "./colored";
 import "./CubeTextureLoader";

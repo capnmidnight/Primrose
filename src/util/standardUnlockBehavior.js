@@ -1,5 +1,3 @@
-// import pliny from "pliny/pliny";
-
 import { isMobile } from "../flags";
 import Orientation from "./Orientation";
 import PointerLock from "./PointerLock";

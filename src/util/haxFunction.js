@@ -1,5 +1,3 @@
-// import pliny from "pliny/pliny";
-
 import hax from "./hax";
 
 export default function haxFunction(target, name, thunk) {

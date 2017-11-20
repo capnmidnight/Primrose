@@ -1,5 +1,3 @@
-// import pliny from "pliny/pliny";
-
 /*
 pliny.value({
   parent: "Primrose.Text.OperatingSystems",

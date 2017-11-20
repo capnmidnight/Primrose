@@ -1,5 +1,3 @@
-// import pliny from "pliny/pliny";
-
 /*
 pliny.function({
   parent: "Primrose.HTTP",

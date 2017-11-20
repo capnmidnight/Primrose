@@ -1,5 +1,3 @@
-// import pliny from "pliny/pliny";
-
 import { quad } from "../../live-api";
 
 import Entity from "./Entity";

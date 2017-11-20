@@ -1,5 +1,3 @@
-// import pliny from "pliny/pliny";
-
 import CardboardVRDisplay from "./CardboardVRDisplay";
 import MagicWindowVRDisplay from "./MagicWindowVRDisplay";
 import MockVRDisplay from "./MockVRDisplay";

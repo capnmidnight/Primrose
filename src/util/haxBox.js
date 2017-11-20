@@ -1,5 +1,3 @@
-// import pliny from "pliny/pliny";
-
 import haxClass from "./haxClass";
 import haxFunction from "./haxFunction";
 

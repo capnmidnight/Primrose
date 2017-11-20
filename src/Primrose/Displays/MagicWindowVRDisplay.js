@@ -1,5 +1,3 @@
-// import pliny from "pliny/pliny";
-
 import FusionPoseSensor from "./SensorFusion/FusionPoseSensor";
 import PolyfilledVRDisplay from "./PolyfilledVRDisplay";
 

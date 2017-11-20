@@ -1,5 +1,3 @@
-// import pliny from "pliny/pliny";
-
 import Player from "../Replay/Player";
 
 import PolyfilledVRDisplay from "./PolyfilledVRDisplay";

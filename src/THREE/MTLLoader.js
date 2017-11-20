@@ -1,5 +1,3 @@
-// import pliny from "pliny/pliny";
-
 /**
  * Loads a Wavefront .mtl file specifying materials
  *

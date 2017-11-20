@@ -1,5 +1,3 @@
-// import pliny from "pliny/pliny";
-
 /**
  * @author mrdoob / http://mrdoob.com/
  */
