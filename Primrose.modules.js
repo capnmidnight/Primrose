@@ -1,7 +1,5 @@
 console.info("[Primrose]:> primrose v0.33.1. see https://www.primrosevr.com for more information.");
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.value({
   parent: "Flags",
@@ -20,8 +18,6 @@ function testUserAgent (a) {
 
 var isMobile = testUserAgent(navigator.userAgent || navigator.vendor || window.opera);
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.value({
   parent: "Flags",
@@ -32,8 +28,6 @@ pliny.value({
 */
 
 var isGearVR = navigator.userAgent.indexOf("Mobile VR") > -1;
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.value({
@@ -46,8 +40,6 @@ pliny.value({
 
 var isCardboard = isMobile && !isGearVR;
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.value({
   parent: "Flags",
@@ -58,8 +50,6 @@ pliny.value({
 */
 
 var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.value({
@@ -72,8 +62,6 @@ pliny.value({
 
 var isChrome = !!window.chrome && !isOpera;
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.value({
   parent: "Flags",
@@ -84,8 +72,6 @@ pliny.value({
 */
 
 var isFirefox = typeof window.InstallTrigger !== "undefined";
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.value({
@@ -98,8 +84,6 @@ pliny.value({
 
 var isIE = /*@cc_on!@*/ false || !!document.documentMode;
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.value({
   parent: "Flags",
@@ -111,8 +95,6 @@ pliny.value({
 
 var isInIFrame = (window.self !== window.top);
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.value({
   parent: "Flags",
@@ -123,8 +105,6 @@ pliny.value({
 */
 
 var isiOS = /iP(hone|od|ad)/.test(navigator.userAgent || "");
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.function({
@@ -139,8 +119,6 @@ function isLandscape() {
   return Math.abs(window.orientation) === 90;
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.value({
   parent: "Flags",
@@ -151,8 +129,6 @@ pliny.value({
 */
 
 var isMacOS = /Macintosh/.test(navigator.userAgent || "");
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.value({
@@ -166,8 +142,6 @@ pliny.value({
 var isSafari = Object.prototype.toString.call(window.HTMLElement)
   .indexOf("Constructor") > 0;
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.value({
   parent: "Flags",
@@ -179,8 +153,6 @@ pliny.value({
 
 var isWebKit = isOpera || isChrome || isSafari;
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.value({
   parent: "Flags",
@@ -191,8 +163,6 @@ pliny.value({
 */
 
 var isWindows = /Windows/.test(navigator.userAgent || "");
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.namespace({
@@ -41806,8 +41776,6 @@ AudioAnalyser.prototype.getData = function () {
 
 };
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.function({
   parent: "Live API",
@@ -41828,8 +41796,6 @@ pliny.function({
 function hub() {
   return new Object3D();
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.class({
@@ -41927,13 +41893,13 @@ class Angle {
   set degrees(newValue) {
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Util.Angle",
       name: "degrees",
       type: "Number",
       description: "Get/set the current value of the angle in degrees."
     });
-*/
+    */
 
     do {
       // figure out if it is adding the raw value, or whole
@@ -41960,19 +41926,17 @@ pliny.property({
   set radians(val) {
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Util.Angle",
       name: "radians",
       type: "Number",
       description: "Get/set the current value of the angle in radians."
     });
-*/
+    */
 
     this.degrees = val * RAD2DEG;
   }
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.function({
@@ -42008,8 +41972,6 @@ function findProperty(elem, arr) {
   }
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.function({
   parent: "Util",
@@ -42038,8 +42000,6 @@ function immutable$1(value) {
     }
   };
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.class({
@@ -42098,7 +42058,7 @@ class AsyncLockRequest {
     this.request = this.request.bind(this);
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Util.AsyncLockRequest",
       name: "available",
       type: "Boolean",
@@ -42272,8 +42232,6 @@ pliny.property({
   }
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.function({
   parent: "Util",
@@ -42321,8 +42279,6 @@ function cache(hash, makeObject, onCacheHit) {
   return _cache[hash];
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.function({
   parent: "Util",
@@ -42352,8 +42308,6 @@ function deleteSetting(settingName) {
     window.localStorage.removeItem(settingName);
   }
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.class({
@@ -42428,8 +42382,6 @@ class FullScreenLockRequest extends AsyncLockRequest {
 
 var FullScreen = new FullScreenLockRequest();
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.function({
   parent: "Util",
@@ -42483,8 +42435,6 @@ function getSetting(settingName, defValue) {
   return defValue;
 }
 
-// import pliny from "pliny/pliny";
-
 function hax(target, name, thunk) {
   var original = target[name];
   if(original) {
@@ -42494,8 +42444,6 @@ function hax(target, name, thunk) {
     };
   }
 }
-
-// import pliny from "pliny/pliny";
 
 function haxClass(target, name, thunk) {
   hax(target, name, (original, args) => {
@@ -42508,8 +42456,6 @@ function haxClass(target, name, thunk) {
   });
 }
 
-// import pliny from "pliny/pliny";
-
 function haxFunction(target, name, thunk) {
   hax(target, name, (original, args) => {
     thunk(args);
@@ -42517,8 +42463,6 @@ function haxFunction(target, name, thunk) {
     return returnValue;
   });
 }
-
-// import pliny from "pliny/pliny";
 
 function injectIceServers(target, name) {
   haxClass(target, name, function(args) {
@@ -42541,8 +42485,6 @@ injectIceServers(window, "webkitRTCPeerConnection");
 injectUserMedia(navigator, "webkitGetUserMedia");
 injectUserMedia(navigator, "getUserMedia");
 injectUserMedia(navigator.mediaDevices, "getUserMedia");
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.function({
@@ -42570,8 +42512,6 @@ function identity(obj) {
   return obj;
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.function({
   parent: "Util",
@@ -42593,8 +42533,6 @@ function isTimestampDeltaValid(timestampDeltaS) {
     MIN_TIMESTEP < timestampDeltaS &&
     timestampDeltaS <= MAX_TIMESTEP;
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.function({
@@ -42662,8 +42600,6 @@ function mutable(value, type) {
   }
 }
 
-// import pliny from "pliny/pliny";
-
 function lock(element) {
   var type = screen.orientation && screen.orientation.type || screen.mozOrientation || "";
   if (type.indexOf("landscape") === -1) {
@@ -42697,8 +42633,6 @@ var Orientation = {
   unlock
 };
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.class({
   parent: "Util",
@@ -42721,8 +42655,6 @@ class PointerLockRequest extends AsyncLockRequest {
 }
 
 var PointerLock = new PointerLockRequest();
-
-// import pliny from "pliny/pliny";
 
 Promise.prototype.log = function(args){
   args = args || [];
@@ -42749,8 +42681,6 @@ function promisify(thunk, defaultResults) {
     });
   });
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.function({
@@ -42796,8 +42726,6 @@ function setSetting(settingName, val) {
   }
 }
 
-// import pliny from "pliny/pliny";
-
 function standardUnlockBehavior() {
   if (isMobile) {
     Orientation.unlock();
@@ -42809,15 +42737,11 @@ function standardUnlockBehavior() {
   }
 }
 
-// import pliny from "pliny/pliny";
-
 function standardExitFullScreenBehavior() {
   return standardUnlockBehavior()
     .then(() => FullScreen.exit())
     .catch((exp) => console.warn("FullScreen failed", exp));
 }
-
-// import pliny from "pliny/pliny";
 
 function standardLockBehavior(elem) {
   if(isiOS) {
@@ -42833,15 +42757,11 @@ function standardLockBehavior(elem) {
   }
 }
 
-// import pliny from "pliny/pliny";
-
 function standardFullScreenBehavior(elem) {
   return FullScreen.request(elem)
     .catch((exp) => console.warn("FullScreen failed", exp))
     .then(standardLockBehavior);
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.class({
@@ -42967,7 +42887,7 @@ class Workerize extends EventDispatcher {
   static createWorker(script, stripFunc) {
 
     /*
-pliny.function({
+    pliny.function({
       parent: "Util.Workerize",
       name: "createWorker",
       description: "A static function that loads Plain Ol' JavaScript Functions into a WebWorker.",
@@ -42982,7 +42902,7 @@ pliny.function({
       }],
       returns: "The WebWorker object."
     });
-*/
+    */
 
     if (typeof script === "function") {
       script = script.toString();
@@ -43057,23 +42977,23 @@ pliny.function({
     // The binary-large-object can be used to convert the script from text to a
     // data URI, because workers can only be created from same-origin URIs.
     /*
-pliny.property({
+    pliny.property({
       parent: "Util.Workerize",
       name: "worker",
       type: "WebWorker",
       description: "The worker thread containing our class."
     });
-*/
+    */
     this.worker = Workerize.createWorker(script, false);
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Util.Workerize",
       name: "args",
       type: "Array",
       description: "Static allocation of an array to save on memory usage when piping commands to a worker."
     });
-*/
+    */
     this.args = [null, null];
 
     this.worker.onmessage = (e) => this.emit(e.data[0], e.data[1]);
@@ -43082,13 +43002,13 @@ pliny.property({
     // postMessage method, to inform the worker thread that methods were called,
     // with parameters.
     /*
-pliny.property({
+    pliny.property({
       parent: "Util.Workerize",
       name: "&lt;mappings for each method in the original class&gt;",
       type: "Function",
       description: "Each mapped function causes a message to be posted to the worker thread with its arguments packed into an array."
     });
-*/
+    */
     for (k in func.prototype) {
       // we skip the addEventListener method because we override it in a
       // different way, to be able to pass messages across the thread boundary.
@@ -43104,7 +43024,7 @@ pliny.property({
   methodShim(eventName, args) {
 
     /*
-pliny.method({
+    pliny.method({
       parent: "Util.Workerize",
       name: "methodShim",
       description: "Posts messages to the worker thread by packing arguments into an array. The worker will receive the array and interpret the first value as the name of the method to invoke and the second value as another array of parameters.",
@@ -43118,15 +43038,13 @@ pliny.method({
         description: "The arguments that we want to pass to the method that we are calling in the worker context."
       }]
     });
-*/
+    */
 
     this.args[0] = eventName;
     this.args[1] = args;
     this.worker.postMessage(this.args);
   }
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.namespace({
@@ -43188,8 +43106,6 @@ var util = Object.freeze({
 	Workerize: Workerize,
 	default: index$3
 });
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.function({
@@ -43337,8 +43253,6 @@ function material(textureDescription, options){
   });
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.function({
   parent: "Primrose.Graphics",
@@ -43392,8 +43306,6 @@ function loadTexture(id, url, progress) {
       }
     }));
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.function({
@@ -43630,8 +43542,6 @@ function textured(geometry, txt, options) {
   return obj;
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.function({
   parent: "Live API",
@@ -43719,8 +43629,6 @@ function colored(geometry, color, options) {
   return obj;
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.function({
   parent: "Live API",
@@ -43789,8 +43697,6 @@ function box(width, height, length, t, u, v) {
     () => new BoxBufferGeometry(width, height, length, t, u, v));
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.function({
   parent: "Live API",
@@ -43856,8 +43762,6 @@ function brick(txt, width, height, length, options) {
     obj = m(box(width, height, length), txt, options);
   return obj;
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.function({
@@ -44254,8 +44158,6 @@ function enableInlineVideo(video, hasAudio, onlyWhitelisted) {
 
 enableInlineVideo.isWhitelisted = isWhitelisted;
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.class({
   parent: "Primrose.Controls",
@@ -44410,8 +44312,6 @@ class Entity extends Object3D {
   }
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.class({
   parent: "Primrose.Controls",
@@ -44519,8 +44419,6 @@ class BaseTextured extends Entity {
     }
   }
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.class({
@@ -44647,8 +44545,6 @@ class Video extends BaseTextured {
   }
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.function({
   parent: "Live API",
@@ -44707,8 +44603,6 @@ function camera(index, options) {
     .catch(console.error.bind(console, "ERR [creating image]:>"));
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.function({
   parent: "Live API",
@@ -44763,8 +44657,6 @@ function circle(r, sections, start, end) {
     `CircleBufferGeometry(${r}, ${sections}, ${start}, ${end})`,
     () => new CircleBufferGeometry(r, sections, start, end));
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.function({
@@ -44825,8 +44717,6 @@ function cloud(verts, c, s) {
     }));
   return new Points(geom, mat);
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.function({
@@ -44913,8 +44803,6 @@ function cylinder(rT, rB, height, rS, hS, openEnded, thetaStart, thetaEnd) {
     `CylinderBufferGeometry(${rT}, ${rB}, ${height}, ${rS}, ${hS}, ${openEnded}, ${thetaStart}, ${thetaEnd})`,
     () => new CylinderBufferGeometry(rT, rB, height, rS, hS, openEnded, thetaStart, thetaEnd));
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.function({
@@ -58650,8 +58538,6 @@ World.prototype.clearForces = function(){
 });
 });
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.function({
   parent: "Live API",
@@ -58694,8 +58580,6 @@ function phys(obj, options) {
 
   return ent;
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.function({
@@ -58768,8 +58652,6 @@ function fixGeometry(geometry, options){
 
   return geometry;
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.function({
@@ -58862,8 +58744,6 @@ function quad(width, height, options) {
     () => fixGeometry(new PlaneBufferGeometry(width, height, options.s, options.t), options));
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.function({
   parent: "Live API",
@@ -58893,8 +58773,6 @@ pliny.function({
 function quat(x, y, z, w) {
   return new Quaternion(x, y, z, w);
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.function({
@@ -59005,8 +58883,6 @@ function range(n, m, s, t) {
   }
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.function({
   parent: "Live API",
@@ -59018,8 +58894,6 @@ pliny.function({
 function raycaster() {
   return new Raycaster();
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.function({
@@ -59093,8 +58967,6 @@ function ring(rInner, rOuter, sectors, rings, start, end) {
     `RingBufferGeometry(${rInner}, ${rOuter}, ${sectors}, ${rings}, ${start}, ${end})`,
     () => new RingBufferGeometry(rInner, rOuter, sectors, rings, start, end));
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.class({
@@ -59270,8 +59142,6 @@ class InsideSphereGeometry extends Geometry {
   }
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.function({
   parent: "Live API",
@@ -59357,8 +59227,6 @@ function shell(r, slices, rings, phi, theta, options) {
     () => fixGeometry(new InsideSphereGeometry(r, slices, rings, phiStart, phi, thetaStart, theta, true), options));
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.function({
   parent: "Live API",
@@ -59408,10 +59276,6 @@ function sphere(r, slices, rings) {
     () => new SphereGeometry(r, slices, rings));
 }
 
-// import pliny from "pliny/pliny";
-
-
-
 class Component {
 
   preStep() {
@@ -59426,8 +59290,6 @@ class Component {
 
   }
 }
-
-// import pliny from "pliny/pliny";
 
 class Spring extends Component {
 
@@ -59453,8 +59315,6 @@ class Spring extends Component {
   }
 
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.function({
@@ -59483,8 +59343,6 @@ function spring(a, b, options) {
   a.components.push(constraint);
   return constraint;
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.function({
@@ -59515,8 +59373,6 @@ pliny.function({
 function v2(x, y) {
   return new Vector2(x, y);
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.function({
@@ -59552,8 +59408,6 @@ pliny.function({
 function v3(x, y, z) {
   return new Vector3(x, y, z);
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.function({
@@ -59594,8 +59448,6 @@ pliny.function({
 function v4(x, y, z, w) {
   return new Vector4(x, y, z, w);
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.namespace({
@@ -59662,8 +59514,6 @@ var liveAPI = Object.freeze({
 	default: index$2
 });
 
-// import pliny from "pliny/pliny";
-
 BufferGeometry.prototype.center =
 Geometry.prototype.center =
   function() {
@@ -59675,16 +59525,12 @@ Geometry.prototype.center =
     return this.offset(-dx, -dy, -dz);
   };
 
-// import pliny from "pliny/pliny";
-
 BufferGeometry.prototype.colored =
 Geometry.prototype.colored =
 Mesh.prototype.colored =
   function(color, options){
     return colored(this, color, options);
   };
-
-// import pliny from "pliny/pliny";
 
 CubeTextureLoader.prototype.load = function( urls, onLoad, onProgress, onError ) {
   var texture = new CubeTexture();
@@ -59706,8 +59552,6 @@ CubeTextureLoader.prototype.load = function( urls, onLoad, onProgress, onError )
 
   return texture;
 };
-
-// import pliny from "pliny/pliny";
 
 Object3D.prototype.emit = EventDispatcher.prototype.emit = function(evt, obj) {
   if(!obj) {
@@ -59778,8 +59622,6 @@ Object3D.prototype.on = EventDispatcher.prototype.on = function(event, listener)
   return this;
 };
 
-// import pliny from "pliny/pliny";
-
 Matrix4.prototype.toString = function(digits) {
   if(digits === undefined){
     digits = 10;
@@ -59819,8 +59661,6 @@ Matrix4.prototype.toString = function(digits) {
   }
   return output;
 };
-
-// import pliny from "pliny/pliny";
 
 /**
  * Loads a Wavefront .mtl file specifying materials
@@ -60400,8 +60240,6 @@ Object.assign( MTLLoader, {
   CASTS_SHADOWS_ONTO_INVISIBLE_SURFACES: 10
 });
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.method({
   parent: "THREE.Object3D",
@@ -60483,8 +60321,6 @@ Object.defineProperty(Object3D.prototype, "visible", {
     }
   }
 });
-
-// import pliny from "pliny/pliny";
 
 /**
  * @author mrdoob / http://mrdoob.com/
@@ -61216,8 +61052,6 @@ class OBJ {
 	}
 }
 
-// import pliny from "pliny/pliny";
-
 Geometry.prototype.offset = function(x, y, z){
   const arr = this.vertices;
   for(let i = 0; i < arr.length; ++i) {
@@ -61240,13 +61074,9 @@ BufferGeometry.prototype.offset = function(x, y, z){
   return this;
 };
 
-// import pliny from "pliny/pliny";
-
 Object3D.prototype.phys = Mesh.prototype.phys = function(options) {
   return phys(this, options);
 };
-
-// import pliny from "pliny/pliny";
 
 BufferGeometry.prototype.textured =
 Geometry.prototype.textured =
@@ -61254,8 +61084,6 @@ Mesh.prototype.textured =
   function(texture, options) {
     return textured(this, texture, options);
   };
-
-// import pliny from "pliny/pliny";
 
 Euler.prototype.toString =
 Quaternion.prototype.toString =
@@ -61293,8 +61121,6 @@ Matrix4.prototype.debug =
     }
     return this;
   };
-
-// import pliny from "pliny/pliny";
 
 var promise = createCommonjsModule(function (module) {
 (function (root) {
@@ -61528,8 +61354,6 @@ var promise = createCommonjsModule(function (module) {
 })(commonjsGlobal);
 });
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.function({
   parent: "Primrose.HTTP",
@@ -61642,8 +61466,6 @@ function XHR(method, type, url, options) {
   });
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.function({
   parent: "Primrose.HTTP",
@@ -61687,8 +61509,6 @@ function get(type, url, options) {
   return XHR("GET", type || "text", url, options);
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.function({
   parent: "Primrose.HTTP",
@@ -61729,8 +61549,6 @@ pliny.function({
 function getBuffer(url, options) {
   return get("arraybuffer", url, options);
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.function({
@@ -61843,19 +61661,17 @@ function cascadeElement(id, tag, DOMClass, add) {
 
   if (elem === null) {
     /*
-pliny.error({
+    pliny.error({
       parent: "Primrose.DOM.cascadeElement",
       name: "Invalid element",
       type: "Error",
       description: "If the element could not be found, could not be created, or one of the appropriate ID was found but did not match the expected type, an error is thrown to halt operation."
     });
-*/
+    */
     throw new Error(id + " does not refer to a valid " + tag + " element.");
   }
   return elem;
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.class({
@@ -62095,7 +61911,7 @@ class Audio3D {
   loadSource(sources, loop) {
 
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.Output.Audio3D",
       name: "loadSound",
       returns: "Promise<MediaElementAudioSourceNode>",
@@ -62147,7 +61963,7 @@ pliny.method({
   });"
       }]
     });
-*/
+    */
 
     return this.ready.then(() => new Promise((resolve, reject) => {
       console.log("Loading " + sources);
@@ -62202,8 +62018,6 @@ pliny.method({
 
 Audio3D.isAvailable = !!window.AudioContext && !!AudioContext.prototype.createGain;
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.class({
   parent: "Primrose.Output",
@@ -62237,8 +62051,6 @@ class PositionalSound {
     return this;
   }
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.class({
@@ -62295,8 +62107,6 @@ class Note extends PositionalSound {
     return this;
   }
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.class({
@@ -62378,8 +62188,6 @@ class Music {
 
 Music.TYPES = TYPES;
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.class({
   parent: "Primrose.Output",
@@ -62429,8 +62237,6 @@ class Sound extends PositionalSound {
     return this;
   }
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.class({
@@ -62492,8 +62298,6 @@ class Speech {
   }
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.namespace({
   parent: "Primrose",
@@ -62510,8 +62314,6 @@ var Audio$2 = {
   Sound,
   Speech
 };
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.class({
@@ -62883,8 +62685,6 @@ class Pointer extends Entity {
 
 Pointer.EVENTS = ["pointerstart", "pointerend", "pointermove", "gazestart", "gazemove", "gazecomplete", "gazecancel", "exit", "enter", "select", "useraction"];
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.enumeration({
   parent: "Primrose",
@@ -63026,8 +62826,6 @@ for (var key in Keys) {
   }
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.class({
   parent: "Primrose.Text",
@@ -63062,8 +62860,6 @@ class Point {
   }
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.class({
   parent: "Primrose.Text",
@@ -63097,8 +62893,6 @@ class Size {
     return "<w:" + this.width + ", h:" + this.height + ">";
   }
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.class({
@@ -63207,8 +63001,6 @@ class Rectangle {
   }
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.class({
   parent: "Primrose.Controls",
@@ -63246,31 +63038,31 @@ class Surface extends BaseTextured {
 
   constructor(options) {
     /*
-pliny.event({ parent: "Primrose.Controls.Surface", name: "focus", description: "If the element is focusable, occurs when the user clicks on an element for the first time, or when a program calls the `focus()` method." });
+    pliny.event({ parent: "Primrose.Controls.Surface", name: "focus", description: "If the element is focusable, occurs when the user clicks on an element for the first time, or when a program calls the `focus()` method." });
 */
     /*
-pliny.event({ parent: "Primrose.Controls.Surface", name: "blur", description: "If the element is focused (which implies it is also focusable), occurs when the user clicks off of an element, or when a program calls the `blur()` method." });
+    pliny.event({ parent: "Primrose.Controls.Surface", name: "blur", description: "If the element is focused (which implies it is also focusable), occurs when the user clicks off of an element, or when a program calls the `blur()` method." });
 */
     /*
-pliny.event({ parent: "Primrose.Controls.Surface", name: "click", description: "Occurs whenever the user clicks on an element." });
+    pliny.event({ parent: "Primrose.Controls.Surface", name: "click", description: "Occurs whenever the user clicks on an element." });
 */
     /*
-pliny.event({ parent: "Primrose.Controls.Surface", name: "keydown", description: "Occurs when the user pushes a key down while focused on the element." });
+    pliny.event({ parent: "Primrose.Controls.Surface", name: "keydown", description: "Occurs when the user pushes a key down while focused on the element." });
 */
     /*
-pliny.event({ parent: "Primrose.Controls.Surface", name: "keyup", description: "Occurs when the user releases a key while focused on the element." });
+    pliny.event({ parent: "Primrose.Controls.Surface", name: "keyup", description: "Occurs when the user releases a key while focused on the element." });
 */
     /*
-pliny.event({ parent: "Primrose.Controls.Surface", name: "paste", description: "Occurs when the user activates the clipboard's `paste` command while focused on the element." });
+    pliny.event({ parent: "Primrose.Controls.Surface", name: "paste", description: "Occurs when the user activates the clipboard's `paste` command while focused on the element." });
 */
     /*
-pliny.event({ parent: "Primrose.Controls.Surface", name: "cut", description: "Occurs when the user activates the clipboard's `cut` command while focused on the element." });
+    pliny.event({ parent: "Primrose.Controls.Surface", name: "cut", description: "Occurs when the user activates the clipboard's `cut` command while focused on the element." });
 */
     /*
-pliny.event({ parent: "Primrose.Controls.Surface", name: "copy", description: "Occurs when the user activates the clipboard's `copy` command while focused on the element." });
+    pliny.event({ parent: "Primrose.Controls.Surface", name: "copy", description: "Occurs when the user activates the clipboard's `copy` command while focused on the element." });
 */
     /*
-pliny.event({ parent: "Primrose.Controls.Surface", name: "wheel", description: "Occurs when the user scrolls the mouse wheel while focused on the element." });
+    pliny.event({ parent: "Primrose.Controls.Surface", name: "wheel", description: "Occurs when the user scrolls the mouse wheel while focused on the element." });
 */
 
 
@@ -63314,13 +63106,13 @@ pliny.event({ parent: "Primrose.Controls.Surface", name: "wheel", description: "
 
     if (canvas === null) {
       /*
-pliny.error({
+      pliny.error({
         parent: "Primrose.Controls.Surface",
         name: "Invalid element",
         type: "Error",
         description: "If the element could not be found, could not be created, or one of the appropriate ID was found but did not match the expected type, an error is thrown to halt operation."
       });
-*/
+      */
       console.error(typeof (options.id));
       console.error(options.id);
       throw new Error(options.id + " does not refer to a valid canvas element.");
@@ -63334,23 +63126,23 @@ pliny.error({
     this._opacity = 1;
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.Controls.Surface",
       name: "focused",
       type: "Boolean",
       description: "A flag indicating if the element, or a child element within it, has received focus from the user."
     });
-*/
+    */
     this.focused = false;
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.Controls.Surface",
       name: "focusable",
       type: "Boolean",
       description: "A flag indicating if the element, or any child elements within it, is capable of receiving focus."
     });
-*/
+    */
     this.focusable = true;
 
     this.style = {};
@@ -63680,7 +63472,7 @@ pliny.property({
 
   startUV(evt) {
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.Controls.Surface",
       name: "startUV",
       parameters: [{
@@ -63690,7 +63482,7 @@ pliny.method({
       }],
       description: "Hooks up to the window's `mouseDown` and `touchStart` events, with coordinates translated to tangent-space UV coordinates, and propagates it to any of its focused subSurfaces."
     });
-*/
+    */
     if(!this._forFocusedSubSurface("startUV", evt)){
       var p = this.mapUV(evt.hit.uv);
       this.startPointer(p.x, p.y);
@@ -63699,7 +63491,7 @@ pliny.method({
 
   moveUV(evt) {
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.Controls.Surface",
       name: "moveUV",
       parameters: [{
@@ -63709,7 +63501,7 @@ pliny.method({
       }],
       description: "Hooks up to the window's `mouseMove` and `touchMove` events, with coordinates translated to tangent-space UV coordinates, and propagates it to any of its focused subSurfaces."
     });
-*/
+    */
     if(!this._forFocusedSubSurface("moveUV", evt)) {
       var p = this.mapUV(evt.hit.uv);
       this.movePointer(p.x, p.y);
@@ -63718,18 +63510,18 @@ pliny.method({
 
   endPointer(evt) {
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.Controls.Surface",
       name: "endPointer",
       description: "Hooks up to the window's `mouseUp` and `toucheEnd` events and propagates it to any of its focused subSurfaces."
     });
-*/
+    */
     this._forFocusedSubSurface("endPointer", evt);
   }
 
   focus() {
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.Controls.Surface",
       name: "focus",
       description: "If the control is focusable, sets the focus property of the control, does not change the focus property of any other control.",
@@ -63757,7 +63549,7 @@ pliny.method({
   }"
       }]
     });
-*/
+    */
 
     if (this.focusable && !this.focused) {
       this.focused = true;
@@ -63767,7 +63559,7 @@ pliny.method({
 
   blur() {
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.Controls.Surface",
       name: "blur",
       description: "If the element is focused, unsets the focus property of the control and all child controls. Does not change the focus property of any parent or sibling controls.",
@@ -63795,7 +63587,7 @@ pliny.method({
   }"
       }]
     });
-*/
+    */
     if (this.focused) {
       this.focused = false;
       for (var i = 0; i < this.subSurfaces.length; ++i) {
@@ -63809,13 +63601,13 @@ pliny.method({
 
   get theme() {
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.Controls.Surface",
       name: "theme",
       type: "Primrose.Text.Themes.*",
       description: "Get or set the theme used for rendering text on any controls in the control tree."
     });
-*/
+    */
     return null;
   }
 
@@ -63827,13 +63619,13 @@ pliny.property({
 
   get lockMovement() {
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.Controls.Surface",
       name: "lockMovement",
       type: "Boolean",
       description: "Recursively searches the deepest leaf-node of the control graph for a control that has its `lockMovement` property set to `true`, indicating that key events should not be used to navigate the user, because they are being interpreted as typing commands."
     });
-*/
+    */
     var lock = false;
     for (var i = 0; i < this.subSurfaces.length && !lock; ++i) {
       lock = lock || this.subSurfaces[i].lockMovement;
@@ -63843,13 +63635,13 @@ pliny.property({
 
   get focusedElement() {
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.Controls.Surface",
       name: "focusedElement",
       type: "Primrose.Controls.Surface",
       description: "Searches the deepest leaf-node of the control graph for a control that has its `focused` property set to `true`."
     });
-*/
+    */
     var result = null,
       head = this;
     while (head && head.focused) {
@@ -63868,7 +63660,7 @@ pliny.property({
 
   keyDown(evt) {
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.Controls.Surface",
       name: "keyDown",
       parameters: [{
@@ -63878,13 +63670,13 @@ pliny.method({
       }],
       description: "Hooks up to the window's `keyDown` event and propagates it to any of its focused subSurfaces."
     });
-*/
+    */
     this._forFocusedSubSurface("keyDown", evt);
   }
 
   keyUp(evt) {
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.Controls.Surface",
       name: "keyUp",
       parameters: [{
@@ -63894,13 +63686,13 @@ pliny.method({
       }],
       description: "Hooks up to the window's `keyUp` event and propagates it to any of its focused subSurfaces."
     });
-*/
+    */
     this._forFocusedSubSurface("keyUp", evt);
   }
 
   readClipboard(evt) {
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.Controls.Surface",
       name: "readClipboard",
       parameters: [{
@@ -63910,13 +63702,13 @@ pliny.method({
       }],
       description: "Hooks up to the clipboard's `paste` event and propagates it to any of its focused subSurfaces."
     });
-*/
+    */
     this._forFocusedSubSurface("readClipboard", evt);
   }
 
   copySelectedText(evt) {
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.Controls.Surface",
       name: "copySelectedText",
       parameters: [{
@@ -63926,13 +63718,13 @@ pliny.method({
       }],
       description: "Hooks up to the clipboard's `copy` event and propagates it to any of its focused subSurfaces."
     });
-*/
+    */
     this._forFocusedSubSurface("copySelectedText", evt);
   }
 
   cutSelectedText(evt) {
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.Controls.Surface",
       name: "cutSelectedText",
       parameters: [{
@@ -63942,13 +63734,13 @@ pliny.method({
       }],
       description: "Hooks up to the clipboard's `cut` event and propagates it to any of its focused subSurfaces."
     });
-*/
+    */
     this._forFocusedSubSurface("cutSelectedText", evt);
   }
 
   readWheel(evt) {
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.Controls.Surface",
       name: "readWheel",
       parameters: [{
@@ -63958,12 +63750,10 @@ pliny.method({
       }],
       description: "Hooks up to the window's `wheel` event and propagates it to any of its focused subSurfaces."
     });
-*/
+    */
     this._forFocusedSubSurface("readWheel", evt);
   }
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.record({
@@ -64018,8 +63808,6 @@ var Default = {
     fontStyle: "underline italic"
   }
 };
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.class({
@@ -64184,8 +63972,6 @@ class Label extends Surface {
   renderCanvasTrim() {}
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.class({
   parent: "Primrose.Controls",
@@ -64245,8 +64031,6 @@ class Button2D extends Label {
   }
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.class({
   parent: "Primrose.Controls",
@@ -64278,39 +64062,39 @@ class Button3D extends Entity {
     this.options.colorPressed = new Color(this.options.colorPressed);
 
     /*
-pliny.event({
+    pliny.event({
       parent: "Primrose.Controls.Button3D",
       name: "click",
       description: "Occurs when the button is activated."
     });
-*/
+    */
 
     /*
-pliny.event({
+    pliny.event({
       parent: "Primrose.Controls.Button3D",
       name: "release",
       description: "Occurs when the button is deactivated."
     });
-*/
+    */
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.Controls.Button3D",
       name: "base",
       type: "THREE.Object3D",
       description: "The stand the button cap sits on."
     });
-*/
+    */
     this.base = model.children[1];
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.Controls.Button3D",
       name: "base",
       type: "THREE.Object3D",
       description: "The moveable part of the button, that triggers the click event."
     });
-*/
+    */
     this.cap = model.children[0];
     this.cap.name = buttonName;
     this.cap.material = this.cap.material.clone();
@@ -64321,41 +64105,41 @@ pliny.property({
     this.add(this.cap);
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.Controls.Button3D",
       name: "color",
       type: "Number",
       description: "The current color of the button cap."
     });
-*/
+    */
     this.color = this.cap.material.color;
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.Controls.Button3D",
       name: " name",
       type: "String",
       description: "A name for the button, to tell it from others when debugging."
     });
-*/
+    */
     this.name = buttonName;
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.Controls.Button3D",
       name: "element",
       type: "Element",
       optional: true,
       description: "If this 3D button was created from a copy of an HTMLButtonElement, this is that element."
     });
-*/
+    */
     this.element = null;
   }
 
   startUV(point) {
 
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.Controls.Button3D",
       name: "startUV",
       description: "Handle a mouse-down event on a textured object.",
@@ -64365,7 +64149,7 @@ pliny.method({
         description: "The UV coordinate of the texture that was clicked."
       }]
     });
-*/
+    */
 
     this.color.copy(this.options.colorPressed);
     if (this.element) {
@@ -64379,7 +64163,7 @@ pliny.method({
   endPointer(evt) {
 
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.Controls.Button3D",
       name: "endPointer",
       description: "Handle a mouse-up event on a textured object.",
@@ -64389,7 +64173,7 @@ pliny.method({
         description: "Not actually used."
       }]
     });
-*/
+    */
 
     this.color.copy(this.options.colorUnpressed);
     this.emit("release", { source: this });
@@ -64398,7 +64182,7 @@ pliny.method({
   consumeEvent(evt) {
 
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.Controls.Button3D",
       name: "consumeEvent",
       description: "Route events.",
@@ -64408,7 +64192,7 @@ pliny.method({
         description: "The event to route."
       }]
     });
-*/
+    */
 
     switch(evt.type){
       case "pointerstart":
@@ -64480,8 +64264,6 @@ Button3D.DEFAULTS = {
   toggle: true
 };
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.class({
   parent: "Primrose.Controls",
@@ -64509,29 +64291,29 @@ class ButtonFactory {
 
   constructor(templateFile, options) {
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.Controls.Button3D",
       name: "options",
       type: "Object",
       description: "The options that the user provided, so that we might change them after the factory has been created, if we so choose."
     });
-*/
+    */
     this.options = options;
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.Controls.Button3D",
       name: "template",
       type: "THREE.Object3D",
       description: "The 3D model for the button, that will be cloned every time a new button is created."
     });
-*/
+    */
     this.template = templateFile;
   }
 
   create(toggle) {
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.ButtonFactory",
       name: "create",
       description: "Clones all of the geometry, materials, etc. in a 3D model to create a new copy of it. This really should be done with instanced objects, but I just don't have the time to deal with it right now.",
@@ -64542,7 +64324,7 @@ pliny.method({
       }],
       return: "The cloned button that which we so desired."
     });
-*/
+    */
 
     var name = "button" + (++buttonCount);
     var obj = this.template.clone();
@@ -64560,8 +64342,6 @@ ButtonFactory.DEFAULT = new ButtonFactory(
     colorPressed: 0x007f00,
     toggle: true
   });
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.class({
@@ -64609,8 +64389,6 @@ class Image extends BaseTextured {
     }));
   }
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.class({
@@ -64725,7 +64503,7 @@ class ModelFactory {
   static loadObject(src, type, progress) {
 
     /*
-pliny.function({
+    pliny.function({
       parent: "Primrose.Controls.ModelFactory",
       name: "loadObject",
       description: "Asynchronously loads a JSON, OBJ, or MTL file as a Three.js object. It processes the scene for attributes, creates new properties on the scene to give us\n\
@@ -64775,7 +64553,7 @@ pliny.function({
       requestAnimationFrame(paint);"
       }]
     });
-*/
+    */
 
     var extMatch = src.match(EXTENSION_PATTERN),
       extension = type && ("." + type) || extMatch[0];
@@ -64856,7 +64634,7 @@ pliny.function({
   static loadObjects(map) {
 
     /*
-pliny.function({
+    pliny.function({
       parent: "Primrose.Controls.ModelFactory",
       name: "loadObjects",
       description: "Asynchronously loads an array of JSON, OBJ, or MTL file as a Three.js object. It processes the objects for attributes, creating new properties on each object to give us\n\
@@ -64922,7 +64700,7 @@ pliny.function({
       requestAnimationFrame(paint);"
       }]
     });
-*/
+    */
 
     var output = {},
       promise = Promise.resolve(output);
@@ -64936,20 +64714,20 @@ pliny.function({
 
   constructor(template) {
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.Graphics.ModelFactory",
       name: "template",
       type: "THREE.Object3D",
       description: "When a model is loaded, stores a reference to the model so it can be cloned in the future."
     });
-*/
+    */
     this.template = template;
   }
 
   clone() {
 
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.Controls.ModelFactory",
       name: "clone",
       description: "Creates a copy of the stored template model.",
@@ -64980,7 +64758,7 @@ pliny.method({
       });"
       }]
     });
-*/
+    */
     var obj = this.template.clone();
 
     obj.traverse((child) => {
@@ -65000,8 +64778,6 @@ pliny.method({
   }
 
 }
-
-// import pliny from "pliny/pliny";
 
 const heightTester = new Raycaster();
 
@@ -65104,8 +64880,6 @@ class Ground extends Entity {
   }
 }
 
-// import pliny from "pliny/pliny";
-
 class Sky extends Entity {
 
   constructor(options) {
@@ -65131,24 +64905,24 @@ class Sky extends Entity {
     else{
 
       /*
-pliny.property({
+      pliny.property({
         parent: "Primrose.Controls.Sky",
         name: "ambient",
         type: "THREE.AmbientLight",
         description: "If the `disableDefaultLighting` option is not present, the ambient light provides a fill light so that dark shadows do not completely obscure object details."
       });
-*/
+      */
       this.ambient = new AmbientLight(0xffffff, 0.5)
         .addTo(this);
 
       /*
-pliny.property({
+      pliny.property({
         parent: "Primrose.Controls.Sky",
         name: "sun",
         type: "THREE.PointLight",
         description: "If the `disableDefaultLighting` option is not present, the sun light provides a key light so that objects have shading and relief."
       });
-*/
+      */
       this.sun = new DirectionalLight(0xffffff, 1)
         .addTo(this)
         .at(0, 100, 100);
@@ -65191,8 +64965,6 @@ pliny.property({
 
 
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.class({
@@ -65449,8 +65221,6 @@ class Cursor {
   }
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.class({
   parent: "Primrose.Text",
@@ -65476,8 +65246,6 @@ class CommandPack {
     Object.assign(this, commands);
   }
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.record({
@@ -65597,8 +65365,6 @@ class BasicTextInput extends CommandPack {
   }
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.record({
   parent: "Primrose.Text.CommandPacks",
@@ -65656,8 +65422,6 @@ var TextEditor = new BasicTextInput(
     }
   });
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.class({
   parent: "Primrose.Text",
@@ -65709,8 +65473,6 @@ class Rule {
   }
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.class({
   parent: "Primrose.Text",
@@ -65741,8 +65503,6 @@ class Token {
     return "[" + this.type + ": " + this.value + "]";
   }
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.class({
@@ -65816,23 +65576,23 @@ See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.
 class Grammar {
   constructor(grammarName, rules) {
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.Text.Grammar",
       name: " name",
       type: "String",
       description: "A user-friendly name for the grammar, to be able to include it in an options listing."
     });
-*/
+    */
     this.name = grammarName;
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.Text.Grammar",
       name: "grammar",
       type: "Array",
       description: "A collection of rules to apply to tokenize text. The rules should be an array of two-element arrays. The first element should be a token name (see [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names), followed by a regular expression that selects the token out of the source code."
     });
-*/
+    */
     // clone the preprocessing grammar to start a new grammar
     this.grammar = rules.map(function (rule) {
       return new Rule(rule[0], rule[1]);
@@ -65889,7 +65649,7 @@ pliny.property({
     }
 
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.Text.Grammar",
       name: "tokenize",
       parameters: [{
@@ -65932,7 +65692,7 @@ pliny.method({
     ]'
       }]
     });
-*/
+    */
     this.tokenize = function (text) {
       // all text starts off as regular text, then gets cut up into tokens of
       // more specific type
@@ -65974,8 +65734,6 @@ pliny.method({
   }
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.value({
   parent: "Primrose.Text.Grammars",
@@ -65999,8 +65757,6 @@ var JavaScript = new Grammar("JavaScript", [
   ["members", /(\w+)\./],
   ["members", /((\w+\.)+)(\w+)/]
 ]);
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.class({
@@ -66963,435 +66719,6 @@ class TextBox extends Surface {
   }
 }
 
-// BEGIN PLINY
-
-// Walks through dot-accessors to retrieve an object out of a root object.
-//
-// @param {Object} bag - the root object.
-// @param {String} name - a period-delimited list of object accessors, naming the object we want to access.
-// @returns {Object} - the object we asked for, or undefined, if it doesn't exist.
-function openBag(bag, name) {
-  // Break up the object path, then recurse through objects until we either run
-  // out of objects or find the one we're looking for.
-  return name
-    .split(".")
-    .reduce((obj, p) => obj[p], bag);
-}
-
-
-function hash(buf) {
-  let s1 = 1, s2 = 0;
-  buf.split("")
-    .forEach((c) => {
-      s1 = (s1 + c.charCodeAt(0)) % 32771;
-      s2 = (s2 + s1) % 32771;
-    });
-
-  return s2 << 8 | s1;
-}
-
-/////
-// Fills in intermediate levels of an object tree to make the full object tree
-// accessible, in the documentation database.
-//
-// @param {String} name - a period-delimited list of object accessors, naming the object we want to fill in.
-// @param {Object} rootObject - the object on which to fill in values.
-// @returns {Object} - the leaf-level filled-in object.
-///
-function fillBag(name) {
-  // Start at the top level.
-  var bag = database;
-  if (typeof name !== "undefined" && name.length > 0) {
-    // Break up the object path.
-    var parts = name.split("."),
-
-      // We'll be rebuilding the path as we go, so we can name intermediate objects.
-      path = "",
-
-      // The first time we extend the path, it doesn't get a period seperator.
-      sep = "";
-    // Walk through the object tree.
-    for (var i = 0; i < parts.length; ++i) {
-      // Fill in any missing objects.
-      if (typeof bag[parts[i]] === "undefined") {
-        bag[parts[i]] = {};
-      }
-
-      path += sep + parts[i];
-      sep = ".";
-
-      // Drill down into the tree.
-      bag = bag[parts[i]];
-
-      // If we have a name, and the object hasn't already been named, then we
-      // give it a name.
-      if (path.length > 0 && !bag.name) {
-        bag.name = path;
-      }
-    }
-  }
-  return bag;
-}
-
-/////
-// Reads the documentation metadata and builds up the documentation database.
-//
-// @param {String} fieldType - the name of the type of object for which we're reading metadata: function, class, namespace, etc.
-// @param {String} info - the metadata object the user provided us.
-///
-function analyzeObject(fieldType, info) {
-  var i;
-  // If the user didn't supply a type for the metadata object, we infer it
-  // from context.
-  if (typeof info.fieldType === 'undefined') {
-    info.fieldType = fieldType;
-  }
-
-  // Find out where we're going to store the object in the metadata database and where in the parent object we're going to store the documentation object.
-  var parentBag = fillBag(info.parent || ""),
-  pluralName = fieldType + "s";
-  pluralName = pluralName.replace(/ys$/, "ies")
-  .replace(/ss$/, "ses");
-  if (!parentBag[pluralName]) {
-    parentBag[pluralName] = [];
-  }
-  var arr = parentBag[pluralName];
-
-  // Make sure we haven't already stored an object by this name.
-  var found = false;
-  for (i = 0; i < arr.length; ++i) {
-    if (arr[i].name === info.name) {
-      found = true;
-    }
-  }
-
-  if (!found) {
-    var subArrays = {};
-
-    ["examples", "issues", "comments"].forEach(function (k) {
-      if (typeof info[k] !== "undefined") {
-        subArrays[k] = info[k];
-        delete info[k];
-      }
-    });
-
-    // After we copy the metadata, we get back the documentation database object
-    // that will store the fuller data we get from other objects.
-    info = copyObjectMetadata(info);
-
-    arr.push(info);
-
-    // Handle other parent-child relationships.
-    if (info.fieldType === "class" && info.baseClass) {
-      if (info.parent === undefined) {
-        info.parent = info.baseClass;
-      }
-      pliny["subClass"](info);
-    }
-
-    for (var k in subArrays) {
-      var subArr = subArrays[k],
-      type = k.substring(0, k.length - 1);
-      for (i = 0; i < subArr.length; ++i) {
-        if (subArr[i].parent === undefined) {
-          subArr[i].parent = info.fullName.replace(/::/g, ".");
-        }
-        pliny[type](subArr[i]);
-      }
-    }
-  }
-}
-
-/////
-// Copies all of the data the user entered for metadata to the documetation
-// object in the documentation database.
-//
-// @param {String} name - a period-delimited list of object accessors, naming the documentation object we want to create.
-// @param {Object} info - the metadata object from the user.
-// @returns the documentation object that we created.
-///
-function copyObjectMetadata(info) {
-  var fullName = (info.parent && info.parent + "." || "") + info.name,
-  bag = fillBag(fullName);
-
-  // Make sure we aren't setting the data for a second time.
-  if (!bag.fieldType) {
-
-    // Copy all the fields! ALL THE FIELDS!
-    // TODO: don't copy metadata directly to bag object. The bag objects are used
-    // as the search path for finding code objects, and some of the metadata field
-    // names might clash with code object field names. Maybe have a new metadata
-    // table.
-    for (var k in info) {
-      bag[k] = info[k];
-    }
-
-    // The fullName is used in titles on documentation articles.
-    if (!bag.fullName) {
-      if (bag.fieldType === "issue") {
-        Object.defineProperty(bag, "issueID", {
-          get: function get() {
-            return hash(this.parent + "." + this.name);
-          }
-        });
-      }
-      Object.defineProperty(bag, "fullName", {
-        get: function get() {
-          var output = "";
-          if (this.parent) {
-            output += this.parent;
-
-            // Print the seperator between the parent identifier and the name of
-            // the object.
-            if (this.fieldType === "method" || this.fieldType === "property" || this.fieldType === "event") {
-              // Methods, properties, and events aren't invokable from their class
-              // objects, so print them in a different way that doesn't suggest you
-              // can dot-access them. I'm using the typical C++ notation for member
-              // fields here.
-              output += "::";
-            }
-            else if (this.fieldType === "example" || this.fieldType === "issue") {
-              output += ": ";
-            }
-            else {
-              output += ".";
-            }
-          }
-          output += this.name;
-          return output;
-        }
-      });
-    }
-
-    // The ID is used to make DOM elements.
-    if (!bag.id) {
-      Object.defineProperty(bag, "id", {
-        get: function get() {
-          return this.fullName.replace(/(\.|:)/g, "_")
-          .replace(/ /g, "");
-        }
-      });
-    }
-
-    // We try to see if the real object exists yet (whether the documentation
-    // before or after the object it is documenting). If it doesn't, then we
-    // wait a small amount of time for the rest of the script to execute and
-    // then pick up where we left off.
-    if (!setContextualHelp(fullName)) {
-      // The setTimeout is to allow the script to continue to load after this
-      // particular function has called, so that more of the script can be
-      // inspected.
-      setTimeout(setContextualHelp, 1, fullName);
-    }
-  }
-  return bag;
-}
-
-function setEnumerationValues(name) {
-  var enumeration = null;
-  try {
-    enumeration = require(name);
-  }
-  catch (exp) {
-    enumeration = null;
-  }
-  if (!enumeration) {
-    setTimeout(setEnumerationValues, 1, name);
-  }
-  else {
-    for (var key in enumeration) {
-      var val = enumeration[key];
-      if (enumeration.hasOwnProperty(key) && typeof val === "number") {
-        pliny["value"]({
-          parent: name,
-          name: key,
-          type: "Number",
-          description: val.toString(),
-          value: val
-        });
-      }
-    }
-  }
-}
-
-const scriptPattern = /\bpliny\s*\.\s*(\w+)/gm;
-/////
-// Finds the actual object in the scope hierarchy, and looks for contextual scripts that might be defined in this object
-//
-// @param {String} name - a period-delimited list of object accessors, naming the real object we want to access.
-// @returns {Object} - the actual object the name refers to, or undefined if such an object exists.
-///
-function setContextualHelp(name) {
-  // Find the real object
-  var obj = openBag(database, name);
-  if (obj) {
-    if (obj.fieldType === "enumeration") {
-      setEnumerationValues(obj.parent + "." + obj.name);
-    }
-    // Look for contextual scripts
-    if (typeof obj === "function") {
-      var script = obj.toString(),
-      match = null;
-      while (!!(match = scriptPattern.exec(script))) {
-        var fieldType = match[1],
-        start = match.index + match[0].length,
-        fieldInfo = getFieldInfo(script.substring(start));
-        // Shove in the context.
-        if (fieldInfo.parent === undefined) {
-          fieldInfo.parent = name;
-        }
-
-        // And follow the normal documentation path.
-        pliny[fieldType].call(null, fieldInfo);
-      }
-    }
-  }
-  return obj;
-}
-
-/////
-// When a documentation script is included inside of a function, we need to
-// read the script and parse out the JSON objects so we can later execute
-// the documentation function safely, i.e. not use eval().
-//
-// @param {String} script - the source code of the containing function.
-// @return {Array} - a list of JSON-parsed objects that are the parameters specified at the documentation function call-site (i.e. sans context)
-///
-function getFieldInfo(script) {
-  var parameters = [],
-  start = 0,
-  scopeLevel = 0,
-  inString = false,
-  stringToken = null;
-
-  // Walk over the script...
-  for (var i = 0; i < script.length; ++i) {
-    // ... a character at a time
-    var c = script.charAt(i);
-
-    // Keep track of whether or not we're in a string. We're looking for any
-    // quotation marks that are either at the beginning of the string or have
-    // not previously been escaped by a backslash...
-    if ((inString && c === stringToken || !inString && (c === '"' || c === "'")) && (i === 0 || script.charAt(i - 1) !== '\\')) {
-      inString = !inString;
-      if (inString) {
-        stringToken = c;
-      }
-    }
-
-    // ... because only then...
-    if (!inString) {
-      // ... can we change scope level. We're only supporting JSON objects,
-      // so no need to go any further than this.
-      if (c === '(' || c === '{' || c === '[') {
-        ++scopeLevel;
-      }
-      else if (c === ')' || c === '}' || c === ']') {
-        --scopeLevel;
-      }
-    }
-
-    // If we've exited the parameter list, or we're inside the parameter list
-    // and see a comma that is not inside of a string literal...
-    if (scopeLevel === 0 || scopeLevel === 1 && c === ',' && !inString) {
-      // ... save the parameter, skipping the first character because it's always
-      // either the open paren for the parameter list or one of the commas
-      // between parameters.
-      parameters.push(parseParameter(script.substring(start + 1, i)
-        .trim()));
-
-      // Advance forward the start of the next token.
-      start = i;
-
-      // If we left the parameter list, we've found all of the parameters and
-      // can quit out of the loop before we get to the end of the script.
-      if (scopeLevel === 0) {
-        break;
-      }
-    }
-  }
-  if (parameters.length !== 1) {
-    throw new Error("There should have only been one parameter to the function");
-  }
-  return parameters[0];
-}
-
-/////
-// When we've found an individual parameter to a documentation function in a
-// contextual scope, we need to make sure it's valid JSON before we try to
-// convert it to a real JavaScript object.
-//
-// @param {String} script - the subscript portion that refers to a single parameter.
-// @return {Object} - the value that the string represents, parsed with JSON.parse().
-///
-function parseParameter(script) {
-  // Make sure all hash key labels are surrounded in quotation marks.
-  const stringLiterals = [],
-    litReplace = (str) => {
-      var name = "&STRING_LIT" + stringLiterals.length + ";";
-      if (str[0] === "'") {
-        str = str.replace(/\\"/g, "&_DBLQUOTE_;")
-        .replace(/\\'/g, "&_SGLQUOTE_;")
-        .replace(/"/g, "\\\"")
-        .replace(/'/g, "\"")
-        .replace(/&_DBLQUOTE_;/g, "\\\"")
-        .replace(/&_SGLQUOTE_;/g, "\\'");
-      }
-      stringLiterals.push(str);
-      return name;
-    },
-    litReturn = (a, b) => stringLiterals[b],
-      param = script.replace(/'(\\'|[^'])+'/g, litReplace)
-        .replace(/"(\\"|[^"])+"/g, litReplace)
-        .replace(/\b(\w+)\b\s*:/g, "\"$1\":")
-        .replace(/&STRING_LIT(\d+);/g, litReturn)
-        .replace(/&STRING_LIT(\d+);/g, litReturn)
-        .replace(/\\\r?\n/g, "");
-  return JSON.parse(param);
-}
-
-  // The default storage location.
-const database = {
-  fieldType: "database",
-  fullName: "[Global]",
-  id: "Global",
-  description: "These are the elements in the global namespace."
-};
-
-// Create documentation functions for each of the supported types of code objects.
-const recorders = [
-  "namespace",
-  "event",
-  "function",
-  "value",
-  "class",
-  "property",
-  "method",
-  "enumeration",
-  "record",
-  "subClass",
-  "example",
-  "error",
-  "issue",
-  "comment"
-].reduce(function (obj, k) {
-  obj[k] = analyzeObject.bind(null, k);
-  return obj;
-}, {});
-
-const pliny = Object.assign({
-
-}, recorders, {
-  database,
-  get(id) {
-    return openBag(database, id);
-  }
-});
-
-
-
-// END PLINY
-
 /*
 pliny.function({
   parent: "Primrose.Displays",
@@ -67411,8 +66738,6 @@ function defaultPose(){
   };
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.class({
   parent: "Primrose.Displays",
@@ -67431,7 +66756,7 @@ class BaseVRDisplay {
   startAnimation(callback) {
 
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.Displays.BaseVRDisplay",
       name: "startAnimation",
       description: "Starts and maintains an animation loop.",
@@ -67441,7 +66766,7 @@ pliny.method({
         description: "The code to execute during the animation update."
       }]
     });
-*/
+    */
 
     if(this._timer === null) {
       this._isAnimating = true;
@@ -67467,12 +66792,12 @@ pliny.method({
   stopAnimation() {
 
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.Displays.BaseVRDisplay",
       name: "stopAnimation",
       description: "Stop any animation loop that is currently running."
     });
-*/
+    */
 
     if(this._timer !== null) {
       this.cancelAnimationFrame(this._timer);
@@ -67481,8 +66806,6 @@ pliny.method({
     }
   }
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.function({
@@ -67706,8 +67029,6 @@ function mixinFrameDataFromPose(Type) {
   };
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.class({
   parent: "Primrose.Displays",
@@ -67720,53 +67041,53 @@ class PolyfilledVRFrameData {
   constructor () {
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.Displays.PolyfilledVRFrameData",
       name: "leftProjectionMatrix",
       type: "Float32Array",
       description: "The projection matrix for the left eye."
     });
-*/
+    */
     this.leftProjectionMatrix = new Float32Array(16);
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.Displays.PolyfilledVRFrameData",
       name: "leftViewMatrix",
       type: "Float32Array",
       description: "The projection matrix for the right eye."
     });
-*/
+    */
     this.leftViewMatrix = new Float32Array(16);
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.Displays.PolyfilledVRFrameData",
       name: "rightProjectionMatrix",
       type: "Float32Array",
       description: "The view matrix for the left eye."
     });
-*/
+    */
     this.rightProjectionMatrix = new Float32Array(16);
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.Displays.PolyfilledVRFrameData",
       name: "rightViewMatrix",
       type: "Float32Array",
       description: "The view matrix for the right eye."
     });
-*/
+    */
     this.rightViewMatrix = new Float32Array(16);
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.Displays.PolyfilledVRFrameData",
       name: "pose",
       type: "VRPose",
       description: "VRPose data, instead of using the legacy VRDisplay.prototype.getPose."
     });
-*/
+    */
     this.pose = null;
   }
 
@@ -67774,8 +67095,6 @@ pliny.property({
     return true;
   }
 }
-
-// import pliny from "pliny/pliny";
 
 /*
  * Copyright 2015 Google Inc. All Rights Reserved.
@@ -67923,8 +67242,6 @@ class PolyfilledVRDisplay extends BaseVRDisplay {
 
 mixinFrameDataFromPose(PolyfilledVRDisplay);
 
-// import pliny from "pliny/pliny";
-
 class StandardMonitorVRDisplay extends PolyfilledVRDisplay {
 
   constructor() {
@@ -67943,8 +67260,6 @@ class StandardMonitorVRDisplay extends PolyfilledVRDisplay {
     return defaultPose();
   }
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.function({
@@ -67980,8 +67295,6 @@ function makeHidingContainer(id, obj) {
   elem.appendChild(obj);
   return elem;
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.class({
@@ -68514,8 +67827,6 @@ class InputProcessor extends EventDispatcher {
   }
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.class({
   parent: "Primrose.Text",
@@ -68619,8 +67930,6 @@ class OperatingSystem {
   }
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.value({
   parent: "Primrose.Text.OperatingSystems",
@@ -68634,8 +67943,6 @@ var Windows = new OperatingSystem(
   "", "HOME", "END",
   "CTRL", "HOME", "END");
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.value({
   parent: "Primrose.Text.OperatingSystems",
@@ -68648,8 +67955,6 @@ var macOS = new OperatingSystem(
   "macOS", "META", "ALT", "METASHIFT_z",
   "META", "LEFTARROW", "RIGHTARROW",
   "META", "UPARROW", "DOWNARROW");
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.class({
@@ -68810,8 +68115,6 @@ CodePage.DEAD = function (key) {
   };
 };
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.record({
   parent: "Primrose.Text.CodePages",
@@ -68938,8 +68241,6 @@ var DE_QWERTZ = new CodePage("Deutsch: QWERTZ", "de", {
   }
 });
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.record({
   parent: "Primrose.Text.CodePages",
@@ -69029,8 +68330,6 @@ var EN_UKX = new CodePage("English: UK Extended", "en-GB", {
   }
 });
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.record({
   parent: "Primrose.Text.CodePages",
@@ -69093,8 +68392,6 @@ var EN_US = new CodePage("English: USA", "en-US", {
     "222": "\""
   }
 });
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.record({
@@ -69193,8 +68490,6 @@ var FR_AZERTY = new CodePage("Français: AZERTY", "fr", {
   }
 });
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.namespace({
   parent: "Primrose.Text",
@@ -69210,8 +68505,6 @@ var CodePages = {
   EN_US,
   FR_AZERTY
 };
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.class({
@@ -69305,8 +68598,6 @@ class Keyboard extends InputProcessor {
   }
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.class({
   parent: "Primrose.Input",
@@ -69379,8 +68670,6 @@ class Mouse extends InputProcessor {
 
 Mouse.NUM_BUTTONS = 3;
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.class({
   parent: "Primrose.Input",
@@ -69449,8 +68738,6 @@ class PoseInputProcessor extends InputProcessor {
     this.matrix.decompose(this.position, this.quaternion, EMPTY_SCALE);
   }
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.class({
@@ -69630,8 +68917,6 @@ Gamepad.VIVE_BUTTONS = {
   MENU_TOUCHED: 7
 };
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.class({
   parent: "Primrose.Input",
@@ -69721,8 +69006,6 @@ class GamepadManager extends EventDispatcher {
   }
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.class({
   parent: "Primrose.Input",
@@ -69808,8 +69091,6 @@ class Touch extends InputProcessor {
     }
   }
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.class({
@@ -69989,8 +69270,6 @@ class Speech$1 extends InputProcessor {
   }
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.class({
   parent: "Primrose.Displays.SensorFusion",
@@ -70016,7 +69295,7 @@ class SensorSample {
   set(sample, timestampS) {
 
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.Displays.SensorFusion.SensorSample",
       name: "set",
       description: "Mutably set the current state of the object.",
@@ -70030,7 +69309,7 @@ pliny.method({
         description: "The time at which the sensor sample was recorded. It's important that all timestamps between values that are meant to be compared together be recorded from the source, as there are multiple sources of \"time\" in the browser, with subtly different meanings, precisions, and starting points."
       }]
     });
-*/
+    */
 
     this.sample = sample;
     this.timestampS = timestampS;
@@ -70039,7 +69318,7 @@ pliny.method({
   copy(sensorSample) {
 
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.Displays.SensorFusion.SensorSample",
       name: "copy",
       description: "Mutably copy the current state of the object from another `SensorSample` object.",
@@ -70049,13 +69328,11 @@ pliny.method({
         description: "The object to copy."
       }]
     });
-*/
+    */
 
     this.set(sensorSample.sample, sensorSample.timestampS);
   }
 }
-
-// import pliny from "pliny/pliny";
 
 /*
  * Copyright 2015 Google Inc. All Rights Reserved.
@@ -70217,8 +69494,6 @@ class ComplementaryFilter {
   }
 }
 
-// import pliny from "pliny/pliny";
-
 /*
  * Copyright 2015 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -70290,8 +69565,6 @@ class PosePredictor {
     this.previousTimestampS = timestampS;
   }
 }
-
-// import pliny from "pliny/pliny";
 
 /*
  * Copyright 2015 Google Inc. All Rights Reserved.
@@ -70491,8 +69764,6 @@ class FusionPoseSensor {
   }
 }
 
-// import pliny from "pliny/pliny";
-
 /*
  * Copyright 2016 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -70597,8 +69868,6 @@ class CardboardVRDisplay extends PolyfilledVRDisplay {
   }
 }
 
-// import pliny from "pliny/pliny";
-
 class MagicWindowVRDisplay extends PolyfilledVRDisplay {
 
   constructor(options) {
@@ -70618,8 +69887,6 @@ class MagicWindowVRDisplay extends PolyfilledVRDisplay {
     return this._poseSensor.getPose();
   }
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.class({
@@ -70653,8 +69920,6 @@ class Automator extends EventDispatcher {
     return this.frames.length;
   }
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.class({
@@ -70710,8 +69975,6 @@ class Obj {
   }
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.class({
   parent: "Primrose.Replay",
@@ -70733,8 +69996,6 @@ class Record extends Obj {
     }
   }
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.class({
@@ -70794,8 +70055,6 @@ class Frame {
     }
   }
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.class({
@@ -70871,8 +70130,6 @@ class Player extends Automator {
     return this.frameIndex >= this.frames.length - 1;
   }
 }
-
-// import pliny from "pliny/pliny";
 
 class MockVRDisplay extends PolyfilledVRDisplay {
   constructor(data) {
@@ -70951,8 +70208,6 @@ class MockVRDisplay extends PolyfilledVRDisplay {
     window.cancelAnimationFrame(handle);
   }
 }
-
-// import pliny from "pliny/pliny";
 
 class NativeVRDisplay extends BaseVRDisplay {
   constructor(display, overrideName, overrideId) {
@@ -71096,8 +70351,6 @@ class NativeVRDisplay extends BaseVRDisplay {
 
 mixinFrameDataFromPose(NativeVRDisplay);
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.function({
   parent: "Primrose.HTTP",
@@ -71126,8 +70379,6 @@ function del(type, url, options) {
   return XHR("DELETE", type, url, options);
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.function({
   parent: "Primrose.HTTP",
@@ -71150,8 +70401,6 @@ pliny.function({
 function delObject(url, options) {
   return del("json", url, options);
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.function({
@@ -71192,8 +70441,6 @@ function getObject(url, options) {
   return get("json", url, options);
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.function({
   parent: "Primrose.HTTP",
@@ -71232,8 +70479,6 @@ function getText(url, options) {
   return get("text", url, options);
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.function({
   parent: "Primrose.HTTP",
@@ -71262,8 +70507,6 @@ function post(type, url, options) {
   return XHR("POST", type, url, options);
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.function({
   parent: "Primrose.HTTP",
@@ -71287,8 +70530,6 @@ function postObject(url, options) {
   return post("json", url, options);
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.namespace({
   parent: "Primrose",
@@ -71308,8 +70549,6 @@ var HTTP = {
   postObject,
   XHR
 };
-
-// import pliny from "pliny/pliny";
 
 const allDisplays = [];
 const isCardboardCompatible = isMobile && !isGearVR;
@@ -71480,8 +70719,6 @@ function install(options) {
   installMonoDisplay(options);
   installMockDisplay(options);
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.class({
@@ -71692,8 +70929,6 @@ class VR extends PoseInputProcessor {
   }
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.function({
   parent: "Primrose.Random",
@@ -71751,8 +70986,6 @@ function number(min, max, power) {
     n = Math.pow(Math.random(), power);
   return min + n * delta;
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.function({
@@ -71827,8 +71060,6 @@ function int(min, max, power) {
   return Math.floor(number(min, max, power));
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.function({
   parent: "Primrose.Random",
@@ -71867,8 +71098,6 @@ function color() {
     b = int(0, 256);
   return r << 16 | g << 8 | b;
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.class({
@@ -71986,12 +71215,12 @@ class RemoteUser extends EventDispatcher {
 
   unpeer() {
     /*
-pliny.method({
+    pliny.method({
       parent: "Pliny.RemoteUser",
       name: "unpeer",
       description: "Cleans up after a user has left the room, removing the audio channels that were created for the user."
     });
-*/
+    */
 
     if (this.audioChannel) {
       this.audioChannel.close();
@@ -72032,7 +71261,7 @@ pliny.method({
 
   update(dt) {
     /*
-pliny.method({
+    pliny.method({
       parent: "Pliny.RemoteUser",
       name: "update",
       description: "Moves the avatar by its velocity for a set amount of time. Updates the audio panner information.",
@@ -72042,7 +71271,7 @@ pliny.method({
         description: "The amount of time since the last update to the user."
       }]
     });
-*/
+    */
 
     this.time += dt;
     var fade = this.time >= RemoteUser.NETWORK_DT;
@@ -72061,7 +71290,7 @@ pliny.method({
 
   setState(v) {
     /*
-pliny.property({
+    pliny.property({
       parent: "Pliny.RemoteUser",
       name: "state",
       description: "After receiving a network update, sets the current state of the remote user so that, by the time the next network update comes around, the user will be where it is predicted to be.",
@@ -72071,7 +71300,7 @@ pliny.property({
         description: "The raw state array from the network (includes the un-read first username field)."
       }]
     });
-*/
+    */
 
     this.time = 0;
     this._predict(this.headPosition, v, 1);
@@ -72086,8 +71315,6 @@ pliny.property({
 RemoteUser.FADE_FACTOR = 0.5;
 RemoteUser.NETWORK_DT = 0.10;
 RemoteUser.NETWORK_DT_INV = 1 / RemoteUser.NETWORK_DT;
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.class({
@@ -72248,8 +71475,6 @@ class Manager extends EventDispatcher {
   }
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.value({
   parent: "Primrose.Text.Grammars",
@@ -72261,8 +71486,6 @@ pliny.value({
 var PlainText = new Grammar("PlainText", [
   ["newlines", /(?:\r\n|\r|\n)/]
 ]);
-
-// import pliny from "pliny/pliny";
 
 const DIFF = new Vector3();
 const MAX_MOVE_DISTANCE = 5;
@@ -72366,8 +71589,6 @@ class Teleporter {
   }
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.value({
   parent: "Primrose.Constants",
@@ -72378,8 +71599,6 @@ pliny.value({
 */
 
 var G = 6.673e-11;
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.value({
@@ -72396,8 +71615,6 @@ var PIXEL_SCALES = [
   0.5,
   1
 ];
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.value({
@@ -72440,8 +71657,6 @@ var SKINS = [
   0x302E2E
 ];
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.value({
   parent: "Primrose.Constants",
@@ -72452,8 +71667,6 @@ pliny.value({
 */
 
 var SYS_FONTS = "-apple-system, '.SFNSText-Regular', 'San Francisco', 'Roboto', 'Segoe UI', 'Helvetica Neue', 'Lucida Grande', sans-serif";
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.enumeration({
@@ -72471,8 +71684,6 @@ var Quality = {
   HIGH: 4,
   MAXIMUM: PIXEL_SCALES.length - 1
 };
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.value({
@@ -72522,8 +71733,6 @@ var NAMES = [
   "Blackhaw"
 ];
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.namespace({
   parent: "Primrose",
@@ -72540,8 +71749,6 @@ var Constants = {
   SKINS,
   SYS_FONTS
 };
-
-// import pliny from "pliny/pliny";
 
 /// NOTE: maybe BrowserEnvironment should be a subclass of THREE.Scene.
 
@@ -72762,13 +71969,13 @@ class BrowserEnvironment extends EventDispatcher {
     super();
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "options",
       type: "Object",
       description: "A manager for messages sent across the network."
     });
-*/
+    */
     this.options = Object.assign({}, BrowserEnvironment.DEFAULTS, options);
 
     this.options.foregroundColor = this.options.foregroundColor || complementColor(new Color(this.options.backgroundColor))
@@ -72777,13 +71984,13 @@ pliny.property({
     this.deltaTime = 1;
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "network",
       type: "Primrose.Network.Manager",
       description: "A manager for messages sent across the network."
     });
-*/
+    */
     this.network = null;
 
     if(this.options.nonstandardIPD !== null){
@@ -72791,23 +71998,23 @@ pliny.property({
     }
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "audioQueue",
       type: "Array",
       description: "Remote user Audio elements that joined as peers before the `BrowserEnvironment` could finish loading all of the assets."
     });
-*/
+    */
     this.audioQueue = [];
 
 
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.BrowserEnvironment",
       name: "zero",
       description: "Zero and reset sensor data."
     });
-*/
+    */
     this.zero = () => {
       if (!this.lockMovement) {
         for (let i = 0; i < this.managers.length; ++i) {
@@ -72992,12 +72199,12 @@ pliny.method({
           }
 
           /*
-pliny.event({
+          pliny.event({
             parent: "Primrose.BrowserEnvironment",
             name: "update",
             description: "Fires after every animation update."
           });
-*/
+          */
           try {
             this.emit("update");
           }
@@ -73018,13 +72225,13 @@ pliny.event({
     };
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "turns",
       type: "Util.Angle",
       description: "A slewing angle that loosely follows the user around."
     });
-*/
+    */
     this.turns = new Angle(0);
     const followEuler = new Euler(),
       maxX = -Math.PI / 4,
@@ -73132,13 +72339,13 @@ pliny.property({
       resolutionScale = 1;
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "factories",
       type: "Object",
       description: "A database of object factories, generally used to create 3D models."
     });
-*/
+    */
     this.factories = {
       avatar: null
     };
@@ -73176,7 +72383,7 @@ pliny.property({
         }
 
         /*
-pliny.property({
+        pliny.property({
           parent: "Primrose.BrowserEnvironment",
           name: "buttonFactory",
           type: "Primrose.Controls.ButtonFactory",
@@ -73197,23 +72404,23 @@ pliny.property({
     //
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "speech",
       type: "Primrose.Audio.Speech",
       description: "A text-2-speech system."
     });
-*/
+    */
     this.speech = new Speech(this.options.speech);
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "audio",
       type: "Primrose.Audio.Audio3D",
       description: "An audio graph that keeps track of 3D information."
     });
-*/
+    */
     this.audio = new Audio3D();
 
     if (this.options.ambientSound) {
@@ -73242,34 +72449,34 @@ pliny.property({
     }
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "music",
       type: "Primrose.Audio.Music",
       description: "A primitive sort of synthesizer for making simple music."
     });
-*/
+    */
     this.music = new Music(this.audio);
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "currentControl",
       type: "Primrose.Control.Entity",
       description: "The currently selected control, by a user-click or some other function."
     });
-*/
+    */
     this.currentControl = null;
 
 
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.BrowserEnvironment",
       name: "fadeOut",
       returns: "Promise",
       description: "Causes the fully rendered view fade out to the color provided `options.backgroundColor`"
     });
-*/
+    */
     let fadeOutPromise = null,
       fadeOutPromiseResolver = null,
       fadeInPromise = null,
@@ -73294,13 +72501,13 @@ pliny.method({
 
 
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.BrowserEnvironment",
       name: "fadeIn",
       returns: "Promise",
       description: "Causes the faded out cube to disappear."
     });
-*/
+    */
     this.fadeIn = () => {
       if(fadeOutPromise) {
         return Promise.reject("Currently fading out.");
@@ -73340,17 +72547,17 @@ pliny.method({
     };
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "teleportAvailable",
       type: "Boolean",
       description: "Returns true when the system is not currently fading out or in.`"
     });
-*/
+    */
     this.teleportAvailable = true;
 
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.BrowserEnvironment",
       name: "transition",
       returns: "Promise",
@@ -73361,7 +72568,7 @@ pliny.method({
         description: "A callback function, to be executed between the fade-out and fade-in effects."
       }]
     });
-*/
+    */
     this.transition = (thunk, check, immediate) => {
       if(immediate) {
         thunk();
@@ -73377,7 +72584,7 @@ pliny.method({
 
 
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.BrowserEnvironment",
       name: "teleport",
       returns: "Promise",
@@ -73394,7 +72601,7 @@ pliny.method({
         description: "If true, skips the transition effect."
       }]
     });
-*/
+    */
     this.teleport = (pos, immediate) => this.transition(
       () => this.moveStage(pos),
       () => this.teleportAvailable && TELEPORT_DISPLACEMENT.copy(pos)
@@ -73414,7 +72621,7 @@ pliny.method({
     };
 
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.BrowserEnvironment",
       name: "consumeEvent",
       description: "Handles pointer interactions and differentiates between teleportation and selecting controls on the screen.",
@@ -73424,7 +72631,7 @@ pliny.method({
         description: "A pointer click event that triggered."
       }]
     });
-*/
+    */
     this.consumeEvent = (evt) => {
       const obj = evt.hit && evt.hit.object,
         cancel = evt.type === "exit" || evt.cmdName === "NORMAL_ESCAPE";
@@ -73459,13 +72666,13 @@ pliny.method({
     };
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "physics",
       type: "CANNON.World",
       description: "The physics subsystem."
     });
-*/
+    */
     this.physics = new cannon.World();
     this.physics.gravity.set(0, this.options.gravity, 0);
     this.physics.broadphase = new cannon.NaiveBroadphase();
@@ -73475,13 +72682,13 @@ pliny.property({
 
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "scene",
       type: "THREE.Scene",
       description: "The 3D scene that gets displayed to the user."
     });
-*/
+    */
     this.options.scene = this.scene = this.options.scene || new Scene();
 
     if (this.options.useFog) {
@@ -73489,35 +72696,35 @@ pliny.property({
     }
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "camera",
       type: "THREE.PerspectiveCamera",
       description: "The camera used to render the view."
     });
-*/
+    */
     this.camera = new PerspectiveCamera(75, 1, this.options.nearPlane, this.options.nearPlane + this.options.drawDistance);
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "sky",
       type: "THREE.Object3D",
       description: "If a `skyTexture` option is provided, it will be a texture cube or photosphere. If no `skyTexture` option is provided, there will only be a THREE.Object3D, to create an anchor point on which implementing scripts can add objects that follow the user's position."
     });
-*/
+    */
     this.sky = new Sky(this.options)
       .addTo(this.scene);
 
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "ground",
       type: "THREE.Object3D",
       description: "If a `groundTexture` option is provided, it will be a flat plane extending to infinity. As the user moves, the ground will shift under them by whole texture repeats, making the ground look infinite."
     });
-*/
+    */
     this.ground = new Ground(this.options)
       .addTo(this.scene);
 
@@ -73525,13 +72732,13 @@ pliny.property({
 
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "ui",
       type: "THREE.Object3D",
       description: "An anchor point on which objects can be added that follows the user around in both position and orientation. The orientation lags following the user, so if the UI is ever in the way, the user can turn slightly and it won't follow them."
     });
-*/
+    */
     this.vicinity = hub().named("Vicinity").addTo(this.scene);
     this.ui = hub().named("UI").addTo(this.vicinity);
 
@@ -73572,13 +72779,13 @@ pliny.property({
     };
 
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.BrowserEnvironment",
       name: "goFullScreen",
       returns: "Promise",
       description: "Enter full-screen mode on one of the available displays. NOTE: due to a defect in iOS, this feature is not available on iPhones or iPads."
     });
-*/
+    */
     this.goFullScreen = (index, evt) => {
       if (evt !== "Gaze") {
 
@@ -73644,13 +72851,13 @@ pliny.method({
     let allowRestart = true;
 
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.BrowserEnvironment",
       name: "start",
       returns: "Promise",
       description: "Restart animation after it has been stopped."
     });
-*/
+    */
     this.start = () => {
       if(allowRestart) {
         this.ready.then(() => {
@@ -73663,7 +72870,7 @@ pliny.method({
 
 
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.BrowserEnvironment",
       name: "stop",
       description: "Pause animation.",
@@ -73681,7 +72888,7 @@ pliny.method({
         description: "Whether or not calling `start()` again is allowed, or if this is a permanent stop."
       } ]
     });
-*/
+    */
     this.stop = (evt, restartAllowed) => {
       if(allowRestart) {
         allowRestart = restartAllowed;
@@ -73709,13 +72916,13 @@ pliny.method({
     }, false);
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "renderer",
       type: "THREE.WebGLRenderer",
       description: "The Three.js renderer being used to draw the scene."
     });
-*/
+    */
     documentReady = documentReady.then(() => {
       if (this.options.renderer) {
         this.renderer = this.options.renderer;
@@ -74025,84 +73232,84 @@ pliny.property({
       this.fader.visible = false;
 
       /*
-pliny.event({
+      pliny.event({
         parent: "Primrose.BrowserEnvironment",
         name: "select",
         description: "Fired when an object has been selected, either by a physical cursor or a gaze-based cursor. You will typically want to use this instead of pointerend or gazecomplete."
       });
-*/
+      */
 
       /*
-pliny.event({
+      pliny.event({
         parent: "Primrose.BrowserEnvironment",
         name: "pointerstart",
         description: "Fired when mouse, gamepad, or touch-based pointers have their trigger buttons depressed."
       });
-*/
+      */
 
       /*
-pliny.event({
+      pliny.event({
         parent: "Primrose.BrowserEnvironment",
         name: "pointerend",
         description: "Fired when mouse, gamepad, or touch-based pointers have their trigger buttons released."
       });
-*/
+      */
 
       /*
-pliny.event({
+      pliny.event({
         parent: "Primrose.BrowserEnvironment",
         name: "pointermove",
         description: "Fired when mouse, gamepad, or touch-based pointers are moved away from where they were last frame."
       });
-*/
+      */
 
       /*
-pliny.event({
+      pliny.event({
         parent: "Primrose.BrowserEnvironment",
         name: "gazestart",
         description: "Fired when a gaze-based cursor starts spinning on a selectable object."
       });
-*/
+      */
 
       /*
-pliny.event({
+      pliny.event({
         parent: "Primrose.BrowserEnvironment",
         name: "gazemove",
         description: "Fired when a gaze-based cursor moves across an object that it is attempting to select."
       });
-*/
+      */
 
       /*
-pliny.event({
+      pliny.event({
         parent: "Primrose.BrowserEnvironment",
         name: "gazecomplete",
         description: "Fired when a gaze-based cursor finishes spinning on a selectable object."
       });
-*/
+      */
 
       /*
-pliny.event({
+      pliny.event({
         parent: "Primrose.BrowserEnvironment",
         name: "gazecancel",
         description: "Fired when a gaze-based cursor is moved off of the object it is attempting to select before it can finish spinning."
       });
-*/
+      */
 
       /*
-pliny.event({
+      pliny.event({
         parent: "Primrose.BrowserEnvironment",
         name: "exit",
         description: "Fired when a pointer leaves an object."
       });
-*/
+      */
 
       /*
-pliny.event({
+      pliny.event({
         parent: "Primrose.BrowserEnvironment",
         name: "enter",
         description: "Fired when a pointer hovers over an object."
       });
-*/
+      */
 
 
       if(!this.options.disableKeyboard) {
@@ -74227,23 +73434,23 @@ pliny.event({
         this.options.progress.hide();
 
         /*
-pliny.event({
+        pliny.event({
           parent: "Primrose.BrowserEnvironment",
           name: "ready",
           description: "Fires after the initial assets have been downloaded and the scene initialized, just before animation starts."
         });
-*/
+        */
         this.emit("ready");
       });
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "quality",
       type: "Primrose.Constants.Quality",
       description: "The current render quality."
     });
-*/
+    */
     Object.defineProperties(this, {
       quality: {
         get: () => this.options.quality,
@@ -74288,13 +73495,13 @@ pliny.property({
   get lockMovement(){
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "lockMovement",
       type: "Boolean",
       description: "True if the user is focused on a text box control. If the user is focused on a text box control, keyboard commands should not move their position."
     });
-*/
+    */
 
     return this.currentControl && this.currentControl.lockMovement;
   }
@@ -74302,7 +73509,7 @@ pliny.property({
   connect(socket, userName) {
 
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.BrowserEnvironment",
       name: "connect",
       description: "Connect to a server at a WebSocket using a specific userName. NOTE: this does not handle authentication or authorization. You must handle those tasks yourself. This only binds an authenticated WebSocket connection to the framework so the framework may use it to transmit user state.",
@@ -74316,7 +73523,7 @@ pliny.method({
         description: "The name of the user being connected."
       }]
     });
-*/
+    */
 
     if(!this.network){
       this.network = new Manager(this, this.audio, this.factories, this.options);
@@ -74329,12 +73536,12 @@ pliny.method({
   disconnect() {
 
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.BrowserEnvironment",
       name: "disconnect",
       description: "Disconnect from the server."
     });
-*/
+    */
 
     return this.network && this.network.disconnect();
   }
@@ -74342,13 +73549,13 @@ pliny.method({
   get displays() {
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.BrowserEnvironment",
       name: "displays",
       type: "Array of BaseVRDisplay",
       description: "The VRDisplays available on the system."
     });
-*/
+    */
 
     return this.VR.displays;
   }
@@ -74409,7 +73616,7 @@ pliny.property({
   setAudioFromUser(userName, audioElement){
 
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.BrowserEnvironment",
       name: "setAudioFromUser",
       description: "When using a 3D-party voice chat provider, this method associates the `HTMLVideoElement` or `HTMLAudioElement` created by the chat provider with the remote user, so that their audio may be spatialized with their position.",
@@ -74423,7 +73630,7 @@ pliny.method({
         description: "The DOM element that represents the user's audio."
       }]
     });
-*/
+    */
 
     this.audioQueue.push([userName, audioElement]);
     if(this.network){
@@ -74436,7 +73643,7 @@ pliny.method({
   insertFullScreenButtons(containerSpec){
 
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.BrowserEnvironment",
       name: "insertFullScreenButtons",
       description: "Add the default UI for managing full screen state.",
@@ -74447,7 +73654,7 @@ pliny.method({
         description: "A query selector for the DOM element to which to add the buttons."
       }]
     });
-*/
+    */
 
     const container = document.querySelector(containerSpec);
     const newButton = (title, text, thunk) => {
@@ -74561,8 +73768,6 @@ BrowserEnvironment.DEFAULTS = {
   disableAdvertising: false
 };
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.class({
   parent: "Primrose.Controls",
@@ -74595,8 +73800,6 @@ class Model extends Entity {
   }
 
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.class({
@@ -74695,8 +73898,6 @@ class PlainText$1 {
   }
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.class({
   parent: "Primrose.Controls",
@@ -74792,8 +73993,6 @@ class Progress {
   }
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.record({
   parent: "Primrose.Text.CommandPacks",
@@ -74808,8 +74007,6 @@ pliny.record({
 // If SHIFT is held, then "back"
 //
 var TextInput$1 = new BasicTextInput("Text Line input commands");
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.class({
@@ -74880,8 +74077,6 @@ class TextInput extends TextBox {
   }
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.namespace({
   parent: "Primrose",
@@ -74908,8 +74103,6 @@ var Controls = {
   TextInput,
   Video
 };
-
-// import pliny from "pliny/pliny";
 
 class MixedRealityVRDisplay extends PolyfilledVRDisplay {
 
@@ -74980,8 +74173,6 @@ class MixedRealityVRDisplay extends PolyfilledVRDisplay {
   }
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.namespace({
   parent: "Primrose",
@@ -74999,8 +74190,6 @@ var Displays = {
   PolyfilledVRFrameData,
   StandardMonitorVRDisplay
 };
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.function({
@@ -75071,8 +74260,6 @@ function findEverything(elem, obj) {
   return obj;
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.namespace({
   parent: "Primrose",
@@ -75086,8 +74273,6 @@ var DOM = {
   findEverything,
   makeHidingContainer
 };
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.namespace({
@@ -75103,8 +74288,6 @@ var Graphics = {
   loadTexture,
   ModelFactory
 };
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.class({
@@ -75148,8 +74331,6 @@ Location.DEFAULTS = {
   timeout: 25000
 };
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.namespace({
   parent: "Primrose",
@@ -75169,8 +74350,6 @@ var Input = {
   Touch,
   VR
 };
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.class({
@@ -75612,8 +74791,6 @@ WebRTCSocket.DEFAULT_ICE_CONFIG = {
   }))
 };
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.class({
   parent: "Primrose.Network",
@@ -75809,8 +74986,6 @@ class AudioChannel extends WebRTCSocket {
   }
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.class({
   parent: "Primrose.Network",
@@ -75846,13 +75021,13 @@ class DataChannel extends WebRTCSocket {
     super(requestICEPath, fromUserName, fromUserIndex, toUserName, toUserIndex, goSecond);
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.Network.DataChannel",
       name: "dataChannel",
       type: "RTCDataChannel",
       description: "A bidirectional data channel from the remote user to the local user."
     });
-*/
+    */
     this.dataChannel = null;
   }
 
@@ -75890,8 +75065,6 @@ pliny.property({
   }
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.namespace({
   parent: "Primrose",
@@ -75907,8 +75080,6 @@ var Network = {
   RemoteUser,
   WebRTCSocket
 };
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.class({
@@ -75968,33 +75139,33 @@ class DirectedForceField extends Component {
     }, options);
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.Physics.DirectedForceField",
       name: "force",
       type: "Number",
       description: "The force to attract the two objects together. Use negative values to repel objects. If `gravitational` is true, the force will be a value for the gravitational constant G in the two-body gravity equation. The real value of G is available as `Primrose.Constants.G."
     });
-*/
+    */
     this.force = options.force;
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.Physics.DirectedForceField",
       name: "gravitational",
       type: "Boolean",
       description: "Indicate whether or not to treat the force as gravity, i.e. taking mass into consideration. If `gravitational` is true, the force will be a value for the gravitational constant G in the two-body gravity equation. The real value of G is available as `Primrose.Constants.G."
     });
-*/
+    */
     this.gravitational = options.gravitational;
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.Physics.DirectedForceField",
       name: "falloff",
       type: "Boolean",
       description: "Indicate whether or not to use a distance-squared fall-off for the force. If `gravitational` is specified, the fall-off is always distance-squared, regardless of setting this value."
     });
-*/
+    */
     this.falloff = options.falloff;
   }
 
@@ -76024,8 +75195,6 @@ pliny.property({
   }
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.namespace({
   parent: "Primrose",
@@ -76038,8 +75207,6 @@ var Physics = {
   DirectedForceField,
   Spring
 };
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.function({
@@ -76084,8 +75251,6 @@ function flipCoin(p = 0.5) {
   return number(1) < p;
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.function({
   parent: "Primrose.Random",
@@ -76123,8 +75288,6 @@ function ID() {
     .toString(36)
     .replace(".", "");
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.function({
@@ -76173,8 +75336,6 @@ pliny.function({
 function item(arr) {
   return arr[int(arr.length)];
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.function({
@@ -76225,8 +75386,6 @@ function steps(min, max, steps) {
   return min + int(0, (1 + max - min) / steps) * steps;
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.function({
   parent: "Primrose.Random",
@@ -76269,8 +75428,6 @@ function vector(min, max){
   );
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.namespace({
   parent: "Primrose",
@@ -76289,8 +75446,6 @@ var Random = {
   steps,
   vector
 };
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.class({
@@ -76317,8 +75472,6 @@ class Watcher extends Obj {
     };
   }
 }
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.class({
@@ -76377,8 +75530,6 @@ class Recorder extends Automator {
   }
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.namespace({
   parent: "Primrose",
@@ -76397,8 +75548,6 @@ var Replay = {
   Watcher
 };
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.namespace({
   parent: "Primrose.Text",
@@ -76413,8 +75562,6 @@ var CommandPacks = {
   TextEditor,
   TextInput: TextInput$1
 };
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.value({
@@ -77074,8 +76221,6 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next,
   };
 };
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.value({
   parent: "Primrose.Text.Grammars",
@@ -77095,8 +76240,6 @@ var HTML = new Grammar("HTML", [
   ],
   ["members", /(\w+)=/]
 ]);
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.value({
@@ -77119,8 +76262,6 @@ var TestResults = new Grammar("TestResults", [
   ["strings", /        \w+/, true]
 ]);
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.namespace({
   parent: "Primrose.Text",
@@ -77138,8 +76279,6 @@ var Grammars = {
   TestResults
 };
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.value({
   parent: "Primrose.Text.OperatingSystems",
@@ -77147,8 +76286,6 @@ pliny.value({
   description: "Keyboard shortcuts for the Linux operating system (actually just a reference to the Windows shortcuts)."
 });
 */
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.namespace({
@@ -77164,8 +76301,6 @@ var OperatingSystems = {
   OperatingSystem,
   Windows
 };
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.class({
@@ -77293,8 +76428,6 @@ class Terminal {
   }
 }
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.record({
   parent: "Primrose.Text.Themes",
@@ -77349,8 +76482,6 @@ var Dark = {
   }
 };
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.namespace({
   parent: "Primrose.Text",
@@ -77363,8 +76494,6 @@ var Themes = {
   Dark,
   Default
 };
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.namespace({
@@ -77389,8 +76518,6 @@ var Text = {
   Token
 };
 
-// import pliny from "pliny/pliny";
-
 /*
 pliny.namespace({
   parent: "Primrose",
@@ -77402,8 +76529,6 @@ pliny.namespace({
 var Tools = {
   Teleporter
 };
-
-// import pliny from "pliny/pliny";
 
 /*
 pliny.namespace({
