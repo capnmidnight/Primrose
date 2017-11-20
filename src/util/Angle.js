@@ -96,13 +96,13 @@ export default class Angle {
   set degrees(newValue) {
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Util.Angle",
       name: "degrees",
       type: "Number",
       description: "Get/set the current value of the angle in degrees."
     });
-*/
+    */
 
     do {
       // figure out if it is adding the raw value, or whole
@@ -129,13 +129,13 @@ pliny.property({
   set radians(val) {
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Util.Angle",
       name: "radians",
       type: "Number",
       description: "Get/set the current value of the angle in radians."
     });
-*/
+    */
 
     this.degrees = val * RAD2DEG;
   }

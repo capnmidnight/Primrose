@@ -73,23 +73,23 @@ import DefaultTheme from "../Themes/Default";
 export default class Grammar {
   constructor(grammarName, rules) {
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.Text.Grammar",
       name: " name",
       type: "String",
       description: "A user-friendly name for the grammar, to be able to include it in an options listing."
     });
-*/
+    */
     this.name = grammarName;
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.Text.Grammar",
       name: "grammar",
       type: "Array",
       description: "A collection of rules to apply to tokenize text. The rules should be an array of two-element arrays. The first element should be a token name (see [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names), followed by a regular expression that selects the token out of the source code."
     });
-*/
+    */
     // clone the preprocessing grammar to start a new grammar
     this.grammar = rules.map(function (rule) {
       return new Rule(rule[0], rule[1]);
@@ -146,7 +146,7 @@ pliny.property({
     }
 
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.Text.Grammar",
       name: "tokenize",
       parameters: [{
@@ -189,7 +189,7 @@ pliny.method({
     ]'
       }]
     });
-*/
+    */
     this.tokenize = function (text) {
       // all text starts off as regular text, then gets cut up into tokens of
       // more specific type

@@ -31,39 +31,39 @@ export default class Button3D extends Entity {
     this.options.colorPressed = new Color(this.options.colorPressed);
 
     /*
-pliny.event({
+    pliny.event({
       parent: "Primrose.Controls.Button3D",
       name: "click",
       description: "Occurs when the button is activated."
     });
-*/
+    */
 
     /*
-pliny.event({
+    pliny.event({
       parent: "Primrose.Controls.Button3D",
       name: "release",
       description: "Occurs when the button is deactivated."
     });
-*/
+    */
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.Controls.Button3D",
       name: "base",
       type: "THREE.Object3D",
       description: "The stand the button cap sits on."
     });
-*/
+    */
     this.base = model.children[1];
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.Controls.Button3D",
       name: "base",
       type: "THREE.Object3D",
       description: "The moveable part of the button, that triggers the click event."
     });
-*/
+    */
     this.cap = model.children[0];
     this.cap.name = buttonName;
     this.cap.material = this.cap.material.clone();
@@ -74,41 +74,41 @@ pliny.property({
     this.add(this.cap);
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.Controls.Button3D",
       name: "color",
       type: "Number",
       description: "The current color of the button cap."
     });
-*/
+    */
     this.color = this.cap.material.color;
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.Controls.Button3D",
       name: " name",
       type: "String",
       description: "A name for the button, to tell it from others when debugging."
     });
-*/
+    */
     this.name = buttonName;
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.Controls.Button3D",
       name: "element",
       type: "Element",
       optional: true,
       description: "If this 3D button was created from a copy of an HTMLButtonElement, this is that element."
     });
-*/
+    */
     this.element = null;
   }
 
   startUV(point) {
 
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.Controls.Button3D",
       name: "startUV",
       description: "Handle a mouse-down event on a textured object.",
@@ -118,7 +118,7 @@ pliny.method({
         description: "The UV coordinate of the texture that was clicked."
       }]
     });
-*/
+    */
 
     this.color.copy(this.options.colorPressed);
     if (this.element) {
@@ -132,7 +132,7 @@ pliny.method({
   endPointer(evt) {
 
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.Controls.Button3D",
       name: "endPointer",
       description: "Handle a mouse-up event on a textured object.",
@@ -142,7 +142,7 @@ pliny.method({
         description: "Not actually used."
       }]
     });
-*/
+    */
 
     this.color.copy(this.options.colorUnpressed);
     this.emit("release", { source: this });
@@ -151,7 +151,7 @@ pliny.method({
   consumeEvent(evt) {
 
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.Controls.Button3D",
       name: "consumeEvent",
       description: "Route events.",
@@ -161,7 +161,7 @@ pliny.method({
         description: "The event to route."
       }]
     });
-*/
+    */
 
     switch(evt.type){
       case "pointerstart":

@@ -109,13 +109,13 @@ export default function cascadeElement(id, tag, DOMClass, add) {
 
   if (elem === null) {
     /*
-pliny.error({
+    pliny.error({
       parent: "Primrose.DOM.cascadeElement",
       name: "Invalid element",
       type: "Error",
       description: "If the element could not be found, could not be created, or one of the appropriate ID was found but did not match the expected type, an error is thrown to halt operation."
     });
-*/
+    */
     throw new Error(id + " does not refer to a valid " + tag + " element.");
   }
   return elem;

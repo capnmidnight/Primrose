@@ -29,29 +29,29 @@ export default class ButtonFactory {
 
   constructor(templateFile, options) {
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.Controls.Button3D",
       name: "options",
       type: "Object",
       description: "The options that the user provided, so that we might change them after the factory has been created, if we so choose."
     });
-*/
+    */
     this.options = options;
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.Controls.Button3D",
       name: "template",
       type: "THREE.Object3D",
       description: "The 3D model for the button, that will be cloned every time a new button is created."
     });
-*/
+    */
     this.template = templateFile;
   }
 
   create(toggle) {
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.ButtonFactory",
       name: "create",
       description: "Clones all of the geometry, materials, etc. in a 3D model to create a new copy of it. This really should be done with instanced objects, but I just don't have the time to deal with it right now.",
@@ -62,7 +62,7 @@ pliny.method({
       }],
       return: "The cloned button that which we so desired."
     });
-*/
+    */
 
     var name = "button" + (++buttonCount);
     var obj = this.template.clone();

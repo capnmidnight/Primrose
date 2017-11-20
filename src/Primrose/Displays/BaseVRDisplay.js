@@ -16,7 +16,7 @@ export default class BaseVRDisplay {
   startAnimation(callback) {
 
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.Displays.BaseVRDisplay",
       name: "startAnimation",
       description: "Starts and maintains an animation loop.",
@@ -26,7 +26,7 @@ pliny.method({
         description: "The code to execute during the animation update."
       }]
     });
-*/
+    */
 
     if(this._timer === null) {
       this._isAnimating = true;
@@ -52,12 +52,12 @@ pliny.method({
   stopAnimation() {
 
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.Displays.BaseVRDisplay",
       name: "stopAnimation",
       description: "Stop any animation loop that is currently running."
     });
-*/
+    */
 
     if(this._timer !== null) {
       this.cancelAnimationFrame(this._timer);

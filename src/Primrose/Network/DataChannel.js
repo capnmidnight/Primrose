@@ -37,13 +37,13 @@ export default class DataChannel extends WebRTCSocket {
     super(requestICEPath, fromUserName, fromUserIndex, toUserName, toUserIndex, goSecond);
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Primrose.Network.DataChannel",
       name: "dataChannel",
       type: "RTCDataChannel",
       description: "A bidirectional data channel from the remote user to the local user."
     });
-*/
+    */
     this.dataChannel = null;
   }
 

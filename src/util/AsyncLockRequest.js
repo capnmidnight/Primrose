@@ -58,7 +58,7 @@ export default class AsyncLockRequest {
     this.request = this.request.bind(this);
 
     /*
-pliny.property({
+    pliny.property({
       parent: "Util.AsyncLockRequest",
       name: "available",
       type: "Boolean",

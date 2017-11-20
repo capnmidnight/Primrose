@@ -240,7 +240,7 @@ export default class Audio3D {
   loadSource(sources, loop) {
 
     /*
-pliny.method({
+    pliny.method({
       parent: "Primrose.Output.Audio3D",
       name: "loadSound",
       returns: "Promise<MediaElementAudioSourceNode>",
@@ -292,7 +292,7 @@ pliny.method({
   });"
       }]
     });
-*/
+    */
 
     return this.ready.then(() => new Promise((resolve, reject) => {
       console.log("Loading " + sources);
