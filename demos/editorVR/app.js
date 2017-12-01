@@ -40,7 +40,7 @@ env.addEventListener("ready", function () {
       tokenizer: Primrose.Text.Grammars.JavaScript,
       value: getSourceCode(isInIFrame)
     })
-    .addTo(env.vicinity)
+    .addTo(env.scene)
     .at(0, env.options.avatarHeight, 0);
 
   console.log("INSTRUCTIONS:");
