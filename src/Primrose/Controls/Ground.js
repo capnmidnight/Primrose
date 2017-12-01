@@ -51,13 +51,13 @@ export default class Ground extends Entity {
     }
     else if(type === "string") {
       this.isInfinite = true;
-      this.model = new Image(this.options.texture, Object.assign({}, this.options, {
+      this.model = new Image(this.options.texture, {
         width: dim,
         height: dim,
         txtRepeatX: dim,
         txtRepeatY: dim,
         anisotropy: 8
-      }));
+      });
 
       promise = this.model.ready;
     }
@@ -75,7 +75,10 @@ export default class Ground extends Entity {
 
         this.watch(this.model, Pointer.EVENTS);
 
-        this.rigidBody = new CANNON.Body({ mass: 0 });
+        this.rigidBody = new CANNON.Body({ 
+          mass: 0,
+          type: CANNON.Body.KINEMATIC
+        });
         if(this.isInfinite) {
           const groundShape = new CANNON.Plane();
           this.rigidBody.addShape(groundShape);
@@ -91,10 +94,14 @@ export default class Ground extends Entity {
 
   moveTo(pos) {
     if(this.isInfinite) {
-      this.position.set(
-        Math.floor(pos.x),
-        0,
-        Math.floor(pos.z))
+      const x = Math.floor(pos.x),
+        z = Math.floor(pos.z);
+      if(this.rigidBody) {
+        this.rigidBody.position.set(x, 0, z);
+      }
+      else {
+        this.position.set(x, 0, z);
+      }
     }
   }
 
