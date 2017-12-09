@@ -47,9 +47,9 @@
   ],
   "dependencies": {
     "cannon": "^0.6.2",
-    "iphone-inline-video": "^1.9.3",
-    "jstransformer-marked": "^1.0.1",
-    "lavu-details-polyfill": "^0.1.0",
+    "iphone-inline-video": "^1.9.6",
+    "jstransformer-marked": "^1.0.2",
+    "lavu-details-polyfill": "^0.1.1",
     "promise-polyfill": "^5.2.1",
     "three": "^0.85.2"
   },
