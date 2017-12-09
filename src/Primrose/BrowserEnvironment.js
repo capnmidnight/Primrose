@@ -1437,6 +1437,7 @@ export default class BrowserEnvironment extends EventDispatcher {
                 highlight = 0xff0000 >> shift,
                 ptr = new Pointer(padID + "Pointer", color, 1, highlight, [mgr], null, this.options);
 
+              // a rough model to represent the motion controller
               box(0.1, 0.025, 0.2)
                 .colored(color, { emissive: highlight })
                 .addTo(ptr);
