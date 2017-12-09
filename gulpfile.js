@@ -43,7 +43,7 @@ var gulp = require("gulp"),
     return {
       name: "Primrose",
       advertise: true,
-      sourceMap: (debug) => debug,
+      sourceMap: (debug) => debug && fmt === "umd",
       extractDocumentation: (debug) => !debug,
       format: fmt
     };
