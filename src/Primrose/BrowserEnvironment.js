@@ -219,16 +219,12 @@ import Audio3D from "./Audio/Audio3D";
 import Music from "./Audio/Music";
 
 import { updateAll, eyeBlankAll } from "./Controls/BaseTextured";
-import Button2D from "./Controls/Button2D";
 import Button3D from "./Controls/Button3D";
 import ButtonFactory from "./Controls/ButtonFactory";
-import Entity from "./Controls/Entity";
 import { preStepAllEntities, postStepAllEntities, updateAllEntities } from "./Controls/Entity";
 import Ground from "./Controls/Ground";
 import Sky from "./Controls/Sky";
 import Image from "./Controls/Image";
-import Surface from "./Controls/Surface";
-import TextBox from "./Controls/TextBox";
 
 import StandardMonitorVRDisplay from "./Displays/StandardMonitorVRDisplay";
 
@@ -242,21 +238,16 @@ import Mouse from "./Input/Mouse";
 import Gamepad from "./Input/Gamepad";
 import GamepadManager from "./Input/GamepadManager";
 import Touch from "./Input/Touch";
-import Speech from "./Input/Speech";
 import VR from "./Input/VR";
 
 import NetworkManager from "./Network/Manager";
-
-import PlainText from "./Text/Grammars/PlainText";
 
 import Teleporter from "./Tools/Teleporter";
 
 import { Quality, PIXEL_SCALES } from "./constants";
 
-
 import {
   EventDispatcher,
-  Object3D,
   BackSide,
   PCFSoftShadowMap,
   FogExp2,
