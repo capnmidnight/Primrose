@@ -265,3 +265,5 @@ paket-files/
 # Unity3D Generated File On Crash Reports
 sysinfo.txt
 *.blend1
+/Primrose.sln
+/Web.config

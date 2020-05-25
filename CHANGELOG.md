@@ -1,3 +1,9 @@
+## v1.0.0 - May 22, 2020
+
+* Moved the declarative input processor to its own project.
+* Deleted all the old WebVR code, stripping everything down to just the text editor.
+* Upgraded international keyboard support by using [KeyEvent.key](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key) instead of custom code-page system.
+
 ## v0.31.4 - Apr 05, 2017
 
 * Sunk the `FPSInput` class into the `BrowserEnvironment` class. This "makes sense" in that the `FPSInput` class was really just an adapter for reading user input values via the events that the browser provides. If we ever implement other `*Environment` classes, the user input would come through completely different means. In other words, all references to the browser's `window` and `document` objects need to be in `BrowserEnvironment` (or some module clearly namespaced to be pertinent to browsers only).
