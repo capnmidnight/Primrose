@@ -19,7 +19,9 @@ export function createCanvas() {
     return document.createElement("canvas");
 }
 
-export function setCanvasSize(canv, w, h) {
+export function setCanvasSize(canv, w, h, superscale = 1) {
+    w *= devicePixelRatio * superscale;
+    h *= devicePixelRatio * superscale;
     if (canv.width != w
         || canv.height != h) {
         canv.width = w;
@@ -29,13 +31,16 @@ export function setCanvasSize(canv, w, h) {
     return false;
 }
 
-export function setContextSize(ctx, w, h) {
-    const canv = ctx.canvas,
-        oldImageSmoothingEnabled = ctx.imageSmoothingEnabled,
+export function setContextSize(ctx, w, h, superscale = 1) {
+    const oldImageSmoothingEnabled = ctx.imageSmoothingEnabled,
         oldTextBaseline = ctx.textBaseline,
         oldTextAlign = ctx.textAlign,
         oldFont = ctx.font,
-        resized = setCanvasSize(canv, w, h);
+        resized = setCanvasSize(
+            ctx.canvas,
+            w,
+            h,
+            superscale);
 
     if (resized) {
         ctx.imageSmoothingEnabled = oldImageSmoothingEnabled;
@@ -47,15 +52,18 @@ export function setContextSize(ctx, w, h) {
     return resized;
 }
 
-export function resizeCanvas(canv) {
-    const w = canv.clientWidth * devicePixelRatio,
-        h = canv.clientHeight * devicePixelRatio;
-    return setCanvasSize(canv, w, h);
+export function resizeCanvas(canv, superscale = 1) {
+    return setCanvasSize(
+        canv,
+        canv.clientWidth,
+        canv.clientHeight,
+        superscale);
 }
 
-export function resizeContext(ctx) {
-    const canv = ctx.canvas,
-        w = canv.clientWidth,
-        h = canv.clientHeight;
-    return setContextSize(ctx, w, h);
+export function resizeContext(ctx, superscale = 1) {
+    return setContextSize(
+        ctx,
+        ctx.canvas.clientWidth,
+        ctx.canvas.clientHeight,
+        superscale);
 }

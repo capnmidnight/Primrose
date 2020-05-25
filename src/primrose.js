@@ -737,7 +737,9 @@ export class Primrose extends EventTarget {
             };
         };
         const setOffsetPointer = (evt) => {
-            pointer.set(evt.offsetX, evt.offsetY);
+            pointer.set(
+                evt.offsetX * this.width / canvas.clientWidth,
+                evt.offsetY * this.height / canvas.clientHeight);
         };
         this.readPointerOverEvent = debugEvt("pointerover", withPrimaryPointer(pointerOver));
         this.readPointerOutEvent = debugEvt("pointerout", withPrimaryPointer(pointerOut));
@@ -800,7 +802,9 @@ export class Primrose extends EventTarget {
             };
         };
         const setTouchPointer = (evt) => {
-            pointer.set(evt.pageX - canvas.offsetLeft, evt.pageY - canvas.offsetTop);
+            pointer.set(
+                (evt.pageX - canvas.offsetLeft) * this.width / canvas.clientWidth,
+                (evt.pageY - canvas.offsetTop) * this.height / canvas.clientHeight);
         };
         this.readTouchStartEvent = debugEvt("touchstart", withPrimaryTouch((evt) => {
             setTouchPointer(evt);
