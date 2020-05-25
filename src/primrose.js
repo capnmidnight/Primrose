@@ -46,8 +46,7 @@ import { Dark } from "./themes.js";
 //>>>>>>>>>> PRIVATE STATIC FIELDS >>>>>>>>>>
 let elementCounter = 0;
 
-const useCaching = !isMobile,
-    wheelScrollSpeed = 4,
+const wheelScrollSpeed = 4,
     vScrollWidth = 2,
     scrollScale = isFirefox ? 3 : 100,
     optionDefaults = Object.freeze({
@@ -58,7 +57,8 @@ const useCaching = !isMobile,
         lineNumbers: true,
         padding: 0,
         fontSize: 16,
-        language: "JavaScript"
+        language: "JavaScript",
+        useRowCaching: true
     });
 //<<<<<<<<<< PRIVATE STATIC FIELDS <<<<<<<<<<
 
@@ -892,6 +892,17 @@ export class Primrose extends EventTarget {
                 }
             },
 
+            useRowCaching: {
+                get: () => useRowCaching,
+                set: (u) => {
+                    u = u || false;
+                    if (u !== useRowCaching) {
+                        useRowCaching = u;
+                        render();
+                    }
+                }
+            },
+
             value: {
                 get: () => value,
                 set: (txt) => setValue(txt, true)
@@ -1065,6 +1076,7 @@ export class Primrose extends EventTarget {
             historyFrame = -1,
             scrolling = false,
             multiLine = false,
+            useRowCaching = false,
             lineCountWidth = 0,
             isOffScreen = false,
             language = JavaScript,
@@ -1240,6 +1252,7 @@ export class Primrose extends EventTarget {
         this.showScrollBars = options.scrollBars;
         this.fontSize = options.fontSize;
         this.language = options.language;
+        this.useRowCaching = options.useRowCaching;
         this.value = currentValue;
         Manager.add(this);
         //<<<<<<<<<< INITIALIZE STATE <<<<<<<<<<
@@ -1362,7 +1375,7 @@ export class Primrose extends EventTarget {
                         gridBounds.width) {
 
                         // draw the text
-                        if (useCaching && rowCache[line] !== undefined) {
+                        if (useRowCaching && rowCache[line] !== undefined) {
                             if (i === 0) {
                                 fgfx.putImageData(rowCache[line], padding, textY + padding);
                             }
@@ -1389,7 +1402,7 @@ export class Primrose extends EventTarget {
                 tokenFront.x = 0;
                 ++tokenFront.y;
                 tokenBack.copy(tokenFront);
-                if (useCaching && drawn && rowCache[line] === undefined) {
+                if (useRowCaching && drawn && rowCache[line] === undefined) {
                     rowCache[line] = fgfx.getImageData(
                         padding,
                         textY + padding,
