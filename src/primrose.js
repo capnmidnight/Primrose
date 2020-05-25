@@ -1048,64 +1048,61 @@ export class Primrose extends EventTarget {
 
 
         //>>>>>>>>>> PRIVATE MUTABLE FIELDS >>>>>>>>>>
-        let elementID = ++elementCounter,
-
+        let value = "",
+            padding = 0,
+            theme = Dark,
+            tabWidth = 2,
             canvas = null,
-
+            tokens = null,
+            resized = false,
             hovered = false,
             focused = false,
+            fontSize = null,
+            tabString = "  ",
             readOnly = false,
             dragging = false,
-            scrolling = false,
-            controlType = singleLineOutput,
-            historyFrame = -1,
-            isOffScreen = false,
-            resized = false,
-
-            value = "",
-            tokens = null,
-            language = JavaScript,
-            multiLine = false,
             wordWrap = false,
-            theme = Dark,
-            fontSize = null,
-            tabWidth = 2,
-            tabString = "  ",
-            padding = 0,
-            showLineNumbers = false,
+            historyFrame = -1,
+            scrolling = false,
+            multiLine = false,
             lineCountWidth = 0,
+            isOffScreen = false,
+            language = JavaScript,
             showScrollBars = false,
+            showLineNumbers = false,
+            elementID = ++elementCounter,
+            controlType = singleLineOutput,
 
-            lastGridBounds = null,
-            lastText = null,
-            lastCharacterWidth = null,
             lastCharacterHeight = null,
-            lastPadding = null,
+            lastCharacterWidth = null,
             lastFrontCursor = null,
+            lastGridBounds = null,
             lastBackCursor = null,
-            lastFocused = null,
-            lastFont = null,
             lastThemeName = null,
+            lastPadding = null,
+            lastFocused = null,
             lastScrollX = null,
-            lastScrollY = null;
+            lastScrollY = null,
+            lastFont = null,
+            lastText = null;
 
-        const scroll = new Point(),
-            gridBounds = new Rectangle(),
-            pointer = new Point(),
-            lastPointer = new Point(),
-            character = new Size(),
-            topLeftGutter = new Size(),
-            bottomRightGutter = new Size(),
-            rowCache = new Map(),
-            frontCursor = new Cursor(),
-            backCursor = new Cursor(),
-            lines = [""],
-            tokenRows = [],
+        const lines = [""],
             history = [],
-            changeEvt = new Event("change"),
-            overEvt = new Event("over"),
+            tokenRows = [],
+            scroll = new Point(),
+            rowCache = new Map(),
+            pointer = new Point(),
+            character = new Size(),
+            lastPointer = new Point(),
+            backCursor = new Cursor(),
             outEvt = new Event("out"),
-            os = isMacOS ? MacOS : Windows;
+            topLeftGutter = new Size(),
+            frontCursor = new Cursor(),
+            overEvt = new Event("over"),
+            gridBounds = new Rectangle(),
+            bottomRightGutter = new Size(),
+            os = isMacOS ? MacOS : Windows,
+            changeEvt = new Event("change");
         //<<<<<<<<<< PRIVATE MUTABLE FIELDS <<<<<<<<<<
 
 
@@ -1373,8 +1370,8 @@ export class Primrose extends EventTarget {
                         else {
                             const style = theme[t.type] || {},
                                 font = (style.fontWeight || theme.regular.fontWeight || "") +
-                                " " + (style.fontStyle || theme.regular.fontStyle || "") +
-                                " " + context.font;
+                                    " " + (style.fontStyle || theme.regular.fontStyle || "") +
+                                    " " + context.font;
                             fgfx.font = font.trim();
                             fgfx.fillStyle = style.foreColor || theme.regular.foreColor;
                             fgfx.fillText(
