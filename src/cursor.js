@@ -37,6 +37,7 @@ export class Cursor {
         this.x = x || 0;
         this.y = y || 0;
         this.moved = true;
+        Object.seal(this);
     }
 
     clone() {

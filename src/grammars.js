@@ -5,7 +5,7 @@ import { PlainText } from "./Grammars/PlainText.js";
 
 export { Basic, HTML, JavaScript, PlainText };
 
-export const grammars = new Map([
+export const grammars = Object.seal(new Map([
     ["basic", Basic],
     ["bas", Basic],
     ["html", HTML],
@@ -13,4 +13,4 @@ export const grammars = new Map([
     ["js", JavaScript],
     ["plaintext", PlainText],
     ["txt", PlainText]
-]);
+]));

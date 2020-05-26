@@ -72,6 +72,7 @@ class OperatingSystem {
         for (let pair of definitions) {
             substitutions.set(pair[1], pair[0]);
         }
+        Object.freeze(substitutions);
 
         this.makeCommand = (evt) => {
             gesture.text = normalizeKeyValue(evt);

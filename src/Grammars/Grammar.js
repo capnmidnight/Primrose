@@ -204,6 +204,8 @@ export class Grammar {
             crudeParsing(tokens);
             return tokens;
         };
+
+        Object.freeze(this);
     }
 
     toHTML(parent, txt, theme, fontSize) {
