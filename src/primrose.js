@@ -1429,11 +1429,8 @@ export class Primrose extends EventTarget {
                 padding);
             for (let y = 0; y < tokenRows.length; ++y) {
                 // draw the tokens on this row
-                const line = lines[y] + padding,
-                    row = tokenRows[y],
+                const row = tokenRows[y],
                     textY = (y - scroll.y) * character.height;
-
-                let drawn = false;
 
                 for (let i = 0; i < row.length; ++i) {
                     const t = row[i];
@@ -1457,8 +1454,6 @@ export class Primrose extends EventTarget {
                             t.value,
                             tokenFront.x * character.width,
                             textY);
-
-                        drawn = true;
                     }
 
                     tokenFront.copy(tokenBack);
