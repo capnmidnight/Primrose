@@ -1208,7 +1208,6 @@ export class Primrose extends EventTarget {
         if (canvas instanceof HTMLCanvasElement
             && this.isInDocument) {
             canvas.tabIndex = currentTabIndex;
-            canvas.style.imageRendering = isChrome ? "pixelated" : "optimizespeed";
             canvas.style.touchAction = "none";
             canvas.addEventListener("focus", () => this.focus());
             canvas.addEventListener("blur", () => this.blur());
