@@ -62,7 +62,7 @@ const wheelScrollSpeed = 4,
 //<<<<<<<<<< PRIVATE STATIC FIELDS <<<<<<<<<<
 
 export class Primrose extends EventTarget {
-    constructor(parentElement, options) {
+    constructor(options) {
         super();
 
         const debugEvt = (name, callback) => {
@@ -78,13 +78,17 @@ export class Primrose extends EventTarget {
         };
 
         //>>>>>>>>>> VALIDATE PARAMETERS >>>>>>>>>>
-        if (parentElement === undefined) {
-            parentElement = null;
+        if (options.parentElement === undefined) {
+            options.parentElement = null;
         }
 
-        if (parentElement !== null
-            && !(parentElement instanceof HTMLElement)) {
-            throw new Error("parentElement must be null or an instance of HTMLElement");
+        if (options.canvas === undefined) {
+            options.canvas = null;
+        }
+
+        if (options.parentElement !== null
+            && !(options.parentElement instanceof HTMLElement)) {
+            throw new Error("parentElement must be null, an instance of HTMLElement, an instance of HTMLCanvaseElement, or an instance of OffscreenCanvase");
         }
 
         options = Object.assign({}, optionDefaults, options);
@@ -1118,6 +1122,7 @@ export class Primrose extends EventTarget {
             tabPressed = false,
             lineCountWidth = 0,
             isOffScreen = false,
+            parentElement = null,
             language = JavaScript,
             showScrollBars = false,
             showLineNumbers = false,
@@ -1187,24 +1192,26 @@ export class Primrose extends EventTarget {
                 }
             }
 
+            currentValue = elem.textContent;
+            elem.innerHTML = "";
+
             options = Object.assign(options, optionUser);
         }
 
-        if (parentElement === null) {
+        if (options.parentElement === null) {
             canvas = createCanvas();
             isOffScreen = !(canvas instanceof HTMLCanvasElement);
         }
-        else if (isCanvas(parentElement)) {
-            canvas = parentElement;
+        else if (isCanvas(options.parentElement)) {
+            canvas = options.parentElement;
             parentElement = canvas.parentElement;
             readOptions(canvas);
         }
         else {
-            canvas = document.createElement("canvas");
-            currentValue = parentElement.textContent;
+            parentElement = options.parentElement
             readOptions(parentElement);
 
-            parentElement.innerHTML = "";
+            canvas = document.createElement("canvas");
             parentElement.appendChild(canvas);
             parentElement.removeAttribute("tabindex");
 

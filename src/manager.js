@@ -93,8 +93,16 @@ const documentReady = document.readyState === "complete"
 
 (async function () {
     await documentReady;
-    const elements = document.getElementsByTagName("primrose");
-    for (let element of elements) {
-        new Primrose(element);
+    const primroses = document.getElementsByTagName("primrose");
+    for (let parentElement of primroses) {
+        new Primrose({
+            parentElement
+        });
+    }
+    const canvases = document.querySelectorAll("canvas.primrose");
+    for (let parentElement of canvases) {
+        new Primrose({
+            parentElement
+        });
     }
 })();
