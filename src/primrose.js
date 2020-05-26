@@ -549,7 +549,6 @@ export class Primrose extends EventTarget {
         ]));
         this.readKeyDownEvent = debugEvt("keydown", (evt) => {
             const command = os.makeCommand(evt);
-            console.log("keydown command", this.toString(), command);
             if (keyDownCommands.has(command.command)) {
                 evt.preventDefault();
                 keyDownCommands.get(command.command)(evt);
