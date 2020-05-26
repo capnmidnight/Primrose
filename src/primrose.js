@@ -805,10 +805,10 @@ export class Primrose extends EventTarget {
 
         this.readWheelEvent = debugEvt("wheel", (evt) => {
             if (hovered || focused) {
-                if (evt.shiftKey) {
+                if (!evt.ctrlKey && !evt.altKey && evt.shiftKey && !evt.metaKey) {
                     this.fontSize += -evt.deltaY / scrollScale;
                 }
-                else {
+                else if (!evt.ctrlKey && !evt.altKey && !evt.shiftKey && !evt.metaKey) {
                     scroll.y += Math.floor(evt.deltaY * wheelScrollSpeed / scrollScale);
                     clampScroll();
                 }
