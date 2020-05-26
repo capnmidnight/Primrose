@@ -806,13 +806,13 @@ export class Primrose extends EventTarget {
 
         this.readWheelEvent = debugEvt("wheel", (evt) => {
             if (hovered || focused) {
-                if (evt.shiftKey || isChrome) {
-                    fontSize += -evt.deltaX / scrollScale;
+                if (evt.shiftKey) {
+                    this.fontSize += -evt.deltaY / scrollScale;
                 }
-                if (!evt.shiftKey || isChrome) {
+                else {
                     scroll.y += Math.floor(evt.deltaY * wheelScrollSpeed / scrollScale);
+                    clampScroll();
                 }
-                clampScroll();
                 render();
                 evt.preventDefault();
             }
@@ -1064,6 +1064,7 @@ export class Primrose extends EventTarget {
             fontSize: {
                 get: () => fontSize,
                 set: (s) => {
+                    s = Math.max(1, s || 0);
                     if (s !== fontSize) {
                         fontSize = s;
                         context.font = `${fontSize}px ${monospaceFamily}`;
@@ -1075,6 +1076,7 @@ export class Primrose extends EventTarget {
                             "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM")
                             .width /
                             100;
+                        rowCache.clear();
                         render();
                     }
                 }
@@ -1423,9 +1425,9 @@ export class Primrose extends EventTarget {
                         && tokenFront.x < scroll.x + gridBounds.width) {
 
                         // draw the text
-                        if (useRowCaching && rowCache[line] !== undefined) {
+                        if (useRowCaching && rowCache.has(line)) {
                             if (i === 0) {
-                                fgfx.putImageData(rowCache[line], padding, textY + padding);
+                                fgfx.putImageData(rowCache.get(line), padding, textY + padding);
                             }
                         }
                         else {
@@ -1450,12 +1452,12 @@ export class Primrose extends EventTarget {
                 tokenFront.x = 0;
                 ++tokenFront.y;
                 tokenBack.copy(tokenFront);
-                if (useRowCaching && drawn && rowCache[line] === undefined) {
-                    rowCache[line] = fgfx.getImageData(
+                if (useRowCaching && drawn && !rowCache.has(line)) {
+                    rowCache.set(line, fgfx.getImageData(
                         padding,
                         textY + padding,
                         this.width - 2 * padding,
-                        character.height);
+                        character.height));
                 }
             }
 
