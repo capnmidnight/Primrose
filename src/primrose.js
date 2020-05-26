@@ -203,9 +203,9 @@ export class Primrose extends EventTarget {
 
         const refreshBuffers = () => {
             resized = true;
-            setContextSize(fgfx, this.width, this.height);
-            setContextSize(bgfx, this.width, this.height);
-            setContextSize(tgfx, this.width, this.height);
+            setContextSize(fgfx, canvas.width, canvas.height);
+            setContextSize(bgfx, canvas.width, canvas.height);
+            setContextSize(tgfx, canvas.width, canvas.height);
             render();
         };
 
@@ -805,12 +805,16 @@ export class Primrose extends EventTarget {
 
         this.readWheelEvent = debugEvt("wheel", (evt) => {
             if (hovered || focused) {
-                if (!evt.ctrlKey && !evt.altKey && evt.shiftKey && !evt.metaKey) {
-                    this.fontSize += -evt.deltaY / scrollScale;
-                }
-                else if (!evt.ctrlKey && !evt.altKey && !evt.shiftKey && !evt.metaKey) {
+                if (!evt.ctrlKey && !evt.altKey && !evt.shiftKey && !evt.metaKey) {
                     scroll.y += Math.floor(evt.deltaY * wheelScrollSpeed / scrollScale);
                     clampScroll();
+                }
+                else if (!evt.altKey && !evt.shiftKey && !evt.metaKey) {
+                    const dir = Math.sign(evt.deltaY);
+                    this.scaleFactor += dir / 4;
+                }
+                else if (!evt.ctrlKey && !evt.altKey && !evt.metaKey) {
+                    this.fontSize += -evt.deltaY / scrollScale;
                 }
                 render();
                 evt.preventDefault();
@@ -1071,7 +1075,7 @@ export class Primrose extends EventTarget {
             scaleFactor: {
                 get: () => scaleFactor,
                 set: (s) => {
-                    s = Math.max(0.25, Math.min(8, s | 0));
+                    s = Math.max(0.25, Math.min(4, s || 0));
                     if (s !== scaleFactor) {
                         scaleFactor = s;
                         this.resize();
@@ -1332,7 +1336,8 @@ export class Primrose extends EventTarget {
             if (theme.regular.backColor) {
                 bgfx.fillStyle = theme.regular.backColor;
             }
-
+            bgfx.save();
+            bgfx.scale(scaleFactor, scaleFactor);
             bgfx[clearFunc](0, 0, this.width, this.height);
             bgfx.save();
             bgfx.translate(
@@ -1392,9 +1397,12 @@ export class Primrose extends EventTarget {
                 fillRect(bgfx, cc, maxCursor.x, maxCursor.y, w, 1);
             }
             bgfx.restore();
+            bgfx.restore();
         };
 
         const renderCanvasForeground = () => {
+            fgfx.save();
+            fgfx.scale(scaleFactor, scaleFactor);
             fgfx.clearRect(0, 0, this.width, this.height);
             fgfx.save();
             tokenFront.fullHome();
@@ -1445,6 +1453,7 @@ export class Primrose extends EventTarget {
             }
 
             fgfx.restore();
+            fgfx.restore();
         };
 
         const renderCanvasTrim = () => {
@@ -1453,6 +1462,8 @@ export class Primrose extends EventTarget {
 
             let maxLineWidth = 0;
 
+            tgfx.save();
+            tgfx.scale(scaleFactor, scaleFactor);
             tgfx.clearRect(0, 0, this.width, this.height);
             tgfx.save();
             tgfx.translate(padding, padding);
@@ -1549,6 +1560,7 @@ export class Primrose extends EventTarget {
                 tgfx.fillStyle = theme.regular.unfocused || DefaultTheme.regular.unfocused;
                 tgfx.fillRect(0, 0, this.width, this.height);
             }
+            tgfx.restore();
         };
 
         const doRender = () => {
