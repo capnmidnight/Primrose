@@ -223,7 +223,7 @@ export class Primrose extends EventTarget {
         };
 
         const clampScroll = () => {
-            const maxY = lines.length - gridBounds.height;
+            const maxY = Math.max(0, lines.length - gridBounds.height);
             if (scroll.y < 0 || maxY === 0) {
                 scroll.y = 0;
             }
@@ -1336,7 +1336,8 @@ export class Primrose extends EventTarget {
             bgfx[clearFunc](0, 0, this.width, this.height);
             bgfx.save();
             bgfx.translate(
-                (gridBounds.x - scroll.x) * character.width + padding, -scroll.y * character.height + padding);
+                (gridBounds.x - scroll.x) * character.width + padding,
+                -scroll.y * character.height + padding);
 
 
             // draw the current row highlighter
@@ -1399,7 +1400,9 @@ export class Primrose extends EventTarget {
 
             fgfx.clearRect(0, 0, this.width, this.height);
             fgfx.save();
-            fgfx.translate((gridBounds.x - scroll.x) * character.width + padding, padding);
+            fgfx.translate(
+                (gridBounds.x - scroll.x) * character.width + padding,
+                padding);
             for (let y = 0; y < tokenRows.length; ++y) {
                 // draw the tokens on this row
                 const line = lines[y] + padding,
@@ -1414,9 +1417,10 @@ export class Primrose extends EventTarget {
                     tokenBack.i += t.value.length;
 
                     // skip drawing tokens that aren't in view
-                    if (scroll.y <= y && y < scroll.y + gridBounds.height &&
-                        scroll.x <= tokenBack.x && tokenFront.x < scroll.x +
-                        gridBounds.width) {
+                    if (scroll.y <= y
+                        && y < scroll.y + gridBounds.height
+                        && scroll.x <= tokenBack.x
+                        && tokenFront.x < scroll.x + gridBounds.width) {
 
                         // draw the text
                         if (useRowCaching && rowCache[line] !== undefined) {
@@ -1562,10 +1566,6 @@ export class Primrose extends EventTarget {
             }
         };
 
-        render = () => {
-            requestAnimationFrame(doRender);
-        };
-
         const doRender = () => {
             if (tokens && theme) {
                 refreshGridBounds();
@@ -1642,6 +1642,10 @@ export class Primrose extends EventTarget {
                 lastScrollX = scroll.x;
                 lastScrollY = scroll.y;
             }
+        };
+
+        render = () => {
+            requestAnimationFrame(doRender);
         };
         //<<<<<<<<<< RENDERING <<<<<<<<<<
 
