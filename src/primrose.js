@@ -1230,12 +1230,13 @@ export class Primrose extends EventTarget {
             });
         }
 
-        if (parentElement !== null
+        if (canvas.parentElement !== null
             && currentTabIndex === -1) {
             const tabbableElements = document.querySelectorAll("[tabindex]");
             for (let tabbableElement of tabbableElements) {
                 currentTabIndex = Math.max(currentTabIndex, tabbableElement.tabIndex);
             }
+            ++currentTabIndex;
         }
 
         if (canvas instanceof HTMLCanvasElement
