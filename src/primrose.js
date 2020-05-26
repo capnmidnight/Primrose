@@ -62,21 +62,21 @@ const wheelScrollSpeed = 4,
     });
 //<<<<<<<<<< PRIVATE STATIC FIELDS <<<<<<<<<<
 
-function debugEvt(name, callback) {
-    return function (evt) {
-        if (isDebug) {
-            console.log(name, this.toString(), evt);
-        }
-
-        if (!!callback) {
-            callback(evt);
-        }
-    };
-}
-
 export class Primrose extends EventTarget {
     constructor(parentElement, options) {
         super();
+
+        const debugEvt = (name, callback) => {
+            return (evt) => {
+                if (isDebug) {
+                    console.log(this.toString(), name, evt);
+                }
+
+                if (!!callback) {
+                    callback(evt);
+                }
+            };
+        };
 
         //>>>>>>>>>> VALIDATE PARAMETERS >>>>>>>>>>
         if (parentElement === undefined) {
