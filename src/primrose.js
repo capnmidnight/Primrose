@@ -56,7 +56,8 @@ const wheelScrollSpeed = 4,
         lineNumbers: true,
         padding: 0,
         fontSize: 16,
-        language: "JavaScript"
+        language: "JavaScript",
+        scaleFactor: devicePixelRatio
     });
 //<<<<<<<<<< PRIVATE STATIC FIELDS <<<<<<<<<<
 
@@ -288,13 +289,13 @@ export class Primrose extends EventTarget {
         };
 
         this.resize = () => {
-            if (resizeContext(context)) {
+            if (resizeContext(context, scaleFactor)) {
                 refreshBuffers();
             }
         };
 
         this.setSize = (w, h) => {
-            if (setContextSize(context, w, h)) {
+            if (setContextSize(context, w, h, scaleFactor)) {
                 refreshBuffers();
             }
         };
@@ -1067,14 +1068,25 @@ export class Primrose extends EventTarget {
                 }
             },
 
+            scaleFactor: {
+                get: () => scaleFactor,
+                set: (s) => {
+                    s = Math.max(0.25, Math.min(8, s | 0));
+                    if (s !== scaleFactor) {
+                        scaleFactor = s;
+                        this.resize();
+                    }
+                }
+            },
+
             width: {
-                get: () => canvas.width,
-                set: (w) => setCanvasSize(canvas, w, this.height)
+                get: () => canvas.width / scaleFactor,
+                set: (w) => setContextSize(context, w, this.height, scaleFactor)
             },
 
             height: {
-                get: () => canvas.height,
-                set: (h) => setCanvasSize(canvas, this.width, h)
+                get: () => canvas.height / scaleFactor,
+                set: (h) => setContextSize(context, this.width, h, scaleFactor)
             }
         });
         //<<<<<<<<<< PUBLIC PROPERTIES <<<<<<<<<<
@@ -1091,6 +1103,7 @@ export class Primrose extends EventTarget {
             hovered = false,
             focused = false,
             fontSize = null,
+            scaleFactor = 2,
             tabString = "  ",
             readOnly = false,
             dragging = false,
@@ -1277,11 +1290,12 @@ export class Primrose extends EventTarget {
         this.readOnly = options.readOnly;
         this.multiLine = options.multiLine;
         this.wordWrap = options.wordWrap;
-        this.padding = options.padding;
-        this.showLineNumbers = options.lineNumbers;
         this.showScrollBars = options.scrollBars;
+        this.showLineNumbers = options.lineNumbers;
+        this.padding = options.padding;
         this.fontSize = options.fontSize;
         this.language = options.language;
+        this.scaleFactor = options.scaleFactor;
         this.value = currentValue;
         Manager.add(this);
         //<<<<<<<<<< INITIALIZE STATE <<<<<<<<<<
@@ -1593,7 +1607,7 @@ export class Primrose extends EventTarget {
                         renderCanvasTrim();
                     }
 
-                    context.clearRect(0, 0, this.width, this.height);
+                    context.clearRect(0, 0, canvas.width, canvas.height);
                     context.drawImage(bg, 0, 0);
                     context.drawImage(fg, 0, 0);
                     context.drawImage(tg, 0, 0);
