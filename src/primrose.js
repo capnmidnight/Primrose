@@ -56,8 +56,7 @@ const wheelScrollSpeed = 4,
         lineNumbers: true,
         padding: 0,
         fontSize: 16,
-        language: "JavaScript",
-        useRowCaching: true
+        language: "JavaScript"
     });
 //<<<<<<<<<< PRIVATE STATIC FIELDS <<<<<<<<<<
 
@@ -929,17 +928,6 @@ export class Primrose extends EventTarget {
                 }
             },
 
-            useRowCaching: {
-                get: () => useRowCaching,
-                set: (u) => {
-                    u = u || false;
-                    if (u !== useRowCaching) {
-                        useRowCaching = u;
-                        render();
-                    }
-                }
-            },
-
             value: {
                 get: () => value,
                 set: (txt) => setValue(txt, true)
@@ -1011,7 +999,6 @@ export class Primrose extends EventTarget {
                 set: (t) => {
                     if (t !== theme) {
                         theme = t;
-                        rowCache.clear();
                         render();
                     }
                 }
@@ -1076,7 +1063,6 @@ export class Primrose extends EventTarget {
                             "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM")
                             .width /
                             100;
-                        rowCache.clear();
                         render();
                     }
                 }
@@ -1114,7 +1100,6 @@ export class Primrose extends EventTarget {
             scrolling = false,
             multiLine = false,
             tabPressed = false,
-            useRowCaching = false,
             lineCountWidth = 0,
             isOffScreen = false,
             language = JavaScript,
@@ -1140,7 +1125,6 @@ export class Primrose extends EventTarget {
             history = [],
             tokenRows = [],
             scroll = new Point(),
-            rowCache = new Map(),
             pointer = new Point(),
             character = new Size(),
             lastPointer = new Point(),
@@ -1298,7 +1282,6 @@ export class Primrose extends EventTarget {
         this.showScrollBars = options.scrollBars;
         this.fontSize = options.fontSize;
         this.language = options.language;
-        this.useRowCaching = options.useRowCaching;
         this.value = currentValue;
         Manager.add(this);
         //<<<<<<<<<< INITIALIZE STATE <<<<<<<<<<
@@ -1425,25 +1408,18 @@ export class Primrose extends EventTarget {
                         && tokenFront.x < scroll.x + gridBounds.width) {
 
                         // draw the text
-                        if (useRowCaching && rowCache.has(line)) {
-                            if (i === 0) {
-                                fgfx.putImageData(rowCache.get(line), padding, textY + padding);
-                            }
-                        }
-                        else {
-                            const style = theme[t.type] || {},
-                                font = (style.fontWeight || theme.regular.fontWeight || "") +
-                                    " " + (style.fontStyle || theme.regular.fontStyle || "") +
-                                    " " + context.font;
-                            fgfx.font = font.trim();
-                            fgfx.fillStyle = style.foreColor || theme.regular.foreColor;
-                            fgfx.fillText(
-                                t.value,
-                                tokenFront.x * character.width,
-                                textY);
+                        const style = theme[t.type] || {},
+                            font = (style.fontWeight || theme.regular.fontWeight || "") +
+                                " " + (style.fontStyle || theme.regular.fontStyle || "") +
+                                " " + context.font;
+                        fgfx.font = font.trim();
+                        fgfx.fillStyle = style.foreColor || theme.regular.foreColor;
+                        fgfx.fillText(
+                            t.value,
+                            tokenFront.x * character.width,
+                            textY);
 
-                            drawn = true;
-                        }
+                        drawn = true;
                     }
 
                     tokenFront.copy(tokenBack);
@@ -1452,13 +1428,6 @@ export class Primrose extends EventTarget {
                 tokenFront.x = 0;
                 ++tokenFront.y;
                 tokenBack.copy(tokenFront);
-                if (useRowCaching && drawn && !rowCache.has(line)) {
-                    rowCache.set(line, fgfx.getImageData(
-                        padding,
-                        textY + padding,
-                        this.width - 2 * padding,
-                        character.height));
-                }
             }
 
             fgfx.restore();
@@ -1611,7 +1580,6 @@ export class Primrose extends EventTarget {
 
                 if (layoutChanged) {
                     performLayout(gridBounds);
-                    rowCache.clear();
                 }
 
                 if (imageChanged) {
