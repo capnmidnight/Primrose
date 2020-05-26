@@ -85,7 +85,8 @@ class OperatingSystem {
             if (evt.ctrlKey
                 || evt.altKey
                 || evt.metaKey) {
-                if (gesture.type === "printable") {
+                if (gesture.type === "printable"
+                    || gesture.type === "whitespace") {
                     gesture.type = "special";
                 }
 

@@ -488,14 +488,17 @@ export class Primrose extends EventTarget {
             ["PrependNewline", () => {
                 if (multiLine) {
                     let indent = "";
-                    const tokenRow = lines[frontCursor.y];
+                    const tokenRow = tokenRows[frontCursor.y];
                     if (tokenRow.length > 0
                         && tokenRow[0].type === "whitespace") {
                         indent = tokenRow[0].value;
                     }
                     frontCursor.home();
+                    backCursor.copy(frontCursor);
                     this.selectedText = indent + "\n";
-                    scrollIntoView(frontCursor);
+                    frontCursor.advanceN(lines, indent.length);
+                    backCursor.copy(frontCursor);
+                    render();
                 }
                 else {
                     this.dispatchEvent(new Event("change"));

@@ -410,6 +410,9 @@ export function normalizeKeyValue(evt) {
     else if (evt.key === "Spacebar") {
         return " ";
     }
+    else if (evt.key === "\n") {
+        return "Enter";
+    }
     // navigation
     else if (evt.key === "Down") {
         return "ArrowDown";
