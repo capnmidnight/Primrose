@@ -20,8 +20,8 @@ export function createCanvas() {
 }
 
 export function setCanvasSize(canv, w, h, superscale = 1) {
-    w *= superscale;
-    h *= superscale;
+    w = Math.floor(w * superscale);
+    h = Math.floor(h * superscale);
     if (canv.width != w
         || canv.height != h) {
         canv.width = w;
