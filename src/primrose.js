@@ -139,9 +139,6 @@ export class Primrose extends EventTarget {
                 refreshTokens();
                 refreshGridBounds();
                 performLayout();
-                if (!setUndo) {
-                    fixCursor();
-                }
                 render();
                 this.dispatchEvent(changeEvt);
             }
@@ -246,14 +243,6 @@ export class Primrose extends EventTarget {
             clampScroll();
         };
 
-        const fixCursor = () => {
-            const moved = frontCursor.fixCursor(lines) ||
-                backCursor.fixCursor(lines);
-            if (moved) {
-                render();
-            }
-        };
-
         const pushUndo = () => {
             if (historyFrame < history.length - 1) {
                 history.splice(historyFrame + 1);
@@ -313,54 +302,76 @@ export class Primrose extends EventTarget {
 
 
         //>>>>>>>>>> KEY EVENT HANDLERS >>>>>>>>>>
-
-
         const keyDownCommands = Object.freeze(new Map([
+            ["CursorUp", () => {
+                const minCursor = Cursor.min(frontCursor, backCursor),
+                    maxCursor = Cursor.max(frontCursor, backCursor);
+                minCursor.up(lines);
+                maxCursor.copy(minCursor);
+                scrollIntoView(frontCursor);
+            }],
+
             ["CursorDown", () => {
-                frontCursor.down(lines);
-                backCursor.copy(frontCursor);
+                const minCursor = Cursor.min(frontCursor, backCursor),
+                    maxCursor = Cursor.max(frontCursor, backCursor);
+                maxCursor.down(lines);
+                minCursor.copy(maxCursor);
                 scrollIntoView(frontCursor);
             }],
 
             ["CursorLeft", () => {
-                frontCursor.left(lines);
-                backCursor.copy(frontCursor);
+                const minCursor = Cursor.min(frontCursor, backCursor),
+                    maxCursor = Cursor.max(frontCursor, backCursor);
+                if (minCursor.i === maxCursor.i) {
+                    minCursor.left(lines);
+                }
+                maxCursor.copy(minCursor);
                 scrollIntoView(frontCursor);
             }],
 
             ["CursorRight", () => {
-                frontCursor.right(lines);
-                backCursor.copy(frontCursor);
-                scrollIntoView(frontCursor);
-            }],
-
-            ["CursorUp", () => {
-                frontCursor.up(lines);
-                backCursor.copy(frontCursor);
-                scrollIntoView(frontCursor);
-            }],
-
-            ["CursorPageDown", () => {
-                fontCursor.incY(gridBounds.height, lines);
-                backCursor.copy(frontCursor);
+                const minCursor = Cursor.min(frontCursor, backCursor),
+                    maxCursor = Cursor.max(frontCursor, backCursor);
+                if (minCursor.i === maxCursor.i) {
+                    maxCursor.right(lines);
+                }
+                minCursor.copy(maxCursor);
                 scrollIntoView(frontCursor);
             }],
 
             ["CursorPageUp", () => {
-                frontCursor.incY(-gridBounds.height, lines);
-                backCursor.copy(frontCursor);
+                const minCursor = Cursor.min(frontCursor, backCursor),
+                    maxCursor = Cursor.max(frontCursor, backCursor);
+                minCursor.incY(lines, -gridBounds.height);
+                maxCursor.copy(minCursor);
+                scrollIntoView(frontCursor);
+            }],
+
+            ["CursorPageDown", () => {
+                const minCursor = Cursor.min(frontCursor, backCursor),
+                    maxCursor = Cursor.max(frontCursor, backCursor);
+                maxCursor.incY(lines, gridBounds.height);
+                minCursor.copy(maxCursor);
                 scrollIntoView(frontCursor);
             }],
 
             ["CursorSkipLeft", () => {
-                frontCursor.skipLeft(lines);
-                backCursor.copy(frontCursor);
+                const minCursor = Cursor.min(frontCursor, backCursor),
+                    maxCursor = Cursor.max(frontCursor, backCursor);
+                if (minCursor.i === maxCursor.i) {
+                    minCursor.skipLeft(lines);
+                }
+                maxCursor.copy(minCursor);
                 scrollIntoView(frontCursor);
             }],
 
             ["CursorSkipRight", () => {
-                frontCursor.skipRight(lines);
-                backCursor.copy(frontCursor);
+                const minCursor = Cursor.min(frontCursor, backCursor),
+                    maxCursor = Cursor.max(frontCursor, backCursor);
+                if (minCursor.i === maxCursor.i) {
+                    maxCursor.skipRight(lines);
+                }
+                minCursor.copy(maxCursor);
                 scrollIntoView(frontCursor);
             }],
 
@@ -409,12 +420,12 @@ export class Primrose extends EventTarget {
             }],
 
             ["SelectPageDown", () => {
-                backCursor.incY(gridBounds.height, lines);
+                backCursor.incY(lines, gridBounds.height);
                 scrollIntoView(backCursor);
             }],
 
             ["SelectPageUp", () => {
-                backCursor.incY(-gridBounds.height, lines);
+                backCursor.incY(lines, -gridBounds.height);
                 scrollIntoView(backCursor);
             }],
 
@@ -516,7 +527,7 @@ export class Primrose extends EventTarget {
             ["InsertTab", () => {
                 tabPressed = true;
                 this.selectedText = tabString;
-                frontCursor.advanceN(lines, tabString.length);
+                frontCursor.incX(lines, tabString.length);
                 backCursor.copy(frontCursor);
             }],
 
@@ -544,7 +555,7 @@ export class Primrose extends EventTarget {
                         indent = tokenRow[0].value;
                     }
                     this.selectedText = "\n" + indent;
-                    frontCursor.advanceN(lines, indent.length + 1);
+                    frontCursor.incX(lines, indent.length + 1);
                     backCursor.copy(frontCursor);
                     render();
                 }
@@ -564,7 +575,7 @@ export class Primrose extends EventTarget {
                     frontCursor.home();
                     backCursor.copy(frontCursor);
                     this.selectedText = indent + "\n";
-                    frontCursor.advanceN(lines, indent.length);
+                    frontCursor.incX(lines, indent.length);
                     backCursor.copy(frontCursor);
                     render();
                 }
@@ -641,6 +652,8 @@ export class Primrose extends EventTarget {
                     str = clipboard.getData(window.clipboardData ? "Text" : "text/plain");
                 if (str) {
                     this.selectedText = str;
+                    frontCursor.incX(str.length);
+                    backCursor.copy(frontCursor);
                 }
             }
         });
@@ -686,7 +699,7 @@ export class Primrose extends EventTarget {
                 onRight = pointer.x >= gridBounds.width;
 
             if (!scrolling && !onBottom && !onLeft && !onRight) {
-                cursor.setXY(pointer.x, pointer.y, lines);
+                cursor.setXY(lines, pointer.x, pointer.y);
                 backCursor.copy(cursor);
             }
             else if (scrolling || onRight && !onBottom) {
@@ -923,7 +936,7 @@ export class Primrose extends EventTarget {
                 get: () => {
                     const minCursor = Cursor.min(frontCursor, backCursor),
                         maxCursor = Cursor.max(frontCursor, backCursor);
-                    return this.value.substring(minCursor.i, maxCursor.i);
+                    return value.substring(minCursor.i, maxCursor.i);
                 },
                 set: (txt) => {
                     txt = txt || "";
@@ -935,9 +948,7 @@ export class Primrose extends EventTarget {
                             left = value.substring(0, minCursor.i),
                             right = value.substring(maxCursor.i);
                         setValue(left + txt + right, true);
-                        //minCursor.advanceN(lines, txt.length);
                         maxCursor.copy(minCursor);
-                        fixCursor();
                         render();
                     }
                 }
@@ -948,7 +959,7 @@ export class Primrose extends EventTarget {
                 set: (i) => {
                     i = i | 0;
                     if (i !== frontCursor.i) {
-                        frontCursor.setI(i, lines);
+                        frontCursor.setI(lines, i);
                         render();
                     }
                 }
@@ -959,7 +970,7 @@ export class Primrose extends EventTarget {
                 set: (i) => {
                     i = i | 0;
                     if (i !== backCursor.i) {
-                        backCursor.setI(i, lines);
+                        backCursor.setI(lines, i);
                         render();
                     }
                 }

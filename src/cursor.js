@@ -1,31 +1,20 @@
-/*
-pliny.class({
-  parent: "Primrose.Text",
-    name: "Cursor",
-    description: "| [under construction]"
-});
-*/
+const combiningMarks =
+    /(<%= allExceptCombiningMarks %>)(<%= combiningMarks %>+)/g,
+    surrogatePair = /(<%= highSurrogates %>)(<%= lowSurrogates %>)/g;
 
 // unicode-aware string reverse
-var reverse = (function () {
-    var combiningMarks =
-        /(<%= allExceptCombiningMarks %>)(<%= combiningMarks %>+)/g,
-        surrogatePair = /(<%= highSurrogates %>)(<%= lowSurrogates %>)/g;
-
-    function reverse(str) {
-        str = str.replace(combiningMarks, function (match, capture1,
-            capture2) {
-            return reverse(capture2) + capture1;
-        })
-            .replace(surrogatePair, "$2$1");
-        var res = "";
-        for (var i = str.length - 1; i >= 0; --i) {
-            res += str[i];
-        }
-        return res;
+export function reverse(str) {
+    str = str.replace(combiningMarks, function (match, capture1,
+        capture2) {
+        return reverse(capture2) + capture1;
+    })
+        .replace(surrogatePair, "$2$1");
+    let res = "";
+    for (let i = str.length - 1; i >= 0; --i) {
+        res += str[i];
     }
-    return reverse;
-})();
+    return res;
+}
 
 export class Cursor {
 
@@ -74,30 +63,14 @@ export class Cursor {
 
     fullEnd(lines) {
         this.i = 0;
-        var lastLength = 0;
-        for (var y = 0; y < lines.length; ++y) {
-            var line = lines[y];
+        let lastLength = 0;
+        for (let y = 0; y < lines.length; ++y) {
+            const line = lines[y];
             lastLength = line.length;
             this.i += lastLength;
         }
         this.y = lines.length - 1;
         this.x = lastLength;
-        this.moved = true;
-    }
-
-    skipLeft(lines) {
-        if (this.x === 0) {
-            this.left(lines);
-        }
-        else {
-            var x = this.x - 1;
-            var line = lines[this.y];
-            var word = reverse(line.substring(0, x));
-            var m = word.match(/(\s|\W)+/);
-            var dx = m ? (m.index + m[0].length + 1) : word.length;
-            this.i -= dx;
-            this.x -= dx;
-        }
         this.moved = true;
     }
 
@@ -107,66 +80,64 @@ export class Cursor {
             --this.x;
             if (this.x < 0) {
                 --this.y;
-                var line = lines[this.y];
-                this.x = line.length;
+                const line = lines[this.y];
+                this.x = line.length - 1;
             }
-            if (this.reverseFromNewline(lines)) {
-                ++this.i;
+        }
+        this.moved = true;
+    }
+
+    right(lines) {
+        const line = lines[this.y];
+        if (this.y < lines.length - 1
+            || this.x < line.length) {
+            ++this.i;
+            if (line[this.x] === '\n') {
+                this.x = 0;
+                ++this.y;
             }
+            else {
+                ++this.x;
+            }
+        }
+    }
+
+    skipLeft(lines) {
+        if (this.x <= 1) {
+            this.left(lines);
+        }
+        else {
+            const x = this.x - 1,
+                line = lines[this.y],
+                word = reverse(line.substring(0, x)),
+                m = word.match(/(\s|\W)+/),
+                dx = m
+                    ? (m.index + m[0].length + 1)
+                    : word.length;
+            this.i -= dx;
+            this.x -= dx;
         }
         this.moved = true;
     }
 
     skipRight(lines) {
-        var line = lines[this.y];
+        const line = lines[this.y];
         if (this.x === line.length || line[this.x] === '\n') {
             this.right(lines);
         }
         else {
-            var x = this.x + 1;
-            line = line.substring(x);
-            var m = line.match(/(\s|\W)+/);
-            var dx = m ? (m.index + m[0].length + 1) : (line.length - this.x);
+            const x = this.x + 1,
+                subline = line.substring(x),
+                m = subline.match(/(\s|\W)+/),
+                dx = m
+                    ? (m.index + m[0].length + 1)
+                    : (subline.length - this.x);
             this.i += dx;
             this.x += dx;
-            this.reverseFromNewline(lines);
-        }
-        this.moved = true;
-    }
-
-    fixCursor(lines) {
-        this.x = this.i;
-        this.y = 0;
-        var total = 0;
-        var line = lines[this.y];
-        while (this.x > line.length) {
-            this.x -= line.length;
-            total += line.length;
-            if (this.y >= lines.length - 1) {
-                this.i = total;
-                this.x = line.length;
-                this.moved = true;
-                break;
-            }
-            ++this.y;
-            line = lines[this.y];
-        }
-        return this.moved;
-    }
-
-    right(lines) {
-        this.advanceN(lines, 1);
-    }
-
-    advanceN(lines, n) {
-        var line = lines[this.y];
-        if (this.y < lines.length - 1 || this.x < line.length) {
-            this.i += n;
-            this.fixCursor(lines);
-            line = lines[this.y];
-            if (this.x > 0 && line[this.x - 1] === '\n') {
-                ++this.y;
-                this.x = 0;
+            if (this.x > 0
+                && line[this.x - 1] === '\n') {
+                --this.x;
+                --this.i;
             }
         }
         this.moved = true;
@@ -179,76 +150,109 @@ export class Cursor {
     }
 
     end(lines) {
-        var line = lines[this.y];
-        var dx = line.length - this.x;
+        const line = lines[this.y];
+        let dx = line.length - this.x;
+        if (line[line.length - 1] === '\n') {
+            --dx;
+        }
         this.i += dx;
         this.x += dx;
-        this.reverseFromNewline(lines);
         this.moved = true;
     }
 
     up(lines) {
         if (this.y > 0) {
             --this.y;
-            var line = lines[this.y];
-            var dx = Math.min(0, line.length - this.x);
+            const line = lines[this.y],
+                dx = Math.min(0, line.length - this.x - 1);
             this.x += dx;
             this.i -= line.length - dx;
-            this.reverseFromNewline(lines);
         }
         this.moved = true;
     }
 
     down(lines) {
         if (this.y < lines.length - 1) {
+            const pLine = lines[this.y];
             ++this.y;
-            var line = lines[this.y];
-            var pLine = lines[this.y - 1];
-            var dx = Math.min(0, line.length - this.x);
-            this.x += dx;
-            this.i += pLine.length + dx;
-            this.reverseFromNewline(lines);
+            this.i += pLine.length;
+
+            const line = lines[this.y];
+            if (this.x > line.length) {
+                let dx = this.x - line.length;
+                if (line[line.length - 1] === '\n') {
+                    ++dx;
+                }
+                this.i -= dx;
+                this.x -= dx;
+            }
         }
         this.moved = true;
     }
 
-    incY(dy, lines) {
-        this.y = Math.max(0, Math.min(lines.length - 1, this.y + dy));
-        var line = lines[this.y];
-        this.x = Math.max(0, Math.min(line.length, this.x));
-        this.i = this.x;
-        for (var i = 0; i < this.y; ++i) {
-            this.i += lines[i].length;
+    incX(lines, dx) {
+        const dir = Math.sign(dx);
+        dx = Math.abs(dx);
+        if (dir === -1) {
+            for (let i = 0; i < dx; ++i) {
+                this.left(lines);
+            }
         }
-        this.reverseFromNewline(lines);
-        this.moved = true;
+        else if (dir === 1) {
+            for (let i = 0; i < dx; ++i) {
+                this.right(lines);
+            }
+        }
     }
 
-    setXY(x, y, lines) {
+    incY(lines, dy) {
+        const dir = Math.sign(dy);
+        dy = Math.abs(dy);
+        if (dir === -1) {
+            for (let i = 0; i < dy; ++i) {
+                this.up(lines);
+            }
+        }
+        else if (dir === 1) {
+            for (let i = 0; i < dy; ++i) {
+                this.down(lines);
+            }
+        }
+    }
+
+    setXY(lines, x, y) {
         this.y = Math.max(0, Math.min(lines.length - 1, y));
-        var line = lines[this.y];
+        const line = lines[this.y];
         this.x = Math.max(0, Math.min(line.length, x));
         this.i = this.x;
-        for (var i = 0; i < this.y; ++i) {
+        for (let i = 0; i < this.y; ++i) {
             this.i += lines[i].length;
         }
-        this.reverseFromNewline(lines);
-        this.moved = true;
-    }
-
-    setI(i, lines) {
-        this.i = i;
-        this.fixCursor(lines);
-        this.moved = true;
-    }
-
-    reverseFromNewline(lines) {
-        var line = lines[this.y];
-        if (this.x > 0 && line[this.x - 1] === '\n') {
+        if (this.x > 0
+            && line[this.x - 1] === '\n') {
             --this.x;
             --this.i;
-            return true;
         }
-        return false;
+        this.moved = true;
+    }
+
+    setI(lines, i) {
+        this.x = this.i = i;
+        this.y = 0;
+        let total = 0,
+            line = lines[this.y];
+        while (this.x > line.length) {
+            this.x -= line.length;
+            total += line.length;
+            if (this.y >= lines.length - 1) {
+                this.i = total;
+                this.x = line.length;
+                this.moved = true;
+                break;
+            }
+            ++this.y;
+            line = lines[this.y];
+        }
+        this.moved = true;
     }
 }
