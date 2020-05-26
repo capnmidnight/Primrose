@@ -244,25 +244,26 @@ export class Primrose extends EventTarget {
         };
 
         const pushUndo = () => {
-            if (historyFrame < history.length - 1) {
-                history.splice(historyFrame + 1);
+            if (historyIndex < history.length - 1) {
+                history.splice(historyIndex + 1);
             }
             history.push({
                 value,
                 frontCursor: frontCursor.i,
                 backCursor: backCursor.i
             });
-            historyFrame = history.length - 1;
+            historyIndex = history.length - 1;
         };
 
         const moveInHistory = (dh) => {
-            const nextFrame = historyFrame + dh;
-            if (0 <= nextFrame && nextFrame < history.length) {
-                historyFrame = nextFrame;
-                const frame = history[historyFrame];
-                frontCursor.setI(frame.frontCursor, lines);
-                backCursor.setI(frame.backCursor, lines);
-                setValue(frame.value, false);
+            const nextHistoryIndex = historyIndex + dh;
+            if (0 <= nextHistoryIndex && nextHistoryIndex < history.length) {
+                const curFrame = history[historyIndex];
+                historyIndex = nextHistoryIndex;
+                const nextFrame = history[historyIndex];
+                setValue(nextFrame.value, false);
+                frontCursor.setI(lines, curFrame.frontCursor);
+                backCursor.setI(lines, curFrame.backCursor);
             }
         }
         //<<<<<<<<<< PRIVATE METHODS <<<<<<<<<<
@@ -1095,7 +1096,7 @@ export class Primrose extends EventTarget {
             readOnly = false,
             dragging = false,
             wordWrap = false,
-            historyFrame = -1,
+            historyIndex = -1,
             scrolling = false,
             multiLine = false,
             tabPressed = false,
