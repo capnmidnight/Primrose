@@ -1173,7 +1173,16 @@ export class Primrose extends EventTarget {
                 if (entry.length > 0) {
                     const pairs = entry.split('=');
                     if (pairs.length > 1) {
-                        optionUser[pairs[0].trim()] = pairs[1].trim();
+                        const key = pairs[0].trim(),
+                            value = pairs[1].trim(),
+                            boolTest = value.toLocaleLowerCase();
+                        if (boolTest === "true"
+                            || boolTest === "false") {
+                            optionUser[key] = boolTest === "true";
+                        }
+                        else {
+                            optionUser[key] = value;
+                        }
                     }
                 }
             }
