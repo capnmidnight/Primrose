@@ -1126,8 +1126,10 @@ export class Primrose extends EventTarget {
             scroll = new Point(),
             pointer = new Point(),
             character = new Size(),
-            lastPointer = new Point(),
+            tokenBack = new Cursor(),
+            tokenFront = new Cursor(),
             backCursor = new Cursor(),
+            lastPointer = new Point(),
             outEvt = new Event("out"),
             topLeftGutter = new Size(),
             frontCursor = new Cursor(),
@@ -1309,9 +1311,10 @@ export class Primrose extends EventTarget {
         const renderCanvasBackground = () => {
             const minCursor = Cursor.min(frontCursor, backCursor),
                 maxCursor = Cursor.max(frontCursor, backCursor),
-                tokenFront = new Cursor(),
-                tokenBack = new Cursor(),
                 clearFunc = theme.regular.backColor ? "fillRect" : "clearRect";
+
+            tokenFront.fullHome();
+            tokenBack.fullHome();
 
             if (theme.regular.backColor) {
                 bgfx.fillStyle = theme.regular.backColor;
@@ -1379,11 +1382,10 @@ export class Primrose extends EventTarget {
         };
 
         const renderCanvasForeground = () => {
-            const tokenFront = new Cursor(),
-                tokenBack = new Cursor();
-
             fgfx.clearRect(0, 0, this.width, this.height);
             fgfx.save();
+            tokenFront.fullHome();
+            tokenBack.fullHome();
             fgfx.translate(
                 (gridBounds.x - scroll.x) * character.width + padding,
                 padding);
