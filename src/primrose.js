@@ -1520,6 +1520,10 @@ export class Primrose extends EventTarget {
         };
 
         render = () => {
+            requestAnimationFrame(doRender);
+        };
+
+        const doRender = () => {
             if (tokens && theme) {
                 refreshGridBounds();
                 const textChanged = lastText !== value,
