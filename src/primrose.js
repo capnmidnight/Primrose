@@ -476,6 +476,9 @@ export class Primrose extends EventTarget {
                         indent = tokenRow[0].value;
                     }
                     this.selectedText = "\n" + indent;
+                    frontCursor.advanceN(lines, indent.length + 1);
+                    backCursor.copy(frontCursor);
+                    render();
                 }
                 else {
                     this.dispatchEvent(new Event("change"));
