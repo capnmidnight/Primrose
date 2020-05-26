@@ -533,7 +533,19 @@ export class Primrose extends EventTarget {
             }],
 
             ["RemoveTab", () => {
-                console.log("not implemented: RemoveTab");
+                const line = lines[frontCursor.y],
+                    toDelete = Math.min(frontCursor.x, tabWidth);
+                for (let i = 0; i < frontCursor.x; ++i) {
+                    if (line[i] !== ' ') {
+                        // can only remove tabs at the beginning of a line
+                        return;
+                    }
+                }
+
+                frontCursor.incX(lines, -toDelete);
+                this.selectedText = "";
+                frontCursor.left(lines);
+                frontCursor.right(lines);
             }]
         ]));
         this.readKeyDownEvent = debugEvt("keydown", (evt) => {
