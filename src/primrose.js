@@ -606,7 +606,6 @@ export class Primrose extends EventTarget {
         ]));
         this.readKeyPressEvent = debugEvt("keypress", (evt) => {
             const command = os.makeCommand(evt);
-            console.log("keypress command", this.toString(), command);
             if (!this.readOnly) {
                 evt.preventDefault();
 
@@ -1598,27 +1597,22 @@ export class Primrose extends EventTarget {
                         || textChanged
                         || characterWidthChanged
                         || characterHeightChanged
-                        || paddingChanged,
-
-                    backgroundChanged = layoutChanged
-                        || cursorChanged
+                        || paddingChanged
                         || scrollChanged
                         || themeChanged,
 
-                    foregroundChanged = backgroundChanged
-                        || textChanged
+                    backgroundChanged = layoutChanged
+                        || cursorChanged,
+
+                    foregroundChanged = layoutChanged
                         || fontChanged,
 
-                    trimChanged = backgroundChanged
+                    trimChanged = layoutChanged
                         || focusChanged,
 
                     imageChanged = foregroundChanged
                         || backgroundChanged
                         || trimChanged;
-
-                if (layoutChanged) {
-                    performLayout(gridBounds);
-                }
 
                 if (imageChanged) {
                     if (backgroundChanged) {
@@ -1649,6 +1643,7 @@ export class Primrose extends EventTarget {
                 lastThemeName = theme.name;
                 lastScrollX = scroll.x;
                 lastScrollY = scroll.y;
+                resized = false;
             }
         };
 
