@@ -276,8 +276,46 @@ export class Primrose extends EventTarget {
                 setValue(frame.value, false);
             }
         }
+        //<<<<<<<<<< PRIVATE METHODS <<<<<<<<<<
 
-        const commands = Object.freeze(new Map([
+
+        //>>>>>>>>>> PUBLIC METHODS >>>>>>>>>>
+        this.toString = () => `Primrose #${elementID}`;
+
+        this.blur = () => {
+            if (focused) {
+                focused = false;
+                this.dispatchEvent(new Event("blur"));
+                render();
+            }
+        };
+
+        this.focus = () => {
+            if (!focused) {
+                focused = true;
+                this.dispatchEvent(new Event("focus"));
+                render();
+            }
+        };
+
+        this.resize = () => {
+            if (resizeContext(context)) {
+                refreshBuffers();
+            }
+        };
+
+        this.setSize = (w, h) => {
+            if (setContextSize(context, w, h)) {
+                refreshBuffers();
+            }
+        };
+        //<<<<<<<<<< PUBLIC METHODS <<<<<<<<<<
+
+
+        //>>>>>>>>>> KEY EVENT HANDLERS >>>>>>>>>>
+
+
+        const keyDownCommands = Object.freeze(new Map([
             ["CursorDown", () => {
                 frontCursor.down(lines);
                 backCursor.copy(frontCursor);
@@ -467,6 +505,36 @@ export class Primrose extends EventTarget {
                 this.selectedText = "";
             }],
 
+            ["Undo", () => {
+                moveInHistory(-1);
+            }],
+
+            ["Redo", () => {
+                moveInHistory(1);
+            }],
+
+            ["InsertTab", () => {
+                tabPressed = true;
+                this.selectedText = tabString;
+                frontCursor.advanceN(lines, tabString.length);
+                backCursor.copy(frontCursor);
+            }],
+
+            ["RemoveTab", () => {
+                console.log("not implemented: RemoveTab");
+            }]
+        ]));
+        this.readKeyDownEvent = debugEvt("keydown", (evt) => {
+            const command = os.makeCommand(evt);
+            console.log("keydown command", this.toString(), command);
+            if (keyDownCommands.has(command.command)) {
+                evt.preventDefault();
+                keyDownCommands.get(command.command)(evt);
+            }
+        });
+
+
+        const keyPressCommands = Object.freeze(new Map([
             ["AppendNewline", () => {
                 if (multiLine) {
                     let indent = "";
@@ -505,84 +573,21 @@ export class Primrose extends EventTarget {
                 }
             }],
 
-
-            ["InsertTab", () => {
-                this.selectedText = tabString;
-            }],
-
-            ["RemoveTab", () => {
-                console.log("not implemented: RemoveTab");
-            }],
-
             ["Undo", () => {
                 moveInHistory(-1);
-            }],
-
-            ["Redo", () => {
-                moveInHistory(1);
             }]
         ]));
-        //<<<<<<<<<< PRIVATE METHODS <<<<<<<<<<
-
-
-        //>>>>>>>>>> PUBLIC METHODS >>>>>>>>>>
-        this.toString = () => `Primrose #${elementID}`;
-
-        this.blur = () => {
-            if (focused) {
-                focused = false;
-                this.dispatchEvent(new Event("blur"));
-                render();
-            }
-        };
-
-        this.focus = () => {
-            if (!focused) {
-                focused = true;
-                this.dispatchEvent(new Event("focus"));
-                render();
-            }
-        };
-
-        this.resize = () => {
-            if (resizeContext(context)) {
-                refreshBuffers();
-            }
-        };
-
-        this.setSize = (w, h) => {
-            if (setContextSize(context, w, h)) {
-                refreshBuffers();
-            }
-        };
-        //<<<<<<<<<< PUBLIC METHODS <<<<<<<<<<
-
-
-        //>>>>>>>>>> KEY EVENT HANDLERS >>>>>>>>>>
-        this.readKeyDownEvent = debugEvt("keydown", (evt) => {
-            const command = os.makeCommand(evt);
-            console.log("keydown command", this.toString(), command);
-            if (command.type !== "printable"
-                && command.type !== "whitespace"
-                && commands.has(command.command)) {
-                evt.preventDefault();
-                commands.get(command.command)();
-            }
-        });
-
         this.readKeyPressEvent = debugEvt("keypress", (evt) => {
             const command = os.makeCommand(evt);
             console.log("keypress command", this.toString(), command);
-            if (!this.readOnly
-                && (command.type === "printable"
-                    || command.type === "whitespace")) {
-
+            if (!this.readOnly) {
                 evt.preventDefault();
 
-                if (commands.has(command.command)) {
-                    commands.get(command.command)();
+                if (keyPressCommands.has(command.command)) {
+                    keyPressCommands.get(command.command)();
                 }
-                else {
+                else if (command.type === "printable"
+                    || command.type === "whitespace") {
                     this.selectedText = command.text;
                     frontCursor.right(lines);
                     backCursor.copy(frontCursor);
@@ -1082,6 +1087,7 @@ export class Primrose extends EventTarget {
             historyFrame = -1,
             scrolling = false,
             multiLine = false,
+            tabPressed = false,
             useRowCaching = false,
             lineCountWidth = 0,
             isOffScreen = false,
@@ -1241,6 +1247,13 @@ export class Primrose extends EventTarget {
 
 
         //>>>>>>>>>> INITIALIZE STATE >>>>>>>>>>
+        this.addEventListener("blur", (evt) => {
+            if (tabPressed) {
+                tabPressed = false;
+                this.focus();
+            }
+        });
+
         options.language = options.language.toLocaleLowerCase();
         if (grammars.has(options.language)) {
             options.language = grammars.get(options.language);

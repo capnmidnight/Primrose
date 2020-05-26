@@ -1,4 +1,4 @@
-import {
+﻿import {
     keyTypes,
     normalizeKeyValue
 } from "./keys.js";
@@ -115,6 +115,10 @@ class OperatingSystem {
 
             if (substitutions.has(gesture.command)) {
                 gesture.command = substitutions.get(gesture.command);
+            }
+
+            if (gesture.command === "PrependNewline") {
+                gesture.type = "whitespace";
             }
 
             return gesture;
