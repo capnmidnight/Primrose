@@ -140,12 +140,7 @@
         </p>
     </main>
 
-    <script type="module">
-        const pageFileName = document.location.pathname.substring(1) || "index.html",
-            pageName = pageFileName.match(/(\w+)\.html/)[1],
-            scriptFile = `./${pageName}.js`;
-        import(scriptFile);
-    </script>
+    <script type="module" src="src/primrose.js"></script>
 </body>
 </html>
 
