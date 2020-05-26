@@ -13,7 +13,6 @@ import {
 import {
     isChrome,
     isFirefox,
-    isMobile,
     isMacOS,
     isDebug
 } from "./flags.js";
@@ -637,7 +636,7 @@ export class Primrose extends EventTarget {
         //<<<<<<<<<< CLIPBOARD EVENT HANDLERS <<<<<<<<<<
 
 
-
+        //>>>>>>>>>> POINTER EVENT HANDLERS >>>>>>>>>>
         const pointerOver = () => {
             hovered = true;
             this.dispatchEvent(overEvt);
@@ -816,6 +815,7 @@ export class Primrose extends EventTarget {
             pointerMove();
         }));
         //<<<<<<<<<< TOUCH EVENT HANDLERS <<<<<<<<<<
+        //<<<<<<<<<< POINTER EVENT HANDLERS <<<<<<<<<<
 
 
         //>>>>>>>>>> PUBLIC PROPERTIES >>>>>>>>>>
