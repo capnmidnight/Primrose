@@ -858,6 +858,10 @@ export class Primrose extends EventTarget {
         //>>>>>>>>>> PUBLIC PROPERTIES >>>>>>>>>>
         Object.defineProperties(this, {
 
+            id: {
+                get: () => id
+            },
+
             parentElement: {
                 get: () => parentElement
             },
@@ -1094,7 +1098,8 @@ export class Primrose extends EventTarget {
 
 
         //>>>>>>>>>> PRIVATE MUTABLE FIELDS >>>>>>>>>>
-        let value = "",
+        let id = null,
+            value = "",
             padding = 0,
             theme = Dark,
             tabWidth = 2,
@@ -1306,6 +1311,7 @@ export class Primrose extends EventTarget {
         Object.freeze(options);
 
         Object.seal(this);
+        id = options.id;
         this.readOnly = options.readOnly;
         this.multiLine = options.multiLine;
         this.wordWrap = options.wordWrap;
