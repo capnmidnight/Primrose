@@ -1225,9 +1225,8 @@ export class Primrose extends EventTarget {
             isOffScreen = !(canv instanceof HTMLCanvasElement);
         }
         else if (isCanvas(options.element)) {
-            canv = options.element;
+            element = canv = options.element;
             canv.innerHTML = "";
-            element = canv.parentElement;
         }
         else {
             element = options.element;
