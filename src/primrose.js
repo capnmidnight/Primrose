@@ -4,11 +4,13 @@ import { Cursor } from "./cursor.js";
 import { monospaceFamily } from "./fonts.js"
 
 import {
+    canvas,
+    assignAttributes,
     isCanvas,
-    createCanvas,
+    offscreenCanvas,
     setContextSize,
     resizeContext
-} from "./canvas.js";
+} from "./html.js";
 
 import {
     isFirefox,
@@ -1187,7 +1189,7 @@ export class Primrose extends EventTarget {
         }
 
         if (options.parentElement === null) {
-            canv = createCanvas();
+            canv = offscreenCanvas(options);
             isOffScreen = !(canv instanceof HTMLCanvasElement);
         }
         else if (isCanvas(options.parentElement)) {
