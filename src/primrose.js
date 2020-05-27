@@ -1199,7 +1199,12 @@ export class Primrose extends EventTarget {
             parentElement = options.parentElement;
             readOptions(parentElement);
 
-            canv = createCanvas();
+            canv = canvas({
+                style: {
+                    width: "100%",
+                    height: "100%"
+                }
+            });
             parentElement.appendChild(canv);
             parentElement.removeAttribute("tabindex");
 
