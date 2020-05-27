@@ -1087,7 +1087,7 @@ export class Primrose extends EventTarget {
                             "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM")
                             .width /
                             100;
-                        render();
+                        refreshGridBounds();
                     }
                 }
             },
