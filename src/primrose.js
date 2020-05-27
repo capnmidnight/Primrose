@@ -1,4 +1,3 @@
-import { Manager } from "./manager.js";
 import { Cursor } from "./cursor.js";
 
 import { monospaceFamily } from "./fonts.js"
@@ -44,7 +43,9 @@ import {
 import { Dark } from "./themes.js";
 
 //>>>>>>>>>> PRIVATE STATIC FIELDS >>>>>>>>>>
-let elementCounter = 0;
+let elementCounter = 0,
+    focusedControl = null,
+    hoveredControl = null;
 
 const wheelScrollSpeed = 4,
     vScrollWidth = 2,
@@ -59,7 +60,26 @@ const wheelScrollSpeed = 4,
         fontSize: 16,
         language: "JavaScript",
         scaleFactor: devicePixelRatio
-    });
+    }),
+    controls = [],
+    elements = new WeakMap(),
+    ready = (document.readyState === "complete"
+        ? Promise.resolve("already")
+        : new Promise((resolve) => {
+            document.addEventListener("readystatechange", (evt) => {
+                if (document.readyState === "complete") {
+                    resolve("had to wait for it");
+                }
+            }, false);
+        }))
+        .then(() => {
+            for (let element of document.getElementsByTagName("primrose")) {
+                new Primrose({
+                    element
+                });
+            }
+        });
+
 //<<<<<<<<<< PRIVATE STATIC FIELDS <<<<<<<<<<
 
 export class Primrose extends EventTarget {
@@ -1650,7 +1670,109 @@ export class Primrose extends EventTarget {
         doRender();
 
         // This is done last so that controls that have errored 
-        // out during their setup don't get added to the manager.
-        Manager.add(this);
+        // out during their setup don't get added to the control
+        // manager.
+        Primrose.add(this);
     }
 }
+
+
+
+Primrose.add = (control) => {
+    controls.push(control);
+    if (control.isInDocument) {
+        elements.set(control.element, control);
+    }
+
+    control.addEventListener("blur", () => {
+        focusedControl = null;
+    });
+
+    control.addEventListener("focus", () => {
+        // make sure the previous control knows it has 
+        // gotten unselected.
+        if (focusedControl !== null
+            && (!focusedControl.isInDocument
+                || !control.isInDocument)) {
+            focusedControl.blur();
+        }
+        focusedControl = control;
+    });
+
+    control.addEventListener("over", () => {
+        hoveredControl = control;
+    });
+
+    control.addEventListener("out", () => {
+        hoveredControl = null;
+    });
+};
+
+Primrose.getEditorForElement = (elem) => {
+    return elements.has(elem)
+        ? elements.get(elem)
+        : null;
+};
+
+Object.defineProperties(Primrose, {
+    focusedControl: {
+        get: () => focusedControl
+    },
+
+    hoveredControl: {
+        get: () => hoveredControl
+    },
+
+    editors: {
+        get: () => controls.slice()
+    },
+
+    ready: {
+        get: () => ready
+    }
+});
+
+Object.freeze(Primrose);
+
+requestAnimationFrame(function update() {
+    requestAnimationFrame(update);
+    for (let i = controls.length - 1; i >= 0; --i) {
+        const control = controls[i];
+        if (control.isInDocument) {
+            if (elements.has(control.element)) {
+                control.resize();
+            }
+            else {
+                controls.splice(i, 1);
+            }
+        }
+    }
+});
+
+const withCurrentControl = (name) => {
+    const evtName = name.toLocaleLowerCase(),
+        funcName = `read${name}Event`;
+
+    window.addEventListener(evtName, (evt) => {
+        if (focusedControl !== null) {
+            focusedControl[funcName](evt);
+        }
+    }, { passive: false });
+};
+
+withCurrentControl("KeyDown");
+withCurrentControl("KeyPress");
+withCurrentControl("KeyUp");
+withCurrentControl("BeforeCopy");
+withCurrentControl("BeforeCut");
+withCurrentControl("BeforePase");
+withCurrentControl("Copy");
+withCurrentControl("Cut");
+withCurrentControl("Paste");
+
+window.addEventListener("wheel", (evt) => {
+    const control = focusedControl || hoveredControl;
+    if (control !== null) {
+        control.readWheelEvent(evt);
+    }
+}, { passive: false });
