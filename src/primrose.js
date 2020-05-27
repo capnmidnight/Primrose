@@ -214,6 +214,9 @@ export class Primrose extends EventTarget {
                     currentRowWidth = 0;
                 }
             }
+
+            maxVerticalScroll = Math.max(0, textRows.length - gridBounds.height)
+
             render();
         };
 
@@ -239,12 +242,11 @@ export class Primrose extends EventTarget {
         };
 
         const clampScroll = () => {
-            const maxY = Math.max(0, textRows.length - gridBounds.height);
-            if (scroll.y < 0 || maxY === 0) {
+            if (scroll.y < 0 || maxVerticalScroll === 0) {
                 scroll.y = 0;
             }
             else {
-                while (scroll.y > maxY) {
+                while (scroll.y > maxVerticalScroll) {
                     --scroll.y;
                 }
             }
@@ -823,17 +825,23 @@ export class Primrose extends EventTarget {
 
         this.readWheelEvent = debugEvt("wheel", (evt) => {
             if (hovered || focused) {
-                evt.preventDefault();
                 if (!evt.ctrlKey
                     && !evt.altKey
                     && !evt.shiftKey
                     && !evt.metaKey) {
-                    scroll.y += Math.floor(evt.deltaY * wheelScrollSpeed / scrollScale);
+                    const delta = Math.floor(evt.deltaY * wheelScrollSpeed / scrollScale),
+                        dir = Math.sign(delta);
+                    if (dir === -1 && scroll.y > 0
+                        || dir === 1 && scroll.y < maxVerticalScroll) {
+                        evt.preventDefault();
+                    }
+                    scroll.y += delta;
                     clampScroll();
                 }
                 else if (!evt.ctrlKey
                     && !evt.altKey
                     && !evt.metaKey) {
+                    evt.preventDefault();
                     this.fontSize += -evt.deltaY / scrollScale;
                 }
                 render();
@@ -1155,6 +1163,7 @@ export class Primrose extends EventTarget {
             showLineNumbers = false,
             elementID = ++elementCounter,
             controlType = singleLineOutput,
+            maxVerticalScroll = 0,
 
             lastCharacterHeight = null,
             lastCharacterWidth = null,
