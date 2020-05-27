@@ -305,8 +305,10 @@ export class Primrose extends EventTarget {
         };
 
         this.resize = () => {
-            if (!this.isInDocument
-                || resizeContext(context, scaleFactor)) {
+            if (!this.isInDocument) {
+                console.warn("Can't automatically resize a canvas that is not in the DOM tree");
+            }
+            else if(resizeContext(context, scaleFactor)) {
                 refreshBuffers();
             }
         };
