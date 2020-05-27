@@ -1157,7 +1157,10 @@ export class Primrose extends EventTarget {
         let currentValue = "",
             currentTabIndex = -1;
 
-        function readOptions(elem) {
+        if (options.parentElement !== null) {
+            const elem = options.parentElement,
+                width = elem.width,
+                height = elem.height;
             currentTabIndex = elem.tabIndex;
 
             const optionsStr = elem.dataset.options || "",
@@ -1183,10 +1186,12 @@ export class Primrose extends EventTarget {
             }
 
             currentValue = elem.textContent;
-            elem.innerHTML = "";
-
-            options = Object.assign(options, optionUser);
+            options = Object.assign(
+                options,
+                { width, height },
+                optionUser);
         }
+
 
         if (options.parentElement === null) {
             canv = offscreenCanvas(options);
@@ -1194,12 +1199,12 @@ export class Primrose extends EventTarget {
         }
         else if (isCanvas(options.parentElement)) {
             canv = options.parentElement;
+            canv.innerHTML = "";
             parentElement = canv.parentElement;
-            readOptions(canv);
         }
         else {
             parentElement = options.parentElement;
-            readOptions(parentElement);
+            parentElement.innerHTML = "";
 
             canv = canvas({
                 style: {
@@ -1210,18 +1215,13 @@ export class Primrose extends EventTarget {
             parentElement.appendChild(canv);
             parentElement.removeAttribute("tabindex");
 
-            Object.assign(parentElement.style, {
-                display: "block",
-                padding: "none",
-                border: "2px inset #c0c0c0",
-                whiteSpace: "pre-wrap",
-                overflow: "unset",
-                fontFamily: monospaceFamily
-            });
-
-            Object.assign(canv.style, {
-                width: "100%",
-                height: "100%"
+            assignAttributes(parentElement, {
+                style: {
+                    display: "block",
+                    padding: "none",
+                    border: "2px inset #c0c0c0",
+                    overflow: "unset"
+                }
             });
         }
 
@@ -1264,11 +1264,11 @@ export class Primrose extends EventTarget {
 
         //>>>>>>>>>> SETUP BUFFERS >>>>>>>>>>
         const context = canv.getContext("2d"),
-            fg = createCanvas(),
+            fg = offscreenCanvas(),
             fgfx = fg.getContext("2d"),
-            bg = createCanvas(),
+            bg = offscreenCanvas(),
             bgfx = bg.getContext("2d"),
-            tg = createCanvas(),
+            tg = offscreenCanvas(),
             tgfx = tg.getContext("2d");
 
         context.imageSmoothingEnabled
