@@ -286,7 +286,8 @@ export class Primrose extends EventTarget {
         };
 
         this.resize = () => {
-            if (resizeContext(context, scaleFactor)) {
+            if (!this.isInDocument
+                || resizeContext(context, scaleFactor)) {
                 refreshBuffers();
             }
         };
