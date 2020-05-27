@@ -1,0 +1,26 @@
+{
+  "name": "primrose",
+  "version": "1.0.2",
+  "description": "Syntax-highlighting text editor that renders to an HTML5 Canvas element",
+  "main": "src/primrose.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/capnmidnight/Primrose.git"
+  },
+  "keywords": [
+    "HTML5",
+    "JavaScript",
+    "Canvas",
+    "text",
+    "editor"
+  ],
+  "author": "Sean T. McBeth <sean.mcbeth+npm@gmail.com> (https://www.seanmcbeth.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/capnmidnight/Primrose/issues"
+  },
+  "homepage": "https://www.primrosevr.com"
+}

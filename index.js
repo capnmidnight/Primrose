@@ -1,4 +1,4 @@
-﻿import { Primrose } from "./src/primrose.js";
+﻿import { Primrose } from "./package/src/primrose.js";
 
 Primrose.ready.then(() => {
     for (let editor of Primrose.editors) {
