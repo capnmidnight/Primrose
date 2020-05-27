@@ -1,4 +1,6 @@
-﻿export function isCanvas(elem) {
+﻿import { canvas } from "./html.js";
+
+export function isCanvas(elem) {
     if (elem instanceof HTMLCanvasElement) {
         return true;
     }
@@ -11,12 +13,22 @@
     return false;
 }
 
-export function createCanvas() {
-    //if (window.OffscreenCanvas) {
-    //    return new OffscreenCanvas(512, 512);
-    //}
+export function createCanvas(options) {
+    const width = options && options.width || 512,
+        height = options && options.height || width;
 
-    return document.createElement("canvas");
+    if (options instanceof Object) {
+        Object.assign(options, {
+            width,
+            height
+        });
+    }
+
+    if (window.OffscreenCanvas) {
+        return new OffscreenCanvas(width, height);
+    }
+
+    return canvas(options);
 }
 
 export function setCanvasSize(canv, w, h, superscale = 1) {

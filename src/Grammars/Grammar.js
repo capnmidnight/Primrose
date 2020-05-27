@@ -1,4 +1,3 @@
-import { monospaceFamily } from "../fonts.js";
 /*
 pliny.class({
   parent: "Primrose.Text",
@@ -71,6 +70,8 @@ See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.
 import { Rule } from "./rule.js";
 import { Token } from "./token.js";
 import { Light as DefaultTheme } from "../themes.js";
+import { div, span, br, text} from "../html.js";
+import { monospaceFamily } from "../fonts.js";
 
 export class Grammar {
     constructor(grammarName, rules) {
@@ -214,22 +215,23 @@ export class Grammar {
         }
 
         var tokenRows = this.tokenize(txt),
-            temp = document.createElement("div");
+            temp = div();
         for (var y = 0; y < tokenRows.length; ++y) {
             // draw the tokens on this row
             var t = tokenRows[y];
             if (t.type === "newlines") {
-                temp.appendChild(document.createElement("br"));
+                temp.appendChild(br());
             }
             else {
                 var style = theme[t.type] || {},
-                    elem = document.createElement("span");
-                elem.style.fontWeight = style.fontWeight || theme.regular.fontWeight;
-                elem.style.fontStyle = style.fontStyle || theme.regular.fontStyle || "";
-                elem.style.color = style.foreColor || theme.regular.foreColor;
-                elem.style.backgroundColor = style.backColor || theme.regular.backColor;
-                elem.style.fontFamily = monospaceFamily;
-                elem.appendChild(document.createTextNode(t.value));
+                    elem = span({
+                        fontWeight: style.fontWeight || theme.regular.fontWeight,
+                        fontStyle: style.fontStyle || theme.regular.fontStyle || "",
+                        color: style.foreColor || theme.regular.foreColor,
+                        backgroundColor: style.backColor || theme.regular.backColor,
+                        fontFamily: monospaceFamily
+                    });
+                elem.appendChild(text(t.value));
                 temp.appendChild(elem);
             }
         }
