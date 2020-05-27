@@ -1097,8 +1097,10 @@ export class Primrose extends EventTarget {
                 set: (s) => {
                     s = Math.max(0.25, Math.min(4, s || 0));
                     if (s !== scaleFactor) {
+                        const lastWidth = this.width,
+                            lastHeight = this.height
                         scaleFactor = s;
-                        this.resize();
+                        this.setSize(lastWidth, lastHeight);
                     }
                 }
             },
