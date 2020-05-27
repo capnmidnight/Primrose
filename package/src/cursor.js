@@ -239,6 +239,8 @@ export class Cursor {
     }
 
     setXY(lines, x, y) {
+        x = Math.floor(x);
+        y = Math.floor(y);
         this.y = Math.max(0, Math.min(lines.length - 1, y));
         const line = lines[this.y];
         this.x = Math.max(0, Math.min(line.length, x));
