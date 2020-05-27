@@ -1,10 +1,15 @@
 ﻿import { Primrose } from "./package/src/primrose.js";
 
-Primrose.ready.then(() => {
+(async function() {
+    await Primrose.ready
+    const response = await fetch("test.js"),
+        code = await response.text();
+
     for (let editor of Primrose.editors) {
         editor.scaleFactor = devicePixelRatio;
+        editor.value = code;
     }
-});
+})();
 
 window.addEventListener("wheel", (evt) => {
     if (evt.ctrlKey
