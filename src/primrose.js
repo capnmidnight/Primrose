@@ -101,13 +101,13 @@ export class Primrose extends EventTarget {
         //>>>>>>>>>> VALIDATE PARAMETERS >>>>>>>>>>
         options = options || {};
 
-        if (options.parentElement === undefined) {
-            options.parentElement = null;
+        if (options.element === undefined) {
+            options.element = null;
         }
 
-        if (options.parentElement !== null
-            && !(options.parentElement instanceof HTMLElement)) {
-            throw new Error("parentElement must be null, an instance of HTMLElement, an instance of HTMLCanvaseElement, or an instance of OffscreenCanvas");
+        if (options.element !== null
+            && !(options.element instanceof HTMLElement)) {
+            throw new Error("element must be null, an instance of HTMLElement, an instance of HTMLCanvaseElement, or an instance of OffscreenCanvas");
         }
 
         options = Object.assign({}, optionDefaults, options);
@@ -882,8 +882,8 @@ export class Primrose extends EventTarget {
                 get: () => id
             },
 
-            parentElement: {
-                get: () => parentElement
+            element: {
+                get: () => element
             },
 
             isInDocument: {
@@ -1140,7 +1140,7 @@ export class Primrose extends EventTarget {
             tabPressed = false,
             lineCountWidth = 0,
             isOffScreen = false,
-            parentElement = null,
+            element = null,
             language = JavaScript,
             showScrollBars = false,
             showLineNumbers = false,
@@ -1184,8 +1184,8 @@ export class Primrose extends EventTarget {
         let currentValue = "",
             currentTabIndex = -1;
 
-        if (options.parentElement !== null) {
-            const elem = options.parentElement,
+        if (options.element !== null) {
+            const elem = options.element,
                 width = elem.width,
                 height = elem.height;
             currentTabIndex = elem.tabIndex;
@@ -1220,18 +1220,18 @@ export class Primrose extends EventTarget {
         }
 
 
-        if (options.parentElement === null) {
+        if (options.element === null) {
             canv = offscreenCanvas(options);
             isOffScreen = !(canv instanceof HTMLCanvasElement);
         }
-        else if (isCanvas(options.parentElement)) {
-            canv = options.parentElement;
+        else if (isCanvas(options.element)) {
+            canv = options.element;
             canv.innerHTML = "";
-            parentElement = canv.parentElement;
+            element = canv.parentElement;
         }
         else {
-            parentElement = options.parentElement;
-            parentElement.innerHTML = "";
+            element = options.element;
+            element.innerHTML = "";
 
             canv = canvas({
                 style: {
@@ -1239,10 +1239,10 @@ export class Primrose extends EventTarget {
                     height: "100%"
                 }
             });
-            parentElement.appendChild(canv);
-            parentElement.removeAttribute("tabindex");
+            element.appendChild(canv);
+            element.removeAttribute("tabindex");
 
-            assignAttributes(parentElement, {
+            assignAttributes(element, {
                 style: {
                     display: "block",
                     padding: "none",
