@@ -797,8 +797,8 @@ export class Primrose extends EventTarget {
         };
         const setOffsetPointer = (evt) => {
             pointer.set(
-                evt.offsetX * this.width / canv.clientWidth,
-                evt.offsetY * this.height / canv.clientHeight);
+                evt.offsetX,
+                evt.offsetY);
         };
         this.readPointerOverEvent = debugEvt("pointerover", withPrimaryPointer(pointerOver));
         this.readPointerOutEvent = debugEvt("pointerout", withPrimaryPointer(pointerOut));
