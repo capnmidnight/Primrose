@@ -1592,28 +1592,22 @@ export class Primrose extends EventTarget {
                         || fontChanged,
 
                     trimChanged = layoutChanged
-                        || focusChanged,
+                        || focusChanged;
 
-                    imageChanged = foregroundChanged
-                        || backgroundChanged
-                        || trimChanged;
-
-                if (imageChanged) {
-                    if (backgroundChanged) {
-                        renderCanvasBackground();
-                    }
-                    if (foregroundChanged) {
-                        renderCanvasForeground();
-                    }
-                    if (trimChanged) {
-                        renderCanvasTrim();
-                    }
-
-                    context.clearRect(0, 0, canv.width, canv.height);
-                    context.drawImage(bg, 0, 0);
-                    context.drawImage(fg, 0, 0);
-                    context.drawImage(tg, 0, 0);
+                if (backgroundChanged) {
+                    renderCanvasBackground();
                 }
+                if (foregroundChanged) {
+                    renderCanvasForeground();
+                }
+                if (trimChanged) {
+                    renderCanvasTrim();
+                }
+
+                context.clearRect(0, 0, canv.width, canv.height);
+                context.drawImage(bg, 0, 0);
+                context.drawImage(fg, 0, 0);
+                context.drawImage(tg, 0, 0);
 
                 lastGridBounds = gridBounds.toString();
                 lastText = value;
