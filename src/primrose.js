@@ -1689,45 +1689,52 @@ export class Primrose extends EventTarget {
         // This is done last so that controls that have errored 
         // out during their setup don't get added to the control
         // manager.
-        Primrose.add(this);
+        Primrose.add(element, this);
     }
 }
 
 
 
-Primrose.add = (control) => {
-    controls.push(control);
-    if (control.isInDocument) {
-        elements.set(control.element, control);
+Primrose.add = (key, control) => {
+    if (key !== null) {
+        elements.set(key, control);
     }
 
-    control.addEventListener("blur", () => {
-        focusedControl = null;
-    });
+    if (controls.indexOf(control) === -1) {
+        controls.push(control);
 
-    control.addEventListener("focus", () => {
-        // make sure the previous control knows it has 
-        // gotten unselected.
-        if (focusedControl !== null
-            && (!focusedControl.isInDocument
-                || !control.isInDocument)) {
-            focusedControl.blur();
-        }
-        focusedControl = control;
-    });
+        control.addEventListener("blur", () => {
+            focusedControl = null;
+        });
 
-    control.addEventListener("over", () => {
-        hoveredControl = control;
-    });
+        control.addEventListener("focus", () => {
+            // make sure the previous control knows it has 
+            // gotten unselected.
+            if (focusedControl !== null
+                && (!focusedControl.isInDocument
+                    || !control.isInDocument)) {
+                focusedControl.blur();
+            }
+            focusedControl = control;
+        });
 
-    control.addEventListener("out", () => {
-        hoveredControl = null;
-    });
+        control.addEventListener("over", () => {
+            hoveredControl = control;
+        });
+
+        control.addEventListener("out", () => {
+            hoveredControl = null;
+        });
+    }
 };
 
-Primrose.getEditorForElement = (elem) => {
-    return elements.has(elem)
-        ? elements.get(elem)
+Primrose.has = (key) => {
+    return elements.has(key);
+};
+
+Primrose.get = (key) => {
+    return elements.has(key)
+        ? elements.get(key)
         : null;
 };
 
