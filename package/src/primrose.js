@@ -831,7 +831,8 @@ export class Primrose extends EventTarget {
                     && !evt.metaKey) {
                     const delta = Math.floor(evt.deltaY * wheelScrollSpeed / scrollScale),
                         dir = Math.sign(delta);
-                    if (dir === -1 && scroll.y > 0
+                    if (focused
+                        || dir === -1 && scroll.y > 0
                         || dir === 1 && scroll.y < maxVerticalScroll) {
                         evt.preventDefault();
                     }
