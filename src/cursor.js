@@ -88,21 +88,6 @@ export class Cursor {
         this.moved = true;
     }
 
-    right(lines) {
-        const line = lines[this.y];
-        if (this.y < lines.length - 1
-            || this.x < line.length) {
-            ++this.i;
-            if (line[this.x] === '\n') {
-                this.x = 0;
-                ++this.y;
-            }
-            else {
-                ++this.x;
-            }
-        }
-    }
-
     skipLeft(lines) {
         if (this.x <= 1) {
             this.left(lines);
@@ -121,12 +106,23 @@ export class Cursor {
         this.moved = true;
     }
 
+    right(lines) {
+        const line = lines[this.y];
+        if (this.y < lines.length - 1
+            || this.x < line.length) {
+            ++this.i;
+            ++this.x;
+            if (this.y < lines.length - 1
+                && this.x === line.length) {
+                this.x = 0;
+                ++this.y;
+            }
+        }
+    }
+
     skipRight(lines) {
         const line = lines[this.y];
-        if (this.x === line.length || line[this.x] === '\n') {
-            this.right(lines);
-        }
-        else {
+        if (this.x < line.length - 1) {
             const x = this.x + 1,
                 subline = line.substring(x),
                 m = subline.match(/(\s|\W)+/),
@@ -136,10 +132,14 @@ export class Cursor {
             this.i += dx;
             this.x += dx;
             if (this.x > 0
-                && line[this.x - 1] === '\n') {
+                && this.x === line.length
+                && this.y < lines.length - 1) {
                 --this.x;
                 --this.i;
             }
+        }
+        else if(this.y < lines.length -1) {
+            this.right(lines);
         }
         this.moved = true;
     }
@@ -153,7 +153,7 @@ export class Cursor {
     end(lines) {
         const line = lines[this.y];
         let dx = line.length - this.x;
-        if (line[line.length - 1] === '\n') {
+        if (this.y < lines.length - 1) {
             --dx;
         }
         this.i += dx;
@@ -179,9 +179,9 @@ export class Cursor {
             this.i += pLine.length;
 
             const line = lines[this.y];
-            if (this.x > line.length) {
+            if (this.x >= line.length) {
                 let dx = this.x - line.length;
-                if (line[line.length - 1] === '\n') {
+                if (this.y < lines.length - 1) {
                     ++dx;
                 }
                 this.i -= dx;
@@ -230,7 +230,8 @@ export class Cursor {
             this.i += lines[i].length;
         }
         if (this.x > 0
-            && line[this.x - 1] === '\n') {
+            && this.x === line.length
+            && this.y < lines.length - 1) {
             --this.x;
             --this.i;
         }

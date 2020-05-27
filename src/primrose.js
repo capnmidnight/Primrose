@@ -11,7 +11,6 @@ import {
 } from "./canvas.js";
 
 import {
-    isChrome,
     isFirefox,
     isMacOS,
     isDebug
@@ -78,6 +77,8 @@ export class Primrose extends EventTarget {
         };
 
         //>>>>>>>>>> VALIDATE PARAMETERS >>>>>>>>>>
+        options = options || {};
+
         if (options.parentElement === undefined) {
             options.parentElement = null;
         }
@@ -207,9 +208,10 @@ export class Primrose extends EventTarget {
 
         const refreshBuffers = () => {
             resized = true;
-            setContextSize(fgfx, canvas.width, canvas.height);
-            setContextSize(bgfx, canvas.width, canvas.height);
-            setContextSize(tgfx, canvas.width, canvas.height);
+            setContextSize(fgfx, canv.width, canv.height);
+            setContextSize(bgfx, canv.width, canv.height);
+            setContextSize(tgfx, canv.width, canv.height);
+            refreshGridBounds();
             render();
         };
 
@@ -776,8 +778,8 @@ export class Primrose extends EventTarget {
         };
         const setOffsetPointer = (evt) => {
             pointer.set(
-                evt.offsetX * this.width / canvas.clientWidth,
-                evt.offsetY * this.height / canvas.clientHeight);
+                evt.offsetX * this.width / canv.clientWidth,
+                evt.offsetY * this.height / canv.clientHeight);
         };
         this.readPointerOverEvent = debugEvt("pointerover", withPrimaryPointer(pointerOver));
         this.readPointerOutEvent = debugEvt("pointerout", withPrimaryPointer(pointerOut));
@@ -845,8 +847,8 @@ export class Primrose extends EventTarget {
         };
         const setTouchPointer = (evt) => {
             pointer.set(
-                (evt.pageX - canvas.offsetLeft) * this.width / canvas.clientWidth,
-                (evt.pageY - canvas.offsetTop) * this.height / canvas.clientHeight);
+                (evt.pageX - canv.offsetLeft) * this.width / canv.clientWidth,
+                (evt.pageY - canv.offsetTop) * this.height / canv.clientHeight);
         };
         this.readTouchStartEvent = debugEvt("touchstart", withPrimaryTouch((evt) => {
             setTouchPointer(evt);
@@ -870,11 +872,11 @@ export class Primrose extends EventTarget {
 
             isInDocument: {
                 get: () => !isOffScreen
-                    && document.body.contains(canvas)
+                    && document.body.contains(canv)
             },
 
             canvas: {
-                get: () => canvas
+                get: () => canv
             },
 
             hovered: {
@@ -1087,12 +1089,12 @@ export class Primrose extends EventTarget {
             },
 
             width: {
-                get: () => canvas.width / scaleFactor,
+                get: () => canv.width / scaleFactor,
                 set: (w) => setContextSize(context, w, this.height, scaleFactor)
             },
 
             height: {
-                get: () => canvas.height / scaleFactor,
+                get: () => canv.height / scaleFactor,
                 set: (h) => setContextSize(context, this.width, h, scaleFactor)
             }
         });
@@ -1104,7 +1106,7 @@ export class Primrose extends EventTarget {
             padding = 0,
             theme = Dark,
             tabWidth = 2,
-            canvas = null,
+            canv = null,
             tokens = null,
             resized = false,
             hovered = false,
@@ -1161,7 +1163,6 @@ export class Primrose extends EventTarget {
             changeEvt = new Event("change");
         //<<<<<<<<<< PRIVATE MUTABLE FIELDS <<<<<<<<<<
 
-
         //>>>>>>>>>> SETUP CANVAS >>>>>>>>>>
         let currentValue = "",
             currentTabIndex = -1;
@@ -1198,20 +1199,20 @@ export class Primrose extends EventTarget {
         }
 
         if (options.parentElement === null) {
-            canvas = createCanvas();
-            isOffScreen = !(canvas instanceof HTMLCanvasElement);
+            canv = createCanvas();
+            isOffScreen = !(canv instanceof HTMLCanvasElement);
         }
         else if (isCanvas(options.parentElement)) {
-            canvas = options.parentElement;
-            parentElement = canvas.parentElement;
-            readOptions(canvas);
+            canv = options.parentElement;
+            parentElement = canv.parentElement;
+            readOptions(canv);
         }
         else {
-            parentElement = options.parentElement
+            parentElement = options.parentElement;
             readOptions(parentElement);
 
-            canvas = document.createElement("canvas");
-            parentElement.appendChild(canvas);
+            canv = createCanvas();
+            parentElement.appendChild(canv);
             parentElement.removeAttribute("tabindex");
 
             Object.assign(parentElement.style, {
@@ -1223,13 +1224,13 @@ export class Primrose extends EventTarget {
                 fontFamily: monospaceFamily
             });
 
-            Object.assign(canvas.style, {
+            Object.assign(canv.style, {
                 width: "100%",
                 height: "100%"
             });
         }
 
-        if (canvas.parentElement !== null
+        if (canv.parentElement !== null
             && currentTabIndex === -1) {
             const tabbableElements = document.querySelectorAll("[tabindex]");
             for (let tabbableElement of tabbableElements) {
@@ -1238,37 +1239,36 @@ export class Primrose extends EventTarget {
             ++currentTabIndex;
         }
 
-        if (canvas instanceof HTMLCanvasElement
+        if (canv instanceof HTMLCanvasElement
             && this.isInDocument) {
-            canvas.tabIndex = currentTabIndex;
-            canvas.style.touchAction = "none";
-            canvas.addEventListener("focus", () => this.focus());
-            canvas.addEventListener("blur", () => this.blur());
+            canv.tabIndex = currentTabIndex;
+            canv.style.touchAction = "none";
+            canv.addEventListener("focus", () => this.focus());
+            canv.addEventListener("blur", () => this.blur());
 
-            if (canvas.onpointerdown === undefined) {
-                canvas.addEventListener("mouseover", this.readMouseOverEvent);
-                canvas.addEventListener("mouseout", this.readMouseOutEvent);
-                canvas.addEventListener("mousedown", this.readMouseDownEvent);
-                canvas.addEventListener("mouseup", this.readMouseUpEvent);
-                canvas.addEventListener("mousemove", this.readMouseMoveEvent);
+            if (canv.onpointerdown === undefined) {
+                canv.addEventListener("mouseover", this.readMouseOverEvent);
+                canv.addEventListener("mouseout", this.readMouseOutEvent);
+                canv.addEventListener("mousedown", this.readMouseDownEvent);
+                canv.addEventListener("mouseup", this.readMouseUpEvent);
+                canv.addEventListener("mousemove", this.readMouseMoveEvent);
 
-                canvas.addEventListener("touchstart", this.readTouchStartEvent);
-                canvas.addEventListener("touchend", this.readTouchEndEvent);
-                canvas.addEventListener("touchmove", this.readTouchMoveEvent);
+                canv.addEventListener("touchstart", this.readTouchStartEvent);
+                canv.addEventListener("touchend", this.readTouchEndEvent);
+                canv.addEventListener("touchmove", this.readTouchMoveEvent);
             }
             else {
-                canvas.addEventListener("pointerover", this.readPointerOverEvent);
-                canvas.addEventListener("pointerout", this.readPointerOutEvent);
-                canvas.addEventListener("pointerdown", this.readPointerDownEvent);
-                canvas.addEventListener("pointerup", this.readPointerUpEvent);
-                canvas.addEventListener("pointermove", this.readPointerMoveEvent);
+                canv.addEventListener("pointerover", this.readPointerOverEvent);
+                canv.addEventListener("pointerout", this.readPointerOutEvent);
+                canv.addEventListener("pointerdown", this.readPointerDownEvent);
+                canv.addEventListener("pointerup", this.readPointerUpEvent);
+                canv.addEventListener("pointermove", this.readPointerMoveEvent);
             }
         }
         //<<<<<<<<<< SETUP CANVAS <<<<<<<<<<
 
-
         //>>>>>>>>>> SETUP BUFFERS >>>>>>>>>>
-        const context = canvas.getContext("2d"),
+        const context = canv.getContext("2d"),
             fg = createCanvas(),
             fgfx = fg.getContext("2d"),
             bg = createCanvas(),
@@ -1288,9 +1288,8 @@ export class Primrose extends EventTarget {
             = "top";
         //<<<<<<<<<< SETUP BUFFERS <<<<<<<<<<
 
-
         //>>>>>>>>>> INITIALIZE STATE >>>>>>>>>>
-        this.addEventListener("blur", (evt) => {
+        this.addEventListener("blur", () => {
             if (tabPressed) {
                 tabPressed = false;
                 this.focus();
@@ -1317,12 +1316,10 @@ export class Primrose extends EventTarget {
         this.language = options.language;
         this.scaleFactor = options.scaleFactor;
         this.value = currentValue;
-        Manager.add(this);
         //<<<<<<<<<< INITIALIZE STATE <<<<<<<<<<
 
 
         //>>>>>>>>>> RENDERING >>>>>>>>>>
-
         const fillRect = (gfx, fill, x, y, w, h) => {
             gfx.fillStyle = fill;
             gfx.fillRect(
@@ -1625,7 +1622,7 @@ export class Primrose extends EventTarget {
                         renderCanvasTrim();
                     }
 
-                    context.clearRect(0, 0, canvas.width, canvas.height);
+                    context.clearRect(0, 0, canv.width, canv.height);
                     context.drawImage(bg, 0, 0);
                     context.drawImage(fg, 0, 0);
                     context.drawImage(tg, 0, 0);
@@ -1653,6 +1650,10 @@ export class Primrose extends EventTarget {
         //<<<<<<<<<< RENDERING <<<<<<<<<<
 
 
-        render();
+        doRender();
+
+        // This is done last so that controls that have errored 
+        // out during their setup don't get added to the manager.
+        Manager.add(this);
     }
 }
