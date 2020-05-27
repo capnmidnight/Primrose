@@ -1107,12 +1107,12 @@ export class Primrose extends EventTarget {
 
             width: {
                 get: () => canv.width / scaleFactor,
-                set: (w) => setContextSize(context, w, this.height, scaleFactor)
+                set: (w) => this.setSize(w, this.height)
             },
 
             height: {
                 get: () => canv.height / scaleFactor,
-                set: (h) => setContextSize(context, this.width, h, scaleFactor)
+                set: (h) => this.setSize(this.width, h)
             }
         });
         //<<<<<<<<<< PUBLIC PROPERTIES <<<<<<<<<<
