@@ -83,13 +83,9 @@ export class Primrose extends EventTarget {
             options.parentElement = null;
         }
 
-        if (options.canvas === undefined) {
-            options.canvas = null;
-        }
-
         if (options.parentElement !== null
             && !(options.parentElement instanceof HTMLElement)) {
-            throw new Error("parentElement must be null, an instance of HTMLElement, an instance of HTMLCanvaseElement, or an instance of OffscreenCanvase");
+            throw new Error("parentElement must be null, an instance of HTMLElement, an instance of HTMLCanvaseElement, or an instance of OffscreenCanvas");
         }
 
         options = Object.assign({}, optionDefaults, options);
