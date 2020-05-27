@@ -823,19 +823,20 @@ export class Primrose extends EventTarget {
 
         this.readWheelEvent = debugEvt("wheel", (evt) => {
             if (hovered || focused) {
-                if (!evt.ctrlKey && !evt.altKey && !evt.shiftKey && !evt.metaKey) {
+                evt.preventDefault();
+                if (!evt.ctrlKey
+                    && !evt.altKey
+                    && !evt.shiftKey
+                    && !evt.metaKey) {
                     scroll.y += Math.floor(evt.deltaY * wheelScrollSpeed / scrollScale);
                     clampScroll();
                 }
-                else if (!evt.altKey && !evt.shiftKey && !evt.metaKey) {
-                    const dir = Math.sign(evt.deltaY);
-                    this.scaleFactor += dir / 4;
-                }
-                else if (!evt.ctrlKey && !evt.altKey && !evt.metaKey) {
+                else if (!evt.ctrlKey
+                    && !evt.altKey
+                    && !evt.metaKey) {
                     this.fontSize += -evt.deltaY / scrollScale;
                 }
                 render();
-                evt.preventDefault();
             }
         });
         //<<<<<<<<<< MOUSE EVENT HANDLERS <<<<<<<<<<
