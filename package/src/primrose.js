@@ -1529,7 +1529,12 @@ export class Primrose extends EventTarget {
                     theme.regular.selectedBackColor ||
                     DefaultTheme.regular.selectedBackColor,
                     0, 0,
-                    gridBounds.x, gridBounds.height);
+                    gridBounds.x, this.width - padding * 2);
+                strokeRect(tgfx,
+                    theme.regular.foreColor ||
+                    DefaultTheme.regular.foreColor,
+                    0, 0,
+                    gridBounds.x, this.height - padding * 2);
             }
 
             tgfx.save();
@@ -1567,14 +1572,6 @@ export class Primrose extends EventTarget {
             }
 
             tgfx.restore();
-
-            if (showLineNumbers) {
-                strokeRect(tgfx,
-                    theme.regular.foreColor ||
-                    DefaultTheme.regular.foreColor,
-                    0, 0,
-                    gridBounds.x, gridBounds.height);
-            }
 
             // draw the scrollbars
             if (showScrollBars) {
