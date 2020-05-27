@@ -75,7 +75,7 @@ export class Cursor {
         this.moved = true;
     }
 
-    left(lines) {
+    left(lines, skipAdjust = false) {
         if (this.i > 0) {
             --this.i;
             --this.x;
@@ -83,6 +83,10 @@ export class Cursor {
                 --this.y;
                 const line = lines[this.y];
                 this.x = line.length - 1;
+            }
+
+            if (!skipAdjust) {
+                lines[this.y].adjust(this, -1);
             }
         }
         this.moved = true;
@@ -102,11 +106,12 @@ export class Cursor {
                     : word.length;
             this.i -= dx;
             this.x -= dx;
+            lines[this.y].adjust(this, -1);
         }
         this.moved = true;
     }
 
-    right(lines) {
+    right(lines, skipAdjust = false) {
         const line = lines[this.y];
         if (this.y < lines.length - 1
             || this.x < line.length) {
@@ -116,6 +121,9 @@ export class Cursor {
                 && this.x === line.length) {
                 this.x = 0;
                 ++this.y;
+            }
+            if (!skipAdjust) {
+                lines[this.y].adjust(this, 1);
             }
         }
     }
@@ -137,6 +145,7 @@ export class Cursor {
                 --this.x;
                 --this.i;
             }
+            lines[this.y].adjust(this, 1);
         }
         else if(this.y < lines.length -1) {
             this.right(lines);
@@ -161,18 +170,21 @@ export class Cursor {
         this.moved = true;
     }
 
-    up(lines) {
+    up(lines, skipAdjust = false) {
         if (this.y > 0) {
             --this.y;
             const line = lines[this.y],
                 dx = Math.min(0, line.length - this.x - 1);
             this.x += dx;
             this.i -= line.length - dx;
+            if (!skipAdjust) {
+                lines[this.y].adjust(this, 1);
+            }
         }
         this.moved = true;
     }
 
-    down(lines) {
+    down(lines, skipAdjust = false) {
         if (this.y < lines.length - 1) {
             const pLine = lines[this.y];
             ++this.y;
@@ -187,6 +199,9 @@ export class Cursor {
                 this.i -= dx;
                 this.x -= dx;
             }
+            if (!skipAdjust) {
+                lines[this.y].adjust(this, 1);
+            }
         }
         this.moved = true;
     }
@@ -196,13 +211,15 @@ export class Cursor {
         dx = Math.abs(dx);
         if (dir === -1) {
             for (let i = 0; i < dx; ++i) {
-                this.left(lines);
+                this.left(lines, true);
             }
+            lines[this.y].adjust(this, -1);
         }
         else if (dir === 1) {
             for (let i = 0; i < dx; ++i) {
-                this.right(lines);
+                this.right(lines, true);
             }
+            lines[this.y].adjust(this, 1);
         }
     }
 
@@ -211,14 +228,15 @@ export class Cursor {
         dy = Math.abs(dy);
         if (dir === -1) {
             for (let i = 0; i < dy; ++i) {
-                this.up(lines);
+                this.up(lines, true);
             }
         }
         else if (dir === 1) {
             for (let i = 0; i < dy; ++i) {
-                this.down(lines);
+                this.down(lines, true);
             }
         }
+        lines[this.y].adjust(this, 1);
     }
 
     setXY(lines, x, y) {
@@ -235,6 +253,7 @@ export class Cursor {
             --this.x;
             --this.i;
         }
+        lines[this.y].adjust(this, 1);
         this.moved = true;
     }
 
@@ -255,6 +274,7 @@ export class Cursor {
             ++this.y;
             line = lines[this.y];
         }
+        lines[this.y].adjust(this, 1);
         this.moved = true;
     }
 }

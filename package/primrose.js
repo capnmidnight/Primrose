@@ -1,4 +1,5 @@
-(function(g,f){typeof exports==='object'&&typeof module!=='undefined'?f(exports):typeof define==='function'&&define.amd?define(['exports'],f):(g=g||self,f(g.Primrose={}));}(this,(function(exports){'use strict';const combiningMarks =
+(function(g,f){typeof exports==='object'&&typeof module!=='undefined'?f(exports):typeof define==='function'&&define.amd?define(['exports'],f):(g=g||self,f(g.Primrose={}));}(this,(function(exports){'use strict';// A selection of fonts for preferred monospace rendering.
+const monospaceFamily = "'Droid Sans Mono', 'Consolas', 'Lucida Console', 'Courier New', 'Courier', monospace";const combiningMarks =
     /(<%= allExceptCombiningMarks %>)(<%= combiningMarks %>+)/g,
     surrogatePair = /(<%= highSurrogates %>)(<%= lowSurrogates %>)/g;
 
@@ -75,7 +76,7 @@ class Cursor {
         this.moved = true;
     }
 
-    left(lines) {
+    left(lines, skipAdjust = false) {
         if (this.i > 0) {
             --this.i;
             --this.x;
@@ -83,6 +84,10 @@ class Cursor {
                 --this.y;
                 const line = lines[this.y];
                 this.x = line.length - 1;
+            }
+
+            if (!skipAdjust) {
+                lines[this.y].adjust(this, -1);
             }
         }
         this.moved = true;
@@ -102,11 +107,12 @@ class Cursor {
                     : word.length;
             this.i -= dx;
             this.x -= dx;
+            lines[this.y].adjust(this, -1);
         }
         this.moved = true;
     }
 
-    right(lines) {
+    right(lines, skipAdjust = false) {
         const line = lines[this.y];
         if (this.y < lines.length - 1
             || this.x < line.length) {
@@ -116,6 +122,9 @@ class Cursor {
                 && this.x === line.length) {
                 this.x = 0;
                 ++this.y;
+            }
+            if (!skipAdjust) {
+                lines[this.y].adjust(this, 1);
             }
         }
     }
@@ -137,6 +146,7 @@ class Cursor {
                 --this.x;
                 --this.i;
             }
+            lines[this.y].adjust(this, 1);
         }
         else if(this.y < lines.length -1) {
             this.right(lines);
@@ -161,18 +171,21 @@ class Cursor {
         this.moved = true;
     }
 
-    up(lines) {
+    up(lines, skipAdjust = false) {
         if (this.y > 0) {
             --this.y;
             const line = lines[this.y],
                 dx = Math.min(0, line.length - this.x - 1);
             this.x += dx;
             this.i -= line.length - dx;
+            if (!skipAdjust) {
+                lines[this.y].adjust(this, 1);
+            }
         }
         this.moved = true;
     }
 
-    down(lines) {
+    down(lines, skipAdjust = false) {
         if (this.y < lines.length - 1) {
             const pLine = lines[this.y];
             ++this.y;
@@ -187,6 +200,9 @@ class Cursor {
                 this.i -= dx;
                 this.x -= dx;
             }
+            if (!skipAdjust) {
+                lines[this.y].adjust(this, 1);
+            }
         }
         this.moved = true;
     }
@@ -196,13 +212,15 @@ class Cursor {
         dx = Math.abs(dx);
         if (dir === -1) {
             for (let i = 0; i < dx; ++i) {
-                this.left(lines);
+                this.left(lines, true);
             }
+            lines[this.y].adjust(this, -1);
         }
         else if (dir === 1) {
             for (let i = 0; i < dx; ++i) {
-                this.right(lines);
+                this.right(lines, true);
             }
+            lines[this.y].adjust(this, 1);
         }
     }
 
@@ -211,14 +229,15 @@ class Cursor {
         dy = Math.abs(dy);
         if (dir === -1) {
             for (let i = 0; i < dy; ++i) {
-                this.up(lines);
+                this.up(lines, true);
             }
         }
         else if (dir === 1) {
             for (let i = 0; i < dy; ++i) {
-                this.down(lines);
+                this.down(lines, true);
             }
         }
+        lines[this.y].adjust(this, 1);
     }
 
     setXY(lines, x, y) {
@@ -235,6 +254,7 @@ class Cursor {
             --this.x;
             --this.i;
         }
+        lines[this.y].adjust(this, 1);
         this.moved = true;
     }
 
@@ -255,10 +275,49 @@ class Cursor {
             ++this.y;
             line = lines[this.y];
         }
+        lines[this.y].adjust(this, 1);
         this.moved = true;
     }
-}// A selection of fonts for preferred monospace rendering.
-const monospaceFamily = "'Droid Sans Mono', 'Consolas', 'Lucida Console', 'Courier New', 'Courier', monospace";function assignAttributes(elem, ...rest) {
+}class Line {
+    constructor(txt) {
+        this.text = txt;
+        this.graphemes = Object.freeze([...txt]);
+        Object.freeze(this);
+    }
+
+    adjust(cursor, dir) {
+        let trueX = 0,
+            i = 0;
+        for (; i < this.graphemes.length
+            && trueX < cursor.x;
+            ++i) {
+            trueX += this.graphemes[i].length;
+        }
+
+        if (trueX !== cursor.x) {
+            let delta = trueX - cursor.x;
+            if (dir === -1
+                && this.graphemes[i].length > 1) {
+                delta -= this.graphemes[i].length;
+            }
+
+            cursor.i += delta;
+            cursor.x += delta;
+        }
+    }
+
+    get length() {
+        return this.text.length;
+    }
+
+    toString() {
+        return this.text;
+    }
+
+    substring(x, y) {
+        return this.text.substring(x, y);
+    }
+}function assignAttributes(elem, ...rest) {
     rest.filter(x => !(x instanceof Element)
             && !(x instanceof String)
             && typeof x !== "string")
@@ -2567,10 +2626,16 @@ class Primrose extends EventTarget {
             gridBounds.set(x, y, w, h);
 
             // group the tokens into rows
+            textRows = value.split(/\n/);
+            for (let i = 0; i < textRows.length; ++i) {
+                if (i < textRows.length - 1) {
+                    textRows[i] += '\n';
+                }
+                textRows[i] = new Line(textRows[i]);
+            }
+
             tokenRows.splice(0);
             tokenRows.push([]);
-            textRows.splice(0);
-            textRows.push("");
             let currentRowWidth = 0;
             const tokenQueue = tokens.slice();
             for (let i = 0; i < tokenQueue.length; ++i) {
@@ -2585,13 +2650,11 @@ class Primrose extends EventTarget {
 
                 if (t.value.length > 0) {
                     tokenRows[tokenRows.length - 1].push(t);
-                    textRows[textRows.length - 1] += t.value;
                     currentRowWidth += t.value.length;
                 }
 
                 if (breakLine) {
                     tokenRows.push([]);
-                    textRows.push("");
                     currentRowWidth = 0;
                 }
             }
@@ -3517,6 +3580,7 @@ class Primrose extends EventTarget {
             focused = false,
             fontSize = null,
             scaleFactor = 2,
+            textRows = [""],
             tabString = "  ",
             readOnly = false,
             dragging = false,
@@ -3548,8 +3612,7 @@ class Primrose extends EventTarget {
             lastFont = null,
             lastText = null;
 
-        const textRows = [""],
-            history = [],
+        const history = [],
             tokenRows = [],
             scroll = new Point(),
             pointer = new Point(),

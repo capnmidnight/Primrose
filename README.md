@@ -4,13 +4,14 @@ Primrose is a syntax highlighting text editor that renders into an HTML5 Canvas 
 
 ## Features
 
+* International keyboard support (left-to-right rendering only)
+* Wide Unicode character-aware
+* Line numbering
+* Color theming
 * Syntax highlighting for:
   * JavaScript, 
   * HTML, and 
   * BASIC
-* Line numbering
-* Color theming
-* International keyboard support (left-to-right rendering only)
 
 ## Getting started with Primrose
 

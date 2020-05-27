@@ -1,6 +1,6 @@
-import { Cursor } from "./cursor.js";
-
 import { monospaceFamily } from "./fonts.js"
+import { Cursor } from "./cursor.js";
+import { Line } from "./line.js";
 
 import {
     canvas,
@@ -186,10 +186,16 @@ export class Primrose extends EventTarget {
             gridBounds.set(x, y, w, h);
 
             // group the tokens into rows
+            textRows = value.split(/\n/);
+            for (let i = 0; i < textRows.length; ++i) {
+                if (i < textRows.length - 1) {
+                    textRows[i] += '\n';
+                }
+                textRows[i] = new Line(textRows[i]);
+            }
+
             tokenRows.splice(0);
             tokenRows.push([]);
-            textRows.splice(0);
-            textRows.push("");
             let currentRowWidth = 0;
             const tokenQueue = tokens.slice();
             for (let i = 0; i < tokenQueue.length; ++i) {
@@ -204,13 +210,11 @@ export class Primrose extends EventTarget {
 
                 if (t.value.length > 0) {
                     tokenRows[tokenRows.length - 1].push(t);
-                    textRows[textRows.length - 1] += t.value;
                     currentRowWidth += t.value.length;
                 }
 
                 if (breakLine) {
                     tokenRows.push([]);
-                    textRows.push("");
                     currentRowWidth = 0;
                 }
             }
@@ -1148,6 +1152,7 @@ export class Primrose extends EventTarget {
             focused = false,
             fontSize = null,
             scaleFactor = 2,
+            textRows = [""],
             tabString = "  ",
             readOnly = false,
             dragging = false,
@@ -1179,8 +1184,7 @@ export class Primrose extends EventTarget {
             lastFont = null,
             lastText = null;
 
-        const textRows = [""],
-            history = [],
+        const history = [],
             tokenRows = [],
             scroll = new Point(),
             pointer = new Point(),
