@@ -1098,7 +1098,7 @@ export class Primrose extends EventTarget {
             theme = Dark,
             tabWidth = 2,
             canv = null,
-            tokens = null,
+            tokens = [],
             resized = false,
             hovered = false,
             focused = false,
