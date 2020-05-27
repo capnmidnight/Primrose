@@ -17,8 +17,8 @@
         if (trueX !== cursor.x) {
             let delta = trueX - cursor.x;
             if (dir === -1
-                && this.graphemes[i].length > 1) {
-                delta -= this.graphemes[i].length;
+                && this.graphemes[i - 1].length > 1) {
+                delta -= this.graphemes[i - 1].length;
             }
 
             cursor.i += delta;

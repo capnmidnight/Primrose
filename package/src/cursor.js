@@ -84,8 +84,7 @@ export class Cursor {
                 const line = lines[this.y];
                 this.x = line.length - 1;
             }
-
-            if (!skipAdjust) {
+            else if (!skipAdjust) {
                 lines[this.y].adjust(this, -1);
             }
         }
@@ -122,7 +121,7 @@ export class Cursor {
                 this.x = 0;
                 ++this.y;
             }
-            if (!skipAdjust) {
+            else if (!skipAdjust) {
                 lines[this.y].adjust(this, 1);
             }
         }

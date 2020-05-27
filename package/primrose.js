@@ -85,8 +85,7 @@ class Cursor {
                 const line = lines[this.y];
                 this.x = line.length - 1;
             }
-
-            if (!skipAdjust) {
+            else if (!skipAdjust) {
                 lines[this.y].adjust(this, -1);
             }
         }
@@ -123,7 +122,7 @@ class Cursor {
                 this.x = 0;
                 ++this.y;
             }
-            if (!skipAdjust) {
+            else if (!skipAdjust) {
                 lines[this.y].adjust(this, 1);
             }
         }
@@ -297,8 +296,8 @@ class Cursor {
         if (trueX !== cursor.x) {
             let delta = trueX - cursor.x;
             if (dir === -1
-                && this.graphemes[i].length > 1) {
-                delta -= this.graphemes[i].length;
+                && this.graphemes[i - 1].length > 1) {
+                delta -= this.graphemes[i - 1].length;
             }
 
             cursor.i += delta;
