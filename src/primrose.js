@@ -1151,7 +1151,8 @@ export class Primrose extends EventTarget {
             gridBounds = new Rectangle(),
             bottomRightGutter = new Size(),
             os = isMacOS ? MacOS : Windows,
-            changeEvt = new Event("change");
+            changeEvt = new Event("change"),
+            updateEvt = new Event("update");
         //<<<<<<<<<< PRIVATE MUTABLE FIELDS <<<<<<<<<<
 
         //>>>>>>>>>> SETUP CANVAS >>>>>>>>>>
@@ -1630,6 +1631,7 @@ export class Primrose extends EventTarget {
                 lastScrollX = scroll.x;
                 lastScrollY = scroll.y;
                 resized = false;
+                this.dispatchEvent(updateEvt);
             }
         };
 
