@@ -1,49 +1,4 @@
-# PRIMROSE
-
-Primrose is a syntax highlighting text editor that renders into an HTML5 Canvas element. This is particularly useful for texturing 3D objects in WebGL apps.
-
-## Features
-
-* Syntax highlighting for:
-  * JavaScript, 
-  * HTML, and 
-  * BASIC
-* Line numbering
-* Color theming
-* International keyboard support (left-to-right rendering only)
-
-## Getting started with Primrose
-
-### In a 2D page
-Here is a basic example that creates an editor in a 2D web page.
-
-#### index.html
-```html
-<html>
-   <body>
-      <primrose style="width:50em;height:25em"></primrose>
-   </body>
-   <script type="module" src="node_modules/primrose/src/primrose.js"></script>_
-</html>
-```
-
-### In a 3D WebGL app
-Here is a basic example that creates an editor in a 3D WebGL app, using [Three.js](https://www.threejs.org).
-
-<em>NOTE: While Primrose can manage most input events on its own, in WebGL contexts, it's not able to figure out what the user's pointer is pointing at. Mouse or VR motion controller support requires implementing Raycast-based picking on your own. However, Primrose does offer a simple interface for implementing pointer operations.</em>
-
-#### index.html
-```html
-<html style="width:100%;height:100%">
-  <body style="width:100%;height:100%">
-  </body>
-  <script type="module" src="index.js"></script>
-</html>
-```
-
-#### index.js
-```javascript
-import * as THREE from 'https://unpkg.com/three@0.116.1/build/three.module.js';
+﻿import * as THREE from 'https://unpkg.com/three@0.116.1/build/three.module.js';
 import { Primrose } from './src/primrose.js';
 
 const {
@@ -203,17 +158,3 @@ function makeScene() {
 
     return { renderer, scene, camera };
 }
-```
-## Contributing
-
-### Conduct
-
-First, please read the [Conduct Policy](CONDUCT.md).
-
-### Contributions
-
-If you think you can be a polite person in accordance with the Conduct Policy, I'd be more than happy to add anyone who asks as a contributor. Just [email me](sean.mcbeth+gh@gmail.com) your profile info and a brief description of what you'd like to work on.
-
-## LICENSING
-
-Primrose is free, open source software (MIT) and may readily be used with other FOSS projects.

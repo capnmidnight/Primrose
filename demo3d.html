@@ -41,53 +41,9 @@
     <link rel="manifest" href="manifest.json">
 
     <link rel="stylesheet" href="stylesheets/general.css" />
-    <link rel="stylesheet" href="stylesheets/icons.css" />
-    <link rel="stylesheet" href="stylesheets/gui.css" />
-    <style>
-        primrose {
-            display: block;
-            border: 2px inset #c0c0c0;
-            white-space: pre-wrap;
-            overflow-x: hidden;
-            overflow-y: scroll;
-            font-family: monospace;
-        }
-    </style>
 </head>
 <body>
-    <main>
-        <h1>
-            <img src="icons/android-icon-36x36.png" alt="logo" title="Primrose logo">
-            Primrose
-            <span class="version-number" style="text-transform:none">v1.0.0</span>
-
-            <a href="https://github.com/capnmidnight/Primrose" target="_blank" rel="noopener">
-                <span class="icon icon-github" title="Follow Primrose on Github">
-                    <span class="accessibility-text">Follow Primrose on Github</span>
-                </span>
-            </a>
-        </h1>
-
-        <p>A source code text editor that renders in an HTML5 canvas. Useful for texturing objects in WebGL apps.</p>
-        <h2>Features</h2>
-        <ul>
-            <li>
-                Syntax highlighting for:
-                <ul>
-                    <li>JavaScript,</li>
-                    <li>HTML, and</li>
-                    <li>BASIC</li>
-                </ul>
-            </li>
-            <li>Line numbering</li>
-            <li>Color theming</li>
-            <li>International keyboard support (left-to-right rendering only)</li>
-        </ul>
-
-        <h2>Demo</h2>
-
-        <h3>In 2D</h3>
-        <primrose style="width:100%;height:30em;max-height:40vh;">function testDemo(scene) {
+        <div id="code" style="display:none">function testDemo(scene) {
     var GRASS = "../shared_assets/images/grass.png",
     ROCK = "../shared_assets/images/rock.png",
     SAND = "../shared_assets/images/sand.png",
@@ -136,30 +92,9 @@
             }
         }
     }
-}</primrose>
+}</div>
 
-        <h3>In 3D</h3>
-        <iframe src="demo3d.html" style="width:100%;height:40em;max-height:50vh;"></iframe>
-
-        <h2>Instructions</h2>
-        <p>Try out what you would normally do in a text editor.</p>
-
-        <h2>Made by</h2>
-        <p>
-            <a href="https://www.seanmcbeth.com" target="_blank" rel="noopener">
-                <span class="icon icon-shrink" title="Sean T. McBeth" />
-            </a>
-            Sean T. McBeth
-        </p>
-        <p>
-            <a href="https://twitter.com/Sean_McBeth" target="_blank" rel="noopener">
-                <span class="icon icon-twitter" title="Follow @Sean_McBeth on Twitter" />
-            </a>
-            Follow @Sean_McBeth on Twitter
-        </p>
-    </main>
-
-    <script type="module" src="index.js"></script>
+    <script type="module" src="demo3d.js"></script>
 </body>
 </html>
 
