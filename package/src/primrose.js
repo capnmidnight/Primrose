@@ -239,7 +239,9 @@ export class Primrose extends EventTarget {
             if (dvMinV < 0 || dvMaxV >= 0) {
                 // compare the absolute values, so we get the smallest change
                 // regardless of direction.
-                dv = Math.abs(dvMinV) < Math.abs(dvMaxV) ? dvMinV : dvMaxV;
+                dv = Math.abs(dvMinV) < Math.abs(dvMaxV)
+                    ? dvMinV
+                    : dvMaxV;
             }
 
             return dv;
