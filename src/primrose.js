@@ -129,7 +129,6 @@ export class Primrose extends EventTarget {
                 }
                 refreshTokens();
                 refreshGridBounds();
-                render();
                 this.dispatchEvent(changeEvt);
             }
         };
@@ -215,6 +214,7 @@ export class Primrose extends EventTarget {
                     currentRowWidth = 0;
                 }
             }
+            render();
         };
 
         const refreshBuffers = () => {
@@ -223,7 +223,6 @@ export class Primrose extends EventTarget {
             setContextSize(bgfx, canv.width, canv.height);
             setContextSize(tgfx, canv.width, canv.height);
             refreshGridBounds();
-            render();
         };
 
         const minDelta = (v, minV, maxV) => {
