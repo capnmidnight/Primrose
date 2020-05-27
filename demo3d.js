@@ -9,7 +9,8 @@ const {
     raycaster = new THREE.Raycaster(),
     mouse = new THREE.Vector2();
 
-makeEditor(document.getElementById('code').textContent.trim());
+makeEditor("test.js", 1);
+makeEditor("test.js", -1);
 
 // >>>> BEGIN POINTER EVENTS <<<<
 renderer.domElement.addEventListener("pointermove", (evt) => {
@@ -79,7 +80,7 @@ function getEditor(hit) {
         || null;
 }
 
-function makeEditor(code) {
+async function makeEditor(file, side) {
 
     // For WebGL textures, you will probably want a 
     // relatively high resolution texture to be able
@@ -119,12 +120,14 @@ function makeEditor(code) {
         new THREE.MeshBasicMaterial({ map: texture, opacity: 0.95, transparent: true })
     );
 
-    mesh.position.set(-0.5, 1.7, -1);
-    mesh.rotation.set(0, 0.25, 0);
+    mesh.position.set(side * 0.5, 1.7, -1);
+    mesh.rotation.set(0, -side * 0.25, 0);
 
     scene.add(mesh);
     Primrose.add(mesh, editor);
 
+    const response = await fetch(file),
+        code = await response.text();
     editor.value = code;
 }
 
