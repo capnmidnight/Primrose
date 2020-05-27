@@ -959,6 +959,11 @@ export class Primrose extends EventTarget {
                 set: (txt) => setValue(txt, true)
             },
 
+            text: {
+                get: () => value,
+                set: (txt) => setValue(txt, true)
+            },
+
             selectedText: {
                 get: () => {
                     const minCursor = Cursor.min(frontCursor, backCursor),
