@@ -1,40 +1,36 @@
 ﻿export class Line {
     constructor(txt) {
-        this.text = txt;
-        this.graphemes = Object.freeze([...txt]);
-        Object.freeze(this);
-    }
+        this.length = txt.length;
 
-    adjust(cursor, dir) {
-        let trueX = 0,
-            i = 0;
-        for (; i < this.graphemes.length
-            && trueX < cursor.x;
-            ++i) {
-            trueX += this.graphemes[i].length;
-        }
+        const graphemes = Object.freeze([...txt]),
+            leftCorrections = new Array(txt.length),
+            rightCorrections = new Array(txt.length);
 
-        if (trueX !== cursor.x) {
-            let delta = trueX - cursor.x;
-            if (dir === -1
-                && this.graphemes[i - 1].length > 1) {
-                delta -= this.graphemes[i - 1].length;
+        let x = 0;
+        for (let grapheme of graphemes) {
+            leftCorrections[x] = 0;
+            rightCorrections[x] = 0;
+            for (let i = 1; i < grapheme.length; ++i) {
+                leftCorrections[x + i] = -i;
+                rightCorrections[x + i] = grapheme.length - i;
             }
-
-            cursor.i += delta;
-            cursor.x += delta;
+            x += grapheme.length;
         }
-    }
 
-    get length() {
-        return this.text.length;
-    }
+        this.adjust = (cursor, dir) => {
+            const correction = dir === -1
+                ? leftCorrections
+                : rightCorrections,
+                delta = correction[cursor.x];
 
-    toString() {
-        return this.text;
-    }
+            cursor.x += delta;
+            cursor.i += delta;
+        };
 
-    substring(x, y) {
-        return this.text.substring(x, y);
+        this.toString = () => txt;
+
+        this.substring = (x, y) => txt.substring(x, y);
+
+        Object.freeze(this);
     }
 }
