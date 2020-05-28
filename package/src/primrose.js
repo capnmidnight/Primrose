@@ -1452,16 +1452,12 @@ export class Primrose extends EventTarget {
                 maxCursor = Cursor.max(frontCursor, backCursor),
                 clearFunc = theme.regular.backColor ? "fillRect" : "clearRect";
 
-            tokenFront.fullHome();
-            tokenBack.fullHome();
-
-            if (theme.regular.backColor) {
+            if (clearFunc === "fillRect") {
                 bgfx.fillStyle = theme.regular.backColor;
             }
+            bgfx[clearFunc](0, 0, canv.width, canv.height);
             bgfx.save();
             bgfx.scale(scaleFactor, scaleFactor);
-            bgfx[clearFunc](0, 0, this.width, this.height);
-            bgfx.save();
             bgfx.translate(
                 (gridBounds.x - scroll.x) * character.width + padding,
                 -scroll.y * character.height + padding);
@@ -1485,7 +1481,6 @@ export class Primrose extends EventTarget {
             for (let y = minY; y <= maxY && y < tokenRows.length; ++y) {
                 // draw the tokens on this row
                 const row = tokenRows[y];
-                console.log(tokenRows.length, y, row);
                 for (let i = 0; i < row.length; ++i) {
                     const t = row[i];
                     tokenBack.x += t.value.length;
@@ -1517,22 +1512,18 @@ export class Primrose extends EventTarget {
 
             // draw the cursor caret
             if (focused) {
-                const cc = theme.cursorColor || "black",
+                const cc = theme.cursorColor || DefaultTheme.cursorColor,
                     w = 1 / character.width;
                 fillRect(bgfx, cc, minCursor.x, minCursor.y, w, 1);
                 fillRect(bgfx, cc, maxCursor.x, maxCursor.y, w, 1);
             }
             bgfx.restore();
-            bgfx.restore();
         };
 
         const renderCanvasForeground = () => {
+            fgfx.clearRect(0, 0, canv.width, canv.height);
             fgfx.save();
             fgfx.scale(scaleFactor, scaleFactor);
-            fgfx.clearRect(0, 0, this.width, this.height);
-            fgfx.save();
-            tokenFront.fullHome();
-            tokenBack.fullHome();
             fgfx.translate(
                 (gridBounds.x - scroll.x) * character.width + padding,
                 padding);
@@ -1578,19 +1569,12 @@ export class Primrose extends EventTarget {
             }
 
             fgfx.restore();
-            fgfx.restore();
         };
 
         const renderCanvasTrim = () => {
-            const tokenFront = new Cursor(),
-                tokenBack = new Cursor();
-
-            let maxLineWidth = 0;
-
+            tgfx.clearRect(0, 0, canv.width, canv.height);
             tgfx.save();
             tgfx.scale(scaleFactor, scaleFactor);
-            tgfx.clearRect(0, 0, this.width, this.height);
-            tgfx.save();
             tgfx.translate(padding, padding);
 
             if (showLineNumbers) {
@@ -1606,49 +1590,50 @@ export class Primrose extends EventTarget {
                     gridBounds.x, this.height - padding * 2);
             }
 
+            let maxLineWidth = 2;
             tgfx.save();
-            tgfx.translate((lineCountWidth - 0.5) * character.width, -scroll.y * character.height);
-            maxLineWidth = 2;
-            let lastLine = -1;
-            const minY = scroll.y | 0,
-                maxY = minY + gridBounds.height,
-                minX = scroll.x | 0,
-                maxX = minX + gridBounds.width;
-            tokenFront.setXY(textRows, 0, minY);
-            tokenBack.copy(tokenFront);
-            for (let y = minY; y < maxY && y < tokenRows.length; ++y) {
-                const row = tokenRows[y];
-
-                for (let i = 0; i < row.length; ++i) {
-                    const t = row[i];
-                    tokenBack.x += t.value.length;
-                    tokenBack.i += t.value.length;
-                }
-                tokenFront.copy(tokenBack);
-
-                maxLineWidth = Math.max(maxLineWidth, tokenBack.x - 1);
-                tokenFront.x = 0;
-                ++tokenFront.y;
+            {
+                tgfx.translate((lineCountWidth - 0.5) * character.width, -scroll.y * character.height);
+                let lastLine = -1;
+                const minY = scroll.y | 0,
+                    maxY = minY + gridBounds.height,
+                    minX = scroll.x | 0,
+                    maxX = minX + gridBounds.width;
+                tokenFront.setXY(textRows, 0, minY);
                 tokenBack.copy(tokenFront);
+                for (let y = minY; y < maxY && y < tokenRows.length; ++y) {
+                    const row = tokenRows[y];
 
-                if (showLineNumbers) {
-                    // draw the left gutter
-                    const currentLine = row.length > 0
+                    for (let i = 0; i < row.length; ++i) {
+                        const t = row[i];
+                        tokenBack.x += t.value.length;
+                        tokenBack.i += t.value.length;
+                    }
+                    tokenFront.copy(tokenBack);
+
+                    maxLineWidth = Math.max(maxLineWidth, tokenBack.x - 1);
+                    tokenFront.x = 0;
+                    ++tokenFront.y;
+                    tokenBack.copy(tokenFront);
+
+                    if (showLineNumbers) {
+                        // draw the left gutter
+                        const currentLine = row.length > 0
                             ? row[0].line
                             : lastLine + 1,
-                        lineNumber = currentLine.toString();
+                            lineNumber = currentLine.toString();
 
-                    if (currentLine > lastLine) {
-                        lastLine = currentLine;
-                        tgfx.font = "bold " + context.font;
-                        tgfx.fillStyle = theme.regular.foreColor;
-                        tgfx.fillText(
-                            lineNumber,
-                            0, y * character.height);
+                        if (currentLine > lastLine) {
+                            lastLine = currentLine;
+                            tgfx.font = "bold " + context.font;
+                            tgfx.fillStyle = theme.regular.foreColor;
+                            tgfx.fillText(
+                                lineNumber,
+                                0, y * character.height);
+                        }
                     }
                 }
             }
-
             tgfx.restore();
 
             // draw the scrollbars
@@ -1681,14 +1666,11 @@ export class Primrose extends EventTarget {
                 }
             }
 
-            tgfx.lineWidth = 2;
             tgfx.restore();
-            tgfx.strokeRect(1, 1, this.width - 2, this.height - 2);
             if (!focused) {
                 tgfx.fillStyle = theme.regular.unfocused || DefaultTheme.regular.unfocused;
-                tgfx.fillRect(0, 0, this.width, this.height);
+                tgfx.fillRect(0, 0, canv.width, canv.height);
             }
-            tgfx.restore();
         };
 
         const doRender = () => {
