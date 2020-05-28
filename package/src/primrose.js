@@ -1391,21 +1391,23 @@ export class Primrose extends EventTarget {
                     maxCursor.y - minCursor.y + 1);
             }
 
-            const maxY = scroll.y + gridBounds.height + 1;
-            tokenFront.setXY(textRows, 0, scroll.y);
+            const minY = scroll.y | 0,
+                maxY = minY + gridBounds.height,
+                minX = scroll.x | 0,
+                maxX = minX + gridBounds.width;
+            tokenFront.setXY(textRows, 0, minY);
             tokenBack.copy(tokenFront);
-            for (let y = scroll.y; y < maxY && y < tokenRows.length; ++y) {
+            for (let y = minY; y <= maxY && y < tokenRows.length; ++y) {
                 // draw the tokens on this row
                 const row = tokenRows[y];
-
+                console.log(tokenRows.length, y, row);
                 for (let i = 0; i < row.length; ++i) {
                     const t = row[i];
                     tokenBack.x += t.value.length;
                     tokenBack.i += t.value.length;
 
                     // skip drawing tokens that aren't in view
-                    if (scroll.x <= tokenBack.x
-                        && tokenFront.x < scroll.x + gridBounds.width) {
+                    if (minX <= tokenBack.x && tokenFront.x <= maxX) {
                         // draw the selection box
                         const inSelection = minCursor.i <= tokenBack.i
                             && tokenFront.i < maxCursor.i;
@@ -1450,10 +1452,13 @@ export class Primrose extends EventTarget {
                 (gridBounds.x - scroll.x) * character.width + padding,
                 padding);
 
-            const maxY = scroll.y + gridBounds.height + 1;
-            tokenFront.setXY(textRows, 0, scroll.y);
+            const minY = scroll.y | 0,
+                maxY = minY + gridBounds.height,
+                minX = scroll.x | 0,
+                maxX = minX + gridBounds.width;
+            tokenFront.setXY(textRows, 0, minY);
             tokenBack.copy(tokenFront);
-            for (let y = scroll.y; y < maxY && y < tokenRows.length; ++y) {
+            for (let y = minY; y <= maxY && y < tokenRows.length; ++y) {
                 // draw the tokens on this row
                 const row = tokenRows[y],
                     textY = (y - scroll.y) * character.height;
@@ -1464,8 +1469,7 @@ export class Primrose extends EventTarget {
                     tokenBack.i += t.value.length;
 
                     // skip drawing tokens that aren't in view
-                    if (scroll.x <= tokenBack.x
-                        && tokenFront.x < scroll.x + gridBounds.width) {
+                    if (minX <= tokenBack.x && tokenFront.x <= maxX) {
 
                         // draw the text
                         const style = theme[t.type] || {},
@@ -1521,10 +1525,13 @@ export class Primrose extends EventTarget {
             tgfx.translate((lineCountWidth - 0.5) * character.width, -scroll.y * character.height);
             maxLineWidth = 2;
             let lastLine = -1;
-            const maxY = scroll.y + gridBounds.height + 1;
-            tokenFront.setXY(textRows, 0, scroll.y);
+            const minY = scroll.y | 0,
+                maxY = minY + gridBounds.height,
+                minX = scroll.x | 0,
+                maxX = minX + gridBounds.width;
+            tokenFront.setXY(textRows, 0, minY);
             tokenBack.copy(tokenFront);
-            for (let y = scroll.y; y < maxY && y < tokenRows.length; ++y) {
+            for (let y = minY; y < maxY && y < tokenRows.length; ++y) {
                 const row = tokenRows[y];
 
                 for (let i = 0; i < row.length; ++i) {
