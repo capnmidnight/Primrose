@@ -1,6 +1,6 @@
 {
   "name": "primrose",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Syntax-highlighting text editor that renders to an HTML5 Canvas element",
   "main": "src/primrose.js",
   "scripts": {
