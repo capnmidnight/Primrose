@@ -1,6 +1,7 @@
-import { monospaceFamily } from "./fonts.js"
 import { Cursor } from "./cursor.js";
+import { monospaceFamily } from "./fonts.js"
 import { Line } from "./line.js";
+import { Dark } from "./themes.js";
 
 import {
     canvas,
@@ -39,8 +40,6 @@ import {
     singleLineInput,
     multiLineInput
 } from "./controlTypes.js";
-
-import { Dark } from "./themes.js";
 
 //>>>>>>>>>> PRIVATE STATIC FIELDS >>>>>>>>>>
 let elementCounter = 0,
@@ -316,7 +315,7 @@ export class Primrose extends EventTarget {
             if (!this.isInDocument) {
                 console.warn("Can't automatically resize a canvas that is not in the DOM tree");
             }
-            else if(resizeContext(context, scaleFactor)) {
+            else if (resizeContext(context, scaleFactor)) {
                 refreshBuffers();
             }
         };
