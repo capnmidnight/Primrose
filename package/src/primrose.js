@@ -1385,7 +1385,10 @@ export class Primrose extends EventTarget {
                     maxCursor.y - minCursor.y + 1);
             }
 
-            for (let y = 0; y < tokenRows.length; ++y) {
+            const maxY = scroll.y + gridBounds.height + 1;
+            tokenFront.setXY(textRows, 0, scroll.y);
+            tokenBack.copy(tokenFront);
+            for (let y = scroll.y; y < maxY && y < tokenRows.length; ++y) {
                 // draw the tokens on this row
                 const row = tokenRows[y];
 
@@ -1395,9 +1398,8 @@ export class Primrose extends EventTarget {
                     tokenBack.i += t.value.length;
 
                     // skip drawing tokens that aren't in view
-                    if (scroll.y <= y && y < scroll.y + gridBounds.height &&
-                        scroll.x <= tokenBack.x && tokenFront.x < scroll.x +
-                        gridBounds.width) {
+                    if (scroll.x <= tokenBack.x
+                        && tokenFront.x < scroll.x + gridBounds.width) {
                         // draw the selection box
                         const inSelection = minCursor.i <= tokenBack.i
                             && tokenFront.i < maxCursor.i;
@@ -1441,7 +1443,11 @@ export class Primrose extends EventTarget {
             fgfx.translate(
                 (gridBounds.x - scroll.x) * character.width + padding,
                 padding);
-            for (let y = 0; y < tokenRows.length; ++y) {
+
+            const maxY = scroll.y + gridBounds.height + 1;
+            tokenFront.setXY(textRows, 0, scroll.y);
+            tokenBack.copy(tokenFront);
+            for (let y = scroll.y; y < maxY && y < tokenRows.length; ++y) {
                 // draw the tokens on this row
                 const row = tokenRows[y],
                     textY = (y - scroll.y) * character.height;
@@ -1452,9 +1458,7 @@ export class Primrose extends EventTarget {
                     tokenBack.i += t.value.length;
 
                     // skip drawing tokens that aren't in view
-                    if (scroll.y <= y
-                        && y < scroll.y + gridBounds.height
-                        && scroll.x <= tokenBack.x
+                    if (scroll.x <= tokenBack.x
                         && tokenFront.x < scroll.x + gridBounds.width) {
 
                         // draw the text
@@ -1510,34 +1514,40 @@ export class Primrose extends EventTarget {
             tgfx.save();
             tgfx.translate((lineCountWidth - 0.5) * character.width, -scroll.y * character.height);
             maxLineWidth = 2;
-            for (let y = 0, lastLine = -1; y < tokenRows.length; ++y) {
+            let lastLine = -1;
+            const maxY = scroll.y + gridBounds.height + 1;
+            tokenFront.setXY(textRows, 0, scroll.y);
+            tokenBack.copy(tokenFront);
+            for (let y = scroll.y; y < maxY && y < tokenRows.length; ++y) {
                 const row = tokenRows[y];
 
                 for (let i = 0; i < row.length; ++i) {
                     const t = row[i];
                     tokenBack.x += t.value.length;
                     tokenBack.i += t.value.length;
-                    tokenFront.copy(tokenBack);
                 }
+                tokenFront.copy(tokenBack);
 
                 maxLineWidth = Math.max(maxLineWidth, tokenBack.x - 1);
                 tokenFront.x = 0;
                 ++tokenFront.y;
                 tokenBack.copy(tokenFront);
 
-                if (showLineNumbers && scroll.y <= y && y < scroll.y + gridBounds.height) {
+                if (showLineNumbers) {
                     // draw the left gutter
-                    const currentLine = row.length > 0 ? row[0].line : lastLine + 1,
+                    const currentLine = row.length > 0
+                            ? row[0].line
+                            : lastLine + 1,
                         lineNumber = currentLine.toString();
-                    tgfx.font = "bold " + context.font;
 
                     if (currentLine > lastLine) {
+                        lastLine = currentLine;
+                        tgfx.font = "bold " + context.font;
                         tgfx.fillStyle = theme.regular.foreColor;
                         tgfx.fillText(
                             lineNumber,
                             0, y * character.height);
                     }
-                    lastLine = currentLine;
                 }
             }
 
