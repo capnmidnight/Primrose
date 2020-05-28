@@ -247,23 +247,24 @@ export class Primrose extends EventTarget {
         };
 
         const clampScroll = () => {
-            if (scroll.y < 0 || maxVerticalScroll === 0) {
+            const toHigh = scroll.y < 0 || maxVerticalScroll === 0,
+                toLow = scroll.y > maxVerticalScroll;
+
+            if (toHigh) {
                 scroll.y = 0;
             }
-            else {
-                while (scroll.y > maxVerticalScroll) {
-                    --scroll.y;
-                }
+            else if (toLow) {
+                scroll.y = maxVerticalScroll;
             }
             render();
+
+            return toHigh || toLow;
         };
 
         const scrollIntoView = (currentCursor) => {
-            scroll.y += minDelta(currentCursor.y, scroll.y, scroll.y + gridBounds.height);
-            if (!wordWrap) {
-                scroll.x += minDelta(currentCursor.x, scroll.x, scroll.x + gridBounds.width);
-            }
-            clampScroll();
+            const dx = minDelta(currentCursor.x, scroll.x, scroll.x + gridBounds.width),
+                dy = minDelta(currentCursor.y, scroll.y, scroll.y + gridBounds.height);
+            this.scrollBy(dx, dy);
         };
 
         const pushUndo = () => {
@@ -324,6 +325,18 @@ export class Primrose extends EventTarget {
             if (setContextSize(context, w, h, scaleFactor)) {
                 refreshBuffers();
             }
+        };
+
+        this.scrollTo = (x, y) => {
+            if (!wordWrap) {
+                scroll.x = x;
+            }
+            scroll.y = y;
+            return clampScroll();
+        };
+
+        this.scrollBy = (dx, dy) => {
+            this.scrollTo(scroll.x + dx, scroll.y + dy);
         };
         //<<<<<<<<<< PUBLIC METHODS <<<<<<<<<<
 
@@ -494,15 +507,13 @@ export class Primrose extends EventTarget {
 
             ["ScrollDown", () => {
                 if (scroll.y < textRows.length - gridBounds.height) {
-                    ++scroll.y;
-                    render();
+                    this.scrollBy(0, 1);
                 }
             }],
 
             ["ScrollUp", () => {
                 if (scroll.y > 0) {
-                    --scroll.y;
-                    render();
+                    this.scrollBy(0, -1);
                 }
             }],
 
@@ -744,7 +755,7 @@ export class Primrose extends EventTarget {
                 const scrollHeight = textRows.length - gridBounds.height;
                 if (gy >= 0 && scrollHeight >= 0) {
                     const sy = gy * scrollHeight / gridBounds.height;
-                    scroll.y = Math.floor(sy);
+                    this.scrollTo(scroll.x, sy);
                 }
             }
             else if (onBottom && !onLeft) {
@@ -755,7 +766,7 @@ export class Primrose extends EventTarget {
                 const scrollWidth = maxWidth - gridBounds.width;
                 if (gx >= 0 && scrollWidth >= 0) {
                     const sx = gx * scrollWidth / gridBounds.width;
-                    scroll.x = Math.floor(sx);
+                    this.scrollTo(sx, scroll.y);
                 }
             }
             else if (onLeft && !onBottom) {
@@ -812,15 +823,10 @@ export class Primrose extends EventTarget {
                     && !evt.altKey
                     && !evt.shiftKey
                     && !evt.metaKey) {
-                    const delta = Math.floor(evt.deltaY * wheelScrollSpeed / scrollScale),
-                        dir = Math.sign(delta);
-                    if (focused
-                        || dir === -1 && scroll.y > 0
-                        || dir === 1 && scroll.y < maxVerticalScroll) {
+                    const dy = Math.floor(evt.deltaY * wheelScrollSpeed / scrollScale);
+                    if (!this.scrollBy(0, dy) || focused) {
                         evt.preventDefault();
                     }
-                    scroll.y += delta;
-                    clampScroll();
                 }
                 else if (!evt.ctrlKey
                     && !evt.altKey
