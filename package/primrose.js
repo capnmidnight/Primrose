@@ -1,5 +1,4 @@
-(function(g,f){typeof exports==='object'&&typeof module!=='undefined'?f(exports):typeof define==='function'&&define.amd?define(['exports'],f):(g=g||self,f(g.Primrose={}));}(this,(function(exports){'use strict';// A selection of fonts for preferred monospace rendering.
-const monospaceFamily = "'Droid Sans Mono', 'Consolas', 'Lucida Console', 'Courier New', 'Courier', monospace";const combiningMarks =
+(function(g,f){typeof exports==='object'&&typeof module!=='undefined'?f(exports):typeof define==='function'&&define.amd?define(['exports'],f):(g=g||self,f(g.Primrose={}));}(this,(function(exports){'use strict';const combiningMarks =
     /(<%= allExceptCombiningMarks %>)(<%= combiningMarks %>+)/g,
     surrogatePair = /(<%= highSurrogates %>)(<%= lowSurrogates %>)/g;
 
@@ -100,10 +99,10 @@ class Cursor {
             const x = this.x - 1,
                 line = lines[this.y],
                 word = reverse(line.substring(0, x)),
-                m = word.match(/(\s|\W)+/),
+                m = word.match(/\w+/),
                 dx = m
                     ? (m.index + m[0].length + 1)
-                    : word.length;
+                    : this.x;
             this.i -= dx;
             this.x -= dx;
             lines[this.y].adjust(this, -1);
@@ -133,10 +132,10 @@ class Cursor {
         if (this.x < line.length - 1) {
             const x = this.x + 1,
                 subline = line.substring(x),
-                m = subline.match(/(\s|\W)+/),
+                m = subline.match(/\w+/),
                 dx = m
                     ? (m.index + m[0].length + 1)
-                    : (subline.length - this.x);
+                    : (line.length - this.x);
             this.i += dx;
             this.x += dx;
             if (this.x > 0
@@ -240,6 +239,8 @@ class Cursor {
     }
 
     setXY(lines, x, y) {
+        x = Math.floor(x);
+        y = Math.floor(y);
         this.y = Math.max(0, Math.min(lines.length - 1, y));
         const line = lines[this.y];
         this.x = Math.max(0, Math.min(line.length, x));
@@ -277,7 +278,8 @@ class Cursor {
         lines[this.y].adjust(this, 1);
         this.moved = true;
     }
-}class Line {
+}// A selection of fonts for preferred monospace rendering.
+const monospaceFamily = "'Droid Sans Mono', 'Consolas', 'Lucida Console', 'Courier New', 'Courier', monospace";class Line {
     constructor(txt) {
         this.length = txt.length;
 
@@ -309,6 +311,145 @@ class Cursor {
         this.toString = () => txt;
 
         this.substring = (x, y) => txt.substring(x, y);
+
+        Object.freeze(this);
+    }
+}// Color themes for text-oriented controls, for use when coupled with a parsing grammar.
+
+// A dark background with a light foreground for text.
+const Dark = Object.freeze({
+    name: "Dark",
+    cursorColor: "white",
+    lineNumbers: {
+        foreColor: "white"
+    },
+    regular: {
+        backColor: "black",
+        foreColor: "#c0c0c0",
+        currentRowBackColor: "#202020",
+        selectedBackColor: "#404040",
+        unfocused: "rgba(0, 0, 255, 0.25)"
+    },
+    strings: {
+        foreColor: "#aa9900",
+        fontStyle: "italic"
+    },
+    regexes: {
+        foreColor: "#aa0099",
+        fontStyle: "italic"
+    },
+    numbers: {
+        foreColor: "green"
+    },
+    comments: {
+        foreColor: "yellow",
+        fontStyle: "italic"
+    },
+    keywords: {
+        foreColor: "cyan"
+    },
+    functions: {
+        foreColor: "brown",
+        fontWeight: "bold"
+    },
+    members: {
+        foreColor: "green"
+    },
+    error: {
+        foreColor: "red",
+        fontStyle: "underline italic"
+    }
+});
+
+
+// A light background with dark foreground text.
+const Light = Object.freeze({
+    name: "Light",
+    cursorColor: "black",
+    lineNumbers: {
+        foreColor: "black"
+    },
+    regular: {
+        backColor: "white",
+        foreColor: "black",
+        currentRowBackColor: "#f0f0f0",
+        selectedBackColor: "#c0c0c0",
+        unfocused: "rgba(0, 0, 255, 0.25)"
+    },
+    strings: {
+        foreColor: "#aa9900",
+        fontStyle: "italic"
+    },
+    regexes: {
+        foreColor: "#aa0099",
+        fontStyle: "italic"
+    },
+    numbers: {
+        foreColor: "green"
+    },
+    comments: {
+        foreColor: "grey",
+        fontStyle: "italic"
+    },
+    keywords: {
+        foreColor: "blue"
+    },
+    functions: {
+        foreColor: "brown",
+        fontWeight: "bold"
+    },
+    members: {
+        foreColor: "green"
+    },
+    error: {
+        foreColor: "red",
+        fontStyle: "underline italic"
+    }
+});class TimedEvent extends EventTarget {
+    constructor(timeout, continuous = false) {
+        super();
+
+        const tickEvt = new Event("tick");
+
+        let handle = null;
+
+        this.cancel = () => {
+            const wasRunning = this.isRunning;
+            if (wasRunning) {
+                if (continuous) {
+                    clearInterval(handle);
+                }
+                else {
+                    clearTimeout(handle);
+                }
+                handle = null;
+            }
+
+            return wasRunning;
+        };
+
+        const tick = () => {
+            if (!continuous) {
+                this.cancel();
+            }
+            this.dispatchEvent(tickEvt);
+        };
+
+        this.start = () => {
+            this.cancel();
+            if (continuous) {
+                handle = setTimeout(tick, timeout);
+            }
+            else {
+                handle = setInterval(tick, timeout);
+            }
+        };
+
+        Object.defineProperties(this, {
+            isRunning: {
+                get: () => handle !== null
+            }
+        });
 
         Object.freeze(this);
     }
@@ -477,16 +618,6 @@ class Point {
             this.x = p.x;
             this.y = p.y;
         }
-    }
-
-    map(width, height) {
-        this.x *= width;
-        this.y = (1 - this.y) * height;
-    }
-
-    unmap(width, height) {
-        this.x /= width;
-        this.y = 1 - (this.y / height);
     }
 
     toCell(character, scroll, gridBounds) {
@@ -1381,98 +1512,7 @@ class Token {
     toString() {
         return "[" + this.type + ": " + this.value + "]";
     }
-}// Color themes for text-oriented controls, for use when coupled with a parsing grammar.
-
-// A dark background with a light foreground for text.
-const Dark = Object.freeze({
-    name: "Dark",
-    cursorColor: "white",
-    lineNumbers: {
-        foreColor: "white"
-    },
-    regular: {
-        backColor: "black",
-        foreColor: "#c0c0c0",
-        currentRowBackColor: "#202020",
-        selectedBackColor: "#404040",
-        unfocused: "rgba(0, 0, 255, 0.25)"
-    },
-    strings: {
-        foreColor: "#aa9900",
-        fontStyle: "italic"
-    },
-    regexes: {
-        foreColor: "#aa0099",
-        fontStyle: "italic"
-    },
-    numbers: {
-        foreColor: "green"
-    },
-    comments: {
-        foreColor: "yellow",
-        fontStyle: "italic"
-    },
-    keywords: {
-        foreColor: "cyan"
-    },
-    functions: {
-        foreColor: "brown",
-        fontWeight: "bold"
-    },
-    members: {
-        foreColor: "green"
-    },
-    error: {
-        foreColor: "red",
-        fontStyle: "underline italic"
-    }
-});
-
-
-// A light background with dark foreground text.
-const Light = Object.freeze({
-    name: "Light",
-    cursorColor: "black",
-    lineNumbers: {
-        foreColor: "black"
-    },
-    regular: {
-        backColor: "white",
-        foreColor: "black",
-        currentRowBackColor: "#f0f0f0",
-        selectedBackColor: "#c0c0c0",
-        unfocused: "rgba(0, 0, 255, 0.25)"
-    },
-    strings: {
-        foreColor: "#aa9900",
-        fontStyle: "italic"
-    },
-    regexes: {
-        foreColor: "#aa0099",
-        fontStyle: "italic"
-    },
-    numbers: {
-        foreColor: "green"
-    },
-    comments: {
-        foreColor: "grey",
-        fontStyle: "italic"
-    },
-    keywords: {
-        foreColor: "blue"
-    },
-    functions: {
-        foreColor: "brown",
-        fontWeight: "bold"
-    },
-    members: {
-        foreColor: "green"
-    },
-    error: {
-        foreColor: "red",
-        fontStyle: "underline italic"
-    }
-});/*
+}/*
 pliny.class({
   parent: "Primrose.Text",
     name: "Grammar",
@@ -2524,8 +2564,11 @@ class Primrose extends EventTarget {
     constructor(options) {
         super();
 
-        const debugEvt = (name, callback) => {
+        const debugEvt = (name, callback, debugLocal) => {
             return (evt) => {
+                if ( debugLocal) {
+                    console.log(this.toString(), name, evt);
+                }
 
                 if (!!callback) {
                     callback(evt);
@@ -2621,14 +2664,8 @@ class Primrose extends EventTarget {
             gridBounds.set(x, y, w, h);
 
             // group the tokens into rows
-            textRows = value.split(/\n/);
-            for (let i = 0; i < textRows.length; ++i) {
-                if (i < textRows.length - 1) {
-                    textRows[i] += '\n';
-                }
-                textRows[i] = new Line(textRows[i]);
-            }
-
+            textRows.splice(0);
+            textRows.push("");
             tokenRows.splice(0);
             tokenRows.push([]);
             let currentRowWidth = 0;
@@ -2643,18 +2680,24 @@ class Primrose extends EventTarget {
                     tokenQueue.splice(i + 1, 0, t.splitAt(split));
                 }
 
+                const end = tokenRows.length - 1;
                 if (t.value.length > 0) {
-                    tokenRows[tokenRows.length - 1].push(t);
+                    tokenRows[end].push(t);
+                    textRows[end] += t.value;
                     currentRowWidth += t.value.length;
                 }
 
                 if (breakLine) {
+                    textRows[end] = new Line(textRows[end]);
+                    textRows.push("");
                     tokenRows.push([]);
                     currentRowWidth = 0;
                 }
             }
 
-            maxVerticalScroll = Math.max(0, textRows.length - gridBounds.height);
+            textRows[textRows.length - 1] = new Line(textRows[textRows.length - 1]);
+
+            maxVerticalScroll = Math.max(0, tokenRows.length - gridBounds.height);
 
             render();
         };
@@ -2674,30 +2717,33 @@ class Primrose extends EventTarget {
             if (dvMinV < 0 || dvMaxV >= 0) {
                 // compare the absolute values, so we get the smallest change
                 // regardless of direction.
-                dv = Math.abs(dvMinV) < Math.abs(dvMaxV) ? dvMinV : dvMaxV;
+                dv = Math.abs(dvMinV) < Math.abs(dvMaxV)
+                    ? dvMinV
+                    : dvMaxV;
             }
 
             return dv;
         };
 
         const clampScroll = () => {
-            if (scroll.y < 0 || maxVerticalScroll === 0) {
+            const toHigh = scroll.y < 0 || maxVerticalScroll === 0,
+                toLow = scroll.y > maxVerticalScroll;
+
+            if (toHigh) {
                 scroll.y = 0;
             }
-            else {
-                while (scroll.y > maxVerticalScroll) {
-                    --scroll.y;
-                }
+            else if (toLow) {
+                scroll.y = maxVerticalScroll;
             }
             render();
+
+            return toHigh || toLow;
         };
 
         const scrollIntoView = (currentCursor) => {
-            scroll.y += minDelta(currentCursor.y, scroll.y, scroll.y + gridBounds.height);
-            if (!wordWrap) {
-                scroll.x += minDelta(currentCursor.x, scroll.x, scroll.x + gridBounds.width);
-            }
-            clampScroll();
+            const dx = minDelta(currentCursor.x, scroll.x, scroll.x + gridBounds.width),
+                dy = minDelta(currentCursor.y, scroll.y, scroll.y + gridBounds.height);
+            this.scrollBy(dx, dy);
         };
 
         const pushUndo = () => {
@@ -2749,7 +2795,7 @@ class Primrose extends EventTarget {
             if (!this.isInDocument) {
                 console.warn("Can't automatically resize a canvas that is not in the DOM tree");
             }
-            else if(resizeContext(context, scaleFactor)) {
+            else if (resizeContext(context, scaleFactor)) {
                 refreshBuffers();
             }
         };
@@ -2758,6 +2804,18 @@ class Primrose extends EventTarget {
             if (setContextSize(context, w, h, scaleFactor)) {
                 refreshBuffers();
             }
+        };
+
+        this.scrollTo = (x, y) => {
+            if (!wordWrap) {
+                scroll.x = x;
+            }
+            scroll.y = y;
+            return clampScroll();
+        };
+
+        this.scrollBy = (dx, dy) => {
+            this.scrollTo(scroll.x + dx, scroll.y + dy);
         };
         //<<<<<<<<<< PUBLIC METHODS <<<<<<<<<<
 
@@ -2928,15 +2986,13 @@ class Primrose extends EventTarget {
 
             ["ScrollDown", () => {
                 if (scroll.y < textRows.length - gridBounds.height) {
-                    ++scroll.y;
-                    render();
+                    this.scrollBy(0, 1);
                 }
             }],
 
             ["ScrollUp", () => {
                 if (scroll.y > 0) {
-                    --scroll.y;
-                    render();
+                    this.scrollBy(0, -1);
                 }
             }],
 
@@ -3080,7 +3136,7 @@ class Primrose extends EventTarget {
             }
         });
 
-        this.readKeyUpEvent = debugEvt();
+        this.readKeyUpEvent = debugEvt("keyup");
         //<<<<<<<<<< KEY EVENT HANDLERS <<<<<<<<<<
 
 
@@ -3144,13 +3200,16 @@ class Primrose extends EventTarget {
 
         const pointerDown = () => {
             this.focus();
+            pressed = true;
+        };
+
+        const startSelecting = () => {
             dragging = true;
-            lastPointer.copy(pointer);
-            lastPointer.toCell(character, scroll, gridBounds);
             moveCursor(frontCursor);
         };
 
         const pointerUp = () => {
+            pressed = false;
             dragging = false;
             scrolling = false;
         };
@@ -3158,6 +3217,9 @@ class Primrose extends EventTarget {
         const pointerMove = () => {
             if (dragging) {
                 moveCursor(backCursor);
+            }
+            else if (pressed) {
+                dragScroll();
             }
         };
 
@@ -3178,7 +3240,7 @@ class Primrose extends EventTarget {
                 const scrollHeight = textRows.length - gridBounds.height;
                 if (gy >= 0 && scrollHeight >= 0) {
                     const sy = gy * scrollHeight / gridBounds.height;
-                    scroll.y = Math.floor(sy);
+                    this.scrollTo(scroll.x, sy);
                 }
             }
             else if (onBottom && !onLeft) {
@@ -3189,24 +3251,39 @@ class Primrose extends EventTarget {
                 const scrollWidth = maxWidth - gridBounds.width;
                 if (gx >= 0 && scrollWidth >= 0) {
                     const sx = gx * scrollWidth / gridBounds.width;
-                    scroll.x = Math.floor(sx);
+                    this.scrollTo(sx, scroll.y);
                 }
             }
 
-            lastPointer.copy(pointer);
             render();
         };
 
+        let lastScrollDX = null,
+            lastScrollDY = null;
+        const dragScroll = () => {
+            if (lastScrollDX !== null
+                && lastScrollDY !== null) {
+                let dx = (lastScrollDX - pointer.x) / character.width,
+                    dy = (lastScrollDY - pointer.y) / character.height;
+                this.scrollBy(dx, dy);
+            }
+            lastScrollDX = pointer.x;
+            lastScrollDY = pointer.y;
+        };
+
+
         //>>>>>>>>>> UV POINTER EVENT HANDLERS >>>>>>>>>>
         const setUVPointer = (evt) => {
-            pointer.set(evt.uv.x, evt.uv.y);
-            pointer.map(this.width, this.height);
+            pointer.set(
+                evt.uv.x * this.width,
+                (1 - evt.uv.y) * this.height);
         };
         this.readUVOverEvent = debugEvt("uvover", pointerOver);
         this.readUVOutEvent = debugEvt("uvout", pointerOut);
         this.readUVDownEvent = debugEvt("uvdown", (evt) => {
             setUVPointer(evt);
             pointerDown();
+            startSelecting();
         });
         this.readUVUpEvent = debugEvt("uvup", pointerUp);
         this.readUVMoveEvent = debugEvt("uvmove", (evt) => {
@@ -3216,39 +3293,18 @@ class Primrose extends EventTarget {
         //<<<<<<<<<< UV POINTER EVENT HANDLERS <<<<<<<<<<
 
 
-        //>>>>>>>>>> POINTER EVENT HANDLERS >>>>>>>>>>
-        const withPrimaryPointer = (callback) => {
-            return (evt) => {
-                if (evt.isPrimary) {
-                    callback(evt);
-                }
-            };
-        };
+        //>>>>>>>>>> MOUSE EVENT HANDLERS >>>>>>>>>> 
         const setOffsetPointer = (evt) => {
             pointer.set(
-                evt.offsetX * this.width / canv.clientWidth,
-                evt.offsetY * this.height / canv.clientHeight);
+                evt.offsetX,
+                evt.offsetY);
         };
-        this.readPointerOverEvent = debugEvt("pointerover", withPrimaryPointer(pointerOver));
-        this.readPointerOutEvent = debugEvt("pointerout", withPrimaryPointer(pointerOut));
-        this.readPointerDownEvent = debugEvt("pointerdown", withPrimaryPointer((evt) => {
-            setOffsetPointer(evt);
-            pointerDown();
-        }));
-        this.readPointerUpEvent = debugEvt("pointerup", withPrimaryPointer(pointerUp));
-        this.readPointerMoveEvent = debugEvt("pointermove", withPrimaryPointer((evt) => {
-            setOffsetPointer(evt);
-            pointerMove();
-        }));
-        //<<<<<<<<<< POINTER EVENT HANDLERS <<<<<<<<<<
-
-
-        //>>>>>>>>>> MOUSE EVENT HANDLERS >>>>>>>>>>
         this.readMouseOverEvent = debugEvt("mouseover", pointerOver);
         this.readMouseOutEvent = debugEvt("mouseout", pointerOut);
         this.readMouseDownEvent = debugEvt("mousedown", (evt) => {
             setOffsetPointer(evt);
             pointerDown();
+            startSelecting();
         });
         this.readMouseUpEvent = debugEvt("mouseup", pointerUp);
         this.readMouseMoveEvent = debugEvt("mousemove", (evt) => {
@@ -3262,15 +3318,10 @@ class Primrose extends EventTarget {
                     && !evt.altKey
                     && !evt.shiftKey
                     && !evt.metaKey) {
-                    const delta = Math.floor(evt.deltaY * wheelScrollSpeed / scrollScale),
-                        dir = Math.sign(delta);
-                    if (focused
-                        || dir === -1 && scroll.y > 0
-                        || dir === 1 && scroll.y < maxVerticalScroll) {
+                    const dy = Math.floor(evt.deltaY * wheelScrollSpeed / scrollScale);
+                    if (!this.scrollBy(0, dy) || focused) {
                         evt.preventDefault();
                     }
-                    scroll.y += delta;
-                    clampScroll();
                 }
                 else if (!evt.ctrlKey
                     && !evt.altKey
@@ -3282,32 +3333,77 @@ class Primrose extends EventTarget {
             }
         });
         const findTouch = (touches) => {
-            for (let touch in touches) {
+            for (let touch of touches) {
                 {
                     return touch;
                 }
             }
             return null;
         };
+
         const withPrimaryTouch = (callback) => {
             return (evt) => {
+                evt.preventDefault();
                 callback(findTouch(evt.touches)
                     || findTouch(evt.changedTouches));
             };
         };
-        const setTouchPointer = (evt) => {
+
+        const setTouchPointer = (touch) => {
+            const cb = canv.getBoundingClientRect();
             pointer.set(
-                (evt.pageX - canv.offsetLeft) * this.width / canv.clientWidth,
-                (evt.pageY - canv.offsetTop) * this.height / canv.clientHeight);
+                touch.clientX - cb.left,
+                touch.clientY - cb.top);
+            console.log(pointer);
         };
-        this.readTouchStartEvent = debugEvt("touchstart", withPrimaryTouch((evt) => {
-            setTouchPointer(evt);
+
+        const longPress = new TimedEvent(1000);
+
+        let vibX = 0,
+            vibY = 0,
+            tx = 0,
+            ty = 0;
+        this.readTouchStartEvent = debugEvt("touchstart", withPrimaryTouch((touch) => {
+            tx = touch.pageX;
+            ty = touch.pageY;
+            setTouchPointer(touch);
             pointerDown();
+            longPress.start();
         }));
-        this.readTouchEndEvent = debugEvt("touchend", withPrimaryTouch(pointerUp));
-        this.readTouchMoveEvent = debugEvt("touchmove", withPrimaryTouch((evt) => {
-            setTouchPointer(evt);
-            pointerMove();
+
+        longPress.addEventListener("tick", () => {
+            startSelecting();
+            backCursor.copy(frontCursor);
+            frontCursor.skipLeft(textRows);
+            backCursor.skipRight(textRows);
+            render();
+            navigator.vibrate(20);
+        });
+
+        this.readTouchEndEvent = debugEvt("touchend", withPrimaryTouch((touch) => {
+            if (longPress.cancel() && !dragging) {
+                startSelecting();
+            }
+            pointerUp();
+            lastScrollDX = null;
+            lastScrollDY = null;
+        }));
+
+        this.readTouchMoveEvent = debugEvt("touchmove", withPrimaryTouch((touch) => {
+            setTouchPointer(touch);
+
+            if (longPress.isRunning) {
+                const dx = touch.pageX - tx,
+                    dy = touch.pageY - ty,
+                    lenSq = dx * dx + dy * dy;
+                if (lenSq > 25) {
+                    longPress.cancel();
+                }
+            }
+
+            if (!longPress.isRunning) {
+                pointerMove();
+            }
         }));
         //<<<<<<<<<< TOUCH EVENT HANDLERS <<<<<<<<<<
         //<<<<<<<<<< POINTER EVENT HANDLERS <<<<<<<<<<
@@ -3576,6 +3672,7 @@ class Primrose extends EventTarget {
             fontSize = null,
             scaleFactor = 2,
             textRows = [""],
+            pressed = false,
             tabString = "  ",
             readOnly = false,
             dragging = false,
@@ -3615,7 +3712,6 @@ class Primrose extends EventTarget {
             tokenBack = new Cursor(),
             tokenFront = new Cursor(),
             backCursor = new Cursor(),
-            lastPointer = new Point(),
             outEvt = new Event("out"),
             frontCursor = new Cursor(),
             overEvt = new Event("over"),
@@ -3713,24 +3809,15 @@ class Primrose extends EventTarget {
             canv.addEventListener("focus", () => this.focus());
             canv.addEventListener("blur", () => this.blur());
 
-            if (canv.onpointerdown === undefined) {
-                canv.addEventListener("mouseover", this.readMouseOverEvent);
-                canv.addEventListener("mouseout", this.readMouseOutEvent);
-                canv.addEventListener("mousedown", this.readMouseDownEvent);
-                canv.addEventListener("mouseup", this.readMouseUpEvent);
-                canv.addEventListener("mousemove", this.readMouseMoveEvent);
+            canv.addEventListener("mouseover", this.readMouseOverEvent);
+            canv.addEventListener("mouseout", this.readMouseOutEvent);
+            canv.addEventListener("mousedown", this.readMouseDownEvent);
+            canv.addEventListener("mouseup", this.readMouseUpEvent);
+            canv.addEventListener("mousemove", this.readMouseMoveEvent);
 
-                canv.addEventListener("touchstart", this.readTouchStartEvent);
-                canv.addEventListener("touchend", this.readTouchEndEvent);
-                canv.addEventListener("touchmove", this.readTouchMoveEvent);
-            }
-            else {
-                canv.addEventListener("pointerover", this.readPointerOverEvent);
-                canv.addEventListener("pointerout", this.readPointerOutEvent);
-                canv.addEventListener("pointerdown", this.readPointerDownEvent);
-                canv.addEventListener("pointerup", this.readPointerUpEvent);
-                canv.addEventListener("pointermove", this.readPointerMoveEvent);
-            }
+            canv.addEventListener("touchstart", this.readTouchStartEvent);
+            canv.addEventListener("touchend", this.readTouchEndEvent);
+            canv.addEventListener("touchmove", this.readTouchMoveEvent);
         }
         //<<<<<<<<<< SETUP CANVAS <<<<<<<<<<
 
@@ -3814,16 +3901,12 @@ class Primrose extends EventTarget {
                 maxCursor = Cursor.max(frontCursor, backCursor),
                 clearFunc = theme.regular.backColor ? "fillRect" : "clearRect";
 
-            tokenFront.fullHome();
-            tokenBack.fullHome();
-
-            if (theme.regular.backColor) {
+            if (clearFunc === "fillRect") {
                 bgfx.fillStyle = theme.regular.backColor;
             }
+            bgfx[clearFunc](0, 0, canv.width, canv.height);
             bgfx.save();
             bgfx.scale(scaleFactor, scaleFactor);
-            bgfx[clearFunc](0, 0, this.width, this.height);
-            bgfx.save();
             bgfx.translate(
                 (gridBounds.x - scroll.x) * character.width + padding,
                 -scroll.y * character.height + padding);
@@ -3838,19 +3921,22 @@ class Primrose extends EventTarget {
                     maxCursor.y - minCursor.y + 1);
             }
 
-            for (let y = 0; y < tokenRows.length; ++y) {
+            const minY = scroll.y | 0,
+                maxY = minY + gridBounds.height,
+                minX = scroll.x | 0,
+                maxX = minX + gridBounds.width;
+            tokenFront.setXY(textRows, 0, minY);
+            tokenBack.copy(tokenFront);
+            for (let y = minY; y <= maxY && y < tokenRows.length; ++y) {
                 // draw the tokens on this row
                 const row = tokenRows[y];
-
                 for (let i = 0; i < row.length; ++i) {
                     const t = row[i];
                     tokenBack.x += t.value.length;
                     tokenBack.i += t.value.length;
 
                     // skip drawing tokens that aren't in view
-                    if (scroll.y <= y && y < scroll.y + gridBounds.height &&
-                        scroll.x <= tokenBack.x && tokenFront.x < scroll.x +
-                        gridBounds.width) {
+                    if (minX <= tokenBack.x && tokenFront.x <= maxX) {
                         // draw the selection box
                         const inSelection = minCursor.i <= tokenBack.i
                             && tokenFront.i < maxCursor.i;
@@ -3875,26 +3961,29 @@ class Primrose extends EventTarget {
 
             // draw the cursor caret
             if (focused) {
-                const cc = theme.cursorColor || "black",
+                const cc = theme.cursorColor || DefaultTheme.cursorColor,
                     w = 1 / character.width;
                 fillRect(bgfx, cc, minCursor.x, minCursor.y, w, 1);
                 fillRect(bgfx, cc, maxCursor.x, maxCursor.y, w, 1);
             }
             bgfx.restore();
-            bgfx.restore();
         };
 
         const renderCanvasForeground = () => {
+            fgfx.clearRect(0, 0, canv.width, canv.height);
             fgfx.save();
             fgfx.scale(scaleFactor, scaleFactor);
-            fgfx.clearRect(0, 0, this.width, this.height);
-            fgfx.save();
-            tokenFront.fullHome();
-            tokenBack.fullHome();
             fgfx.translate(
                 (gridBounds.x - scroll.x) * character.width + padding,
                 padding);
-            for (let y = 0; y < tokenRows.length; ++y) {
+
+            const minY = scroll.y | 0,
+                maxY = minY + gridBounds.height,
+                minX = scroll.x | 0,
+                maxX = minX + gridBounds.width;
+            tokenFront.setXY(textRows, 0, minY);
+            tokenBack.copy(tokenFront);
+            for (let y = minY; y <= maxY && y < tokenRows.length; ++y) {
                 // draw the tokens on this row
                 const row = tokenRows[y],
                     textY = (y - scroll.y) * character.height;
@@ -3905,10 +3994,7 @@ class Primrose extends EventTarget {
                     tokenBack.i += t.value.length;
 
                     // skip drawing tokens that aren't in view
-                    if (scroll.y <= y
-                        && y < scroll.y + gridBounds.height
-                        && scroll.x <= tokenBack.x
-                        && tokenFront.x < scroll.x + gridBounds.width) {
+                    if (minX <= tokenBack.x && tokenFront.x <= maxX) {
 
                         // draw the text
                         const style = theme[t.type] || {},
@@ -3932,19 +4018,12 @@ class Primrose extends EventTarget {
             }
 
             fgfx.restore();
-            fgfx.restore();
         };
 
         const renderCanvasTrim = () => {
-            const tokenFront = new Cursor(),
-                tokenBack = new Cursor();
-
-            let maxLineWidth = 0;
-
+            tgfx.clearRect(0, 0, canv.width, canv.height);
             tgfx.save();
             tgfx.scale(scaleFactor, scaleFactor);
-            tgfx.clearRect(0, 0, this.width, this.height);
-            tgfx.save();
             tgfx.translate(padding, padding);
 
             if (showLineNumbers) {
@@ -3952,52 +4031,57 @@ class Primrose extends EventTarget {
                     theme.regular.selectedBackColor ||
                     DefaultTheme.regular.selectedBackColor,
                     0, 0,
-                    gridBounds.x, gridBounds.height);
-            }
-
-            tgfx.save();
-            tgfx.translate((lineCountWidth - 0.5) * character.width, -scroll.y * character.height);
-            maxLineWidth = 2;
-            for (let y = 0, lastLine = -1; y < tokenRows.length; ++y) {
-                const row = tokenRows[y];
-
-                for (let i = 0; i < row.length; ++i) {
-                    const t = row[i];
-                    tokenBack.x += t.value.length;
-                    tokenBack.i += t.value.length;
-                    tokenFront.copy(tokenBack);
-                }
-
-                maxLineWidth = Math.max(maxLineWidth, tokenBack.x - 1);
-                tokenFront.x = 0;
-                ++tokenFront.y;
-                tokenBack.copy(tokenFront);
-
-                if (showLineNumbers && scroll.y <= y && y < scroll.y + gridBounds.height) {
-                    // draw the left gutter
-                    const currentLine = row.length > 0 ? row[0].line : lastLine + 1,
-                        lineNumber = currentLine.toString();
-                    tgfx.font = "bold " + context.font;
-
-                    if (currentLine > lastLine) {
-                        tgfx.fillStyle = theme.regular.foreColor;
-                        tgfx.fillText(
-                            lineNumber,
-                            0, y * character.height);
-                    }
-                    lastLine = currentLine;
-                }
-            }
-
-            tgfx.restore();
-
-            if (showLineNumbers) {
+                    gridBounds.x, this.width - padding * 2);
                 strokeRect(tgfx,
                     theme.regular.foreColor ||
                     DefaultTheme.regular.foreColor,
                     0, 0,
-                    gridBounds.x, gridBounds.height);
+                    gridBounds.x, this.height - padding * 2);
             }
+
+            let maxLineWidth = 2;
+            tgfx.save();
+            {
+                tgfx.translate((lineCountWidth - 0.5) * character.width, -scroll.y * character.height);
+                let lastLine = -1;
+                const minY = scroll.y | 0,
+                    maxY = minY + gridBounds.height;
+                tokenFront.setXY(textRows, 0, minY);
+                tokenBack.copy(tokenFront);
+                for (let y = minY; y < maxY && y < tokenRows.length; ++y) {
+                    const row = tokenRows[y];
+
+                    for (let i = 0; i < row.length; ++i) {
+                        const t = row[i];
+                        tokenBack.x += t.value.length;
+                        tokenBack.i += t.value.length;
+                    }
+                    tokenFront.copy(tokenBack);
+
+                    maxLineWidth = Math.max(maxLineWidth, tokenBack.x - 1);
+                    tokenFront.x = 0;
+                    ++tokenFront.y;
+                    tokenBack.copy(tokenFront);
+
+                    if (showLineNumbers) {
+                        // draw the left gutter
+                        const currentLine = row.length > 0
+                            ? row[0].line
+                            : lastLine + 1,
+                            lineNumber = currentLine.toString();
+
+                        if (currentLine > lastLine) {
+                            lastLine = currentLine;
+                            tgfx.font = "bold " + context.font;
+                            tgfx.fillStyle = theme.regular.foreColor;
+                            tgfx.fillText(
+                                lineNumber,
+                                0, y * character.height);
+                        }
+                    }
+                }
+            }
+            tgfx.restore();
 
             // draw the scrollbars
             if (showScrollBars) {
@@ -4029,14 +4113,11 @@ class Primrose extends EventTarget {
                 }
             }
 
-            tgfx.lineWidth = 2;
             tgfx.restore();
-            tgfx.strokeRect(1, 1, this.width - 2, this.height - 2);
             if (!focused) {
                 tgfx.fillStyle = theme.regular.unfocused || DefaultTheme.regular.unfocused;
-                tgfx.fillRect(0, 0, this.width, this.height);
+                tgfx.fillRect(0, 0, canv.width, canv.height);
             }
-            tgfx.restore();
         };
 
         const doRender = () => {
@@ -4085,9 +4166,12 @@ class Primrose extends EventTarget {
                 }
 
                 context.clearRect(0, 0, canv.width, canv.height);
+                context.save();
+                context.translate(vibX, vibY);
                 context.drawImage(bg, 0, 0);
                 context.drawImage(fg, 0, 0);
                 context.drawImage(tg, 0, 0);
+                context.restore();
 
                 lastGridBounds = gridBounds.toString();
                 lastText = value;
