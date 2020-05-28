@@ -2,6 +2,7 @@ import { Cursor } from "./cursor.js";
 import { monospaceFamily } from "./fonts.js"
 import { Line } from "./line.js";
 import { Dark } from "./themes.js";
+import { TimedEvent } from "./timedEvent.js";
 
 import {
     canvas,
@@ -721,13 +722,16 @@ export class Primrose extends EventTarget {
 
         const pointerDown = () => {
             this.focus();
+            pressed = true;
+        };
+
+        const startSelecting = () => {
             dragging = true;
-            lastPointer.copy(pointer);
-            lastPointer.toCell(character, scroll, gridBounds);
             moveCursor(frontCursor);
         };
 
         const pointerUp = () => {
+            pressed = false;
             dragging = false;
             scrolling = false;
         };
@@ -735,6 +739,9 @@ export class Primrose extends EventTarget {
         const pointerMove = () => {
             if (dragging) {
                 moveCursor(backCursor);
+            }
+            else if (pressed) {
+                dragScroll();
             }
         };
 
@@ -776,9 +783,22 @@ export class Primrose extends EventTarget {
                 // clicked in the lower-left corner
             }
 
-            lastPointer.copy(pointer);
             render();
         }
+
+        let lastScrollDX = null,
+            lastScrollDY = null;
+        const dragScroll = () => {
+            if (lastScrollDX !== null
+                && lastScrollDY !== null) {
+                let dx = (lastScrollDX - pointer.x) / character.width,
+                    dy = (lastScrollDY - pointer.y) / character.height;
+                this.scrollBy(dx, dy);
+            }
+            lastScrollDX = pointer.x;
+            lastScrollDY = pointer.y;
+        };
+
 
         //>>>>>>>>>> UV POINTER EVENT HANDLERS >>>>>>>>>>
         const setUVPointer = (evt) => {
@@ -791,6 +811,7 @@ export class Primrose extends EventTarget {
         this.readUVDownEvent = debugEvt("uvdown", (evt) => {
             setUVPointer(evt);
             pointerDown();
+            startSelecting();
         });
         this.readUVUpEvent = debugEvt("uvup", pointerUp);
         this.readUVMoveEvent = debugEvt("uvmove", (evt) => {
@@ -800,17 +821,18 @@ export class Primrose extends EventTarget {
         //<<<<<<<<<< UV POINTER EVENT HANDLERS <<<<<<<<<<
 
 
+        //>>>>>>>>>> MOUSE EVENT HANDLERS >>>>>>>>>> 
         const setOffsetPointer = (evt) => {
             pointer.set(
                 evt.offsetX,
                 evt.offsetY);
         };
-        //>>>>>>>>>> MOUSE EVENT HANDLERS >>>>>>>>>>
         this.readMouseOverEvent = debugEvt("mouseover", pointerOver);
         this.readMouseOutEvent = debugEvt("mouseout", pointerOut);
         this.readMouseDownEvent = debugEvt("mousedown", (evt) => {
             setOffsetPointer(evt);
             pointerDown();
+            startSelecting();
         });
         this.readMouseUpEvent = debugEvt("mouseup", pointerUp);
         this.readMouseMoveEvent = debugEvt("mousemove", (evt) => {
@@ -844,7 +866,7 @@ export class Primrose extends EventTarget {
         //>>>>>>>>>> TOUCH EVENT HANDLERS >>>>>>>>>>
         let currentTouchID = null;
         const findTouch = (touches) => {
-            for (let touch in touches) {
+            for (let touch of touches) {
                 if (currentTouchID === null
                     || touch.identifier === currentTouchID) {
                     return touch;
@@ -852,25 +874,87 @@ export class Primrose extends EventTarget {
             }
             return null;
         }
+
         const withPrimaryTouch = (callback) => {
             return (evt) => {
+                evt.preventDefault();
                 callback(findTouch(evt.touches)
                     || findTouch(evt.changedTouches))
             };
         };
-        const setTouchPointer = (evt) => {
+
+        const setTouchPointer = (touch) => {
+            const cb = canv.getBoundingClientRect();
             pointer.set(
-                (evt.pageX - canv.offsetLeft) * this.width / canv.clientWidth,
-                (evt.pageY - canv.offsetTop) * this.height / canv.clientHeight);
+                touch.clientX - cb.left,
+                touch.clientY - cb.top);
+            console.log(pointer);
         };
-        this.readTouchStartEvent = debugEvt("touchstart", withPrimaryTouch((evt) => {
-            setTouchPointer(evt);
+
+        const vibrate = (len) => {
+            longPress.cancel();
+            if (len > 0) {
+                vibX = (Math.random() - 0.5) * 10;
+                vibY = (Math.random() - 0.5) * 10;
+                setTimeout(() => vibrate(len - 10), 10);
+            }
+            else {
+                vibX = 0;
+                vibY = 0;
+            }
+            render();
+        };
+
+        const longPress = new TimedEvent(1000);
+
+        let vibX = 0,
+            vibY = 0,
+            tx = 0,
+            ty = 0;
+        this.readTouchStartEvent = debugEvt("touchstart", withPrimaryTouch((touch) => {
+            tx = touch.pageX;
+            ty = touch.pageY;
+            setTouchPointer(touch);
             pointerDown();
+            longPress.start();
         }));
-        this.readTouchEndEvent = debugEvt("touchend", withPrimaryTouch(pointerUp));
-        this.readTouchMoveEvent = debugEvt("touchmove", withPrimaryTouch((evt) => {
-            setTouchPointer(evt);
-            pointerMove();
+
+        longPress.addEventListener("tick", () => {
+            startSelecting();
+            backCursor.copy(frontCursor);
+            frontCursor.skipLeft(textRows);
+            backCursor.skipRight(textRows);
+            render();
+            navigator.vibrate(20);
+            if (isDebug) {
+                vibrate(320);
+            }
+        });
+
+        this.readTouchEndEvent = debugEvt("touchend", withPrimaryTouch((touch) => {
+            if (longPress.cancel() && !dragging) {
+                startSelecting();
+            }
+            pointerUp();
+            lastScrollDX = null;
+            lastScrollDY = null;
+        }));
+
+        this.readTouchMoveEvent = debugEvt("touchmove", withPrimaryTouch((touch) => {
+            setTouchPointer(touch);
+
+            if (longPress.isRunning) {
+                const dx = touch.pageX - tx,
+                    dy = touch.pageY - ty,
+                    lenSq = dx * dx + dy * dy;
+                if (lenSq > 25) {
+                    longPress.cancel();
+                }
+            }
+
+            if (!longPress.isRunning) {
+                pointerMove();
+            }
         }));
         //<<<<<<<<<< TOUCH EVENT HANDLERS <<<<<<<<<<
         //<<<<<<<<<< POINTER EVENT HANDLERS <<<<<<<<<<
@@ -1139,6 +1223,7 @@ export class Primrose extends EventTarget {
             fontSize = null,
             scaleFactor = 2,
             textRows = [""],
+            pressed = false,
             tabString = "  ",
             readOnly = false,
             dragging = false,
@@ -1178,7 +1263,6 @@ export class Primrose extends EventTarget {
             tokenBack = new Cursor(),
             tokenFront = new Cursor(),
             backCursor = new Cursor(),
-            lastPointer = new Point(),
             outEvt = new Event("out"),
             frontCursor = new Cursor(),
             overEvt = new Event("over"),
@@ -1653,9 +1737,12 @@ export class Primrose extends EventTarget {
                 }
 
                 context.clearRect(0, 0, canv.width, canv.height);
+                context.save();
+                context.translate(vibX, vibY);
                 context.drawImage(bg, 0, 0);
                 context.drawImage(fg, 0, 0);
                 context.drawImage(tg, 0, 0);
+                context.restore();
 
                 lastGridBounds = gridBounds.toString();
                 lastText = value;
