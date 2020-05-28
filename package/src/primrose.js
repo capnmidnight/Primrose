@@ -185,14 +185,8 @@ export class Primrose extends EventTarget {
             gridBounds.set(x, y, w, h);
 
             // group the tokens into rows
-            textRows = value.split(/\n/);
-            for (let i = 0; i < textRows.length; ++i) {
-                if (i < textRows.length - 1) {
-                    textRows[i] += '\n';
-                }
-                textRows[i] = new Line(textRows[i]);
-            }
-
+            textRows.splice(0);
+            textRows.push("");
             tokenRows.splice(0);
             tokenRows.push([]);
             let currentRowWidth = 0;
@@ -207,16 +201,22 @@ export class Primrose extends EventTarget {
                     tokenQueue.splice(i + 1, 0, t.splitAt(split));
                 }
 
+                const end = tokenRows.length - 1;
                 if (t.value.length > 0) {
-                    tokenRows[tokenRows.length - 1].push(t);
+                    tokenRows[end].push(t);
+                    textRows[end] += t.value;
                     currentRowWidth += t.value.length;
                 }
 
                 if (breakLine) {
+                    textRows[end] = new Line(textRows[end]);
+                    textRows.push("");
                     tokenRows.push([]);
                     currentRowWidth = 0;
                 }
             }
+
+            textRows[textRows.length - 1] = new Line(textRows[textRows.length - 1]);
 
             maxVerticalScroll = Math.max(0, tokenRows.length - gridBounds.height);
 
