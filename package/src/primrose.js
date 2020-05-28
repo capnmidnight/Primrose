@@ -1625,7 +1625,7 @@ export class Primrose extends EventTarget {
                     maxX = minX + gridBounds.width;
                 tokenFront.setXY(textRows, 0, minY);
                 tokenBack.copy(tokenFront);
-                for (let y = minY; y < maxY && y < tokenRows.length; ++y) {
+                for (let y = minY; y <= maxY && y < tokenRows.length; ++y) {
                     const row = tokenRows[y];
 
                     for (let i = 0; i < row.length; ++i) {
