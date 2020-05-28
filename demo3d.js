@@ -134,6 +134,7 @@ async function makeEditor(file, side) {
 function makeScene() {
     const renderer = new THREE.WebGLRenderer({ antialias: true })
     document.body.appendChild(renderer.domElement);
+    document.body.style.touchAction = "none";
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
 
