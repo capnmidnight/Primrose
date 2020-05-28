@@ -730,7 +730,7 @@ export class Primrose extends EventTarget {
             moveCursor(frontCursor);
         };
 
-        const pointerUp = () => {
+        const mouseLikePointerUp = () => {
             pressed = false;
             dragging = false;
             scrolling = false;
@@ -799,26 +799,57 @@ export class Primrose extends EventTarget {
             lastScrollDY = pointer.y;
         };
 
+        const mouseLikePointerDown = (setPointer) => {
+            return (evt) => {
+                setPointer(evt);
+                pointerDown();
+                startSelecting();
+            }
+        };
 
-        //>>>>>>>>>> UV POINTER EVENT HANDLERS >>>>>>>>>>
-        const setUVPointer = (evt) => {
-            pointer.set(
-                evt.uv.x * this.width,
-                (1 - evt.uv.y) * this.height);
-        }
-        this.readUVOverEvent = debugEvt("uvover", pointerOver);
-        this.readUVOutEvent = debugEvt("uvout", pointerOut);
-        this.readUVDownEvent = debugEvt("uvdown", (evt) => {
-            setUVPointer(evt);
-            pointerDown();
-            startSelecting();
-        });
-        this.readUVUpEvent = debugEvt("uvup", pointerUp);
-        this.readUVMoveEvent = debugEvt("uvmove", (evt) => {
-            setUVPointer(evt);
-            pointerMove();
-        });
-        //<<<<<<<<<< UV POINTER EVENT HANDLERS <<<<<<<<<<
+        const mouseLikePointerMove = (setPointer) => {
+            return (evt) => {
+                setPointer(evt);
+                pointerMove();
+            };
+        };
+
+        const touchLikePointerDown = (setPointer) => {
+            return (evt) => {
+                setPointer(evt);
+                tx = pointer.x;
+                ty = pointer.y;
+                pointerDown();
+                longPress.start();
+            };
+        };
+
+        const touchLikePointerUp = () => {
+            if (longPress.cancel() && !dragging) {
+                startSelecting();
+            }
+            mouseLikePointerUp();
+            lastScrollDX = null;
+            lastScrollDY = null;
+        };
+
+        const touchLikePointerMove = (setPointer) => {
+            return (evt) => {
+                setPointer(evt);
+                if (longPress.isRunning) {
+                    const dx = pointer.x - tx,
+                        dy = pointer.y - ty,
+                        lenSq = dx * dx + dy * dy;
+                    if (lenSq > 25) {
+                        longPress.cancel();
+                    }
+                }
+
+                if (!longPress.isRunning) {
+                    pointerMove();
+                }
+            };
+        };
 
 
         //>>>>>>>>>> MOUSE EVENT HANDLERS >>>>>>>>>> 
@@ -829,16 +860,9 @@ export class Primrose extends EventTarget {
         };
         this.readMouseOverEvent = debugEvt("mouseover", pointerOver);
         this.readMouseOutEvent = debugEvt("mouseout", pointerOut);
-        this.readMouseDownEvent = debugEvt("mousedown", (evt) => {
-            setOffsetPointer(evt);
-            pointerDown();
-            startSelecting();
-        });
-        this.readMouseUpEvent = debugEvt("mouseup", pointerUp);
-        this.readMouseMoveEvent = debugEvt("mousemove", (evt) => {
-            setOffsetPointer(evt);
-            pointerMove();
-        });
+        this.readMouseDownEvent = debugEvt("mousedown", mouseLikePointerDown(setOffsetPointer));
+        this.readMouseUpEvent = debugEvt("mouseup", mouseLikePointerUp);
+        this.readMouseMoveEvent = debugEvt("mousemove", mouseLikePointerMove(setOffsetPointer));
 
         this.readWheelEvent = debugEvt("wheel", (evt) => {
             if (hovered || focused) {
@@ -888,7 +912,6 @@ export class Primrose extends EventTarget {
             pointer.set(
                 touch.clientX - cb.left,
                 touch.clientY - cb.top);
-            console.log(pointer);
         };
 
         const vibrate = (len) => {
@@ -907,18 +930,6 @@ export class Primrose extends EventTarget {
 
         const longPress = new TimedEvent(1000);
 
-        let vibX = 0,
-            vibY = 0,
-            tx = 0,
-            ty = 0;
-        this.readTouchStartEvent = debugEvt("touchstart", withPrimaryTouch((touch) => {
-            tx = touch.pageX;
-            ty = touch.pageY;
-            setTouchPointer(touch);
-            pointerDown();
-            longPress.start();
-        }));
-
         longPress.addEventListener("tick", () => {
             startSelecting();
             backCursor.copy(frontCursor);
@@ -931,32 +942,45 @@ export class Primrose extends EventTarget {
             }
         });
 
-        this.readTouchEndEvent = debugEvt("touchend", withPrimaryTouch((touch) => {
-            if (longPress.cancel() && !dragging) {
-                startSelecting();
-            }
-            pointerUp();
-            lastScrollDX = null;
-            lastScrollDY = null;
-        }));
-
-        this.readTouchMoveEvent = debugEvt("touchmove", withPrimaryTouch((touch) => {
-            setTouchPointer(touch);
-
-            if (longPress.isRunning) {
-                const dx = touch.pageX - tx,
-                    dy = touch.pageY - ty,
-                    lenSq = dx * dx + dy * dy;
-                if (lenSq > 25) {
-                    longPress.cancel();
-                }
-            }
-
-            if (!longPress.isRunning) {
-                pointerMove();
-            }
-        }));
+        let vibX = 0,
+            vibY = 0,
+            tx = 0,
+            ty = 0;
+        this.readTouchStartEvent = debugEvt("touchstart", withPrimaryTouch(touchLikePointerDown(setTouchPointer)));
+        this.readTouchMoveEvent = debugEvt("touchmove", withPrimaryTouch(touchLikePointerMove(setTouchPointer)));
+        this.readTouchEndEvent = debugEvt("touchend", withPrimaryTouch(touchLikePointerUp));
         //<<<<<<<<<< TOUCH EVENT HANDLERS <<<<<<<<<<
+
+
+        //>>>>>>>>>> UV POINTER EVENT HANDLERS >>>>>>>>>>
+        const setUVPointer = (evt) => {
+            pointer.set(
+                evt.uv.x * this.width,
+                (1 - evt.uv.y) * this.height);
+        }
+
+        this.mouse = Object.freeze({
+            readOverEventUV: debugEvt("mouseuvover", pointerOver),
+            readOutEventUV: debugEvt("mouseuvout", pointerOut),
+            readDownEventUV: debugEvt("mouseuvdown", mouseLikePointerDown(setUVPointer)),
+            readMoveEventUV: debugEvt("mouseuvmove", mouseLikePointerMove(setUVPointer)),
+            readUpEventUV: debugEvt("mouseuvup", mouseLikePointerUp)
+        });
+
+        this.touch = Object.freeze({
+            readOverEventUV: debugEvt("touchuvover", pointerOver),
+            readOutEventUV: debugEvt("touchuvout", pointerOut),
+            readDownEventUV: debugEvt("touchuvdown", touchLikePointerDown(setUVPointer)),
+            readMoveEventUV: debugEvt("touchuvmove", touchLikePointerMove(setUVPointer)),
+            readUpEventUV: debugEvt("touchuvup", touchLikePointerUp)
+        });
+
+        this.readUVOverEvent = this.mouse.readOverEventUV;
+        this.readUVOutEvent = this.mouse.readOutEventUV;
+        this.readUVDownEvent = this.mouse.readDownEventUV;
+        this.readUVUpEvent = this.mouse.readUpEventUV;
+        this.readUVMoveEvent = this.mouse.readMoveEventUV;
+        //<<<<<<<<<< UV POINTER EVENT HANDLERS <<<<<<<<<<
         //<<<<<<<<<< POINTER EVENT HANDLERS <<<<<<<<<<
 
 

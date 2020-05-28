@@ -2,10 +2,10 @@
 import { Primrose } from './package/src/primrose.js';
 
 const {
-        renderer,
-        scene,
-        camera
-    } = makeScene(),
+    renderer,
+    scene,
+    camera
+} = makeScene(),
     raycaster = new THREE.Raycaster(),
     mouse = new THREE.Vector2();
 
@@ -13,49 +13,81 @@ makeEditor("test.js", 1);
 makeEditor("test.js", -1);
 
 // >>>> BEGIN POINTER EVENTS <<<<
-renderer.domElement.addEventListener("pointermove", (evt) => {
-    const hit = getHit(evt),
-        curEditor = getEditor(hit);
+function pointerMove(pointerType) {
+    return function (evt) {
+        const hit = getHit(evt),
+            curEditor = getEditor(hit);
+        // did the editor change?
+        if (curEditor !== Primrose.hoveredControl) {
+            // manage the hover events
+            if (curEditor !== null) {
+                curEditor[pointerType].readOverEventUV();
+            }
+            else if (Primrose.hoveredControl != null) {
+                Primrose.hoveredControl[pointerType].readOutEventUV();
+            }
+        }
 
-    // did the editor change?
-    if (curEditor !== Primrose.hoveredControl) {
-        // manage the hover events
+        // manage the mouse-move event
         if (curEditor !== null) {
-            curEditor.readUVOverEvent();
+            curEditor[pointerType].readMoveEventUV(hit);
         }
-        else if (Primrose.hoveredControl != null) {
-            Primrose.hoveredControl.readUVOutEvent();
+    };
+}
+
+function pointerDown(pointerType) {
+    return function (evt) {
+        const hit = getHit(evt),
+            curEditor = getEditor(hit);
+
+        // Did we click on an editor?
+        if (curEditor !== null) {
+            curEditor[pointerType].readDownEventUV(hit);
+        }
+        else if (Primrose.focusedControl !== null) {
+            Primrose.focusedControl.blur();
+        }
+    };
+}
+
+function pointerUp(pointerType) {
+    return function (evt) {
+        const hit = getHit(evt),
+            curEditor = getEditor(hit);
+
+        // Did we release the mouse on an editor?
+        if (curEditor !== null) {
+            curEditor[pointerType].readUpEventUV(hit);
+        }
+    };
+}
+
+
+let currentTouchID = null;
+const findTouch = (touches) => {
+    for (let touch of touches) {
+        if (currentTouchID === null
+            || touch.identifier === currentTouchID) {
+            return touch;
         }
     }
+    return null;
+}
 
-    // manage the mouse-move event
-    if (curEditor !== null) {
-        curEditor.readUVMoveEvent(hit);
-    }
-});
+const withPrimaryTouch = (callback) => {
+    return (evt) => {
+        evt.preventDefault();
+        callback(findTouch(evt.touches)
+            || findTouch(evt.changedTouches))
+    };
+};
 
-renderer.domElement.addEventListener("pointerdown", (evt) => {
-    const hit = getHit(evt),
-        curEditor = getEditor(hit);
-
-    // Did we click on an editor?
-    if (curEditor !== null) {
-        curEditor.readUVDownEvent(hit);
-    }
-    else if (Primrose.focusedControl !== null) {
-        Primrose.focusedControl.blur();
-    }
-});
-
-renderer.domElement.addEventListener("pointerup", (evt) => {
-    const hit = getHit(evt),
-        curEditor = getEditor(hit);
-
-    // Did we release the mouse on an editor?
-    if (curEditor !== null) {
-        curEditor.readUVUpEvent(hit);
-    }
-});
+renderer.domElement.addEventListener("mousedown", pointerDown("mouse"));
+renderer.domElement.addEventListener("mousemove", pointerMove("mouse"));
+renderer.domElement.addEventListener("mouseup", pointerUp("mouse"));
+renderer.domElement.addEventListener("touchstart", withPrimaryTouch(pointerDown("touch")));
+renderer.domElement.addEventListener("touchmove", withPrimaryTouch(pointerMove("touch")));
+renderer.domElement.addEventListener("touchend", withPrimaryTouch(pointerUp("touch")));
 /// >>>> END POINTER EVENTS <<<<
 
 
@@ -134,7 +166,6 @@ async function makeEditor(file, side) {
 function makeScene() {
     const renderer = new THREE.WebGLRenderer({ antialias: true })
     document.body.appendChild(renderer.domElement);
-    document.body.style.touchAction = "none";
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
 
