@@ -99,10 +99,10 @@ export class Cursor {
             const x = this.x - 1,
                 line = lines[this.y],
                 word = reverse(line.substring(0, x)),
-                m = word.match(/(\s|\W)+/),
+                m = word.match(/\w+/),
                 dx = m
                     ? (m.index + m[0].length + 1)
-                    : word.length;
+                    : this.x;
             this.i -= dx;
             this.x -= dx;
             lines[this.y].adjust(this, -1);
@@ -132,10 +132,10 @@ export class Cursor {
         if (this.x < line.length - 1) {
             const x = this.x + 1,
                 subline = line.substring(x),
-                m = subline.match(/(\s|\W)+/),
+                m = subline.match(/\w+/),
                 dx = m
                     ? (m.index + m[0].length + 1)
-                    : (subline.length - this.x);
+                    : (line.length - this.x);
             this.i += dx;
             this.x += dx;
             if (this.x > 0
