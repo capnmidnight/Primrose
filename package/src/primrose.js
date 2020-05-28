@@ -782,8 +782,9 @@ export class Primrose extends EventTarget {
 
         //>>>>>>>>>> UV POINTER EVENT HANDLERS >>>>>>>>>>
         const setUVPointer = (evt) => {
-            pointer.set(evt.uv.x, evt.uv.y);
-            pointer.map(this.width, this.height);
+            pointer.set(
+                evt.uv.x * this.width,
+                (1 - evt.uv.y) * this.height);
         }
         this.readUVOverEvent = debugEvt("uvover", pointerOver);
         this.readUVOutEvent = debugEvt("uvout", pointerOut);

@@ -24,16 +24,6 @@ export class Point {
         }
     }
 
-    map(width, height) {
-        this.x *= width;
-        this.y = (1 - this.y) * height;
-    }
-
-    unmap(width, height) {
-        this.x /= width;
-        this.y = 1 - (this.y / height);
-    }
-
     toCell(character, scroll, gridBounds) {
         this.x = Math.round(this.x / character.width) + scroll.x - gridBounds.x;
         this.y = Math.floor((this.y / character.height) - 0.25) + scroll.y;
