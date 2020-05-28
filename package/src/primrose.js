@@ -218,7 +218,7 @@ export class Primrose extends EventTarget {
                 }
             }
 
-            maxVerticalScroll = Math.max(0, textRows.length - gridBounds.height)
+            maxVerticalScroll = Math.max(0, tokenRows.length - gridBounds.height);
 
             render();
         };
