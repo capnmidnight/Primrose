@@ -788,33 +788,11 @@ export class Primrose extends EventTarget {
         //<<<<<<<<<< UV POINTER EVENT HANDLERS <<<<<<<<<<
 
 
-        //>>>>>>>>>> POINTER EVENT HANDLERS >>>>>>>>>>
-        const withPrimaryPointer = (callback) => {
-            return (evt) => {
-                if (evt.isPrimary) {
-                    callback(evt);
-                }
-            };
-        };
         const setOffsetPointer = (evt) => {
             pointer.set(
                 evt.offsetX,
                 evt.offsetY);
         };
-        this.readPointerOverEvent = debugEvt("pointerover", withPrimaryPointer(pointerOver));
-        this.readPointerOutEvent = debugEvt("pointerout", withPrimaryPointer(pointerOut));
-        this.readPointerDownEvent = debugEvt("pointerdown", withPrimaryPointer((evt) => {
-            setOffsetPointer(evt);
-            pointerDown();
-        }));
-        this.readPointerUpEvent = debugEvt("pointerup", withPrimaryPointer(pointerUp));
-        this.readPointerMoveEvent = debugEvt("pointermove", withPrimaryPointer((evt) => {
-            setOffsetPointer(evt);
-            pointerMove();
-        }));
-        //<<<<<<<<<< POINTER EVENT HANDLERS <<<<<<<<<<
-
-
         //>>>>>>>>>> MOUSE EVENT HANDLERS >>>>>>>>>>
         this.readMouseOverEvent = debugEvt("mouseover", pointerOver);
         this.readMouseOutEvent = debugEvt("mouseout", pointerOut);
@@ -1291,24 +1269,15 @@ export class Primrose extends EventTarget {
             canv.addEventListener("focus", () => this.focus());
             canv.addEventListener("blur", () => this.blur());
 
-            if (canv.onpointerdown === undefined) {
-                canv.addEventListener("mouseover", this.readMouseOverEvent);
-                canv.addEventListener("mouseout", this.readMouseOutEvent);
-                canv.addEventListener("mousedown", this.readMouseDownEvent);
-                canv.addEventListener("mouseup", this.readMouseUpEvent);
-                canv.addEventListener("mousemove", this.readMouseMoveEvent);
+            canv.addEventListener("mouseover", this.readMouseOverEvent);
+            canv.addEventListener("mouseout", this.readMouseOutEvent);
+            canv.addEventListener("mousedown", this.readMouseDownEvent);
+            canv.addEventListener("mouseup", this.readMouseUpEvent);
+            canv.addEventListener("mousemove", this.readMouseMoveEvent);
 
-                canv.addEventListener("touchstart", this.readTouchStartEvent);
-                canv.addEventListener("touchend", this.readTouchEndEvent);
-                canv.addEventListener("touchmove", this.readTouchMoveEvent);
-            }
-            else {
-                canv.addEventListener("pointerover", this.readPointerOverEvent);
-                canv.addEventListener("pointerout", this.readPointerOutEvent);
-                canv.addEventListener("pointerdown", this.readPointerDownEvent);
-                canv.addEventListener("pointerup", this.readPointerUpEvent);
-                canv.addEventListener("pointermove", this.readPointerMoveEvent);
-            }
+            canv.addEventListener("touchstart", this.readTouchStartEvent);
+            canv.addEventListener("touchend", this.readTouchEndEvent);
+            canv.addEventListener("touchmove", this.readTouchMoveEvent);
         }
         //<<<<<<<<<< SETUP CANVAS <<<<<<<<<<
 
