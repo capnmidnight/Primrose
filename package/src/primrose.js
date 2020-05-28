@@ -86,9 +86,9 @@ export class Primrose extends EventTarget {
     constructor(options) {
         super();
 
-        const debugEvt = (name, callback) => {
+        const debugEvt = (name, callback, debugLocal) => {
             return (evt) => {
-                if (isDebug) {
+                if (isDebug || debugLocal) {
                     console.log(this.toString(), name, evt);
                 }
 
