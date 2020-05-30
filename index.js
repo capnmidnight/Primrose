@@ -1,4 +1,4 @@
-﻿import { Primrose } from "./package/src/primrose.js";
+﻿import { Primrose } from "./package/primrose.min.js";
 
 (async function() {
     await Primrose.ready
@@ -17,7 +17,9 @@ window.addEventListener("wheel", (evt) => {
         && !evt.shiftKey
         && !evt.metaKey) {
         for (let editor of Primrose.editors) {
-            if (editor.isInDocument) {
+            if (editor.isInDocument
+                && editor.focused) {
+                evt.preventDefault();
                 const dir = -Math.sign(evt.deltaY);
                 editor.scaleFactor += dir / 4;
             }

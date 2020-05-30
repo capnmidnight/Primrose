@@ -8,12 +8,10 @@ pliny.value({
 
 import { Grammar } from "./Grammar.js";
 export const JavaScript = new Grammar("JavaScript", [
-    ["newlines", /(?:\r\n|\r|\n)/],
-    ["whitespace", /(?:\s+)/],
     ["startBlockComments", /\/\*/],
     ["endBlockComments", /\*\//],
     ["regexes", /(?:^|,|;|\(|\[|\{)(?:\s*)(\/(?:\\\/|[^\n\/])+\/)/],
-    ["stringDelim", /("|')/],
+    ["stringDelim", /("|'|`)/],
     ["startLineComments", /\/\/.*$/m],
     ["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/],
     ["keywords",

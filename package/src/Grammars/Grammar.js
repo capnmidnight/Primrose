@@ -73,8 +73,15 @@ import { Light as DefaultTheme } from "../themes.js";
 import { div, span, br, text} from "../html.js";
 import { monospaceFamily } from "../fonts.js";
 
+const DefaultRules = [
+    ["newlines", /(?:\r\n|\r|\n)/],
+    ["whitespace", /(?:\s+)/]
+];
+
 export class Grammar {
     constructor(grammarName, rules) {
+        rules = rules || [];
+        rules = DefaultRules.concat(rules);
         /*
         pliny.property({
           parent: "Primrose.Text.Grammar",

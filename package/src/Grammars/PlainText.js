@@ -7,6 +7,4 @@ pliny.value({
 */
 
 import { Grammar } from "./Grammar.js";
-export const PlainText = new Grammar("PlainText", [
-    ["newlines", /(?:\r\n|\r|\n)/]
-]);
+export const PlainText = new Grammar("PlainText");

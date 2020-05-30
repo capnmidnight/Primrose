@@ -7,16 +7,12 @@ class BasicGrammar extends Grammar {
         super("BASIC",
             // Grammar rules are applied in the order they are specified.
             [
-                // Text needs at least the newlines token, or else every line will attempt to render as a single line and the line count won't work.
-                ["newlines", /(?:\r\n|\r|\n)/],
-                ["whitespace", /(?:\s+)/],
                 // BASIC programs used to require the programmer type in her own line numbers. The start at the beginning of the line.
                 ["lineNumbers", /^\d+\s+/],
                 // Comments were lines that started with the keyword "REM" (for REMARK) and ran to the end of the line. They did not have to be numbered, because they were not executable and were stripped out by the interpreter.
                 ["startLineComments", /^REM\s/],
                 // Both double-quoted and single-quoted strings were not always supported, but in this case, I'm just demonstrating how it would be done for both.
-                ["strings", /"(?:\\"|[^"])*"/],
-                ["strings", /'(?:\\'|[^'])*'/],
+                ["stringDelim", /("|')/],
                 // Numbers are an optional dash, followed by a optional digits, followed by optional period, followed by 1 or more required digits. This allows us to match both integers and decimal numbers, both positive and negative, with or without leading zeroes for decimal numbers between (-1, 1).
                 ["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/],
                 // Keywords are really just a list of different words we want to match, surrounded by the "word boundary" selector "\b".
@@ -30,7 +26,7 @@ class BasicGrammar extends Grammar {
                     /(?:\+|;|,|-|\*\*|\*|\/|>=|<=|=|<>|<|>|OR|AND|NOT|MOD|\(|\)|\[|\])/
                 ],
                 // Once everything else has been matched, the left over blocks of words are treated as variable and function names.
-                ["identifiers", /\w+\$?/]
+                ["members", /\w+\$?/]
             ]);
     }
 

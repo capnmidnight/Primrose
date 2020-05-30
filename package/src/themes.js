@@ -90,3 +90,8 @@ export const Light = Object.freeze({
         fontStyle: "underline italic"
     }
 });
+
+export const themes = Object.freeze(new Map([
+    ["light", Light],
+    ["dark", Dark]
+]));

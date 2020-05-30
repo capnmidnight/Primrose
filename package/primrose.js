@@ -1,4 +1,4 @@
-(function(g,f){typeof exports==='object'&&typeof module!=='undefined'?f(exports):typeof define==='function'&&define.amd?define(['exports'],f):(g=g||self,f(g.Primrose={}));}(this,(function(exports){'use strict';const combiningMarks =
+const combiningMarks =
     /(<%= allExceptCombiningMarks %>)(<%= combiningMarks %>+)/g,
     surrogatePair = /(<%= highSurrogates %>)(<%= lowSurrogates %>)/g;
 
@@ -278,8 +278,12 @@ class Cursor {
         lines[this.y].adjust(this, 1);
         this.moved = true;
     }
-}// A selection of fonts for preferred monospace rendering.
-const monospaceFamily = "'Droid Sans Mono', 'Consolas', 'Lucida Console', 'Courier New', 'Courier', monospace";class Line {
+}
+
+// A selection of fonts for preferred monospace rendering.
+const monospaceFamily = "'Droid Sans Mono', 'Consolas', 'Lucida Console', 'Courier New', 'Courier', monospace";
+
+class Line {
     constructor(txt) {
         this.length = txt.length;
 
@@ -314,7 +318,9 @@ const monospaceFamily = "'Droid Sans Mono', 'Consolas', 'Lucida Console', 'Couri
 
         Object.freeze(this);
     }
-}// Color themes for text-oriented controls, for use when coupled with a parsing grammar.
+}
+
+// Color themes for text-oriented controls, for use when coupled with a parsing grammar.
 
 // A dark background with a light foreground for text.
 const Dark = Object.freeze({
@@ -405,7 +411,14 @@ const Light = Object.freeze({
         foreColor: "red",
         fontStyle: "underline italic"
     }
-});class TimedEvent extends EventTarget {
+});
+
+const themes = Object.freeze(new Map([
+    ["light", Light],
+    ["dark", Dark]
+]));
+
+class TimedEvent extends EventTarget {
     constructor(timeout, continuous = false) {
         super();
 
@@ -453,7 +466,9 @@ const Light = Object.freeze({
 
         Object.freeze(this);
     }
-}function assignAttributes(elem, ...rest) {
+}
+
+function assignAttributes(elem, ...rest) {
     rest.filter(x => !(x instanceof Element)
             && !(x instanceof String)
             && typeof x !== "string")
@@ -579,7 +594,9 @@ function resizeContext(ctx, superscale = 1) {
         ctx.canvas.clientWidth,
         ctx.canvas.clientHeight,
         superscale);
-}// Various flags used for feature detecting and configuring the system
+}
+
+// Various flags used for feature detecting and configuring the system
 const isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
 const isFirefox = typeof window.InstallTrigger !== "undefined";
 const isiOS = /iP(hone|od|ad)/.test(navigator.userAgent || "");
@@ -594,7 +611,9 @@ function testUserAgent(a) {
             a.substring(0, 4));
 }
 
-const isMobile = testUserAgent(navigator.userAgent || navigator.vendor || window.opera);/*
+const isMobile = testUserAgent(navigator.userAgent || navigator.vendor || window.opera);
+
+/*
 pliny.class({
   parent: "Primrose.Text",
     name: "Point",
@@ -764,7 +783,9 @@ class Rectangle {
     toString() {
         return `[${this.point.toString()} x ${this.size.toString()}]`;
     }
-}// These values are defined here:
+}
+
+// These values are defined here:
 //   https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values
 //   Values read on May 24, 2020
 const keyGroups = Object.freeze(new Map([
@@ -1308,7 +1329,9 @@ function normalizeKeyValue(evt) {
         return ",";
     }
     return evt.key;
-}const gesture = Object.seal({
+}
+
+const gesture = Object.seal({
     type: "",
     text: "",
     command: ""
@@ -1445,7 +1468,9 @@ const MacOS = new OperatingSystem(
     "Meta", "Alt",
     "MetaShift_z",
     "Meta", "ArrowLeft", "ArrowRight",
-    "Meta", "ArrowUp", "ArrowDown");// A single syntax matching rule, for tokenizing code.
+    "Meta", "ArrowUp", "ArrowDown");
+
+// A single syntax matching rule, for tokenizing code.
 class Rule {
     constructor(name, test) {
         this.name = name;
@@ -1488,7 +1513,9 @@ class Rule {
             }
         }
     }
-}// A chunk of text that represents a single element of code,
+}
+
+// A chunk of text that represents a single element of code,
 // with fields linking it back to its source.
 class Token {
     constructor(value, type, index, line) {
@@ -1512,7 +1539,9 @@ class Token {
     toString() {
         return "[" + this.type + ": " + this.value + "]";
     }
-}/*
+}
+
+/*
 pliny.class({
   parent: "Primrose.Text",
     name: "Grammar",
@@ -1581,8 +1610,15 @@ See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.
 });
 */
 
+const DefaultRules = [
+    ["newlines", /(?:\r\n|\r|\n)/],
+    ["whitespace", /(?:\s+)/]
+];
+
 class Grammar {
     constructor(grammarName, rules) {
+        rules = rules || [];
+        rules = DefaultRules.concat(rules);
         /*
         pliny.property({
           parent: "Primrose.Text.Grammar",
@@ -1751,22 +1787,20 @@ class Grammar {
             lineHeight: `${fontSize}px`,
         });
     }
-}// A grammar and an interpreter for a BASIC-like language.
+}
+
+// A grammar and an interpreter for a BASIC-like language.
 class BasicGrammar extends Grammar {
     constructor() {
         super("BASIC",
             // Grammar rules are applied in the order they are specified.
             [
-                // Text needs at least the newlines token, or else every line will attempt to render as a single line and the line count won't work.
-                ["newlines", /(?:\r\n|\r|\n)/],
-                ["whitespace", /(?:\s+)/],
                 // BASIC programs used to require the programmer type in her own line numbers. The start at the beginning of the line.
                 ["lineNumbers", /^\d+\s+/],
                 // Comments were lines that started with the keyword "REM" (for REMARK) and ran to the end of the line. They did not have to be numbered, because they were not executable and were stripped out by the interpreter.
                 ["startLineComments", /^REM\s/],
                 // Both double-quoted and single-quoted strings were not always supported, but in this case, I'm just demonstrating how it would be done for both.
-                ["strings", /"(?:\\"|[^"])*"/],
-                ["strings", /'(?:\\'|[^'])*'/],
+                ["stringDelim", /("|')/],
                 // Numbers are an optional dash, followed by a optional digits, followed by optional period, followed by 1 or more required digits. This allows us to match both integers and decimal numbers, both positive and negative, with or without leading zeroes for decimal numbers between (-1, 1).
                 ["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/],
                 // Keywords are really just a list of different words we want to match, surrounded by the "word boundary" selector "\b".
@@ -1780,7 +1814,7 @@ class BasicGrammar extends Grammar {
                     /(?:\+|;|,|-|\*\*|\*|\/|>=|<=|=|<>|<|>|OR|AND|NOT|MOD|\(|\)|\[|\])/
                 ],
                 // Once everything else has been matched, the left over blocks of words are treated as variable and function names.
-                ["identifiers", /\w+\$?/]
+                ["members", /\w+\$?/]
             ]);
     }
 
@@ -2406,7 +2440,9 @@ class BasicGrammar extends Grammar {
     };
 }
 
-const Basic = new BasicGrammar();/*
+const Basic = new BasicGrammar();
+
+/*
 pliny.value({
   parent: "Primrose.Text.Grammars",
   name: "HTML",
@@ -2414,8 +2450,6 @@ pliny.value({
 });
 */
 const HTML = new Grammar("HTML", [
-    ["newlines", /(?:\r\n|\r|\n)/],
-    ["whitespace", /(?:\s+)/],
     ["startBlockComments", /(?:<|&lt;)!--/],
     ["endBlockComments", /--(?:>|&gt;)/],
     ["stringDelim", /("|')/],
@@ -2424,7 +2458,9 @@ const HTML = new Grammar("HTML", [
         /(?:<|&lt;)\/?(html|base|head|link|meta|style|title|address|article|aside|footer|header|h1|h2|h3|h4|h5|h6|hgroup|nav|section|dd|div|dl|dt|figcaption|figure|hr|li|main|ol|p|pre|ul|a|abbr|b|bdi|bdo|br|cite|code|data|dfn|em|i|kbd|mark|q|rp|rt|rtc|ruby|s|samp|small|span|strong|sub|sup|time|u|var|wbr|area|audio|img|map|track|video|embed|object|param|source|canvas|noscript|script|del|ins|caption|col|colgroup|table|tbody|td|tfoot|th|thead|tr|button|datalist|fieldset|form|input|label|legend|meter|optgroup|option|output|progress|select|textarea|details|dialog|menu|menuitem|summary|content|element|shadow|template|acronym|applet|basefont|big|blink|center|command|content|dir|font|frame|frameset|isindex|keygen|listing|marquee|multicol|nextid|noembed|plaintext|spacer|strike|tt|xmp)\b/
     ],
     ["members", /(\w+)=/]
-]);/*
+]);
+
+/*
 pliny.value({
   parent: "Primrose.Text.Grammars",
   name: "JavaScript",
@@ -2432,12 +2468,10 @@ pliny.value({
 });
 */
 const JavaScript = new Grammar("JavaScript", [
-    ["newlines", /(?:\r\n|\r|\n)/],
-    ["whitespace", /(?:\s+)/],
     ["startBlockComments", /\/\*/],
     ["endBlockComments", /\*\//],
     ["regexes", /(?:^|,|;|\(|\[|\{)(?:\s*)(\/(?:\\\/|[^\n\/])+\/)/],
-    ["stringDelim", /("|')/],
+    ["stringDelim", /("|'|`)/],
     ["startLineComments", /\/\/.*$/m],
     ["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/],
     ["keywords",
@@ -2446,16 +2480,18 @@ const JavaScript = new Grammar("JavaScript", [
     ["functions", /(\w+)(?:\s*\()/],
     ["members", /(\w+)\./],
     ["members", /((\w+\.)+)(\w+)/]
-]);/*
+]);
+
+/*
 pliny.value({
   parent: "Primrose.Text.Grammars",
   name: "PlainText",
   description: "A grammar that makes displaying plain text work with the text editor designed for syntax highlighting."
 });
 */
-const PlainText = new Grammar("PlainText", [
-    ["newlines", /(?:\r\n|\r|\n)/]
-]);const grammars = Object.seal(new Map([
+const PlainText = new Grammar("PlainText");
+
+const grammars = Object.freeze(new Map([
     ["basic", Basic],
     ["bas", Basic],
     ["html", HTML],
@@ -2463,7 +2499,9 @@ const PlainText = new Grammar("PlainText", [
     ["js", JavaScript],
     ["plaintext", PlainText],
     ["txt", PlainText]
-]));const singleLineOutput = Object.freeze([
+]));
+
+const singleLineOutput = Object.freeze([
     "CursorLeft",
     "CursorRight",
     "CursorSkipLeft",
@@ -2520,10 +2558,13 @@ const multiLineInput = Object.freeze(multiLineOutput
     .concat([
         "AppendNewline",
         "PrependNewline"
-    ]));//>>>>>>>>>> PRIVATE STATIC FIELDS >>>>>>>>>>
+    ]));
+
+//>>>>>>>>>> PRIVATE STATIC FIELDS >>>>>>>>>>
 let elementCounter = 0,
     focusedControl = null,
-    hoveredControl = null;
+    hoveredControl = null,
+    publicControls = [];
 
 const wheelScrollSpeed = 4,
     vScrollWidth = 2,
@@ -2567,7 +2608,7 @@ class Primrose extends EventTarget {
         const debugEvt = (name, callback, debugLocal) => {
             return (evt) => {
                 if ( debugLocal) {
-                    console.log(this.toString(), name, evt);
+                    console.log(`Primrose #${elementID}`, name, evt);
                 }
 
                 if (!!callback) {
@@ -2593,9 +2634,323 @@ class Primrose extends EventTarget {
 
 
         //>>>>>>>>>> PRIVATE METHODS >>>>>>>>>>
+        //>>>>>>>>>> RENDERING >>>>>>>>>>
         let render = () => {
             // do nothing, disabling rendering until the object is fully initialized;
         };
+
+        const fillRect = (gfx, fill, x, y, w, h) => {
+            gfx.fillStyle = fill;
+            gfx.fillRect(
+                x * character.width,
+                y * character.height,
+                w * character.width + 1,
+                h * character.height + 1);
+        };
+
+        const strokeRect = (gfx, stroke, x, y, w, h) => {
+            gfx.strokeStyle = stroke;
+            gfx.strokeRect(
+                x * character.width,
+                y * character.height,
+                w * character.width + 1,
+                h * character.height + 1);
+        };
+
+        const renderCanvasBackground = () => {
+            const minCursor = Cursor.min(frontCursor, backCursor),
+                maxCursor = Cursor.max(frontCursor, backCursor),
+                clearFunc = theme.regular.backColor ? "fillRect" : "clearRect";
+
+            if (clearFunc === "fillRect") {
+                bgfx.fillStyle = theme.regular.backColor;
+            }
+            bgfx[clearFunc](0, 0, canv.width, canv.height);
+            bgfx.save();
+            bgfx.scale(scaleFactor, scaleFactor);
+            bgfx.translate(
+                (gridBounds.x - scroll.x) * character.width + padding,
+                -scroll.y * character.height + padding);
+
+
+            // draw the current row highlighter
+            if (focused) {
+                fillRect(bgfx, theme.regular.currentRowBackColor ||
+                    DefaultTheme.regular.currentRowBackColor,
+                    0, minCursor.y,
+                    gridBounds.width,
+                    maxCursor.y - minCursor.y + 1);
+            }
+
+            const minY = scroll.y | 0,
+                maxY = minY + gridBounds.height,
+                minX = scroll.x | 0,
+                maxX = minX + gridBounds.width;
+            tokenFront.setXY(textRows, 0, minY);
+            tokenBack.copy(tokenFront);
+            for (let y = minY; y <= maxY && y < tokenRows.length; ++y) {
+                // draw the tokens on this row
+                const row = tokenRows[y];
+                for (let i = 0; i < row.length; ++i) {
+                    const t = row[i];
+                    tokenBack.x += t.value.length;
+                    tokenBack.i += t.value.length;
+
+                    // skip drawing tokens that aren't in view
+                    if (minX <= tokenBack.x && tokenFront.x <= maxX) {
+                        // draw the selection box
+                        const inSelection = minCursor.i <= tokenBack.i
+                            && tokenFront.i < maxCursor.i;
+                        if (inSelection) {
+                            const selectionFront = Cursor.max(minCursor, tokenFront),
+                                selectionBack = Cursor.min(maxCursor, tokenBack),
+                                cw = selectionBack.i - selectionFront.i;
+                            fillRect(bgfx, theme.regular.selectedBackColor ||
+                                DefaultTheme.regular.selectedBackColor,
+                                selectionFront.x, selectionFront.y,
+                                cw, 1);
+                        }
+                    }
+
+                    tokenFront.copy(tokenBack);
+                }
+
+                tokenFront.x = 0;
+                ++tokenFront.y;
+                tokenBack.copy(tokenFront);
+            }
+
+            // draw the cursor caret
+            if (focused) {
+                const cc = theme.cursorColor || DefaultTheme.cursorColor,
+                    w = 1 / character.width;
+                fillRect(bgfx, cc, minCursor.x, minCursor.y, w, 1);
+                fillRect(bgfx, cc, maxCursor.x, maxCursor.y, w, 1);
+            }
+            bgfx.restore();
+        };
+
+        const renderCanvasForeground = () => {
+            fgfx.clearRect(0, 0, canv.width, canv.height);
+            fgfx.save();
+            fgfx.scale(scaleFactor, scaleFactor);
+            fgfx.translate(
+                (gridBounds.x - scroll.x) * character.width + padding,
+                padding);
+
+            const minY = scroll.y | 0,
+                maxY = minY + gridBounds.height,
+                minX = scroll.x | 0,
+                maxX = minX + gridBounds.width;
+            tokenFront.setXY(textRows, 0, minY);
+            tokenBack.copy(tokenFront);
+            for (let y = minY; y <= maxY && y < tokenRows.length; ++y) {
+                // draw the tokens on this row
+                const row = tokenRows[y],
+                    textY = (y - scroll.y) * character.height;
+
+                for (let i = 0; i < row.length; ++i) {
+                    const t = row[i];
+                    tokenBack.x += t.value.length;
+                    tokenBack.i += t.value.length;
+
+                    // skip drawing tokens that aren't in view
+                    if (minX <= tokenBack.x && tokenFront.x <= maxX) {
+
+                        // draw the text
+                        const style = theme[t.type] || {},
+                            font = (style.fontWeight || theme.regular.fontWeight || "") +
+                                " " + (style.fontStyle || theme.regular.fontStyle || "") +
+                                " " + context.font;
+                        fgfx.font = font.trim();
+                        fgfx.fillStyle = style.foreColor || theme.regular.foreColor;
+                        fgfx.fillText(
+                            t.value,
+                            tokenFront.x * character.width,
+                            textY);
+                    }
+
+                    tokenFront.copy(tokenBack);
+                }
+
+                tokenFront.x = 0;
+                ++tokenFront.y;
+                tokenBack.copy(tokenFront);
+            }
+
+            fgfx.restore();
+        };
+
+        const renderCanvasTrim = () => {
+            tgfx.clearRect(0, 0, canv.width, canv.height);
+            tgfx.save();
+            tgfx.scale(scaleFactor, scaleFactor);
+            tgfx.translate(padding, padding);
+
+            if (showLineNumbers) {
+                fillRect(tgfx,
+                    theme.regular.selectedBackColor ||
+                    DefaultTheme.regular.selectedBackColor,
+                    0, 0,
+                    gridBounds.x, this.width - padding * 2);
+                strokeRect(tgfx,
+                    theme.regular.foreColor ||
+                    DefaultTheme.regular.foreColor,
+                    0, 0,
+                    gridBounds.x, this.height - padding * 2);
+            }
+
+            let maxLineWidth = 2;
+            tgfx.save();
+            {
+                tgfx.translate((lineCountWidth - 0.5) * character.width, -scroll.y * character.height);
+                let lastLine = -1;
+                const minY = scroll.y | 0,
+                    maxY = minY + gridBounds.height;
+                tokenFront.setXY(textRows, 0, minY);
+                tokenBack.copy(tokenFront);
+                for (let y = minY; y <= maxY && y < tokenRows.length; ++y) {
+                    const row = tokenRows[y];
+
+                    for (let i = 0; i < row.length; ++i) {
+                        const t = row[i];
+                        tokenBack.x += t.value.length;
+                        tokenBack.i += t.value.length;
+                    }
+                    tokenFront.copy(tokenBack);
+
+                    maxLineWidth = Math.max(maxLineWidth, tokenBack.x - 1);
+                    tokenFront.x = 0;
+                    ++tokenFront.y;
+                    tokenBack.copy(tokenFront);
+
+                    if (showLineNumbers) {
+                        // draw the left gutter
+                        const currentLine = row.length > 0
+                            ? row[0].line
+                            : lastLine + 1,
+                            lineNumber = currentLine.toString();
+
+                        if (currentLine > lastLine) {
+                            lastLine = currentLine;
+                            tgfx.font = "bold " + context.font;
+                            tgfx.fillStyle = theme.regular.foreColor;
+                            tgfx.fillText(
+                                lineNumber,
+                                0, y * character.height);
+                        }
+                    }
+                }
+            }
+            tgfx.restore();
+
+            // draw the scrollbars
+            if (showScrollBars) {
+                const drawWidth = gridBounds.width * character.width - padding,
+                    drawHeight = gridBounds.height * character.height,
+                    scrollX = (scroll.x * drawWidth) / maxLineWidth + gridBounds.x * character.width,
+                    scrollY = (scroll.y * drawHeight) / tokenRows.length;
+
+                tgfx.fillStyle = theme.regular.selectedBackColor ||
+                    DefaultTheme.regular.selectedBackColor;
+                // horizontal
+                let bw = null;
+                if (!wordWrap && maxLineWidth > gridBounds.width) {
+                    const scrollBarWidth = drawWidth * (gridBounds.width / maxLineWidth),
+                        by = gridBounds.height * character.height;
+                    bw = Math.max(character.width, scrollBarWidth);
+                    tgfx.fillRect(scrollX, by, bw, character.height);
+                    tgfx.strokeRect(scrollX, by, bw, character.height);
+                }
+
+                //vertical
+                if (tokenRows.length > gridBounds.height) {
+                    const scrollBarHeight = drawHeight * (gridBounds.height / tokenRows.length),
+                        bx = this.width - vScrollWidth * character.width - 2 * padding,
+                        bh = Math.max(character.height, scrollBarHeight);
+                    bw = vScrollWidth * character.width;
+                    tgfx.fillRect(bx, scrollY, bw, bh);
+                    tgfx.strokeRect(bx, scrollY, bw, bh);
+                }
+            }
+
+            tgfx.restore();
+            if (!focused) {
+                tgfx.fillStyle = theme.regular.unfocused || DefaultTheme.regular.unfocused;
+                tgfx.fillRect(0, 0, canv.width, canv.height);
+            }
+        };
+
+        const doRender = () => {
+            if (tokens && theme) {
+                const textChanged = lastText !== value,
+                    focusChanged = focused !== lastFocused,
+                    fontChanged = context.font !== lastFont,
+                    paddingChanged = padding !== lastPadding,
+                    themeChanged = theme.name !== lastThemeName,
+                    boundsChanged = gridBounds.toString() !== lastGridBounds,
+                    characterWidthChanged = character.width !== lastCharacterWidth,
+                    characterHeightChanged = character.height !== lastCharacterHeight,
+
+                    cursorChanged = frontCursor.i !== lastFrontCursor
+                        || backCursor.i !== lastBackCursor,
+
+                    scrollChanged = scroll.x !== lastScrollX
+                        || scroll.y !== lastScrollY,
+
+                    layoutChanged = resized
+                        || boundsChanged
+                        || textChanged
+                        || characterWidthChanged
+                        || characterHeightChanged
+                        || paddingChanged
+                        || scrollChanged
+                        || themeChanged,
+
+                    backgroundChanged = layoutChanged
+                        || cursorChanged,
+
+                    foregroundChanged = layoutChanged
+                        || fontChanged,
+
+                    trimChanged = layoutChanged
+                        || focusChanged;
+
+                if (backgroundChanged) {
+                    renderCanvasBackground();
+                }
+                if (foregroundChanged) {
+                    renderCanvasForeground();
+                }
+                if (trimChanged) {
+                    renderCanvasTrim();
+                }
+
+                context.clearRect(0, 0, canv.width, canv.height);
+                context.save();
+                context.translate(vibX, vibY);
+                context.drawImage(bg, 0, 0);
+                context.drawImage(fg, 0, 0);
+                context.drawImage(tg, 0, 0);
+                context.restore();
+
+                lastGridBounds = gridBounds.toString();
+                lastText = value;
+                lastCharacterWidth = character.width;
+                lastCharacterHeight = character.height;
+                lastPadding = padding;
+                lastFrontCursor = frontCursor.i;
+                lastBackCursor = backCursor.i;
+                lastFocused = focused;
+                lastFont = context.font;
+                lastThemeName = theme.name;
+                lastScrollX = scroll.x;
+                lastScrollY = scroll.y;
+                resized = false;
+                this.dispatchEvent(updateEvt);
+            }
+        };
+        //<<<<<<<<<< RENDERING <<<<<<<<<<
 
         const setValue = (txt, setUndo) => {
             txt = txt || "";
@@ -2773,24 +3128,31 @@ class Primrose extends EventTarget {
 
 
         //>>>>>>>>>> PUBLIC METHODS >>>>>>>>>>
-        this.toString = () => `Primrose #${elementID}`;
 
+        /// <summary>
+        /// Removes focus from the control.
+        /// </summary>
         this.blur = () => {
             if (focused) {
                 focused = false;
-                this.dispatchEvent(new Event("blur"));
+                this.dispatchEvent(blurEvt);
                 render();
             }
         };
 
+        /// <summary>
+        /// Sets the control to be the focused control. If all controls in the app have been properly registered with the Event Manager, then any other, currently focused control will first get `blur`red.
+        /// </summary>
         this.focus = () => {
             if (!focused) {
                 focused = true;
-                this.dispatchEvent(new Event("focus"));
+                this.dispatchEvent(focusEvt);
                 render();
             }
         };
 
+        /// <summary>
+        /// </summary>
         this.resize = () => {
             if (!this.isInDocument) {
                 console.warn("Can't automatically resize a canvas that is not in the DOM tree");
@@ -2800,12 +3162,18 @@ class Primrose extends EventTarget {
             }
         };
 
+        /// <summary>
+        /// Sets the scale-independent width and height of the editor control.
+        /// </summary>
         this.setSize = (w, h) => {
             if (setContextSize(context, w, h, scaleFactor)) {
                 refreshBuffers();
             }
         };
 
+        /// <summary>
+        /// Move the scroll window to a new location. Values get clamped to the text contents of the editor.
+        /// </summary>
         this.scrollTo = (x, y) => {
             if (!wordWrap) {
                 scroll.x = x;
@@ -2814,8 +3182,11 @@ class Primrose extends EventTarget {
             return clampScroll();
         };
 
+        /// <summary>
+        /// Move the scroll window by a given amount to a new location. The final location of the scroll window gets clamped to the text contents of the editor.
+        /// </summary>
         this.scrollBy = (dx, dy) => {
-            this.scrollTo(scroll.x + dx, scroll.y + dy);
+            return this.scrollTo(scroll.x + dx, scroll.y + dy);
         };
         //<<<<<<<<<< PUBLIC METHODS <<<<<<<<<<
 
@@ -3064,6 +3435,7 @@ class Primrose extends EventTarget {
                 frontCursor.right(textRows);
             }]
         ]));
+
         this.readKeyDownEvent = debugEvt("keydown", (evt) => {
             const command = os.makeCommand(evt);
             if (keyDownCommands.has(command.command)) {
@@ -3088,7 +3460,7 @@ class Primrose extends EventTarget {
                     render();
                 }
                 else {
-                    this.dispatchEvent(new Event("change"));
+                    this.dispatchEvent(changeEvt);
                 }
             }],
 
@@ -3108,7 +3480,7 @@ class Primrose extends EventTarget {
                     render();
                 }
                 else {
-                    this.dispatchEvent(new Event("change"));
+                    this.dispatchEvent(changeEvt);
                 }
             }],
 
@@ -3116,6 +3488,7 @@ class Primrose extends EventTarget {
                 moveInHistory(-1);
             }]
         ]));
+        
         this.readKeyPressEvent = debugEvt("keypress", (evt) => {
             const command = os.makeCommand(evt);
             if (!this.readOnly) {
@@ -3141,14 +3514,6 @@ class Primrose extends EventTarget {
 
 
         //>>>>>>>>>> CLIPBOARD EVENT HANDLERS >>>>>>>>>>
-        function setFalse(evt) {
-            evt.returnValue = false;
-        }
-
-        this.readBeforeCopyEvent = setFalse;
-        this.readBeforeCutEvent = setFalse;
-        this.readBeforePasteEvent = setFalse;
-
         const copySelectedText = (evt) => {
             if (focused && frontCursor.i !== backCursor.i) {
                 const clipboard = evt.clipboardData || window.clipboardData;
@@ -3206,12 +3571,6 @@ class Primrose extends EventTarget {
         const startSelecting = () => {
             dragging = true;
             moveCursor(frontCursor);
-        };
-
-        const mouseLikePointerUp = () => {
-            pressed = false;
-            dragging = false;
-            scrolling = false;
         };
 
         const pointerMove = () => {
@@ -3279,6 +3638,12 @@ class Primrose extends EventTarget {
             }
         };
 
+        const mouseLikePointerUp = () => {
+            pressed = false;
+            dragging = false;
+            scrolling = false;
+        };
+
         const mouseLikePointerMove = (setPointer) => {
             return (evt) => {
                 setPointer(evt);
@@ -3325,16 +3690,16 @@ class Primrose extends EventTarget {
 
 
         //>>>>>>>>>> MOUSE EVENT HANDLERS >>>>>>>>>> 
-        const setOffsetPointer = (evt) => {
+        const setMousePointer = (evt) => {
             pointer.set(
                 evt.offsetX,
                 evt.offsetY);
         };
         this.readMouseOverEvent = debugEvt("mouseover", pointerOver);
         this.readMouseOutEvent = debugEvt("mouseout", pointerOut);
-        this.readMouseDownEvent = debugEvt("mousedown", mouseLikePointerDown(setOffsetPointer));
+        this.readMouseDownEvent = debugEvt("mousedown", mouseLikePointerDown(setMousePointer));
         this.readMouseUpEvent = debugEvt("mouseup", mouseLikePointerUp);
-        this.readMouseMoveEvent = debugEvt("mousemove", mouseLikePointerMove(setOffsetPointer));
+        this.readMouseMoveEvent = debugEvt("mousemove", mouseLikePointerMove(setMousePointer));
 
         this.readWheelEvent = debugEvt("wheel", (evt) => {
             if (hovered || focused) {
@@ -3356,6 +3721,27 @@ class Primrose extends EventTarget {
                 render();
             }
         });
+        //<<<<<<<<<< MOUSE EVENT HANDLERS <<<<<<<<<<
+
+
+        //>>>>>>>>>> TOUCH EVENT HANDLERS >>>>>>>>>>
+        let vibX = 0,
+            vibY = 0;
+
+        const longPress = new TimedEvent(1000);
+
+        longPress.addEventListener("tick", () => {
+            startSelecting();
+            backCursor.copy(frontCursor);
+            frontCursor.skipLeft(textRows);
+            backCursor.skipRight(textRows);
+            render();
+            navigator.vibrate(20);
+        });
+
+        let tx = 0,
+            ty = 0;
+
         const findTouch = (touches) => {
             for (let touch of touches) {
                 {
@@ -3380,21 +3766,6 @@ class Primrose extends EventTarget {
                 touch.clientY - cb.top);
         };
 
-        const longPress = new TimedEvent(1000);
-
-        longPress.addEventListener("tick", () => {
-            startSelecting();
-            backCursor.copy(frontCursor);
-            frontCursor.skipLeft(textRows);
-            backCursor.skipRight(textRows);
-            render();
-            navigator.vibrate(20);
-        });
-
-        let vibX = 0,
-            vibY = 0,
-            tx = 0,
-            ty = 0;
         this.readTouchStartEvent = debugEvt("touchstart", withPrimaryTouch(touchLikePointerDown(setTouchPointer)));
         this.readTouchMoveEvent = debugEvt("touchmove", withPrimaryTouch(touchLikePointerMove(setTouchPointer)));
         this.readTouchEndEvent = debugEvt("touchend", withPrimaryTouch(touchLikePointerUp));
@@ -3409,26 +3780,60 @@ class Primrose extends EventTarget {
         };
 
         this.mouse = Object.freeze({
+
+            /// <summary>
+            /// Read's a THREE.js Raycast intersection to perform the hover gestures.
+            // </summary>
             readOverEventUV: debugEvt("mouseuvover", pointerOver),
+
+            /// <summary>
+            /// Read's a THREE.js Raycast intersection to perform the end of the hover gesture.
+            // </summary>
             readOutEventUV: debugEvt("mouseuvout", pointerOut),
+
+            /// <summary>
+            /// Read's a THREE.js Raycast intersection to perform mouse-like behavior for primary-button-down gesture.
+            // </summary>
             readDownEventUV: debugEvt("mouseuvdown", mouseLikePointerDown(setUVPointer)),
-            readMoveEventUV: debugEvt("mouseuvmove", mouseLikePointerMove(setUVPointer)),
-            readUpEventUV: debugEvt("mouseuvup", mouseLikePointerUp)
+
+            /// <summary>
+            /// Read's a THREE.js Raycast intersection to perform mouse-like behavior for primary-button-up gesture.
+            // </summary>
+            readUpEventUV: debugEvt("mouseuvup", mouseLikePointerUp),
+
+            /// <summary>
+            /// Read's a THREE.js Raycast intersection to perform mouse-like behavior for move gesture, whether the primary button is pressed or not.
+            // </summary>
+            readMoveEventUV: debugEvt("mouseuvmove", mouseLikePointerMove(setUVPointer))
         });
 
         this.touch = Object.freeze({
+
+            /// <summary>
+            /// Read's a THREE.js Raycast intersection to perform the end of the hover gesture. This is the same as mouse.readOverEventUV, included for completeness.
+            // </summary>
             readOverEventUV: debugEvt("touchuvover", pointerOver),
+
+            /// <summary>
+            /// Read's a THREE.js Raycast intersection to perform the end of the hover gesture. This is the same as mouse.readOutEventUV, included for completeness.
+            // </summary>
             readOutEventUV: debugEvt("touchuvout", pointerOut),
+
+            /// <summary>
+            /// Read's a THREE.js Raycast intersection to perform touch-like behavior for the first finger touching down gesture.
+            // </summary>
             readDownEventUV: debugEvt("touchuvdown", touchLikePointerDown(setUVPointer)),
+
+            /// <summary>
+            /// Read's a THREE.js Raycast intersection to perform touch-like behavior for the first finger raising up gesture.
+            // </summary>
             readMoveEventUV: debugEvt("touchuvmove", touchLikePointerMove(setUVPointer)),
+
+            /// <summary>
+            /// Read's a THREE.js Raycast intersection to perform touch-like behavior for the first finger moving gesture.
+            // </summary>
             readUpEventUV: debugEvt("touchuvup", touchLikePointerUp)
         });
-
-        this.readUVOverEvent = this.mouse.readOverEventUV;
-        this.readUVOutEvent = this.mouse.readOutEventUV;
-        this.readUVDownEvent = this.mouse.readDownEventUV;
-        this.readUVUpEvent = this.mouse.readUpEventUV;
-        this.readUVMoveEvent = this.mouse.readMoveEventUV;
         //<<<<<<<<<< UV POINTER EVENT HANDLERS <<<<<<<<<<
         //<<<<<<<<<< POINTER EVENT HANDLERS <<<<<<<<<<
 
@@ -3436,27 +3841,41 @@ class Primrose extends EventTarget {
         //>>>>>>>>>> PUBLIC PROPERTIES >>>>>>>>>>
         Object.defineProperties(this, {
 
-            id: {
-                get: () => id
-            },
-
+            /// <summary>
+            /// The DOM element that was used to construct the `Primrose` control out of the document tree.If the Control was not constructed from the document tree, this value will be`null`.
+            /// </summary>
             element: {
                 get: () => element
             },
 
+            /// <summary>
+            /// Returns `false` if `element` is null. Returns `true` otherwise.
+            /// </summary>
             isInDocument: {
                 get: () => !isOffScreen
                     && document.body.contains(canv)
             },
 
+            /// <summary>
+            /// The canvas to which the editor is rendering text. If the `options.element` value was set to a canvas, that canvas will be returned. Otherwise, the canvas will be the canvas that Primrose created for the control. If `OffscreenCanvas` is not available, the canvas will be an `HTMLCanvasElement`.
+            /// </summary>
             canvas: {
                 get: () => canv
             },
 
+            /// <summary>
+            /// Returns `true` when the control has a pointer hovering over it.
+            /// </summary>
             hovered: {
                 get: () => hovered
             },
 
+            /// <summary>
+            /// Returns `true` when the control has been selected.Writing to this value will change the focus state of the control.
+            /// If the control is already focused and`focused` is set to`true`, or the control is not focused and`focus` is set to`false`, nothing happens.
+            /// If the control is focused and`focused` is set to`false`, the control is blurred, just as if `blur()` was called.
+            /// If the control is not focused and`focused` is set to`true`, the control is blurred, just as if `focus()` was called.
+            /// </summary>
             focused: {
                 get: () => focused,
                 set: (f) => {
@@ -3471,6 +3890,9 @@ class Primrose extends EventTarget {
                 }
             },
 
+            /// <summary>
+            /// Indicates whether or not the text in the editor control can be modified.
+            /// </summary>
             readOnly: {
                 get: () => readOnly,
                 set: (r) => {
@@ -3497,6 +3919,9 @@ class Primrose extends EventTarget {
                 }
             },
 
+            /// <summary>
+            /// Indicates whether or not the text in the editor control will be broken across lines when it reaches the right edge of the editor control.
+            /// </summary>
             wordWrap: {
                 get: () => wordWrap,
                 set: (w) => {
@@ -3511,16 +3936,26 @@ class Primrose extends EventTarget {
                 }
             },
 
+            /// <summary>
+            /// The text value contained in the control. NOTE: if the text value was set with Windows-style newline characters (`\r\n`), the newline characters will be normalized to Unix-style newline characters (`\n`).
+            /// </summary>
             value: {
                 get: () => value,
                 set: (txt) => setValue(txt, true)
             },
 
+            /// <summary>
+            /// A synonymn for `value`
+            /// </summary>
             text: {
                 get: () => value,
                 set: (txt) => setValue(txt, true)
             },
 
+            /// <summary>
+            /// The range of text that is currently selected by the cursor. If no text is selected, reading `selectedText` returns the empty string (`""`) and writing to it inserts text at the current cursor location. 
+            /// If text is selected, reading `selectedText` returns the text between the front and back cursors, writing to it overwrites the selected text, inserting the provided value.
+            /// </summary>
             selectedText: {
                 get: () => {
                     const minCursor = Cursor.min(frontCursor, backCursor),
@@ -3543,6 +3978,9 @@ class Primrose extends EventTarget {
                 }
             },
 
+            /// <summary>
+            /// The string index at which the front cursor is located. NOTE: the "front cursor" is the main cursor, but does not necessarily represent the beginning of the selction range. The selection range runs from the minimum of front and back cursors, to the maximum.
+            /// </summary>
             selectionStart: {
                 get: () => frontCursor.i,
                 set: (i) => {
@@ -3554,6 +3992,9 @@ class Primrose extends EventTarget {
                 }
             },
 
+            /// <summary>
+            /// The string index at which the back cursor is located. NOTE: the "back cursor" is the selection range cursor, but does not necessarily represent the end of the selction range. The selection range runs from the minimum of front and back cursors, to the maximum.
+            /// </summary>
             selectionEnd: {
                 get: () => backCursor.i,
                 set: (i) => {
@@ -3565,12 +4006,18 @@ class Primrose extends EventTarget {
                 }
             },
 
+            /// <summary>
+            /// If the back cursor is behind the front cursor, this value returns `"backward"`. Otherwise, `"forward"` is returned.
+            /// </summary>
             selectionDirection: {
                 get: () => frontCursor.i <= backCursor.i
                     ? "forward"
                     : "backward"
             },
 
+            /// <summary>
+            /// The number of spaces to insert when the <kbd>Tab</kbd> key is pressed. Changing this value does not convert existing tabs, it only changes future tabs that get inserted.
+            /// </summary>
             tabWidth: {
                 get: () => tabWidth,
                 set: (tw) => {
@@ -3582,6 +4029,9 @@ class Primrose extends EventTarget {
                 }
             },
 
+            /// <summary>
+            /// A JavaScript object that defines the color and style values for rendering different UI and text elements.
+            /// </summary>
             theme: {
                 get: () => theme,
                 set: (t) => {
@@ -3592,6 +4042,9 @@ class Primrose extends EventTarget {
                 }
             },
 
+            /// <summary>
+            /// Set or get the language pack used to tokenize the control text for syntax highlighting.
+            /// </summary>
             language: {
                 get: () => language,
                 set: (l) => {
@@ -3603,6 +4056,9 @@ class Primrose extends EventTarget {
                 }
             },
 
+            /// <summary>
+            /// The `Number` of pixels to inset the control rendering from the edge of the canvas. This is useful for texturing objects where the texture edge cannot be precisely controlled. This value is scale-independent.
+            /// </summary>
             padding: {
                 get: () => padding,
                 set: (p) => {
@@ -3614,6 +4070,9 @@ class Primrose extends EventTarget {
                 }
             },
 
+            /// <summary>
+            /// Indicates whether or not line numbers should be rendered on the left side of the control.
+            /// </summary>
             showLineNumbers: {
                 get: () => showLineNumbers,
                 set: (s) => {
@@ -3625,6 +4084,9 @@ class Primrose extends EventTarget {
                 }
             },
 
+            /// <summary>
+            /// Indicates whether or not scroll bars should be rendered at the right and bottom in the control. If wordWrap is enabled, the bottom, horizontal scrollbar will not be rendered.
+            /// </summary>
             showScrollBars: {
                 get: () => showScrollBars,
                 set: (s) => {
@@ -3636,6 +4098,9 @@ class Primrose extends EventTarget {
                 }
             },
 
+            /// <summary>
+            /// The `Number` of pixels tall to draw characters. This value is scale-independent.
+            /// </summary>
             fontSize: {
                 get: () => fontSize,
                 set: (s) => {
@@ -3656,6 +4121,10 @@ class Primrose extends EventTarget {
                 }
             },
 
+            /// <summary>
+            /// The value by which pixel values are scaled before being used by the editor control.
+            /// With THREE.js, it's best to set this value to 1 and change the width, height, and fontSize manually.
+            /// </summary>
             scaleFactor: {
                 get: () => scaleFactor,
                 set: (s) => {
@@ -3669,11 +4138,17 @@ class Primrose extends EventTarget {
                 }
             },
 
+            /// <summary>
+            /// The scale-independent width of the editor control.
+            /// </summary>
             width: {
                 get: () => canv.width / scaleFactor,
                 set: (w) => this.setSize(w, this.height)
             },
 
+            /// <summary>
+            /// The scale-independent height of the editor control.
+            /// </summary>
             height: {
                 get: () => canv.height / scaleFactor,
                 set: (h) => this.setSize(this.width, h)
@@ -3683,8 +4158,7 @@ class Primrose extends EventTarget {
 
 
         //>>>>>>>>>> PRIVATE MUTABLE FIELDS >>>>>>>>>>
-        let id = null,
-            value = "",
+        let value = "",
             padding = 0,
             theme = Dark,
             tabWidth = 2,
@@ -3695,7 +4169,6 @@ class Primrose extends EventTarget {
             focused = false,
             fontSize = null,
             scaleFactor = 2,
-            textRows = [""],
             pressed = false,
             tabString = "  ",
             readOnly = false,
@@ -3730,20 +4203,23 @@ class Primrose extends EventTarget {
 
         const history = [],
             tokenRows = [],
+            textRows = [""],
             scroll = new Point(),
             pointer = new Point(),
             character = new Size(),
+            bottomRightGutter = new Size(),
+            gridBounds = new Rectangle(),
             tokenBack = new Cursor(),
             tokenFront = new Cursor(),
             backCursor = new Cursor(),
-            outEvt = new Event("out"),
             frontCursor = new Cursor(),
+            outEvt = new Event("out"),
             overEvt = new Event("over"),
-            gridBounds = new Rectangle(),
-            bottomRightGutter = new Size(),
-            os = isMacOS ? MacOS : Windows,
+            blurEvt = new Event("blur"),
+            focusEvt = new Event("focus"),
             changeEvt = new Event("change"),
-            updateEvt = new Event("update");
+            updateEvt = new Event("update"),
+            os = isMacOS ? MacOS : Windows;
         //<<<<<<<<<< PRIVATE MUTABLE FIELDS <<<<<<<<<<
 
         //>>>>>>>>>> SETUP CANVAS >>>>>>>>>>
@@ -3887,7 +4363,6 @@ class Primrose extends EventTarget {
         Object.freeze(options);
 
         Object.seal(this);
-        id = options.id;
         this.readOnly = options.readOnly;
         this.multiLine = options.multiLine;
         this.wordWrap = options.wordWrap;
@@ -3900,326 +4375,9 @@ class Primrose extends EventTarget {
         this.value = currentValue;
         //<<<<<<<<<< INITIALIZE STATE <<<<<<<<<<
 
-
-        //>>>>>>>>>> RENDERING >>>>>>>>>>
-        const fillRect = (gfx, fill, x, y, w, h) => {
-            gfx.fillStyle = fill;
-            gfx.fillRect(
-                x * character.width,
-                y * character.height,
-                w * character.width + 1,
-                h * character.height + 1);
-        };
-
-        const strokeRect = (gfx, stroke, x, y, w, h) => {
-            gfx.strokeStyle = stroke;
-            gfx.strokeRect(
-                x * character.width,
-                y * character.height,
-                w * character.width + 1,
-                h * character.height + 1);
-        };
-
-        const renderCanvasBackground = () => {
-            const minCursor = Cursor.min(frontCursor, backCursor),
-                maxCursor = Cursor.max(frontCursor, backCursor),
-                clearFunc = theme.regular.backColor ? "fillRect" : "clearRect";
-
-            if (clearFunc === "fillRect") {
-                bgfx.fillStyle = theme.regular.backColor;
-            }
-            bgfx[clearFunc](0, 0, canv.width, canv.height);
-            bgfx.save();
-            bgfx.scale(scaleFactor, scaleFactor);
-            bgfx.translate(
-                (gridBounds.x - scroll.x) * character.width + padding,
-                -scroll.y * character.height + padding);
-
-
-            // draw the current row highlighter
-            if (focused) {
-                fillRect(bgfx, theme.regular.currentRowBackColor ||
-                    DefaultTheme.regular.currentRowBackColor,
-                    0, minCursor.y,
-                    gridBounds.width,
-                    maxCursor.y - minCursor.y + 1);
-            }
-
-            const minY = scroll.y | 0,
-                maxY = minY + gridBounds.height,
-                minX = scroll.x | 0,
-                maxX = minX + gridBounds.width;
-            tokenFront.setXY(textRows, 0, minY);
-            tokenBack.copy(tokenFront);
-            for (let y = minY; y <= maxY && y < tokenRows.length; ++y) {
-                // draw the tokens on this row
-                const row = tokenRows[y];
-                for (let i = 0; i < row.length; ++i) {
-                    const t = row[i];
-                    tokenBack.x += t.value.length;
-                    tokenBack.i += t.value.length;
-
-                    // skip drawing tokens that aren't in view
-                    if (minX <= tokenBack.x && tokenFront.x <= maxX) {
-                        // draw the selection box
-                        const inSelection = minCursor.i <= tokenBack.i
-                            && tokenFront.i < maxCursor.i;
-                        if (inSelection) {
-                            const selectionFront = Cursor.max(minCursor, tokenFront),
-                                selectionBack = Cursor.min(maxCursor, tokenBack),
-                                cw = selectionBack.i - selectionFront.i;
-                            fillRect(bgfx, theme.regular.selectedBackColor ||
-                                DefaultTheme.regular.selectedBackColor,
-                                selectionFront.x, selectionFront.y,
-                                cw, 1);
-                        }
-                    }
-
-                    tokenFront.copy(tokenBack);
-                }
-
-                tokenFront.x = 0;
-                ++tokenFront.y;
-                tokenBack.copy(tokenFront);
-            }
-
-            // draw the cursor caret
-            if (focused) {
-                const cc = theme.cursorColor || DefaultTheme.cursorColor,
-                    w = 1 / character.width;
-                fillRect(bgfx, cc, minCursor.x, minCursor.y, w, 1);
-                fillRect(bgfx, cc, maxCursor.x, maxCursor.y, w, 1);
-            }
-            bgfx.restore();
-        };
-
-        const renderCanvasForeground = () => {
-            fgfx.clearRect(0, 0, canv.width, canv.height);
-            fgfx.save();
-            fgfx.scale(scaleFactor, scaleFactor);
-            fgfx.translate(
-                (gridBounds.x - scroll.x) * character.width + padding,
-                padding);
-
-            const minY = scroll.y | 0,
-                maxY = minY + gridBounds.height,
-                minX = scroll.x | 0,
-                maxX = minX + gridBounds.width;
-            tokenFront.setXY(textRows, 0, minY);
-            tokenBack.copy(tokenFront);
-            for (let y = minY; y <= maxY && y < tokenRows.length; ++y) {
-                // draw the tokens on this row
-                const row = tokenRows[y],
-                    textY = (y - scroll.y) * character.height;
-
-                for (let i = 0; i < row.length; ++i) {
-                    const t = row[i];
-                    tokenBack.x += t.value.length;
-                    tokenBack.i += t.value.length;
-
-                    // skip drawing tokens that aren't in view
-                    if (minX <= tokenBack.x && tokenFront.x <= maxX) {
-
-                        // draw the text
-                        const style = theme[t.type] || {},
-                            font = (style.fontWeight || theme.regular.fontWeight || "") +
-                                " " + (style.fontStyle || theme.regular.fontStyle || "") +
-                                " " + context.font;
-                        fgfx.font = font.trim();
-                        fgfx.fillStyle = style.foreColor || theme.regular.foreColor;
-                        fgfx.fillText(
-                            t.value,
-                            tokenFront.x * character.width,
-                            textY);
-                    }
-
-                    tokenFront.copy(tokenBack);
-                }
-
-                tokenFront.x = 0;
-                ++tokenFront.y;
-                tokenBack.copy(tokenFront);
-            }
-
-            fgfx.restore();
-        };
-
-        const renderCanvasTrim = () => {
-            tgfx.clearRect(0, 0, canv.width, canv.height);
-            tgfx.save();
-            tgfx.scale(scaleFactor, scaleFactor);
-            tgfx.translate(padding, padding);
-
-            if (showLineNumbers) {
-                fillRect(tgfx,
-                    theme.regular.selectedBackColor ||
-                    DefaultTheme.regular.selectedBackColor,
-                    0, 0,
-                    gridBounds.x, this.width - padding * 2);
-                strokeRect(tgfx,
-                    theme.regular.foreColor ||
-                    DefaultTheme.regular.foreColor,
-                    0, 0,
-                    gridBounds.x, this.height - padding * 2);
-            }
-
-            let maxLineWidth = 2;
-            tgfx.save();
-            {
-                tgfx.translate((lineCountWidth - 0.5) * character.width, -scroll.y * character.height);
-                let lastLine = -1;
-                const minY = scroll.y | 0,
-                    maxY = minY + gridBounds.height;
-                tokenFront.setXY(textRows, 0, minY);
-                tokenBack.copy(tokenFront);
-                for (let y = minY; y < maxY && y < tokenRows.length; ++y) {
-                    const row = tokenRows[y];
-
-                    for (let i = 0; i < row.length; ++i) {
-                        const t = row[i];
-                        tokenBack.x += t.value.length;
-                        tokenBack.i += t.value.length;
-                    }
-                    tokenFront.copy(tokenBack);
-
-                    maxLineWidth = Math.max(maxLineWidth, tokenBack.x - 1);
-                    tokenFront.x = 0;
-                    ++tokenFront.y;
-                    tokenBack.copy(tokenFront);
-
-                    if (showLineNumbers) {
-                        // draw the left gutter
-                        const currentLine = row.length > 0
-                            ? row[0].line
-                            : lastLine + 1,
-                            lineNumber = currentLine.toString();
-
-                        if (currentLine > lastLine) {
-                            lastLine = currentLine;
-                            tgfx.font = "bold " + context.font;
-                            tgfx.fillStyle = theme.regular.foreColor;
-                            tgfx.fillText(
-                                lineNumber,
-                                0, y * character.height);
-                        }
-                    }
-                }
-            }
-            tgfx.restore();
-
-            // draw the scrollbars
-            if (showScrollBars) {
-                const drawWidth = gridBounds.width * character.width - padding,
-                    drawHeight = gridBounds.height * character.height,
-                    scrollX = (scroll.x * drawWidth) / maxLineWidth + gridBounds.x * character.width,
-                    scrollY = (scroll.y * drawHeight) / tokenRows.length;
-
-                tgfx.fillStyle = theme.regular.selectedBackColor ||
-                    DefaultTheme.regular.selectedBackColor;
-                // horizontal
-                let bw = null;
-                if (!wordWrap && maxLineWidth > gridBounds.width) {
-                    const scrollBarWidth = drawWidth * (gridBounds.width / maxLineWidth),
-                        by = gridBounds.height * character.height;
-                    bw = Math.max(character.width, scrollBarWidth);
-                    tgfx.fillRect(scrollX, by, bw, character.height);
-                    tgfx.strokeRect(scrollX, by, bw, character.height);
-                }
-
-                //vertical
-                if (tokenRows.length > gridBounds.height) {
-                    const scrollBarHeight = drawHeight * (gridBounds.height / tokenRows.length),
-                        bx = this.width - vScrollWidth * character.width - 2 * padding,
-                        bh = Math.max(character.height, scrollBarHeight);
-                    bw = vScrollWidth * character.width;
-                    tgfx.fillRect(bx, scrollY, bw, bh);
-                    tgfx.strokeRect(bx, scrollY, bw, bh);
-                }
-            }
-
-            tgfx.restore();
-            if (!focused) {
-                tgfx.fillStyle = theme.regular.unfocused || DefaultTheme.regular.unfocused;
-                tgfx.fillRect(0, 0, canv.width, canv.height);
-            }
-        };
-
-        const doRender = () => {
-            if (tokens && theme) {
-                const textChanged = lastText !== value,
-                    focusChanged = focused !== lastFocused,
-                    fontChanged = context.font !== lastFont,
-                    paddingChanged = padding !== lastPadding,
-                    themeChanged = theme.name !== lastThemeName,
-                    boundsChanged = gridBounds.toString() !== lastGridBounds,
-                    characterWidthChanged = character.width !== lastCharacterWidth,
-                    characterHeightChanged = character.height !== lastCharacterHeight,
-
-                    cursorChanged = frontCursor.i !== lastFrontCursor
-                        || backCursor.i !== lastBackCursor,
-
-                    scrollChanged = scroll.x !== lastScrollX
-                        || scroll.y !== lastScrollY,
-
-                    layoutChanged = resized
-                        || boundsChanged
-                        || textChanged
-                        || characterWidthChanged
-                        || characterHeightChanged
-                        || paddingChanged
-                        || scrollChanged
-                        || themeChanged,
-
-                    backgroundChanged = layoutChanged
-                        || cursorChanged,
-
-                    foregroundChanged = layoutChanged
-                        || fontChanged,
-
-                    trimChanged = layoutChanged
-                        || focusChanged;
-
-                if (backgroundChanged) {
-                    renderCanvasBackground();
-                }
-                if (foregroundChanged) {
-                    renderCanvasForeground();
-                }
-                if (trimChanged) {
-                    renderCanvasTrim();
-                }
-
-                context.clearRect(0, 0, canv.width, canv.height);
-                context.save();
-                context.translate(vibX, vibY);
-                context.drawImage(bg, 0, 0);
-                context.drawImage(fg, 0, 0);
-                context.drawImage(tg, 0, 0);
-                context.restore();
-
-                lastGridBounds = gridBounds.toString();
-                lastText = value;
-                lastCharacterWidth = character.width;
-                lastCharacterHeight = character.height;
-                lastPadding = padding;
-                lastFrontCursor = frontCursor.i;
-                lastBackCursor = backCursor.i;
-                lastFocused = focused;
-                lastFont = context.font;
-                lastThemeName = theme.name;
-                lastScrollX = scroll.x;
-                lastScrollY = scroll.y;
-                resized = false;
-                this.dispatchEvent(updateEvt);
-            }
-        };
-
         render = () => {
             requestAnimationFrame(doRender);
         };
-        //<<<<<<<<<< RENDERING <<<<<<<<<<
-
-
         doRender();
 
         // This is done last so that controls that have errored 
@@ -4229,8 +4387,12 @@ class Primrose extends EventTarget {
     }
 }
 
-
-
+/// <summary>
+/// Registers a new Primrose editor control with the Event Manager, to wire-up key, clipboard, and mouse wheel events, and to manage the currently focused element.
+/// The Event Manager maintains the references in a WeakMap, so when the JS Garbage Collector collects the objects, they will be gone.
+/// Multiple objects may be used to register a single control with the Event Manager without causing issue.This is useful for associating the control with closed objects from other systems, such as Three.js Mesh objects being targeted for pointer picking.
+/// If you are working with Three.js, it's recommended to use the Mesh on which you are texturing the canvas as the key when adding the editor to the Event Manager.
+/// </summary>
 Primrose.add = (key, control) => {
     if (key !== null) {
         elements.set(key, control);
@@ -4238,6 +4400,7 @@ Primrose.add = (key, control) => {
 
     if (controls.indexOf(control) === -1) {
         controls.push(control);
+        publicControls = Object.freeze(controls.slice());
 
         control.addEventListener("blur", () => {
             focusedControl = null;
@@ -4264,10 +4427,16 @@ Primrose.add = (key, control) => {
     }
 };
 
+/// <summary>
+/// Checks for the existence of a control, by the key that the user supplied when calling `Primrose.add()`
+/// </summary>
 Primrose.has = (key) => {
     return elements.has(key);
 };
 
+/// <summary>
+/// Gets the control associated with the given key.
+/// </summary>
 Primrose.get = (key) => {
     return elements.has(key)
         ? elements.get(key)
@@ -4275,18 +4444,34 @@ Primrose.get = (key) => {
 };
 
 Object.defineProperties(Primrose, {
-    focusedControl: {
-        get: () => focusedControl
-    },
 
+    /// <summary>
+    /// The current `Primrose` control that has the mouse hovered over it. In 2D contexts, you probably don't need to check this value, but in WebGL contexts, this is useful for helping Primrose manage events.
+    /// If no control is hovered, this returns `null`.
+    /// </summary>
     hoveredControl: {
         get: () => hoveredControl
     },
 
-    editors: {
-        get: () => controls.slice()
+    /// <summary>
+    /// The current `Primrose` control that has pointer-focus. It will receive all keyboard and clipboard events. In 2D contexts, you probably don't need to check this value, but in WebGL contexts, this is useful for helping Primrose manage events.
+    /// If no control is focused, this returns `null`.
+    /// </summary>
+    focusedControl: {
+        get: () => focusedControl
     },
 
+    /// <summary>
+    /// An array of all of the `Primrose` editor controls that Primrose currently knows about.
+    /// This array is not mutable and is not the array used by the Event Manager. It is a read-only clone that is created whenever the Event Manager registers or removes a new control
+    /// </summary.
+    editors: {
+        get: () => publicControls
+    },
+
+    /// <summary>
+    /// A `Promise` that resolves when the document is ready and the Event Manager has finished its initial setup.
+    /// </summary>
     ready: {
         get: () => ready
     }
@@ -4304,6 +4489,7 @@ requestAnimationFrame(function update() {
             }
             else {
                 controls.splice(i, 1);
+                publicControls = Object.freeze(controls.slice());
             }
         }
     }
@@ -4323,9 +4509,6 @@ const withCurrentControl = (name) => {
 withCurrentControl("KeyDown");
 withCurrentControl("KeyPress");
 withCurrentControl("KeyUp");
-withCurrentControl("BeforeCopy");
-withCurrentControl("BeforeCut");
-withCurrentControl("BeforePase");
 withCurrentControl("Copy");
 withCurrentControl("Cut");
 withCurrentControl("Paste");
@@ -4335,4 +4518,6 @@ window.addEventListener("wheel", (evt) => {
     if (control !== null) {
         control.readWheelEvent(evt);
     }
-}, { passive: false });exports.Primrose=Primrose;Object.defineProperty(exports,'__esModule',{value:true});})));
+}, { passive: false });
+
+export { Basic, Dark, Grammar, HTML, JavaScript, Light, PlainText, Primrose, grammars, themes };

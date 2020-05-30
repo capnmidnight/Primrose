@@ -8,8 +8,6 @@ pliny.value({
 
 import { Grammar } from "./Grammar.js";
 export const HTML = new Grammar("HTML", [
-    ["newlines", /(?:\r\n|\r|\n)/],
-    ["whitespace", /(?:\s+)/],
     ["startBlockComments", /(?:<|&lt;)!--/],
     ["endBlockComments", /--(?:>|&gt;)/],
     ["stringDelim", /("|')/],

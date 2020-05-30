@@ -1,9 +1,8 @@
 export default {
-    input: "src/primrose.js",
+    input: "index.js",
     output: {
         file: "primrose.js",
-        format: "umd",
-        compact: true,
+        format: "es",
         name: "Primrose"
     }
 };
