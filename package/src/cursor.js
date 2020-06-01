@@ -67,7 +67,7 @@ export class Cursor {
         let lastLength = 0;
         for (let y = 0; y < lines.length; ++y) {
             const line = lines[y];
-            lastLength = line.length;
+            lastLength = line.stringLength;
             this.i += lastLength;
         }
         this.y = lines.length - 1;
@@ -82,7 +82,7 @@ export class Cursor {
             if (this.x < 0) {
                 --this.y;
                 const line = lines[this.y];
-                this.x = line.length - 1;
+                this.x = line.stringLength - 1;
             }
             else if (!skipAdjust) {
                 lines[this.y].adjust(this, -1);
@@ -113,11 +113,11 @@ export class Cursor {
     right(lines, skipAdjust = false) {
         const line = lines[this.y];
         if (this.y < lines.length - 1
-            || this.x < line.length) {
+            || this.x < line.stringLength) {
             ++this.i;
             ++this.x;
             if (this.y < lines.length - 1
-                && this.x === line.length) {
+                && this.x === line.stringLength) {
                 this.x = 0;
                 ++this.y;
             }
@@ -129,17 +129,17 @@ export class Cursor {
 
     skipRight(lines) {
         const line = lines[this.y];
-        if (this.x < line.length - 1) {
+        if (this.x < line.stringLength - 1) {
             const x = this.x + 1,
                 subline = line.substring(x),
                 m = subline.match(/\w+/),
                 dx = m
                     ? (m.index + m[0].length + 1)
-                    : (line.length - this.x);
+                    : (line.stringLength - this.x);
             this.i += dx;
             this.x += dx;
             if (this.x > 0
-                && this.x === line.length
+                && this.x === line.stringLength
                 && this.y < lines.length - 1) {
                 --this.x;
                 --this.i;
@@ -160,7 +160,7 @@ export class Cursor {
 
     end(lines) {
         const line = lines[this.y];
-        let dx = line.length - this.x;
+        let dx = line.stringLength - this.x;
         if (this.y < lines.length - 1) {
             --dx;
         }
@@ -173,9 +173,9 @@ export class Cursor {
         if (this.y > 0) {
             --this.y;
             const line = lines[this.y],
-                dx = Math.min(0, line.length - this.x - 1);
+                dx = Math.min(0, line.stringLength - this.x - 1);
             this.x += dx;
-            this.i -= line.length - dx;
+            this.i -= line.stringLength - dx;
             if (!skipAdjust) {
                 lines[this.y].adjust(this, 1);
             }
@@ -187,11 +187,11 @@ export class Cursor {
         if (this.y < lines.length - 1) {
             const pLine = lines[this.y];
             ++this.y;
-            this.i += pLine.length;
+            this.i += pLine.stringLength;
 
             const line = lines[this.y];
-            if (this.x >= line.length) {
-                let dx = this.x - line.length;
+            if (this.x >= line.stringLength) {
+                let dx = this.x - line.stringLength;
                 if (this.y < lines.length - 1) {
                     ++dx;
                 }
@@ -243,13 +243,13 @@ export class Cursor {
         y = Math.floor(y);
         this.y = Math.max(0, Math.min(lines.length - 1, y));
         const line = lines[this.y];
-        this.x = Math.max(0, Math.min(line.length, x));
+        this.x = Math.max(0, Math.min(line.stringLength, x));
         this.i = this.x;
         for (let i = 0; i < this.y; ++i) {
-            this.i += lines[i].length;
+            this.i += lines[i].stringLength;
         }
         if (this.x > 0
-            && this.x === line.length
+            && this.x === line.stringLength
             && this.y < lines.length - 1) {
             --this.x;
             --this.i;
@@ -263,18 +263,25 @@ export class Cursor {
         this.y = 0;
         let total = 0,
             line = lines[this.y];
-        while (this.x > line.length) {
-            this.x -= line.length;
-            total += line.length;
+        while (this.x > line.stringLength) {
+            this.x -= line.stringLength;
+            total += line.stringLength;
             if (this.y >= lines.length - 1) {
                 this.i = total;
-                this.x = line.length;
+                this.x = line.stringLength;
                 this.moved = true;
                 break;
             }
             ++this.y;
             line = lines[this.y];
         }
+
+        if (this.y < lines.length - 1
+            && this.x === line.stringLength) {
+            this.x = 0;
+            ++this.y;
+        }
+
         lines[this.y].adjust(this, 1);
         this.moved = true;
     }

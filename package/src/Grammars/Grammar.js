@@ -106,16 +106,9 @@ export class Grammar {
 
         function crudeParsing(tokens) {
             var commentDelim = null,
-                stringDelim = null,
-                line = 0,
-                i, t;
-            for (i = 0; i < tokens.length; ++i) {
-                t = tokens[i];
-                t.index = i;
-                t.line = line;
-                if (t.type === "newlines") {
-                    ++line;
-                }
+                stringDelim = null;
+            for (let i = 0; i < tokens.length; ++i) {
+                const t = tokens[i];
 
                 if (stringDelim) {
                     if (t.type === "stringDelim" && t.value === stringDelim && (i === 0 || tokens[i - 1].value[tokens[i - 1].value.length - 1] !== "\\")) {
@@ -145,9 +138,9 @@ export class Grammar {
             }
 
             // recombine like-tokens
-            for (i = tokens.length - 1; i > 0; --i) {
-                var p = tokens[i - 1];
-                t = tokens[i];
+            for (let i = tokens.length - 1; i > 0; --i) {
+                const p = tokens[i - 1],
+                    t = tokens[i];
                 if (p.type === t.type
                     && p.type !== "newlines") {
                     p.value += t.value;
@@ -156,7 +149,7 @@ export class Grammar {
             }
 
             // remove empties
-            for (i = tokens.length - 1; i >= 0; --i) {
+            for (let i = tokens.length - 1; i >= 0; --i) {
                 if (tokens[i].value.length === 0) {
                     tokens.splice(i, 1);
                 }

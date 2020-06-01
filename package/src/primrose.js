@@ -294,33 +294,16 @@ export class Primrose extends EventTarget {
                 tokenFront.setXY(lines, 0, minY);
                 tokenBack.copy(tokenFront);
                 for (let y = minY; y <= maxY && y < lines.length; ++y) {
-                    const row = lines[y].tokens;
-
-                    for (let i = 0; i < row.length; ++i) {
-                        const t = row[i];
-                        tokenBack.x += t.value.length;
-                        tokenBack.i += t.value.length;
-                    }
-                    tokenFront.copy(tokenBack);
-
-                    maxLineWidth = Math.max(maxLineWidth, tokenBack.x - 1);
-                    tokenFront.x = 0;
-                    ++tokenFront.y;
-                    tokenBack.copy(tokenFront);
-
+                    const line = lines[y];
+                    maxLineWidth = Math.max(maxLineWidth, line.stringLength);
                     if (showLineNumbers) {
                         // draw the left gutter
-                        const currentLine = row.length > 0
-                            ? row[0].line
-                            : lastLine + 1,
-                            lineNumber = currentLine.toString();
-
-                        if (currentLine > lastLine) {
-                            lastLine = currentLine;
+                        if (line.lineNumber > lastLine) {
+                            lastLine = line.lineNumber;
                             tgfx.font = "bold " + context.font;
                             tgfx.fillStyle = theme.regular.foreColor;
                             tgfx.fillText(
-                                lineNumber,
+                                line.lineNumber,
                                 0, y * character.height);
                         }
                     }
@@ -453,40 +436,8 @@ export class Primrose extends EventTarget {
             }
 
             if (controlType !== lastControlType) {
-                refreshGridBounds();
+                refreshTokens(0, lines.length - 1, value);
             }
-        };
-
-        const setValue = (txt, setUndo) => {
-            txt = txt || "";
-            txt = txt.replace(/\r\n/g, "\n");
-            if (txt !== value) {
-                value = txt;
-                if (setUndo) {
-                    pushUndo();
-                }
-                refreshTokens();
-                this.dispatchEvent(changeEvt);
-            }
-        };
-
-        const setSelectedText = (txt) => {
-            txt = txt || "";
-            txt = txt.replace(/\r\n/g, "\n");
-
-            if (frontCursor.i !== backCursor.i || txt.length > 0) {
-                const minCursor = Cursor.min(frontCursor, backCursor),
-                    maxCursor = Cursor.max(frontCursor, backCursor),
-                    left = value.substring(0, minCursor.i),
-                    right = value.substring(maxCursor.i);
-                setValue(left + txt + right, true);
-                maxCursor.copy(minCursor);
-            }
-        };
-
-        const refreshTokens = () => {
-            tokens.splice(0, tokens.length, ...language.tokenize(value));
-            refreshLayout();
         };
 
         const refreshGutter = () => {
@@ -501,11 +452,64 @@ export class Primrose extends EventTarget {
             }
         };
 
-        const refreshGridBounds = () => {
+        const setValue = (txt, setUndo) => {
+            txt = txt || "";
+            txt = txt.replace(/\r\n/g, "\n");
+            if (txt !== value) {
+                value = txt;
+                if (setUndo) {
+                    pushUndo();
+                }
+                refreshTokens(0, lines.length - 1, value);
+                this.dispatchEvent(changeEvt);
+            }
+        };
+
+        const setSelectedText = (txt) => {
+            txt = txt || "";
+            txt = txt.replace(/\r\n/g, "\n");
+
+            if (frontCursor.i !== backCursor.i || txt.length > 0) {
+                const minCursor = Cursor.min(frontCursor, backCursor),
+                    maxCursor = Cursor.max(frontCursor, backCursor),
+                    left = value.substring(0, minCursor.i),
+                    right = value.substring(maxCursor.i),
+                    startLine = lines[minCursor.y],
+                    startStringI = minCursor.i - startLine.startStringIndex,
+                    endLine = lines[maxCursor.y],
+                    endStringI = maxCursor.i - endLine.startStringIndex,
+                    left_ = startLine.substring(0, startStringI),
+                    right_ = endLine.substring(endStringI),
+                    txt_ = left_ + txt + right_;
+
+                value = left + txt + right;
+                pushUndo();
+                refreshTokens(minCursor.y, maxCursor.y, txt_);
+                //refreshTokens(0, lines.length - 1, value);
+                frontCursor.setI(lines, minCursor.i + txt.length);
+                backCursor.copy(frontCursor);
+                scrollIntoView(frontCursor);
+                this.dispatchEvent(changeEvt);
+            }
+        };
+
+        const refreshTokens = (startY, endY, txt) => {
+            const newTokens = language.tokenize(txt),
+                startLine = lines[startY],
+                startTokenI = startLine.startTokenIndex,
+                endLine = lines[endY],
+                tokenRemoveCount = endLine.endTokenIndex - startTokenI,
+                oldTokens = tokens.splice(startTokenI, tokenRemoveCount, ...newTokens);
+
             // figure out the width of the line count gutter
             lineCountWidth = 0;
             if (showLineNumbers) {
-                const lineCount = value.split(/\n/).length;
+                lineCount = 0;
+                for (let token of tokens) {
+                    if (token.type === "newlines") {
+                        ++lineCount;
+                    }
+                }
                 lineCountWidth = Math.max(1, Math.ceil(Math.log(lineCount) / Math.LN10)) + 1;
             }
 
@@ -516,37 +520,71 @@ export class Primrose extends EventTarget {
                 h = Math.floor((this.height - 2 * padding) / character.height) - y - bottomRightGutter.height;
             gridBounds.set(x, y, w, h);
 
-            refreshLayout();
+            //refreshLayout(startY, endY, newTokens);
+            refreshLayout(0, lines.length - 1, tokens);
         };
 
-        const refreshLayout = () => {
-            lines.splice(0);
-            lines.push("");
-            const tokenQueue = tokens.map(t => t.clone());
-            let currentTokens = [];
+        const refreshLayout = (startY, endY, newTokens) => {
+            // Perform the layout
+            const tokenQueue = newTokens.map(t => t.clone()),
+                lineRemoveCount = endY - startY + 1,
+                newLines = [];
+            let currentString = "",
+                currentTokens = [],
+                currentStringIndex = 0,
+                currentTokenIndex = 0,
+                currentLineNumber = startY;
             for (let i = 0; i < tokenQueue.length; ++i) {
                 const t = tokenQueue[i],
-                    end = lines.length - 1,
-                    widthLeft = gridBounds.width - lines[end].length,
+                    widthLeft = gridBounds.width - currentString.length,
                     wrap = wordWrap && t.type !== "newlines" && t.value.length > widthLeft,
                     breakLine = t.type === "newlines" || wrap;
 
                 if (wrap) {
-                    const split = t.value.length > gridBounds.width ? widthLeft : 0;
+                    const split = t.value.length > gridBounds.width
+                        ? widthLeft
+                        : 0;
                     tokenQueue.splice(i + 1, 0, t.splitAt(split));
                 }
 
                 currentTokens.push(t);
-                lines[end] += t.value;
+                currentString += t.value;
 
-                if (breakLine) {
-                    lines[end] = new Line(lines[end], currentTokens);
-                    lines.push("");
+                if (breakLine
+                    || i === tokenQueue.length - 1) {
+                    newLines.push(new Line(currentString, currentTokens, currentStringIndex, currentTokenIndex, currentLineNumber));
+                    currentStringIndex += currentString.length;
+                    currentTokenIndex += currentTokens.length;
+
                     currentTokens = [];
+                    currentString = "";
+
+                    if (!wrap) {
+                        ++currentLineNumber;
+                    }
                 }
             }
 
-            lines[lines.length - 1] = new Line(lines[lines.length - 1], currentTokens);
+            const oldLines = lines.splice(startY, lineRemoveCount, ...newLines);
+
+            // renumber lines
+            const deltaLines = newLines.length - oldLines.length;
+            if (deltaLines !== 0) {
+                for (let y = startY + newLines.length; y < lines.length; ++y) {
+                    lines[y].lineNumber += deltaLines;
+                }
+            }
+
+            // provide editing room at the end of the buffer
+            if (lines.length === 0) {
+                lines.push(Line.emptyLine(0, 0, 0));
+            }
+            else {
+                const lastLine = lines[lines.length - 1];
+                if (lastLine.text.endsWith('\n')) {
+                    lines.push(Line.emptyLine(lastLine.endStringIndex, lastLine.endTokenIndex, lastLine.lineNumber + 1));
+                }
+            }
 
             maxVerticalScroll = Math.max(0, lines.length - gridBounds.height);
 
@@ -558,7 +596,7 @@ export class Primrose extends EventTarget {
             setContextSize(fgfx, canv.width, canv.height);
             setContextSize(bgfx, canv.width, canv.height);
             setContextSize(tgfx, canv.width, canv.height);
-            refreshGridBounds();
+            refreshTokens(0, lines.length - 1, value);
         };
 
         const minDelta = (v, minV, maxV) => {
@@ -911,8 +949,6 @@ export class Primrose extends EventTarget {
             ["InsertTab", () => {
                 tabPressed = true;
                 setSelectedText(tabString);
-                frontCursor.incX(lines, tabString.length);
-                backCursor.copy(frontCursor);
             }],
 
             ["RemoveTab", () => {
@@ -927,8 +963,6 @@ export class Primrose extends EventTarget {
 
                 frontCursor.incX(lines, -toDelete);
                 setSelectedText("");
-                frontCursor.left(lines);
-                frontCursor.right(lines);
             }]
         ]));
 
@@ -951,9 +985,6 @@ export class Primrose extends EventTarget {
                         indent = tokenRow[0].value;
                     }
                     setSelectedText("\n" + indent);
-                    frontCursor.incX(lines, indent.length + 1);
-                    backCursor.copy(frontCursor);
-                    render();
                 }
                 else {
                     this.dispatchEvent(changeEvt);
@@ -971,9 +1002,6 @@ export class Primrose extends EventTarget {
                     frontCursor.home();
                     backCursor.copy(frontCursor);
                     setSelectedText(indent + "\n");
-                    frontCursor.incX(lines, indent.length);
-                    backCursor.copy(frontCursor);
-                    render();
                 }
                 else {
                     this.dispatchEvent(changeEvt);
@@ -996,8 +1024,6 @@ export class Primrose extends EventTarget {
                 else if (command.type === "printable"
                     || command.type === "whitespace") {
                     setSelectedText(command.text);
-                    frontCursor.right(lines);
-                    backCursor.copy(frontCursor);
                 }
 
                 clampScroll();
@@ -1040,8 +1066,6 @@ export class Primrose extends EventTarget {
                     str = clipboard.getData(window.clipboardData ? "Text" : "text/plain");
                 if (str) {
                     setSelectedText(str);
-                    frontCursor.incX(str.length);
-                    backCursor.copy(frontCursor);
                 }
             }
         });
@@ -1101,7 +1125,7 @@ export class Primrose extends EventTarget {
             else if (onBottom && !onLeft) {
                 let maxWidth = 0;
                 for (let dy = 0; dy < lines.length; ++dy) {
-                    maxWidth = Math.max(maxWidth, lines[dy].length);
+                    maxWidth = Math.max(maxWidth, lines[dy].stringLength);
                 }
                 const scrollWidth = maxWidth - gridBounds.width;
                 if (gx >= 0 && scrollWidth >= 0) {
@@ -1560,7 +1584,7 @@ export class Primrose extends EventTarget {
                 set: (l) => {
                     if (l !== language) {
                         language = l;
-                        refreshTokens();
+                        refreshTokens(0, lines.length - 1, value);
                         render();
                     }
                 }
@@ -1626,7 +1650,7 @@ export class Primrose extends EventTarget {
                             "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM")
                             .width /
                             100;
-                        refreshGridBounds();
+                        refreshTokens(0, lines.length - 1, value);
                     }
                 }
             },
@@ -1687,6 +1711,7 @@ export class Primrose extends EventTarget {
             scrolling = false,
             multiLine = false,
             tabPressed = false,
+            lineCount = 1,
             lineCountWidth = 0,
             isOffScreen = false,
             element = null,
@@ -1712,7 +1737,7 @@ export class Primrose extends EventTarget {
 
         const history = [],
             tokens = [],
-            lines = [new Line("", [])],
+            lines = [Line.emptyLine(0, 0, 0)],
             scroll = new Point(),
             pointer = new Point(),
             character = new Size(),

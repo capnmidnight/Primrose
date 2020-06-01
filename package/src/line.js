@@ -1,8 +1,16 @@
 ﻿export class Line {
-    constructor(txt, tokens) {
+    constructor(txt, tokens, startStringIndex, startTokenIndex, lineNumber) {
         this.text = txt;
+        this.startStringIndex = startStringIndex;
+        this.stringLength = txt.length;
+        this.endStringIndex = this.startStringIndex + this.stringLength;
+
         this.tokens = tokens;
-        this.length = txt.length;
+        this.startTokenIndex = startTokenIndex;
+        this.numTokens = tokens.length;
+        this.endTokenIndex = this.startTokenIndex + this.numTokens;
+
+        this.lineNumber = lineNumber;
 
         const graphemes = Object.freeze([...txt]),
             leftCorrections = new Array(txt.length),
@@ -39,6 +47,8 @@
 
         this.substring = (x, y) => txt.substring(x, y);
 
-        Object.freeze(this);
+        Object.seal(this);
     }
 }
+
+Line.emptyLine = (startStringIndex, startTokenIndex, lineNumber) => new Line("", [], startStringIndex, startTokenIndex, lineNumber);
