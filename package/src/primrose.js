@@ -450,6 +450,21 @@ export class Primrose extends EventTarget {
             }
         };
 
+        const setSelectedText = (txt) => {
+            txt = txt || "";
+            txt = txt.replace(/\r\n/g, "\n");
+
+            if (frontCursor.i !== backCursor.i || txt.length > 0) {
+                const minCursor = Cursor.min(frontCursor, backCursor),
+                    maxCursor = Cursor.max(frontCursor, backCursor),
+                    left = value.substring(0, minCursor.i),
+                    right = value.substring(maxCursor.i);
+                setValue(left + txt + right, true);
+                maxCursor.copy(minCursor);
+                render();
+            }
+        };
+
         const refreshControlType = () => {
             const lastControlType = controlType;
 
@@ -850,28 +865,28 @@ export class Primrose extends EventTarget {
                 if (frontCursor.i === backCursor.i) {
                     backCursor.left(lines);
                 }
-                this.selectedText = "";
+                setSelectedText("");
             }],
 
             ["DeleteLetterRight", () => {
                 if (frontCursor.i === backCursor.i) {
                     backCursor.right(lines);
                 }
-                this.selectedText = "";
+                setSelectedText("");
             }],
 
             ["DeleteWordLeft", () => {
                 if (frontCursor.i === backCursor.i) {
                     frontCursor.skipLeft(lines);
                 }
-                this.selectedText = "";
+                setSelectedText("");
             }],
 
             ["DeleteWordRight", () => {
                 if (frontCursor.i === backCursor.i) {
                     backCursor.skipRight(lines);
                 }
-                this.selectedText = "";
+                setSelectedText("");
             }],
 
             ["DeleteLine", () => {
@@ -880,7 +895,7 @@ export class Primrose extends EventTarget {
                     backCursor.end(lines);
                     backCursor.right(lines);
                 }
-                this.selectedText = "";
+                setSelectedText("");
             }],
 
             ["Undo", () => {
@@ -893,7 +908,7 @@ export class Primrose extends EventTarget {
 
             ["InsertTab", () => {
                 tabPressed = true;
-                this.selectedText = tabString;
+                setSelectedText(tabString);
                 frontCursor.incX(lines, tabString.length);
                 backCursor.copy(frontCursor);
             }],
@@ -909,7 +924,7 @@ export class Primrose extends EventTarget {
                 }
 
                 frontCursor.incX(lines, -toDelete);
-                this.selectedText = "";
+                setSelectedText("");
                 frontCursor.left(lines);
                 frontCursor.right(lines);
             }]
@@ -933,7 +948,7 @@ export class Primrose extends EventTarget {
                         && tokenRow[0].type === "whitespace") {
                         indent = tokenRow[0].value;
                     }
-                    this.selectedText = "\n" + indent;
+                    setSelectedText("\n" + indent);
                     frontCursor.incX(lines, indent.length + 1);
                     backCursor.copy(frontCursor);
                     render();
@@ -953,7 +968,7 @@ export class Primrose extends EventTarget {
                     }
                     frontCursor.home();
                     backCursor.copy(frontCursor);
-                    this.selectedText = indent + "\n";
+                    setSelectedText(indent + "\n");
                     frontCursor.incX(lines, indent.length);
                     backCursor.copy(frontCursor);
                     render();
@@ -978,7 +993,7 @@ export class Primrose extends EventTarget {
                 }
                 else if (command.type === "printable"
                     || command.type === "whitespace") {
-                    this.selectedText = command.text;
+                    setSelectedText(command.text);
                     frontCursor.right(lines);
                     backCursor.copy(frontCursor);
                 }
@@ -1012,7 +1027,7 @@ export class Primrose extends EventTarget {
         this.readCutEvent = debugEvt("cut", (evt) => {
             if (copySelectedText(evt)
                 && !this.readOnly) {
-                this.selectedText = "";
+                setSelectedText("");
             }
         });
 
@@ -1022,7 +1037,7 @@ export class Primrose extends EventTarget {
                 const clipboard = evt.clipboardData || window.clipboardData,
                     str = clipboard.getData(window.clipboardData ? "Text" : "text/plain");
                 if (str) {
-                    this.selectedText = str;
+                    setSelectedText(str);
                     frontCursor.incX(str.length);
                     backCursor.copy(frontCursor);
                 }
@@ -1467,18 +1482,7 @@ export class Primrose extends EventTarget {
                     return value.substring(minCursor.i, maxCursor.i);
                 },
                 set: (txt) => {
-                    txt = txt || "";
-                    txt = txt.replace(/\r\n/g, "\n");
-
-                    if (frontCursor.i !== backCursor.i || txt.length > 0) {
-                        const minCursor = Cursor.min(frontCursor, backCursor),
-                            maxCursor = Cursor.max(frontCursor, backCursor),
-                            left = value.substring(0, minCursor.i),
-                            right = value.substring(maxCursor.i);
-                        setValue(left + txt + right, true);
-                        maxCursor.copy(minCursor);
-                        render();
-                    }
+                    setSelectedText(txt);
                 }
             },
 
