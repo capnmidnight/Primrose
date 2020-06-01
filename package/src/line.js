@@ -29,6 +29,10 @@
                 cursor.x += delta;
                 cursor.i += delta;
             }
+            else if (dir === 1
+                && txt[txt.length - 1] === '\n') {
+                this.adjust(cursor, -1);
+            }
         };
 
         this.toString = () => txt;
