@@ -485,7 +485,7 @@ export class Primrose extends EventTarget {
         };
 
         const refreshTokens = () => {
-            tokens = language.tokenize(value);
+            tokens.splice(0, tokens.length, ...language.tokenize(value));
             refreshLayout();
         };
 
@@ -1673,7 +1673,6 @@ export class Primrose extends EventTarget {
             theme = Dark,
             tabWidth = 2,
             canv = null,
-            tokens = [],
             resized = false,
             hovered = false,
             focused = false,
@@ -1712,6 +1711,7 @@ export class Primrose extends EventTarget {
             lastText = null;
 
         const history = [],
+            tokens = [],
             lines = [new Line("", [])],
             scroll = new Point(),
             pointer = new Point(),
