@@ -461,7 +461,6 @@ export class Primrose extends EventTarget {
                     right = value.substring(maxCursor.i);
                 setValue(left + txt + right, true);
                 maxCursor.copy(minCursor);
-                render();
             }
         };
 
