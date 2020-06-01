@@ -1,5 +1,7 @@
 ﻿export class Line {
-    constructor(txt) {
+    constructor(txt, tokens) {
+        this.text = txt;
+        this.tokens = tokens;
         this.length = txt.length;
 
         const graphemes = Object.freeze([...txt]),

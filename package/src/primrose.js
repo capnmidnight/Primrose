@@ -168,11 +168,11 @@ export class Primrose extends EventTarget {
                 maxY = minY + gridBounds.height,
                 minX = scroll.x | 0,
                 maxX = minX + gridBounds.width;
-            tokenFront.setXY(textRows, 0, minY);
+            tokenFront.setXY(lines, 0, minY);
             tokenBack.copy(tokenFront);
-            for (let y = minY; y <= maxY && y < tokenRows.length; ++y) {
+            for (let y = minY; y <= maxY && y < lines.length; ++y) {
                 // draw the tokens on this row
-                const row = tokenRows[y];
+                const row = lines[y].tokens;
                 for (let i = 0; i < row.length; ++i) {
                     const t = row[i];
                     tokenBack.x += t.value.length;
@@ -224,11 +224,11 @@ export class Primrose extends EventTarget {
                 maxY = minY + gridBounds.height,
                 minX = scroll.x | 0,
                 maxX = minX + gridBounds.width;
-            tokenFront.setXY(textRows, 0, minY);
+            tokenFront.setXY(lines, 0, minY);
             tokenBack.copy(tokenFront);
-            for (let y = minY; y <= maxY && y < tokenRows.length; ++y) {
+            for (let y = minY; y <= maxY && y < lines.length; ++y) {
                 // draw the tokens on this row
-                const row = tokenRows[y],
+                const row = lines[y].tokens,
                     textY = (y - scroll.y) * character.height;
 
                 for (let i = 0; i < row.length; ++i) {
@@ -291,10 +291,10 @@ export class Primrose extends EventTarget {
                     maxY = minY + gridBounds.height,
                     minX = scroll.x | 0,
                     maxX = minX + gridBounds.width;
-                tokenFront.setXY(textRows, 0, minY);
+                tokenFront.setXY(lines, 0, minY);
                 tokenBack.copy(tokenFront);
-                for (let y = minY; y <= maxY && y < tokenRows.length; ++y) {
-                    const row = tokenRows[y];
+                for (let y = minY; y <= maxY && y < lines.length; ++y) {
+                    const row = lines[y].tokens;
 
                     for (let i = 0; i < row.length; ++i) {
                         const t = row[i];
@@ -333,7 +333,7 @@ export class Primrose extends EventTarget {
                 const drawWidth = gridBounds.width * character.width - padding,
                     drawHeight = gridBounds.height * character.height,
                     scrollX = (scroll.x * drawWidth) / maxLineWidth + gridBounds.x * character.width,
-                    scrollY = (scroll.y * drawHeight) / tokenRows.length;
+                    scrollY = (scroll.y * drawHeight) / lines.length;
 
                 tgfx.fillStyle = theme.regular.selectedBackColor ||
                     DefaultTheme.regular.selectedBackColor;
@@ -348,8 +348,8 @@ export class Primrose extends EventTarget {
                 }
 
                 //vertical
-                if (tokenRows.length > gridBounds.height) {
-                    const scrollBarHeight = drawHeight * (gridBounds.height / tokenRows.length),
+                if (lines.length > gridBounds.height) {
+                    const scrollBarHeight = drawHeight * (gridBounds.height / lines.length),
                         bx = this.width - vScrollWidth * character.width - 2 * padding,
                         bh = Math.max(character.height, scrollBarHeight);
                     bw = vScrollWidth * character.width;
@@ -366,7 +366,7 @@ export class Primrose extends EventTarget {
         };
 
         const doRender = () => {
-            if (tokens && theme) {
+            if (theme) {
                 const textChanged = lastText !== value,
                     focusChanged = focused !== lastFocused,
                     fontChanged = context.font !== lastFont,
@@ -503,40 +503,35 @@ export class Primrose extends EventTarget {
             gridBounds.set(x, y, w, h);
 
             // group the tokens into rows
-            textRows.splice(0);
-            textRows.push("");
-            tokenRows.splice(0);
-            tokenRows.push([]);
-            let currentRowWidth = 0;
-            const tokenQueue = tokens.slice();
+            lines.splice(0);
+            lines.push("");
+            const tokenQueue = tokens.map(t => t.clone());
+            let currentTokens = [];
             for (let i = 0; i < tokenQueue.length; ++i) {
-                const t = tokenQueue[i].clone(),
-                    widthLeft = gridBounds.width - currentRowWidth,
+                const t = tokenQueue[i],
+                    end = lines.length - 1,
+                    widthLeft = gridBounds.width - lines[end].length,
                     wrap = wordWrap && t.type !== "newlines" && t.value.length > widthLeft,
                     breakLine = t.type === "newlines" || wrap;
+
                 if (wrap) {
                     const split = t.value.length > gridBounds.width ? widthLeft : 0;
                     tokenQueue.splice(i + 1, 0, t.splitAt(split));
                 }
 
-                const end = tokenRows.length - 1;
-                if (t.value.length > 0) {
-                    tokenRows[end].push(t);
-                    textRows[end] += t.value;
-                    currentRowWidth += t.value.length;
-                }
+                currentTokens.push(t);
+                lines[end] += t.value;
 
                 if (breakLine) {
-                    textRows[end] = new Line(textRows[end]);
-                    textRows.push("");
-                    tokenRows.push([]);
-                    currentRowWidth = 0;
+                    lines[end] = new Line(lines[end], currentTokens);
+                    lines.push("");
+                    currentTokens = [];
                 }
             }
 
-            textRows[textRows.length - 1] = new Line(textRows[textRows.length - 1]);
+            lines[lines.length - 1] = new Line(lines[lines.length - 1], currentTokens);
 
-            maxVerticalScroll = Math.max(0, tokenRows.length - gridBounds.height);
+            maxVerticalScroll = Math.max(0, lines.length - gridBounds.height);
 
             render();
         };
@@ -604,8 +599,8 @@ export class Primrose extends EventTarget {
                 historyIndex = nextHistoryIndex;
                 const nextFrame = history[historyIndex];
                 setValue(nextFrame.value, false);
-                frontCursor.setI(textRows, curFrame.frontCursor);
-                backCursor.setI(textRows, curFrame.backCursor);
+                frontCursor.setI(lines, curFrame.frontCursor);
+                backCursor.setI(lines, curFrame.backCursor);
             }
         }
         //<<<<<<<<<< PRIVATE METHODS <<<<<<<<<<
@@ -680,7 +675,7 @@ export class Primrose extends EventTarget {
             ["CursorUp", () => {
                 const minCursor = Cursor.min(frontCursor, backCursor),
                     maxCursor = Cursor.max(frontCursor, backCursor);
-                minCursor.up(textRows);
+                minCursor.up(lines);
                 maxCursor.copy(minCursor);
                 scrollIntoView(frontCursor);
             }],
@@ -688,7 +683,7 @@ export class Primrose extends EventTarget {
             ["CursorDown", () => {
                 const minCursor = Cursor.min(frontCursor, backCursor),
                     maxCursor = Cursor.max(frontCursor, backCursor);
-                maxCursor.down(textRows);
+                maxCursor.down(lines);
                 minCursor.copy(maxCursor);
                 scrollIntoView(frontCursor);
             }],
@@ -697,7 +692,7 @@ export class Primrose extends EventTarget {
                 const minCursor = Cursor.min(frontCursor, backCursor),
                     maxCursor = Cursor.max(frontCursor, backCursor);
                 if (minCursor.i === maxCursor.i) {
-                    minCursor.left(textRows);
+                    minCursor.left(lines);
                 }
                 maxCursor.copy(minCursor);
                 scrollIntoView(frontCursor);
@@ -707,7 +702,7 @@ export class Primrose extends EventTarget {
                 const minCursor = Cursor.min(frontCursor, backCursor),
                     maxCursor = Cursor.max(frontCursor, backCursor);
                 if (minCursor.i === maxCursor.i) {
-                    maxCursor.right(textRows);
+                    maxCursor.right(lines);
                 }
                 minCursor.copy(maxCursor);
                 scrollIntoView(frontCursor);
@@ -716,7 +711,7 @@ export class Primrose extends EventTarget {
             ["CursorPageUp", () => {
                 const minCursor = Cursor.min(frontCursor, backCursor),
                     maxCursor = Cursor.max(frontCursor, backCursor);
-                minCursor.incY(textRows, -gridBounds.height);
+                minCursor.incY(lines, -gridBounds.height);
                 maxCursor.copy(minCursor);
                 scrollIntoView(frontCursor);
             }],
@@ -724,7 +719,7 @@ export class Primrose extends EventTarget {
             ["CursorPageDown", () => {
                 const minCursor = Cursor.min(frontCursor, backCursor),
                     maxCursor = Cursor.max(frontCursor, backCursor);
-                maxCursor.incY(textRows, gridBounds.height);
+                maxCursor.incY(lines, gridBounds.height);
                 minCursor.copy(maxCursor);
                 scrollIntoView(frontCursor);
             }],
@@ -733,7 +728,7 @@ export class Primrose extends EventTarget {
                 const minCursor = Cursor.min(frontCursor, backCursor),
                     maxCursor = Cursor.max(frontCursor, backCursor);
                 if (minCursor.i === maxCursor.i) {
-                    minCursor.skipLeft(textRows);
+                    minCursor.skipLeft(lines);
                 }
                 maxCursor.copy(minCursor);
                 scrollIntoView(frontCursor);
@@ -743,7 +738,7 @@ export class Primrose extends EventTarget {
                 const minCursor = Cursor.min(frontCursor, backCursor),
                     maxCursor = Cursor.max(frontCursor, backCursor);
                 if (minCursor.i === maxCursor.i) {
-                    maxCursor.skipRight(textRows);
+                    maxCursor.skipRight(lines);
                 }
                 minCursor.copy(maxCursor);
                 scrollIntoView(frontCursor);
@@ -756,60 +751,60 @@ export class Primrose extends EventTarget {
             }],
 
             ["CursorEnd", () => {
-                frontCursor.end(textRows);
+                frontCursor.end(lines);
                 backCursor.copy(frontCursor);
                 scrollIntoView(frontCursor);
             }],
 
             ["CursorFullHome", () => {
-                frontCursor.fullHome(textRows);
+                frontCursor.fullHome(lines);
                 backCursor.copy(frontCursor);
                 scrollIntoView(frontCursor);
             }],
 
             ["CursorFullEnd", () => {
-                frontCursor.fullEnd(textRows);
+                frontCursor.fullEnd(lines);
                 backCursor.copy(frontCursor);
                 scrollIntoView(frontCursor);
             }],
 
             ["SelectDown", () => {
-                backCursor.down(textRows);
+                backCursor.down(lines);
                 scrollIntoView(frontCursor);
             }],
 
             ["SelectLeft", () => {
-                backCursor.left(textRows);
+                backCursor.left(lines);
                 scrollIntoView(backCursor);
             }],
 
             ["SelectRight", () => {
-                backCursor.right(textRows);
+                backCursor.right(lines);
                 scrollIntoView(backCursor);
             }],
 
             ["SelectUp", () => {
-                backCursor.up(textRows);
+                backCursor.up(lines);
                 scrollIntoView(backCursor);
             }],
 
             ["SelectPageDown", () => {
-                backCursor.incY(textRows, gridBounds.height);
+                backCursor.incY(lines, gridBounds.height);
                 scrollIntoView(backCursor);
             }],
 
             ["SelectPageUp", () => {
-                backCursor.incY(textRows, -gridBounds.height);
+                backCursor.incY(lines, -gridBounds.height);
                 scrollIntoView(backCursor);
             }],
 
             ["SelectSkipLeft", () => {
-                backCursor.skipLeft(textRows);
+                backCursor.skipLeft(lines);
                 scrollIntoView(backCursor);
             }],
 
             ["SelectSkipRight", () => {
-                backCursor.skipRight(textRows);
+                backCursor.skipRight(lines);
                 scrollIntoView(backCursor);
             }],
 
@@ -819,28 +814,28 @@ export class Primrose extends EventTarget {
             }],
 
             ["SelectEnd", () => {
-                backCursor.end(textRows);
+                backCursor.end(lines);
                 scrollIntoView(backCursor);
             }],
 
             ["SelectFullHome", () => {
-                backCursor.fullHome(textRows);
+                backCursor.fullHome(lines);
                 scrollIntoView(backCursor);
             }],
 
             ["SelectFullEnd", () => {
-                backCursor.fullEnd(textRows);
+                backCursor.fullEnd(lines);
                 scrollIntoView(backCursor);
             }],
 
             ["SelectAll", () => {
                 frontCursor.fullHome();
-                backCursor.fullEnd(textRows);
+                backCursor.fullEnd(lines);
                 render();
             }],
 
             ["ScrollDown", () => {
-                if (scroll.y < textRows.length - gridBounds.height) {
+                if (scroll.y < lines.length - gridBounds.height) {
                     this.scrollBy(0, 1);
                 }
             }],
@@ -853,28 +848,28 @@ export class Primrose extends EventTarget {
 
             ["DeleteLetterLeft", () => {
                 if (frontCursor.i === backCursor.i) {
-                    backCursor.left(textRows);
+                    backCursor.left(lines);
                 }
                 this.selectedText = "";
             }],
 
             ["DeleteLetterRight", () => {
                 if (frontCursor.i === backCursor.i) {
-                    backCursor.right(textRows);
+                    backCursor.right(lines);
                 }
                 this.selectedText = "";
             }],
 
             ["DeleteWordLeft", () => {
                 if (frontCursor.i === backCursor.i) {
-                    frontCursor.skipLeft(textRows);
+                    frontCursor.skipLeft(lines);
                 }
                 this.selectedText = "";
             }],
 
             ["DeleteWordRight", () => {
                 if (frontCursor.i === backCursor.i) {
-                    backCursor.skipRight(textRows);
+                    backCursor.skipRight(lines);
                 }
                 this.selectedText = "";
             }],
@@ -882,8 +877,8 @@ export class Primrose extends EventTarget {
             ["DeleteLine", () => {
                 if (frontCursor.i === backCursor.i) {
                     frontCursor.home();
-                    backCursor.end(textRows);
-                    backCursor.right(textRows);
+                    backCursor.end(lines);
+                    backCursor.right(lines);
                 }
                 this.selectedText = "";
             }],
@@ -899,12 +894,12 @@ export class Primrose extends EventTarget {
             ["InsertTab", () => {
                 tabPressed = true;
                 this.selectedText = tabString;
-                frontCursor.incX(textRows, tabString.length);
+                frontCursor.incX(lines, tabString.length);
                 backCursor.copy(frontCursor);
             }],
 
             ["RemoveTab", () => {
-                const line = textRows[frontCursor.y],
+                const line = lines[frontCursor.y],
                     toDelete = Math.min(frontCursor.x, tabWidth);
                 for (let i = 0; i < frontCursor.x; ++i) {
                     if (line[i] !== ' ') {
@@ -913,10 +908,10 @@ export class Primrose extends EventTarget {
                     }
                 }
 
-                frontCursor.incX(textRows, -toDelete);
+                frontCursor.incX(lines, -toDelete);
                 this.selectedText = "";
-                frontCursor.left(textRows);
-                frontCursor.right(textRows);
+                frontCursor.left(lines);
+                frontCursor.right(lines);
             }]
         ]));
 
@@ -933,13 +928,13 @@ export class Primrose extends EventTarget {
             ["AppendNewline", () => {
                 if (multiLine) {
                     let indent = "";
-                    const tokenRow = tokenRows[frontCursor.y];
+                    const tokenRow = lines[frontCursor.y].tokens;
                     if (tokenRow.length > 0
                         && tokenRow[0].type === "whitespace") {
                         indent = tokenRow[0].value;
                     }
                     this.selectedText = "\n" + indent;
-                    frontCursor.incX(textRows, indent.length + 1);
+                    frontCursor.incX(lines, indent.length + 1);
                     backCursor.copy(frontCursor);
                     render();
                 }
@@ -951,7 +946,7 @@ export class Primrose extends EventTarget {
             ["PrependNewline", () => {
                 if (multiLine) {
                     let indent = "";
-                    const tokenRow = tokenRows[frontCursor.y];
+                    const tokenRow = lines[frontCursor.y].tokens;
                     if (tokenRow.length > 0
                         && tokenRow[0].type === "whitespace") {
                         indent = tokenRow[0].value;
@@ -959,7 +954,7 @@ export class Primrose extends EventTarget {
                     frontCursor.home();
                     backCursor.copy(frontCursor);
                     this.selectedText = indent + "\n";
-                    frontCursor.incX(textRows, indent.length);
+                    frontCursor.incX(lines, indent.length);
                     backCursor.copy(frontCursor);
                     render();
                 }
@@ -972,7 +967,7 @@ export class Primrose extends EventTarget {
                 moveInHistory(-1);
             }]
         ]));
-        
+
         this.readKeyPressEvent = debugEvt("keypress", (evt) => {
             const command = os.makeCommand(evt);
             if (!this.readOnly) {
@@ -984,7 +979,7 @@ export class Primrose extends EventTarget {
                 else if (command.type === "printable"
                     || command.type === "whitespace") {
                     this.selectedText = command.text;
-                    frontCursor.right(textRows);
+                    frontCursor.right(lines);
                     backCursor.copy(frontCursor);
                 }
 
@@ -1075,12 +1070,12 @@ export class Primrose extends EventTarget {
                 onRight = pointer.x >= gridBounds.width;
 
             if (!scrolling && !onBottom && !onLeft && !onRight) {
-                cursor.setXY(textRows, pointer.x, pointer.y);
+                cursor.setXY(lines, pointer.x, pointer.y);
                 backCursor.copy(cursor);
             }
             else if (scrolling || onRight && !onBottom) {
                 scrolling = true;
-                const scrollHeight = textRows.length - gridBounds.height;
+                const scrollHeight = lines.length - gridBounds.height;
                 if (gy >= 0 && scrollHeight >= 0) {
                     const sy = gy * scrollHeight / gridBounds.height;
                     this.scrollTo(scroll.x, sy);
@@ -1088,8 +1083,8 @@ export class Primrose extends EventTarget {
             }
             else if (onBottom && !onLeft) {
                 let maxWidth = 0;
-                for (let dy = 0; dy < textRows.length; ++dy) {
-                    maxWidth = Math.max(maxWidth, textRows[dy].length);
+                for (let dy = 0; dy < lines.length; ++dy) {
+                    maxWidth = Math.max(maxWidth, lines[dy].length);
                 }
                 const scrollWidth = maxWidth - gridBounds.width;
                 if (gx >= 0 && scrollWidth >= 0) {
@@ -1237,8 +1232,8 @@ export class Primrose extends EventTarget {
         longPress.addEventListener("tick", () => {
             startSelecting();
             backCursor.copy(frontCursor);
-            frontCursor.skipLeft(textRows);
-            backCursor.skipRight(textRows);
+            frontCursor.skipLeft(lines);
+            backCursor.skipRight(lines);
             render();
             navigator.vibrate(20);
             if (isDebug) {
@@ -1495,7 +1490,7 @@ export class Primrose extends EventTarget {
                 set: (i) => {
                     i = i | 0;
                     if (i !== frontCursor.i) {
-                        frontCursor.setI(textRows, i);
+                        frontCursor.setI(lines, i);
                         render();
                     }
                 }
@@ -1509,7 +1504,7 @@ export class Primrose extends EventTarget {
                 set: (i) => {
                     i = i | 0;
                     if (i !== backCursor.i) {
-                        backCursor.setI(textRows, i);
+                        backCursor.setI(lines, i);
                         render();
                     }
                 }
@@ -1711,8 +1706,7 @@ export class Primrose extends EventTarget {
             lastText = null;
 
         const history = [],
-            tokenRows = [],
-            textRows = [""],
+            lines = [new Line("", [])],
             scroll = new Point(),
             pointer = new Point(),
             character = new Size(),
