@@ -453,7 +453,7 @@ export class Primrose extends EventTarget {
             }
 
             if (controlType !== lastControlType) {
-                render();
+                refreshGridBounds();
             }
         };
 
