@@ -436,6 +436,27 @@ export class Primrose extends EventTarget {
         };
         //<<<<<<<<<< RENDERING <<<<<<<<<<
 
+        const refreshControlType = () => {
+            const lastControlType = controlType;
+
+            if (readOnly && multiLine) {
+                controlType = multiLineOutput;
+            }
+            else if (readOnly && !multiLine) {
+                controlType = singleLineOutput;
+            }
+            else if (!readOnly && multiLine) {
+                controlType = multiLineInput;
+            }
+            else {
+                controlType = singleLineInput;
+            }
+
+            if (controlType !== lastControlType) {
+                render();
+            }
+        };
+
         const setValue = (txt, setUndo) => {
             txt = txt || "";
             txt = txt.replace(/\r\n/g, "\n");
@@ -461,27 +482,6 @@ export class Primrose extends EventTarget {
                     right = value.substring(maxCursor.i);
                 setValue(left + txt + right, true);
                 maxCursor.copy(minCursor);
-            }
-        };
-
-        const refreshControlType = () => {
-            const lastControlType = controlType;
-
-            if (readOnly && multiLine) {
-                controlType = multiLineOutput;
-            }
-            else if (readOnly && !multiLine) {
-                controlType = singleLineOutput;
-            }
-            else if (!readOnly && multiLine) {
-                controlType = multiLineInput;
-            }
-            else {
-                controlType = singleLineInput;
-            }
-
-            if (controlType !== lastControlType) {
-                render();
             }
         };
 
