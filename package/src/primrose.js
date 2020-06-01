@@ -466,7 +466,6 @@ export class Primrose extends EventTarget {
                     pushUndo();
                 }
                 refreshTokens();
-                refreshLayout();
                 this.dispatchEvent(changeEvt);
             }
         };
@@ -487,6 +486,7 @@ export class Primrose extends EventTarget {
 
         const refreshTokens = () => {
             tokens = language.tokenize(value);
+            refreshLayout();
         };
 
         const refreshGutter = () => {
