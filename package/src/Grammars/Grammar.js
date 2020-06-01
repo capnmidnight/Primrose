@@ -111,6 +111,7 @@ export class Grammar {
                 i, t;
             for (i = 0; i < tokens.length; ++i) {
                 t = tokens[i];
+                t.index = i;
                 t.line = line;
                 if (t.type === "newlines") {
                     ++line;
@@ -202,7 +203,7 @@ export class Grammar {
         this.tokenize = function (text) {
             // all text starts off as regular text, then gets cut up into tokens of
             // more specific type
-            const tokens = [new Token(text, "regular", 0)];
+            const tokens = [new Token(text, "regular")];
             for (let rule of this.grammar) {
                 for (var j = 0; j < tokens.length; ++j) {
                     rule.carveOutMatchedToken(tokens, j);
