@@ -22,11 +22,13 @@
         this.adjust = (cursor, dir) => {
             const correction = dir === -1
                 ? leftCorrections
-                : rightCorrections,
-                delta = correction[cursor.x];
+                : rightCorrections;
 
-            cursor.x += delta;
-            cursor.i += delta;
+            if (cursor.x < correction.length) {
+                const delta = correction[cursor.x];
+                cursor.x += delta;
+                cursor.i += delta;
+            }
         };
 
         this.toString = () => txt;
