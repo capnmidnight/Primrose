@@ -466,7 +466,7 @@ export class Primrose extends EventTarget {
                     pushUndo();
                 }
                 refreshTokens();
-                refreshGridBounds();
+                refreshLayout();
                 this.dispatchEvent(changeEvt);
             }
         };
@@ -516,7 +516,10 @@ export class Primrose extends EventTarget {
                 h = Math.floor((this.height - 2 * padding) / character.height) - y - bottomRightGutter.height;
             gridBounds.set(x, y, w, h);
 
-            // group the tokens into rows
+            refreshLayout();
+        };
+
+        const refreshLayout = () => {
             lines.splice(0);
             lines.push("");
             const tokenQueue = tokens.map(t => t.clone());
