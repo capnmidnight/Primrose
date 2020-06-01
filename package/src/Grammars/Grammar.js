@@ -148,8 +148,16 @@ export class Grammar {
             for (i = tokens.length - 1; i > 0; --i) {
                 var p = tokens[i - 1];
                 t = tokens[i];
-                if (p.type === t.type && p.type !== "newlines") {
+                if (p.type === t.type
+                    && p.type !== "newlines") {
                     p.value += t.value;
+                    tokens.splice(i, 1);
+                }
+            }
+
+            // remove empties
+            for (i = tokens.length - 1; i >= 0; --i) {
+                if (tokens[i].value.length === 0) {
                     tokens.splice(i, 1);
                 }
             }
