@@ -150,7 +150,7 @@ export class Grammar {
 
             // remove empties
             for (let i = tokens.length - 1; i >= 0; --i) {
-                if (tokens[i].value.length === 0) {
+                if (tokens[i].length === 0) {
                     tokens.splice(i, 1);
                 }
             }
@@ -204,7 +204,7 @@ export class Grammar {
         this.tokenize = function (text) {
             // all text starts off as regular text, then gets cut up into tokens of
             // more specific type
-            const tokens = [new Token(text, "regular")];
+            const tokens = [new Token(text, "regular", 0)];
             for (let rule of this.grammar) {
                 for (var j = 0; j < tokens.length; ++j) {
                     rule.carveOutMatchedToken(tokens, j);

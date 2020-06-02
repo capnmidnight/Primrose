@@ -175,8 +175,8 @@ export class Primrose extends EventTarget {
                 const row = rows[y].tokens;
                 for (let i = 0; i < row.length; ++i) {
                     const t = row[i];
-                    tokenBack.x += t.value.length;
-                    tokenBack.i += t.value.length;
+                    tokenBack.x += t.length;
+                    tokenBack.i += t.length;
 
                     // skip drawing tokens that aren't in view
                     if (minX <= tokenBack.x && tokenFront.x <= maxX) {
@@ -233,8 +233,8 @@ export class Primrose extends EventTarget {
 
                 for (let i = 0; i < row.length; ++i) {
                     const t = row[i];
-                    tokenBack.x += t.value.length;
-                    tokenBack.i += t.value.length;
+                    tokenBack.x += t.length;
+                    tokenBack.i += t.length;
 
                     // skip drawing tokens that aren't in view
                     if (minX <= tokenBack.x && tokenFront.x <= maxX) {
@@ -436,7 +436,7 @@ export class Primrose extends EventTarget {
             }
 
             if (controlType !== lastControlType) {
-                refreshTokens(0, rows.length - 1, value);
+                refreshAllTokens();
             }
         };
 
@@ -460,7 +460,7 @@ export class Primrose extends EventTarget {
                 if (setUndo) {
                     pushUndo();
                 }
-                refreshTokens(0, rows.length - 1, value);
+                refreshAllTokens();
                 this.dispatchEvent(changeEvt);
             }
         };
@@ -497,6 +497,10 @@ export class Primrose extends EventTarget {
             }
         };
 
+        const refreshAllTokens = () => {
+            refreshTokens(0, rows.length - 1, value);
+        }
+
         const refreshTokens = (startY, endY, txt) => {
             const newTokens = language.tokenize(txt),
                 startRow = rows[startY],
@@ -507,7 +511,7 @@ export class Primrose extends EventTarget {
                 endLineNumber = endRow.lineNumber,
                 endStringIndex = endRow.endStringIndex,
                 endTokenIndex = endRow.endTokenIndex,
-                tokenRemoveCount = endRow.endTokenIndex - startTokenIndex,
+                tokenRemoveCount = endTokenIndex - startTokenIndex,
                 oldTokens = tokens.splice(startTokenIndex, tokenRemoveCount, ...newTokens),
                 oldLineCount = lineCount;
 
@@ -550,11 +554,11 @@ export class Primrose extends EventTarget {
             for (let i = 0; i < tokenQueue.length; ++i) {
                 const t = tokenQueue[i],
                     widthLeft = gridBounds.width - currentString.length,
-                    wrap = wordWrap && t.type !== "newlines" && t.value.length > widthLeft,
+                    wrap = wordWrap && t.type !== "newlines" && t.length > widthLeft,
                     breakLine = t.type === "newlines" || wrap;
 
                 if (wrap) {
-                    const split = t.value.length > gridBounds.width
+                    const split = t.length > gridBounds.width
                         ? widthLeft
                         : 0;
                     tokenQueue.splice(i + 1, 0, t.splitAt(split));
@@ -614,7 +618,7 @@ export class Primrose extends EventTarget {
             setContextSize(fgfx, canv.width, canv.height);
             setContextSize(bgfx, canv.width, canv.height);
             setContextSize(tgfx, canv.width, canv.height);
-            refreshTokens(0, rows.length - 1, value);
+            refreshAllTokens();
         };
 
         const minDelta = (v, minV, maxV) => {
@@ -1602,7 +1606,7 @@ export class Primrose extends EventTarget {
                 set: (l) => {
                     if (l !== language) {
                         language = l;
-                        refreshTokens(0, rows.length - 1, value);
+                        refreshAllTokens();
                     }
                 }
             },
@@ -1667,7 +1671,7 @@ export class Primrose extends EventTarget {
                             "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM")
                             .width /
                             100;
-                        refreshTokens(0, rows.length - 1, value);
+                        refreshAllTokens();
                     }
                 }
             },

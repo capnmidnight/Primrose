@@ -20,7 +20,7 @@ export class Rule {
                 if (start === 0) {
                     // the rule matches the start of the token
                     token.type = this.name;
-                    if (end < token.value.length) {
+                    if (end < token.length) {
                         // but not the end
                         const next = token.splitAt(end);
                         next.type = "regular";
@@ -30,7 +30,7 @@ export class Rule {
                 else {
                     // the rule matches from the middle of the token
                     const mid = token.splitAt(start);
-                    if (midx.length < mid.value.length) {
+                    if (midx.length < mid.length) {
                         // but not the end
                         const right = mid.splitAt(midx.length);
                         tokens.splice(j + 1, 0, right);
