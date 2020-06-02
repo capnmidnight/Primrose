@@ -484,11 +484,11 @@ export class Primrose extends EventTarget {
                     changedEndSubStringIndex = maxCursor.i - endRow.startStringIndex,
                     changedRight = endRow.substring(changedEndSubStringIndex),
 
-                    changedText = changedLeft + txt + changedRight,
-                    newValue = unchangedLeft + changedText + unchangedRight;
+                    changedText = changedLeft + txt + changedRight;
 
-                value = newValue;
+                value = unchangedLeft + changedText + unchangedRight;
                 pushUndo();
+
                 refreshTokens(minCursor.y, maxCursor.y, changedText);
                 frontCursor.setI(rows, minCursor.i + txt.length);
                 backCursor.copy(frontCursor);
@@ -502,6 +502,19 @@ export class Primrose extends EventTarget {
         }
 
         const refreshTokens = (startY, endY, txt) => {
+
+            while (startY > 0
+                && rows[startY].lineNumber === rows[startY - 1].lineNumber) {
+                --startY;
+                txt = rows[startY].text + txt;
+            }
+
+            while (endY < rows.length - 1 && rows[endY].lineNumber === rows[endY + 1].lineNumber) {
+                ++endY;
+                txt += rows[endY].text;
+            }
+
+
             const newTokens = language.tokenize(txt),
                 startRow = rows[startY],
                 startTokenIndex = startRow.startTokenIndex,
@@ -585,7 +598,7 @@ export class Primrose extends EventTarget {
             rows.splice(startY, rowRemoveCount, ...newRows);
 
             // renumber rows
-            const deltaLines = endLineNumber - 2 * startLineNumber + currentLineNumber,
+            const deltaLines = endLineNumber - 2 * startLineNumber + currentLineNumber - 1,
                 deltaStringIndex = currentStringIndex - endStringIndex,
                 deltaTokenIndex = currentTokenIndex - endTokenIndex;
             for (let y = startY + newRows.length; y < rows.length; ++y) {
