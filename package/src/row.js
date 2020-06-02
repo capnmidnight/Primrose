@@ -1,4 +1,4 @@
-﻿export class Line {
+﻿export class Row {
     constructor(txt, tokens, startStringIndex, startTokenIndex, lineNumber) {
         this.text = txt;
         this.startStringIndex = startStringIndex;
@@ -51,4 +51,4 @@
     }
 }
 
-Line.emptyLine = (startStringIndex, startTokenIndex, lineNumber) => new Line("", [], startStringIndex, startTokenIndex, lineNumber);
+Row.emptyRow = (startStringIndex, startTokenIndex, lineNumber) => new Row("", [], startStringIndex, startTokenIndex, lineNumber);
