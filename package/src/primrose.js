@@ -313,29 +313,28 @@ export class Primrose extends EventTarget {
 
             // draw the scrollbars
             if (showScrollBars) {
-                const drawWidth = gridBounds.width * character.width - padding,
-                    drawHeight = gridBounds.height * character.height,
-                    scrollX = (scroll.x * drawWidth) / maxRowWidth + gridBounds.x * character.width,
-                    scrollY = (scroll.y * drawHeight) / rows.length;
-
                 tgfx.fillStyle = theme.regular.selectedBackColor ||
                     DefaultTheme.regular.selectedBackColor;
+
                 // horizontal
-                let bw = null;
                 if (!wordWrap && maxRowWidth > gridBounds.width) {
-                    const scrollBarWidth = drawWidth * (gridBounds.width / maxRowWidth),
-                        by = gridBounds.height * character.height;
-                    bw = Math.max(character.width, scrollBarWidth);
+                    const drawWidth = gridBounds.width * character.width - padding,
+                        scrollX = (scroll.x * drawWidth) / maxRowWidth + gridBounds.x * character.width,
+                        scrollBarWidth = drawWidth * (gridBounds.width / maxRowWidth),
+                        by = this.height - character.height - padding,
+                        bw = Math.max(character.width, scrollBarWidth);
                     tgfx.fillRect(scrollX, by, bw, character.height);
                     tgfx.strokeRect(scrollX, by, bw, character.height);
                 }
 
                 //vertical
                 if (rows.length > gridBounds.height) {
-                    const scrollBarHeight = drawHeight * (gridBounds.height / rows.length),
+                    const drawHeight = gridBounds.height * character.height,
+                        scrollY = (scroll.y * drawHeight) / rows.length,
+                        scrollBarHeight = drawHeight * (gridBounds.height / rows.length),
                         bx = this.width - vScrollWidth * character.width - 2 * padding,
+                        bw = vScrollWidth * character.width,
                         bh = Math.max(character.height, scrollBarHeight);
-                    bw = vScrollWidth * character.width;
                     tgfx.fillRect(bx, scrollY, bw, bh);
                     tgfx.strokeRect(bx, scrollY, bw, bh);
                 }

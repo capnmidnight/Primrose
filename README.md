@@ -64,7 +64,7 @@ The documentation here represents the public API. Any properties, methods, funct
 
 ### Primrose
 
-The `Primrose` class extends the [EventTarget](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget) class, receiving all of its methods and properties. It is a text editor control that renders to an [HTML5 Canvas](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API), using the [CanvasRenderingContext2D](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D) API.
+The `Primrose` class extends the [EventTarget](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget) class. It is a text editor control that renders to an [HTML5 Canvas](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API), using the [CanvasRenderingContext2D](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D) API.
 
 #### Importing
 
@@ -116,15 +116,15 @@ new Primrose({ lineNumbers: false, wordWrap: false });
 ##### Options
 The options object has the following fields:
 
-* **element:([HTMLElement](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement)|[HTMLCanvasElement](https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement)|[OffscreenCanvas](https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvas))** - *Default: `null`* - an [HTMLElement](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement) that represents the `Primrose` control. This can either be:
+* **element:([HTMLElement](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement)|[HTMLCanvasElement](https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement)|[OffscreenCanvas](https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvas))** - *Default: `null`* - a document element or a canvas that represents the `Primrose` control. This can either be:
   * a `<primrose>` tag (which is a generic HTML tag in DOM), in which case the editor Canvas will be inserted into the `<primrose>` tag, or
-  * an `HTMLCanvasElement` element, in which case the editor will take control of the canvas.
-  * *`null`*, which instructs Primrose to construct its own Canvas element. If `OffscreenCanvas`, that will be used instead of `HTMLCanvasElement`.
+  * an `HTMLCanvasElement` element or `OffscreeCanvas` object, in which case the editor will take control of the canvas.
+  * *`null`*, which instructs Primrose to construct its own Canvas element. If `OffscreenCanvas` is available, that will be used instead of `HTMLCanvasElement`.
 * **width:[Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** - *Default: `undefined`* - the scale-independent width of the canvas used when `element` is null
 * **height:[Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** - *Default: `undefined`* - the scale-independent height of the canvas used when `element` is null
-* **padding:[Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** - *Default: `0`* - the scale-independent amount of inset the control rendering from the edge of the canvas. This is useful for texturing objects where the texture edge cannot be precisely controlled.
+* **padding:[Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** - *Default: `0`* - the scale-independent amount of inset for rendering the contents from the edge of the canvas. This is useful for texturing objects where the texture edge cannot be precisely controlled.
 * **fontSize:[Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** - *Default: `16`* - the scale-independent height to draw characters.
-* **scaleFactor:[Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** - *Default: `window.devicePixelRatio` - A multiplicative factor for how large to scale the `width` and `height` of the canvas, to improve rendering sharpness on high-resolution displays. With THREE.js, it's best to set this value to 1 and change the width, height, and fontSize manually.
+* **scaleFactor:[Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** - *Default: `window.devicePixelRatio` - A multiplicative factor for how large to scale the `width`, `height`, `fontSize`, and `padding` of the canvas, to improve rendering sharpness on high-resolution displays. With THREE.js, it's best to set this value to 1 and change the width, height, and fontSize manually.
 * **readOnly:[Boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** - *Default: `false`* - indicates whether or not the text editor should allow changes to its value.
 * **multiLine:[Boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** - *Default: `true`* - indicates whether or not the text editor should break long lines onto new lines.
 * **scrollBars:[Boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** - *Default: `true`* - indicates whether or not scroll bars should be rendered at the right and bottom in the control. If wordWrap is enabled, the bottom, horizontal scrollbar will not be rendered.
@@ -146,8 +146,8 @@ The options object has the following fields:
 The events in Primrose are all of type [Event](https://developer.mozilla.org/en-US/docs/Web/API/Event), having no other properties set on them. The only way to register the events is to call `addEventListener`, i.e. there are no `on###` properties on the object for the event handlers.
 
 * *change:[Event](https://developer.mozilla.org/en-US/docs/Web/API/Event)* - Fires when the text in the control has changed.
-* *blur:[Event](https://developer.mozilla.org/en-US/docs/Web/API/Event)* - Fires when the control first loses focus. Subsequent calls to `blur()` will not fire the `blur` event.
-* *focus:[Event](https://developer.mozilla.org/en-US/docs/Web/API/Event)* - Fires when the control first gains focus. Subsequent calls to `focus()` will not fire the `focus` event.
+* *blur:[Event](https://developer.mozilla.org/en-US/docs/Web/API/Event)* - Fires when the control first loses focus. Calls to `blur()` while the control is not focused will not fire the `blur` event.
+* *focus:[Event](https://developer.mozilla.org/en-US/docs/Web/API/Event)* - Fires when the control first gains focus. Calls to `focus()` while the control is focused will not fire the `focus` event.
 * *over:[Event](https://developer.mozilla.org/en-US/docs/Web/API/Event)* - Fires when the control is first hovered over by a pointer.
 * *out:[Event](https://developer.mozilla.org/en-US/docs/Web/API/Event)* - Fires the first time the controller is no longer hovered over by a pointer.
 * *update:[Event](https://developer.mozilla.org/en-US/docs/Web/API/Event)* - Fires when the Primrose control finishes rendering.
@@ -233,7 +233,7 @@ editor.blur(); // 'blurred!' printed out to console.
 <hr>
 
 ##### focus()
-Sets the control to be the focused control. If all controls in the app have been properly registered with the Event Manager, then any other, currently focused control will first get `blur`red.
+Sets the control to be the focused control. If all controls in the app have been properly registered with the Event Manager, then any other, currently focused control will first get `blur`'d.
 
 ###### Example
 
@@ -298,16 +298,19 @@ const editor = new Primrose({
   scaleFactor: 2
 });
 
-if(editor.width === 512) { /* true *}
+if(editor.width === 512) { /* true */ }
 if(editor.canvas.width === 1024) { /* true */}
 
 editor.setSize(1024, 1024);
-if(editor.width === 1024) { /* true *}
+if(editor.width === 1024) { /* true */ }
 if(editor.canvas.width === 2048) { /* true */}
 ```
 
 
 ###### Parameters
+
+* *width* - the nominal width of the editor canvas. This value is scaled by `scaleFactor` before actually setting the canvas width.
+* *height* - the nominal height of the editor canvas. This value is scaled by `scaleFactor` before actually setting the canvas height.
 
 <hr>
 
@@ -348,7 +351,7 @@ If the control is already focused and `focused` is set to `true`, or the control
 
 If the control is focused and `focused` is set to `false`, the control is blurred, just as if `blur()` was called.
 
-If the control is not focused and `focused` is set to `true`, the control is blurred, just as if `focus()` was called.
+If the control is not focused and `focused` is set to `true`, the control is focused, just as if `focus()` was called.
 
 <hr>
 
@@ -498,7 +501,7 @@ const editor = new Primrose({
   scaleFactor: 2
 });
 
-if(editor.width === 512) { /* true *}
+if(editor.width === 512) { /* true */ }
 if(editor.canvas.width === 1024) { /* true */}
 ```
 
@@ -516,7 +519,7 @@ const editor = new Primrose({
   scaleFactor: 2
 });
 
-if(editor.height === 512) { /* true *}
+if(editor.height === 512) { /* true */ }
 if(editor.canvas.height === 1024) { /* true */}
 ```
 
