@@ -36,7 +36,6 @@ export class Cursor {
         this.i = i || 0;
         this.x = x || 0;
         this.y = y || 0;
-        this.moved = true;
         Object.seal(this);
     }
 
@@ -52,14 +51,12 @@ export class Cursor {
         this.i = cursor.i;
         this.x = cursor.x;
         this.y = cursor.y;
-        this.moved = false;
     }
 
     fullHome() {
         this.i = 0;
         this.x = 0;
         this.y = 0;
-        this.moved = true;
     }
 
     fullEnd(rows) {
@@ -72,7 +69,6 @@ export class Cursor {
         }
         this.y = rows.length - 1;
         this.x = lastLength;
-        this.moved = true;
     }
 
     left(rows, skipAdjust = false) {
@@ -88,7 +84,6 @@ export class Cursor {
                 rows[this.y].adjust(this, -1);
             }
         }
-        this.moved = true;
     }
 
     skipLeft(rows) {
@@ -107,7 +102,6 @@ export class Cursor {
             this.x -= dx;
             rows[this.y].adjust(this, -1);
         }
-        this.moved = true;
     }
 
     right(rows, skipAdjust = false) {
@@ -149,13 +143,11 @@ export class Cursor {
         else if(this.y < rows.length -1) {
             this.right(rows);
         }
-        this.moved = true;
     }
 
     home() {
         this.i -= this.x;
         this.x = 0;
-        this.moved = true;
     }
 
     end(rows) {
@@ -166,7 +158,6 @@ export class Cursor {
         }
         this.i += dx;
         this.x += dx;
-        this.moved = true;
     }
 
     up(rows, skipAdjust = false) {
@@ -180,7 +171,6 @@ export class Cursor {
                 rows[this.y].adjust(this, 1);
             }
         }
-        this.moved = true;
     }
 
     down(rows, skipAdjust = false) {
@@ -202,7 +192,6 @@ export class Cursor {
                 rows[this.y].adjust(this, 1);
             }
         }
-        this.moved = true;
     }
 
     incX(rows, dx) {
@@ -255,7 +244,6 @@ export class Cursor {
             --this.i;
         }
         rows[this.y].adjust(this, 1);
-        this.moved = true;
     }
 
     setI(rows, i) {
@@ -269,7 +257,6 @@ export class Cursor {
             if (this.y >= rows.length - 1) {
                 this.i = total;
                 this.x = row.stringLength;
-                this.moved = true;
                 break;
             }
             ++this.y;
@@ -283,6 +270,5 @@ export class Cursor {
         }
 
         rows[this.y].adjust(this, 1);
-        this.moved = true;
     }
 }
