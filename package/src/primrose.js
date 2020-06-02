@@ -1072,9 +1072,7 @@ export class Primrose extends EventTarget {
         //>>>>>>>>>> CLIPBOARD EVENT HANDLERS >>>>>>>>>>
         const copySelectedText = (evt) => {
             if (focused && frontCursor.i !== backCursor.i) {
-                const clipboard = evt.clipboardData || window.clipboardData;
-                clipboard.setData(
-                    window.clipboardData ? "Text" : "text/plain", this.selectedText);
+                evt.clipboardData.setData("text/plain", this.selectedText);
                 evt.returnValue = false;
                 return true;
             }
