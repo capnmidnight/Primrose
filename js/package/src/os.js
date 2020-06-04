@@ -17,62 +17,58 @@ class OperatingSystem {
         this.name = osName;
 
         const pre4 = pre3;
-        pre3 = pre3.length > 0 ? pre3 : "Normal";
-
-        const definitions = Object.freeze(new Map([
-            ["CursorDown", "Normal_ArrowDown"],
-            ["CursorLeft", "Normal_ArrowLeft"],
-            ["CursorRight", "Normal_ArrowRight"],
-            ["CursorUp", "Normal_ArrowUp"],
-            ["CursorPageDown", "Normal_PageDown"],
-            ["CursorPageUp", "Normal_PageUp"],
-            ["CursorSkipLeft", `${pre2}_ArrowLeft`],
-            ["CursorSkipRight", `${pre2}_ArrowRight`],
-            ["CursorHome", `${pre3}_${home}`],
-            ["CursorEnd", `${pre3}_${end}`],
-            ["CursorFullHome", `${pre5}_${fullHome}`],
-            ["CursorFullEnd", `${pre5}_${fullEnd}`],
-
-
-            ["SelectDown", "Shift_ArrowDown"],
-            ["SelectLeft", "Shift_ArrowLeft"],
-            ["SelectRight", "Shift_ArrowRight"],
-            ["SelectUp", "Shift_ArrowUp"],
-            ["SelectPageDown", "Shift_PageDown"],
-            ["SelectPageUp", "Shift_PageUp"],
-            ["SelectSkipLeft", `${pre2}Shift_ArrowLeft`],
-            ["SelectSkipRight", `${pre2}Shift_ArrowRight`],
-            ["SelectHome", `${pre4}Shift_${home}`],
-            ["SelectEnd", `${pre4}Shift_${end}`],
-            ["SelectFullHome", `${pre5}Shift_${fullHome}`],
-            ["SelectFullEnd", `${pre5}Shift_${fullEnd}`],
-
-            ["SelectAll", `${pre1}_a`],
-
-            ["ScrollDown", `${pre1}_ArrowDown`],
-            ["ScrollUp", `${pre1}_ArrowUp`],
-
-            ["DeleteLetterLeft", "Normal_Backspace"],
-            ["DeleteLetterRight", "Normal_Delete"],
-            ["DeleteWordLeft", `${pre2}_Backspace`],
-            ["DeleteWordRight", `${pre2}_Delete`],
-            ["DeleteLine", `Shift_Delete`],
-
-            ["AppendNewline", "Normal_Enter"],
-            ["PrependNewline", `${pre2}_Enter`],
-
-            ["InsertTab", "Normal_Tab"],
-            ["RemoveTab", "Shift_Tab"],
-
-            ["Undo", `${pre1}_z`],
-            ["Redo", redo]
-        ]));
-
-        const substitutions = new Map();
-        for (let pair of definitions) {
-            substitutions.set(pair[1], pair[0]);
+        if (pre3.length === 0) {
+            pre3 = "Normal";
         }
-        Object.freeze(substitutions);
+
+        const substitutions = Object.freeze(new Map([
+            ["Normal_ArrowDown", "CursorDown"],
+            ["Normal_ArrowLeft", "CursorLeft"],
+            ["Normal_ArrowRight", "CursorRight"],
+            ["Normal_ArrowUp", "CursorUp"],
+            ["Normal_PageDown", "CursorPageDown"],
+            ["Normal_PageUp", "CursorPageUp"],
+            [`${pre2}_ArrowLeft`, "CursorSkipLeft"],
+            [`${pre2}_ArrowRight`, "CursorSkipRight"],
+            [`${pre3}_${home}`, "CursorHome"],
+            [`${pre3}_${end}`, "CursorEnd"],
+            [`${pre5}_${fullHome}`, "CursorFullHome"],
+            [`${pre5}_${fullEnd}`, "CursorFullEnd"],
+
+
+            ["Shift_ArrowDown", "SelectDown"],
+            ["Shift_ArrowLeft", "SelectLeft"],
+            ["Shift_ArrowRight", "SelectRight"],
+            ["Shift_ArrowUp", "SelectUp"],
+            ["Shift_PageDown", "SelectPageDown"],
+            ["Shift_PageUp", "SelectPageUp"],
+            [`${pre2}Shift_ArrowLeft`, "SelectSkipLeft"],
+            [`${pre2}Shift_ArrowRight`, "SelectSkipRight"],
+            [`${pre4}Shift_${home}`, "SelectHome"],
+            [`${pre4}Shift_${end}`, "SelectEnd"],
+            [`${pre5}Shift_${fullHome}`, "SelectFullHome"],
+            [`${pre5}Shift_${fullEnd}`, "SelectFullEnd"],
+
+            [`${pre1}_a`, "SelectAll"],
+
+            [`${pre1}_ArrowDown`, "ScrollDown"],
+            [`${pre1}_ArrowUp`, "ScrollUp"],
+
+            ["Normal_Backspace", "DeleteLetterLeft"],
+            ["Normal_Delete", "DeleteLetterRight"],
+            [`${pre2}_Backspace`, "DeleteWordLeft"],
+            [`${pre2}_Delete`, "DeleteWordRight"],
+            [`Shift_Delete`, "DeleteLine"],
+
+            ["Normal_Enter", "AppendNewline"],
+            [`${pre2}_Enter`, "PrependNewline"],
+
+            ["Normal_Tab", "InsertTab"],
+            ["Shift_Tab", "RemoveTab"],
+
+            [`${pre1}_z`, "Undo"],
+            [redo, "Redo"]
+        ]));
 
         this.makeCommand = (evt) => {
             gesture.text = normalizeKeyValue(evt);
