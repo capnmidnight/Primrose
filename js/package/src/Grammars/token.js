@@ -4,10 +4,16 @@ export class Token {
     constructor(value, type, stringIndex) {
         this.value = value;
         this.startStringIndex = stringIndex;
-        this.length = value.length;
-        this.endStringIndex = this.startStringIndex + this.length;
         this.type = type;
         Object.seal(this);
+    }
+
+    get length() {
+        return this.value.length;
+    }
+
+    get endStringIndex() {
+        return this.startStringIndex + this.length;
     }
 
     clone() {
@@ -21,6 +27,6 @@ export class Token {
     }
 
     toString() {
-        return "[" + this.type + ": " + this.value + "]";
+        return `[${this.type}: ${this.value}]`;
     }
 };
