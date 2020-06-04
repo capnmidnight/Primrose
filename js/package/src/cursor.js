@@ -44,7 +44,7 @@ export class Cursor {
     }
 
     toString() {
-        return "[i:" + this.i + " x:" + this.x + " y:" + this.y + "]";
+        return `[i:${this.i} x:${this.x} y:${this.y}]`;
     }
 
     copy(cursor) {

@@ -41,7 +41,7 @@ export class Point {
     }
 
     toString() {
-        return "(x:" + this.x + ", y:" + this.y + ")";
+        return `(x:${this.x}, y:${this.y})`;
     }
 };
 
@@ -69,7 +69,7 @@ export class Size {
     }
 
     toString() {
-        return "<w:" + this.width + ", h:" + this.height + ">";
+        return `<w:${this.width}, h:${this.height}>`;
     }
 };
 
