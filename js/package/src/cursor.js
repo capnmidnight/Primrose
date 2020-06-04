@@ -247,6 +247,8 @@ export class Cursor {
     }
 
     setI(rows, i) {
+        const delta = this.i - i,
+            dir = Math.sign(delta);
         this.x = this.i = i;
         this.y = 0;
         let total = 0,
@@ -269,6 +271,6 @@ export class Cursor {
             ++this.y;
         }
 
-        rows[this.y].adjust(this, 1);
+        rows[this.y].adjust(this, dir);
     }
 }
