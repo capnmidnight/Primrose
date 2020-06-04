@@ -1,4 +1,4 @@
-﻿import { isMacOS } from "./flags.js";
+﻿import { isApple } from "./flags.js";
 
 // These values are defined here:
 //   https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values
@@ -379,7 +379,7 @@ for (let pair of keyGroups) {
 Object.freeze(keyTypes);
 
 let isFnDown = false;
-if (isMacOS) {
+if (isApple) {
     window.addEventListener("keydown", (evt) => {
         if (evt.key === "Fn") {
             isFnDown = true;
@@ -431,7 +431,7 @@ export function normalizeKeyValue(evt) {
         return "Delete";
     }
     else if (evt.key === "Delete"
-        && isMacOS
+        && isApple
         && isFnDown) {
         return "Backspace";
     }

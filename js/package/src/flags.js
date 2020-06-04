@@ -6,6 +6,7 @@ export const isFirefox = typeof window.InstallTrigger !== "undefined";
 export const isIE = /*@cc_on!@*/ false || !!document.documentMode;
 export const isiOS = /iP(hone|od|ad)/.test(navigator.userAgent || "");
 export const isMacOS = /Macintosh/.test(navigator.userAgent || "");
+export const isApple = isiOS || isMacOS;
 export const isSafari = Object.prototype.toString.call(window.HTMLElement)
     .indexOf("Constructor") > 0;
 

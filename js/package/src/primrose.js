@@ -15,7 +15,7 @@ import {
 
 import {
     isFirefox,
-    isMacOS,
+    isApple,
     isDebug
 } from "./flags.js";
 
@@ -1784,7 +1784,7 @@ export class Primrose extends EventTarget {
             focusEvt = new Event("focus"),
             changeEvt = new Event("change"),
             updateEvt = new Event("update"),
-            os = isMacOS ? MacOS : Windows;
+            os = isApple ? MacOS : Windows;
         //<<<<<<<<<< PRIVATE MUTABLE FIELDS <<<<<<<<<<
 
         //>>>>>>>>>> SETUP CANVAS >>>>>>>>>>
