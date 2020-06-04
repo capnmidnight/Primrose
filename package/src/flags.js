@@ -22,6 +22,10 @@ export function isLandscape() {
     return Math.abs(window.orientation) === 90;
 }
 
+export function isWorker() {
+    return typeof importScripts === 'function';
+}
+
 export const browserName = isChrome
     ? "CHROMIUM"
     : (isFirefox
