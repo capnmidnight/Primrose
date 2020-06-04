@@ -4,15 +4,15 @@
 export const Dark = Object.freeze({
     name: "Dark",
     cursorColor: "white",
+    unfocused: "rgba(0, 0, 255, 0.25)",
+    currentRowBackColor: "#202020",
+    selectedBackColor: "#404040",
     lineNumbers: {
         foreColor: "white"
     },
     regular: {
         backColor: "black",
-        foreColor: "#c0c0c0",
-        currentRowBackColor: "#202020",
-        selectedBackColor: "#404040",
-        unfocused: "rgba(0, 0, 255, 0.25)"
+        foreColor: "#c0c0c0"
     },
     strings: {
         foreColor: "#aa9900",
@@ -50,15 +50,15 @@ export const Dark = Object.freeze({
 export const Light = Object.freeze({
     name: "Light",
     cursorColor: "black",
+    unfocused: "rgba(0, 0, 255, 0.25)",
+    currentRowBackColor: "#f0f0f0",
+    selectedBackColor: "#c0c0c0",
     lineNumbers: {
         foreColor: "black"
     },
     regular: {
         backColor: "white",
-        foreColor: "black",
-        currentRowBackColor: "#f0f0f0",
-        selectedBackColor: "#c0c0c0",
-        unfocused: "rgba(0, 0, 255, 0.25)"
+        foreColor: "black"
     },
     strings: {
         foreColor: "#aa9900",

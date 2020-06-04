@@ -1,7 +1,7 @@
 import { Cursor } from "./cursor.js";
 import { monospaceFamily } from "./fonts.js"
 import { Row } from "./row.js";
-import { Dark } from "./themes.js";
+import { Dark as DefaultTheme } from "./themes.js";
 import { TimedEvent } from "./timedEvent.js";
 
 import {
@@ -157,8 +157,8 @@ export class Primrose extends EventTarget {
 
             // draw the current row highlighter
             if (focused) {
-                fillRect(bgfx, theme.regular.currentRowBackColor ||
-                    DefaultTheme.regular.currentRowBackColor,
+                fillRect(bgfx, theme.currentRowBackColor ||
+                    DefaultTheme.currentRowBackColor,
                     0, minCursor.y,
                     gridBounds.width,
                     maxCursor.y - minCursor.y + 1);
@@ -187,8 +187,8 @@ export class Primrose extends EventTarget {
                             const selectionFront = Cursor.max(minCursor, tokenFront),
                                 selectionBack = Cursor.min(maxCursor, tokenBack),
                                 cw = selectionBack.i - selectionFront.i;
-                            fillRect(bgfx, theme.regular.selectedBackColor ||
-                                DefaultTheme.regular.selectedBackColor,
+                            fillRect(bgfx, theme.selectedBackColor ||
+                                DefaultTheme.selectedBackColor,
                                 selectionFront.x, selectionFront.y,
                                 cw, 1);
                         }
@@ -271,8 +271,8 @@ export class Primrose extends EventTarget {
 
             if (showLineNumbers) {
                 fillRect(tgfx,
-                    theme.regular.selectedBackColor ||
-                    DefaultTheme.regular.selectedBackColor,
+                    theme.selectedBackColor ||
+                    DefaultTheme.selectedBackColor,
                     0, 0,
                     gridBounds.x, this.width - padding * 2);
                 strokeRect(tgfx,
@@ -313,8 +313,8 @@ export class Primrose extends EventTarget {
 
             // draw the scrollbars
             if (showScrollBars) {
-                tgfx.fillStyle = theme.regular.selectedBackColor ||
-                    DefaultTheme.regular.selectedBackColor;
+                tgfx.fillStyle = theme.selectedBackColor ||
+                    DefaultTheme.selectedBackColor;
 
                 // horizontal
                 if (!wordWrap && maxRowWidth > gridBounds.width) {
@@ -342,7 +342,7 @@ export class Primrose extends EventTarget {
 
             tgfx.restore();
             if (!focused) {
-                tgfx.fillStyle = theme.regular.unfocused || DefaultTheme.regular.unfocused;
+                tgfx.fillStyle = theme.unfocused || DefaultTheme.unfocused;
                 tgfx.fillRect(0, 0, canv.width, canv.height);
             }
         };
@@ -1725,7 +1725,7 @@ export class Primrose extends EventTarget {
         //>>>>>>>>>> PRIVATE MUTABLE FIELDS >>>>>>>>>>
         let value = "",
             padding = 0,
-            theme = Dark,
+            theme = DefaultTheme,
             tabWidth = 2,
             canv = null,
             resized = false,
