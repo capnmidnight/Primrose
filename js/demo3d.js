@@ -1,6 +1,5 @@
 ﻿import * as THREE from 'https://unpkg.com/three@0.116.1/build/three.module.js';
-import { Primrose } from './package/src/primrose.js';
-import { Light } from "./package/src/themes.js";
+import { Primrose, Light } from './package/primrose.min.js';
 
 const {
     renderer,
