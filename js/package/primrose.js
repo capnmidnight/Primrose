@@ -1627,15 +1627,61 @@ See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.
 });
 */
 
-const DefaultRules = [
-    ["newlines", /(?:\r\n|\r|\n)/],
-    ["whitespace", /(?:\s+)/]
-];
+function crudeParsing(tokens) {
+    var commentDelim = null,
+        stringDelim = null;
+    for (let i = 0; i < tokens.length; ++i) {
+        const t = tokens[i];
+
+        if (stringDelim) {
+            if (t.type === "stringDelim" && t.value === stringDelim && (i === 0 || tokens[i - 1].value[tokens[i - 1].value.length - 1] !== "\\")) {
+                stringDelim = null;
+            }
+            if (t.type !== "newlines") {
+                t.type = "strings";
+            }
+        }
+        else if (commentDelim) {
+            if (commentDelim === "startBlockComments" && t.type === "endBlockComments" ||
+                commentDelim === "startLineComments" && t.type === "newlines") {
+                commentDelim = null;
+            }
+            if (t.type !== "newlines") {
+                t.type = "comments";
+            }
+        }
+        else if (t.type === "stringDelim") {
+            stringDelim = t.value;
+            t.type = "strings";
+        }
+        else if (t.type === "startBlockComments" || t.type === "startLineComments") {
+            commentDelim = t.type;
+            t.type = "comments";
+        }
+    }
+
+    // recombine like-tokens
+    for (let i = tokens.length - 1; i > 0; --i) {
+        const p = tokens[i - 1],
+            t = tokens[i];
+        if (p.type === t.type
+            && p.type !== "newlines") {
+            p.value += t.value;
+            tokens.splice(i, 1);
+        }
+    }
+
+    // remove empties
+    for (let i = tokens.length - 1; i >= 0; --i) {
+        if (tokens[i].length === 0) {
+            tokens.splice(i, 1);
+        }
+    }
+}
 
 class Grammar {
     constructor(grammarName, rules) {
         rules = rules || [];
-        rules = DefaultRules.concat(rules);
         /*
         pliny.property({
           parent: "Primrose.Text.Grammar",
@@ -1658,118 +1704,66 @@ class Grammar {
         this.grammar = rules.map((rule) =>
             new Rule(rule[0], rule[1]));
 
-        function crudeParsing(tokens) {
-            var commentDelim = null,
-                stringDelim = null;
-            for (let i = 0; i < tokens.length; ++i) {
-                const t = tokens[i];
+        Object.freeze(this);
+    }
 
-                if (stringDelim) {
-                    if (t.type === "stringDelim" && t.value === stringDelim && (i === 0 || tokens[i - 1].value[tokens[i - 1].value.length - 1] !== "\\")) {
-                        stringDelim = null;
-                    }
-                    if (t.type !== "newlines") {
-                        t.type = "strings";
-                    }
-                }
-                else if (commentDelim) {
-                    if (commentDelim === "startBlockComments" && t.type === "endBlockComments" ||
-                        commentDelim === "startLineComments" && t.type === "newlines") {
-                        commentDelim = null;
-                    }
-                    if (t.type !== "newlines") {
-                        t.type = "comments";
-                    }
-                }
-                else if (t.type === "stringDelim") {
-                    stringDelim = t.value;
-                    t.type = "strings";
-                }
-                else if (t.type === "startBlockComments" || t.type === "startLineComments") {
-                    commentDelim = t.type;
-                    t.type = "comments";
-                }
-            }
-
-            // recombine like-tokens
-            for (let i = tokens.length - 1; i > 0; --i) {
-                const p = tokens[i - 1],
-                    t = tokens[i];
-                if (p.type === t.type
-                    && p.type !== "newlines") {
-                    p.value += t.value;
-                    tokens.splice(i, 1);
-                }
-            }
-
-            // remove empties
-            for (let i = tokens.length - 1; i >= 0; --i) {
-                if (tokens[i].length === 0) {
-                    tokens.splice(i, 1);
-                }
+    /*
+    pliny.method({
+      parent: "Primrose.Text.Grammar",
+      name: "tokenize",
+      parameters: [{
+        name: "text",
+        type: "String",
+        description: "The text to tokenize."
+      }],
+      returns: "An array of tokens, ammounting to drawing instructions to the renderer. However, they still need to be layed out to fit the bounds of the text area.",
+      description: "Breaks plain text up into a list of tokens that can later be rendered with color.",
+      examples: [{
+        name: 'Tokenize some JavaScript',
+        description: 'Primrose comes with a grammar for JavaScript built in.\n\
+  \n\
+  ## Code:\n\
+  \n\
+    grammar(\"JavaScript\");\n\
+    var tokens = new Primrose.Text.Grammars.JavaScript\n\
+      .tokenize("var x = 3;\\n\\\n\
+    var y = 2;\\n\\\n\
+    console.log(x + y);");\n\
+    console.log(JSON.stringify(tokens));\n\
+  \n\
+  ## Result:\n\
+  \n\
+    grammar(\"JavaScript\");\n\
+    [ \n\
+      { "value": "var", "type": "keywords", "index": 0, "line": 0 },\n\
+      { "value": " x = ", "type": "regular", "index": 3, "line": 0 },\n\
+      { "value": "3", "type": "numbers", "index": 8, "line": 0 },\n\
+      { "value": ";", "type": "regular", "index": 9, "line": 0 },\n\
+      { "value": "\\n", "type": "newlines", "index": 10, "line": 0 },\n\
+      { "value": " y = ", "type": "regular", "index": 11, "line": 1 },\n\
+      { "value": "2", "type": "numbers", "index": 16, "line": 1 },\n\
+      { "value": ";", "type": "regular", "index": 17, "line": 1 },\n\
+      { "value": "\\n", "type": "newlines", "index": 18, "line": 1 },\n\
+      { "value": "console", "type": "members", "index": 19, "line": 2 },\n\
+      { "value": ".", "type": "regular", "index": 26, "line": 2 },\n\
+      { "value": "log", "type": "functions", "index": 27, "line": 2 },\n\
+      { "value": "(x + y);", "type": "regular", "index": 30, "line": 2 }\n\
+    ]'
+      }]
+    });
+    */
+    tokenize(text) {
+        // all text starts off as regular text, then gets cut up into tokens of
+        // more specific type
+        const tokens = [new Token(text, "regular", 0)];
+        for (let rule of this.grammar) {
+            for (var j = 0; j < tokens.length; ++j) {
+                rule.carveOutMatchedToken(tokens, j);
             }
         }
 
-        /*
-        pliny.method({
-          parent: "Primrose.Text.Grammar",
-          name: "tokenize",
-          parameters: [{
-            name: "text",
-            type: "String",
-            description: "The text to tokenize."
-          }],
-          returns: "An array of tokens, ammounting to drawing instructions to the renderer. However, they still need to be layed out to fit the bounds of the text area.",
-          description: "Breaks plain text up into a list of tokens that can later be rendered with color.",
-          examples: [{
-            name: 'Tokenize some JavaScript',
-            description: 'Primrose comes with a grammar for JavaScript built in.\n\
-      \n\
-      ## Code:\n\
-      \n\
-        grammar(\"JavaScript\");\n\
-        var tokens = new Primrose.Text.Grammars.JavaScript\n\
-          .tokenize("var x = 3;\\n\\\n\
-        var y = 2;\\n\\\n\
-        console.log(x + y);");\n\
-        console.log(JSON.stringify(tokens));\n\
-      \n\
-      ## Result:\n\
-      \n\
-        grammar(\"JavaScript\");\n\
-        [ \n\
-          { "value": "var", "type": "keywords", "index": 0, "line": 0 },\n\
-          { "value": " x = ", "type": "regular", "index": 3, "line": 0 },\n\
-          { "value": "3", "type": "numbers", "index": 8, "line": 0 },\n\
-          { "value": ";", "type": "regular", "index": 9, "line": 0 },\n\
-          { "value": "\\n", "type": "newlines", "index": 10, "line": 0 },\n\
-          { "value": " y = ", "type": "regular", "index": 11, "line": 1 },\n\
-          { "value": "2", "type": "numbers", "index": 16, "line": 1 },\n\
-          { "value": ";", "type": "regular", "index": 17, "line": 1 },\n\
-          { "value": "\\n", "type": "newlines", "index": 18, "line": 1 },\n\
-          { "value": "console", "type": "members", "index": 19, "line": 2 },\n\
-          { "value": ".", "type": "regular", "index": 26, "line": 2 },\n\
-          { "value": "log", "type": "functions", "index": 27, "line": 2 },\n\
-          { "value": "(x + y);", "type": "regular", "index": 30, "line": 2 }\n\
-        ]'
-          }]
-        });
-        */
-        this.tokenize = function (text) {
-            // all text starts off as regular text, then gets cut up into tokens of
-            // more specific type
-            const tokens = [new Token(text, "regular", 0)];
-            for (let rule of this.grammar) {
-                for (var j = 0; j < tokens.length; ++j) {
-                    rule.carveOutMatchedToken(tokens, j);
-                }
-            }
-
-            crudeParsing(tokens);
-            return tokens;
-        };
-
-        Object.freeze(this);
+        crudeParsing(tokens);
+        return tokens;
     }
 
     toHTML(parent, txt, theme, fontSize) {
@@ -1814,8 +1808,10 @@ class BasicGrammar extends Grammar {
         super("BASIC",
             // Grammar rules are applied in the order they are specified.
             [
+                ["newlines", /(?:\r\n|\r|\n)/],
                 // BASIC programs used to require the programmer type in her own line numbers. The start at the beginning of the line.
                 ["lineNumbers", /^\d+\s+/],
+                ["whitespace", /(?:\s+)/],
                 // Comments were lines that started with the keyword "REM" (for REMARK) and ran to the end of the line. They did not have to be numbered, because they were not executable and were stripped out by the interpreter.
                 ["startLineComments", /^REM\s/],
                 // Both double-quoted and single-quoted strings were not always supported, but in this case, I'm just demonstrating how it would be done for both.
@@ -2469,6 +2465,8 @@ pliny.value({
 });
 */
 const HTML = new Grammar("HTML", [
+    ["newlines", /(?:\r\n|\r|\n)/],
+    ["whitespace", /(?:\s+)/],
     ["startBlockComments", /(?:<|&lt;)!--/],
     ["endBlockComments", /--(?:>|&gt;)/],
     ["stringDelim", /("|')/],
@@ -2487,6 +2485,8 @@ pliny.value({
 });
 */
 const JavaScript = new Grammar("JavaScript", [
+    ["newlines", /(?:\r\n|\r|\n)/],
+    ["whitespace", /(?:\s+)/],
     ["startBlockComments", /\/\*/],
     ["endBlockComments", /\*\//],
     ["regexes", /(?:^|,|;|\(|\[|\{)(?:\s*)(\/(?:\\\/|[^\n\/])+\/)/],
@@ -2508,7 +2508,10 @@ pliny.value({
   description: "A grammar that makes displaying plain text work with the text editor designed for syntax highlighting."
 });
 */
-const PlainText = new Grammar("PlainText");
+const PlainText = new Grammar("PlainText", [
+    ["newlines", /(?:\r\n|\r|\n)/],
+    ["whitespace", /(?:\s+)/]
+]);
 
 const grammars = Object.freeze(new Map([
     ["basic", Basic],
