@@ -7,20 +7,21 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "Primrose", "js\", "{568BB83
 	ProjectSection(WebsiteProperties) = preProject
 		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.0"
 		Debug.AspNetCompiler.VirtualPath = "/localhost_50220"
-		Debug.AspNetCompiler.PhysicalPath = "..\Primrose\"
+		Debug.AspNetCompiler.PhysicalPath = "js\"
 		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_50220\"
 		Debug.AspNetCompiler.Updateable = "true"
 		Debug.AspNetCompiler.ForceOverwrite = "true"
 		Debug.AspNetCompiler.FixedNames = "false"
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.VirtualPath = "/localhost_50220"
-		Release.AspNetCompiler.PhysicalPath = "..\Primrose\"
+		Release.AspNetCompiler.PhysicalPath = "js\"
 		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_50220\"
 		Release.AspNetCompiler.Updateable = "true"
 		Release.AspNetCompiler.ForceOverwrite = "true"
 		Release.AspNetCompiler.FixedNames = "false"
 		Release.AspNetCompiler.Debug = "False"
 		VWDPort = "50220"
+		SlnRelativePath = "js\"
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Primrose.NETStandard2", "csharp\Primrose.NETStandard2\Primrose.NETStandard2.csproj", "{D7FF6192-1970-4075-B7B9-4BDCF04A5C74}"
