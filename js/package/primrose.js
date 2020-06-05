@@ -44,7 +44,7 @@ class Cursor {
     }
 
     toString() {
-        return "[i:" + this.i + " x:" + this.x + " y:" + this.y + "]";
+        return `[i:${this.i} x:${this.x} y:${this.y}]`;
     }
 
     copy(cursor) {
@@ -247,6 +247,8 @@ class Cursor {
     }
 
     setI(rows, i) {
+        const delta = this.i - i,
+            dir = Math.sign(delta);
         this.x = this.i = i;
         this.y = 0;
         let total = 0,
@@ -269,7 +271,7 @@ class Cursor {
             ++this.y;
         }
 
-        rows[this.y].adjust(this, 1);
+        rows[this.y].adjust(this, dir);
     }
 }
 
@@ -337,15 +339,15 @@ Row.emptyRow = (startStringIndex, startTokenIndex, lineNumber) => new Row("", []
 const Dark = Object.freeze({
     name: "Dark",
     cursorColor: "white",
+    unfocused: "rgba(0, 0, 255, 0.25)",
+    currentRowBackColor: "#202020",
+    selectedBackColor: "#404040",
     lineNumbers: {
         foreColor: "white"
     },
     regular: {
         backColor: "black",
-        foreColor: "#c0c0c0",
-        currentRowBackColor: "#202020",
-        selectedBackColor: "#404040",
-        unfocused: "rgba(0, 0, 255, 0.25)"
+        foreColor: "#c0c0c0"
     },
     strings: {
         foreColor: "#aa9900",
@@ -383,15 +385,15 @@ const Dark = Object.freeze({
 const Light = Object.freeze({
     name: "Light",
     cursorColor: "black",
+    unfocused: "rgba(0, 0, 255, 0.25)",
+    currentRowBackColor: "#f0f0f0",
+    selectedBackColor: "#c0c0c0",
     lineNumbers: {
         foreColor: "black"
     },
     regular: {
         backColor: "white",
-        foreColor: "black",
-        currentRowBackColor: "#f0f0f0",
-        selectedBackColor: "#c0c0c0",
-        unfocused: "rgba(0, 0, 255, 0.25)"
+        foreColor: "black"
     },
     strings: {
         foreColor: "#aa9900",
@@ -612,6 +614,7 @@ const isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
 const isFirefox = typeof window.InstallTrigger !== "undefined";
 const isiOS = /iP(hone|od|ad)/.test(navigator.userAgent || "");
 const isMacOS = /Macintosh/.test(navigator.userAgent || "");
+const isApple = isiOS || isMacOS;
 const isSafari = Object.prototype.toString.call(window.HTMLElement)
     .indexOf("Constructor") > 0;
 
@@ -667,7 +670,7 @@ class Point {
     }
 
     toString() {
-        return "(x:" + this.x + ", y:" + this.y + ")";
+        return `(x:${this.x}, y:${this.y})`;
     }
 }
 class Size {
@@ -694,7 +697,7 @@ class Size {
     }
 
     toString() {
-        return "<w:" + this.width + ", h:" + this.height + ">";
+        return `<w:${this.width}, h:${this.height}>`;
     }
 }
 class Rectangle {
@@ -1175,7 +1178,7 @@ for (let pair of keyGroups) {
 Object.freeze(keyTypes);
 
 let isFnDown = false;
-if (isMacOS) {
+if (isApple) {
     window.addEventListener("keydown", (evt) => {
         if (evt.key === "Fn") {
             isFnDown = true;
@@ -1227,7 +1230,7 @@ function normalizeKeyValue(evt) {
         return "Delete";
     }
     else if (evt.key === "Delete"
-        && isMacOS
+        && isApple
         && isFnDown) {
         return "Backspace";
     }
@@ -1356,62 +1359,58 @@ class OperatingSystem {
         this.name = osName;
 
         const pre4 = pre3;
-        pre3 = pre3.length > 0 ? pre3 : "Normal";
-
-        const definitions = Object.freeze(new Map([
-            ["CursorDown", "Normal_ArrowDown"],
-            ["CursorLeft", "Normal_ArrowLeft"],
-            ["CursorRight", "Normal_ArrowRight"],
-            ["CursorUp", "Normal_ArrowUp"],
-            ["CursorPageDown", "Normal_PageDown"],
-            ["CursorPageUp", "Normal_PageUp"],
-            ["CursorSkipLeft", `${pre2}_ArrowLeft`],
-            ["CursorSkipRight", `${pre2}_ArrowRight`],
-            ["CursorHome", `${pre3}_${home}`],
-            ["CursorEnd", `${pre3}_${end}`],
-            ["CursorFullHome", `${pre5}_${fullHome}`],
-            ["CursorFullEnd", `${pre5}_${fullEnd}`],
-
-
-            ["SelectDown", "Shift_ArrowDown"],
-            ["SelectLeft", "Shift_ArrowLeft"],
-            ["SelectRight", "Shift_ArrowRight"],
-            ["SelectUp", "Shift_ArrowUp"],
-            ["SelectPageDown", "Shift_PageDown"],
-            ["SelectPageUp", "Shift_PageUp"],
-            ["SelectSkipLeft", `${pre2}Shift_ArrowLeft`],
-            ["SelectSkipRight", `${pre2}Shift_ArrowRight`],
-            ["SelectHome", `${pre4}Shift_${home}`],
-            ["SelectEnd", `${pre4}Shift_${end}`],
-            ["SelectFullHome", `${pre5}Shift_${fullHome}`],
-            ["SelectFullEnd", `${pre5}Shift_${fullEnd}`],
-
-            ["SelectAll", `${pre1}_a`],
-
-            ["ScrollDown", `${pre1}_ArrowDown`],
-            ["ScrollUp", `${pre1}_ArrowUp`],
-
-            ["DeleteLetterLeft", "Normal_Backspace"],
-            ["DeleteLetterRight", "Normal_Delete"],
-            ["DeleteWordLeft", `${pre2}_Backspace`],
-            ["DeleteWordRight", `${pre2}_Delete`],
-            ["DeleteLine", `Shift_Delete`],
-
-            ["AppendNewline", "Normal_Enter"],
-            ["PrependNewline", `${pre2}_Enter`],
-
-            ["InsertTab", "Normal_Tab"],
-            ["RemoveTab", "Shift_Tab"],
-
-            ["Undo", `${pre1}_z`],
-            ["Redo", redo]
-        ]));
-
-        const substitutions = new Map();
-        for (let pair of definitions) {
-            substitutions.set(pair[1], pair[0]);
+        if (pre3.length === 0) {
+            pre3 = "Normal";
         }
-        Object.freeze(substitutions);
+
+        const substitutions = Object.freeze(new Map([
+            ["Normal_ArrowDown", "CursorDown"],
+            ["Normal_ArrowLeft", "CursorLeft"],
+            ["Normal_ArrowRight", "CursorRight"],
+            ["Normal_ArrowUp", "CursorUp"],
+            ["Normal_PageDown", "CursorPageDown"],
+            ["Normal_PageUp", "CursorPageUp"],
+            [`${pre2}_ArrowLeft`, "CursorSkipLeft"],
+            [`${pre2}_ArrowRight`, "CursorSkipRight"],
+            [`${pre3}_${home}`, "CursorHome"],
+            [`${pre3}_${end}`, "CursorEnd"],
+            [`${pre5}_${fullHome}`, "CursorFullHome"],
+            [`${pre5}_${fullEnd}`, "CursorFullEnd"],
+
+
+            ["Shift_ArrowDown", "SelectDown"],
+            ["Shift_ArrowLeft", "SelectLeft"],
+            ["Shift_ArrowRight", "SelectRight"],
+            ["Shift_ArrowUp", "SelectUp"],
+            ["Shift_PageDown", "SelectPageDown"],
+            ["Shift_PageUp", "SelectPageUp"],
+            [`${pre2}Shift_ArrowLeft`, "SelectSkipLeft"],
+            [`${pre2}Shift_ArrowRight`, "SelectSkipRight"],
+            [`${pre4}Shift_${home}`, "SelectHome"],
+            [`${pre4}Shift_${end}`, "SelectEnd"],
+            [`${pre5}Shift_${fullHome}`, "SelectFullHome"],
+            [`${pre5}Shift_${fullEnd}`, "SelectFullEnd"],
+
+            [`${pre1}_a`, "SelectAll"],
+
+            [`${pre1}_ArrowDown`, "ScrollDown"],
+            [`${pre1}_ArrowUp`, "ScrollUp"],
+
+            ["Normal_Backspace", "DeleteLetterLeft"],
+            ["Normal_Delete", "DeleteLetterRight"],
+            [`${pre2}_Backspace`, "DeleteWordLeft"],
+            [`${pre2}_Delete`, "DeleteWordRight"],
+            [`Shift_Delete`, "DeleteLine"],
+
+            ["Normal_Enter", "AppendNewline"],
+            [`${pre2}_Enter`, "PrependNewline"],
+
+            ["Normal_Tab", "InsertTab"],
+            ["Shift_Tab", "RemoveTab"],
+
+            [`${pre1}_z`, "Undo"],
+            [redo, "Redo"]
+        ]));
 
         this.makeCommand = (evt) => {
             gesture.text = normalizeKeyValue(evt);
@@ -1532,10 +1531,16 @@ class Token {
     constructor(value, type, stringIndex) {
         this.value = value;
         this.startStringIndex = stringIndex;
-        this.length = value.length;
-        this.endStringIndex = this.startStringIndex + this.length;
         this.type = type;
         Object.seal(this);
+    }
+
+    get length() {
+        return this.value.length;
+    }
+
+    get endStringIndex() {
+        return this.startStringIndex + this.length;
     }
 
     clone() {
@@ -1549,7 +1554,7 @@ class Token {
     }
 
     toString() {
-        return "[" + this.type + ": " + this.value + "]";
+        return `[${this.type}: ${this.value}]`;
     }
 }
 
@@ -2689,8 +2694,8 @@ class Primrose extends EventTarget {
 
             // draw the current row highlighter
             if (focused) {
-                fillRect(bgfx, theme.regular.currentRowBackColor ||
-                    DefaultTheme.regular.currentRowBackColor,
+                fillRect(bgfx, theme.currentRowBackColor ||
+                    Dark.currentRowBackColor,
                     0, minCursor.y,
                     gridBounds.width,
                     maxCursor.y - minCursor.y + 1);
@@ -2719,8 +2724,8 @@ class Primrose extends EventTarget {
                             const selectionFront = Cursor.max(minCursor, tokenFront),
                                 selectionBack = Cursor.min(maxCursor, tokenBack),
                                 cw = selectionBack.i - selectionFront.i;
-                            fillRect(bgfx, theme.regular.selectedBackColor ||
-                                DefaultTheme.regular.selectedBackColor,
+                            fillRect(bgfx, theme.selectedBackColor ||
+                                Dark.selectedBackColor,
                                 selectionFront.x, selectionFront.y,
                                 cw, 1);
                         }
@@ -2736,7 +2741,7 @@ class Primrose extends EventTarget {
 
             // draw the cursor caret
             if (focused) {
-                const cc = theme.cursorColor || DefaultTheme.cursorColor,
+                const cc = theme.cursorColor || Dark.cursorColor,
                     w = 1 / character.width;
                 fillRect(bgfx, cc, minCursor.x, minCursor.y, w, 1);
                 fillRect(bgfx, cc, maxCursor.x, maxCursor.y, w, 1);
@@ -2773,9 +2778,15 @@ class Primrose extends EventTarget {
 
                         // draw the text
                         const style = theme[t.type] || {},
-                            font = (style.fontWeight || theme.regular.fontWeight || "") +
-                                " " + (style.fontStyle || theme.regular.fontStyle || "") +
-                                " " + context.font;
+                            fontWeight = style.fontWeight
+                                || theme.regular.fontWeight
+                                || Dark.regular.fontWeight
+                                || "",
+                            fontStyle = style.fontStyle
+                                || theme.regular.fontStyle
+                                || Dark.regular.fontStyle
+                                || "",
+                            font = `${fontWeight} ${fontStyle} ${context.font}`;
                         fgfx.font = font.trim();
                         fgfx.fillStyle = style.foreColor || theme.regular.foreColor;
                         fgfx.fillText(
@@ -2803,13 +2814,13 @@ class Primrose extends EventTarget {
 
             if (showLineNumbers) {
                 fillRect(tgfx,
-                    theme.regular.selectedBackColor ||
-                    DefaultTheme.regular.selectedBackColor,
+                    theme.selectedBackColor ||
+                    Dark.selectedBackColor,
                     0, 0,
                     gridBounds.x, this.width - padding * 2);
                 strokeRect(tgfx,
                     theme.regular.foreColor ||
-                    DefaultTheme.regular.foreColor,
+                    Dark.regular.foreColor,
                     0, 0,
                     gridBounds.x, this.height - padding * 2);
             }
@@ -2843,8 +2854,8 @@ class Primrose extends EventTarget {
 
             // draw the scrollbars
             if (showScrollBars) {
-                tgfx.fillStyle = theme.regular.selectedBackColor ||
-                    DefaultTheme.regular.selectedBackColor;
+                tgfx.fillStyle = theme.selectedBackColor ||
+                    Dark.selectedBackColor;
 
                 // horizontal
                 if (!wordWrap && maxRowWidth > gridBounds.width) {
@@ -2872,7 +2883,7 @@ class Primrose extends EventTarget {
 
             tgfx.restore();
             if (!focused) {
-                tgfx.fillStyle = theme.regular.unfocused || DefaultTheme.regular.unfocused;
+                tgfx.fillStyle = theme.unfocused || Dark.unfocused;
                 tgfx.fillRect(0, 0, canv.width, canv.height);
             }
         };
@@ -3518,13 +3529,14 @@ class Primrose extends EventTarget {
                 const row = rows[frontCursor.y],
                     toDelete = Math.min(frontCursor.x, tabWidth);
                 for (let i = 0; i < frontCursor.x; ++i) {
-                    if (row[i] !== ' ') {
+                    if (row.text[i] !== ' ') {
                         // can only remove tabs at the beginning of a row
                         return;
                     }
                 }
 
-                frontCursor.incX(rows, -toDelete);
+                backCursor.copy(frontCursor);
+                backCursor.incX(rows, -toDelete);
                 setSelectedText("");
             }]
         ]));
@@ -3601,9 +3613,7 @@ class Primrose extends EventTarget {
         //>>>>>>>>>> CLIPBOARD EVENT HANDLERS >>>>>>>>>>
         const copySelectedText = (evt) => {
             if (focused && frontCursor.i !== backCursor.i) {
-                const clipboard = evt.clipboardData || window.clipboardData;
-                clipboard.setData(
-                    window.clipboardData ? "Text" : "text/plain", this.selectedText);
+                evt.clipboardData.setData("text/plain", this.selectedText);
                 evt.returnValue = false;
                 return true;
             }
@@ -4290,7 +4300,7 @@ class Primrose extends EventTarget {
             focusEvt = new Event("focus"),
             changeEvt = new Event("change"),
             updateEvt = new Event("update"),
-            os = isMacOS ? MacOS : Windows;
+            os = isApple ? MacOS : Windows;
         //<<<<<<<<<< PRIVATE MUTABLE FIELDS <<<<<<<<<<
 
         //>>>>>>>>>> SETUP CANVAS >>>>>>>>>>
