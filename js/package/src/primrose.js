@@ -241,9 +241,15 @@ export class Primrose extends EventTarget {
 
                         // draw the text
                         const style = theme[t.type] || {},
-                            font = (style.fontWeight || theme.regular.fontWeight || "") +
-                                " " + (style.fontStyle || theme.regular.fontStyle || "") +
-                                " " + context.font;
+                            fontWeight = style.fontWeight
+                                || theme.regular.fontWeight
+                                || DefaultTheme.regular.fontWeight
+                                || "",
+                            fontStyle = style.fontStyle
+                                || theme.regular.fontStyle
+                                || DefaultTheme.regular.fontStyle
+                                || "",
+                            font = `${fontWeight} ${fontStyle} ${context.font}`;
                         fgfx.font = font.trim();
                         fgfx.fillStyle = style.foreColor || theme.regular.foreColor;
                         fgfx.fillText(
