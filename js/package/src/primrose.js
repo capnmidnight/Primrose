@@ -526,12 +526,9 @@ export class Primrose extends EventTarget {
                 startLineNumber = startRow.lineNumber,
                 startStringIndex = startRow.startStringIndex,
                 endRow = rows[endY],
-                endLineNumber = endRow.lineNumber,
-                endStringIndex = endRow.endStringIndex,
                 endTokenIndex = endRow.endTokenIndex,
                 tokenRemoveCount = endTokenIndex - startTokenIndex,
-                oldTokens = tokens.splice(startTokenIndex, tokenRemoveCount, ...newTokens),
-                oldLineCount = lineCount;
+                oldTokens = tokens.splice(startTokenIndex, tokenRemoveCount, ...newTokens);
 
             // figure out the width of the line count gutter
             lineCountWidth = 0;
@@ -603,16 +600,18 @@ export class Primrose extends EventTarget {
             rows.splice(startY, rowRemoveCount, ...newRows);
 
             // renumber rows
-            const deltaLines = endLineNumber - 2 * startLineNumber + currentLineNumber - 1,
-                deltaStringIndex = currentStringIndex - endStringIndex,
-                deltaTokenIndex = currentTokenIndex - endTokenIndex;
             for (let y = startY + newRows.length; y < rows.length; ++y) {
                 const row = rows[y];
-                row.lineNumber += deltaLines;
-                row.startStringIndex += deltaStringIndex;
-                row.endStringIndex += deltaStringIndex;
-                row.startTokenIndex += deltaTokenIndex;
-                row.endTokenIndex += deltaTokenIndex;
+                row.lineNumber = currentLineNumber;
+                row.startStringIndex = currentStringIndex;
+                row.startTokenIndex += currentTokenIndex;
+
+                currentStringIndex += row.stringLength;
+                currentTokenIndex += row.numTokens;
+
+                if (row.tokens[row.tokens.length - 1].type === "newlines") {
+                    ++currentLineNumber;
+                }
             }
 
             // provide editing room at the end of the buffer

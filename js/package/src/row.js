@@ -2,13 +2,9 @@
     constructor(txt, tokens, startStringIndex, startTokenIndex, lineNumber) {
         this.text = txt;
         this.startStringIndex = startStringIndex;
-        this.stringLength = txt.length;
-        this.endStringIndex = this.startStringIndex + this.stringLength;
 
         this.tokens = tokens;
         this.startTokenIndex = startTokenIndex;
-        this.numTokens = tokens.length;
-        this.endTokenIndex = this.startTokenIndex + this.numTokens;
 
         this.lineNumber = lineNumber;
 
@@ -48,6 +44,22 @@
         this.substring = (x, y) => txt.substring(x, y);
 
         Object.seal(this);
+    }
+
+    get stringLength() {
+        return this.text.length;
+    }
+
+    get endStringIndex() {
+        return this.startStringIndex + this.stringLength;
+    }
+
+    get numTokens() {
+        return this.tokens.length;
+    }
+
+    get endTokenIndex() {
+        return this.startTokenIndex + this.numTokens;
     }
 }
 
