@@ -3,7 +3,6 @@ using System.Drawing;
 
 namespace Primrose
 {
-
     public static class Themes
     {
         /// <summary>
@@ -12,55 +11,55 @@ namespace Primrose
         public static readonly Theme Dark = new Theme
         {
             name = "Dark",
-            cursorColor = "white",
-            unfocused = "rgba(0, 0, 255, 0.25)",
-            currentRowBackColor = new SolidBrush(Color.FromArgb(0x20, 0x20, 0x20)),
-            selectedBackColor = new SolidBrush(Color.FromArgb(0x40, 0x40, 0x40)),
+            cursorColor = Color.White,
+            unfocused = Color.FromArgb(0x3f, 0, 0, 0xff),
+            currentRowBackColor = Color.FromArgb(0x20, 0x20, 0x20),
+            selectedBackColor = Color.FromArgb(0x40, 0x40, 0x40),
             lineNumbers = new ThemeRule
             {
-                foreColor = "white"
+                foreColor = Color.White
             },
             regular = new ThemeRule
             {
-                backColor = Brushes.Black,
-                foreColor = "#c0c0c0"
+                backColor = Color.Black,
+                foreColor = Color.FromArgb(0xc0, 0xc0, 0xc0)
             },
             strings = new ThemeRule
             {
-                foreColor = "#aa9900",
-                fontStyle = "italic"
+                foreColor = Color.FromArgb(0xaa, 0x99, 0x00),
+                fontStyle = FontStyle.Italic
             },
             regexes = new ThemeRule
             {
-                foreColor = "#aa0099",
-                fontStyle = "italic"
+                foreColor = Color.FromArgb(0xaa, 0x00, 0x99),
+                fontStyle = FontStyle.Italic
             },
             numbers = new ThemeRule
             {
-                foreColor = "green"
+                foreColor = Color.Green
             },
             comments = new ThemeRule
             {
-                foreColor = "yellow",
-                fontStyle = "italic"
+                foreColor = Color.Yellow,
+                fontStyle = FontStyle.Italic
             },
             keywords = new ThemeRule
             {
-                foreColor = "cyan"
+                foreColor = Color.Cyan
             },
             functions = new ThemeRule
             {
-                foreColor = "brown",
-                fontWeight = "bold"
+                foreColor = Color.Brown,
+                fontStyle = FontStyle.Bold
             },
             members = new ThemeRule
             {
-                foreColor = "green"
+                foreColor = Color.Green
             },
             error = new ThemeRule
             {
-                foreColor = "red",
-                fontStyle = "underline italic"
+                foreColor = Color.Red,
+                fontStyle = FontStyle.Italic | FontStyle.Underline
             }
         };
 
@@ -71,55 +70,55 @@ namespace Primrose
         public static readonly Theme Light = new Theme
         {
             name = "Light",
-            cursorColor = "black",
-            unfocused = "rgba(0, 0, 255, 0.25)",
-            currentRowBackColor = new SolidBrush(Color.FromArgb(0xf0, 0xf0, 0xf0)),
-            selectedBackColor = new SolidBrush(Color.FromArgb(0xc0, 0xc0, 0xc0)),
+            cursorColor = Color.Black,
+            unfocused = Color.FromArgb(0x3f, 0, 0, 0xff),
+            currentRowBackColor = Color.FromArgb(0xf0, 0xf0, 0xf0),
+            selectedBackColor = Color.FromArgb(0xc0, 0xc0, 0xc0),
             lineNumbers = new ThemeRule
             {
-                foreColor = "black"
+                foreColor = Color.Black
             },
             regular = new ThemeRule
             {
-                backColor = Brushes.White,
-                foreColor = "black"
+                backColor = Color.White,
+                foreColor = Color.Black
             },
             strings = new ThemeRule
             {
-                foreColor = "#aa9900",
-                fontStyle = "italic"
+                foreColor = Color.FromArgb(0xaa, 0x99, 0x00),
+                fontStyle = FontStyle.Italic
             },
             regexes = new ThemeRule
             {
-                foreColor = "#aa0099",
-                fontStyle = "italic"
+                foreColor = Color.FromArgb(0xaa, 0x00, 0x99),
+                fontStyle = FontStyle.Italic
             },
             numbers = new ThemeRule
             {
-                foreColor = "green"
+                foreColor = Color.Green
             },
             comments = new ThemeRule
             {
-                foreColor = "grey",
-                fontStyle = "italic"
+                foreColor = Color.Gray,
+                fontStyle = FontStyle.Italic
             },
             keywords = new ThemeRule
             {
-                foreColor = "blue"
+                foreColor = Color.Blue
             },
             functions = new ThemeRule
             {
-                foreColor = "brown",
-                fontWeight = "bold"
+                foreColor = Color.Brown,
+                fontStyle = FontStyle.Bold
             },
             members = new ThemeRule
             {
-                foreColor = "green"
+                foreColor = Color.Green
             },
             error = new ThemeRule
             {
-                foreColor = "red",
-                fontStyle = "underline italic"
+                foreColor = Color.Red,
+                fontStyle = FontStyle.Italic | FontStyle.Underline
             }
         };
 

@@ -13,14 +13,14 @@ namespace Primrose
         }
 
         public string text { get; }
-        public int startStringIndex { get; }
+        public int startStringIndex { get; set; }
         public int stringLength => text.Length;
         public int endStringIndex => startStringIndex + stringLength;
         public Token[] tokens { get; }
-        public int startTokenIndex { get; }
+        public int startTokenIndex { get; set; }
         public int numTokens => tokens.Length;
         public int endTokenIndex => startTokenIndex + numTokens;
-        public int lineNumber { get; }
+        public int lineNumber { get; set; }
 
         private readonly int[] leftCorrections;
         private readonly int[] rightCorrections;

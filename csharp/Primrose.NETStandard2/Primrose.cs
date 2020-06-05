@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 
 namespace Primrose
 {
@@ -95,6 +96,7 @@ namespace Primrose
             lineCountWidth = 1,
             maxVerticalScroll;
         private bool resized,
+            fontChanged,
             pressed,
             dragging,
             scrolling,
@@ -114,7 +116,6 @@ namespace Primrose
             lastScrollY = null;
         string lastGridBounds = null,
             lastThemeName = null,
-            lastFont = null,
             lastText = null;
 
         private Image fg, bg, tg;
@@ -446,6 +447,53 @@ namespace Primrose
                     setSelectedText("");
                 } }
             };
+
+            keyPressCommands = new Dictionary<string, Action>() {
+                { "AppendNewline", () =>
+                {
+                    if (multiLine)
+                    {
+                        var indent = "";
+                        var rowTokens = rows[frontCursor.y].tokens;
+                        if (rowTokens.Length > 0
+                            && rowTokens[0].type == "whitespace")
+                        {
+                            indent = rowTokens[0].value;
+                        }
+                        setSelectedText("\n" + indent);
+                    }
+                    else
+                    {
+                        OnChange();
+                    }
+                } },
+
+                { "PrependNewline", () =>
+                {
+                    if (multiLine)
+                    {
+                        var indent = "";
+                        var rowTokens = rows[frontCursor.y].tokens;
+                        if (rowTokens.Length > 0
+                            && rowTokens[0].type == "whitespace")
+                        {
+                            indent = rowTokens[0].value;
+                        }
+                        frontCursor.home();
+                        backCursor.copy(frontCursor);
+                        setSelectedText(indent + "\n");
+                    }
+                    else
+                    {
+                        OnChange();
+                    }
+                } },
+
+                { "Undo", () =>
+                {
+                    moveInHistory(-1);
+                } }
+            };
             #endregion
 
             longPress.Tick += (obj, evt) =>
@@ -512,7 +560,6 @@ namespace Primrose
             {
                 bool textChanged = lastText != value,
                     focusChanged = focused != lastFocused,
-                    fontChanged = context.font != lastFont,
                     paddingChanged = padding != lastPadding,
                     themeChanged = theme.name != lastThemeName,
                     boundsChanged = gridBounds.ToString() != lastGridBounds,
@@ -573,29 +620,29 @@ namespace Primrose
                 lastFrontCursor = frontCursor.i;
                 lastBackCursor = backCursor.i;
                 lastFocused = focused;
-                lastFont = context.font;
                 lastThemeName = theme.name;
                 lastScrollX = scroll.x;
                 lastScrollY = scroll.y;
                 resized = false;
+                fontChanged = false;
                 OnUpdate();
             }
         }
 
-        private void fillRect(Graphics gfx, Brush fill, int x, int y, int w, int h)
+        private void fillRect(Graphics gfx, Color color, int x, int y, int w, int h)
         {
             gfx.FillRectangle(
-                fill,
+                brushes[color],
                 x * character.width,
                 y * character.height,
                 w * character.width + 1,
                 h * character.height + 1);
         }
 
-        private void strokeRect(Graphics gfx, Pen stroke, int x, int y, int w, int h)
+        private void strokeRect(Graphics gfx, Color color, int x, int y, int w, int h)
         {
             gfx.DrawRectangle(
-                stroke,
+                pens[color],
                 x * character.width,
                 y * character.height,
                 w * character.width + 1,
@@ -606,231 +653,257 @@ namespace Primrose
         {
             var minCursor = Cursor.min(frontCursor, backCursor);
             var maxCursor = Cursor.max(frontCursor, backCursor);
-            var fillStyle = theme.regular?.backColor ?? DefaultTheme.regular.backColor;
+            bgfx.FillRectangle(
+                brushes[theme.regular.backColor], 
+                0, 0, 
+                canvas.Width, canvas.Height);
 
-            bgfx.FillRectangle(fillStyle, 0, 0, canvas.Width, canvas.Height);
-
-            bgfx.Save();
-            bgfx.ScaleTransform(scaleFactor, scaleFactor);
-            bgfx.TranslateTransform(
-                (gridBounds.x - scroll.x) * character.width + padding,
-                -scroll.y * character.height + padding);
-
-
-            // draw the current row highlighter
-            if (focused)
+            using (bgfx.Push())
             {
-                fillRect(bgfx,
-                    theme?.currentRowBackColor ?? DefaultTheme.currentRowBackColor,
-                    0, minCursor.y,
-                    gridBounds.width,
-                    maxCursor.y - minCursor.y + 1);
-            }
+                bgfx.ScaleTransform(scaleFactor, scaleFactor);
+                bgfx.TranslateTransform(
+                    (gridBounds.x - scroll.x) * character.width + padding,
+                    -scroll.y * character.height + padding);
 
-            int minY = scroll.y,
-                maxY = minY + gridBounds.height,
-                minX = scroll.x,
-                maxX = minX + gridBounds.width;
-            tokenFront.setXY(rows, 0, minY);
-            tokenBack.copy(tokenFront);
-            for (var y = minY; y <= maxY && y < rows.Count; ++y)
-            {
-                // draw the tokens on this row
-                var row = rows[y].tokens;
-                for (var i = 0; i < row.Length; ++i)
+
+                // draw the current row highlighter
+                if (focused)
                 {
-                    var t = row[i];
-                    tokenBack.x += t.length;
-                    tokenBack.i += t.length;
-
-                    // skip drawing tokens that aren't in view
-                    if (minX <= tokenBack.x && tokenFront.x <= maxX)
-                    {
-                        // draw the selection box
-                        var inSelection = minCursor.i <= tokenBack.i
-                            && tokenFront.i < maxCursor.i;
-                        if (inSelection)
-                        {
-                            var selectionFront = Cursor.max(minCursor, tokenFront);
-                            var selectionBack = Cursor.min(maxCursor, tokenBack);
-                            var cw = selectionBack.i - selectionFront.i;
-                            fillRect(bgfx,
-                                theme.selectedBackColor ?? DefaultTheme.selectedBackColor,
-                                selectionFront.x, selectionFront.y,
-                                cw, 1);
-                        }
-                    }
-
-                    tokenFront.copy(tokenBack);
+                    fillRect(bgfx,
+                        theme.currentRowBackColor,
+                        0, minCursor.y,
+                        gridBounds.width,
+                        maxCursor.y - minCursor.y + 1);
                 }
 
-                tokenFront.x = 0;
-                ++tokenFront.y;
-                tokenBack.copy(tokenFront);
-            }
-
-            // draw the cursor caret
-            if (focused)
-            {
-                var cc = theme.cursorColor ?? DefaultTheme.cursorColor;
-                var w = 1 / character.width;
-                fillRect(bgfx, cc, minCursor.x, minCursor.y, w, 1);
-                fillRect(bgfx, cc, maxCursor.x, maxCursor.y, w, 1);
-            }
-            bgfx.restore();
-        }
-
-        private void renderCanvasForeground()
-        {
-            fgfx.clearRect(0, 0, canvas.width, canvas.height);
-            fgfx.save();
-            fgfx.scale(scaleFactor, scaleFactor);
-            fgfx.translate(
-                (gridBounds.x - scroll.x) * character.width + padding,
-                padding);
-
-            int minY = scroll.y,
-                maxY = minY + gridBounds.height,
-                minX = scroll.x,
-                maxX = minX + gridBounds.width;
-            tokenFront.setXY(rows, 0, minY);
-            tokenBack.copy(tokenFront);
-            for (var y = minY; y <= maxY && y < rows.length; ++y)
-            {
-                // draw the tokens on this row
-                var row = rows[y].tokens;
-                var textY = (y - scroll.y) * character.height;
-
-                for (var i = 0; i < row.length; ++i)
-                {
-                    var t = row[i];
-                    tokenBack.x += t.length;
-                    tokenBack.i += t.length;
-
-                    // skip drawing tokens that aren't in view
-                    if (minX <= tokenBack.x && tokenFront.x <= maxX)
-                    {
-
-                        // draw the text
-                        var style = theme[t.type];
-                        var fontWeight = style?.fontWeight
-                            ?? theme.regular.fontWeight
-                            ?? DefaultTheme.regular.fontWeight
-                            ?? "";
-                        var fontStyle = style?.fontStyle
-                            ?? theme.regular.fontStyle
-                            ?? DefaultTheme.regular.fontStyle
-                            ?? "";
-                        var font = $"{fontWeight} {fontStyle} {context.font}";
-                        fgfx.font = font.trim();
-                        fgfx.fillStyle = style.foreColor || theme.regular.foreColor;
-                        fgfx.fillText(
-                            t.value,
-                            tokenFront.x * character.width,
-                            textY);
-                    }
-
-                    tokenFront.copy(tokenBack);
-                }
-
-                tokenFront.x = 0;
-                ++tokenFront.y;
-                tokenBack.copy(tokenFront);
-            }
-
-            fgfx.restore();
-        }
-
-        private void renderCanvasTrim()
-        {
-            tgfx.clearRect(0, 0, canvas.width, canvas.height);
-            tgfx.save();
-            tgfx.scale(scaleFactor, scaleFactor);
-            tgfx.translate(padding, padding);
-
-            if (showLineNumbers)
-            {
-                fillRect(tgfx,
-                    theme.selectedBackColor ?? DefaultTheme.selectedBackColor,
-                    0, 0,
-                    gridBounds.x, this.width - padding * 2);
-                strokeRect(tgfx,
-                    theme.regular.foreColor ?? DefaultTheme.regular.foreColor,
-                    0, 0,
-                    gridBounds.x, this.height - padding * 2);
-            }
-
-            let maxRowWidth = 2;
-            tgfx.save();
-            {
-                tgfx.translate((lineCountWidth - 0.5) * character.width, -scroll.y * character.height);
-                int lastLineNumber = -1,
-                    minY = scroll.y,
+                int minY = scroll.y,
                     maxY = minY + gridBounds.height,
                     minX = scroll.x,
                     maxX = minX + gridBounds.width;
                 tokenFront.setXY(rows, 0, minY);
                 tokenBack.copy(tokenFront);
-                for (var y = minY; y <= maxY && y < rows.length; ++y)
+                for (var y = minY; y <= maxY && y < rows.Count; ++y)
                 {
-                    var row = rows[y];
-                    maxRowWidth = Math.max(maxRowWidth, row.stringLength);
-                    if (showLineNumbers)
+                    // draw the tokens on this row
+                    var row = rows[y].tokens;
+                    for (var i = 0; i < row.Length; ++i)
                     {
-                        // draw the left gutter
-                        if (row.lineNumber > lastLineNumber)
+                        var t = row[i];
+                        tokenBack.x += t.length;
+                        tokenBack.i += t.length;
+
+                        // skip drawing tokens that aren't in view
+                        if (minX <= tokenBack.x && tokenFront.x <= maxX)
                         {
-                            lastLineNumber = row.lineNumber;
-                            tgfx.font = "bold " + context.font;
-                            tgfx.fillStyle = theme.regular.foreColor;
-                            tgfx.fillText(
-                                row.lineNumber,
-                                0, y * character.height);
+                            // draw the selection box
+                            var inSelection = minCursor.i <= tokenBack.i
+                                && tokenFront.i < maxCursor.i;
+                            if (inSelection)
+                            {
+                                var selectionFront = Cursor.max(minCursor, tokenFront);
+                                var selectionBack = Cursor.min(maxCursor, tokenBack);
+                                var cw = selectionBack.i - selectionFront.i;
+                                fillRect(bgfx,
+                                    theme.selectedBackColor,
+                                    selectionFront.x, selectionFront.y,
+                                    cw, 1);
+                            }
+                        }
+
+                        tokenFront.copy(tokenBack);
+                    }
+
+                    tokenFront.x = 0;
+                    ++tokenFront.y;
+                    tokenBack.copy(tokenFront);
+                }
+
+                // draw the cursor caret
+                if (focused)
+                {
+                    var cc = theme.cursorColor;
+                    var w = 1 / character.width;
+                    fillRect(bgfx, cc, minCursor.x, minCursor.y, w, 1);
+                    fillRect(bgfx, cc, maxCursor.x, maxCursor.y, w, 1);
+                }
+            }
+        }
+
+        private void renderCanvasForeground()
+        {
+            fgfx.Clear(Color.Transparent);
+            using (fgfx.Push())
+            {
+                fgfx.ScaleTransform(scaleFactor, scaleFactor);
+                fgfx.TranslateTransform(
+                    (gridBounds.x - scroll.x) * character.width + padding,
+                    padding);
+
+                int minY = scroll.y,
+                    maxY = minY + gridBounds.height,
+                    minX = scroll.x,
+                    maxX = minX + gridBounds.width;
+                tokenFront.setXY(rows, 0, minY);
+                tokenBack.copy(tokenFront);
+                for (var y = minY; y <= maxY && y < rows.Count; ++y)
+                {
+                    // draw the tokens on this row
+                    var rowTokens = rows[y].tokens;
+                    var textY = (y - scroll.y) * character.height;
+
+                    for (var i = 0; i < rowTokens.Length; ++i)
+                    {
+                        var t = rowTokens[i];
+                        tokenBack.x += t.length;
+                        tokenBack.i += t.length;
+
+                        // skip drawing tokens that aren't in view
+                        if (minX <= tokenBack.x && tokenFront.x <= maxX)
+                        {
+
+                            // draw the text
+                            var style = theme[t.type];
+                            fgfx.DrawString(
+                                t.value,
+                                fonts[style.fontStyle],
+                                brushes[style.foreColor],
+                                tokenFront.x * character.width,
+                                textY);
+                        }
+
+                        tokenFront.copy(tokenBack);
+                    }
+
+                    tokenFront.x = 0;
+                    ++tokenFront.y;
+                    tokenBack.copy(tokenFront);
+                }
+            }
+        }
+
+        private void renderCanvasTrim()
+        {
+            tgfx.Clear(Color.Transparent);
+            using (tgfx.Push())
+            {
+                tgfx.ScaleTransform(scaleFactor, scaleFactor);
+                tgfx.TranslateTransform(padding, padding);
+
+                if (showLineNumbers)
+                {
+                    fillRect(tgfx,
+                        theme.selectedBackColor,
+                        0, 0,
+                        gridBounds.x, width - padding * 2);
+                    //strokeRect(tgfx,
+                    //    theme.regular.foreColor ?? DefaultTheme.regular.foreColor,
+                    //    0, 0,
+                    //    gridBounds.x, height - padding * 2);
+                }
+
+                var maxRowWidth = 2;
+                using (tgfx.Push())
+                {
+                    tgfx.TranslateTransform((lineCountWidth - 0.5f) * character.width, -scroll.y * character.height);
+                    int lastLineNumber = -1,
+                        minY = scroll.y,
+                        maxY = minY + gridBounds.height,
+                        minX = scroll.x,
+                        maxX = minX + gridBounds.width;
+                    tokenFront.setXY(rows, 0, minY);
+                    tokenBack.copy(tokenFront);
+                    for (var y = minY; y <= maxY && y < rows.Count; ++y)
+                    {
+                        var row = rows[y];
+                        maxRowWidth = Math.Max(maxRowWidth, row.stringLength);
+                        if (showLineNumbers)
+                        {
+                            // draw the left gutter
+                            if (row.lineNumber > lastLineNumber)
+                            {
+                                lastLineNumber = row.lineNumber;
+                                var fillStyle = theme.regular.foreColor;
+                                tgfx.DrawString(
+                                    row.lineNumber.ToString(),
+                                    fonts[FontStyle.Bold],
+                                    brushes[fillStyle],
+                                    0, y * character.height);
+                            }
                         }
                     }
                 }
-            }
-            tgfx.restore();
 
-            // draw the scrollbars
-            if (showScrollBars)
-            {
-                tgfx.fillStyle = theme.selectedBackColor ?? DefaultTheme.selectedBackColor;
-
-                // horizontal
-                if (!wordWrap && maxRowWidth > gridBounds.width)
+                // draw the scrollbars
+                if (showScrollBars)
                 {
-                    int drawWidth = gridBounds.width * character.width - padding,
-                        scrollX = (scroll.x * drawWidth) / maxRowWidth + gridBounds.x * character.width,
-                        scrollBarWidth = drawWidth * (gridBounds.width / maxRowWidth),
-                        by = this.height - character.height - padding,
-                        bw = Math.Max(character.width, scrollBarWidth);
-                    tgfx.fillRect(scrollX, by, bw, character.height);
-                    tgfx.strokeRect(scrollX, by, bw, character.height);
+                    var brush = brushes[theme.selectedBackColor];
+
+                    // horizontal
+                    if (!wordWrap && maxRowWidth > gridBounds.width)
+                    {
+                        int drawWidth = gridBounds.width * character.width - padding,
+                            scrollX = (scroll.x * drawWidth) / maxRowWidth + gridBounds.x * character.width,
+                            scrollBarWidth = drawWidth * (gridBounds.width / maxRowWidth),
+                            by = height - character.height - padding,
+                            bw = Math.Max(character.width, scrollBarWidth);
+                        tgfx.FillRectangle(brush, scrollX, by, bw, character.height);
+                        //tgfx.strokeRect(scrollX, by, bw, character.height);
+                    }
+
+                    //vertical
+                    if (rows.Count > gridBounds.height)
+                    {
+                        int drawHeight = gridBounds.height * character.height,
+                            scrollY = (scroll.y * drawHeight) / rows.Count,
+                            scrollBarHeight = drawHeight * (gridBounds.height / rows.Count),
+                            bx = width - vScrollWidth * character.width - 2 * padding,
+                            bw = vScrollWidth * character.width,
+                            bh = Math.Max(character.height, scrollBarHeight);
+                        tgfx.FillRectangle(brush, bx, scrollY, bw, bh);
+                        //tgfx.strokeRect(bx, scrollY, bw, bh);
+                    }
                 }
 
-                //vertical
-                if (rows.length > gridBounds.height)
-                {
-                    int drawHeight = gridBounds.height * character.height,
-                        scrollY = (scroll.y * drawHeight) / rows.length,
-                        scrollBarHeight = drawHeight * (gridBounds.height / rows.length),
-                        bx = this.width - vScrollWidth * character.width - 2 * padding,
-                        bw = vScrollWidth * character.width,
-                        bh = Math.Max(character.height, scrollBarHeight);
-                    tgfx.fillRect(bx, scrollY, bw, bh);
-                    tgfx.strokeRect(bx, scrollY, bw, bh);
-                }
             }
-
-            tgfx.restore();
             if (!focused)
             {
-                tgfx.fillStyle = theme.regular.unfocused || DefaultTheme.regular.unfocused;
-                tgfx.fillRect(0, 0, canvas.width, canvas.height);
+                var fillStyle = brushes[theme.unfocused];
+                tgfx.FillRectangle(fillStyle, 0, 0, canvas.Width, canvas.Height);
             }
         }
         #endregion RENDERING
+
+        private readonly Dictionary<FontStyle, Font> fonts = new Dictionary<FontStyle, Font>();
+        private void refreshFont()
+        {
+            fontChanged = true;
+            foreach(var font in fonts.Values)
+            {
+                font.Dispose();
+            }
+            fonts.Clear();
+
+            var styles = theme.Styles
+                .Union(DefaultTheme.Styles)
+                .Append(FontStyle.Bold)
+                .Distinct();
+
+            foreach(var style in styles)
+            {
+                fonts.Add(style, new Font(fontFamily, fontSize, style, GraphicsUnit.Pixel));
+            }
+
+            character.height = fontSize;
+            // measure 100 letter M's, then divide by 100, to get the width of an M
+            // to two decimal places on systems that return integer values from
+            // measureText.
+            character.width = (int)Math.Round(context.MeasureString(
+                "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
+                fonts[FontStyle.Regular])
+                .Width /
+                100);
+            refreshAllTokens();
+        }
 
         private void refreshControlType()
         {
@@ -838,19 +911,19 @@ namespace Primrose
 
             if (readOnly && multiLine)
             {
-                controlType = multiLineOutput;
+                controlType = ControlTypes.multiLineOutput;
             }
             else if (readOnly && !multiLine)
             {
-                controlType = singleLineOutput;
+                controlType = ControlTypes.singleLineOutput;
             }
             else if (!readOnly && multiLine)
             {
-                controlType = multiLineInput;
+                controlType = ControlTypes.multiLineInput;
             }
             else
             {
-                controlType = singleLineInput;
+                controlType = ControlTypes.singleLineInput;
             }
 
             if (controlType != lastControlType)
@@ -896,15 +969,15 @@ namespace Primrose
             txt = txt ?? string.Empty;
             txt = txt.Replace("\r\n", "\n");
 
-            if (frontCursor.i != backCursor.i || txt.length > 0)
+            if (frontCursor.i != backCursor.i || txt.Length > 0)
             {
                 var minCursor = Cursor.min(frontCursor, backCursor);
                 var maxCursor = Cursor.max(frontCursor, backCursor);
                 var startRow = rows[minCursor.y];
                 var endRow = rows[maxCursor.y];
 
-                var unchangedLeft = value.substring(0, startRow.startStringIndex);
-                var unchangedRight = value.substring(endRow.endStringIndex);
+                var unchangedLeft = value.Substring(0, startRow.startStringIndex);
+                var unchangedRight = value.Substring(endRow.endStringIndex);
 
                 var changedStartSubStringIndex = minCursor.i - startRow.startStringIndex;
                 var changedLeft = startRow.substring(0, changedStartSubStringIndex);
@@ -919,7 +992,7 @@ namespace Primrose
                 pushUndo();
 
                 refreshTokens(minCursor.y, maxCursor.y, changedText);
-                frontCursor.setI(rows, minCursor.i + txt.length);
+                frontCursor.setI(rows, minCursor.i + txt.Length);
                 backCursor.copy(frontCursor);
                 scrollIntoView(frontCursor);
                 OnChange();
@@ -928,7 +1001,7 @@ namespace Primrose
 
         private void refreshAllTokens()
         {
-            refreshTokens(0, rows.length - 1, value);
+            refreshTokens(0, rows.Count - 1, value);
         }
 
         private void refreshTokens(int startY, int endY, string txt)
@@ -940,7 +1013,7 @@ namespace Primrose
                 txt = rows[startY].text + txt;
             }
 
-            while (endY < rows.length - 1 && rows[endY].lineNumber == rows[endY + 1].lineNumber)
+            while (endY < rows.Count - 1 && rows[endY].lineNumber == rows[endY + 1].lineNumber)
             {
                 ++endY;
                 txt += rows[endY].text;
@@ -957,7 +1030,7 @@ namespace Primrose
             var endStringIndex = endRow.endStringIndex;
             var endTokenIndex = endRow.endTokenIndex;
             var tokenRemoveCount = endTokenIndex - startTokenIndex;
-            var oldTokens = tokens.splice(startTokenIndex, tokenRemoveCount, ...newTokens);
+            var oldTokens = tokens.Splice(startTokenIndex, tokenRemoveCount, newTokens);
             var oldLineCount = lineCount;
 
             // figure out the width of the line count gutter
@@ -980,18 +1053,19 @@ namespace Primrose
                     }
                 }
 
-                lineCountWidth = Math.Max(1, Math.Ceiling(Math.Log10(lineCount))) + 1;
+                lineCountWidth = Math.Max(1, (int)Math.Ceiling(Math.Log10(lineCount))) + 1;
             }
 
             // measure the grid
-            int x = Math.floor(lineCountWidth + padding / character.width),
-                y = Math.floor(padding / character.height),
-                w = Math.floor((this.width - 2 * padding) / character.width) - x - bottomRightGutter.width,
-                h = Math.floor((this.height - 2 * padding) / character.height) - y - bottomRightGutter.height;
+            var fPadding = (float)padding;
+            int x = (int)Math.Floor(lineCountWidth + fPadding / character.width),
+                y = (int)Math.Floor(fPadding / character.height),
+                w = (int)Math.Floor((width - 2 * fPadding) / character.width) - x - bottomRightGutter.width,
+                h = (int)Math.Floor((height - 2 * fPadding) / character.height) - y - bottomRightGutter.height;
             gridBounds.set(x, y, w, h);
 
             // Perform the layout
-            var tokenQueue = newTokens.Select(t => t.clone()).ToArray();
+            var tokenQueue = newTokens.Select(t => t.clone()).ToList();
             var rowRemoveCount = endY - startY + 1;
             var newRows = new List<Row>();
 
@@ -1001,10 +1075,10 @@ namespace Primrose
             var currentTokenIndex = startTokenIndex;
             var currentLineNumber = startLineNumber;
 
-            for (var i = 0; i < tokenQueue.Length; ++i)
+            for (var i = 0; i < tokenQueue.Count; ++i)
             {
                 var t = tokenQueue[i];
-                var widthLeft = gridBounds.width - currentString.length;
+                var widthLeft = gridBounds.width - currentString.Length;
                 var wrap = wordWrap && t.type != "newlines" && t.length > widthLeft;
                 var breakLine = t.type == "newlines" || wrap;
 
@@ -1013,20 +1087,20 @@ namespace Primrose
                     var split = t.length > gridBounds.width
                         ? widthLeft
                         : 0;
-                    tokenQueue.splice(i + 1, 0, t.splitAt(split));
+                    tokenQueue.Splice(i + 1, 0, t.splitAt(split));
                 }
 
-                currentTokens.push(t);
+                currentTokens.Add(t);
                 currentString += t.value;
 
                 if (breakLine
-                    || i == tokenQueue.length - 1)
+                    || i == tokenQueue.Count - 1)
                 {
-                    newRows.push(new Row(currentString, currentTokens, currentStringIndex, currentTokenIndex, currentLineNumber));
-                    currentStringIndex += currentString.length;
-                    currentTokenIndex += currentTokens.length;
+                    newRows.Add(new Row(currentString, currentTokens.ToArray(), currentStringIndex, currentTokenIndex, currentLineNumber));
+                    currentStringIndex += currentString.Length;
+                    currentTokenIndex += currentTokens.Count;
 
-                    currentTokens = new List<Token>();
+                    currentTokens.Clear();
                     currentString = "";
 
                     if (t.type == "newlines")
@@ -1036,45 +1110,43 @@ namespace Primrose
                 }
             }
 
-            rows.splice(startY, rowRemoveCount, ...newRows);
+            rows.Splice(startY, rowRemoveCount, newRows);
 
             // renumber rows
             int deltaLines = endLineNumber - 2 * startLineNumber + currentLineNumber - 1,
                 deltaStringIndex = currentStringIndex - endStringIndex,
                 deltaTokenIndex = currentTokenIndex - endTokenIndex;
-            for (var y = startY + newRows.Count; y < rows.length; ++y)
+            for (var i = startY + newRows.Count; i < rows.Count; ++i)
             {
-                var row = rows[y];
+                var row = rows[i];
                 row.lineNumber += deltaLines;
                 row.startStringIndex += deltaStringIndex;
-                row.endStringIndex += deltaStringIndex;
                 row.startTokenIndex += deltaTokenIndex;
-                row.endTokenIndex += deltaTokenIndex;
             }
 
             // provide editing room at the end of the buffer
-            if (rows.length == 0)
+            if (rows.Count == 0)
             {
-                rows.push(Row.emptyRow(0, 0, 0));
+                rows.Add(Row.emptyRow(0, 0, 0));
             }
             else
             {
-                var lastRow = rows[rows.length - 1];
-                if (lastRow.text.endsWith('\n'))
+                var lastRow = rows[rows.Count - 1];
+                if (lastRow.text.EndsWith("\n"))
                 {
-                    rows.push(Row.emptyRow(lastRow.endStringIndex, lastRow.endTokenIndex, lastRow.lineNumber + 1));
+                    rows.Add(Row.emptyRow(lastRow.endStringIndex, lastRow.endTokenIndex, lastRow.lineNumber + 1));
                 }
             }
 
-            maxVerticalScroll = Math.max(0, rows.length - gridBounds.height);
+            maxVerticalScroll = Math.Max(0, rows.Count - gridBounds.height);
 
             render();
         }
 
-        private bool setContextSize(ref Image img, ref Graphics gfx, int width, int height, int scaleFactor = 1)
+        private bool setContextSize(ref Image img, ref Graphics gfx, int width, int height, float scaleFactor = 1)
         {
-            width *= scaleFactor;
-            height *= scaleFactor;
+            width = (int)Math.Round(width * scaleFactor);
+            height = (int)Math.Round(height * scaleFactor);
             if (img != null
                 && img.Width == width
                 && img.Height == height)
@@ -1111,7 +1183,6 @@ namespace Primrose
                 = tgfx.SmoothingMode
                 = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
 
-            tgfx.textAlign = "right";
             refreshAllTokens();
         }
 
@@ -1154,28 +1225,28 @@ namespace Primrose
         {
             int dx = minDelta(cursor.x, scroll.x, scroll.x + gridBounds.width),
                 dy = minDelta(cursor.y, scroll.y, scroll.y + gridBounds.height);
-            this.scrollBy(dx, dy);
+            scrollBy(dx, dy);
         }
 
         private void pushUndo()
         {
-            if (historyIndex < history.length - 1)
+            if (historyIndex < history.Count - 1)
             {
-                history.splice(historyIndex + 1);
+                history.RemoveAt(historyIndex + 1);
             }
-            history.Add(new
+            history.Add(new HistoryFrame
             {
-                value,
+                value = value,
                 frontCursor = frontCursor.i,
                 backCursor = backCursor.i
             });
-            historyIndex = history.length - 1;
+            historyIndex = history.Count - 1;
         }
 
         private void moveInHistory(int dh)
         {
             var nextHistoryIndex = historyIndex + dh;
-            if (0 <= nextHistoryIndex && nextHistoryIndex < history.length)
+            if (0 <= nextHistoryIndex && nextHistoryIndex < history.Count)
             {
                 var curFrame = history[historyIndex];
                 historyIndex = nextHistoryIndex;
@@ -1244,7 +1315,7 @@ namespace Primrose
         /// </summary>
         public bool scrollBy(int dx, int dy)
         {
-            return this.scrollTo(scroll.x + dx, scroll.y + dy);
+            return scrollTo(scroll.x + dx, scroll.y + dy);
         }
         #endregion PUBLIC METHODS
 
@@ -1252,7 +1323,7 @@ namespace Primrose
         #region KEY EVENT HANDLERS
         private readonly Dictionary<string, Action> keyDownCommands;
 
-        public void readKeyDownEvent(object evt)
+        public void readKeyDownEvent(KeyEvent evt)
         {
             debugEvt("keydown", evt);
             var command = os.makeCommand(evt);
@@ -1264,54 +1335,9 @@ namespace Primrose
         }
 
 
-        private readonly Dictionary<string, Action> keyPressCommands = new Dictionary<string, Action>() {
-            { "AppendNewline", () =>
-            {
-                if (multiLine)
-                {
-                    var indent = "";
-                    var row = rows[frontCursor.y].tokens;
-                    if (row.length > 0
-                        && row[0].type == "whitespace")
-                    {
-                        indent = row[0].value;
-                    }
-                    setSelectedText("\n" + indent);
-                }
-                else
-                {
-                    OnChange();
-                }
-            } },
+        private readonly Dictionary<string, Action> keyPressCommands;
 
-            { "PrependNewline", () =>
-            {
-                if (multiLine)
-                {
-                    var indent = "";
-                    var row = rows[frontCursor.y].tokens;
-                    if (row.length > 0
-                        && row[0].type == "whitespace")
-                    {
-                        indent = row[0].value;
-                    }
-                    frontCursor.home();
-                    backCursor.copy(frontCursor);
-                    setSelectedText(indent + "\n");
-                }
-                else
-                {
-                    OnChange();
-                }
-            } },
-
-            { "Undo", () =>
-            {
-                moveInHistory(-1);
-            } }
-        };
-
-        public void readKeyPressEvent(object evt)
+        public void readKeyPressEvent(KeyEvent evt)
         {
             debugEvt("keypress", evt);
             if (!readOnly)
@@ -1319,9 +1345,9 @@ namespace Primrose
                 var command = os.makeCommand(evt);
                 evt.preventDefault();
 
-                if (keyPressCommands.has(command.command))
+                if (keyPressCommands.ContainsKey(command.command))
                 {
-                    keyPressCommands.get(command.command)();
+                    keyPressCommands[command.command]();
                 }
                 else if (command.type == "printable"
                     || command.type == "whitespace")
@@ -1354,13 +1380,13 @@ namespace Primrose
             return false;
         }
 
-        public readCopyEvent(object evt)
+        public void readCopyEvent(object evt)
         {
             debugEvt("copy", evt);
             copySelectedText(evt);
         }
 
-        public readCutEvent(object evt)
+        public void readCutEvent(object evt)
         {
             debugEvt("cut", evt);
             if (copySelectedText(evt)
@@ -1402,7 +1428,7 @@ namespace Primrose
 
         private void pointerDown(object evt)
         {
-            this.focus();
+            focus();
             pressed = true;
         }
 
@@ -1441,25 +1467,25 @@ namespace Primrose
             else if (scrolling || onRight && !onBottom)
             {
                 scrolling = true;
-                var scrollHeight = rows.length - gridBounds.height;
+                var scrollHeight = rows.Count - gridBounds.height;
                 if (gy >= 0 && scrollHeight >= 0)
                 {
                     var sy = gy * scrollHeight / gridBounds.height;
-                    this.scrollTo(scroll.x, sy);
+                    scrollTo(scroll.x, sy);
                 }
             }
             else if (onBottom && !onLeft)
             {
                 var maxWidth = 0;
-                for (var dy = 0; dy < rows.length; ++dy)
+                for (var dy = 0; dy < rows.Count; ++dy)
                 {
-                    maxWidth = Math.max(maxWidth, rows[dy].stringLength);
+                    maxWidth = Math.Max(maxWidth, rows[dy].stringLength);
                 }
                 var scrollWidth = maxWidth - gridBounds.width;
                 if (gx >= 0 && scrollWidth >= 0)
                 {
                     var sx = gx * scrollWidth / gridBounds.width;
-                    this.scrollTo(sx, scroll.y);
+                    scrollTo(sx, scroll.y);
                 }
             }
             else if (onLeft && !onBottom)
@@ -1481,9 +1507,9 @@ namespace Primrose
             if (lastScrollDX != null
                 && lastScrollDY != null)
             {
-                var dx = (lastScrollDX.Value - pointer.x) / character.width,
+                int dx = (lastScrollDX.Value - pointer.x) / character.width,
                     dy = (lastScrollDY.Value - pointer.y) / character.height;
-                this.scrollBy(dx, dy);
+                scrollBy(dx, dy);
             }
             lastScrollDX = pointer.x;
             lastScrollDY = pointer.y;
@@ -1610,7 +1636,7 @@ namespace Primrose
                     && !evt.shiftKey
                     && !evt.metaKey)
                 {
-                    var dy = Math.floor(evt.deltaY * wheelScrollSpeed / scrollScale);
+                    var dy = Math.Floor(evt.deltaY * wheelScrollSpeed / scrollScale);
                     if (!this.scrollBy(0, dy) || focused)
                     {
                         evt.preventDefault();
@@ -1621,7 +1647,7 @@ namespace Primrose
                     && !evt.metaKey)
                 {
                     evt.preventDefault();
-                    this.fontSize += -evt.deltaY / scrollScale;
+                    fontSize += -evt.deltaY / scrollScale;
                 }
                 render();
             }
@@ -1657,7 +1683,7 @@ namespace Primrose
             ty = 0;
         int? currentTouchID = null;
 
-        private void findTouch(object[] touches)
+        private object findTouch(object[] touches)
         {
             foreach (var touch in touches)
             {
@@ -1836,7 +1862,7 @@ namespace Primrose
         /// </summary>
         public bool focused
         {
-            get => isfocused;
+            get => isFocused;
             set
             {
                 if (value != focused)
@@ -1940,7 +1966,7 @@ namespace Primrose
             {
                 Cursor minCursor = Cursor.min(frontCursor, backCursor),
                     maxCursor = Cursor.max(frontCursor, backCursor);
-                return value.substring(minCursor.i, maxCursor.i);
+                return value.Substring(minCursor.i, maxCursor.i);
             }
 
             set => setSelectedText(value);
@@ -1997,13 +2023,15 @@ namespace Primrose
             {
                 tabWidth = value;
                 tabString = "";
-                for (let i = 0; i < tabWidth; ++i)
+                for (var i = 0; i < tabWidth; ++i)
                 {
                     tabString += " ";
                 }
             }
         }
 
+        private readonly Dictionary<Color, Brush> brushes = new Dictionary<Color, Brush>();
+        private readonly Dictionary<Color, Pen> pens = new Dictionary<Color, Pen>();
         private Theme renderTheme = DefaultTheme;
         /// <summary>
         /// A JavaScript object that defines the color and style values for rendering different UI and text elements.
@@ -2013,10 +2041,28 @@ namespace Primrose
             get => renderTheme;
             set
             {
-                value ??= DefaultTheme;
                 if (value != theme)
                 {
+                    var allColors = value.Colors.ToArray();
+                    var oldColors = brushes.Keys.Where(c => !allColors.Contains(c)).ToArray();
+                    var newColors = allColors.Where(c => !brushes.ContainsKey(c));
+                    foreach(var color in oldColors)
+                    {
+                        pens[color].Dispose();
+                        pens.Remove(color);
+
+                        brushes[color].Dispose();
+                        brushes.Remove(color);
+                    }
+
+                    foreach (var color in newColors)
+                    {
+                        pens[color] = new Pen(color);
+                        brushes[color] = new SolidBrush(color);
+                    }
+
                     renderTheme = value;
+
                     render();
                 }
             }
@@ -2031,7 +2077,7 @@ namespace Primrose
             get => grammar;
             set
             {
-                value ??= Grammars.PlainText;
+                value ??= Grammar.PlainText;
                 if (value != language)
                 {
                     language = value;
@@ -2091,7 +2137,29 @@ namespace Primrose
             }
         }
 
-        private bool renderFontSize;
+        private FontFamily DefaultFontFamily = new FontFamily(System.Drawing.Text.GenericFontFamilies.Monospace);
+        private FontFamily renderFontFamily;
+        public FontFamily fontFamily
+        {
+            get => renderFontFamily;
+            set
+            {
+                value ??= DefaultFontFamily;
+                if (value != renderFontFamily)
+                {
+                    if(renderFontFamily != null
+                        && renderFontFamily != DefaultFontFamily)
+                    {
+                        renderFontFamily?.Dispose();
+                    }
+
+                    renderFontFamily = value;
+                    refreshFont();
+                }
+            }
+        }
+
+        private int renderFontSize;
         /// <summary>
         /// The `Number` of pixels tall to draw characters. This value is scale-independent.
         /// </summary>
@@ -2100,41 +2168,32 @@ namespace Primrose
             get => renderFontSize;
             set
             {
-                value = Math.max(1, value);
+                value = Math.Max(1, value);
                 if (value != fontSize)
                 {
                     renderFontSize = value;
-                    context.font = $"{fontSize}px {monospaceFamily}";
-                    character.height = fontSize;
-                    // measure 100 letter M's, then divide by 100, to get the width of an M
-                    // to two decimal places on systems that return integer values from
-                    // measureText.
-                    character.width = context.measureText(
-                        "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM")
-                        .width /
-                        100;
-                    refreshAllTokens();
+                    refreshFont();
                 }
             }
         }
 
-        private int renderScaleFactor;
+        private float renderScaleFactor;
         /// <summary>
         /// The value by which pixel values are scaled before being used by the editor control.
         /// With THREE.js, it's best to set this value to 1 and change the width, height, and fontSize manually.
         /// </summary>
-        public int scaleFactor
+        public float scaleFactor
         {
             get => renderScaleFactor;
             set
             {
-                value = Math.Max(0.25, Math.Min(4, value));
+                value = Math.Max(0.25f, Math.Min(4, value));
                 if (value != scaleFactor)
                 {
-                    int lastWidth = this.width,
-                        lastHeight = this.height;
+                    int lastWidth = width,
+                        lastHeight = height;
                     renderScaleFactor = value;
-                    this.setSize(lastWidth, lastHeight);
+                    setSize(lastWidth, lastHeight);
                 }
             }
         }
@@ -2144,8 +2203,8 @@ namespace Primrose
         /// </summary>
         public int width
         {
-            get => canvas.width / scaleFactor;
-            set => setSize(value, this.height);
+            get => (int)(canvas.Width / scaleFactor);
+            set => setSize(value, height);
         }
 
         /// <summary>
@@ -2153,8 +2212,8 @@ namespace Primrose
         /// </summary>
         public int height
         {
-            get => canvas.height / scaleFactor;
-            set => this.setSize(this.width, value);
+            get => (int)(canvas.Height / scaleFactor);
+            set => setSize(width, value);
         }
         #endregion PUBLIC PROPERTIES 
 
@@ -2187,12 +2246,7 @@ namespace Primrose
                 {
                     // make sure the previous control knows it has 
                     // gotten unselected.
-                    if (focusedControl != null
-                        && (!focusedControl.isInDocument
-                            || !control.isInDocument))
-                    {
-                        focusedControl.blur();
-                    }
+                    focusedControl?.blur();
                     focusedControl = control;
                 };
 
@@ -2201,7 +2255,7 @@ namespace Primrose
                     hoveredControl = control;
                 };
 
-                control.Out += () =>
+                control.Out += (obj, evt) =>
                 {
                     hoveredControl = null;
                 };
