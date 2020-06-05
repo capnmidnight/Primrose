@@ -1,5 +1,6 @@
 ﻿import * as THREE from 'https://unpkg.com/three@0.116.1/build/three.module.js';
-import { Primrose } from './package/primrose.min.js';
+import { Primrose } from './package/src/primrose.js';
+import { Light } from "./package/src/themes.js";
 
 const {
     renderer,
@@ -161,6 +162,10 @@ async function makeEditor(file, side) {
     const response = await fetch(file),
         code = await response.text();
     editor.value = code;
+
+    if (side === 1) {
+        editor.theme = Light;
+    }
 }
 
 function makeScene() {
