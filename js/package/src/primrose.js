@@ -989,13 +989,14 @@ export class Primrose extends EventTarget {
                 const row = rows[frontCursor.y],
                     toDelete = Math.min(frontCursor.x, tabWidth);
                 for (let i = 0; i < frontCursor.x; ++i) {
-                    if (row[i] !== ' ') {
+                    if (row.text[i] !== ' ') {
                         // can only remove tabs at the beginning of a row
                         return;
                     }
                 }
 
-                frontCursor.incX(rows, -toDelete);
+                backCursor.copy(frontCursor);
+                backCursor.incX(rows, -toDelete);
                 setSelectedText("");
             }]
         ]));
