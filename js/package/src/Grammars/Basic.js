@@ -7,8 +7,10 @@ class BasicGrammar extends Grammar {
         super("BASIC",
             // Grammar rules are applied in the order they are specified.
             [
+                ["newlines", /(?:\r\n|\r|\n)/],
                 // BASIC programs used to require the programmer type in her own line numbers. The start at the beginning of the line.
                 ["lineNumbers", /^\d+\s+/],
+                ["whitespace", /(?:\s+)/],
                 // Comments were lines that started with the keyword "REM" (for REMARK) and ran to the end of the line. They did not have to be numbered, because they were not executable and were stripped out by the interpreter.
                 ["startLineComments", /^REM\s/],
                 // Both double-quoted and single-quoted strings were not always supported, but in this case, I'm just demonstrating how it would be done for both.
