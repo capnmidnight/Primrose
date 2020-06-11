@@ -5,6 +5,7 @@ import { Dark as DefaultTheme } from "./themes.js";
 import { TimedEvent } from "./timedEvent.js";
 
 import {
+    clear,
     canvas,
     assignAttributes,
     isCanvas,
@@ -1839,11 +1840,11 @@ export class Primrose extends EventTarget {
         }
         else if (isCanvas(options.element)) {
             element = canv = options.element;
-            canv.innerHTML = "";
+            clear(canv);
         }
         else {
             element = options.element;
-            element.innerHTML = "";
+            clear(element);
 
             canv = canvas({
                 style: {

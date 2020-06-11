@@ -1,7 +1,21 @@
-﻿import { Primrose, grammars, themes } from "./package/primrose.min.js";
+﻿import { Primrose } from "./package/src/primrose.js";
+import { grammars } from "./package/src/grammars.js";
+import { themes } from "./package/src/themes.js";
+import { version } from "./package/src/version.js";
+
+//import { Primrose, grammars, themes } from "./package/primrose.min.js";
 
 (async function() {
     await Primrose.ready
+
+    const versionNumbers = document.querySelectorAll(".version-number");
+    for (let i = 0; i < versionNumbers.length; ++i) {
+        const vn = versionNumbers[i];
+        while (vn.lastChild) {
+            vn.lastChild.remove();
+        }
+        vn.appendChild(document.createTextNode("v" + version));
+    }
 
     const demosSel = document.querySelector("#demos"),
         themesSel = document.querySelector("#themes"),

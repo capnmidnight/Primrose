@@ -30,6 +30,12 @@
     });
 }
 
+export function clear(elem) {
+    while (elem.lastChild) {
+        elem.lastChild.remove();
+    }
+}
+
 export function tag(name, ...rest) {
     const elem = document.createElement(name);
 

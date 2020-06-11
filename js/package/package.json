@@ -5,7 +5,7 @@
   "main": "src/primrose.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "pkg": "copy ..\\..\\README.md . && rollup -c && minify primrose.js > primrose.min.js"
+    "pkg": "node .\\writeversion.js > src\\version.js && copy ..\\..\\README.md . && rollup -c && minify primrose.js > primrose.min.js"
   },
   "repository": {
     "type": "git",
