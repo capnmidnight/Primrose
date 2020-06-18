@@ -2,10 +2,10 @@
   "name": "primrose",
   "version": "1.1.6",
   "description": "Syntax-highlighting text editor that renders to an HTML5 Canvas element",
-  "main": "src/primrose.js",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "pkg": "node .\\writeversion.js > src\\version.js && copy ..\\..\\README.md . && rollup -c && minify primrose.js > primrose.min.js"
+    "pkg": "node .\\writeversion.js && copy ..\\..\\README.md . && rollup -c && minify primrose.js > primrose.min.js"
   },
   "repository": {
     "type": "git",

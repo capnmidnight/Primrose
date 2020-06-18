@@ -265,7 +265,6 @@ paket-files/
 # Unity3D Generated File On Crash Reports
 sysinfo.txt
 *.blend1
-/Web.config
-/package/README.md
+
 /js/package/README.md
 /js/Web.config
