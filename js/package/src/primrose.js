@@ -131,13 +131,14 @@ export class Primrose extends EventBase {
 
         const renderCanvasBackground = () => {
             const minCursor = Cursor.min(frontCursor, backCursor),
-                maxCursor = Cursor.max(frontCursor, backCursor),
-                clearFunc = theme.regular.backColor ? "fillRect" : "clearRect";
+                maxCursor = Cursor.max(frontCursor, backCursor);
 
-            if (clearFunc === "fillRect") {
+            bgfx.clearRect(0, 0, canv.width, canv.height);
+            if (theme.regular.backColor) {
                 bgfx.fillStyle = theme.regular.backColor;
+                bgfx.fillRect(0, 0, canv.width, canv.height);
             }
-            bgfx[clearFunc](0, 0, canv.width, canv.height);
+
             bgfx.save();
             bgfx.scale(scaleFactor, scaleFactor);
             bgfx.translate(
