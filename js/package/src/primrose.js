@@ -1,47 +1,36 @@
+import {
+    multiLineInput, multiLineOutput,
+    singleLineInput, singleLineOutput
+} from "./controlTypes.js";
 import { Cursor } from "./cursor.js";
-import { monospaceFamily } from "./fonts.js"
+import { EventBase } from "./eventBase.js";
+import {
+    isApple,
+    isDebug, isFirefox
+} from "./flags.js";
+import { monospaceFamily } from "./fonts.js";
+import {
+    grammars, JavaScript
+} from "./grammars.js";
+import {
+    assignAttributes, canvas, clear,
+
+
+    isCanvas,
+    offscreenCanvas,
+
+    resizeContext, setContextSize
+} from "./html.js";
+import {
+    MacOS, Windows
+} from "./os.js";
+import { Point } from "./point.js";
+import { Rectangle } from "./rectangle.js";
 import { Row } from "./row.js";
+import { Size } from "./size.js";
 import { Dark as DefaultTheme } from "./themes.js";
 import { TimedEvent } from "./timedEvent.js";
 
-import {
-    clear,
-    canvas,
-    assignAttributes,
-    isCanvas,
-    offscreenCanvas,
-    setContextSize,
-    resizeContext
-} from "./html.js";
-
-import {
-    isFirefox,
-    isApple,
-    isDebug
-} from "./flags.js";
-
-import {
-    Point,
-    Size,
-    Rectangle
-} from "./geom.js";
-
-import {
-    Windows,
-    MacOS
-} from "./os.js";
-
-import {
-    JavaScript,
-    grammars
-} from "./grammars.js";
-
-import {
-    singleLineOutput,
-    multiLineOutput,
-    singleLineInput,
-    multiLineInput
-} from "./controlTypes.js";
 
 //>>>>>>>>>> PRIVATE STATIC FIELDS >>>>>>>>>>
 let elementCounter = 0,
@@ -84,7 +73,7 @@ const wheelScrollSpeed = 4,
 
 //<<<<<<<<<< PRIVATE STATIC FIELDS <<<<<<<<<<
 
-export class Primrose extends EventTarget {
+export class Primrose extends EventBase {
     constructor(options) {
         super();
 

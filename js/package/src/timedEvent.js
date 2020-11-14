@@ -1,4 +1,6 @@
-﻿export class TimedEvent extends EventTarget {
+﻿import { EventBase } from "./eventBase.js";
+
+export class TimedEvent extends EventBase {
     constructor(timeout, continuous = false) {
         super();
 
