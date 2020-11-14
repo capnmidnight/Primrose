@@ -1,3 +1,62 @@
+const singleLineOutput = Object.freeze([
+    "CursorLeft",
+    "CursorRight",
+    "CursorSkipLeft",
+    "CursorSkipRight",
+    "CursorHome",
+    "CursorEnd",
+    "CursorFullHome",
+    "CursorFullEnd",
+
+    "SelectLeft",
+    "SelectRight",
+    "SelectSkipLeft",
+    "SelectSkipRight",
+    "SelectHome",
+    "SelectEnd",
+    "SelectFullHome",
+    "SelectFullEnd",
+
+    "SelectAll"
+]);
+
+const multiLineOutput = Object.freeze(singleLineOutput
+    .concat([
+        "CursorDown",
+        "CursorUp",
+        "CursorPageDown",
+        "CursorPageUp",
+
+        "SelectDown",
+        "SelectUp",
+        "SelectPageDown",
+        "SelectPageUp",
+
+        "ScrollDown",
+        "ScrollUp"
+    ]));
+
+const input = [
+    "Backspace",
+    "Delete",
+    "DeleteWordLeft",
+    "DeleteWordRight",
+    "DeleteLine",
+
+    "Undo",
+    "Redo",
+];
+
+const singleLineInput = Object.freeze(singleLineOutput
+    .concat(input));
+
+const multiLineInput = Object.freeze(multiLineOutput
+    .concat(input)
+    .concat([
+        "AppendNewline",
+        "PrependNewline"
+    ]));
+
 const combiningMarks =
     /(<%= allExceptCombiningMarks %>)(<%= combiningMarks %>+)/g,
     surrogatePair = /(<%= highSurrogates %>)(<%= lowSurrogates %>)/g;
@@ -140,7 +199,7 @@ class Cursor {
             }
             rows[this.y].adjust(this, 1);
         }
-        else if(this.y < rows.length -1) {
+        else if (this.y < rows.length - 1) {
             this.right(rows);
         }
     }
@@ -275,75 +334,205 @@ class Cursor {
     }
 }
 
+/**
+ * Removes an item at the given index from an array.
+ * @param {any[]} arr
+ * @param {number} idx
+ * @returns {any} - the item that was removed.
+ */
+function arrayRemoveAt(arr, idx) {
+    if (!(arr instanceof Array)) {
+        throw new Error("Must provide an array as the first parameter.");
+    }
+    return arr.splice(idx, 1);
+}
+
+function isFunction(func) {
+    return typeof func === "function" || func instanceof Function;
+}
+
+/** A polyfill for EventTarget, which is not extendable in Safari */
+const EventBase = (function () {
+    try {
+        new window.EventTarget();
+        return class EventBase extends EventTarget {
+            constructor() {
+                super();
+            }
+        };
+    } catch (exp) {
+
+        /** @type {WeakMap<EventBase, Map<string, Listener[]>> */
+        const selfs = new WeakMap();
+
+        return class EventBase {
+
+            constructor() {
+                selfs.set(this, new Map());
+            }
+
+            /**
+             * @param {string} type
+             * @param {Function} callback
+             * @param {any} options
+             */
+            addEventListener(type, callback, options) {
+                if (isFunction(callback)) {
+                    const self = selfs.get(this);
+                    if (!self.has(type)) {
+                        self.set(type, []);
+                    }
+
+                    const listeners = self.get(type);
+                    if (!listeners.find(l => l.callback === callback)) {
+                        listeners.push({
+                            target: this,
+                            callback,
+                            options
+                        });
+                    }
+                }
+            }
+
+            /**
+             * @param {string} type
+             * @param {Function} callback
+             */
+            removeEventListener(type, callback) {
+                if (isFunction(callback)) {
+                    const self = selfs.get(this);
+                    if (self.has(type)) {
+                        const listeners = self.get(type),
+                            idx = listeners.findIndex(l => l.callback === callback);
+                        if (idx >= 0) {
+                            arrayRemoveAt(listeners, idx);
+                        }
+                    }
+                }
+            }
+
+            /**
+             * @param {Event} evt
+             */
+            dispatchEvent(evt) {
+                const self = selfs.get(this);
+                if (!self.has(evt.type)) {
+                    return true;
+                }
+                else {
+                    const listeners = self.get(evt.type);
+                    for (const listener of listeners) {
+                        if (listener.options && listener.options.once) {
+                            this.removeEventListener(evt.type, listener.callback);
+                        }
+                        listener.callback.call(listener.target, evt);
+                    }
+                    return !evt.defaultPrevented;
+                }
+            }
+        };
+    }
+
+})();
+
+// Various flags used for feature detecting and configuring the system
+const isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
+const isFirefox = typeof window.InstallTrigger !== "undefined";
+const isiOS = /iP(hone|od|ad)/.test(navigator.userAgent || "");
+const isMacOS = /Macintosh/.test(navigator.userAgent || "");
+const isApple = isiOS || isMacOS;
+const isSafari = Object.prototype.toString.call(window.HTMLElement)
+    .indexOf("Constructor") > 0;
+
+function testUserAgent(a) {
+    return /(android|bb\d+|meego).+|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od|ad)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(
+        a) ||
+        /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(
+            a.substring(0, 4));
+}
+
+const isMobile = testUserAgent(navigator.userAgent || navigator.vendor || window.opera);
+
 // A selection of fonts for preferred monospace rendering.
 const monospaceFamily = "'Droid Sans Mono', 'Consolas', 'Lucida Console', 'Courier New', 'Courier', monospace";
 
-class Row {
-    constructor(txt, tokens, startStringIndex, startTokenIndex, lineNumber) {
-        this.text = txt;
-        this.startStringIndex = startStringIndex;
+// A single syntax matching rule, for tokenizing code.
+class Rule {
+    constructor(name, test) {
+        this.name = name;
+        this.test = test;
+        Object.freeze(this);
+    }
 
-        this.tokens = tokens;
-        this.startTokenIndex = startTokenIndex;
-
-        this.lineNumber = lineNumber;
-
-        const graphemes = Object.freeze([...txt]),
-            leftCorrections = new Array(txt.length),
-            rightCorrections = new Array(txt.length);
-
-        let x = 0;
-        for (let grapheme of graphemes) {
-            leftCorrections[x] = 0;
-            rightCorrections[x] = 0;
-            for (let i = 1; i < grapheme.length; ++i) {
-                leftCorrections[x + i] = -i;
-                rightCorrections[x + i] = grapheme.length - i;
+    carveOutMatchedToken(tokens, j) {
+        const token = tokens[j];
+        if (token.type === "regular") {
+            const res = this.test.exec(token.value);
+            if (!!res) {
+                // Only use the last group that matches the regex, to allow for more
+                // complex regexes that can match in special contexts, but not make
+                // the context part of the token.
+                const midx = res[res.length - 1],
+                    start = res.input.indexOf(midx),
+                    end = start + midx.length;
+                if (start === 0) {
+                    // the rule matches the start of the token
+                    token.type = this.name;
+                    if (end < token.length) {
+                        // but not the end
+                        const next = token.splitAt(end);
+                        next.type = "regular";
+                        tokens.splice(j + 1, 0, next);
+                    }
+                }
+                else {
+                    // the rule matches from the middle of the token
+                    const mid = token.splitAt(start);
+                    if (midx.length < mid.length) {
+                        // but not the end
+                        const right = mid.splitAt(midx.length);
+                        tokens.splice(j + 1, 0, right);
+                    }
+                    mid.type = this.name;
+                    tokens.splice(j + 1, 0, mid);
+                }
             }
-            x += grapheme.length;
         }
-
-        this.adjust = (cursor, dir) => {
-            const correction = dir === -1
-                ? leftCorrections
-                : rightCorrections;
-
-            if (cursor.x < correction.length) {
-                const delta = correction[cursor.x];
-                cursor.x += delta;
-                cursor.i += delta;
-            }
-            else if (dir === 1
-                && txt[txt.length - 1] === '\n') {
-                this.adjust(cursor, -1);
-            }
-        };
-
-        this.toString = () => txt;
-
-        this.substring = (x, y) => txt.substring(x, y);
-
-        Object.seal(this);
-    }
-
-    get stringLength() {
-        return this.text.length;
-    }
-
-    get endStringIndex() {
-        return this.startStringIndex + this.stringLength;
-    }
-
-    get numTokens() {
-        return this.tokens.length;
-    }
-
-    get endTokenIndex() {
-        return this.startTokenIndex + this.numTokens;
     }
 }
 
-Row.emptyRow = (startStringIndex, startTokenIndex, lineNumber) => new Row("", [], startStringIndex, startTokenIndex, lineNumber);
+// A chunk of text that represents a single element of code,
+// with fields linking it back to its source.
+class Token {
+    constructor(value, type, stringIndex) {
+        this.value = value;
+        this.startStringIndex = stringIndex;
+        this.type = type;
+        Object.seal(this);
+    }
+
+    get length() {
+        return this.value.length;
+    }
+
+    get endStringIndex() {
+        return this.startStringIndex + this.length;
+    }
+
+    clone() {
+        return new Token(this.value, this.type, this.startStringIndex);
+    }
+
+    splitAt(i) {
+        var next = this.value.substring(i);
+        this.value = this.value.substring(0, i);
+        return new Token(next, this.type, this.startStringIndex + i);
+    }
+
+    toString() {
+        return `[${this.type}: ${this.value}]`;
+    }
+}
 
 // Color themes for text-oriented controls, for use when coupled with a parsing grammar.
 
@@ -358,7 +547,7 @@ const Dark = Object.freeze({
         foreColor: "white"
     },
     regular: {
-        backColor: "black",
+        backColor: "rgba(0, 0, 0, 0.5)",
         foreColor: "#c0c0c0"
     },
     strings: {
@@ -443,56 +632,6 @@ const themes = Object.freeze(new Map([
     ["dark", Dark]
 ]));
 
-class TimedEvent extends EventTarget {
-    constructor(timeout, continuous = false) {
-        super();
-
-        const tickEvt = new Event("tick");
-
-        let handle = null;
-
-        this.cancel = () => {
-            const wasRunning = this.isRunning;
-            if (wasRunning) {
-                if (continuous) {
-                    clearInterval(handle);
-                }
-                else {
-                    clearTimeout(handle);
-                }
-                handle = null;
-            }
-
-            return wasRunning;
-        };
-
-        const tick = () => {
-            if (!continuous) {
-                this.cancel();
-            }
-            this.dispatchEvent(tickEvt);
-        };
-
-        this.start = () => {
-            this.cancel();
-            if (continuous) {
-                handle = setTimeout(tick, timeout);
-            }
-            else {
-                handle = setInterval(tick, timeout);
-            }
-        };
-
-        Object.defineProperties(this, {
-            isRunning: {
-                get: () => handle !== null
-            }
-        });
-
-        Object.freeze(this);
-    }
-}
-
 function assignAttributes(elem, ...rest) {
     rest.filter(x => !(x instanceof Element)
             && !(x instanceof String)
@@ -523,6 +662,12 @@ function assignAttributes(elem, ...rest) {
             }
         }
     });
+}
+
+function clear(elem) {
+    while (elem.lastChild) {
+        elem.lastChild.remove();
+    }
 }
 
 function tag(name, ...rest) {
@@ -619,955 +764,6 @@ function resizeContext(ctx, superscale = 1) {
         ctx.canvas.clientWidth,
         ctx.canvas.clientHeight,
         superscale);
-}
-
-// Various flags used for feature detecting and configuring the system
-const isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
-const isFirefox = typeof window.InstallTrigger !== "undefined";
-const isiOS = /iP(hone|od|ad)/.test(navigator.userAgent || "");
-const isMacOS = /Macintosh/.test(navigator.userAgent || "");
-const isApple = isiOS || isMacOS;
-const isSafari = Object.prototype.toString.call(window.HTMLElement)
-    .indexOf("Constructor") > 0;
-
-function testUserAgent(a) {
-    return /(android|bb\d+|meego).+|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od|ad)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(
-        a) ||
-        /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(
-            a.substring(0, 4));
-}
-
-const isMobile = testUserAgent(navigator.userAgent || navigator.vendor || window.opera);
-
-/*
-pliny.class({
-  parent: "Primrose.Text",
-    name: "Point",
-    description: "| [under construction]"
-});
-*/
-
-class Point {
-    constructor(x, y) {
-        this.set(x || 0, y || 0);
-        Object.seal(this);
-    }
-
-    set(x, y) {
-        this.x = x;
-        this.y = y;
-    }
-
-    copy(p) {
-        if (p) {
-            this.x = p.x;
-            this.y = p.y;
-        }
-    }
-
-    toCell(character, scroll, gridBounds) {
-        this.x = Math.round(this.x / character.width) + scroll.x - gridBounds.x;
-        this.y = Math.floor((this.y / character.height) - 0.25) + scroll.y;
-    }
-
-    inBounds(bounds) {
-        return bounds.left <= this.x
-            && this.x < bounds.right
-            && bounds.top <= this.y
-            && this.y < bounds.bottom;
-    }
-
-    clone() {
-        return new Point(this.x, this.y);
-    }
-
-    toString() {
-        return `(x:${this.x}, y:${this.y})`;
-    }
-}
-class Size {
-    constructor(width, height) {
-        this.width = width || 0;
-        this.height = height || 0;
-        Object.seal(this);
-    }
-
-    set(width, height) {
-        this.width = width;
-        this.height = height;
-    }
-
-    copy(s) {
-        if (!!s) {
-            this.width = s.width;
-            this.height = s.height;
-        }
-    }
-
-    clone() {
-        return new Size(this.width, this.height);
-    }
-
-    toString() {
-        return `<w:${this.width}, h:${this.height}>`;
-    }
-}
-class Rectangle {
-    constructor(x, y, width, height) {
-        this.point = new Point(x, y);
-        this.size = new Size(width, height);
-        Object.freeze(this);
-    }
-
-    get x() {
-        return this.point.x;
-    }
-
-    set x(x) {
-        this.point.x = x;
-    }
-
-    get left() {
-        return this.point.x;
-    }
-    set left(x) {
-        this.point.x = x;
-    }
-
-    get width() {
-        return this.size.width;
-    }
-    set width(width) {
-        this.size.width = width;
-    }
-
-    get right() {
-        return this.point.x + this.size.width;
-    }
-    set right(right) {
-        this.point.x = right - this.size.width;
-    }
-
-    get y() {
-        return this.point.y;
-    }
-    set y(y) {
-        this.point.y = y;
-    }
-
-    get top() {
-        return this.point.y;
-    }
-    set top(y) {
-        this.point.y = y;
-    }
-
-    get height() {
-        return this.size.height;
-    }
-    set height(height) {
-        this.size.height = height;
-    }
-
-    get bottom() {
-        return this.point.y + this.size.height;
-    }
-    set bottom(bottom) {
-        this.point.y = bottom - this.size.height;
-    }
-
-    get area() {
-        return this.width * this.height;
-    }
-
-    set(x, y, width, height) {
-        this.point.set(x, y);
-        this.size.set(width, height);
-    }
-
-    copy(r) {
-        if (r) {
-            this.point.copy(r.point);
-            this.size.copy(r.size);
-        }
-    }
-
-    clone() {
-        return new Rectangle(this.point.x, this.point.y, this.size.width, this.size.height);
-    }
-
-    overlap(r) {
-        const left = Math.max(this.left, r.left),
-            top = Math.max(this.top, r.top),
-            right = Math.min(this.right, r.right),
-            bottom = Math.min(this.bottom, r.bottom);
-        if (right > left && bottom > top) {
-            return new Rectangle(left, top, right - left, bottom - top);
-        }
-    }
-
-    toString() {
-        return `[${this.point.toString()} x ${this.size.toString()}]`;
-    }
-}
-
-// These values are defined here:
-//   https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values
-//   Values read on May 24, 2020
-const keyGroups = Object.freeze(new Map([
-    ["special", [
-        "Unidentified"
-    ]],
-
-    ["modifier", [
-        "Alt",
-        "AltGraph",
-        "CapsLock",
-        "Control",
-        "Fn",
-        "FnLock",
-        "Hyper",
-        "Meta",
-        "NumLock",
-        "ScrollLock",
-        "Shift",
-        "Super",
-        "Symbol",
-        "SymbolLock"
-    ]],
-
-    ["whitespace", [
-        "Enter",
-        "Tab"
-    ]],
-
-    ["navigation", [
-        "ArrowDown",
-        "ArrowLeft",
-        "ArrowRight",
-        "ArrowUp",
-        "End",
-        "Home",
-        "PageDown",
-        "PageUp"
-    ]],
-
-    ["editing", [
-        "Backspace",
-        "Clear",
-        "Copy",
-        "CrSel",
-        "Cut",
-        "Delete",
-        "EraseEof",
-        "ExSel",
-        "Insert",
-        "Paste",
-        "Redo",
-        "Undo"
-    ]],
-
-    ["ui", [
-        "Accept",
-        "Again",
-        "Attn",
-        "Cancel",
-        "ContextMenu",
-        "Escape",
-        "Execute",
-        "Find",
-        "Finish",
-        "Help",
-        "Pause",
-        "Play",
-        "Props",
-        "Select",
-        "ZoomIn",
-        "ZoomOut"
-    ]],
-
-    ["device", [
-        "BrightnessDown",
-        "BrightnessUp",
-        "Eject",
-        "LogOff",
-        "Power",
-        "PowerOff",
-        "PrintScreen",
-        "Hibernate",
-        "Standby",
-        "WakeUp"
-    ]],
-
-    ["ime", [
-        "AllCandidates",
-        "Alphanumeric",
-        "CodeInput",
-        "Compose",
-        "Convert",
-        "Dead",
-        "FinalMode",
-        "GroupFirst",
-        "GroupNext",
-        "GroupPrevious",
-        "ModeChange",
-        "NextCandidate",
-        "NonConvert",
-        "PreviousCandidate",
-        "Process",
-        "SingleCandidate"
-    ]],
-
-    ["korean", [
-        "HangulMode",
-        "HanjaMode",
-        "JunjaMode"
-    ]],
-
-    ["japanese", [
-        "Eisu",
-        "Hankaku",
-        "Hiragana",
-        "HiraganaKatakana",
-        "KanaMode",
-        "KanjiMode",
-        "Katakana",
-        "Romaji",
-        "Zenkaku",
-        "ZenkakuHanaku"
-    ]],
-
-    ["function", [
-        "F1",
-        "F2",
-        "F3",
-        "F4",
-        "F5",
-        "F6",
-        "F7",
-        "F8",
-        "F9",
-        "F10",
-        "F11",
-        "F12",
-        "F13",
-        "F14",
-        "F15",
-        "F16",
-        "F17",
-        "F18",
-        "F19",
-        "F20",
-        "Soft1",
-        "Soft2",
-        "Soft3",
-        "Soft4"
-    ]],
-
-    ["phone", [
-        "AppSwitch",
-        "Call",
-        "Camera",
-        "CameraFocus",
-        "EndCall",
-        "GoBack",
-        "GoHome",
-        "HeadsetHook",
-        "LastNumberRedial",
-        "Notification",
-        "MannerMode",
-        "VoiceDial"
-    ]],
-
-    ["multimedia", [
-        "ChannelDown",
-        "ChannelUp",
-        "MediaFastForward",
-        "MediaPause",
-        "MediaPlay",
-        "MediaPlayPause",
-        "MediaRecord",
-        "MediaRewind",
-        "MediaStop",
-        "MediaTrackNext",
-        "MediaTrackPrevious"
-    ]],
-
-    ["audio", [
-        "AudioBalanceLeft",
-        "AudioBalanceRight",
-        "AudioBassDown",
-        "AudioBassBoostDown",
-        "AudioBassBoostToggle",
-        "AudioBassBoostUp",
-        "AudioBassUp",
-        "AudioFaderFront",
-        "AudioFaderRear",
-        "AudioSurroundModeNext",
-        "AudioTrebleDown",
-        "AudioTrebleUp",
-        "AudioVolumeDown",
-        "AudioVolumeMute",
-        "AudioVolumeUp",
-        "MicrophoneToggle",
-        "MicrophoneVolumeDown",
-        "MicrophoneVolumeMute",
-        "MicrophoneVolumeUp"
-    ]],
-
-    ["tv", [
-        "TV",
-        "TV3DMode",
-        "TVAntennaCable",
-        "TVAudioDescription",
-        "TVAudioDescriptionMixDown",
-        "TVAudioDescriptionMixUp",
-        "TVContentsMenu",
-        "TVDataService",
-        "TVInput",
-        "TVInputComponent1",
-        "TVInputComponent2",
-        "TVInputComposite1",
-        "TVInputComposite2",
-        "TVInputHDMI1",
-        "TVInputHDMI2",
-        "TVInputHDMI3",
-        "TVInputHDMI4",
-        "TVInputVGA1",
-        "TVMediaContext",
-        "TVNetwork",
-        "TVNumberEntry",
-        "TVPower",
-        "TVRadioService",
-        "TVSatellite",
-        "TVSatelliteBS",
-        "TVSatelliteCS",
-        "TVSatelliteToggle",
-        "TVTerrestrialAnalog",
-        "TVTerrestrialDigital",
-        "TVTimer"
-    ]],
-
-    ["mediaController", [
-        "AVRInput",
-        "AVRPower",
-        "ColorF0Red",
-        "ColorF1Green",
-        "ColorF2Yellow",
-        "ColorF3Blue",
-        "ColorF4Grey",
-        "ColorF5Brown",
-        "ClosedCaptionToggle",
-        "Dimmer",
-        "DisplaySwap",
-        "DVR",
-        "Exit",
-        "FavoriteClear0",
-        "FavoriteClear1",
-        "FavoriteClear2",
-        "FavoriteClear3",
-        "FavoriteRecall0",
-        "FavoriteRecall1",
-        "FavoriteRecall2",
-        "FavoriteRecall3",
-        "FavoriteStore0",
-        "FavoriteStore1",
-        "FavoriteStore2",
-        "FavoriteStore3",
-        "Guide",
-        "GuideNextDay",
-        "GuidePreviousDay",
-        "Info",
-        "InstantReplay",
-        "Link",
-        "ListProgram",
-        "LiveContent",
-        "Lock",
-        "MediaApps",
-        "MediaAudioTrack",
-        "MediaLast",
-        "MediaSkipBackward",
-        "MediaSkipForward",
-        "MediaStepBackward",
-        "MediaStepForward",
-        "MediaTopMenu",
-        "NavigateIn",
-        "NavigateNext",
-        "NavigateOut",
-        "NavigatePrevious",
-        "NextFavoriteChannel",
-        "NextUserProfile",
-        "OnDemand",
-        "Pairing",
-        "PinPDown",
-        "PinPMove",
-        "PinPToggle",
-        "PinPUp",
-        "PlaySpeedDown",
-        "PlaySpeedReset",
-        "PlaySpeedUp",
-        "RandomToggle",
-        "RcLowBattery",
-        "RecordSpeedNext",
-        "RfBypass",
-        "ScanChannelsToggle",
-        "ScreenModeNext",
-        "Settings",
-        "SplitScreenToggle",
-        "STBInput",
-        "STBPower",
-        "Subtitle",
-        "Teletext",
-        "VideoModeNext",
-        "Wink",
-        "ZoomToggle"
-    ]],
-
-    ["speechRecognition", [
-        "SpeechCorrectionList",
-        "SpeechInputToggle"
-    ]],
-
-    ["document", [
-        "Close",
-        "New",
-        "Open",
-        "Print",
-        "Save",
-        "SpellCheck",
-        "MailForward",
-        "MailReply",
-        "MailSend"
-    ]],
-
-    ["applicationSelector", [
-        "LaunchCalculator",
-        "LaunchCalendar",
-        "LaunchContacts",
-        "LaunchMail",
-        "LaunchMediaPlayer",
-        "LaunchMusicPlayer",
-        "LaunchMyComputer",
-        "LaunchPhone",
-        "LaunchScreenSaver",
-        "LaunchSpreadsheet",
-        "LaunchWebBrowser",
-        "LaunchWebCam",
-        "LaunchWordProcessor",
-        "LaunchApplication1",
-        "LaunchApplication2",
-        "LaunchApplication3",
-        "LaunchApplication4",
-        "LaunchApplication5",
-        "LaunchApplication6",
-        "LaunchApplication7",
-        "LaunchApplication8",
-        "LaunchApplication9",
-    ]],
-
-    ["browserControl", [
-        "BrowserBack",
-        "BrowserFavorites",
-        "BrowserForward",
-        "BrowserHome",
-        "BrowserRefresh",
-        "BrowserSearch",
-        "BrowserStop"
-    ]],
-
-    ["numericKeypad", [
-        "Clear"
-    ]]
-]));
-
-// reverse lookup for keyGroups
-const keyTypes = new Map();
-for (let pair of keyGroups) {
-    for (let value of pair[1]) {
-        keyTypes.set(value, pair[0]);
-    }
-}
-Object.freeze(keyTypes);
-
-let isFnDown = false;
-if (isApple) {
-    window.addEventListener("keydown", (evt) => {
-        if (evt.key === "Fn") {
-            isFnDown = true;
-        }
-    });
-
-    window.addEventListener("keyup", (evt) => {
-        if (evt.key === "Fn") {
-            isFnDown = false;
-        }
-    });
-}
-// Fixes for out-of-spec values that some older browser versions might have returned.
-function normalizeKeyValue(evt) {
-    // modifier
-    if (evt.key === "OS"
-        && (evt.code === "OSLeft"
-            || evt.code === "OSRight")) {
-        return "Meta";
-    }
-    else if (evt.key === "Scroll") {
-        return "ScrollLock";
-    }
-    else if (evt.key === "Win") {
-        return "Meta";
-    }
-    // whitespace
-    else if (evt.key === "Spacebar") {
-        return " ";
-    }
-    else if (evt.key === "\n") {
-        return "Enter";
-    }
-    // navigation
-    else if (evt.key === "Down") {
-        return "ArrowDown";
-    }
-    else if (evt.key === "Left") {
-        return "ArrowLeft";
-    }
-    else if (evt.key === "Right") {
-        return "ArrowRight";
-    }
-    else if (evt.key === "Up") {
-        return "ArrowUp";
-    }
-    // editing
-    else if (evt.key === "Del") {
-        return "Delete";
-    }
-    else if (evt.key === "Delete"
-        && isApple
-        && isFnDown) {
-        return "Backspace";
-    }
-    else if (evt.key === "Crsel") {
-        return "CrSel";
-    }
-    else if (evt.key === "Exsel") {
-        return "ExSel";
-    }
-    // ui
-    else if (evt.key === "Esc") {
-        return "Escape";
-    }
-    else if (evt.key === "Apps") {
-        return "ContextMenu";
-    }
-    // device - None
-    // ime
-    else if (evt.key === "Multi") {
-        return "Compose";
-    }
-    else if (evt.key === "Nonconvert") {
-        return "NonConvert";
-    }
-    // korean - None
-    // japanese
-    else if (evt.key === "RomanCharacters") {
-        return "Eisu";
-    }
-    else if (evt.key === "HalfWidth") {
-        return "Hankaku";
-    }
-    else if (evt.key === "FullWidth") {
-        return "Zenkaku";
-    }
-    // dead - None
-    // function - None
-    // phone
-    else if (evt.key === "Exit"
-        || evt.key === "MozHomeScreen") {
-        return "GoHome";
-    }
-    // multimedia
-    else if (evt.key === "MediaNextTrack") {
-        return "MediaTrackNext";
-    }
-    else if (evt.key === "MediaPreviousTrack") {
-        return "MediaTrackPrevious";
-    }
-    else if (evt.key === "FastFwd") {
-        return "MedaiFastFwd";
-    }
-    // audio
-    else if (evt.key === "VolumeDown") {
-        return "AudioVolumeDown";
-    }
-    else if (evt.key === "VolumeMute") {
-        return "AudioVolumeMute";
-    }
-    else if (evt.key === "VolumeUp") {
-        return "AudioVolumeUp";
-    }
-    // TV
-    else if (evt.key === "Live") {
-        return "TV";
-    }
-    // media
-    else if (evt.key === "Zoom") {
-        return "ZoomToggle";
-    }
-    // speech recognition - None
-    // document - None
-    // application selector
-    else if (evt.key === "SelectMedia"
-        || evt.key === "MediaSelect") {
-        return "LaunchMediaPlayer";
-    }
-    // browser - None
-    // numeric keypad
-    else if (evt.key === "Add") {
-        return "+";
-    }
-    else if (evt.key === "Divide") {
-        return "/";
-    }
-    else if (evt.key === "Decimal") {
-        // this is incorrect for some locales, but
-        // this is a deprecated value that is fixed in
-        // modern browsers, so it shouldn't come up
-        // very often.
-        return ".";
-    }
-    else if (evt.key === "Key11") {
-        return "11";
-    }
-    else if (evt.key === "Key12") {
-        return "12";
-    }
-    else if (evt.key === "Multiply") {
-        return "*";
-    }
-    else if (evt.key === "Subtract") {
-        return "-";
-    }
-    else if (evt.key === "Separator") {
-        // this is incorrect for some locales, but 
-        // this is a deprecated value that is fixed in
-        // modern browsers, so it shouldn't come up
-        // very often.
-        return ",";
-    }
-    return evt.key;
-}
-
-const gesture = Object.seal({
-    type: "",
-    text: "",
-    command: ""
-});
-
-// Translates operating system-specific Browser KeyboardEvents into a
-// cross-platform Gesture that can then be dispatched to a CommandPack
-// for translation to an EditorCommand.
-class OperatingSystem {
-    constructor(osName, pre1, pre2, redo, pre3, home, end, pre5, fullHome, fullEnd) {
-        this.name = osName;
-
-        const pre4 = pre3;
-        if (pre3.length === 0) {
-            pre3 = "Normal";
-        }
-
-        const substitutions = Object.freeze(new Map([
-            ["Normal_ArrowDown", "CursorDown"],
-            ["Normal_ArrowLeft", "CursorLeft"],
-            ["Normal_ArrowRight", "CursorRight"],
-            ["Normal_ArrowUp", "CursorUp"],
-            ["Normal_PageDown", "CursorPageDown"],
-            ["Normal_PageUp", "CursorPageUp"],
-            [`${pre2}_ArrowLeft`, "CursorSkipLeft"],
-            [`${pre2}_ArrowRight`, "CursorSkipRight"],
-            [`${pre3}_${home}`, "CursorHome"],
-            [`${pre3}_${end}`, "CursorEnd"],
-            [`${pre5}_${fullHome}`, "CursorFullHome"],
-            [`${pre5}_${fullEnd}`, "CursorFullEnd"],
-
-
-            ["Shift_ArrowDown", "SelectDown"],
-            ["Shift_ArrowLeft", "SelectLeft"],
-            ["Shift_ArrowRight", "SelectRight"],
-            ["Shift_ArrowUp", "SelectUp"],
-            ["Shift_PageDown", "SelectPageDown"],
-            ["Shift_PageUp", "SelectPageUp"],
-            [`${pre2}Shift_ArrowLeft`, "SelectSkipLeft"],
-            [`${pre2}Shift_ArrowRight`, "SelectSkipRight"],
-            [`${pre4}Shift_${home}`, "SelectHome"],
-            [`${pre4}Shift_${end}`, "SelectEnd"],
-            [`${pre5}Shift_${fullHome}`, "SelectFullHome"],
-            [`${pre5}Shift_${fullEnd}`, "SelectFullEnd"],
-
-            [`${pre1}_a`, "SelectAll"],
-
-            [`${pre1}_ArrowDown`, "ScrollDown"],
-            [`${pre1}_ArrowUp`, "ScrollUp"],
-
-            ["Normal_Backspace", "DeleteLetterLeft"],
-            ["Normal_Delete", "DeleteLetterRight"],
-            [`${pre2}_Backspace`, "DeleteWordLeft"],
-            [`${pre2}_Delete`, "DeleteWordRight"],
-            [`Shift_Delete`, "DeleteLine"],
-
-            ["Normal_Enter", "AppendNewline"],
-            [`${pre2}_Enter`, "PrependNewline"],
-
-            ["Normal_Tab", "InsertTab"],
-            ["Shift_Tab", "RemoveTab"],
-
-            [`${pre1}_z`, "Undo"],
-            [redo, "Redo"]
-        ]));
-
-        this.makeCommand = (evt) => {
-            gesture.text = normalizeKeyValue(evt);
-
-            gesture.type = keyTypes.has(gesture.text)
-                ? keyTypes.get(gesture.text)
-                : "printable";
-
-            gesture.command = "";
-
-            if (evt.ctrlKey
-                || evt.altKey
-                || evt.metaKey) {
-                if (gesture.type === "printable"
-                    || gesture.type === "whitespace") {
-                    gesture.type = "special";
-                }
-
-                if (evt.ctrlKey) {
-                    gesture.command += "Control";
-                }
-
-                if (evt.altKey) {
-                    gesture.command += "Alt";
-                }
-
-                if (evt.metaKey) {
-                    gesture.command += "Meta";
-                }
-            }
-
-            if (evt.shiftKey) {
-                gesture.command += "Shift";
-            }
-
-            if (gesture.command === "") {
-                gesture.command += "Normal";
-            }
-
-            gesture.command += "_" + gesture.text;
-
-            if (substitutions.has(gesture.command)) {
-                gesture.command = substitutions.get(gesture.command);
-            }
-
-            if (gesture.command === "PrependNewline") {
-                gesture.type = "whitespace";
-            }
-
-            return gesture;
-        };
-
-        Object.freeze(this);
-    }
-}
-const Windows = new OperatingSystem(
-    "Windows",
-    "Control", "Control",
-    "Control_y",
-    "", "Home", "End",
-    "Control", "Home", "End");
-
-const MacOS = new OperatingSystem(
-    "macOS",
-    "Meta", "Alt",
-    "MetaShift_z",
-    "Meta", "ArrowLeft", "ArrowRight",
-    "Meta", "ArrowUp", "ArrowDown");
-
-// A single syntax matching rule, for tokenizing code.
-class Rule {
-    constructor(name, test) {
-        this.name = name;
-        this.test = test;
-        Object.freeze(this);
-    }
-
-    carveOutMatchedToken(tokens, j) {
-        const token = tokens[j];
-        if (token.type === "regular") {
-            const res = this.test.exec(token.value);
-            if (!!res) {
-                // Only use the last group that matches the regex, to allow for more
-                // complex regexes that can match in special contexts, but not make
-                // the context part of the token.
-                const midx = res[res.length - 1],
-                    start = res.input.indexOf(midx),
-                    end = start + midx.length;
-                if (start === 0) {
-                    // the rule matches the start of the token
-                    token.type = this.name;
-                    if (end < token.length) {
-                        // but not the end
-                        const next = token.splitAt(end);
-                        next.type = "regular";
-                        tokens.splice(j + 1, 0, next);
-                    }
-                }
-                else {
-                    // the rule matches from the middle of the token
-                    const mid = token.splitAt(start);
-                    if (midx.length < mid.length) {
-                        // but not the end
-                        const right = mid.splitAt(midx.length);
-                        tokens.splice(j + 1, 0, right);
-                    }
-                    mid.type = this.name;
-                    tokens.splice(j + 1, 0, mid);
-                }
-            }
-        }
-    }
-}
-
-// A chunk of text that represents a single element of code,
-// with fields linking it back to its source.
-class Token {
-    constructor(value, type, stringIndex) {
-        this.value = value;
-        this.startStringIndex = stringIndex;
-        this.type = type;
-        Object.seal(this);
-    }
-
-    get length() {
-        return this.value.length;
-    }
-
-    get endStringIndex() {
-        return this.startStringIndex + this.length;
-    }
-
-    clone() {
-        return new Token(this.value, this.type, this.startStringIndex);
-    }
-
-    splitAt(i) {
-        var next = this.value.substring(i);
-        this.value = this.value.substring(0, i);
-        return new Token(next, this.type, this.startStringIndex + i);
-    }
-
-    toString() {
-        return `[${this.type}: ${this.value}]`;
-    }
 }
 
 /*
@@ -2535,64 +1731,978 @@ const grammars = Object.freeze(new Map([
     ["txt", PlainText]
 ]));
 
-const singleLineOutput = Object.freeze([
-    "CursorLeft",
-    "CursorRight",
-    "CursorSkipLeft",
-    "CursorSkipRight",
-    "CursorHome",
-    "CursorEnd",
-    "CursorFullHome",
-    "CursorFullEnd",
+// These values are defined here:
+//   https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values
+//   Values read on May 24, 2020
+const keyGroups = Object.freeze(new Map([
+    ["special", [
+        "Unidentified"
+    ]],
 
-    "SelectLeft",
-    "SelectRight",
-    "SelectSkipLeft",
-    "SelectSkipRight",
-    "SelectHome",
-    "SelectEnd",
-    "SelectFullHome",
-    "SelectFullEnd",
+    ["modifier", [
+        "Alt",
+        "AltGraph",
+        "CapsLock",
+        "Control",
+        "Fn",
+        "FnLock",
+        "Hyper",
+        "Meta",
+        "NumLock",
+        "ScrollLock",
+        "Shift",
+        "Super",
+        "Symbol",
+        "SymbolLock"
+    ]],
 
-    "SelectAll"
-]);
+    ["whitespace", [
+        "Enter",
+        "Tab"
+    ]],
 
-const multiLineOutput = Object.freeze(singleLineOutput
-    .concat([
-        "CursorDown",
-        "CursorUp",
-        "CursorPageDown",
-        "CursorPageUp",
+    ["navigation", [
+        "ArrowDown",
+        "ArrowLeft",
+        "ArrowRight",
+        "ArrowUp",
+        "End",
+        "Home",
+        "PageDown",
+        "PageUp"
+    ]],
 
-        "SelectDown",
-        "SelectUp",
-        "SelectPageDown",
-        "SelectPageUp",
+    ["editing", [
+        "Backspace",
+        "Clear",
+        "Copy",
+        "CrSel",
+        "Cut",
+        "Delete",
+        "EraseEof",
+        "ExSel",
+        "Insert",
+        "Paste",
+        "Redo",
+        "Undo"
+    ]],
 
-        "ScrollDown",
-        "ScrollUp"
-    ]));
+    ["ui", [
+        "Accept",
+        "Again",
+        "Attn",
+        "Cancel",
+        "ContextMenu",
+        "Escape",
+        "Execute",
+        "Find",
+        "Finish",
+        "Help",
+        "Pause",
+        "Play",
+        "Props",
+        "Select",
+        "ZoomIn",
+        "ZoomOut"
+    ]],
 
-const input = [
-    "Backspace",
-    "Delete",
-    "DeleteWordLeft",
-    "DeleteWordRight",
-    "DeleteLine",
+    ["device", [
+        "BrightnessDown",
+        "BrightnessUp",
+        "Eject",
+        "LogOff",
+        "Power",
+        "PowerOff",
+        "PrintScreen",
+        "Hibernate",
+        "Standby",
+        "WakeUp"
+    ]],
 
-    "Undo",
-    "Redo",
-];
+    ["ime", [
+        "AllCandidates",
+        "Alphanumeric",
+        "CodeInput",
+        "Compose",
+        "Convert",
+        "Dead",
+        "FinalMode",
+        "GroupFirst",
+        "GroupNext",
+        "GroupPrevious",
+        "ModeChange",
+        "NextCandidate",
+        "NonConvert",
+        "PreviousCandidate",
+        "Process",
+        "SingleCandidate"
+    ]],
 
-const singleLineInput = Object.freeze(singleLineOutput
-    .concat(input));
+    ["korean", [
+        "HangulMode",
+        "HanjaMode",
+        "JunjaMode"
+    ]],
 
-const multiLineInput = Object.freeze(multiLineOutput
-    .concat(input)
-    .concat([
-        "AppendNewline",
-        "PrependNewline"
-    ]));
+    ["japanese", [
+        "Eisu",
+        "Hankaku",
+        "Hiragana",
+        "HiraganaKatakana",
+        "KanaMode",
+        "KanjiMode",
+        "Katakana",
+        "Romaji",
+        "Zenkaku",
+        "ZenkakuHanaku"
+    ]],
+
+    ["function", [
+        "F1",
+        "F2",
+        "F3",
+        "F4",
+        "F5",
+        "F6",
+        "F7",
+        "F8",
+        "F9",
+        "F10",
+        "F11",
+        "F12",
+        "F13",
+        "F14",
+        "F15",
+        "F16",
+        "F17",
+        "F18",
+        "F19",
+        "F20",
+        "Soft1",
+        "Soft2",
+        "Soft3",
+        "Soft4"
+    ]],
+
+    ["phone", [
+        "AppSwitch",
+        "Call",
+        "Camera",
+        "CameraFocus",
+        "EndCall",
+        "GoBack",
+        "GoHome",
+        "HeadsetHook",
+        "LastNumberRedial",
+        "Notification",
+        "MannerMode",
+        "VoiceDial"
+    ]],
+
+    ["multimedia", [
+        "ChannelDown",
+        "ChannelUp",
+        "MediaFastForward",
+        "MediaPause",
+        "MediaPlay",
+        "MediaPlayPause",
+        "MediaRecord",
+        "MediaRewind",
+        "MediaStop",
+        "MediaTrackNext",
+        "MediaTrackPrevious"
+    ]],
+
+    ["audio", [
+        "AudioBalanceLeft",
+        "AudioBalanceRight",
+        "AudioBassDown",
+        "AudioBassBoostDown",
+        "AudioBassBoostToggle",
+        "AudioBassBoostUp",
+        "AudioBassUp",
+        "AudioFaderFront",
+        "AudioFaderRear",
+        "AudioSurroundModeNext",
+        "AudioTrebleDown",
+        "AudioTrebleUp",
+        "AudioVolumeDown",
+        "AudioVolumeMute",
+        "AudioVolumeUp",
+        "MicrophoneToggle",
+        "MicrophoneVolumeDown",
+        "MicrophoneVolumeMute",
+        "MicrophoneVolumeUp"
+    ]],
+
+    ["tv", [
+        "TV",
+        "TV3DMode",
+        "TVAntennaCable",
+        "TVAudioDescription",
+        "TVAudioDescriptionMixDown",
+        "TVAudioDescriptionMixUp",
+        "TVContentsMenu",
+        "TVDataService",
+        "TVInput",
+        "TVInputComponent1",
+        "TVInputComponent2",
+        "TVInputComposite1",
+        "TVInputComposite2",
+        "TVInputHDMI1",
+        "TVInputHDMI2",
+        "TVInputHDMI3",
+        "TVInputHDMI4",
+        "TVInputVGA1",
+        "TVMediaContext",
+        "TVNetwork",
+        "TVNumberEntry",
+        "TVPower",
+        "TVRadioService",
+        "TVSatellite",
+        "TVSatelliteBS",
+        "TVSatelliteCS",
+        "TVSatelliteToggle",
+        "TVTerrestrialAnalog",
+        "TVTerrestrialDigital",
+        "TVTimer"
+    ]],
+
+    ["mediaController", [
+        "AVRInput",
+        "AVRPower",
+        "ColorF0Red",
+        "ColorF1Green",
+        "ColorF2Yellow",
+        "ColorF3Blue",
+        "ColorF4Grey",
+        "ColorF5Brown",
+        "ClosedCaptionToggle",
+        "Dimmer",
+        "DisplaySwap",
+        "DVR",
+        "Exit",
+        "FavoriteClear0",
+        "FavoriteClear1",
+        "FavoriteClear2",
+        "FavoriteClear3",
+        "FavoriteRecall0",
+        "FavoriteRecall1",
+        "FavoriteRecall2",
+        "FavoriteRecall3",
+        "FavoriteStore0",
+        "FavoriteStore1",
+        "FavoriteStore2",
+        "FavoriteStore3",
+        "Guide",
+        "GuideNextDay",
+        "GuidePreviousDay",
+        "Info",
+        "InstantReplay",
+        "Link",
+        "ListProgram",
+        "LiveContent",
+        "Lock",
+        "MediaApps",
+        "MediaAudioTrack",
+        "MediaLast",
+        "MediaSkipBackward",
+        "MediaSkipForward",
+        "MediaStepBackward",
+        "MediaStepForward",
+        "MediaTopMenu",
+        "NavigateIn",
+        "NavigateNext",
+        "NavigateOut",
+        "NavigatePrevious",
+        "NextFavoriteChannel",
+        "NextUserProfile",
+        "OnDemand",
+        "Pairing",
+        "PinPDown",
+        "PinPMove",
+        "PinPToggle",
+        "PinPUp",
+        "PlaySpeedDown",
+        "PlaySpeedReset",
+        "PlaySpeedUp",
+        "RandomToggle",
+        "RcLowBattery",
+        "RecordSpeedNext",
+        "RfBypass",
+        "ScanChannelsToggle",
+        "ScreenModeNext",
+        "Settings",
+        "SplitScreenToggle",
+        "STBInput",
+        "STBPower",
+        "Subtitle",
+        "Teletext",
+        "VideoModeNext",
+        "Wink",
+        "ZoomToggle"
+    ]],
+
+    ["speechRecognition", [
+        "SpeechCorrectionList",
+        "SpeechInputToggle"
+    ]],
+
+    ["document", [
+        "Close",
+        "New",
+        "Open",
+        "Print",
+        "Save",
+        "SpellCheck",
+        "MailForward",
+        "MailReply",
+        "MailSend"
+    ]],
+
+    ["applicationSelector", [
+        "LaunchCalculator",
+        "LaunchCalendar",
+        "LaunchContacts",
+        "LaunchMail",
+        "LaunchMediaPlayer",
+        "LaunchMusicPlayer",
+        "LaunchMyComputer",
+        "LaunchPhone",
+        "LaunchScreenSaver",
+        "LaunchSpreadsheet",
+        "LaunchWebBrowser",
+        "LaunchWebCam",
+        "LaunchWordProcessor",
+        "LaunchApplication1",
+        "LaunchApplication2",
+        "LaunchApplication3",
+        "LaunchApplication4",
+        "LaunchApplication5",
+        "LaunchApplication6",
+        "LaunchApplication7",
+        "LaunchApplication8",
+        "LaunchApplication9",
+    ]],
+
+    ["browserControl", [
+        "BrowserBack",
+        "BrowserFavorites",
+        "BrowserForward",
+        "BrowserHome",
+        "BrowserRefresh",
+        "BrowserSearch",
+        "BrowserStop"
+    ]],
+
+    ["numericKeypad", [
+        "Clear"
+    ]]
+]));
+
+// reverse lookup for keyGroups
+const keyTypes = new Map();
+for (let pair of keyGroups) {
+    for (let value of pair[1]) {
+        keyTypes.set(value, pair[0]);
+    }
+}
+Object.freeze(keyTypes);
+
+let isFnDown = false;
+if (isApple) {
+    window.addEventListener("keydown", (evt) => {
+        if (evt.key === "Fn") {
+            isFnDown = true;
+        }
+    });
+
+    window.addEventListener("keyup", (evt) => {
+        if (evt.key === "Fn") {
+            isFnDown = false;
+        }
+    });
+}
+// Fixes for out-of-spec values that some older browser versions might have returned.
+function normalizeKeyValue(evt) {
+    // modifier
+    if (evt.key === "OS"
+        && (evt.code === "OSLeft"
+            || evt.code === "OSRight")) {
+        return "Meta";
+    }
+    else if (evt.key === "Scroll") {
+        return "ScrollLock";
+    }
+    else if (evt.key === "Win") {
+        return "Meta";
+    }
+    // whitespace
+    else if (evt.key === "Spacebar") {
+        return " ";
+    }
+    else if (evt.key === "\n") {
+        return "Enter";
+    }
+    // navigation
+    else if (evt.key === "Down") {
+        return "ArrowDown";
+    }
+    else if (evt.key === "Left") {
+        return "ArrowLeft";
+    }
+    else if (evt.key === "Right") {
+        return "ArrowRight";
+    }
+    else if (evt.key === "Up") {
+        return "ArrowUp";
+    }
+    // editing
+    else if (evt.key === "Del") {
+        return "Delete";
+    }
+    else if (evt.key === "Delete"
+        && isApple
+        && isFnDown) {
+        return "Backspace";
+    }
+    else if (evt.key === "Crsel") {
+        return "CrSel";
+    }
+    else if (evt.key === "Exsel") {
+        return "ExSel";
+    }
+    // ui
+    else if (evt.key === "Esc") {
+        return "Escape";
+    }
+    else if (evt.key === "Apps") {
+        return "ContextMenu";
+    }
+    // device - None
+    // ime
+    else if (evt.key === "Multi") {
+        return "Compose";
+    }
+    else if (evt.key === "Nonconvert") {
+        return "NonConvert";
+    }
+    // korean - None
+    // japanese
+    else if (evt.key === "RomanCharacters") {
+        return "Eisu";
+    }
+    else if (evt.key === "HalfWidth") {
+        return "Hankaku";
+    }
+    else if (evt.key === "FullWidth") {
+        return "Zenkaku";
+    }
+    // dead - None
+    // function - None
+    // phone
+    else if (evt.key === "Exit"
+        || evt.key === "MozHomeScreen") {
+        return "GoHome";
+    }
+    // multimedia
+    else if (evt.key === "MediaNextTrack") {
+        return "MediaTrackNext";
+    }
+    else if (evt.key === "MediaPreviousTrack") {
+        return "MediaTrackPrevious";
+    }
+    else if (evt.key === "FastFwd") {
+        return "MedaiFastFwd";
+    }
+    // audio
+    else if (evt.key === "VolumeDown") {
+        return "AudioVolumeDown";
+    }
+    else if (evt.key === "VolumeMute") {
+        return "AudioVolumeMute";
+    }
+    else if (evt.key === "VolumeUp") {
+        return "AudioVolumeUp";
+    }
+    // TV
+    else if (evt.key === "Live") {
+        return "TV";
+    }
+    // media
+    else if (evt.key === "Zoom") {
+        return "ZoomToggle";
+    }
+    // speech recognition - None
+    // document - None
+    // application selector
+    else if (evt.key === "SelectMedia"
+        || evt.key === "MediaSelect") {
+        return "LaunchMediaPlayer";
+    }
+    // browser - None
+    // numeric keypad
+    else if (evt.key === "Add") {
+        return "+";
+    }
+    else if (evt.key === "Divide") {
+        return "/";
+    }
+    else if (evt.key === "Decimal") {
+        // this is incorrect for some locales, but
+        // this is a deprecated value that is fixed in
+        // modern browsers, so it shouldn't come up
+        // very often.
+        return ".";
+    }
+    else if (evt.key === "Key11") {
+        return "11";
+    }
+    else if (evt.key === "Key12") {
+        return "12";
+    }
+    else if (evt.key === "Multiply") {
+        return "*";
+    }
+    else if (evt.key === "Subtract") {
+        return "-";
+    }
+    else if (evt.key === "Separator") {
+        // this is incorrect for some locales, but 
+        // this is a deprecated value that is fixed in
+        // modern browsers, so it shouldn't come up
+        // very often.
+        return ",";
+    }
+    return evt.key;
+}
+
+const gesture = Object.seal({
+    type: "",
+    text: "",
+    command: ""
+});
+
+// Translates operating system-specific Browser KeyboardEvents into a
+// cross-platform Gesture that can then be dispatched to a CommandPack
+// for translation to an EditorCommand.
+class OperatingSystem {
+    constructor(osName, pre1, pre2, redo, pre3, home, end, pre5, fullHome, fullEnd) {
+        this.name = osName;
+
+        const pre4 = pre3;
+        if (pre3.length === 0) {
+            pre3 = "Normal";
+        }
+
+        const substitutions = Object.freeze(new Map([
+            ["Normal_ArrowDown", "CursorDown"],
+            ["Normal_ArrowLeft", "CursorLeft"],
+            ["Normal_ArrowRight", "CursorRight"],
+            ["Normal_ArrowUp", "CursorUp"],
+            ["Normal_PageDown", "CursorPageDown"],
+            ["Normal_PageUp", "CursorPageUp"],
+            [`${pre2}_ArrowLeft`, "CursorSkipLeft"],
+            [`${pre2}_ArrowRight`, "CursorSkipRight"],
+            [`${pre3}_${home}`, "CursorHome"],
+            [`${pre3}_${end}`, "CursorEnd"],
+            [`${pre5}_${fullHome}`, "CursorFullHome"],
+            [`${pre5}_${fullEnd}`, "CursorFullEnd"],
+
+
+            ["Shift_ArrowDown", "SelectDown"],
+            ["Shift_ArrowLeft", "SelectLeft"],
+            ["Shift_ArrowRight", "SelectRight"],
+            ["Shift_ArrowUp", "SelectUp"],
+            ["Shift_PageDown", "SelectPageDown"],
+            ["Shift_PageUp", "SelectPageUp"],
+            [`${pre2}Shift_ArrowLeft`, "SelectSkipLeft"],
+            [`${pre2}Shift_ArrowRight`, "SelectSkipRight"],
+            [`${pre4}Shift_${home}`, "SelectHome"],
+            [`${pre4}Shift_${end}`, "SelectEnd"],
+            [`${pre5}Shift_${fullHome}`, "SelectFullHome"],
+            [`${pre5}Shift_${fullEnd}`, "SelectFullEnd"],
+
+            [`${pre1}_a`, "SelectAll"],
+
+            [`${pre1}_ArrowDown`, "ScrollDown"],
+            [`${pre1}_ArrowUp`, "ScrollUp"],
+
+            ["Normal_Backspace", "DeleteLetterLeft"],
+            ["Normal_Delete", "DeleteLetterRight"],
+            [`${pre2}_Backspace`, "DeleteWordLeft"],
+            [`${pre2}_Delete`, "DeleteWordRight"],
+            [`Shift_Delete`, "DeleteLine"],
+
+            ["Normal_Enter", "AppendNewline"],
+            [`${pre2}_Enter`, "PrependNewline"],
+
+            ["Normal_Tab", "InsertTab"],
+            ["Shift_Tab", "RemoveTab"],
+
+            [`${pre1}_z`, "Undo"],
+            [redo, "Redo"]
+        ]));
+
+        this.makeCommand = (evt) => {
+            gesture.text = normalizeKeyValue(evt);
+
+            gesture.type = keyTypes.has(gesture.text)
+                ? keyTypes.get(gesture.text)
+                : "printable";
+
+            gesture.command = "";
+
+            if (evt.ctrlKey
+                || evt.altKey
+                || evt.metaKey) {
+                if (gesture.type === "printable"
+                    || gesture.type === "whitespace") {
+                    gesture.type = "special";
+                }
+
+                if (evt.ctrlKey) {
+                    gesture.command += "Control";
+                }
+
+                if (evt.altKey) {
+                    gesture.command += "Alt";
+                }
+
+                if (evt.metaKey) {
+                    gesture.command += "Meta";
+                }
+            }
+
+            if (evt.shiftKey) {
+                gesture.command += "Shift";
+            }
+
+            if (gesture.command === "") {
+                gesture.command += "Normal";
+            }
+
+            gesture.command += "_" + gesture.text;
+
+            if (substitutions.has(gesture.command)) {
+                gesture.command = substitutions.get(gesture.command);
+            }
+
+            if (gesture.command === "PrependNewline") {
+                gesture.type = "whitespace";
+            }
+
+            return gesture;
+        };
+
+        Object.freeze(this);
+    }
+}
+const Windows = new OperatingSystem(
+    "Windows",
+    "Control", "Control",
+    "Control_y",
+    "", "Home", "End",
+    "Control", "Home", "End");
+
+const MacOS = new OperatingSystem(
+    "macOS",
+    "Meta", "Alt",
+    "MetaShift_z",
+    "Meta", "ArrowLeft", "ArrowRight",
+    "Meta", "ArrowUp", "ArrowDown");
+
+/*
+pliny.class({
+  parent: "Primrose.Text",
+    name: "Point",
+    description: "| [under construction]"
+});
+*/
+
+
+class Point {
+    constructor(x, y) {
+        this.set(x || 0, y || 0);
+        Object.seal(this);
+    }
+
+    set(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    copy(p) {
+        if (p) {
+            this.x = p.x;
+            this.y = p.y;
+        }
+    }
+
+    toCell(character, scroll, gridBounds) {
+        this.x = Math.round(this.x / character.width) + scroll.x - gridBounds.x;
+        this.y = Math.floor((this.y / character.height) - 0.25) + scroll.y;
+    }
+
+    inBounds(bounds) {
+        return bounds.left <= this.x
+            && this.x < bounds.right
+            && bounds.top <= this.y
+            && this.y < bounds.bottom;
+    }
+
+    clone() {
+        return new Point(this.x, this.y);
+    }
+
+    toString() {
+        return `(x:${this.x}, y:${this.y})`;
+    }
+}
+
+class Size {
+    constructor(width, height) {
+        this.width = width || 0;
+        this.height = height || 0;
+        Object.seal(this);
+    }
+
+    set(width, height) {
+        this.width = width;
+        this.height = height;
+    }
+
+    copy(s) {
+        if (!!s) {
+            this.width = s.width;
+            this.height = s.height;
+        }
+    }
+
+    clone() {
+        return new Size(this.width, this.height);
+    }
+
+    toString() {
+        return `<w:${this.width}, h:${this.height}>`;
+    }
+}
+
+class Rectangle {
+    constructor(x, y, width, height) {
+        this.point = new Point(x, y);
+        this.size = new Size(width, height);
+        Object.freeze(this);
+    }
+
+    get x() {
+        return this.point.x;
+    }
+
+    set x(x) {
+        this.point.x = x;
+    }
+
+    get left() {
+        return this.point.x;
+    }
+    set left(x) {
+        this.point.x = x;
+    }
+
+    get width() {
+        return this.size.width;
+    }
+    set width(width) {
+        this.size.width = width;
+    }
+
+    get right() {
+        return this.point.x + this.size.width;
+    }
+    set right(right) {
+        this.point.x = right - this.size.width;
+    }
+
+    get y() {
+        return this.point.y;
+    }
+    set y(y) {
+        this.point.y = y;
+    }
+
+    get top() {
+        return this.point.y;
+    }
+    set top(y) {
+        this.point.y = y;
+    }
+
+    get height() {
+        return this.size.height;
+    }
+    set height(height) {
+        this.size.height = height;
+    }
+
+    get bottom() {
+        return this.point.y + this.size.height;
+    }
+    set bottom(bottom) {
+        this.point.y = bottom - this.size.height;
+    }
+
+    get area() {
+        return this.width * this.height;
+    }
+
+    set(x, y, width, height) {
+        this.point.set(x, y);
+        this.size.set(width, height);
+    }
+
+    copy(r) {
+        if (r) {
+            this.point.copy(r.point);
+            this.size.copy(r.size);
+        }
+    }
+
+    clone() {
+        return new Rectangle(this.point.x, this.point.y, this.size.width, this.size.height);
+    }
+
+    overlap(r) {
+        const left = Math.max(this.left, r.left),
+            top = Math.max(this.top, r.top),
+            right = Math.min(this.right, r.right),
+            bottom = Math.min(this.bottom, r.bottom);
+        if (right > left && bottom > top) {
+            return new Rectangle(left, top, right - left, bottom - top);
+        }
+    }
+
+    toString() {
+        return `[${this.point.toString()} x ${this.size.toString()}]`;
+    }
+}
+
+class Row {
+    constructor(txt, tokens, startStringIndex, startTokenIndex, lineNumber) {
+        this.text = txt;
+        this.startStringIndex = startStringIndex;
+
+        this.tokens = tokens;
+        this.startTokenIndex = startTokenIndex;
+
+        this.lineNumber = lineNumber;
+
+        const graphemes = Object.freeze([...txt]),
+            leftCorrections = new Array(txt.length),
+            rightCorrections = new Array(txt.length);
+
+        let x = 0;
+        for (let grapheme of graphemes) {
+            leftCorrections[x] = 0;
+            rightCorrections[x] = 0;
+            for (let i = 1; i < grapheme.length; ++i) {
+                leftCorrections[x + i] = -i;
+                rightCorrections[x + i] = grapheme.length - i;
+            }
+            x += grapheme.length;
+        }
+
+        this.adjust = (cursor, dir) => {
+            const correction = dir === -1
+                ? leftCorrections
+                : rightCorrections;
+
+            if (cursor.x < correction.length) {
+                const delta = correction[cursor.x];
+                cursor.x += delta;
+                cursor.i += delta;
+            }
+            else if (dir === 1
+                && txt[txt.length - 1] === '\n') {
+                this.adjust(cursor, -1);
+            }
+        };
+
+        this.toString = () => txt;
+
+        this.substring = (x, y) => txt.substring(x, y);
+
+        Object.seal(this);
+    }
+
+    get stringLength() {
+        return this.text.length;
+    }
+
+    get endStringIndex() {
+        return this.startStringIndex + this.stringLength;
+    }
+
+    get numTokens() {
+        return this.tokens.length;
+    }
+
+    get endTokenIndex() {
+        return this.startTokenIndex + this.numTokens;
+    }
+}
+
+Row.emptyRow = (startStringIndex, startTokenIndex, lineNumber) => new Row("", [], startStringIndex, startTokenIndex, lineNumber);
+
+class TimedEvent extends EventBase {
+    constructor(timeout, continuous = false) {
+        super();
+
+        const tickEvt = new Event("tick");
+
+        let handle = null;
+
+        this.cancel = () => {
+            const wasRunning = this.isRunning;
+            if (wasRunning) {
+                if (continuous) {
+                    clearInterval(handle);
+                }
+                else {
+                    clearTimeout(handle);
+                }
+                handle = null;
+            }
+
+            return wasRunning;
+        };
+
+        const tick = () => {
+            if (!continuous) {
+                this.cancel();
+            }
+            this.dispatchEvent(tickEvt);
+        };
+
+        this.start = () => {
+            this.cancel();
+            if (continuous) {
+                handle = setTimeout(tick, timeout);
+            }
+            else {
+                handle = setInterval(tick, timeout);
+            }
+        };
+
+        Object.defineProperties(this, {
+            isRunning: {
+                get: () => handle !== null
+            }
+        });
+
+        Object.freeze(this);
+    }
+}
 
 //>>>>>>>>>> PRIVATE STATIC FIELDS >>>>>>>>>>
 let elementCounter = 0,
@@ -2635,7 +2745,7 @@ const wheelScrollSpeed = 4,
 
 //<<<<<<<<<< PRIVATE STATIC FIELDS <<<<<<<<<<
 
-class Primrose extends EventTarget {
+class Primrose extends EventBase {
     constructor(options) {
         super();
 
@@ -2693,13 +2803,14 @@ class Primrose extends EventTarget {
 
         const renderCanvasBackground = () => {
             const minCursor = Cursor.min(frontCursor, backCursor),
-                maxCursor = Cursor.max(frontCursor, backCursor),
-                clearFunc = theme.regular.backColor ? "fillRect" : "clearRect";
+                maxCursor = Cursor.max(frontCursor, backCursor);
 
-            if (clearFunc === "fillRect") {
+            bgfx.clearRect(0, 0, canv.width, canv.height);
+            if (theme.regular.backColor) {
                 bgfx.fillStyle = theme.regular.backColor;
+                bgfx.fillRect(0, 0, canv.width, canv.height);
             }
-            bgfx[clearFunc](0, 0, canv.width, canv.height);
+
             bgfx.save();
             bgfx.scale(scaleFactor, scaleFactor);
             bgfx.translate(
@@ -4364,11 +4475,11 @@ class Primrose extends EventTarget {
         }
         else if (isCanvas(options.element)) {
             element = canv = options.element;
-            canv.innerHTML = "";
+            clear(canv);
         }
         else {
             element = options.element;
-            element.innerHTML = "";
+            clear(element);
 
             canv = canvas({
                 style: {
