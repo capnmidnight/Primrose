@@ -1,0 +1,47 @@
+﻿/*
+pliny.class({
+  parent: "Primrose.Text",
+    name: "Point",
+    description: "| [under construction]"
+});
+*/
+
+
+export class Point {
+    constructor(x, y) {
+        this.set(x || 0, y || 0);
+        Object.seal(this);
+    }
+
+    set(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    copy(p) {
+        if (p) {
+            this.x = p.x;
+            this.y = p.y;
+        }
+    }
+
+    toCell(character, scroll, gridBounds) {
+        this.x = Math.round(this.x / character.width) + scroll.x - gridBounds.x;
+        this.y = Math.floor((this.y / character.height) - 0.25) + scroll.y;
+    }
+
+    inBounds(bounds) {
+        return bounds.left <= this.x
+            && this.x < bounds.right
+            && bounds.top <= this.y
+            && this.y < bounds.bottom;
+    }
+
+    clone() {
+        return new Point(this.x, this.y);
+    }
+
+    toString() {
+        return `(x:${this.x}, y:${this.y})`;
+    }
+}
