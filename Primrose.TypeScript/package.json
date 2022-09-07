@@ -1,0 +1,30 @@
+{
+  "version": "1.1.7",
+  "name": "primrose",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node --experimental-modules esbuild.config.js",
+    "watch": "node --experimental-modules esbuild.config.js --watch",
+    "check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@juniper-lib/esbuild": "file:../../Juniper/src/Juniper.TypeScript/@juniper-lib/esbuild",
+    "@juniper-lib/testing": "file:../../Juniper/src/Juniper.TypeScript/@juniper-lib/testing",
+    "@juniper-types/dom-types": "file:../../Juniper/src/Juniper.TypeScript/@juniper-types/dom-types",
+    "@types/offscreencanvas": "2019.7.0",
+    "esbuild": "0.15.5"
+  },
+  "dependencies": {
+    "@juniper-lib/graphics2d": "file:../../Juniper/src/Juniper.TypeScript/@juniper-lib/graphics2d",
+    "@juniper-lib/dom": "file:../../Juniper/src/Juniper.TypeScript/@juniper-lib/dom",
+    "@juniper-lib/emoji": "file:../../Juniper/src/Juniper.TypeScript/@juniper-lib/emoji",
+    "@juniper-lib/fetcher": "file:../../Juniper/src/Juniper.TypeScript/@juniper-lib/fetcher",
+    "@juniper-lib/mediatypes": "file:../../Juniper/src/Juniper.TypeScript/@juniper-lib/mediatypes",
+    "@juniper-lib/tests": "file:../../Juniper/src/Juniper.TypeScript/@juniper-lib/tests",
+    "@juniper-lib/tslib": "file:../../Juniper/src/Juniper.TypeScript/@juniper-lib/tslib",
+    "@juniper-lib/workers": "file:../../Juniper/src/Juniper.TypeScript/@juniper-lib/workers",
+    "gl-matrix": "3.4.3",
+    "typescript": "4.8.2"
+  }
+}

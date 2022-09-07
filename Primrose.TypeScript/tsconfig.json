@@ -1,0 +1,64 @@
+{
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.glsl",
+    "src/**/*.frag",
+    "src/**/*.vert",
+    "package.json"
+  ],
+
+  "exclude": [
+    "bin",
+    "obj"
+  ],
+
+  "compileOnSave": true,
+
+  "compilerOptions": {
+    "lib": [ "ES2021", "DOM", "WebWorker", "DOM.Iterable" ],
+    "target": "ES2021",
+    "module": "ES2020",
+    "moduleResolution": "Node",
+
+    "declaration": true,
+    "disableSizeLimit": true,
+    "downlevelIteration": true,
+    "importHelpers": true,
+    "incremental": true,
+    "experimentalDecorators": false,
+    "removeComments": false,
+    "resolveJsonModule": true,
+    "skipDefaultLibCheck": true,
+    "skipLibCheck": true,
+    "sourceMap": false,
+
+    "allowJs": false,
+    "allowSyntheticDefaultImports": true,
+    "allowUmdGlobalAccess": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+
+    "noEmit": true,
+    "noEmitHelpers": true,
+    "noEmitOnError": false,
+    "noErrorTruncation": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noImplicitUseStrict": false,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+
+    "strictBindCallApply": true,
+    "strictFunctionTypes": true,
+    "strictNullChecks": false,
+    "strictPropertyInitialization": false,
+
+    "typeRoots": [
+      "./node_modules/@types",
+      "./node_modules/@juniper-types"
+    ]
+  }
+}
