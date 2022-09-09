@@ -1,7 +1,7 @@
-import { CanvasTypes, Context2D, createOffscreenCanvas, createUtilityCanvas, isCanvas, isHTMLCanvas, resizeContext, setContextSize } from "@juniper-lib/dom/canvas";
-import { border, display, getMonospaceFonts, height, overflow, padding as cssPadding, perc, visibility, width } from "@juniper-lib/dom/css";
-import { Canvas, elementApply, elementClearChildren, InputText } from "@juniper-lib/dom/tags";
+import { CanvasTypes, Context2D, createUtilityCanvas, isCanvas, isHTMLCanvas, resizeContext, setContextSize } from "@juniper-lib/dom/canvas";
+import { border, display, getMonospaceFonts, height, overflow, padding as cssPadding, perc, width } from "@juniper-lib/dom/css";
 import { onMouseDown, onMouseMove, onMouseOut, onMouseOver, onMouseUp, onTouchEnd, onTouchMove, onTouchStart } from "@juniper-lib/dom/evts";
+import { Canvas, elementApply, elementClearChildren, InputText } from "@juniper-lib/dom/tags";
 import { arrayReplace } from "@juniper-lib/tslib/collections/arrays";
 import { TypedEvent, TypedEventBase } from "@juniper-lib/tslib/events/EventBase";
 import { isApple, isFirefox } from "@juniper-lib/tslib/flags";
@@ -9,7 +9,7 @@ import { isDefined, isNullOrUndefined, isString } from "@juniper-lib/tslib/typeC
 import { multiLineInput, multiLineOutput, singleLineInput, singleLineOutput } from "./controlTypes";
 import { Cursor } from "./Cursor";
 import { Delayer } from "./Delayer";
-import { grammars, JavaScript, Grammar, Token } from "./Grammars";
+import { Grammar, grammars, JavaScript, Token } from "./Grammars";
 import { MacOS, Windows } from "./os";
 import { Point } from "./Point";
 import { Rectangle } from "./Rectangle";
