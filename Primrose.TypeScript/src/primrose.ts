@@ -1,7 +1,8 @@
+import { id } from "@juniper-lib/dom/attrs";
 import { CanvasTypes, Context2D, createUtilityCanvas, isCanvas, isHTMLCanvas, resizeContext, setContextSize } from "@juniper-lib/dom/canvas";
 import { border, display, getMonospaceFonts, height, overflow, padding as cssPadding, perc, width } from "@juniper-lib/dom/css";
 import { onMouseDown, onMouseMove, onMouseOut, onMouseOver, onMouseUp, onTouchEnd, onTouchMove, onTouchStart } from "@juniper-lib/dom/evts";
-import { Canvas, elementApply, elementClearChildren, InputText } from "@juniper-lib/dom/tags";
+import { Canvas, elementApply, elementClearChildren, getElement, InputText, TextArea } from "@juniper-lib/dom/tags";
 import { arrayReplace } from "@juniper-lib/tslib/collections/arrays";
 import { TypedEvent, TypedEventBase } from "@juniper-lib/tslib/events/EventBase";
 import { isApple, isFirefox } from "@juniper-lib/tslib/flags";
@@ -303,6 +304,7 @@ export class Primrose extends TypedEventBase<{
     private readonly _mouse: PointerControlMap;
     private readonly _touch: PointerControlMap;
 
+    private readonly surrogate: HTMLTextAreaElement;
     private readonly context: Context2D;
     private readonly fg: CanvasTypes;
     private readonly fgfx: Context2D;
@@ -313,6 +315,16 @@ export class Primrose extends TypedEventBase<{
 
     constructor(options: Partial<PrimroseOptions>) {
         super();
+
+        this.surrogate = getElement<HTMLTextAreaElement>("#primroseSurrogate");
+        if (isNullOrUndefined(this.surrogate)) {
+            elementApply(document.body,
+                this.surrogate = TextArea(
+                    id("primroseSurrogate"),
+                    display("none")
+                )
+            );
+        }
 
         //>>>>>>>>>> VALIDATE PARAMETERS >>>>>>>>>>
         options = options || {};
@@ -1789,9 +1801,7 @@ export class Primrose extends TypedEventBase<{
     blur() {
         if (this.focused) {
             this._focused = false;
-            if (this.element.tagName === "INPUT") {
-                this.element.blur();
-            }
+            this.surrogate.blur();
             this.dispatchEvent(this.blurEvt);
             this.render();
         }
@@ -1803,9 +1813,7 @@ export class Primrose extends TypedEventBase<{
     focus() {
         if (!this.focused) {
             this._focused = true;
-            if (this.element.tagName === "INPUT") {
-                //this.element.focus();
-            }
+            this.surrogate.focus();
             this.dispatchEvent(this.focusEvt);
             this.render();
         }
@@ -1857,6 +1865,9 @@ export class Primrose extends TypedEventBase<{
         if (this.keyDownCommands.has(command.command)) {
             evt.preventDefault();
             this.keyDownCommands.get(command.command)(evt);
+        }
+        else if (evt.key === "Tab") {
+            evt.preventDefault();
         }
     }
 
