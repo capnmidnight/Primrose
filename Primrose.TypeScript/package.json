@@ -13,7 +13,7 @@
     "@juniper-lib/testing": "file:../../Juniper/src/Juniper.TypeScript/@juniper-lib/testing",
     "@juniper-types/dom-types": "file:../../Juniper/src/Juniper.TypeScript/@juniper-types/dom-types",
     "@types/offscreencanvas": "2019.7.0",
-    "esbuild": "0.15.5"
+    "esbuild": "0.17.15"
   },
   "dependencies": {
     "@juniper-lib/graphics2d": "file:../../Juniper/src/Juniper.TypeScript/@juniper-lib/graphics2d",

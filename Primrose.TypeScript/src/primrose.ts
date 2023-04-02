@@ -781,13 +781,13 @@ export class Primrose extends TypedEventBase<{
 
         //>>>>>>>>>> SETUP BUFFERS >>>>>>>>>>
 
-        this.context = this.canv.getContext("2d");
+        this.context = this.canv.getContext("2d") as Context2D;
         this.fg = createUtilityCanvas(this.canv.width, this.canv.height);
-        this.fgfx = this.fg.getContext("2d");
+        this.fgfx = this.fg.getContext("2d") as Context2D;
         this.bg = createUtilityCanvas(this.canv.width, this.canv.height);
-        this.bgfx = this.bg.getContext("2d");
+        this.bgfx = this.bg.getContext("2d") as Context2D;
         this.tg = createUtilityCanvas(this.canv.width, this.canv.height);
-        this.tgfx = this.tg.getContext("2d");
+        this.tgfx = this.tg.getContext("2d") as Context2D;
 
         this.context.imageSmoothingEnabled
             = this.fgfx.imageSmoothingEnabled
@@ -1892,7 +1892,6 @@ export class Primrose extends TypedEventBase<{
     private copySelectedText(evt: ClipboardEvent) {
         if (this.focused && this.frontCursor.i !== this.backCursor.i) {
             evt.clipboardData.setData("text/plain", this.selectedText);
-            evt.returnValue = false;
             return true;
         }
 
@@ -1912,7 +1911,6 @@ export class Primrose extends TypedEventBase<{
 
     readPasteEvent(evt: ClipboardEvent) {
         if (this.focused && !this.readOnly) {
-            evt.returnValue = false;
             const clipboard = evt.clipboardData;
             const str = clipboard.getData("text/plain");
             if (str) {
