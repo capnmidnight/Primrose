@@ -13,13 +13,16 @@
     "@juniper-lib/testing": "file:../../Juniper/src/Juniper.TypeScript/@juniper-lib/testing",
     "@juniper-types/dom-types": "file:../../Juniper/src/Juniper.TypeScript/@juniper-types/dom-types",
     "@types/offscreencanvas": "2019.7.0",
-    "esbuild": "0.17.15"
+    "esbuild": "0.17.15",
+    "eslint": "^8.42.0"
   },
   "dependencies": {
-    "@juniper-lib/graphics2d": "file:../../Juniper/src/Juniper.TypeScript/@juniper-lib/graphics2d",
+    "@juniper-lib/collections": "file:../../Juniper/src/Juniper.TypeScript/@juniper-lib/collections",
     "@juniper-lib/dom": "file:../../Juniper/src/Juniper.TypeScript/@juniper-lib/dom",
     "@juniper-lib/emoji": "file:../../Juniper/src/Juniper.TypeScript/@juniper-lib/emoji",
+    "@juniper-lib/events": "file:../../Juniper/src/Juniper.TypeScript/@juniper-lib/events",
     "@juniper-lib/fetcher": "file:../../Juniper/src/Juniper.TypeScript/@juniper-lib/fetcher",
+    "@juniper-lib/graphics2d": "file:../../Juniper/src/Juniper.TypeScript/@juniper-lib/graphics2d",
     "@juniper-lib/mediatypes": "file:../../Juniper/src/Juniper.TypeScript/@juniper-lib/mediatypes",
     "@juniper-lib/tests": "file:../../Juniper/src/Juniper.TypeScript/@juniper-lib/tests",
     "@juniper-lib/tslib": "file:../../Juniper/src/Juniper.TypeScript/@juniper-lib/tslib",

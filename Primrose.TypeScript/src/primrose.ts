@@ -1,21 +1,21 @@
+import { arrayReplace } from "@juniper-lib/collections/arrays";
 import { id } from "@juniper-lib/dom/attrs";
 import { CanvasTypes, Context2D, createUtilityCanvas, isCanvas, isHTMLCanvas, resizeContext, setContextSize } from "@juniper-lib/dom/canvas";
-import { border, display, getMonospaceFonts, height, overflow, padding as cssPadding, perc, width } from "@juniper-lib/dom/css";
+import { border, padding as cssPadding, display, getMonospaceFonts, height, overflow, perc, width } from "@juniper-lib/dom/css";
 import { onMouseDown, onMouseMove, onMouseOut, onMouseOver, onMouseUp, onTouchEnd, onTouchMove, onTouchStart } from "@juniper-lib/dom/evts";
-import { Canvas, elementApply, elementClearChildren, getElement, InputText, TextArea } from "@juniper-lib/dom/tags";
-import { arrayReplace } from "@juniper-lib/tslib/collections/arrays";
-import { TypedEvent, TypedEventBase } from "@juniper-lib/tslib/events/EventBase";
+import { Canvas, InputText, TextArea, elementApply, elementClearChildren, getElement } from "@juniper-lib/dom/tags";
+import { TypedEvent, TypedEventBase } from "@juniper-lib/events/EventBase";
 import { isApple, isFirefox } from "@juniper-lib/tslib/flags";
 import { isDefined, isNullOrUndefined, isString } from "@juniper-lib/tslib/typeChecks";
-import { multiLineInput, multiLineOutput, singleLineInput, singleLineOutput } from "./controlTypes";
 import { Cursor } from "./Cursor";
 import { Delayer } from "./Delayer";
-import { Grammar, grammars, JavaScript, Token } from "./Grammars";
-import { MacOS, Windows } from "./os";
+import { Grammar, JavaScript, Token, grammars } from "./Grammars";
 import { Point } from "./Point";
 import { Rectangle } from "./Rectangle";
 import { Row } from "./Row";
 import { Size } from "./Size";
+import { multiLineInput, multiLineOutput, singleLineInput, singleLineOutput } from "./controlTypes";
+import { MacOS, Windows } from "./os";
 import { Dark as DefaultTheme } from "./themes";
 
 export interface UVEvent {
