@@ -67,7 +67,7 @@ class OperatingSystem {
             ["Normal_Delete", "DeleteLetterRight"],
             [`${pre2}_Backspace`, "DeleteWordLeft"],
             [`${pre2}_Delete`, "DeleteWordRight"],
-            [`Shift_Delete`, "DeleteLine"],
+            ["Shift_Delete", "DeleteLine"],
 
             ["Normal_Enter", "AppendNewline"],
             [`${pre2}_Enter`, "PrependNewline"],
@@ -128,11 +128,11 @@ class OperatingSystem {
             }
 
             return gesture;
-        }
+        };
 
         Object.freeze(this);
     }
-};
+}
 
 export const Windows = new OperatingSystem(
     "Windows",

@@ -74,7 +74,7 @@ import { Rule } from "./Rule";
 import { Token, TokenType } from "./Token";
 
 function crudeParsing(tokens: Token[]) {
-    var commentDelim = null,
+    let commentDelim = null,
         stringDelim = null;
     for (let i = 0; i < tokens.length; ++i) {
         const t = tokens[i];
@@ -203,8 +203,8 @@ export class Grammar {
         // all text starts off as regular text, then gets cut up into tokens of
         // more specific type
         const tokens = [new Token(text, "regular", 0)];
-        for (let rule of this.grammar) {
-            for (var j = 0; j < tokens.length; ++j) {
+        for (const rule of this.grammar) {
+            for (let j = 0; j < tokens.length; ++j) {
                 rule.carveOutMatchedToken(tokens, j);
             }
         }
@@ -218,16 +218,16 @@ export class Grammar {
             theme = DefaultTheme;
         }
 
-        var tokenRows = this.tokenize(txt),
+        const tokenRows = this.tokenize(txt),
             temp = Div();
-        for (var y = 0; y < tokenRows.length; ++y) {
+        for (let y = 0; y < tokenRows.length; ++y) {
             // draw the tokens on this row
-            var t = tokenRows[y];
+            const t = tokenRows[y];
             if (t.type === "newlines") {
                 temp.appendChild(BR());
             }
             else {
-                var style = theme[t.type] || {},
+                const style = theme[t.type] || {},
                     elem = Span(
                         fontWeight(style.fontWeight || theme.regular.fontWeight),
                         fontStyle(style.fontStyle || theme.regular.fontStyle || ""),
@@ -246,4 +246,4 @@ export class Grammar {
             lineHeight: `${fontSize}px`,
         });
     }
-};
+}

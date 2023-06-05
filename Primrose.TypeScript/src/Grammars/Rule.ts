@@ -12,7 +12,7 @@ export class Rule {
         const token = tokens[j];
         if (token.type === "regular") {
             const res = this.test.exec(token.value);
-            if (!!res) {
+            if (res) {
                 // Only use the last group that matches the regex, to allow for more
                 // complex regexes that can match in special contexts, but not make
                 // the context part of the token.
@@ -43,4 +43,4 @@ export class Rule {
             }
         }
     }
-};
+}

@@ -12,7 +12,7 @@ export const JavaScript = new Grammar("JavaScript", [
     ["whitespace", /(?:\s+)/],
     ["startBlockComments", /\/\*/],
     ["endBlockComments", /\*\//],
-    ["regexes", /(?:^|,|;|\(|\[|\{)(?:\s*)(\/(?:\\\/|[^\n\/])+\/)/],
+    ["regexes", /(?:^|,|;|\(|\[|\{)(?:\s*)(\/(?:\\\/|[^\n/])+\/)/],
     ["stringDelim", /("|'|`)/],
     ["startLineComments", /\/\/.*$/m],
     ["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/],

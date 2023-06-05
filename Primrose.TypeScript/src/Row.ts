@@ -22,7 +22,7 @@ export class Row {
         this.rightCorrections = new Array<number>(text.length);
 
         let x = 0;
-        for (let grapheme of graphemes) {
+        for (const grapheme of graphemes) {
             this.leftCorrections[x] = 0;
             this.rightCorrections[x] = 0;
             for (let i = 1; i < grapheme.length; ++i) {
@@ -54,7 +54,7 @@ export class Row {
             cursor.i += delta;
         }
         else if (dir === 1
-            && this.text[this.text.length - 1] === '\n') {
+            && this.text[this.text.length - 1] === "\n") {
             this.adjust(cursor, -1);
         }
     }

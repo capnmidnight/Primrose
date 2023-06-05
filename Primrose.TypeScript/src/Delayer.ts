@@ -37,6 +37,6 @@ export class Delayer extends TypedEventBase<{
 
     start() {
         this.cancel();
-        this.timer = setInterval(this.tick, this.timeout) as any;
+        this.timer = setInterval(this.tick, this.timeout);
     }
 }

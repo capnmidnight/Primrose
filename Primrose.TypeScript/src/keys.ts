@@ -371,8 +371,8 @@ export const keyGroups = Object.freeze(new Map([
 
 // reverse lookup for keyGroups
 export const keyTypes = new Map();
-for (let pair of keyGroups) {
-    for (let value of pair[1]) {
+for (const pair of keyGroups) {
+    for (const value of pair[1]) {
         keyTypes.set(value, pair[0]);
     }
 }

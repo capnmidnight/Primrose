@@ -11,7 +11,7 @@
     }
 
     copy(s: Size) {
-        if (!!s) {
+        if (s) {
             this.width = s.width;
             this.height = s.height;
         }

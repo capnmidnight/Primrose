@@ -39,7 +39,7 @@ export class Token {
     }
 
     splitAt(i: number): Token {
-        var next = this.value.substring(i);
+        const next = this.value.substring(i);
         this.value = this.value.substring(0, i);
         return new Token(next, this.type, this.startStringIndex + i);
     }
@@ -47,4 +47,4 @@ export class Token {
     toString() {
         return `[${this.type}: ${this.value}]`;
     }
-};
+}

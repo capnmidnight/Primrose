@@ -109,7 +109,7 @@ const publicControls: Primrose[] = [],
         language: "JavaScript",
         scaleFactor: devicePixelRatio
     }),
-    elements: WeakMap<any, Primrose> = new WeakMap(),
+    elements: WeakMap<Element, Primrose> = new WeakMap(),
     ready = (document.readyState === "complete"
         ? Promise.resolve("already")
         : new Promise((resolve) => {
@@ -120,7 +120,7 @@ const publicControls: Primrose[] = [],
             }, false);
         }))
         .then(() => {
-            for (let element of document.getElementsByTagName("primrose")) {
+            for (const element of document.getElementsByTagName("primrose")) {
                 new Primrose({
                     element: element as HTMLElement
                 });
@@ -144,7 +144,7 @@ export class Primrose extends TypedEventBase<{
     /// Multiple objects may be used to register a single control with the Event Manager without causing issue.This is useful for associating the control with closed objects from other systems, such as Three Mesh objects being targeted for pointer picking.
     /// If you are working with Three, it's recommended to use the Mesh on which you are texturing the canvas as the key when adding the editor to the Event Manager.
     /// </summary>
-    static add(key: any, control: Primrose) {
+    static add(key: Element, control: Primrose) {
         if (key !== null) {
             elements.set(key, control);
         }
@@ -181,14 +181,14 @@ export class Primrose extends TypedEventBase<{
     /// <summary>
     /// Checks for the existence of a control, by the key that the user supplied when calling `Primrose.add()`
     /// </summary>
-    static has(key: any) {
+    static has(key: Element) {
         return elements.has(key);
     }
 
     /// <summary>
     /// Gets the control associated with the given key.
     /// </summary>
-    static get(key: any) {
+    static get(key: Element) {
         return elements.has(key)
             ? elements.get(key)
             : null;
@@ -216,7 +216,7 @@ export class Primrose extends TypedEventBase<{
     /// This array is not mutable and is not the array used by the Event Manager. It is a read-only clone that is created whenever the Event Manager registers or removes a new control
     /// </summary.
     static get editors() {
-        return publicControls
+        return publicControls;
     }
 
     /// <summary>
@@ -572,7 +572,7 @@ export class Primrose extends TypedEventBase<{
                 const row = this.rows[this.frontCursor.y];
                 const toDelete = Math.min(this.frontCursor.x, this.tabWidth);
                 for (let i = 0; i < this.frontCursor.x; ++i) {
-                    if (row.text[i] !== ' ') {
+                    if (row.text[i] !== " ") {
                         // can only remove tabs at the beginning of a row
                         return;
                     }
@@ -695,21 +695,23 @@ export class Primrose extends TypedEventBase<{
             this.currentTabIndex = elem.tabIndex;
 
             const optionsStr = elem.dataset.options || "";
-            const entries = optionsStr.trim().split(',');
+            const entries = optionsStr.trim().split(",");
             const optionUser: Partial<PrimroseOptions> = {};
             for (let entry of entries) {
                 entry = entry.trim();
                 if (entry.length > 0) {
-                    const pairs = entry.split('=');
+                    const pairs = entry.split("=");
                     if (pairs.length > 1) {
                         const key = pairs[0].trim();
                         const value = pairs[1].trim();
                         const boolTest = value.toLocaleLowerCase();
                         if (boolTest === "true"
                             || boolTest === "false") {
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
                             (optionUser as any)[key] = boolTest === "true";
                         }
                         else {
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
                             (optionUser as any)[key] = value;
                         }
                     }
@@ -761,7 +763,7 @@ export class Primrose extends TypedEventBase<{
 
             if (this.currentTabIndex === -1) {
                 const tabbableElements = document.querySelectorAll<HTMLElement>("[tabindex]");
-                for (let tabbableElement of tabbableElements) {
+                for (const tabbableElement of tabbableElements) {
                     this.currentTabIndex = Math.max(this.currentTabIndex, tabbableElement.tabIndex);
                 }
                 ++this.currentTabIndex;
@@ -824,7 +826,7 @@ export class Primrose extends TypedEventBase<{
 
         let language: Grammar = null;
         if (options.language instanceof Grammar) {
-            language = options.language
+            language = options.language;
         }
         else if (isString(options.language)) {
             options.language = options.language.toLocaleLowerCase();
@@ -1054,7 +1056,7 @@ export class Primrose extends TypedEventBase<{
     get selectionDirection() {
         return this.frontCursor.i <= this.backCursor.i
             ? "forward"
-            : "backward"
+            : "backward";
     }
 
     /// <summary>
@@ -1188,7 +1190,7 @@ export class Primrose extends TypedEventBase<{
         s = Math.max(0.25, Math.min(4, s || 0));
         if (s !== this.scaleFactor) {
             const lastWidth = this.width;
-            const lastHeight = this.height
+            const lastHeight = this.height;
             this._scaleFactor = s;
             this.setSize(lastWidth, lastHeight);
         }
@@ -1203,7 +1205,7 @@ export class Primrose extends TypedEventBase<{
     }
 
     set width(w) {
-        this.setSize(w, this.height)
+        this.setSize(w, this.height);
     }
 
 
@@ -1269,9 +1271,9 @@ export class Primrose extends TypedEventBase<{
         if (this.focused) {
             this.fillRect(this.bgfx, this.theme.currentRowBackColor ||
                 DefaultTheme.currentRowBackColor,
-                0, minCursor.y,
-                this.gridBounds.width,
-                maxCursor.y - minCursor.y + 1);
+            0, minCursor.y,
+            this.gridBounds.width,
+            maxCursor.y - minCursor.y + 1);
         }
 
         const minY = this.scroll.y | 0;
@@ -1299,8 +1301,8 @@ export class Primrose extends TypedEventBase<{
                         const cw = selectionBack.i - selectionFront.i;
                         this.fillRect(this.bgfx, this.theme.selectedBackColor ||
                             DefaultTheme.selectedBackColor,
-                            selectionFront.x, selectionFront.y,
-                            cw, 1);
+                        selectionFront.x, selectionFront.y,
+                        cw, 1);
                     }
                 }
 
@@ -1643,13 +1645,13 @@ export class Primrose extends TypedEventBase<{
             // figure out the width of the line count gutter
             this.lineCountWidth = 0;
             if (this.showLineNumbers) {
-                for (let token of oldTokens) {
+                for (const token of oldTokens) {
                     if (token.type === "newlines") {
                         --this.lineCount;
                     }
                 }
 
-                for (let token of newTokens) {
+                for (const token of newTokens) {
                     if (token.type === "newlines") {
                         ++this.lineCount;
                     }
@@ -1731,7 +1733,7 @@ export class Primrose extends TypedEventBase<{
             }
             else {
                 const lastRow = this.rows[this.rows.length - 1];
-                if (lastRow.text.endsWith('\n')) {
+                if (lastRow.text.endsWith("\n")) {
                     this.rows.push(Row.emptyRow(lastRow.endStringIndex, lastRow.endTokenIndex, lastRow.lineNumber + 1));
                 }
             }
@@ -2015,8 +2017,8 @@ export class Primrose extends TypedEventBase<{
     private dragScroll() {
         if (this.lastScrollDX !== null
             && this.lastScrollDY !== null) {
-            let dx = (this.lastScrollDX - this.pointer.x) / this.character.width;
-            let dy = (this.lastScrollDY - this.pointer.y) / this.character.height;
+            const dx = (this.lastScrollDX - this.pointer.x) / this.character.width;
+            const dy = (this.lastScrollDY - this.pointer.y) / this.character.height;
             this.scrollBy(dx, dy);
         }
         this.lastScrollDX = this.pointer.x;
@@ -2045,14 +2047,14 @@ export class Primrose extends TypedEventBase<{
         else if (this.pressed) {
             this.dragScroll();
         }
-    }
+    };
 
     private mouseLikePointerDown<T>(setPointer: (evt: T) => void) {
         return (evt: T) => {
             setPointer.call(this, evt);
             this.pointerDown();
             this.startSelecting();
-        }
+        };
     }
 
     private mouseLikePointerUp() {
@@ -2149,7 +2151,7 @@ export class Primrose extends TypedEventBase<{
     //>>>>>>>>>> TOUCH EVENT HANDLERS >>>>>>>>>>
 
     private findTouch(touches: TouchList) {
-        for (let touch of touches) {
+        for (const touch of touches) {
             if (this.currentTouchID === null
                 || touch.identifier === this.currentTouchID) {
                 return touch;
@@ -2162,7 +2164,7 @@ export class Primrose extends TypedEventBase<{
         return (evt: TouchEvent) => {
             evt.preventDefault();
             callback(this.findTouch(evt.touches)
-                || this.findTouch(evt.changedTouches))
+                || this.findTouch(evt.changedTouches));
         };
     }
 
@@ -2212,6 +2214,7 @@ const withCurrentControl = (name: EventName) => {
 
     window.addEventListener(evtName, (evt) => {
         if (focusedControl !== null) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             focusedControl[funcName](evt as any);
         }
     }, { passive: false });
