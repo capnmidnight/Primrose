@@ -1,5 +1,5 @@
 import { arrayReplace } from "@juniper-lib/collections/arrays";
-import { id } from "@juniper-lib/dom/attrs";
+import { ID } from "@juniper-lib/dom/attrs";
 import { CanvasTypes, Context2D, createUtilityCanvas, isCanvas, isHTMLCanvas, resizeContext, setContextSize } from "@juniper-lib/dom/canvas";
 import { border, padding as cssPadding, display, getMonospaceFonts, height, overflow, perc, width } from "@juniper-lib/dom/css";
 import { onMouseDown, onMouseMove, onMouseOut, onMouseOver, onMouseUp, onTouchEnd, onTouchMove, onTouchStart } from "@juniper-lib/dom/evts";
@@ -320,7 +320,7 @@ export class Primrose extends TypedEventBase<{
         if (isNullOrUndefined(this.surrogate)) {
             elementApply(document.body,
                 this.surrogate = TextArea(
-                    id("primroseSurrogate"),
+                    ID("primroseSurrogate"),
                     display("none")
                 )
             );

@@ -4,7 +4,7 @@ export class Delayer extends TypedEventBase<{
     "tick": TypedEvent<"tick">;
 }> {
 
-    private timer: number = null;
+    private timer: ReturnType<typeof setInterval> = null;
 
     private readonly tick: () => void;
 
