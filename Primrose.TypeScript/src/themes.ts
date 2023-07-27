@@ -3,18 +3,18 @@
 import { TokenType } from "./Grammars";
 
 export interface FontStyle {
-    readonly backColor: CSSColorValue;
-    readonly foreColor: CSSColorValue;
+    readonly backColor: CssColorValue;
+    readonly foreColor: CssColorValue;
     readonly fontStyle: string;
     readonly fontWeight: string;
 }
 
 export interface Theme extends Partial<Record<TokenType, Partial<FontStyle>>> {
     readonly name: string;
-    readonly cursorColor?: CSSColorValue;
-    readonly unfocused?: CSSColorValue;
-    readonly currentRowBackColor?: CSSColorValue;
-    readonly selectedBackColor?: CSSColorValue;
+    readonly cursorColor?: CssColorValue;
+    readonly unfocused?: CssColorValue;
+    readonly currentRowBackColor?: CssColorValue;
+    readonly selectedBackColor?: CssColorValue;
     readonly lineNumbers?: Partial<FontStyle>;
     readonly regular?: Partial<FontStyle>;
     readonly strings?: Partial<FontStyle>;

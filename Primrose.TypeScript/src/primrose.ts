@@ -707,11 +707,9 @@ export class Primrose extends TypedEventBase<{
                         const boolTest = value.toLocaleLowerCase();
                         if (boolTest === "true"
                             || boolTest === "false") {
-                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
                             (optionUser as any)[key] = boolTest === "true";
                         }
                         else {
-                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
                             (optionUser as any)[key] = value;
                         }
                     }
@@ -1232,7 +1230,7 @@ export class Primrose extends TypedEventBase<{
     //>>>>>>>>>> PRIVATE METHODS >>>>>>>>>>
     //>>>>>>>>>> RENDERING >>>>>>>>>>
 
-    private fillRect(gfx: Context2D, fill: CSSColorValue, x: number, y: number, w: number, h: number) {
+    private fillRect(gfx: Context2D, fill: CssColorValue, x: number, y: number, w: number, h: number) {
         gfx.fillStyle = fill;
         gfx.fillRect(
             x * this.character.width,
@@ -1241,7 +1239,7 @@ export class Primrose extends TypedEventBase<{
             h * this.character.height + 1);
     }
 
-    private strokeRect(gfx: Context2D, stroke: CSSColorValue, x: number, y: number, w: number, h: number) {
+    private strokeRect(gfx: Context2D, stroke: CssColorValue, x: number, y: number, w: number, h: number) {
         gfx.strokeStyle = stroke;
         gfx.strokeRect(
             x * this.character.width,
@@ -2214,7 +2212,6 @@ const withCurrentControl = (name: EventName) => {
 
     window.addEventListener(evtName, (evt) => {
         if (focusedControl !== null) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             focusedControl[funcName](evt as any);
         }
     }, { passive: false });
