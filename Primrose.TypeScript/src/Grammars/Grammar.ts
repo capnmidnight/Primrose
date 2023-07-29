@@ -68,7 +68,7 @@ See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.
 */
 
 import { backgroundColor, color, fontStyle, fontWeight, getMonospaceFamily } from "@juniper-lib/dom/css";
-import { BR, Div, elementApply, Span } from "@juniper-lib/dom/tags";
+import { BR, Div, HtmlRender, Span } from "@juniper-lib/dom/tags";
 import { Light as DefaultTheme, Theme } from "../themes";
 import { Rule } from "./Rule";
 import { Token, TokenType } from "./Token";
@@ -234,7 +234,7 @@ export class Grammar {
                         color(style.foreColor || theme.regular.foreColor),
                         backgroundColor(style.backColor || theme.regular.backColor),
                         getMonospaceFamily());
-                elementApply(elem, t.value);
+                HtmlRender(elem, t.value);
                 temp.appendChild(elem);
             }
         }

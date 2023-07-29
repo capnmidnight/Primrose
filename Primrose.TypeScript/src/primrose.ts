@@ -3,7 +3,7 @@ import { ID } from "@juniper-lib/dom/attrs";
 import { CanvasTypes, Context2D, createUtilityCanvas, isCanvas, isHTMLCanvas, resizeContext, setContextSize } from "@juniper-lib/dom/canvas";
 import { border, padding as cssPadding, display, getMonospaceFonts, height, overflow, perc, width } from "@juniper-lib/dom/css";
 import { onMouseDown, onMouseMove, onMouseOut, onMouseOver, onMouseUp, onTouchEnd, onTouchMove, onTouchStart } from "@juniper-lib/dom/evts";
-import { Canvas, InputText, TextArea, elementApply, elementClearChildren, getElement } from "@juniper-lib/dom/tags";
+import { Canvas, InputText, TextArea, HtmlRender, elementClearChildren, getElement } from "@juniper-lib/dom/tags";
 import { TypedEvent, TypedEventBase } from "@juniper-lib/events/TypedEventBase";
 import { isApple, isFirefox } from "@juniper-lib/tslib/flags";
 import { isDefined, isNullOrUndefined, isString } from "@juniper-lib/tslib/typeChecks";
@@ -318,7 +318,7 @@ export class Primrose extends TypedEventBase<{
 
         this.surrogate = getElement<HTMLTextAreaElement>("#primroseSurrogate");
         if (isNullOrUndefined(this.surrogate)) {
-            elementApply(document.body,
+            HtmlRender(document.body,
                 this.surrogate = TextArea(
                     ID("primroseSurrogate"),
                     display("none")
@@ -748,7 +748,7 @@ export class Primrose extends TypedEventBase<{
             this.element.appendChild(this.canv);
             this.element.removeAttribute("tabindex");
 
-            elementApply(this.element,
+            HtmlRender(this.element,
                 display("block"),
                 cssPadding(0),
                 border("2px inset #c0c0c0"),
@@ -2135,7 +2135,7 @@ export class Primrose extends TypedEventBase<{
     }
 
     set2DMouseEvents(canv: HTMLElement) {
-        elementApply(canv,
+        HtmlRender(canv,
             onMouseOver(() => this.readMouseOverEvent()),
             onMouseOut(() => this.readMouseOutEvent()),
             onMouseDown((evt) => this.readMouseDownEvent(evt)),
@@ -2188,7 +2188,7 @@ export class Primrose extends TypedEventBase<{
     }
 
     set2DTouchEvents(canv: HTMLElement) {
-        elementApply(canv,
+        HtmlRender(canv,
             onTouchStart((evt) => this.readTouchStartEvent(evt)),
             onTouchMove((evt) => this.readTouchMoveEvent(evt)),
             onTouchEnd((evt) => this.readTouchEndEvent(evt))
