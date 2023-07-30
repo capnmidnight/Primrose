@@ -1,6 +1,6 @@
-﻿import { TypedEvent, TypedEventBase } from "@juniper-lib/events/TypedEventBase";
+﻿import { TypedEvent, TypedEventTarget } from "@juniper-lib/events/TypedEventBase";
 
-export class Delayer extends TypedEventBase<{
+export class Delayer extends TypedEventTarget<{
     "tick": TypedEvent<"tick">;
 }> {
 
