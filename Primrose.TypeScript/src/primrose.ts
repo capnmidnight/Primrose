@@ -4,7 +4,7 @@ import { CanvasTypes, Context2D, createUtilityCanvas, isCanvas, isHTMLCanvas, re
 import { border, padding as cssPadding, display, getMonospaceFonts, height, overflow, perc, width } from "@juniper-lib/dom/css";
 import { onMouseDown, onMouseMove, onMouseOut, onMouseOver, onMouseUp, onTouchEnd, onTouchMove, onTouchStart } from "@juniper-lib/dom/evts";
 import { Canvas, InputText, TextArea, HtmlRender, elementClearChildren, getElement } from "@juniper-lib/dom/tags";
-import { TypedEvent, TypedEventTarget } from "@juniper-lib/events/TypedEventBase";
+import { TypedEvent, TypedEventTarget } from "@juniper-lib/events/TypedEventTarget";
 import { isApple, isFirefox } from "@juniper-lib/tslib/flags";
 import { isDefined, isNullOrUndefined, isString } from "@juniper-lib/tslib/typeChecks";
 import { Cursor } from "./Cursor";
