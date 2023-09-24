@@ -1,54 +1,40 @@
-﻿import { stringReverse } from "@juniper-lib/tslib/dist/strings/stringReverse";
-import type { Row } from "./Row";
-
+import { stringReverse } from "@juniper-lib/tslib/dist/strings/stringReverse";
 export class Cursor {
-
-    static min(a: Cursor, b: Cursor) {
+    static min(a, b) {
         if (a.i <= b.i) {
             return a;
         }
         return b;
     }
-
-    static max(a: Cursor, b: Cursor) {
+    static max(a, b) {
         if (a.i > b.i) {
             return a;
         }
         return b;
     }
-
-    public i: number;
-    public x: number;
-    public y: number;
-
-    constructor(i?: number, x?: number, y?: number) {
+    constructor(i, x, y) {
         this.i = i || 0;
         this.x = x || 0;
         this.y = y || 0;
         Object.seal(this);
     }
-
     clone() {
         return new Cursor(this.i, this.x, this.y);
     }
-
     toString() {
         return `[i:${this.i} x:${this.x} y:${this.y}]`;
     }
-
-    copy(cursor: Cursor) {
+    copy(cursor) {
         this.i = cursor.i;
         this.x = cursor.x;
         this.y = cursor.y;
     }
-
     fullHome() {
         this.i = 0;
         this.x = 0;
         this.y = 0;
     }
-
-    fullEnd(rows: Row[]) {
+    fullEnd(rows) {
         this.i = 0;
         let lastLength = 0;
         for (let y = 0; y < rows.length; ++y) {
@@ -59,8 +45,7 @@ export class Cursor {
         this.y = rows.length - 1;
         this.x = lastLength;
     }
-
-    left(rows: Row[], skipAdjust = false) {
+    left(rows, skipAdjust = false) {
         if (this.i > 0) {
             --this.i;
             --this.x;
@@ -74,26 +59,20 @@ export class Cursor {
             }
         }
     }
-
-    skipLeft(rows: Row[]) {
+    skipLeft(rows) {
         if (this.x <= 1) {
             this.left(rows);
         }
         else {
-            const x = this.x - 1,
-                row = rows[this.y],
-                word = stringReverse(row.substring(0, x)),
-                m = word.match(/\w+/),
-                dx = m
-                    ? (m.index + m[0].length + 1)
-                    : this.x;
+            const x = this.x - 1, row = rows[this.y], word = stringReverse(row.substring(0, x)), m = word.match(/\w+/), dx = m
+                ? (m.index + m[0].length + 1)
+                : this.x;
             this.i -= dx;
             this.x -= dx;
             rows[this.y].adjust(this, -1);
         }
     }
-
-    right(rows: Row[], skipAdjust = false) {
+    right(rows, skipAdjust = false) {
         const row = rows[this.y];
         if (this.y < rows.length - 1
             || this.x < row.stringLength) {
@@ -109,16 +88,12 @@ export class Cursor {
             }
         }
     }
-
-    skipRight(rows: Row[]) {
+    skipRight(rows) {
         const row = rows[this.y];
         if (this.x < row.stringLength - 1) {
-            const x = this.x + 1,
-                subrow = row.substring(x),
-                m = subrow.match(/\w+/),
-                dx = m
-                    ? (m.index + m[0].length + 1)
-                    : (row.stringLength - this.x);
+            const x = this.x + 1, subrow = row.substring(x), m = subrow.match(/\w+/), dx = m
+                ? (m.index + m[0].length + 1)
+                : (row.stringLength - this.x);
             this.i += dx;
             this.x += dx;
             if (this.x > 0
@@ -133,13 +108,11 @@ export class Cursor {
             this.right(rows);
         }
     }
-
     home() {
         this.i -= this.x;
         this.x = 0;
     }
-
-    end(rows: Row[]) {
+    end(rows) {
         const row = rows[this.y];
         let dx = row.stringLength - this.x;
         if (this.y < rows.length - 1) {
@@ -148,12 +121,10 @@ export class Cursor {
         this.i += dx;
         this.x += dx;
     }
-
-    up(rows: Row[], skipAdjust = false) {
+    up(rows, skipAdjust = false) {
         if (this.y > 0) {
             --this.y;
-            const row = rows[this.y],
-                dx = Math.min(0, row.stringLength - this.x - 1);
+            const row = rows[this.y], dx = Math.min(0, row.stringLength - this.x - 1);
             this.x += dx;
             this.i -= row.stringLength - dx;
             if (!skipAdjust) {
@@ -161,13 +132,11 @@ export class Cursor {
             }
         }
     }
-
-    down(rows: Row[], skipAdjust = false) {
+    down(rows, skipAdjust = false) {
         if (this.y < rows.length - 1) {
             const prevRow = rows[this.y];
             ++this.y;
             this.i += prevRow.stringLength;
-
             const row = rows[this.y];
             if (this.x >= row.stringLength) {
                 let dx = this.x - row.stringLength;
@@ -182,8 +151,7 @@ export class Cursor {
             }
         }
     }
-
-    incX(rows: Row[], dx: number) {
+    incX(rows, dx) {
         const dir = Math.sign(dx);
         dx = Math.abs(dx);
         if (dir === -1) {
@@ -199,8 +167,7 @@ export class Cursor {
             rows[this.y].adjust(this, 1);
         }
     }
-
-    incY(rows: Row[], dy: number) {
+    incY(rows, dy) {
         const dir = Math.sign(dy);
         dy = Math.abs(dy);
         if (dir === -1) {
@@ -215,8 +182,7 @@ export class Cursor {
         }
         rows[this.y].adjust(this, 1);
     }
-
-    setXY(rows: Row[], x: number, y: number) {
+    setXY(rows, x, y) {
         x = Math.floor(x);
         y = Math.floor(y);
         this.y = Math.max(0, Math.min(rows.length - 1, y));
@@ -234,14 +200,11 @@ export class Cursor {
         }
         rows[this.y].adjust(this, 1);
     }
-
-    setI(rows: Row[], i: number) {
-        const delta = this.i - i,
-            dir = Math.sign(delta);
+    setI(rows, i) {
+        const delta = this.i - i, dir = Math.sign(delta);
         this.x = this.i = i;
         this.y = 0;
-        let total = 0,
-            row = rows[this.y];
+        let total = 0, row = rows[this.y];
         while (this.x > row.stringLength) {
             this.x -= row.stringLength;
             total += row.stringLength;
@@ -253,13 +216,12 @@ export class Cursor {
             ++this.y;
             row = rows[this.y];
         }
-
         if (this.y < rows.length - 1
             && this.x === row.stringLength) {
             this.x = 0;
             ++this.y;
         }
-
         rows[this.y].adjust(this, dir);
     }
 }
+//# sourceMappingURL=Cursor.js.map

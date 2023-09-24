@@ -3,8 +3,7 @@
     "src/**/*.ts",
     "src/**/*.glsl",
     "src/**/*.frag",
-    "src/**/*.vert",
-    "package.json"
+    "src/**/*.vert"
   ],
 
   "exclude": [
@@ -15,51 +14,52 @@
   "compileOnSave": true,
 
   "compilerOptions": {
-    "lib": [ "ES2021", "DOM", "WebWorker", "DOM.Iterable" ],
-    "target": "ES2021",
-    "module": "ES2020",
+    "module": "ES2022",
     "moduleResolution": "Node",
-
+    "target": "ES2022",
+    "lib": [
+      "ES2021",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "typeRoots": [
+      "./node_modules/@types",
+      "./node_modules/@juniper-types",
+      "./src/types"
+    ],
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "allowJs": true,
+    "checkJs": false,
+    "alwaysStrict": true,
+    "assumeChangesOnlyAffectDirectDependencies": true,
+    "useDefineForClassFields": false,
     "declaration": true,
+    "declarationMap": true,
     "disableSizeLimit": true,
     "downlevelIteration": true,
-    "importHelpers": true,
-    "incremental": true,
+    "emitDeclarationOnly": false,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "removeComments": false,
-    "resolveJsonModule": true,
-    "skipDefaultLibCheck": true,
-    "skipLibCheck": true,
-    "sourceMap": false,
-
-    "allowJs": false,
-    "allowSyntheticDefaultImports": true,
-    "allowUmdGlobalAccess": true,
-    "allowUnreachableCode": false,
-    "allowUnusedLabels": false,
-
-    "noEmit": true,
-    "noEmitHelpers": false,
+    "forceConsistentCasingInFileNames": true,
+    "importHelpers": false,
+    "incremental": true,
+    "noEmit": false,
+    "noEmitHelpers": true,
     "noEmitOnError": false,
     "noErrorTruncation": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": true,
     "noImplicitOverride": true,
     "noImplicitReturns": true,
-    "noImplicitUseStrict": false,
     "noImplicitThis": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-
+    "resolveJsonModule": true,
+    "skipDefaultLibCheck": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
     "strictBindCallApply": true,
-    "strictFunctionTypes": true,
-    "strictNullChecks": false,
-    "strictPropertyInitialization": false,
-
-    "typeRoots": [
-      "./node_modules/@types",
-      "./node_modules/@juniper-types"
-    ]
+    "strictFunctionTypes": true
   }
 }

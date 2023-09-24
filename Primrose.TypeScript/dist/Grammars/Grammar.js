@@ -66,19 +66,15 @@ See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.
     }]
 });
 */
-
 import { backgroundColor, color, fontStyle, fontWeight, getMonospaceFamily } from "@juniper-lib/dom/dist/css";
 import { BR, Div, HtmlRender, Span } from "@juniper-lib/dom/dist/tags";
-import { Light as DefaultTheme, Theme } from "../themes";
+import { Light as DefaultTheme } from "../themes";
 import { Rule } from "./Rule";
-import { Token, TokenType } from "./Token";
-
-function crudeParsing(tokens: Token[]) {
-    let commentDelim = null,
-        stringDelim = null;
+import { Token } from "./Token";
+function crudeParsing(tokens) {
+    let commentDelim = null, stringDelim = null;
     for (let i = 0; i < tokens.length; ++i) {
         const t = tokens[i];
-
         if (stringDelim) {
             if (t.type === "stringDelim" && t.value === stringDelim && (i === 0 || tokens[i - 1].value[tokens[i - 1].value.length - 1] !== "\\")) {
                 stringDelim = null;
@@ -105,18 +101,15 @@ function crudeParsing(tokens: Token[]) {
             t.type = "comments";
         }
     }
-
     // recombine like-tokens
     for (let i = tokens.length - 1; i > 0; --i) {
-        const p = tokens[i - 1],
-            t = tokens[i];
+        const p = tokens[i - 1], t = tokens[i];
         if (p.type === t.type
             && p.type !== "newlines") {
             p.value += t.value;
             tokens.splice(i, 1);
         }
     }
-
     // remove empties
     for (let i = tokens.length - 1; i >= 0; --i) {
         if (tokens[i].length === 0) {
@@ -124,11 +117,9 @@ function crudeParsing(tokens: Token[]) {
         }
     }
 }
-
 export class Grammar {
-    private readonly grammar: Rule[];
-
-    constructor(public readonly name: string, rules: [TokenType, RegExp][]) {
+    constructor(name, rules) {
+        this.name = name;
         rules = rules || [];
         /*
         pliny.property({
@@ -138,7 +129,6 @@ export class Grammar {
           description: "A user-friendly name for the grammar, to be able to include it in an options listing."
         });
         */
-
         /*
         pliny.property({
           parent: "Primrose.Text.Grammar",
@@ -148,12 +138,9 @@ export class Grammar {
         });
         */
         // clone the preprocessing grammar to start a new grammar
-        this.grammar = rules.map((rule) =>
-            new Rule(rule[0], rule[1]));
-
+        this.grammar = rules.map((rule) => new Rule(rule[0], rule[1]));
         Object.freeze(this);
     }
-
     /*
     pliny.method({
       parent: "Primrose.Text.Grammar",
@@ -199,7 +186,7 @@ export class Grammar {
       }]
     });
     */
-    tokenize(text: string) {
+    tokenize(text) {
         // all text starts off as regular text, then gets cut up into tokens of
         // more specific type
         const tokens = [new Token(text, "regular", 0)];
@@ -208,18 +195,14 @@ export class Grammar {
                 rule.carveOutMatchedToken(tokens, j);
             }
         }
-
         crudeParsing(tokens);
         return tokens;
     }
-
-    toHTML(parent: HTMLElement, txt: string, theme: Theme, fontSize: number) {
+    toHTML(parent, txt, theme, fontSize) {
         if (theme === undefined) {
             theme = DefaultTheme;
         }
-
-        const tokenRows = this.tokenize(txt),
-            temp = Div();
+        const tokenRows = this.tokenize(txt), temp = Div();
         for (let y = 0; y < tokenRows.length; ++y) {
             // draw the tokens on this row
             const t = tokenRows[y];
@@ -227,18 +210,11 @@ export class Grammar {
                 temp.appendChild(BR());
             }
             else {
-                const style = theme[t.type] || {},
-                    elem = Span(
-                        fontWeight(style.fontWeight || theme.regular.fontWeight),
-                        fontStyle(style.fontStyle || theme.regular.fontStyle || ""),
-                        color(style.foreColor || theme.regular.foreColor),
-                        backgroundColor(style.backColor || theme.regular.backColor),
-                        getMonospaceFamily());
+                const style = theme[t.type] || {}, elem = Span(fontWeight(style.fontWeight || theme.regular.fontWeight), fontStyle(style.fontStyle || theme.regular.fontStyle || ""), color(style.foreColor || theme.regular.foreColor), backgroundColor(style.backColor || theme.regular.backColor), getMonospaceFamily());
                 HtmlRender(elem, t.value);
                 temp.appendChild(elem);
             }
         }
-
         parent.innerHTML = temp.innerHTML;
         Object.assign(parent.style, {
             backgroundColor: theme.regular.backColor,
@@ -247,3 +223,4 @@ export class Grammar {
         });
     }
 }
+//# sourceMappingURL=Grammar.js.map

@@ -1,0 +1,1 @@
+{"version":3,"file":"PlainText.js","sourceRoot":"","sources":["../../src/Grammars/PlainText.ts"],"names":[],"mappings":"AAAA;;;;;;EAME;AAEF,OAAO,EAAE,OAAO,EAAE,MAAM,WAAW,CAAC;AACpC,MAAM,CAAC,MAAM,SAAS,GAAG,IAAI,OAAO,CAAC,WAAW,EAAE;IAC9C,CAAC,UAAU,EAAE,gBAAgB,CAAC;IAC9B,CAAC,YAAY,EAAE,SAAS,CAAC;CAC5B,CAAC,CAAC"}

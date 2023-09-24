@@ -4,9 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node --experimental-modules esbuild.config.js",
-    "watch": "node --experimental-modules esbuild.config.js --watch",
-    "check": "tsc --noEmit"
+    "build": "tsc -b",
+    "watch": "tsc -b --watch",
+    "check": "tsc --noEmit",
+    "bundle": "node esbuild.config.mjs",
+    "juniper-build": "npm run build"
   },
   "devDependencies": {
     "@juniper-lib/esbuild": "file:../../Juniper/src/Juniper.TypeScript/@juniper-lib/esbuild",

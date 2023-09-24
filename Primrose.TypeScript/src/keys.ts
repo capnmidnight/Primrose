@@ -1,4 +1,4 @@
-﻿import { isApple } from "@juniper-lib/tslib/flags";
+﻿import { isApple } from "@juniper-lib/tslib/dist/flags";
 
 // These values are defined here:
 //   https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values

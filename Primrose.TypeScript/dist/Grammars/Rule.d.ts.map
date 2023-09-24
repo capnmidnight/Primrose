@@ -1,0 +1,1 @@
+{"version":3,"file":"Rule.d.ts","sourceRoot":"","sources":["../../src/Grammars/Rule.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,KAAK,EAAE,SAAS,EAAE,MAAM,SAAS,CAAC;AAGhD,qBAAa,IAAI;aACe,IAAI,EAAE,SAAS;aAAkB,IAAI,EAAE,MAAM;gBAA7C,IAAI,EAAE,SAAS,EAAkB,IAAI,EAAE,MAAM;IAMzE,oBAAoB,CAAC,MAAM,EAAE,KAAK,EAAE,EAAE,CAAC,EAAE,MAAM;CAmClD"}
