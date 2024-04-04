@@ -14,7 +14,7 @@
     "@juniper-lib/esbuild": "file:../../Juniper/src/Juniper.TypeScript/@juniper-lib/esbuild",
     "@juniper-lib/testing": "file:../../Juniper/src/Juniper.TypeScript/@juniper-lib/testing",
     "@juniper-types/dom-types": "file:../../Juniper/src/Juniper.TypeScript/@juniper-types/dom-types",
-    "@types/offscreencanvas": "2019.7.0",
+    "@types/offscreencanvas": "2019.7.3",
     "esbuild": "0.18.17",
     "tslib": "2.6.1"
   },
